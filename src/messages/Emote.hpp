@@ -20,6 +20,7 @@ struct Emote {
     {
         return name.string;
     }
+    void animate() const;
 };
 
 bool operator==(const Emote &a, const Emote &b);

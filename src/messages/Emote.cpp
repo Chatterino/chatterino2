@@ -4,6 +4,13 @@
 
 namespace chatterino {
 
+void Emote::animate() const
+{
+    images.getImage1().get()->setAnimated(true);
+    images.getImage2().get()->setAnimated(true);
+    images.getImage3().get()->setAnimated(true);
+}
+
 bool operator==(const Emote &a, const Emote &b)
 {
     return std::tie(a.homePage, a.name, a.tooltip, a.images) ==

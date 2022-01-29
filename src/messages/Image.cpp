@@ -373,7 +373,12 @@ bool Image::animated() const
 {
     assertInGuiThread();
 
-    return this->frames_->animated();
+    return this->frames_->animated() || this->animated_;
+}
+
+void Image::setAnimated(bool animate)
+{
+    this->animated_ = animate;
 }
 
 int Image::width() const

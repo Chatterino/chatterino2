@@ -1003,6 +1003,8 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
         if (zeroWidthEmotes.contains(name.string))
         {
             flags.set(MessageElementFlag::ZeroWidthEmote);
+            if (auto emoteptr = globalBttvEmotes.emote(name))
+                emoteptr.get()->animate();
         }
     }
 

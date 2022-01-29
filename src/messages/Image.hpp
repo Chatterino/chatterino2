@@ -69,6 +69,7 @@ public:
     int width() const;
     int height() const;
     bool animated() const;
+    void setAnimated(bool animate);
 
     bool operator==(const Image &image) const;
     bool operator!=(const Image &image) const;
@@ -84,6 +85,7 @@ private:
     const Url url_{};
     const qreal scale_{1};
     std::atomic_bool empty_{false};
+    bool animated_{false};
 
     // gui thread only
     bool shouldLoad_{false};
