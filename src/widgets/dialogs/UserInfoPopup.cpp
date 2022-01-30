@@ -174,6 +174,58 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
              }
              return "";
          }},
+        {"execModeratorAction",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.empty())
+             {
+                 return "execModeratorAction action needs an argument, which "
+                        "moderation action to execute, see description in the "
+                        "editor";
+             }
+             auto target = arguments.at(0);
+             QString msg;
+
+             // these can't have /timeout/ buttons because they are not timeouts
+             if (target == "ban")
+             {
+                 msg = QString("/ban %1").arg(this->userName_);
+             }
+             else if (target == "unban")
+             {
+                 msg = QString("/unban %1").arg(this->userName_);
+             }
+             else
+             {
+                 // find and execute timeout button #TARGET
+
+                 bool ok;
+                 int buttonNum = target.toInt(&ok);
+                 if (!ok)
+                 {
+                     return QString("Invalid argument for execModeratorAction: "
+                                    "%1. Use "
+                                    "\"ban\", \"unban\" or the number of the "
+                                    "timeout "
+                                    "button to execute")
+                         .arg(target);
+                 }
+
+                 const auto &timeoutButtons =
+                     getSettings()->timeoutButtons.getValue();
+                 if (timeoutButtons.size() < buttonNum || 0 >= buttonNum)
+                 {
+                     return QString("Invalid argument for execModeratorAction: "
+                                    "%1. Integer out of usable range: [1, %2]")
+                         .arg(buttonNum, timeoutButtons.size() - 1);
+                 }
+                 const auto &button = timeoutButtons.at(buttonNum - 1);
+                 msg = QString("/timeout %1 %2")
+                           .arg(this->userName_)
+                           .arg(calculateTimeoutDuration(button));
+             }
+             this->channel_->sendMessage(msg);
+             return "";
+         }},
 
         // these actions make no sense in the context of a usercard, so they aren't implemented
         {"reject", nullptr},
