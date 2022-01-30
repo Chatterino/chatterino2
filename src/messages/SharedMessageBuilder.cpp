@@ -217,7 +217,8 @@ void SharedMessageBuilder::parseHighlights()
             << "sent a message";
 
         this->message().flags.set(MessageFlag::Highlighted);
-        if (!this->message().flags.has(MessageFlag::Subscription))
+        if (!(this->message().flags.has(MessageFlag::Subscription) &&
+              getSettings()->enableSubHighlight))
         {
             this->message().highlightColor = userHighlight.getColor();
         }
