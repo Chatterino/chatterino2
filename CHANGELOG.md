@@ -2,7 +2,6 @@
 
 ## Unversioned
 
-- Minor: Removed timestamp from AutoMod messages. (#3503)
 - Major: Added customizable shortcuts. (#2340)
 - Minor: Make animated emote playback speed match browser (Firefox and Chrome) behaviour. (#3506)
 - Minor: Added middle click split to open in browser (#3356)
