@@ -53,7 +53,7 @@
 - Minor: Removed timestamp from AutoMod messages. (#3503)
 - Minor: Added ability to copy message ID with `Shift + Right Click`. (#3481)
 - Minor: Colorize the entire split header when focused. (#3379)
-- Minor: Show context menu anywhere in MessageLayout when applicable (#3566)
+- Minor: Show right click context menu anywhere within a message's line. (#3566)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
