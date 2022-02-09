@@ -1762,11 +1762,6 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         }
     }
 
-    if (hoverLayoutElement == nullptr)
-    {
-        return;
-    }
-
     // handle the click
     this->handleMouseClick(event, hoverLayoutElement, layout);
 
@@ -1791,13 +1786,14 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             }
 
             auto &link = hoveredElement->getLink();
-            if (!getSettings()->linksDoubleClickOnly)
+            if (hoveredElement != nullptr &&
+                !getSettings()->linksDoubleClickOnly)
             {
                 this->handleLinkClick(event, link, layout.get());
             }
 
             // Invoke to signal from EmotePopup.
-            if (link.type == Link::InsertText)
+            if (hoveredElement != nullptr && link.type == Link::InsertText)
             {
                 this->linkClicked.invoke(link);
             }
@@ -1813,7 +1809,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             };
 
             auto &link = hoveredElement->getLink();
-            if (link.type == Link::UserInfo)
+            if (hoveredElement != nullptr && link.type == Link::UserInfo)
             {
                 const bool commaMention = getSettings()->mentionUsersWithComma;
                 const bool isFirstWord =
@@ -1822,7 +1818,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                     formatUserMention(link.value, isFirstWord, commaMention);
                 insertText("@" + userMention + " ");
             }
-            else if (link.type == Link::UserWhisper)
+            else if (hoveredElement != nullptr &&
+                     link.type == Link::UserWhisper)
             {
                 insertText("/w " + link.value + " ");
             }
@@ -1848,9 +1845,6 @@ void ChannelView::addContextMenuItems(
     const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
     QMouseEvent *event)
 {
-    const auto &creator = hoveredElement->getCreator();
-    auto creatorFlags = creator.getFlags();
-
     static QMenu *previousMenu = nullptr;
     if (previousMenu != nullptr)
     {
@@ -1860,128 +1854,163 @@ void ChannelView::addContextMenuItems(
 
     auto menu = new QMenu;
     previousMenu = menu;
-
-    // Badge actions
-    if (creatorFlags.hasAny({MessageElementFlag::Badges}))
+    if (hoveredElement != nullptr)
     {
-        if (auto badgeElement = dynamic_cast<const BadgeElement *>(&creator))
-            addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
-                                     *menu);
-    }
+        const auto &creator = hoveredElement->getCreator();
+        auto creatorFlags = creator.getFlags();
 
-    // Emote actions
-    if (creatorFlags.hasAny(
-            {MessageElementFlag::EmoteImages, MessageElementFlag::EmojiImage}))
-    {
-        if (auto emoteElement = dynamic_cast<const EmoteElement *>(&creator))
-            addEmoteContextMenuItems(*emoteElement->getEmote(), creatorFlags,
-                                     *menu);
-    }
-
-    // add seperator
-    if (!menu->actions().empty())
-    {
-        menu->addSeparator();
-    }
-
-    // Link copy
-    if (hoveredElement->getLink().type == Link::Url)
-    {
-        QString url = hoveredElement->getLink().value;
-
-        // open link
-        menu->addAction("Open link", [url] {
-            QDesktopServices::openUrl(QUrl(url));
-        });
-        // open link default
-        if (supportsIncognitoLinks())
+        // Badge actions
+        if (creatorFlags.hasAny({MessageElementFlag::Badges}))
         {
-            menu->addAction("Open link incognito", [url] {
-                openLinkIncognito(url);
-            });
+            if (auto badgeElement =
+                    dynamic_cast<const BadgeElement *>(&creator))
+                addEmoteContextMenuItems(*badgeElement->getEmote(),
+                                         creatorFlags, *menu);
         }
-        menu->addAction("Copy link", [url] {
-            crossPlatformCopy(url);
-        });
 
-        menu->addSeparator();
-    }
+        // Emote actions
+        if (creatorFlags.hasAny({MessageElementFlag::EmoteImages,
+                                 MessageElementFlag::EmojiImage}))
+        {
+            if (auto emoteElement =
+                    dynamic_cast<const EmoteElement *>(&creator))
+                addEmoteContextMenuItems(*emoteElement->getEmote(),
+                                         creatorFlags, *menu);
+        }
 
-    // Copy actions
-    if (!this->selection_.isEmpty())
-    {
-        menu->addAction("Copy selection", [this] {
-            crossPlatformCopy(this->getSelectedText());
-        });
-    }
-
-    menu->addAction("Copy message", [layout] {
-        QString copyString;
-        layout->addSelectionText(copyString, 0, INT_MAX,
-                                 CopyMode::OnlyTextAndEmotes);
-
-        crossPlatformCopy(copyString);
-    });
-
-    menu->addAction("Copy full message", [layout] {
-        QString copyString;
-        layout->addSelectionText(copyString);
-
-        crossPlatformCopy(copyString);
-    });
-
-    // If is a link to a Twitch user/stream
-    if (hoveredElement->getLink().type == Link::Url)
-    {
-        static QRegularExpression twitchChannelRegex(
-            R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?:popout\/)?(?<username>[a-z0-9_]{3,}))",
-            QRegularExpression::CaseInsensitiveOption);
-        static QSet<QString> ignoredUsernames{
-            "directory",      //
-            "downloads",      //
-            "drops",          //
-            "friends",        //
-            "inventory",      //
-            "jobs",           //
-            "login",          //
-            "messages",       //
-            "payments",       //
-            "profile",        //
-            "security",       //
-            "settings",       //
-            "signup",         //
-            "subscriptions",  //
-            "turbo",          //
-            "videos",         //
-            "wallet",         //
-        };
-
-        auto twitchMatch =
-            twitchChannelRegex.match(hoveredElement->getLink().value);
-        auto twitchUsername = twitchMatch.captured("username");
-        if (!twitchUsername.isEmpty() &&
-            !ignoredUsernames.contains(twitchUsername))
+        // add seperator
+        if (!menu->actions().empty())
         {
             menu->addSeparator();
-            menu->addAction("Open in new split", [twitchUsername, this] {
-                this->openChannelIn.invoke(twitchUsername,
-                                           FromTwitchLinkOpenChannelIn::Split);
+        }
+
+        // Link copy
+        if (hoveredElement->getLink().type == Link::Url)
+        {
+            QString url = hoveredElement->getLink().value;
+
+            // open link
+            menu->addAction("Open link", [url] {
+                QDesktopServices::openUrl(QUrl(url));
             });
-            menu->addAction("Open in new tab", [twitchUsername, this] {
-                this->openChannelIn.invoke(twitchUsername,
-                                           FromTwitchLinkOpenChannelIn::Tab);
+            // open link default
+            if (supportsIncognitoLinks())
+            {
+                menu->addAction("Open link incognito", [url] {
+                    openLinkIncognito(url);
+                });
+            }
+            menu->addAction("Copy link", [url] {
+                crossPlatformCopy(url);
             });
 
             menu->addSeparator();
-            menu->addAction("Open player in browser", [twitchUsername, this] {
-                this->openChannelIn.invoke(
-                    twitchUsername, FromTwitchLinkOpenChannelIn::BrowserPlayer);
-            });
-            menu->addAction("Open in streamlink", [twitchUsername, this] {
-                this->openChannelIn.invoke(
-                    twitchUsername, FromTwitchLinkOpenChannelIn::Streamlink);
+        }
+
+        // Copy actions
+        if (!this->selection_.isEmpty())
+        {
+            menu->addAction("Copy selection", [this] {
+                crossPlatformCopy(this->getSelectedText());
             });
         }
+
+        menu->addAction("Copy message", [layout] {
+            QString copyString;
+            layout->addSelectionText(copyString, 0, INT_MAX,
+                                     CopyMode::OnlyTextAndEmotes);
+
+            crossPlatformCopy(copyString);
+        });
+
+        menu->addAction("Copy full message", [layout] {
+            QString copyString;
+            layout->addSelectionText(copyString);
+
+            crossPlatformCopy(copyString);
+        });
+
+        // If is a link to a Twitch user/stream
+        if (hoveredElement->getLink().type == Link::Url)
+        {
+            static QRegularExpression twitchChannelRegex(
+                R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?:popout\/)?(?<username>[a-z0-9_]{3,}))",
+                QRegularExpression::CaseInsensitiveOption);
+            static QSet<QString> ignoredUsernames{
+                "directory",      //
+                "downloads",      //
+                "drops",          //
+                "friends",        //
+                "inventory",      //
+                "jobs",           //
+                "login",          //
+                "messages",       //
+                "payments",       //
+                "profile",        //
+                "security",       //
+                "settings",       //
+                "signup",         //
+                "subscriptions",  //
+                "turbo",          //
+                "videos",         //
+                "wallet",         //
+            };
+
+            auto twitchMatch =
+                twitchChannelRegex.match(hoveredElement->getLink().value);
+            auto twitchUsername = twitchMatch.captured("username");
+            if (!twitchUsername.isEmpty() &&
+                !ignoredUsernames.contains(twitchUsername))
+            {
+                menu->addSeparator();
+                menu->addAction("Open in new split", [twitchUsername, this] {
+                    this->openChannelIn.invoke(
+                        twitchUsername, FromTwitchLinkOpenChannelIn::Split);
+                });
+                menu->addAction("Open in new tab", [twitchUsername, this] {
+                    this->openChannelIn.invoke(
+                        twitchUsername, FromTwitchLinkOpenChannelIn::Tab);
+                });
+
+                menu->addSeparator();
+                menu->addAction(
+                    "Open player in browser", [twitchUsername, this] {
+                        this->openChannelIn.invoke(
+                            twitchUsername,
+                            FromTwitchLinkOpenChannelIn::BrowserPlayer);
+                    });
+                menu->addAction("Open in streamlink", [twitchUsername, this] {
+                    this->openChannelIn.invoke(
+                        twitchUsername,
+                        FromTwitchLinkOpenChannelIn::Streamlink);
+                });
+            }
+        }
+    }
+    else
+    {
+        // Copy actions
+        if (!this->selection_.isEmpty())
+        {
+            menu->addAction("Copy selection", [this] {
+                crossPlatformCopy(this->getSelectedText());
+            });
+        }
+
+        menu->addAction("Copy message", [layout] {
+            QString copyString;
+            layout->addSelectionText(copyString, 0, INT_MAX,
+                                     CopyMode::OnlyTextAndEmotes);
+
+            crossPlatformCopy(copyString);
+        });
+
+        menu->addAction("Copy full message", [layout] {
+            QString copyString;
+            layout->addSelectionText(copyString);
+
+            crossPlatformCopy(copyString);
+        });
     }
 
     if (event->modifiers() == Qt::ShiftModifier &&
