@@ -152,30 +152,12 @@ void SearchPopup::initLayout()
                 this->searchInput_ = new QLineEdit(this);
                 layout2->addWidget(this->searchInput_);
 
-                if (getSettings()->incrementalSearch)
-                {
-                    this->searchInput_->setPlaceholderText("Type to search");
-                    this->searchInput_->setClearButtonEnabled(true);
-                    this->searchInput_->findChild<QAbstractButton *>()->setIcon(
-                        QPixmap(":/buttons/clearSearch.png"));
-                    QObject::connect(this->searchInput_,
-                                     &QLineEdit::textChanged, this,
-                                     &SearchPopup::search);
-                }
-                else
-                {
-                    QObject::connect(this->searchInput_,
-                                     &QLineEdit::returnPressed, [this] {
-                                         this->search();
-                                     });
-                    QPushButton *searchButton = new QPushButton(this);
-                    searchButton->setText("Search");
-                    layout2->addWidget(searchButton);
-                    QObject::connect(searchButton, &QPushButton::clicked,
-                                     [this] {
-                                         this->search();
-                                     });
-                }
+                this->searchInput_->setPlaceholderText("Type to search");
+                this->searchInput_->setClearButtonEnabled(true);
+                this->searchInput_->findChild<QAbstractButton *>()->setIcon(
+                    QPixmap(":/buttons/clearSearch.png"));
+                QObject::connect(this->searchInput_, &QLineEdit::textChanged,
+                                 this, &SearchPopup::search);
             }
 
             layout1->addLayout(layout2);

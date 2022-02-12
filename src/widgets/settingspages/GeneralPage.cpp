@@ -19,9 +19,6 @@
 #include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 
-#include "controllers/hotkeys/Hotkey.hpp"
-#include "controllers/hotkeys/HotkeyController.hpp"
-
 #include <QDesktopServices>
 #include <QFileDialog>
 
@@ -698,13 +695,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
-    {
-        QString text = "Search as you type in channel search";
-        auto hotkey = getApp()->hotkeys->getHotkeyByName("show search");
-        if (hotkey != nullptr)
-            text.append(QString(" (%1)").arg(hotkey->toString()));
-        layout.addCheckbox(text, s.incrementalSearch);
-    }
+
     layout.addStretch();
 
     // invisible element for width
