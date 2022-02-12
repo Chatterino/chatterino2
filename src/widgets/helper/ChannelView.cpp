@@ -1785,15 +1785,19 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                 this->queueLayout();
             }
 
-            auto &link = hoveredElement->getLink();
-            if (hoveredElement != nullptr &&
-                !getSettings()->linksDoubleClickOnly)
+            if (hoveredElement == nullptr)
+            {
+                return;
+            }
+
+            const auto &link = hoveredElement->getLink();
+            if (!getSettings()->linksDoubleClickOnly)
             {
                 this->handleLinkClick(event, link, layout.get());
             }
 
             // Invoke to signal from EmotePopup.
-            if (hoveredElement != nullptr && link.type == Link::InsertText)
+            if (link.type == Link::InsertText)
             {
                 this->linkClicked.invoke(link);
             }
@@ -1808,29 +1812,39 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                 }
             };
 
-            auto &link = hoveredElement->getLink();
-            if (hoveredElement != nullptr && link.type == Link::UserInfo)
+            if (hoveredElement != nullptr)
             {
-                const bool commaMention = getSettings()->mentionUsersWithComma;
-                const bool isFirstWord =
-                    split && split->getInput().isEditFirstWord();
-                auto userMention =
-                    formatUserMention(link.value, isFirstWord, commaMention);
-                insertText("@" + userMention + " ");
+                const auto &link = hoveredElement->getLink();
+
+                if (link.type == Link::UserInfo)
+                {
+                    const bool commaMention =
+                        getSettings()->mentionUsersWithComma;
+                    const bool isFirstWord =
+                        split && split->getInput().isEditFirstWord();
+                    auto userMention = formatUserMention(
+                        link.value, isFirstWord, commaMention);
+                    insertText("@" + userMention + " ");
+                    return;
+                }
+
+                if (link.type == Link::UserWhisper)
+                {
+                    insertText("/w " + link.value + " ");
+                    return;
+                }
             }
-            else if (hoveredElement != nullptr &&
-                     link.type == Link::UserWhisper)
-            {
-                insertText("/w " + link.value + " ");
-            }
-            else
-            {
-                this->addContextMenuItems(hoveredElement, layout, event);
-            }
+
+            this->addContextMenuItems(hoveredElement, layout, event);
         }
         break;
         case Qt::MiddleButton: {
-            auto &link = hoveredElement->getLink();
+            if (hoveredElement == nullptr)
+            {
+                return;
+            }
+
+            const auto &link = hoveredElement->getLink();
             if (!getSettings()->linksDoubleClickOnly)
             {
                 this->handleLinkClick(event, link, layout.get());
