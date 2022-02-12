@@ -35,32 +35,6 @@
 namespace {
 using namespace chatterino;
 
-// stripUserName removes any @ prefix or , suffix to make it more suitable for command use
-void stripUserName(QString &userName)
-{
-    if (userName.startsWith('@'))
-    {
-        userName.remove(0, 1);
-    }
-    if (userName.endsWith(','))
-    {
-        userName.chop(1);
-    }
-}
-
-// stripChannelName removes any @ prefix or , suffix to make it more suitable for command use
-void stripChannelName(QString &channelName)
-{
-    if (channelName.startsWith('@') || channelName.startsWith('#'))
-    {
-        channelName.remove(0, 1);
-    }
-    if (channelName.endsWith(','))
-    {
-        channelName.chop(1);
-    }
-}
-
 void sendWhisperMessage(const QString &text)
 {
     // (hemirt) pajlada: "we should not be sending whispers through jtv, but
