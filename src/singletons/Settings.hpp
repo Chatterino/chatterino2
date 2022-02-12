@@ -98,8 +98,8 @@ public:
         "/appearance/messages/usernameDisplayMode",
         UsernameDisplayMode::UsernameAndLocalizedName};
 
-    IntSetting tabDirection = {"/appearance/tabDirection",
-                               NotebookTabDirection::Horizontal};
+    EnumSetting<NotebookTabDirection> tabDirection = {
+        "/appearance/tabDirection", NotebookTabDirection::Horizontal};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
