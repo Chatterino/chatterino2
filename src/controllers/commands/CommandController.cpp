@@ -718,15 +718,10 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         stripChannelName(target);
-
         auto app = getApp();
-        Window &window = app->windows->createWindow(WindowType::Popup);
-        Split *split = new Split(static_cast<SplitContainer *>(
-            window.getNotebook().getOrAddSelectedPage()));
-
+        Split *split = new Split(nullptr);
         split->setChannel(app->twitch.server->getOrAddChannel(target));
-        window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
-        window.show();
+        split->popup();
 
         return "";
     });
