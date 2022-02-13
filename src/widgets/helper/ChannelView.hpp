@@ -157,10 +157,25 @@ private:
                        const QPoint &relativePos, int &wordStart, int &wordEnd);
 
     void handleMouseClick(QMouseEvent *event,
-                          const MessageLayoutElement *hoverLayoutElement,
+                          const MessageLayoutElement *hoveredElement,
                           MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
                              MessageLayoutPtr layout, QMouseEvent *event);
+    void addImageContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                  MessageLayoutPtr layout, QMouseEvent *event,
+                                  QMenu &menu);
+    void addLinkContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                 MessageLayoutPtr layout, QMouseEvent *event,
+                                 QMenu &menu);
+    void addMessageContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                    MessageLayoutPtr layout, QMouseEvent *event,
+                                    QMenu &menu);
+    void addTwitchLinkContextMenuItems(
+        const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
+        QMouseEvent *event, QMenu &menu);
+    void addHiddenContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                   MessageLayoutPtr layout, QMouseEvent *event,
+                                   QMenu &menu);
     int getLayoutWidth() const;
     void updatePauses();
     void unpaused();
