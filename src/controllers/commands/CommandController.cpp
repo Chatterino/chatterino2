@@ -699,29 +699,46 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/popup", [](const QStringList &words,
                                        ChannelPtr channel) {
+        static const auto *usageMessage =
+            "Usage: /popup [channel]. Open specified Twitch channel in "
+            "a new window. If no channel argument is specified, open "
+            "the currently selected split instead.";
+
         QString target(words.value(1));
+        stripChannelName(target);
 
         if (target.isEmpty())
         {
-            if (channel->isTwitchChannel() && !channel->isEmpty())
+            auto *currentPage =
+                dynamic_cast<SplitContainer *>(getApp()
+                                                   ->windows->getMainWindow()
+                                                   .getNotebook()
+                                                   .getSelectedPage());
+            if (currentPage != nullptr)
             {
-                target = channel->getName();
+                auto *currentSplit = currentPage->getSelectedSplit();
+                if (currentSplit != nullptr)
+                {
+                    currentSplit->popup();
+
+                    return "";
+                }
             }
-            else
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Usage: /popup [channel]. Open specified Twitch channel in "
-                    "a new window. If no channel argument is specified, open "
-                    "the currently focused split instead."));
-                return "";
-            }
+
+            channel->addMessage(makeSystemMessage(usageMessage));
+            return "";
         }
 
-        stripChannelName(target);
-        auto app = getApp();
-        Split *split = new Split(nullptr);
+        auto *app = getApp();
+        Window &window = app->windows->createWindow(WindowType::Popup);
+
+        auto *split = new Split(static_cast<SplitContainer *>(
+            window.getNotebook().getOrAddSelectedPage()));
+
         split->setChannel(app->twitch.server->getOrAddChannel(target));
-        split->popup();
+
+        window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+        window.show();
 
         return "";
     });
