@@ -47,6 +47,7 @@
 - Minor: Messages can now be highlighted by subscriber or founder badges. (#3445)
 - Minor: User timeout buttons can now be triggered using hotkeys. (#3483)
 - Minor: Add workaround for multipart emoji as described in [the RFC](https://mm2pl.github.io/emoji_rfc.pdf). (#3469)
+- Minor: Added a way to open channel popup by right-clicking the avatar in a usercard. (#3486)
 - Minor: Add feedback when using the whisper command `/w` incorrectly. (#3439)
 - Minor: Add feedback when writing a non-command message in the `/whispers` split. (#3439)
 - Minor: Opening streamlink through hotkeys and/or split header menu matches `/streamlink` command and shows feedback in chat as well. (#3510)
