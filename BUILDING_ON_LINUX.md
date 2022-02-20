@@ -2,7 +2,7 @@
 
 Note on Qt version compatibility: If you are installing Qt from a package manager, please ensure the version you are installing is at least **Qt 5.12 or newer**.
 
-## Ubuntu 18.04
+## Ubuntu 20.04
 
 _Most likely works the same for other Debian-like distros_
 
