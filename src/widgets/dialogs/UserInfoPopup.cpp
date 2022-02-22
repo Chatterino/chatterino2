@@ -291,11 +291,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                             crossPlatformCopy(avatarUrl);
                         });
 
-                        // try to make msvc happy?
-                        auto temporary = this->userName_.toLower();
+                        // we need to assign login name for msvc compilation
+                        auto loginName = this->userName_.toLower();
                         menu->addAction(
-                            "Open channel in a new popup window",
-                            [userName = temporary] {
+                            "Open channel in a new popup window", this,
+                            [loginName] {
                                 auto app = getApp();
                                 auto &window = app->windows->createWindow(
                                     WindowType::Popup, true);
@@ -303,7 +303,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                                                  .getOrAddSelectedPage()
                                                  ->appendNewSplit(false);
                                 split->setChannel(app->twitch2->getOrAddChannel(
-                                    userName.toLower()));
+                                    loginName.toLower()));
                             });
 
                         menu->popup(QCursor::pos());

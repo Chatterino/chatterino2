@@ -13,6 +13,7 @@ public:
         QPixmap alazymeme;
         QPixmap fourtf;
         QPixmap kararty;
+        QPixmap karlpolice;
         QPixmap mm2pl;
         QPixmap pajlada;
         QPixmap slch;
