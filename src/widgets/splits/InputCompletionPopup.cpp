@@ -9,6 +9,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
+#include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/listview/GenericListView.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
@@ -164,8 +165,16 @@ void InputCompletionPopup::updateUsers(const QString &text, ChannelPtr channel)
         int count = 0;
         for (const auto &name : chatters)
         {
-            this->model_.addItem(std::make_unique<InputCompletionItem>(
-                nullptr, name, this->callback_));
+            if (getSettings()->lowercaseUsernames)
+            {
+                this->model_.addItem(std::make_unique<InputCompletionItem>(
+                    nullptr, name.toLower(), this->callback_));
+            }
+            else
+            {
+                this->model_.addItem(std::make_unique<InputCompletionItem>(
+                    nullptr, name, this->callback_));
+            }
 
             if (count++ == maxEntryCount)
                 break;
