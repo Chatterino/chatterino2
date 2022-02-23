@@ -407,8 +407,6 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
 
     if (event->type() == QEvent::FocusIn)
     {
-        widget->grabKeyboard();
-
         auto *radio = dynamic_cast<QRadioButton *>(watched);
         if (radio)
         {
@@ -416,11 +414,6 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
         }
 
         return true;
-    }
-    else if (event->type() == QEvent::FocusOut)
-    {
-        widget->releaseKeyboard();
-        return false;
     }
     else if (event->type() == QEvent::KeyPress)
     {
