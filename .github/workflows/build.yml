@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-2019, ubuntu-latest, macos-latest]
         qt-version: [5.15.2, 5.12.10]
         build-system: [qmake, cmake]
         pch: [true]
@@ -24,8 +24,8 @@ jobs:
       fail-fast: false
 
     steps:
-      - name: Set environment variables for windows-latest
-        if: matrix.os == 'windows-latest'
+      - name: Set environment variables for windows-2019
+        if: matrix.os == 'windows-2019'
         run: |
             echo "vs_version=2019" >> $GITHUB_ENV
         shell: bash
