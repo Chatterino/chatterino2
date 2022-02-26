@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2019, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
         qt-version: [5.15.2, 5.12.10]
         build-system: [qmake, cmake]
         pch: [true]
@@ -24,10 +24,10 @@ jobs:
       fail-fast: false
 
     steps:
-      - name: Set environment variables for windows-2019
-        if: matrix.os == 'windows-2019'
+      - name: Set environment variables for windows-latest
+        if: matrix.os == 'windows-latest'
         run: |
-            echo "vs_version=2019" >> $GITHUB_ENV
+            echo "vs_version=2022" >> $GITHUB_ENV
         shell: bash
 
       - uses: actions/checkout@v2.4.0
@@ -56,11 +56,18 @@ jobs:
           version: ${{ matrix.qt-version }}
 
       # WINDOWS
-      - name: Cache conan packages
+      - name: Cache conan packages part 1
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v2.1.7
         with:
-          key: ${{ runner.os }}-conan-${{ hashFiles('**/conanfile.txt') }}-20210412
+          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.txt') }}
+          path:  ~/.conan/
+
+      - name: Cache conan packages part 2
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/cache@v2.1.7
+        with:
+          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
           path: C:/.conan/
 
       - name: Add Conan to path
@@ -81,7 +88,7 @@ jobs:
         run: |
             mkdir build
             cd build
-            conan install ..
+            conan install .. -b missing
             qmake ..
             set cl=/MP
             nmake /S /NOLOGO
@@ -95,7 +102,7 @@ jobs:
         run: |
             mkdir build
             cd build
-            conan install ..
+            conan install ..  -b missing
             cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..
             set cl=/MP
             nmake /S /NOLOGO
@@ -111,6 +118,11 @@ jobs:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ matrix.build-system }}.zip
           path: build/chatterino-windows-x86-64.zip
 
+      - name: Clean Conan pkgs
+        if: startsWith(matrix.os, 'windows')
+        run: conan remove "*" -fsb
+        shell: bash
+        
       # LINUX
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
