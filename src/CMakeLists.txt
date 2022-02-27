@@ -239,8 +239,6 @@ set(SOURCE_FILES
 
         providers/twitch/api/Helix.cpp
         providers/twitch/api/Helix.hpp
-        providers/twitch/api/Kraken.cpp
-        providers/twitch/api/Kraken.hpp
 
         singletons/Badges.cpp
         singletons/Badges.hpp
