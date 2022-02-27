@@ -351,9 +351,6 @@ void TwitchAccount::loadUserstateEmotes()
             },
             [] {
                 // fetching emotes failed, ivr API might be down
-            },
-            [=] {
-                qCDebug(chatterinoTwitch) << "Finished loading emotes from IVR";
             });
     };
 }
