@@ -2,19 +2,6 @@
 
 this folder describes what sort of API requests we do, what permissions are required for the requests etc
 
-## Kraken (V5)
-
-We use few Kraken endpoints in Chatterino2.
-
-### Get User Emotes
-
-URL: https://dev.twitch.tv/docs/v5/reference/users#get-user-emotes  
-Requires `user_subscriptions` scope
-
-Migration path: **Unknown**
-
-- We use this in `providers/twitch/TwitchAccount.cpp loadEmotes` to figure out which emotes a user is allowed to use!
-
 ## Helix
 
 Full Helix API reference: https://dev.twitch.tv/docs/api/reference
