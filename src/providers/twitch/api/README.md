@@ -10,7 +10,6 @@ Full Helix API reference: https://dev.twitch.tv/docs/api/reference
 
 URL: https://dev.twitch.tv/docs/api/reference#get-users
 
-- We implement this in `providers/twitch/api/Helix.cpp fetchUsers`.  
   Used in:
   - `UserInfoPopup` to get ID, viewCount, displayName, createdAt of username we clicked
   - `CommandController` to power any commands that need to get a user ID
@@ -21,7 +20,6 @@ URL: https://dev.twitch.tv/docs/api/reference#get-users
 
 URL: https://dev.twitch.tv/docs/api/reference#get-users-follows
 
-- We implement this in `providers/twitch/api/Helix.cpp fetchUsersFollows`  
   Used in:
   - `UserInfoPopup` to get number of followers a user has
 
@@ -29,7 +27,6 @@ URL: https://dev.twitch.tv/docs/api/reference#get-users-follows
 
 URL: https://dev.twitch.tv/docs/api/reference#get-streams
 
-- We implement this in `providers/twitch/api/Helix.cpp fetchStreams`  
   Used in:
   - `TwitchChannel` to get live status, game, title, and viewer count of a channel
   - `NotificationController` to provide notifications for channels you might not have open in Chatterino, but are still interested in getting notifications for
@@ -39,7 +36,6 @@ URL: https://dev.twitch.tv/docs/api/reference#get-streams
 URL: https://dev.twitch.tv/docs/api/reference#create-clip  
 Requires `clips:edit` scope
 
-- We implement this in `providers/twitch/api/Helix.cpp createClip`  
   Used in:
   - `TwitchChannel` to create a clip of a live broadcast
 
@@ -47,7 +43,6 @@ Requires `clips:edit` scope
 
 URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
 
-- We implement this in `providers/twitch/api/Helix.cpp getChannel`  
   Used in:
   - `TwitchChannel` to refresh stream title
 
@@ -56,7 +51,6 @@ URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
 URL: https://dev.twitch.tv/docs/api/reference#modify-channel-information  
 Requires `channel:manage:broadcast` scope
 
-- We implement this in `providers/twitch/api/Helix.cpp updateChannel`  
   Used in:
   - `/setgame` to update the game in the current channel
   - `/settitle` to update the title in the current channel
@@ -66,7 +60,6 @@ Requires `channel:manage:broadcast` scope
 URL: https://dev.twitch.tv/docs/api/reference/#create-stream-marker  
 Requires `user:edit:broadcast` scope
 
-- We implement this in `providers/twitch/api/Helix.cpp createStreamMarker`  
   Used in:
   - `controllers/commands/CommandController.cpp` in /marker command
 
@@ -75,7 +68,6 @@ Requires `user:edit:broadcast` scope
 URL: https://dev.twitch.tv/docs/api/reference#get-user-block-list  
 Requires `user:read:blocked_users` scope
 
-- We implement this in `providers/twitch/api/Helix.cpp loadBlocks`  
   Used in:
   - `providers/twitch/TwitchAccount.cpp loadBlocks` to load list of blocked (blocked) users by current user
 
@@ -84,7 +76,6 @@ Requires `user:read:blocked_users` scope
 URL: https://dev.twitch.tv/docs/api/reference#block-user  
 Requires `user:manage:blocked_users` scope
 
-- We implement this in `providers/twitch/api/Helix.cpp blockUser`  
   Used in:
   - `widgets/dialogs/UserInfoPopup.cpp` to block a user via checkbox in the usercard
   - `controllers/commands/CommandController.cpp` to block a user via "/block" command
@@ -94,7 +85,6 @@ Requires `user:manage:blocked_users` scope
 URL: https://dev.twitch.tv/docs/api/reference#unblock-user  
 Requires `user:manage:blocked_users` scope
 
-- We implement this in `providers/twitch/api/Helix.cpp unblockUser`  
   Used in:
   - `widgets/dialogs/UserInfoPopup.cpp` to unblock a user via checkbox in the usercard
   - `controllers/commands/CommandController.cpp` to unblock a user via "/unblock" command
@@ -103,7 +93,6 @@ Requires `user:manage:blocked_users` scope
 
 URL: https://dev.twitch.tv/docs/api/reference#search-categories
 
-- We implement this in `providers/twitch/api/Helix.cpp searchGames`  
   Used in:
   - `controllers/commands/CommandController.cpp` in `/setgame` command to fuzzy search for game titles
 
@@ -112,7 +101,6 @@ URL: https://dev.twitch.tv/docs/api/reference#search-categories
 URL: https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages  
 Requires `moderator:manage:automod` scope
 
-- We implement this in `providers/twitch/api/Helix.cpp manageAutoModMessages`  
   Used in:
   - `providers/twitch/TwitchAccount.cpp` to approve/deny held AutoMod messages
 
@@ -120,7 +108,6 @@ Requires `moderator:manage:automod` scope
 
 URL: https://dev.twitch.tv/docs/api/reference/#get-cheermotes
 
-- We implement this in `providers/twitch/api/Helix.cpp getCheermotes`  
   Used in:
   - `providers/twitch/TwitchChannel.cpp` to resolve a chats available cheer emotes. This helps us parse incoming messages like `pajaCheer1000`
 
@@ -128,15 +115,12 @@ URL: https://dev.twitch.tv/docs/api/reference/#get-cheermotes
 
 URL: https://dev.twitch.tv/docs/api/reference#get-emote-sets
 
-- We implement this in `providers/twitch/api/Helix.cpp getEmoteSetData`  
-  Used in:
-  - `providers/twitch/TwitchAccount.cpp` to set emoteset owner data upon loading subscriber emotes from Kraken
+  Not used anywhere at the moment. Could be useful in the future for loading emotes from Helix.
 
 ### Get Channel Emotes
 
 URL: https://dev.twitch.tv/docs/api/reference#get-channel-emotes
 
-- We implement this in `providers/twitch/api/Helix.cpp getChannelEmotes`  
   Not used anywhere at the moment.
 
 ## TMI
