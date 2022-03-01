@@ -213,7 +213,6 @@ SOURCES += \
     src/providers/seventv/SeventvBadges.cpp \
     src/providers/seventv/SeventvEmotes.cpp \
     src/providers/twitch/api/Helix.cpp \
-    src/providers/twitch/api/Kraken.cpp \
     src/providers/twitch/ChannelPointReward.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
     src/providers/twitch/PubsubActions.cpp \
@@ -463,7 +462,6 @@ HEADERS += \
     src/providers/seventv/SeventvBadges.hpp \
     src/providers/seventv/SeventvEmotes.hpp \
     src/providers/twitch/api/Helix.hpp \
-    src/providers/twitch/api/Kraken.hpp \
     src/providers/twitch/ChannelPointReward.hpp \
     src/providers/twitch/ChatterinoWebSocketppLogger.hpp \
     src/providers/twitch/EmoteValue.hpp \

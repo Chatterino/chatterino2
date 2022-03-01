@@ -5,7 +5,6 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/api/Helix.hpp"
-#include "providers/twitch/api/Kraken.hpp"
 
 namespace chatterino {
 
@@ -149,7 +148,6 @@ void TwitchAccountManager::load()
             qCDebug(chatterinoTwitch)
                 << "Twitch user updated to" << newUsername;
             getHelix()->update(user->getOAuthClient(), user->getOAuthToken());
-            getKraken()->update(user->getOAuthClient(), user->getOAuthToken());
             this->currentUser_ = user;
         }
         else

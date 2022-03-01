@@ -501,7 +501,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 
     if (emoteSetsChanged)
     {
-        currentUser->loadUserstateEmotes([] {});
+        currentUser->loadUserstateEmotes();
     }
 
     QString channelName;
