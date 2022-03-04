@@ -30,7 +30,7 @@ jobs:
             echo "vs_version=2022" >> $GITHUB_ENV
         shell: bash
 
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
         with:
           submodules: true
           fetch-depth: 0  # allows for tags access
