@@ -39,8 +39,8 @@ jobs:
         id: cache-qt
         uses: actions/cache@v2.1.7
         with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-20210109
+          path: "${{ github.workspace }}/qt/"
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
 
       # LINUX
       - name: Install p7zip (Ubuntu)
@@ -54,6 +54,7 @@ jobs:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           extra: --external 7z
           version: ${{ matrix.qt-version }}
+          dir: "${{ github.workspace }}/qt/"
 
       # WINDOWS
       - name: Cache conan packages part 1
