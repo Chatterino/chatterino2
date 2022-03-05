@@ -58,6 +58,7 @@
 - Minor: Added incremental search to channel search. (#3544)
 - Minor: Show right click context menu anywhere within a message's line. (#3566)
 - Minor: Make Tab Layout setting only accept predefined values (#3564)
+- Minor: Added librewolf, icecat, and waterfox incognito support. (#3588)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
