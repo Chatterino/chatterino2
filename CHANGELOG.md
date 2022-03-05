@@ -53,6 +53,7 @@
 - Minor: Opening streamlink through hotkeys and/or split header menu matches `/streamlink` command and shows feedback in chat as well. (#3510)
 - Minor: Removed timestamp from AutoMod messages. (#3503)
 - Minor: Added ability to copy message ID with `Shift + Right Click`. (#3481)
+- Minor: Added /popup command to open currently focused split or supplied channel in a new window. (#3529)
 - Minor: Colorize the entire split header when focused. (#3379)
 - Minor: Added incremental search to channel search. (#3544)
 - Minor: Show right click context menu anywhere within a message's line. (#3566)
