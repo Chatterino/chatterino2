@@ -44,6 +44,10 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               1,
           }},
          {"search", ActionDefinition{"Focus search box"}},
+         {"execModeratorAction",
+          ActionDefinition{
+              "Usercard: execute moderation action",
+              "<ban, unban or number of the timeout button to use>", 1}},
      }},
     {HotkeyCategory::Split,
      {

@@ -27,10 +27,10 @@ jobs:
       - name: Set environment variables for windows-latest
         if: matrix.os == 'windows-latest'
         run: |
-            echo "vs_version=2019" >> $GITHUB_ENV
+            echo "vs_version=2022" >> $GITHUB_ENV
         shell: bash
 
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
         with:
           submodules: true
           fetch-depth: 0  # allows for tags access
@@ -39,8 +39,8 @@ jobs:
         id: cache-qt
         uses: actions/cache@v2.1.7
         with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-20210109
+          path: "${{ github.workspace }}/qt/"
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
 
       # LINUX
       - name: Install p7zip (Ubuntu)
@@ -50,17 +50,23 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          aqtversion: '==1.1.1'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          extra: --external 7z
           version: ${{ matrix.qt-version }}
+          dir: "${{ github.workspace }}/qt/"
 
       # WINDOWS
-      - name: Cache conan packages
+      - name: Cache conan packages part 1
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v2.1.7
         with:
-          key: ${{ runner.os }}-conan-${{ hashFiles('**/conanfile.txt') }}-20210412
+          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.txt') }}
+          path:  ~/.conan/
+
+      - name: Cache conan packages part 2
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/cache@v2.1.7
+        with:
+          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
           path: C:/.conan/
 
       - name: Add Conan to path
@@ -81,7 +87,7 @@ jobs:
         run: |
             mkdir build
             cd build
-            conan install ..
+            conan install .. -b missing
             qmake ..
             set cl=/MP
             nmake /S /NOLOGO
@@ -95,7 +101,7 @@ jobs:
         run: |
             mkdir build
             cd build
-            conan install ..
+            conan install ..  -b missing
             cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..
             set cl=/MP
             nmake /S /NOLOGO
@@ -106,11 +112,16 @@ jobs:
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ matrix.build-system }}.zip
           path: build/chatterino-windows-x86-64.zip
 
+      - name: Clean Conan pkgs
+        if: startsWith(matrix.os, 'windows')
+        run: conan remove "*" -fsb
+        shell: bash
+        
       # LINUX
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
@@ -175,14 +186,14 @@ jobs:
 
       - name: Upload artifact - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ matrix.build-system }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
           name: Chatterino-${{ matrix.qt-version }}-${{ matrix.build-system }}.deb
           path: build/Chatterino.deb
@@ -228,7 +239,7 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
           name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
           path: build/chatterino-osx.dmg
@@ -252,42 +263,42 @@ jobs:
               Nightly Build
           prerelease: true
 
-      - uses: actions/download-artifact@v2.1.0
+      - uses: actions/download-artifact@v3
         with:
           name: chatterino-windows-x86-64-5.15.2-qmake.zip
           path: windows/
 
-      - uses: actions/download-artifact@v2.1.0
+      - uses: actions/download-artifact@v3
         with:
           name: chatterino-windows-x86-64-5.15.2-cmake.zip
           path: windows-cmake/
 
-      - uses: actions/download-artifact@v2.1.0
+      - uses: actions/download-artifact@v3
         with:
           name: Chatterino-x86_64-5.15.2-qmake.AppImage
           path: linux/
 
-      - uses: actions/download-artifact@v2.1.0
+      - uses: actions/download-artifact@v3
         with:
           name: Chatterino-x86_64-5.15.2-cmake.AppImage
           path: linux-cmake/
 
-      - uses: actions/download-artifact@v2.1.0
+      - uses: actions/download-artifact@v3
         with:
           name: Chatterino-5.15.2-qmake.deb
           path: ubuntu/
 
-      - uses: actions/download-artifact@v2.1.0
+      - uses: actions/download-artifact@v3
         with:
           name: Chatterino-5.15.2-cmake.deb
           path: ubuntu-cmake/
 
-      - uses: actions/download-artifact@v2.1.0
+      - uses: actions/download-artifact@v3
         with:
           name: chatterino-osx-5.15.2-qmake.dmg
           path: macos/
 
-      - uses: actions/download-artifact@v2.1.0
+      - uses: actions/download-artifact@v3
         with:
           name: chatterino-osx-5.15.2-cmake.dmg
           path: macos-cmake/
