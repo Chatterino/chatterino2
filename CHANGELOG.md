@@ -108,6 +108,7 @@
 - Dev: Added CMake build option `BUILD_WITH_QTKEYCHAIN` to build with or without Qt5Keychain support (On by default). (#3318)
 - Dev: Added /fakemsg command for debugging (#3448)
 - Dev: Notebook::select\* functions now take an optional `focusPage` parameter (true by default) which keeps the default behaviour of selecting the page after it has been selected. If set to false, the page is _not_ focused after being selected. (#3446)
+- Dev: Updated PubSub client to use TLS v1.2 (#3599)
 
 ## 2.3.4
 
