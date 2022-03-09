@@ -167,7 +167,7 @@ jobs:
               -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
               -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
               ..
-            make -j$(nrpoc)
+            make -j$(nproc)
         shell: bash
 
       - name: Package - AppImage (Ubuntu)
