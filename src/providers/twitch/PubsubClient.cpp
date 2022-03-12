@@ -1178,7 +1178,7 @@ void PubSub::onConnectionClose(WebsocketHandle hdl)
 PubSub::WebsocketContextPtr PubSub::onTLSInit(websocketpp::connection_hdl hdl)
 {
     WebsocketContextPtr ctx(
-        new boost::asio::ssl::context(boost::asio::ssl::context::tlsv1));
+        new boost::asio::ssl::context(boost::asio::ssl::context::tlsv12));
 
     try
     {
