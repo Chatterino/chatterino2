@@ -103,6 +103,7 @@
 - Bugfix: Fixed automod and unban messages showing when moderation actions were disabled (#3548)
 - Bugfix: Fixed crash when rendering a highlight inside of a sub message, with sub message highlights themselves turned off. (#3556)
 - BugFix: Fixed SplitInput placeholder color. (#3606)
+- BugFix: Fixed double-clicking on usernames with right/middle click causing text selection. (#TODO)
 - Dev: Batch checking live status for channels with live notifications that aren't connected. (#3442)
 - Dev: Add GitHub action to test builds without precompiled headers enabled. (#3327)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
