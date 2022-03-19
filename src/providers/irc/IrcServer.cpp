@@ -195,7 +195,7 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
             if (highlighted && showInMentions)
             {
-                getApp()->twitch2->mentionsChannel->addMessage(msg);
+                getApp()->twitch->mentionsChannel->addMessage(msg);
             }
         }
         else

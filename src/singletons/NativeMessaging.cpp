@@ -240,8 +240,8 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
             postToThread([=] {
                 if (!name.isEmpty())
                 {
-                    app->twitch2->watchingChannel.reset(
-                        app->twitch2->getOrAddChannel(name));
+                    app->twitch->watchingChannel.reset(
+                        app->twitch->getOrAddChannel(name));
                 }
 
                 if (attach || attachFullscreen)
@@ -253,7 +253,7 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
                     if (!name.isEmpty())
                     {
                         window->setChannel(
-                            app->twitch2->getOrAddChannel(name));
+                            app->twitch->getOrAddChannel(name));
                     }
 //                    }
 //                    window->show();

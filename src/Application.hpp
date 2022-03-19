@@ -58,7 +58,7 @@ public:
 
     CommandController *const commands{};
     NotificationController *const notifications{};
-    TwitchIrcServer *const twitch2{};
+    TwitchIrcServer *const twitch{};
     ChatterinoBadges *const chatterinoBadges{};
     FfzBadges *const ffzBadges{};
 

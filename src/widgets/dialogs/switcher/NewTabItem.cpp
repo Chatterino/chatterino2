@@ -26,7 +26,7 @@ void NewTabItem::action()
 
     Split *split = new Split(container);
     split->setChannel(
-        getApp()->twitch2->getOrAddChannel(this->channelName_));
+        getApp()->twitch->getOrAddChannel(this->channelName_));
     container->appendSplit(split);
 }
 

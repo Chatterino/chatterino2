@@ -687,7 +687,7 @@ void SplitInput::editTextChanged()
     if (text.startsWith("/r ", Qt::CaseInsensitive) &&
         this->split_->getChannel()->isTwitchChannel())
     {
-        QString lastUser = app->twitch2->lastUserThatWhisperedMe.get();
+        QString lastUser = app->twitch->lastUserThatWhisperedMe.get();
         if (!lastUser.isEmpty())
         {
             this->ui_.textEdit->setPlainText("/w " + lastUser + text.mid(2));

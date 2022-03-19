@@ -61,7 +61,7 @@ Application::Application(Settings &_settings, Paths &_paths)
 
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
-    , twitch2(&this->emplace<TwitchIrcServer>())
+    , twitch(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , ffzBadges(&this->emplace<FfzBadges>())
     , logging(&this->emplace<Logging>())
@@ -144,7 +144,7 @@ int Application::run(QApplication &qtApp)
 {
     assert(isAppInitialized);
 
-    this->twitch2->connect();
+    this->twitch->connect();
 
     if (!getArgs().isFramelessEmbed)
     {
@@ -196,10 +196,10 @@ void Application::initNm(Paths &paths)
 
 void Application::initPubsub()
 {
-    this->twitch2->pubsub->signals_.moderation.chatCleared.connect(
+    this->twitch->pubsub->signals_.moderation.chatCleared.connect(
         [this](const auto &action) {
             auto chan =
-                this->twitch2->getChannelOrEmptyByID(action.roomID);
+                this->twitch->getChannelOrEmptyByID(action.roomID);
             if (chan->isEmpty())
             {
                 return;
@@ -214,10 +214,10 @@ void Application::initPubsub()
             });
         });
 
-    this->twitch2->pubsub->signals_.moderation.modeChanged.connect(
+    this->twitch->pubsub->signals_.moderation.modeChanged.connect(
         [this](const auto &action) {
             auto chan =
-                this->twitch2->getChannelOrEmptyByID(action.roomID);
+                this->twitch->getChannelOrEmptyByID(action.roomID);
             if (chan->isEmpty())
             {
                 return;
@@ -241,10 +241,10 @@ void Application::initPubsub()
             });
         });
 
-    this->twitch2->pubsub->signals_.moderation.moderationStateChanged.connect(
+    this->twitch->pubsub->signals_.moderation.moderationStateChanged.connect(
         [this](const auto &action) {
             auto chan =
-                this->twitch2->getChannelOrEmptyByID(action.roomID);
+                this->twitch->getChannelOrEmptyByID(action.roomID);
             if (chan->isEmpty())
             {
                 return;
@@ -263,10 +263,10 @@ void Application::initPubsub()
             });
         });
 
-    this->twitch2->pubsub->signals_.moderation.userBanned.connect(
+    this->twitch->pubsub->signals_.moderation.userBanned.connect(
         [&](const auto &action) {
             auto chan =
-                this->twitch2->getChannelOrEmptyByID(action.roomID);
+                this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty())
             {
@@ -280,10 +280,10 @@ void Application::initPubsub()
                 chan->addOrReplaceTimeout(msg);
             });
         });
-    this->twitch2->pubsub->signals_.moderation.messageDeleted.connect(
+    this->twitch->pubsub->signals_.moderation.messageDeleted.connect(
         [&](const auto &action) {
             auto chan =
-                this->twitch2->getChannelOrEmptyByID(action.roomID);
+                this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty() || getSettings()->hideDeletionActions)
             {
@@ -321,10 +321,10 @@ void Application::initPubsub()
             });
         });
 
-    this->twitch2->pubsub->signals_.moderation.userUnbanned.connect(
+    this->twitch->pubsub->signals_.moderation.userUnbanned.connect(
         [&](const auto &action) {
             auto chan =
-                this->twitch2->getChannelOrEmptyByID(action.roomID);
+                this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty())
             {
@@ -338,10 +338,10 @@ void Application::initPubsub()
             });
         });
 
-    this->twitch2->pubsub->signals_.moderation.automodMessage.connect(
+    this->twitch->pubsub->signals_.moderation.automodMessage.connect(
         [&](const auto &action) {
             auto chan =
-                this->twitch2->getChannelOrEmptyByID(action.roomID);
+                this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty())
             {
@@ -355,10 +355,10 @@ void Application::initPubsub()
             });
         });
 
-    this->twitch2->pubsub->signals_.moderation.automodUserMessage.connect(
+    this->twitch->pubsub->signals_.moderation.automodUserMessage.connect(
         [&](const auto &action) {
             auto chan =
-                this->twitch2->getChannelOrEmptyByID(action.roomID);
+                this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty())
             {
@@ -373,10 +373,10 @@ void Application::initPubsub()
             chan->deleteMessage(msg->id);
         });
 
-    this->twitch2->pubsub->signals_.moderation.automodInfoMessage.connect(
+    this->twitch->pubsub->signals_.moderation.automodInfoMessage.connect(
         [&](const auto &action) {
             auto chan =
-                this->twitch2->getChannelOrEmptyByID(action.roomID);
+                this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty())
             {
@@ -389,11 +389,11 @@ void Application::initPubsub()
             });
         });
 
-    this->twitch2->pubsub->signals_.pointReward.redeemed.connect([&](auto &data) {
+    this->twitch->pubsub->signals_.pointReward.redeemed.connect([&](auto &data) {
         QString channelId;
         if (rj::getSafe(data, "channel_id", channelId))
         {
-            auto chan = this->twitch2->getChannelOrEmptyByID(channelId);
+            auto chan = this->twitch->getChannelOrEmptyByID(channelId);
 
             auto reward = ChannelPointReward(data);
 
@@ -411,14 +411,14 @@ void Application::initPubsub()
         }
     });
 
-    this->twitch2->pubsub->start();
+    this->twitch->pubsub->start();
 
     auto RequestModerationActions = [=]() {
-        this->twitch2->pubsub->unlistenAllModerationActions();
+        this->twitch->pubsub->unlistenAllModerationActions();
         // TODO(pajlada): Unlisten to all authed topics instead of only
-        // moderation topics this->twitch2->pubsub->UnlistenAllAuthedTopics();
+        // moderation topics this->twitch->pubsub->UnlistenAllAuthedTopics();
 
-        this->twitch2->pubsub->listenToWhispers(
+        this->twitch->pubsub->listenToWhispers(
             this->accounts->twitch.getCurrent());
     };
 

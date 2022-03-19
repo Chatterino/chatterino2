@@ -1016,15 +1016,15 @@ MessageElementFlags ChannelView::getFlags() const
         {
             flags.set(MessageElementFlag::ModeratorTools);
         }
-        if (this->underlyingChannel_ == app->twitch2->mentionsChannel ||
-            this->underlyingChannel_ == app->twitch2->liveChannel)
+        if (this->underlyingChannel_ == app->twitch->mentionsChannel ||
+            this->underlyingChannel_ == app->twitch->liveChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);
         }
     }
 
-    if (this->sourceChannel_ == app->twitch2->mentionsChannel)
+    if (this->sourceChannel_ == app->twitch->mentionsChannel)
         flags.set(MessageElementFlag::ChannelName);
 
     return flags;
@@ -1072,7 +1072,7 @@ void ChannelView::drawMessages(QPainter &painter)
 
     auto app = getApp();
     bool isMentions =
-        this->underlyingChannel_ == app->twitch2->mentionsChannel;
+        this->underlyingChannel_ == app->twitch->mentionsChannel;
 
     for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {

@@ -972,8 +972,8 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
     auto *app = getApp();
 
-    const auto &globalBttvEmotes = app->twitch2->getBttvEmotes();
-    const auto &globalFfzEmotes = app->twitch2->getFfzEmotes();
+    const auto &globalBttvEmotes = app->twitch->getBttvEmotes();
+    const auto &globalFfzEmotes = app->twitch->getFfzEmotes();
 
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
