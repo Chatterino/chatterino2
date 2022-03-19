@@ -104,6 +104,7 @@
 - Bugfix: Fixed automod and unban messages showing when moderation actions were disabled (#3548)
 - Bugfix: Fixed crash when rendering a highlight inside of a sub message, with sub message highlights themselves turned off. (#3556)
 - BugFix: Fixed SplitInput placeholder color. (#3606)
+- BugFix: Remove game from stream/split title when set to "nothing." (#3609)
 - BugFix: Fixed double-clicking on usernames with right/middle click causing text selection. (#3608)
 - Dev: Batch checking live status for channels with live notifications that aren't connected. (#3442)
 - Dev: Add GitHub action to test builds without precompiled headers enabled. (#3327)
