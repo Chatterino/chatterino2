@@ -48,7 +48,7 @@ void sendWhisperMessage(const QString &text)
     // Constants used here are defined in TwitchChannel.hpp
     toSend.replace(ZERO_WIDTH_JOINER, ESCAPE_TAG);
 
-    app->twitch.server->sendMessage("jtv", toSend);
+    app->twitch->sendMessage("jtv", toSend);
 }
 
 bool appendWhisperMessageWordsLocally(const QStringList &words)
@@ -68,8 +68,8 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
 
     const auto &acc = app->accounts->twitch.getCurrent();
     const auto &accemotes = *acc->accessEmotes();
-    const auto &bttvemotes = app->twitch.server->getBttvEmotes();
-    const auto &ffzemotes = app->twitch.server->getFfzEmotes();
+    const auto &bttvemotes = app->twitch->getBttvEmotes();
+    const auto &ffzemotes = app->twitch->getFfzEmotes();
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
@@ -136,14 +136,14 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     b->flags.set(MessageFlag::Whisper);
     auto messagexD = b.release();
 
-    app->twitch.server->whispersChannel->addMessage(messagexD);
+    app->twitch->whispersChannel->addMessage(messagexD);
 
     auto overrideFlags = boost::optional<MessageFlags>(messagexD->flags);
     overrideFlags->set(MessageFlag::DoNotLog);
 
     if (getSettings()->inlineWhispers)
     {
-        app->twitch.server->forEachChannel(
+        app->twitch->forEachChannel(
             [&messagexD, overrideFlags](ChannelPtr _channel) {
                 _channel->addMessage(messagexD, overrideFlags);
             });
@@ -501,7 +501,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             stripChannelName(channelName);
 
             ChannelPtr channelTemp =
-                getApp()->twitch2->getChannelOrEmpty(channelName);
+                getApp()->twitch->getChannelOrEmpty(channelName);
 
             if (channelTemp->isEmpty())
             {
@@ -723,7 +723,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         auto *split = new Split(static_cast<SplitContainer *>(
             window.getNotebook().getOrAddSelectedPage()));
 
-        split->setChannel(app->twitch.server->getOrAddChannel(target));
+        split->setChannel(app->twitch->getOrAddChannel(target));
 
         window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
 
@@ -907,7 +907,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
 
     this->registerCommand("/raw", [](const QStringList &words, ChannelPtr) {
-        getApp()->twitch2->sendRawMessage(words.mid(1).join(" "));
+        getApp()->twitch->sendRawMessage(words.mid(1).join(" "));
         return "";
     });
 #ifndef NDEBUG
@@ -922,7 +922,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 return "";
             }
             auto ircText = words.mid(1).join(" ");
-            getApp()->twitch2->addFakeMessage(ircText);
+            getApp()->twitch->addFakeMessage(ircText);
             return "";
         });
 #endif
