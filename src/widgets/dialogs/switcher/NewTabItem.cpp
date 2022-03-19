@@ -25,8 +25,7 @@ void NewTabItem::action()
     SplitContainer *container = nb.addPage(true);
 
     Split *split = new Split(container);
-    split->setChannel(
-        getApp()->twitch.server->getOrAddChannel(this->channelName_));
+    split->setChannel(getApp()->twitch->getOrAddChannel(this->channelName_));
     container->appendSplit(split);
 }
 
