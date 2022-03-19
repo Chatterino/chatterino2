@@ -64,12 +64,6 @@ public:
 
     /*[[deprecated]]*/ Logging *const logging{};
 
-    /// Provider-specific
-    struct {
-        /*[[deprecated("use twitch2 instead")]]*/ TwitchIrcServer *server{};
-        /*[[deprecated("use twitch2->pubsub instead")]]*/ PubSub *pubsub{};
-    } twitch;
-
 private:
     void addSingleton(Singleton *singleton);
     void initPubsub();
