@@ -2081,6 +2081,11 @@ void ChannelView::addHiddenContextMenuItems(
 }
 void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
 {
+    if (event->button() != Qt::LeftButton)
+    {
+        return;
+    }
+
     std::shared_ptr<MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
