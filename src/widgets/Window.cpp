@@ -283,14 +283,14 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         {
             doc.Parse(channelRewardMessage);
             app->twitch2->addFakeMessage(channelRewardIRCMessage);
-            app->twitch.pubsub->signals_.pointReward.redeemed.invoke(
+            app->twitch2->pubsub->signals_.pointReward.redeemed.invoke(
                 doc["data"]["message"]["data"]["redemption"]);
             alt = !alt;
         }
         else
         {
             doc.Parse(channelRewardMessage2);
-            app->twitch.pubsub->signals_.pointReward.redeemed.invoke(
+            app->twitch2->pubsub->signals_.pointReward.redeemed.invoke(
                 doc["data"]["message"]["data"]["redemption"]);
             alt = !alt;
         }
