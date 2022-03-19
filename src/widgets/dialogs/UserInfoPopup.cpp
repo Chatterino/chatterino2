@@ -13,7 +13,6 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/api/Helix.hpp"
-#include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -302,7 +301,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                                 auto split = window.getNotebook()
                                                  .getOrAddSelectedPage()
                                                  ->appendNewSplit(false);
-                                split->setChannel(app->twitch2->getOrAddChannel(
+                                split->setChannel(app->twitch->getOrAddChannel(
                                     loginName.toLower()));
                             });
 
