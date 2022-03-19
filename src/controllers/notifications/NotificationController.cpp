@@ -163,7 +163,7 @@ void NotificationController::fetchFakeChannels()
     for (std::vector<int>::size_type i = 0;
          i != channelMap[Platform::Twitch].raw().size(); i++)
     {
-        auto chan = getApp()->twitch.server->getChannelOrEmpty(
+        auto chan = getApp()->twitch2->getChannelOrEmpty(
             channelMap[Platform::Twitch].raw()[i]);
         if (chan->isEmpty())
         {

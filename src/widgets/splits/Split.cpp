@@ -126,7 +126,7 @@ Split::Split(QWidget *parent)
                                            QString twitchChannel,
                                            FromTwitchLinkOpenChannelIn openIn) {
         ChannelPtr channel =
-            getApp()->twitch.server->getOrAddChannel(twitchChannel);
+            getApp()->twitch2->getOrAddChannel(twitchChannel);
         switch (openIn)
         {
             case FromTwitchLinkOpenChannelIn::Split:

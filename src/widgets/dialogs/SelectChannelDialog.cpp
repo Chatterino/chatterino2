@@ -350,24 +350,24 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
         case TAB_TWITCH: {
             if (this->ui_.twitch.channel->isChecked())
             {
-                return app->twitch.server->getOrAddChannel(
+                return app->twitch2->getOrAddChannel(
                     this->ui_.twitch.channelName->text().trimmed());
             }
             else if (this->ui_.twitch.watching->isChecked())
             {
-                return app->twitch.server->watchingChannel;
+                return app->twitch2->watchingChannel;
             }
             else if (this->ui_.twitch.mentions->isChecked())
             {
-                return app->twitch.server->mentionsChannel;
+                return app->twitch2->mentionsChannel;
             }
             else if (this->ui_.twitch.whispers->isChecked())
             {
-                return app->twitch.server->whispersChannel;
+                return app->twitch2->whispersChannel;
             }
             else if (this->ui_.twitch.live->isChecked())
             {
-                return app->twitch.server->liveChannel;
+                return app->twitch2->liveChannel;
             }
         }
         break;
