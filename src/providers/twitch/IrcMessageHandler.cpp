@@ -887,8 +887,8 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 
 void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
 {
-    auto channel = getApp()->twitch->getChannelOrEmpty(
-        message->parameter(0).remove(0, 1));
+    auto channel =
+        getApp()->twitch->getChannelOrEmpty(message->parameter(0).remove(0, 1));
 
     auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
     if (!twitchChannel)
@@ -906,8 +906,8 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
 {
-    auto channel = getApp()->twitch->getChannelOrEmpty(
-        message->parameter(0).remove(0, 1));
+    auto channel =
+        getApp()->twitch->getChannelOrEmpty(message->parameter(0).remove(0, 1));
 
     auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
     if (!twitchChannel)

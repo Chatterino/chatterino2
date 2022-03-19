@@ -1071,8 +1071,7 @@ void ChannelView::drawMessages(QPainter &painter)
     bool windowFocused = this->window() == QApplication::activeWindow();
 
     auto app = getApp();
-    bool isMentions =
-        this->underlyingChannel_ == app->twitch->mentionsChannel;
+    bool isMentions = this->underlyingChannel_ == app->twitch->mentionsChannel;
 
     for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {

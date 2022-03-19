@@ -877,8 +877,7 @@ void TwitchChannel::refreshPubsub()
         return;
 
     auto account = getApp()->accounts->twitch.getCurrent();
-    getApp()->twitch->pubsub->listenToChannelModerationActions(roomId,
-                                                                account);
+    getApp()->twitch->pubsub->listenToChannelModerationActions(roomId, account);
     getApp()->twitch->pubsub->listenToAutomod(roomId, account);
     getApp()->twitch->pubsub->listenToChannelPointRewards(roomId, account);
 }

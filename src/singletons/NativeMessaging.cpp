@@ -252,8 +252,7 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
                         AttachedWindow::get(::GetForegroundWindow(), args);
                     if (!name.isEmpty())
                     {
-                        window->setChannel(
-                            app->twitch->getOrAddChannel(name));
+                        window->setChannel(app->twitch->getOrAddChannel(name));
                     }
 //                    }
 //                    window->show();

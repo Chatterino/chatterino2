@@ -198,8 +198,7 @@ void Application::initPubsub()
 {
     this->twitch->pubsub->signals_.moderation.chatCleared.connect(
         [this](const auto &action) {
-            auto chan =
-                this->twitch->getChannelOrEmptyByID(action.roomID);
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
             if (chan->isEmpty())
             {
                 return;
@@ -216,8 +215,7 @@ void Application::initPubsub()
 
     this->twitch->pubsub->signals_.moderation.modeChanged.connect(
         [this](const auto &action) {
-            auto chan =
-                this->twitch->getChannelOrEmptyByID(action.roomID);
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
             if (chan->isEmpty())
             {
                 return;
@@ -243,8 +241,7 @@ void Application::initPubsub()
 
     this->twitch->pubsub->signals_.moderation.moderationStateChanged.connect(
         [this](const auto &action) {
-            auto chan =
-                this->twitch->getChannelOrEmptyByID(action.roomID);
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
             if (chan->isEmpty())
             {
                 return;
@@ -265,8 +262,7 @@ void Application::initPubsub()
 
     this->twitch->pubsub->signals_.moderation.userBanned.connect(
         [&](const auto &action) {
-            auto chan =
-                this->twitch->getChannelOrEmptyByID(action.roomID);
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty())
             {
@@ -282,8 +278,7 @@ void Application::initPubsub()
         });
     this->twitch->pubsub->signals_.moderation.messageDeleted.connect(
         [&](const auto &action) {
-            auto chan =
-                this->twitch->getChannelOrEmptyByID(action.roomID);
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty() || getSettings()->hideDeletionActions)
             {
@@ -323,8 +318,7 @@ void Application::initPubsub()
 
     this->twitch->pubsub->signals_.moderation.userUnbanned.connect(
         [&](const auto &action) {
-            auto chan =
-                this->twitch->getChannelOrEmptyByID(action.roomID);
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty())
             {
@@ -340,8 +334,7 @@ void Application::initPubsub()
 
     this->twitch->pubsub->signals_.moderation.automodMessage.connect(
         [&](const auto &action) {
-            auto chan =
-                this->twitch->getChannelOrEmptyByID(action.roomID);
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty())
             {
@@ -357,8 +350,7 @@ void Application::initPubsub()
 
     this->twitch->pubsub->signals_.moderation.automodUserMessage.connect(
         [&](const auto &action) {
-            auto chan =
-                this->twitch->getChannelOrEmptyByID(action.roomID);
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty())
             {
@@ -375,8 +367,7 @@ void Application::initPubsub()
 
     this->twitch->pubsub->signals_.moderation.automodInfoMessage.connect(
         [&](const auto &action) {
-            auto chan =
-                this->twitch->getChannelOrEmptyByID(action.roomID);
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty())
             {
@@ -389,27 +380,29 @@ void Application::initPubsub()
             });
         });
 
-    this->twitch->pubsub->signals_.pointReward.redeemed.connect([&](auto &data) {
-        QString channelId;
-        if (rj::getSafe(data, "channel_id", channelId))
-        {
-            auto chan = this->twitch->getChannelOrEmptyByID(channelId);
+    this->twitch->pubsub->signals_.pointReward.redeemed.connect(
+        [&](auto &data) {
+            QString channelId;
+            if (rj::getSafe(data, "channel_id", channelId))
+            {
+                auto chan = this->twitch->getChannelOrEmptyByID(channelId);
 
-            auto reward = ChannelPointReward(data);
+                auto reward = ChannelPointReward(data);
 
-            postToThread([chan, reward] {
-                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
-                {
-                    channel->addChannelPointReward(reward);
-                }
-            });
-        }
-        else
-        {
-            qCDebug(chatterinoApp)
-                << "Couldn't find channel id of point reward";
-        }
-    });
+                postToThread([chan, reward] {
+                    if (auto channel =
+                            dynamic_cast<TwitchChannel *>(chan.get()))
+                    {
+                        channel->addChannelPointReward(reward);
+                    }
+                });
+            }
+            else
+            {
+                qCDebug(chatterinoApp)
+                    << "Couldn't find channel id of point reward";
+            }
+        });
 
     this->twitch->pubsub->start();
 
