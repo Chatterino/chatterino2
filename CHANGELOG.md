@@ -103,6 +103,7 @@
 - Bugfix: Disabled /popout and /streamlink from working in non-twitch channels (e.g. /whispers) when supplied no arguments. (#3541)
 - Bugfix: Fixed automod and unban messages showing when moderation actions were disabled (#3548)
 - Bugfix: Fixed crash when rendering a highlight inside of a sub message, with sub message highlights themselves turned off. (#3556)
+- Bugfix: Don't grab the keyboard in channel picker dialog (#3575)
 - BugFix: Fixed SplitInput placeholder color. (#3606)
 - BugFix: Remove game from stream/split title when set to "nothing." (#3609)
 - BugFix: Fixed double-clicking on usernames with right/middle click causing text selection. (#3608)
