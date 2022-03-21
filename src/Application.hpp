@@ -59,18 +59,12 @@ public:
 
     CommandController *const commands{};
     NotificationController *const notifications{};
-    TwitchIrcServer *const twitch2{};
+    TwitchIrcServer *const twitch{};
     ChatterinoBadges *const chatterinoBadges{};
     SeventvBadges *const seventvBadges{};
     FfzBadges *const ffzBadges{};
 
     /*[[deprecated]]*/ Logging *const logging{};
-
-    /// Provider-specific
-    struct {
-        /*[[deprecated("use twitch2 instead")]]*/ TwitchIrcServer *server{};
-        /*[[deprecated("use twitch2->pubsub instead")]]*/ PubSub *pubsub{};
-    } twitch;
 
 private:
     void addSingleton(Singleton *singleton);

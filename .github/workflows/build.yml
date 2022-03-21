@@ -153,7 +153,7 @@ jobs:
             mkdir build
             cd build
             qmake PREFIX=/usr ..
-            make -j8
+            make -j$(nproc)
         shell: bash
 
       - name: Build with CMake (Ubuntu)
@@ -167,7 +167,7 @@ jobs:
               -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
               -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
               ..
-            make -j8
+            make -j$(nproc)
         shell: bash
 
       - name: Package - AppImage (Ubuntu)
@@ -211,7 +211,7 @@ jobs:
             mkdir build
             cd build
             $Qt5_DIR/bin/qmake .. DEFINES+=$dateOfBuild
-            make -j8
+            make -j$(sysctl -n hw.logicalcpu)
         shell: bash
 
       - name: Build with CMake (MacOS)
@@ -224,7 +224,7 @@ jobs:
                 -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
                 -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
                 ..
-            make -j8
+            make -j$(sysctl -n hw.logicalcpu)
         shell: bash
 
       - name: Package (MacOS)

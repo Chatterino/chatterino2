@@ -59,6 +59,7 @@
 - Minor: Show right click context menu anywhere within a message's line. (#3566)
 - Minor: Make Tab Layout setting only accept predefined values (#3564)
 - Minor: Added librewolf, icecat, and waterfox incognito support. (#3588)
+- Minor: Updated to Emoji v14.0 (#3612)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
@@ -102,6 +103,10 @@
 - Bugfix: Disabled /popout and /streamlink from working in non-twitch channels (e.g. /whispers) when supplied no arguments. (#3541)
 - Bugfix: Fixed automod and unban messages showing when moderation actions were disabled (#3548)
 - Bugfix: Fixed crash when rendering a highlight inside of a sub message, with sub message highlights themselves turned off. (#3556)
+- Bugfix: Don't grab the keyboard in channel picker dialog (#3575)
+- BugFix: Fixed SplitInput placeholder color. (#3606)
+- BugFix: Remove game from stream/split title when set to "nothing." (#3609)
+- BugFix: Fixed double-clicking on usernames with right/middle click causing text selection. (#3608)
 - Dev: Batch checking live status for channels with live notifications that aren't connected. (#3442)
 - Dev: Add GitHub action to test builds without precompiled headers enabled. (#3327)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
@@ -109,6 +114,8 @@
 - Dev: Added CMake build option `BUILD_WITH_QTKEYCHAIN` to build with or without Qt5Keychain support (On by default). (#3318)
 - Dev: Added /fakemsg command for debugging (#3448)
 - Dev: Notebook::select\* functions now take an optional `focusPage` parameter (true by default) which keeps the default behaviour of selecting the page after it has been selected. If set to false, the page is _not_ focused after being selected. (#3446)
+- Dev: Updated PubSub client to use TLS v1.2 (#3599)
+- Dev: Use system logical core count for Ubuntu/macOS GitHub actions builds. (#3602)
 
 ## 2.3.4
 
