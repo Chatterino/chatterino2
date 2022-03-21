@@ -342,7 +342,7 @@ void EmotePopup::loadChannel(ChannelPtr channel)
 
     // global
     addEmotes(*globalChannel, *getApp()->twitch->getSeventvEmotes().emotes(),
-                "7TV", MessageElementFlag::SeventvEmote);
+              "7TV", MessageElementFlag::SeventvEmote);
     addEmotes(*globalChannel, *getApp()->twitch->getBttvEmotes().emotes(),
               "BetterTTV", MessageElementFlag::BttvEmote);
     addEmotes(*globalChannel, *getApp()->twitch->getFfzEmotes().emotes(),
@@ -410,7 +410,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
 
     auto seventvGlobalEmotes = this->filterEmoteMap(
-        searchText, getApp()->twitch2->getSeventvEmotes().emotes());
+        searchText, getApp()->twitch->getSeventvEmotes().emotes());
     auto bttvGlobalEmotes = this->filterEmoteMap(
         searchText, getApp()->twitch->getBttvEmotes().emotes());
     auto ffzGlobalEmotes = this->filterEmoteMap(

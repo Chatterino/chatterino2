@@ -142,7 +142,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     }
 
     // 7TV Global
-    for (auto &emote : *getApp()->twitch2->getSeventvEmotes().emotes())
+    for (auto &emote : *getApp()->twitch->getSeventvEmotes().emotes())
     {
         addString(emote.first.string, TaggedString::Type::SEVENTVGlobalEmote);
     }
