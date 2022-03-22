@@ -97,6 +97,8 @@ public:
 
     void clearMessages();
     void showUserInfoPopup(const QString &userName);
+    void showUserInfoPopup(const QString &userName,
+                           const QString &alternativePopoutChannel);
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
