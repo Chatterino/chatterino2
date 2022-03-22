@@ -2168,6 +2168,11 @@ void ChannelView::showUserInfoPopup(const QString &userName,
     userPopup->setData(userName, this->hasSourceChannel()
                                      ? this->sourceChannel_
                                      : this->underlyingChannel_);
+    if (alternativePopoutChannel != nullptr)
+    {
+        userPopup->setPopoutChannel(alternativePopoutChannel);
+    }
+
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     userPopup->move(QCursor::pos() - offset);
     userPopup->show();
