@@ -43,7 +43,7 @@ public:
     }
 
     template <typename T2, typename... Args>
-    LayoutCreator<T2> emplace(Args &&...args)
+    LayoutCreator<T2> emplace(Args &&... args)
     {
         T2 *t = new T2(std::forward<Args>(args)...);
 
@@ -184,7 +184,7 @@ private:
 };
 
 template <typename T, typename... Args>
-LayoutCreator<T> makeDialog(Args &&...args)
+LayoutCreator<T> makeDialog(Args &&... args)
 {
     T *t = new T(std::forward<Args>(args)...);
     t->setAttribute(Qt::WA_DeleteOnClose);
