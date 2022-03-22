@@ -2161,7 +2161,7 @@ void ChannelView::showUserInfoPopup(const QString &userName)
 void ChannelView::showUserInfoPopup(const QString &userName,
                                     const QString &alternativePopoutChannel)
 {
-    QWidget *userCardParent =
+    auto *userCardParent =
         static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
     auto *userPopup =
         new UserInfoPopup(getSettings()->autoCloseUserPopup, userCardParent);
