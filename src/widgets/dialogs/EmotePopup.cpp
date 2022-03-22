@@ -344,12 +344,12 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     if (getSettings()->enableLoadingSevenTV)
     {
         addEmotes(*globalChannel,
-                  *getApp()->twitch2->getSeventvEmotes().emotes(), "7TV",
+                  *getApp()->twitch->getSeventvEmotes().emotes(), "7TV",
                   MessageElementFlag::SeventvEmote);
     }
-    addEmotes(*globalChannel, *getApp()->twitch2->getBttvEmotes().emotes(),
+    addEmotes(*globalChannel, *getApp()->twitch->getBttvEmotes().emotes(),
               "BetterTTV", MessageElementFlag::BttvEmote);
-    addEmotes(*globalChannel, *getApp()->twitch2->getFfzEmotes().emotes(),
+    addEmotes(*globalChannel, *getApp()->twitch->getFfzEmotes().emotes(),
               "FrankerFaceZ", MessageElementFlag::FfzEmote);
 
     // channel
@@ -417,11 +417,11 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
 
     auto seventvGlobalEmotes = this->filterEmoteMap(
-        searchText, getApp()->twitch2->getSeventvEmotes().emotes());
+        searchText, getApp()->twitch->getSeventvEmotes().emotes());
     auto bttvGlobalEmotes = this->filterEmoteMap(
-        searchText, getApp()->twitch2->getBttvEmotes().emotes());
+        searchText, getApp()->twitch->getBttvEmotes().emotes());
     auto ffzGlobalEmotes = this->filterEmoteMap(
-        searchText, getApp()->twitch2->getFfzEmotes().emotes());
+        searchText, getApp()->twitch->getFfzEmotes().emotes());
 
     // twitch
     addEmoteSets(twitchGlobalEmotes, *searchChannel, *searchChannel,

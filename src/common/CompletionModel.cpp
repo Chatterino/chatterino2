@@ -142,19 +142,19 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     }
 
     // 7TV Global
-    for (auto &emote : *getApp()->twitch2->getSeventvEmotes().emotes())
+    for (auto &emote : *getApp()->twitch->getSeventvEmotes().emotes())
     {
         addString(emote.first.string, TaggedString::Type::SEVENTVGlobalEmote);
     }
 
     // Bttv Global
-    for (auto &emote : *getApp()->twitch2->getBttvEmotes().emotes())
+    for (auto &emote : *getApp()->twitch->getBttvEmotes().emotes())
     {
         addString(emote.first.string, TaggedString::Type::BTTVChannelEmote);
     }
 
     // Ffz Global
-    for (auto &emote : *getApp()->twitch2->getFfzEmotes().emotes())
+    for (auto &emote : *getApp()->twitch->getFfzEmotes().emotes())
     {
         addString(emote.first.string, TaggedString::Type::FFZChannelEmote);
     }

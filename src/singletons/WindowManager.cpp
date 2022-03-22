@@ -609,23 +609,23 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 
     if (descriptor.type_ == "twitch")
     {
-        return app->twitch.server->getOrAddChannel(descriptor.channelName_);
+        return app->twitch->getOrAddChannel(descriptor.channelName_);
     }
     else if (descriptor.type_ == "mentions")
     {
-        return app->twitch.server->mentionsChannel;
+        return app->twitch->mentionsChannel;
     }
     else if (descriptor.type_ == "watching")
     {
-        return app->twitch.server->watchingChannel;
+        return app->twitch->watchingChannel;
     }
     else if (descriptor.type_ == "whispers")
     {
-        return app->twitch.server->whispersChannel;
+        return app->twitch->whispersChannel;
     }
     else if (descriptor.type_ == "live")
     {
-        return app->twitch.server->liveChannel;
+        return app->twitch->liveChannel;
     }
     else if (descriptor.type_ == "irc")
     {

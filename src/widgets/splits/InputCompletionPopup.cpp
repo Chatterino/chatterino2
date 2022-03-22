@@ -110,11 +110,11 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
                 addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
         }
 
-        if (auto seventvG = getApp()->twitch2->getSeventvEmotes().emotes())
+        if (auto seventvG = getApp()->twitch->getSeventvEmotes().emotes())
             addEmotes(emotes, *seventvG, text, "Global 7TV");
-        if (auto bttvG = getApp()->twitch2->getBttvEmotes().emotes())
+        if (auto bttvG = getApp()->twitch->getBttvEmotes().emotes())
             addEmotes(emotes, *bttvG, text, "Global BetterTTV");
-        if (auto ffzG = getApp()->twitch2->getFfzEmotes().emotes())
+        if (auto ffzG = getApp()->twitch->getFfzEmotes().emotes())
             addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
 
         addEmojis(emotes, getApp()->emotes->emojis.emojis, text);

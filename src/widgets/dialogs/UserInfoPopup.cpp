@@ -301,7 +301,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                                 auto split = window.getNotebook()
                                                  .getOrAddSelectedPage()
                                                  ->appendNewSplit(false);
-                                split->setChannel(app->twitch2->getOrAddChannel(
+                                split->setChannel(app->twitch->getOrAddChannel(
                                     loginName.toLower()));
                             });
 

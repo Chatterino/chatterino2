@@ -9,8 +9,7 @@ namespace filterparser {
 
 ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 {
-    auto watchingChannel =
-        chatterino::getApp()->twitch.server->watchingChannel.get();
+    auto watchingChannel = chatterino::getApp()->twitch->watchingChannel.get();
 
     /* Known Identifiers
      *

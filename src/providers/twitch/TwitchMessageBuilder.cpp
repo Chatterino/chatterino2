@@ -1015,9 +1015,9 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
     auto *app = getApp();
 
-    const auto &globalSeventvEmotes = app->twitch.server->getSeventvEmotes();
-    const auto &globalBttvEmotes = app->twitch.server->getBttvEmotes();
-    const auto &globalFfzEmotes = app->twitch.server->getFfzEmotes();
+    const auto &globalSeventvEmotes = app->twitch->getSeventvEmotes();
+    const auto &globalBttvEmotes = app->twitch->getBttvEmotes();
+    const auto &globalFfzEmotes = app->twitch->getFfzEmotes();
 
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
