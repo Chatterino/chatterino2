@@ -63,7 +63,7 @@ public:
     void addLink(const QString &origLink, const QString &matchedLink);
 
     template <typename T, typename... Args>
-    T *emplace(Args &&... args)
+    T *emplace(Args &&...args)
     {
         static_assert(std::is_base_of<MessageElement, T>::value,
                       "T must extend MessageElement");
