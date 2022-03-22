@@ -385,7 +385,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
         QObject::connect(usercard.getElement(), &Button::leftClicked, [this] {
             QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
-                                      this->channel_->getName() +
+                                      this->popoutChannelName_ +
                                       "/viewercard/" + this->userName_);
         });
 
