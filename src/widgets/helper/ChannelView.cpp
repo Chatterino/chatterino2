@@ -2187,7 +2187,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserWhisper:
         case Link::UserInfo: {
             auto user = link.value;
-            this->showUserInfoPopup(user);
+            this->showUserInfoPopup(user, layout->getMessage()->channelName);
         }
         break;
 
