@@ -698,6 +698,11 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
     });
 }
 
+void UserInfoPopup::setPopoutChannel(const QString &channelName)
+{
+    this->popoutChannelName_ = channelName;
+}
+
 void UserInfoPopup::updateLatestMessages()
 {
     auto filteredChannel = filterMessages(this->userName_, this->channel_);
