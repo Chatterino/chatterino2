@@ -683,6 +683,7 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 {
     this->userName_ = name;
     this->channel_ = channel;
+    this->popoutChannelName_ = channel->getName();
     this->setWindowTitle(TEXT_TITLE.arg(name, channel->getName()));
 
     this->ui_.nameLabel->setText(name);
