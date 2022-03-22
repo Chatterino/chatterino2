@@ -60,7 +60,7 @@
 - Minor: Make Tab Layout setting only accept predefined values (#3564)
 - Minor: Added librewolf, icecat, and waterfox incognito support. (#3588)
 - Minor: Updated to Emoji v14.0 (#3612)
-- Minor: Use original channel when opening a user's popout in /mentions (#3623)
+- Minor: Fixed being unable to load Twitch Usercards from the `/mentions` tab. (#3623)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
