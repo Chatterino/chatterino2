@@ -310,6 +310,16 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                     }
                     break;
 
+                    case Qt::MiddleButton: { 
+                        ChannelPtr channel = getApp()->twitch->getOrAddChannel(userName_.toLower());   
+                        auto &nb = getApp()->windows->getMainWindow().getNotebook();
+                        SplitContainer *container = nb.addPage(true);
+                        Split *split = new Split(container);
+                        split->setChannel(channel);
+                        container->appendSplit(split);
+                    }
+                    break;
+
                     default:;
                 }
             });
