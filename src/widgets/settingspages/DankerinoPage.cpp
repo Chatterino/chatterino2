@@ -43,7 +43,7 @@ void DankerinoPage::initLayout(GeneralPageView &layout)
     auto &s = *getSettings();
 
     layout.addTitle("Apperance");
-    layout.addCheckbox("Show placeholder in text input box (requires restart)",
+    layout.addCheckbox("Show placeholder in text input box",
                        s.showTextInputPlaceholder);
     layout.addCheckbox("Colorize usernames on IRC", s.colorizeNicknamesOnIrc);
     layout.addCheckbox("Gray-out recent messages", s.grayOutRecents);

@@ -175,6 +175,11 @@ Split::Split(QWidget *parent)
             }
         },
         this->signalHolder_);
+    getSettings()->showTextInputPlaceholder.connect(
+        [this]() {
+            this->updateInputPlaceholder();
+        },
+        this->signalHolder_);
 
     this->header_->updateModerationModeIcon();
     this->overlay_->hide();
@@ -591,7 +596,8 @@ void Split::updateInputPlaceholder()
         {
             placeholderText =
                 QString("Send message as %1...")
-                    .arg(getApp()->accounts->twitch.getCurrent()->getUserName());
+                    .arg(
+                        getApp()->accounts->twitch.getCurrent()->getUserName());
         }
     }
 
