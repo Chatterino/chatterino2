@@ -132,3 +132,56 @@ Open up your terminal with the Visual Studio environment variables, then enter t
 2. `cd build`
 3. `cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..`
 4. `nmake`
+
+## Building/Running in CLion
+
+_Note:_ We're using `build` instead of the CLion default `cmake-build-debug` folder.
+
+Install [conan](https://conan.io/downloads.html) and make sure it's in your `PATH` (default setting).
+
+Clone the repository as described in the readme. Open a terminal in the cloned folder and enter the following commands:
+
+1. `mkdir build && cd build`
+2. `conan install .. -s build_type=Debug`
+
+Now open the project in CLion. You will be greeted with the _Open Project Wizard_. Set the _CMake Options_ to
+
+```
+-DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64\lib\cmake\Qt5
+-DUSE_CONAN=ON
+-DCMAKE_CXX_FLAGS=/bigobj
+```
+
+and the _Build Directory_ to `build`.
+
+<details>
+<summary>Screenshot of CMake configuration</summary>
+
+![Screenshot CMake configuration](https://i.imgur.com/ePmIgST.png)
+</details>
+
+After the CMake project is loaded, open the _Run/Debug Configurations_.
+
+Select the `CMake Applications > chatterino` configuration and add a new _Run External tool_ task to _Before launch_.
+
+- Set the _Program_ to `C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe`
+- Set the _Arguments_
+  to `$CMakeCurrentProductFile$ --debug --no-compiler-runtime --no-translations --no-opengl-sw --dir bin/`
+- Set the _Working directory_ to `$ProjectFileDir$\build`
+
+<details>
+<summary>Screenshot of External tool</summary>
+
+![Screenshot of External Tool](https://i.imgur.com/DYg6nDp.png)
+</details>
+
+<details>
+<summary>Screenshot of chatterino configuration</summary>
+
+![Screenshot of chatterino configuration](https://i.imgur.com/tZRHdU2.png)
+</details>
+
+Now you can run the `chatterino | Debug` configuration.
+
+If you want to run the portable version of Chatterino, create a file called `modes` inside of `build/bin` and
+write `portable` into it.
