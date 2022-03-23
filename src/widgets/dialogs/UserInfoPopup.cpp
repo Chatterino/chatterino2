@@ -311,6 +311,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                     break;
 
                     case Qt::MiddleButton: {
+                        // don't open a new tab if there's no avatar (probably in cases when invalid user's usercard was opened)
+                        if (this->avatarUrl_.isEmpty())
+                        {
+                            return;
+                        }
                         ChannelPtr channel = getApp()->twitch->getOrAddChannel(
                             userName_.toLower());
                         auto &nb =
