@@ -239,6 +239,10 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
 
         if (this->readConnection_)
         {
+            if (channelName.size() == 0)
+            {
+                return;
+            }
             if (channelName.at(0) == "$")
             {
                 this->readConnection_->sendRaw("PART " + channelName.mid(1));
