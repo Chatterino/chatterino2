@@ -158,6 +158,7 @@ and the _Build Directory_ to `build`.
 <summary>Screenshot of CMake configuration</summary>
 
 ![Screenshot CMake configuration](https://i.imgur.com/ePmIgST.png)
+
 </details>
 
 After the CMake project is loaded, open the _Run/Debug Configurations_.
@@ -173,12 +174,14 @@ Select the `CMake Applications > chatterino` configuration and add a new _Run Ex
 <summary>Screenshot of External tool</summary>
 
 ![Screenshot of External Tool](https://i.imgur.com/DYg6nDp.png)
+
 </details>
 
 <details>
 <summary>Screenshot of chatterino configuration</summary>
 
 ![Screenshot of chatterino configuration](https://i.imgur.com/tZRHdU2.png)
+
 </details>
 
 Now you can run the `chatterino | Debug` configuration.
