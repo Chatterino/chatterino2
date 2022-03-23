@@ -12,6 +12,7 @@
 - Minor: Webchat detection uses a customizable highlight now. (Mm2PL/Dankerino#90, Mm2PL/Dankerino#114)
 - Minor: Update 7TV code (Mm2pl/Dankerino#95)
 - Minor: Add Open in popup usercard menu option (Mm2PL/Dankerino#111)
+- Minor: Fix placeholder text showing despite having the option disabled (Mm2pl/Dankerino#121)
 
 ### Chatterino
 
