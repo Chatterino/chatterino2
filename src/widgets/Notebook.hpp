@@ -60,6 +60,9 @@ public:
 
     void setTabDirection(NotebookTabDirection direction);
 
+    bool isNotebookLayoutLocked() const;
+    void setLockNotebookLayout(bool value);
+
 protected:
     virtual void scaleChangedEvent(float scale_) override;
     virtual void resizeEvent(QResizeEvent *) override;
@@ -98,7 +101,9 @@ private:
     bool showTabs_ = true;
     bool showAddButton_ = false;
     int lineOffset_ = 20;
+    bool lockNotebookLayout_ = false;
     NotebookTabDirection tabDirection_ = NotebookTabDirection::Horizontal;
+    QAction *lockNotebookLayoutAction_;
 };
 
 class SplitNotebook : public Notebook

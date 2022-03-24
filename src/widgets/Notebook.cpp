@@ -40,6 +40,23 @@ Notebook::Notebook(QWidget *parent)
             this->setShowTabs(!this->getShowTabs());
         },
         QKeySequence("Ctrl+U"));
+
+    lockNotebookLayoutAction_ = new QAction("Lock Tab Layout", &this->menu_);
+
+    // Load lock notebook layout state from settings
+    this->setLockNotebookLayout(getSettings()->lockNotebookLayout.getValue());
+
+    lockNotebookLayoutAction_->setCheckable(true);
+    lockNotebookLayoutAction_->setChecked(this->lockNotebookLayout_);
+
+    // Update lockNotebookLayout_ value anytime the user changes the checkbox state
+    QObject::connect(lockNotebookLayoutAction_, &QAction::triggered,
+                     [this](bool value) {
+                         this->lockNotebookLayout_ = value;
+                     });
+
+    // Append it to our current menu actions
+    this->menu_.addAction(lockNotebookLayoutAction_);
 }
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
@@ -316,6 +333,11 @@ QWidget *Notebook::tabAt(QPoint point, int &index, int maxWidth)
 
 void Notebook::rearrangePage(QWidget *page, int index)
 {
+    if (this->isNotebookLayoutLocked())
+    {
+        return;
+    }
+
     // Queue up save because: Tab rearranged
     getApp()->windows->queueSave();
 
@@ -671,6 +693,18 @@ void Notebook::paintEvent(QPaintEvent *event)
         painter.fillRect(this->lineOffset_, 0, int(2 * scale), this->height(),
                          this->theme->tabs.dividerLine);
     }
+}
+
+bool Notebook::isNotebookLayoutLocked() const
+{
+    return this->lockNotebookLayout_;
+}
+
+void Notebook::setLockNotebookLayout(bool value)
+{
+    this->lockNotebookLayout_ = value;
+    this->lockNotebookLayoutAction_->setChecked(value);
+    getSettings()->lockNotebookLayout.setValue(value);
 }
 
 NotebookButton *Notebook::getAddButton()
