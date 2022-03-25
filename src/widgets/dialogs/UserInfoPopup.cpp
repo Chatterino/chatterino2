@@ -855,7 +855,7 @@ void UserInfoPopup::updateUserData()
 
         // get followage and subage
         getIvr()->getSubage(
-            this->userName_, this->channel_->getName(),
+            this->userName_, this->popoutChannelName_,
             [this, hack](const IvrSubage &subageInfo) {
                 if (!hack.lock())
                 {
