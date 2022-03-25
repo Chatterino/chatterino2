@@ -1716,6 +1716,22 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             else if (hoverLayoutElement->getFlags().has(
                          MessageElementFlag::Username))
             {
+                if (event->modifiers() == Qt::ShiftModifier)
+                {
+                    this->openChannelIn.invoke(
+                        hoverLayoutElement->getLink().value,
+                        FromTwitchLinkOpenChannelIn::Tab);
+                    return;
+                }
+
+                if (event->modifiers() == Qt::AltModifier)
+                {
+                    this->openChannelIn.invoke(
+                        hoverLayoutElement->getLink().value,
+                        FromTwitchLinkOpenChannelIn::Split);
+                    return;
+                }
+
                 openTwitchUsercard(this->channel_->getName(),
                                    hoverLayoutElement->getLink().value);
                 return;
