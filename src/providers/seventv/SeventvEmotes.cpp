@@ -8,6 +8,7 @@
 #include "messages/ImageSet.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -81,6 +82,7 @@ namespace {
     {
         auto emotes = EmoteMap();
 
+        // We always show all global emotes, no need to check visibility here
         for (const auto &jsonEmote : jsonEmotes)
         {
             auto emote = createEmote(jsonEmote, true);
@@ -101,8 +103,17 @@ namespace {
         {
             auto jsonEmote = jsonEmote_.toObject();
 
-            auto emote = createEmote(jsonEmote, false);
+            // Check our visibility of this emote, don't display if unlisted
+            int64_t visibility = jsonEmote.value("visibility").toInt();
+            auto visibilityFlags = SeventvEmoteVisibilityFlags(
+                SeventvEmoteVisibilityFlag(visibility));
+            if (!getSettings()->showUnlistedEmotes &&
+                visibilityFlags.has(SeventvEmoteVisibilityFlag::Unlisted))
+            {
+                continue;
+            }
 
+            auto emote = createEmote(jsonEmote, false);
             emotes[emote.name] = cachedOrMake(std::move(emote.emote), emote.id);
         }
 
