@@ -11,11 +11,12 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/api/Helix.hpp"
-#include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
@@ -23,9 +24,11 @@
 #include "util/StreamerMode.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/Scrollbar.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -133,6 +136,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                                     : userInfoPopupFlags,
                  parent)
     , hack_(new bool)
+    , dragTimer_(this)
 {
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
@@ -171,6 +175,58 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
              {
                  qCWarning(chatterinoHotkeys) << "Unknown scroll direction";
              }
+             return "";
+         }},
+        {"execModeratorAction",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.empty())
+             {
+                 return "execModeratorAction action needs an argument, which "
+                        "moderation action to execute, see description in the "
+                        "editor";
+             }
+             auto target = arguments.at(0);
+             QString msg;
+
+             // these can't have /timeout/ buttons because they are not timeouts
+             if (target == "ban")
+             {
+                 msg = QString("/ban %1").arg(this->userName_);
+             }
+             else if (target == "unban")
+             {
+                 msg = QString("/unban %1").arg(this->userName_);
+             }
+             else
+             {
+                 // find and execute timeout button #TARGET
+
+                 bool ok;
+                 int buttonNum = target.toInt(&ok);
+                 if (!ok)
+                 {
+                     return QString("Invalid argument for execModeratorAction: "
+                                    "%1. Use "
+                                    "\"ban\", \"unban\" or the number of the "
+                                    "timeout "
+                                    "button to execute")
+                         .arg(target);
+                 }
+
+                 const auto &timeoutButtons =
+                     getSettings()->timeoutButtons.getValue();
+                 if (timeoutButtons.size() < buttonNum || 0 >= buttonNum)
+                 {
+                     return QString("Invalid argument for execModeratorAction: "
+                                    "%1. Integer out of usable range: [1, %2]")
+                         .arg(buttonNum, timeoutButtons.size() - 1);
+                 }
+                 const auto &button = timeoutButtons.at(buttonNum - 1);
+                 msg = QString("/timeout %1 %2")
+                           .arg(this->userName_)
+                           .arg(calculateTimeoutDuration(button));
+             }
+             this->channel_->sendMessage(msg);
              return "";
          }},
 
@@ -233,6 +289,21 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                         menu->addAction("Copy avatar link", [avatarUrl] {
                             crossPlatformCopy(avatarUrl);
                         });
+
+                        // we need to assign login name for msvc compilation
+                        auto loginName = this->userName_.toLower();
+                        menu->addAction(
+                            "Open channel in a new popup window", this,
+                            [loginName] {
+                                auto app = getApp();
+                                auto &window = app->windows->createWindow(
+                                    WindowType::Popup, true);
+                                auto split = window.getNotebook()
+                                                 .getOrAddSelectedPage()
+                                                 ->appendNewSplit(false);
+                                split->setChannel(app->twitch->getOrAddChannel(
+                                    loginName.toLower()));
+                            });
 
                         menu->popup(QCursor::pos());
                         menu->raise();
@@ -428,12 +499,21 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
     this->installEvents();
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
-}
 
-// remove once https://github.com/pajlada/signals/pull/10 gets merged
-UserInfoPopup::~UserInfoPopup()
-{
-    this->refreshConnection_.disconnect();
+    this->dragTimer_.callOnTimeout(
+        [this, hack = std::weak_ptr<bool>(this->hack_)] {
+            if (!hack.lock())
+            {
+                // Ensure this timer is never called after the object has been destroyed
+                return;
+            }
+            if (!this->isMoving_)
+            {
+                return;
+            }
+
+            this->move(this->requestedDragPos_);
+        });
 }
 
 void UserInfoPopup::themeChangedEvent()
@@ -457,6 +537,36 @@ void UserInfoPopup::scaleChangedEvent(float /*scale*/)
 
         this->setGeometry(geo);
     });
+}
+
+void UserInfoPopup::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::MouseButton::LeftButton)
+    {
+        this->dragTimer_.start(std::chrono::milliseconds(17));
+        this->startPosDrag_ = event->pos();
+        this->movingRelativePos = event->localPos();
+    }
+}
+
+void UserInfoPopup::mouseReleaseEvent(QMouseEvent *event)
+{
+    this->dragTimer_.stop();
+    this->isMoving_ = false;
+}
+
+void UserInfoPopup::mouseMoveEvent(QMouseEvent *event)
+{
+    // Drag the window by the amount changed from inital position
+    // Note that we provide a few *units* of deadzone so people don't
+    // start dragging the window if they are slow at clicking.
+    auto movePos = event->pos() - this->startPosDrag_;
+    if (this->isMoving_ || movePos.manhattanLength() > 10.0)
+    {
+        this->requestedDragPos_ =
+            (event->screenPos() - this->movingRelativePos).toPoint();
+        this->isMoving_ = true;
+    }
 }
 
 void UserInfoPopup::installEvents()
@@ -601,26 +711,25 @@ void UserInfoPopup::updateLatestMessages()
     // shrink dialog in case ChannelView goes from visible to hidden
     this->adjustSize();
 
-    this->refreshConnection_
-        .disconnect();  // remove once https://github.com/pajlada/signals/pull/10 gets merged
+    this->refreshConnection_ =
+        std::make_unique<pajlada::Signals::ScopedConnection>(
+            this->channel_->messageAppended.connect([this, hasMessages](
+                                                        auto message, auto) {
+                if (!checkMessageUserName(this->userName_, message))
+                    return;
 
-    this->refreshConnection_ = this->channel_->messageAppended.connect(
-        [this, hasMessages](auto message, auto) {
-            if (!checkMessageUserName(this->userName_, message))
-                return;
-
-            if (hasMessages)
-            {
-                // display message in ChannelView
-                this->ui_.latestMessages->channel()->addMessage(message);
-            }
-            else
-            {
-                // The ChannelView is currently hidden, so manually refresh
-                // and display the latest messages
-                this->updateLatestMessages();
-            }
-        });
+                if (hasMessages)
+                {
+                    // display message in ChannelView
+                    this->ui_.latestMessages->channel()->addMessage(message);
+                }
+                else
+                {
+                    // The ChannelView is currently hidden, so manually refresh
+                    // and display the latest messages
+                    this->updateLatestMessages();
+                }
+            }));
 }
 
 void UserInfoPopup::updateUserData()

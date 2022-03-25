@@ -144,30 +144,34 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToFloat(args.value, 1.f);
         });
-    layout.addDropdown<int>(
-        "Tab layout", {"Horizontal", "Vertical"}, s.tabDirection,
-        [](auto val) {
-            switch (val)
-            {
-                case NotebookTabDirection::Horizontal:
-                    return "Horizontal";
-                case NotebookTabDirection::Vertical:
-                    return "Vertical";
-            }
+    ComboBox *tabDirectionDropdown =
+        layout.addDropdown<std::underlying_type<NotebookTabDirection>::type>(
+            "Tab layout", {"Horizontal", "Vertical"}, s.tabDirection,
+            [](auto val) {
+                switch (val)
+                {
+                    case NotebookTabDirection::Horizontal:
+                        return "Horizontal";
+                    case NotebookTabDirection::Vertical:
+                        return "Vertical";
+                }
 
-            return "";
-        },
-        [](auto args) {
-            if (args.value == "Vertical")
-            {
-                return NotebookTabDirection::Vertical;
-            }
-            else
-            {
-                // default to horizontal
-                return NotebookTabDirection::Horizontal;
-            }
-        });
+                return "";
+            },
+            [](auto args) {
+                if (args.value == "Vertical")
+                {
+                    return NotebookTabDirection::Vertical;
+                }
+                else
+                {
+                    // default to horizontal
+                    return NotebookTabDirection::Horizontal;
+                }
+            },
+            false);
+    tabDirectionDropdown->setMinimumWidth(
+        tabDirectionDropdown->minimumSizeHint().width());
 
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost);
@@ -366,7 +370,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Extra information like \"youtube video stats\" or title of webpages "
         "can be loaded for all links if enabled. Optionally you can also show "
         "thumbnails for emotes, videos and more. The information is pulled "
-        "from our servers.");
+        "from our servers. The Link Previews are loaded through <a "
+        "href=\"https://github.com/Chatterino/api\">an API</a> hosted by the "
+        "Chatterino developers. These are the API <a "
+        "href=\"https://braize.pajlada.com/chatterino/legal/"
+        "terms-of-service\">Terms of Services</a> and <a "
+        "href=\"https://braize.pajlada.com/chatterino/legal/"
+        "privacy-policy\">Privacy Policy</a>.");
     layout.addCheckbox("Enable", s.linkInfoTooltip);
     layout.addDropdown<int>(
         "Also show thumbnails if available",

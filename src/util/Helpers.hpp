@@ -5,6 +5,13 @@
 
 namespace chatterino {
 
+/**
+ * @brief startsWithOrContains is a wrapper for checking
+ * whether str1 starts with or contains str2 within itself
+ **/
+bool startsWithOrContains(const QString &str1, const QString &str2,
+                          Qt::CaseSensitivity caseSensitivity, bool startsWith);
+
 QString generateUuid();
 
 QString formatRichLink(const QString &url, bool file = false);

@@ -86,6 +86,9 @@ void SettingsDialog::initUi()
                     .emplace<QLineEdit>()
                     .assign(&this->ui_.search);
     edit->setPlaceholderText("Find in settings... (Ctrl+F by default)");
+    edit->setClearButtonEnabled(true);
+    edit->findChild<QAbstractButton *>()->setIcon(
+        QPixmap(":/buttons/clearSearch.png"));
 
     QObject::connect(edit.getElement(), &QLineEdit::textChanged, this,
                      &SettingsDialog::filterElements);

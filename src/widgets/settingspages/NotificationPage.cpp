@@ -55,9 +55,7 @@ NotificationPage::NotificationPage()
                     // implementation of custom combobox done
                     // because addComboBox only can handle strings-settings
                     // int setting for the ToastReaction is desired
-                    openIn
-                        .append(this->createToastReactionComboBox(
-                            this->managedConnections_))
+                    openIn.append(this->createToastReactionComboBox())
                         ->setSizePolicy(QSizePolicy::Maximum,
                                         QSizePolicy::Preferred);
                 }
@@ -118,8 +116,7 @@ NotificationPage::NotificationPage()
         }
     }
 }
-QComboBox *NotificationPage::createToastReactionComboBox(
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections)
+QComboBox *NotificationPage::createToastReactionComboBox()
 {
     QComboBox *toastReactionOptions = new QComboBox();
 
@@ -135,7 +132,7 @@ QComboBox *NotificationPage::createToastReactionComboBox(
         [toastReactionOptions](const int &index, auto) {
             toastReactionOptions->setCurrentIndex(index);
         },
-        managedConnections);
+        this->managedConnections_);
 
     QObject::connect(toastReactionOptions,
                      QOverload<int>::of(&QComboBox::currentIndexChanged),

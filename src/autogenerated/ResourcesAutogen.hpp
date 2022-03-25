@@ -11,8 +11,10 @@ public:
     struct {
         QPixmap _1xelerate;
         QPixmap alazymeme;
+        QPixmap brian6932;
         QPixmap fourtf;
         QPixmap kararty;
+        QPixmap karlpolice;
         QPixmap mm2pl;
         QPixmap pajlada;
         QPixmap slch;
@@ -24,6 +26,7 @@ public:
         QPixmap addSplitDark;
         QPixmap ban;
         QPixmap banRed;
+        QPixmap clearSearch;
         QPixmap copyDark;
         QPixmap copyLight;
         QPixmap menuDark;

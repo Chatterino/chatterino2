@@ -99,10 +99,10 @@ void SplitInput::initLayout()
     QObject::connect(this->ui_.textEdit, &QTextEdit::textChanged, this,
                      &SplitInput::onTextChanged);
 
-    this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
+    this->managedConnections_.managedConnect(app->fonts->fontChanged, [=]() {
         this->ui_.textEdit->setFont(
             app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
-    }));
+    });
 
     // open emote popup
     QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [=] {
@@ -136,6 +136,8 @@ void SplitInput::scaleChangedEvent(float scale)
     this->setMaximumHeight(int(150 * this->scale()));
     this->ui_.textEdit->setFont(
         getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+    this->ui_.textEditLength->setFont(
+        getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale()));
 }
 
 void SplitInput::themeChangedEvent()
@@ -152,10 +154,10 @@ void SplitInput::themeChangedEvent()
     this->updateEmoteButton();
     this->ui_.textEditLength->setPalette(palette);
 
+    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     this->ui_.textEdit->setPalette(placeholderPalette);
 #endif
-    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 
     this->ui_.hbox->setMargin(
         int((this->theme->isLightTheme() ? 4 : 2) * this->scale()));
@@ -685,7 +687,7 @@ void SplitInput::editTextChanged()
     if (text.startsWith("/r ", Qt::CaseInsensitive) &&
         this->split_->getChannel()->isTwitchChannel())
     {
-        QString lastUser = app->twitch.server->lastUserThatWhisperedMe.get();
+        QString lastUser = app->twitch->lastUserThatWhisperedMe.get();
         if (!lastUser.isEmpty())
         {
             this->ui_.textEdit->setPlainText("/w " + lastUser + text.mid(2));

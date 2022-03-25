@@ -28,6 +28,14 @@ MessagePtr makeSystemMessage(const QString &text, const QTime &time)
     return MessageBuilder(systemMessage, text, time).release();
 }
 
+EmotePtr makeAutoModBadge()
+{
+    return std::make_shared<Emote>(Emote{
+        EmoteName{}, ImageSet{Image::fromPixmap(getResources().twitch.automod)},
+        Tooltip{"AutoMod"},
+        Url{"https://dashboard.twitch.tv/settings/moderation/automod"}});
+}
+
 MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action)
 {
     auto builder = MessageBuilder();
@@ -37,10 +45,8 @@ MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action)
     builder.message().flags.set(MessageFlag::PubSub);
 
     // AutoMod shield badge
-    builder
-        .emplace<ImageElement>(Image::fromPixmap(getResources().twitch.automod),
-                               MessageElementFlag::BadgeChannelAuthority)
-        ->setTooltip("AutoMod");
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
     // AutoMod "username"
     builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
                                  MessageColor(QColor("blue")),
@@ -90,15 +96,14 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
 
     //
     // Builder for AutoMod message with explanation
-    builder.emplace<TimestampElement>();
     builder.message().loginName = "automod";
     builder.message().flags.set(MessageFlag::PubSub);
+    builder.message().flags.set(MessageFlag::Timeout);
+    builder.message().flags.set(MessageFlag::AutoMod);
 
     // AutoMod shield badge
-    builder
-        .emplace<ImageElement>(Image::fromPixmap(getResources().twitch.automod),
-                               MessageElementFlag::BadgeChannelAuthority)
-        ->setTooltip("AutoMod");
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
     // AutoMod "username"
     builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
                                  MessageColor(QColor("blue")),
@@ -126,7 +131,6 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     // ID of message caught by AutoMod
     //    builder.emplace<TextElement>(action.msgID, MessageElementFlag::Text,
     //                                 MessageColor::Text);
-    builder.message().flags.set(MessageFlag::AutoMod);
     auto text1 =
         QString("AutoMod: Held a message for reason: %1. Allow will post "
                 "it in chat. Allow Deny")
@@ -142,6 +146,8 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     builder2.emplace<TwitchModerationElement>();
     builder2.message().loginName = action.target.login;
     builder2.message().flags.set(MessageFlag::PubSub);
+    builder2.message().flags.set(MessageFlag::Timeout);
+    builder2.message().flags.set(MessageFlag::AutoMod);
 
     // sender username
     builder2
@@ -157,7 +163,6 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     // sender's message caught by AutoMod
     builder2.emplace<TextElement>(action.message, MessageElementFlag::Text,
                                   MessageColor::Text);
-    builder2.message().flags.set(MessageFlag::AutoMod);
     auto text2 =
         QString("%1: %2").arg(action.target.displayName, action.message);
     builder2.message().messageText = text2;
