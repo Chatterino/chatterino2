@@ -25,9 +25,9 @@ Notes:
      **Convenience link for Visual Studio 2022: [boost_1_79_0_b1-msvc-14.3-64.exe](https://sourceforge.net/projects/boost/files/boost-binaries/1.79.0_b1/boost_1_79_0_b1-msvc-14.3-64.exe/download)**
 
 2. When prompted where to install Boost, set the location to `C:\local\boost`.
-3. After the installation finishes, rename the `C:\local\boost\lib64-msvc-14.2` (or similar) directory to simply `lib` (`C:\local\boost\lib`).
+3. After the installation finishes, rename the `C:\local\boost\boost_1_79_0_b1_rc1` (or similar) directory to simply `lib` (`C:\local\boost\lib`).
 
-Note: This installation will take about 1.7 GB of disk space.
+Note: This installation will take about 2.1 GB of disk space.
 
 ## OpenSSL
 
