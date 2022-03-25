@@ -35,7 +35,7 @@ Notebook::Notebook(QWidget *parent)
     this->addButton_->setHidden(true);
 
     this->menu_.addAction(
-        "Toggle Visibility of Tabs",
+        "Toggle visibility of tabs",
         [this]() {
             this->setShowTabs(!this->getShowTabs());
         },
