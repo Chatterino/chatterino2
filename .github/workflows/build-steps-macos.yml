@@ -29,7 +29,13 @@ jobs:
           path: "${{ github.workspace }}/qt/"
           key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
 
-      # MACOS
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: ${{ matrix.qt-version }}
+          dir: "${{ github.workspace }}/qt/"
+
       - name: Install dependencies (MacOS)
         run: |
           brew install boost openssl rapidjson p7zip create-dmg cmake tree

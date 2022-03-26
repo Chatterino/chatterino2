@@ -33,7 +33,6 @@ jobs:
           path: ../Qt
           key: ubuntu-latest-QtCache-${{ matrix.qt-version }}-20210109
 
-      # LINUX
       - name: Install p7zip (Ubuntu)
         run: sudo apt-get update && sudo apt-get -y install p7zip-full
 
