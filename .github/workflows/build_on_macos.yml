@@ -31,13 +31,11 @@ jobs:
 
       # MACOS
       - name: Install dependencies (MacOS)
-        if: startsWith(matrix.os, 'macos')
         run: |
           brew install boost openssl rapidjson p7zip create-dmg cmake tree
         shell: bash
 
       - name: Build (MacOS)
-        if: startsWith(matrix.os, 'macos') && matrix.build-system == 'qmake'
         run: |
           mkdir build
           cd build
@@ -46,7 +44,6 @@ jobs:
         shell: bash
 
       - name: Build with CMake (MacOS)
-        if: startsWith(matrix.os, 'macos') && matrix.build-system == 'cmake'
         run: |
           mkdir build
           cd build
@@ -59,7 +56,6 @@ jobs:
         shell: bash
 
       - name: Package (MacOS)
-        if: startsWith(matrix.os, 'macos')
         run: |
           ls -la
           pwd
@@ -69,7 +65,6 @@ jobs:
         shell: bash
 
       - name: Upload artifact (MacOS)
-        if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
