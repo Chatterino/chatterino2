@@ -2,10 +2,7 @@
 name: Build on Linux
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
+  workflow_call:
 
 jobs:
   build:

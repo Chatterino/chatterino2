@@ -2,10 +2,7 @@
 name: Build on macOS
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
+  workflow_call:
 
 jobs:
   build:
