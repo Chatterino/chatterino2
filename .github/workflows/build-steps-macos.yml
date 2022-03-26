@@ -42,6 +42,7 @@ jobs:
         shell: bash
 
       - name: Build (MacOS)
+        if: matrix.build-system == 'qmake'
         run: |
           mkdir build
           cd build
@@ -50,6 +51,7 @@ jobs:
         shell: bash
 
       - name: Build with CMake (MacOS)
+        if: matrix.build-system == 'cmake'
         run: |
           mkdir build
           cd build
