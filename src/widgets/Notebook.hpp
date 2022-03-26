@@ -63,6 +63,8 @@ public:
     bool isNotebookLayoutLocked() const;
     void setLockNotebookLayout(bool value);
 
+    void addNotebookActionsToMenu(QMenu *menu);
+
 protected:
     virtual void scaleChangedEvent(float scale_) override;
     virtual void resizeEvent(QResizeEvent *) override;

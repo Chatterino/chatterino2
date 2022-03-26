@@ -34,13 +34,6 @@ Notebook::Notebook(QWidget *parent)
 
     this->addButton_->setHidden(true);
 
-    this->menu_.addAction(
-        "Toggle visibility of tabs",
-        [this]() {
-            this->setShowTabs(!this->getShowTabs());
-        },
-        QKeySequence("Ctrl+U"));
-
     this->lockNotebookLayoutAction_ = new QAction("Lock Tab Layout", this);
 
     // Load lock notebook layout state from settings
@@ -56,7 +49,8 @@ Notebook::Notebook(QWidget *parent)
                      });
 
     // Append it to our current menu actions
-    this->menu_.addAction(this->lockNotebookLayoutAction_);
+
+    this->addNotebookActionsToMenu(&this->menu_);
 }
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
@@ -705,6 +699,18 @@ void Notebook::setLockNotebookLayout(bool value)
     this->lockNotebookLayout_ = value;
     this->lockNotebookLayoutAction_->setChecked(value);
     getSettings()->lockNotebookLayout.setValue(value);
+}
+
+void Notebook::addNotebookActionsToMenu(QMenu *menu)
+{
+    menu->addAction(
+        "Toggle visibility of tabs",
+        [this]() {
+            this->setShowTabs(!this->getShowTabs());
+        },
+        QKeySequence("Ctrl+U"));
+
+    menu->addAction(this->lockNotebookLayoutAction_);
 }
 
 NotebookButton *Notebook::getAddButton()
