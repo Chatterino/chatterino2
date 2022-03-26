@@ -76,7 +76,7 @@ bool isInStreamerMode()
             {
                 shouldShowWarning = false;
 
-                getApp()->twitch2->addGlobalSystemMessage(
+                getApp()->twitch->addGlobalSystemMessage(
                     "Streamer Mode is set to Automatic, but pgrep is missing. "
                     "Install it to fix the issue or set Streamer Mode to "
                     "Enabled or Disabled in the Settings.");

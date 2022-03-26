@@ -33,13 +33,13 @@ Note: This installation will take about 1.5 GB of disk space.
 
 ### For our websocket library, we need OpenSSL 1.1
 
-1. Download OpenSSL for windows, version `1.1.1m`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1m.exe)**
+1. Download OpenSSL for windows, version `1.1.1n`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1n.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 
 ### For Qt SSL, we need OpenSSL 1.0
 
-1. Download OpenSSL for Windows, version `1.0.2u`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2u.exe)**
+1. Download OpenSSL for Windows, version `1.0.2u`: **[Download](https://web.archive.org/web/20211109231823/https://slproweb.com/download/Win64OpenSSL-1_0_2u.exe)**
 2. When prompted, install it to any arbitrary empty directory.
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 4. Copy the OpenSSL 1.0 files from its `\bin` folder to `C:\local\bin` (You will need to create the folder)
@@ -84,7 +84,7 @@ Compiling with Breakpad support enables crash reports that can be of use for dev
 
 1. Open the `chatterino.pro` file by double-clicking it, or by opening it via Qt Creator.
 2. You will be presented with a screen that is titled "Configure Project". In this screen, you should have at least one option present ready to be configured, like this:
-   ![Qt Create Configure Project screenshot](https://i.imgur.com/dbz45mB.png)
+   ![Qt Create Configure Project screenshot](https://user-images.githubusercontent.com/41973452/159462759-470e5371-671e-478e-85ca-33452ca9bea3.png)
 3. Select the profile(s) you want to build with and click "Configure Project".
 
 ### How to run and produce builds
