@@ -89,12 +89,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     this->menu_.addSeparator();
 
-    this->menu_.addAction(
-        "Toggle visibility of tabs",
-        [this]() {
-            this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
-        },
-        QKeySequence("Ctrl+U"));
+    this->notebook_->addNotebookActionsToMenu(&this->menu_);
 }
 
 void NotebookTab::showRenameDialog()
