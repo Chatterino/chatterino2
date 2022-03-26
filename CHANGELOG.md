@@ -43,7 +43,7 @@
 - Minor: Added autocompletion for default Twitch commands starting with the dot (e.g. `.mods` which does the same as `/mods`). (#3144)
 - Minor: Sorted usernames in `Users joined/parted` messages alphabetically. (#3421)
 - Minor: Mod list, VIP list, and Users joined/parted messages are now searchable. (#3426)
-- Minor: Add search to emote popup. (#3404, #3527)
+- Minor: Add search to emote popup. (#3404, #3527, #3543)
 - Minor: Messages can now be highlighted by subscriber or founder badges. (#3445)
 - Minor: User timeout buttons can now be triggered using hotkeys. (#3483)
 - Minor: Add workaround for multipart emoji as described in [the RFC](https://mm2pl.github.io/emoji_rfc.pdf). (#3469)
