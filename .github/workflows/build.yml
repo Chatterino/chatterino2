@@ -8,6 +8,15 @@ on:
   pull_request:
 
 jobs:
+  build-windows:
+    uses: ./.github/workflows/build-steps-windows.yml
+
+  build-macos:
+    uses: ./.github/workflows/build-steps-macos.yml
+
+  build-linux:
+    uses: ./.github/workflows/build-steps-linux.yml
+
   create-release:
     needs: build
     runs-on: ubuntu-latest
