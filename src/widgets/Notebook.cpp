@@ -41,7 +41,7 @@ Notebook::Notebook(QWidget *parent)
         },
         QKeySequence("Ctrl+U"));
 
-    this->lockNotebookLayoutAction_ = new QAction("Lock Tab Layout", &this->menu_);
+    this->lockNotebookLayoutAction_ = new QAction("Lock Tab Layout", this);
 
     // Load lock notebook layout state from settings
     this->setLockNotebookLayout(getSettings()->lockNotebookLayout.getValue());
