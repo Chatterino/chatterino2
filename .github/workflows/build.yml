@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest]
         qt-version: [5.15.2, 5.12.10]
         build-system: [qmake, cmake]
         pch: [true]
@@ -103,52 +103,6 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: conan remove "*" -fsb
         shell: bash
-
-      # MACOS
-      - name: Install dependencies (MacOS)
-        if: startsWith(matrix.os, 'macos')
-        run: |
-          brew install boost openssl rapidjson p7zip create-dmg cmake tree
-        shell: bash
-
-      - name: Build (MacOS)
-        if: startsWith(matrix.os, 'macos') && matrix.build-system == 'qmake'
-        run: |
-          mkdir build
-          cd build
-          $Qt5_DIR/bin/qmake .. DEFINES+=$dateOfBuild
-          make -j$(sysctl -n hw.logicalcpu)
-        shell: bash
-
-      - name: Build with CMake (MacOS)
-        if: startsWith(matrix.os, 'macos') && matrix.build-system == 'cmake'
-        run: |
-          mkdir build
-          cd build
-          cmake \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
-              ..
-          make -j$(sysctl -n hw.logicalcpu)
-        shell: bash
-
-      - name: Package (MacOS)
-        if: startsWith(matrix.os, 'macos')
-        run: |
-          ls -la
-          pwd
-          ls -la build || true
-          cd build
-          sh ./../.CI/CreateDMG.sh
-        shell: bash
-
-      - name: Upload artifact (MacOS)
-        if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v3
-        with:
-          name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
-          path: build/chatterino-osx.dmg
 
   create-release:
     needs: build
