@@ -41,22 +41,22 @@ Notebook::Notebook(QWidget *parent)
         },
         QKeySequence("Ctrl+U"));
 
-    lockNotebookLayoutAction_ = new QAction("Lock Tab Layout", &this->menu_);
+    this->lockNotebookLayoutAction_ = new QAction("Lock Tab Layout", &this->menu_);
 
     // Load lock notebook layout state from settings
     this->setLockNotebookLayout(getSettings()->lockNotebookLayout.getValue());
 
-    lockNotebookLayoutAction_->setCheckable(true);
-    lockNotebookLayoutAction_->setChecked(this->lockNotebookLayout_);
+    this->lockNotebookLayoutAction_->setCheckable(true);
+    this->lockNotebookLayoutAction_->setChecked(this->lockNotebookLayout_);
 
     // Update lockNotebookLayout_ value anytime the user changes the checkbox state
-    QObject::connect(lockNotebookLayoutAction_, &QAction::triggered,
+    QObject::connect(this->lockNotebookLayoutAction_, &QAction::triggered,
                      [this](bool value) {
                          this->setLockNotebookLayout(value);
                      });
 
     // Append it to our current menu actions
-    this->menu_.addAction(lockNotebookLayoutAction_);
+    this->menu_.addAction(this->lockNotebookLayoutAction_);
 }
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
