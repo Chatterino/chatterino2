@@ -385,7 +385,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
         QObject::connect(usercard.getElement(), &Button::leftClicked, [this] {
             QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
-                                      this->popoutChannelName_ +
+                                      this->channel_->getName() +
                                       "/viewercard/" + this->userName_);
         });
 
@@ -683,7 +683,6 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 {
     this->userName_ = name;
     this->channel_ = channel;
-    this->popoutChannelName_ = channel->getName();
     this->setWindowTitle(TEXT_TITLE.arg(name, channel->getName()));
 
     this->ui_.nameLabel->setText(name);
@@ -697,11 +696,6 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
     QTimer::singleShot(1, this, [this] {
         this->setStayInScreenRect(true);
     });
-}
-
-void UserInfoPopup::setPopoutChannel(const QString &channelName)
-{
-    this->popoutChannelName_ = channelName;
 }
 
 void UserInfoPopup::updateLatestMessages()
@@ -855,7 +849,7 @@ void UserInfoPopup::updateUserData()
 
         // get followage and subage
         getIvr()->getSubage(
-            this->userName_, this->popoutChannelName_,
+            this->userName_, this->channel_->getName(),
             [this, hack](const IvrSubage &subageInfo) {
                 if (!hack.lock())
                 {
