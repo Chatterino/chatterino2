@@ -350,9 +350,9 @@ void EmotePopup::loadChannel(ChannelPtr channel)
         *globalChannel, *subChannel, this->channel_->getName());
 
     // global
-    addEmotes(*globalChannel, *getApp()->twitch2->getBttvEmotes().emotes(),
+    addEmotes(*globalChannel, *getApp()->twitch->getBttvEmotes().emotes(),
               "BetterTTV", MessageElementFlag::BttvEmote);
-    addEmotes(*globalChannel, *getApp()->twitch2->getFfzEmotes().emotes(),
+    addEmotes(*globalChannel, *getApp()->twitch->getFfzEmotes().emotes(),
               "FrankerFaceZ", MessageElementFlag::FfzEmote);
 
     // channel
@@ -415,9 +415,9 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
 
     auto bttvGlobalEmotes = this->filterEmoteMap(
-        searchText, getApp()->twitch2->getBttvEmotes().emotes());
+        searchText, getApp()->twitch->getBttvEmotes().emotes());
     auto ffzGlobalEmotes = this->filterEmoteMap(
-        searchText, getApp()->twitch2->getFfzEmotes().emotes());
+        searchText, getApp()->twitch->getFfzEmotes().emotes());
 
     // twitch
     addEmoteSets(twitchGlobalEmotes, *searchChannel, *searchChannel,

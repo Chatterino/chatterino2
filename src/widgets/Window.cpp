@@ -254,7 +254,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         static int index = 0;
         auto app = getApp();
         const auto &msg = messages[index++ % messages.size()];
-        app->twitch.server->addFakeMessage(msg);
+        app->twitch->addFakeMessage(msg);
         return "";
     });
 
@@ -262,7 +262,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         const auto &messages = cheerMessages;
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
-        getApp()->twitch.server->addFakeMessage(msg);
+        getApp()->twitch->addFakeMessage(msg);
         return "";
     });
 
@@ -271,7 +271,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         static int index = 0;
         auto app = getApp();
         const auto &msg = messages[index++ % messages.size()];
-        app->twitch.server->addFakeMessage(msg);
+        app->twitch->addFakeMessage(msg);
         return "";
     });
 
@@ -282,15 +282,15 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         if (alt)
         {
             doc.Parse(channelRewardMessage);
-            app->twitch.server->addFakeMessage(channelRewardIRCMessage);
-            app->twitch.pubsub->signals_.pointReward.redeemed.invoke(
+            app->twitch->addFakeMessage(channelRewardIRCMessage);
+            app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
                 doc["data"]["message"]["data"]["redemption"]);
             alt = !alt;
         }
         else
         {
             doc.Parse(channelRewardMessage2);
-            app->twitch.pubsub->signals_.pointReward.redeemed.invoke(
+            app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
                 doc["data"]["message"]["data"]["redemption"]);
             alt = !alt;
         }
@@ -301,7 +301,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         const auto &messages = emoteTestMessages;
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
-        getApp()->twitch.server->addFakeMessage(msg);
+        getApp()->twitch->addFakeMessage(msg);
         return "";
     });
 #endif
@@ -466,7 +466,7 @@ void Window::addShortcuts()
              this->notebook_->select(splitContainer);
              Split *split = new Split(splitContainer);
              split->setChannel(
-                 getApp()->twitch.server->getOrAddChannel(si.channelName));
+                 getApp()->twitch->getOrAddChannel(si.channelName));
              split->setFilters(si.filters);
              splitContainer->appendSplit(split);
              return "";

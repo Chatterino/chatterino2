@@ -163,7 +163,7 @@ void NotificationController::fetchFakeChannels()
     for (std::vector<int>::size_type i = 0;
          i != channelMap[Platform::Twitch].raw().size(); i++)
     {
-        auto chan = getApp()->twitch.server->getChannelOrEmpty(
+        auto chan = getApp()->twitch->getChannelOrEmpty(
             channelMap[Platform::Twitch].raw()[i]);
         if (chan->isEmpty())
         {
@@ -236,7 +236,7 @@ void NotificationController::checkStream(bool live, QString channelName)
     }
     MessageBuilder builder;
     TwitchMessageBuilder::liveMessage(channelName, &builder);
-    getApp()->twitch2->liveChannel->addMessage(builder.release());
+    getApp()->twitch->liveChannel->addMessage(builder.release());
 
     // Indicate that we have pushed notifications for this stream
     fakeTwitchChannels.push_back(channelName);
