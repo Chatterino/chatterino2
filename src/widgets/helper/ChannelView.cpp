@@ -1718,17 +1718,25 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             {
                 if (event->modifiers() == Qt::ShiftModifier)
                 {
-                    this->openChannelIn.invoke(
-                        hoverLayoutElement->getLink().value,
-                        FromTwitchLinkOpenChannelIn::Tab);
+                    ChannelPtr channel = getApp()->twitch->getOrAddChannel(
+                        hoverLayoutElement->getLink().value);
+                    auto &nb = getApp()->windows->getMainWindow().getNotebook();
+                    SplitContainer *container = nb.addPage(true);
+                    Split *split = new Split(container);
+                    split->setChannel(channel);
+                    container->appendSplit(split);
                     return;
                 }
 
                 if (event->modifiers() == Qt::AltModifier)
                 {
-                    this->openChannelIn.invoke(
-                        hoverLayoutElement->getLink().value,
-                        FromTwitchLinkOpenChannelIn::Split);
+                    ChannelPtr channel = getApp()->twitch->getOrAddChannel(
+                        hoverLayoutElement->getLink().value);
+                    auto &nb = getApp()->windows->getMainWindow().getNotebook();
+                    SplitContainer *container = nb.getOrAddSelectedPage();
+                    Split *split = new Split(container);
+                    split->setChannel(channel);
+                    container->appendSplit(split);
                     return;
                 }
 
