@@ -454,7 +454,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                 case TimeoutWidget::Ban: {
                     if (this->underlyingChannel_)
                     {
-                        this->underlyingChannel_->sendMessage("/ban " + this->userName_);
+                        this->underlyingChannel_->sendMessage("/ban " +
+                                                              this->userName_);
                     }
                 }
                 break;
@@ -462,16 +463,16 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                     if (this->underlyingChannel_)
                     {
                         this->underlyingChannel_->sendMessage("/unban " +
-                                                    this->userName_);
+                                                              this->userName_);
                     }
                 }
                 break;
                 case TimeoutWidget::Timeout: {
                     if (this->underlyingChannel_)
                     {
-                        this->underlyingChannel_->sendMessage("/timeout " +
-                                                    this->userName_ + " " +
-                                                    QString::number(arg));
+                        this->underlyingChannel_->sendMessage(
+                            "/timeout " + this->userName_ + " " +
+                            QString::number(arg));
                     }
                 }
                 break;
@@ -709,7 +710,8 @@ void UserInfoPopup::setData(const QString &name,
 
 void UserInfoPopup::updateLatestMessages()
 {
-    auto filteredChannel = filterMessages(this->userName_, this->underlyingChannel_);
+    auto filteredChannel =
+        filterMessages(this->userName_, this->underlyingChannel_);
     this->ui_.latestMessages->setChannel(filteredChannel);
     this->ui_.latestMessages->setSourceChannel(this->underlyingChannel_);
 
@@ -722,23 +724,24 @@ void UserInfoPopup::updateLatestMessages()
 
     this->refreshConnection_ =
         std::make_unique<pajlada::Signals::ScopedConnection>(
-            this->underlyingChannel_->messageAppended.connect([this, hasMessages](
-                                                        auto message, auto) {
-                if (!checkMessageUserName(this->userName_, message))
-                    return;
+            this->underlyingChannel_->messageAppended.connect(
+                [this, hasMessages](auto message, auto) {
+                    if (!checkMessageUserName(this->userName_, message))
+                        return;
 
-                if (hasMessages)
-                {
-                    // display message in ChannelView
-                    this->ui_.latestMessages->channel()->addMessage(message);
-                }
-                else
-                {
-                    // The ChannelView is currently hidden, so manually refresh
-                    // and display the latest messages
-                    this->updateLatestMessages();
-                }
-            }));
+                    if (hasMessages)
+                    {
+                        // display message in ChannelView
+                        this->ui_.latestMessages->channel()->addMessage(
+                            message);
+                    }
+                    else
+                    {
+                        // The ChannelView is currently hidden, so manually refresh
+                        // and display the latest messages
+                        this->updateLatestMessages();
+                    }
+                }));
 }
 
 void UserInfoPopup::updateUserData()
@@ -790,8 +793,8 @@ void UserInfoPopup::updateUserData()
             this->ui_.nameLabel->setProperty("copy-text", user.displayName);
         }
 
-        this->setWindowTitle(
-            TEXT_TITLE.arg(user.displayName, this->underlyingChannel_->getName()));
+        this->setWindowTitle(TEXT_TITLE.arg(
+            user.displayName, this->underlyingChannel_->getName()));
         this->ui_.viewCountLabel->setText(
             TEXT_VIEWS.arg(localizeNumbers(user.viewCount)));
         this->ui_.createdDateLabel->setText(
