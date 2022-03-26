@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added a setting to control whether to gray out message history and to draw a line below the last message loaded from message history. (#3546)
 - Major: Added customizable shortcuts. (#2340)
 - Minor: Make animated emote playback speed match browser (Firefox and Chrome) behaviour. (#3506)
 - Minor: Added middle click split to open in browser (#3356)

@@ -843,6 +843,13 @@ void TwitchChannel::loadRecentMessages()
                 }
             }
 
+            if (!allBuiltMessages.empty() &&
+                getSettings()->showBeforeConnectingIndicator)
+            {
+                auto &last_elem = allBuiltMessages.back();
+                last_elem->flags.set(MessageFlag::LastBeforeConnecting);
+            }
+
             postToThread([this, shared, root,
                           messages = std::move(allBuiltMessages)]() mutable {
                 shared->addMessagesAtStart(messages);

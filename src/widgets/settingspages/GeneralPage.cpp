@@ -292,6 +292,37 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addColorButton("Line color",
                           QColor(getSettings()->lastMessageColor.getValue()),
                           getSettings()->lastMessageColor);
+    layout.addSeperator();
+    layout.addCheckbox("Gray-out message history.", s.grayOutHistory);
+    layout.addCheckbox(
+        "Draw a line below the last message loaded from message history.",
+        s.showBeforeConnectingIndicator);
+    layout.addDropdown<std::underlying_type<Qt::BrushStyle>::type>(
+        "Line style", {"Dotted", "Solid"}, s.beforeConnectingPattern,
+        [](int value) {
+            switch (value)
+            {
+                case Qt::VerPattern:
+                    return 0;
+                case Qt::SolidPattern:
+                default:
+                    return 1;
+            }
+        },
+        [](DropdownArgs args) {
+            switch (args.index)
+            {
+                case 0:
+                    return Qt::VerPattern;
+                case 1:
+                default:
+                    return Qt::SolidPattern;
+            }
+        },
+        false);
+    layout.addColorButton(
+        "Line color", QColor(getSettings()->beforeConnectingColor.getValue()),
+        getSettings()->beforeConnectingColor);
 
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);

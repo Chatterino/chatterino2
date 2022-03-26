@@ -86,6 +86,13 @@ public:
                                      false};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
+    BoolSetting grayOutHistory = {"/appearance/messages/grayOutHistory", true};
+    BoolSetting showBeforeConnectingIndicator = {
+        "/appearance/messages/showBeforeConnectingIndicator", false};
+    EnumSetting<Qt::BrushStyle> beforeConnectingPattern = {
+        "/appearance/messages/beforeConnectingPattern", Qt::SolidPattern};
+    QStringSetting beforeConnectingColor = {
+        "/appearance/messages/beforeConnectingColor", "#7f2026"};
     BoolSetting compactEmotes = {"/appearance/messages/compactEmotes", true};
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
     BoolSetting hideModerationActions = {

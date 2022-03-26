@@ -214,7 +214,8 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
         //                         QBrush(QColor(64, 64, 64, 64)));
     }
 
-    if (this->message_->flags.has(MessageFlag::RecentMessage))
+    if (this->message_->flags.has(MessageFlag::RecentMessage) &&
+        getSettings()->grayOutHistory)
     {
         painter.fillRect(0, y, pixmap->width(), pixmap->height(),
                          app->themes->messages.disabled);
@@ -261,6 +262,30 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 
         QBrush brush(color, static_cast<Qt::BrushStyle>(
                                 getSettings()->lastMessagePattern.getValue()));
+
+        painter.fillRect(0, y + this->container_->getHeight() - 1,
+                         pixmap->width(), 1, brush);
+    }
+
+    // draw last message before connecting line
+    if (this->message_->flags.has(MessageFlag::LastBeforeConnecting))
+    {
+        QColor color;
+        if (getSettings()->beforeConnectingColor != "")
+        {
+            color = QColor(getSettings()->beforeConnectingColor.getValue());
+        }
+        else
+        {
+            color =
+                isWindowFocused
+                    ? app->themes->tabs.selected.backgrounds.regular.color()
+                    : app->themes->tabs.selected.backgrounds.unfocused.color();
+        }
+
+        QBrush brush(color,
+                     static_cast<Qt::BrushStyle>(
+                         getSettings()->beforeConnectingPattern.getValue()));
 
         painter.fillRect(0, y + this->container_->getHeight() - 1,
                          pixmap->width(), 1, brush);
