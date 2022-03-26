@@ -48,8 +48,6 @@ Notebook::Notebook(QWidget *parent)
                          this->setLockNotebookLayout(value);
                      });
 
-    // Append it to our current menu actions
-
     this->addNotebookActionsToMenu(&this->menu_);
 }
 
