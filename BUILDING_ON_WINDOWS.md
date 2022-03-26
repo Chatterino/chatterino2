@@ -157,7 +157,7 @@ and the _Build Directory_ to `build`.
 <details>
 <summary>Screenshot of CMake configuration</summary>
 
-![Screenshot CMake configuration](https://i.imgur.com/ePmIgST.png)
+![Screenshot CMake configuration](https://user-images.githubusercontent.com/41973452/160240561-26ec205c-20af-4aa5-a6a3-b87a27fc16eb.png)
 
 </details>
 
@@ -173,14 +173,14 @@ Select the `CMake Applications > chatterino` configuration and add a new _Run Ex
 <details>
 <summary>Screenshot of External tool</summary>
 
-![Screenshot of External Tool](https://i.imgur.com/DYg6nDp.png)
+![Screenshot of External Tool](https://user-images.githubusercontent.com/41973452/160240818-f4b41525-3de9-4e3d-8228-98beab2a3ead.png)
 
 </details>
 
 <details>
 <summary>Screenshot of chatterino configuration</summary>
 
-![Screenshot of chatterino configuration](https://i.imgur.com/tZRHdU2.png)
+![Screenshot of chatterino configuration](https://user-images.githubusercontent.com/41973452/160240843-dc0c603c-227f-4f56-98ca-57f03989dfb4.png)
 
 </details>
 
