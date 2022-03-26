@@ -681,9 +681,18 @@ void UserInfoPopup::installEvents()
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 {
+    this->setData(name, channel, channel);
+}
+
+void UserInfoPopup::setData(const QString &name,
+                            const ChannelPtr &contextChannel,
+                            const ChannelPtr &openingChannel)
+{
     this->userName_ = name;
-    this->channel_ = channel;
-    this->setWindowTitle(TEXT_TITLE.arg(name, channel->getName()));
+    this->channel_ = openingChannel;
+    this->underlyingChannel_ = contextChannel;
+    this->setWindowTitle(
+        TEXT_TITLE.arg(name, this->underlyingChannel_->getName()));
 
     this->ui_.nameLabel->setText(name);
     this->ui_.nameLabel->setProperty("copy-text", name);

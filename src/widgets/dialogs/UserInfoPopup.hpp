@@ -24,6 +24,8 @@ public:
     UserInfoPopup(bool closeAutomatically, QWidget *parent);
 
     void setData(const QString &name, const ChannelPtr &channel);
+    void setData(const QString &name, const ChannelPtr &openingChannel,
+                 const ChannelPtr &contextChannel);
 
 protected:
     virtual void themeChangedEvent() override;
@@ -45,6 +47,7 @@ private:
     QString userId_;
     QString avatarUrl_;
     ChannelPtr channel_;
+    ChannelPtr underlyingChannel_;
 
     // isMoving_ is set to true if the user is holding the left mouse button down and has moved the mouse a small amount away from the original click point (startPosDrag_)
     bool isMoving_ = false;
