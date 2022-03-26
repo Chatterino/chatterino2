@@ -52,7 +52,7 @@ Notebook::Notebook(QWidget *parent)
     // Update lockNotebookLayout_ value anytime the user changes the checkbox state
     QObject::connect(lockNotebookLayoutAction_, &QAction::triggered,
                      [this](bool value) {
-                         this->lockNotebookLayout_ = value;
+                         this->setLockNotebookLayout(value);
                      });
 
     // Append it to our current menu actions
