@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Added highlights for first messages (#3267)
 - Major: Added customizable shortcuts. (#2340, #3633)
 - Minor: Make animated emote playback speed match browser (Firefox and Chrome) behaviour. (#3506)
 - Minor: Added middle click split to open in browser (#3356)
@@ -25,7 +26,6 @@
 - Minor: Strip leading @ and trailing , from username in `/popout` command. (#3217)
 - Minor: Added `flags.reward_message` filter variable (#3231)
 - Minor: Added chatter count to viewer list popout (#3261)
-- Minor: Added highlights for first messages (#3267)
 - Minor: Ignore out of bounds check for tiling wms (#3270)
 - Minor: Add clear cache button to cache settings section (#3277)
 - Minor: Added `flags.first_message` filter variable (#3292)
