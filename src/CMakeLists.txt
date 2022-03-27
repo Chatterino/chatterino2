@@ -626,7 +626,7 @@ if (WIN32)
 endif ()
 
 if (MSVC)
-    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc)
+    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc /bigobj)
 endif ()
 
 if (APPLE AND BUILD_APP)
@@ -659,7 +659,7 @@ if (USE_CONAN AND TARGET CONAN_PKG::boost)
 else ()
     target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
-        Boost::boost
+        ${Boost_LIBRARIES}
         )
 endif ()
 
