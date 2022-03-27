@@ -58,7 +58,8 @@ endif ()
 find_package(Sanitizers)
 
 # Find boost on the system
-find_package(Boost REQUIRED COMPONENTS random)
+find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS random)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
