@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.3.5
+
 - Major: Added highlights for first messages (#3267)
 - Major: Added customizable shortcuts. (#2340, #3633)
 - Minor: Make animated emote playback speed match browser (Firefox and Chrome) behaviour. (#3506)
