@@ -456,6 +456,13 @@ void SplitInput::addShortcuts()
              this->ui_.textEdit->selectAll();
              return "";
          }},
+        {"selectWord",
+         [this](std::vector<QString>) -> QString {
+             auto cursor = this->ui_.textEdit->textCursor();
+             cursor.select(QTextCursor::WordUnderCursor);
+             this->ui_.textEdit->setTextCursor(cursor);
+             return "";
+         }},
     };
 
     this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(

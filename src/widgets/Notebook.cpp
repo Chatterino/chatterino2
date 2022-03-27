@@ -34,12 +34,21 @@ Notebook::Notebook(QWidget *parent)
 
     this->addButton_->setHidden(true);
 
-    this->menu_.addAction(
-        "Toggle visibility of tabs",
-        [this]() {
-            this->setShowTabs(!this->getShowTabs());
-        },
-        QKeySequence("Ctrl+U"));
+    this->lockNotebookLayoutAction_ = new QAction("Lock Tab Layout", this);
+
+    // Load lock notebook layout state from settings
+    this->setLockNotebookLayout(getSettings()->lockNotebookLayout.getValue());
+
+    this->lockNotebookLayoutAction_->setCheckable(true);
+    this->lockNotebookLayoutAction_->setChecked(this->lockNotebookLayout_);
+
+    // Update lockNotebookLayout_ value anytime the user changes the checkbox state
+    QObject::connect(this->lockNotebookLayoutAction_, &QAction::triggered,
+                     [this](bool value) {
+                         this->setLockNotebookLayout(value);
+                     });
+
+    this->addNotebookActionsToMenu(&this->menu_);
 }
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
@@ -316,6 +325,11 @@ QWidget *Notebook::tabAt(QPoint point, int &index, int maxWidth)
 
 void Notebook::rearrangePage(QWidget *page, int index)
 {
+    if (this->isNotebookLayoutLocked())
+    {
+        return;
+    }
+
     // Queue up save because: Tab rearranged
     getApp()->windows->queueSave();
 
@@ -671,6 +685,30 @@ void Notebook::paintEvent(QPaintEvent *event)
         painter.fillRect(this->lineOffset_, 0, int(2 * scale), this->height(),
                          this->theme->tabs.dividerLine);
     }
+}
+
+bool Notebook::isNotebookLayoutLocked() const
+{
+    return this->lockNotebookLayout_;
+}
+
+void Notebook::setLockNotebookLayout(bool value)
+{
+    this->lockNotebookLayout_ = value;
+    this->lockNotebookLayoutAction_->setChecked(value);
+    getSettings()->lockNotebookLayout.setValue(value);
+}
+
+void Notebook::addNotebookActionsToMenu(QMenu *menu)
+{
+    menu->addAction(
+        "Toggle visibility of tabs",
+        [this]() {
+            this->setShowTabs(!this->getShowTabs());
+        },
+        QKeySequence("Ctrl+U"));
+
+    menu->addAction(this->lockNotebookLayoutAction_);
 }
 
 NotebookButton *Notebook::getAddButton()
