@@ -49,12 +49,6 @@ namespace {
         if (errors.length() > 0)
         {
             QMessageBox messageBox;
-// Set error window on top
-#ifdef USEWINSDK
-            ::SetWindowPos(HWND(messageBox.winId()), HWND_TOPMOST, 0, 0, 0, 0,
-                           0);
-
-#endif
             messageBox.setWindowTitle(
                 "Chatterino - invalid account credentials");
             messageBox.setIcon(QMessageBox::Critical);
@@ -241,10 +235,6 @@ void AdvancedLoginWidget::refreshButtons()
 LoginWidget::LoginWidget(QWidget *parent)
     : QDialog(parent)
 {
-#ifdef USEWINSDK
-    ::SetWindowPos(HWND(this->winId()), HWND_TOPMOST, 0, 0, 0, 0, 0);
-#endif
-
     this->setWindowTitle("Chatterino - add new account");
 
     this->setLayout(&this->ui_.mainLayout);
