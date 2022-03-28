@@ -20,8 +20,8 @@
 
 ## Building
 
-1. Install dependencies (~26 GB)
-   - `vcpkg install benchmark boost gtest openssl qt5 qtkeychain rapidjson websocketpp wintoast`
+1. Install dependencies (~21 GB)
+   - `vcpkg install benchmark boost-foreach boost-interprocess boost-random boost-variant gtest openssl qt5-multimedia qtkeychain rapidjson websocketpp wintoast`
 1. Clone and build
    - `git clone --recurse-submodules https://github.com/Chatterino/chatterino2.git`
    - `mkdir .\chatterino2\build\`
@@ -34,6 +34,4 @@
 
 ## TODO
 
-- Could reduce the size of dependencies by only installing the components we need
-- Errors when trying to install x86 dependencies
 - Errors when trying to run a debug build
