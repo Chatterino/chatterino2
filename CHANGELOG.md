@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- BugFix: Prevent login window from rendering main window unmovable (#3636)
+
 ## 2.3.5
 
 - Major: Added highlights for first messages (#3267)
