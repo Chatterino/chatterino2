@@ -52,7 +52,7 @@ namespace {
 // Set error window on top
 #ifdef USEWINSDK
             ::SetWindowPos(HWND(messageBox.winId()), HWND_TOPMOST, 0, 0, 0, 0,
-                           SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+                           SWP_SHOWWINDOW);
 
 #endif
             messageBox.setWindowTitle(
