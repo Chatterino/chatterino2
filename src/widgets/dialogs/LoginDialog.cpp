@@ -243,7 +243,7 @@ LoginWidget::LoginWidget(QWidget *parent)
 {
 #ifdef USEWINSDK
     ::SetWindowPos(HWND(this->winId()), HWND_TOPMOST, 0, 0, 0, 0,
-                   SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+                   SWP_SHOWWINDOW);
 #endif
 
     this->setWindowTitle("Chatterino - add new account");
