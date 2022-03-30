@@ -130,8 +130,6 @@ float BaseWindow::qtFontScale() const
 
 void BaseWindow::init()
 {
-    this->setWindowIcon(QIcon(":/images/icon.png"));
-
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame())
     {
