@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        qt-version: [5.15.2, 5.12.10]
+        qt-version: [5.15.2]
         build-system: [qmake, cmake]
         pch: [true]
         include:

@@ -377,6 +377,8 @@ public:
         "/misc/twitch/messageHistoryLimit",
         800,
     };
+    BoolSetting displaySevenTVAnimatedProfile = {
+        "/misc/displaySevenTVAnimatedProfile", true};
 
     IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 1};
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
