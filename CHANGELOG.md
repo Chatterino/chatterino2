@@ -3,6 +3,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed rendering of moderator announcements. (#3639)
+
 ## 2.3.5
 
 ### Dankerino
