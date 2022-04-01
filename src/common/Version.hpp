@@ -5,7 +5,6 @@
 
 #define CHATTERINO_VERSION "7.3.5-beta1"
 
-
 #if defined(Q_OS_WIN)
 #    define CHATTERINO_OS "win"
 #elif defined(Q_OS_MACOS)
