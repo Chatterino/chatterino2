@@ -195,6 +195,7 @@ private:
 
     void onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr msg);
     void onConnectionOpen(websocketpp::connection_hdl hdl);
+    void onConnectionFail(websocketpp::connection_hdl hdl);
     void onConnectionClose(websocketpp::connection_hdl hdl);
     WebsocketContextPtr onTLSInit(websocketpp::connection_hdl hdl);
 

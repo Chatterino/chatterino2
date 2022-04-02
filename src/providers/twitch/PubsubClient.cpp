@@ -865,6 +865,8 @@ PubSub::PubSub()
         bind(&PubSub::onConnectionOpen, this, ::_1));
     this->websocketClient.set_close_handler(
         bind(&PubSub::onConnectionClose, this, ::_1));
+    this->websocketClient.set_fail_handler(
+        bind(&PubSub::onConnectionFail, this, ::_1));
 
     // Add an initial client
     this->addClient();
@@ -1151,6 +1153,28 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
         }
     }
 
+    if (!this->requests.empty())
+    {
+        this->addClient();
+    }
+}
+
+void PubSub::onConnectionFail(WebsocketHandle hdl)
+{
+    DebugCount::increase("PubSub failed connections");
+    if (auto conn = this->websocketClient.get_con_from_hdl(std::move(hdl)))
+    {
+        qCDebug(chatterinoPubsub) << "PubSub connection attempt failed (error: "
+                                  << conn->get_ec().message().c_str() << ")";
+    }
+    else
+    {
+        qCDebug(chatterinoPubsub)
+            << "PubSub connection attempt failed but we can't "
+               "get the connection from a handle.";
+    }
+
+    this->addingClient = false;
     if (!this->requests.empty())
     {
         this->addClient();
