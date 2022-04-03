@@ -281,7 +281,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                    .arg(batches.at(i).join(","));
         getIvr()->getBulkEmoteSets(
             batches.at(i).join(","),
-            [this](QJsonArray emoteSetArray) {
+            [this, weakChannel](QJsonArray emoteSetArray) {
                 auto emoteData = this->emotes_.access();
                 auto localEmoteData = this->localEmotes_.access();
                 for (auto emoteSet_ : emoteSetArray)
