@@ -216,7 +216,7 @@ void TwitchAccount::loadEmotes(std::weak_ptr<Channel> weakChannel)
         qCDebug(chatterinoTwitch) << "Cleared emotes!";
     }
 
-    this->loadUserstateEmotes();
+    this->loadUserstateEmotes(weakChannel);
 }
 
 bool TwitchAccount::setUserstateEmoteSets(QStringList newEmoteSets)
@@ -234,7 +234,7 @@ bool TwitchAccount::setUserstateEmoteSets(QStringList newEmoteSets)
     return true;
 }
 
-void TwitchAccount::loadUserstateEmotes()
+void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
 {
     if (this->userstateEmoteSets_.isEmpty())
     {
