@@ -350,8 +350,8 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
 
                     if (auto channel = weakChannel.lock(); channel != nullptr)
                     {
-                        channel->addMessage(
-                            makeSystemMessage("Twitch subscriber emotes reloaded."));
+                        channel->addMessage(makeSystemMessage(
+                            "Twitch subscriber emotes reloaded."));
                     }
                 }
             },
