@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Bugfix: Fixed rendering of moderator announcements. (#3639)
+- Bugfix: Fixed display name dependence of live status calls. (#3646)
 
 ## 2.3.5
 
