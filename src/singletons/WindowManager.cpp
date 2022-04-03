@@ -59,7 +59,7 @@ void WindowManager::showSettingsDialog(QWidget *parent,
     if (getArgs().dontSaveSettings)
     {
         QMessageBox::critical(parent, "Chatterino - Editing Settings Forbidden",
-                              "Settings cannot be edited when running with "
+                              "Settings cannot be edited when running with\n"
                               "commandline arguments such as '-c'.");
     }
     else

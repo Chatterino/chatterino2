@@ -135,6 +135,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           ActionDefinition{"Choose previously sent message"}},
          {"redo", ActionDefinition{"Redo"}},
          {"selectAll", ActionDefinition{"Select all"}},
+         {"selectWord", ActionDefinition{"Select word"}},
          {"sendMessage",
           ActionDefinition{
               "Send message",
