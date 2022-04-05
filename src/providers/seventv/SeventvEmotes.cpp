@@ -62,11 +62,23 @@ namespace {
         bool zeroWidth =
             visibilityFlags.has(SeventvEmoteVisibilityFlag::ZeroWidth);
 
+        auto heightArr = jsonEmote.toObject().value("height").toArray();
+        auto size2x = heightArr.at(1).toDouble();
+        auto size3x = heightArr.at(2).toDouble();
+        auto size4x = heightArr.at(3).toDouble();
+        if (heightArr.size() != 4 || size2x <= 48) {
+            size2x = 0.66;
+            size3x = 0.42;
+        } else {
+            size2x = 0.5;
+            size3x = 0.33;
+        }
+
         auto emote = Emote(
             {name,
              ImageSet{Image::fromUrl(getEmoteLink(id, "1x"), 1),
-                      //   Image::fromUrl(getEmoteLink(id, "2x"), 0.66),
-                      //   Image::fromUrl(getEmoteLink(id, "3x"), 0.42),
+                        Image::fromUrl(getEmoteLink(id, "2x"), size2x),
+                        Image::fromUrl(getEmoteLink(id, "3x"), size3x),
                       Image::fromUrl(getEmoteLink(id, "4x"), 0.25)},
              Tooltip{QString("%1<br>%2 7TV Emote<br>By: %3")
                          .arg(name.string, (isGlobal ? "Global" : "Channel"),
@@ -156,6 +168,7 @@ void SeventvEmotes::loadEmotes()
             provider_id
             visibility
             mime
+            height
             owner {
                 id
                 display_name
@@ -216,6 +229,7 @@ void SeventvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                     provider_id
                     visibility
                     mime
+                    height
                     owner {
                         id
                         display_name
