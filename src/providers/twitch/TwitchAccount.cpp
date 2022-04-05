@@ -347,12 +347,12 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                                   return l.name.string < r.name.string;
                               });
                     emoteData->emoteSets.emplace_back(emoteSet);
+                }
 
-                    if (auto channel = weakChannel.lock(); channel != nullptr)
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "Twitch subscriber emotes reloaded."));
-                    }
+                if (auto channel = weakChannel.lock(); channel != nullptr)
+                {
+                    channel->addMessage(makeSystemMessage(
+                        "Twitch subscriber emotes reloaded."));
                 }
             },
             [] {
