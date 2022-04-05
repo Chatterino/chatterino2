@@ -216,7 +216,7 @@ void TwitchAccount::loadEmotes(std::weak_ptr<Channel> weakChannel)
         qCDebug(chatterinoTwitch) << "Cleared emotes!";
     }
 
-    this->loadUserstateEmotes();
+    this->loadUserstateEmotes(weakChannel);
 }
 
 bool TwitchAccount::setUserstateEmoteSets(QStringList newEmoteSets)
@@ -234,7 +234,7 @@ bool TwitchAccount::setUserstateEmoteSets(QStringList newEmoteSets)
     return true;
 }
 
-void TwitchAccount::loadUserstateEmotes()
+void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
 {
     if (this->userstateEmoteSets_.isEmpty())
     {
@@ -281,7 +281,7 @@ void TwitchAccount::loadUserstateEmotes()
                    .arg(batches.at(i).join(","));
         getIvr()->getBulkEmoteSets(
             batches.at(i).join(","),
-            [this](QJsonArray emoteSetArray) {
+            [this, weakChannel](QJsonArray emoteSetArray) {
                 auto emoteData = this->emotes_.access();
                 auto localEmoteData = this->localEmotes_.access();
                 for (auto emoteSet_ : emoteSetArray)
@@ -347,6 +347,12 @@ void TwitchAccount::loadUserstateEmotes()
                                   return l.name.string < r.name.string;
                               });
                     emoteData->emoteSets.emplace_back(emoteSet);
+                }
+
+                if (auto channel = weakChannel.lock(); channel != nullptr)
+                {
+                    channel->addMessage(makeSystemMessage(
+                        "Twitch subscriber emotes reloaded."));
                 }
             },
             [] {
