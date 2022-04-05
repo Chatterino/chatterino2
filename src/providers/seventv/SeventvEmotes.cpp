@@ -65,9 +65,9 @@ namespace {
         auto emote = Emote(
             {name,
              ImageSet{Image::fromUrl(getEmoteLink(id, "1x"), 1),
-                      Image::fromUrl(getEmoteLink(id, "2x"), 0.50),
-                      Image::fromUrl(getEmoteLink(id, "3x"), 0.286),
-                      Image::fromUrl(getEmoteLink(id, "4x"), 0.250)},
+                      //   Image::fromUrl(getEmoteLink(id, "2x"), 0.66),
+                      //   Image::fromUrl(getEmoteLink(id, "3x"), 0.42),
+                      Image::fromUrl(getEmoteLink(id, "4x"), 0.25)},
              Tooltip{QString("%1<br>%2 7TV Emote<br>By: %3")
                          .arg(name.string, (isGlobal ? "Global" : "Channel"),
                               author.string)},
