@@ -2,8 +2,6 @@
 
 ## Unversioned
 
-- Bugfix: Fixed rendering of moderator announcements. (#3639)
-
 ## 2.3.5
 
 - Major: Added highlights for first messages (#3267)
@@ -65,6 +63,7 @@
 - Minor: Added librewolf, icecat, and waterfox incognito support. (#3588)
 - Minor: Updated to Emoji v14.0 (#3612)
 - Minor: Add support for locking tab arrangement (#3627)
+- Bugfix: Fixed rendering of moderator announcements. (#3639)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
