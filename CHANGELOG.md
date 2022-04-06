@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unversioned
-
+- Minor: Added quotation marks around the automod phrases for clairty 
 ## 2.3.5
 
 - Major: Added highlights for first messages (#3267)
