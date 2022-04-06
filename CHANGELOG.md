@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Adjust large stream thumbnail to 16:9 (#3655)
+
 ## 2.3.5
 
 - Major: Added highlights for first messages (#3267)
