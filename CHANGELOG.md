@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Bugfix: Fixed display name dependence of live status calls. (#3646)
+- Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 
 ## 2.3.5
 
