@@ -1,7 +1,8 @@
 # Changelog
 
 ## Unversioned
-- Minor: Added quotation marks around the automod phrases for clairty 
+- Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
+
 ## 2.3.5
 
 - Major: Added highlights for first messages (#3267)
