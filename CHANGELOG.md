@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
+
 ## 2.3.5
 
 - Major: Added highlights for first messages (#3267)
