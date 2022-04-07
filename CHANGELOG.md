@@ -1,7 +1,6 @@
 # Changelog
 
 ## Unversioned
-- Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
 
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
