@@ -34,13 +34,29 @@ Notebook::Notebook(QWidget *parent)
 
     this->addButton_->setHidden(true);
 
+    // create actions at once, so we can disable one checkbox with the other
+    this->showLiveOnlyAction_ = new QAction("Show live tabs only", this);
     this->lockNotebookLayoutAction_ = new QAction("Lock Tab Layout", this);
 
-    // Load lock notebook layout state from settings
+    // Load checkbox states from settings
     this->setLockNotebookLayout(getSettings()->lockNotebookLayout.getValue());
+    this->setShowLiveOnly(getSettings()->showLiveOnly.getValue());
 
+    this->showLiveOnlyAction_->setCheckable(true);
+    this->showLiveOnlyAction_->setChecked(this->showLiveOnly_);
+    QObject::connect(this->showLiveOnlyAction_, &QAction::triggered,
+                     [this](bool value) {
+                         this->setShowLiveOnly(value);
+                         this->lockNotebookLayoutAction_->setEnabled(!value);
+                         this->lockNotebookLayoutAction_->setChecked(
+                             value || this->lockNotebookLayout_);
+                     });
+
+    //check and disable if we're only showing live tabs
     this->lockNotebookLayoutAction_->setCheckable(true);
-    this->lockNotebookLayoutAction_->setChecked(this->lockNotebookLayout_);
+    this->lockNotebookLayoutAction_->setEnabled(!this->showLiveOnly_);
+    this->lockNotebookLayoutAction_->setChecked(this->lockNotebookLayout_ ||
+                                                this->showLiveOnly_);
 
     // Update lockNotebookLayout_ value anytime the user changes the checkbox state
     QObject::connect(this->lockNotebookLayoutAction_, &QAction::triggered,
@@ -64,13 +80,12 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
     Item item;
     item.page = page;
     item.tab = tab;
-
-    this->items_.append(item);
+    this->allItems_.append(item);
 
     page->hide();
     page->setParent(this);
 
-    if (select || this->items_.count() == 1)
+    if (select || this->allItems_.count() == 1)
     {
         this->select(page);
     }
@@ -87,31 +102,31 @@ void Notebook::removePage(QWidget *page)
     // Queue up save because: Tab removed
     getApp()->windows->queueSave();
 
-    for (int i = 0; i < this->items_.count(); i++)
+    for (int i = 0; i < this->allItems_.count(); i++)
     {
-        if (this->items_[i].page == page)
+        if (this->allItems_[i].page == page)
         {
-            if (this->items_.count() == 1)
+            if (this->allItems_.count() == 1)
             {
                 this->select(nullptr);
             }
-            else if (i == this->items_.count() - 1)
+            else if (i == this->allItems_.count() - 1)
             {
-                this->select(this->items_[i - 1].page);
+                this->select(this->allItems_[i - 1].page);
             }
             else
             {
-                this->select(this->items_[i + 1].page);
+                this->select(this->allItems_[i + 1].page);
             }
 
-            this->items_[i].page->deleteLater();
-            this->items_[i].tab->deleteLater();
+            this->allItems_[i].page->deleteLater();
+            this->allItems_[i].tab->deleteLater();
 
             //    if (this->items.empty()) {
             //        this->addNewPage();
             //    }
 
-            this->items_.removeAt(i);
+            this->allItems_.removeAt(i);
             break;
         }
     }
@@ -129,9 +144,9 @@ void Notebook::removeCurrentPage()
 
 int Notebook::indexOf(QWidget *page) const
 {
-    for (int i = 0; i < this->items_.count(); i++)
+    for (int i = 0; i < this->allItems_.count(); i++)
     {
-        if (this->items_[i].page == page)
+        if (this->allItems_[i].page == page)
         {
             return i;
         }
@@ -199,7 +214,7 @@ void Notebook::select(QWidget *page, bool focusPage)
 
 bool Notebook::containsPage(QWidget *page)
 {
-    return std::any_of(this->items_.begin(), this->items_.end(),
+    return std::any_of(this->allItems_.begin(), this->allItems_.end(),
                        [page](const auto &item) {
                            return item.page == page;
                        });
@@ -207,11 +222,11 @@ bool Notebook::containsPage(QWidget *page)
 
 Notebook::Item &Notebook::findItem(QWidget *page)
 {
-    auto it = std::find_if(this->items_.begin(), this->items_.end(),
+    auto it = std::find_if(this->allItems_.begin(), this->allItems_.end(),
                            [page](const auto &item) {
                                return page == item.page;
                            });
-    assert(it != this->items_.end());
+    assert(it != this->allItems_.end());
     return *it;
 }
 
@@ -230,30 +245,30 @@ bool Notebook::containsChild(const QObject *obj, const QObject *child)
 
 void Notebook::selectIndex(int index, bool focusPage)
 {
-    if (index < 0 || this->items_.count() <= index)
+    if (index < 0 || this->allItems_.count() <= index)
     {
         return;
     }
 
-    this->select(this->items_[index].page, focusPage);
+    this->select(this->allItems_[index].page, focusPage);
 }
 
 void Notebook::selectNextTab(bool focusPage)
 {
-    if (this->items_.size() <= 1)
+    if (this->allItems_.size() <= 1)
     {
         return;
     }
 
     auto index =
-        (this->indexOf(this->selectedPage_) + 1) % this->items_.count();
+        (this->indexOf(this->selectedPage_) + 1) % this->allItems_.count();
 
-    this->select(this->items_[index].page, focusPage);
+    this->select(this->allItems_[index].page, focusPage);
 }
 
 void Notebook::selectPreviousTab(bool focusPage)
 {
-    if (this->items_.size() <= 1)
+    if (this->allItems_.size() <= 1)
     {
         return;
     }
@@ -262,31 +277,31 @@ void Notebook::selectPreviousTab(bool focusPage)
 
     if (index < 0)
     {
-        index += this->items_.count();
+        index += this->allItems_.count();
     }
 
-    this->select(this->items_[index].page, focusPage);
+    this->select(this->allItems_[index].page, focusPage);
 }
 
 void Notebook::selectLastTab(bool focusPage)
 {
-    const auto size = this->items_.size();
+    const auto size = this->allItems_.size();
     if (size <= 1)
     {
         return;
     }
 
-    this->select(this->items_[size - 1].page, focusPage);
+    this->select(this->allItems_[size - 1].page, focusPage);
 }
 
 int Notebook::getPageCount() const
 {
-    return this->items_.count();
+    return this->allItems_.count();
 }
 
 QWidget *Notebook::getPageAt(int index) const
 {
-    return this->items_[index].page;
+    return this->allItems_[index].page;
 }
 
 int Notebook::getSelectedIndex() const
@@ -333,7 +348,7 @@ void Notebook::rearrangePage(QWidget *page, int index)
     // Queue up save because: Tab rearranged
     getApp()->windows->queueSave();
 
-    this->items_.move(this->indexOf(page), index);
+    this->allItems_.move(this->indexOf(page), index);
 
     this->performLayout(true);
 }
@@ -356,9 +371,8 @@ bool Notebook::getShowTabs() const
 void Notebook::setShowTabs(bool value)
 {
     this->showTabs_ = value;
-
     this->performLayout();
-    for (auto &item : this->items_)
+    for (auto &item : this->allItems_)
     {
         item.tab->setHidden(!value);
     }
@@ -390,6 +404,21 @@ void Notebook::setShowTabs(bool value)
     }
 }
 
+bool Notebook::getShowLiveOnly() const
+{
+    return this->showLiveOnly_;
+}
+void Notebook::setShowLiveOnly(bool value)
+{
+    this->showLiveOnly_ = value;
+    this->showLiveOnlyAction_->setChecked(value);
+    //check and disable the "lock tabs" button
+    this->lockNotebookLayoutAction_->setEnabled(!value);
+    this->lockNotebookLayoutAction_->setChecked(value ||
+                                                this->lockNotebookLayout_);
+    getSettings()->showLiveOnly.setValue(value);
+    this->performLayout();
+}
 bool Notebook::getShowAddButton() const
 {
     return this->showAddButton_;
@@ -450,6 +479,30 @@ void Notebook::performLayout(bool animated)
 
         if (this->showTabs_)
         {
+            if (this->getShowLiveOnly())
+            {
+                this->items_.clear();
+                for (auto &item : this->allItems_)
+                {
+                    if (item.tab->getIsLive())
+                    {
+                        this->items_.append(item);
+                        item.tab->setHidden(!this->showTabs_);
+                    }
+                    else
+                    {
+                        item.tab->setHidden(true);
+                    }
+                }
+            }
+            else
+            {
+                for (auto &item : this->allItems_)
+                {
+                    item.tab->setHidden(!this->showTabs_);
+                }
+                this->items_ = this->allItems_;
+            }
             // layout tabs
             /// Notebook tabs need to know if they are in the last row.
             auto firstInBottomRow =
@@ -591,7 +644,6 @@ void Notebook::performLayout(bool animated)
                 for (int i = colStart; i < colEnd; i++)
                 {
                     auto item = this->items_.at(i);
-
                     /// Layout tab
                     item.tab->growWidth(largestWidth);
                     item.tab->moveAnimated(QPoint(x, y), animated);
@@ -689,7 +741,7 @@ void Notebook::paintEvent(QPaintEvent *event)
 
 bool Notebook::isNotebookLayoutLocked() const
 {
-    return this->lockNotebookLayout_;
+    return (this->lockNotebookLayout_ || this->showLiveOnly_);
 }
 
 void Notebook::setLockNotebookLayout(bool value)
@@ -707,7 +759,7 @@ void Notebook::addNotebookActionsToMenu(QMenu *menu)
             this->setShowTabs(!this->getShowTabs());
         },
         QKeySequence("Ctrl+U"));
-
+    menu->addAction(this->showLiveOnlyAction_);
     menu->addAction(this->lockNotebookLayoutAction_);
 }
 
@@ -728,7 +780,7 @@ NotebookButton *Notebook::addCustomButton()
 
 NotebookTab *Notebook::getTabFromPage(QWidget *page)
 {
-    for (auto &it : this->items_)
+    for (auto &it : this->allItems_)
     {
         if (it.page == page)
         {

@@ -203,6 +203,13 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               "[on, off, or toggle. default: toggle]",
               0,
               1,
+          }},
+         {"setShowLiveOnly",
+          ActionDefinition{
+              "Show live tabs only",
+              "[on, off, or toggle. default: toggle]",
+              0,
+              1,
           }}}},
 };
 

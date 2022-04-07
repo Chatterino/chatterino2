@@ -294,6 +294,11 @@ void NotebookTab::setLive(bool isLive)
     {
         this->isLive_ = isLive;
         this->update();
+        if (this->notebook_->getShowLiveOnly())
+        {
+            this->setHidden(!isLive);
+            this->notebook_->performLayout();
+        }
     }
 }
 
@@ -685,6 +690,11 @@ QRect NotebookTab::getXRect()
     return QRect(this->width() - static_cast<int>(20 * s),
                  static_cast<int>(9 * s), static_cast<int>(16 * s),
                  static_cast<int>(16 * s));
+}
+
+bool NotebookTab::getIsLive() const
+{
+    return this->isLive_;
 }
 
 }  // namespace chatterino

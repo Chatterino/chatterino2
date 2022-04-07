@@ -387,6 +387,7 @@ public:
     BoolSetting informOnTabVisibilityToggle = {"/misc/askOnTabVisibilityToggle",
                                                true};
     BoolSetting lockNotebookLayout = {"/misc/lockNotebookLayout", false};
+    BoolSetting showLiveOnly = {"/misc/showLiveOnly", false};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",

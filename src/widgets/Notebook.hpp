@@ -53,6 +53,9 @@ public:
     bool getShowTabs() const;
     void setShowTabs(bool value);
 
+    bool getShowLiveOnly() const;
+    void setShowLiveOnly(bool value);
+
     bool getShowAddButton() const;
     void setShowAddButton(bool value);
 
@@ -80,6 +83,10 @@ protected:
         QWidget *selectedWidget{};
     };
 
+    const QList<Item> allItems()
+    {
+        return allItems_;
+    }
     const QList<Item> items()
     {
         return items_;
@@ -92,6 +99,7 @@ private:
     static bool containsChild(const QObject *obj, const QObject *child);
     NotebookTab *getTabFromPage(QWidget *page);
 
+    QList<Item> allItems_;
     QList<Item> items_;
     QMenu menu_;
     QWidget *selectedPage_ = nullptr;
@@ -101,11 +109,13 @@ private:
 
     bool allowUserTabManagement_ = false;
     bool showTabs_ = true;
+    bool showLiveOnly_ = false;
     bool showAddButton_ = false;
     int lineOffset_ = 20;
     bool lockNotebookLayout_ = false;
     NotebookTabDirection tabDirection_ = NotebookTabDirection::Horizontal;
     QAction *lockNotebookLayoutAction_;
+    QAction *showLiveOnlyAction_;
 };
 
 class SplitNotebook : public Notebook
