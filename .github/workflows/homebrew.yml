@@ -21,8 +21,8 @@ jobs:
       # Pulls out the version from the ref (e.g. refs/tags/v2.3.1 -> 2.3.1)
       - name: 'Extract version from tag'
         run: |
-            'STRIPPED_VERSION=$("refs/tags/$(C2_TAGGED_VERSION)" | sed "s/refs\/tags\/v//gm")'
-            'echo "C2_TAGGED_VERSION=$(STRIPPED_VERSION)" >> $GITHUB_ENV'
+            'STRIPPED_VERSION=$(echo "refs/tags/$C2_TAGGED_VERSION" | sed "s/refs\/tags\/v//gm")'
+            'echo "C2_TAGGED_VERSION=$STRIPPED_VERSION" >> $GITHUB_ENV'
       - name: 'Execute ''brew bump-cask-pr'' with version'
-        run: 'brew bump-cask-pr --version $(C2_TAGGED_VERSION) $(C2_CASK_NAME)'
+        run: 'brew bump-cask-pr --version $C2_TAGGED_VERSION $C2_CASK_NAME'
 
