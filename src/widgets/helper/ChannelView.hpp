@@ -96,6 +96,13 @@ public:
     void queueLayout();
 
     void clearMessages();
+
+    /**
+     * @brief Creates and shows a UserInfoPopup dialog
+     *
+     * @param userName The login name of the user
+     * @param alternativePopoutChannel Optional parameter containing the channel name to use for context
+     **/
     void showUserInfoPopup(const QString &userName,
                            QString alternativePopoutChannel = QString());
 
