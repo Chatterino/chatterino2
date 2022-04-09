@@ -46,7 +46,9 @@ private:
     QString userName_;
     QString userId_;
     QString avatarUrl_;
+    // The channel the popup was opened from (e.g. /mentions or #forsen). Can be a special channel.
     ChannelPtr channel_;
+    // The channel the messages are rendered from (e.g. #forsen). Can be a special channel, but will try to not be where possible.
     ChannelPtr underlyingChannel_;
 
     // isMoving_ is set to true if the user is holding the left mouse button down and has moved the mouse a small amount away from the original click point (startPosDrag_)
