@@ -2160,11 +2160,12 @@ void ChannelView::showUserInfoPopup(const QString &userName,
         static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
     auto *userPopup =
         new UserInfoPopup(getSettings()->autoCloseUserPopup, userCardParent);
+
+    auto contextChannel =
+        getApp()->twitch->getChannelOrEmpty(alternativePopoutChannel);
     auto openingChannel = this->hasSourceChannel() ? this->sourceChannel_
                                                    : this->underlyingChannel_;
-    userPopup->setData(
-        userName, getApp()->twitch->getChannelOrEmpty(alternativePopoutChannel),
-        openingChannel);
+    userPopup->setData(userName, contextChannel, openingChannel);
 
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     userPopup->move(QCursor::pos() - offset);
