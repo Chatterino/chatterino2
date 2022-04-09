@@ -24,8 +24,8 @@ public:
     UserInfoPopup(bool closeAutomatically, QWidget *parent);
 
     void setData(const QString &name, const ChannelPtr &channel);
-    void setData(const QString &name, const ChannelPtr &openingChannel,
-                 const ChannelPtr &contextChannel);
+    void setData(const QString &name, const ChannelPtr &contextChannel,
+                 const ChannelPtr &openingChannel);
 
 protected:
     virtual void themeChangedEvent() override;
