@@ -4,6 +4,7 @@
 
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
 - Minor: Adjust large stream thumbnail to 16:9 (#3655)
+- Minor: Add information about the user's operating system in the About page. (#3663)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 
 ## 2.3.5
