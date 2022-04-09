@@ -692,8 +692,14 @@ void UserInfoPopup::setData(const QString &name,
     this->userName_ = name;
     this->channel_ = openingChannel;
 
-    this->underlyingChannel_ =
-        !contextChannel->isEmpty() ? contextChannel : openingChannel;
+    if (!contextChannel->isEmpty())
+    {
+        this->underlyingChannel_ = contextChannel;
+    }
+    else
+    {
+        this->underlyingChannel_ = openingChannel;
+    }
 
     this->setWindowTitle(
         TEXT_TITLE.arg(name, this->underlyingChannel_->getName()));
