@@ -408,11 +408,13 @@ bool Notebook::getShowLiveOnly() const
 {
     return this->showLiveOnly_;
 }
+
 void Notebook::setShowLiveOnly(bool value)
 {
     this->showLiveOnly_ = value;
     this->showLiveOnlyAction_->setChecked(value);
-    //check and disable the "lock tabs" button
+
+    // check and disable the "lock tabs" button
     this->lockNotebookLayoutAction_->setEnabled(!value);
     this->lockNotebookLayoutAction_->setChecked(value ||
                                                 this->lockNotebookLayout_);

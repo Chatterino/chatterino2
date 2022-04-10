@@ -206,7 +206,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           }},
          {"setShowLiveOnly",
           ActionDefinition{
-              "Show live tabs only",
+              "Only show live tabs",
               "[on, off, or toggle. default: toggle]",
               0,
               1,

@@ -87,6 +87,7 @@ protected:
     {
         return allItems_;
     }
+
     const QList<Item> items()
     {
         return items_;
