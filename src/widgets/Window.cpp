@@ -604,48 +604,35 @@ void Window::addShortcuts()
          }},
         {"setShowLiveOnly",
          [this](std::vector<QString> arguments) -> QString {
-             auto mode = 2;
+             auto arg = "toggle";
              if (arguments.size() != 0)
              {
                  auto arg = arguments.at(0);
-                 if (arg == "off")
-                 {
-                     mode = 0;
-                 }
-                 else if (arg == "on")
-                 {
-                     mode = 1;
-                 }
-                 else if (arg == "toggle")
-                 {
-                     mode = 2;
-                 }
-                 else
-                 {
-                     qCWarning(chatterinoHotkeys)
-                         << "Invalid argument for setShowLiveOnly hotkey: "
-                         << arg;
-                     return QString("Invalid argument for setShowLiveOnly "
-                                    "hotkey: %1. Use \"on\" or \"off\".")
-                         .arg(arg);
-                 }
              }
-
-             if (mode == 0)
+             if (arg == "off")
              {
                  getSettings()->showLiveOnly.setValue(false);
                  this->notebook_->setShowLiveOnly(false);
              }
-             else if (mode == 1)
+             else if (arg == "on")
              {
                  getSettings()->showLiveOnly.setValue(true);
                  this->notebook_->setShowLiveOnly(true);
              }
-             else if (mode == 2)
+             else if (arg == "toggle")
              {
                  auto value = this->notebook_->getShowLiveOnly();
                  getSettings()->showLiveOnly.setValue(!value);
                  this->notebook_->setShowLiveOnly(!value);
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid argument for setShowLiveOnly hotkey: " << arg;
+                 return QString(
+                            "Invalid argument for setShowLiveOnly "
+                            "hotkey: %1. Use \"on\", \"off\", or \"toggle\".")
+                     .arg(arg);
              }
              return "";
          }},

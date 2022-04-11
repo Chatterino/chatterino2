@@ -32,7 +32,7 @@ public:
     void removePage(QWidget *page);
     void removeCurrentPage();
 
-    int indexOf(QWidget *page) const;
+    int indexOf(QWidget *page, bool liveOnly = true) const;
     virtual void select(QWidget *page, bool focusPage = true);
     void selectIndex(int index, bool focusPage = true);
     void selectNextTab(bool focusPage = true);

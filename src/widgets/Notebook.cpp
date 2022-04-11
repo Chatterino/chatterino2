@@ -142,11 +142,12 @@ void Notebook::removeCurrentPage()
     }
 }
 
-int Notebook::indexOf(QWidget *page) const
+int Notebook::indexOf(QWidget *page, bool liveOnly) const
 {
-    for (int i = 0; i < this->allItems_.count(); i++)
+    const auto items_ = liveOnly ? this->items_ : this->allItems_;
+    for (int i = 0; i < items_.count(); i++)
     {
-        if (this->allItems_[i].page == page)
+        if (items_[i].page == page)
         {
             return i;
         }
@@ -255,43 +256,49 @@ void Notebook::selectIndex(int index, bool focusPage)
 
 void Notebook::selectNextTab(bool focusPage)
 {
-    if (this->allItems_.size() <= 1)
+    bool showLiveOnly_ = this->getShowLiveOnly();
+    const auto items_ = showLiveOnly_ ? this->items_ : this->allItems_;
+    if (items_.size() <= 1)
     {
         return;
     }
 
-    auto index =
-        (this->indexOf(this->selectedPage_) + 1) % this->allItems_.count();
+    auto index = (this->indexOf(this->selectedPage_, showLiveOnly_) + 1) %
+                 items_.count();
 
-    this->select(this->allItems_[index].page, focusPage);
+    this->select(items_[index].page, focusPage);
 }
 
 void Notebook::selectPreviousTab(bool focusPage)
 {
-    if (this->allItems_.size() <= 1)
+    bool showLiveOnly_ = this->getShowLiveOnly();
+    const auto items_ = showLiveOnly_ ? this->items_ : this->allItems_;
+    if (items_.size() <= 1)
     {
         return;
     }
 
-    int index = this->indexOf(this->selectedPage_) - 1;
+    int index = this->indexOf(this->selectedPage_, showLiveOnly_) - 1;
 
     if (index < 0)
     {
-        index += this->allItems_.count();
+        index += items_.count();
     }
 
-    this->select(this->allItems_[index].page, focusPage);
+    this->select(items_[index].page, focusPage);
 }
 
 void Notebook::selectLastTab(bool focusPage)
 {
-    const auto size = this->allItems_.size();
+    const auto items_ =
+        this->getShowLiveOnly() ? this->items_ : this->allItems_;
+    const auto size = items_.size();
     if (size <= 1)
     {
         return;
     }
 
-    this->select(this->allItems_[size - 1].page, focusPage);
+    this->select(this->items_[size - 1].page, focusPage);
 }
 
 int Notebook::getPageCount() const
