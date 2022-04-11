@@ -889,7 +889,7 @@ SplitContainer *SplitNotebook::addPage(bool select)
     auto tab = Notebook::addPage(container, QString(), select);
     container->setTab(tab);
     tab->setParent(this);
-    tab->setVisible(this->getShowTabs());
+    tab->setVisible(this->getShowTabs() && !this->getShowLiveOnly());
     return container;
 }
 
