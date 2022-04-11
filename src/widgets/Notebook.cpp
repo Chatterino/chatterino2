@@ -817,7 +817,7 @@ SplitNotebook::SplitNotebook(Window *parent)
 
     this->signalHolder_.managedConnect(
         getApp()->windows->selectSplit, [this](Split *split) {
-            for (auto &&item : this->items())
+            for (auto &&item : this->allItems())
             {
                 if (auto sc = dynamic_cast<SplitContainer *>(item.page))
                 {
