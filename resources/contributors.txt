@@ -11,6 +11,7 @@
 
 fourtf | https://fourtf.com | :/avatars/fourtf.png | Author, main developer
 pajlada | https://pajlada.se | :/avatars/pajlada.png | Collaborator, co-developer
+zneix | https://github.com/zneix | :/avatars/zneix.png | Collaborator
 
 Cranken | https://github.com/Cranken | | Contributor
 hemirt | https://github.com/hemirt | | Contributor
@@ -36,7 +37,6 @@ Mm2PL | https://github.com/mm2pl | :/avatars/mm2pl.png | Contributor
 gempir | https://github.com/gempir | | Contributor
 mfmarlow | https://github.com/mfmarlow | | Contributor
 dnsge | https://github.com/dnsge | | Contributor
-zneix | https://github.com/zneix | :/avatars/zneix.png | Contributor
 y0dax | https://github.com/y0dax | | Contributor
 Iulian Onofrei | https://github.com/revolter | :/avatars/revolter.jpg | Contributor
 matthewde | https://github.com/m4tthewde | :/avatars/matthewde.jpg | Contributor
