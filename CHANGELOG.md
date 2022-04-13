@@ -6,6 +6,7 @@
 - Minor: Adjust large stream thumbnail to 16:9 (#3655)
 - Minor: Fixed being unable to load Twitch Usercards from the `/mentions` tab. (#3623)
 - Minor: Add information about the user's operating system in the About page. (#3663)
+- Minor: Added a safety check for max timeouts to prevent a crash 
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 
