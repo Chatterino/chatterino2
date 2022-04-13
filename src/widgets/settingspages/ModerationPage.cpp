@@ -224,11 +224,13 @@ void ModerationPage::addModerationButtonSettings(
         if (unit == "d" && duration > 14)
         {
             line->setText("14");
+            duration->setValue(14); //Safety Mechanism as when it exceeds 2w it can cause huge issues with connecting
             return;
         }
         else if (unit == "w" && duration > 2)
         {
             line->setText("2");
+            duration->setValue(2); //Safety Mechanism as when it exceeds 2w it can cause huge issues with connecting
             return;
         }
 
