@@ -272,11 +272,10 @@ void Application::initPubsub()
                 return;
             }
 
-            MessageBuilder msg(action);
-            msg->flags.set(MessageFlag::PubSub);
-
-            postToThread([chan, msg = msg.release()] {
-                chan->addOrReplaceTimeout(msg);
+            postToThread([chan, action] {
+                MessageBuilder msg(action);
+                msg->flags.set(MessageFlag::PubSub);
+                chan->addOrReplaceTimeout(msg.release());
             });
         });
     this->twitch->pubsub->signals_.moderation.messageDeleted.connect(
