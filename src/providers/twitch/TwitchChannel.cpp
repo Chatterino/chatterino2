@@ -770,39 +770,8 @@ void TwitchChannel::parseLiveStatus(bool live, const HelixStream &stream)
     {
         auto status = this->streamStatus_.access();
         status->viewerCount = stream.viewerCount;
-        if (status->gameId != stream.gameId)
-        {
-            status->gameId = stream.gameId;
-
-            if (!stream.gameId.isEmpty())
-            {
-                // Resolve game ID to game name
-                getHelix()->getGameById(
-                    stream.gameId,
-                    [this, weak = weakOf<Channel>(this)](const auto &game) {
-                        ChannelPtr shared = weak.lock();
-                        if (!shared)
-                        {
-                            return;
-                        }
-
-                        {
-                            auto status = this->streamStatus_.access();
-                            status->game = game.name;
-                        }
-
-                        this->liveStatusChanged.invoke();
-                    },
-                    [] {
-                        // failure
-                    });
-            }
-            else
-            {
-                // Game is nothing and can't be resolved by the API, force empty
-                status->game = "";
-            }
-        }
+        status->gameId = stream.gameId;
+        status->game = stream.gameName;
         status->title = stream.title;
         QDateTime since = QDateTime::fromString(stream.startedAt, Qt::ISODate);
         auto diff = since.secsTo(QDateTime::currentDateTime());

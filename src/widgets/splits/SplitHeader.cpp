@@ -716,7 +716,7 @@ void SplitHeader::updateChannelText()
                     url.append("-160x90.jpg");
                     break;
                 case 3:
-                    url.append("-360x180.jpg");
+                    url.append("-360x203.jpg");
                     break;
                 default:
                     url = "";

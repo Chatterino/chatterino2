@@ -226,7 +226,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                            .arg(this->userName_)
                            .arg(calculateTimeoutDuration(button));
              }
-             this->channel_->sendMessage(msg);
+             this->underlyingChannel_->sendMessage(msg);
              return "";
          }},
 
@@ -389,21 +389,21 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
         QObject::connect(usercard.getElement(), &Button::leftClicked, [this] {
             QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
-                                      this->channel_->getName() +
+                                      this->underlyingChannel_->getName() +
                                       "/viewercard/" + this->userName_);
         });
 
         QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
-            this->channel_->sendMessage("/mod " + this->userName_);
+            this->underlyingChannel_->sendMessage("/mod " + this->userName_);
         });
         QObject::connect(unmod.getElement(), &Button::leftClicked, [this] {
-            this->channel_->sendMessage("/unmod " + this->userName_);
+            this->underlyingChannel_->sendMessage("/unmod " + this->userName_);
         });
         QObject::connect(vip.getElement(), &Button::leftClicked, [this] {
-            this->channel_->sendMessage("/vip " + this->userName_);
+            this->underlyingChannel_->sendMessage("/vip " + this->userName_);
         });
         QObject::connect(unvip.getElement(), &Button::leftClicked, [this] {
-            this->channel_->sendMessage("/unvip " + this->userName_);
+            this->underlyingChannel_->sendMessage("/unvip " + this->userName_);
         });
 
         QObject::connect(checkAfk.getElement(), &Button::leftClicked, [this] {
@@ -485,7 +485,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
         this->userStateChanged_.connect([this, mod, unmod, vip,
                                          unvip]() mutable {
             TwitchChannel *twitchChannel =
-                dynamic_cast<TwitchChannel *>(this->channel_.get());
+                dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
 
             bool visibilityModButtons = false;
 
@@ -515,7 +515,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
         this->userStateChanged_.connect([this, lineMod, timeout]() mutable {
             TwitchChannel *twitchChannel =
-                dynamic_cast<TwitchChannel *>(this->channel_.get());
+                dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
 
             bool hasModRights =
                 twitchChannel ? twitchChannel->hasModRights() : false;
@@ -531,26 +531,27 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
             switch (action)
             {
                 case TimeoutWidget::Ban: {
-                    if (this->channel_)
+                    if (this->underlyingChannel_)
                     {
-                        this->channel_->sendMessage("/ban " + this->userName_);
+                        this->underlyingChannel_->sendMessage("/ban " +
+                                                              this->userName_);
                     }
                 }
                 break;
                 case TimeoutWidget::Unban: {
-                    if (this->channel_)
+                    if (this->underlyingChannel_)
                     {
-                        this->channel_->sendMessage("/unban " +
-                                                    this->userName_);
+                        this->underlyingChannel_->sendMessage("/unban " +
+                                                              this->userName_);
                     }
                 }
                 break;
                 case TimeoutWidget::Timeout: {
-                    if (this->channel_)
+                    if (this->underlyingChannel_)
                     {
-                        this->channel_->sendMessage("/timeout " +
-                                                    this->userName_ + " " +
-                                                    QString::number(arg));
+                        this->underlyingChannel_->sendMessage(
+                            "/timeout " + this->userName_ + " " +
+                            QString::number(arg));
                     }
                 }
                 break;
@@ -760,9 +761,27 @@ void UserInfoPopup::installEvents()
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 {
+    this->setData(name, channel, channel);
+}
+
+void UserInfoPopup::setData(const QString &name,
+                            const ChannelPtr &contextChannel,
+                            const ChannelPtr &openingChannel)
+{
     this->userName_ = name;
-    this->channel_ = channel;
-    this->setWindowTitle(TEXT_TITLE.arg(name, channel->getName()));
+    this->channel_ = openingChannel;
+
+    if (!contextChannel->isEmpty())
+    {
+        this->underlyingChannel_ = contextChannel;
+    }
+    else
+    {
+        this->underlyingChannel_ = openingChannel;
+    }
+
+    this->setWindowTitle(
+        TEXT_TITLE.arg(name, this->underlyingChannel_->getName()));
 
     this->ui_.nameLabel->setText(name);
     this->ui_.nameLabel->setProperty("copy-text", name);
@@ -779,9 +798,10 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 
 void UserInfoPopup::updateLatestMessages()
 {
-    auto filteredChannel = filterMessages(this->userName_, this->channel_);
+    auto filteredChannel =
+        filterMessages(this->userName_, this->underlyingChannel_);
     this->ui_.latestMessages->setChannel(filteredChannel);
-    this->ui_.latestMessages->setSourceChannel(this->channel_);
+    this->ui_.latestMessages->setSourceChannel(this->underlyingChannel_);
 
     const bool hasMessages = filteredChannel->hasMessages();
     this->ui_.latestMessages->setVisible(hasMessages);
@@ -792,23 +812,24 @@ void UserInfoPopup::updateLatestMessages()
 
     this->refreshConnection_ =
         std::make_unique<pajlada::Signals::ScopedConnection>(
-            this->channel_->messageAppended.connect([this, hasMessages](
-                                                        auto message, auto) {
-                if (!checkMessageUserName(this->userName_, message))
-                    return;
+            this->underlyingChannel_->messageAppended.connect(
+                [this, hasMessages](auto message, auto) {
+                    if (!checkMessageUserName(this->userName_, message))
+                        return;
 
-                if (hasMessages)
-                {
-                    // display message in ChannelView
-                    this->ui_.latestMessages->channel()->addMessage(message);
-                }
-                else
-                {
-                    // The ChannelView is currently hidden, so manually refresh
-                    // and display the latest messages
-                    this->updateLatestMessages();
-                }
-            }));
+                    if (hasMessages)
+                    {
+                        // display message in ChannelView
+                        this->ui_.latestMessages->channel()->addMessage(
+                            message);
+                    }
+                    else
+                    {
+                        // The ChannelView is currently hidden, so manually refresh
+                        // and display the latest messages
+                        this->updateLatestMessages();
+                    }
+                }));
 }
 
 void UserInfoPopup::updateUserData()
@@ -860,8 +881,8 @@ void UserInfoPopup::updateUserData()
             this->ui_.nameLabel->setProperty("copy-text", user.displayName);
         }
 
-        this->setWindowTitle(
-            TEXT_TITLE.arg(user.displayName, this->channel_->getName()));
+        this->setWindowTitle(TEXT_TITLE.arg(
+            user.displayName, this->underlyingChannel_->getName()));
         this->ui_.viewCountLabel->setText(
             TEXT_VIEWS.arg(localizeNumbers(user.viewCount)));
         this->ui_.createdDateLabel->setText(
@@ -928,7 +949,7 @@ void UserInfoPopup::updateUserData()
 
         // get followage and subage
         getIvr()->getSubage(
-            this->userName_, this->channel_->getName(),
+            this->userName_, this->underlyingChannel_->getName(),
             [this, hack](const IvrSubage &subageInfo) {
                 if (!hack.lock())
                 {
