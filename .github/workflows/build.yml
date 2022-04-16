@@ -251,12 +251,12 @@ jobs:
         os: [windows-latest]
       fail-fast: false
     steps:
-      - name: Where am I?
-        run: |
-            echo $pwd
-            ls
       - name: Set environment variables
         run: echo "VCPKG_DEFAULT_TRIPLET=x64-windows" >> $env:GITHUB_ENV
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0  # allows for tags access
       - name: Cache Dependencies
         uses: actions/cache@v3
         with:
