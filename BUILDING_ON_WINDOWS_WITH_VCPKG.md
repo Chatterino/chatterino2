@@ -20,12 +20,14 @@
 
 ## Building
 
-1. Install dependencies (~21 GB)
-   - `vcpkg install benchmark boost-foreach boost-interprocess boost-random boost-variant gtest openssl qt5-multimedia qtkeychain rapidjson websocketpp wintoast`
-1. Clone and build
+1. Clone
    - `git clone --recurse-submodules https://github.com/Chatterino/chatterino2.git`
-   - `mkdir .\chatterino2\build\`
-   - `cd .\chatterino2\build\`
+1. Install dependencies (~21 GB)
+   - `cd .\chatterino2\`
+   - `vcpkg install`
+1. Build
+   - `mkdir .\build\`
+   - `cd .\build\`
    - (cmd) `cmake .. -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake`
    - (ps1) `cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"`
    - `cmake --build . --parallel <threads> --config Release`
