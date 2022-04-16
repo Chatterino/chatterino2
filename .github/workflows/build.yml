@@ -252,7 +252,10 @@ jobs:
       fail-fast: false
     steps:
       - name: Set environment variables
-        run: echo "VCPKG_DEFAULT_TRIPLET=x64-windows" >> $env:GITHUB_ENV
+        run: |
+            echo "VCPKG_DEFAULT_TRIPLET=x64-windows" >> $env:GITHUB_ENV
+            echo "VCPKG_FEATURE_FLAGS=binarycaching" >> $env:GITHUB_ENV
+            echo "XDG_CACHE_HOME=C:/cache/" >> $env:GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           submodules: true
@@ -260,8 +263,8 @@ jobs:
       - name: Cache Dependencies
         uses: actions/cache@v3
         with:
-          path: "C:/vcpkg"
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+          path: C:/cache/
+          key: ${{ runner.os }}-vcpkg-archive-${{ hashFiles('**/vcpkg.json') }}
       - name: Dependencies
         run: vcpkg install
       - name: Build
