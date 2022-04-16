@@ -1,7 +1,7 @@
 #pragma once
 
-#include <rapidjson/document.h>
 #include <QColor>
+#include <QJsonObject>
 #include <QString>
 
 #include <chrono>
@@ -18,7 +18,7 @@ struct ActionUser {
 };
 
 struct PubSubAction {
-    PubSubAction(const rapidjson::Value &data, const QString &_roomID);
+    PubSubAction(const QJsonObject &data, const QString &_roomID);
     ActionUser source;
 
     std::chrono::steady_clock::time_point timestamp;

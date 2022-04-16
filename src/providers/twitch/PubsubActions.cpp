@@ -1,14 +1,13 @@
 #include "providers/twitch/PubsubActions.hpp"
 
-#include "providers/twitch/PubsubHelpers.hpp"
-
 namespace chatterino {
 
-PubSubAction::PubSubAction(const rapidjson::Value &data, const QString &_roomID)
+PubSubAction::PubSubAction(const QJsonObject &data, const QString &_roomID)
     : timestamp(std::chrono::steady_clock::now())
     , roomID(_roomID)
 {
-    getCreatedByUser(data, this->source);
+    this->source.id = data.value("created_by_user_id").toString();
+    this->source.login = data.value("created_by").toString();
 }
 
 }  // namespace chatterino

@@ -28,7 +28,8 @@
 
 #ifndef NDEBUG
 #    include <rapidjson/document.h>
-#    include "providers/twitch/PubsubClient.hpp"
+#    include "providers/twitch/PubsubManager.hpp"
+#    include "providers/twitch/PubsubMessages.hpp"
 #    include "util/SampleCheerMessages.hpp"
 #    include "util/SampleLinks.hpp"
 #endif
@@ -284,17 +285,24 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         static bool alt = true;
         if (alt)
         {
-            doc.Parse(channelRewardMessage);
+            auto oMessage = parsePubSubMessage(channelRewardMessage);
+            auto oInnerMessage =
+                parsePubSubDataPayload<PubSubCommunityPointsChannelV1Message>(
+                    oMessage->intoMessage()->message.toUtf8());
+
             app->twitch->addFakeMessage(channelRewardIRCMessage);
             app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
-                doc["data"]["message"]["data"]["redemption"]);
+                oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
         else
         {
-            doc.Parse(channelRewardMessage2);
+            auto oMessage = parsePubSubMessage(channelRewardMessage2);
+            auto oInnerMessage =
+                parsePubSubDataPayload<PubSubCommunityPointsChannelV1Message>(
+                    oMessage->intoMessage()->message.toUtf8());
             app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
-                doc["data"]["message"]["data"]["redemption"]);
+                oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
         return "";

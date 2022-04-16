@@ -96,6 +96,7 @@ include(lib/signals.pri)
 include(lib/settings.pri)
 include(lib/serialize.pri)
 include(lib/lrucache.pri)
+include(lib/magic_enum.pri)
 include(lib/winsdk.pri)
 include(lib/rapidjson.pri)
 include(lib/qtkeychain.pri)
@@ -215,6 +216,7 @@ SOURCES += \
     src/providers/twitch/PubsubActions.cpp \
     src/providers/twitch/PubsubClient.cpp \
     src/providers/twitch/PubsubHelpers.cpp \
+    src/providers/twitch/PubsubManager.cpp \
     src/providers/twitch/TwitchAccount.cpp \
     src/providers/twitch/TwitchAccountManager.cpp \
     src/providers/twitch/TwitchBadge.cpp \
@@ -460,7 +462,11 @@ HEADERS += \
     src/providers/twitch/IrcMessageHandler.hpp \
     src/providers/twitch/PubsubActions.hpp \
     src/providers/twitch/PubsubClient.hpp \
+    src/providers/twitch/PubsubClientOptions.hpp \
     src/providers/twitch/PubsubHelpers.hpp \
+    src/providers/twitch/PubsubManager.hpp \
+    src/providers/twitch/PubsubMessages.hpp \
+    src/providers/twitch/PubsubWebsocket.hpp \
     src/providers/twitch/TwitchAccount.hpp \
     src/providers/twitch/TwitchAccountManager.hpp \
     src/providers/twitch/TwitchBadge.hpp \

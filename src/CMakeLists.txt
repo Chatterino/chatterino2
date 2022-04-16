@@ -214,8 +214,13 @@ set(SOURCE_FILES
         providers/twitch/PubsubActions.hpp
         providers/twitch/PubsubClient.cpp
         providers/twitch/PubsubClient.hpp
+        providers/twitch/PubsubClientOptions.hpp
         providers/twitch/PubsubHelpers.cpp
         providers/twitch/PubsubHelpers.hpp
+        providers/twitch/PubsubManager.cpp
+        providers/twitch/PubsubManager.hpp
+        providers/twitch/PubsubMessages.hpp
+        providers/twitch/PubsubWebsocket.hpp
         providers/twitch/TwitchAccount.cpp
         providers/twitch/TwitchAccount.hpp
         providers/twitch/TwitchAccountManager.cpp
@@ -510,6 +515,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         Threads::Threads
         RapidJSON::RapidJSON
         LRUCache
+        MagicEnum
         )
 if (BUILD_WITH_QTKEYCHAIN)
     target_link_libraries(${LIBRARY_PROJECT}

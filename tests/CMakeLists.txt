@@ -15,6 +15,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/RatelimitBucket.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Hotkeys.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/UtilTwitch.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchPubSubClient.cpp
     # Add your new file above this line!
     )
 

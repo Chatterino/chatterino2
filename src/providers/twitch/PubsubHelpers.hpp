@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QJsonObject>
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <memory>
@@ -11,16 +12,6 @@ namespace chatterino {
 class TwitchAccount;
 struct ActionUser;
 
-const rapidjson::Value &getArgs(const rapidjson::Value &data);
-const rapidjson::Value &getMsgID(const rapidjson::Value &data);
-
-bool getCreatedByUser(const rapidjson::Value &data, ActionUser &user);
-
-bool getTargetUser(const rapidjson::Value &data, ActionUser &user);
-bool getTargetUserName(const rapidjson::Value &data, ActionUser &user);
-
-rapidjson::Document createListenMessage(const std::vector<QString> &topicsVec,
-                                        std::shared_ptr<TwitchAccount> account);
 rapidjson::Document createUnlistenMessage(
     const std::vector<QString> &topicsVec);
 

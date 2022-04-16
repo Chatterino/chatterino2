@@ -2,6 +2,9 @@
 
 #include "providers/twitch/ChatterinoWebSocketppLogger.hpp"
 #include "providers/twitch/PubsubActions.hpp"
+#include "providers/twitch/PubsubClientOptions.hpp"
+#include "providers/twitch/PubsubMessages.hpp"
+#include "providers/twitch/PubsubWebsocket.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 
@@ -18,193 +21,65 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <string_view>
 #include <thread>
 #include <unordered_map>
 #include <vector>
 
 namespace chatterino {
 
-struct chatterinoconfig : public websocketpp::config::asio_tls_client {
-    typedef websocketpp::log::chatterinowebsocketpplogger<
-        concurrency_type, websocketpp::log::elevel>
-        elog_type;
-    typedef websocketpp::log::chatterinowebsocketpplogger<
-        concurrency_type, websocketpp::log::alevel>
-        alog_type;
-
-    struct permessage_deflate_config {
-    };
-
-    typedef websocketpp::extensions::permessage_deflate::disabled<
-        permessage_deflate_config>
-        permessage_deflate_type;
+struct TopicData {
+    QString topic;
+    bool authed{false};
+    bool persistent{false};
 };
 
-using WebsocketClient = websocketpp::client<chatterinoconfig>;
-using WebsocketHandle = websocketpp::connection_hdl;
-using WebsocketErrorCode = websocketpp::lib::error_code;
-
-#define MAX_PUBSUB_LISTENS 50
-#define MAX_PUBSUB_CONNECTIONS 10
-
-struct RequestMessage {
-    QString payload;
-    int topicCount;
+struct Listener : TopicData {
+    bool confirmed{false};
 };
 
-namespace detail {
-
-    struct Listener {
-        QString topic;
-        bool authed;
-        bool persistent;
-        bool confirmed = false;
-    };
-
-    class PubSubClient : public std::enable_shared_from_this<PubSubClient>
-    {
-    public:
-        PubSubClient(WebsocketClient &_websocketClient,
-                     WebsocketHandle _handle);
-
-        void start();
-        void stop();
-
-        bool listen(rapidjson::Document &message);
-        void unlistenPrefix(const QString &prefix);
-
-        void handlePong();
-
-        bool isListeningToTopic(const QString &topic);
-
-    private:
-        void ping();
-        bool send(const char *payload);
-
-        WebsocketClient &websocketClient_;
-        WebsocketHandle handle_;
-        uint16_t numListens_ = 0;
-
-        std::vector<Listener> listeners_;
-
-        std::atomic<bool> awaitingPong_{false};
-        std::atomic<bool> started_{false};
-    };
-
-}  // namespace detail
-
-class PubSub
+class PubSubClient : public std::enable_shared_from_this<PubSubClient>
 {
-    using WebsocketMessagePtr =
-        websocketpp::config::asio_tls_client::message_type::ptr;
-    using WebsocketContextPtr =
-        websocketpp::lib::shared_ptr<boost::asio::ssl::context>;
-
-    template <typename T>
-    using Signal =
-        pajlada::Signals::Signal<T>;  // type-id is vector<T, Alloc<T>>
-
-    WebsocketClient websocketClient;
-    std::unique_ptr<std::thread> mainThread;
-
 public:
-    PubSub();
+    // The max amount of topics we may listen to with a single connection
+    static constexpr int listensPerConnection = 50;
 
-    ~PubSub() = delete;
-
-    enum class State {
-        Connected,
-        Disconnected,
-    };
+    PubSubClient(WebsocketClient &_websocketClient, WebsocketHandle _handle,
+                 const PubSubClientOptions &clientOptions);
 
     void start();
+    void stop();
 
-    bool isConnected() const
-    {
-        return this->state == State::Connected;
-    }
+    void close(const std::string &reason,
+               websocketpp::close::status::value code =
+                   websocketpp::close::status::normal);
 
-    pajlada::Signals::NoArgSignal connected;
+    std::pair<bool, QString> listen(rapidjson::Document &message);
+    void unlistenPrefix(const QString &prefix);
 
-    struct {
-        struct {
-            Signal<ClearChatAction> chatCleared;
-            Signal<DeleteAction> messageDeleted;
-            Signal<ModeChangedAction> modeChanged;
-            Signal<ModerationStateAction> moderationStateChanged;
+    void handleListenResponse(const PubSubMessage &message);
+    void handleUnlistenResponse(const PubSubMessage &message);
 
-            Signal<BanAction> userBanned;
-            Signal<UnbanAction> userUnbanned;
-
-            Signal<AutomodAction> automodMessage;
-            Signal<AutomodUserAction> automodUserMessage;
-            Signal<AutomodInfoAction> automodInfoMessage;
-        } moderation;
-
-        struct {
-            // Parsing should be done in PubSubManager as well,
-            // but for now we just send the raw data
-            Signal<const rapidjson::Value &> received;
-            Signal<const rapidjson::Value &> sent;
-        } whisper;
-
-        struct {
-            Signal<rapidjson::Value &> redeemed;
-        } pointReward;
-    } signals_;
-
-    void listenToWhispers(std::shared_ptr<TwitchAccount> account);
-
-    void unlistenAllModerationActions();
-
-    void listenToChannelModerationActions(
-        const QString &channelID, std::shared_ptr<TwitchAccount> account);
-    void listenToAutomod(const QString &channelID,
-                         std::shared_ptr<TwitchAccount> account);
-
-    void listenToChannelPointRewards(const QString &channelID,
-                                     std::shared_ptr<TwitchAccount> account);
-
-    std::vector<std::unique_ptr<rapidjson::Document>> requests;
-
-private:
-    void listenToTopic(const QString &topic,
-                       std::shared_ptr<TwitchAccount> account);
-
-    void listen(rapidjson::Document &&msg);
-    bool tryListen(rapidjson::Document &msg);
+    void handlePong();
 
     bool isListeningToTopic(const QString &topic);
 
-    void addClient();
-    std::atomic<bool> addingClient{false};
+    std::vector<Listener> getListeners() const;
 
-    State state = State::Connected;
+private:
+    void ping();
+    bool send(const char *payload);
 
-    std::map<WebsocketHandle, std::shared_ptr<detail::PubSubClient>,
-             std::owner_less<WebsocketHandle>>
-        clients;
+    WebsocketClient &websocketClient_;
+    WebsocketHandle handle_;
+    uint16_t numListens_ = 0;
 
-    std::unordered_map<
-        QString, std::function<void(const rapidjson::Value &, const QString &)>>
-        moderationActionHandlers;
+    std::vector<Listener> listeners_;
 
-    std::unordered_map<
-        QString, std::function<void(const rapidjson::Value &, const QString &)>>
-        channelTermsActionHandlers;
+    std::atomic<bool> awaitingPong_{false};
+    std::atomic<bool> started_{false};
 
-    void onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr msg);
-    void onConnectionOpen(websocketpp::connection_hdl hdl);
-    void onConnectionFail(websocketpp::connection_hdl hdl);
-    void onConnectionClose(websocketpp::connection_hdl hdl);
-    WebsocketContextPtr onTLSInit(websocketpp::connection_hdl hdl);
-
-    void handleResponse(const rapidjson::Document &msg);
-    void handleListenResponse(const RequestMessage &msg, bool failed);
-    void handleUnlistenResponse(const RequestMessage &msg, bool failed);
-    void handleMessageResponse(const rapidjson::Value &data);
-
-    void runThread();
+    const PubSubClientOptions &clientOptions_;
 };
 
 }  // namespace chatterino

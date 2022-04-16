@@ -17,7 +17,7 @@
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/Irc2.hpp"
-#include "providers/twitch/PubsubClient.hpp"
+#include "providers/twitch/PubsubManager.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
@@ -382,37 +382,36 @@ void Application::initPubsub()
 
     this->twitch->pubsub->signals_.pointReward.redeemed.connect(
         [&](auto &data) {
-            QString channelId;
-            if (rj::getSafe(data, "channel_id", channelId))
-            {
-                auto chan = this->twitch->getChannelOrEmptyByID(channelId);
-
-                auto reward = ChannelPointReward(data);
-
-                postToThread([chan, reward] {
-                    if (auto channel =
-                            dynamic_cast<TwitchChannel *>(chan.get()))
-                    {
-                        channel->addChannelPointReward(reward);
-                    }
-                });
-            }
-            else
+            QString channelId = data.value("channel_id").toString();
+            if (channelId.isEmpty())
             {
                 qCDebug(chatterinoApp)
                     << "Couldn't find channel id of point reward";
+                return;
             }
+
+            auto chan = this->twitch->getChannelOrEmptyByID(channelId);
+
+            auto reward = ChannelPointReward(data);
+
+            postToThread([chan, reward] {
+                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->addChannelPointReward(reward);
+                }
+            });
         });
 
     this->twitch->pubsub->start();
 
     auto RequestModerationActions = [=]() {
+        this->twitch->pubsub->setAccount(
+            getApp()->accounts->twitch.getCurrent());
         this->twitch->pubsub->unlistenAllModerationActions();
         // TODO(pajlada): Unlisten to all authed topics instead of only
         // moderation topics this->twitch->pubsub->UnlistenAllAuthedTopics();
 
-        this->twitch->pubsub->listenToWhispers(
-            this->accounts->twitch.getCurrent());
+        this->twitch->pubsub->listenToWhispers();
     };
 
     this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);
