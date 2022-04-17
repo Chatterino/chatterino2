@@ -262,8 +262,8 @@ jobs:
       - name: Cache Dependencies
         uses: actions/cache@v3
         with:
-          path: ${{ env.LOCALAPPDATA }}/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-archive-${{ hashFiles('**/vcpkg.json') }}
+          path: ${{ github.workspace }}/vcpkg_installed
+          key: ${{ runner.os }}-vcpkg_installed-${{ hashFiles('**/vcpkg.json') }}
       - name: Dependencies
         run: vcpkg install
       - name: Build
