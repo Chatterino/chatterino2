@@ -244,35 +244,6 @@ jobs:
           name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
           path: build/chatterino-osx.dmg
 
-  build-vcpkg:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest]
-      fail-fast: false
-    steps:
-      - name: Set environment variables
-        run: |
-            echo "VCPKG_DEFAULT_TRIPLET=x64-windows" >> $env:GITHUB_ENV
-            echo "VCPKG_FEATURE_FLAGS=binarycaching" >> $env:GITHUB_ENV
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-          fetch-depth: 0  # allows for tags access
-      - name: Cache Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/vcpkg_installed
-          key: ${{ runner.os }}-vcpkg_installed-${{ hashFiles('**/vcpkg.json') }}
-      - name: Dependencies
-        run: vcpkg install
-      - name: Build
-        run: |
-            mkdir build
-            cd build
-            cmake .. -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
-            cmake --build . --config Release
-
   create-release:
     needs: build
     runs-on: ubuntu-latest

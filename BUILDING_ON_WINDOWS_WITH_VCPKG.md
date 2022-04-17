@@ -33,7 +33,3 @@
    - `cmake --build . --parallel <threads> --config Release`
 1. Run
    - `.\bin\chatterino2.exe`
-
-## TODO
-
-- Errors when trying to run a debug build
