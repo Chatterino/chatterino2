@@ -983,13 +983,6 @@ void Split::showViewerList()
     static QStringList jsonLabels = {"broadcaster", "moderators", "vips",
                                      "staff",       "admins",     "global_mods",
                                      "viewers"};
-    QList<QListWidgetItem *> labelList;
-    for (auto &x : labels)
-    {
-        auto label = formatListItemText(x);
-        label->setForeground(this->theme->accent);
-        labelList.append(label);
-    }
     auto loadingLabel = new QLabel("Loading...");
 
     NetworkRequest::twitchRequest("https://tmi.twitch.tv/group/user/" +
@@ -1005,6 +998,18 @@ void Split::showViewerList()
                     .arg(localizeNumbers(obj.value("chatter_count").toInt())));
 
             loadingLabel->hide();
+            QList<QListWidgetItem *> labelList;
+            for (int i = 0; i < labels.size(); i++)
+            {
+                auto label = formatListItemText(
+                    QString("%1 (%2)")
+                        .arg(labels.at(i))
+                        .arg(localizeNumbers(chattersObj.value(jsonLabels.at(i))
+                                                 .toArray()
+                                                 .size())));
+                label->setForeground(this->theme->accent);
+                labelList.append(label);
+            }
             for (int i = 0; i < jsonLabels.size(); i++)
             {
                 auto currentCategory =
