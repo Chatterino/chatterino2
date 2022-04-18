@@ -368,7 +368,7 @@ void Notebook::setShowTabs(bool value)
     // show a popup upon hiding tabs
     if (!value && getSettings()->informOnTabVisibilityToggle.getValue())
     {
-        QMessageBox msgBox;
+        QMessageBox msgBox(this->window());
         msgBox.window()->setWindowTitle("Chatterino - hidden tabs");
         msgBox.setText("You've just hidden your tabs.");
         msgBox.setInformativeText(

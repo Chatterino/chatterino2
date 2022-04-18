@@ -7,6 +7,7 @@
 - Minor: Fixed being unable to load Twitch Usercards from the `/mentions` tab. (#3623)
 - Minor: Add information about the user's operating system in the About page. (#3663)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
+- Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 
 ## 2.3.5

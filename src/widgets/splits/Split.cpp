@@ -219,7 +219,7 @@ Split::Split(QWidget *parent)
 
             if (getSettings()->askOnImageUpload.getValue())
             {
-                QMessageBox msgBox;
+                QMessageBox msgBox(this->window());
                 msgBox.setWindowTitle("Chatterino");
                 msgBox.setText("Image upload");
                 msgBox.setInformativeText(

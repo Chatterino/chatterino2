@@ -757,10 +757,8 @@ QString GeneralPage::getFont(const DropdownArgs &args) const
         args.combobox->setEditText("Choosing...");
         QFontDialog dialog(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.));
 
-        dialog.setWindowFlag(Qt::WindowStaysOnTopHint);
-
         auto ok = bool();
-        auto font = dialog.getFont(&ok);
+        auto font = dialog.getFont(&ok, this->window());
 
         if (ok)
             return font.family();
