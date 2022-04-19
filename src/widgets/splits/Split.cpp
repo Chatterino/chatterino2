@@ -1010,9 +1010,7 @@ void Split::showViewerList()
                 auto label = formatListItemText(
                     QString("%1 (%2)")
                         .arg(labels.at(i))
-                        .arg(localizeNumbers(chattersObj.value(jsonLabels.at(i))
-                                                 .toArray()
-                                                 .size())));
+                        .arg(localizeNumbers(currentCategory.size())));
                 label->setForeground(this->theme->accent);
                 chattersList->addItem(label);
                 foreach (const QJsonValue &v, currentCategory)
