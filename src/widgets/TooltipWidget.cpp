@@ -82,7 +82,7 @@ void TooltipWidget::scaleChangedEvent(float)
 
 void TooltipWidget::updateFont()
 {
-    this->setFont(
+    this->displayText_->setFont(
         getFonts()->getFont(FontStyle::ChatMediumSmall, this->scale()));
 }
 
