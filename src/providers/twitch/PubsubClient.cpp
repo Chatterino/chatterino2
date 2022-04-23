@@ -65,37 +65,30 @@ void PubSubClient::close(const std::string &reason,
     }
 }
 
-std::pair<bool, QString> PubSubClient::listen(rapidjson::Document &message)
+bool PubSubClient::listen(PubSubListenMessage msg)
 {
-    int numRequestedListens = message["data"]["topics"].Size();
+    int numRequestedListens = msg.topics.size();
 
     if (this->numListens_ + numRequestedListens >
         PubSubClient::listensPerConnection)
     {
         // This PubSubClient is already at its peak listens
-        return {false, ""};
+        return false;
     }
     this->numListens_ += numRequestedListens;
     DebugCount::increase("PubSub topic pending listens", numRequestedListens);
 
-    for (const auto &topic : message["data"]["topics"].GetArray())
+    for (const auto &topic : msg.topics)
     {
-        this->listeners_.emplace_back(
-            Listener{topic.GetString(), false, false, false});
+        this->listeners_.emplace_back(Listener{topic, false, false, false});
     }
 
     qCDebug(chatterinoPubsub)
         << "Subscribing to" << numRequestedListens << "topics";
 
-    auto nonce = generateUuid();
-    rj::set(message, "nonce", nonce);
+    this->send(msg.toJson());
 
-    QString payload = rj::stringify(message);
-    // sentListens[nonce] = RequestMessage{payload, numRequestedListens};
-
-    this->send(payload.toUtf8());
-
-    return {true, nonce};
+    return true;
 }
 
 void PubSubClient::unlistenPrefix(const QString &prefix)

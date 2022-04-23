@@ -26,19 +26,7 @@ struct PubSubMessage {
     QString typeString;
     Type type;
 
-    PubSubMessage(QJsonObject _object)
-        : object(std::move(_object))
-        , nonce(this->object.value("nonce").toString())
-        , error(this->object.value("error").toString())
-        , typeString(this->object.value("type").toString())
-    {
-        auto oType =
-            magic_enum::enum_cast<Type>(this->typeString.toStdString());
-        if (oType.has_value())
-        {
-            this->type = oType.value();
-        }
-    }
+    PubSubMessage(QJsonObject _object);
 
     template <class InnerClass>
     boost::optional<InnerClass> toInner();

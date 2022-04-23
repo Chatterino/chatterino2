@@ -243,6 +243,7 @@ set(SOURCE_FILES
         providers/twitch/TwitchUser.hpp
 
         providers/twitch/pubsubmessages/AutoMod.hpp
+        providers/twitch/pubsubmessages/Base.cpp
         providers/twitch/pubsubmessages/Base.hpp
         providers/twitch/pubsubmessages/ChannelPoints.hpp
         providers/twitch/pubsubmessages/ChatModeratorAction.hpp

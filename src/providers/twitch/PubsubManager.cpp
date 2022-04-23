@@ -1,5 +1,6 @@
 #include "providers/twitch/PubsubManager.hpp"
 
+#include "common/QLogging.hpp"
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/PubsubHelpers.hpp"
@@ -9,12 +10,10 @@
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
-#include <rapidjson/error/en.h>
-
+#include <algorithm>
 #include <exception>
 #include <iostream>
 #include <thread>
-#include "common/QLogging.hpp"
 
 using websocketpp::lib::bind;
 using websocketpp::lib::placeholders::_1;
@@ -626,7 +625,7 @@ void PubSub::listenToChannelPointRewards(const QString &channelID)
     this->listenToTopic(topic);
 }
 
-void PubSub::listen(rapidjson::Document &&msg)
+void PubSub::listen(PubSubListenMessage msg)
 {
     if (this->tryListen(msg))
     {
@@ -635,20 +634,24 @@ void PubSub::listen(rapidjson::Document &&msg)
 
     this->addClient();
 
-    this->requests.emplace_back(
-        std::make_unique<rapidjson::Document>(std::move(msg)));
+    std::copy(msg.topics.begin(), msg.topics.end(),
+              std::back_inserter(this->requests));
 
     DebugCount::increase("PubSub topic backlog");
 }
 
-bool PubSub::tryListen(rapidjson::Document &msg)
+bool PubSub::tryListen(PubSubListenMessage msg)
 {
     for (const auto &p : this->clients)
     {
         const auto &client = p.second;
-        if (auto [success, nonce] = client->listen(msg); success)
+        if (auto success = client->listen(msg); success)
         {
-            this->registerNonce(nonce, {client, "LISTEN", 1});
+            this->registerNonce(msg.nonce, {
+                                               client,
+                                               "LISTEN",
+                                               msg.topics.size(),
+                                           });
             return true;
         }
     }
@@ -768,20 +771,26 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
 
     qCDebug(chatterinoPubsub) << "PubSub connection opened!";
 
-    for (auto it = this->requests.begin(); it != this->requests.end();)
+    const auto topicsToTake =
+        std::min(this->requests.size(), PubSubClient::listensPerConnection);
+
+    std::vector<QString> newTopics(
+        std::make_move_iterator(this->requests.begin()),
+        std::make_move_iterator(this->requests.begin() + topicsToTake));
+
+    this->requests.erase(this->requests.begin(),
+                         this->requests.begin() + topicsToTake);
+
+    PubSubListenMessage msg(newTopics);
+
+    if (auto success = client->listen(msg); !success)
     {
-        const auto &request = *it;
-        if (auto [success, nonce] = client->listen(*request); success)
-        {
-            DebugCount::decrease("PubSub topic backlog");
-            this->registerNonce(nonce, {client, "LISTEN", 1});
-            it = this->requests.erase(it);
-        }
-        else
-        {
-            ++it;
-        }
+        qCWarning(chatterinoPubsub) << "Failed to listen to " << topicsToTake
+                                    << "new topics on new client";
+        return;
     }
+
+    this->registerNonce(msg.nonce, {client, "LISTEN", topicsToTake});
 
     if (!this->requests.empty())
     {
@@ -1179,24 +1188,7 @@ void PubSub::runThread()
 
 void PubSub::listenToTopic(const QString &topic)
 {
-    rapidjson::Document msg(rapidjson::kObjectType);
-    auto &a = msg.GetAllocator();
-
-    rj::set(msg, "type", "LISTEN");
-
-    rapidjson::Value data(rapidjson::kObjectType);
-
-    if (!this->token_.isEmpty())
-    {
-        rj::set(data, "auth_token", this->token_, a);
-    }
-
-    rapidjson::Value topics(rapidjson::kArrayType);
-    rj::add(topics, topic, a);
-
-    rj::set(data, "topics", topics, a);
-
-    rj::set(msg, "data", data);
+    PubSubListenMessage msg({topic});
 
     this->listen(std::move(msg));
 }

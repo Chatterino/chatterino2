@@ -5,10 +5,7 @@
 #include "providers/twitch/PubsubClientOptions.hpp"
 #include "providers/twitch/PubsubMessages.hpp"
 #include "providers/twitch/PubsubWebsocket.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
 
-#include <rapidjson/document.h>
 #include <QString>
 #include <pajlada/signals/signal.hpp>
 #include <websocketpp/client.hpp>
@@ -17,13 +14,6 @@
 #include <websocketpp/logger/basic.hpp>
 
 #include <atomic>
-#include <chrono>
-#include <map>
-#include <memory>
-#include <set>
-#include <string_view>
-#include <thread>
-#include <unordered_map>
 #include <vector>
 
 namespace chatterino {
@@ -42,7 +32,7 @@ class PubSubClient : public std::enable_shared_from_this<PubSubClient>
 {
 public:
     // The max amount of topics we may listen to with a single connection
-    static constexpr int listensPerConnection = 50;
+    static constexpr std::size_t listensPerConnection = 50;
 
     PubSubClient(WebsocketClient &_websocketClient, WebsocketHandle _handle,
                  const PubSubClientOptions &clientOptions);
@@ -54,7 +44,7 @@ public:
                websocketpp::close::status::value code =
                    websocketpp::close::status::normal);
 
-    std::pair<bool, QString> listen(rapidjson::Document &message);
+    bool listen(PubSubListenMessage msg);
     void unlistenPrefix(const QString &prefix);
 
     void handleListenResponse(const PubSubMessage &message);

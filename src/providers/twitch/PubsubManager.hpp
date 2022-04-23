@@ -6,6 +6,7 @@
 #include "providers/twitch/PubsubClientOptions.hpp"
 #include "providers/twitch/PubsubWebsocket.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
+#include "util/ExponentialBackoff.hpp"
 
 #include <rapidjson/document.h>
 #include <QJsonObject>
@@ -20,7 +21,6 @@
 #include <chrono>
 #include <map>
 #include <memory>
-#include <set>
 #include <thread>
 #include <unordered_map>
 #include <vector>
@@ -120,7 +120,7 @@ public:
 
     void listenToChannelPointRewards(const QString &channelID);
 
-    std::vector<std::unique_ptr<rapidjson::Document>> requests;
+    std::vector<QString> requests;
 
     struct {
         std::atomic<uint32_t> connectionsClosed{0};
@@ -133,8 +133,8 @@ public:
     void listenToTopic(const QString &topic);
 
 private:
-    void listen(rapidjson::Document &&msg);
-    bool tryListen(rapidjson::Document &msg);
+    void listen(PubSubListenMessage msg);
+    bool tryListen(PubSubListenMessage msg);
 
     bool isListeningToTopic(const QString &topic);
 
@@ -170,7 +170,7 @@ private:
     struct NonceInfo {
         std::weak_ptr<PubSubClient> client;
         QString messageType;  // e.g. LISTEN or UNLISTEN
-        int topicCount;
+        std::size_t topicCount;
     };
 
     // Register a nonce for a specific client

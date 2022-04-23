@@ -13,6 +13,7 @@
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubsubManager.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
