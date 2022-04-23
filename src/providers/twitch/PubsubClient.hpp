@@ -32,7 +32,7 @@ class PubSubClient : public std::enable_shared_from_this<PubSubClient>
 {
 public:
     // The max amount of topics we may listen to with a single connection
-    static constexpr std::size_t listensPerConnection = 50;
+    static constexpr std::vector<QString>::size_type listensPerConnection = 50;
 
     PubSubClient(WebsocketClient &_websocketClient, WebsocketHandle _handle,
                  const PubSubClientOptions &clientOptions);
