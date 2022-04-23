@@ -434,6 +434,7 @@ HEADERS += \
     src/messages/search/LinkPredicate.hpp \
     src/messages/search/MessageFlagsPredicate.hpp \
     src/messages/search/MessagePredicate.hpp \
+    src/messages/search/RegexPredicate.hpp \
     src/messages/search/SubstringPredicate.hpp \
     src/messages/Selection.hpp \
     src/messages/SharedMessageBuilder.hpp \
@@ -466,6 +467,12 @@ HEADERS += \
     src/providers/twitch/PubsubHelpers.hpp \
     src/providers/twitch/PubsubManager.hpp \
     src/providers/twitch/PubsubMessages.hpp \
+    src/providers/twitch/pubsubmessages/AutoMod.hpp \
+    src/providers/twitch/pubsubmessages/Base.hpp \
+    src/providers/twitch/pubsubmessages/ChannelPoints.hpp \
+    src/providers/twitch/pubsubmessages/ChatModeratorAction.hpp \
+    src/providers/twitch/pubsubmessages/Message.hpp \
+    src/providers/twitch/pubsubmessages/Whisper.hpp \
     src/providers/twitch/PubsubWebsocket.hpp \
     src/providers/twitch/TwitchAccount.hpp \
     src/providers/twitch/TwitchAccountManager.hpp \

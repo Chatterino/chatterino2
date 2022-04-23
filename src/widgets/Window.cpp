@@ -285,10 +285,10 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         static bool alt = true;
         if (alt)
         {
-            auto oMessage = parsePubSubMessage(channelRewardMessage);
+            auto oMessage = parsePubSubBaseMessage(channelRewardMessage);
             auto oInnerMessage =
-                parsePubSubDataPayload<PubSubCommunityPointsChannelV1Message>(
-                    oMessage->intoMessage()->message.toUtf8());
+                oMessage->toInner<PubSubMessageMessage>()
+                    ->toInner<PubSubCommunityPointsChannelV1Message>();
 
             app->twitch->addFakeMessage(channelRewardIRCMessage);
             app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
@@ -297,10 +297,10 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         }
         else
         {
-            auto oMessage = parsePubSubMessage(channelRewardMessage2);
+            auto oMessage = parsePubSubBaseMessage(channelRewardMessage2);
             auto oInnerMessage =
-                parsePubSubDataPayload<PubSubCommunityPointsChannelV1Message>(
-                    oMessage->intoMessage()->message.toUtf8());
+                oMessage->toInner<PubSubMessageMessage>()
+                    ->toInner<PubSubCommunityPointsChannelV1Message>();
             app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
                 oInnerMessage->data.value("redemption").toObject());
             alt = !alt;

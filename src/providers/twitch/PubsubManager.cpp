@@ -695,7 +695,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
     const auto &payload =
         QString::fromStdString(websocketMessage->get_payload());
 
-    auto oMessage = parsePubSubMessage(payload);
+    auto oMessage = parsePubSubBaseMessage(payload);
 
     if (!oMessage)
     {
@@ -709,7 +709,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
 
     switch (message.type)
     {
-        case PubSubMessageType::PONG: {
+        case PubSubMessage::Type::Pong: {
             auto clientIt = this->clients.find(hdl);
 
             // If this assert goes off, there's something wrong with the connection
@@ -722,13 +722,13 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
         }
         break;
 
-        case PubSubMessageType::RESPONSE: {
+        case PubSubMessage::Type::Response: {
             this->handleResponse(message);
         }
         break;
 
-        case PubSubMessageType::MESSAGE: {
-            auto oMessageMessage = message.intoMessage();
+        case PubSubMessage::Type::Message: {
+            auto oMessageMessage = message.toInner<PubSubMessageMessage>();
             if (!oMessageMessage)
             {
                 qCDebug(chatterinoPubsub) << "Malformed MESSAGE:" << payload;
@@ -739,7 +739,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
         }
         break;
 
-        case PubSubMessageType::INVALID:
+        case PubSubMessage::Type::INVALID:
         default: {
             qCDebug(chatterinoPubsub)
                 << "Unknown message type:" << message.typeString;
@@ -941,37 +941,32 @@ void PubSub::handleUnlistenResponse(int topicCount, bool failed)
 void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 {
     QString topic = message.topic;
-    auto payloadBytes = message.message.toUtf8();
 
     if (topic.startsWith("whispers."))
     {
-        auto oInnerMessage =
-            parsePubSubDataPayload<PubSubWhisperMessage>(payloadBytes);
+        auto oInnerMessage = message.toInner<PubSubWhisperMessage>();
         if (!oInnerMessage)
         {
-            qCDebug(chatterinoPubsub)
-                << "Error parsing inner message:" << message.message;
             return;
         }
-
         auto whisperMessage = *oInnerMessage;
 
         switch (whisperMessage.type)
         {
-            case PubSubWhisperMessageType::whisper_received: {
+            case PubSubWhisperMessage::Type::WhisperReceived: {
                 this->signals_.whisper.received.invoke(whisperMessage);
             }
             break;
-            case PubSubWhisperMessageType::whisper_sent: {
+            case PubSubWhisperMessage::Type::WhisperSent: {
                 this->signals_.whisper.sent.invoke(whisperMessage);
             }
             break;
-            case PubSubWhisperMessageType::thread: {
+            case PubSubWhisperMessage::Type::Thread: {
                 // Handle thread?
             }
             break;
 
-            case PubSubWhisperMessageType::INVALID:
+            case PubSubWhisperMessage::Type::INVALID:
             default: {
                 qCDebug(chatterinoPubsub)
                     << "Invalid whisper type:" << whisperMessage.typeString;
@@ -982,12 +977,9 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
     else if (topic.startsWith("chat_moderator_actions."))
     {
         auto oInnerMessage =
-            parsePubSubDataPayload<PubSubChatModeratorActionMessage>(
-                payloadBytes);
+            message.toInner<PubSubChatModeratorActionMessage>();
         if (!oInnerMessage)
         {
-            qCDebug(chatterinoPubsub)
-                << "Error parsing inner message:" << message.message;
             return;
         }
 
@@ -1000,7 +992,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
         switch (innerMessage.type)
         {
-            case PubSubChatModeratorActionMessageType::moderation_action: {
+            case PubSubChatModeratorActionMessage::Type::ModerationAction: {
                 QString moderationAction =
                     innerMessage.data.value("moderation_action").toString();
 
@@ -1018,7 +1010,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
                 handlerIt->second(innerMessage.data, channelID);
             }
             break;
-            case PubSubChatModeratorActionMessageType::channel_terms_action: {
+            case PubSubChatModeratorActionMessage::Type::ChannelTermsAction: {
                 QString channelTermsAction =
                     innerMessage.data.value("type").toString();
 
@@ -1037,7 +1029,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
             }
             break;
 
-            case PubSubChatModeratorActionMessageType::INVALID:
+            case PubSubChatModeratorActionMessage::Type::INVALID:
             default: {
                 qCDebug(chatterinoPubsub)
                     << "Invalid whisper type:" << innerMessage.typeString;
@@ -1048,12 +1040,9 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
     else if (topic.startsWith("community-points-channel-v1."))
     {
         auto oInnerMessage =
-            parsePubSubDataPayload<PubSubCommunityPointsChannelV1Message>(
-                payloadBytes);
+            message.toInner<PubSubCommunityPointsChannelV1Message>();
         if (!oInnerMessage)
         {
-            qCDebug(chatterinoPubsub)
-                << "Error parsing inner message:" << message.message;
             return;
         }
 
@@ -1061,14 +1050,14 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
         switch (innerMessage.type)
         {
-            case PubSubCommunityPointsChannelV1MessageType::RewardRedeemed: {
+            case PubSubCommunityPointsChannelV1Message::Type::RewardRedeemed: {
                 auto redemption =
                     innerMessage.data.value("redemption").toObject();
                 this->signals_.pointReward.redeemed.invoke(redemption);
             }
             break;
 
-            case PubSubCommunityPointsChannelV1MessageType::INVALID:
+            case PubSubCommunityPointsChannelV1Message::Type::INVALID:
             default: {
                 qCDebug(chatterinoPubsub)
                     << "Invalid point event type:" << innerMessage.typeString;
@@ -1078,12 +1067,9 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
     }
     else if (topic.startsWith("automod-queue."))
     {
-        auto oInnerMessage =
-            parsePubSubDataPayload<PubSubAutomodQueueMessage>(payloadBytes);
+        auto oInnerMessage = message.toInner<PubSubAutoModQueueMessage>();
         if (!oInnerMessage)
         {
-            qCDebug(chatterinoPubsub)
-                << "Error parsing inner message:" << message.message;
             return;
         }
 
@@ -1097,7 +1083,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
         switch (innerMessage.type)
         {
-            case PubSubAutomodQueueMessageType::automod_caught_message: {
+            case PubSubAutoModQueueMessage::Type::AutoModCaughtMessage: {
                 if (innerMessage.status == "PENDING")
                 {
                     AutomodAction action(innerMessage.data, channelID);
@@ -1169,7 +1155,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
             }
             break;
 
-            case PubSubAutomodQueueMessageType::INVALID:
+            case PubSubAutoModQueueMessage::Type::INVALID:
             default: {
                 qCDebug(chatterinoPubsub) << "Unhandled automod event type:"
                                           << innerMessage.typeString;
