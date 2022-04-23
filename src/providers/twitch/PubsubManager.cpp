@@ -771,8 +771,8 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
 
     qCDebug(chatterinoPubsub) << "PubSub connection opened!";
 
-    auto clientMaxListens = PubSubClient::listensPerConnection;
-    const auto topicsToTake = std::min(this->requests.size(), clientMaxListens);
+    const auto topicsToTake =
+        (std::min)(this->requests.size(), PubSubClient::listensPerConnection);
 
     std::vector<QString> newTopics(
         std::make_move_iterator(this->requests.begin()),
