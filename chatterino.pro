@@ -221,6 +221,7 @@ SOURCES += \
     src/providers/twitch/pubsubmessages/Base.cpp \
     src/providers/twitch/pubsubmessages/ChannelPoints.cpp \
     src/providers/twitch/pubsubmessages/ChatModeratorAction.cpp \
+    src/providers/twitch/pubsubmessages/Listen.cpp \
     src/providers/twitch/pubsubmessages/Whisper.cpp \
     src/providers/twitch/TwitchAccount.cpp \
     src/providers/twitch/TwitchAccountManager.cpp \
@@ -476,6 +477,7 @@ HEADERS += \
     src/providers/twitch/pubsubmessages/Base.hpp \
     src/providers/twitch/pubsubmessages/ChannelPoints.hpp \
     src/providers/twitch/pubsubmessages/ChatModeratorAction.hpp \
+    src/providers/twitch/pubsubmessages/Listen.hpp \
     src/providers/twitch/pubsubmessages/Message.hpp \
     src/providers/twitch/pubsubmessages/Whisper.hpp \
     src/providers/twitch/PubsubWebsocket.hpp \

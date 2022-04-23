@@ -127,6 +127,8 @@ public:
         std::atomic<uint32_t> connectionsFailed{0};
         std::atomic<uint32_t> messagesReceived{0};
         std::atomic<uint32_t> messagesFailedToParse{0};
+        std::atomic<uint32_t> listenResponses{0};
+        std::atomic<uint32_t> unlistenResponses{0};
     } diag;
 
     void listenToTopic(const QString &topic);

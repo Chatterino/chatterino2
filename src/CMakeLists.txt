@@ -250,6 +250,8 @@ set(SOURCE_FILES
         providers/twitch/pubsubmessages/ChannelPoints.hpp
         providers/twitch/pubsubmessages/ChatModeratorAction.cpp
         providers/twitch/pubsubmessages/ChatModeratorAction.hpp
+        providers/twitch/pubsubmessages/Listen.cpp
+        providers/twitch/pubsubmessages/Listen.hpp
         providers/twitch/pubsubmessages/Message.hpp
         providers/twitch/pubsubmessages/Whisper.cpp
         providers/twitch/pubsubmessages/Whisper.hpp

@@ -782,6 +782,7 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
                          this->requests.begin() + topicsToTake);
 
     PubSubListenMessage msg(newTopics);
+    msg.setToken(this->token_);
 
     if (auto success = client->listen(msg); !success)
     {
@@ -923,6 +924,7 @@ void PubSub::handleResponse(const PubSubMessage &message)
 
 void PubSub::handleListenResponse(int topicCount, bool failed)
 {
+    this->diag.listenResponses++;
     DebugCount::decrease("PubSub topic pending listens", topicCount);
     if (failed)
     {
@@ -936,6 +938,7 @@ void PubSub::handleListenResponse(int topicCount, bool failed)
 
 void PubSub::handleUnlistenResponse(int topicCount, bool failed)
 {
+    this->diag.unlistenResponses++;
     DebugCount::decrease("PubSub topic pending unlistens", topicCount);
     if (failed)
     {
@@ -1189,6 +1192,7 @@ void PubSub::runThread()
 void PubSub::listenToTopic(const QString &topic)
 {
     PubSubListenMessage msg({topic});
+    msg.setToken(this->token_);
 
     this->listen(std::move(msg));
 }
