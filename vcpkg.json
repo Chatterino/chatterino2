@@ -4,6 +4,7 @@
   "version": "2.0.0",
   "dependencies": [
     "benchmark",
+    "boost-asio",
     "boost-foreach",
     "boost-interprocess",
     "boost-random",
@@ -11,9 +12,10 @@
     "gtest",
     "openssl",
     "qt5-multimedia",
-    "qtkeychain",
-    "rapidjson",
-    "websocketpp",
-    "wintoast"
+    "qt5-tools"
+  ],
+  "builtin-baseline": "2ac61f87f69f0484b8044f95ab274038fbaf7bdd",
+  "overrides": [
+    { "name": "openssl", "version-string": "1.1.1n" }
   ]
 }
