@@ -169,7 +169,7 @@ private:
     struct NonceInfo {
         std::weak_ptr<PubSubClient> client;
         QString messageType;  // e.g. LISTEN or UNLISTEN
-        std::size_t topicCount;
+        uint32_t topicCount;
     };
 
     // Register a nonce for a specific client
