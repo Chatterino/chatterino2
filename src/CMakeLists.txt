@@ -242,12 +242,16 @@ set(SOURCE_FILES
         providers/twitch/TwitchUser.cpp
         providers/twitch/TwitchUser.hpp
 
+        providers/twitch/pubsubmessages/AutoMod.cpp
         providers/twitch/pubsubmessages/AutoMod.hpp
         providers/twitch/pubsubmessages/Base.cpp
         providers/twitch/pubsubmessages/Base.hpp
+        providers/twitch/pubsubmessages/ChannelPoints.cpp
         providers/twitch/pubsubmessages/ChannelPoints.hpp
+        providers/twitch/pubsubmessages/ChatModeratorAction.cpp
         providers/twitch/pubsubmessages/ChatModeratorAction.hpp
         providers/twitch/pubsubmessages/Message.hpp
+        providers/twitch/pubsubmessages/Whisper.cpp
         providers/twitch/pubsubmessages/Whisper.hpp
 
         providers/twitch/api/Helix.cpp

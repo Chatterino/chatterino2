@@ -8,7 +8,6 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "util/ExponentialBackoff.hpp"
 
-#include <rapidjson/document.h>
 #include <QJsonObject>
 #include <QString>
 #include <pajlada/signals/signal.hpp>

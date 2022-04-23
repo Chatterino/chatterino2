@@ -217,7 +217,11 @@ SOURCES += \
     src/providers/twitch/PubsubClient.cpp \
     src/providers/twitch/PubsubHelpers.cpp \
     src/providers/twitch/PubsubManager.cpp \
+    src/providers/twitch/pubsubmessages/AutoMod.cpp \
     src/providers/twitch/pubsubmessages/Base.cpp \
+    src/providers/twitch/pubsubmessages/ChannelPoints.cpp \
+    src/providers/twitch/pubsubmessages/ChatModeratorAction.cpp \
+    src/providers/twitch/pubsubmessages/Whisper.cpp \
     src/providers/twitch/TwitchAccount.cpp \
     src/providers/twitch/TwitchAccountManager.cpp \
     src/providers/twitch/TwitchBadge.cpp \
