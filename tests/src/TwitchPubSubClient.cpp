@@ -19,7 +19,7 @@ using namespace std::chrono_literals;
  * Incoming ChatModeratorAciton message (COMPLETE)
  **/
 
-// #define RUN_PUBSUB_TESTS
+#define RUN_PUBSUB_TESTS
 
 #ifdef RUN_PUBSUB_TESTS
 
@@ -99,7 +99,7 @@ TEST(TwitchPubSubClient, ServerDoesntRespondToPings)
 
 TEST(TwitchPubSubClient, DisconnectedAfter1s)
 {
-    auto pingInterval = std::chrono::seconds(1);
+    auto pingInterval = std::chrono::seconds(10);
     const QString host("wss://127.0.0.1:9050/disconnect-client-after-1s");
 
     auto *pubSub = new PubSub(host, pingInterval);
@@ -121,7 +121,7 @@ TEST(TwitchPubSubClient, DisconnectedAfter1s)
     ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
     ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
     ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 2);
+    ASSERT_EQ(pubSub->diag.messagesReceived, 2);  // Listen RESPONSE & Pong
     ASSERT_EQ(pubSub->diag.listenResponses, 1);
 
     std::this_thread::sleep_for(350ms);
@@ -131,7 +131,7 @@ TEST(TwitchPubSubClient, DisconnectedAfter1s)
     ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
     ASSERT_EQ(pubSub->diag.messagesReceived, 2);
 
-    std::this_thread::sleep_for(350ms);
+    std::this_thread::sleep_for(600ms);
 
     ASSERT_EQ(pubSub->diag.connectionsOpened, 2);
     ASSERT_EQ(pubSub->diag.connectionsClosed, 1);

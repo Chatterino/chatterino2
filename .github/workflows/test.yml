@@ -77,6 +77,8 @@ jobs:
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
+            docker pull ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.2
+            docker run --network=host --detach ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.2
             ./bin/chatterino-test --platform minimal
         working-directory: build-test
         shell: bash
