@@ -1162,7 +1162,7 @@ const QList<QUuid> Split::getFilters() const
 
 void Split::showSearch(bool singleChannel)
 {
-    SearchPopup *popup = new SearchPopup(this);
+    auto *popup = new SearchPopup(this);
 
     popup->setChannelFilters(this->view_->getFilterSet());
     popup->setAttribute(Qt::WA_DeleteOnClose);
