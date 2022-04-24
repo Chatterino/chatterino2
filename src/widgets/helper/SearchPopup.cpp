@@ -3,11 +3,9 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QVBoxLayout>
 
 #include "common/Channel.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "messages/Message.hpp"
 #include "messages/search/AuthorPredicate.hpp"
 #include "messages/search/ChannelPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
