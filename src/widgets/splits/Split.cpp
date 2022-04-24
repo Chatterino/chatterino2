@@ -1051,8 +1051,8 @@ void Split::showViewerList()
     });
 
     auto listDoubleClick = [=](QString userName) {
-        //if the list item contains a parentheses it means that
-        //it's a category label so don't show a usercard
+        // if the list item contains a parentheses it means that
+        // it's a category label so don't show a usercard
         if (!userName.contains("(") && !userName.isEmpty())
         {
             this->view_->showUserInfoPopup(userName);
