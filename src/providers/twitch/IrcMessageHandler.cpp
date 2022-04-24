@@ -31,6 +31,7 @@ static const QSet<QString> specialMessageTypes{
     "resub",          // resub messages
     "bitsbadgetier",  // bits badge upgrade
     "ritual",         // new viewer ritual
+    "announcement",   // new mod announcement thing
 };
 
 MessagePtr generateBannedMessage(bool confirmedBan)
@@ -649,6 +650,10 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
                          kFormatNumbers(
                              tags.value("msg-param-threshold").toInt()));
         }
+        else if (msgType == "announcement")
+        {
+            messageText = "Announcement";
+        }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
                                 calculateMessageTimestamp(message));
@@ -698,6 +703,10 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
                     .arg(tags.value("display-name").toString(),
                          kFormatNumbers(
                              tags.value("msg-param-threshold").toInt()));
+        }
+        else if (msgType == "announcement")
+        {
+            messageText = "Announcement";
         }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),

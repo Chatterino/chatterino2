@@ -2,6 +2,16 @@
 
 ## Unversioned
 
+- Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
+- Minor: Adjust large stream thumbnail to 16:9 (#3655)
+- Minor: Fixed being unable to load Twitch Usercards from the `/mentions` tab. (#3623)
+- Minor: Add information about the user's operating system in the About page. (#3663)
+- Minor: Added chatter count for each category in viewer list. (#3683)
+- Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
+- Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
+- Bugfix: Fixed an issue in the emote picker where an emotes tooltip would not properly disappear. (#3686)
+- Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
+
 ## 2.3.5
 
 - Major: Added highlights for first messages (#3267)
@@ -63,6 +73,7 @@
 - Minor: Added librewolf, icecat, and waterfox incognito support. (#3588)
 - Minor: Updated to Emoji v14.0 (#3612)
 - Minor: Add support for locking tab arrangement (#3627)
+- Bugfix: Fixed rendering of moderator announcements. (#3639)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
