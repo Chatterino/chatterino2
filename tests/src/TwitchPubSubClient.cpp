@@ -97,7 +97,7 @@ TEST(TwitchPubSubClient, ServerDoesntRespondToPings)
     ASSERT_EQ(pubSub->diag.messagesReceived, 2);
 }
 
-TEST(TwitchPubSubClient, RandomDisconnect)
+TEST(TwitchPubSubClient, DisconnectedAfter1s)
 {
     auto pingInterval = std::chrono::seconds(1);
     const QString host("wss://127.0.0.1:9050/disconnect-client-after-1s");
@@ -124,20 +124,20 @@ TEST(TwitchPubSubClient, RandomDisconnect)
     ASSERT_EQ(pubSub->diag.messagesReceived, 2);
     ASSERT_EQ(pubSub->diag.listenResponses, 1);
 
-    std::this_thread::sleep_for(750ms);
+    std::this_thread::sleep_for(350ms);
 
     ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
     ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
     ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 3);
+    ASSERT_EQ(pubSub->diag.messagesReceived, 2);
 
-    std::this_thread::sleep_for(750ms);
+    std::this_thread::sleep_for(350ms);
 
     ASSERT_EQ(pubSub->diag.connectionsOpened, 2);
     ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
     ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
     ASSERT_EQ(pubSub->diag.listenResponses, 2);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 5);  // new listen & new pong
+    ASSERT_EQ(pubSub->diag.messagesReceived, 4);  // new listen & new pong
 
     pubSub->stop();
 }
@@ -158,7 +158,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
 
     for (auto i = 0; i < PubSubClient::listensPerConnection; ++i)
     {
-        pubSub->listenToTopic("test");
+        pubSub->listenToTopic(QString("test-1.%1").arg(i));
     }
 
     std::this_thread::sleep_for(50ms);
@@ -169,7 +169,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
 
     for (auto i = 0; i < PubSubClient::listensPerConnection; ++i)
     {
-        pubSub->listenToTopic("test");
+        pubSub->listenToTopic(QString("test-2.%1").arg(i));
     }
 
     std::this_thread::sleep_for(50ms);
@@ -297,6 +297,90 @@ TEST(TwitchPubSubClient, ModeratorActionsUserBanned)
     ASSERT_EQ(receivedAction.duration, 0);
     ASSERT_EQ(receivedAction.target, expectedTarget);
     ASSERT_EQ(receivedAction.source, expectedSource);
+
+    pubSub->stop();
+
+    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+}
+
+TEST(TwitchPubSubClient, MissingToken)
+{
+    auto pingInterval = std::chrono::seconds(1);
+    // The token that's required is "xD"
+    const QString host("wss://127.0.0.1:9050/authentication-required");
+
+    auto *pubSub = new PubSub(host, pingInterval);
+    // pubSub->setAccountData("", "123456");
+    pubSub->start();
+
+    pubSub->listenToTopic("chat_moderator_actions.123456.123456");
+
+    std::this_thread::sleep_for(50ms);
+
+    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub->diag.messagesReceived, 2);
+    ASSERT_EQ(pubSub->diag.listenResponses, 0);
+    ASSERT_EQ(pubSub->diag.failedListenResponses, 1);
+
+    pubSub->stop();
+
+    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+}
+
+TEST(TwitchPubSubClient, WrongToken)
+{
+    auto pingInterval = std::chrono::seconds(1);
+    // The token that's required is "xD"
+    const QString host("wss://127.0.0.1:9050/authentication-required");
+
+    auto *pubSub = new PubSub(host, pingInterval);
+    pubSub->setAccountData("wrongtoken", "123456");
+    pubSub->start();
+
+    pubSub->listenToTopic("chat_moderator_actions.123456.123456");
+
+    std::this_thread::sleep_for(50ms);
+
+    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub->diag.messagesReceived, 2);
+    ASSERT_EQ(pubSub->diag.listenResponses, 0);
+    ASSERT_EQ(pubSub->diag.failedListenResponses, 1);
+
+    pubSub->stop();
+
+    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+}
+
+TEST(TwitchPubSubClient, CorrectToken)
+{
+    auto pingInterval = std::chrono::seconds(1);
+    // The token that's required is "xD"
+    const QString host("wss://127.0.0.1:9050/authentication-required");
+
+    auto *pubSub = new PubSub(host, pingInterval);
+    pubSub->setAccountData("xD", "123456");
+    pubSub->start();
+
+    pubSub->listenToTopic("chat_moderator_actions.123456.123456");
+
+    std::this_thread::sleep_for(50ms);
+
+    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub->diag.messagesReceived, 2);
+    ASSERT_EQ(pubSub->diag.listenResponses, 1);
+    ASSERT_EQ(pubSub->diag.failedListenResponses, 0);
 
     pubSub->stop();
 

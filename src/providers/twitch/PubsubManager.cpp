@@ -924,14 +924,15 @@ void PubSub::handleResponse(const PubSubMessage &message)
 
 void PubSub::handleListenResponse(int topicCount, bool failed)
 {
-    this->diag.listenResponses++;
     DebugCount::decrease("PubSub topic pending listens", topicCount);
     if (failed)
     {
+        this->diag.failedListenResponses++;
         DebugCount::increase("PubSub topic failed listens", topicCount);
     }
     else
     {
+        this->diag.listenResponses++;
         DebugCount::increase("PubSub topic listening", topicCount);
     }
 }

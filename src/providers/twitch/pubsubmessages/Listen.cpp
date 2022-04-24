@@ -21,11 +21,6 @@ QByteArray PubSubListenMessage::toJson() const
 
     root["nonce"] = this->nonce;
 
-    if (!this->token.isEmpty())
-    {
-        root["auth_token"] = this->token;
-    }
-
     {
         QJsonObject data;
 
@@ -35,6 +30,11 @@ QByteArray PubSubListenMessage::toJson() const
                   std::back_inserter(jsonTopics));
 
         data["topics"] = jsonTopics;
+
+        if (!this->token.isEmpty())
+        {
+            data["auth_token"] = this->token;
+        }
 
         root["data"] = data;
     }
