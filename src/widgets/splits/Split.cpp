@@ -273,7 +273,7 @@ void Split::addShortcuts()
          }},
         {"showSearch",
          [this](std::vector<QString>) -> QString {
-             this->showSearch();
+             this->showSearch(true);
              return "";
          }},
         {"reconnect",
