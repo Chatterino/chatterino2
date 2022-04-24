@@ -9,6 +9,7 @@
 - Minor: Added chatter count for each category in viewer list. (#3683)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
+- Bugfix: Fixed an issue in the emote picker where an emotes tooltip would not properly disappear. (#3686)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 
 ## 2.3.5
