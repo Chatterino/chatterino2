@@ -1163,10 +1163,26 @@ const QList<QUuid> Split::getFilters() const
 void Split::showSearch(bool singleChannel)
 {
     auto *popup = new SearchPopup(this);
-
-    popup->setChannelFilters(this->view_->getFilterSet());
     popup->setAttribute(Qt::WA_DeleteOnClose);
-    popup->setChannel(this->getChannel());
+
+    if (singleChannel)
+    {
+        popup->addChannel(this->getChannelView());
+        popup->show();
+        return;
+    }
+
+    // Pass every ChannelView for every Split across the app to the search popup
+    auto &notebook = getApp()->windows->getMainWindow().getNotebook();
+    for (int i = 0; i < notebook.getPageCount(); ++i)
+    {
+        auto container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
+        for (auto split : container->getSplits())
+        {
+            popup->addChannel(split->getChannelView());
+        }
+    }
+
     popup->show();
 }
 

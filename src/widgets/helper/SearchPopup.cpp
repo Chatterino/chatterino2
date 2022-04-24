@@ -93,12 +93,13 @@ void SearchPopup::setChannelFilters(FilterSetPtr filters)
     this->channelFilters_ = std::move(filters);
 }
 
-void SearchPopup::setChannel(const ChannelPtr &channel)
+void SearchPopup::addChannel(const ChannelView &channel)
 {
-    this->channelView_->setSourceChannel(channel);
-    this->channelName_ = channel->getName();
-    this->snapshot_ = channel->getMessageSnapshot();
-    this->search();
+    // TODO: properly implement
+    this->channelView_->setSourceChannel(channel.sourceChannel());
+    this->channelName_ = this->channelView_->channel()->getName();
+    //    this->snapshot_ = channel->getMessageSnapshot();
+    //    this->search();
 
     this->updateWindowTitle();
 }
