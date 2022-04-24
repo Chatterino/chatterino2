@@ -18,7 +18,6 @@ public:
     SearchPopup(QWidget *parent);
 
     virtual void addChannel(const ChannelView &channel);
-    virtual void setChannelFilters(FilterSetPtr filters);
 
 protected:
     virtual void updateWindowTitle();

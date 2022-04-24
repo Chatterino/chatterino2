@@ -16,6 +16,7 @@
 
 namespace chatterino {
 
+// TODO: pass in predicates instead of text so we can iterate the channel list calling this method
 ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
                                const LimitedQueueSnapshot<MessagePtr> &snapshot,
                                FilterSetPtr filterSet)
@@ -84,11 +85,6 @@ void SearchPopup::addShortcuts()
 
     this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
-}
-
-void SearchPopup::setChannelFilters(FilterSetPtr filters)
-{
-    this->channelFilters_ = std::move(filters);
 }
 
 void SearchPopup::addChannel(const ChannelView &channel)
