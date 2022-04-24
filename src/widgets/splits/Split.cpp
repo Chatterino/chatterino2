@@ -1155,7 +1155,7 @@ const QList<QUuid> Split::getFilters() const
     return this->view_->getFilterIds();
 }
 
-void Split::showSearch()
+void Split::showSearch(bool singleChannel)
 {
     SearchPopup *popup = new SearchPopup(this);
 
