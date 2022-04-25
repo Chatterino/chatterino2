@@ -89,11 +89,20 @@ void SearchPopup::addShortcuts()
 
 void SearchPopup::addChannel(ChannelView &channel)
 {
-    // TODO: properly implement
-    this->channelView_->setSourceChannel(channel.sourceChannel());
-    this->channelName_ = this->channelView_->channel()->getName();
-    //    this->snapshot_ = channel->getMessageSnapshot();
-    //    this->search();
+    // TODO: user info card popups pajaW
+
+    if (this->searchChannels_.empty())
+    {
+        this->channelView_->setSourceChannel(channel.channel());
+        this->channelName_ = channel.channel()->getName();
+    }
+    else if (this->searchChannels_.size() == 1)
+    {
+        this->channelView_->setSourceChannel(
+            std::make_shared<Channel>("multichannel", Channel::Type::None));
+    }
+
+    this->searchChannels_.append(std::ref(channel));
 
     this->updateWindowTitle();
 }

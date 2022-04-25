@@ -59,6 +59,7 @@ private:
     ChannelView *channelView_{};
     QString channelName_{};
     FilterSetPtr channelFilters_;
+    QList<std::reference_wrapper<ChannelView>> searchChannels_;
 };
 
 }  // namespace chatterino
