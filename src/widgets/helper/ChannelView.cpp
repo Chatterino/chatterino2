@@ -1240,6 +1240,8 @@ void ChannelView::enterEvent(QEvent *)
 
 void ChannelView::leaveEvent(QEvent *)
 {
+    TooltipWidget::instance()->hide();
+
     this->unpause(PauseReason::Mouse);
 
     this->queueLayout();

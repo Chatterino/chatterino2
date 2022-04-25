@@ -983,13 +983,6 @@ void Split::showViewerList()
     static QStringList jsonLabels = {"broadcaster", "moderators", "vips",
                                      "staff",       "admins",     "global_mods",
                                      "viewers"};
-    QList<QListWidgetItem *> labelList;
-    for (auto &x : labels)
-    {
-        auto label = formatListItemText(x);
-        label->setForeground(this->theme->accent);
-        labelList.append(label);
-    }
     auto loadingLabel = new QLabel("Loading...");
 
     NetworkRequest::twitchRequest("https://tmi.twitch.tv/group/user/" +
@@ -1014,7 +1007,10 @@ void Split::showViewerList()
                 if (currentCategory.empty())
                     continue;
 
-                chattersList->addItem(labelList.at(i));
+                auto label = formatListItemText(QString("%1 (%2)").arg(
+                    labels.at(i), localizeNumbers(currentCategory.size())));
+                label->setForeground(this->theme->accent);
+                chattersList->addItem(label);
                 foreach (const QJsonValue &v, currentCategory)
                 {
                     chattersList->addItem(formatListItemText(v.toString()));
@@ -1055,7 +1051,9 @@ void Split::showViewerList()
     });
 
     auto listDoubleClick = [=](QString userName) {
-        if (!labels.contains(userName) && !userName.isEmpty())
+        // if the list item contains a parentheses it means that
+        // it's a category label so don't show a usercard
+        if (!userName.contains("(") && !userName.isEmpty())
         {
             this->view_->showUserInfoPopup(userName);
         }
