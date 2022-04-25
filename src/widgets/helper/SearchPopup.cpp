@@ -121,6 +121,11 @@ void SearchPopup::updateWindowTitle()
     this->setWindowTitle("Searching in " + historyName + " history");
 }
 
+void SearchPopup::showEvent(QShowEvent*)
+{
+    this->search();
+}
+
 void SearchPopup::search()
 {
     this->channelView_->setChannel(filter(this->searchInput_->text(),

@@ -21,6 +21,7 @@ public:
 
 protected:
     virtual void updateWindowTitle();
+    void showEvent(QShowEvent *event) override;
 
 private:
     void initLayout();
