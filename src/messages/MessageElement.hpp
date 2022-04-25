@@ -315,6 +315,7 @@ public:
                         MessageElementFlags flags) override;
 
     TextElement *formatTime(const QTime &time);
+    QTime getTime();
 
 private:
     QTime time_;
