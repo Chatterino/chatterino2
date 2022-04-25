@@ -27,6 +27,7 @@ private:
     void initLayout();
     void search();
     void addShortcuts() override;
+    LimitedQueueSnapshot<MessagePtr> buildSnapshot();
 
     /**
      * @brief Only retains those message from a list of messages that satisfy a

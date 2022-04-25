@@ -142,6 +142,87 @@ void SearchPopup::search()
                                           this->channelFilters_));
 }
 
+LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
+{
+    // no point in filtering/sorting if it's a single channel search
+    if (this->searchChannels_.length() == 1)
+    {
+        const auto channelPtr = this->searchChannels_.at(0);
+        return channelPtr.get().channel()->getMessageSnapshot();
+    }
+
+    auto combinedSnapshot = std::vector<std::shared_ptr<const Message>>{};
+    for (auto &channel : this->searchChannels_)
+    {
+        const LimitedQueueSnapshot<MessagePtr> &snapshot =
+            channel.get().channel()->getMessageSnapshot();
+
+        // TODO: implement iterator on LimitedQueueSnapshot?
+        for (auto i = 0; i < snapshot.size(); ++i)
+        {
+            combinedSnapshot.push_back(snapshot[i]);
+        }
+    }
+
+    // remove any duplicate messages from splits containing the same channel
+    std::sort(combinedSnapshot.begin(), combinedSnapshot.end(),
+              [] (MessagePtr &a, MessagePtr &b) {
+                  return a->id > b->id;
+              });
+
+    auto uniqueIterator =
+        std::unique(combinedSnapshot.begin(), combinedSnapshot.end(),
+                    [] (MessagePtr &a, MessagePtr &b) {
+                        return a->id == b->id;
+                    });
+
+    combinedSnapshot.erase(uniqueIterator, combinedSnapshot.end());
+
+    // resort by time for presentation
+    std::sort(combinedSnapshot.begin(), combinedSnapshot.end(),
+              [] (MessagePtr &a, MessagePtr &b) {
+                  QTime messageTimeA;
+                  QTime messageTimeB;
+
+                  auto maxSize = std::max(a->elements.size(), b->elements.size());
+                  for (int i = 0; i < maxSize; ++i)
+                  {
+                      // FIXME: there's gotta be a better way to do this
+                      if (messageTimeA.isNull())
+                      {
+                          if (auto timestamp =
+                                  dynamic_cast<TimestampElement *>(
+                                      a->elements.at(i).get()))
+                          {
+                              messageTimeA = timestamp->getTime();
+                          }
+                      }
+
+                      if (messageTimeB.isNull())
+                      {
+                          if (auto timestamp =
+                              dynamic_cast<TimestampElement *>(
+                                  b->elements.at(i).get()))
+                          {
+                              messageTimeB = timestamp->getTime();
+                          }
+                      }
+
+                      if (!messageTimeA.isNull() && !messageTimeB.isNull())
+                      {
+                          break;
+                      }
+                  }
+
+                  return messageTimeA < messageTimeB;
+              });
+
+    auto queue = LimitedQueue<MessagePtr>(combinedSnapshot.size());
+    queue.pushFront(combinedSnapshot);
+
+    return queue.getSnapshot();
+}
+
 void SearchPopup::initLayout()
 {
     // VBOX
