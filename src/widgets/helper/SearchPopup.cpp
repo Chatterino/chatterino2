@@ -119,6 +119,10 @@ void SearchPopup::updateWindowTitle()
     {
         historyName = "mentions";
     }
+    else if (this->searchChannels_.size() > 1)
+    {
+        historyName = "multiple channels'";
+    }
     else if (this->channelName_.isEmpty())
     {
         historyName = "<empty>'s";
