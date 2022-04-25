@@ -137,6 +137,12 @@ void SearchPopup::showEvent(QShowEvent*)
 
 void SearchPopup::search()
 {
+    if (snapshot_.size() == 0)
+    {
+        this->snapshot_ = this->buildSnapshot();
+    }
+
+    // TODO: pass filters for each channel, shit
     this->channelView_->setChannel(filter(this->searchInput_->text(),
                                           this->channelName_, this->snapshot_,
                                           this->channelFilters_));
