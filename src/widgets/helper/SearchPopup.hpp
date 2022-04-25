@@ -17,7 +17,7 @@ class SearchPopup : public BasePopup
 public:
     SearchPopup(QWidget *parent);
 
-    virtual void addChannel(const ChannelView &channel);
+    virtual void addChannel(ChannelView &channel);
 
 protected:
     virtual void updateWindowTitle();

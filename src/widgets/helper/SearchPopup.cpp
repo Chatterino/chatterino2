@@ -87,7 +87,7 @@ void SearchPopup::addShortcuts()
         HotkeyCategory::PopupWindow, actions, this);
 }
 
-void SearchPopup::addChannel(const ChannelView &channel)
+void SearchPopup::addChannel(ChannelView &channel)
 {
     // TODO: properly implement
     this->channelView_->setSourceChannel(channel.sourceChannel());
