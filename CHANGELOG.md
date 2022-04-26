@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Added multi-channel searching to search dialog via keyboard shortcut. (#3694)
 - Minor: Added `is:first-msg` search option. (#3700)
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
 - Minor: Adjust large stream thumbnail to 16:9 (#3655)
