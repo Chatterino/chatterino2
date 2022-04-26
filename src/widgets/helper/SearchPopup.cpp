@@ -96,6 +96,10 @@ void SearchPopup::addChannel(ChannelView &channel)
     {
         this->channelView_->setSourceChannel(
             std::make_shared<Channel>("multichannel", Channel::Type::None));
+
+        auto flags = this->channelView_->getFlags();
+        flags.set(MessageElementFlag::ChannelName);
+        this->channelView_->setOverrideFlags(flags);
     }
 
     this->searchChannels_.append(std::ref(channel));
