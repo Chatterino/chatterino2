@@ -192,40 +192,7 @@ LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
     // resort by time for presentation
     std::sort(combinedSnapshot.begin(), combinedSnapshot.end(),
               [] (MessagePtr &a, MessagePtr &b) {
-                  QTime messageTimeA;
-                  QTime messageTimeB;
-
-                  auto maxSize = std::max(a->elements.size(), b->elements.size());
-                  for (int i = 0; i < maxSize; ++i)
-                  {
-                      // FIXME: there's gotta be a better way to do this
-                      if (messageTimeA.isNull())
-                      {
-                          if (auto timestamp =
-                                  dynamic_cast<TimestampElement *>(
-                                      a->elements.at(i).get()))
-                          {
-                              messageTimeA = timestamp->getTime();
-                          }
-                      }
-
-                      if (messageTimeB.isNull())
-                      {
-                          if (auto timestamp =
-                              dynamic_cast<TimestampElement *>(
-                                  b->elements.at(i).get()))
-                          {
-                              messageTimeB = timestamp->getTime();
-                          }
-                      }
-
-                      if (!messageTimeA.isNull() && !messageTimeB.isNull())
-                      {
-                          break;
-                      }
-                  }
-
-                  return messageTimeA < messageTimeB;
+                  return a->receivedTime < b->receivedTime;
               });
 
     auto queue = LimitedQueue<MessagePtr>(combinedSnapshot.size());
