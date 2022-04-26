@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QMovie>
+
+#include "singletons/Paths.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
@@ -11,6 +14,10 @@
 class QCheckBox;
 
 namespace chatterino {
+
+inline static const QString SEVENTV_USER_API =
+    "https://api.7tv.app/v2/users/%1";
+inline static const QString SEVENTV_CDR_PP = "https://cdn.7tv.app/pp/%1/%2";
 
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
@@ -39,7 +46,12 @@ private:
     void updateUserData();
     void updateLatestMessages();
 
-    void loadAvatar(const QUrl &url);
+    void loadAvatar(const HelixUser &user);
+    void fetchSevenTVAvatar(const HelixUser &user);
+    void setSevenTVAvatar(const QString &filename);
+    void saveCacheAvatar(const QByteArray &avatar, const QString &filename);
+    QString getFilename(const QString &url);
+
     bool isMod_;
     bool isBroadcaster_;
 

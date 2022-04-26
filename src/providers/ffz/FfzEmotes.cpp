@@ -33,7 +33,7 @@ namespace {
     {
         auto url1x = getEmoteLink(urls, "1");
         auto url2x = getEmoteLink(urls, "2");
-        auto url3x = getEmoteLink(urls, "4");
+        auto url4x = getEmoteLink(urls, "4");
 
         //, code, tooltip
         emoteData.name = name;
@@ -41,8 +41,8 @@ namespace {
             ImageSet{Image::fromUrl(url1x, 1),
                      url2x.string.isEmpty() ? Image::getEmpty()
                                             : Image::fromUrl(url2x, 0.5),
-                     url3x.string.isEmpty() ? Image::getEmpty()
-                                            : Image::fromUrl(url3x, 0.25)};
+                     url4x.string.isEmpty() ? Image::getEmpty()
+                                            : Image::fromUrl(url4x, 0.250)};
         emoteData.tooltip = {tooltip};
     }
     EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)

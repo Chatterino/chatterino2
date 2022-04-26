@@ -1,6 +1,6 @@
 # Building on macOS
 
-#### Note - If you want to develop Chatterino 2 you might also want to install Qt Creator (make sure to install **Qt 5.12 or newer**), it is not required though and any C++ IDE (might require additional setup for cmake to find Qt libraries) or a normal text editor + running qmake/cmake from terminal should work as well
+#### Note - If you want to develop Chatterino 2 you might also want to install Qt Creator (make sure to install **Qt 5.15 or newer**), it is not required though and any C++ IDE (might require additional setup for cmake to find Qt libraries) or a normal text editor + running qmake/cmake from terminal should work as well
 
 #### Note - Chatterino 2 is only tested on macOS 10.14 and above - anything below that is considered unsupported. It may or may not work on earlier versions
 

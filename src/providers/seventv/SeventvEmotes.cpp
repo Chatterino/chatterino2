@@ -62,11 +62,27 @@ namespace {
         bool zeroWidth =
             visibilityFlags.has(SeventvEmoteVisibilityFlag::ZeroWidth);
 
+        auto heightArr = jsonEmote.toObject().value("height").toArray();
+        auto size2x = heightArr.at(1).toDouble();
+        auto size3x = heightArr.at(2).toDouble();
+        auto size4x = heightArr.at(3).toDouble();
+        if (heightArr.size() != 4 || size2x <= 48)
+        {
+            size2x = 0.66;
+            size3x = 0.42;
+        }
+        else
+        {
+            size2x = 0.5;
+            size3x = 0.33;
+        }
+
         auto emote = Emote(
             {name,
              ImageSet{Image::fromUrl(getEmoteLink(id, "1x"), 1),
-                      Image::fromUrl(getEmoteLink(id, "2x"), 0.66),
-                      Image::fromUrl(getEmoteLink(id, "3x"), 0.33)},
+                      Image::fromUrl(getEmoteLink(id, "2x"), size2x),
+                      Image::fromUrl(getEmoteLink(id, "3x"), size3x),
+                      Image::fromUrl(getEmoteLink(id, "4x"), 0.25)},
              Tooltip{QString("%1<br>%2 7TV Emote<br>By: %3")
                          .arg(name.string, (isGlobal ? "Global" : "Channel"),
                               author.string)},
@@ -81,6 +97,7 @@ namespace {
     {
         auto emotes = EmoteMap();
 
+        // We always show all global emotes, no need to check visibility here
         for (const auto &jsonEmote : jsonEmotes)
         {
             auto emote = createEmote(jsonEmote, true);
@@ -101,8 +118,17 @@ namespace {
         {
             auto jsonEmote = jsonEmote_.toObject();
 
-            auto emote = createEmote(jsonEmote, false);
+            // Check our visibility of this emote, don't display if unlisted
+            int64_t visibility = jsonEmote.value("visibility").toInt();
+            auto visibilityFlags = SeventvEmoteVisibilityFlags(
+                SeventvEmoteVisibilityFlag(visibility));
+            if (!getSettings()->showUnlistedEmotes &&
+                visibilityFlags.has(SeventvEmoteVisibilityFlag::Unlisted))
+            {
+                continue;
+            }
 
+            auto emote = createEmote(jsonEmote, false);
             emotes[emote.name] = cachedOrMake(std::move(emote.emote), emote.id);
         }
 
@@ -149,6 +175,7 @@ void SeventvEmotes::loadEmotes()
             provider_id
             visibility
             mime
+            height
             owner {
                 id
                 display_name
@@ -209,6 +236,7 @@ void SeventvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                     provider_id
                     visibility
                     mime
+                    height
                     owner {
                         id
                         display_name

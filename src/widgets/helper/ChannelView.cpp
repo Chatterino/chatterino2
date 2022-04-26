@@ -92,6 +92,7 @@ namespace {
         addImageLink(emote.images.getImage1(), '1');
         addImageLink(emote.images.getImage2(), '2');
         addImageLink(emote.images.getImage3(), '3');
+        addImageLink(emote.images.getImage4(), '4');
 
         // Copy and open emote page link
         auto addPageLink = [&](const QString &name) {
@@ -1469,12 +1470,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                 if (emoteElement)
                 {
                     tooltipPreviewImage.setImage(
-                        emoteElement->getEmote()->images.getImage(3.0));
+                        emoteElement->getEmote()->images.getImage(4.0));
                 }
                 else if (badgeElement)
                 {
                     tooltipPreviewImage.setImage(
-                        badgeElement->getEmote()->images.getImage(3.0));
+                        badgeElement->getEmote()->images.getImage(4.0));
                 }
             }
             else

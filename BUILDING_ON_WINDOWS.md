@@ -58,7 +58,7 @@ Note: This installation will take about 200 MB of disk space.
 
 Notes:
 
-- Installing the latest **stable** Qt version is advised for new installations, but if you want to use your existing installation please ensure you are running **Qt 5.12 or later**.
+- Installing the latest **stable** Qt version is advised for new installations, but if you want to use your existing installation please ensure you are running **Qt 5.15 or later**.
 
 ### When prompted which components to install:
 
