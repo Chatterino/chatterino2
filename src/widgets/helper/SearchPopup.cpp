@@ -96,6 +96,7 @@ void SearchPopup::addChannel(ChannelView &channel)
 
         auto flags = this->channelView_->getFlags();
         flags.set(MessageElementFlag::ChannelName);
+        flags.unset(MessageElementFlag::ModeratorTools);
         this->channelView_->setOverrideFlags(flags);
     }
 
