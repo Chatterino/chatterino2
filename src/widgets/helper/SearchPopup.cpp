@@ -232,13 +232,13 @@ void SearchPopup::initLayout()
 {
     // VBOX
     {
-        QVBoxLayout *layout1 = new QVBoxLayout(this);
+        auto *layout1 = new QVBoxLayout(this);
         layout1->setMargin(0);
         layout1->setSpacing(0);
 
         // HBOX
         {
-            QHBoxLayout *layout2 = new QHBoxLayout(this);
+            auto *layout2 = new QHBoxLayout(this);
             layout2->setMargin(8);
             layout2->setSpacing(8);
 
