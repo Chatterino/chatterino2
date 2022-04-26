@@ -131,7 +131,7 @@ void SearchPopup::updateWindowTitle()
     this->setWindowTitle("Searching in " + historyName + " history");
 }
 
-void SearchPopup::showEvent(QShowEvent*)
+void SearchPopup::showEvent(QShowEvent *)
 {
     this->search();
 }
@@ -178,13 +178,13 @@ LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
 
     // remove any duplicate messages from splits containing the same channel
     std::sort(combinedSnapshot.begin(), combinedSnapshot.end(),
-              [] (MessagePtr &a, MessagePtr &b) {
+              [](MessagePtr &a, MessagePtr &b) {
                   return a->id > b->id;
               });
 
     auto uniqueIterator =
         std::unique(combinedSnapshot.begin(), combinedSnapshot.end(),
-                    [] (MessagePtr &a, MessagePtr &b) {
+                    [](MessagePtr &a, MessagePtr &b) {
                         return a->id == b->id;
                     });
 
@@ -192,7 +192,7 @@ LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
 
     // resort by time for presentation
     std::sort(combinedSnapshot.begin(), combinedSnapshot.end(),
-              [] (MessagePtr &a, MessagePtr &b) {
+              [](MessagePtr &a, MessagePtr &b) {
                   return a->receivedTime < b->receivedTime;
               });
 
