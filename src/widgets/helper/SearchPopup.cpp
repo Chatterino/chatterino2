@@ -18,8 +18,7 @@ namespace chatterino {
 
 // TODO: pass in predicates instead of text so we can iterate the channel list calling this method
 ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
-                               const LimitedQueueSnapshot<MessagePtr> &snapshot,
-                               FilterSetPtr filterSet)
+                               const LimitedQueueSnapshot<MessagePtr> &snapshot)
 {
     ChannelPtr channel(new Channel(channelName, Channel::Type::None));
 
@@ -42,9 +41,6 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
                 break;
             }
         }
-
-        if (accept && filterSet)
-            accept = filterSet->filter(message, channel);
 
         // If all predicates match, add the message to the channel
         if (accept)
@@ -148,8 +144,7 @@ void SearchPopup::search()
 
     // TODO: pass filters for each channel, shit
     this->channelView_->setChannel(filter(this->searchInput_->text(),
-                                          this->channelName_, this->snapshot_,
-                                          this->channelFilters_));
+                                          this->channelName_, this->snapshot_));
 }
 
 LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()

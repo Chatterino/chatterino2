@@ -42,8 +42,7 @@ private:
      *         "snapshot"
      */
     static ChannelPtr filter(const QString &text, const QString &channelName,
-                             const LimitedQueueSnapshot<MessagePtr> &snapshot,
-                             FilterSetPtr filterSet);
+                             const LimitedQueueSnapshot<MessagePtr> &snapshot);
 
     /**
      * @brief Checks the input for tags and registers their corresponding
@@ -59,7 +58,6 @@ private:
     QLineEdit *searchInput_{};
     ChannelView *channelView_{};
     QString channelName_{};
-    FilterSetPtr channelFilters_;
     QList<std::reference_wrapper<ChannelView>> searchChannels_;
 };
 
