@@ -187,8 +187,9 @@ MessagePtr TwitchMessageBuilder::build()
     }
 
     // timestamp
+    this->message().receivedTime = calculateMessageTime(this->ircMessage);
     this->emplace<TimestampElement>(
-        calculateMessageTimestamp(this->ircMessage));
+        calculateMessageTimestamp(this->message().receivedTime));
 
     if (this->shouldAddModerationElements())
     {

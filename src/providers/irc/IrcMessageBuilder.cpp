@@ -58,8 +58,9 @@ MessagePtr IrcMessageBuilder::build()
     // PUSH ELEMENTS
     this->appendChannelName();
 
+    this->message().receivedTime = calculateMessageTime(this->ircMessage);
     this->emplace<TimestampElement>(
-        calculateMessageTimestamp(this->ircMessage));
+        calculateMessageTimestamp(this->message().receivedTime));
 
     this->appendUsername();
 
