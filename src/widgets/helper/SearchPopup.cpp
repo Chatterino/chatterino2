@@ -159,13 +159,20 @@ LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
     auto combinedSnapshot = std::vector<std::shared_ptr<const Message>>{};
     for (auto &channel : this->searchChannels_)
     {
+        ChannelView &sharedView = channel.get();
+
+        const FilterSetPtr filterSet = sharedView.getFilterSet();
         const LimitedQueueSnapshot<MessagePtr> &snapshot =
-            channel.get().channel()->getMessageSnapshot();
+            sharedView.channel()->getMessageSnapshot();
 
         // TODO: implement iterator on LimitedQueueSnapshot?
         for (auto i = 0; i < snapshot.size(); ++i)
         {
-            combinedSnapshot.push_back(snapshot[i]);
+            const MessagePtr &message = snapshot[i];
+            if (filterSet->filter(message, sharedView.channel()))
+            {
+                combinedSnapshot.push_back(message);
+            }
         }
     }
 
