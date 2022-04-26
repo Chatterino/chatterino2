@@ -429,10 +429,6 @@ TextElement *TimestampElement::formatTime(const QTime &time)
                            MessageColor::System, FontStyle::ChatMedium);
 }
 
-QTime TimestampElement::getTime() {
-    return this->time_;
-}
-
 // TWITCH MODERATION
 TwitchModerationElement::TwitchModerationElement()
     : MessageElement(MessageElementFlag::ModeratorTools)
