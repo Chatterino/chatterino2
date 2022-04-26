@@ -66,13 +66,13 @@ void SearchPopup::addShortcuts()
 {
     HotkeyController::HotkeyMap actions{
         {"search",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->searchInput_->setFocus();
              this->searchInput_->selectAll();
              return "";
          }},
         {"delete",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->close();
              return "";
          }},
