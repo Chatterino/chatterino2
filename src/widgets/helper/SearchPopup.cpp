@@ -16,7 +16,6 @@
 
 namespace chatterino {
 
-// TODO: pass in predicates instead of text so we can iterate the channel list calling this method
 ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
                                const LimitedQueueSnapshot<MessagePtr> &snapshot)
 {
@@ -85,8 +84,6 @@ void SearchPopup::addShortcuts()
 
 void SearchPopup::addChannel(ChannelView &channel)
 {
-    // TODO: user info card popups pajaW
-
     if (this->searchChannels_.empty())
     {
         this->channelView_->setSourceChannel(channel.channel());
