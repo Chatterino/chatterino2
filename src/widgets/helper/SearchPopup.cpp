@@ -142,7 +142,6 @@ void SearchPopup::search()
         this->snapshot_ = this->buildSnapshot();
     }
 
-    // TODO: pass filters for each channel, shit
     this->channelView_->setChannel(filter(this->searchInput_->text(),
                                           this->channelName_, this->snapshot_));
 }
