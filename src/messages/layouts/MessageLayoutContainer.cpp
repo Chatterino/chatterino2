@@ -176,10 +176,15 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         this->currentX_ -= this->spaceWidth_;
     }
 
-    // set move element
-    element->setPosition(
-        QPoint(this->currentX_ + xOffset,
-               this->currentY_ - element->getRect().height() + yOffset));
+    int yPaintPos = element->getRect().height();
+    if (element->getCreator().isVCentered())
+    {
+        yPaintPos = (this->lineHeight_ / 2) + (element->getRect().height() / 2);
+    }
+
+    // set paint position
+    element->setPosition(QPoint(this->currentX_ + xOffset,
+                                this->currentY_ - yPaintPos + yOffset));
 
     element->setLine(this->line_);
 

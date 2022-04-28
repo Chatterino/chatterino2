@@ -154,12 +154,14 @@ public:
     MessageElement *setThumbnail(const ImagePtr &thumbnail);
 
     MessageElement *setTrailingSpace(bool value);
+    MessageElement *setVCentered(bool value);
     const QString &getTooltip() const;
     const ImagePtr &getThumbnail() const;
     const ThumbnailType &getThumbnailType() const;
 
     const Link &getLink() const;
     bool hasTrailingSpace() const;
+    bool isVCentered() const;
     MessageElementFlags getFlags() const;
     MessageElement *updateLink();
 
@@ -171,6 +173,7 @@ public:
 protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
+    bool vCentered = false;
 
 private:
     QString text_;
