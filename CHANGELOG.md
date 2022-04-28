@@ -7,6 +7,7 @@
 - Minor: Fixed being unable to load Twitch Usercards from the `/mentions` tab. (#3623)
 - Minor: Add information about the user's operating system in the About page. (#3663)
 - Minor: Added chatter count for each category in viewer list. (#3683)
+- Minor: Badges will now appear vertically centered. (#3697)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
 - Bugfix: Fixed an issue in the emote picker where an emotes tooltip would not properly disappear. (#3686)
