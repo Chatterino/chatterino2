@@ -11,7 +11,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
-#include "providers/twitch/PubsubManager.hpp"
+#include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -163,17 +163,17 @@ TwitchChannel::TwitchChannel(const QString &name)
     this->bSignals_.emplace_back(
         getApp()->accounts->twitch.currentUserChanged.connect([=] {
             this->setMod(false);
-            this->refreshPubsub();
+            this->refreshPubSub();
         }));
 
-    this->refreshPubsub();
+    this->refreshPubSub();
     this->userStateChanged.connect([this] {
-        this->refreshPubsub();
+        this->refreshPubSub();
     });
 
     // room id loaded -> refresh live status
     this->roomIdChanged.connect([this]() {
-        this->refreshPubsub();
+        this->refreshPubSub();
         this->refreshTitle();
         this->refreshLiveStatus();
         this->refreshBadges();
@@ -839,7 +839,7 @@ void TwitchChannel::loadRecentMessages()
         .execute();
 }
 
-void TwitchChannel::refreshPubsub()
+void TwitchChannel::refreshPubSub()
 {
     auto roomId = this->roomId();
     if (roomId.isEmpty())

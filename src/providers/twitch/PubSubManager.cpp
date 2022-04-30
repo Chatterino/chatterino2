@@ -1,10 +1,9 @@
-#include "providers/twitch/PubsubManager.hpp"
+#include "providers/twitch/PubSubManager.hpp"
 
 #include "common/QLogging.hpp"
-#include "providers/twitch/PubsubActions.hpp"
-#include "providers/twitch/PubsubClient.hpp"
-#include "providers/twitch/PubsubHelpers.hpp"
-#include "providers/twitch/PubsubMessages.hpp"
+#include "providers/twitch/PubSubActions.hpp"
+#include "providers/twitch/PubSubHelpers.hpp"
+#include "providers/twitch/PubSubMessages.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
@@ -27,7 +26,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
           pingInterval,
       })
 {
-    qCDebug(chatterinoPubsub) << "init PubSub";
+    qCDebug(chatterinoPubSub) << "init PubSub";
 
     this->moderationActionHandlers["clear"] = [this](const auto &data,
                                                      const auto &roomID) {
@@ -57,7 +56,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
 
         if (args.empty())
         {
-            qCDebug(chatterinoPubsub)
+            qCDebug(chatterinoPubSub)
                 << "Missing duration argument in slowmode on";
             return;
         }
@@ -448,13 +447,13 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
     this->moderationActionHandlers["denied_automod_message"] =
         [](const auto &data, const auto &roomID) {
             // This message got denied by a moderator
-            // qCDebug(chatterinoPubsub) << rj::stringify(data);
+            // qCDebug(chatterinoPubSub) << rj::stringify(data);
         };
 
     this->moderationActionHandlers["approved_automod_message"] =
         [](const auto &data, const auto &roomID) {
             // This message got approved by a moderator
-            // qCDebug(chatterinoPubsub) << rj::stringify(data);
+            // qCDebug(chatterinoPubSub) << rj::stringify(data);
         };
 
     this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
@@ -485,7 +484,7 @@ void PubSub::addClient()
         return;
     }
 
-    qCDebug(chatterinoPubsub) << "Adding an additional client";
+    qCDebug(chatterinoPubSub) << "Adding an additional client";
 
     this->addingClient = true;
 
@@ -495,7 +494,7 @@ void PubSub::addClient()
 
     if (ec)
     {
-        qCDebug(chatterinoPubsub)
+        qCDebug(chatterinoPubSub)
             << "Unable to establish connection:" << ec.message().c_str();
         return;
     }
@@ -571,7 +570,7 @@ bool PubSub::listenToWhispers()
 {
     if (this->userID_.isEmpty())
     {
-        qCDebug(chatterinoPubsub)
+        qCDebug(chatterinoPubSub)
             << "Unable to listen to whispers topic, no user logged in";
         return false;
     }
@@ -579,7 +578,7 @@ bool PubSub::listenToWhispers()
     static const QString topicFormat("whispers.%1");
     auto topic = topicFormat.arg(this->userID_);
 
-    qCDebug(chatterinoPubsub) << "Listen to whispers" << topic;
+    qCDebug(chatterinoPubSub) << "Listen to whispers" << topic;
 
     this->listenToTopic(topic);
 
@@ -590,7 +589,7 @@ void PubSub::listenToChannelModerationActions(const QString &channelID)
 {
     if (this->userID_.isEmpty())
     {
-        qCDebug(chatterinoPubsub) << "Unable to listen to moderation actions "
+        qCDebug(chatterinoPubSub) << "Unable to listen to moderation actions "
                                      "topic, no user logged in";
         return;
     }
@@ -605,7 +604,7 @@ void PubSub::listenToChannelModerationActions(const QString &channelID)
         return;
     }
 
-    qCDebug(chatterinoPubsub) << "Listen to topic" << topic;
+    qCDebug(chatterinoPubSub) << "Listen to topic" << topic;
 
     this->listenToTopic(topic);
 }
@@ -614,7 +613,7 @@ void PubSub::listenToAutomod(const QString &channelID)
 {
     if (this->userID_.isEmpty())
     {
-        qCDebug(chatterinoPubsub)
+        qCDebug(chatterinoPubSub)
             << "Unable to listen to automod topic, no user logged in";
         return;
     }
@@ -629,7 +628,7 @@ void PubSub::listenToAutomod(const QString &channelID)
         return;
     }
 
-    qCDebug(chatterinoPubsub) << "Listen to topic" << topic;
+    qCDebug(chatterinoPubSub) << "Listen to topic" << topic;
 
     this->listenToTopic(topic);
 }
@@ -645,7 +644,7 @@ void PubSub::listenToChannelPointRewards(const QString &channelID)
     {
         return;
     }
-    qCDebug(chatterinoPubsub) << "Listen to topic" << topic;
+    qCDebug(chatterinoPubSub) << "Listen to topic" << topic;
 
     this->listenToTopic(topic);
 }
@@ -729,7 +728,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
 
     if (!oMessage)
     {
-        qCDebug(chatterinoPubsub)
+        qCDebug(chatterinoPubSub)
             << "Unable to parse incoming pubsub message" << payload;
         this->diag.messagesFailedToParse += 1;
         return;
@@ -761,7 +760,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
             auto oMessageMessage = message.toInner<PubSubMessageMessage>();
             if (!oMessageMessage)
             {
-                qCDebug(chatterinoPubsub) << "Malformed MESSAGE:" << payload;
+                qCDebug(chatterinoPubSub) << "Malformed MESSAGE:" << payload;
                 return;
             }
 
@@ -771,7 +770,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
 
         case PubSubMessage::Type::INVALID:
         default: {
-            qCDebug(chatterinoPubsub)
+            qCDebug(chatterinoPubSub)
                 << "Unknown message type:" << message.typeString;
         }
         break;
@@ -796,7 +795,7 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
 
     this->clients.emplace(hdl, client);
 
-    qCDebug(chatterinoPubsub) << "PubSub connection opened!";
+    qCDebug(chatterinoPubSub) << "PubSub connection opened!";
 
     const auto topicsToTake =
         (std::min)(this->requests.size(), PubSubClient::listensPerConnection);
@@ -813,7 +812,7 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
 
     if (auto success = client->listen(msg); !success)
     {
-        qCWarning(chatterinoPubsub) << "Failed to listen to " << topicsToTake
+        qCWarning(chatterinoPubSub) << "Failed to listen to " << topicsToTake
                                     << "new topics on new client";
         return;
     }
@@ -839,12 +838,12 @@ void PubSub::onConnectionFail(WebsocketHandle hdl)
     DebugCount::increase("PubSub failed connections");
     if (auto conn = this->websocketClient.get_con_from_hdl(std::move(hdl)))
     {
-        qCDebug(chatterinoPubsub) << "PubSub connection attempt failed (error: "
+        qCDebug(chatterinoPubSub) << "PubSub connection attempt failed (error: "
                                   << conn->get_ec().message().c_str() << ")";
     }
     else
     {
-        qCDebug(chatterinoPubsub)
+        qCDebug(chatterinoPubSub)
             << "PubSub connection attempt failed but we can't "
                "get the connection from a handle.";
     }
@@ -861,7 +860,7 @@ void PubSub::onConnectionFail(WebsocketHandle hdl)
 
 void PubSub::onConnectionClose(WebsocketHandle hdl)
 {
-    qCDebug(chatterinoPubsub) << "Connection closed";
+    qCDebug(chatterinoPubSub) << "Connection closed";
     this->diag.connectionsClosed += 1;
 
     DebugCount::decrease("PubSub connections");
@@ -900,7 +899,7 @@ PubSub::WebsocketContextPtr PubSub::onTLSInit(websocketpp::connection_hdl hdl)
     }
     catch (const std::exception &e)
     {
-        qCDebug(chatterinoPubsub)
+        qCDebug(chatterinoPubSub)
             << "Exception caught in OnTLSInit:" << e.what();
     }
 
@@ -913,7 +912,7 @@ void PubSub::handleResponse(const PubSubMessage &message)
 
     if (failed)
     {
-        qCDebug(chatterinoPubsub)
+        qCDebug(chatterinoPubSub)
             << "Error" << message.error << "on nonce" << message.nonce;
     }
 
@@ -929,7 +928,7 @@ void PubSub::handleResponse(const PubSubMessage &message)
         auto client = info.client.lock();
         if (!client)
         {
-            qCDebug(chatterinoPubsub) << "Client associated with nonce"
+            qCDebug(chatterinoPubSub) << "Client associated with nonce"
                                       << message.nonce << "is no longer alive";
             return;
         }
@@ -945,14 +944,14 @@ void PubSub::handleResponse(const PubSubMessage &message)
         }
         else
         {
-            qCDebug(chatterinoPubsub)
+            qCDebug(chatterinoPubSub)
                 << "Unhandled nonce message type" << info.messageType;
         }
 
         return;
     }
 
-    qCDebug(chatterinoPubsub) << "Response on unused" << message.nonce
+    qCDebug(chatterinoPubSub) << "Response on unused" << message.nonce
                               << "client/topic listener mismatch?";
 }
 
@@ -977,12 +976,12 @@ void PubSub::handleUnlistenResponse(const NonceInfo &info, bool failed)
     DebugCount::decrease("PubSub topic pending unlistens", info.topicCount);
     if (failed)
     {
-        qCDebug(chatterinoPubsub) << "Failed unlistening to" << info.topics;
+        qCDebug(chatterinoPubSub) << "Failed unlistening to" << info.topics;
         DebugCount::increase("PubSub topic failed unlistens", info.topicCount);
     }
     else
     {
-        qCDebug(chatterinoPubsub) << "Successful unlistened to" << info.topics;
+        qCDebug(chatterinoPubSub) << "Successful unlistened to" << info.topics;
         DebugCount::decrease("PubSub topic listening", info.topicCount);
     }
 }
@@ -1017,7 +1016,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
             case PubSubWhisperMessage::Type::INVALID:
             default: {
-                qCDebug(chatterinoPubsub)
+                qCDebug(chatterinoPubSub)
                     << "Invalid whisper type:" << whisperMessage.typeString;
             }
             break;
@@ -1050,7 +1049,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
                 if (handlerIt == this->moderationActionHandlers.end())
                 {
-                    qCDebug(chatterinoPubsub)
+                    qCDebug(chatterinoPubSub)
                         << "No handler found for moderation action"
                         << moderationAction;
                     return;
@@ -1068,7 +1067,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
                 if (handlerIt == this->channelTermsActionHandlers.end())
                 {
-                    qCDebug(chatterinoPubsub)
+                    qCDebug(chatterinoPubSub)
                         << "No handler found for channel terms action"
                         << channelTermsAction;
                     return;
@@ -1080,7 +1079,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
             case PubSubChatModeratorActionMessage::Type::INVALID:
             default: {
-                qCDebug(chatterinoPubsub)
+                qCDebug(chatterinoPubSub)
                     << "Invalid whisper type:" << innerMessage.typeString;
             }
             break;
@@ -1108,7 +1107,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
             case PubSubCommunityPointsChannelV1Message::Type::INVALID:
             default: {
-                qCDebug(chatterinoPubsub)
+                qCDebug(chatterinoPubSub)
                     << "Invalid point event type:" << innerMessage.typeString;
             }
             break;
@@ -1206,7 +1205,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
             case PubSubAutoModQueueMessage::Type::INVALID:
             default: {
-                qCDebug(chatterinoPubsub) << "Unhandled automod event type:"
+                qCDebug(chatterinoPubSub) << "Unhandled automod event type:"
                                           << innerMessage.typeString;
             }
             break;
@@ -1214,16 +1213,16 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
     }
     else
     {
-        qCDebug(chatterinoPubsub) << "Unknown topic:" << topic;
+        qCDebug(chatterinoPubSub) << "Unknown topic:" << topic;
         return;
     }
 }
 
 void PubSub::runThread()
 {
-    qCDebug(chatterinoPubsub) << "Start pubsub manager thread";
+    qCDebug(chatterinoPubSub) << "Start pubsub manager thread";
     this->websocketClient.run();
-    qCDebug(chatterinoPubsub) << "Done with pubsub manager thread";
+    qCDebug(chatterinoPubSub) << "Done with pubsub manager thread";
 }
 
 void PubSub::listenToTopic(const QString &topic)

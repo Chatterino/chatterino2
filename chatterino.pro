@@ -213,9 +213,9 @@ SOURCES += \
     src/providers/twitch/api/Helix.cpp \
     src/providers/twitch/ChannelPointReward.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
-    src/providers/twitch/PubsubActions.cpp \
-    src/providers/twitch/PubsubClient.cpp \
-    src/providers/twitch/PubsubManager.cpp \
+    src/providers/twitch/PubSubActions.cpp \
+    src/providers/twitch/PubSubClient.cpp \
+    src/providers/twitch/PubSubManager.cpp \
     src/providers/twitch/pubsubmessages/AutoMod.cpp \
     src/providers/twitch/pubsubmessages/Base.cpp \
     src/providers/twitch/pubsubmessages/ChannelPoints.cpp \
@@ -467,12 +467,12 @@ HEADERS += \
     src/providers/twitch/ChatterinoWebSocketppLogger.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
-    src/providers/twitch/PubsubActions.hpp \
-    src/providers/twitch/PubsubClient.hpp \
-    src/providers/twitch/PubsubClientOptions.hpp \
-    src/providers/twitch/PubsubHelpers.hpp \
-    src/providers/twitch/PubsubManager.hpp \
-    src/providers/twitch/PubsubMessages.hpp \
+    src/providers/twitch/PubSubActions.hpp \
+    src/providers/twitch/PubSubClient.hpp \
+    src/providers/twitch/PubSubClientOptions.hpp \
+    src/providers/twitch/PubSubHelpers.hpp \
+    src/providers/twitch/PubSubManager.hpp \
+    src/providers/twitch/PubSubMessages.hpp \
     src/providers/twitch/pubsubmessages/AutoMod.hpp \
     src/providers/twitch/pubsubmessages/Base.hpp \
     src/providers/twitch/pubsubmessages/ChannelPoints.hpp \
@@ -481,7 +481,7 @@ HEADERS += \
     src/providers/twitch/pubsubmessages/Message.hpp \
     src/providers/twitch/pubsubmessages/Unlisten.hpp \
     src/providers/twitch/pubsubmessages/Whisper.hpp \
-    src/providers/twitch/PubsubWebsocket.hpp \
+    src/providers/twitch/PubSubWebsocket.hpp \
     src/providers/twitch/TwitchAccount.hpp \
     src/providers/twitch/TwitchAccountManager.hpp \
     src/providers/twitch/TwitchBadge.hpp \

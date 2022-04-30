@@ -145,7 +145,7 @@ private:
     // Methods
     void refreshLiveStatus();
     void parseLiveStatus(bool live, const HelixStream &stream);
-    void refreshPubsub();
+    void refreshPubSub();
     void refreshChatters();
     void refreshBadges();
     void refreshCheerEmotes();

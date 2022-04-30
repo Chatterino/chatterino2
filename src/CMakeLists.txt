@@ -210,16 +210,16 @@ set(SOURCE_FILES
         providers/twitch/ChannelPointReward.hpp
         providers/twitch/IrcMessageHandler.cpp
         providers/twitch/IrcMessageHandler.hpp
-        providers/twitch/PubsubActions.cpp
-        providers/twitch/PubsubActions.hpp
-        providers/twitch/PubsubClient.cpp
-        providers/twitch/PubsubClient.hpp
-        providers/twitch/PubsubClientOptions.hpp
-        providers/twitch/PubsubHelpers.hpp
-        providers/twitch/PubsubManager.cpp
-        providers/twitch/PubsubManager.hpp
-        providers/twitch/PubsubMessages.hpp
-        providers/twitch/PubsubWebsocket.hpp
+        providers/twitch/PubSubActions.cpp
+        providers/twitch/PubSubActions.hpp
+        providers/twitch/PubSubClient.cpp
+        providers/twitch/PubSubClient.hpp
+        providers/twitch/PubSubClientOptions.hpp
+        providers/twitch/PubSubHelpers.hpp
+        providers/twitch/PubSubManager.cpp
+        providers/twitch/PubSubManager.hpp
+        providers/twitch/PubSubMessages.hpp
+        providers/twitch/PubSubWebsocket.hpp
         providers/twitch/TwitchAccount.cpp
         providers/twitch/TwitchAccount.hpp
         providers/twitch/TwitchAccountManager.cpp

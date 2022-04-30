@@ -1,4 +1,4 @@
-#include "providers/twitch/PubsubActions.hpp"
+#include "providers/twitch/PubSubActions.hpp"
 
 namespace chatterino {
 

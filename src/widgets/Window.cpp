@@ -28,8 +28,8 @@
 
 #ifndef NDEBUG
 #    include <rapidjson/document.h>
-#    include "providers/twitch/PubsubManager.hpp"
-#    include "providers/twitch/PubsubMessages.hpp"
+#    include "providers/twitch/PubSubManager.hpp"
+#    include "providers/twitch/PubSubMessages.hpp"
 #    include "util/SampleCheerMessages.hpp"
 #    include "util/SampleLinks.hpp"
 #endif

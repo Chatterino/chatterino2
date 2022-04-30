@@ -1,9 +1,8 @@
 #pragma once
 
-#include "providers/twitch/PubsubActions.hpp"
-#include "providers/twitch/PubsubClientOptions.hpp"
-#include "providers/twitch/PubsubMessages.hpp"
-#include "providers/twitch/PubsubWebsocket.hpp"
+#include "providers/twitch/PubSubClientOptions.hpp"
+#include "providers/twitch/PubSubMessages.hpp"
+#include "providers/twitch/PubSubWebsocket.hpp"
 
 #include <QString>
 #include <pajlada/signals/signal.hpp>

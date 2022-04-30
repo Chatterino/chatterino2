@@ -1,10 +1,11 @@
 #pragma once
 
 #include "providers/twitch/ChatterinoWebSocketppLogger.hpp"
-#include "providers/twitch/PubsubActions.hpp"
-#include "providers/twitch/PubsubClient.hpp"
-#include "providers/twitch/PubsubClientOptions.hpp"
-#include "providers/twitch/PubsubWebsocket.hpp"
+#include "providers/twitch/PubSubActions.hpp"
+#include "providers/twitch/PubSubClient.hpp"
+#include "providers/twitch/PubSubClientOptions.hpp"
+#include "providers/twitch/PubSubMessages.hpp"
+#include "providers/twitch/PubSubWebsocket.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "util/ExponentialBackoff.hpp"
 

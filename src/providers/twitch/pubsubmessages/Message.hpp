@@ -26,14 +26,14 @@ struct PubSubMessageMessage {
 
         if (messageDoc.isNull())
         {
-            qCWarning(chatterinoPubsub) << "PubSub message (type MESSAGE) "
+            qCWarning(chatterinoPubSub) << "PubSub message (type MESSAGE) "
                                            "missing inner message payload";
             return;
         }
 
         if (!messageDoc.isObject())
         {
-            qCWarning(chatterinoPubsub)
+            qCWarning(chatterinoPubSub)
                 << "PubSub message (type MESSAGE) inner message payload is not "
                    "an object";
             return;

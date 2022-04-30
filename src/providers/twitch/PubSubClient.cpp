@@ -1,8 +1,9 @@
-#include "providers/twitch/PubsubClient.hpp"
+#include "providers/twitch/PubSubClient.hpp"
 
 #include "common/QLogging.hpp"
-#include "providers/twitch/PubsubActions.hpp"
-#include "providers/twitch/PubsubHelpers.hpp"
+#include "providers/twitch/PubSubActions.hpp"
+#include "providers/twitch/PubSubHelpers.hpp"
+#include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/pubsubmessages/Unlisten.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
@@ -49,7 +50,7 @@ void PubSubClient::close(const std::string &reason,
     auto conn = this->websocketClient_.get_con_from_hdl(this->handle_, ec);
     if (ec)
     {
-        qCDebug(chatterinoPubsub)
+        qCDebug(chatterinoPubSub)
             << "Client::close(): Error getting con:" << ec.message().c_str();
         return;
     }
@@ -57,7 +58,7 @@ void PubSubClient::close(const std::string &reason,
     conn->close(code, reason, ec);
     if (ec)
     {
-        qCDebug(chatterinoPubsub)
+        qCDebug(chatterinoPubSub)
             << "Client::close(): Error closing:" << ec.message().c_str();
         return;
     }
@@ -81,7 +82,7 @@ bool PubSubClient::listen(PubSubListenMessage msg)
         this->listeners_.emplace_back(Listener{topic, false, false, false});
     }
 
-    qCDebug(chatterinoPubsub)
+    qCDebug(chatterinoPubSub)
         << "Subscribing to" << numRequestedListens << "topics";
 
     this->send(msg.toJson());
@@ -165,7 +166,7 @@ void PubSubClient::ping()
 
     if (this->awaitingPong_)
     {
-        qCDebug(chatterinoPubsub) << "No pong response, disconnect!";
+        qCDebug(chatterinoPubSub) << "No pong response, disconnect!";
         this->close("Didn't respond to ping");
 
         return;
@@ -199,7 +200,7 @@ bool PubSubClient::send(const char *payload)
 
     if (ec)
     {
-        qCDebug(chatterinoPubsub) << "Error sending message" << payload << ":"
+        qCDebug(chatterinoPubSub) << "Error sending message" << payload << ":"
                                   << ec.message().c_str();
         // TODO(pajlada): Check which error code happened and maybe
         // gracefully handle it

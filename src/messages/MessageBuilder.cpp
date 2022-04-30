@@ -7,7 +7,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/LinkResolver.hpp"
-#include "providers/twitch/PubsubActions.hpp"
+#include "providers/twitch/PubSubActions.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"

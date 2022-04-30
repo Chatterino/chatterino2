@@ -17,7 +17,7 @@
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/Irc2.hpp"
-#include "providers/twitch/PubsubManager.hpp"
+#include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
@@ -137,7 +137,7 @@ void Application::initialize(Settings &settings, Paths &paths)
     {
         this->initNm(paths);
     }
-    this->initPubsub();
+    this->initPubSub();
 }
 
 int Application::run(QApplication &qtApp)
@@ -194,7 +194,7 @@ void Application::initNm(Paths &paths)
 #endif
 }
 
-void Application::initPubsub()
+void Application::initPubSub()
 {
     this->twitch->pubsub->signals_.moderation.chatCleared.connect(
         [this](const auto &action) {
