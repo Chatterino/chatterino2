@@ -170,10 +170,12 @@ LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
         for (auto i = 0; i < snapshot.size(); ++i)
         {
             const MessagePtr &message = snapshot[i];
-            if (filterSet->filter(message, sharedView.channel()))
+            if (filterSet && !filterSet->filter(message, sharedView.channel()))
             {
-                combinedSnapshot.push_back(message);
+                continue;
             }
+
+            combinedSnapshot.push_back(message);
         }
     }
 
