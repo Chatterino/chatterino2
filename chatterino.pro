@@ -215,13 +215,13 @@ SOURCES += \
     src/providers/twitch/IrcMessageHandler.cpp \
     src/providers/twitch/PubsubActions.cpp \
     src/providers/twitch/PubsubClient.cpp \
-    src/providers/twitch/PubsubHelpers.cpp \
     src/providers/twitch/PubsubManager.cpp \
     src/providers/twitch/pubsubmessages/AutoMod.cpp \
     src/providers/twitch/pubsubmessages/Base.cpp \
     src/providers/twitch/pubsubmessages/ChannelPoints.cpp \
     src/providers/twitch/pubsubmessages/ChatModeratorAction.cpp \
     src/providers/twitch/pubsubmessages/Listen.cpp \
+    src/providers/twitch/pubsubmessages/Unlisten.cpp \
     src/providers/twitch/pubsubmessages/Whisper.cpp \
     src/providers/twitch/TwitchAccount.cpp \
     src/providers/twitch/TwitchAccountManager.cpp \
@@ -479,6 +479,7 @@ HEADERS += \
     src/providers/twitch/pubsubmessages/ChatModeratorAction.hpp \
     src/providers/twitch/pubsubmessages/Listen.hpp \
     src/providers/twitch/pubsubmessages/Message.hpp \
+    src/providers/twitch/pubsubmessages/Unlisten.hpp \
     src/providers/twitch/pubsubmessages/Whisper.hpp \
     src/providers/twitch/PubsubWebsocket.hpp \
     src/providers/twitch/TwitchAccount.hpp \

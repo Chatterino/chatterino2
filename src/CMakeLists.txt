@@ -215,7 +215,6 @@ set(SOURCE_FILES
         providers/twitch/PubsubClient.cpp
         providers/twitch/PubsubClient.hpp
         providers/twitch/PubsubClientOptions.hpp
-        providers/twitch/PubsubHelpers.cpp
         providers/twitch/PubsubHelpers.hpp
         providers/twitch/PubsubManager.cpp
         providers/twitch/PubsubManager.hpp
@@ -253,6 +252,8 @@ set(SOURCE_FILES
         providers/twitch/pubsubmessages/Listen.cpp
         providers/twitch/pubsubmessages/Listen.hpp
         providers/twitch/pubsubmessages/Message.hpp
+        providers/twitch/pubsubmessages/Unlisten.cpp
+        providers/twitch/pubsubmessages/Unlisten.hpp
         providers/twitch/pubsubmessages/Whisper.cpp
         providers/twitch/pubsubmessages/Whisper.hpp
 

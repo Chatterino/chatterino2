@@ -31,6 +31,11 @@ struct Listener : TopicData {
 class PubSubClient : public std::enable_shared_from_this<PubSubClient>
 {
 public:
+    struct UnlistenPrefixResponse {
+        std::vector<QString>::size_type numUnlistens;
+        QString nonce;
+    };
+
     // The max amount of topics we may listen to with a single connection
     static constexpr std::vector<QString>::size_type listensPerConnection = 50;
 
@@ -45,7 +50,7 @@ public:
                    websocketpp::close::status::normal);
 
     bool listen(PubSubListenMessage msg);
-    void unlistenPrefix(const QString &prefix);
+    UnlistenPrefixResponse unlistenPrefix(const QString &prefix);
 
     void handleListenResponse(const PubSubMessage &message);
     void handleUnlistenResponse(const PubSubMessage &message);

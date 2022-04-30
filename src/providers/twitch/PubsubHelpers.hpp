@@ -12,9 +12,6 @@ namespace chatterino {
 class TwitchAccount;
 struct ActionUser;
 
-rapidjson::Document createUnlistenMessage(
-    const std::vector<QString> &topicsVec);
-
 // Create timer using given ioService
 template <typename Duration, typename Callback>
 void runAfter(boost::asio::io_service &ioService, Duration duration,

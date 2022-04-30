@@ -538,7 +538,16 @@ void PubSub::unlistenAllModerationActions()
     for (const auto &p : this->clients)
     {
         const auto &client = p.second;
-        client->unlistenPrefix("chat_moderator_actions.");
+        if (const auto &[numUnlistens, nonce] =
+                client->unlistenPrefix("chat_moderator_actions.");
+            numUnlistens > 0)
+        {
+            this->registerNonce(nonce, {
+                                           client,
+                                           "UNLISTEN",
+                                           numUnlistens,
+                                       });
+        }
     }
 }
 

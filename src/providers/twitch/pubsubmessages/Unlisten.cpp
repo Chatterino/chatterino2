@@ -1,4 +1,4 @@
-#include "providers/twitch/pubsubmessages/Listen.hpp"
+#include "providers/twitch/pubsubmessages/Unlisten.hpp"
 
 #include "util/Helpers.hpp"
 
@@ -8,22 +8,17 @@
 
 namespace chatterino {
 
-PubSubListenMessage::PubSubListenMessage(std::vector<QString> _topics)
+PubSubUnlistenMessage::PubSubUnlistenMessage(std::vector<QString> _topics)
     : topics(std::move(_topics))
     , nonce(generateUuid())
 {
 }
 
-void PubSubListenMessage::setToken(const QString &_token)
-{
-    this->token = _token;
-}
-
-QByteArray PubSubListenMessage::toJson() const
+QByteArray PubSubUnlistenMessage::toJson() const
 {
     QJsonObject root;
 
-    root["type"] = "LISTEN";
+    root["type"] = "UNLISTEN";
     root["nonce"] = this->nonce;
 
     {
@@ -35,11 +30,6 @@ QByteArray PubSubListenMessage::toJson() const
                   std::back_inserter(jsonTopics));
 
         data["topics"] = jsonTopics;
-
-        if (!this->token.isEmpty())
-        {
-            data["auth_token"] = this->token;
-        }
 
         root["data"] = data;
     }

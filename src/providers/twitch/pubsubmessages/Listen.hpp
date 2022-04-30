@@ -1,10 +1,5 @@
 #pragma once
 
-#include "util/Helpers.hpp"
-
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QString>
 
 #include <vector>

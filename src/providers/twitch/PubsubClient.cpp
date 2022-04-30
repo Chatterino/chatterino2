@@ -2,6 +2,7 @@
 
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/PubsubHelpers.hpp"
+#include "providers/twitch/pubsubmessages/Unlisten.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
@@ -91,7 +92,8 @@ bool PubSubClient::listen(PubSubListenMessage msg)
     return true;
 }
 
-void PubSubClient::unlistenPrefix(const QString &prefix)
+PubSubClient::UnlistenPrefixResponse PubSubClient::unlistenPrefix(
+    const QString &prefix)
 {
     std::vector<QString> topics;
 
@@ -111,25 +113,20 @@ void PubSubClient::unlistenPrefix(const QString &prefix)
 
     if (topics.empty())
     {
-        return;
+        return {0, ""};
     }
 
-    int numRequestedUnlistens = topics.size();
+    auto numRequestedUnlistens = topics.size();
 
     this->numListens_ -= numRequestedUnlistens;
     DebugCount::increase("PubSub topic pending unlistens",
                          numRequestedUnlistens);
 
-    auto message = createUnlistenMessage(topics);
+    PubSubUnlistenMessage message(topics);
 
-    auto nonce = generateUuid();
-    rj::set(message, "nonce", nonce);
+    this->send(message.toJson());
 
-    QString payload = rj::stringify(message);
-    // TODO
-    // sentUnlistens[nonce] = RequestMessage{payload, numRequestedUnlistens};
-
-    this->send(payload.toUtf8());
+    return {numRequestedUnlistens, message.nonce};
 }
 
 void PubSubClient::handleListenResponse(const PubSubMessage &message)
