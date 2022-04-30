@@ -21,9 +21,6 @@ using websocketpp::lib::placeholders::_2;
 
 namespace chatterino {
 
-static std::map<QString, PubSubRequestMessage> sentListens;
-static std::map<QString, PubSubRequestMessage> sentUnlistens;
-
 PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
     : host_(host)
     , clientOptions_({

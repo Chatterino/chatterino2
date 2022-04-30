@@ -12,9 +12,6 @@
 #include <QString>
 #include <pajlada/signals/signal.hpp>
 #include <websocketpp/client.hpp>
-#include <websocketpp/config/asio_client.hpp>
-#include <websocketpp/extensions/permessage_deflate/disabled.hpp>
-#include <websocketpp/logger/basic.hpp>
 
 #include <atomic>
 #include <chrono>
@@ -25,11 +22,6 @@
 #include <vector>
 
 namespace chatterino {
-
-struct PubSubRequestMessage {
-    QString payload;
-    int topicCount;
-};
 
 class PubSub
 {
