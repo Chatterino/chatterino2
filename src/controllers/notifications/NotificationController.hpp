@@ -39,15 +39,12 @@ public:
 private:
     bool initialized_ = false;
 
+    void fetchFakeChannels();
     void removeFakeChannel(const QString channelName);
     void checkStream(bool live, QString channelName);
 
     // fakeTwitchChannels is a list of streams who are live that we have already sent out a notification for
-public:  //temp
-    void fetchFakeChannels();
     std::vector<QString> fakeTwitchChannels;
-
-private:
     QTimer *liveStatusTimer_;
 
     ChatterinoSetting<std::vector<QString>> twitchSetting_ = {

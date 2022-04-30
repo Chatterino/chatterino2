@@ -5,7 +5,6 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandModel.hpp"
-#include "controllers/notifications/NotificationController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
@@ -32,8 +31,6 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QUrl>
-
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 
 namespace {
 using namespace chatterino;
@@ -929,21 +926,6 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 #endif
-
-    this->registerCommand(
-        "dbg", [](const QStringList &words, ChannelPtr channel) -> QString {
-            const QString channelName = "mm2pl";
-            MessageBuilder builder;
-            TwitchMessageBuilder::liveMessage(channelName, &builder);
-            getApp()->twitch->liveChannel->addMessage(builder.release());
-            getApp()->notifications->fakeTwitchChannels.push_back(channelName);
-            return "";
-        });
-    this->registerCommand(
-        "dbg2", [](const QStringList &words, ChannelPtr channel) -> QString {
-            getApp()->notifications->fetchFakeChannels();
-            return "";
-        });
 }
 
 void CommandController::save()
