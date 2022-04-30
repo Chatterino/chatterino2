@@ -305,6 +305,19 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                                     loginName.toLower()));
                             });
 
+                        menu->addAction(
+                            "Open channel in a new tab", this, [loginName] {
+                                ChannelPtr channel =
+                                    getApp()->twitch->getOrAddChannel(
+                                        loginName);
+                                auto &nb = getApp()
+                                               ->windows->getMainWindow()
+                                               .getNotebook();
+                                SplitContainer *container = nb.addPage(true);
+                                Split *split = new Split(container);
+                                split->setChannel(channel);
+                                container->appendSplit(split);
+                            });
                         menu->popup(QCursor::pos());
                         menu->raise();
                     }
