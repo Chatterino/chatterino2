@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added `is:first-msg` search option. (#3700)
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
 - Minor: Adjust large stream thumbnail to 16:9 (#3655)
 - Minor: Fixed being unable to load Twitch Usercards from the `/mentions` tab. (#3623)
