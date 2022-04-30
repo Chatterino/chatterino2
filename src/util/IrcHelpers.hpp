@@ -96,14 +96,4 @@ inline QDateTime calculateMessageTime(const Communi::IrcMessage *message)
     return QDateTime::currentDateTime();
 }
 
-inline QTime calculateMessageTimestamp(const Communi::IrcMessage *message)
-{
-    return QDateTime::fromMSecsSinceEpoch(calculateMessageTime(message)).time();
-}
-
-inline QTime calculateMessageTimestamp(long millisSinceEpoch)
-{
-    return QDateTime::fromMSecsSinceEpoch(millisSinceEpoch).time();
-}
-
 }  // namespace chatterino
