@@ -196,7 +196,7 @@ LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
     // resort by time for presentation
     std::sort(combinedSnapshot.begin(), combinedSnapshot.end(),
               [](MessagePtr &a, MessagePtr &b) {
-                  return a->receivedTime < b->receivedTime;
+                  return a->serverReceivedTime < b->serverReceivedTime;
               });
 
     auto queue = LimitedQueue<MessagePtr>(combinedSnapshot.size());
