@@ -1,5 +1,6 @@
 #include "providers/twitch/PubsubClient.hpp"
 
+#include "common/QLogging.hpp"
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/PubsubHelpers.hpp"
 #include "providers/twitch/pubsubmessages/Unlisten.hpp"
@@ -8,12 +9,8 @@
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
-#include <rapidjson/error/en.h>
-
 #include <exception>
-#include <iostream>
 #include <thread>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 

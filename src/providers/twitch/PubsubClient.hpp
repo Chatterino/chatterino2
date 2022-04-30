@@ -1,6 +1,5 @@
 #pragma once
 
-#include "providers/twitch/ChatterinoWebSocketppLogger.hpp"
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/PubsubClientOptions.hpp"
 #include "providers/twitch/PubsubMessages.hpp"
@@ -8,10 +7,6 @@
 
 #include <QString>
 #include <pajlada/signals/signal.hpp>
-#include <websocketpp/client.hpp>
-#include <websocketpp/config/asio_client.hpp>
-#include <websocketpp/extensions/permessage_deflate/disabled.hpp>
-#include <websocketpp/logger/basic.hpp>
 
 #include <atomic>
 #include <vector>
