@@ -646,7 +646,7 @@ void PubSub::listen(PubSubListenMessage msg)
     std::copy(msg.topics.begin(), msg.topics.end(),
               std::back_inserter(this->requests));
 
-    DebugCount::increase("PubSub topic backlog");
+    DebugCount::increase("PubSub topic backlog", msg.topics.size());
 }
 
 bool PubSub::tryListen(PubSubListenMessage msg)
@@ -799,6 +799,7 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
                                     << "new topics on new client";
         return;
     }
+    DebugCount::decrease("PubSub topic backlog", msg.topics.size());
 
     this->registerNonce(msg.nonce, {client, "LISTEN", topicsToTake});
 
