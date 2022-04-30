@@ -10,6 +10,7 @@
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <boost/signals2.hpp>
 
 namespace chatterino {
 
@@ -151,6 +152,7 @@ private:
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
     pajlada::Signals::SignalHolder signalHolder_;
+    std::vector<boost::signals2::scoped_connection> bSignals_;
 
 public slots:
     void addSibling();

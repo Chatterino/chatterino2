@@ -57,10 +57,10 @@ Window::Window(WindowType type)
     this->addMenuBar();
 #endif
 
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [this] {
+    this->bSignals_.emplace_back(
+        getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->onAccountSelected();
-        });
+        }));
     this->onAccountSelected();
 
     if (type == WindowType::Main)

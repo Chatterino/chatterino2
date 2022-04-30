@@ -113,7 +113,7 @@ PubSubClient::UnlistenPrefixResponse PubSubClient::unlistenPrefix(
 
     if (topics.empty())
     {
-        return {0, ""};
+        return {{}, ""};
     }
 
     auto numRequestedUnlistens = topics.size();
@@ -126,7 +126,7 @@ PubSubClient::UnlistenPrefixResponse PubSubClient::unlistenPrefix(
 
     this->send(message.toJson());
 
-    return {numRequestedUnlistens, message.nonce};
+    return {message.topics, message.nonce};
 }
 
 void PubSubClient::handleListenResponse(const PubSubMessage &message)

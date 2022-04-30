@@ -538,14 +538,33 @@ void PubSub::unlistenAllModerationActions()
     for (const auto &p : this->clients)
     {
         const auto &client = p.second;
-        if (const auto &[numUnlistens, nonce] =
+        if (const auto &[topics, nonce] =
                 client->unlistenPrefix("chat_moderator_actions.");
-            numUnlistens > 0)
+            !topics.empty())
         {
             this->registerNonce(nonce, {
                                            client,
                                            "UNLISTEN",
-                                           numUnlistens,
+                                           topics,
+                                           topics.size(),
+                                       });
+        }
+    }
+}
+
+void PubSub::unlistenWhispers()
+{
+    for (const auto &p : this->clients)
+    {
+        const auto &client = p.second;
+        if (const auto &[topics, nonce] = client->unlistenPrefix("whispers.");
+            !topics.empty())
+        {
+            this->registerNonce(nonce, {
+                                           client,
+                                           "UNLISTEN",
+                                           topics,
+                                           topics.size(),
                                        });
         }
     }
@@ -659,6 +678,7 @@ bool PubSub::tryListen(PubSubListenMessage msg)
             this->registerNonce(msg.nonce, {
                                                client,
                                                "LISTEN",
+                                               msg.topics,
                                                msg.topics.size(),
                                            });
             return true;
@@ -675,6 +695,7 @@ void PubSub::registerNonce(QString nonce, NonceInfo info)
 
 boost::optional<PubSub::NonceInfo> PubSub::findNonceInfo(QString nonce)
 {
+    // TODO: This should also DELETE the nonceinfo from the map
     auto it = this->nonces_.find(nonce);
 
     if (it == this->nonces_.end())
@@ -801,7 +822,12 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
     }
     DebugCount::decrease("PubSub topic backlog", msg.topics.size());
 
-    this->registerNonce(msg.nonce, {client, "LISTEN", topicsToTake});
+    this->registerNonce(msg.nonce, {
+                                       client,
+                                       "LISTEN",
+                                       msg.topics,
+                                       topicsToTake,
+                                   });
 
     if (!this->requests.empty())
     {
@@ -900,29 +926,30 @@ void PubSub::handleResponse(const PubSubMessage &message)
         return;
     }
 
-    if (auto info = this->findNonceInfo(message.nonce); info)
+    if (auto oInfo = this->findNonceInfo(message.nonce); oInfo)
     {
-        auto client = info->client.lock();
+        const auto info = *oInfo;
+        auto client = info.client.lock();
         if (!client)
         {
             qCDebug(chatterinoPubsub) << "Client associated with nonce"
                                       << message.nonce << "is no longer alive";
             return;
         }
-        if (info->messageType == "LISTEN")
+        if (info.messageType == "LISTEN")
         {
             client->handleListenResponse(message);
-            this->handleListenResponse(info->topicCount, failed);
+            this->handleListenResponse(info, failed);
         }
-        else if (info->messageType == "UNLISTEN")
+        else if (info.messageType == "UNLISTEN")
         {
             client->handleUnlistenResponse(message);
-            this->handleUnlistenResponse(info->topicCount, failed);
+            this->handleUnlistenResponse(info, failed);
         }
         else
         {
             qCDebug(chatterinoPubsub)
-                << "Unhandled nonce message type" << info->messageType;
+                << "Unhandled nonce message type" << info.messageType;
         }
 
         return;
@@ -932,32 +959,34 @@ void PubSub::handleResponse(const PubSubMessage &message)
                               << "client/topic listener mismatch?";
 }
 
-void PubSub::handleListenResponse(int topicCount, bool failed)
+void PubSub::handleListenResponse(const NonceInfo &info, bool failed)
 {
-    DebugCount::decrease("PubSub topic pending listens", topicCount);
+    DebugCount::decrease("PubSub topic pending listens", info.topicCount);
     if (failed)
     {
         this->diag.failedListenResponses++;
-        DebugCount::increase("PubSub topic failed listens", topicCount);
+        DebugCount::increase("PubSub topic failed listens", info.topicCount);
     }
     else
     {
         this->diag.listenResponses++;
-        DebugCount::increase("PubSub topic listening", topicCount);
+        DebugCount::increase("PubSub topic listening", info.topicCount);
     }
 }
 
-void PubSub::handleUnlistenResponse(int topicCount, bool failed)
+void PubSub::handleUnlistenResponse(const NonceInfo &info, bool failed)
 {
     this->diag.unlistenResponses++;
-    DebugCount::decrease("PubSub topic pending unlistens", topicCount);
+    DebugCount::decrease("PubSub topic pending unlistens", info.topicCount);
     if (failed)
     {
-        DebugCount::increase("PubSub topic failed unlistens", topicCount);
+        qCDebug(chatterinoPubsub) << "Failed unlistening to" << info.topics;
+        DebugCount::increase("PubSub topic failed unlistens", info.topicCount);
     }
     else
     {
-        DebugCount::decrease("PubSub topic listening", topicCount);
+        qCDebug(chatterinoPubsub) << "Successful unlistened to" << info.topics;
+        DebugCount::decrease("PubSub topic listening", info.topicCount);
     }
 }
 

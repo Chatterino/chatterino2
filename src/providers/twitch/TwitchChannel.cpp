@@ -160,16 +160,12 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [=] {
+    this->bSignals_.emplace_back(
+        getApp()->accounts->twitch.currentUserChanged.connect([=] {
             this->setMod(false);
-        });
-
-    // pubsub
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [=] {
             this->refreshPubsub();
-        });
+        }));
+
     this->refreshPubsub();
     this->userStateChanged.connect([this] {
         this->refreshPubsub();

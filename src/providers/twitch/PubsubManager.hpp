@@ -42,6 +42,13 @@ class PubSub
     using Signal =
         pajlada::Signals::Signal<T>;  // type-id is vector<T, Alloc<T>>
 
+    struct NonceInfo {
+        std::weak_ptr<PubSubClient> client;
+        QString messageType;  // e.g. LISTEN or UNLISTEN
+        std::vector<QString> topics;
+        std::vector<QString>::size_type topicCount;
+    };
+
     WebsocketClient websocketClient;
     std::unique_ptr<std::thread> mainThread;
 
@@ -112,6 +119,7 @@ public:
     } signals_;
 
     void unlistenAllModerationActions();
+    void unlistenWhispers();
 
     bool listenToWhispers();
     void listenToChannelModerationActions(const QString &channelID);
@@ -165,15 +173,9 @@ private:
     WebsocketContextPtr onTLSInit(websocketpp::connection_hdl hdl);
 
     void handleResponse(const PubSubMessage &message);
-    void handleListenResponse(int topicCount, bool failed);
-    void handleUnlistenResponse(int topicCount, bool failed);
+    void handleListenResponse(const NonceInfo &info, bool failed);
+    void handleUnlistenResponse(const NonceInfo &info, bool failed);
     void handleMessageResponse(const PubSubMessageMessage &message);
-
-    struct NonceInfo {
-        std::weak_ptr<PubSubClient> client;
-        QString messageType;  // e.g. LISTEN or UNLISTEN
-        std::vector<QString>::size_type topicCount;
-    };
 
     // Register a nonce for a specific client
     void registerNonce(QString nonce, NonceInfo nonceInfo);

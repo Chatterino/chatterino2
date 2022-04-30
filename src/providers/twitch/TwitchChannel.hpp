@@ -16,6 +16,7 @@
 #include <QElapsedTimer>
 #include <QRegularExpression>
 #include <boost/optional.hpp>
+#include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
 #include <mutex>
@@ -199,6 +200,7 @@ private:
     bool isClipCreationInProgress{false};
 
     pajlada::Signals::SignalHolder signalHolder_;
+    std::vector<boost::signals2::scoped_connection> bSignals_;
 
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;

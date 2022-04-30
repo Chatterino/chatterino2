@@ -32,7 +32,7 @@ class PubSubClient : public std::enable_shared_from_this<PubSubClient>
 {
 public:
     struct UnlistenPrefixResponse {
-        std::vector<QString>::size_type numUnlistens;
+        std::vector<QString> topics;
         QString nonce;
     };
 
