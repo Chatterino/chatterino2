@@ -125,7 +125,7 @@ enum class MessageElementFlag : int64_t {
     // ZeroWidthEmotes are emotes that are supposed to overlay over any pre-existing emotes
     // e.g. BTTV's SoSnowy during christmas season
     ZeroWidthEmote = (1LL << 31),
-    
+
     // draw position
     VerticallyCentered = (1LL << 32),
 
