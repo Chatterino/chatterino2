@@ -96,7 +96,15 @@ public:
     void queueLayout();
 
     void clearMessages();
-    void showUserInfoPopup(const QString &userName);
+
+    /**
+     * @brief Creates and shows a UserInfoPopup dialog
+     *
+     * @param userName The login name of the user
+     * @param alternativePopoutChannel Optional parameter containing the channel name to use for context
+     **/
+    void showUserInfoPopup(const QString &userName,
+                           QString alternativePopoutChannel = QString());
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;

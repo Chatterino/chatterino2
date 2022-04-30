@@ -2,7 +2,23 @@
 
 ## Unversioned
 
-- Major: Added customizable shortcuts. (#2340)
+- Minor: Added `is:first-msg` search option. (#3700)
+- Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
+- Minor: Adjust large stream thumbnail to 16:9 (#3655)
+- Minor: Fixed being unable to load Twitch Usercards from the `/mentions` tab. (#3623)
+- Minor: Add information about the user's operating system in the About page. (#3663)
+- Minor: Added chatter count for each category in viewer list. (#3683)
+- Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
+- Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
+- Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
+- Bugfix: Fixed an issue in the emote picker where an emotes tooltip would not properly disappear. (#3686)
+- Bugfix: Fixed incorrect spacing of settings icons at high DPI. (#3698)
+- Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
+
+## 2.3.5
+
+- Major: Added highlights for first messages (#3267)
+- Major: Added customizable shortcuts. (#2340, #3633)
 - Minor: Make animated emote playback speed match browser (Firefox and Chrome) behaviour. (#3506)
 - Minor: Added middle click split to open in browser (#3356)
 - Minor: Added new search predicate to filter for messages matching a regex (#3282)
@@ -25,7 +41,6 @@
 - Minor: Strip leading @ and trailing , from username in `/popout` command. (#3217)
 - Minor: Added `flags.reward_message` filter variable (#3231)
 - Minor: Added chatter count to viewer list popout (#3261)
-- Minor: Added highlights for first messages (#3267)
 - Minor: Ignore out of bounds check for tiling wms (#3270)
 - Minor: Add clear cache button to cache settings section (#3277)
 - Minor: Added `flags.first_message` filter variable (#3292)
@@ -43,7 +58,7 @@
 - Minor: Added autocompletion for default Twitch commands starting with the dot (e.g. `.mods` which does the same as `/mods`). (#3144)
 - Minor: Sorted usernames in `Users joined/parted` messages alphabetically. (#3421)
 - Minor: Mod list, VIP list, and Users joined/parted messages are now searchable. (#3426)
-- Minor: Add search to emote popup. (#3404, #3527)
+- Minor: Add search to emote popup. (#3404, #3527, #3543)
 - Minor: Messages can now be highlighted by subscriber or founder badges. (#3445)
 - Minor: User timeout buttons can now be triggered using hotkeys. (#3483)
 - Minor: Add workaround for multipart emoji as described in [the RFC](https://mm2pl.github.io/emoji_rfc.pdf). (#3469)
@@ -60,7 +75,8 @@
 - Minor: Make Tab Layout setting only accept predefined values (#3564)
 - Minor: Added librewolf, icecat, and waterfox incognito support. (#3588)
 - Minor: Updated to Emoji v14.0 (#3612)
-- Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
+- Minor: Add support for locking tab arrangement (#3627)
+- Bugfix: Fixed rendering of moderator announcements. (#3639)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)

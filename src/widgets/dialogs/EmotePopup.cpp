@@ -168,13 +168,22 @@ EmotePopup::EmotePopup(QWidget *parent)
     searchRegex.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
     QValidator *searchValidator = new QRegularExpressionValidator(searchRegex);
 
+    layout->setMargin(0);
+    layout->setSpacing(0);
+
+    QHBoxLayout *layout2 = new QHBoxLayout(this);
+    layout2->setMargin(8);
+    layout2->setSpacing(8);
+
     this->search_ = new QLineEdit();
     this->search_->setPlaceholderText("Search all emotes...");
     this->search_->setValidator(searchValidator);
     this->search_->setClearButtonEnabled(true);
     this->search_->findChild<QAbstractButton *>()->setIcon(
         QPixmap(":/buttons/clearSearch.png"));
-    layout->addWidget(this->search_);
+    layout2->addWidget(this->search_);
+
+    layout->addLayout(layout2);
 
     QObject::connect(this->search_, &QLineEdit::textChanged, this,
                      &EmotePopup::filterEmotes);

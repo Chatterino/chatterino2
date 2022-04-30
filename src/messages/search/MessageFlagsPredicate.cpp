@@ -28,6 +28,10 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
         {
             this->flags_.set(MessageFlag::System);
         }
+        else if (flag == "first-msg")
+        {
+            this->flags_.set(MessageFlag::FirstMessage);
+        }
     }
 }
 
