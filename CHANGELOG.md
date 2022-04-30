@@ -8,6 +8,7 @@
 - Minor: Fixed being unable to load Twitch Usercards from the `/mentions` tab. (#3623)
 - Minor: Add information about the user's operating system in the About page. (#3663)
 - Minor: Added chatter count for each category in viewer list. (#3683)
+- Minor: Sorted usernames in /vips message to be case-insensitive. (#3696)
 - Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Bugfix: Fixed live notifications not getting updated for closed streams going offline. (#3678)
