@@ -10,6 +10,7 @@
 - Minor: Added chatter count for each category in viewer list. (#3683)
 - Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
+- Bugfix: Fixed live notifications not getting updated for closed streams going offline. (#3678)
 - Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
 - Bugfix: Fixed an issue in the emote picker where an emotes tooltip would not properly disappear. (#3686)
 - Bugfix: Fixed incorrect spacing of settings icons at high DPI. (#3698)
