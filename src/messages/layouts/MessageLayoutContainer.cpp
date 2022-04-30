@@ -176,15 +176,10 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         this->currentX_ -= this->spaceWidth_;
     }
 
-    int yPaintPos = element->getRect().height();
-    if (element->getCreator().isVCentered())
-    {
-        yPaintPos = (this->lineHeight_ / 2) + (element->getRect().height() / 2);
-    }
-
     // set paint position
-    element->setPosition(QPoint(this->currentX_ + xOffset,
-                                this->currentY_ - yPaintPos + yOffset));
+    element->setPosition(
+        QPoint(this->currentX_ + xOffset,
+               this->currentY_ - element->getRect().height() + yOffset));
 
     element->setLine(this->line_);
 
@@ -360,7 +355,10 @@ void MessageLayoutContainer::paintElements(QPainter &painter)
         painter.setPen(QColor(0, 255, 0));
         painter.drawRect(element->getRect());
 #endif
-
+        if (element->getFlags().has(MessageElementFlag::VerticallyCentered))
+        {
+            element->centerVertically(this->lineHeight_);
+        }
         element->paint(painter);
     }
 }

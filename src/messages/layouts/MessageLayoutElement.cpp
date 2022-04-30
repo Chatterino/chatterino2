@@ -36,6 +36,11 @@ MessageElement &MessageLayoutElement::getCreator() const
     return this->creator_;
 }
 
+void MessageLayoutElement::centerVertically(int maxHeight)
+{
+    this->rect_.moveTop((maxHeight / 2) + (this->rect_.height() / 2));
+}
+
 void MessageLayoutElement::setPosition(QPoint point)
 {
     this->rect_.moveTopLeft(point);

@@ -29,6 +29,7 @@ public:
 
     const QRect &getRect() const;
     MessageElement &getCreator() const;
+    void centerVertically(int maxHeight);
     void setPosition(QPoint point);
     bool hasTrailingSpace() const;
     int getLine() const;
