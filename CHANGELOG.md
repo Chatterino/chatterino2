@@ -6,6 +6,7 @@
 - Minor: Adjust large stream thumbnail to 16:9 (#3655)
 - Minor: Fixed being unable to load Twitch Usercards from the `/mentions` tab. (#3623)
 - Minor: Add information about the user's operating system in the About page. (#3663)
+- Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
 - Bugfix: Fixed an issue in the emote picker where an emotes tooltip would not properly disappear. (#3686)
