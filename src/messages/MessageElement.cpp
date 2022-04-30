@@ -58,12 +58,6 @@ MessageElement *MessageElement::setTrailingSpace(bool value)
     return this;
 }
 
-MessageElement *MessageElement::setVCentered(bool value)
-{
-    this->vCentered = value;
-    return this;
-}
-
 const QString &MessageElement::getTooltip() const
 {
     return this->tooltip_;
@@ -89,9 +83,10 @@ bool MessageElement::hasTrailingSpace() const
     return this->trailingSpace;
 }
 
-bool MessageElement::isVCentered() const
+MessageElement *MessageElement::setFlag(MessageElementFlag flag)
 {
-    return this->vCentered;
+    this->flags_.set(flag);
+    return this;
 }
 
 MessageElementFlags MessageElement::getFlags() const
@@ -204,7 +199,7 @@ BadgeElement::BadgeElement(const EmotePtr &emote, MessageElementFlags flags)
     , emote_(emote)
 {
     this->setTooltip(emote->tooltip.string);
-    this->setVCentered(true);
+    this->setFlag(MessageElementFlag::VerticallyCentered);
 }
 
 void BadgeElement::addToContainer(MessageLayoutContainer &container,

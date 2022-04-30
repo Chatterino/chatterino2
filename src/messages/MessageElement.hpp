@@ -125,6 +125,9 @@ enum class MessageElementFlag : int64_t {
     // ZeroWidthEmotes are emotes that are supposed to overlay over any pre-existing emotes
     // e.g. BTTV's SoSnowy during christmas season
     ZeroWidthEmote = (1LL << 31),
+    
+    // draw position
+    VerticallyCentered = (1LL << 32),
 
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
@@ -152,16 +155,14 @@ public:
     MessageElement *setTooltip(const QString &tooltip);
     MessageElement *setThumbnailType(const ThumbnailType type);
     MessageElement *setThumbnail(const ImagePtr &thumbnail);
-
+    MessageElement *setFlag(MessageElementFlag flag);
     MessageElement *setTrailingSpace(bool value);
-    MessageElement *setVCentered(bool value);
     const QString &getTooltip() const;
     const ImagePtr &getThumbnail() const;
     const ThumbnailType &getThumbnailType() const;
 
     const Link &getLink() const;
     bool hasTrailingSpace() const;
-    bool isVCentered() const;
     MessageElementFlags getFlags() const;
     MessageElement *updateLink();
 
@@ -173,7 +174,6 @@ public:
 protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
-    bool vCentered = false;
 
 private:
     QString text_;
