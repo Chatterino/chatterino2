@@ -156,7 +156,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
     ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
     ASSERT_EQ(pubSub->diag.messagesReceived, 0);
 
-    for (auto i = 0; i < PubSubClient::listensPerConnection; ++i)
+    for (auto i = 0; i < PubSubClient::MAX_LISTENS; ++i)
     {
         pubSub->listenToTopic(QString("test-1.%1").arg(i));
     }
@@ -167,7 +167,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
     ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
     ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
 
-    for (auto i = 0; i < PubSubClient::listensPerConnection; ++i)
+    for (auto i = 0; i < PubSubClient::MAX_LISTENS; ++i)
     {
         pubSub->listenToTopic(QString("test-2.%1").arg(i));
     }
@@ -199,7 +199,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimitSingleStep)
     ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
     ASSERT_EQ(pubSub->diag.messagesReceived, 0);
 
-    for (auto i = 0; i < PubSubClient::listensPerConnection * 2; ++i)
+    for (auto i = 0; i < PubSubClient::MAX_LISTENS * 2; ++i)
     {
         pubSub->listenToTopic("test");
     }

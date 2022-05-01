@@ -67,8 +67,7 @@ bool PubSubClient::listen(PubSubListenMessage msg)
 {
     int numRequestedListens = msg.topics.size();
 
-    if (this->numListens_ + numRequestedListens >
-        PubSubClient::listensPerConnection)
+    if (this->numListens_ + numRequestedListens > PubSubClient::MAX_LISTENS)
     {
         // This PubSubClient is already at its peak listens
         return false;

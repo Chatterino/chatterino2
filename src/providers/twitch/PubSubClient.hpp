@@ -31,7 +31,7 @@ public:
     };
 
     // The max amount of topics we may listen to with a single connection
-    static constexpr std::vector<QString>::size_type listensPerConnection = 50;
+    static constexpr std::vector<QString>::size_type MAX_LISTENS = 50;
 
     PubSubClient(WebsocketClient &_websocketClient, WebsocketHandle _handle,
                  const PubSubClientOptions &clientOptions);
