@@ -86,6 +86,7 @@ private:
         int endIndex;
         int startCharIndex;
         int endCharIndex;
+        int height;
         QRect rect;
     };
 

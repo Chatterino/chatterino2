@@ -249,8 +249,11 @@ void MessageLayoutContainer::breakLine()
         this->lines_.back().endIndex = this->lineStart_;
         this->lines_.back().endCharIndex = this->charIndex_;
     }
+
+    int finalLineHeight = (2 * this->margin.top * this->scale_) + lineHeight_;
+
     this->lines_.push_back(
-        {(int)lineStart_, 0, this->charIndex_, 0,
+        {(int)lineStart_, 0, this->charIndex_, 0, finalLineHeight,
          QRect(-100000, this->currentY_, 200000, lineHeight_)});
 
     for (int i = this->lineStart_; i < this->elements_.size(); i++)
@@ -357,7 +360,7 @@ void MessageLayoutContainer::paintElements(QPainter &painter)
 #endif
         if (element->getFlags().has(MessageElementFlag::VerticallyCentered))
         {
-            element->centerVertically(this->lineHeight_);
+            element->centerVertically(this->lines_[element->getLine()].height);
         }
         element->paint(painter);
     }
