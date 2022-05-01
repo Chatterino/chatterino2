@@ -15,7 +15,7 @@
 
 namespace chatterino {
 
-static const char *PING_PAYLOAD = "{\"type\":\"PING\"}";
+static const char *PING_PAYLOAD = R"({"type":"PING"})";
 
 PubSubClient::PubSubClient(WebsocketClient &websocketClient,
                            WebsocketHandle handle,
