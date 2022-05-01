@@ -51,15 +51,14 @@ void PubSubClient::close(const std::string &reason,
     if (ec)
     {
         qCDebug(chatterinoPubSub)
-            << "Client::close(): Error getting con:" << ec.message().c_str();
+            << "Error getting con:" << ec.message().c_str();
         return;
     }
 
     conn->close(code, reason, ec);
     if (ec)
     {
-        qCDebug(chatterinoPubSub)
-            << "Client::close(): Error closing:" << ec.message().c_str();
+        qCDebug(chatterinoPubSub) << "Error closing:" << ec.message().c_str();
         return;
     }
 }
