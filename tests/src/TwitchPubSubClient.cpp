@@ -11,12 +11,12 @@ using namespace std::chrono_literals;
  * Server randomly disconnects us, we should reconnect (COMPLETE)
  * Client listens to more than 50 topics, so it opens 2 connections (COMPLETE)
  * Server sends RECONNECT message to us, we should reconnect (INCOMPLETE, leaving for now since if we just ignore it and Twitch disconnects us we should already handle it properly)
- * Listen that required authentication, but authentication is missing
- * Listen that required authentication, but authentication is wrong
+ * Listen that required authentication, but authentication is missing (COMPLETE)
+ * Listen that required authentication, but authentication is wrong (COMPLETE)
  * Incoming Whisper message (COMPLETE)
  * Incoming AutoMod message
  * Incoming ChannelPoints message
- * Incoming ChatModeratorAciton message (COMPLETE)
+ * Incoming ChatModeratorAction message (COMPLETE)
  **/
 
 #define RUN_PUBSUB_TESTS
