@@ -1,4 +1,4 @@
-#include "providers/twitch/PubsubManager.hpp"
+#include "providers/twitch/PubSubManager.hpp"
 
 #include <gtest/gtest.h>
 
