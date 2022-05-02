@@ -130,10 +130,6 @@ void SharedMessageBuilder::parseHighlights()
 {
     auto app = getApp();
 
-    auto currentUser = app->accounts->twitch.getCurrent();
-
-    QString currentUsername = currentUser->getUserName();
-
     if (getCSettings().isBlacklistedUser(this->ircMessage->nick()))
     {
         // Do nothing. We ignore highlights from this user.
@@ -226,6 +222,9 @@ void SharedMessageBuilder::parseHighlights()
             return;
         }
     }
+
+    auto currentUser = app->accounts->twitch.getCurrent();
+    QString currentUsername = currentUser->getUserName();
 
     if (this->ircMessage->nick() == currentUsername)
     {
