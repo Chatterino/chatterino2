@@ -130,37 +130,6 @@ void SharedMessageBuilder::parseHighlights()
 {
     auto app = getApp();
 
-    // Highlight because it's a subscription
-    if (this->message().flags.has(MessageFlag::Subscription) &&
-        getSettings()->enableSubHighlight)
-    {
-        if (getSettings()->enableSubHighlightTaskbar)
-        {
-            this->highlightAlert_ = true;
-        }
-
-        if (getSettings()->enableSubHighlightSound)
-        {
-            this->highlightSound_ = true;
-
-            // Use custom sound if set, otherwise use fallback
-            if (!getSettings()->subHighlightSoundUrl.getValue().isEmpty())
-            {
-                this->highlightSoundUrl_ =
-                    QUrl(getSettings()->subHighlightSoundUrl.getValue());
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
-        }
-
-        this->message().flags.set(MessageFlag::Highlighted);
-        this->message().highlightColor =
-            ColorProvider::instance().color(ColorType::Subscription);
-    }
-
-    // XXX: Non-common term in SharedMessageBuilder
     auto currentUser = app->accounts->twitch.getCurrent();
 
     QString currentUsername = currentUser->getUserName();
@@ -262,6 +231,36 @@ void SharedMessageBuilder::parseHighlights()
     {
         // Do nothing. Highlights cannot be triggered by yourself
         return;
+    }
+
+    // Highlight because it's a subscription
+    if (this->message().flags.has(MessageFlag::Subscription) &&
+        getSettings()->enableSubHighlight)
+    {
+        if (getSettings()->enableSubHighlightTaskbar)
+        {
+            this->highlightAlert_ = true;
+        }
+
+        if (getSettings()->enableSubHighlightSound)
+        {
+            this->highlightSound_ = true;
+
+            // Use custom sound if set, otherwise use fallback
+            if (!getSettings()->subHighlightSoundUrl.getValue().isEmpty())
+            {
+                this->highlightSoundUrl_ =
+                    QUrl(getSettings()->subHighlightSoundUrl.getValue());
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
+        }
+
+        this->message().flags.set(MessageFlag::Highlighted);
+        this->message().highlightColor =
+            ColorProvider::instance().color(ColorType::Subscription);
     }
 
     // TODO: This vector should only be rebuilt upon highlights being changed
