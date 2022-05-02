@@ -15,6 +15,7 @@
 - Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
 - Bugfix: Fixed an issue in the emote picker where an emotes tooltip would not properly disappear. (#3686)
 - Bugfix: Fixed incorrect spacing of settings icons at high DPI. (#3698)
+- Bugfix: Fixed highlights triggering from own resub messages. (#3707)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 
 ## 2.3.5
