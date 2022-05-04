@@ -992,7 +992,6 @@ void UserInfoPopup::fetchSevenTVAvatar(const HelixUser &user)
             if (profile_picture_id.length() > 0)
             {
                 auto URI = SEVENTV_CDR_PP.arg(id, profile_picture_id);
-                this->avatarUrl_ = URI;
 
                 NetworkRequest(URI)
                     .timeout(20000)
@@ -1007,7 +1006,12 @@ void UserInfoPopup::fetchSevenTVAvatar(const HelixUser &user)
                             this->getFilename(hash.result().toHex());
 
                         this->saveCacheAvatar(data, filename);
-                        this->setSevenTVAvatar(filename);
+
+                        if (this->ui_.avatarButton != nullptr)
+                        {
+                            this->avatarUrl_ = URI;
+                            this->setSevenTVAvatar(filename);
+                        }
 
                         return Success;
                     })
