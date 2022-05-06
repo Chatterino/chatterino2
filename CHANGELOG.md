@@ -10,6 +10,7 @@
 - Minor: Added chatter count for each category in viewer list. (#3683)
 - Minor: Sorted usernames in /vips message to be case-insensitive. (#3696)
 - Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
+- Minor: Fixed tag parsing for consecutive escaped characters. (#3711)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Bugfix: Fixed live notifications not getting updated for closed streams going offline. (#3678)
 - Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
