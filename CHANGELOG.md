@@ -11,11 +11,13 @@
 - Minor: Added chatter count for each category in viewer list. (#3683)
 - Minor: Sorted usernames in /vips message to be case-insensitive. (#3696)
 - Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
+- Minor: Fixed tag parsing for consecutive escaped characters. (#3711)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Bugfix: Fixed live notifications not getting updated for closed streams going offline. (#3678)
 - Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
 - Bugfix: Fixed an issue in the emote picker where an emotes tooltip would not properly disappear. (#3686)
 - Bugfix: Fixed incorrect spacing of settings icons at high DPI. (#3698)
+- Bugfix: Fixed existing emote popups not being raised from behind other windows when refocusing them on macOS (#3713)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 
 ## 2.3.5
