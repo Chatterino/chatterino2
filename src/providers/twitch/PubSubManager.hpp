@@ -119,6 +119,7 @@ public:
     } signals_;
 
     void unlistenAllModerationActions();
+    void unlistenAutomod();
     void unlistenWhispers();
 
     bool listenToWhispers();

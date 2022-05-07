@@ -507,6 +507,7 @@ void Application::initPubSub()
     this->accounts->twitch.currentUserChanged.connect(
         [=] {
             this->twitch->pubsub->unlistenAllModerationActions();
+            this->twitch->pubsub->unlistenAutomod();
             this->twitch->pubsub->unlistenWhispers();
         },
         boost::signals2::at_front);
