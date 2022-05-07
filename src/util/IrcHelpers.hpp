@@ -51,7 +51,6 @@ inline QString parseTagString(const QString &input)
                 break;
             }
 
-            i++;
             length--;
         }
     }
