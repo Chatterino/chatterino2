@@ -167,6 +167,9 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "lrucache",
                        "https://github.com/lamerman/cpp-lru-cache",
                        ":/licenses/lrucache.txt");
+            addLicense(form.getElement(), "magic_enum",
+                       "https://github.com/Neargye/magic_enum",
+                       ":/licenses/magic_enum.txt");
         }
 
         // Attributions

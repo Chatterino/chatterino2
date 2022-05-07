@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "MessageElement.hpp"
-#include "providers/twitch/PubsubActions.hpp"
+#include "providers/twitch/PubSubActions.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 #include "util/IrcHelpers.hpp"
