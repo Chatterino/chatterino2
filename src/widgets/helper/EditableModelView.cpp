@@ -1,5 +1,4 @@
 #include "EditableModelView.hpp"
-#include "util/Twitch.hpp"
 #include "widgets/helper/RegExpItemDelegate.hpp"
 
 #include <QAbstractItemView>
@@ -26,8 +25,6 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     this->tableView_->setDragDropMode(QTableView::DragDropMode::InternalMove);
     this->tableView_->setDragDropOverwriteMode(false);
     this->tableView_->setDefaultDropAction(Qt::DropAction::MoveAction);
-    this->tableView_->setItemDelegate(
-        new RegExpItemDelegate(this, TWITCH_USERNAME_PATTERN));
     this->tableView_->verticalHeader()->setVisible(false);
 
     // create layout
@@ -93,6 +90,10 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
 
     // finish button layout
     buttons->addStretch(1);
+}
+void EditableModelView::setValidationPattern(QString pattern)
+{
+    this->tableView_->setItemDelegate(new RegExpItemDelegate(this, pattern));
 }
 
 void EditableModelView::setTitles(std::initializer_list<QString> titles)

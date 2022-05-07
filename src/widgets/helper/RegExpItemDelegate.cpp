@@ -1,4 +1,6 @@
 #include "widgets/helper/RegExpItemDelegate.hpp"
+#include <QLineEdit>
+#include <QRegularExpression>
 
 namespace chatterino {
 
