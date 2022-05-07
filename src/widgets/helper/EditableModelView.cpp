@@ -1,4 +1,6 @@
 #include "EditableModelView.hpp"
+#include "util/Twitch.hpp"
+#include "widgets/helper/RegExpItemDelegate.hpp"
 
 #include <QAbstractItemView>
 #include <QAbstractTableModel>
@@ -24,6 +26,8 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     this->tableView_->setDragDropMode(QTableView::DragDropMode::InternalMove);
     this->tableView_->setDragDropOverwriteMode(false);
     this->tableView_->setDefaultDropAction(Qt::DropAction::MoveAction);
+    this->tableView_->setItemDelegate(
+        new RegExpItemDelegate(this, TWITCH_USERNAME_PATTERN));
     this->tableView_->verticalHeader()->setVisible(false);
 
     // create layout

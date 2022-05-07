@@ -4,6 +4,8 @@
 
 namespace chatterino {
 
+QString const TWITCH_USERNAME_PATTERN("^[a-zA-Z0-9][a-zA-Z0-9_]{1,24}");
+
 void openTwitchUsercard(const QString channel, const QString username);
 
 // stripUserName removes any @ prefix or , suffix to make it more suitable for command use
