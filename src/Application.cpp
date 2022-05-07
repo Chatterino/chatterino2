@@ -31,6 +31,7 @@
 #include "singletons/Toasts.hpp"
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -331,21 +332,105 @@ void Application::initPubSub()
             });
         });
 
-    this->twitch->pubsub->signals_.moderation.automodMessage.connect(
-        [&](const auto &action) {
-            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+    const auto handleAutoModMessage = [&](const auto &action) {
+        auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
-            if (chan->isEmpty())
-            {
-                return;
-            }
+        if (chan->isEmpty())
+        {
+            return;
+        }
 
-            postToThread([chan, action] {
-                const auto p = makeAutomodMessage(action);
-                chan->addMessage(p.first);
-                chan->addMessage(p.second);
-            });
+        postToThread([chan, action] {
+            const auto p = makeAutomodMessage(action);
+            chan->addMessage(p.first);
+            chan->addMessage(p.second);
         });
+    };
+
+    this->twitch->pubsub->signals_.moderation.autoModMessageCaught.connect(
+        [&](const auto &msg, const QString &channelID) {
+            switch (msg.type)
+            {
+                case PubSubAutoModQueueMessage::Type::AutoModCaughtMessage: {
+                    if (msg.status == "PENDING")
+                    {
+                        AutomodAction action(msg.data, channelID);
+                        action.reason = QString("%1 level %2")
+                                            .arg(msg.contentCategory)
+                                            .arg(msg.contentLevel);
+
+                        action.msgID = msg.messageID;
+                        action.message = msg.messageText;
+
+                        // this message also contains per-word automod data, which could be implemented
+
+                        // extract sender data manually because Twitch loves not being consistent
+                        QString senderDisplayName =
+                            msg.senderUserDisplayName;  // Might be transformed later
+                        bool hasLocalizedName = false;
+                        if (!msg.senderUserDisplayName.isEmpty())
+                        {
+                            // check for non-ascii display names
+                            if (QString::compare(msg.senderUserDisplayName,
+                                                 msg.senderUserLogin,
+                                                 Qt::CaseInsensitive) != 0)
+                            {
+                                hasLocalizedName = true;
+                            }
+                        }
+                        QColor senderColor = msg.senderUserChatColor;
+                        QString senderColor_;
+                        if (!senderColor.isValid() &&
+                            getSettings()->colorizeNicknames)
+                        {
+                            // color may be not present if user is a grey-name
+                            senderColor = getRandomColor(msg.senderUserID);
+                        }
+
+                        // handle username style based on prefered setting
+                        switch (getSettings()->usernameDisplayMode.getValue())
+                        {
+                            case UsernameDisplayMode::Username: {
+                                if (hasLocalizedName)
+                                {
+                                    senderDisplayName = msg.senderUserLogin;
+                                }
+                                break;
+                            }
+                            case UsernameDisplayMode::LocalizedName: {
+                                break;
+                            }
+                            case UsernameDisplayMode::
+                                UsernameAndLocalizedName: {
+                                if (hasLocalizedName)
+                                {
+                                    senderDisplayName = QString("%1(%2)").arg(
+                                        msg.senderUserLogin,
+                                        msg.senderUserDisplayName);
+                                }
+                                break;
+                            }
+                        }
+
+                        action.target =
+                            ActionUser{msg.senderUserID, msg.senderUserLogin,
+                                       senderDisplayName, senderColor};
+                        handleAutoModMessage(action);
+                    }
+                    // "ALLOWED" and "DENIED" statuses remain unimplemented
+                    // They are versions of automod_message_(denied|approved) but for mods.
+                }
+                break;
+
+                case PubSubAutoModQueueMessage::Type::INVALID:
+                default: {
+                }
+                break;
+            }
+        });
+
+    this->twitch->pubsub->signals_.moderation.autoModMessageBlocked.connect(
+        handleAutoModMessage);
 
     this->twitch->pubsub->signals_.moderation.automodUserMessage.connect(
         [&](const auto &action) {

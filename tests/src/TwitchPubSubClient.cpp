@@ -1,5 +1,7 @@
 #include "providers/twitch/PubSubManager.hpp"
 
+#include "providers/twitch/PubSubActions.hpp"
+
 #include <gtest/gtest.h>
 
 using namespace chatterino;
@@ -381,6 +383,51 @@ TEST(TwitchPubSubClient, CorrectToken)
     ASSERT_EQ(pubSub->diag.messagesReceived, 2);
     ASSERT_EQ(pubSub->diag.listenResponses, 1);
     ASSERT_EQ(pubSub->diag.failedListenResponses, 0);
+
+    pubSub->stop();
+
+    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+}
+
+TEST(TwitchPubSubClient, AutoModMessageHeld)
+{
+    auto pingInterval = std::chrono::seconds(1);
+    const QString host("wss://127.0.0.1:9050/automod-held");
+
+    auto *pubSub = new PubSub(host, pingInterval);
+    pubSub->setAccountData("xD", "123456");
+    pubSub->start();
+
+    boost::optional<PubSubAutoModQueueMessage> oReceived;
+    boost::optional<QString> oChannelID;
+
+    pubSub->signals_.moderation.autoModMessageCaught.connect(
+        [&](const auto &msg, const QString &channelID) {
+            oReceived = msg;
+            oChannelID = channelID;
+        });
+
+    pubSub->listenToTopic("automod-queue.117166826.117166826");
+
+    std::this_thread::sleep_for(50ms);
+
+    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub->diag.messagesReceived, 3);
+    ASSERT_EQ(pubSub->diag.listenResponses, 1);
+    ASSERT_EQ(pubSub->diag.failedListenResponses, 0);
+
+    ASSERT_TRUE(oReceived);
+    ASSERT_TRUE(oChannelID);
+
+    auto received = *oReceived;
+    auto channelID = *oChannelID;
+
+    ASSERT_EQ(channelID, "117166826");
+    ASSERT_EQ(received.messageText, "kurwa");
 
     pubSub->stop();
 

@@ -94,7 +94,14 @@ public:
             Signal<BanAction> userBanned;
             Signal<UnbanAction> userUnbanned;
 
-            Signal<AutomodAction> automodMessage;
+            // Message caught by automod
+            //                                channelID
+            pajlada::Signals::Signal<PubSubAutoModQueueMessage, QString>
+                autoModMessageCaught;
+
+            // Message blocked by moderator
+            Signal<AutomodAction> autoModMessageBlocked;
+
             Signal<AutomodUserAction> automodUserMessage;
             Signal<AutomodInfoAction> automodInfoMessage;
         } moderation;

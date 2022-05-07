@@ -4,7 +4,6 @@
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
-#include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -26,8 +25,6 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
           pingInterval,
       })
 {
-    qCDebug(chatterinoPubSub) << "init PubSub";
-
     this->moderationActionHandlers["clear"] = [this](const auto &data,
                                                      const auto &roomID) {
         ClearChatAction action(data, roomID);
@@ -284,7 +281,6 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
 
     this->moderationActionHandlers["automod_rejected"] =
         [this](const auto &data, const auto &roomID) {
-            // Display the automod message and prompt the allow/deny
             AutomodAction action(data, roomID);
 
             action.source.id = data.value("created_by_user_id").toString();
@@ -311,7 +307,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
             action.message = args[1].toString();  // May be omitted
             action.reason = args[2].toString();   // May be omitted
 
-            this->signals_.moderation.automodMessage.invoke(action);
+            this->signals_.moderation.autoModMessageBlocked.invoke(action);
         };
 
     this->moderationActionHandlers["automod_message_rejected"] =
@@ -1129,87 +1125,8 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
         // Channel ID where the moderator actions are coming from
         auto channelID = topicParts[2];
 
-        switch (innerMessage.type)
-        {
-            case PubSubAutoModQueueMessage::Type::AutoModCaughtMessage: {
-                if (innerMessage.status == "PENDING")
-                {
-                    AutomodAction action(innerMessage.data, channelID);
-                    action.reason = QString("%1 level %2")
-                                        .arg(innerMessage.contentCategory)
-                                        .arg(innerMessage.contentLevel);
-
-                    action.msgID = innerMessage.messageID;
-                    action.message = innerMessage.messageText;
-
-                    // this message also contains per-word automod data, which could be implemented
-
-                    // extract sender data manually because Twitch loves not being consistent
-                    QString senderDisplayName =
-                        innerMessage
-                            .senderUserDisplayName;  // Might be transformed later
-                    bool hasLocalizedName = false;
-                    if (!innerMessage.senderUserDisplayName.isEmpty())
-                    {
-                        // check for non-ascii display names
-                        if (QString::compare(innerMessage.senderUserDisplayName,
-                                             innerMessage.senderUserLogin,
-                                             Qt::CaseInsensitive) != 0)
-                        {
-                            hasLocalizedName = true;
-                        }
-                    }
-                    QColor senderColor = innerMessage.senderUserChatColor;
-                    QString senderColor_;
-                    if (!senderColor.isValid() &&
-                        getSettings()->colorizeNicknames)
-                    {
-                        // color may be not present if user is a grey-name
-                        senderColor = getRandomColor(innerMessage.senderUserID);
-                    }
-
-                    // handle username style based on prefered setting
-                    switch (getSettings()->usernameDisplayMode.getValue())
-                    {
-                        case UsernameDisplayMode::Username: {
-                            if (hasLocalizedName)
-                            {
-                                senderDisplayName =
-                                    innerMessage.senderUserLogin;
-                            }
-                            break;
-                        }
-                        case UsernameDisplayMode::LocalizedName: {
-                            break;
-                        }
-                        case UsernameDisplayMode::UsernameAndLocalizedName: {
-                            if (hasLocalizedName)
-                            {
-                                senderDisplayName = QString("%1(%2)").arg(
-                                    innerMessage.senderUserLogin,
-                                    innerMessage.senderUserDisplayName);
-                            }
-                            break;
-                        }
-                    }
-
-                    action.target = ActionUser{innerMessage.senderUserID,
-                                               innerMessage.senderUserLogin,
-                                               senderDisplayName, senderColor};
-                    this->signals_.moderation.automodMessage.invoke(action);
-                }
-                // "ALLOWED" and "DENIED" statuses remain unimplemented
-                // They are versions of automod_message_(denied|approved) but for mods.
-            }
-            break;
-
-            case PubSubAutoModQueueMessage::Type::INVALID:
-            default: {
-                qCDebug(chatterinoPubSub) << "Unhandled automod event type:"
-                                          << innerMessage.typeString;
-            }
-            break;
-        }
+        this->signals_.moderation.autoModMessageCaught.invoke(innerMessage,
+                                                              channelID);
     }
     else
     {
