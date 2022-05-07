@@ -549,7 +549,8 @@ void PubSub::unlistenAutomod()
     for (const auto &p : this->clients)
     {
         const auto &client = p.second;
-        if (const auto &[topics, nonce] = client->unlistenPrefix("automod-queue.");
+        if (const auto &[topics, nonce] =
+                client->unlistenPrefix("automod-queue.");
             !topics.empty())
         {
             this->registerNonce(nonce, {
