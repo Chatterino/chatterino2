@@ -332,23 +332,14 @@ void Application::initPubSub()
             });
         });
 
-    const auto handleAutoModMessage = [&](const auto &action) {
-        auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
-
-        if (chan->isEmpty())
-        {
-            return;
-        }
-
-        postToThread([chan, action] {
-            const auto p = makeAutomodMessage(action);
-            chan->addMessage(p.first);
-            chan->addMessage(p.second);
-        });
-    };
-
     this->twitch->pubsub->signals_.moderation.autoModMessageCaught.connect(
         [&](const auto &msg, const QString &channelID) {
+            auto chan = this->twitch->getChannelOrEmptyByID(channelID);
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
             switch (msg.type)
             {
                 case PubSubAutoModQueueMessage::Type::AutoModCaughtMessage: {
@@ -415,7 +406,11 @@ void Application::initPubSub()
                         action.target =
                             ActionUser{msg.senderUserID, msg.senderUserLogin,
                                        senderDisplayName, senderColor};
-                        handleAutoModMessage(action);
+                        postToThread([chan, action] {
+                            const auto p = makeAutomodMessage(action);
+                            chan->addMessage(p.first);
+                            chan->addMessage(p.second);
+                        });
                     }
                     // "ALLOWED" and "DENIED" statuses remain unimplemented
                     // They are versions of automod_message_(denied|approved) but for mods.
@@ -430,7 +425,19 @@ void Application::initPubSub()
         });
 
     this->twitch->pubsub->signals_.moderation.autoModMessageBlocked.connect(
-        handleAutoModMessage);
+        [&](const auto &action) {
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            postToThread([chan, action] {
+                const auto p = makeAutomodMessage(action);
+                chan->addMessage(p.first);
+                chan->addMessage(p.second);
+            });
+        });
 
     this->twitch->pubsub->signals_.moderation.automodUserMessage.connect(
         [&](const auto &action) {

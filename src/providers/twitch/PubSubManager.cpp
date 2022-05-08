@@ -279,6 +279,8 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         this->signals_.moderation.userUnbanned.invoke(action);
     };
 
+    /*
+    // This handler is no longer required as we use the automod-queue topic now
     this->moderationActionHandlers["automod_rejected"] =
         [this](const auto &data, const auto &roomID) {
             AutomodAction action(data, roomID);
@@ -309,6 +311,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
 
             this->signals_.moderation.autoModMessageBlocked.invoke(action);
         };
+    */
 
     this->moderationActionHandlers["automod_message_rejected"] =
         [this](const auto &data, const auto &roomID) {
