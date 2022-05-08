@@ -1,7 +1,7 @@
 #pragma once
 
-#include <rapidjson/document.h>
 #include <QColor>
+#include <QJsonObject>
 #include <QString>
 
 #include <chrono>
@@ -15,10 +15,24 @@ struct ActionUser {
     // displayName should be in format "login(localizedName)" for non-ascii usernames
     QString displayName;
     QColor color;
+
+    inline bool operator==(const ActionUser &rhs) const
+    {
+        return this->id == rhs.id && this->login == rhs.login &&
+               this->displayName == rhs.displayName && this->color == rhs.color;
+    }
 };
 
+inline QDebug operator<<(QDebug dbg, const ActionUser &user)
+{
+    dbg.nospace() << "ActionUser(" << user.id << ", " << user.login << ", "
+                  << user.displayName << ", " << user.color << ")";
+
+    return dbg.maybeSpace();
+}
+
 struct PubSubAction {
-    PubSubAction(const rapidjson::Value &data, const QString &_roomID);
+    PubSubAction(const QJsonObject &data, const QString &_roomID);
     ActionUser source;
 
     std::chrono::steady_clock::time_point timestamp;

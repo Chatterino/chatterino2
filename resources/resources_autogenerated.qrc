@@ -59,6 +59,7 @@
     <file>licenses/emoji-data-source.txt</file>
     <file>licenses/libcommuni_BSD3.txt</file>
     <file>licenses/lrucache.txt</file>
+    <file>licenses/magic_enum.txt</file>
     <file>licenses/openssl.txt</file>
     <file>licenses/pajlada_settings.txt</file>
     <file>licenses/pajlada_signals.txt</file>

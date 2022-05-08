@@ -103,10 +103,10 @@ Split::Split(QWidget *parent)
     this->input_->ui_.textEdit->installEventFilter(parent);
 
     // update placeholder text on Twitch account change and channel change
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [this] {
+    this->bSignals_.emplace_back(
+        getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->updateInputPlaceholder();
-        });
+        }));
     this->signalHolder_.managedConnect(channelChanged, [this] {
         this->updateInputPlaceholder();
     });

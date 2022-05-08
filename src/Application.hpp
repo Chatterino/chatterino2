@@ -68,7 +68,7 @@ public:
 
 private:
     void addSingleton(Singleton *singleton);
-    void initPubsub();
+    void initPubSub();
     void initNm(Paths &paths);
 
     template <typename T,

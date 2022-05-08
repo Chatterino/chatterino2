@@ -204,10 +204,10 @@ SplitHeader::SplitHeader(Split *_split)
         this->handleChannelChanged();
     });
 
-    this->managedConnections_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [this] {
+    this->bSignals_.emplace_back(
+        getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->updateModerationModeIcon();
-        });
+        }));
 
     auto _ = [this](const auto &, const auto &) {
         this->updateChannelText();
