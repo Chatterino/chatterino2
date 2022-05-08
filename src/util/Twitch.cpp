@@ -5,6 +5,12 @@
 
 namespace chatterino {
 
+namespace {
+
+    const auto TWITCH_USER_LOGIN_PATTERN = R"(^[a-z0-9]\w{0,24}$)";
+
+}  // namespace
+
 void openTwitchUsercard(QString channel, QString username)
 {
     QDesktopServices::openUrl("https://www.twitch.tv/popout/" + channel +
@@ -35,12 +41,20 @@ void stripChannelName(QString &channelName)
     }
 }
 
-QRegularExpression twitchUsernameRegexp()
+QRegularExpression twitchUserNameRegexp()
 {
-    static QRegularExpression twitchUsernameRegexp(
-        "^[a-zA-Z0-9][a-zA-Z0-9_]{0,24}$");
+    static QRegularExpression re(
+        TWITCH_USER_LOGIN_PATTERN,
+        QRegularExpression::PatternOption::CaseInsensitiveOption);
 
-    return twitchUsernameRegexp;
+    return re;
+}
+
+QRegularExpression twitchUserLoginRegexp()
+{
+    static QRegularExpression re(TWITCH_USER_LOGIN_PATTERN);
+
+    return re;
 }
 
 }  // namespace chatterino

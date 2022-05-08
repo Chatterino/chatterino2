@@ -97,7 +97,7 @@ NotificationPage::NotificationPage()
                                 nullptr, Platform::Twitch))
                         .getElement();
                 view->setTitles({"Twitch channels"});
-                view->setValidationRegexp(twitchUsernameRegexp());
+                view->setValidationRegexp(twitchUserNameRegexp());
 
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
