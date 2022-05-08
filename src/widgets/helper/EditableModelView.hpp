@@ -16,7 +16,7 @@ public:
     EditableModelView(QAbstractTableModel *model, bool movable = true);
 
     void setTitles(std::initializer_list<QString> titles);
-    void setValidationPattern(QString pattern);
+    void setValidationRegexp(QRegularExpression regexp);
 
     QTableView *getTableView();
     QAbstractTableModel *getModel();

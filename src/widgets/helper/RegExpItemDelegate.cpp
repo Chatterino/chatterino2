@@ -1,12 +1,13 @@
 #include "widgets/helper/RegExpItemDelegate.hpp"
+
 #include <QLineEdit>
-#include <QRegularExpression>
 
 namespace chatterino {
 
-RegExpItemDelegate::RegExpItemDelegate(QObject *parent, QString pattern)
+RegExpItemDelegate::RegExpItemDelegate(QObject *parent,
+                                       QRegularExpression regexp)
     : QStyledItemDelegate(parent)
-    , pattern_(pattern)
+    , regexp_(regexp)
 {
 }
 
@@ -14,9 +15,9 @@ QWidget *RegExpItemDelegate::createEditor(QWidget *parent,
                                           const QStyleOptionViewItem &option,
                                           const QModelIndex &index) const
 {
-    QLineEdit *editor = new QLineEdit(parent);
-    QRegularExpression rx(this->pattern_);
-    editor->setValidator(new QRegularExpressionValidator(rx, editor));
+    auto *editor = new QLineEdit(parent);
+    editor->setValidator(
+        new QRegularExpressionValidator(this->regexp_, editor));
     return editor;
 }
 

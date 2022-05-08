@@ -35,4 +35,12 @@ void stripChannelName(QString &channelName)
     }
 }
 
+QRegularExpression twitchUsernameRegexp()
+{
+    static QRegularExpression twitchUsernameRegexp(
+        "^[a-zA-Z0-9][a-zA-Z0-9_]{0,24}$");
+
+    return twitchUsernameRegexp;
+}
+
 }  // namespace chatterino

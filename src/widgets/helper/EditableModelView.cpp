@@ -91,9 +91,9 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     // finish button layout
     buttons->addStretch(1);
 }
-void EditableModelView::setValidationPattern(QString pattern)
+void EditableModelView::setValidationRegexp(QRegularExpression regexp)
 {
-    this->tableView_->setItemDelegate(new RegExpItemDelegate(this, pattern));
+    this->tableView_->setItemDelegate(new RegExpItemDelegate(this, regexp));
 }
 
 void EditableModelView::setTitles(std::initializer_list<QString> titles)
