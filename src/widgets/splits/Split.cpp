@@ -1032,7 +1032,7 @@ void Split::showViewerList()
             resultList->clear();
             for (auto &item : results)
             {
-                if (!labels.contains(item->text()))
+                if (!item->text().contains("("))
                 {
                     resultList->addItem(formatListItemText(item->text()));
                 }
