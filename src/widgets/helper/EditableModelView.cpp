@@ -1,4 +1,5 @@
 #include "EditableModelView.hpp"
+#include "widgets/helper/RegExpItemDelegate.hpp"
 
 #include <QAbstractItemView>
 #include <QAbstractTableModel>
@@ -89,6 +90,10 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
 
     // finish button layout
     buttons->addStretch(1);
+}
+void EditableModelView::setValidationRegexp(QRegularExpression regexp)
+{
+    this->tableView_->setItemDelegate(new RegExpItemDelegate(this, regexp));
 }
 
 void EditableModelView::setTitles(std::initializer_list<QString> titles)

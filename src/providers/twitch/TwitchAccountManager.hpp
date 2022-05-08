@@ -5,6 +5,8 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "util/SharedPtrElementLess.hpp"
 
+#include <boost/signals2.hpp>
+
 #include <mutex>
 #include <vector>
 
@@ -48,7 +50,8 @@ public:
 
     pajlada::Settings::Setting<QString> currentUsername{"/accounts/current",
                                                         ""};
-    pajlada::Signals::NoArgSignal currentUserChanged;
+    // pajlada::Signals::NoArgSignal currentUserChanged;
+    boost::signals2::signal<void()> currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
 
     SignalVector<std::shared_ptr<TwitchAccount>> accounts;

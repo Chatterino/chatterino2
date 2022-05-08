@@ -159,3 +159,108 @@ TEST(UtilTwitch, StripChannelName)
             << qUtf8Printable(expectedChannelName);
     }
 }
+
+TEST(UtilTwitch, UserLoginRegexp)
+{
+    struct TestCase {
+        QString inputUserLogin;
+        bool matches;
+    };
+
+    std::vector<TestCase> tests{
+        {
+            "pajlada",
+            true,
+        },
+        {
+            // Login names must not start with an underscore
+            "_pajlada",
+            false,
+        },
+        {
+            "@pajlada",
+            false,
+        },
+        {
+            "pajlada!",
+            false,
+        },
+        {
+            "pajlada,",
+            false,
+        },
+        {
+            // Login names must not contain capital letters
+            "Pajlada",
+            false,
+        },
+        {"k", true},
+        {"testaccount_420", true},
+        {"3v", true},
+        {"ron", true},
+        {"bits", true},
+    };
+
+    const auto &regexp = twitchUserLoginRegexp();
+
+    for (const auto &[inputUserLogin, expectedMatch] : tests)
+    {
+        const auto &match = regexp.match(inputUserLogin);
+        auto actual = regexp.match(inputUserLogin);
+
+        EXPECT_EQ(match.hasMatch(), expectedMatch)
+            << qUtf8Printable(inputUserLogin) << " did not match as expected";
+    }
+}
+
+TEST(UtilTwitch, UserNameRegexp)
+{
+    struct TestCase {
+        QString inputUserLogin;
+        bool matches;
+    };
+
+    std::vector<TestCase> tests{
+        {"PAJLADA", true},
+        {
+            // User names must not start with an underscore
+            "_pajlada",
+            false,
+        },
+        {
+            "@pajlada",
+            false,
+        },
+        {
+            "pajlada!",
+            false,
+        },
+        {
+            "pajlada,",
+            false,
+        },
+        {
+            "Pajlada",
+            true,
+        },
+        {"k", true},
+        {"testaccount_420", true},
+        {"3v", true},
+        {"ron", true},
+        {"bits", true},
+        {"3V", true},
+        {"Ron", true},
+        {"Bits", true},
+    };
+
+    const auto &regexp = twitchUserNameRegexp();
+
+    for (const auto &[inputUserLogin, expectedMatch] : tests)
+    {
+        const auto &match = regexp.match(inputUserLogin);
+        auto actual = regexp.match(inputUserLogin);
+
+        EXPECT_EQ(match.hasMatch(), expectedMatch)
+            << qUtf8Printable(inputUserLogin) << " did not match as expected";
+    }
+}
