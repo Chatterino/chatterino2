@@ -22,10 +22,13 @@
 
 using namespace chatterino;
 
+#define SUPPORT_QT_NETWORK_TESTS
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
 
+#ifdef SUPPORT_QT_NETWORK_TESTS
     QApplication app(argc, argv);
 
     chatterino::NetworkManager::init();
@@ -39,4 +42,7 @@ int main(int argc, char **argv)
     });
 
     return app.exec();
+#else
+    return RUN_ALL_TESTS();
+#endif
 }

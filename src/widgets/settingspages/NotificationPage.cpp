@@ -6,6 +6,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/Twitch.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QCheckBox>
@@ -96,6 +97,7 @@ NotificationPage::NotificationPage()
                                 nullptr, Platform::Twitch))
                         .getElement();
                 view->setTitles({"Twitch channels"});
+                view->setValidationRegexp(twitchUserNameRegexp());
 
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);

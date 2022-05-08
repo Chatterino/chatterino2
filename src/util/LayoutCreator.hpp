@@ -43,7 +43,10 @@ public:
     }
 
     template <typename T2, typename... Args>
-    LayoutCreator<T2> emplace(Args &&... args)
+    // clang-format off
+    // clang-format can be enabled once clang-format v11+ has been installed in CI
+    LayoutCreator<T2> emplace(Args &&...args)
+    // clang-format on
     {
         T2 *t = new T2(std::forward<Args>(args)...);
 
@@ -184,7 +187,10 @@ private:
 };
 
 template <typename T, typename... Args>
-LayoutCreator<T> makeDialog(Args &&... args)
+// clang-format off
+// clang-format can be enabled once clang-format v11+ has been installed in CI
+LayoutCreator<T> makeDialog(Args &&...args)
+// clang-format on
 {
     T *t = new T(std::forward<Args>(args)...);
     t->setAttribute(Qt::WA_DeleteOnClose);
