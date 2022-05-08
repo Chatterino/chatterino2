@@ -420,6 +420,8 @@ set(SOURCE_FILES
         widgets/helper/NotebookTab.hpp
         widgets/helper/QColorPicker.cpp
         widgets/helper/QColorPicker.hpp
+        widgets/helper/RegExpItemDelegate.cpp
+        widgets/helper/RegExpItemDelegate.hpp
         widgets/helper/ResizingTextEdit.cpp
         widgets/helper/ResizingTextEdit.hpp
         widgets/helper/ScrollbarHighlight.cpp
