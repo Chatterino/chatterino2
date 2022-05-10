@@ -33,6 +33,10 @@
     <file>buttons/modModeDisabled2.png</file>
     <file>buttons/modModeEnabled.png</file>
     <file>buttons/modModeEnabled2.png</file>
+    <file>buttons/replyDark.png</file>
+    <file>buttons/replyLight.png</file>
+    <file>buttons/replyThreadDark.png</file>
+    <file>buttons/replyThreadLight.png</file>
     <file>buttons/search.png</file>
     <file>buttons/timeout.png</file>
     <file>buttons/trashCan.png</file>

@@ -38,6 +38,10 @@ public:
         QPixmap modModeDisabled2;
         QPixmap modModeEnabled;
         QPixmap modModeEnabled2;
+        QPixmap replyDark;
+        QPixmap replyLight;
+        QPixmap replyThreadDark;
+        QPixmap replyThreadLight;
         QPixmap search;
         QPixmap timeout;
         QPixmap trashCan;
