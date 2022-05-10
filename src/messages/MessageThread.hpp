@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace chatterino {
-class Message;
+struct Message;
 
 class MessageThread
 {
