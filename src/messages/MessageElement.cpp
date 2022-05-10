@@ -395,6 +395,100 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+SingleLineTextElement::SingleLineTextElement(const QString &text,
+                                             MessageElementFlags flags,
+                                             const MessageColor &color,
+                                             FontStyle style)
+    : MessageElement(flags)
+    , color_(color)
+    , style_(style)
+{
+    for (const auto &word : text.split(' '))
+    {
+        this->words_.push_back({word, -1});
+        // fourtf: add logic to store multiple spaces after message
+    }
+}
+
+void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
+                                           MessageElementFlags flags)
+{
+    auto app = getApp();
+
+    if (flags.hasAny(this->getFlags()))
+    {
+        QFontMetrics metrics =
+            app->fonts->getFontMetrics(this->style_, container.getScale());
+
+        auto getTextLayoutElement = [&](QString text, int width,
+                                        bool hasTrailingSpace) {
+            auto color = this->color_.getColor(*app->themes);
+            app->themes->normalizeColor(color);
+
+            auto e = (new TextLayoutElement(
+                          *this, text, QSize(width, metrics.height()), color,
+                          this->style_, container.getScale()))
+                         ->setLink(this->getLink());
+            e->setTrailingSpace(hasTrailingSpace);
+            e->setText(text);
+
+            // If URL link was changed,
+            // Should update it in MessageLayoutElement too!
+            if (this->getLink().type == Link::Url)
+            {
+                static_cast<TextLayoutElement *>(e)->listenToLinkChanges();
+            }
+            return e;
+        };
+
+        QString ellipsis = "...";
+
+        for (Word &word : this->words_)
+        {
+            word.width = metrics.horizontalAdvance(word.text);
+
+            // see if the text fits in the current line
+            if (container.fitsInLine(word.width))
+            {
+                container.addElementNoLineBreak(getTextLayoutElement(
+                    word.text, word.width, this->hasTrailingSpace()));
+            }
+            else
+            {
+                // word overflows, try minimum truncation
+                bool cutSuccess = false;
+                for (size_t cut = 1; cut < word.text.length(); ++cut)
+                {
+                    // Cut off n characters and append the ellipsis.
+                    // Try removing characters one by one until the word fits.
+                    QString truncatedWord = word.text.chopped(cut) + ellipsis;
+                    int newSize = metrics.horizontalAdvance(truncatedWord);
+                    if (container.fitsInLine(newSize))
+                    {
+                        container.addElementNoLineBreak(getTextLayoutElement(
+                            truncatedWord, newSize, false));
+                        cutSuccess = true;
+                        break;
+                    }
+                }
+
+                if (!cutSuccess)
+                {
+                    // We weren't able to show any part of the current word, so
+                    // just append the ellipsis.
+                    int ellipsisSize = metrics.horizontalAdvance(ellipsis);
+                    container.addElementNoLineBreak(
+                        getTextLayoutElement(ellipsis, ellipsisSize, false));
+                }
+
+                break;
+            }
+        }
+
+        container.breakLine();
+    }
+}
+
 // TIMESTAMP
 TimestampElement::TimestampElement(QTime time)
     : MessageElement(MessageElementFlag::Timestamp)
