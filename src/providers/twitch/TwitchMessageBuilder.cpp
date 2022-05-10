@@ -200,10 +200,12 @@ MessagePtr TwitchMessageBuilder::build()
 
         // construct reply elements
         this->emplace<TextElement>("Replying to", MessageElementFlag::Text,
-                                   MessageColor::System, FontStyle::ChatSmall);
+                                   MessageColor::System,
+                                   FontStyle::ChatMediumSmall);
+
         this->emplace<TextElement>(
                 "@" + threadRoot->loginName + ":", MessageElementFlag::Username,
-                threadRoot->usernameColor, FontStyle::ChatSmall)
+                threadRoot->usernameColor, FontStyle::ChatMediumSmall)
             ->setLink({Link::UserWhisper, threadRoot->displayName});
 
         this->emplace<SingleLineTextElement>(
@@ -272,6 +274,12 @@ MessagePtr TwitchMessageBuilder::build()
 
     // words
     QStringList splits = this->originalMessage_.split(' ');
+
+    if (this->thread_ && !splits.isEmpty() && splits[0].startsWith('@'))
+    {
+        // If this is a reply, remove the first word which should be "@username"
+        splits.pop_front();
+    }
 
     this->addWords(splits, twitchEmotes);
 
