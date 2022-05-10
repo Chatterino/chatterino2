@@ -186,6 +186,31 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::FirstMessage);
     }
 
+    // reply threads
+    if (this->thread_)
+    {
+        // set references
+        this->message().replyThread = this->thread_;
+        this->thread_->addToThread(this->weakOf());
+
+        // enable reply flag
+        this->message().flags.set(MessageFlag::ReplyMessage);
+
+        const auto &threadRoot = this->thread_->root();
+
+        // construct reply elements
+        this->emplace<TextElement>("Replying to", MessageElementFlag::Text,
+                                   MessageColor::System, FontStyle::ChatSmall);
+        this->emplace<TextElement>(
+                "@" + threadRoot->loginName + ":", MessageElementFlag::Username,
+                threadRoot->usernameColor, FontStyle::ChatSmall)
+            ->setLink({Link::UserWhisper, threadRoot->displayName});
+
+        this->emplace<SingleLineTextElement>(
+            threadRoot->messageText, MessageElementFlag::Text, this->textColor_,
+            FontStyle::ChatMediumSmall);
+    }
+
     // timestamp
     this->emplace<TimestampElement>(
         calculateMessageTimestamp(this->ircMessage));
@@ -263,13 +288,6 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::HighlightedWhisper, true);
         this->message().highlightColor =
             ColorProvider::instance().color(ColorType::Whisper);
-    }
-
-    // reply threads
-    if (this->thread_)
-    {
-        this->message().replyThread = this->thread_;
-        this->thread_->addToThread(this->weakOf());
     }
 
     return this->release();
