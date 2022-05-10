@@ -25,6 +25,7 @@ static const QMap<QString, QString> validIdentifiersMap = {
     {"flags.reward_message", "channel point reward message?"},
     {"flags.first_message", "first message?"},
     {"flags.whisper", "whisper message?"},
+    {"flags.reply", "reply message?"},
     {"message.content", "message text"},
     {"message.length", "message length"}};
 
