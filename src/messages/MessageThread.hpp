@@ -1,0 +1,44 @@
+#pragma once
+
+#include "messages/Message.hpp"
+
+#include <QString>
+
+#include <memory>
+#include <vector>
+
+namespace chatterino {
+class Message;
+
+class MessageThread
+{
+public:
+    MessageThread(const std::shared_ptr<const Message> &rootMessage);
+    ~MessageThread();
+
+    void addToThread(const std::shared_ptr<const Message> &message);
+    void addToThread(const std::weak_ptr<const Message> &message);
+
+    /// Returns the number of live reply references
+    size_t liveCount() const;
+
+    /// Returns the number of live reply references
+    size_t liveCount(const std::shared_ptr<const Message> &exclude) const;
+
+    const QString &rootId() const
+    {
+        return rootMessageId_;
+    }
+
+    const std::shared_ptr<const Message> &root() const
+    {
+        return rootMessage_;
+    }
+
+private:
+    QString rootMessageId_;
+    std::shared_ptr<const Message> rootMessage_;
+    std::vector<std::weak_ptr<const Message>> replies_;
+};
+
+}  // namespace chatterino

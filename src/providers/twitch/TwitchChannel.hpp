@@ -7,6 +7,7 @@
 #include "common/ChatterSet.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
+#include "messages/MessageThread.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -151,6 +152,7 @@ private:
     void refreshCheerEmotes();
     void loadRecentMessages();
     void fetchDisplayName();
+    void cleanUpReplyThreads();
 
     void setLive(bool newLiveStatus);
     void setMod(bool value);
@@ -171,6 +173,7 @@ private:
     int chatterCount_;
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
+    std::unordered_map<QString, std::weak_ptr<MessageThread>> threads_;
 
 protected:
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
@@ -195,6 +198,7 @@ private:
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
+    QTimer threadClearTimer_;
     QElapsedTimer titleRefreshedTimer_;
     QElapsedTimer clipCreationTimer_;
     bool isClipCreationInProgress{false};

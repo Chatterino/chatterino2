@@ -186,6 +186,7 @@ SOURCES += \
     src/messages/MessageColor.cpp \
     src/messages/MessageContainer.cpp \
     src/messages/MessageElement.cpp \
+    src/messages/MessageThread.cpp \
     src/messages/search/AuthorPredicate.cpp \
     src/messages/search/ChannelPredicate.cpp \
     src/messages/search/LinkPredicate.cpp \
@@ -436,6 +437,7 @@ HEADERS += \
     src/messages/MessageContainer.hpp \
     src/messages/MessageElement.hpp \
     src/messages/MessageParseArgs.hpp \
+    src/messages/MessageThread.hpp \
     src/messages/search/AuthorPredicate.hpp \
     src/messages/search/ChannelPredicate.hpp \
     src/messages/search/LinkPredicate.hpp \

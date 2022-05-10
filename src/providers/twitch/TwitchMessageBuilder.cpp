@@ -265,6 +265,13 @@ MessagePtr TwitchMessageBuilder::build()
             ColorProvider::instance().color(ColorType::Whisper);
     }
 
+    // reply threads
+    if (this->thread_)
+    {
+        this->message().replyThread = this->thread_;
+        this->thread_->addToThread(this->weakOf());
+    }
+
     return this->release();
 }
 
@@ -1508,6 +1515,12 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(QString prefix,
             ->setLink({Link::UserInfo, username})
             ->setTrailingSpace(false);
     }
+}
+
+void TwitchMessageBuilder::setThread(
+    const std::shared_ptr<MessageThread> &thread)
+{
+    this->thread_ = thread;
 }
 
 }  // namespace chatterino

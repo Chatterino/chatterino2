@@ -275,7 +275,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
     auto channel = dynamic_cast<TwitchChannel *>(chan.get());
 
     const auto &tags = _message->tags();
-    if (const auto &it = tags.find("custom-reward-id"); it != tags.end())
+    if (const auto it = tags.find("custom-reward-id"); it != tags.end())
     {
         const auto rewardId = it.value().toString();
         if (!channel->isChannelPointRewardKnown(rewardId))
@@ -299,6 +299,37 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
     }
 
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
+
+    if (const auto it = tags.find("reply-parent-msg-id"); it != tags.end())
+    {
+        const QString replyID = it.value().toString();
+        auto threadIt = channel->threads_.find(replyID);
+        if (threadIt != channel->threads_.end() && !threadIt->second.expired())
+        {
+            // Thread already exists (has a reply)
+            builder.setThread(threadIt->second.lock());
+        }
+        else
+        {
+            // Thread does not yet exist, find root reply and create thread.
+            // Linear search is justified by the infrequent use of replies
+            auto snapshot = channel->getMessageSnapshot();
+            for (size_t i = 0; i < snapshot.size(); ++i)
+            {
+                if (snapshot[i]->id == replyID)
+                {
+                    // Found root reply message
+                    std::shared_ptr<MessageThread> newThread =
+                        std::make_unique<MessageThread>(snapshot[i]);
+
+                    // Store weak reference to thread
+                    builder.setThread(newThread);
+                    channel->threads_[replyID] = newThread;
+                    break;
+                }
+            }
+        }
+    }
 
     if (isSub || !builder.isIgnored())
     {

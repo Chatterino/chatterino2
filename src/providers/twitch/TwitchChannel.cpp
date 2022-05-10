@@ -182,11 +182,33 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->refreshBTTVChannelEmotes(false);
     });
 
+    this->messageRemovedFromStart.connect([this](MessagePtr &msg) {
+        if (msg->replyThread)
+        {
+            if (msg->replyThread->liveCount(msg) == 0)
+            {
+                this->threads_.erase(msg->replyThread->rootId());
+            }
+        }
+    });
+
     // timers
     QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [=] {
         this->refreshChatters();
     });
     this->chattersListTimer_.start(5 * 60 * 1000);
+
+    QObject::connect(&this->threadClearTimer_, &QTimer::timeout, [=] {
+        // We periodically check for any dangling reply threads that missed
+        // being cleaned up on messageRemovedFromStart. This could occur if
+        // some other part of the program, like a user card, held a reference
+        // to the message.
+        //
+        // It seems difficult to actually replicate a situation where things
+        // are actually cleaned up, but I've verified that cleanups DO happen.
+        this->cleanUpReplyThreads();
+    });
+    this->threadClearTimer_.start(5 * 60 * 1000);
 
     QObject::connect(&this->liveStatusTimer_, &QTimer::timeout, [=] {
         this->refreshLiveStatus();
@@ -922,6 +944,28 @@ void TwitchChannel::fetchDisplayName()
             channel->displayNameChanged.invoke();
         },
         [] {});
+}
+
+void TwitchChannel::cleanUpReplyThreads()
+{
+    for (auto it = this->threads_.begin(), last = this->threads_.end();
+         it != last;)
+    {
+        bool doErase = true;
+        if (auto thread = it->second.lock())
+        {
+            doErase = thread->liveCount() == 0;
+        }
+
+        if (doErase)
+        {
+            it = this->threads_.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 void TwitchChannel::refreshBadges()

@@ -142,6 +142,8 @@ set(SOURCE_FILES
         messages/MessageContainer.hpp
         messages/MessageElement.cpp
         messages/MessageElement.hpp
+        messages/MessageThread.cpp
+        messages/MessageThread.hpp
 
         messages/SharedMessageBuilder.cpp
         messages/SharedMessageBuilder.hpp
@@ -707,4 +709,3 @@ if (LIBRT)
         ${LIBRT}
         )
 endif ()
-
