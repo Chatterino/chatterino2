@@ -298,6 +298,21 @@ MessagePtr TwitchMessageBuilder::build()
             ColorProvider::instance().color(ColorType::Whisper);
     }
 
+    if (this->thread_)
+    {
+        auto &img = getResources().buttons.replyThreadDark;
+        this->emplace<PrettyImageElement>(Image::fromPixmap(img, 0.15), 1,
+                                          Qt::gray, MessageElementFlag::Default)
+            ->setLink({Link::ViewThread, this->thread_->rootId()});
+    }
+    else
+    {
+        auto &img = getResources().buttons.replyDark;
+        this->emplace<PrettyImageElement>(Image::fromPixmap(img, 0.15), 1,
+                                          Qt::gray, MessageElementFlag::Default)
+            ->setLink({Link::ReplyToMessage, this->message().id});
+    }
+
     return this->release();
 }
 

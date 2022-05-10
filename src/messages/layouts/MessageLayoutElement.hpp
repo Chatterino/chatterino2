@@ -61,6 +61,27 @@ private:
     int line_{};
 };
 
+class FloatingMessageLayoutElement : boost::noncopyable
+{
+public:
+    FloatingMessageLayoutElement(MessageElement &creator_, const QSize &size);
+    virtual ~FloatingMessageLayoutElement();
+
+    const QRect &getRect() const;
+    MessageElement &getCreator() const;
+
+    const Link &getLink() const;
+    FloatingMessageLayoutElement *setLink(const Link &link_);
+    FlagsEnum<MessageElementFlag> getFlags() const;
+
+    virtual void paint(QPainter &painter) = 0;
+
+private:
+    QRect rect_;
+    Link link_;
+    MessageElement &creator_;
+};
+
 // IMAGE
 class ImageLayoutElement : public MessageLayoutElement
 {
@@ -91,6 +112,25 @@ protected:
 
 private:
     QColor color_;
+};
+
+class PrettyFloatingImageLayoutElement : public FloatingMessageLayoutElement
+{
+public:
+    PrettyFloatingImageLayoutElement(MessageElement &creator, ImagePtr image,
+                                     const QSize &size, int padding,
+                                     QColor background);
+
+protected:
+    void paint(QPainter &painter) override;
+    // const QRect getRectIn(const QRect &messageRect) const override;
+
+private:
+    ImagePtr image_;
+    int padding_;
+    // int rightMargin_;
+    QColor background_;
+    QSize imageSize_;
 };
 
 // TEXT

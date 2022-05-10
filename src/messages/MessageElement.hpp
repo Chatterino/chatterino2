@@ -209,6 +209,22 @@ private:
     ImagePtr image_;
 };
 
+// contains a floating image with a background color
+class PrettyImageElement : public MessageElement
+{
+public:
+    PrettyImageElement(ImagePtr image, int padding, QColor background,
+                       MessageElementFlags flags);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+private:
+    ImagePtr image_;
+    int padding_;
+    QColor background_;
+};
+
 // contains a text, it will split it into words
 class TextElement : public MessageElement
 {

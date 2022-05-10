@@ -340,6 +340,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
 
     // draw message
     this->container_->paintElements(painter);
+    this->container_->paintFloatingElements(painter, buffer->rect());
 
 #ifdef FOURTF
     // debug
@@ -391,6 +392,13 @@ const MessageLayoutElement *MessageLayout::getElementAt(QPoint point)
 {
     // go through all words and return the first one that contains the point.
     return this->container_->getElementAt(point);
+}
+
+const FloatingMessageLayoutElement *MessageLayout::getFloatingElementAt(
+    QPoint point)
+{
+    // go through all words and return the first one that contains the point.
+    return this->container_->getFloatingElementAt(point);
 }
 
 int MessageLayout::getLastCharacterIndex() const

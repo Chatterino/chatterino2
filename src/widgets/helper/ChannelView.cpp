@@ -1293,6 +1293,22 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
+    const FloatingMessageLayoutElement *floatingHoverElement =
+        layout->getFloatingElementAt(relativePos);
+
+    if (floatingHoverElement != nullptr)
+    {
+        if (floatingHoverElement->getLink().isValid())
+        {
+            this->setCursor(Qt::PointingHandCursor);
+        }
+        else
+        {
+            this->setCursor(Qt::ArrowCursor);
+        }
+        return;
+    }
+
     // check if word underneath cursor
     const MessageLayoutElement *hoverLayoutElement =
         layout->getElementAt(relativePos);
@@ -1751,6 +1767,16 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
+    const FloatingMessageLayoutElement *floatingHoverElement =
+        layout->getFloatingElementAt(relativePos);
+
+    if (floatingHoverElement != nullptr)
+    {
+        this->handleMouseClick(event, floatingHoverElement, layout);
+        this->update();
+        return;
+    }
+
     const MessageLayoutElement *hoverLayoutElement =
         layout->getElementAt(relativePos);
     // Triple-clicking a message selects the whole message
@@ -1850,6 +1876,26 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             {
                 this->handleLinkClick(event, link, layout.get());
             }
+        }
+        break;
+        default:;
+    }
+}
+
+void ChannelView::handleMouseClick(
+    QMouseEvent *event, const FloatingMessageLayoutElement *hoveredElement,
+    MessageLayoutPtr layout)
+{
+    if (hoveredElement == nullptr)
+    {
+        return;
+    }
+
+    switch (event->button())
+    {
+        case Qt::LeftButton: {
+            const auto &link = hoveredElement->getLink();
+            this->handleLinkClick(event, link, layout.get());
         }
         break;
         default:;
@@ -2296,6 +2342,12 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         break;
         case Link::Reconnect: {
             this->underlyingChannel_.get()->reconnect();
+        }
+        break;
+        case Link::ReplyToMessage: {
+        }
+        break;
+        case Link::ViewThread: {
         }
         break;
 

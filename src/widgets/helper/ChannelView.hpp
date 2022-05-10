@@ -167,6 +167,9 @@ private:
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoveredElement,
                           MessageLayoutPtr layout);
+    void handleMouseClick(QMouseEvent *event,
+                          const FloatingMessageLayoutElement *hoveredElement,
+                          MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
                              MessageLayoutPtr layout, QMouseEvent *event);
     void addImageContextMenuItems(const MessageLayoutElement *hoveredElement,

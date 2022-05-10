@@ -61,16 +61,20 @@ struct MessageLayoutContainer {
     bool canAddElements();
     void addElement(MessageLayoutElement *element);
     void addElementNoLineBreak(MessageLayoutElement *element);
+    void addFloatingElement(FloatingMessageLayoutElement *element);
     void breakLine();
     bool atStartOfLine();
     bool fitsInLine(int width_);
     MessageLayoutElement *getElementAt(QPoint point);
+    FloatingMessageLayoutElement *getFloatingElementAt(QPoint point);
 
     // painting
     void paintElements(QPainter &painter);
     void paintAnimatedElements(QPainter &painter, int yOffset);
     void paintSelection(QPainter &painter, int messageIndex,
                         Selection &selection, int yOffset);
+
+    void paintFloatingElements(QPainter &painter, const QRect &rect);
 
     // selection
     int getSelectionIndex(QPoint point);
@@ -111,6 +115,8 @@ private:
     bool isCollapsed_ = false;
 
     std::vector<std::unique_ptr<MessageLayoutElement>> elements_;
+    std::vector<std::unique_ptr<FloatingMessageLayoutElement>>
+        floatingElements_;
     std::vector<Line> lines_;
 };
 

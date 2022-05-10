@@ -16,6 +16,7 @@ using MessagePtr = std::shared_ptr<const Message>;
 struct Selection;
 struct MessageLayoutContainer;
 class MessageLayoutElement;
+class FloatingMessageLayoutElement;
 
 enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
@@ -54,6 +55,7 @@ public:
 
     // Elements
     const MessageLayoutElement *getElementAt(QPoint point);
+    const FloatingMessageLayoutElement *getFloatingElementAt(QPoint point);
     int getLastCharacterIndex() const;
     int getFirstMessageCharacterIndex() const;
     int getSelectionIndex(QPoint position);

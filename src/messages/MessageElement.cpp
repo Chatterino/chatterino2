@@ -132,6 +132,31 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+PrettyImageElement::PrettyImageElement(ImagePtr image, int padding,
+                                       QColor background,
+                                       MessageElementFlags flags)
+    : MessageElement(flags)
+    , image_(image)
+    , padding_(padding)
+    , background_(background)
+{
+}
+
+void PrettyImageElement::addToContainer(MessageLayoutContainer &container,
+                                        MessageElementFlags flags)
+{
+    if (flags.hasAny(this->getFlags()))
+    {
+        auto size = QSize(this->image_->width() * container.getScale(),
+                          this->image_->height() * container.getScale());
+
+        container.addFloatingElement(
+            (new PrettyFloatingImageLayoutElement(
+                 *this, this->image_, size, this->padding_, this->background_))
+                ->setLink(this->getLink()));
+    }
+}
+
 // EMOTE
 EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags,
                            const MessageColor &textElementColor)
