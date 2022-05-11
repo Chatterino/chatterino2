@@ -38,6 +38,7 @@ public:
     ~MessageLayout();
 
     const Message *getMessage();
+    const MessagePtr &getMessagePtr() const;
 
     int getHeight() const;
 

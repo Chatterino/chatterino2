@@ -85,7 +85,7 @@ Split::Split(QWidget *parent)
     , channel_(Channel::getEmpty())
     , vbox_(new QVBoxLayout(this))
     , header_(new SplitHeader(this))
-    , view_(new ChannelView(this))
+    , view_(new ChannelView(this, this))
     , input_(new SplitInput(this))
     , overlay_(new SplitOverlay(this))
 {

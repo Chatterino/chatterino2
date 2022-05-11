@@ -55,6 +55,11 @@ const Message *MessageLayout::getMessage()
     return this->message_.get();
 }
 
+const MessagePtr &MessageLayout::getMessagePtr() const
+{
+    return this->message_;
+}
+
 // Height
 int MessageLayout::getHeight() const
 {

@@ -946,6 +946,11 @@ void TwitchChannel::fetchDisplayName()
         [] {});
 }
 
+void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)
+{
+    this->threads_[thread->rootId()] = thread;
+}
+
 void TwitchChannel::cleanUpReplyThreads()
 {
     for (auto it = this->threads_.begin(), last = this->threads_.end();

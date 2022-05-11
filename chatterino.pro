@@ -285,6 +285,7 @@ SOURCES += \
     src/widgets/dialogs/LoginDialog.cpp \
     src/widgets/dialogs/NotificationPopup.cpp \
     src/widgets/dialogs/QualityPopup.cpp \
+    src/widgets/dialogs/ReplyThreadPopup.cpp \
     src/widgets/dialogs/SelectChannelDialog.cpp \
     src/widgets/dialogs/SelectChannelFiltersDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
@@ -567,6 +568,7 @@ HEADERS += \
     src/widgets/dialogs/LoginDialog.hpp \
     src/widgets/dialogs/NotificationPopup.hpp \
     src/widgets/dialogs/QualityPopup.hpp \
+    src/widgets/dialogs/ReplyThreadPopup.hpp \
     src/widgets/dialogs/SelectChannelDialog.hpp \
     src/widgets/dialogs/SelectChannelFiltersDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \

@@ -35,6 +35,11 @@ public:
         return rootMessage_;
     }
 
+    const std::vector<std::weak_ptr<const Message>> &replies() const
+    {
+        return replies_;
+    }
+
 private:
     QString rootMessageId_;
     std::shared_ptr<const Message> rootMessage_;

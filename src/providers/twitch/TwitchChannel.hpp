@@ -119,6 +119,9 @@ public:
     // Cheers
     boost::optional<CheerEmote> cheerEmote(const QString &string);
 
+    // Replies
+    void addReplyThread(const std::shared_ptr<MessageThread> &thread);
+
     // Signals
     pajlada::Signals::NoArgSignal roomIdChanged;
     pajlada::Signals::NoArgSignal userStateChanged;

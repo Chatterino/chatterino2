@@ -39,6 +39,8 @@ class Scrollbar;
 class EffectLabel;
 struct Link;
 class MessageLayoutElement;
+class FloatingMessageLayoutElement;
+class Split;
 
 enum class PauseReason {
     Mouse,
@@ -61,7 +63,7 @@ class ChannelView final : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit ChannelView(BaseWidget *parent = nullptr);
+    explicit ChannelView(BaseWidget *parent = nullptr, Split *split = nullptr);
 
     void queueUpdate();
     Scrollbar &getScrollBar();
@@ -194,6 +196,8 @@ private:
     void enableScrolling(const QPointF &scrollStart);
     void disableScrolling();
 
+    void showReplyThreadPopup(const MessagePtr &message);
+
     QTimer *layoutCooldown_;
     bool layoutQueued_;
 
@@ -219,6 +223,7 @@ private:
     ChannelPtr channel_ = nullptr;
     ChannelPtr underlyingChannel_ = nullptr;
     ChannelPtr sourceChannel_ = nullptr;
+    Split *split_ = nullptr;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;

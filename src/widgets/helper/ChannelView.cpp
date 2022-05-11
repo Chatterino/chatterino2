@@ -44,6 +44,7 @@
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -119,9 +120,10 @@ namespace {
     }
 }  // namespace
 
-ChannelView::ChannelView(BaseWidget *parent)
+ChannelView::ChannelView(BaseWidget *parent, Split *split)
     : BaseWidget(parent)
     , scrollBar_(new Scrollbar(this))
+    , split_(split)
 {
     this->setMouseTracking(true);
 
@@ -2344,10 +2346,9 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             this->underlyingChannel_.get()->reconnect();
         }
         break;
-        case Link::ReplyToMessage: {
-        }
-        break;
+        case Link::ReplyToMessage:
         case Link::ViewThread: {
+            this->showReplyThreadPopup(layout->getMessagePtr());
         }
         break;
 
@@ -2470,6 +2471,40 @@ void ChannelView::scrollUpdateRequested()
     // "Good" feeling multiplier found by trial-and-error
     const qreal multiplier = qreal(0.02);
     this->scrollBar_->offset(multiplier * offset);
+}
+
+void ChannelView::showReplyThreadPopup(const MessagePtr &message)
+{
+    if (message == nullptr)
+    {
+        return;  // todo remove
+    }
+
+    std::shared_ptr<MessageThread> thread;
+
+    if (message->replyThread == nullptr)
+    {
+        auto tc = dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
+        if (tc)
+        {
+            thread = std::make_unique<MessageThread>(message);
+            tc->addReplyThread(thread);
+        }
+    }
+    else
+    {
+        thread = message->replyThread;
+    }
+
+    auto popupParent =
+        static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
+    auto popup = new ReplyThreadPopup(popupParent, this->split_);
+
+    popup->setThread(thread);
+
+    QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
+    popup->move(QCursor::pos() - offset);
+    popup->show();
 }
 
 }  // namespace chatterino

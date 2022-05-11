@@ -324,7 +324,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
 
                     // Store weak reference to thread
                     builder.setThread(newThread);
-                    channel->threads_[replyID] = newThread;
+                    channel->addReplyThread(newThread);
                     break;
                 }
             }
