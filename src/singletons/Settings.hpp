@@ -159,6 +159,8 @@ public:
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier",
                                           1.0};
     BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", true};
+    BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
+                                        true};
     // BoolSetting twitchSeperateWriteConnection =
     // {"/behaviour/twitchSeperateWriteConnection", false};
 

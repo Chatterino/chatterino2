@@ -18,7 +18,7 @@ class ReplyThreadPopup final : public BaseWindow
     Q_OBJECT
 
 public:
-    ReplyThreadPopup(QWidget *parent, Split *split);
+    ReplyThreadPopup(bool closeAutomatically, QWidget *parent, Split *split);
 
     void setThread(const std::shared_ptr<const MessageThread> &thread);
 

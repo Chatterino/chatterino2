@@ -632,6 +632,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
     layout.addCheckbox("Automatically close user popup when it loses focus",
                        s.autoCloseUserPopup);
+    layout.addCheckbox(
+        "Automatically close reply thread popup when it loses focus",
+        s.autoCloseThreadPopup);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
     layout.addCheckbox("Color @usernames", s.colorUsernames);

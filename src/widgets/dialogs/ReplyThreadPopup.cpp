@@ -6,15 +6,22 @@
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 
+const QString TEXT_TITLE("Reply Thread - @%1 in #%2");
+
 namespace chatterino {
 
-ReplyThreadPopup::ReplyThreadPopup(QWidget *parent, Split *split)
+ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
+                                   Split *split)
     : BaseWindow(BaseWindow::EnableCustomFrame, parent)
     , split_(split)
 {
     this->setWindowTitle("Reply Thread");
     this->setStayInScreenRect(true);
-    this->setAttribute(Qt::WA_DeleteOnClose);
+
+    if (closeAutomatically)
+        this->setActionOnFocusLoss(BaseWindow::Delete);
+    else
+        this->setAttribute(Qt::WA_DeleteOnClose);
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
@@ -35,6 +42,7 @@ ReplyThreadPopup::ReplyThreadPopup(QWidget *parent, Split *split)
         }));
 
     layout->setSpacing(0);
+    layout->setMargin(1);
     layout->addWidget(this->ui_.threadView, 1);
     layout->addWidget(this->ui_.replyInput);
 }
@@ -57,6 +65,8 @@ void ReplyThreadPopup::addMessagesFromThread()
     }
 
     const auto &sourceChannel = this->split_->getChannel();
+    this->setWindowTitle(TEXT_TITLE.arg(this->thread_->root()->loginName,
+                                        sourceChannel->getName()));
 
     ChannelPtr virtualChannel;
     if (sourceChannel->isTwitchChannel())
