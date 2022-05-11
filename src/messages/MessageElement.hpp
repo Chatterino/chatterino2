@@ -126,6 +126,11 @@ enum class MessageElementFlag : int64_t {
     // e.g. BTTV's SoSnowy during christmas season
     ZeroWidthEmote = (1LL << 31),
 
+    // for elements of the message reply
+    RepliedMessage = (1LL << 32),
+    RepliedText = Text | RepliedMessage,
+    RepliedUsername = Text | RepliedMessage,
+
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
               AlwaysShow,

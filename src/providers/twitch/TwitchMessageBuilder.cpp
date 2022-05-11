@@ -199,18 +199,19 @@ MessagePtr TwitchMessageBuilder::build()
         const auto &threadRoot = this->thread_->root();
 
         // construct reply elements
-        this->emplace<TextElement>("Replying to", MessageElementFlag::Text,
-                                   MessageColor::System,
-                                   FontStyle::ChatMediumSmall);
-
         this->emplace<TextElement>(
-                "@" + threadRoot->loginName + ":", MessageElementFlag::Username,
-                threadRoot->usernameColor, FontStyle::ChatMediumSmall)
+            "Replying to", MessageElementFlag::RepliedText,
+            MessageColor::System, FontStyle::ChatMediumSmall);
+
+        this->emplace<TextElement>("@" + threadRoot->loginName + ":",
+                                   MessageElementFlag::RepliedUsername,
+                                   threadRoot->usernameColor,
+                                   FontStyle::ChatMediumSmall)
             ->setLink({Link::UserWhisper, threadRoot->displayName});
 
         this->emplace<SingleLineTextElement>(
-            threadRoot->messageText, MessageElementFlag::Text, this->textColor_,
-            FontStyle::ChatMediumSmall);
+            threadRoot->messageText, MessageElementFlag::RepliedText,
+            this->textColor_, FontStyle::ChatMediumSmall);
     }
 
     // timestamp
