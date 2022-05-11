@@ -103,7 +103,7 @@ public:
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
-    BoolSetting showMessageButtons = {"/appearance/showMessageButtons", true};
+    BoolSetting showMessageButtons = {"/appearance/showMessageButtons", false};
     IntSetting collpseMessagesMinLines = {
         "/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessages = {
