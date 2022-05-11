@@ -87,6 +87,7 @@ public:
 
     // CHANNEL INFO
     virtual bool canSendMessage() const;
+    virtual bool isWritable() const;  // whether split input will be usable
     virtual void sendMessage(const QString &message);
     virtual bool isMod() const;
     virtual bool isBroadcaster() const;

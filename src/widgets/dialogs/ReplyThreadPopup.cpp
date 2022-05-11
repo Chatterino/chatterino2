@@ -30,7 +30,7 @@ ReplyThreadPopup::ReplyThreadPopup(QWidget *parent, Split *split)
 
     this->bSignals_.emplace_back(
         getApp()->accounts->twitch.currentUserChanged.connect([this] {
-            this->updateInputPlaceholder();
+            this->updateInputUI();
         }));
 
     layout->addWidget(this->ui_.threadView, 1);
@@ -43,7 +43,7 @@ void ReplyThreadPopup::setThread(
     this->thread_ = thread;
     this->ui_.replyInput->setThread(thread);
     this->addMessagesFromThread();
-    this->updateInputPlaceholder();
+    this->updateInputUI();
 }
 
 void ReplyThreadPopup::addMessagesFromThread()
@@ -92,12 +92,21 @@ void ReplyThreadPopup::addMessagesFromThread()
                 }));
 }
 
-void ReplyThreadPopup::updateInputPlaceholder()
+void ReplyThreadPopup::updateInputUI()
 {
     auto channel = this->split_->getChannel();
     if (!channel || !channel->isTwitchChannel())
     {
         return;
+    }
+
+    if (channel->isWritable())
+    {
+        this->ui_.replyInput->show();
+    }
+    else
+    {
+        this->ui_.replyInput->hide();
     }
 
     auto user = getApp()->accounts->twitch.getCurrent();

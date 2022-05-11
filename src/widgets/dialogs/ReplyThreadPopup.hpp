@@ -24,7 +24,7 @@ public:
 
 private:
     void addMessagesFromThread();
-    void updateInputPlaceholder();
+    void updateInputUI();
 
     // The message reply thread
     std::shared_ptr<const MessageThread> thread_;
