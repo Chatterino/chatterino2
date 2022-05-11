@@ -338,6 +338,7 @@ SOURCES += \
     src/widgets/splits/ClosedSplits.cpp \
     src/widgets/splits/InputCompletionItem.cpp \
     src/widgets/splits/InputCompletionPopup.cpp \
+    src/widgets/splits/ReplyInput.cpp \
     src/widgets/splits/Split.cpp \
     src/widgets/splits/SplitContainer.cpp \
     src/widgets/splits/SplitHeader.cpp \
@@ -624,6 +625,7 @@ HEADERS += \
     src/widgets/splits/ClosedSplits.hpp \
     src/widgets/splits/InputCompletionItem.hpp \
     src/widgets/splits/InputCompletionPopup.hpp \
+    src/widgets/splits/ReplyInput.hpp \
     src/widgets/splits/Split.hpp \
     src/widgets/splits/SplitContainer.hpp \
     src/widgets/splits/SplitHeader.hpp \

@@ -3,6 +3,7 @@
 #include "common/Channel.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/ChannelView.hpp"
+#include "widgets/helper/ResizingTextEdit.hpp"
 
 namespace chatterino {
 
@@ -24,16 +25,17 @@ ReplyThreadPopup::ReplyThreadPopup(QWidget *parent, Split *split)
     this->ui_.threadView->setSizePolicy(QSizePolicy::Expanding,
                                         QSizePolicy::Expanding);
 
-    this->ui_.splitInput = new SplitInput(this->split_);
+    this->ui_.replyInput = new ReplyInput(this, this->split_);
 
     layout->addWidget(this->ui_.threadView, 1);
-    layout->addWidget(this->ui_.splitInput);
+    layout->addWidget(this->ui_.replyInput);
 }
 
 void ReplyThreadPopup::setThread(
     const std::shared_ptr<const MessageThread> &thread)
 {
     this->thread_ = thread;
+    this->ui_.replyInput->setThread(thread);
     this->addMessagesFromThread();
 }
 

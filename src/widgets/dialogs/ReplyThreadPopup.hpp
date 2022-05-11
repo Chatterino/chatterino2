@@ -2,8 +2,8 @@
 
 #include "messages/MessageThread.hpp"
 #include "widgets/BaseWindow.hpp"
+#include "widgets/splits/ReplyInput.hpp"
 #include "widgets/splits/Split.hpp"
-#include "widgets/splits/SplitInput.hpp"
 
 #include <memory>
 
@@ -29,7 +29,7 @@ private:
 
     struct {
         ChannelView *threadView = nullptr;
-        SplitInput *splitInput = nullptr;
+        ReplyInput *replyInput = nullptr;
     } ui_;
 };
 

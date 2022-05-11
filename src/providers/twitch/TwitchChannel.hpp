@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Application.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
@@ -83,6 +84,8 @@ public:
     virtual bool isEmpty() const override;
     virtual bool canSendMessage() const override;
     virtual void sendMessage(const QString &message) override;
+    virtual void sendReply(const QString &message, const QString &replyId,
+                           const QString &replyUser);
     virtual bool isMod() const override;
     bool isVip() const;
     bool isStaff() const;
@@ -157,6 +160,7 @@ private:
     void loadRecentMessages();
     void fetchDisplayName();
     void cleanUpReplyThreads();
+    void showLoginMessage();
 
     void setLive(bool newLiveStatus);
     void setMod(bool value);
@@ -169,6 +173,8 @@ private:
 
     const QString &getDisplayName() const override;
     const QString &getLocalizedName() const override;
+
+    QString prepareMessage(Application *app, const QString &message) const;
 
     // Data
     const QString subscriptionUrl_;

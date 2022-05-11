@@ -1,5 +1,6 @@
 #pragma once
 
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "util/QObjectRef.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
@@ -26,6 +27,7 @@ class SplitInput : public BaseWidget
 
 public:
     SplitInput(Split *_chatWidget);
+    SplitInput(QWidget *parent, Split *_chatWidget);
 
     void clearSelection();
     bool isEditFirstWord() const;
@@ -43,7 +45,21 @@ protected:
 
     virtual void mousePressEvent(QMouseEvent *event) override;
 
-private:
+protected:
+    virtual QString hotkeyCursorToStart(std::vector<QString> &arguments);
+    virtual QString hotkeyCursorToEnd(std::vector<QString> &arguments);
+    virtual QString hotkeyOpenEmotesPopup();
+    virtual QString hotkeySendMessage(std::vector<QString> &arguments);
+    virtual QString hotkeyPreviousMessage();
+    virtual QString hotkeyNextMessage();
+    virtual QString hotkeyUndo();
+    virtual QString hotkeyRedo();
+    virtual QString hotkeyCopy(std::vector<QString> &arguments);
+    virtual QString hotkeyPaste();
+    virtual QString hotkeyClear();
+    virtual QString hotkeySelectAll();
+    virtual QString hotkeySelectWord();
+
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
@@ -78,6 +94,7 @@ private slots:
     void editTextChanged();
 
     friend class Split;
+    friend class ReplyThreadPopup;
 };
 
 }  // namespace chatterino

@@ -3,7 +3,6 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/commands/CommandController.hpp"
-#include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Link.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -23,6 +22,8 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/splits/SplitInput.hpp"
 
+#include <functional>
+
 #include <QCompleter>
 #include <QPainter>
 
@@ -30,7 +31,12 @@ namespace chatterino {
 const int TWITCH_MESSAGE_LIMIT = 500;
 
 SplitInput::SplitInput(Split *_chatWidget)
-    : BaseWidget(_chatWidget)
+    : SplitInput(_chatWidget, _chatWidget)
+{
+}
+
+SplitInput::SplitInput(QWidget *parent, Split *_chatWidget)
+    : BaseWidget(parent)
     , split_(_chatWidget)
 {
     this->installEventFilter(this);
@@ -214,255 +220,313 @@ void SplitInput::openEmotePopup()
     this->emotePopup_->activateWindow();
 }
 
+QString SplitInput::hotkeyCursorToStart(std::vector<QString> &arguments)
+{
+    if (arguments.size() != 1)
+    {
+        qCWarning(chatterinoHotkeys)
+            << "Invalid cursorToStart arguments. Argument 0: select "
+               "(\"withSelection\" or \"withoutSelection\")";
+        return "Invalid cursorToStart arguments. Argument 0: select "
+               "(\"withSelection\" or \"withoutSelection\")";
+    }
+    QTextCursor cursor = this->ui_.textEdit->textCursor();
+    auto place = QTextCursor::Start;
+    auto stringTakeSelection = arguments.at(0);
+    bool select;
+    if (stringTakeSelection == "withSelection")
+    {
+        select = true;
+    }
+    else if (stringTakeSelection == "withoutSelection")
+    {
+        select = false;
+    }
+    else
+    {
+        qCWarning(chatterinoHotkeys)
+            << "Invalid cursorToStart select argument (0)!";
+        return "Invalid cursorToStart select argument (0)!";
+    }
+
+    cursor.movePosition(place, select ? QTextCursor::MoveMode::KeepAnchor
+                                      : QTextCursor::MoveMode::MoveAnchor);
+    this->ui_.textEdit->setTextCursor(cursor);
+    return "";
+}
+
+QString SplitInput::hotkeyCursorToEnd(std::vector<QString> &arguments)
+{
+    if (arguments.size() != 1)
+    {
+        qCWarning(chatterinoHotkeys)
+            << "Invalid cursorToEnd arguments. Argument 0: select "
+               "(\"withSelection\" or \"withoutSelection\")";
+        return "Invalid cursorToEnd arguments. Argument 0: select "
+               "(\"withSelection\" or \"withoutSelection\")";
+    }
+    QTextCursor cursor = this->ui_.textEdit->textCursor();
+    auto place = QTextCursor::End;
+    auto stringTakeSelection = arguments.at(0);
+    bool select;
+    if (stringTakeSelection == "withSelection")
+    {
+        select = true;
+    }
+    else if (stringTakeSelection == "withoutSelection")
+    {
+        select = false;
+    }
+    else
+    {
+        qCWarning(chatterinoHotkeys)
+            << "Invalid cursorToEnd select argument (0)!";
+        return "Invalid cursorToEnd select argument (0)!";
+    }
+
+    cursor.movePosition(place, select ? QTextCursor::MoveMode::KeepAnchor
+                                      : QTextCursor::MoveMode::MoveAnchor);
+    this->ui_.textEdit->setTextCursor(cursor);
+    return "";
+}
+
+QString SplitInput::hotkeyOpenEmotesPopup()
+{
+    this->openEmotePopup();
+    return "";
+}
+
+QString SplitInput::hotkeySendMessage(std::vector<QString> &arguments)
+{
+    auto c = this->split_->getChannel();
+    if (c == nullptr)
+        return "";
+
+    QString message = ui_.textEdit->toPlainText();
+
+    message = message.replace('\n', ' ');
+    QString sendMessage = getApp()->commands->execCommand(message, c, false);
+
+    c->sendMessage(sendMessage);
+    // don't add duplicate messages and empty message to message history
+    if ((this->prevMsg_.isEmpty() || !this->prevMsg_.endsWith(message)) &&
+        !message.trimmed().isEmpty())
+    {
+        this->prevMsg_.append(message);
+    }
+    bool shouldClearInput = true;
+    if (arguments.size() != 0 && arguments.at(0) == "keepInput")
+    {
+        shouldClearInput = false;
+    }
+
+    if (shouldClearInput)
+    {
+        this->currMsg_ = QString();
+        this->ui_.textEdit->setPlainText(QString());
+    }
+    this->prevIndex_ = this->prevMsg_.size();
+    return "";
+}
+
+QString SplitInput::hotkeyPreviousMessage()
+{
+    if (this->prevMsg_.size() && this->prevIndex_)
+    {
+        if (this->prevIndex_ == (this->prevMsg_.size()))
+        {
+            this->currMsg_ = ui_.textEdit->toPlainText();
+        }
+
+        this->prevIndex_--;
+        this->ui_.textEdit->setPlainText(this->prevMsg_.at(this->prevIndex_));
+
+        QTextCursor cursor = this->ui_.textEdit->textCursor();
+        cursor.movePosition(QTextCursor::End);
+        this->ui_.textEdit->setTextCursor(cursor);
+    }
+    return "";
+}
+
+QString SplitInput::hotkeyNextMessage()
+{
+    // If user did not write anything before then just do nothing.
+    if (this->prevMsg_.isEmpty())
+    {
+        return "";
+    }
+    bool cursorToEnd = true;
+    QString message = ui_.textEdit->toPlainText();
+
+    if (this->prevIndex_ != (this->prevMsg_.size() - 1) &&
+        this->prevIndex_ != this->prevMsg_.size())
+    {
+        this->prevIndex_++;
+        this->ui_.textEdit->setPlainText(this->prevMsg_.at(this->prevIndex_));
+    }
+    else
+    {
+        this->prevIndex_ = this->prevMsg_.size();
+        if (message == this->prevMsg_.at(this->prevIndex_ - 1))
+        {
+            // If user has just come from a message history
+            // Then simply get currMsg_.
+            this->ui_.textEdit->setPlainText(this->currMsg_);
+        }
+        else if (message != this->currMsg_)
+        {
+            // If user are already in current message
+            // And type something new
+            // Then replace currMsg_ with new one.
+            this->currMsg_ = message;
+        }
+        // If user is already in current message
+        // Then don't touch cursos.
+        cursorToEnd = (message == this->prevMsg_.at(this->prevIndex_ - 1));
+    }
+
+    if (cursorToEnd)
+    {
+        QTextCursor cursor = this->ui_.textEdit->textCursor();
+        cursor.movePosition(QTextCursor::End);
+        this->ui_.textEdit->setTextCursor(cursor);
+    }
+    return "";
+}
+
+QString SplitInput::hotkeyUndo()
+{
+    this->ui_.textEdit->undo();
+    return "";
+}
+
+QString SplitInput::hotkeyRedo()
+{
+    this->ui_.textEdit->redo();
+    return "";
+}
+
+QString SplitInput::hotkeyCopy(std::vector<QString> &arguments)
+{
+    // XXX: this action is unused at the moment, a qt standard shortcut is used instead
+    if (arguments.size() == 0)
+    {
+        return "copy action takes only one argument: the source "
+               "of the copy \"split\", \"input\" or "
+               "\"auto\". If the source is \"split\", only text "
+               "from the chat will be copied. If it is "
+               "\"splitInput\", text from the input box will be "
+               "copied. Automatic will pick whichever has a "
+               "selection";
+    }
+    bool copyFromSplit = false;
+    auto mode = arguments.at(0);
+    if (mode == "split")
+    {
+        copyFromSplit = true;
+    }
+    else if (mode == "splitInput")
+    {
+        copyFromSplit = false;
+    }
+    else if (mode == "auto")
+    {
+        const auto &cursor = this->ui_.textEdit->textCursor();
+        copyFromSplit = !cursor.hasSelection();
+    }
+
+    if (copyFromSplit)
+    {
+        this->split_->copyToClipboard();
+    }
+    else
+    {
+        this->ui_.textEdit->copy();
+    }
+    return "";
+}
+
+QString SplitInput::hotkeyPaste()
+{
+    this->ui_.textEdit->paste();
+    return "";
+}
+
+QString SplitInput::hotkeyClear()
+{
+    this->ui_.textEdit->setText("");
+    this->ui_.textEdit->moveCursor(QTextCursor::Start);
+    return "";
+}
+
+QString SplitInput::hotkeySelectAll()
+{
+    this->ui_.textEdit->selectAll();
+    return "";
+}
+
+QString SplitInput::hotkeySelectWord()
+{
+    auto cursor = this->ui_.textEdit->textCursor();
+    cursor.select(QTextCursor::WordUnderCursor);
+    this->ui_.textEdit->setTextCursor(cursor);
+    return "";
+}
+
 void SplitInput::addShortcuts()
 {
     HotkeyController::HotkeyMap actions{
         {"cursorToStart",
          [this](std::vector<QString> arguments) -> QString {
-             if (arguments.size() != 1)
-             {
-                 qCWarning(chatterinoHotkeys)
-                     << "Invalid cursorToStart arguments. Argument 0: select "
-                        "(\"withSelection\" or \"withoutSelection\")";
-                 return "Invalid cursorToStart arguments. Argument 0: select "
-                        "(\"withSelection\" or \"withoutSelection\")";
-             }
-             QTextCursor cursor = this->ui_.textEdit->textCursor();
-             auto place = QTextCursor::Start;
-             auto stringTakeSelection = arguments.at(0);
-             bool select;
-             if (stringTakeSelection == "withSelection")
-             {
-                 select = true;
-             }
-             else if (stringTakeSelection == "withoutSelection")
-             {
-                 select = false;
-             }
-             else
-             {
-                 qCWarning(chatterinoHotkeys)
-                     << "Invalid cursorToStart select argument (0)!";
-                 return "Invalid cursorToStart select argument (0)!";
-             }
-
-             cursor.movePosition(place,
-                                 select ? QTextCursor::MoveMode::KeepAnchor
-                                        : QTextCursor::MoveMode::MoveAnchor);
-             this->ui_.textEdit->setTextCursor(cursor);
-             return "";
+             return this->hotkeyCursorToStart(arguments);
          }},
         {"cursorToEnd",
          [this](std::vector<QString> arguments) -> QString {
-             if (arguments.size() != 1)
-             {
-                 qCWarning(chatterinoHotkeys)
-                     << "Invalid cursorToEnd arguments. Argument 0: select "
-                        "(\"withSelection\" or \"withoutSelection\")";
-                 return "Invalid cursorToEnd arguments. Argument 0: select "
-                        "(\"withSelection\" or \"withoutSelection\")";
-             }
-             QTextCursor cursor = this->ui_.textEdit->textCursor();
-             auto place = QTextCursor::End;
-             auto stringTakeSelection = arguments.at(0);
-             bool select;
-             if (stringTakeSelection == "withSelection")
-             {
-                 select = true;
-             }
-             else if (stringTakeSelection == "withoutSelection")
-             {
-                 select = false;
-             }
-             else
-             {
-                 qCWarning(chatterinoHotkeys)
-                     << "Invalid cursorToEnd select argument (0)!";
-                 return "Invalid cursorToEnd select argument (0)!";
-             }
-
-             cursor.movePosition(place,
-                                 select ? QTextCursor::MoveMode::KeepAnchor
-                                        : QTextCursor::MoveMode::MoveAnchor);
-             this->ui_.textEdit->setTextCursor(cursor);
-             return "";
+             return this->hotkeyCursorToEnd(arguments);
          }},
         {"openEmotesPopup",
          [this](std::vector<QString>) -> QString {
-             this->openEmotePopup();
-             return "";
+             return this->hotkeyOpenEmotesPopup();
          }},
         {"sendMessage",
          [this](std::vector<QString> arguments) -> QString {
-             auto c = this->split_->getChannel();
-             if (c == nullptr)
-                 return "";
-
-             QString message = ui_.textEdit->toPlainText();
-
-             message = message.replace('\n', ' ');
-             QString sendMessage =
-                 getApp()->commands->execCommand(message, c, false);
-
-             c->sendMessage(sendMessage);
-             // don't add duplicate messages and empty message to message history
-             if ((this->prevMsg_.isEmpty() ||
-                  !this->prevMsg_.endsWith(message)) &&
-                 !message.trimmed().isEmpty())
-             {
-                 this->prevMsg_.append(message);
-             }
-             bool shouldClearInput = true;
-             if (arguments.size() != 0 && arguments.at(0) == "keepInput")
-             {
-                 shouldClearInput = false;
-             }
-
-             if (shouldClearInput)
-             {
-                 this->currMsg_ = QString();
-                 this->ui_.textEdit->setPlainText(QString());
-             }
-             this->prevIndex_ = this->prevMsg_.size();
-             return "";
+             return this->hotkeySendMessage(arguments);
          }},
         {"previousMessage",
          [this](std::vector<QString>) -> QString {
-             if (this->prevMsg_.size() && this->prevIndex_)
-             {
-                 if (this->prevIndex_ == (this->prevMsg_.size()))
-                 {
-                     this->currMsg_ = ui_.textEdit->toPlainText();
-                 }
-
-                 this->prevIndex_--;
-                 this->ui_.textEdit->setPlainText(
-                     this->prevMsg_.at(this->prevIndex_));
-
-                 QTextCursor cursor = this->ui_.textEdit->textCursor();
-                 cursor.movePosition(QTextCursor::End);
-                 this->ui_.textEdit->setTextCursor(cursor);
-             }
-             return "";
+             return this->hotkeyPreviousMessage();
          }},
         {"nextMessage",
          [this](std::vector<QString>) -> QString {
-             // If user did not write anything before then just do nothing.
-             if (this->prevMsg_.isEmpty())
-             {
-                 return "";
-             }
-             bool cursorToEnd = true;
-             QString message = ui_.textEdit->toPlainText();
-
-             if (this->prevIndex_ != (this->prevMsg_.size() - 1) &&
-                 this->prevIndex_ != this->prevMsg_.size())
-             {
-                 this->prevIndex_++;
-                 this->ui_.textEdit->setPlainText(
-                     this->prevMsg_.at(this->prevIndex_));
-             }
-             else
-             {
-                 this->prevIndex_ = this->prevMsg_.size();
-                 if (message == this->prevMsg_.at(this->prevIndex_ - 1))
-                 {
-                     // If user has just come from a message history
-                     // Then simply get currMsg_.
-                     this->ui_.textEdit->setPlainText(this->currMsg_);
-                 }
-                 else if (message != this->currMsg_)
-                 {
-                     // If user are already in current message
-                     // And type something new
-                     // Then replace currMsg_ with new one.
-                     this->currMsg_ = message;
-                 }
-                 // If user is already in current message
-                 // Then don't touch cursos.
-                 cursorToEnd =
-                     (message == this->prevMsg_.at(this->prevIndex_ - 1));
-             }
-
-             if (cursorToEnd)
-             {
-                 QTextCursor cursor = this->ui_.textEdit->textCursor();
-                 cursor.movePosition(QTextCursor::End);
-                 this->ui_.textEdit->setTextCursor(cursor);
-             }
-             return "";
+             return this->hotkeyNextMessage();
          }},
         {"undo",
          [this](std::vector<QString>) -> QString {
-             this->ui_.textEdit->undo();
-             return "";
+             return this->hotkeyUndo();
          }},
         {"redo",
          [this](std::vector<QString>) -> QString {
-             this->ui_.textEdit->redo();
-             return "";
+             return this->hotkeyRedo();
          }},
         {"copy",
          [this](std::vector<QString> arguments) -> QString {
-             // XXX: this action is unused at the moment, a qt standard shortcut is used instead
-             if (arguments.size() == 0)
-             {
-                 return "copy action takes only one argument: the source "
-                        "of the copy \"split\", \"input\" or "
-                        "\"auto\". If the source is \"split\", only text "
-                        "from the chat will be copied. If it is "
-                        "\"splitInput\", text from the input box will be "
-                        "copied. Automatic will pick whichever has a "
-                        "selection";
-             }
-             bool copyFromSplit = false;
-             auto mode = arguments.at(0);
-             if (mode == "split")
-             {
-                 copyFromSplit = true;
-             }
-             else if (mode == "splitInput")
-             {
-                 copyFromSplit = false;
-             }
-             else if (mode == "auto")
-             {
-                 const auto &cursor = this->ui_.textEdit->textCursor();
-                 copyFromSplit = !cursor.hasSelection();
-             }
-
-             if (copyFromSplit)
-             {
-                 this->split_->copyToClipboard();
-             }
-             else
-             {
-                 this->ui_.textEdit->copy();
-             }
-             return "";
+             return this->hotkeyCopy(arguments);
          }},
         {"paste",
          [this](std::vector<QString>) -> QString {
-             this->ui_.textEdit->paste();
-             return "";
+             return this->hotkeyPaste();
          }},
         {"clear",
          [this](std::vector<QString>) -> QString {
-             this->ui_.textEdit->setText("");
-             this->ui_.textEdit->moveCursor(QTextCursor::Start);
-             return "";
+             return this->hotkeyClear();
          }},
         {"selectAll",
          [this](std::vector<QString>) -> QString {
-             this->ui_.textEdit->selectAll();
-             return "";
+             return this->hotkeySelectAll();
          }},
         {"selectWord",
          [this](std::vector<QString>) -> QString {
-             auto cursor = this->ui_.textEdit->textCursor();
-             cursor.select(QTextCursor::WordUnderCursor);
-             this->ui_.textEdit->setTextCursor(cursor);
-             return "";
+             return this->hotkeySelectWord();
          }},
     };
 
