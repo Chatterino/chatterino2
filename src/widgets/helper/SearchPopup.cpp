@@ -166,7 +166,8 @@ void SearchPopup::initLayout()
 
         // CHANNELVIEW
         {
-            this->channelView_ = new ChannelView(this, this->split_);
+            this->channelView_ = new ChannelView(this, this->split_,
+                                                 ChannelView::Context::Search);
 
             layout1->addWidget(this->channelView_);
         }

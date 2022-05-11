@@ -65,6 +65,7 @@ public:
 
     // Misc
     bool isDisabled() const;
+    void setRenderReplies(bool render);
 
 private:
     // variables
@@ -72,6 +73,7 @@ private:
     std::shared_ptr<MessageLayoutContainer> container_;
     std::shared_ptr<QPixmap> buffer_{};
     bool bufferValid_ = false;
+    bool renderReplies_ = true;
 
     int height_ = 0;
 

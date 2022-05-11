@@ -120,10 +120,11 @@ namespace {
     }
 }  // namespace
 
-ChannelView::ChannelView(BaseWidget *parent, Split *split)
+ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
     : BaseWidget(parent)
     , scrollBar_(new Scrollbar(this))
     , split_(split)
+    , context_(context)
 {
     this->setMouseTracking(true);
 
@@ -707,7 +708,10 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
             messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
         }
 
-        this->messages_.pushBack(MessageLayoutPtr(messageLayout), deleted);
+        MessageLayoutPtr mlp(messageLayout);
+        this->configureMessageLayout(mlp);
+        this->messages_.pushBack(mlp, deleted);
+
         if (this->showScrollbarHighlights())
         {
             this->scrollBar_->addHighlight(
@@ -816,7 +820,9 @@ void ChannelView::messageAppended(MessagePtr &message,
         loop.exec();
     }
 
-    if (this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted))
+    MessageLayoutPtr mlp(messageRef);
+    this->configureMessageLayout(mlp);
+    if (this->messages_.pushBack(mlp, deleted))
     {
         if (this->paused())
         {
@@ -875,7 +881,9 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
         this->lastMessageHasAlternateBackgroundReverse_ =
             !this->lastMessageHasAlternateBackgroundReverse_;
 
-        messageRefs.at(i) = MessageLayoutPtr(layout);
+        MessageLayoutPtr mlp(layout);
+        this->configureMessageLayout(mlp);
+        messageRefs.at(i) = mlp;
     }
 
     /// Add the messages at the start
@@ -928,6 +936,8 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     }
 
     MessageLayoutPtr newItem(new MessageLayout(replacement));
+    this->configureMessageLayout(newItem);
+
     auto snapshot = this->messages_.getSnapshot();
     if (index >= snapshot.size())
     {
@@ -2558,6 +2568,19 @@ void ChannelView::setFloatingVisible(bool visible)
 bool ChannelView::shouldRenderFloatingElements() const
 {
     return this->floatingVisible_ && getSettings()->showMessageButtons;
+}
+
+void ChannelView::configureMessageLayout(MessageLayoutPtr &messageLayout) const
+{
+    if (this->context_ == ChannelView::Context::ReplyThread)
+    {
+        messageLayout->setRenderReplies(false);
+    }
+}
+
+ChannelView::Context ChannelView::getContext() const
+{
+    return this->context_;
 }
 
 }  // namespace chatterino

@@ -152,6 +152,12 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
             continue;
         }
 
+        if (!this->renderReplies_ &&
+            element->getFlags().has(MessageElementFlag::RepliedMessage))
+        {
+            continue;
+        }
+
         element->addToContainer(*this->container_, flags);
     }
 
@@ -429,6 +435,11 @@ void MessageLayout::addSelectionText(QString &str, int from, int to,
                                      CopyMode copymode)
 {
     this->container_->addSelectionText(str, from, to, copymode);
+}
+
+void MessageLayout::setRenderReplies(bool render)
+{
+    this->renderReplies_ = render;
 }
 
 }  // namespace chatterino

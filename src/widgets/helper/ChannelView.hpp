@@ -63,7 +63,15 @@ class ChannelView final : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit ChannelView(BaseWidget *parent = nullptr, Split *split = nullptr);
+    enum class Context {
+        None,
+        UserCard,
+        ReplyThread,
+        Search,
+    };
+
+    explicit ChannelView(BaseWidget *parent = nullptr, Split *split = nullptr,
+                         Context context = Context::None);
 
     void queueUpdate();
     Scrollbar &getScrollBar();
@@ -98,6 +106,8 @@ public:
     void queueLayout();
 
     void clearMessages();
+
+    Context getContext() const;
 
     /**
      * @brief Creates and shows a UserInfoPopup dialog
@@ -201,6 +211,8 @@ private:
     void showReplyThreadPopup(const MessagePtr &message);
     bool shouldRenderFloatingElements() const;
 
+    void configureMessageLayout(MessageLayoutPtr &messageLayout) const;
+
     QTimer *layoutCooldown_;
     bool layoutQueued_;
 
@@ -271,6 +283,8 @@ private:
 
     Selection selection_;
     bool selecting_ = false;
+
+    const Context context_;
 
     LimitedQueue<MessageLayoutPtr> messages_;
 

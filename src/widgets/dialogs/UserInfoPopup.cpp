@@ -511,7 +511,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
         this->ui_.noMessagesLabel = new Label("No recent messages");
         this->ui_.noMessagesLabel->setVisible(false);
 
-        this->ui_.latestMessages = new ChannelView(this, this->split_);
+        this->ui_.latestMessages =
+            new ChannelView(this, this->split_, ChannelView::Context::UserCard);
         this->ui_.latestMessages->setMinimumSize(400, 275);
         this->ui_.latestMessages->setSizePolicy(QSizePolicy::Expanding,
                                                 QSizePolicy::Expanding);

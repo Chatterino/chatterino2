@@ -129,7 +129,7 @@ enum class MessageElementFlag : int64_t {
     // for elements of the message reply
     RepliedMessage = (1LL << 32),
     RepliedText = Text | RepliedMessage,
-    RepliedUsername = Text | RepliedMessage,
+    RepliedUsername = Username | RepliedMessage,
 
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
