@@ -92,8 +92,16 @@ namespace {
         LimitedQueueSnapshot<MessagePtr> snapshot =
             channel->getMessageSnapshot();
 
-        ChannelPtr channelPtr(
-            new Channel(channel->getName(), Channel::Type::None));
+        ChannelPtr channelPtr;
+        if (channel->isTwitchChannel())
+        {
+            channelPtr = std::make_shared<TwitchChannel>(channel->getName());
+        }
+        else
+        {
+            channelPtr = std::make_shared<Channel>(channel->getName(),
+                                                   Channel::Type::None);
+        }
 
         for (size_t i = 0; i < snapshot.size(); i++)
         {
@@ -131,10 +139,12 @@ FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
     BaseWindow::FramelessDraggable};
 #endif
 
-UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
+UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
+                             Split *split)
     : BaseWindow(closeAutomatically ? userInfoPopupFlagsCloseAutomatically
                                     : userInfoPopupFlags,
                  parent)
+    , split_(split)
     , hack_(new bool)
     , dragTimer_(this)
 {
@@ -501,7 +511,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
         this->ui_.noMessagesLabel = new Label("No recent messages");
         this->ui_.noMessagesLabel->setVisible(false);
 
-        this->ui_.latestMessages = new ChannelView(this);
+        this->ui_.latestMessages = new ChannelView(this, this->split_);
         this->ui_.latestMessages->setMinimumSize(400, 275);
         this->ui_.latestMessages->setSizePolicy(QSizePolicy::Expanding,
                                                 QSizePolicy::Expanding);

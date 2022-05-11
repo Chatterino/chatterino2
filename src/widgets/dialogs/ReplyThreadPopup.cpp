@@ -19,6 +19,7 @@ ReplyThreadPopup::ReplyThreadPopup(QWidget *parent, Split *split)
 
     // initialize UI
     this->ui_.threadView = new ChannelView(this, this->split_);
+    this->ui_.threadView->setFloatingVisible(false);
     this->ui_.threadView->setMinimumSize(400, 100);
     this->ui_.threadView->setSizePolicy(QSizePolicy::Expanding,
                                         QSizePolicy::Expanding);
@@ -46,8 +47,18 @@ void ReplyThreadPopup::addMessagesFromThread()
 
     const auto &sourceChannel = this->split_->getChannel();
 
-    ChannelPtr virtualChannel(
-        new Channel(sourceChannel->getName(), Channel::Type::None));
+    ChannelPtr virtualChannel;
+    if (sourceChannel->isTwitchChannel())
+    {
+        virtualChannel =
+            std::make_shared<TwitchChannel>(sourceChannel->getName());
+    }
+    else
+    {
+        virtualChannel = std::make_shared<Channel>(sourceChannel->getName(),
+                                                   Channel::Type::None);
+    }
+
     this->ui_.threadView->setChannel(virtualChannel);
     this->ui_.threadView->setSourceChannel(sourceChannel);
 

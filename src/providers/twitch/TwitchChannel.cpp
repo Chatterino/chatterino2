@@ -951,6 +951,12 @@ void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)
     this->threads_[thread->rootId()] = thread;
 }
 
+const std::unordered_map<QString, std::weak_ptr<MessageThread>>
+    &TwitchChannel::threads() const
+{
+    return this->threads_;
+}
+
 void TwitchChannel::cleanUpReplyThreads()
 {
     for (auto it = this->threads_.begin(), last = this->threads_.end();

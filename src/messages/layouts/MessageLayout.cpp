@@ -174,7 +174,8 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 // Painting
 void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                           Selection &selection, bool isLastReadMessage,
-                          bool isWindowFocused, bool isMentions)
+                          bool isWindowFocused, bool isMentions,
+                          bool paintFloating)
 {
     auto app = getApp();
     QPixmap *pixmap = this->buffer_.get();
@@ -199,7 +200,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 
     if (!this->bufferValid_ || !selection.isEmpty())
     {
-        this->updateBuffer(pixmap, messageIndex, selection);
+        this->updateBuffer(pixmap, messageIndex, selection, paintFloating);
     }
 
     // draw on buffer
@@ -275,7 +276,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 }
 
 void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
-                                 Selection & /*selection*/)
+                                 Selection & /*selection*/, bool paintFloating)
 {
     if (buffer->isNull())
         return;
@@ -345,7 +346,10 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
 
     // draw message
     this->container_->paintElements(painter);
-    this->container_->paintFloatingElements(painter, buffer->rect());
+    if (paintFloating)
+    {
+        this->container_->paintFloatingElements(painter, buffer->rect());
+    }
 
 #ifdef FOURTF
     // debug

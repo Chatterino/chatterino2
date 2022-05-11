@@ -21,7 +21,8 @@ class UserInfoPopup final : public BaseWindow
     Q_OBJECT
 
 public:
-    UserInfoPopup(bool closeAutomatically, QWidget *parent);
+    UserInfoPopup(bool closeAutomatically, QWidget *parent,
+                  Split *split = nullptr);
 
     void setData(const QString &name, const ChannelPtr &channel);
     void setData(const QString &name, const ChannelPtr &contextChannel,
@@ -42,6 +43,8 @@ private:
     void loadAvatar(const QUrl &url);
     bool isMod_;
     bool isBroadcaster_;
+
+    Split *split_;
 
     QString userName_;
     QString userId_;

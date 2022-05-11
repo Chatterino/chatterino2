@@ -49,7 +49,7 @@ public:
     // Painting
     void paint(QPainter &painter, int width, int y, int messageIndex,
                Selection &selection, bool isLastReadMessage,
-               bool isWindowFocused, bool isMentions);
+               bool isWindowFocused, bool isMentions, bool paintFloating);
     void invalidateBuffer();
     void deleteBuffer();
     void deleteCache();
@@ -87,7 +87,8 @@ private:
 
     // methods
     void actuallyLayout(int width, MessageElementFlags flags);
-    void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection);
+    void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection,
+                      bool paintFloating);
 };
 
 using MessageLayoutPtr = std::shared_ptr<MessageLayout>;

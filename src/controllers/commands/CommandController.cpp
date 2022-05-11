@@ -516,7 +516,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         auto *userPopup = new UserInfoPopup(
             getSettings()->autoCloseUserPopup,
-            static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
+            static_cast<QWidget *>(&(getApp()->windows->getMainWindow())),
+            nullptr);
         userPopup->setData(userName, channel);
         userPopup->move(QCursor::pos());
         userPopup->show();

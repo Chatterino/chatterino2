@@ -158,6 +158,11 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split)
                      &ChannelView::scrollUpdateRequested);
 
     this->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
+
+    if (this->split_ == nullptr)
+    {
+        this->setFloatingVisible(false);  // prevent a whole bunch of problems
+    }
 }
 
 void ChannelView::initializeLayout()
@@ -1085,8 +1090,10 @@ void ChannelView::drawMessages(QPainter &painter)
             isLastMessage = this->lastReadMessage_.get() == layout;
         }
 
-        layout->paint(painter, DRAW_WIDTH, y, i, this->selection_,
-                      isLastMessage, windowFocused, isMentions);
+        layout->paint(
+            painter, DRAW_WIDTH, y, i, this->selection_, isLastMessage,
+            windowFocused, isMentions,
+            this->floatingVisible_ && this->channel_->isTwitchChannel());
 
         y += layout->getHeight();
 
@@ -1295,20 +1302,23 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
-    const FloatingMessageLayoutElement *floatingHoverElement =
-        layout->getFloatingElementAt(relativePos);
-
-    if (floatingHoverElement != nullptr)
+    if (this->floatingVisible_)
     {
-        if (floatingHoverElement->getLink().isValid())
+        const FloatingMessageLayoutElement *floatingHoverElement =
+            layout->getFloatingElementAt(relativePos);
+
+        if (floatingHoverElement != nullptr)
         {
-            this->setCursor(Qt::PointingHandCursor);
+            if (floatingHoverElement->getLink().isValid())
+            {
+                this->setCursor(Qt::PointingHandCursor);
+            }
+            else
+            {
+                this->setCursor(Qt::ArrowCursor);
+            }
+            return;
         }
-        else
-        {
-            this->setCursor(Qt::ArrowCursor);
-        }
-        return;
     }
 
     // check if word underneath cursor
@@ -1769,14 +1779,17 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
-    const FloatingMessageLayoutElement *floatingHoverElement =
-        layout->getFloatingElementAt(relativePos);
-
-    if (floatingHoverElement != nullptr)
+    if (this->floatingVisible_)
     {
-        this->handleMouseClick(event, floatingHoverElement, layout);
-        this->update();
-        return;
+        const FloatingMessageLayoutElement *floatingHoverElement =
+            layout->getFloatingElementAt(relativePos);
+
+        if (floatingHoverElement != nullptr)
+        {
+            this->handleMouseClick(event, floatingHoverElement, layout);
+            this->update();
+            return;
+        }
     }
 
     const MessageLayoutElement *hoverLayoutElement =
@@ -2208,8 +2221,8 @@ void ChannelView::showUserInfoPopup(const QString &userName,
 {
     auto *userCardParent =
         static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
-    auto *userPopup =
-        new UserInfoPopup(getSettings()->autoCloseUserPopup, userCardParent);
+    auto *userPopup = new UserInfoPopup(getSettings()->autoCloseUserPopup,
+                                        userCardParent, this->split_);
 
     auto contextChannel =
         getApp()->twitch->getChannelOrEmpty(alternativePopoutChannel);
@@ -2477,18 +2490,41 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
 {
     if (message == nullptr)
     {
-        return;  // todo remove
+        return;
     }
 
     std::shared_ptr<MessageThread> thread;
 
     if (message->replyThread == nullptr)
     {
-        auto tc = dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
-        if (tc)
+        auto getThread = [&](TwitchChannel *tc) {
+            auto threadIt = tc->threads().find(message->id);
+            if (threadIt != tc->threads().end() && !threadIt->second.expired())
+            {
+                return threadIt->second.lock();
+            }
+            else
+            {
+                auto thread = std::make_shared<MessageThread>(message);
+                tc->addReplyThread(thread);
+                return thread;
+            }
+        };
+
+        if (auto tc =
+                dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get()))
         {
-            thread = std::make_unique<MessageThread>(message);
-            tc->addReplyThread(thread);
+            thread = getThread(tc);
+        }
+        else if (auto tc = dynamic_cast<TwitchChannel *>(this->channel_.get()))
+        {
+            thread = getThread(tc);
+        }
+        else
+        {
+            // Unable to create new reply thread.
+            // TODO(dnsge): Should probably notify user?
+            return;
         }
     }
     else
@@ -2505,6 +2541,11 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     popup->move(QCursor::pos() - offset);
     popup->show();
+}
+
+void ChannelView::setFloatingVisible(bool visible)
+{
+    this->floatingVisible_ = visible;
 }
 
 }  // namespace chatterino

@@ -75,6 +75,8 @@ public:
         int slowMode = 0;
     };
 
+    explicit TwitchChannel(const QString &channelName);
+
     void initialize();
 
     // Channel methods
@@ -121,6 +123,8 @@ public:
 
     // Replies
     void addReplyThread(const std::shared_ptr<MessageThread> &thread);
+    const std::unordered_map<QString, std::weak_ptr<MessageThread>> &threads()
+        const;
 
     // Signals
     pajlada::Signals::NoArgSignal roomIdChanged;
@@ -141,9 +145,6 @@ private:
         QString displayName;
         QString localizedName;
     } nameOptions;
-
-protected:
-    explicit TwitchChannel(const QString &channelName);
 
 private:
     // Methods

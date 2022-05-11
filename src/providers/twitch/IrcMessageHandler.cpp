@@ -320,7 +320,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                 {
                     // Found root reply message
                     std::shared_ptr<MessageThread> newThread =
-                        std::make_unique<MessageThread>(snapshot[i]);
+                        std::make_shared<MessageThread>(snapshot[i]);
 
                     // Store weak reference to thread
                     builder.setThread(newThread);

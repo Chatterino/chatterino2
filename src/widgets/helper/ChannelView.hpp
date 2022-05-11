@@ -108,6 +108,8 @@ public:
     void showUserInfoPopup(const QString &userName,
                            QString alternativePopoutChannel = QString());
 
+    void setFloatingVisible(bool visible);
+
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
@@ -240,6 +242,8 @@ private:
     // "Show latest messages" button
     bool showingLatestMessages_ = true;
     bool enableScrollingToBottom_ = true;
+
+    bool floatingVisible_ = true;
 
     bool onlyUpdateEmotes_ = false;
 
