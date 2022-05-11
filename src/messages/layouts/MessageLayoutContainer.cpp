@@ -692,7 +692,8 @@ void MessageLayoutContainer::addSelectionText(QString &str, int from, int to,
 
     for (auto &element : this->elements_)
     {
-        if (element->getCreator().getFlags().has(
+        if (copymode != CopyMode::Everything &&
+            element->getCreator().getFlags().has(
                 MessageElementFlag::RepliedMessage))
         {
             // Don't include the message being replied to

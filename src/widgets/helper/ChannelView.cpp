@@ -2048,7 +2048,8 @@ void ChannelView::addMessageContextMenuItems(
 
     menu.addAction("Copy full message", [layout] {
         QString copyString;
-        layout->addSelectionText(copyString);
+        layout->addSelectionText(copyString, 0, INT_MAX,
+                                 CopyMode::EverythingButReplies);
 
         crossPlatformCopy(copyString);
     });

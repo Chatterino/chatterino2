@@ -51,6 +51,7 @@ using MessagePtr = std::shared_ptr<const Message>;
 
 enum class CopyMode {
     Everything,
+    EverythingButReplies,
     OnlyTextAndEmotes,
 };
 
