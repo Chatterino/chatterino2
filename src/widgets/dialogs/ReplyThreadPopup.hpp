@@ -5,6 +5,7 @@
 #include "widgets/splits/ReplyInput.hpp"
 #include "widgets/splits/Split.hpp"
 
+#include <boost/signals2.hpp>
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
 
@@ -23,6 +24,7 @@ public:
 
 private:
     void addMessagesFromThread();
+    void updateInputPlaceholder();
 
     // The message reply thread
     std::shared_ptr<const MessageThread> thread_;
@@ -36,6 +38,7 @@ private:
     } ui_;
 
     std::unique_ptr<pajlada::Signals::ScopedConnection> messageConnection_;
+    std::vector<boost::signals2::scoped_connection> bSignals_;
 };
 
 }  // namespace chatterino

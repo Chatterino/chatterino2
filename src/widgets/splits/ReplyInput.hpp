@@ -17,6 +17,8 @@ public:
 
     void setThread(const std::shared_ptr<const MessageThread> &thread);
 
+    void setPlaceholderText(const QString &text);
+
 private:
     virtual QString hotkeySendMessage(std::vector<QString> &arguments) override;
 

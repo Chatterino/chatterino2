@@ -1,5 +1,6 @@
 #include "ReplyThreadPopup.hpp"
 
+#include "Application.hpp"
 #include "common/Channel.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -27,6 +28,11 @@ ReplyThreadPopup::ReplyThreadPopup(QWidget *parent, Split *split)
 
     this->ui_.replyInput = new ReplyInput(this, this->split_);
 
+    this->bSignals_.emplace_back(
+        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+            this->updateInputPlaceholder();
+        }));
+
     layout->addWidget(this->ui_.threadView, 1);
     layout->addWidget(this->ui_.replyInput);
 }
@@ -37,6 +43,7 @@ void ReplyThreadPopup::setThread(
     this->thread_ = thread;
     this->ui_.replyInput->setThread(thread);
     this->addMessagesFromThread();
+    this->updateInputPlaceholder();
 }
 
 void ReplyThreadPopup::addMessagesFromThread()
@@ -83,6 +90,31 @@ void ReplyThreadPopup::addMessagesFromThread()
                         virtualChannel->addMessage(message);
                     }
                 }));
+}
+
+void ReplyThreadPopup::updateInputPlaceholder()
+{
+    auto channel = this->split_->getChannel();
+    if (!channel || !channel->isTwitchChannel())
+    {
+        return;
+    }
+
+    auto user = getApp()->accounts->twitch.getCurrent();
+    QString placeholderText;
+
+    if (user->isAnon())
+    {
+        placeholderText = "Log in to send messages...";
+    }
+    else
+    {
+        placeholderText =
+            QString("Reply as %1...")
+                .arg(getApp()->accounts->twitch.getCurrent()->getUserName());
+    }
+
+    this->ui_.replyInput->setPlaceholderText(placeholderText);
 }
 
 }  // namespace chatterino

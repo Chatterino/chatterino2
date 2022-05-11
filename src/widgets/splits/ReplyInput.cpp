@@ -63,4 +63,9 @@ QString ReplyInput::hotkeySendMessage(std::vector<QString> &arguments)
     return "";
 }
 
+void ReplyInput::setPlaceholderText(const QString &text)
+{
+    this->ui_.textEdit->setPlaceholderText(text);
+}
+
 }  // namespace chatterino
