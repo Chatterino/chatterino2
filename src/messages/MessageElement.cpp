@@ -505,7 +505,8 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                     }
 
                     container.addElementNoLineBreak(
-                        new ImageLayoutElement(*this, image, size));
+                        (new ImageLayoutElement(*this, image, size))
+                            ->setLink(this->getLink()));
                 }
             }
             else if (parsedWord.type() == typeid(QString))
