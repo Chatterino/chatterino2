@@ -1090,10 +1090,10 @@ void ChannelView::drawMessages(QPainter &painter)
             isLastMessage = this->lastReadMessage_.get() == layout;
         }
 
-        layout->paint(
-            painter, DRAW_WIDTH, y, i, this->selection_, isLastMessage,
-            windowFocused, isMentions,
-            this->floatingVisible_ && this->channel_->isTwitchChannel());
+        layout->paint(painter, DRAW_WIDTH, y, i, this->selection_,
+                      isLastMessage, windowFocused, isMentions,
+                      this->shouldRenderFloatingElements() &&
+                          this->channel_->isTwitchChannel());
 
         y += layout->getHeight();
 
@@ -1302,7 +1302,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
-    if (this->floatingVisible_)
+    if (this->shouldRenderFloatingElements())
     {
         const FloatingMessageLayoutElement *floatingHoverElement =
             layout->getFloatingElementAt(relativePos);
@@ -1779,7 +1779,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
-    if (this->floatingVisible_)
+    if (this->shouldRenderFloatingElements())
     {
         const FloatingMessageLayoutElement *floatingHoverElement =
             layout->getFloatingElementAt(relativePos);
@@ -2550,6 +2550,11 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
 void ChannelView::setFloatingVisible(bool visible)
 {
     this->floatingVisible_ = visible;
+}
+
+bool ChannelView::shouldRenderFloatingElements() const
+{
+    return this->floatingVisible_ && getSettings()->showMessageButtons;
 }
 
 }  // namespace chatterino

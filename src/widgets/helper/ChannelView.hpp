@@ -199,6 +199,7 @@ private:
     void disableScrolling();
 
     void showReplyThreadPopup(const MessagePtr &message);
+    bool shouldRenderFloatingElements() const;
 
     QTimer *layoutCooldown_;
     bool layoutQueued_;

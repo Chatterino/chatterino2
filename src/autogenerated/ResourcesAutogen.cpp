@@ -32,9 +32,7 @@ Resources2::Resources2()
     this->buttons.modModeEnabled = QPixmap(":/buttons/modModeEnabled.png");
     this->buttons.modModeEnabled2 = QPixmap(":/buttons/modModeEnabled2.png");
     this->buttons.replyDark = QPixmap(":/buttons/replyDark.png");
-    this->buttons.replyLight = QPixmap(":/buttons/replyLight.png");
     this->buttons.replyThreadDark = QPixmap(":/buttons/replyThreadDark.png");
-    this->buttons.replyThreadLight = QPixmap(":/buttons/replyThreadLight.png");
     this->buttons.search = QPixmap(":/buttons/search.png");
     this->buttons.timeout = QPixmap(":/buttons/timeout.png");
     this->buttons.trashCan = QPixmap(":/buttons/trashCan.png");
