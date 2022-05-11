@@ -5,6 +5,8 @@
 #include "messages/Emote.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
+#include "providers/emoji/Emojis.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
@@ -467,46 +469,85 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
         };
 
         QString ellipsis = "...";
+        auto addEllipsis = [&]() {
+            int ellipsisSize = metrics.horizontalAdvance(ellipsis);
+            container.addElementNoLineBreak(
+                getTextLayoutElement(ellipsis, ellipsisSize, false));
+        };
 
         for (Word &word : this->words_)
         {
-            word.width = metrics.horizontalAdvance(word.text);
-
-            // see if the text fits in the current line
-            if (container.fitsInLine(word.width))
+            auto parsedWords = app->emotes->emojis.parse(word.text);
+            if (parsedWords.size() == 0)
             {
-                container.addElementNoLineBreak(getTextLayoutElement(
-                    word.text, word.width, this->hasTrailingSpace()));
+                continue;  // sanity check
             }
-            else
+
+            auto &parsedWord = parsedWords[0];
+            if (parsedWord.type() == typeid(EmotePtr))
             {
-                // word overflows, try minimum truncation
-                bool cutSuccess = false;
-                for (size_t cut = 1; cut < word.text.length(); ++cut)
+                auto emote = boost::get<EmotePtr>(parsedWord);
+                auto image =
+                    emote->images.getImageOrLoaded(container.getScale());
+                if (!image->isEmpty())
                 {
-                    // Cut off n characters and append the ellipsis.
-                    // Try removing characters one by one until the word fits.
-                    QString truncatedWord = word.text.chopped(cut) + ellipsis;
-                    int newSize = metrics.horizontalAdvance(truncatedWord);
-                    if (container.fitsInLine(newSize))
+                    auto emoteScale = getSettings()->emoteScale.getValue();
+
+                    auto size = QSize(
+                        int(container.getScale() * image->width() * emoteScale),
+                        int(container.getScale() * image->height() *
+                            emoteScale));
+
+                    if (!container.fitsInLine(size.width()))
                     {
-                        container.addElementNoLineBreak(getTextLayoutElement(
-                            truncatedWord, newSize, false));
-                        cutSuccess = true;
+                        addEllipsis();
                         break;
                     }
-                }
 
-                if (!cutSuccess)
-                {
-                    // We weren't able to show any part of the current word, so
-                    // just append the ellipsis.
-                    int ellipsisSize = metrics.horizontalAdvance(ellipsis);
                     container.addElementNoLineBreak(
-                        getTextLayoutElement(ellipsis, ellipsisSize, false));
+                        new ImageLayoutElement(*this, image, size));
                 }
+            }
+            else if (parsedWord.type() == typeid(QString))
+            {
+                word.width = metrics.horizontalAdvance(word.text);
 
-                break;
+                // see if the text fits in the current line
+                if (container.fitsInLine(word.width))
+                {
+                    container.addElementNoLineBreak(getTextLayoutElement(
+                        word.text, word.width, this->hasTrailingSpace()));
+                }
+                else
+                {
+                    // word overflows, try minimum truncation
+                    bool cutSuccess = false;
+                    for (size_t cut = 1; cut < word.text.length(); ++cut)
+                    {
+                        // Cut off n characters and append the ellipsis.
+                        // Try removing characters one by one until the word fits.
+                        QString truncatedWord =
+                            word.text.chopped(cut) + ellipsis;
+                        int newSize = metrics.horizontalAdvance(truncatedWord);
+                        if (container.fitsInLine(newSize))
+                        {
+                            container.addElementNoLineBreak(
+                                getTextLayoutElement(truncatedWord, newSize,
+                                                     false));
+                            cutSuccess = true;
+                            break;
+                        }
+                    }
+
+                    if (!cutSuccess)
+                    {
+                        // We weren't able to show any part of the current word, so
+                        // just append the ellipsis.
+                        addEllipsis();
+                    }
+
+                    break;
+                }
             }
         }
 
