@@ -23,6 +23,7 @@
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/splits/Split.hpp"
 
@@ -911,6 +912,67 @@ void CommandController::initialize(Settings &, Paths &paths)
         getApp()->twitch->sendRawMessage(words.mid(1).join(" "));
         return "";
     });
+
+    auto replyCommand = [](const QStringList &words, ChannelPtr channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /reply command only works in Twitch Channels"));
+            return "";
+        }
+
+        if (words.size() < 3)
+        {
+            channel->addMessage(
+                makeSystemMessage("Usage: /reply <username> <message>"));
+            return "";
+        }
+
+        QString username = words[1];
+        if (username.startsWith('@'))
+        {
+            username.remove(0, 1);
+        }
+
+        auto snapshot = twitchChannel->getMessageSnapshot();
+        for (size_t i = snapshot.size(); i-- > 0;)
+        {
+            auto &msg = snapshot[i];
+            if (msg->loginName.compare(username, Qt::CaseInsensitive) == 0)
+            {
+                std::shared_ptr<MessageThread> thread;
+                // found most recent message by user
+                if (msg->replyThread == nullptr)
+                {
+                    thread = std::make_shared<MessageThread>(msg);
+                    twitchChannel->addReplyThread(thread);
+                }
+                else
+                {
+                    thread = msg->replyThread;
+                }
+
+                QString reply;
+                for (int n = 2; n < words.size(); ++n)
+                {
+                    reply += words[n] + ' ';
+                }
+
+                twitchChannel->sendReply(reply, thread->rootId());
+                return "";
+            }
+        }
+
+        channel->addMessage(
+            makeSystemMessage("A message from that user wasn't found"));
+
+        return "";
+    };
+
+    this->registerCommand("/reply", replyCommand);
+    this->registerCommand("/r", replyCommand);
+
 #ifndef NDEBUG
     this->registerCommand(
         "/fakemsg",
