@@ -33,6 +33,7 @@ ReplyThreadPopup::ReplyThreadPopup(QWidget *parent, Split *split)
             this->updateInputUI();
         }));
 
+    layout->setSpacing(0);
     layout->addWidget(this->ui_.threadView, 1);
     layout->addWidget(this->ui_.replyInput);
 }
