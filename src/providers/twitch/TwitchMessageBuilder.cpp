@@ -276,12 +276,6 @@ MessagePtr TwitchMessageBuilder::build()
     // words
     QStringList splits = this->originalMessage_.split(' ');
 
-    if (this->thread_ && !splits.isEmpty() && splits[0].startsWith('@'))
-    {
-        // If this is a reply, remove the first word which should be "@username"
-        splits.pop_front();
-    }
-
     this->addWords(splits, twitchEmotes);
 
     this->message().messageText = this->originalMessage_;
