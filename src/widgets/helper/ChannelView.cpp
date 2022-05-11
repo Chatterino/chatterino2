@@ -2559,6 +2559,7 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     popup->move(QCursor::pos() - offset);
     popup->show();
+    popup->giveFocus(Qt::MouseFocusReason);
 }
 
 void ChannelView::setFloatingVisible(bool visible)

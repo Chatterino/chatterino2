@@ -21,6 +21,10 @@ public:
     ReplyThreadPopup(bool closeAutomatically, QWidget *parent, Split *split);
 
     void setThread(const std::shared_ptr<const MessageThread> &thread);
+    void giveFocus(Qt::FocusReason reason);
+
+protected:
+    void focusInEvent(QFocusEvent *event) override;
 
 private:
     void addMessagesFromThread();

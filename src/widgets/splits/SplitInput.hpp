@@ -45,6 +45,8 @@ protected:
 
     virtual void mousePressEvent(QMouseEvent *event) override;
 
+    virtual void giveFocus(Qt::FocusReason reason);
+
 protected:
     virtual QString hotkeyCursorToStart(std::vector<QString> &arguments);
     virtual QString hotkeyCursorToEnd(std::vector<QString> &arguments);

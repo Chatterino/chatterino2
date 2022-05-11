@@ -33,6 +33,9 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     this->ui_.threadView->setMinimumSize(400, 100);
     this->ui_.threadView->setSizePolicy(QSizePolicy::Expanding,
                                         QSizePolicy::Expanding);
+    this->ui_.threadView->mouseDown.connect([this](QMouseEvent *) {
+        this->giveFocus(Qt::MouseFocusReason);
+    });
 
     this->ui_.replyInput = new ReplyInput(this, this->split_);
 
@@ -136,6 +139,16 @@ void ReplyThreadPopup::updateInputUI()
     }
 
     this->ui_.replyInput->setPlaceholderText(placeholderText);
+}
+
+void ReplyThreadPopup::giveFocus(Qt::FocusReason reason)
+{
+    this->ui_.replyInput->giveFocus(reason);
+}
+
+void ReplyThreadPopup::focusInEvent(QFocusEvent *event)
+{
+    this->giveFocus(event->reason());
 }
 
 }  // namespace chatterino

@@ -845,4 +845,9 @@ void SplitInput::mousePressEvent(QMouseEvent *)
     this->split_->giveFocus(Qt::MouseFocusReason);
 }
 
+void SplitInput::giveFocus(Qt::FocusReason reason)
+{
+    this->ui_.textEdit->setFocus(reason);
+}
+
 }  // namespace chatterino
