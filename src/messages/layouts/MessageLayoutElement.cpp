@@ -247,8 +247,7 @@ void ImageWithBackgroundLayoutElement::paint(QPainter &painter)
 PrettyFloatingImageLayoutElement::PrettyFloatingImageLayoutElement(
     MessageElement &creator, ImagePtr image, const QSize &size, int padding,
     QColor background)
-    : FloatingMessageLayoutElement(
-          creator, size.grownBy(QMargins(padding, padding, padding, padding)))
+    : FloatingMessageLayoutElement(creator, size + QSize(padding, padding))
     , image_(std::move(image))
     , padding_(padding)
     , background_(background)
