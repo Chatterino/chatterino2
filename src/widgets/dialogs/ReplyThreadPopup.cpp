@@ -72,6 +72,17 @@ void ReplyThreadPopup::addMessagesFromThread()
             virtualChannel->addMessage(msg);
         }
     }
+
+    this->messageConnection_ =
+        std::make_unique<pajlada::Signals::ScopedConnection>(
+            sourceChannel->messageAppended.connect(
+                [this, virtualChannel](MessagePtr &message, auto) {
+                    if (message->replyThread == this->thread_)
+                    {
+                        // same reply thread, add message
+                        virtualChannel->addMessage(message);
+                    }
+                }));
 }
 
 }  // namespace chatterino

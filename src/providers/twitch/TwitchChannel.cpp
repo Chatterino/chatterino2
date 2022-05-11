@@ -446,8 +446,7 @@ void TwitchChannel::sendMessage(const QString &message)
     }
 }
 
-void TwitchChannel::sendReply(const QString &message, const QString &replyId,
-                              const QString &replyUser)
+void TwitchChannel::sendReply(const QString &message, const QString &replyId)
 {
     auto app = getApp();
     if (!app->accounts->twitch.isLoggedIn())
@@ -464,11 +463,8 @@ void TwitchChannel::sendReply(const QString &message, const QString &replyId,
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << this->getName()
                               << "] Send reply message:" << message;
 
-    // Add @username prefix for Twitch consistency
-    QString messageWithPrefix = "@" + replyUser + " " + message;
-
     // Do last message processing
-    QString parsedMessage = this->prepareMessage(app, messageWithPrefix);
+    QString parsedMessage = this->prepareMessage(app, message);
 
     bool messageSent = false;
     this->sendReplySignal.invoke(this->getName(), parsedMessage, replyId,

@@ -84,8 +84,7 @@ public:
     virtual bool isEmpty() const override;
     virtual bool canSendMessage() const override;
     virtual void sendMessage(const QString &message) override;
-    virtual void sendReply(const QString &message, const QString &replyId,
-                           const QString &replyUser);
+    virtual void sendReply(const QString &message, const QString &replyId);
     virtual bool isMod() const override;
     bool isVip() const;
     bool isStaff() const;

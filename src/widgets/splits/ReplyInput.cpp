@@ -41,8 +41,7 @@ QString ReplyInput::hotkeySendMessage(std::vector<QString> &arguments)
     message = message.replace('\n', ' ');
     QString sendMessage = getApp()->commands->execCommand(message, c, false);
 
-    tc->sendReply(sendMessage, this->thread_->rootId(),
-                  this->thread_->root()->loginName);
+    tc->sendReply(sendMessage, this->thread_->rootId());
     // don't add duplicate messages and empty message to message history
     if ((this->prevMsg_.isEmpty() || !this->prevMsg_.endsWith(message)) &&
         !message.trimmed().isEmpty())

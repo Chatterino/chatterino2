@@ -5,6 +5,9 @@
 #include "widgets/splits/ReplyInput.hpp"
 #include "widgets/splits/Split.hpp"
 
+#include <pajlada/signals/scoped-connection.hpp>
+#include <pajlada/signals/signal.hpp>
+
 #include <memory>
 
 namespace chatterino {
@@ -31,6 +34,8 @@ private:
         ChannelView *threadView = nullptr;
         ReplyInput *replyInput = nullptr;
     } ui_;
+
+    std::unique_ptr<pajlada::Signals::ScopedConnection> messageConnection_;
 };
 
 }  // namespace chatterino
