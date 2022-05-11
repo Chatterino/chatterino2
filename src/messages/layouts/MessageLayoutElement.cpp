@@ -10,6 +10,7 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <QPainterPath>
 
 namespace chatterino {
 
