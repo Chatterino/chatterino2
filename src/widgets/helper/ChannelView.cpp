@@ -2052,6 +2052,10 @@ void ChannelView::addMessageContextMenuItems(
 
         crossPlatformCopy(copyString);
     });
+
+    menu.addAction("Reply to message", [this, layout] {
+        this->showReplyThreadPopup(layout->getMessagePtr());
+    });
 }
 
 void ChannelView::addTwitchLinkContextMenuItems(
