@@ -11,7 +11,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
-#include "providers/twitch/PubsubClient.hpp"
+#include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
@@ -23,6 +23,8 @@
 // using namespace Communi;
 using namespace std::chrono_literals;
 
+#define TWITCH_PUBSUB_URL "wss://pubsub-edge.twitch.tv"
+
 namespace chatterino {
 
 TwitchIrcServer::TwitchIrcServer()
@@ -33,7 +35,7 @@ TwitchIrcServer::TwitchIrcServer()
 {
     this->initializeIrc();
 
-    this->pubsub = new PubSub;
+    this->pubsub = new PubSub(TWITCH_PUBSUB_URL);
 
     // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) {
     // this->connect(); },
@@ -46,6 +48,7 @@ void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
     getApp()->accounts->twitch.currentUserChanged.connect([this]() {
         postToThread([this] {
             this->connect();
+            this->pubsub->setAccount(getApp()->accounts->twitch.getCurrent());
         });
     });
 

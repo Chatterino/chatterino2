@@ -910,6 +910,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             auto users = msgParts.at(1)
                              .mid(1)  // there is a space before the first user
                              .split(", ");
+            users.sort(Qt::CaseInsensitive);
             TwitchMessageBuilder::listOfUsersSystemMessage(msgParts.at(0),
                                                            users, tc, &builder);
             channel->addMessage(builder.release());

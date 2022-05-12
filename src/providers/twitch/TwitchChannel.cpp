@@ -12,8 +12,9 @@
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
-#include "providers/twitch/PubsubClient.hpp"
+#include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
@@ -161,24 +162,20 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [=] {
+    this->bSignals_.emplace_back(
+        getApp()->accounts->twitch.currentUserChanged.connect([=] {
             this->setMod(false);
-        });
+            this->refreshPubSub();
+        }));
 
-    // pubsub
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [=] {
-            this->refreshPubsub();
-        });
-    this->refreshPubsub();
+    this->refreshPubSub();
     this->userStateChanged.connect([this] {
-        this->refreshPubsub();
+        this->refreshPubSub();
     });
 
     // room id loaded -> refresh live status
     this->roomIdChanged.connect([this]() {
-        this->refreshPubsub();
+        this->refreshPubSub();
         this->refreshTitle();
         this->refreshLiveStatus();
         this->refreshBadges();
@@ -300,11 +297,6 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
 {
     assertInGuiThread();
 
-    if (!reward.hasParsedSuccessfully)
-    {
-        return;
-    }
-
     if (!reward.isUserInputRequired)
     {
         MessageBuilder builder;
@@ -314,7 +306,7 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
         return;
     }
 
-    bool result;
+    bool result = false;
     {
         auto channelPointRewards = this->channelPointRewards_.access();
         result = channelPointRewards->try_emplace(reward.id, reward).second;
@@ -882,16 +874,21 @@ void TwitchChannel::loadRecentMessages()
         .execute();
 }
 
-void TwitchChannel::refreshPubsub()
+void TwitchChannel::refreshPubSub()
 {
     auto roomId = this->roomId();
     if (roomId.isEmpty())
+    {
         return;
+    }
 
-    auto account = getApp()->accounts->twitch.getCurrent();
-    getApp()->twitch->pubsub->listenToChannelModerationActions(roomId, account);
-    getApp()->twitch->pubsub->listenToAutomod(roomId, account);
-    getApp()->twitch->pubsub->listenToChannelPointRewards(roomId, account);
+    auto currentAccount = getApp()->accounts->twitch.getCurrent();
+
+    getApp()->twitch->pubsub->setAccount(currentAccount);
+
+    getApp()->twitch->pubsub->listenToChannelModerationActions(roomId);
+    getApp()->twitch->pubsub->listenToAutomod(roomId);
+    getApp()->twitch->pubsub->listenToChannelPointRewards(roomId);
 }
 
 void TwitchChannel::refreshChatters()

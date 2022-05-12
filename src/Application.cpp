@@ -20,7 +20,7 @@
 #include "providers/irc/Irc2.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
-#include "providers/twitch/PubsubClient.hpp"
+#include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
@@ -34,6 +34,7 @@
 #include "singletons/Toasts.hpp"
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -142,7 +143,7 @@ void Application::initialize(Settings &settings, Paths &paths)
     {
         this->initNm(paths);
     }
-    this->initPubsub();
+    this->initPubSub();
 }
 
 int Application::run(QApplication &qtApp)
@@ -199,7 +200,7 @@ void Application::initNm(Paths &paths)
 #endif
 }
 
-void Application::initPubsub()
+void Application::initPubSub()
 {
     this->twitch->pubsub->signals_.moderation.chatCleared.connect(
         [this](const auto &action) {
@@ -336,10 +337,101 @@ void Application::initPubsub()
             });
         });
 
-    this->twitch->pubsub->signals_.moderation.automodMessage.connect(
+    this->twitch->pubsub->signals_.moderation.autoModMessageCaught.connect(
+        [&](const auto &msg, const QString &channelID) {
+            auto chan = this->twitch->getChannelOrEmptyByID(channelID);
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            switch (msg.type)
+            {
+                case PubSubAutoModQueueMessage::Type::AutoModCaughtMessage: {
+                    if (msg.status == "PENDING")
+                    {
+                        AutomodAction action(msg.data, channelID);
+                        action.reason = QString("%1 level %2")
+                                            .arg(msg.contentCategory)
+                                            .arg(msg.contentLevel);
+
+                        action.msgID = msg.messageID;
+                        action.message = msg.messageText;
+
+                        // this message also contains per-word automod data, which could be implemented
+
+                        // extract sender data manually because Twitch loves not being consistent
+                        QString senderDisplayName =
+                            msg.senderUserDisplayName;  // Might be transformed later
+                        bool hasLocalizedName = false;
+                        if (!msg.senderUserDisplayName.isEmpty())
+                        {
+                            // check for non-ascii display names
+                            if (QString::compare(msg.senderUserDisplayName,
+                                                 msg.senderUserLogin,
+                                                 Qt::CaseInsensitive) != 0)
+                            {
+                                hasLocalizedName = true;
+                            }
+                        }
+                        QColor senderColor = msg.senderUserChatColor;
+                        QString senderColor_;
+                        if (!senderColor.isValid() &&
+                            getSettings()->colorizeNicknames)
+                        {
+                            // color may be not present if user is a grey-name
+                            senderColor = getRandomColor(msg.senderUserID);
+                        }
+
+                        // handle username style based on prefered setting
+                        switch (getSettings()->usernameDisplayMode.getValue())
+                        {
+                            case UsernameDisplayMode::Username: {
+                                if (hasLocalizedName)
+                                {
+                                    senderDisplayName = msg.senderUserLogin;
+                                }
+                                break;
+                            }
+                            case UsernameDisplayMode::LocalizedName: {
+                                break;
+                            }
+                            case UsernameDisplayMode::
+                                UsernameAndLocalizedName: {
+                                if (hasLocalizedName)
+                                {
+                                    senderDisplayName = QString("%1(%2)").arg(
+                                        msg.senderUserLogin,
+                                        msg.senderUserDisplayName);
+                                }
+                                break;
+                            }
+                        }
+
+                        action.target =
+                            ActionUser{msg.senderUserID, msg.senderUserLogin,
+                                       senderDisplayName, senderColor};
+                        postToThread([chan, action] {
+                            const auto p = makeAutomodMessage(action);
+                            chan->addMessage(p.first);
+                            chan->addMessage(p.second);
+                        });
+                    }
+                    // "ALLOWED" and "DENIED" statuses remain unimplemented
+                    // They are versions of automod_message_(denied|approved) but for mods.
+                }
+                break;
+
+                case PubSubAutoModQueueMessage::Type::INVALID:
+                default: {
+                }
+                break;
+            }
+        });
+
+    this->twitch->pubsub->signals_.moderation.autoModMessageBlocked.connect(
         [&](const auto &action) {
             auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
-
             if (chan->isEmpty())
             {
                 return;
@@ -386,38 +478,44 @@ void Application::initPubsub()
 
     this->twitch->pubsub->signals_.pointReward.redeemed.connect(
         [&](auto &data) {
-            QString channelId;
-            if (rj::getSafe(data, "channel_id", channelId))
-            {
-                auto chan = this->twitch->getChannelOrEmptyByID(channelId);
-
-                auto reward = ChannelPointReward(data);
-
-                postToThread([chan, reward] {
-                    if (auto channel =
-                            dynamic_cast<TwitchChannel *>(chan.get()))
-                    {
-                        channel->addChannelPointReward(reward);
-                    }
-                });
-            }
-            else
+            QString channelId = data.value("channel_id").toString();
+            if (channelId.isEmpty())
             {
                 qCDebug(chatterinoApp)
                     << "Couldn't find channel id of point reward";
+                return;
             }
+
+            auto chan = this->twitch->getChannelOrEmptyByID(channelId);
+
+            auto reward = ChannelPointReward(data);
+
+            postToThread([chan, reward] {
+                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->addChannelPointReward(reward);
+                }
+            });
         });
 
     this->twitch->pubsub->start();
 
     auto RequestModerationActions = [=]() {
-        this->twitch->pubsub->unlistenAllModerationActions();
+        this->twitch->pubsub->setAccount(
+            getApp()->accounts->twitch.getCurrent());
         // TODO(pajlada): Unlisten to all authed topics instead of only
         // moderation topics this->twitch->pubsub->UnlistenAllAuthedTopics();
 
-        this->twitch->pubsub->listenToWhispers(
-            this->accounts->twitch.getCurrent());
+        this->twitch->pubsub->listenToWhispers();
     };
+
+    this->accounts->twitch.currentUserChanged.connect(
+        [=] {
+            this->twitch->pubsub->unlistenAllModerationActions();
+            this->twitch->pubsub->unlistenAutomod();
+            this->twitch->pubsub->unlistenWhispers();
+        },
+        boost::signals2::at_front);
 
     this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);
 

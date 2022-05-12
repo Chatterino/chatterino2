@@ -28,7 +28,8 @@
 
 #ifndef NDEBUG
 #    include <rapidjson/document.h>
-#    include "providers/twitch/PubsubClient.hpp"
+#    include "providers/twitch/PubSubManager.hpp"
+#    include "providers/twitch/PubSubMessages.hpp"
 #    include "util/SampleCheerMessages.hpp"
 #    include "util/SampleLinks.hpp"
 #endif
@@ -56,10 +57,10 @@ Window::Window(WindowType type)
     this->addMenuBar();
 #endif
 
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [this] {
+    this->bSignals_.emplace_back(
+        getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->onAccountSelected();
-        });
+        }));
     this->onAccountSelected();
 
     if (type == WindowType::Main)
@@ -284,17 +285,24 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         static bool alt = true;
         if (alt)
         {
-            doc.Parse(channelRewardMessage);
+            auto oMessage = parsePubSubBaseMessage(channelRewardMessage);
+            auto oInnerMessage =
+                oMessage->toInner<PubSubMessageMessage>()
+                    ->toInner<PubSubCommunityPointsChannelV1Message>();
+
             app->twitch->addFakeMessage(channelRewardIRCMessage);
             app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
-                doc["data"]["message"]["data"]["redemption"]);
+                oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
         else
         {
-            doc.Parse(channelRewardMessage2);
+            auto oMessage = parsePubSubBaseMessage(channelRewardMessage2);
+            auto oInnerMessage =
+                oMessage->toInner<PubSubMessageMessage>()
+                    ->toInner<PubSubCommunityPointsChannelV1Message>();
             app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
-                doc["data"]["message"]["data"]["redemption"]);
+                oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
         return "";
