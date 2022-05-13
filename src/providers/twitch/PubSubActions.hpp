@@ -3,6 +3,7 @@
 #include <QColor>
 #include <QJsonObject>
 #include <QString>
+#include <QDebug>
 
 #include <chrono>
 #include <cinttypes>
