@@ -1,6 +1,5 @@
 #pragma once
 
-#include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 
 #include <QRegularExpression>
@@ -23,10 +22,8 @@ struct TimeoutMessageTag {
 const SystemMessageTag systemMessage{};
 const TimeoutMessageTag timeoutMessage{};
 
-MessagePtr makeSystemMessage(const QString &text,
-                             const bool &parseLinks = true);
-MessagePtr makeSystemMessage(const QString &text, const QTime &time,
-                             const bool &parseLinks = true);
+MessagePtr makeSystemMessage(const QString &text);
+MessagePtr makeSystemMessage(const QString &text, const QTime &time);
 std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     const AutomodAction &action);
 MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action);
@@ -45,8 +42,7 @@ class MessageBuilder
 public:
     MessageBuilder();
     MessageBuilder(SystemMessageTag, const QString &text,
-                   const QTime &time = QTime::currentTime(),
-                   const bool &parseLinks = true);
+                   const QTime &time = QTime::currentTime());
     MessageBuilder(TimeoutMessageTag, const QString &systemMessageText,
                    int times, const QTime &time = QTime::currentTime());
     MessageBuilder(TimeoutMessageTag, const QString &username,

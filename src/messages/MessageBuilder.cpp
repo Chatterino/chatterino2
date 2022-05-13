@@ -18,16 +18,14 @@
 
 namespace chatterino {
 
-MessagePtr makeSystemMessage(const QString &text, const bool &parseLinks)
+MessagePtr makeSystemMessage(const QString &text)
 {
-    return MessageBuilder(systemMessage, text, QTime::currentTime(), parseLinks)
-        .release();
+    return MessageBuilder(systemMessage, text).release();
 }
 
-MessagePtr makeSystemMessage(const QString &text, const QTime &time,
-                             const bool &parseLinks)
+MessagePtr makeSystemMessage(const QString &text, const QTime &time)
 {
-    return MessageBuilder(systemMessage, text, time, parseLinks).release();
+    return MessageBuilder(systemMessage, text, time).release();
 }
 
 EmotePtr makeAutoModBadge()
@@ -181,33 +179,25 @@ MessageBuilder::MessageBuilder()
 }
 
 MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
-                               const QTime &time, const bool &parseLinks)
+                               const QTime &time)
     : MessageBuilder()
 {
     this->emplace<TimestampElement>(time);
 
-    if (!parseLinks)
+    // check system message for links
+    // (e.g. needed for sub ticket message in sub only mode)
+    const QStringList textFragments = text.split(QRegularExpression("\\s"));
+    for (const auto &word : textFragments)
     {
-        this->emplace<TextElement>(text, MessageElementFlag::Text,
-                                   MessageColor::System);
-    }
-    else
-    {
-        // check system message for links
-        // (e.g. needed for sub ticket message in sub only mode)
-        const QStringList textFragments = text.split(QRegularExpression("\\s"));
-        for (const auto &word : textFragments)
+        const auto linkString = this->matchLink(word);
+        if (linkString.isEmpty())
         {
-            const auto linkString = this->matchLink(word);
-            if (linkString.isEmpty())
-            {
-                this->emplace<TextElement>(word, MessageElementFlag::Text,
-                                           MessageColor::System);
-            }
-            else
-            {
-                this->addLink(word, linkString);
-            }
+            this->emplace<TextElement>(word, MessageElementFlag::Text,
+                                       MessageColor::System);
+        }
+        else
+        {
+            this->addLink(word, linkString);
         }
     }
     this->message().flags.set(MessageFlag::System);
