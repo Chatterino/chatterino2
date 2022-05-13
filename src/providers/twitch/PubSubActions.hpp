@@ -1,9 +1,9 @@
 #pragma once
 
 #include <QColor>
+#include <QDebug>
 #include <QJsonObject>
 #include <QString>
-#include <QDebug>
 
 #include <chrono>
 #include <cinttypes>
