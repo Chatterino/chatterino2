@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QColor>
+#include <QDebug>
 #include <QJsonObject>
 #include <QString>
 
