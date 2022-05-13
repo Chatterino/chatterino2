@@ -1,4 +1,5 @@
 #include "widgets/helper/RegExpItemDelegate.hpp"
+#include "widgets/helper/TrimRegExpValidator.hpp"
 
 #include <QLineEdit>
 
@@ -16,8 +17,7 @@ QWidget *RegExpItemDelegate::createEditor(QWidget *parent,
                                           const QModelIndex &index) const
 {
     auto *editor = new QLineEdit(parent);
-    editor->setValidator(
-        new QRegularExpressionValidator(this->regexp_, editor));
+    editor->setValidator(new TrimRegExpValidator(this->regexp_, editor));
     return editor;
 }
 
