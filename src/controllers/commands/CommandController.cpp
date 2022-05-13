@@ -455,7 +455,11 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         for (QString &str : debugMessages)
         {
-            channel->addMessage(makeSystemMessage(str, false));
+            MessageBuilder builder;
+            builder.emplace<TimestampElement>(QTime::currentTime());
+            builder.emplace<TextElement>(str, MessageElementFlag::Text,
+                                         MessageColor::System);
+            channel->addMessage(builder.release());
         }
         return "";
     });
