@@ -18,14 +18,16 @@
 
 namespace chatterino {
 
-MessagePtr makeSystemMessage(const QString &text)
+MessagePtr makeSystemMessage(const QString &text, const bool &parseLinks)
 {
-    return MessageBuilder(systemMessage, text).release();
+    return MessageBuilder(systemMessage, text, QTime::currentTime(), parseLinks)
+        .release();
 }
 
-MessagePtr makeSystemMessage(const QString &text, const QTime &time)
+MessagePtr makeSystemMessage(const QString &text, const QTime &time,
+                             const bool &parseLinks)
 {
-    return MessageBuilder(systemMessage, text, time).release();
+    return MessageBuilder(systemMessage, text, time, parseLinks).release();
 }
 
 EmotePtr makeAutoModBadge()
@@ -179,25 +181,33 @@ MessageBuilder::MessageBuilder()
 }
 
 MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
-                               const QTime &time)
+                               const QTime &time, const bool &parseLinks)
     : MessageBuilder()
 {
     this->emplace<TimestampElement>(time);
 
-    // check system message for links
-    // (e.g. needed for sub ticket message in sub only mode)
-    const QStringList textFragments = text.split(QRegularExpression("\\s"));
-    for (const auto &word : textFragments)
+    if (!parseLinks)
     {
-        const auto linkString = this->matchLink(word);
-        if (linkString.isEmpty())
+        this->emplace<TextElement>(text, MessageElementFlag::Text,
+                                   MessageColor::System);
+    }
+    else
+    {
+        // check system message for links
+        // (e.g. needed for sub ticket message in sub only mode)
+        const QStringList textFragments = text.split(QRegularExpression("\\s"));
+        for (const auto &word : textFragments)
         {
-            this->emplace<TextElement>(word, MessageElementFlag::Text,
-                                       MessageColor::System);
-        }
-        else
-        {
-            this->addLink(word, linkString);
+            const auto linkString = this->matchLink(word);
+            if (linkString.isEmpty())
+            {
+                this->emplace<TextElement>(word, MessageElementFlag::Text,
+                                           MessageColor::System);
+            }
+            else
+            {
+                this->addLink(word, linkString);
+            }
         }
     }
     this->message().flags.set(MessageFlag::System);
