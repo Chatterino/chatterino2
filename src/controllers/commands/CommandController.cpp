@@ -22,6 +22,7 @@
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
+#include "util/Qt.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/splits/Split.hpp"
@@ -155,7 +156,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
 bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
-    QStringList words = text.split(' ', QString::SkipEmptyParts);
+    QStringList words = text.split(' ', Qt::SkipEmptyParts);
 
     if (words.length() == 0)
     {
@@ -945,7 +946,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                                        ChannelPtr channel, bool dryRun)
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
-    QStringList words = text.split(' ', QString::SkipEmptyParts);
+    QStringList words = text.split(' ', Qt::SkipEmptyParts);
 
     if (words.length() == 0)
     {
@@ -982,7 +983,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             text = getApp()->emotes->emojis.replaceShortCodes(
                 this->execCustomCommand(words, it.value(), dryRun, channel));
 
-            words = text.split(' ', QString::SkipEmptyParts);
+            words = text.split(' ', Qt::SkipEmptyParts);
 
             if (words.length() == 0)
             {

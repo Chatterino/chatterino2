@@ -15,6 +15,7 @@
 #include "widgets/helper/EditableModelView.hpp"
 //#include "widgets/helper/ComboBoxItemDelegate.hpp"
 #include "util/CombinePath.hpp"
+#include "util/Qt.hpp"
 
 #include <QLabel>
 #include <QTextEdit>
@@ -61,7 +62,7 @@ CommandPage::CommandPage()
             c1settings.open(QIODevice::ReadOnly);
             for (auto line : QString(c1settings.readAll())
                                  .split(QRegularExpression("[\r\n]"),
-                                        QString::SkipEmptyParts))
+                                        Qt::SkipEmptyParts))
             {
                 if (int index = line.indexOf(' '); index != -1)
                 {
