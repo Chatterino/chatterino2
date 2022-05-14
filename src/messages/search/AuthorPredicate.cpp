@@ -1,5 +1,7 @@
 #include "messages/search/AuthorPredicate.hpp"
 
+#include "util/Qt.hpp"
+
 namespace chatterino {
 
 AuthorPredicate::AuthorPredicate(const QStringList &authors)
@@ -8,7 +10,7 @@ AuthorPredicate::AuthorPredicate(const QStringList &authors)
     // Check if any comma-seperated values were passed and transform those
     for (const auto &entry : authors)
     {
-        for (const auto &author : entry.split(',', QString::SkipEmptyParts))
+        for (const auto &author : entry.split(',', Qt::SkipEmptyParts))
         {
             this->authors_ << author;
         }
