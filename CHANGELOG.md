@@ -14,6 +14,7 @@
 - Minor: Fixed tag parsing for consecutive escaped characters. (#3711)
 - Minor: Prevent user from entering incorrect characters in Live Notifications channels list. (#3715)
 - Minor: Fixed automod caught message notice appearing twice for mods. (#3717)
+- Bugfix: Pasting to search in emote popup window will now ignore whitespaces. (#3730)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Bugfix: Fixed live notifications not getting updated for closed streams going offline. (#3678)
 - Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
