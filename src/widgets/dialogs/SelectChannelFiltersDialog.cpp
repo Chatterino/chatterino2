@@ -23,7 +23,7 @@ SelectChannelFiltersDialog::SelectChannelFiltersDialog(
     auto scrollAreaContent = new QWidget;
     scrollAreaContent->setLayout(itemVbox);
 
-    auto scrollArea = new QScrollArea(this);
+    auto scrollArea = new QScrollArea;
     scrollArea->setWidgetResizable(true);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setWidget(scrollAreaContent);
