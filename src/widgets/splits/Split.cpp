@@ -1067,6 +1067,22 @@ void Split::showViewerList()
         listDoubleClick(resultList->currentItem()->text());
     });
 
+    HotkeyController::HotkeyMap actions{
+        {"delete",
+         [viewerDock](std::vector<QString>) -> QString {
+             viewerDock->close();
+             return "";
+         }},
+        {"accept", nullptr},
+        {"reject", nullptr},
+        {"scrollPage", nullptr},
+        {"openTab", nullptr},
+        {"search", nullptr},
+    };
+
+    getApp()->hotkeys->shortcutsForCategory(HotkeyCategory::PopupWindow,
+                                            actions, viewerDock);
+
     dockVbox->addWidget(searchBar);
     dockVbox->addWidget(loadingLabel);
     dockVbox->addWidget(chattersList);
