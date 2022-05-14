@@ -1077,7 +1077,12 @@ void Split::showViewerList()
         {"reject", nullptr},
         {"scrollPage", nullptr},
         {"openTab", nullptr},
-        {"search", nullptr},
+        {"search",
+         [searchBar](std::vector<QString>) -> QString {
+             searchBar->setFocus();
+             searchBar->selectAll();
+             return "";
+         }},
     };
 
     getApp()->hotkeys->shortcutsForCategory(HotkeyCategory::PopupWindow,
