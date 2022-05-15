@@ -67,6 +67,8 @@ struct Deserialize<chatterino::Command> {
                                      command.showInMsgContextMenu))
         {
             PAJLADA_REPORT_ERROR(error);
+
+            command.showInMsgContextMenu = false;
             return command;
         }
 
