@@ -10,10 +10,12 @@ namespace chatterino {
 struct Command {
     QString name;
     QString func;
+    bool showInMsgContextMenu;
 
     Command() = default;
     explicit Command(const QString &text);
-    Command(const QString &name, const QString &func);
+    Command(const QString &name, const QString &func,
+            bool showInMsgContextMenu = false);
 
     QString toString() const;
 };
@@ -31,6 +33,8 @@ struct Serialize<chatterino::Command> {
 
         chatterino::rj::set(ret, "name", value.name, a);
         chatterino::rj::set(ret, "func", value.func, a);
+        chatterino::rj::set(ret, "showInMsgContextMenu",
+                            value.showInMsgContextMenu, a);
 
         return ret;
     }
@@ -55,6 +59,12 @@ struct Deserialize<chatterino::Command> {
             return command;
         }
         if (!chatterino::rj::getSafe(value, "func", command.func))
+        {
+            PAJLADA_REPORT_ERROR(error);
+            return command;
+        }
+        if (!chatterino::rj::getSafe(value, "showInMsgContextMenu",
+                                     command.showInMsgContextMenu))
         {
             PAJLADA_REPORT_ERROR(error);
             return command;
