@@ -204,10 +204,10 @@ SplitHeader::SplitHeader(Split *_split)
         this->handleChannelChanged();
     });
 
-    this->managedConnections_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [this] {
+    this->bSignals_.emplace_back(
+        getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->updateModerationModeIcon();
-        });
+        }));
 
     auto _ = [this](const auto &, const auto &) {
         this->updateChannelText();
@@ -714,7 +714,7 @@ void SplitHeader::updateChannelText()
                     url.append("-160x90.jpg");
                     break;
                 case 3:
-                    url.append("-360x180.jpg");
+                    url.append("-360x203.jpg");
                     break;
                 default:
                     url = "";

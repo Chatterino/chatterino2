@@ -210,6 +210,7 @@ void SplitInput::openEmotePopup()
                               int(500 * this->emotePopup_->scale()));
     this->emotePopup_->loadChannel(this->split_->getChannel());
     this->emotePopup_->show();
+    this->emotePopup_->raise();
     this->emotePopup_->activateWindow();
 }
 
@@ -454,6 +455,13 @@ void SplitInput::addShortcuts()
         {"selectAll",
          [this](std::vector<QString>) -> QString {
              this->ui_.textEdit->selectAll();
+             return "";
+         }},
+        {"selectWord",
+         [this](std::vector<QString>) -> QString {
+             auto cursor = this->ui_.textEdit->textCursor();
+             cursor.select(QTextCursor::WordUnderCursor);
+             this->ui_.textEdit->setTextCursor(cursor);
              return "";
          }},
     };

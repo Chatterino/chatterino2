@@ -4,6 +4,8 @@
     <file>avatars/alazymeme.png</file>
     <file>avatars/brian6932.png</file>
     <file>avatars/fourtf.png</file>
+    <file>avatars/hicupalot.png</file>
+    <file>avatars/iprodigy.png</file>
     <file>avatars/kararty.png</file>
     <file>avatars/karlpolice.png</file>
     <file>avatars/matthewde.jpg</file>
@@ -57,6 +59,7 @@
     <file>licenses/emoji-data-source.txt</file>
     <file>licenses/libcommuni_BSD3.txt</file>
     <file>licenses/lrucache.txt</file>
+    <file>licenses/magic_enum.txt</file>
     <file>licenses/openssl.txt</file>
     <file>licenses/pajlada_settings.txt</file>
     <file>licenses/pajlada_signals.txt</file>

@@ -24,6 +24,8 @@ public:
     UserInfoPopup(bool closeAutomatically, QWidget *parent);
 
     void setData(const QString &name, const ChannelPtr &channel);
+    void setData(const QString &name, const ChannelPtr &contextChannel,
+                 const ChannelPtr &openingChannel);
 
 protected:
     virtual void themeChangedEvent() override;
@@ -44,7 +46,10 @@ private:
     QString userName_;
     QString userId_;
     QString avatarUrl_;
+    // The channel the popup was opened from (e.g. /mentions or #forsen). Can be a special channel.
     ChannelPtr channel_;
+    // The channel the messages are rendered from (e.g. #forsen). Can be a special channel, but will try to not be where possible.
+    ChannelPtr underlyingChannel_;
 
     // isMoving_ is set to true if the user is holding the left mouse button down and has moved the mouse a small amount away from the original click point (startPosDrag_)
     bool isMoving_ = false;

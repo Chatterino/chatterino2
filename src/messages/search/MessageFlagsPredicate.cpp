@@ -1,12 +1,14 @@
 #include "messages/search/MessageFlagsPredicate.hpp"
 
+#include "util/Qt.hpp"
+
 namespace chatterino {
 
 MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
     : flags_()
 {
     // Check if any comma-seperated values were passed and transform those
-    for (const auto &flag : flags.split(',', QString::SkipEmptyParts))
+    for (const auto &flag : flags.split(',', Qt::SkipEmptyParts))
     {
         if (flag == "deleted" || flag == "disabled")
         {
@@ -27,6 +29,10 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
         else if (flag == "system")
         {
             this->flags_.set(MessageFlag::System);
+        }
+        else if (flag == "first-msg")
+        {
+            this->flags_.set(MessageFlag::FirstMessage);
         }
     }
 }

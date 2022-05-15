@@ -7,7 +7,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/LinkResolver.hpp"
-#include "providers/twitch/PubsubActions.hpp"
+#include "providers/twitch/PubSubActions.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
@@ -403,25 +403,25 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
     switch (action.type)
     {
         case AutomodUserAction::AddPermitted: {
-            text = QString("%1 added %2 as a permitted term on AutoMod.")
+            text = QString("%1 added \"%2\" as a permitted term on AutoMod.")
                        .arg(action.source.login, action.message);
         }
         break;
 
         case AutomodUserAction::AddBlocked: {
-            text = QString("%1 added %2 as a blocked term on AutoMod.")
+            text = QString("%1 added \"%2\" as a blocked term on AutoMod.")
                        .arg(action.source.login, action.message);
         }
         break;
 
         case AutomodUserAction::RemovePermitted: {
-            text = QString("%1 removed %2 as a permitted term on AutoMod.")
+            text = QString("%1 removed \"%2\" as a permitted term on AutoMod.")
                        .arg(action.source.login, action.message);
         }
         break;
 
         case AutomodUserAction::RemoveBlocked: {
-            text = QString("%1 removed %2 as a blocked term on AutoMod.")
+            text = QString("%1 removed \"%2\" as a blocked term on AutoMod.")
                        .arg(action.source.login, action.message);
         }
         break;

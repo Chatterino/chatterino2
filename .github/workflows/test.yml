@@ -4,6 +4,9 @@ name: Test
 on:
   pull_request:
 
+env:
+  TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.3
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -77,6 +80,8 @@ jobs:
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
+            docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
+            docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
             ./bin/chatterino-test --platform minimal
         working-directory: build-test
         shell: bash

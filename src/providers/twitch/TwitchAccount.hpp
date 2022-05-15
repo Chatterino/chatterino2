@@ -114,7 +114,7 @@ public:
     void loadEmotes(std::weak_ptr<Channel> weakChannel = {});
     // loadUserstateEmotes loads emote sets that are part of the USERSTATE emote-sets key
     // this function makes sure not to load emote sets that have already been loaded
-    void loadUserstateEmotes();
+    void loadUserstateEmotes(std::weak_ptr<Channel> weakChannel = {});
     // setUserStateEmoteSets sets the emote sets that were parsed from the USERSTATE emote-sets key
     // Returns true if the newly inserted emote sets differ from the ones previously saved
     [[nodiscard]] bool setUserstateEmoteSets(QStringList newEmoteSets);

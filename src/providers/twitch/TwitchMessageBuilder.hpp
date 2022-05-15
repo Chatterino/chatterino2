@@ -4,7 +4,7 @@
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
-#include "providers/twitch/PubsubActions.hpp"
+#include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>

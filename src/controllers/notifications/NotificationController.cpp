@@ -178,12 +178,12 @@ void NotificationController::fetchFakeChannels()
                 std::unordered_set<QString> liveStreams;
                 for (const auto &stream : streams)
                 {
-                    liveStreams.insert(stream.userName);
+                    liveStreams.insert(stream.userLogin);
                 }
 
                 for (const auto &name : batch)
                 {
-                    auto it = liveStreams.find(name);
+                    auto it = liveStreams.find(name.toLower());
                     this->checkStream(it != liveStreams.end(), name);
                 }
             },
@@ -249,6 +249,26 @@ void NotificationController::removeFakeChannel(const QString channelName)
     if (i != fakeTwitchChannels.end())
     {
         fakeTwitchChannels.erase(i);
+        // "delete" old 'CHANNEL is live' message
+        LimitedQueueSnapshot<MessagePtr> snapshot =
+            getApp()->twitch->liveChannel->getMessageSnapshot();
+        int snapshotLength = snapshot.size();
+
+        // MSVC hates this code if the parens are not there
+        int end = (std::max)(0, snapshotLength - 200);
+        // this assumes that channelName is a login name therefore will only delete messages from fake channels
+        auto liveMessageSearchText = QString("%1 is live!").arg(channelName);
+
+        for (int i = snapshotLength - 1; i >= end; --i)
+        {
+            auto &s = snapshot[i];
+
+            if (s->messageText == liveMessageSearchText)
+            {
+                s->flags.set(MessageFlag::Disabled);
+                break;
+            }
+        }
     }
 }
 
