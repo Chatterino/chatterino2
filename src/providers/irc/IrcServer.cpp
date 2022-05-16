@@ -270,7 +270,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 MessageBuilder builder;
 
                 builder.emplace<TimestampElement>(
-                    calculateMessageTimestamp(message));
+                    calculateMessageTime(message).time());
                 builder.emplace<TextElement>(message->toData(),
                                              MessageElementFlag::Text);
                 builder->flags.set(MessageFlag::Debug);

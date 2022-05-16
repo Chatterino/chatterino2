@@ -36,6 +36,8 @@ git submodule update --init --recursive
 
 [Building on Windows](../master/BUILDING_ON_WINDOWS.md)
 
+[Building on Windows with vcpkg](../master/BUILDING_ON_WINDOWS_WITH_VCPKG.md)
+
 [Building on Linux](../master/BUILDING_ON_LINUX.md)
 
 [Building on Mac](../master/BUILDING_ON_MAC.md)
