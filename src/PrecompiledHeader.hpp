@@ -94,6 +94,7 @@
 #    include <QStyleOption>
 #    include <QTabWidget>
 #    include <QTextEdit>
+#    include <QPlainTextEdit>
 #    include <QThread>
 #    include <QThreadPool>
 #    include <QTime>

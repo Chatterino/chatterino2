@@ -113,6 +113,10 @@ set(SOURCE_FILES
         controllers/nicknames/NicknamesModel.hpp
         controllers/nicknames/Nickname.hpp
 
+        controllers/notes/NotesModel.cpp
+        controllers/notes/NotesModel.hpp
+        controllers/notes/Note.hpp  
+
         controllers/notifications/NotificationController.cpp
         controllers/notifications/NotificationController.hpp
         controllers/notifications/NotificationModel.cpp

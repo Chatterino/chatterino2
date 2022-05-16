@@ -25,6 +25,7 @@ ConcurrentSettings::ConcurrentSettings()
     , filterRecords(*new SignalVector<FilterRecordPtr>())
     , nicknames(*new SignalVector<Nickname>())
     , moderationActions(*new SignalVector<ModerationAction>)
+    , notes(*new SignalVector<Note>())
 {
     persist(this->highlightedMessages, "/highlighting/highlights");
     persist(this->blacklistedUsers, "/highlighting/blacklist");
@@ -36,6 +37,7 @@ ConcurrentSettings::ConcurrentSettings()
     persist(this->nicknames, "/nicknames");
     // tagged users?
     persist(this->moderationActions, "/moderation/actions");
+    persist(this->notes, "/notes");
 }
 
 bool ConcurrentSettings::isHighlightedUser(const QString &username)

@@ -86,6 +86,9 @@ private:
         QCheckBox *block = nullptr;
         QCheckBox *ignoreHighlights = nullptr;
 
+        QPushButton *saveNoteButton = nullptr;
+        QPlainTextEdit *note = nullptr;
+
         Label *noMessagesLabel = nullptr;
         ChannelView *latestMessages = nullptr;
         QPushButton *refreshButton = nullptr;

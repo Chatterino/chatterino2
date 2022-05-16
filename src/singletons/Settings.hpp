@@ -11,6 +11,7 @@
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/nicknames/Nickname.hpp"
+#include "controllers/notes/Note.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
@@ -40,6 +41,7 @@ public:
     SignalVector<FilterRecordPtr> &filterRecords;
     SignalVector<Nickname> &nicknames;
     SignalVector<ModerationAction> &moderationActions;
+    SignalVector<Note> &notes;
 
     bool isHighlightedUser(const QString &username);
     bool isBlacklistedUser(const QString &username);

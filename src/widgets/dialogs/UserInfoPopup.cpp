@@ -31,6 +31,7 @@
 #include "widgets/splits/Split.hpp"
 
 #include <QCheckBox>
+#include <QDebug>
 #include <QDesktopServices>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -495,7 +496,22 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
     layout.emplace<Line>(false);
 
-    // fourth line (last messages)
+    // fourth line (notes)
+    auto notes = layout.emplace<QVBoxLayout>();
+    {
+        this->ui_.note = new QPlainTextEdit();
+        this->ui_.note->setMinimumSize(400, 75);
+        this->ui_.note->setSizePolicy(QSizePolicy::Expanding,
+                                      QSizePolicy::Expanding);
+
+        this->ui_.saveNoteButton = new QPushButton();
+        this->ui_.saveNoteButton->setText("Save note");
+
+        notes->addWidget(this->ui_.note);
+        notes->addWidget(this->ui_.saveNoteButton);
+    }
+
+    // fifth line (last messages)
     auto logs = layout.emplace<QVBoxLayout>().withoutMargin();
     {
         this->ui_.noMessagesLabel = new Label("No recent messages");
@@ -691,6 +707,14 @@ void UserInfoPopup::installEvents()
                 }
             }
         });
+
+    // notes
+    QObject::connect(this->ui_.saveNoteButton, &QPushButton::clicked, [this]() {
+        qDebug() << "saving notes for" << this->userId_
+                 << this->ui_.note->toPlainText();
+        getSettings()->notes.insert(
+            Note{this->userId_, this->ui_.note->toPlainText()});
+    });
 }
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
@@ -855,6 +879,19 @@ void UserInfoPopup::updateUserData()
             blocks->find(user.id) != blocks->end())
         {
             isIgnoring = true;
+        }
+
+        // get the user's note
+        const auto &notesVector = getSettings()->notes.raw();
+
+        for (int i = 0; i < notesVector.size(); i++)
+        {
+            qDebug() << "checking" << this->userId_ << notesVector[i].id()
+                     << notesVector[i].note();
+            if (this->userId_ == notesVector[i].id())
+            {
+                this->ui_.note->setPlainText(notesVector[i].note());
+            }
         }
 
         // get ignoreHighlights state
