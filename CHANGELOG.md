@@ -12,7 +12,7 @@
 - Minor: Sorted usernames in /vips message to be case-insensitive. (#3696)
 - Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
 - Minor: Fixed tag parsing for consecutive escaped characters. (#3711)
-- Minor: Prevent user from entering incorrect characters in Live Notifications channels list. (#3715)
+- Minor: Prevent user from entering incorrect characters in Live Notifications channels list. (#3715, #3730)
 - Minor: Fixed automod caught message notice appearing twice for mods. (#3717)
 - Minor: Added ability to execute commands on chat messages using the message context menu. (#3738)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
