@@ -10,6 +10,7 @@
 #include <memory>
 #include <shared_mutex>
 #include <vector>
+#include <unordered_map>
 
 #include <QColor>
 
