@@ -104,3 +104,6 @@ Stamp
 tmp
 Source
 Dependencies_*
+
+# vcpkg
+vcpkg_installed/

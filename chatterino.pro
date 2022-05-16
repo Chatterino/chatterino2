@@ -306,6 +306,7 @@ SOURCES += \
     src/widgets/helper/NotebookTab.cpp \
     src/widgets/helper/QColorPicker.cpp \
     src/widgets/helper/RegExpItemDelegate.cpp \
+    src/widgets/helper/TrimRegExpValidator.cpp \
     src/widgets/helper/ResizingTextEdit.cpp \
     src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/SearchPopup.cpp \
@@ -590,6 +591,7 @@ HEADERS += \
     src/widgets/helper/NotebookTab.hpp \
     src/widgets/helper/QColorPicker.hpp \
     src/widgets/helper/RegExpItemDelegate.hpp \
+    src/widgets/helper/TrimRegExpValidator.hpp \
     src/widgets/helper/ResizingTextEdit.hpp \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \
