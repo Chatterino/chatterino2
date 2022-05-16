@@ -1,4 +1,5 @@
 #include "widgets/helper/RegExpItemDelegate.hpp"
+
 #include "widgets/helper/TrimRegExpValidator.hpp"
 
 #include <QLineEdit>
