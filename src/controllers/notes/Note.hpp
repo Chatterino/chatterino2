@@ -56,7 +56,7 @@ struct Serialize<chatterino::Note> {
 template <>
 struct Deserialize<chatterino::Note> {
     static chatterino::Note get(const rapidjson::Value &value,
-                                    bool *error = nullptr)
+                                bool *error = nullptr)
     {
         if (!value.IsObject())
         {

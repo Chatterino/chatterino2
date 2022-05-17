@@ -169,6 +169,7 @@ SOURCES += \
     src/controllers/moderationactions/ModerationAction.cpp \
     src/controllers/moderationactions/ModerationActionModel.cpp \
     src/controllers/nicknames/NicknamesModel.cpp \
+    src/controllers/notes/NoteModel.cpp \
     src/controllers/notifications/NotificationController.cpp \
     src/controllers/notifications/NotificationModel.cpp \
     src/controllers/pings/MutedChannelModel.cpp \
@@ -416,6 +417,8 @@ HEADERS += \
     src/controllers/moderationactions/ModerationActionModel.hpp \
     src/controllers/nicknames/Nickname.hpp \
     src/controllers/nicknames/NicknamesModel.hpp \
+    src/controllers/notes/NoteModel.hpp \
+    src/controllers/notes/Note.hpp \
     src/controllers/notifications/NotificationController.hpp \
     src/controllers/notifications/NotificationModel.hpp \
     src/controllers/pings/MutedChannelModel.hpp \
