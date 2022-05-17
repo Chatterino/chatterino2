@@ -563,7 +563,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             else
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /requests <channel>. You can also use the command "
+                    "Usage: /requests [channel]. You can also use the command "
                     "without arguments in any Twitch channel to open its "
                     "channel points requests queue. Only the broadcaster and "
                     "moderators have permission to view the queue."));
