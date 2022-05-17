@@ -24,7 +24,6 @@
 - Bugfix: Fixed automod queue pubsub topic persisting after user change. (#3718)
 - Bugfix: Fixed viewer list not closing after pressing escape key. (#3734)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
-- Dev: Fix compiling on macOS without precompiled headers (#3741)
 
 ## 2.3.5
 
