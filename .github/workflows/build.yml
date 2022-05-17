@@ -8,7 +8,7 @@ on:
   pull_request:
 
 concurrency: 
-  group: ${{ github.ref }}
+  group: build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
