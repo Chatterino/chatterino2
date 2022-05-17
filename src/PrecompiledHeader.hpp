@@ -74,6 +74,7 @@
 #    include <QPainterPath>
 #    include <QPalette>
 #    include <QPixmap>
+#    include <QPlainTextEdit>
 #    include <QPoint>
 #    include <QProcess>
 #    include <QPropertyAnimation>
@@ -94,7 +95,6 @@
 #    include <QStyleOption>
 #    include <QTabWidget>
 #    include <QTextEdit>
-#    include <QPlainTextEdit>
 #    include <QThread>
 #    include <QThreadPool>
 #    include <QTime>
