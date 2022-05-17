@@ -356,8 +356,7 @@ MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point)
 FloatingMessageLayoutElement *MessageLayoutContainer::getFloatingElementAt(
     QPoint point)
 {
-    for (std::unique_ptr<FloatingMessageLayoutElement> &element :
-         this->floatingElements_)
+    for (const auto &element : this->floatingElements_)
     {
         if (element->getRect().contains(point))
         {

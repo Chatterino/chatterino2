@@ -149,8 +149,8 @@ void PrettyImageElement::addToContainer(MessageLayoutContainer &container,
 {
     if (flags.hasAny(this->getFlags()))
     {
-        auto size = QSize(this->image_->width() * container.getScale(),
-                          this->image_->height() * container.getScale());
+        auto size = QSize(this->image_->width(), this->image_->height()) *
+                    container.getScale();
 
         container.addFloatingElement(
             (new PrettyFloatingImageLayoutElement(
@@ -493,10 +493,8 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                 {
                     auto emoteScale = getSettings()->emoteScale.getValue();
 
-                    auto size = QSize(
-                        int(container.getScale() * image->width() * emoteScale),
-                        int(container.getScale() * image->height() *
-                            emoteScale));
+                    auto size = QSize(image->width(), image->height()) *
+                                (emoteScale * container.getScale());
 
                     if (!container.fitsInLine(size.width()))
                     {

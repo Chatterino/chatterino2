@@ -24,7 +24,7 @@ public:
         Reconnect,
         CopyToClipboard,
         ReplyToMessage,
-        ViewThread
+        ViewThread,
     };
 
     Link();
