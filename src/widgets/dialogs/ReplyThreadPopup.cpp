@@ -115,14 +115,7 @@ void ReplyThreadPopup::updateInputUI()
         return;
     }
 
-    if (channel->isWritable())
-    {
-        this->ui_.replyInput->show();
-    }
-    else
-    {
-        this->ui_.replyInput->hide();
-    }
+    this->ui_.replyInput->setVisible(channel->isWritable());
 
     auto user = getApp()->accounts->twitch.getCurrent();
     QString placeholderText;
