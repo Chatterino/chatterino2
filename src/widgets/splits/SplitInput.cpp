@@ -308,25 +308,27 @@ QString SplitInput::hotkeySendMessage(std::vector<QString> &arguments)
     QString sendMessage = getApp()->commands->execCommand(message, c, false);
 
     c->sendMessage(sendMessage);
+
+    this->postMessageSend(message, arguments);
+    return "";
+}
+
+void SplitInput::postMessageSend(const QString &message,
+                                 const std::vector<QString> &arguments)
+{
     // don't add duplicate messages and empty message to message history
     if ((this->prevMsg_.isEmpty() || !this->prevMsg_.endsWith(message)) &&
         !message.trimmed().isEmpty())
     {
         this->prevMsg_.append(message);
     }
-    bool shouldClearInput = true;
-    if (arguments.size() != 0 && arguments.at(0) == "keepInput")
-    {
-        shouldClearInput = false;
-    }
 
-    if (shouldClearInput)
+    if (arguments.empty() || arguments.at(0) != "keepInput")
     {
         this->currMsg_ = QString();
         this->ui_.textEdit->setPlainText(QString());
     }
     this->prevIndex_ = this->prevMsg_.size();
-    return "";
 }
 
 QString SplitInput::hotkeyPreviousMessage()

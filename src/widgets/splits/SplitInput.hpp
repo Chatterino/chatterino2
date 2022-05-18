@@ -47,6 +47,9 @@ protected:
 
     virtual void giveFocus(Qt::FocusReason reason);
 
+    void postMessageSend(const QString &message,
+                         const std::vector<QString> &arguments);
+
 protected:
     virtual QString hotkeyCursorToStart(std::vector<QString> &arguments);
     virtual QString hotkeyCursorToEnd(std::vector<QString> &arguments);

@@ -41,25 +41,10 @@ QString ReplyInput::hotkeySendMessage(std::vector<QString> &arguments)
     message = message.replace('\n', ' ');
     QString sendMessage = getApp()->commands->execCommand(message, c, false);
 
+    // Reply within TwitchChannel
     tc->sendReply(sendMessage, this->thread_->rootId());
-    // don't add duplicate messages and empty message to message history
-    if ((this->prevMsg_.isEmpty() || !this->prevMsg_.endsWith(message)) &&
-        !message.trimmed().isEmpty())
-    {
-        this->prevMsg_.append(message);
-    }
-    bool shouldClearInput = true;
-    if (arguments.size() != 0 && arguments.at(0) == "keepInput")
-    {
-        shouldClearInput = false;
-    }
 
-    if (shouldClearInput)
-    {
-        this->currMsg_ = QString();
-        this->ui_.textEdit->setPlainText(QString());
-    }
-    this->prevIndex_ = this->prevMsg_.size();
+    this->postMessageSend(message, arguments);
     return "";
 }
 
