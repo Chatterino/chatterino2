@@ -427,6 +427,8 @@ set(SOURCE_FILES
         widgets/helper/QColorPicker.hpp
         widgets/helper/RegExpItemDelegate.cpp
         widgets/helper/RegExpItemDelegate.hpp
+        widgets/helper/TrimRegExpValidator.cpp
+        widgets/helper/TrimRegExpValidator.hpp
         widgets/helper/ResizingTextEdit.cpp
         widgets/helper/ResizingTextEdit.hpp
         widgets/helper/ScrollbarHighlight.cpp
@@ -654,7 +656,7 @@ if (WIN32)
 endif ()
 
 if (MSVC)
-    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc)
+    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc /bigobj)
 endif ()
 
 if (APPLE AND BUILD_APP)
@@ -687,7 +689,7 @@ if (USE_CONAN AND TARGET CONAN_PKG::boost)
 else ()
     target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
-        Boost::boost
+        ${Boost_LIBRARIES}
         )
 endif ()
 

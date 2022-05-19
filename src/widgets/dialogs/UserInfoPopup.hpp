@@ -100,7 +100,6 @@ private:
 
         Label *noMessagesLabel = nullptr;
         ChannelView *latestMessages = nullptr;
-        QPushButton *refreshButton = nullptr;
     } ui_;
 
     class TimeoutWidget : public BaseWidget

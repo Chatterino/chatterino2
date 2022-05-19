@@ -15,11 +15,11 @@
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
+#include "widgets/helper/TrimRegExpValidator.hpp"
 
 #include <QAbstractButton>
 #include <QHBoxLayout>
 #include <QRegularExpression>
-#include <QRegularExpressionValidator>
 #include <QTabWidget>
 
 namespace chatterino {
@@ -166,7 +166,6 @@ EmotePopup::EmotePopup(QWidget *parent)
 
     QRegularExpression searchRegex("\\S*");
     searchRegex.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
-    QValidator *searchValidator = new QRegularExpressionValidator(searchRegex);
 
     layout->setMargin(0);
     layout->setSpacing(0);
@@ -177,7 +176,7 @@ EmotePopup::EmotePopup(QWidget *parent)
 
     this->search_ = new QLineEdit();
     this->search_->setPlaceholderText("Search all emotes...");
-    this->search_->setValidator(searchValidator);
+    this->search_->setValidator(new TrimRegExpValidator(searchRegex));
     this->search_->setClearButtonEnabled(true);
     this->search_->findChild<QAbstractButton *>()->setIcon(
         QPixmap(":/buttons/clearSearch.png"));
