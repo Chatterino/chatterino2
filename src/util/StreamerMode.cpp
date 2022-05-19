@@ -34,7 +34,7 @@ const QStringList &broadcastingBinaries()
         "obs.exe",         "obs64.exe",        "PRISMLiveStudio.exe",
         "XSplit.Core.exe", "TwitchStudio.exe", "vMix64.exe"};
 #else
-    static QStringList bins = {"obs"};
+    static QStringList bins = {"obs", "Twitch Studio", "Streamlabs Desktop"};
 #endif
     return bins;
 }
