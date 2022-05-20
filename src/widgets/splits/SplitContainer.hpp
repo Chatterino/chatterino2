@@ -14,6 +14,7 @@
 #include <functional>
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <unordered_map>
 #include <vector>
 
 class QJsonObject;
