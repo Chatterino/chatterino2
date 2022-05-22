@@ -38,8 +38,10 @@ void LinkResolver::getLinkInfo(
                 response = root.value("tooltip").toString();
 
                 if (root.contains("thumbnail"))
+                {
                     thumbnail =
                         Image::fromUrl({root.value("thumbnail").toString()});
+                }
                 if (getSettings()->unshortLinks)
                 {
                     linkString = root.value("link").toString();
