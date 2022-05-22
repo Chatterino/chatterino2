@@ -53,6 +53,12 @@ void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
 
     this->bttv.loadEmotes();
     this->ffz.loadEmotes();
+
+    /* Refresh all twitch channel's live status in bulk every 30 seconds after starting chatterino */
+    QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [=] {
+        this->bulkRefreshLiveStatus();
+    });
+    this->bulkLiveStatusTimer_.start(30 * 1000);
 }
 
 void TwitchIrcServer::initializeConnection(IrcConnection *connection,
@@ -294,6 +300,31 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
     }
 
     return Channel::getEmpty();
+}
+
+void TwitchIrcServer::bulkRefreshLiveStatus()
+{
+    QStringList userLogins;
+    this->forEachChannel([&userLogins](ChannelPtr chan) {
+        userLogins.push_back(chan->getName());
+    });
+
+    getHelix()->fetchStreams(
+        QStringList(), userLogins,
+        [this](std::vector<HelixStream> streams) {
+            for (const auto &stream : streams)
+            {
+                auto chan = this->getChannelOrEmpty(stream.userLogin);
+                if (chan->getType() == Channel::Type::None)
+                    continue;
+
+                auto twitchChan = dynamic_cast<TwitchChannel *>(chan.get());
+                twitchChan->parseLiveStatus(true, stream);
+            }
+        },
+        []() {
+            // failure
+        });
 }
 
 QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)
