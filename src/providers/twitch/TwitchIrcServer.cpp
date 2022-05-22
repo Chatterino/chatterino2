@@ -342,7 +342,7 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
     for (const auto &batch : getChannelsInBatches(userIDs))
     {
         getHelix()->fetchStreams(
-            userIDs, QStringList(),
+            batch, QStringList(),
             [this](std::vector<HelixStream> streams) {
                 for (const auto &stream : streams)
                 {
