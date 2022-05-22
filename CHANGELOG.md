@@ -23,6 +23,7 @@
 - Bugfix: Fixed existing emote popups not being raised from behind other windows when refocusing them on macOS (#3713)
 - Bugfix: Fixed automod queue pubsub topic persisting after user change. (#3718)
 - Bugfix: Fixed viewer list not closing after pressing escape key. (#3734)
+- Bugfix: Fixed links with no thumbnail having previous link's thumbnail. (#3720)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 
 ## 2.3.5
