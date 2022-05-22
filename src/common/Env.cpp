@@ -54,9 +54,6 @@ Env::Env()
     , linkResolverUrl(readStringEnv(
           "CHATTERINO2_LINK_RESOLVER_URL",
           "https://braize.pajlada.com/chatterino/link_resolver/%1"))
-    , twitchEmoteSetResolverUrl(readStringEnv(
-          "CHATTERINO2_TWITCH_EMOTE_SET_RESOLVER_URL",
-          "https://braize.pajlada.com/chatterino/twitchemotes/set/%1/"))
     , twitchServerHost(
           readStringEnv("CHATTERINO2_TWITCH_SERVER_HOST", "irc.chat.twitch.tv"))
     , twitchServerPort(readPortEnv("CHATTERINO2_TWITCH_SERVER_PORT", 443))

@@ -12,7 +12,7 @@
 - Minor: Sorted usernames in /vips message to be case-insensitive. (#3696)
 - Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
 - Minor: Fixed tag parsing for consecutive escaped characters. (#3711)
-- Minor: Prevent user from entering incorrect characters in Live Notifications channels list. (#3715)
+- Minor: Prevent user from entering incorrect characters in Live Notifications channels list. (#3715, #3730)
 - Minor: Fixed automod caught message notice appearing twice for mods. (#3717)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Bugfix: Fixed live notifications not getting updated for closed streams going offline. (#3678)
@@ -22,6 +22,7 @@
 - Bugfix: Fixed highlights triggering from own resub messages. (#3707)
 - Bugfix: Fixed existing emote popups not being raised from behind other windows when refocusing them on macOS (#3713)
 - Bugfix: Fixed automod queue pubsub topic persisting after user change. (#3718)
+- Bugfix: Fixed viewer list not closing after pressing escape key. (#3734)
 - Bugfix: Fixed links with no thumbnail having previous link's thumbnail. (#3720)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 

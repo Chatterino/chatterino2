@@ -1,6 +1,7 @@
 #include "CommandController.hpp"
 
 #include "Application.hpp"
+#include "common/Env.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
@@ -20,6 +21,7 @@
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/Qt.hpp"
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
@@ -155,7 +157,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
 bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
-    QStringList words = text.split(' ', QString::SkipEmptyParts);
+    QStringList words = text.split(' ', Qt::SkipEmptyParts);
 
     if (words.length() == 0)
     {
@@ -438,6 +440,29 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             return "";
         });
+
+    this->registerCommand("/debug-env", [](const auto & /*words*/,
+                                           ChannelPtr channel) {
+        auto env = Env::get();
+
+        QStringList debugMessages{
+            "recentMessagesApiUrl: " + env.recentMessagesApiUrl,
+            "linkResolverUrl: " + env.linkResolverUrl,
+            "twitchServerHost: " + env.twitchServerHost,
+            "twitchServerPort: " + QString::number(env.twitchServerPort),
+            "twitchServerSecure: " + QString::number(env.twitchServerSecure),
+        };
+
+        for (QString &str : debugMessages)
+        {
+            MessageBuilder builder;
+            builder.emplace<TimestampElement>(QTime::currentTime());
+            builder.emplace<TextElement>(str, MessageElementFlag::Text,
+                                         MessageColor::System);
+            channel->addMessage(builder.release());
+        }
+        return "";
+    });
 
     this->registerCommand("/uptime", [](const auto & /*words*/, auto channel) {
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
@@ -945,7 +970,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                                        ChannelPtr channel, bool dryRun)
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
-    QStringList words = text.split(' ', QString::SkipEmptyParts);
+    QStringList words = text.split(' ', Qt::SkipEmptyParts);
 
     if (words.length() == 0)
     {
@@ -982,7 +1007,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             text = getApp()->emotes->emojis.replaceShortCodes(
                 this->execCustomCommand(words, it.value(), dryRun, channel));
 
-            words = text.split(' ', QString::SkipEmptyParts);
+            words = text.split(' ', Qt::SkipEmptyParts);
 
             if (words.length() == 0)
             {
