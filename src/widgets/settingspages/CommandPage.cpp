@@ -44,8 +44,9 @@ CommandPage::CommandPage()
         layout.emplace<EditableModelView>(app->commands->createModel(nullptr))
             .getElement();
 
-    view->setTitles({"Trigger", "Command"});
-    view->getTableView()->horizontalHeader()->setStretchLastSection(true);
+    view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+        1, QHeaderView::Stretch);
     view->addButtonPressed.connect([] {
         getApp()->commands->items.append(
             Command{"/command", "I made a new command HeyGuys"});
