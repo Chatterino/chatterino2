@@ -332,17 +332,17 @@ namespace {
 
 void TwitchIrcServer::bulkRefreshLiveStatus()
 {
-    QStringList userIds;
-    this->forEachChannel([&userIds](ChannelPtr chan) {
+    QStringList userIDs;
+    this->forEachChannel([&userIDs](ChannelPtr chan) {
         auto twitchChan = dynamic_cast<TwitchChannel *>(chan.get());
         if (!twitchChan->roomId().isEmpty())
-            userIds.push_back(twitchChan->roomId());
+            userIDs.push_back(twitchChan->roomId());
     });
 
-    for (const auto &batch : getChannelsInBatches(userIds))
+    for (const auto &batch : getChannelsInBatches(userIDs))
     {
         getHelix()->fetchStreams(
-            userIds, QStringList(),
+            userIDs, QStringList(),
             [this](std::vector<HelixStream> streams) {
                 for (const auto &stream : streams)
                 {
