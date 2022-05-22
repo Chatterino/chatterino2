@@ -302,29 +302,62 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
     return Channel::getEmpty();
 }
 
+namespace {
+    // TODO: combine this with getEmoteSetBatches in TwitchAccount.cpp, maybe some templated thing
+    std::vector<QStringList> getChannelsInBatches(QStringList channels)
+    {
+        constexpr int batchSize = 100;
+
+        int batchCount = (channels.size() / batchSize) + 1;
+
+        std::vector<QStringList> batches;
+        batches.reserve(batchCount);
+
+        for (int i = 0; i < batchCount; i++)
+        {
+            QStringList batch;
+
+            // I hate you, msvc
+            int last = (std::min)(batchSize, channels.size() - batchSize * i);
+            for (int j = 0; j < last; j++)
+            {
+                batch.push_back(channels.at(j + (batchSize * i)));
+            }
+            batches.emplace_back(batch);
+        }
+
+        return batches;
+    }
+}  // namespace
+
 void TwitchIrcServer::bulkRefreshLiveStatus()
 {
-    QStringList userLogins;
-    this->forEachChannel([&userLogins](ChannelPtr chan) {
-        userLogins.push_back(chan->getName());
+    QStringList userIds;
+    this->forEachChannel([&userIds](ChannelPtr chan) {
+        auto twitchChan = dynamic_cast<TwitchChannel *>(chan.get());
+        if (!twitchChan->roomId().isEmpty())
+            userIds.push_back(twitchChan->roomId());
     });
 
-    getHelix()->fetchStreams(
-        QStringList(), userLogins,
-        [this](std::vector<HelixStream> streams) {
-            for (const auto &stream : streams)
-            {
-                auto chan = this->getChannelOrEmpty(stream.userLogin);
-                if (chan->getType() == Channel::Type::None)
-                    continue;
+    for (const auto &batch : getChannelsInBatches(userIds))
+    {
+        getHelix()->fetchStreams(
+            userIds, QStringList(),
+            [this](std::vector<HelixStream> streams) {
+                for (const auto &stream : streams)
+                {
+                    auto chan = this->getChannelOrEmptyByID(stream.userId);
+                    if (chan->getType() != Channel::Type::Twitch)
+                        continue;
 
-                auto twitchChan = dynamic_cast<TwitchChannel *>(chan.get());
-                twitchChan->parseLiveStatus(true, stream);
-            }
-        },
-        []() {
-            // failure
-        });
+                    auto twitchChan = dynamic_cast<TwitchChannel *>(chan.get());
+                    twitchChan->parseLiveStatus(true, stream);
+                }
+            },
+            []() {
+                // failure
+            });
+    }
 }
 
 QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)
