@@ -198,7 +198,6 @@ private:
     // --
     QString lastSentMessage_;
     QObject lifetimeGuard_;
-    QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
     QElapsedTimer titleRefreshedTimer_;
     QElapsedTimer clipCreationTimer_;

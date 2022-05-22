@@ -1891,6 +1891,10 @@ void ChannelView::addContextMenuItems(
     // Add hidden options (e.g. copy message ID) if the user held down Shift
     this->addHiddenContextMenuItems(hoveredElement, layout, event, *menu);
 
+    // Add executable command options
+    this->addCommandExecutionContextMenuItems(hoveredElement, layout, event,
+                                              *menu);
+
     menu->popup(QCursor::pos());
     menu->raise();
 }
@@ -2087,6 +2091,62 @@ void ChannelView::addHiddenContextMenuItems(
                        });
     }
 }
+
+void ChannelView::addCommandExecutionContextMenuItems(
+    const MessageLayoutElement * /*hoveredElement*/, MessageLayoutPtr layout,
+    QMouseEvent * /*event*/, QMenu &menu)
+{
+    /* Get commands to be displayed in context menu; 
+     * only those that had the showInMsgContextMenu check box marked in the Commands page */
+    std::vector<Command> cmds;
+    for (auto &cmd : getApp()->commands->items)
+    {
+        if (cmd.showInMsgContextMenu)
+        {
+            cmds.push_back(cmd);
+        }
+    }
+
+    if (cmds.empty())
+    {
+        return;
+    }
+
+    menu.addSeparator();
+    auto executeAction = menu.addAction("Execute command");
+    auto cmdMenu = new QMenu;
+    executeAction->setMenu(cmdMenu);
+
+    for (auto &cmd : cmds)
+    {
+        QString inputText = this->selection_.isEmpty()
+                                ? layout->getMessage()->messageText
+                                : this->getSelectedText();
+
+        inputText.push_front(cmd.name + " ");
+
+        cmdMenu->addAction(cmd.name, [this, inputText] {
+            ChannelPtr channel;
+
+            /* Search popups and user message history's underlyingChannels aren't of type TwitchChannel, but
+             * we would still like to execute commands from them. Use their source channel instead if applicable. */
+            if (this->hasSourceChannel())
+            {
+                channel = this->sourceChannel();
+            }
+            else
+            {
+                channel = this->underlyingChannel_;
+            }
+
+            QString value =
+                getApp()->commands->execCommand(inputText, channel, false);
+
+            channel->sendMessage(value);
+        });
+    }
+}
+
 void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (event->button() != Qt::LeftButton)

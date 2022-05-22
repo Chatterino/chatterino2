@@ -31,7 +31,29 @@ class DankerinoBadges;
 class SeventvBadges;
 class FfzBadges;
 
-class Application
+class IApplication
+{
+public:
+    IApplication();
+    virtual ~IApplication() = default;
+
+    static IApplication *instance;
+
+    virtual Theme *getThemes() = 0;
+    virtual Fonts *getFonts() = 0;
+    virtual Emotes *getEmotes() = 0;
+    virtual AccountController *getAccounts() = 0;
+    virtual HotkeyController *getHotkeys() = 0;
+    virtual WindowManager *getWindows() = 0;
+    virtual Toasts *getToasts() = 0;
+    virtual CommandController *getCommands() = 0;
+    virtual NotificationController *getNotifications() = 0;
+    virtual TwitchIrcServer *getTwitch() = 0;
+    virtual ChatterinoBadges *getChatterinoBadges() = 0;
+    virtual FfzBadges *getFfzBadges() = 0;
+};
+
+class Application : public IApplication
 {
     std::vector<std::unique_ptr<Singleton>> singletons_;
     int argc_;
@@ -68,6 +90,55 @@ public:
 
     /*[[deprecated]]*/ Logging *const logging{};
 
+    Theme *getThemes() override
+    {
+        return this->themes;
+    }
+    Fonts *getFonts() override
+    {
+        return this->fonts;
+    }
+    Emotes *getEmotes() override
+    {
+        return this->emotes;
+    }
+    AccountController *getAccounts() override
+    {
+        return this->accounts;
+    }
+    HotkeyController *getHotkeys() override
+    {
+        return this->hotkeys;
+    }
+    WindowManager *getWindows() override
+    {
+        return this->windows;
+    }
+    Toasts *getToasts() override
+    {
+        return this->toasts;
+    }
+    CommandController *getCommands() override
+    {
+        return this->commands;
+    }
+    NotificationController *getNotifications() override
+    {
+        return this->notifications;
+    }
+    TwitchIrcServer *getTwitch() override
+    {
+        return this->twitch;
+    }
+    ChatterinoBadges *getChatterinoBadges() override
+    {
+        return this->chatterinoBadges;
+    }
+    FfzBadges *getFfzBadges() override
+    {
+        return this->ffzBadges;
+    }
+
 private:
     void addSingleton(Singleton *singleton);
     void initPubSub();
@@ -86,5 +157,8 @@ private:
 };
 
 Application *getApp();
+
+// Get an interface version of the Application class - should be preferred when possible for new code
+IApplication *getIApp();
 
 }  // namespace chatterino

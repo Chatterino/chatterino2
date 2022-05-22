@@ -7,6 +7,10 @@ on:
       - dankerino
   pull_request:
 
+concurrency: 
+  group: build-archlinux-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest

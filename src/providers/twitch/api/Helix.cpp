@@ -7,7 +7,7 @@
 
 namespace chatterino {
 
-static Helix *instance = nullptr;
+static IHelix *instance = nullptr;
 
 void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
                        ResultCallback<std::vector<HelixUser>> successCallback,
@@ -921,10 +921,17 @@ void Helix::initialize()
 {
     assert(instance == nullptr);
 
-    instance = new Helix();
+    initializeHelix(new Helix());
 }
 
-Helix *getHelix()
+void initializeHelix(IHelix *_instance)
+{
+    assert(_instance != nullptr);
+
+    instance = _instance;
+}
+
+IHelix *getHelix()
 {
     assert(instance != nullptr);
 

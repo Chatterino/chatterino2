@@ -49,6 +49,12 @@ namespace chatterino {
 static std::atomic<bool> isAppInitialized{false};
 
 Application *Application::instance = nullptr;
+IApplication *IApplication::instance = nullptr;
+
+IApplication::IApplication()
+{
+    IApplication::instance = this;
+}
 
 // this class is responsible for handling the workflow of Chatterino
 // It will create the instances of the major classes, and connect their signals
@@ -529,6 +535,15 @@ Application *getApp()
     assertInGuiThread();
 
     return Application::instance;
+}
+
+IApplication *getIApp()
+{
+    assert(IApplication::instance != nullptr);
+
+    assertInGuiThread();
+
+    return IApplication::instance;
 }
 
 }  // namespace chatterino
