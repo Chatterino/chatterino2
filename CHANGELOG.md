@@ -27,6 +27,7 @@
 - Bugfix: Fixed viewer list not closing after pressing escape key. (#3734)
 - Bugfix: Fixed links with no thumbnail having previous link's thumbnail. (#3720)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
+- Dev: Batch checking live status for all channels after startup. (#3757)
 
 ## 2.3.5
 
