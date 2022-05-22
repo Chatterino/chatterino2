@@ -139,7 +139,7 @@ void SearchPopup::showEvent(QShowEvent *)
 
 void SearchPopup::search()
 {
-    if (snapshot_.size() == 0)
+    if (this->snapshot_.size() == 0)
     {
         this->snapshot_ = this->buildSnapshot();
     }
