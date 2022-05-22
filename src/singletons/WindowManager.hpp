@@ -68,6 +68,7 @@ public:
     virtual void initialize(Settings &settings, Paths &paths) override;
     virtual void save() override;
     void closeAll();
+    void setVisibilityAll(bool visible);
 
     int getGeneration() const;
     void incGeneration();

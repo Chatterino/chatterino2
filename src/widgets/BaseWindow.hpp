@@ -31,6 +31,7 @@ public:
         FramelessDraggable = 16,
         DontFocus = 32,
         Dialog = 64,
+        IgnoreTrayEvent = 128,
     };
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
@@ -63,6 +64,10 @@ public:
 
     static bool supportsCustomWindowFrame();
 
+    FlagsEnum<Flags> const &getFlags();
+
+    virtual bool shouldHandleTrayEvent(bool visible);
+
 protected:
     virtual bool nativeEvent(const QByteArray &eventType, void *message,
                              long *result) override;
@@ -81,6 +86,8 @@ protected:
     virtual bool event(QEvent *event) override;
     virtual void wheelEvent(QWheelEvent *event) override;
 
+    virtual bool isMainWindow();
+
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -89,6 +96,8 @@ protected:
 
     void updateScale();
 
+    void handleMinimizeEvent(QEvent *event);
+    void handleCloseEvent(QEvent *event);
     boost::optional<QColor> overrideBackgroundColor_;
 
 private:

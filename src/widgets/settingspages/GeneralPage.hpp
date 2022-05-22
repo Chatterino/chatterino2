@@ -29,6 +29,10 @@ private:
 
     DescriptionLabel *cachePath_{};
     GeneralPageView *view_{};
+
+    QCheckBox *enableTrayIcon{};
+    QComboBox *minimizeTrayAction{};
+    QComboBox *closeTrayAction{};
 };
 
 }  // namespace chatterino

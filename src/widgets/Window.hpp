@@ -2,6 +2,7 @@
 
 #include "widgets/BaseWindow.hpp"
 
+#include <QSystemTrayIcon>
 #include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -25,12 +26,14 @@ public:
 
     WindowType getType();
     SplitNotebook &getNotebook();
+    QSystemTrayIcon *getTrayIcon();
 
     pajlada::Signals::NoArgSignal closed;
 
 protected:
     void closeEvent(QCloseEvent *event) override;
     bool event(QEvent *event) override;
+    bool isMainWindow() override;
 
 private:
     void addCustomTitlebarButtons();
@@ -50,6 +53,11 @@ private:
 
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;
+
+    QSystemTrayIcon *trayIcon_ = nullptr;
+    QAction *actionExit_ = nullptr;
+    QAction *actionShow_ = nullptr;
+    QMenu *trayContextMenu_ = nullptr;
 
     friend class Notebook;
 };

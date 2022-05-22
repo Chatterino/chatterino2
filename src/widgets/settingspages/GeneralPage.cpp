@@ -16,6 +16,7 @@
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/BaseWindow.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 
@@ -185,6 +186,62 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
     layout.addCheckbox("Show which channels are live in tabs", s.showTabLive);
+
+    minimizeTrayAction =
+        layout.addDropdown<std::underlying_type<TrayAction>::type>(
+            "Behavior when you press the minimize button",
+            {"Ask me", "Minimize to task bar", "Minimize to tray"},
+            s.minizeTrayAction,
+            [](auto val) {
+                switch (val)
+                {
+                    default:
+                    case TrayAction::MinimizeToTaskBar:
+                        return QString("Minimize to task bar");
+                    case TrayAction::AskMe:
+                        return QString("Ask me");
+                    case TrayAction::MinimizeToTray:
+                        return QString("Minimize to tray");
+                }
+            },
+            [](auto args) {
+                if (args.value == "Minimize to tray")
+                    return TrayAction::MinimizeToTray;
+                if (args.value == "Ask me")
+                    return TrayAction::AskMe;
+                return TrayAction::MinimizeToTaskBar;
+            },
+            false);
+    closeTrayAction =
+        layout.addDropdown<std::underlying_type<TrayAction>::type>(
+            "Behavior when you press the close button",
+            {"Ask me", "Close Chatterino", "Minimize to tray"},
+            s.closeTrayAction,
+            [](auto val) {
+                switch (val)
+                {
+                    default:
+                    case TrayAction::CloseChatterino:
+                        return QString("Close Chatterino");
+                    case TrayAction::AskMe:
+                        return QString("Ask me");
+                    case TrayAction::MinimizeToTray:
+                        return QString("Minimize to tray");
+                }
+            },
+            [](auto args) {
+                if (args.value == "Minimize to tray")
+                    return TrayAction::MinimizeToTray;
+                if (args.value == "Ask me")
+                    return TrayAction::AskMe;
+                return TrayAction::CloseChatterino;
+            },
+            false);
+
+    minimizeTrayAction->setMinimumWidth(
+        closeTrayAction->minimumSizeHint().width() + 35);
+    closeTrayAction->setMinimumWidth(
+        closeTrayAction->minimumSizeHint().width() + 35);
 
     layout.addTitle("Chat");
 

@@ -23,7 +23,9 @@ TooltipWidget *TooltipWidget::instance()
 }
 
 TooltipWidget::TooltipWidget(BaseWidget *parent)
-    : BaseWindow({BaseWindow::TopMost, BaseWindow::DontFocus}, parent)
+    : BaseWindow({BaseWindow::TopMost, BaseWindow::DontFocus,
+                  BaseWindow::IgnoreTrayEvent},
+                 parent)
     , displayImage_(new QLabel())
     , displayText_(new QLabel())
 {

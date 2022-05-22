@@ -58,6 +58,14 @@ enum UsernameDisplayMode : int {
     LocalizedName = 2,             // Localized name
     UsernameAndLocalizedName = 3,  // Username (Localized name)
 };
+
+enum TrayAction : int {
+    AskMe = 0,              // Default
+    MinimizeToTray = 1,     // Minimize to tray icon
+    MinimizeToTaskBar = 2,  // Minimize to task bar
+    CloseChatterino = 3     // Close program
+};
+
 /// Settings which are availlable for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings : public ABSettings, public ConcurrentSettings
@@ -112,6 +120,10 @@ public:
     BoolSetting showTabLive = {"/appearance/showTabLiveButton", true};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
                                          false};
+    EnumSetting<TrayAction> minizeTrayAction = {
+        "/appearance/minimizeTrayAction", AskMe};
+    EnumSetting<TrayAction> closeTrayAction = {"/appearance/closeTrayAction",
+                                               AskMe};
     BoolSetting hideUserButton = {"/appearance/hideUserButton", false};
     BoolSetting enableSmoothScrolling = {"/appearance/smoothScrolling", true};
     BoolSetting enableSmoothScrollingNewMessages = {
