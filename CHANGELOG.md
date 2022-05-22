@@ -14,6 +14,7 @@
 - Minor: Fixed tag parsing for consecutive escaped characters. (#3711)
 - Minor: Prevent user from entering incorrect characters in Live Notifications channels list. (#3715, #3730)
 - Minor: Fixed automod caught message notice appearing twice for mods. (#3717)
+- Minor: Added `/requests` command. Usage: `/requests [channel]`. Opens the channel points requests queue for the provided channel or the current channel if no input is provided. (#3746)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Bugfix: Fixed live notifications not getting updated for closed streams going offline. (#3678)
 - Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
