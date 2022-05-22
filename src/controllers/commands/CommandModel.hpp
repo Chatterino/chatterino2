@@ -11,14 +11,13 @@ class CommandController;
 
 class CommandModel : public SignalVectorModel<Command>
 {
-public:
     explicit CommandModel(QObject *parent);
 
     enum Column {
         Trigger = 0,
         CommandFunc = 1,
         ShowInMessageContextMenu = 2,
-        COUNT
+        COUNT,
     };
 
 protected:

@@ -66,9 +66,10 @@ struct Deserialize<chatterino::Command> {
         if (!chatterino::rj::getSafe(value, "showInMsgContextMenu",
                                      command.showInMsgContextMenu))
         {
+            command.showInMsgContextMenu = false;
+
             PAJLADA_REPORT_ERROR(error);
 
-            command.showInMsgContextMenu = false;
             return command;
         }
 

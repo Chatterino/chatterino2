@@ -2096,11 +2096,15 @@ void ChannelView::addCommandExecutionContextMenuItems(
     for (auto &cmd : getApp()->commands->items)
     {
         if (cmd.showInMsgContextMenu)
+        {
             cmds.push_back(cmd);
+        }
     }
 
     if (cmds.empty())
+    {
         return;
+    }
 
     menu.addSeparator();
     auto executeAction = menu.addAction("Execute command");
@@ -2121,9 +2125,13 @@ void ChannelView::addCommandExecutionContextMenuItems(
             /* Search popups and user message history's underlyingChannels aren't of type TwitchChannel, but
              * we would still like to execute commands from them. Use their source channel instead if applicable. */
             if (this->hasSourceChannel())
+            {
                 channel = this->sourceChannel();
+            }
             else
+            {
                 channel = this->underlyingChannel_;
+            }
 
             QString value =
                 getApp()->commands->execCommand(inputText, channel, false);
