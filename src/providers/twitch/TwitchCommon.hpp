@@ -72,6 +72,7 @@ static const QStringList TWITCH_DEFAULT_COMMANDS{
     "unraid",
     "delete",
     "announce",
+    "requests",
 };
 
 static const QStringList TWITCH_WHISPER_COMMANDS{"/w", ".w"};
