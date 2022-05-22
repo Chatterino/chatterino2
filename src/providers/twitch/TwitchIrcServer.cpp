@@ -346,7 +346,7 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
             [this](std::vector<HelixStream> streams) {
                 for (const auto &stream : streams)
                 {
-                    auto chan = this->getChannelOrEmptyByID(stream.userId);
+                    auto chan = this->getChannelOrEmpty(stream.userLogin);
                     if (chan->getType() != Channel::Type::Twitch)
                         continue;
 
