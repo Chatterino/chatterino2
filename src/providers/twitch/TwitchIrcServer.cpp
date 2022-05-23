@@ -345,7 +345,7 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
             (QSet<QString>(batch.begin(), batch.end()));
 #else
-            (QSet<QString>::fromList(batch));
+            (batch.toSet());
 #endif
 
         getHelix()->fetchStreams(
