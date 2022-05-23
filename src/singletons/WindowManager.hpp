@@ -59,6 +59,10 @@ public:
     Window &getSelectedWindow();
     Window &createWindow(WindowType type, bool show = true);
 
+    // Opens a channel in new popup window
+    Window &openNewChannelWindow(ChannelPtr channel);
+    Window &openNewChannelWindow(QString channelName);
+
     void select(Split *split);
     void select(SplitContainer *container);
 

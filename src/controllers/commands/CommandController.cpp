@@ -742,15 +742,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         }
 
-        auto *app = getApp();
-        Window &window = app->windows->createWindow(WindowType::Popup, true);
-
-        auto *split = new Split(static_cast<SplitContainer *>(
-            window.getNotebook().getOrAddSelectedPage()));
-
-        split->setChannel(app->twitch->getOrAddChannel(target));
-
-        window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+        getApp()->windows->openNewChannelWindow(target);
 
         return "";
     });

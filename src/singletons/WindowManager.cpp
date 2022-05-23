@@ -275,6 +275,22 @@ Window &WindowManager::createWindow(WindowType type, bool show)
     return *window;
 }
 
+Window &WindowManager::openNewChannelWindow(ChannelPtr channel)
+{
+    Window &window = this->createWindow(WindowType::Popup, true);
+    auto split =
+        window.getNotebook().getOrAddSelectedPage()->appendNewSplit(false);
+    split->setChannel(channel);
+    window.getNotebook().getOrAddSelectedPage()->refreshTab();
+    return window;
+}
+
+Window &WindowManager::openNewChannelWindow(QString channelName)
+{
+    return this->openNewChannelWindow(
+        getApp()->twitch->getOrAddChannel(channelName));
+}
+
 void WindowManager::select(Split *split)
 {
     this->selectSplit.invoke(split);
