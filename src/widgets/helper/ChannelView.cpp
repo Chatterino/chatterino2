@@ -2064,11 +2064,15 @@ void ChannelView::addMessageContextMenuItems(
         crossPlatformCopy(copyString);
     });
 
-    menu.addAction(
-        this->channel_->isWritable() ? "Reply to message" : "View thread",
-        [this, layout] {
-            this->showReplyThreadPopup(layout->getMessagePtr());
-        });
+    // Only display reply option where it makes sense
+    if (this->canReplyToMessages())
+    {
+        menu.addAction(
+            this->channel_->isWritable() ? "Reply to message" : "View thread",
+            [this, layout] {
+                this->showReplyThreadPopup(layout->getMessagePtr());
+            });
+    }
 }
 
 void ChannelView::addTwitchLinkContextMenuItems(
@@ -2578,11 +2582,36 @@ void ChannelView::configureMessageLayout(MessageLayoutPtr &messageLayout) const
     {
         messageLayout->setRenderReplies(false);
     }
+
+    if (!this->canReplyToMessages())
+    {
+        messageLayout->setRenderFloatingElements(false);  // hide reply button
+    }
 }
 
 ChannelView::Context ChannelView::getContext() const
 {
     return this->context_;
+}
+
+bool ChannelView::canReplyToMessages() const
+{
+    if (this->context_ == ChannelView::Context::ReplyThread ||
+        this->context_ == ChannelView::Context::Search)
+    {
+        return false;
+    }
+    else if (!this->channel_->isTwitchChannel())
+    {
+        return false;
+    }
+    else if (this->channel_->getType() == Channel::Type::TwitchWhispers ||
+             this->channel_->getType() == Channel::Type::TwitchLive)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 }  // namespace chatterino

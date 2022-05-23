@@ -352,7 +352,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
 
     // draw message
     this->container_->paintElements(painter);
-    if (paintFloating)
+    if (paintFloating && this->renderFloatingElements_)
     {
         this->container_->paintFloatingElements(painter, buffer->rect());
     }
@@ -440,6 +440,11 @@ void MessageLayout::addSelectionText(QString &str, int from, int to,
 void MessageLayout::setRenderReplies(bool render)
 {
     this->renderReplies_ = render;
+}
+
+void MessageLayout::setRenderFloatingElements(bool render)
+{
+    this->renderFloatingElements_ = render;
 }
 
 }  // namespace chatterino

@@ -66,6 +66,7 @@ public:
     // Misc
     bool isDisabled() const;
     void setRenderReplies(bool render);
+    void setRenderFloatingElements(bool render);
 
 private:
     // variables
@@ -74,6 +75,7 @@ private:
     std::shared_ptr<QPixmap> buffer_{};
     bool bufferValid_ = false;
     bool renderReplies_ = true;
+    bool renderFloatingElements_ = true;
 
     int height_ = 0;
 

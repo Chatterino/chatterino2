@@ -212,6 +212,7 @@ private:
     bool shouldRenderFloatingElements() const;
 
     void configureMessageLayout(MessageLayoutPtr &messageLayout) const;
+    bool canReplyToMessages() const;
 
     QTimer *layoutCooldown_;
     bool layoutQueued_;
