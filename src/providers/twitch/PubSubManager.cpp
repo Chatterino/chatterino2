@@ -584,6 +584,25 @@ void PubSub::unlistenWhispers()
     }
 }
 
+void PubSub::unlistenChatroomsUser()
+{
+    for (const auto &p : this->clients)
+    {
+        const auto &client = p.second;
+        if (const auto &[topics, nonce] =
+                client->unlistenPrefix("chatrooms-user-v1.");
+            !topics.empty())
+        {
+            this->registerNonce(nonce, {
+                                           client,
+                                           "UNLISTEN",
+                                           topics,
+                                           topics.size(),
+                                       });
+        }
+    }
+}
+
 bool PubSub::listenToWhispers()
 {
     if (this->userID_.isEmpty())
@@ -597,6 +616,25 @@ bool PubSub::listenToWhispers()
     auto topic = topicFormat.arg(this->userID_);
 
     qCDebug(chatterinoPubSub) << "Listen to whispers" << topic;
+
+    this->listenToTopic(topic);
+
+    return true;
+}
+
+bool PubSub::listenToChatroomsUser()
+{
+    if (this->userID_.isEmpty())
+    {
+        qCDebug(chatterinoPubSub)
+            << "Unable to listen to chatrooms-user topic, no user logged in";
+        return false;
+    }
+
+    static const QString topicFormat("chatrooms-user-v1.%1");
+    auto topic = topicFormat.arg(this->userID_);
+
+    qCDebug(chatterinoPubSub) << "Listen to chatrooms-user" << topic;
 
     this->listenToTopic(topic);
 
@@ -1040,6 +1078,33 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
             break;
         }
     }
+    else if (topic.startsWith("chatrooms-user-v1."))
+    {
+        auto oInnerMessage = message.toInner<PubSubChatroomsUserMessage>();
+        if (!oInnerMessage)
+        {
+            return;
+        }
+        auto chatroomsUserMessage = *oInnerMessage;
+
+        switch (chatroomsUserMessage.type)
+        {
+            case PubSubChatroomsUserMessage::Type::UserModerationAction: {
+                this->signals_.chatroomsUser.action.invoke(
+                    chatroomsUserMessage);
+            }
+            break;
+            case PubSubChatroomsUserMessage::Type::ChannelBannedUpdate: {
+                this->signals_.chatroomsUser.channelBannedUpdate.invoke(
+                    chatroomsUserMessage);
+            }
+            break;
+
+            case PubSubChatroomsUserMessage::Type::INVALID:
+            default:
+                break;
+        }
+    }
     else if (topic.startsWith("chat_moderator_actions."))
     {
         auto oInnerMessage =
@@ -1097,8 +1162,8 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
             case PubSubChatModeratorActionMessage::Type::INVALID:
             default: {
-                qCDebug(chatterinoPubSub)
-                    << "Invalid whisper type:" << innerMessage.typeString;
+                qCDebug(chatterinoPubSub) << "Invalid moderator action type:"
+                                          << innerMessage.typeString;
             }
             break;
         }

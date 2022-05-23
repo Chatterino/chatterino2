@@ -114,6 +114,11 @@ public:
         } whisper;
 
         struct {
+            Signal<const PubSubChatroomsUserMessage &> action;
+            Signal<const PubSubChatroomsUserMessage &> channelBannedUpdate;
+        } chatroomsUser;
+
+        struct {
             Signal<const QJsonObject &> redeemed;
         } pointReward;
     } signals_;
@@ -121,8 +126,10 @@ public:
     void unlistenAllModerationActions();
     void unlistenAutomod();
     void unlistenWhispers();
+    void unlistenChatroomsUser();
 
     bool listenToWhispers();
+    bool listenToChatroomsUser();
     void listenToChannelModerationActions(const QString &channelID);
     void listenToAutomod(const QString &channelID);
 

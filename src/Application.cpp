@@ -499,6 +499,36 @@ void Application::initPubSub()
             });
         });
 
+    // A moderation action is performed against current user
+    this->twitch->pubsub->signals_.chatroomsUser.action.connect(
+        [&](PubSubChatroomsUserMessage data) {
+            if (data.channelID.isEmpty())
+            {
+                qCDebug(chatterinoApp)
+                    << "Couldn't find channelID of chatrooms user message";
+                return;
+            }
+            qCDebug(chatterinoApp)
+                << data.typeString << bool(data.userIsRestricted);
+
+            auto ch = this->twitch->getChannelOrEmptyByID(data.channelID);
+            if (data.action == "untimeout" || data.action == "unban")
+            {
+                //QString msg = "You were " + ""
+                auto msg = makeSystemMessage(data.action);
+                postToThread([ch, msg] {
+                    ch->addMessage(msg);
+                });
+            }
+        });
+
+    // Current user becomes able to chat -> unable to chat or vice versa
+    this->twitch->pubsub->signals_.chatroomsUser.channelBannedUpdate.connect(
+        [&](auto &data) {
+            qCDebug(chatterinoApp)
+                << data.typeString << bool(data.userIsRestricted);
+        });
+
     this->twitch->pubsub->start();
 
     auto RequestModerationActions = [=]() {
@@ -508,6 +538,7 @@ void Application::initPubSub()
         // moderation topics this->twitch->pubsub->UnlistenAllAuthedTopics();
 
         this->twitch->pubsub->listenToWhispers();
+        this->twitch->pubsub->listenToChatroomsUser();
     };
 
     this->accounts->twitch.currentUserChanged.connect(
@@ -515,6 +546,7 @@ void Application::initPubSub()
             this->twitch->pubsub->unlistenAllModerationActions();
             this->twitch->pubsub->unlistenAutomod();
             this->twitch->pubsub->unlistenWhispers();
+            this->twitch->pubsub->unlistenChatroomsUser();
         },
         boost::signals2::at_front);
 
