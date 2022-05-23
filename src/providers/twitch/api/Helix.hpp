@@ -389,6 +389,20 @@ public:
         ResultCallback<std::vector<HelixGame>> successCallback,
         HelixFailureCallback failureCallback) = 0;
 
+    virtual void updateStreamTags(QString broadcasterId, QStringList tags,
+                                  std::function<void()> successCallback,
+                                  HelixFailureCallback failureCallback) = 0;
+
+    virtual void getStreamTags(
+        QString broadcasterId,
+        ResultCallback<std::vector<HelixTag>> successCallback,
+        HelixFailureCallback failureCallback) = 0;
+
+    virtual void fetchStreamTags(
+        QString after,
+        ResultCallback<std::vector<HelixTag>, QString> successCallback,
+        HelixFailureCallback failureCallback) = 0;
+
     // https://dev.twitch.tv/docs/api/reference#search-categories
     virtual void searchGames(
         QString gameName,
@@ -505,20 +519,21 @@ public:
                     ResultCallback<std::vector<HelixGame>> successCallback,
                     HelixFailureCallback failureCallback) final;
 
+    // https://dev.twitch.tv/docs/api/reference#replace-stream-tags
     void updateStreamTags(QString broadcasterId, QStringList tags,
                           std::function<void()> successCallback,
-                          HelixFailureCallback failureCallback);
+                          HelixFailureCallback failureCallback) final;
 
+    // https://dev.twitch.tv/docs/api/reference#get-stream-tags
     void getStreamTags(QString broadcasterId,
                        ResultCallback<std::vector<HelixTag>> successCallback,
-                       HelixFailureCallback failureCallback);
+                       HelixFailureCallback failureCallback) final;
 
-    void getAllStreamTags(ResultCallback<std::vector<HelixTag>> successCallback,
-                          HelixFailureCallback failureCallback);
+    // https://dev.twitch.tv/docs/api/reference#get-all-stream-tags
     void fetchStreamTags(
         QString after,
         ResultCallback<std::vector<HelixTag>, QString> successCallback,
-        HelixFailureCallback failureCallback);
+        HelixFailureCallback failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#search-categories
     void searchGames(QString gameName,
