@@ -84,7 +84,7 @@ Compiling with Breakpad support enables crash reports that can be of use for dev
 
 1. Open the `chatterino.pro` file by double-clicking it, or by opening it via Qt Creator.
 2. You will be presented with a screen that is titled "Configure Project". In this screen, you should have at least one option present ready to be configured, like this:
-   ![Qt Create Configure Project screenshot](https://user-images.githubusercontent.com/69117321/168619622-cdad1264-945a-47b8-9b1f-f11e3c6ac90f.png)
+   ![Qt Create Configure Project screenshot](https://user-images.githubusercontent.com/69117321/169887645-2ae0871a-fe8a-4eb9-98db-7b996dea3a54.png)
 3. Select the profile(s) you want to build with and click "Configure Project".
 
 ### How to run and produce builds
