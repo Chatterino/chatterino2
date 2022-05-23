@@ -205,7 +205,6 @@ private:
     // --
     QString lastSentMessage_;
     QObject lifetimeGuard_;
-    QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
     QTimer threadClearTimer_;
     QElapsedTimer titleRefreshedTimer_;

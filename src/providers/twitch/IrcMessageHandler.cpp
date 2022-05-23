@@ -452,7 +452,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         chan->disableAllMessages();
         chan->addMessage(
             makeSystemMessage("Chat has been cleared by a moderator.",
-                              calculateMessageTimestamp(message)));
+                              calculateMessageTime(message).time()));
 
         return;
     }
@@ -468,7 +468,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     auto timeoutMsg =
         MessageBuilder(timeoutMessage, username, durationInSeconds, false,
-                       calculateMessageTimestamp(message))
+                       calculateMessageTime(message).time())
             .release();
     chan->addOrReplaceTimeout(timeoutMsg);
 
@@ -687,7 +687,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
         }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
-                                calculateMessageTimestamp(message));
+                                calculateMessageTime(message).time());
 
         b->flags.set(MessageFlag::Subscription);
         auto newMessage = b.release();
@@ -741,7 +741,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
-                                calculateMessageTimestamp(message));
+                                calculateMessageTime(message).time());
 
         b->flags.set(MessageFlag::Subscription);
         auto newMessage = b.release();
@@ -811,7 +811,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
                 .arg(remainingTime.isEmpty() ? "0s" : remainingTime);
 
         builtMessage.emplace_back(makeSystemMessage(
-            formattedMessage, calculateMessageTimestamp(message)));
+            formattedMessage, calculateMessageTime(message).time()));
 
         return builtMessage;
     }
@@ -820,7 +820,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     std::vector<MessagePtr> builtMessages;
 
     builtMessages.emplace_back(makeSystemMessage(
-        message->content(), calculateMessageTimestamp(message)));
+        message->content(), calculateMessageTime(message).time()));
 
     return builtMessages;
 }

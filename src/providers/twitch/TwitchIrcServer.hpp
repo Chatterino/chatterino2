@@ -31,6 +31,8 @@ public:
 
     std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
 
+    void bulkRefreshLiveStatus();
+
     Atomic<QString> lastUserThatWhisperedMe;
 
     const ChannelPtr whispersChannel;
@@ -78,6 +80,7 @@ private:
 
     BttvEmotes bttv;
     FfzEmotes ffz;
+    QTimer bulkLiveStatusTimer_;
 
     pajlada::Signals::SignalHolder signalHolder_;
 };
