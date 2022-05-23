@@ -341,8 +341,12 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
 
     for (const auto &batch : getChannelsInBatches(userIDs))
     {
-        auto offlineChannelIDs = std::make_shared<QSet<QString>>(
-            QSet<QString>(batch.begin(), batch.end()));
+        auto offlineChannelIDs = std::make_shared<QSet<QString>>
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+            (QSet<QString>(batch.begin(), batch.end()));
+#else
+            (QSet<QString>::fromList(batch));
+#endif
 
         getHelix()->fetchStreams(
             batch, QStringList(),
