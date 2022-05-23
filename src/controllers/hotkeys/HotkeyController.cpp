@@ -340,6 +340,9 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             QKeySequence("Ctrl+F"), "showSearch",
                             std::vector<QString>(), "show search");
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
+                            QKeySequence("Ctrl+Shift+F"), "showGlobalSearch",
+                            std::vector<QString>(), "show global search");
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
                             QKeySequence("Ctrl+F5"), "reconnect",
                             std::vector<QString>(), "reconnect");
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
