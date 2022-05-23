@@ -2190,7 +2190,6 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             switch (event->modifiers())
             {
                 case Qt::ShiftModifier:
-                    // openChannelIn = FromTwitchLinkOpenChannelIn::
                     getApp()->windows->openNewChannelWindow(link.value);
                     break;
                 case Qt::ControlModifier:
