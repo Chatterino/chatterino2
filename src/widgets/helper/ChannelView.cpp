@@ -1718,22 +1718,6 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             else if (hoverLayoutElement->getFlags().has(
                          MessageElementFlag::Username))
             {
-                if (event->modifiers() == Qt::ShiftModifier)
-                {
-                    this->openChannelIn.invoke(
-                        hoverLayoutElement->getLink().value,
-                        FromTwitchLinkOpenChannelIn::Tab);
-                    return;
-                }
-
-                if (event->modifiers() == Qt::AltModifier)
-                {
-                    this->openChannelIn.invoke(
-                        hoverLayoutElement->getLink().value,
-                        FromTwitchLinkOpenChannelIn::Split);
-                    return;
-                }
-
                 openTwitchUsercard(this->channel_->getName(),
                                    hoverLayoutElement->getLink().value);
                 return;
@@ -2203,8 +2187,26 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
     {
         case Link::UserWhisper:
         case Link::UserInfo: {
-            auto user = link.value;
-            this->showUserInfoPopup(user, layout->getMessage()->channelName);
+            switch (event->modifiers())
+            {
+                case Qt::ShiftModifier:
+                    // openChannelIn = FromTwitchLinkOpenChannelIn::
+                    getApp()->windows->openNewChannelWindow(link.value);
+                    break;
+                case Qt::ControlModifier:
+                    this->openChannelIn.invoke(
+                        link.value, FromTwitchLinkOpenChannelIn::Tab);
+                    break;
+                case Qt::AltModifier:
+                    this->openChannelIn.invoke(
+                        link.value, FromTwitchLinkOpenChannelIn::Split);
+                    break;
+                default:
+                    auto user = link.value;
+                    this->showUserInfoPopup(user,
+                                            layout->getMessage()->channelName);
+                    break;
+            }
         }
         break;
 
