@@ -332,59 +332,48 @@ namespace {
 
 void TwitchIrcServer::bulkRefreshLiveStatus()
 {
-    QStringList userIDs;
-    this->forEachChannel([&userIDs](ChannelPtr chan) {
+    auto twitchChans = std::make_shared<QHash<QString, TwitchChannel *>>();
+
+    this->forEachChannel([twitchChans](ChannelPtr chan) {
         auto twitchChan = dynamic_cast<TwitchChannel *>(chan.get());
-        if (!twitchChan->roomId().isEmpty())
-            userIDs.push_back(twitchChan->roomId());
+        if (twitchChan && !twitchChan->roomId().isEmpty())
+        {
+            twitchChans->insert(twitchChan->roomId(), twitchChan);
+        }
     });
 
-    for (const auto &batch : getChannelsInBatches(userIDs))
+    for (const auto &batch : getChannelsInBatches(twitchChans->keys()))
     {
-        auto offlineChannelIDs = std::make_shared<QSet<QString>>
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-            (batch.toSet());
-#else
-            (QSet<QString>(batch.begin(), batch.end()));
-#endif
-
         getHelix()->fetchStreams(
-            batch, QStringList(),
-            [this, offlineChannelIDs](std::vector<HelixStream> streams) {
+            batch, {},
+            [this, twitchChans](std::vector<HelixStream> streams) {
                 for (const auto &stream : streams)
                 {
-                    offlineChannelIDs->remove(stream.userId);
-
-                    auto chan = this->getChannelOrEmpty(stream.userLogin);
-                    if (chan->getType() != Channel::Type::Twitch)
+                    if (!twitchChans->contains(stream.userId))
                         continue;
 
-                    auto twitchChan = dynamic_cast<TwitchChannel *>(chan.get());
-                    twitchChan->parseLiveStatus(true, stream);
+                    twitchChans->value(stream.userId)
+                        ->parseLiveStatus(true, stream);
+
+                    // remaining channels will be used later to set their stream status as offline
+                    twitchChans->remove(stream.userId);
                 }
             },
             []() {
                 // failure
             },
-            [this, offlineChannelIDs] {
-                // All the channels that were not present in fetchStreams response are assumed to be offline
+            [this, twitchChans] {
+                // All the channels that were not present in fetchStreams response should be assumed to be offline
                 // It is necessary to update their stream status in case they've went live -> offline
                 // Otherwise some of them will be marked as live forever
-
-                for (const auto &weak : this->getChannels())
+                for (auto it = twitchChans->constBegin();
+                     it != twitchChans->end(); it++)
                 {
-                    auto chan = weak.lock();
-
-                    if (chan->getType() != Channel::Type::Twitch)
+                    // safety check, just in case
+                    if (it.value() == nullptr)
                         continue;
 
-                    auto twitchChan = dynamic_cast<TwitchChannel *>(chan.get());
-
-                    if (!offlineChannelIDs->contains(twitchChan->roomId()))
-                        continue;
-
-                    // twitchChan is in our list of channels that are offline, update its status
-                    twitchChan->parseLiveStatus(false, {});
+                    it.value()->parseLiveStatus(false, {});
                 }
             });
     }
