@@ -204,11 +204,11 @@ MessagePtr TwitchMessageBuilder::build()
                 MessageColor::System, FontStyle::ChatMediumSmall)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
 
-        this->emplace<TextElement>("@" + threadRoot->loginName + ":",
+        this->emplace<TextElement>("@" + threadRoot->displayName + ":",
                                    MessageElementFlag::RepliedUsername,
                                    threadRoot->usernameColor,
                                    FontStyle::ChatMediumSmall)
-            ->setLink({Link::UserWhisper, threadRoot->displayName});
+            ->setLink({Link::UserInfo, threadRoot->displayName});
 
         this->emplace<SingleLineTextElement>(
                 threadRoot->messageText, MessageElementFlag::RepliedText,
