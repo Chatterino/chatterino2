@@ -304,13 +304,14 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
 
 namespace {
     // TODO: combine this with getEmoteSetBatches in TwitchAccount.cpp, maybe some templated thing
-    std::vector<QStringList> getChannelsInBatches(QStringList channels)
+    template <class T>
+    std::vector<T> getChannelsInBatches(T channels)
     {
         constexpr int batchSize = 100;
 
         int batchCount = (channels.size() / batchSize) + 1;
 
-        std::vector<QStringList> batches;
+        std::vector<T> batches;
         batches.reserve(batchCount);
 
         for (int i = 0; i < batchCount; i++)
@@ -342,6 +343,7 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
         }
     });
 
+    // iterate over batches of channel IDs
     for (const auto &batch : getChannelsInBatches(twitchChans->keys()))
     {
         getHelix()->fetchStreams(
@@ -362,18 +364,17 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
             []() {
                 // failure
             },
-            [this, twitchChans] {
+            [this, batch, twitchChans] {
                 // All the channels that were not present in fetchStreams response should be assumed to be offline
                 // It is necessary to update their stream status in case they've went live -> offline
                 // Otherwise some of them will be marked as live forever
-                for (auto it = twitchChans->constBegin();
-                     it != twitchChans->end(); it++)
+                for (const auto &chID : batch)
                 {
                     // safety check, just in case
-                    if (it.value() == nullptr)
+                    if (twitchChans->value(chID) == nullptr)
                         continue;
 
-                    it.value()->parseLiveStatus(false, {});
+                    twitchChans->value(chID)->parseLiveStatus(false, {});
                 }
             });
     }
