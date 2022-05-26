@@ -11,9 +11,9 @@ const QSet<QString> predictions{"predictions"};
 const QSet<QString> channelAuthority{"moderator", "vip", "broadcaster"};
 const QSet<QString> subBadges{"subscriber", "founder"};
 
-Badge::Badge(const std::pair<const QString, QString> keyValuePair)
-    : key_(std::move(keyValuePair.first))
-    , value_(std::move(keyValuePair.second))
+Badge::Badge(QString key, QString value)
+    : key_(std::move(key))
+    , value_(std::move(value))
 {
     if (globalAuthority.contains(this->key_))
     {

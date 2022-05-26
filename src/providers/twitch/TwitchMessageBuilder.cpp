@@ -985,6 +985,25 @@ boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
     return boost::none;
 }
 
+std::unordered_map<QString, QString> TwitchMessageBuilder::parseBadgeInfoTag(
+    const QVariantMap &tags)
+{
+    auto infoMap = std::unordered_map<QString, QString>();
+
+    auto infoIt = tags.constFind("badge-info");
+    if (infoIt == tags.end())
+        return infoMap;
+
+    auto badges = infoIt.value().toString().split(',', Qt::SkipEmptyParts);
+
+    for (const QString &badge : badges)
+    {
+        infoMap.emplace(this->slashKeyValue(badge));
+    }
+
+    return infoMap;
+}
+
 void TwitchMessageBuilder::appendTwitchBadges()
 {
     if (this->twitchChannel == nullptr)
@@ -992,14 +1011,11 @@ void TwitchMessageBuilder::appendTwitchBadges()
         return;
     }
 
-    auto badgeInfos = this->parseTagList(this->tags, "badge-info");
-    auto badgeMap = this->parseTagList(this->tags, "badges");
-    std::vector<Badge> badgeVector;
+    auto badgeInfos = this->parseBadgeInfoTag(this->tags);
+    auto badges = this->parseBadgeTag(this->tags);
 
-    for (const Badge &badge : badgeMap)
+    for (const Badge &badge : badges)
     {
-        badgeVector.emplace_back(badge);
-
         auto badgeEmote = this->getTwitchBadge(badge);
         if (!badgeEmote)
         {
@@ -1076,7 +1092,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             ->setTooltip(tooltip);
     }
 
-    this->message().badges = badgeVector;
+    this->message().badges = badges;
     this->message().badgeInfos = badgeInfos;
 }
 

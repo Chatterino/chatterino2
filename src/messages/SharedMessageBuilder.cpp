@@ -75,35 +75,42 @@ void SharedMessageBuilder::parse()
     this->message().flags.set(MessageFlag::Collapsed);
 }
 
-std::unordered_map<QString, QString> SharedMessageBuilder::parseTagList(
-    const QVariantMap &tags, const QString &key)
+// "foo/bar/baz,tri/hard" can be a valid badge-info tag
+// In that case, valid map content should be 'split by slash' only once:
+// {"foo": "bar/baz", "tri": "hard"}
+std::pair<QString, QString> SharedMessageBuilder::slashKeyValue(
+    const QString &keyValueString)
 {
-    auto badges = std::unordered_map<QString, QString>();
+    return {
+        // part before first slash (index 0 of section)
+        keyValueString.section('/', 0, 0, QString::SectionSkipEmpty),
+        // part after first slash (index 1 of section)
+        keyValueString.section('/', 1, -1, QString::SectionSkipEmpty),
+    };
+}
 
-    auto iterator = tags.find(key);
-    if (iterator == tags.end())
-        return badges;
+std::vector<Badge> SharedMessageBuilder::parseBadgeTag(const QVariantMap &tags)
+{
+    auto b = std::vector<Badge>();
 
-    auto list = iterator.value().toString().split(',', Qt::SkipEmptyParts);
+    auto badgesIt = tags.constFind("badges");
+    if (badgesIt == tags.end())
+        return b;
 
-    // "foo/bar/baz,tri/hard" can be a valid badge tag
-    // In that case, valid map content should be:
-    // {"foo": "bar/baz", "tri": "hard"}
-    for (const QString &tagListEl : list)
+    auto badges = badgesIt.value().toString().split(',', Qt::SkipEmptyParts);
+
+    for (const QString &badge : badges)
     {
-        if (!tagListEl.contains('/'))
+        if (!badge.contains('/'))
         {
             continue;
         }
 
-        badges.emplace(
-            // substring before first slash (index 0), selecting only that index in 3rd parameter
-            tagListEl.section('/', 0, 0),
-            // substring after first slash (index 1, second item), not specifying aend takes all remaining elements
-            tagListEl.section('/', 1));
+        auto pair = this->slashKeyValue(badge);
+        b.emplace_back(Badge{pair.first, pair.second});
     }
 
-    return badges;
+    return b;
 }
 
 bool SharedMessageBuilder::isIgnored() const
@@ -335,7 +342,7 @@ void SharedMessageBuilder::parseHighlights()
     }
 
     // Highlight because of badge
-    auto badges = this->parseTagList(this->tags, "badges");
+    auto badges = this->parseBadgeTag(this->tags);
     auto badgeHighlights = getCSettings().highlightedBadges.readOnly();
     bool badgeHighlightSet = false;
     for (const HighlightBadge &highlight : *badgeHighlights)

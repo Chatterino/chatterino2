@@ -88,6 +88,9 @@ private:
     void addTextOrEmoji(EmotePtr emote) override;
     void addTextOrEmoji(const QString &value) override;
 
+    // Copied some common logic from SharedMessageBuilder::parseBadgeTag
+    std::unordered_map<QString, QString> parseBadgeInfoTag(
+        const QVariantMap &tag);
     void appendTwitchBadges();
     void appendChatterinoBadges();
     void appendFfzBadges();

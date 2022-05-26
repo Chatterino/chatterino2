@@ -33,6 +33,8 @@ public:
     virtual void triggerHighlights();
     virtual MessagePtr build() = 0;
 
+    static std::pair<QString, QString> slashKeyValue(const QString &str);
+
 protected:
     virtual void parse();
 
@@ -40,9 +42,8 @@ protected:
 
     virtual void parseUsername();
 
-    // Used for parsing PRIVMSG tags which contain a comma separated list of key-value elements
-    std::unordered_map<QString, QString> parseTagList(const QVariantMap &tags,
-                                                      const QString &key);
+    // Parses "badges" tag which contains a comma separated list of key-value elements
+    virtual std::vector<Badge> parseBadgeTag(const QVariantMap &tag);
 
     virtual Outcome tryAppendEmote(const EmoteName &name)
     {
