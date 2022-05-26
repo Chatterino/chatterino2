@@ -340,7 +340,7 @@ void SharedMessageBuilder::parseHighlights()
     bool badgeHighlightSet = false;
     for (const HighlightBadge &highlight : *badgeHighlights)
     {
-        for (const auto &badge : badges)
+        for (const Badge &badge : badges)
         {
             if (!highlight.isMatch(badge))
             {

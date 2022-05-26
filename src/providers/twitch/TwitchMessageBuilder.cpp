@@ -994,11 +994,10 @@ void TwitchMessageBuilder::appendTwitchBadges()
 
     auto badgeInfos = this->parseTagList(this->tags, "badge-info");
     auto badgeMap = this->parseTagList(this->tags, "badges");
-
     std::vector<Badge> badgeVector;
-    for (const auto &badgeData : badgeMap)
+
+    for (const Badge &badge : badgeMap)
     {
-        Badge badge(badgeData);
         badgeVector.emplace_back(badge);
 
         auto badgeEmote = this->getTwitchBadge(badge);
