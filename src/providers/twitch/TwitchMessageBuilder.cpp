@@ -7,6 +7,7 @@
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -46,55 +47,6 @@ const QSet<QString> zeroWidthEmotes{
 }  // namespace
 
 namespace chatterino {
-
-namespace {
-
-    QStringList parseTagList(const QVariantMap &tags, const QString &key)
-    {
-        auto iterator = tags.find(key);
-        if (iterator == tags.end())
-            return QStringList{};
-
-        return iterator.value().toString().split(',', Qt::SkipEmptyParts);
-    }
-
-    std::map<QString, QString> parseBadgeInfos(const QVariantMap &tags)
-    {
-        std::map<QString, QString> badgeInfos;
-
-        for (QString badgeInfo : parseTagList(tags, "badge-info"))
-        {
-            QStringList parts = badgeInfo.split('/');
-            if (parts.size() != 2)
-            {
-                continue;
-            }
-
-            badgeInfos.emplace(parts[0], parts[1]);
-        }
-
-        return badgeInfos;
-    }
-
-    std::vector<Badge> parseBadges(const QVariantMap &tags)
-    {
-        std::vector<Badge> badges;
-
-        for (QString badge : parseTagList(tags, "badges"))
-        {
-            QStringList parts = badge.split('/');
-            if (parts.size() != 2)
-            {
-                continue;
-            }
-
-            badges.emplace_back(parts[0], parts[1]);
-        }
-
-        return badges;
-    }
-
-}  // namespace
 
 TwitchMessageBuilder::TwitchMessageBuilder(
     Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
@@ -1040,11 +992,15 @@ void TwitchMessageBuilder::appendTwitchBadges()
         return;
     }
 
-    auto badgeInfos = parseBadgeInfos(this->tags);
-    auto badges = parseBadges(this->tags);
+    auto badgeInfos = this->parseTagList(this->tags, "badge-info");
+    auto badgeMap = this->parseTagList(this->tags, "badges");
 
-    for (const auto &badge : badges)
+    std::vector<Badge> badgeVector;
+    for (const auto &badgeData : badgeMap)
     {
+        Badge badge(badgeData);
+        badgeVector.emplace_back(badge);
+
         auto badgeEmote = this->getTwitchBadge(badge);
         if (!badgeEmote)
         {
@@ -1091,7 +1047,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
                 // (tier + amount of months with leading zero if less than 100)
                 // e.g. 3054 - tier 3 4,5-year sub. 2108 - tier 2 9-year sub
                 const auto &subTier =
-                    badge.value_.length() > 3 ? badge.value_.front() : '1';
+                    badge.value_.length() > 3 ? badge.value_.at(0) : '1';
                 const auto &subMonths = badgeInfoIt->second;
                 tooltip +=
                     QString(" (%1%2 months)")
@@ -1121,7 +1077,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             ->setTooltip(tooltip);
     }
 
-    this->message().badges = badges;
+    this->message().badges = badgeVector;
     this->message().badgeInfos = badgeInfos;
 }
 

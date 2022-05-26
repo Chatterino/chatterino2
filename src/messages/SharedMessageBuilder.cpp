@@ -4,7 +4,6 @@
 #include "common/QLogging.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
-#include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
@@ -34,33 +33,6 @@ namespace {
         {
             return QUrl("qrc:/sounds/ping2.wav");
         }
-    }
-
-    QStringList parseTagList(const QVariantMap &tags, const QString &key)
-    {
-        auto iterator = tags.find(key);
-        if (iterator == tags.end())
-            return QStringList{};
-
-        return iterator.value().toString().split(',', Qt::SkipEmptyParts);
-    }
-
-    std::vector<Badge> parseBadges(const QVariantMap &tags)
-    {
-        std::vector<Badge> badges;
-
-        for (QString badge : parseTagList(tags, "badges"))
-        {
-            QStringList parts = badge.split('/');
-            if (parts.size() != 2)
-            {
-                continue;
-            }
-
-            badges.emplace_back(parts[0], parts[1]);
-        }
-
-        return badges;
     }
 
 }  // namespace
@@ -101,6 +73,37 @@ void SharedMessageBuilder::parse()
     this->parseUsername();
 
     this->message().flags.set(MessageFlag::Collapsed);
+}
+
+std::unordered_map<QString, QString> SharedMessageBuilder::parseTagList(
+    const QVariantMap &tags, const QString &key)
+{
+    auto badges = std::unordered_map<QString, QString>();
+
+    auto iterator = tags.find(key);
+    if (iterator == tags.end())
+        return badges;
+
+    auto list = iterator.value().toString().split(',', Qt::SkipEmptyParts);
+
+    // "foo/bar/baz,tri/hard" can be a valid badge tag
+    // In that case, valid map content should be:
+    // {"foo": "bar/baz", "tri": "hard"}
+    for (const QString &tagListEl : list)
+    {
+        if (!tagListEl.contains('/'))
+        {
+            continue;
+        }
+
+        badges.emplace(
+            // substring before first slash (index 0), selecting only that index in 3rd parameter
+            tagListEl.section('/', 0, 0),
+            // substring after first slash (index 1, second item), not specifying aend takes all remaining elements
+            tagListEl.section('/', 1));
+    }
+
+    return badges;
 }
 
 bool SharedMessageBuilder::isIgnored() const
@@ -332,12 +335,12 @@ void SharedMessageBuilder::parseHighlights()
     }
 
     // Highlight because of badge
-    auto badges = parseBadges(this->tags);
+    auto badges = this->parseTagList(this->tags, "badges");
     auto badgeHighlights = getCSettings().highlightedBadges.readOnly();
     bool badgeHighlightSet = false;
     for (const HighlightBadge &highlight : *badgeHighlights)
     {
-        for (const Badge &badge : badges)
+        for (const auto &badge : badges)
         {
             if (!highlight.isMatch(badge))
             {

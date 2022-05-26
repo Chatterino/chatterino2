@@ -65,7 +65,7 @@ struct Message : boost::noncopyable {
     QColor usernameColor;
     QDateTime serverReceivedTime;
     std::vector<Badge> badges;
-    std::map<QString, QString> badgeInfos;
+    std::unordered_map<QString, QString> badgeInfos;
     std::shared_ptr<QColor> highlightColor;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;

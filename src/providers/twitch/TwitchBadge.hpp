@@ -9,7 +9,7 @@ namespace chatterino {
 class Badge
 {
 public:
-    Badge(QString key, QString value);
+    Badge(const std::pair<const QString, QString> keyValuePair);
 
     QString key_;           // e.g. bits
     QString value_;         // e.g. 100

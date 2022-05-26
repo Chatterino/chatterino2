@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/MessageColor.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
 #include <QColor>
@@ -38,6 +39,10 @@ protected:
     virtual void parseUsernameColor();
 
     virtual void parseUsername();
+
+    // Used for parsing PRIVMSG tags which contain a comma separated list of key-value elements
+    std::unordered_map<QString, QString> parseTagList(const QVariantMap &tags,
+                                                      const QString &key);
 
     virtual Outcome tryAppendEmote(const EmoteName &name)
     {
