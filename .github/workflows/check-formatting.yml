@@ -7,6 +7,10 @@ on:
       - chatterino7
   pull_request:
 
+concurrency: 
+  group: check-formatting-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-20.04

@@ -273,7 +273,12 @@ void Split::addShortcuts()
          }},
         {"showSearch",
          [this](std::vector<QString>) -> QString {
-             this->showSearch();
+             this->showSearch(true);
+             return "";
+         }},
+        {"showGlobalSearch",
+         [this](std::vector<QString>) -> QString {
+             this->showSearch(false);
              return "";
          }},
         {"reconnect",
@@ -1155,13 +1160,29 @@ const QList<QUuid> Split::getFilters() const
     return this->view_->getFilterIds();
 }
 
-void Split::showSearch()
+void Split::showSearch(bool singleChannel)
 {
-    SearchPopup *popup = new SearchPopup(this);
-
-    popup->setChannelFilters(this->view_->getFilterSet());
+    auto *popup = new SearchPopup(this);
     popup->setAttribute(Qt::WA_DeleteOnClose);
-    popup->setChannel(this->getChannel());
+
+    if (singleChannel)
+    {
+        popup->addChannel(this->getChannelView());
+        popup->show();
+        return;
+    }
+
+    // Pass every ChannelView for every Split across the app to the search popup
+    auto &notebook = getApp()->windows->getMainWindow().getNotebook();
+    for (int i = 0; i < notebook.getPageCount(); ++i)
+    {
+        auto container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
+        for (auto split : container->getSplits())
+        {
+            popup->addChannel(split->getChannelView());
+        }
+    }
+
     popup->show();
 }
 

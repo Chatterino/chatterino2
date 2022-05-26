@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Added multi-channel searching to search dialog via keyboard shortcut. [Ctrl+Shift+F by default] (#3694)
 - Minor: Added `is:first-msg` search option. (#3700)
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
 - Minor: Adjust large stream thumbnail to 16:9 (#3655)
@@ -14,6 +15,9 @@
 - Minor: Fixed tag parsing for consecutive escaped characters. (#3711)
 - Minor: Prevent user from entering incorrect characters in Live Notifications channels list. (#3715, #3730)
 - Minor: Fixed automod caught message notice appearing twice for mods. (#3717)
+- Minor: Added `/requests` command. Usage: `/requests [channel]`. Opens the channel points requests queue for the provided channel or the current channel if no input is provided. (#3746)
+- Minor: Added ability to execute commands on chat messages using the message context menu. (#3738)
+- Minor: Added `/copy` command. Usage: `/copy <text>`. Copies provided text to clipboard - can be useful with custom commands. (#3763)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Bugfix: Fixed live notifications not getting updated for closed streams going offline. (#3678)
 - Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
@@ -23,7 +27,9 @@
 - Bugfix: Fixed existing emote popups not being raised from behind other windows when refocusing them on macOS (#3713)
 - Bugfix: Fixed automod queue pubsub topic persisting after user change. (#3718)
 - Bugfix: Fixed viewer list not closing after pressing escape key. (#3734)
+- Bugfix: Fixed links with no thumbnail having previous link's thumbnail. (#3720)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
+- Dev: Batch checking live status for all channels after startup. (#3757, #3762)
 
 ## 2.3.5
 

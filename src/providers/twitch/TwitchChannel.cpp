@@ -191,11 +191,6 @@ TwitchChannel::TwitchChannel(const QString &name)
     });
     this->chattersListTimer_.start(5 * 60 * 1000);
 
-    QObject::connect(&this->liveStatusTimer_, &QTimer::timeout, [=] {
-        this->refreshLiveStatus();
-    });
-    this->liveStatusTimer_.start(60 * 1000);
-
     // debugging
 #if 0
     for (int i = 0; i < 1000; i++) {
