@@ -2,6 +2,7 @@
 
 #include "common/FlagsEnum.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
+#include "util/QStringHash.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QTime>
