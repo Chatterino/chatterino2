@@ -3,6 +3,10 @@
 
 ## Unversioned
 
+### Dankerino
+- Minor: Added RaccAttack URL to Twitch Emote context menu (Mm2PL/Dankerino#122)
+
+### Chatterino
 - Minor: Added `is:first-msg` search option. (#3700)
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
 - Minor: Adjust large stream thumbnail to 16:9 (#3655)
