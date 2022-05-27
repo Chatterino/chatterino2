@@ -91,7 +91,7 @@ std::pair<QString, QString> SharedMessageBuilder::slashKeyValue(
 
 std::vector<Badge> SharedMessageBuilder::parseBadgeTag(const QVariantMap &tags)
 {
-    auto b = std::vector<Badge>();
+    std::vector<Badge> b;
 
     auto badgesIt = tags.constFind("badges");
     if (badgesIt == tags.end())

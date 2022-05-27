@@ -43,7 +43,7 @@ protected:
     virtual void parseUsername();
 
     // Parses "badges" tag which contains a comma separated list of key-value elements
-    virtual std::vector<Badge> parseBadgeTag(const QVariantMap &tag);
+    virtual std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
 
     virtual Outcome tryAppendEmote(const EmoteName &name)
     {

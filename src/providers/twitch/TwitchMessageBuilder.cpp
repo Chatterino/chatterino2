@@ -988,15 +988,15 @@ boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
 std::unordered_map<QString, QString> TwitchMessageBuilder::parseBadgeInfoTag(
     const QVariantMap &tags)
 {
-    auto infoMap = std::unordered_map<QString, QString>();
+    std::unordered_map<QString, QString> infoMap;
 
     auto infoIt = tags.constFind("badge-info");
     if (infoIt == tags.end())
         return infoMap;
 
-    auto badges = infoIt.value().toString().split(',', Qt::SkipEmptyParts);
+    auto info = infoIt.value().toString().split(',', Qt::SkipEmptyParts);
 
-    for (const QString &badge : badges)
+    for (const QString &badge : info)
     {
         infoMap.emplace(this->slashKeyValue(badge));
     }
