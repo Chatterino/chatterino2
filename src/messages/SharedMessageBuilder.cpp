@@ -8,6 +8,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
+#include "util/QStringHash.hpp"
 #include "util/Qt.hpp"
 #include "util/StreamerMode.hpp"
 
