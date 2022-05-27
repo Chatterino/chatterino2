@@ -35,15 +35,15 @@ public:
 
     static std::pair<QString, QString> slashKeyValue(const QString &str);
 
+    // Parses "badges" tag which contains a comma separated list of key-value elements
+    std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
+
 protected:
     virtual void parse();
 
     virtual void parseUsernameColor();
 
     virtual void parseUsername();
-
-    // Parses "badges" tag which contains a comma separated list of key-value elements
-    virtual std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
 
     virtual Outcome tryAppendEmote(const EmoteName &name)
     {
