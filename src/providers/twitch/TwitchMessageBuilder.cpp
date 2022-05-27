@@ -1078,9 +1078,9 @@ void TwitchMessageBuilder::appendTwitchBadges()
             {
                 auto predictionText =
                     badgeInfoIt->second
-                        .replace("\\s", " ")  // standard IRC escapes
-                        .replace("\\:", ";")
-                        .replace("\\\\", "\\")
+                        .replace(R"(\s)", " ")  // standard IRC escapes
+                        .replace(R"(\:)", ";")
+                        .replace(R"(\\)", R"(\)")
                         .replace("⸝", ",");  // twitch's comma escape
                 // Careful, the first character is RIGHT LOW PARAPHRASE BRACKET or U+2E1D, which just looks like a comma
 
