@@ -613,27 +613,8 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
     auto parameters = message->parameters();
 
     QString msgType = tags.value("msg-id").toString();
+    QString msgColor = tags.value("msg-param-color").toString();
     QString content;
-    if (parameters.size() >= 2)
-    {
-        content = parameters[1];
-    }
-
-    if (specialMessageTypes.contains(msgType))
-    {
-        // Messages are not required, so they might be empty
-        if (!content.isEmpty())
-        {
-            MessageParseArgs args;
-            args.trimSubscriberUsername = true;
-
-            TwitchMessageBuilder builder(channel, message, args, content,
-                                         false);
-            builder->flags.set(MessageFlag::Subscription);
-            builder->flags.unset(MessageFlag::Highlighted);
-            builtMessages.emplace_back(builder.build());
-        }
-    }
 
     auto it = tags.find("system-msg");
 
@@ -663,6 +644,27 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
         builtMessages.emplace_back(newMessage);
     }
 
+    if (parameters.size() >= 2)
+    {
+        content = parameters[1];
+    }
+
+    if (specialMessageTypes.contains(msgType))
+    {
+        // Messages are not required, so they might be empty
+        if (!content.isEmpty())
+        {
+            MessageParseArgs args;
+            args.trimSubscriberUsername = true;
+
+            TwitchMessageBuilder builder(channel, message, args, content,
+                                         false);
+            builder->flags.set(MessageFlag::Subscription);
+            builder->flags.unset(MessageFlag::Highlighted);
+            builtMessages.emplace_back(builder.build());
+        }
+    }
+
     return builtMessages;
 }
 
@@ -674,20 +676,8 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
 
     auto target = parameters[0];
     QString msgType = tags.value("msg-id").toString();
+    QString msgColor = tags.value("msg-param-color").toString();
     QString content;
-    if (parameters.size() >= 2)
-    {
-        content = parameters[1];
-    }
-
-    if (specialMessageTypes.contains(msgType))
-    {
-        // Messages are not required, so they might be empty
-        if (!content.isEmpty())
-        {
-            this->addMessage(message, target, content, server, true, false);
-        }
-    }
 
     auto it = tags.find("system-msg");
 
@@ -732,6 +722,20 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         if (!chan->isEmpty())
         {
             chan->addMessage(newMessage);
+        }
+    }
+
+    if (parameters.size() >= 2)
+    {
+        content = parameters[1];
+    }
+
+    if (specialMessageTypes.contains(msgType))
+    {
+        // Messages are not required, so they might be empty
+        if (!content.isEmpty())
+        {
+            this->addMessage(message, target, content, server, true, false);
         }
     }
 }
