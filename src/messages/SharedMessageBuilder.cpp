@@ -83,9 +83,9 @@ std::pair<QString, QString> SharedMessageBuilder::slashKeyValue(
 {
     return {
         // part before first slash (index 0 of section)
-        keyValueString.section('/', 0, 0, QString::SectionSkipEmpty),
+        keyValueString.section('/', 0, 0),
         // part after first slash (index 1 of section)
-        keyValueString.section('/', 1, -1, QString::SectionSkipEmpty),
+        keyValueString.section('/', 1, -1),
     };
 }
 
