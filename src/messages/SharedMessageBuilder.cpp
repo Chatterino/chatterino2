@@ -4,7 +4,6 @@
 #include "common/QLogging.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
-#include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
