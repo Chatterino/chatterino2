@@ -26,6 +26,35 @@ using namespace std::chrono_literals;
 
 namespace chatterino {
 
+namespace {
+    // TODO: combine this with getEmoteSetBatches in TwitchAccount.cpp, maybe some templated thing
+    template <class T>
+    std::vector<T> getChannelsInBatches(T channels)
+    {
+        constexpr int batchSize = 100;
+
+        int batchCount = (channels.size() / batchSize) + 1;
+
+        std::vector<T> batches;
+        batches.reserve(batchCount);
+
+        for (int i = 0; i < batchCount; i++)
+        {
+            QStringList batch;
+
+            // I hate you, msvc
+            int last = (std::min)(batchSize, channels.size() - batchSize * i);
+            for (int j = 0; j < last; j++)
+            {
+                batch.push_back(channels.at(j + (batchSize * i)));
+            }
+            batches.emplace_back(batch);
+        }
+
+        return batches;
+    }
+}  // namespace
+
 TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
@@ -301,35 +330,6 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
 
     return Channel::getEmpty();
 }
-
-namespace {
-    // TODO: combine this with getEmoteSetBatches in TwitchAccount.cpp, maybe some templated thing
-    template <class T>
-    std::vector<T> getChannelsInBatches(T channels)
-    {
-        constexpr int batchSize = 100;
-
-        int batchCount = (channels.size() / batchSize) + 1;
-
-        std::vector<T> batches;
-        batches.reserve(batchCount);
-
-        for (int i = 0; i < batchCount; i++)
-        {
-            QStringList batch;
-
-            // I hate you, msvc
-            int last = (std::min)(batchSize, channels.size() - batchSize * i);
-            for (int j = 0; j < last; j++)
-            {
-                batch.push_back(channels.at(j + (batchSize * i)));
-            }
-            batches.emplace_back(batch);
-        }
-
-        return batches;
-    }
-}  // namespace
 
 void TwitchIrcServer::bulkRefreshLiveStatus()
 {
