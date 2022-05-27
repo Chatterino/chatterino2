@@ -336,10 +336,10 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
     auto twitchChans = std::make_shared<QHash<QString, TwitchChannel *>>();
 
     this->forEachChannel([twitchChans](ChannelPtr chan) {
-        auto twitchChan = dynamic_cast<TwitchChannel *>(chan.get());
-        if (twitchChan && !twitchChan->roomId().isEmpty())
+        auto tc = dynamic_cast<TwitchChannel *>(chan.get());
+        if (tc && !tc->roomId().isEmpty())
         {
-            twitchChans->insert(twitchChan->roomId(), twitchChan);
+            twitchChans->insert(tc->roomId(), tc);
         }
     });
 
@@ -348,7 +348,7 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
     {
         getHelix()->fetchStreams(
             batch, {},
-            [this, twitchChans](std::vector<HelixStream> streams) {
+            [&twitchChans](std::vector<HelixStream> streams) {
                 for (const auto &stream : streams)
                 {
                     if (!twitchChans->contains(stream.userId))
@@ -364,13 +364,13 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
             []() {
                 // failure
             },
-            [this, batch, twitchChans] {
+            [&batch, &twitchChans] {
                 // All the channels that were not present in fetchStreams response should be assumed to be offline
                 // It is necessary to update their stream status in case they've went live -> offline
                 // Otherwise some of them will be marked as live forever
                 for (const auto &chID : batch)
                 {
-                    // safety check, just in case
+                    // early out in case channel does not exist anymore
                     if (twitchChans->value(chID) == nullptr)
                         continue;
 
