@@ -366,7 +366,7 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
             },
             [&batch, &twitchChans] {
                 // All the channels that were not present in fetchStreams response should be assumed to be offline
-                // It is necessary to update their stream status in case they've went live -> offline
+                // It is necessary to update their stream status in case they've gone live -> offline
                 // Otherwise some of them will be marked as live forever
                 for (const auto &chID : batch)
                 {
