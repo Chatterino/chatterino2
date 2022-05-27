@@ -111,7 +111,7 @@ namespace {
 
         if (creatorFlags.has(MessageElementFlag::TwitchEmote))
         {
-            addPageLink("Raccatta");
+            addPageLink("RaccAttack");
         }
         else if (creatorFlags.has(MessageElementFlag::SeventvEmote))
         {
