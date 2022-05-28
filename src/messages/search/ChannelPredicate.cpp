@@ -1,5 +1,7 @@
 #include "messages/search/ChannelPredicate.hpp"
 
+#include "util/Qt.hpp"
+
 namespace chatterino {
 
 ChannelPredicate::ChannelPredicate(const QStringList &channels)
@@ -8,7 +10,7 @@ ChannelPredicate::ChannelPredicate(const QStringList &channels)
     // Check if any comma-seperated values were passed and transform those
     for (const auto &entry : channels)
     {
-        for (const auto &channel : entry.split(',', QString::SkipEmptyParts))
+        for (const auto &channel : entry.split(',', Qt::SkipEmptyParts))
         {
             this->channels_ << channel;
         }

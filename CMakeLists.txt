@@ -59,6 +59,7 @@ find_package(Sanitizers)
 
 # Find boost on the system
 find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS random)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
@@ -101,7 +102,18 @@ find_package(RapidJSON REQUIRED)
 find_package(Websocketpp REQUIRED)
 
 if (BUILD_TESTS)
-    find_package(GTest REQUIRED)
+    add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib/googletest" "lib/googletest")
+
+    mark_as_advanced(
+        BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
+        gmock_build_tests gtest_build_samples gtest_build_tests
+        gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
+    )
+
+    set_target_properties(gtest PROPERTIES FOLDER lib)
+    set_target_properties(gtest_main PROPERTIES FOLDER lib)
+    set_target_properties(gmock PROPERTIES FOLDER lib)
+    set_target_properties(gmock_main PROPERTIES FOLDER lib)
 endif ()
 
 if (BUILD_BENCHMARKS)

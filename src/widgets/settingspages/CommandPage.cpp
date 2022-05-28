@@ -15,6 +15,7 @@
 #include "widgets/helper/EditableModelView.hpp"
 //#include "widgets/helper/ComboBoxItemDelegate.hpp"
 #include "util/CombinePath.hpp"
+#include "util/Qt.hpp"
 
 #include <QLabel>
 #include <QTextEdit>
@@ -43,8 +44,9 @@ CommandPage::CommandPage()
         layout.emplace<EditableModelView>(app->commands->createModel(nullptr))
             .getElement();
 
-    view->setTitles({"Trigger", "Command"});
-    view->getTableView()->horizontalHeader()->setStretchLastSection(true);
+    view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+        1, QHeaderView::Stretch);
     view->addButtonPressed.connect([] {
         getApp()->commands->items.append(
             Command{"/command", "I made a new command HeyGuys"});
@@ -59,9 +61,9 @@ CommandPage::CommandPage()
         QObject::connect(button, &QPushButton::clicked, this, [] {
             QFile c1settings = c1settingsPath();
             c1settings.open(QIODevice::ReadOnly);
-            for (auto line : QString(c1settings.readAll())
-                                 .split(QRegularExpression("[\r\n]"),
-                                        QString::SkipEmptyParts))
+            for (auto line :
+                 QString(c1settings.readAll())
+                     .split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts))
             {
                 if (int index = line.indexOf(' '); index != -1)
                 {

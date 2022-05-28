@@ -81,6 +81,8 @@ public:
     void pause(PauseReason reason, boost::optional<uint> msecs = boost::none);
     void unpause(PauseReason reason);
 
+    MessageElementFlags getFlags() const;
+
     ChannelPtr channel();
     void setChannel(ChannelPtr channel_);
 
@@ -158,7 +160,6 @@ private:
 
     void drawMessages(QPainter &painter);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
-    MessageElementFlags getFlags() const;
     void selectWholeMessage(MessageLayout *layout, int &messageIndex);
     void getWordBounds(MessageLayout *layout,
                        const MessageLayoutElement *element,
@@ -184,6 +185,10 @@ private:
     void addHiddenContextMenuItems(const MessageLayoutElement *hoveredElement,
                                    MessageLayoutPtr layout, QMouseEvent *event,
                                    QMenu &menu);
+    void addCommandExecutionContextMenuItems(
+        const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
+        QMouseEvent *event, QMenu &menu);
+
     int getLayoutWidth() const;
     void updatePauses();
     void unpaused();
