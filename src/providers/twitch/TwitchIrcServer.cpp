@@ -40,7 +40,7 @@ namespace {
 
         for (int i = 0; i < batchCount; i++)
         {
-            QStringList batch;
+            T batch;
 
             // I hate you, msvc
             int last = (std::min)(batchSize, channels.size() - batchSize * i);
