@@ -256,11 +256,12 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
             this->rebuildChecks(settings);
         });
 
-    // this->signalHolder_.managedConnect(getApp())
+    getIApp()->getAccounts()->twitch.currentUserChanged.connect(
+        [this, &settings] {
+            this->rebuildChecks(settings);
+        });
 
     this->rebuildChecks(settings);
-
-    // TODO: Rebuild on user changed
 }
 
 void HighlightController::rebuildChecks(Settings &settings)
