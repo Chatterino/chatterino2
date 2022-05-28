@@ -352,7 +352,9 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
                 for (const auto &stream : streams)
                 {
                     if (!twitchChans->contains(stream.userId))
+                    {
                         continue;
+                    }
 
                     twitchChans->value(stream.userId)
                         ->parseLiveStatus(true, stream);
@@ -372,7 +374,9 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
                 {
                     // early out in case channel does not exist anymore
                     if (twitchChans->value(chID) == nullptr)
+                    {
                         continue;
+                    }
 
                     twitchChans->value(chID)->parseLiveStatus(false, {});
                 }
