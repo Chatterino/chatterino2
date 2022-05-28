@@ -17,6 +17,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/UtilTwitch.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/IrcHelpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchPubSubClient.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchMessageBuilder.cpp
     # Add your new file above this line!
     )
 

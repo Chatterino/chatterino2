@@ -620,7 +620,7 @@ void Window::addShortcuts()
              else if (mode == 3)
              {
                  getSettings()->enableStreamerMode.setValue(
-                     StreamerModeSetting::DetectObs);
+                     StreamerModeSetting::DetectStreamingSoftware);
              }
              return "";
          }},
