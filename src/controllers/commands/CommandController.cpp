@@ -17,6 +17,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Clipboard.hpp"
 #include "util/CombinePath.hpp"
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
@@ -548,6 +549,36 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
+    this->registerCommand("/requests", [](const QStringList &words,
+                                          ChannelPtr channel) {
+        QString target(words.value(1));
+
+        if (target.isEmpty())
+        {
+            if (channel->getType() == Channel::Type::Twitch &&
+                !channel->isEmpty())
+            {
+                target = channel->getName();
+            }
+            else
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /requests [channel]. You can also use the command "
+                    "without arguments in any Twitch channel to open its "
+                    "channel points requests queue. Only the broadcaster and "
+                    "moderators have permission to view the queue."));
+                return "";
+            }
+        }
+
+        stripChannelName(target);
+        QDesktopServices::openUrl(
+            QUrl(QString("https://www.twitch.tv/popout/%1/reward-queue")
+                     .arg(target)));
+
+        return "";
+    });
+
     this->registerCommand(
         "/chatters", [](const auto & /*words*/, auto channel) {
             auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
@@ -795,6 +826,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
         return "";
     });
+
     this->registerCommand("/setgame", [](const QStringList &words,
                                          const ChannelPtr channel) {
         if (words.size() < 2)
@@ -893,6 +925,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+
     this->registerCommand(
         "/delete", [](const QStringList &words, ChannelPtr channel) -> QString {
             // This is a wrapper over the standard Twitch /delete command
@@ -935,6 +968,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         getApp()->twitch->sendRawMessage(words.mid(1).join(" "));
         return "";
     });
+
 #ifndef NDEBUG
     this->registerCommand(
         "/fakemsg",
@@ -951,6 +985,19 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 #endif
+
+    this->registerCommand(
+        "/copy", [](const QStringList &words, ChannelPtr channel) -> QString {
+            if (words.size() < 2)
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage: /copy <text> - copies provided "
+                                      "text to clipboard."));
+                return "";
+            }
+            crossPlatformCopy(words.mid(1).join(" "));
+            return "";
+        });
 }
 
 void CommandController::save()

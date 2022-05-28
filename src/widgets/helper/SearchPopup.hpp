@@ -17,16 +17,17 @@ class SearchPopup : public BasePopup
 public:
     SearchPopup(QWidget *parent);
 
-    virtual void setChannel(const ChannelPtr &channel);
-    virtual void setChannelFilters(FilterSetPtr filters);
+    virtual void addChannel(ChannelView &channel);
 
 protected:
     virtual void updateWindowTitle();
+    void showEvent(QShowEvent *event) override;
 
 private:
     void initLayout();
     void search();
     void addShortcuts() override;
+    LimitedQueueSnapshot<MessagePtr> buildSnapshot();
 
     /**
      * @brief Only retains those message from a list of messages that satisfy a
@@ -41,8 +42,7 @@ private:
      *         "snapshot"
      */
     static ChannelPtr filter(const QString &text, const QString &channelName,
-                             const LimitedQueueSnapshot<MessagePtr> &snapshot,
-                             FilterSetPtr filterSet);
+                             const LimitedQueueSnapshot<MessagePtr> &snapshot);
 
     /**
      * @brief Checks the input for tags and registers their corresponding
@@ -58,7 +58,7 @@ private:
     QLineEdit *searchInput_{};
     ChannelView *channelView_{};
     QString channelName_{};
-    FilterSetPtr channelFilters_;
+    QList<std::reference_wrapper<ChannelView>> searchChannels_;
 };
 
 }  // namespace chatterino
