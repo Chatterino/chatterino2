@@ -138,14 +138,6 @@ namespace detail {
     {
         QVector<Frame<QImage>> frames;
 
-        if (reader.imageCount() == 0)
-        {
-            qCDebug(chatterinoImage)
-                << "Error while reading image" << url.string << ": '"
-                << reader.errorString() << "'";
-            return frames;
-        }
-
         QImage image;
         for (int index = 0; index < reader.imageCount(); ++index)
         {
@@ -413,8 +405,30 @@ void Image::actuallyLoad()
             buffer.open(QIODevice::ReadOnly);
             QImageReader reader(&buffer);
 
+            if (!reader.canRead())
+            {
+                qCDebug(chatterinoImage)
+                    << "Error: image cant be read " << shared->url().string;
+                return Failure;
+            }
+
+            const auto size = reader.size();
+            if (size.isEmpty())
+            {
+                return Failure;
+            }
+
+            // returns 1 for non-animated formats
+            if (reader.imageCount() <= 0)
+            {
+                qCDebug(chatterinoImage)
+                    << "Error: image has less than 1 frame "
+                    << shared->url().string << ": " << reader.errorString();
+                return Failure;
+            }
+
             // use "double" to prevent int overflows
-            if (double(reader.size().width()) * double(reader.size().height()) *
+            if (double(size.width()) * double(size.height()) *
                     double(reader.imageCount()) * 4.0 >
                 double(Image::maxBytesRam))
             {

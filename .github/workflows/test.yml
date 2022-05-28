@@ -7,6 +7,10 @@ on:
 env:
   TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.3
 
+concurrency: 
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -60,8 +64,7 @@ jobs:
                 libxcb-image0 \
                 libxcb-keysyms1 \
                 libxcb-render-util0 \
-                libxcb-xinerama0 \
-                libgtest-dev
+                libxcb-xinerama0
 
       - name: Create build directory (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')

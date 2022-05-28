@@ -33,4 +33,9 @@ Badge::Badge(QString key, QString value)
     }
 }
 
+bool Badge::operator==(const Badge &other) const
+{
+    return this->key_ == other.key_ && this->value_ == other.value_;
+}
+
 }  // namespace chatterino
