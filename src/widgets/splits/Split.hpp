@@ -172,7 +172,7 @@ public slots:
     void copyToClipboard();
     void startWatching();
     void setFiltersDialog();
-    void showSearch();
+    void showSearch(bool singleChannel);
     void showViewerList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();

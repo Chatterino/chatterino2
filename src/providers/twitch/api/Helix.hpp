@@ -373,15 +373,18 @@ public:
     virtual void fetchStreams(
         QStringList userIds, QStringList userLogins,
         ResultCallback<std::vector<HelixStream>> successCallback,
-        HelixFailureCallback failureCallback) = 0;
+        HelixFailureCallback failureCallback,
+        std::function<void()> finallyCallback) = 0;
 
     virtual void getStreamById(
         QString userId, ResultCallback<bool, HelixStream> successCallback,
-        HelixFailureCallback failureCallback) = 0;
+        HelixFailureCallback failureCallback,
+        std::function<void()> finallyCallback) = 0;
 
     virtual void getStreamByName(
         QString userName, ResultCallback<bool, HelixStream> successCallback,
-        HelixFailureCallback failureCallback) = 0;
+        HelixFailureCallback failureCallback,
+        std::function<void()> finallyCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#get-games
     virtual void fetchGames(
@@ -504,15 +507,18 @@ public:
     // https://dev.twitch.tv/docs/api/reference#get-streams
     void fetchStreams(QStringList userIds, QStringList userLogins,
                       ResultCallback<std::vector<HelixStream>> successCallback,
-                      HelixFailureCallback failureCallback) final;
+                      HelixFailureCallback failureCallback,
+                      std::function<void()> finallyCallback) final;
 
     void getStreamById(QString userId,
                        ResultCallback<bool, HelixStream> successCallback,
-                       HelixFailureCallback failureCallback) final;
+                       HelixFailureCallback failureCallback,
+                       std::function<void()> finallyCallback) final;
 
     void getStreamByName(QString userName,
                          ResultCallback<bool, HelixStream> successCallback,
-                         HelixFailureCallback failureCallback) final;
+                         HelixFailureCallback failureCallback,
+                         std::function<void()> finallyCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#get-games
     void fetchGames(QStringList gameIds, QStringList gameNames,
