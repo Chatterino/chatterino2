@@ -15,6 +15,7 @@
 - Minor: Fixed tag parsing for consecutive escaped characters. (#3711)
 - Minor: Prevent user from entering incorrect characters in Live Notifications channels list. (#3715, #3730)
 - Minor: Fixed automod caught message notice appearing twice for mods. (#3717)
+- Minor: Add scrollbar to `Select filters` dialog. (#3737)
 - Minor: Added `/requests` command. Usage: `/requests [channel]`. Opens the channel points requests queue for the provided channel or the current channel if no input is provided. (#3746)
 - Minor: Added ability to execute commands on chat messages using the message context menu. (#3738)
 - Minor: Added `/copy` command. Usage: `/copy <text>`. Copies provided text to clipboard - can be useful with custom commands. (#3763)
