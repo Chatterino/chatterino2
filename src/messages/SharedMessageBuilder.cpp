@@ -95,7 +95,9 @@ std::vector<Badge> SharedMessageBuilder::parseBadgeTag(const QVariantMap &tags)
 
     auto badgesIt = tags.constFind("badges");
     if (badgesIt == tags.end())
+    {
         return b;
+    }
 
     auto badges = badgesIt.value().toString().split(',', Qt::SkipEmptyParts);
 

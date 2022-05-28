@@ -1014,7 +1014,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
     auto badgeInfos = TwitchMessageBuilder::parseBadgeInfoTag(this->tags);
     auto badges = this->parseBadgeTag(this->tags);
 
-    for (const Badge &badge : badges)
+    for (const auto &badge : badges)
     {
         auto badgeEmote = this->getTwitchBadge(badge);
         if (!badgeEmote)
