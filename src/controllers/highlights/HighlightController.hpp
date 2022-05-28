@@ -29,6 +29,9 @@ struct HighlightResult {
     {
     }
 
+    /**
+     * @brief Construct an empty HighlightResult with all side-effects disabled
+     **/
     static HighlightResult emptyResult()
     {
         return {
@@ -37,17 +40,30 @@ struct HighlightResult {
     }
 
     /**
-     * @brief alert designates whether this highlight should trigger the taskbar to flash
+     * @brief true if highlight should trigger the taskbar to flash
      **/
-    bool alert;
+    bool alert{false};
 
-    bool playSound;
+    /**
+     * @brief true if highlight should play a notification sound
+     **/
+    bool playSound{false};
 
-    // customSoundUrl may only be set if playSound has been set
-    boost::optional<QUrl> customSoundUrl;
+    /**
+     * @brief Can be set to a different sound that should play when this highlight is activated
+     *
+     * May only be set if playSound is true
+     **/
+    boost::optional<QUrl> customSoundUrl{};
 
-    std::shared_ptr<QColor> color;
+    /**
+     * @brief set if highlight should set a background color
+     **/
+    std::shared_ptr<QColor> color{};
 
+    /**
+     * @brief true if highlight should show message in the /mentions split
+     **/
     bool showInMentions{false};
 
     bool operator==(const HighlightResult &other) const
@@ -86,6 +102,9 @@ struct HighlightResult {
         return !(*this == other);
     }
 
+    /**
+     * @brief Returns true if no side-effect has been enabled
+     **/
     [[nodiscard]] bool empty() const
     {
         return !this->alert && !this->playSound &&
@@ -93,6 +112,9 @@ struct HighlightResult {
                !this->showInMentions;
     }
 
+    /**
+     * @brief Returns true if all side-effects have been enabled
+     **/
     [[nodiscard]] bool full() const
     {
         return this->alert && this->playSound &&
