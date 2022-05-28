@@ -1,7 +1,5 @@
 #include "controllers/highlights/HighlightController.hpp"
 
-#include "debug/Benchmark.hpp"
-
 namespace {
 
 using namespace chatterino;
@@ -266,8 +264,6 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
 
 void HighlightController::rebuildChecks(Settings &settings)
 {
-    BenchmarkGuard benchmarkGuard("HighlightController::rebuildChecks");
-
     // Access checks for modification
     auto checks = this->checks_.access();
     checks->clear();
@@ -295,8 +291,6 @@ std::pair<bool, HighlightResult> HighlightController::check(
     const MessageParseArgs &args, const std::vector<Badge> &badges,
     const QString &senderName, const QString &originalMessage) const
 {
-    BenchmarkGuard benchmarkGuard("HighlightController::check");
-
     bool highlighted = false;
     auto result = HighlightResult::emptyResult();
 
