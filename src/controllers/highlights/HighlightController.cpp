@@ -1,5 +1,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 
+#include "common/QLogging.hpp"
+
 namespace {
 
 using namespace chatterino;
@@ -234,28 +236,38 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
     this->rebuildListener_.addSetting(settings.enableSubHighlightTaskbar);
 
     this->rebuildListener_.setCB([this, &settings] {
+        qCDebug(chatterinoHighlights)
+            << "Rebuild checks because a setting changed";
         this->rebuildChecks(settings);
     });
 
     this->signalHolder_.managedConnect(
         getCSettings().highlightedBadges.delayedItemsChanged,
         [this, &settings] {
+            qCDebug(chatterinoHighlights)
+                << "Rebuild checks because highlight badges changed";
             this->rebuildChecks(settings);
         });
 
     this->signalHolder_.managedConnect(
         getCSettings().highlightedUsers.delayedItemsChanged, [this, &settings] {
+            qCDebug(chatterinoHighlights)
+                << "Rebuild checks because highlight users changed";
             this->rebuildChecks(settings);
         });
 
     this->signalHolder_.managedConnect(
         getCSettings().highlightedMessages.delayedItemsChanged,
         [this, &settings] {
+            qCDebug(chatterinoHighlights)
+                << "Rebuild checks because highlight messages changed";
             this->rebuildChecks(settings);
         });
 
     getIApp()->getAccounts()->twitch.currentUserChanged.connect(
         [this, &settings] {
+            qCDebug(chatterinoHighlights)
+                << "Rebuild checks because user swapped accounts";
             this->rebuildChecks(settings);
         });
 
@@ -272,19 +284,14 @@ void HighlightController::rebuildChecks(Settings &settings)
     // Subscription -> Whisper -> User -> Message -> Badge
 
     rebuildSubscriptionHighlights(settings, *checks);
-    qDebug() << "Rebuilt subscription highlights: " << checks->size();
 
     rebuildWhisperHighlights(settings, *checks);
-    qDebug() << "Rebuilt whisper highlights: " << checks->size();
 
     rebuildUserHighlights(settings, *checks);
-    qDebug() << "Rebuilt user highlights: " << checks->size();
 
     rebuildMessageHighlights(settings, *checks);
-    qDebug() << "Rebuilt message highlights: " << checks->size();
 
     rebuildBadgeHighlights(settings, *checks);
-    qDebug() << "Rebuilt badge highlights: " << checks->size();
 }
 
 std::pair<bool, HighlightResult> HighlightController::check(
