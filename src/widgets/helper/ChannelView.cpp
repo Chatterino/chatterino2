@@ -109,7 +109,11 @@ namespace {
                                 });
         };
 
-        if (creatorFlags.has(MessageElementFlag::SeventvEmote))
+        if (creatorFlags.has(MessageElementFlag::TwitchEmote))
+        {
+            addPageLink("RaccAttack");
+        }
+        else if (creatorFlags.has(MessageElementFlag::SeventvEmote))
         {
             addPageLink("7TV");
         }

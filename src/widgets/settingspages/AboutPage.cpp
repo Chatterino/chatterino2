@@ -185,6 +185,7 @@ AboutPage::AboutPage()
             l.emplace<QLabel>("Emoji datasource provided by <a href=\"https://www.iamcal.com/\">Cal Henderson</a>"
                               "(<a href=\"https://github.com/iamcal/emoji-data/blob/master/LICENSE\">show license</a>)")->setOpenExternalLinks(true);
             l.emplace<QLabel>("GraphQL Logo is licensed under <a href=\"https://github.com/graphql/graphql-spec/issues/398#issuecomment-426844088\">CC-BY-4.0</a>)")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Twitch emote data provided by <a href=\"https://emotes.raccatta.cc/\">emotes.raccatta.cc</a>")->setOpenExternalLinks(true);
             // clang-format on
         }
 
