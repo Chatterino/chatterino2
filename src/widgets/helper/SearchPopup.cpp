@@ -3,11 +3,9 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QVBoxLayout>
 
 #include "common/Channel.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "messages/Message.hpp"
 #include "messages/search/AuthorPredicate.hpp"
 #include "messages/search/ChannelPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
@@ -19,8 +17,7 @@
 namespace chatterino {
 
 ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
-                               const LimitedQueueSnapshot<MessagePtr> &snapshot,
-                               FilterSetPtr filterSet)
+                               const LimitedQueueSnapshot<MessagePtr> &snapshot)
 {
     ChannelPtr channel(new Channel(channelName, Channel::Type::None));
 
@@ -44,9 +41,6 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
             }
         }
 
-        if (accept && filterSet)
-            accept = filterSet->filter(message, channel);
-
         // If all predicates match, add the message to the channel
         if (accept)
             channel->addMessage(message);
@@ -67,13 +61,13 @@ void SearchPopup::addShortcuts()
 {
     HotkeyController::HotkeyMap actions{
         {"search",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->searchInput_->setFocus();
              this->searchInput_->selectAll();
              return "";
          }},
         {"delete",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->close();
              return "";
          }},
@@ -88,17 +82,25 @@ void SearchPopup::addShortcuts()
         HotkeyCategory::PopupWindow, actions, this);
 }
 
-void SearchPopup::setChannelFilters(FilterSetPtr filters)
+void SearchPopup::addChannel(ChannelView &channel)
 {
-    this->channelFilters_ = std::move(filters);
-}
+    if (this->searchChannels_.empty())
+    {
+        this->channelView_->setSourceChannel(channel.channel());
+        this->channelName_ = channel.channel()->getName();
+    }
+    else if (this->searchChannels_.size() == 1)
+    {
+        this->channelView_->setSourceChannel(
+            std::make_shared<Channel>("multichannel", Channel::Type::None));
 
-void SearchPopup::setChannel(const ChannelPtr &channel)
-{
-    this->channelView_->setSourceChannel(channel);
-    this->channelName_ = channel->getName();
-    this->snapshot_ = channel->getMessageSnapshot();
-    this->search();
+        auto flags = this->channelView_->getFlags();
+        flags.set(MessageElementFlag::ChannelName);
+        flags.unset(MessageElementFlag::ModeratorTools);
+        this->channelView_->setOverrideFlags(flags);
+    }
+
+    this->searchChannels_.append(std::ref(channel));
 
     this->updateWindowTitle();
 }
@@ -115,6 +117,10 @@ void SearchPopup::updateWindowTitle()
     {
         historyName = "mentions";
     }
+    else if (this->searchChannels_.size() > 1)
+    {
+        historyName = "multiple channels'";
+    }
     else if (this->channelName_.isEmpty())
     {
         historyName = "<empty>'s";
@@ -126,24 +132,90 @@ void SearchPopup::updateWindowTitle()
     this->setWindowTitle("Searching in " + historyName + " history");
 }
 
+void SearchPopup::showEvent(QShowEvent *)
+{
+    this->search();
+}
+
 void SearchPopup::search()
 {
+    if (this->snapshot_.size() == 0)
+    {
+        this->snapshot_ = this->buildSnapshot();
+    }
+
     this->channelView_->setChannel(filter(this->searchInput_->text(),
-                                          this->channelName_, this->snapshot_,
-                                          this->channelFilters_));
+                                          this->channelName_, this->snapshot_));
+}
+
+LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
+{
+    // no point in filtering/sorting if it's a single channel search
+    if (this->searchChannels_.length() == 1)
+    {
+        const auto channelPtr = this->searchChannels_.at(0);
+        return channelPtr.get().channel()->getMessageSnapshot();
+    }
+
+    auto combinedSnapshot = std::vector<std::shared_ptr<const Message>>{};
+    for (auto &channel : this->searchChannels_)
+    {
+        ChannelView &sharedView = channel.get();
+
+        const FilterSetPtr filterSet = sharedView.getFilterSet();
+        const LimitedQueueSnapshot<MessagePtr> &snapshot =
+            sharedView.channel()->getMessageSnapshot();
+
+        // TODO: implement iterator on LimitedQueueSnapshot?
+        for (auto i = 0; i < snapshot.size(); ++i)
+        {
+            const MessagePtr &message = snapshot[i];
+            if (filterSet && !filterSet->filter(message, sharedView.channel()))
+            {
+                continue;
+            }
+
+            combinedSnapshot.push_back(message);
+        }
+    }
+
+    // remove any duplicate messages from splits containing the same channel
+    std::sort(combinedSnapshot.begin(), combinedSnapshot.end(),
+              [](MessagePtr &a, MessagePtr &b) {
+                  return a->id > b->id;
+              });
+
+    auto uniqueIterator =
+        std::unique(combinedSnapshot.begin(), combinedSnapshot.end(),
+                    [](MessagePtr &a, MessagePtr &b) {
+                        return a->id == b->id;
+                    });
+
+    combinedSnapshot.erase(uniqueIterator, combinedSnapshot.end());
+
+    // resort by time for presentation
+    std::sort(combinedSnapshot.begin(), combinedSnapshot.end(),
+              [](MessagePtr &a, MessagePtr &b) {
+                  return a->serverReceivedTime < b->serverReceivedTime;
+              });
+
+    auto queue = LimitedQueue<MessagePtr>(combinedSnapshot.size());
+    queue.pushFront(combinedSnapshot);
+
+    return queue.getSnapshot();
 }
 
 void SearchPopup::initLayout()
 {
     // VBOX
     {
-        QVBoxLayout *layout1 = new QVBoxLayout(this);
+        auto *layout1 = new QVBoxLayout(this);
         layout1->setMargin(0);
         layout1->setSpacing(0);
 
         // HBOX
         {
-            QHBoxLayout *layout2 = new QHBoxLayout(this);
+            auto *layout2 = new QHBoxLayout(this);
             layout2->setMargin(8);
             layout2->setSpacing(8);
 
