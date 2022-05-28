@@ -351,16 +351,15 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
             [&twitchChans](std::vector<HelixStream> streams) {
                 for (const auto &stream : streams)
                 {
+                    // remaining channels will be used later to set their stream status as offline
+                    // so we use take(id) to remove channel from unordered_map
+                    auto tc = twitchChans->take(stream.userId);
                     if (!twitchChans->contains(stream.userId))
                     {
                         continue;
                     }
 
-                    twitchChans->value(stream.userId)
-                        ->parseLiveStatus(true, stream);
-
-                    // remaining channels will be used later to set their stream status as offline
-                    twitchChans->remove(stream.userId);
+                    tc->parseLiveStatus(true, stream);
                 }
             },
             []() {
@@ -372,13 +371,14 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
                 // Otherwise some of them will be marked as live forever
                 for (const auto &chID : batch)
                 {
+                    auto tc = twitchChans->value(chID);
                     // early out in case channel does not exist anymore
-                    if (twitchChans->value(chID) == nullptr)
+                    if (tc == nullptr)
                     {
                         continue;
                     }
 
-                    twitchChans->value(chID)->parseLiveStatus(false, {});
+                    tc->parseLiveStatus(false, {});
                 }
             });
     }
