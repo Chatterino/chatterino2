@@ -144,7 +144,7 @@ void rebuildMessageHighlights(Settings &settings,
 void rebuildUserHighlights(Settings &settings,
                            std::vector<HighlightCheck> &checks)
 {
-    auto userHighlights = getCSettings().highlightedUsers.readOnly();
+    auto userHighlights = settings.highlightedUsers.readOnly();
 
     for (const auto &highlight : *userHighlights)
     {
@@ -181,7 +181,7 @@ void rebuildUserHighlights(Settings &settings,
 void rebuildBadgeHighlights(Settings &settings,
                             std::vector<HighlightCheck> &checks)
 {
-    auto badgeHighlights = getCSettings().highlightedBadges.readOnly();
+    auto badgeHighlights = settings.highlightedBadges.readOnly();
 
     for (const auto &highlight : *badgeHighlights)
     {
