@@ -354,7 +354,7 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
                     // remaining channels will be used later to set their stream status as offline
                     // so we use take(id) to remove channel from unordered_map
                     auto tc = twitchChans->take(stream.userId);
-                    if (!twitchChans->contains(stream.userId))
+                    if (tc == nullptr)
                     {
                         continue;
                     }
