@@ -176,6 +176,11 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
     return false;
 }
 
+const std::function<QString(const QString &, const ChannelPtr &)>
+    noOpPlaceholder = [](const auto &altText, const auto &channel) {
+        return altText;
+    };
+
 const std::map<QString,
                std::function<QString(const QString &, const ChannelPtr &)>>
     COMMAND_VARS{
@@ -239,6 +244,8 @@ const std::map<QString,
                 return name.isEmpty() ? altText : name;
             },
         },
+        // variables used in mod buttons and the like, these make no sense in normal commands, so they are left empty
+        {"input.text", noOpPlaceholder},
     };
 
 }  // namespace
