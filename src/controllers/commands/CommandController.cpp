@@ -246,6 +246,9 @@ const std::map<QString,
         },
         // variables used in mod buttons and the like, these make no sense in normal commands, so they are left empty
         {"input.text", noOpPlaceholder},
+        {"msg.id", noOpPlaceholder},
+        {"user.name", noOpPlaceholder},
+        {"msg.text", noOpPlaceholder},
     };
 
 }  // namespace
