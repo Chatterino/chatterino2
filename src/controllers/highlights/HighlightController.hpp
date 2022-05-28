@@ -23,8 +23,8 @@ struct HighlightResult {
                     std::shared_ptr<QColor> _color, bool _showInMentions)
         : alert(_alert)
         , playSound(_playSound)
-        , customSoundUrl(_customSoundUrl)
-        , color(_color)
+        , customSoundUrl(std::move(_customSoundUrl))
+        , color(std::move(_color))
         , showInMentions(_showInMentions)
     {
     }
