@@ -68,8 +68,8 @@ public:
                                          Channel *channel,
                                          MessageBuilder *builder);
 
-    // Copied some common logic from SharedMessageBuilder::parseBadgeTag
-    std::unordered_map<QString, QString> parseBadgeInfoTag(
+    // Shares some common logic from SharedMessageBuilder::parseBadgeTag
+    static std::unordered_map<QString, QString> parseBadgeInfoTag(
         const QVariantMap &tags);
 
 private:

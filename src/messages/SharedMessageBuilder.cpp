@@ -79,13 +79,13 @@ void SharedMessageBuilder::parse()
 // In that case, valid map content should be 'split by slash' only once:
 // {"foo": "bar/baz", "tri": "hard"}
 std::pair<QString, QString> SharedMessageBuilder::slashKeyValue(
-    const QString &keyValueString)
+    const QString &kvStr)
 {
     return {
         // part before first slash (index 0 of section)
-        keyValueString.section('/', 0, 0),
+        kvStr.section('/', 0, 0),
         // part after first slash (index 1 of section)
-        keyValueString.section('/', 1, -1),
+        kvStr.section('/', 1, -1),
     };
 }
 
@@ -106,7 +106,7 @@ std::vector<Badge> SharedMessageBuilder::parseBadgeTag(const QVariantMap &tags)
             continue;
         }
 
-        auto pair = this->slashKeyValue(badge);
+        auto pair = SharedMessageBuilder::slashKeyValue(badge);
         b.emplace_back(Badge{pair.first, pair.second});
     }
 

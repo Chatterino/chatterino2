@@ -998,7 +998,7 @@ std::unordered_map<QString, QString> TwitchMessageBuilder::parseBadgeInfoTag(
 
     for (const QString &badge : info)
     {
-        infoMap.emplace(this->slashKeyValue(badge));
+        infoMap.emplace(SharedMessageBuilder::slashKeyValue(badge));
     }
 
     return infoMap;
@@ -1011,7 +1011,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
         return;
     }
 
-    auto badgeInfos = this->parseBadgeInfoTag(this->tags);
+    auto badgeInfos = TwitchMessageBuilder::parseBadgeInfoTag(this->tags);
     auto badges = this->parseBadgeTag(this->tags);
 
     for (const Badge &badge : badges)

@@ -114,19 +114,16 @@ TEST(TwitchMessageBuilder, BadgeInfoParsing)
 
     for (const auto &test : testCases)
     {
-        Channel chan("zneix", Channel::Type::Twitch);
-        Communi::IrcConnection ircConn(nullptr);
         auto privmsg =
-            Communi::IrcPrivateMessage::fromData(test.input, &ircConn);
+            Communi::IrcPrivateMessage::fromData(test.input, nullptr);
 
-        MessageParseArgs args;
-        TwitchMessageBuilder builder(&chan, privmsg, args, "", false);
-
-        auto outputBadgeInfo = builder.parseBadgeInfoTag(privmsg->tags());
+        auto outputBadgeInfo =
+            TwitchMessageBuilder::parseBadgeInfoTag(privmsg->tags());
         EXPECT_EQ(outputBadgeInfo, test.expectedBadgeInfo)
             << "Input for badgeInfo " << test.input.toStdString() << " failed";
 
-        auto outputBadges = builder.parseBadgeTag(privmsg->tags());
+        auto outputBadges =
+            SharedMessageBuilder::parseBadgeTag(privmsg->tags());
         EXPECT_EQ(outputBadges, test.expectedBadges)
             << "Input for badges " << test.input.toStdString() << " failed";
     }

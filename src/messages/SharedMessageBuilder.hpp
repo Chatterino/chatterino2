@@ -33,10 +33,10 @@ public:
     virtual void triggerHighlights();
     virtual MessagePtr build() = 0;
 
-    static std::pair<QString, QString> slashKeyValue(const QString &str);
+    static std::pair<QString, QString> slashKeyValue(const QString &kvStr);
 
     // Parses "badges" tag which contains a comma separated list of key-value elements
-    std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
+    static std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
 
 protected:
     virtual void parse();
