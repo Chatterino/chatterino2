@@ -88,8 +88,6 @@ bool HighlightBadge::compare(const QString &id, const Badge &badge) const
     if (this->hasVersions_)
     {
         auto parts = SharedMessageBuilder::slashKeyValue(id);
-        // zneix: I believe we don't need to check for whether parts.second is empty
-        // since there's a short-circuit after first comparison returns false
         return parts.first.compare(badge.key_, Qt::CaseInsensitive) == 0 &&
                parts.second.compare(badge.value_, Qt::CaseInsensitive) == 0;
     }
