@@ -1134,18 +1134,18 @@ QString CommandController::execCustomCommand(const QStringList &words,
             auto varName = match.captured(4);
             auto altText = match.captured(5);  // alt text or empty string
 
-            auto var = COMMAND_VARS.find(varName);
+            auto var = context.find(varName);
 
-            if (var != COMMAND_VARS.end())
+            if (var != context.end())
             {
-                result += var->second(altText, channel);
+                result += var->second.isEmpty() ? altText : var->second;
             }
             else
             {
-                auto it = context.find(varName);
-                if (it != context.end())
+                auto it = COMMAND_VARS.find(varName);
+                if (it != COMMAND_VARS.end())
                 {
-                    result += it->second.isEmpty() ? altText : it->second;
+                    result += it->second(altText, channel);
                 }
                 else
                 {
