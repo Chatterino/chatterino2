@@ -10,7 +10,7 @@ namespace {
         {
             out.append(' ');
         }
-        out.append(count);
+        out.append(QString::number(count));
         out.append(suffix);
     }
 
