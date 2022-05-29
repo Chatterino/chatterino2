@@ -26,6 +26,7 @@ public:
 
     const QString &version() const;
     const QString &commitHash() const;
+    const bool &isModified() const;
     const QString &dateOfBuild() const;
     const QString &fullVersion() const;
     const bool &isSupportedOS() const;
@@ -36,6 +37,7 @@ private:
 
     QString version_;
     QString commitHash_;
+    bool isModified_;
     QString dateOfBuild_;
     QString fullVersion_;
     bool isSupportedOS_;

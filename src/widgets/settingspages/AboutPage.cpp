@@ -46,79 +46,58 @@ AboutPage::AboutPage()
         }
         logo->setScaledContents(true);
 
-        // this does nothing
-        //        QPalette palette;
-        //        palette.setColor(QPalette::Text, Qt::white);
-        //        palette.setColor(QPalette::Link, "#a5cdff");
-        //        palette.setColor(QPalette::LinkVisited, "#a5cdff");
-
-        /*auto xd = layout.emplace<QGroupBox>("Created by...");
-        {
-            auto created = xd.emplace<QLabel>();
-            {
-                created->setText("Created by <a
-        href=\"https://github.com/fourtf\">fourtf</a><br>" "with big help from
-        pajlada."); created->setTextFormat(Qt::RichText);
-                created->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                                 Qt::LinksAccessibleByKeyboard |
-                                                 Qt::LinksAccessibleByKeyboard);
-                created->setOpenExternalLinks(true);
-                //        created->setPalette(palette);
-            }
-
-            //            auto github = xd.emplace<QLabel>();
-            //            {
-            //                github->setText(
-            //                    "<a
-        href=\"https://github.com/fourtf/chatterino2\">Chatterino on
-            //                    Github</a>");
-            //                github->setTextFormat(Qt::RichText);
-            // github->setTextInteractionFlags(Qt::TextBrowserInteraction |
-            // Qt::LinksAccessibleByKeyboard |
-            // Qt::LinksAccessibleByKeyboard);
-            //                github->setOpenExternalLinks(true);
-            //                //        github->setPalette(palette);
-            //            }
-        }*/
-
         // Version
         auto versionInfo = layout.emplace<QGroupBox>("Version");
         {
+            auto l = versionInfo.emplace<QVBoxLayout>();
             auto version = Version::instance();
-            QString osInfo = QSysInfo::prettyProductName() +
-                             ", kernel: " + QSysInfo::kernelVersion();
-            if (version.isFlatpak())
-            {
-                osInfo += ", running from Flatpak";
-            }
 
-            QString commitHashLink =
-                QString("<a "
-                        "href=\"https://github.com/Chatterino/chatterino2/"
-                        "commit/%1\">%1</a>")
-                    .arg(version.commitHash());
+            // build-related information
 
-            QString nightlyBuildInfo;
+            QString modified = version.isModified() ? " modified" : "";
+
+            QString nightlyInfo;
             if (Modes::instance().isNightly)
             {
-                nightlyBuildInfo =
-                    QString(", built on %1").arg(version.dateOfBuild());
+                nightlyInfo = " on " + version.dateOfBuild();
             }
 
-            QString supportedOS;
+            QStringList buildInfo{"Qt " QT_VERSION_STR};
+#ifdef USEWINSDK
+            buildInfo.append("Windows SDK");
+#endif
+#ifdef _MSC_FULL_VER
+            buildInfo.append("MSVC " + QString::number(_MSC_FULL_VER, 10));
+#endif
+
+            auto build =
+                QString(
+                    R"(%1 (commit <a href="https://github.com/Chatterino/chatterino2/commit/%2">%2</a>%3); built%4 with %5)")
+                    .arg(version.fullVersion(), version.commitHash(), modified,
+                         nightlyInfo, buildInfo.join(", "));
+
+            auto versionLabel = l.emplace<QLabel>(build);
+            versionLabel->setOpenExternalLinks(true);
+            versionLabel->setTextInteractionFlags(
+                Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse |
+                Qt::LinksAccessibleByKeyboard);
+
+            // runtime-related information
+
+            auto running = QString("running on %1, kernel: %2")
+                               .arg(QSysInfo::prettyProductName(),
+                                    QSysInfo::kernelVersion());
+            if (version.isFlatpak())
+            {
+                running += ", running from Flatpak";
+            }
+
             if (!version.isSupportedOS())
             {
-                supportedOS = "(unsupported OS)";
+                running += " (unsupported OS)";
             }
 
-            QString text = QString("%1 (commit %2%3) running on %4 %5")
-                               .arg(version.fullVersion(), commitHashLink,
-                                    nightlyBuildInfo, osInfo, supportedOS);
-
-            auto versionLabel = versionInfo.emplace<QLabel>(text);
-            versionLabel->setOpenExternalLinks(true);
-            versionLabel->setTextInteractionFlags(Qt::TextSelectableByMouse |
-                                                  Qt::LinksAccessibleByMouse);
+            l.emplace<QLabel>(running);
         }
 
         // About Chatterino
@@ -255,18 +234,6 @@ AboutPage::AboutPage()
             }
         }
     }
-
-    auto buildInfo = QStringList();
-    buildInfo += "Qt " QT_VERSION_STR;
-#ifdef USEWINSDK
-    buildInfo += "Windows SDK";
-#endif
-#ifdef _MSC_FULL_VER
-    buildInfo += "MSVC " + QString::number(_MSC_FULL_VER, 10);
-#endif
-
-    auto buildText = QString("Built with " + buildInfo.join(", "));
-    layout.emplace<QLabel>(buildText);
 
     layout->addStretch(1);
 }

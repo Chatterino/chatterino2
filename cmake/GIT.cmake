@@ -8,12 +8,16 @@
 # GIT_RELEASE
 #   If the git binary is found and the git work tree is intact, GIT_RELEASE is worked out using the `git describe` command
 #   The value of GIT_RELEASE can be overriden by defining the GIT_RELEASE environment variable
+# GIT_MODIFIED
+#	If the git binary is found and the git work tree is intact, GIT_MODIFIED is worked out using the `git status --porcelain` command
+#   The value of GIT_MODIFIED can be overriden by defining the GIT_MODIFIED environment variable
 
 find_package(Git)
 
 set(GIT_HASH "GIT-REPOSITORY-NOT-FOUND")
 set(GIT_COMMIT "GIT-REPOSITORY-NOT-FOUND")
 set(GIT_RELEASE "${PROJECT_VERSION}")
+set(GIT_MODIFIED "")
 
 if (GIT_EXECUTABLE)
     execute_process(
@@ -49,6 +53,13 @@ if (GIT_EXECUTABLE)
                 OUTPUT_VARIABLE GIT_RELEASE
                 OUTPUT_STRIP_TRAILING_WHITESPACE
         )
+
+        execute_process(
+                COMMAND ${GIT_EXECUTABLE} status --porcelain
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                OUTPUT_VARIABLE GIT_MODIFIED
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
     endif (GIT_REPOSITORY_FOUND)
 endif (GIT_EXECUTABLE)
 
@@ -61,5 +72,8 @@ endif ()
 if (DEFINED ENV{GIT_RELEASE})
     set(GIT_RELEASE "$ENV{GIT_RELEASE}")
 endif ()
+if (DEFINED ENV{GIT_MODIFIED})
+    set(GIT_MODIFIED "$ENV{GIT_MODIFIED}")
+endif ()
 
-message(STATUS "Injected git values: ${GIT_COMMIT} (${GIT_RELEASE}) ${GIT_HASH}")
+message(STATUS "Injected git values: ${GIT_COMMIT} (${GIT_RELEASE}) ${GIT_HASH} ${GIT_MODIFIED}")

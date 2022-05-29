@@ -16,6 +16,10 @@ Version::Version()
     this->commitHash_ =
         QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_HASH)).remove('"');
 
+    // Whether or not the vcs tree had any changes at the time of build
+    // Non-empty value of GIT_MODIFIED means it had
+    this->isModified_ = bool(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_MODIFIED));
+
     // Date of build file generation (≈ date of build)
 #ifdef CHATTERINO_CMAKE_GEN_DATE
     this->dateOfBuild_ =
@@ -57,6 +61,11 @@ const QString &Version::fullVersion() const
 const QString &Version::commitHash() const
 {
     return this->commitHash_;
+}
+
+const bool &Version::isModified() const
+{
+    return this->isModified_;
 }
 
 const QString &Version::dateOfBuild() const
