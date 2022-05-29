@@ -18,6 +18,8 @@
 - Minor: Added `/requests` command. Usage: `/requests [channel]`. Opens the channel points requests queue for the provided channel or the current channel if no input is provided. (#3746)
 - Minor: Added ability to execute commands on chat messages using the message context menu. (#3738)
 - Minor: Added `/copy` command. Usage: `/copy <text>`. Copies provided text to clipboard - can be useful with custom commands. (#3763)
+- Minor: Adjusted the layout of announcement messages to show the system message "Announcement" first. (#3782)
+- Minor: Added the different announcement color versions (blue, green, and orange). (#3782)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Bugfix: Fixed live notifications not getting updated for closed streams going offline. (#3678)
 - Bugfix: Fixed certain settings dialogs appearing behind the main window, when `Always on top` was used. (#3679)
