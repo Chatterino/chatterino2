@@ -263,6 +263,7 @@ SOURCES += \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/RatelimitBucket.cpp \
+    src/util/SampleData.cpp \
     src/util/SplitCommand.cpp \
     src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
