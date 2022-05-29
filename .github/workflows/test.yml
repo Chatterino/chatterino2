@@ -4,6 +4,13 @@ name: Test
 on:
   pull_request:
 
+env:
+  TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.3
+
+concurrency: 
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -13,13 +20,13 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v3
         with:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-20201005
@@ -57,8 +64,7 @@ jobs:
                 libxcb-image0 \
                 libxcb-keysyms1 \
                 libxcb-render-util0 \
-                libxcb-xinerama0 \
-                libgtest-dev
+                libxcb-xinerama0
 
       - name: Create build directory (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
@@ -77,6 +83,8 @@ jobs:
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
+            docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
+            docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
             ./bin/chatterino-test --platform minimal
         working-directory: build-test
         shell: bash

@@ -31,7 +31,9 @@ public:
 
         struct {
             QColor border;
+            QColor focusedBorder;
             QColor background;
+            QColor focusedBackground;
             QColor text;
             QColor focusedText;
             // int margin;
@@ -56,11 +58,6 @@ public:
 
 private:
     void actuallyUpdate(double hue, double multiplier) override;
-    void fillLookupTableValues(double (&array)[360], double from, double to,
-                               double fromValue, double toValue);
-
-    double middleLookupTable_[360] = {};
-    double minLookupTable_[360] = {};
 
     pajlada::Signals::NoArgSignal repaintVisibleChatWidgets_;
 

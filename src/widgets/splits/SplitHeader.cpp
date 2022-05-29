@@ -204,9 +204,10 @@ SplitHeader::SplitHeader(Split *_split)
         this->handleChannelChanged();
     });
 
-    this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [this] {
-        this->updateModerationModeIcon();
-    });
+    this->bSignals_.emplace_back(
+        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+            this->updateModerationModeIcon();
+        }));
 
     auto _ = [this](const auto &, const auto &) {
         this->updateChannelText();
@@ -302,19 +303,19 @@ void SplitHeader::initializeLayout()
     });
 
     // update moderation button when items changed
-    this->managedConnect(getSettings()->moderationActions.delayedItemsChanged,
-                         [this] {
-                             if (getSettings()->moderationActions.empty())
-                             {
-                                 if (this->split_->getModerationMode())
-                                     this->split_->setModerationMode(true);
-                             }
-                             else
-                             {
-                                 if (this->split_->getModerationMode())
-                                     this->split_->setModerationMode(true);
-                             }
-                         });
+    this->managedConnections_.managedConnect(
+        getSettings()->moderationActions.delayedItemsChanged, [this] {
+            if (getSettings()->moderationActions.empty())
+            {
+                if (this->split_->getModerationMode())
+                    this->split_->setModerationMode(true);
+            }
+            else
+            {
+                if (this->split_->getModerationMode())
+                    this->split_->setModerationMode(true);
+            }
+        });
 
     getSettings()->customURIScheme.connect(
         [this] {
@@ -348,20 +349,8 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     menu->addAction("Set filters", this->split_, &Split::setFiltersDialog);
     menu->addSeparator();
 #ifdef USEWEBENGINE
-    this->dropdownMenu.addAction("Start watching", this, [this] {
-        ChannelPtr _channel = this->split->getChannel();
-        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_channel.get());
-
-        if (tc != nullptr)
-        {
-            StreamView *view = new StreamView(
-                _channel,
-                "https://player.twitch.tv/?parent=twitch.tv&channel=" +
-                    tc->name);
-            view->setAttribute(Qt::WA_DeleteOnClose, true);
-            view->show();
-        }
-    });
+    this->dropdownMenu.addAction("Start watching", this->split_,
+                                 &Split::startWatching);
 #endif
 
     auto *twitchChannel =
@@ -531,7 +520,8 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
     menu->addAction(setR9k);
     menu->addAction(setFollowers);
 
-    this->managedConnections_.push_back(this->modeUpdateRequested_.connect(
+    this->managedConnections_.managedConnect(
+        this->modeUpdateRequested_,
         [this, setSub, setEmote, setSlow, setR9k, setFollowers]() {
             auto twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
@@ -548,7 +538,7 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
             setEmote->setChecked(roomModes->emoteOnly);
             setSub->setChecked(roomModes->submode);
             setFollowers->setChecked(roomModes->followerOnly != -1);
-        }));
+        });
 
     auto toggle = [this](const QString &command, QAction *action) mutable {
         this->split_->getChannel().get()->sendMessage(
@@ -664,10 +654,10 @@ void SplitHeader::handleChannelChanged()
     auto channel = this->split_->getChannel();
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        this->channelConnections_.emplace_back(
-            twitchChannel->liveStatusChanged.connect([this]() {
+        this->channelConnections_.managedConnect(
+            twitchChannel->liveStatusChanged, [this]() {
                 this->updateChannelText();
-            }));
+            });
     }
 }
 
@@ -724,7 +714,7 @@ void SplitHeader::updateChannelText()
                     url.append("-160x90.jpg");
                     break;
                 case 3:
-                    url.append("-360x180.jpg");
+                    url.append("-360x203.jpg");
                     break;
                 default:
                     url = "";
@@ -795,11 +785,19 @@ void SplitHeader::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->theme->splits.header.background);
-    painter.setPen(this->theme->splits.header.border);
+    QColor background = this->theme->splits.header.background;
+    QColor border = this->theme->splits.header.border;
+
+    if (this->split_->hasFocus())
+    {
+        background = this->theme->splits.header.focusedBackground;
+        border = this->theme->splits.header.focusedBorder;
+    }
+
+    painter.fillRect(rect(), background);
+    painter.setPen(border);
     painter.drawRect(0, 0, width() - 1, height() - 2);
-    painter.fillRect(0, height() - 1, width(), 1,
-                     this->theme->splits.background);
+    painter.fillRect(0, height() - 1, width(), 1, background);
 }
 
 void SplitHeader::mousePressEvent(QMouseEvent *event)
@@ -819,6 +817,11 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
             auto menu = this->createMainMenu().release();
             menu->setAttribute(Qt::WA_DeleteOnClose);
             menu->popup(this->mapToGlobal(event->pos() + QPoint(0, 4)));
+        }
+        break;
+
+        case Qt::MiddleButton: {
+            this->split_->openInBrowser();
         }
         break;
     }
@@ -914,10 +917,21 @@ void SplitHeader::themeChangedEvent()
         this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
         this->addButton_->setPixmap(getResources().buttons.addSplitDark);
     }
+
+    this->update();
 }
 
 void SplitHeader::reloadChannelEmotes()
 {
+    using namespace std::chrono_literals;
+
+    auto now = std::chrono::steady_clock::now();
+    if (this->lastReloadedChannelEmotes_ + 30s > now)
+    {
+        return;
+    }
+    this->lastReloadedChannelEmotes_ = now;
+
     auto channel = this->split_->getChannel();
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
@@ -929,6 +943,15 @@ void SplitHeader::reloadChannelEmotes()
 
 void SplitHeader::reloadSubscriberEmotes()
 {
+    using namespace std::chrono_literals;
+
+    auto now = std::chrono::steady_clock::now();
+    if (this->lastReloadedSubEmotes_ + 30s > now)
+    {
+        return;
+    }
+    this->lastReloadedSubEmotes_ = now;
+
     auto channel = this->split_->getChannel();
     getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
 }

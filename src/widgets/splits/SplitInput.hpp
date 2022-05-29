@@ -44,7 +44,9 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
+    void addShortcuts() override;
     void initLayout();
+    bool eventFilter(QObject *obj, QEvent *event) override;
     void installKeyPressedEvent();
     void onCursorPositionChanged();
     void onTextChanged();
@@ -69,7 +71,7 @@ private:
         QHBoxLayout *hbox;
     } ui_;
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
     QStringList prevMsg_;
     QString currMsg_;
     int prevIndex_ = 0;

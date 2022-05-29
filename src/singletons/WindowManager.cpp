@@ -59,7 +59,7 @@ void WindowManager::showSettingsDialog(QWidget *parent,
     if (getArgs().dontSaveSettings)
     {
         QMessageBox::critical(parent, "Chatterino - Editing Settings Forbidden",
-                              "Settings cannot be edited when running with "
+                              "Settings cannot be edited when running with\n"
                               "commandline arguments such as '-c'.");
     }
     else
@@ -605,23 +605,23 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 
     if (descriptor.type_ == "twitch")
     {
-        return app->twitch.server->getOrAddChannel(descriptor.channelName_);
+        return app->twitch->getOrAddChannel(descriptor.channelName_);
     }
     else if (descriptor.type_ == "mentions")
     {
-        return app->twitch.server->mentionsChannel;
+        return app->twitch->mentionsChannel;
     }
     else if (descriptor.type_ == "watching")
     {
-        return app->twitch.server->watchingChannel;
+        return app->twitch->watchingChannel;
     }
     else if (descriptor.type_ == "whispers")
     {
-        return app->twitch.server->whispersChannel;
+        return app->twitch->whispersChannel;
     }
     else if (descriptor.type_ == "live")
     {
-        return app->twitch.server->liveChannel;
+        return app->twitch->liveChannel;
     }
     else if (descriptor.type_ == "irc")
     {
@@ -684,11 +684,13 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
         {
             // out of bounds windows
             auto screens = qApp->screens();
-            bool outOfBounds = std::none_of(
-                screens.begin(), screens.end(), [&](QScreen *screen) {
-                    return screen->availableGeometry().intersects(
-                        windowData.geometry_);
-                });
+            bool outOfBounds =
+                !getenv("I3SOCK") &&
+                std::none_of(screens.begin(), screens.end(),
+                             [&](QScreen *screen) {
+                                 return screen->availableGeometry().intersects(
+                                     windowData.geometry_);
+                             });
 
             // ask if move into bounds
             auto &&should = shouldMoveOutOfBoundsWindow();

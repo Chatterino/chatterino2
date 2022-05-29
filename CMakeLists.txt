@@ -7,7 +7,7 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
-project(chatterino VERSION 2.3.4)
+project(chatterino VERSION 2.3.5)
 
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
@@ -15,6 +15,7 @@ option(BUILD_BENCHMARKS "Build the benchmarks for Chatterino" OFF)
 option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
 option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
+option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key chain" ON)
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
 
@@ -58,6 +59,7 @@ find_package(Sanitizers)
 
 # Find boost on the system
 find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS random)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
@@ -77,20 +79,21 @@ else()
     add_subdirectory("${LIBCOMMUNI_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
 endif()
 
-# Link QtKeychain statically
-option(QTKEYCHAIN_STATIC "" ON)
+if (BUILD_WITH_QTKEYCHAIN)
+    # Link QtKeychain statically
+    option(QTKEYCHAIN_STATIC "" ON)
+    if (USE_SYSTEM_QTKEYCHAIN)
+        find_package(Qt${MAJOR_QT_VERSION}Keychain REQUIRED)
+    else()
+        set(QTKEYCHAIN_ROOT_LIB_FOLDER "${CMAKE_SOURCE_DIR}/lib/qtkeychain")
+        if (NOT EXISTS "${QTKEYCHAIN_ROOT_LIB_FOLDER}/CMakeLists.txt")
+            message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/qtkeychain/CMakeLists.txt")
+        endif()
 
-if (USE_SYSTEM_QTKEYCHAIN)
-    find_package(Qt${MAJOR_QT_VERSION}Keychain REQUIRED)
-else()
-    set(QTKEYCHAIN_ROOT_LIB_FOLDER "${CMAKE_SOURCE_DIR}/lib/qtkeychain")
-    if (NOT EXISTS "${QTKEYCHAIN_ROOT_LIB_FOLDER}/CMakeLists.txt")
-        message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/qtkeychain/CMakeLists.txt")
-    endif()
-
-    add_subdirectory("${QTKEYCHAIN_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
-    if (NOT TARGET qt${MAJOR_QT_VERSION}keychain)
-        message(FATAL_ERROR "qt${MAJOR_QT_VERSION}keychain target was not created :@")
+        add_subdirectory("${QTKEYCHAIN_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
+        if (NOT TARGET qt${MAJOR_QT_VERSION}keychain)
+            message(FATAL_ERROR "qt${MAJOR_QT_VERSION}keychain target was not created :@")
+        endif()
     endif()
 endif()
 
@@ -99,7 +102,18 @@ find_package(RapidJSON REQUIRED)
 find_package(Websocketpp REQUIRED)
 
 if (BUILD_TESTS)
-    find_package(GTest REQUIRED)
+    add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib/googletest" "lib/googletest")
+
+    mark_as_advanced(
+        BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
+        gmock_build_tests gtest_build_samples gtest_build_tests
+        gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
+    )
+
+    set_target_properties(gtest PROPERTIES FOLDER lib)
+    set_target_properties(gtest_main PROPERTIES FOLDER lib)
+    set_target_properties(gmock PROPERTIES FOLDER lib)
+    set_target_properties(gmock_main PROPERTIES FOLDER lib)
 endif ()
 
 if (BUILD_BENCHMARKS)
@@ -110,6 +124,7 @@ endif ()
 find_package(PajladaSerialize REQUIRED)
 find_package(PajladaSignals REQUIRED)
 find_package(LRUCache REQUIRED)
+find_package(MagicEnum REQUIRED)
 
 if (USE_SYSTEM_PAJLADA_SETTINGS)
     find_package(PajladaSettings REQUIRED)

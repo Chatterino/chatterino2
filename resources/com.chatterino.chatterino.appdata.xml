@@ -32,6 +32,6 @@
         <binary>chatterino</binary>
     </provides>
     <releases>
-        <release version="2.3.4" date="2021-08-05"/>
+        <release version="2.3.5" date="2022-04-05"/>
     </releases>
 </component>

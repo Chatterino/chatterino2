@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "controllers/moderationactions/ModerationActionModel.hpp"
-#include "controllers/taggedusers/TaggedUsersModel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
 #include "util/Helpers.hpp"
@@ -24,22 +23,17 @@
 
 namespace chatterino {
 
-qint64 dirSize(QString dirPath)
+qint64 dirSize(QString &dirPath)
 {
+    QDirIterator it(dirPath, QDirIterator::Subdirectories);
     qint64 size = 0;
-    QDir dir(dirPath);
-    // calculate total size of current directories' files
-    QDir::Filters fileFilters = QDir::Files | QDir::System | QDir::Hidden;
-    for (QString filePath : dir.entryList(fileFilters))
+
+    while (it.hasNext())
     {
-        QFileInfo fi(dir, filePath);
-        size += fi.size();
+        size += it.fileInfo().size();
+        it.next();
     }
-    // add size of child directories recursively
-    QDir::Filters dirFilters =
-        QDir::Dirs | QDir::NoDotAndDotDot | QDir::System | QDir::Hidden;
-    for (QString childDirPath : dir.entryList(dirFilters))
-        size += dirSize(dirPath + QDir::separator() + childDirPath);
+
     return size;
 }
 
@@ -59,20 +53,18 @@ QString formatSize(qint64 size)
 
 QString fetchLogDirectorySize()
 {
-    QString logPathDirectory = getSettings()->logPath.getValue().isEmpty()
-                                   ? getPaths()->messageLogDirectory
-                                   : getSettings()->logPath;
+    QString logsDirectoryPath = getSettings()->logPath.getValue().isEmpty()
+                                    ? getPaths()->messageLogDirectory
+                                    : getSettings()->logPath;
 
-    qint64 logsSize = dirSize(logPathDirectory);
-    QString logsSizeLabel = "Your logs currently take up ";
-    logsSizeLabel += formatSize(logsSize);
-    logsSizeLabel += " of space";
-    return logsSizeLabel;
+    auto logsSize = dirSize(logsDirectoryPath);
+
+    return QString("Your logs currently take up %1 of space")
+        .arg(formatSize(logsSize));
 }
 
 ModerationPage::ModerationPage()
 {
-    auto app = getApp();
     LayoutCreator<ModerationPage> layoutCreator(this);
 
     auto tabs = layoutCreator.emplace<QTabWidget>();
@@ -158,8 +150,8 @@ ModerationPage::ModerationPage()
         // clang-format off
         auto label = modMode.emplace<QLabel>(
             "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/modModeDisabled.png'> in a channel that you moderate.<br><br>"
-            "Moderation buttons can be bound to chat commands such as \"/ban {user}\", \"/timeout {user} 1000\", \"/w someusername !report {user} was bad in channel {channel}\" or any other custom text commands.<br>"
-            "For deleting messages use /delete {msg-id}.<br><br>"
+            "Moderation buttons can be bound to chat commands such as \"/ban {user.name}\", \"/timeout {user.name} 1000\", \"/w someusername !report {user.name} was bad in channel {channel.name}\" or any other custom text commands.<br>"
+            "For deleting messages use /delete {msg.id}.<br><br>"
             "More information can be found <a href='https://wiki.chatterino.com/Moderation/#moderation-mode'>here</a>.");
         label->setOpenExternalLinks(true);
         label->setWordWrap(true);
@@ -189,22 +181,8 @@ ModerationPage::ModerationPage()
 
         view->addButtonPressed.connect([] {
             getSettings()->moderationActions.append(
-                ModerationAction("/timeout {user} 300"));
+                ModerationAction("/timeout {user.name} 300"));
         });
-
-        /*auto taggedUsers = tabs.appendTab(new QVBoxLayout, "Tagged users");
-        {
-            EditableModelView *view = *taggedUsers.emplace<EditableModelView>(
-                app->taggedUsers->createModel(nullptr));
-
-            view->setTitles({"Name"});
-            view->getTableView()->horizontalHeader()->setStretchLastSection(true);
-
-            view->addButtonPressed.connect([] {
-                getApp()->taggedUsers->users.appendItem(
-                    TaggedUser(ProviderId::Twitch, "example", "xD"));
-            });
-        }*/
     }
 
     this->addModerationButtonSettings(tabs);

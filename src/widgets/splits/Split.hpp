@@ -10,6 +10,7 @@
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <boost/signals2.hpp>
 
 namespace chatterino {
 
@@ -31,7 +32,7 @@ class SelectChannelDialog;
 //   - Responsible for rendering and handling user text input
 //
 // Each sub-element has a reference to the parent Chat Widget
-class Split : public BaseWidget, pajlada::Signals::SignalHolder
+class Split : public BaseWidget
 {
     friend class SplitInput;
 
@@ -115,17 +116,18 @@ private:
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
     void updateInputPlaceholder();
+    void addShortcuts() override;
 
     /**
-     * @brief Opens twitch channel stream in a browser player (opens a formatted link)
+     * @brief Opens Twitch channel stream in a browser player (opens a formatted link)
      */
     void openChannelInBrowserPlayer(ChannelPtr channel);
     /**
-     * @brief Opens twitch channel stream in streamlink app (if stream is live and streamlink is installed)
+     * @brief Opens Twitch channel stream in streamlink app (if stream is live and streamlink is installed)
      */
     void openChannelInStreamlink(QString channelName);
     /**
-     * @brief Opens twitch channel chat in a new chatterino tab
+     * @brief Opens Twitch channel chat in a new Chatterino tab
      */
     void joinChannelInNewTab(ChannelPtr channel);
 
@@ -151,8 +153,7 @@ private:
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
     pajlada::Signals::SignalHolder signalHolder_;
-
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    std::vector<boost::signals2::scoped_connection> bSignals_;
 
 public slots:
     void addSibling();
@@ -169,8 +170,9 @@ public slots:
     void openInStreamlink();
     void openWithCustomScheme();
     void copyToClipboard();
+    void startWatching();
     void setFiltersDialog();
-    void showSearch();
+    void showSearch(bool singleChannel);
     void showViewerList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();

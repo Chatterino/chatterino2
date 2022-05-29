@@ -22,7 +22,6 @@ namespace chatterino {
 class HighlightPhrase;
 class HighlightBlacklistUser;
 class IgnorePhrase;
-class TaggedUser;
 class FilterRecord;
 class Nickname;
 
@@ -40,7 +39,6 @@ public:
     SignalVector<QString> &mutedChannels;
     SignalVector<FilterRecordPtr> &filterRecords;
     SignalVector<Nickname> &nicknames;
-    //SignalVector<TaggedUser> &taggedUsers;
     SignalVector<ModerationAction> &moderationActions;
 
     bool isHighlightedUser(const QString &username);
@@ -100,8 +98,8 @@ public:
         "/appearance/messages/usernameDisplayMode",
         UsernameDisplayMode::UsernameAndLocalizedName};
 
-    IntSetting tabDirection = {"/appearance/tabDirection",
-                               NotebookTabDirection::Horizontal};
+    EnumSetting<NotebookTabDirection> tabDirection = {
+        "/appearance/tabDirection", NotebookTabDirection::Horizontal};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
@@ -210,7 +208,7 @@ public:
 
     /// Streamer Mode
     EnumSetting<StreamerModeSetting> enableStreamerMode = {
-        "/streamerMode/enabled", StreamerModeSetting::DetectObs};
+        "/streamerMode/enabled", StreamerModeSetting::DetectStreamingSoftware};
     BoolSetting streamerModeHideUsercardAvatars = {
         "/streamerMode/hideUsercardAvatars", true};
     BoolSetting streamerModeHideLinkThumbnails = {
@@ -274,6 +272,17 @@ public:
         "/highlighting/redeemedHighlightSoundUrl", ""};
     QStringSetting redeemedHighlightColor = {
         "/highlighting/redeemedHighlightColor", ""};
+
+    BoolSetting enableFirstMessageHighlight = {
+        "/highlighting/firstMessageHighlight/highlighted", true};
+    //    BoolSetting enableFirstMessageHighlightSound = {
+    //        "/highlighting/firstMessageHighlight/enableSound", false};
+    //    BoolSetting enableFirstMessageHighlightTaskbar = {
+    //        "/highlighting/firstMessageHighlight/enableTaskbarFlashing", false};
+    QStringSetting firstMessageHighlightSoundUrl = {
+        "/highlighting/firstMessageHighlightSoundUrl", ""};
+    QStringSetting firstMessageHighlightColor = {
+        "/highlighting/firstMessageHighlightColor", ""};
 
     BoolSetting enableSubHighlight = {
         "/highlighting/subHighlight/subsHighlighted", true};
@@ -377,6 +386,7 @@ public:
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
     BoolSetting informOnTabVisibilityToggle = {"/misc/askOnTabVisibilityToggle",
                                                true};
+    BoolSetting lockNotebookLayout = {"/misc/lockNotebookLayout", false};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",

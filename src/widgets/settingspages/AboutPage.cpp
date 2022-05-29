@@ -85,16 +85,35 @@ AboutPage::AboutPage()
         auto versionInfo = layout.emplace<QGroupBox>("Version");
         {
             auto version = Version::instance();
-            QString text = QString("%1 (commit %2%3)")
-                               .arg(version.fullVersion())
-                               .arg("<a "
-                                    "href=\"https://github.com/Chatterino/"
-                                    "chatterino2/commit/" +
-                                    version.commitHash() + "\">" +
-                                    version.commitHash() + "</a>")
-                               .arg(Modes::instance().isNightly
-                                        ? ", " + version.dateOfBuild()
-                                        : "");
+            QString osInfo = QSysInfo::prettyProductName() +
+                             ", kernel: " + QSysInfo::kernelVersion();
+            if (version.isFlatpak())
+            {
+                osInfo += ", running from Flatpak";
+            }
+
+            QString commitHashLink =
+                QString("<a "
+                        "href=\"https://github.com/Chatterino/chatterino2/"
+                        "commit/%1\">%1</a>")
+                    .arg(version.commitHash());
+
+            QString nightlyBuildInfo;
+            if (Modes::instance().isNightly)
+            {
+                nightlyBuildInfo =
+                    QString(", built on %1").arg(version.dateOfBuild());
+            }
+
+            QString supportedOS;
+            if (!version.isSupportedOS())
+            {
+                supportedOS = "(unsupported OS)";
+            }
+
+            QString text = QString("%1 (commit %2%3) running on %4 %5")
+                               .arg(version.fullVersion(), commitHashLink,
+                                    nightlyBuildInfo, osInfo, supportedOS);
 
             auto versionLabel = versionInfo.emplace<QLabel>(text);
             versionLabel->setOpenExternalLinks(true);
@@ -109,7 +128,6 @@ AboutPage::AboutPage()
 
             // clang-format off
             l.emplace<QLabel>("Chatterino Wiki can be found <a href=\"" LINK_CHATTERINO_WIKI "\">here</a>")->setOpenExternalLinks(true);
-            l.emplace<QLabel>("Support <a href=\"" LINK_DONATE "\">Chatterino</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("All about Chatterino's <a href=\"" LINK_CHATTERINO_FEATURES "\">features</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Join the official Chatterino <a href=\"" LINK_CHATTERINO_DISCORD "\">Discord</a>")->setOpenExternalLinks(true);
             // clang-format on
@@ -141,12 +159,17 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Websocketpp",
                        "https://www.zaphoyd.com/websocketpp/",
                        ":/licenses/websocketpp.txt");
+#ifndef NO_QTKEYCHAIN
             addLicense(form.getElement(), "QtKeychain",
                        "https://github.com/frankosterfeld/qtkeychain",
                        ":/licenses/qtkeychain.txt");
+#endif
             addLicense(form.getElement(), "lrucache",
                        "https://github.com/lamerman/cpp-lru-cache",
                        ":/licenses/lrucache.txt");
+            addLicense(form.getElement(), "magic_enum",
+                       "https://github.com/Neargye/magic_enum",
+                       ":/licenses/magic_enum.txt");
         }
 
         // Attributions

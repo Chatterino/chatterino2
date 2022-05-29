@@ -15,6 +15,7 @@ Q_LOGGING_CATEGORY(chatterinoCommon, "chatterino.common", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoEmoji, "chatterino.emoji", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoFfzemotes, "chatterino.ffzemotes", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoHelper, "chatterino.helper", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoHotkeys, "chatterino.hotkeys", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoHTTP, "chatterino.http", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoImage, "chatterino.image", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoIrc, "chatterino.irc", logThreshold);
@@ -27,7 +28,7 @@ Q_LOGGING_CATEGORY(chatterinoNotification, "chatterino.notification",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoNuulsuploader, "chatterino.nuulsuploader",
                    logThreshold);
-Q_LOGGING_CATEGORY(chatterinoPubsub, "chatterino.pubsub", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoPubSub, "chatterino.pubsub", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoStreamlink, "chatterino.streamlink", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoStreamerMode, "chatterino.streamermode",
                    logThreshold);

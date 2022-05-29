@@ -96,6 +96,7 @@ include(lib/signals.pri)
 include(lib/settings.pri)
 include(lib/serialize.pri)
 include(lib/lrucache.pri)
+include(lib/magic_enum.pri)
 include(lib/winsdk.pri)
 include(lib/rapidjson.pri)
 include(lib/qtkeychain.pri)
@@ -159,6 +160,10 @@ SOURCES += \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \
     src/controllers/highlights/UserHighlightModel.cpp \
+    src/controllers/hotkeys/Hotkey.cpp \
+    src/controllers/hotkeys/HotkeyController.cpp \
+    src/controllers/hotkeys/HotkeyHelpers.cpp \
+    src/controllers/hotkeys/HotkeyModel.cpp \
     src/controllers/ignores/IgnoreController.cpp \
     src/controllers/ignores/IgnoreModel.cpp \
     src/controllers/moderationactions/ModerationAction.cpp \
@@ -167,8 +172,6 @@ SOURCES += \
     src/controllers/notifications/NotificationController.cpp \
     src/controllers/notifications/NotificationModel.cpp \
     src/controllers/pings/MutedChannelModel.cpp \
-    src/controllers/taggedusers/TaggedUser.cpp \
-    src/controllers/taggedusers/TaggedUsersModel.cpp \
     src/debug/Benchmark.cpp \
     src/main.cpp \
     src/messages/Emote.cpp \
@@ -187,6 +190,7 @@ SOURCES += \
     src/messages/search/ChannelPredicate.cpp \
     src/messages/search/LinkPredicate.cpp \
     src/messages/search/MessageFlagsPredicate.cpp \
+    src/messages/search/RegexPredicate.cpp \
     src/messages/search/SubstringPredicate.cpp \
     src/messages/SharedMessageBuilder.cpp \
     src/providers/bttv/BttvEmotes.cpp \
@@ -207,12 +211,18 @@ SOURCES += \
     src/providers/IvrApi.cpp \
     src/providers/LinkResolver.cpp \
     src/providers/twitch/api/Helix.cpp \
-    src/providers/twitch/api/Kraken.cpp \
     src/providers/twitch/ChannelPointReward.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
-    src/providers/twitch/PubsubActions.cpp \
-    src/providers/twitch/PubsubClient.cpp \
-    src/providers/twitch/PubsubHelpers.cpp \
+    src/providers/twitch/PubSubActions.cpp \
+    src/providers/twitch/PubSubClient.cpp \
+    src/providers/twitch/PubSubManager.cpp \
+    src/providers/twitch/pubsubmessages/AutoMod.cpp \
+    src/providers/twitch/pubsubmessages/Base.cpp \
+    src/providers/twitch/pubsubmessages/ChannelPoints.cpp \
+    src/providers/twitch/pubsubmessages/ChatModeratorAction.cpp \
+    src/providers/twitch/pubsubmessages/Listen.cpp \
+    src/providers/twitch/pubsubmessages/Unlisten.cpp \
+    src/providers/twitch/pubsubmessages/Whisper.cpp \
     src/providers/twitch/TwitchAccount.cpp \
     src/providers/twitch/TwitchAccountManager.cpp \
     src/providers/twitch/TwitchBadge.cpp \
@@ -267,6 +277,7 @@ SOURCES += \
     src/widgets/dialogs/BadgePickerDialog.cpp \
     src/widgets/dialogs/ChannelFilterEditorDialog.cpp \
     src/widgets/dialogs/ColorPickerDialog.cpp \
+    src/widgets/dialogs/EditHotkeyDialog.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
     src/widgets/dialogs/IrcConnectionEditor.cpp \
     src/widgets/dialogs/LastRunCrashDialog.cpp \
@@ -294,6 +305,8 @@ SOURCES += \
     src/widgets/helper/NotebookButton.cpp \
     src/widgets/helper/NotebookTab.cpp \
     src/widgets/helper/QColorPicker.cpp \
+    src/widgets/helper/RegExpItemDelegate.cpp \
+    src/widgets/helper/TrimRegExpValidator.cpp \
     src/widgets/helper/ResizingTextEdit.cpp \
     src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/SearchPopup.cpp \
@@ -390,6 +403,12 @@ HEADERS += \
     src/controllers/highlights/HighlightModel.hpp \
     src/controllers/highlights/HighlightPhrase.hpp \
     src/controllers/highlights/UserHighlightModel.hpp \
+    src/controllers/hotkeys/ActionNames.hpp \
+    src/controllers/hotkeys/Hotkey.hpp \
+    src/controllers/hotkeys/HotkeyCategory.hpp \
+    src/controllers/hotkeys/HotkeyController.hpp \
+    src/controllers/hotkeys/HotkeyHelpers.hpp \
+    src/controllers/hotkeys/HotkeyModel.hpp \
     src/controllers/ignores/IgnoreController.hpp \
     src/controllers/ignores/IgnoreModel.hpp \
     src/controllers/ignores/IgnorePhrase.hpp \
@@ -400,8 +419,6 @@ HEADERS += \
     src/controllers/notifications/NotificationController.hpp \
     src/controllers/notifications/NotificationModel.hpp \
     src/controllers/pings/MutedChannelModel.hpp \
-    src/controllers/taggedusers/TaggedUser.hpp \
-    src/controllers/taggedusers/TaggedUsersModel.hpp \
     src/debug/AssertInGuiThread.hpp \
     src/debug/Benchmark.hpp \
     src/ForwardDecl.hpp \
@@ -425,6 +442,7 @@ HEADERS += \
     src/messages/search/LinkPredicate.hpp \
     src/messages/search/MessageFlagsPredicate.hpp \
     src/messages/search/MessagePredicate.hpp \
+    src/messages/search/RegexPredicate.hpp \
     src/messages/search/SubstringPredicate.hpp \
     src/messages/Selection.hpp \
     src/messages/SharedMessageBuilder.hpp \
@@ -447,14 +465,25 @@ HEADERS += \
     src/providers/IvrApi.hpp \
     src/providers/LinkResolver.hpp \
     src/providers/twitch/api/Helix.hpp \
-    src/providers/twitch/api/Kraken.hpp \
     src/providers/twitch/ChannelPointReward.hpp \
     src/providers/twitch/ChatterinoWebSocketppLogger.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
-    src/providers/twitch/PubsubActions.hpp \
-    src/providers/twitch/PubsubClient.hpp \
-    src/providers/twitch/PubsubHelpers.hpp \
+    src/providers/twitch/PubSubActions.hpp \
+    src/providers/twitch/PubSubClient.hpp \
+    src/providers/twitch/PubSubClientOptions.hpp \
+    src/providers/twitch/PubSubHelpers.hpp \
+    src/providers/twitch/PubSubManager.hpp \
+    src/providers/twitch/PubSubMessages.hpp \
+    src/providers/twitch/pubsubmessages/AutoMod.hpp \
+    src/providers/twitch/pubsubmessages/Base.hpp \
+    src/providers/twitch/pubsubmessages/ChannelPoints.hpp \
+    src/providers/twitch/pubsubmessages/ChatModeratorAction.hpp \
+    src/providers/twitch/pubsubmessages/Listen.hpp \
+    src/providers/twitch/pubsubmessages/Message.hpp \
+    src/providers/twitch/pubsubmessages/Unlisten.hpp \
+    src/providers/twitch/pubsubmessages/Whisper.hpp \
+    src/providers/twitch/PubSubWebsocket.hpp \
     src/providers/twitch/TwitchAccount.hpp \
     src/providers/twitch/TwitchAccountManager.hpp \
     src/providers/twitch/TwitchBadge.hpp \
@@ -515,7 +544,6 @@ HEADERS += \
     src/util/SampleCheerMessages.hpp \
     src/util/SampleLinks.hpp \
     src/util/SharedPtrElementLess.hpp \
-    src/util/Shortcut.hpp \
     src/util/SplitCommand.hpp \
     src/util/StandardItemHelper.hpp \
     src/util/StreamerMode.hpp \
@@ -531,6 +559,7 @@ HEADERS += \
     src/widgets/dialogs/BadgePickerDialog.hpp \
     src/widgets/dialogs/ChannelFilterEditorDialog.hpp \
     src/widgets/dialogs/ColorPickerDialog.hpp \
+    src/widgets/dialogs/EditHotkeyDialog.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
     src/widgets/dialogs/IrcConnectionEditor.hpp \
     src/widgets/dialogs/LastRunCrashDialog.hpp \
@@ -561,6 +590,8 @@ HEADERS += \
     src/widgets/helper/NotebookButton.hpp \
     src/widgets/helper/NotebookTab.hpp \
     src/widgets/helper/QColorPicker.hpp \
+    src/widgets/helper/RegExpItemDelegate.hpp \
+    src/widgets/helper/TrimRegExpValidator.hpp \
     src/widgets/helper/ResizingTextEdit.hpp \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \
@@ -607,7 +638,8 @@ RESOURCES += \
 DISTFILES +=
 
 FORMS += \
-    src/widgets/dialogs/IrcConnectionEditor.ui
+    src/widgets/dialogs/IrcConnectionEditor.ui \
+    src/widgets/dialogs/EditHotkeyDialog.ui  
 
 # do not use windows min/max macros
 #win32 {

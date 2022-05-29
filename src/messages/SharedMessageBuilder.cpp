@@ -4,11 +4,11 @@
 #include "common/QLogging.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
-#include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
+#include "util/Qt.hpp"
 #include "util/StreamerMode.hpp"
 
 #include <QFileInfo>
@@ -33,34 +33,6 @@ namespace {
         {
             return QUrl("qrc:/sounds/ping2.wav");
         }
-    }
-
-    QStringList parseTagList(const QVariantMap &tags, const QString &key)
-    {
-        auto iterator = tags.find(key);
-        if (iterator == tags.end())
-            return QStringList{};
-
-        return iterator.value().toString().split(
-            ',', QString::SplitBehavior::SkipEmptyParts);
-    }
-
-    std::vector<Badge> parseBadges(const QVariantMap &tags)
-    {
-        std::vector<Badge> badges;
-
-        for (QString badge : parseTagList(tags, "badges"))
-        {
-            QStringList parts = badge.split('/');
-            if (parts.size() != 2)
-            {
-                continue;
-            }
-
-            badges.emplace_back(parts[0], parts[1]);
-        }
-
-        return badges;
     }
 
 }  // namespace
@@ -103,6 +75,46 @@ void SharedMessageBuilder::parse()
     this->message().flags.set(MessageFlag::Collapsed);
 }
 
+// "foo/bar/baz,tri/hard" can be a valid badge-info tag
+// In that case, valid map content should be 'split by slash' only once:
+// {"foo": "bar/baz", "tri": "hard"}
+std::pair<QString, QString> SharedMessageBuilder::slashKeyValue(
+    const QString &kvStr)
+{
+    return {
+        // part before first slash (index 0 of section)
+        kvStr.section('/', 0, 0),
+        // part after first slash (index 1 of section)
+        kvStr.section('/', 1, -1),
+    };
+}
+
+std::vector<Badge> SharedMessageBuilder::parseBadgeTag(const QVariantMap &tags)
+{
+    std::vector<Badge> b;
+
+    auto badgesIt = tags.constFind("badges");
+    if (badgesIt == tags.end())
+    {
+        return b;
+    }
+
+    auto badges = badgesIt.value().toString().split(',', Qt::SkipEmptyParts);
+
+    for (const QString &badge : badges)
+    {
+        if (!badge.contains('/'))
+        {
+            continue;
+        }
+
+        auto pair = SharedMessageBuilder::slashKeyValue(badge);
+        b.emplace_back(Badge{pair.first, pair.second});
+    }
+
+    return b;
+}
+
 bool SharedMessageBuilder::isIgnored() const
 {
     return isIgnoredMessage({
@@ -129,40 +141,6 @@ void SharedMessageBuilder::parseUsername()
 void SharedMessageBuilder::parseHighlights()
 {
     auto app = getApp();
-
-    if (this->message().flags.has(MessageFlag::Subscription) &&
-        getSettings()->enableSubHighlight)
-    {
-        if (getSettings()->enableSubHighlightTaskbar)
-        {
-            this->highlightAlert_ = true;
-        }
-
-        if (getSettings()->enableSubHighlightSound)
-        {
-            this->highlightSound_ = true;
-
-            // Use custom sound if set, otherwise use fallback
-            if (!getSettings()->subHighlightSoundUrl.getValue().isEmpty())
-            {
-                this->highlightSoundUrl_ =
-                    QUrl(getSettings()->subHighlightSoundUrl.getValue());
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
-        }
-
-        this->message().flags.set(MessageFlag::Highlighted);
-        this->message().highlightColor =
-            ColorProvider::instance().color(ColorType::Subscription);
-    }
-
-    // XXX: Non-common term in SharedMessageBuilder
-    auto currentUser = app->accounts->twitch.getCurrent();
-
-    QString currentUsername = currentUser->getUserName();
 
     if (getCSettings().isBlacklistedUser(this->ircMessage->nick()))
     {
@@ -216,7 +194,8 @@ void SharedMessageBuilder::parseHighlights()
             << "sent a message";
 
         this->message().flags.set(MessageFlag::Highlighted);
-        if (!this->message().flags.has(MessageFlag::Subscription))
+        if (!(this->message().flags.has(MessageFlag::Subscription) &&
+              getSettings()->enableSubHighlight))
         {
             this->message().highlightColor = userHighlight.getColor();
         }
@@ -256,10 +235,43 @@ void SharedMessageBuilder::parseHighlights()
         }
     }
 
+    auto currentUser = app->accounts->twitch.getCurrent();
+    QString currentUsername = currentUser->getUserName();
+
     if (this->ircMessage->nick() == currentUsername)
     {
         // Do nothing. Highlights cannot be triggered by yourself
         return;
+    }
+
+    // Highlight because it's a subscription
+    if (this->message().flags.has(MessageFlag::Subscription) &&
+        getSettings()->enableSubHighlight)
+    {
+        if (getSettings()->enableSubHighlightTaskbar)
+        {
+            this->highlightAlert_ = true;
+        }
+
+        if (getSettings()->enableSubHighlightSound)
+        {
+            this->highlightSound_ = true;
+
+            // Use custom sound if set, otherwise use fallback
+            if (!getSettings()->subHighlightSoundUrl.getValue().isEmpty())
+            {
+                this->highlightSoundUrl_ =
+                    QUrl(getSettings()->subHighlightSoundUrl.getValue());
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
+        }
+
+        this->message().flags.set(MessageFlag::Highlighted);
+        this->message().highlightColor =
+            ColorProvider::instance().color(ColorType::Subscription);
     }
 
     // TODO: This vector should only be rebuilt upon highlights being changed
@@ -288,7 +300,8 @@ void SharedMessageBuilder::parseHighlights()
         }
 
         this->message().flags.set(MessageFlag::Highlighted);
-        if (!this->message().flags.has(MessageFlag::Subscription))
+        if (!(this->message().flags.has(MessageFlag::Subscription) &&
+              getSettings()->enableSubHighlight))
         {
             this->message().highlightColor = highlight.getColor();
         }
@@ -331,7 +344,7 @@ void SharedMessageBuilder::parseHighlights()
     }
 
     // Highlight because of badge
-    auto badges = parseBadges(this->tags);
+    auto badges = this->parseBadgeTag(this->tags);
     auto badgeHighlights = getCSettings().highlightedBadges.readOnly();
     bool badgeHighlightSet = false;
     for (const HighlightBadge &highlight : *badgeHighlights)
@@ -346,7 +359,8 @@ void SharedMessageBuilder::parseHighlights()
             if (!badgeHighlightSet)
             {
                 this->message().flags.set(MessageFlag::Highlighted);
-                if (!this->message().flags.has(MessageFlag::Subscription))
+                if (!(this->message().flags.has(MessageFlag::Subscription) &&
+                      getSettings()->enableSubHighlight))
                 {
                     this->message().highlightColor = highlight.getColor();
                 }

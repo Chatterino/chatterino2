@@ -4,7 +4,7 @@
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
-#include "providers/twitch/PubsubActions.hpp"
+#include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
@@ -64,6 +64,13 @@ public:
                                 MessageBuilder *builder);
     static void deletionMessage(const DeleteAction &action,
                                 MessageBuilder *builder);
+    static void listOfUsersSystemMessage(QString prefix, QStringList users,
+                                         Channel *channel,
+                                         MessageBuilder *builder);
+
+    // Shares some common logic from SharedMessageBuilder::parseBadgeTag
+    static std::unordered_map<QString, QString> parseBadgeInfoTag(
+        const QVariantMap &tags);
 
 private:
     void parseUsernameColor() override;

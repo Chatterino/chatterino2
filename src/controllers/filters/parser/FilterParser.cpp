@@ -9,8 +9,7 @@ namespace filterparser {
 
 ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 {
-    auto watchingChannel =
-        chatterino::getApp()->twitch.server->watchingChannel.get();
+    auto watchingChannel = chatterino::getApp()->twitch->watchingChannel.get();
 
     /* Known Identifiers
      *
@@ -28,6 +27,8 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * flags.points_redeemed
      * flags.sub_message
      * flags.system_message
+     * flags.reward_message
+     * flags.first_message
      * flags.whisper
      *
      * message.content
@@ -77,6 +78,9 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
         {"flags.points_redeemed", m->flags.has(MessageFlag::RedeemedHighlight)},
         {"flags.sub_message", m->flags.has(MessageFlag::Subscription)},
         {"flags.system_message", m->flags.has(MessageFlag::System)},
+        {"flags.reward_message",
+         m->flags.has(MessageFlag::RedeemedChannelPointReward)},
+        {"flags.first_message", m->flags.has(MessageFlag::FirstMessage)},
         {"flags.whisper", m->flags.has(MessageFlag::Whisper)},
 
         {"message.content", m->messageText},

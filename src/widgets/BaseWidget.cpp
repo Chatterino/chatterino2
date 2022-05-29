@@ -2,6 +2,8 @@
 
 #include "BaseSettings.hpp"
 #include "BaseTheme.hpp"
+#include "common/QLogging.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <QChildEvent>
@@ -24,6 +26,16 @@ BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
 
         this->update();
     });
+}
+void BaseWidget::clearShortcuts()
+{
+    for (auto shortcut : this->shortcuts_)
+    {
+        shortcut->setKey(QKeySequence());
+        shortcut->removeEventFilter(this);
+        shortcut->deleteLater();
+    }
+    this->shortcuts_.clear();
 }
 
 float BaseWidget::scale() const
