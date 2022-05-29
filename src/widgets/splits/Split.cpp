@@ -874,11 +874,7 @@ void Split::explainSplitting()
 
 void Split::popup()
 {
-    Window &window = getApp()->windows->openNewChannelWindow(
-        this->getIndirectChannel().get());
-    Split *split = window.getNotebook().getOrAddSelectedPage()->getSplits()[0];
-    split->setModerationMode(this->getModerationMode());
-    split->setFilters(this->getFilters());
+    getApp()->windows->createChannelWindow(this);
 }
 
 void Split::clear()

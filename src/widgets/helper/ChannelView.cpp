@@ -2187,21 +2187,21 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
     {
         case Link::UserWhisper:
         case Link::UserInfo: {
+            auto user = link.value;
             switch (event->modifiers())
             {
                 case Qt::ShiftModifier:
-                    getApp()->windows->openNewChannelWindow(link.value);
+                    getApp()->windows->createChannelWindow(user);
                     break;
                 case Qt::ControlModifier:
                     this->openChannelIn.invoke(
-                        link.value, FromTwitchLinkOpenChannelIn::Tab);
+                        user, FromTwitchLinkOpenChannelIn::Tab);
                     break;
                 case Qt::AltModifier:
                     this->openChannelIn.invoke(
-                        link.value, FromTwitchLinkOpenChannelIn::Split);
+                        user, FromTwitchLinkOpenChannelIn::Split);
                     break;
                 default:
-                    auto user = link.value;
                     this->showUserInfoPopup(user,
                                             layout->getMessage()->channelName);
                     break;

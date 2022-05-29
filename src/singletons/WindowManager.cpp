@@ -275,7 +275,7 @@ Window &WindowManager::createWindow(WindowType type, bool show)
     return *window;
 }
 
-Window &WindowManager::openNewChannelWindow(ChannelPtr channel)
+Window &WindowManager::createChannelWindow(ChannelPtr channel)
 {
     Window &window = this->createWindow(WindowType::Popup, true);
     auto split =
@@ -285,10 +285,20 @@ Window &WindowManager::openNewChannelWindow(ChannelPtr channel)
     return window;
 }
 
-Window &WindowManager::openNewChannelWindow(QString channelName)
+Window &WindowManager::createChannelWindow(QString channelName)
 {
-    return this->openNewChannelWindow(
+    return this->createChannelWindow(
         getApp()->twitch->getOrAddChannel(channelName));
+}
+
+Window &WindowManager::createChannelWindow(Split *split)
+{
+    Window &window =
+        this->createChannelWindow(split->getIndirectChannel().get());
+    Split *_split = window.getNotebook().getOrAddSelectedPage()->getSplits()[0];
+    _split->setModerationMode(split->getModerationMode());
+    _split->setFilters(split->getFilters());
+    return window;
 }
 
 void WindowManager::select(Split *split)

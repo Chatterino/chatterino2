@@ -295,7 +295,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                         menu->addAction(
                             "Open channel in a new popup window", this,
                             [loginName] {
-                                getApp()->windows->openNewChannelWindow(
+                                getApp()->windows->createChannelWindow(
                                     loginName);
                             });
 

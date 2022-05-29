@@ -742,7 +742,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         }
 
-        getApp()->windows->openNewChannelWindow(target);
+        getApp()->windows->createChannelWindow(target);
 
         return "";
     });
