@@ -263,6 +263,7 @@ SOURCES += \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/RatelimitBucket.cpp \
+    src/util/SampleData.cpp \
     src/util/SplitCommand.cpp \
     src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
@@ -539,8 +540,7 @@ HEADERS += \
     src/util/RapidJsonSerializeQString.hpp \
     src/util/RatelimitBucket.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
-    src/util/SampleCheerMessages.hpp \
-    src/util/SampleLinks.hpp \
+    src/util/SampleData.hpp \
     src/util/SharedPtrElementLess.hpp \
     src/util/SplitCommand.hpp \
     src/util/StandardItemHelper.hpp \
