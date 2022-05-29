@@ -9,7 +9,7 @@
 #   If the git binary is found and the git work tree is intact, GIT_RELEASE is worked out using the `git describe` command
 #   The value of GIT_RELEASE can be overriden by defining the GIT_RELEASE environment variable
 # GIT_MODIFIED
-#	If the git binary is found and the git work tree is intact, GIT_MODIFIED is worked out using the `git status --porcelain` command
+#	If the git binary is found and the git work tree is intact, GIT_MODIFIED is worked out using the `git status --porcelain -z` command
 #   The value of GIT_MODIFIED can be overriden by defining the GIT_MODIFIED environment variable
 
 find_package(Git)
@@ -55,7 +55,7 @@ if (GIT_EXECUTABLE)
         )
 
         execute_process(
-                COMMAND ${GIT_EXECUTABLE} status --porcelain
+                COMMAND ${GIT_EXECUTABLE} status --porcelain -z
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                 OUTPUT_VARIABLE GIT_MODIFIED
                 OUTPUT_STRIP_TRAILING_WHITESPACE

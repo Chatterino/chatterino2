@@ -37,7 +37,7 @@ private:
 
     QString version_;
     QString commitHash_;
-    bool isModified_;
+    bool isModified_{false};
     QString dateOfBuild_;
     QString fullVersion_;
     bool isSupportedOS_;

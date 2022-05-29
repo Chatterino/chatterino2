@@ -666,12 +666,16 @@ linux {
 
 git_commit=$$(GIT_COMMIT)
 git_release=$$(GIT_RELEASE)
+git_modified=$$(GIT_MODIFIED)
 # Git data
 isEmpty(git_commit) {
 git_commit=$$system(git rev-parse HEAD)
 }
 isEmpty(git_release) {
 git_release=$$system(git describe)
+}
+isEmpty(git_modified) {
+git_modified=$$system(git status --porcelain -z)
 }
 git_hash = $$str_member($$git_commit, 0, 8)
 
@@ -680,6 +684,7 @@ git_hash = $$str_member($$git_commit, 0, 8)
 DEFINES += CHATTERINO_GIT_COMMIT=\\\"$$git_commit\\\"
 DEFINES += CHATTERINO_GIT_RELEASE=\\\"$$git_release\\\"
 DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
+DEFINES += CHATTERINO_GIT_MODIFIED=\\\"$$git_modified\\\"
 
 CONFIG(debug, debug|release) {
     message("Building Chatterino2 DEBUG")
