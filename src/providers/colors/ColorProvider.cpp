@@ -133,6 +133,26 @@ void ColorProvider::initTypeColorMap()
              std::make_shared<QColor>(
                  HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR)});
     }
+
+    this->typeColorMap_.insert(
+        {ColorType::AnnouncePurple,
+            std::make_shared<QColor>(
+                HighlightPhrase::ANNOUNCE_PURPLE)}); //purple
+
+    this->typeColorMap_.insert(
+        {ColorType::AnnounceBlue,
+            std::make_shared<QColor>(
+                HighlightPhrase::ANNOUNCE_BLUE)}); //blue
+
+    this->typeColorMap_.insert(
+        {ColorType::AnnounceGreen,
+            std::make_shared<QColor>(
+                HighlightPhrase::ANNOUNCE_GREEN)}); //green
+
+    this->typeColorMap_.insert(
+        {ColorType::AnnounceOrange,
+            std::make_shared<QColor>(
+                HighlightPhrase::ANNOUNCE_ORANGE)}); //orange
 }
 
 void ColorProvider::initDefaultColors()

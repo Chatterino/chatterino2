@@ -335,6 +335,34 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     {
         backgroundColor = QColor("#4A273D");
     }
+    else if (this->message_->flags.has(MessageFlag::AnnouncePurple))
+    {
+        // Blend highlight color with usual background color
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ColorProvider::instance().color(ColorType::AnnouncePurple));
+    }
+    else if (this->message_->flags.has(MessageFlag::AnnounceBlue))
+    {
+        // Blend highlight color with usual background color
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ColorProvider::instance().color(ColorType::AnnounceBlue));
+    }
+    else if (this->message_->flags.has(MessageFlag::AnnounceGreen))
+    {
+        // Blend highlight color with usual background color
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ColorProvider::instance().color(ColorType::AnnounceGreen));
+    }
+    else if (this->message_->flags.has(MessageFlag::AnnounceOrange))
+    {
+        // Blend highlight color with usual background color
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ColorProvider::instance().color(ColorType::AnnounceOrange));
+    }
 
     painter.fillRect(buffer->rect(), backgroundColor);
 

@@ -15,6 +15,10 @@ QColor HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR =
 QColor HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR =
     QColor(72, 127, 63, 60);
 QColor HighlightPhrase::FALLBACK_SUB_COLOR = QColor(196, 102, 255, 100);
+QColor HighlightPhrase::ANNOUNCE_PURPLE = QColor(196, 102, 255, 100);
+QColor HighlightPhrase::ANNOUNCE_BLUE = QColor(40, 40, 156, 100);
+QColor HighlightPhrase::ANNOUNCE_GREEN = QColor(47, 156, 47, 100);
+QColor HighlightPhrase::ANNOUNCE_ORANGE = QColor(255, 165, 0, 100);
 
 bool HighlightPhrase::operator==(const HighlightPhrase &other) const
 {

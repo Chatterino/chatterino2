@@ -13,6 +13,10 @@ enum class ColorType {
     Whisper,
     RedeemedHighlight,
     FirstMessageHighlight,
+    AnnouncePurple,
+    AnnounceBlue,
+    AnnounceGreen,
+    AnnounceOrange
 };
 
 class ColorProvider

@@ -83,6 +83,10 @@ public:
     static QColor FALLBACK_REDEEMED_HIGHLIGHT_COLOR;
     static QColor FALLBACK_SUB_COLOR;
     static QColor FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR;
+    static QColor ANNOUNCE_PURPLE;
+    static QColor ANNOUNCE_BLUE;
+    static QColor ANNOUNCE_GREEN;
+    static QColor ANNOUNCE_ORANGE;
 
 private:
     QString pattern_;

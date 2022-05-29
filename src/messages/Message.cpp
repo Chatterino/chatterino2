@@ -48,6 +48,30 @@ SBHighlight Message::getScrollBarHighlight() const
             ColorProvider::instance().color(ColorType::FirstMessageHighlight),
             SBHighlight::Default, false, true);
     }
+    else if (this->flags.has(MessageFlag::AnnouncePurple))
+    {
+        return SBHighlight(
+            ColorProvider::instance().color(ColorType::AnnouncePurple),
+            SBHighlight::Default, false, true);
+    }
+    else if (this->flags.has(MessageFlag::AnnounceBlue))
+    {
+        return SBHighlight(
+            ColorProvider::instance().color(ColorType::AnnounceBlue),
+            SBHighlight::Default, false, true);
+    }
+    else if (this->flags.has(MessageFlag::AnnounceGreen))
+    {
+        return SBHighlight(
+            ColorProvider::instance().color(ColorType::AnnounceGreen),
+            SBHighlight::Default, false, true);
+    }
+    else if (this->flags.has(MessageFlag::AnnounceOrange))
+    {
+        return SBHighlight(
+            ColorProvider::instance().color(ColorType::AnnounceOrange),
+            SBHighlight::Default, false, true);
+    }
     return SBHighlight();
 }
 
