@@ -2,7 +2,7 @@
 
 namespace chatterino {
 
-/// Sample Messages
+/// Sample messages coming from IRC
 
 const QStringList &getSampleCheerMessages()
 {

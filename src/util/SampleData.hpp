@@ -4,14 +4,14 @@
 
 namespace chatterino {
 
-/// Sample Messages
+/// Sample messages coming from IRC
 
 const QStringList &getSampleCheerMessages();
 const QStringList &getSampleSubMessages();
 const QStringList &getSampleMiscMessages();
 const QStringList &getSampleEmoteTestMessages();
 
-/// channel point reward tests
+/// Channel point reward tests
 
 const QString &getSampleChannelRewardMessage();
 const QString &getSampleChannelRewardMessage2();
