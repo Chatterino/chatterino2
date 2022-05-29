@@ -187,10 +187,8 @@ void Window::addCustomTitlebarButtons()
 void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
 {
 #ifndef NDEBUG
-    auto cheerMessages = sampleCheerMessages;
-
     actions.emplace("addMiscMessage", [=](std::vector<QString>) -> QString {
-        const auto &messages = sampleMiscMessages;
+        const auto &messages = getSampleMiscMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
         getApp()->twitch->addFakeMessage(msg);
@@ -198,7 +196,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
     });
 
     actions.emplace("addCheerMessage", [=](std::vector<QString>) -> QString {
-        const auto &messages = cheerMessages;
+        const auto &messages = getSampleCheerMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
         getApp()->twitch->addFakeMessage(msg);
@@ -206,7 +204,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
     });
 
     actions.emplace("addLinkMessage", [=](std::vector<QString>) -> QString {
-        const auto &messages = sampleLinkMessages;
+        const auto &messages = getSampleLinkMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
         getApp()->twitch->addFakeMessage(msg);
@@ -219,19 +217,21 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         static bool alt = true;
         if (alt)
         {
-            auto oMessage = parsePubSubBaseMessage(sampleChannelRewardMessage);
+            auto oMessage =
+                parsePubSubBaseMessage(getSampleChannelRewardMessage());
             auto oInnerMessage =
                 oMessage->toInner<PubSubMessageMessage>()
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
 
-            app->twitch->addFakeMessage(sampleChannelRewardIRCMessage);
+            app->twitch->addFakeMessage(getSampleChannelRewardIRCMessage());
             app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
                 oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
         else
         {
-            auto oMessage = parsePubSubBaseMessage(sampleChannelRewardMessage2);
+            auto oMessage =
+                parsePubSubBaseMessage(getSampleChannelRewardMessage2());
             auto oInnerMessage =
                 oMessage->toInner<PubSubMessageMessage>()
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
@@ -243,7 +243,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
     });
 
     actions.emplace("addEmoteMessage", [=](std::vector<QString>) -> QString {
-        const auto &messages = sampleEmoteTestMessages;
+        const auto &messages = getSampleEmoteTestMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
         getApp()->twitch->addFakeMessage(msg);
