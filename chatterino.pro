@@ -527,7 +527,6 @@ HEADERS += \
     src/util/IncognitoBrowser.hpp \
     src/util/InitUpdateButton.hpp \
     src/util/IrcHelpers.hpp \
-    src/util/IsBigEndian.hpp \
     src/util/LayoutCreator.hpp \
     src/util/LayoutHelper.hpp \
     src/util/NuulsUploader.hpp \
@@ -536,7 +535,6 @@ HEADERS += \
     src/util/PostToThread.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \
-    src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RapidJsonSerializeQString.hpp \
     src/util/RatelimitBucket.hpp \
