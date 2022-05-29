@@ -1,69 +1,38 @@
 #include "util/FormatTime.hpp"
 
 #include <benchmark/benchmark.h>
-#include <gtest/gtest.h>
-#include <QDebug>
 
 using namespace chatterino;
 
-struct TestCase {
-    int input;
-    QString expectedOutput;
-};
-
-std::vector<TestCase> tests{
-    {
-        0,
-        "0s",
-    },
-    {
-        1337,
-        "22m 17s",
-    },
-    {
-        623452,
-        "7d 5h 10m 52s",
-    },
-    {
-        8345,
-        "2h 19m 5s",
-    },
-    {
-        314034,
-        "3d 15h 13m 54s",
-    },
-    {
-        27,
-        "27s",
-    },
-    {
-        34589,
-        "9h 36m 29s",
-    },
-    {
-        3659,
-        "1h 59s",
-    },
-    {
-        1045345,
-        "12d 2h 22m 25s",
-    },
-    {
-        86432,
-        "1d 32s",
-    },
-};
-
-static void BM_TimeFormatting(benchmark::State &state)
+template <class... Args>
+void BM_TimeFormatting(benchmark::State &state, Args &&...args)
 {
+    auto args_tuple = std::make_tuple(std::move(args)...);
     for (auto _ : state)
     {
-        for (const auto &test : tests)
-        {
-            auto output = formatTime(test.input);
-            auto matches = output == test.expectedOutput;
-        }
+        formatTime(std::get<0>(args_tuple));
     }
 }
 
-BENCHMARK(BM_TimeFormatting);
+BENCHMARK_CAPTURE(BM_TimeFormatting, 0, 0);
+BENCHMARK_CAPTURE(BM_TimeFormatting, qs0, "0");
+BENCHMARK_CAPTURE(BM_TimeFormatting, 1337, 1337);
+BENCHMARK_CAPTURE(BM_TimeFormatting, qs1337, "1337");
+BENCHMARK_CAPTURE(BM_TimeFormatting, 623452, 623452);
+BENCHMARK_CAPTURE(BM_TimeFormatting, qs623452, "623452");
+BENCHMARK_CAPTURE(BM_TimeFormatting, 8345, 8345);
+BENCHMARK_CAPTURE(BM_TimeFormatting, qs8345, "8345");
+BENCHMARK_CAPTURE(BM_TimeFormatting, 314034, 314034);
+BENCHMARK_CAPTURE(BM_TimeFormatting, qs314034, "314034");
+BENCHMARK_CAPTURE(BM_TimeFormatting, 27, 27);
+BENCHMARK_CAPTURE(BM_TimeFormatting, qs27, "27");
+BENCHMARK_CAPTURE(BM_TimeFormatting, 34589, 34589);
+BENCHMARK_CAPTURE(BM_TimeFormatting, qs34589, "34589");
+BENCHMARK_CAPTURE(BM_TimeFormatting, 3659, 3659);
+BENCHMARK_CAPTURE(BM_TimeFormatting, qs3659, "3659");
+BENCHMARK_CAPTURE(BM_TimeFormatting, 1045345, 1045345);
+BENCHMARK_CAPTURE(BM_TimeFormatting, qs1045345, "1045345");
+BENCHMARK_CAPTURE(BM_TimeFormatting, 86432, 86432);
+BENCHMARK_CAPTURE(BM_TimeFormatting, qs86432, "86432");
+BENCHMARK_CAPTURE(BM_TimeFormatting, qsempty, "");
+BENCHMARK_CAPTURE(BM_TimeFormatting, qsinvalid, "asd");
