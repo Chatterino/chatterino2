@@ -9,11 +9,9 @@ jobs:
   check-changelog:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
       # Gives an error if there's no change in the changelog (except using label)
       - name: Changelog check
-        uses: dangoslen/changelog-enforcer@v2.2.0
+        uses: dangoslen/changelog-enforcer@v3
         with:
           changeLogPath: 'CHANGELOG.md'
           skipLabels: 'no changelog entry needed, ci, submodules'

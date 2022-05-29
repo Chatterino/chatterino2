@@ -2,6 +2,8 @@
 
 #include "common/Modes.hpp"
 
+#include <QFileInfo>
+
 #define UGLYMACROHACK1(s) #s
 #define FROM_EXTERNAL_DEFINE(s) UGLYMACROHACK1(s)
 
@@ -9,19 +11,15 @@ namespace chatterino {
 
 Version::Version()
 {
-    // Version
     this->version_ = CHATTERINO_VERSION;
 
-    // Commit hash
     this->commitHash_ =
         QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_HASH)).remove('"');
 
-    // Date of build, this is depended on the format not changing
-#ifdef CHATTERINO_NIGHTLY_VERSION_STRING
+    // Date of build file generation (≈ date of build)
+#ifdef CHATTERINO_CMAKE_GEN_DATE
     this->dateOfBuild_ =
-        QString(FROM_EXTERNAL_DEFINE(CHATTERINO_NIGHTLY_VERSION_STRING))
-            .remove('"')
-            .split(' ')[0];
+        QString(FROM_EXTERNAL_DEFINE(CHATTERINO_CMAKE_GEN_DATE)).remove('"');
 #endif
 
     // "Full" version string, as displayed in window title
@@ -69,6 +67,11 @@ const QString &Version::dateOfBuild() const
 const bool &Version::isSupportedOS() const
 {
     return this->isSupportedOS_;
+}
+
+bool Version::isFlatpak() const
+{
+    return QFileInfo::exists("/.flatpak-info");
 }
 
 }  // namespace chatterino

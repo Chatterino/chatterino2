@@ -222,13 +222,10 @@ TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text,
 
 void TextLayoutElement::listenToLinkChanges()
 {
-    this->managedConnections_.emplace_back(
-        static_cast<TextElement &>(this->getCreator())
-            .linkChanged.connect([this]() {
-                // log("Old link: {}", this->getCreator().getLink().value);
-                // log("This link: {}", this->getLink().value);
-                this->setLink(this->getCreator().getLink());
-            }));
+    this->managedConnections_.managedConnect(
+        static_cast<TextElement &>(this->getCreator()).linkChanged, [this]() {
+            this->setLink(this->getCreator().getLink());
+        });
 }
 
 void TextLayoutElement::addCopyTextToString(QString &str, int from,
@@ -402,42 +399,6 @@ int TextIconLayoutElement::getXFromIndex(int index)
     else
     {
         return this->getRect().right();
-    }
-}
-
-//
-// TEXT
-//
-
-MultiColorTextLayoutElement::MultiColorTextLayoutElement(
-    MessageElement &_creator, QString &_text, const QSize &_size,
-    std::vector<PajSegment> segments, FontStyle _style, float _scale)
-    : TextLayoutElement(_creator, _text, _size, QColor{}, _style, _scale)
-    , segments_(segments)
-{
-    this->setText(_text);
-}
-
-void MultiColorTextLayoutElement::paint(QPainter &painter)
-{
-    auto app = getApp();
-
-    painter.setPen(this->color_);
-
-    painter.setFont(app->fonts->getFont(this->style_, this->scale_));
-
-    int xOffset = 0;
-
-    auto metrics = app->fonts->getFontMetrics(this->style_, this->scale_);
-
-    for (const auto &segment : this->segments_)
-    {
-        painter.setPen(segment.color);
-        painter.drawText(QRectF(this->getRect().x() + xOffset,
-                                this->getRect().y(), 10000, 10000),
-                         segment.text,
-                         QTextOption(Qt::AlignLeft | Qt::AlignTop));
-        xOffset += metrics.horizontalAdvance(segment.text);
     }
 }
 

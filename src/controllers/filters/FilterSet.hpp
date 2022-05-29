@@ -36,12 +36,13 @@ public:
         this->listener_.disconnect();
     }
 
-    bool filter(const MessagePtr &m) const
+    bool filter(const MessagePtr &m, ChannelPtr channel) const
     {
         if (this->filters_.size() == 0)
             return true;
 
-        filterparser::ContextMap context = filterparser::buildContextMap(m);
+        filterparser::ContextMap context =
+            filterparser::buildContextMap(m, channel.get());
         for (const auto &f : this->filters_.values())
         {
             if (!f->valid() || !f->filter(context))

@@ -23,16 +23,20 @@ class CommandModel;
 class CommandController final : public Singleton
 {
 public:
-    SignalVector<Command> items_;
+    SignalVector<Command> items;
 
     QString execCommand(const QString &text, std::shared_ptr<Channel> channel,
                         bool dryRun);
-    QStringList getDefaultTwitchCommandList();
+    QStringList getDefaultChatterinoCommandList();
 
     virtual void initialize(Settings &, Paths &paths) override;
     virtual void save() override;
 
     CommandModel *createModel(QObject *parent);
+
+    QString execCustomCommand(const QStringList &words, const Command &command,
+                              bool dryRun, ChannelPtr channel,
+                              std::map<QString, QString> context = {});
 
 private:
     void load(Paths &paths);
@@ -57,10 +61,7 @@ private:
     std::unique_ptr<pajlada::Settings::Setting<std::vector<Command>>>
         commandsSetting_;
 
-    QString execCustomCommand(const QStringList &words, const Command &command,
-                              bool dryRun);
-
-    QStringList commandAutoCompletions_;
+    QStringList defaultChatterinoCommandAutoCompletions_;
 };
 
 }  // namespace chatterino

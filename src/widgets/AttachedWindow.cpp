@@ -1,13 +1,15 @@
 #include "AttachedWindow.hpp"
 
 #include "Application.hpp"
+#include "ForwardDecl.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QTimer>
 #include <QVBoxLayout>
-#include "common/QLogging.hpp"
+#include <memory>
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"

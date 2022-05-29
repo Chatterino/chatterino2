@@ -5,7 +5,6 @@
 #include "boost/algorithm/algorithm.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
-#include "util/Shortcut.hpp"
 #include "util/WindowsHelper.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
@@ -83,10 +82,6 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 
     this->updateScale();
 
-    createWindowShortcut(this, "CTRL+0", [] {
-        getSettings()->uiScale.setValue(1);
-    });
-
     this->resize(300, 150);
 
 #ifdef USEWINSDK
@@ -135,8 +130,6 @@ float BaseWindow::qtFontScale() const
 
 void BaseWindow::init()
 {
-    this->setWindowIcon(QIcon(":/images/icon.png"));
-
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame())
     {
@@ -234,7 +227,7 @@ void BaseWindow::init()
                                    0, 0, 0,
                                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
                 },
-                this->managedConnections_);
+                this->connections_);
         });
     }
 #else
@@ -243,13 +236,14 @@ void BaseWindow::init()
     {
         getSettings()->windowTopMost.connect(
             [this](bool topMost, auto) {
+                auto isVisible = this->isVisible();
                 this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
-                if (this->isVisible())
+                if (isVisible)
                 {
                     this->show();
                 }
             },
-            this->managedConnections_);
+            this->connections_);
     }
 #endif
 }
@@ -641,11 +635,7 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                              long *result)
 {
 #ifdef USEWINSDK
-#    if (QT_VERSION == QT_VERSION_CHECK(5, 11, 1))
-    MSG *msg = *reinterpret_cast<MSG **>(message);
-#    else
     MSG *msg = reinterpret_cast<MSG *>(message);
-#    endif
 
     bool returnValue = false;
 

@@ -5,6 +5,7 @@
 #include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
 #include "common/WindowDescriptors.hpp"
+
 #include "pajlada/settings/settinglistener.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
@@ -30,6 +31,8 @@ public:
     WindowManager();
     ~WindowManager() override;
 
+    static void encodeTab(SplitContainer *tab, bool isSelected,
+                          QJsonObject &obj);
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
     static void encodeFilters(Split *split, QJsonArray &arr);
     static IndirectChannel decodeChannel(const SplitDescriptor &descriptor);
@@ -99,7 +102,8 @@ public:
     pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
 
 private:
-    void encodeNodeRecursively(SplitContainer::Node *node, QJsonObject &obj);
+    static void encodeNodeRecursively(SplitContainer::Node *node,
+                                      QJsonObject &obj);
 
     // Load window layout from the window-layout.json file
     WindowLayout loadWindowLayoutFromFile() const;

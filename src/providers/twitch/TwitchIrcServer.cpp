@@ -11,7 +11,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
-#include "providers/twitch/PubsubClient.hpp"
+#include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
@@ -22,7 +22,38 @@
 // using namespace Communi;
 using namespace std::chrono_literals;
 
+#define TWITCH_PUBSUB_URL "wss://pubsub-edge.twitch.tv"
+
 namespace chatterino {
+
+namespace {
+    // TODO: combine this with getEmoteSetBatches in TwitchAccount.cpp, maybe some templated thing
+    template <class T>
+    std::vector<T> getChannelsInBatches(T channels)
+    {
+        constexpr int batchSize = 100;
+
+        int batchCount = (channels.size() / batchSize) + 1;
+
+        std::vector<T> batches;
+        batches.reserve(batchCount);
+
+        for (int i = 0; i < batchCount; i++)
+        {
+            T batch;
+
+            // I hate you, msvc
+            int last = (std::min)(batchSize, channels.size() - batchSize * i);
+            for (int j = 0; j < last; j++)
+            {
+                batch.push_back(channels.at(j + (batchSize * i)));
+            }
+            batches.emplace_back(batch);
+        }
+
+        return batches;
+    }
+}  // namespace
 
 TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
@@ -32,7 +63,7 @@ TwitchIrcServer::TwitchIrcServer()
 {
     this->initializeIrc();
 
-    this->pubsub = new PubSub;
+    this->pubsub = new PubSub(TWITCH_PUBSUB_URL);
 
     // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) {
     // this->connect(); },
@@ -45,11 +76,18 @@ void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
     getApp()->accounts->twitch.currentUserChanged.connect([this]() {
         postToThread([this] {
             this->connect();
+            this->pubsub->setAccount(getApp()->accounts->twitch.getCurrent());
         });
     });
 
     this->bttv.loadEmotes();
     this->ffz.loadEmotes();
+
+    /* Refresh all twitch channel's live status in bulk every 30 seconds after starting chatterino */
+    QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [=] {
+        this->bulkRefreshLiveStatus();
+    });
+    this->bulkLiveStatusTimer_.start(30 * 1000);
 }
 
 void TwitchIrcServer::initializeConnection(IrcConnection *connection,
@@ -197,34 +235,13 @@ void TwitchIrcServer::writeConnectionMessageReceived(
     // Below commands enabled through the twitch.tv/commands CAP REQ
     if (command == "USERSTATE")
     {
-        // Received USERSTATE upon PRIVMSGing
+        // Received USERSTATE upon sending PRIVMSG messages
         handler.handleUserStateMessage(message);
     }
     else if (command == "NOTICE")
     {
-        static std::unordered_set<std::string> readConnectionOnlyIDs{
-            "host_on",
-            "host_off",
-            "host_target_went_offline",
-            "emote_only_on",
-            "emote_only_off",
-            "slow_on",
-            "slow_off",
-            "subs_on",
-            "subs_off",
-            "r9k_on",
-            "r9k_off",
-
-            // Display for user who times someone out. This implies you're a
-            // moderator, at which point you will be connected to PubSub and receive
-            // a better message from there.
-            "timeout_success",
-            "ban_success",
-
-            // Channel suspended notices
-            "msg_channel_suspended",
-        };
-
+        // List of expected NOTICE messages on write connection
+        // https://git.kotmisia.pl/Mm2PL/docs/src/branch/master/irc_msg_ids.md#command-results
         handler.handleNoticeMessage(
             static_cast<Communi::IrcNoticeMessage *>(message));
     }
@@ -312,6 +329,59 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
     }
 
     return Channel::getEmpty();
+}
+
+void TwitchIrcServer::bulkRefreshLiveStatus()
+{
+    auto twitchChans = std::make_shared<QHash<QString, TwitchChannel *>>();
+
+    this->forEachChannel([twitchChans](ChannelPtr chan) {
+        auto tc = dynamic_cast<TwitchChannel *>(chan.get());
+        if (tc && !tc->roomId().isEmpty())
+        {
+            twitchChans->insert(tc->roomId(), tc);
+        }
+    });
+
+    // iterate over batches of channel IDs
+    for (const auto &batch : getChannelsInBatches(twitchChans->keys()))
+    {
+        getHelix()->fetchStreams(
+            batch, {},
+            [twitchChans](std::vector<HelixStream> streams) {
+                for (const auto &stream : streams)
+                {
+                    // remaining channels will be used later to set their stream status as offline
+                    // so we use take(id) to remove it
+                    auto tc = twitchChans->take(stream.userId);
+                    if (tc == nullptr)
+                    {
+                        continue;
+                    }
+
+                    tc->parseLiveStatus(true, stream);
+                }
+            },
+            []() {
+                // failure
+            },
+            [batch, twitchChans] {
+                // All the channels that were not present in fetchStreams response should be assumed to be offline
+                // It is necessary to update their stream status in case they've gone live -> offline
+                // Otherwise some of them will be marked as live forever
+                for (const auto &chID : batch)
+                {
+                    auto tc = twitchChans->value(chID);
+                    // early out in case channel does not exist anymore
+                    if (tc == nullptr)
+                    {
+                        continue;
+                    }
+
+                    tc->parseLiveStatus(false, {});
+                }
+            });
+    }
 }
 
 QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)

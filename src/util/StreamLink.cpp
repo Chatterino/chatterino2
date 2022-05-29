@@ -1,15 +1,20 @@
 #include "util/StreamLink.hpp"
 
 #include "Application.hpp"
+#include "providers/irc/IrcMessageBuilder.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/SplitCommand.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QErrorMessage>
 #include <QFileInfo>
 #include <QProcess>
 #include "common/QLogging.hpp"
+#include "common/Version.hpp"
 
 #include <functional>
 
@@ -33,18 +38,6 @@ namespace {
 #else
         return "/usr/bin/streamlink";
 #endif
-    }
-
-    QString getStreamlinkProgram()
-    {
-        if (getSettings()->streamlinkUseCustomPath)
-        {
-            return getSettings()->streamlinkPath + "/" + getBinaryName();
-        }
-        else
-        {
-            return getBinaryName();
-        }
     }
 
     bool checkStreamlinkPath(const QString &path)
@@ -83,7 +76,27 @@ namespace {
     QProcess *createStreamlinkProcess()
     {
         auto p = new QProcess;
-        p->setProgram(getStreamlinkProgram());
+
+        const QString path = [] {
+            if (getSettings()->streamlinkUseCustomPath)
+            {
+                return getSettings()->streamlinkPath + "/" + getBinaryName();
+            }
+            else
+            {
+                return QString{getBinaryName()};
+            }
+        }();
+
+        if (Version::instance().isFlatpak())
+        {
+            p->setProgram("flatpak-spawn");
+            p->setArguments({"--host", path});
+        }
+        else
+        {
+            p->setProgram(path);
+        }
 
         QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
             if (err == QProcess::FailedToStart)
@@ -165,7 +178,8 @@ void getStreamQualities(const QString &channelURL,
             }
         });
 
-    p->setArguments({channelURL, "--default-stream=KKona"});
+    p->setArguments(p->arguments() +
+                    QStringList{channelURL, "--default-stream=KKona"});
 
     p->start();
 }
@@ -173,7 +187,9 @@ void getStreamQualities(const QString &channelURL,
 void openStreamlink(const QString &channelURL, const QString &quality,
                     QStringList extraArguments)
 {
-    QStringList arguments = extraArguments << channelURL << quality;
+    auto proc = createStreamlinkProcess();
+    auto arguments = proc->arguments()
+                     << extraArguments << channelURL << quality;
 
     // Remove empty arguments before appending additional streamlink options
     // as the options might purposely contain empty arguments
@@ -182,7 +198,8 @@ void openStreamlink(const QString &channelURL, const QString &quality,
     QString additionalOptions = getSettings()->streamlinkOpts.getValue();
     arguments << splitCommand(additionalOptions);
 
-    bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
+    proc->setArguments(std::move(arguments));
+    bool res = proc->startDetached();
 
     if (!res)
     {
@@ -192,6 +209,20 @@ void openStreamlink(const QString &channelURL, const QString &quality,
 
 void openStreamlinkForChannel(const QString &channel)
 {
+    static const QString INFO_TEMPLATE("Opening %1 in Streamlink ...");
+
+    auto *currentPage = dynamic_cast<SplitContainer *>(
+        getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+    if (currentPage != nullptr)
+    {
+        if (auto currentSplit = currentPage->getSelectedSplit();
+            currentSplit != nullptr)
+        {
+            currentSplit->getChannel()->addMessage(
+                makeSystemMessage(INFO_TEMPLATE.arg(channel)));
+        }
+    }
+
     QString channelURL = "twitch.tv/" + channel;
 
     QString preferredQuality = getSettings()->preferredQuality.getValue();
@@ -200,7 +231,7 @@ void openStreamlinkForChannel(const QString &channel)
     if (preferredQuality == "choose")
     {
         getStreamQualities(channelURL, [=](QStringList qualityOptions) {
-            QualityPopup::showDialog(channel, qualityOptions);
+            QualityPopup::showDialog(channelURL, qualityOptions);
         });
 
         return;

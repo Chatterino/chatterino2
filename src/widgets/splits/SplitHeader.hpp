@@ -2,15 +2,16 @@
 
 #include "widgets/BaseWidget.hpp"
 
+#include <QElapsedTimer>
 #include <QMenu>
 #include <QPoint>
-#include <memory>
+#include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/connection.hpp>
 #include <pajlada/signals/signalholder.hpp>
-#include <vector>
 
-#include <QElapsedTimer>
+#include <memory>
+#include <vector>
 
 namespace chatterino {
 
@@ -19,7 +20,7 @@ class EffectLabel;
 class Label;
 class Split;
 
-class SplitHeader final : public BaseWidget, pajlada::Signals::SignalHolder
+class SplitHeader final : public BaseWidget
 {
     Q_OBJECT
 
@@ -64,6 +65,8 @@ private:
     bool isLive_{false};
     QString thumbnail_;
     QElapsedTimer lastThumbnail_;
+    std::chrono::steady_clock::time_point lastReloadedChannelEmotes_;
+    std::chrono::steady_clock::time_point lastReloadedSubEmotes_;
 
     // ui
     Button *dropdownButton_{};
@@ -81,11 +84,11 @@ private:
 
     // signals
     pajlada::Signals::NoArgSignal modeUpdateRequested_;
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
-    std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
+    pajlada::Signals::SignalHolder channelConnections_;
+    std::vector<boost::signals2::scoped_connection> bSignals_;
 
 public slots:
-    void moveSplit();
     void reloadChannelEmotes();
     void reloadSubscriberEmotes();
     void reconnect();
