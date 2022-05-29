@@ -273,7 +273,12 @@ void Split::addShortcuts()
          }},
         {"showSearch",
          [this](std::vector<QString>) -> QString {
-             this->showSearch();
+             this->showSearch(true);
+             return "";
+         }},
+        {"showGlobalSearch",
+         [this](std::vector<QString>) -> QString {
+             this->showSearch(false);
              return "";
          }},
         {"reconnect",
@@ -985,6 +990,33 @@ void Split::showViewerList()
                                      "viewers"};
     auto loadingLabel = new QLabel("Loading...");
 
+    searchBar->setPlaceholderText("Search User...");
+
+    auto performListSearch = [=]() {
+        auto query = searchBar->text();
+        if (query.isEmpty())
+        {
+            resultList->hide();
+            chattersList->show();
+            return;
+        }
+
+        auto results = chattersList->findItems(query, Qt::MatchContains);
+        chattersList->hide();
+        resultList->clear();
+        for (auto &item : results)
+        {
+            if (!item->text().contains("("))
+            {
+                resultList->addItem(formatListItemText(item->text()));
+            }
+        }
+        resultList->show();
+    };
+
+    QObject::connect(searchBar, &QLineEdit::textEdited, this,
+                     performListSearch);
+
     NetworkRequest::twitchRequest("https://tmi.twitch.tv/group/user/" +
                                   this->getChannel()->getName() + "/chatters")
         .caller(this)
@@ -1018,54 +1050,31 @@ void Split::showViewerList()
                 chattersList->addItem(new QListWidgetItem());
             }
 
+            performListSearch();
             return Success;
         })
         .execute();
-
-    searchBar->setPlaceholderText("Search User...");
-    QObject::connect(searchBar, &QLineEdit::textEdited, this, [=]() {
-        auto query = searchBar->text();
-        if (!query.isEmpty())
-        {
-            auto results = chattersList->findItems(query, Qt::MatchContains);
-            chattersList->hide();
-            resultList->clear();
-            for (auto &item : results)
-            {
-                if (!labels.contains(item->text()))
-                {
-                    resultList->addItem(formatListItemText(item->text()));
-                }
-            }
-            resultList->show();
-        }
-        else
-        {
-            resultList->hide();
-            chattersList->show();
-        }
-    });
 
     QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {
         viewerDock->setMinimumWidth(300);
     });
 
-    auto listDoubleClick = [=](QString userName) {
+    auto listDoubleClick = [this](const QModelIndex &index) {
+        const auto itemText = index.data().toString();
+
         // if the list item contains a parentheses it means that
         // it's a category label so don't show a usercard
-        if (!userName.contains("(") && !userName.isEmpty())
+        if (!itemText.contains("(") && !itemText.isEmpty())
         {
-            this->view_->showUserInfoPopup(userName);
+            this->view_->showUserInfoPopup(itemText);
         }
     };
 
-    QObject::connect(chattersList, &QListWidget::doubleClicked, this, [=]() {
-        listDoubleClick(chattersList->currentItem()->text());
-    });
+    QObject::connect(chattersList, &QListWidget::doubleClicked, this,
+                     listDoubleClick);
 
-    QObject::connect(resultList, &QListWidget::doubleClicked, this, [=]() {
-        listDoubleClick(resultList->currentItem()->text());
-    });
+    QObject::connect(resultList, &QListWidget::doubleClicked, this,
+                     listDoubleClick);
 
     HotkeyController::HotkeyMap actions{
         {"delete",
@@ -1155,13 +1164,29 @@ const QList<QUuid> Split::getFilters() const
     return this->view_->getFilterIds();
 }
 
-void Split::showSearch()
+void Split::showSearch(bool singleChannel)
 {
-    SearchPopup *popup = new SearchPopup(this);
-
-    popup->setChannelFilters(this->view_->getFilterSet());
+    auto *popup = new SearchPopup(this);
     popup->setAttribute(Qt::WA_DeleteOnClose);
-    popup->setChannel(this->getChannel());
+
+    if (singleChannel)
+    {
+        popup->addChannel(this->getChannelView());
+        popup->show();
+        return;
+    }
+
+    // Pass every ChannelView for every Split across the app to the search popup
+    auto &notebook = getApp()->windows->getMainWindow().getNotebook();
+    for (int i = 0; i < notebook.getPageCount(); ++i)
+    {
+        auto container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
+        for (auto split : container->getSplits())
+        {
+            popup->addChannel(split->getChannelView());
+        }
+    }
+
     popup->show();
 }
 
