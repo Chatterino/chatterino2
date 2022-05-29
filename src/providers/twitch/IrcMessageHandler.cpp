@@ -239,14 +239,15 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
     this->addMessage(
         message, message->target(),
         message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
-        false, message->isAction());
+        false, message->isAction(), false, MessageFlag::None);
 }
 
 void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                                    const QString &target,
                                    const QString &content,
                                    TwitchIrcServer &server, bool isSub,
-                                   bool isAction)
+                                   bool isAction, bool isAnnouncement,
+                                   MessageFlag announcementFlag)
 {
     QString channelName;
     if (!trimChannelName(target, channelName))
@@ -262,7 +263,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
     }
 
     MessageParseArgs args;
-    if (isSub)
+    if (isSub || isAnnouncement)
     {
         args.trimSubscriberUsername = true;
     }
@@ -287,7 +288,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                     if (reward.id == rewardId)
                     {
                         this->addMessage(clone, target, content, server, isSub,
-                                         isAction);
+                                         isAction, isAnnouncement, announcementFlag);
                         clone->deleteLater();
                         return true;
                     }
@@ -300,12 +301,18 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
 
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
 
-    if (isSub || !builder.isIgnored())
+    if (isSub || isAnnouncement || !builder.isIgnored())
     {
         if (isSub)
         {
             builder->flags.set(MessageFlag::Subscription);
             builder->flags.unset(MessageFlag::Highlighted);
+        }
+        
+        if (isAnnouncement)
+        {
+            builder->flags.set(MessageFlag::Announcement);
+            builder->flags.set(announcementFlag);
         }
         auto msg = builder.build();
 
@@ -615,6 +622,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
     QString msgType = tags.value("msg-id").toString();
     QString msgColor = tags.value("msg-param-color").toString();
     QString content;
+    MessageFlag announceFlag = MessageFlag::None;
 
     auto it = tags.find("system-msg");
 
@@ -634,12 +642,29 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
         else if (msgType == "announcement")
         {
             messageText = "Announcement";
+            QString announceCol = tags.value("msg-param-color").toString();
+            if (announceCol == "PRIMARY" || announceCol == "PURPLE" || announceCol == "")
+            {
+                announceFlag = MessageFlag::AnnouncePurple;
+            }
+            else if (announceCol == "BLUE")
+            {
+                announceFlag = MessageFlag::AnnounceBlue;
+            }
+            else if (announceCol == "GREEN")
+            {
+                announceFlag = MessageFlag::AnnounceGreen;
+            }
+            else if (announceCol == "ORANGE")
+            {
+                announceFlag = MessageFlag::AnnounceOrange;
+            }
         }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
                                 calculateMessageTime(message).time());
 
-        b->flags.set(MessageFlag::Subscription);
+        b->flags.set(announceFlag);
         auto newMessage = b.release();
         builtMessages.emplace_back(newMessage);
     }
@@ -659,7 +684,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
 
             TwitchMessageBuilder builder(channel, message, args, content,
                                          false);
-            builder->flags.set(MessageFlag::Subscription);
+            builder->flags.set(announceFlag);
             builder->flags.unset(MessageFlag::Highlighted);
             builtMessages.emplace_back(builder.build());
         }
@@ -678,6 +703,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
     QString msgType = tags.value("msg-id").toString();
     QString msgColor = tags.value("msg-param-color").toString();
     QString content;
+    MessageFlag announceFlag = MessageFlag::None;
 
     auto it = tags.find("system-msg");
 
@@ -697,12 +723,29 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         else if (msgType == "announcement")
         {
             messageText = "Announcement";
+            QString announceCol = tags.value("msg-param-color").toString();
+            if (announceCol == "PRIMARY" || announceCol == "PURPLE" || announceCol == "")
+            {
+                announceFlag = MessageFlag::AnnouncePurple;
+            }
+            else if (announceCol == "BLUE")
+            {
+                announceFlag = MessageFlag::AnnounceBlue;
+            }
+            else if (announceCol == "GREEN")
+            {
+                announceFlag = MessageFlag::AnnounceGreen;
+            }
+            else if (announceCol == "ORANGE")
+            {
+                announceFlag = MessageFlag::AnnounceOrange;
+            }
         }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
                                 calculateMessageTime(message).time());
 
-        b->flags.set(MessageFlag::Subscription);
+        b->flags.set(announceFlag);
         auto newMessage = b.release();
 
         QString channelName;
@@ -734,8 +777,8 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
     {
         // Messages are not required, so they might be empty
         if (!content.isEmpty())
-        {
-            this->addMessage(message, target, content, server, true, false);
+        {   
+            this->addMessage(message, target, content, server, false, false, true, announceFlag);
         }
     }
 }

@@ -58,7 +58,7 @@ public:
 private:
     void addMessage(Communi::IrcMessage *message, const QString &target,
                     const QString &content, TwitchIrcServer &server,
-                    bool isResub, bool isAction);
+                    bool isResub, bool isAction, bool isAnnouncement, MessageFlag announcementFlag);
 };
 
 }  // namespace chatterino

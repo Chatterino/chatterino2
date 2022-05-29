@@ -39,6 +39,11 @@ enum class MessageFlag : uint32_t {
     RedeemedChannelPointReward = (1 << 21),
     ShowInMentions = (1 << 22),
     FirstMessage = (1 << 23),
+    Announcement = (1 << 24),
+    AnnouncePurple = (1 << 25),
+    AnnounceBlue = (1 << 26),
+    AnnounceGreen = (1 << 27),
+    AnnounceOrange = (1 << 28),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
