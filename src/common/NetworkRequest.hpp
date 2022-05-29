@@ -61,6 +61,7 @@ public:
     NetworkRequest authorizeTwitchV5(const QString &clientID,
                                      const QString &oauthToken = QString()) &&;
     NetworkRequest multiPart(QHttpMultiPart *payload) &&;
+    NetworkRequest followRedirects(bool followRedirects) &&;
 
     void execute();
 

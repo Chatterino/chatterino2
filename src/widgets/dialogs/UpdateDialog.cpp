@@ -14,6 +14,8 @@ UpdateDialog::UpdateDialog()
     : BaseWindow({BaseWindow::Frameless, BaseWindow::TopMost,
                   BaseWindow::EnableCustomFrame})
 {
+    this->setActionOnFocusLoss(BaseWindow::Delete);
+
     auto layout =
         LayoutCreator<UpdateDialog>(this).setLayoutType<QVBoxLayout>();
 
@@ -27,7 +29,6 @@ UpdateDialog::UpdateDialog()
 
     QObject::connect(install, &QPushButton::clicked, this, [this] {
         Updates::instance().installUpdates();
-        this->close();
     });
     QObject::connect(dismiss, &QPushButton::clicked, this, [this] {
         this->buttonClicked.invoke(Dismiss);

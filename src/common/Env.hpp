@@ -16,6 +16,7 @@ public:
     const QString twitchServerHost;
     const uint16_t twitchServerPort;
     const bool twitchServerSecure;
+    const bool forceUpdate;
 };
 
 }  // namespace chatterino

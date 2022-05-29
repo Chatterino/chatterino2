@@ -58,6 +58,7 @@ Env::Env()
           readStringEnv("CHATTERINO2_TWITCH_SERVER_HOST", "irc.chat.twitch.tv"))
     , twitchServerPort(readPortEnv("CHATTERINO2_TWITCH_SERVER_PORT", 443))
     , twitchServerSecure(readBoolEnv("CHATTERINO2_TWITCH_SERVER_SECURE", true))
+    , forceUpdate(readBoolEnv("CHATTERINO2_FORCE_UPDATE", false))
 {
 }
 

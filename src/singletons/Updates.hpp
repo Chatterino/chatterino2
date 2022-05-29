@@ -1,5 +1,7 @@
 #pragma once
 
+#include "providers/GitHubReleases.hpp"
+
 #include <QString>
 #include <pajlada/signals/signal.hpp>
 
@@ -42,9 +44,11 @@ private:
     Status status_ = None;
     bool isDowngrade_{};
 
-    QString updateExe_;
-    QString updatePortable_;
     QString updateGuideLink_;
+    QString releaseURL_;
+
+    GitHubReleaseAsset releaseAsset_;
+    void selectReleaseAsset(const GitHubRelease &release);
 
     void setStatus_(Status status);
 };

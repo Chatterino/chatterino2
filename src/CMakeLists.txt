@@ -165,6 +165,8 @@ set(SOURCE_FILES
         messages/search/SubstringPredicate.cpp
         messages/search/SubstringPredicate.hpp
 
+        providers/GitHubReleases.cpp
+        providers/GitHubReleases.hpp
         providers/IvrApi.cpp
         providers/IvrApi.hpp
         providers/LinkResolver.cpp

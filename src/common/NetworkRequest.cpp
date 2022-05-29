@@ -11,6 +11,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QNetworkRequest>
 #include <QtConcurrent>
 #include "common/QLogging.hpp"
 
@@ -147,6 +148,13 @@ NetworkRequest NetworkRequest::multiPart(QHttpMultiPart *payload) &&
 {
     payload->setParent(this->data->lifetimeManager_);
     this->data->multiPartPayload_ = payload;
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::followRedirects(bool followRedirects) &&
+{
+    this->data->request_.setAttribute(QNetworkRequest::FollowRedirectsAttribute,
+                                      followRedirects);
     return std::move(*this);
 }
 

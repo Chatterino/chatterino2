@@ -200,6 +200,7 @@ SOURCES += \
     src/providers/emoji/Emojis.cpp \
     src/providers/ffz/FfzBadges.cpp \
     src/providers/ffz/FfzEmotes.cpp \
+    src/providers/GitHubReleases.cpp \
     src/providers/irc/AbstractIrcServer.cpp \
     src/providers/irc/Irc2.cpp \
     src/providers/irc/IrcAccount.cpp \
@@ -306,13 +307,13 @@ SOURCES += \
     src/widgets/helper/NotebookTab.cpp \
     src/widgets/helper/QColorPicker.cpp \
     src/widgets/helper/RegExpItemDelegate.cpp \
-    src/widgets/helper/TrimRegExpValidator.cpp \
     src/widgets/helper/ResizingTextEdit.cpp \
     src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/SearchPopup.cpp \
     src/widgets/helper/SettingsDialogTab.cpp \
     src/widgets/helper/SignalLabel.cpp \
     src/widgets/helper/TitlebarButton.cpp \
+    src/widgets/helper/TrimRegExpValidator.cpp \
     src/widgets/Label.cpp \
     src/widgets/listview/GenericItemDelegate.cpp \
     src/widgets/listview/GenericListItem.cpp \
@@ -454,6 +455,7 @@ HEADERS += \
     src/providers/emoji/Emojis.hpp \
     src/providers/ffz/FfzBadges.hpp \
     src/providers/ffz/FfzEmotes.hpp \
+    src/providers/GitHubReleases.hpp \
     src/providers/irc/AbstractIrcServer.hpp \
     src/providers/irc/Irc2.hpp \
     src/providers/irc/IrcAccount.hpp \
@@ -536,6 +538,7 @@ HEADERS += \
     src/util/PostToThread.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \
+    src/util/Qt.hpp \
     src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RapidJsonSerializeQString.hpp \
@@ -591,13 +594,13 @@ HEADERS += \
     src/widgets/helper/NotebookTab.hpp \
     src/widgets/helper/QColorPicker.hpp \
     src/widgets/helper/RegExpItemDelegate.hpp \
-    src/widgets/helper/TrimRegExpValidator.hpp \
     src/widgets/helper/ResizingTextEdit.hpp \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \
     src/widgets/helper/SettingsDialogTab.hpp \
     src/widgets/helper/SignalLabel.hpp \
     src/widgets/helper/TitlebarButton.hpp \
+    src/widgets/helper/TrimRegExpValidator.hpp \
     src/widgets/Label.hpp \
     src/widgets/listview/GenericItemDelegate.hpp \
     src/widgets/listview/GenericListItem.hpp \
