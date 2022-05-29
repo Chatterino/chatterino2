@@ -203,8 +203,7 @@ void ChannelView::initializeSignals()
 
     this->signalHolder_.managedConnect(
         getApp()->windows->layoutRequested, [&](Channel *channel) {
-            if (this->isVisible() &&
-                (channel == nullptr || this->channel_.get() == channel))
+            if ((channel == nullptr || this->channel_.get() == channel))
             {
                 this->queueLayout();
             }

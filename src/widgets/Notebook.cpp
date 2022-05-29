@@ -106,17 +106,17 @@ void Notebook::removePage(QWidget *page)
     {
         if (this->allItems_[i].page == page)
         {
-            if (this->allItems_.count() == 1)
+            if (this->items_.count() == 1)
             {
                 this->select(nullptr);
             }
-            else if (i == this->allItems_.count() - 1)
+            else if (i == this->items_.count() - 1)
             {
-                this->select(this->allItems_[i - 1].page);
+                this->select(this->items_[i - 1].page);
             }
             else
             {
-                this->select(this->allItems_[i + 1].page);
+                this->select(this->items_[i + 1].page);
             }
 
             this->allItems_[i].page->deleteLater();
