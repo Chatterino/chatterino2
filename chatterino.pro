@@ -541,8 +541,7 @@ HEADERS += \
     src/util/RapidJsonSerializeQString.hpp \
     src/util/RatelimitBucket.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
-    src/util/SampleCheerMessages.hpp \
-    src/util/SampleLinks.hpp \
+    src/util/SampleData.hpp \
     src/util/SharedPtrElementLess.hpp \
     src/util/SplitCommand.hpp \
     src/util/StandardItemHelper.hpp \
