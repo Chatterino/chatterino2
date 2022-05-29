@@ -1,12 +1,19 @@
 #include "FormatTime.hpp"
 
 namespace chatterino {
+
 namespace {
-    void appendDuration(int count, QChar &&order, QString &outString)
+
+    void appendDuration(int count, QChar &&suffix, QString &out)
     {
-        outString.append(QString::number(count));
-        outString.append(order);
+        if (!out.isEmpty())
+        {
+            out.append(' ');
+        }
+        out.append(QString::number(count));
+        out.append(suffix);
     }
+
 }  // namespace
 
 QString formatTime(int totalSeconds)
@@ -25,26 +32,14 @@ QString formatTime(int totalSeconds)
     }
     if (hours > 0)
     {
-        if (!res.isEmpty())
-        {
-            res.append(" ");
-        }
         appendDuration(hours, 'h', res);
     }
     if (minutes > 0)
     {
-        if (!res.isEmpty())
-        {
-            res.append(" ");
-        }
         appendDuration(minutes, 'm', res);
     }
     if (seconds > 0)
     {
-        if (!res.isEmpty())
-        {
-            res.append(" ");
-        }
         appendDuration(seconds, 's', res);
     }
     return res;
