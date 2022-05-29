@@ -94,6 +94,62 @@ namespace {
         return badges;
     }
 
+    QString stylizeUsername(const QString &username, const Message &message)
+    {
+        auto app = getApp();
+
+        const QString &localizedName = message.localizedName;
+        bool hasLocalizedName = !localizedName.isEmpty();
+
+        // The full string that will be rendered in the chat widget
+        QString usernameText;
+
+        switch (getSettings()->usernameDisplayMode.getValue())
+        {
+            case UsernameDisplayMode::Username: {
+                usernameText = username;
+            }
+            break;
+
+            case UsernameDisplayMode::LocalizedName: {
+                if (hasLocalizedName)
+                {
+                    usernameText = localizedName;
+                }
+                else
+                {
+                    usernameText = username;
+                }
+            }
+            break;
+
+            default:
+            case UsernameDisplayMode::UsernameAndLocalizedName: {
+                if (hasLocalizedName)
+                {
+                    usernameText = username + "(" + localizedName + ")";
+                }
+                else
+                {
+                    usernameText = username;
+                }
+            }
+            break;
+        }
+
+        auto nicknames = getCSettings().nicknames.readOnly();
+
+        for (const auto &nickname : *nicknames)
+        {
+            if (nickname.match(usernameText))
+            {
+                break;
+            }
+        }
+
+        return usernameText;
+    }
+
 }  // namespace
 
 TwitchMessageBuilder::TwitchMessageBuilder(
@@ -198,16 +254,18 @@ MessagePtr TwitchMessageBuilder::build()
 
         const auto &threadRoot = this->thread_->root();
 
+        QString usernameText =
+            stylizeUsername(threadRoot->loginName, *threadRoot.get());
+
         // construct reply elements
         this->emplace<TextElement>(
                 "Replying to", MessageElementFlag::RepliedText,
                 MessageColor::System, FontStyle::ChatMediumSmall)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
 
-        this->emplace<TextElement>("@" + threadRoot->displayName + ":",
-                                   MessageElementFlag::RepliedUsername,
-                                   threadRoot->usernameColor,
-                                   FontStyle::ChatMediumSmall)
+        this->emplace<TextElement>(
+                "@" + usernameText + ":", MessageElementFlag::RepliedUsername,
+                threadRoot->usernameColor, FontStyle::ChatMediumSmall)
             ->setLink({Link::UserInfo, threadRoot->displayName});
 
         this->emplace<SingleLineTextElement>(
@@ -652,53 +710,7 @@ void TwitchMessageBuilder::appendUsername()
         }
     }
 
-    bool hasLocalizedName = !localizedName.isEmpty();
-
-    // The full string that will be rendered in the chat widget
-    QString usernameText;
-
-    switch (getSettings()->usernameDisplayMode.getValue())
-    {
-        case UsernameDisplayMode::Username: {
-            usernameText = username;
-        }
-        break;
-
-        case UsernameDisplayMode::LocalizedName: {
-            if (hasLocalizedName)
-            {
-                usernameText = localizedName;
-            }
-            else
-            {
-                usernameText = username;
-            }
-        }
-        break;
-
-        default:
-        case UsernameDisplayMode::UsernameAndLocalizedName: {
-            if (hasLocalizedName)
-            {
-                usernameText = username + "(" + localizedName + ")";
-            }
-            else
-            {
-                usernameText = username;
-            }
-        }
-        break;
-    }
-
-    auto nicknames = getCSettings().nicknames.readOnly();
-
-    for (const auto &nickname : *nicknames)
-    {
-        if (nickname.match(usernameText))
-        {
-            break;
-        }
-    }
+    QString usernameText = stylizeUsername(username, this->message());
 
     if (this->args.isSentWhisper)
     {
