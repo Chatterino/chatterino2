@@ -4,7 +4,7 @@
 
 namespace chatterino {
 
-QStringList getValidLinks()
+inline QStringList getValidLinks()
 {
     return {
         R"(http://github.com/)",
@@ -112,7 +112,7 @@ QStringList getValidLinks()
     };
 }
 
-QStringList getValidButIgnoredLinks()
+inline QStringList getValidButIgnoredLinks()
 {
     return {
         R"(http://username:password@github.com/)",
@@ -124,7 +124,7 @@ QStringList getValidButIgnoredLinks()
     };
 }
 
-QStringList getInvalidLinks()
+inline QStringList getInvalidLinks()
 {
     return {
         R"(1.40)",
