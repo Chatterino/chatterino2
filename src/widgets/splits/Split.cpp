@@ -994,25 +994,24 @@ void Split::showViewerList()
 
     auto performListSearch = [=]() {
         auto query = searchBar->text();
-        if (!query.isEmpty())
-        {
-            auto results = chattersList->findItems(query, Qt::MatchContains);
-            chattersList->hide();
-            resultList->clear();
-            for (auto &item : results)
-            {
-                if (!item->text().contains("("))
-                {
-                    resultList->addItem(formatListItemText(item->text()));
-                }
-            }
-            resultList->show();
-        }
-        else
+        if (query.isEmpty())
         {
             resultList->hide();
             chattersList->show();
+            return;
         }
+
+        auto results = chattersList->findItems(query, Qt::MatchContains);
+        chattersList->hide();
+        resultList->clear();
+        for (auto &item : results)
+        {
+            if (!item->text().contains("("))
+            {
+                resultList->addItem(formatListItemText(item->text()));
+            }
+        }
+        resultList->show();
     };
 
     QObject::connect(searchBar, &QLineEdit::textEdited, this,
