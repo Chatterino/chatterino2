@@ -35,6 +35,10 @@ Version::Version()
 
     this->fullVersion_ += this->version_;
 
+#ifndef NDEBUG
+    this->fullVersion_ += " DEBUG";
+#endif
+
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     this->isSupportedOS_ = true;
 #else
