@@ -399,4 +399,21 @@ public:
 private:
     ImageSet images_;
 };
+
+class ReplyCurveElement : public MessageElement
+{
+public:
+    ReplyCurveElement();
+
+    ReplyCurveElement(int neededMargin, int size);
+    ReplyCurveElement(int neededMargin, int width, int height);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+private:
+    int neededMargin_;
+    QSize size_;
+};
+
 }  // namespace chatterino

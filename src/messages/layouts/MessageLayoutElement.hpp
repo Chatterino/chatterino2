@@ -182,4 +182,24 @@ private:
     QString line2;
 };
 
+class ReplyCurveLayoutElement : public MessageLayoutElement
+{
+public:
+    ReplyCurveLayoutElement(MessageElement &creator, const QSize &size,
+                            float thickness, float lMargin);
+
+protected:
+    void paint(QPainter &painter) override;
+    void paintAnimated(QPainter &painter, int yOffset) override;
+    int getMouseOverIndex(const QPoint &abs) const override;
+    int getXFromIndex(int index) override;
+    void addCopyTextToString(QString &str, int from = 0,
+                             int to = INT_MAX) const override;
+    int getSelectionIndexCount() const override;
+
+private:
+    QPen pen_;
+    float neededMargin_;
+};
+
 }  // namespace chatterino

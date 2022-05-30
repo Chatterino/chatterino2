@@ -46,7 +46,6 @@ Resources2::Resources2()
     this->buttons.vip = QPixmap(":/buttons/vip.png");
     this->error = QPixmap(":/error.png");
     this->icon = QPixmap(":/icon.png");
-    this->icons.downLeftReply = QPixmap(":/icons/downLeftReply.png");
     this->pajaDank = QPixmap(":/pajaDank.png");
     this->scrolling.downScroll = QPixmap(":/scrolling/downScroll.png");
     this->scrolling.neutralScroll = QPixmap(":/scrolling/neutralScroll.png");

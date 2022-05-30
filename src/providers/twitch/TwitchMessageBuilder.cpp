@@ -257,9 +257,7 @@ MessagePtr TwitchMessageBuilder::build()
         QString usernameText =
             stylizeUsername(threadRoot->loginName, *threadRoot.get());
 
-        auto &img = getResources().icons.downLeftReply;
-        this->emplace<ScalingImageElement>(Image::fromPixmap(img, 0.2),
-                                           MessageElementFlag::RepliedText);
+        this->emplace<ReplyCurveElement>();
 
         // construct reply elements
         this->emplace<TextElement>(

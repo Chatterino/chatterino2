@@ -661,4 +661,36 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+ReplyCurveElement::ReplyCurveElement()
+    // these values nicely align with a single badge
+    : ReplyCurveElement(3, 18, 14)
+{
+}
+
+ReplyCurveElement::ReplyCurveElement(int neededMargin, int size)
+    : MessageElement(MessageElementFlag::RepliedText)
+    , neededMargin_(neededMargin)
+    , size_(size, size)
+{
+}
+
+ReplyCurveElement::ReplyCurveElement(int neededMargin, int width, int height)
+    : MessageElement(MessageElementFlag::RepliedText)
+    , neededMargin_(neededMargin)
+    , size_(width, height)
+{
+}
+
+void ReplyCurveElement::addToContainer(MessageLayoutContainer &container,
+                                       MessageElementFlags flags)
+{
+    if (flags.hasAny(this->getFlags()))
+    {
+        QSize boxSize = this->size_ * container.getScale();
+        container.addElement(new ReplyCurveLayoutElement(
+            *this, boxSize, 1.5 * container.getScale(),
+            this->neededMargin_ * container.getScale()));
+    }
+}
+
 }  // namespace chatterino

@@ -61,8 +61,6 @@
     <file>examples/splitting.gif</file>
     <file>icon.ico</file>
     <file>icon.png</file>
-    <file>icons/downLeftReply.png</file>
-    <file>icons/downLeftReply.svg</file>
     <file>licenses/boost_boost.txt</file>
     <file>licenses/emoji-data-source.txt</file>
     <file>licenses/libcommuni_BSD3.txt</file>

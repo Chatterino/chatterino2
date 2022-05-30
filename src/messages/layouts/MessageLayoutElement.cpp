@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QPainter>
 #include <QPainterPath>
+#include <QPen>
 
 namespace chatterino {
 
@@ -475,6 +476,76 @@ int TextIconLayoutElement::getXFromIndex(int index)
     {
         return this->getRect().right();
     }
+}
+
+ReplyCurveLayoutElement::ReplyCurveLayoutElement(MessageElement &creator,
+                                                 const QSize &size,
+                                                 float thickness,
+                                                 float neededMargin)
+    : MessageLayoutElement(creator, size)
+    , neededMargin_(neededMargin)
+{
+    this->pen_.setColor(QColor("#888"));
+    this->pen_.setWidthF(thickness);
+    this->pen_.setCapStyle(Qt::RoundCap);
+}
+
+void ReplyCurveLayoutElement::paint(QPainter &painter)
+{
+    QRectF paintRect(this->getRect());
+    QPainterPath bezierPath;
+
+    qreal top = paintRect.top() + paintRect.height() * 0.25;  // 25% from top
+    qreal left = paintRect.left() + this->neededMargin_;
+    qreal bottom = paintRect.bottom() - this->neededMargin_;
+    QPointF startPoint(left, bottom);
+    QPointF controlPoint(left, top);
+    QPointF endPoint(paintRect.right(), top);
+
+    // Create curve path
+    bezierPath.moveTo(startPoint);
+    bezierPath.quadTo(controlPoint, endPoint);
+
+    // Render curve
+    painter.setPen(this->pen_);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.drawPath(bezierPath);
+}
+
+void ReplyCurveLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+{
+}
+
+int ReplyCurveLayoutElement::getMouseOverIndex(const QPoint &abs) const
+{
+    return 0;
+}
+
+int ReplyCurveLayoutElement::getXFromIndex(int index)
+{
+    if (index <= 0)
+    {
+        return this->getRect().left();
+    }
+    else if (index == 1)
+    {
+        // fourtf: remove space width
+        return this->getRect().right();
+    }
+    else
+    {
+        return this->getRect().right();
+    }
+}
+
+void ReplyCurveLayoutElement::addCopyTextToString(QString &str, int from,
+                                                  int to) const
+{
+}
+
+int ReplyCurveLayoutElement::getSelectionIndexCount() const
+{
+    return 1;
 }
 
 }  // namespace chatterino
