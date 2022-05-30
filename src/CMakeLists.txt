@@ -635,10 +635,14 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO_GIT_HASH=\"${GIT_HASH}\"
     CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
     CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
-    CHATTERINO_GIT_MODIFIED=\"${GIT_MODIFIED}\"
 
     CHATTERINO_CMAKE_GEN_DATE=\"${cmake_gen_date}\"
     )
+if (GIT_MODIFIED)
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
+        CHATTERINO_GIT_MODIFIED
+        )
+endif ()
 if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CMAKE_BUILD

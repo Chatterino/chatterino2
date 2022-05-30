@@ -9,15 +9,15 @@
 #   If the git binary is found and the git work tree is intact, GIT_RELEASE is worked out using the `git describe` command
 #   The value of GIT_RELEASE can be overriden by defining the GIT_RELEASE environment variable
 # GIT_MODIFIED
-#	If the git binary is found and the git work tree is intact, GIT_MODIFIED is worked out using the `git status --porcelain -z` command
-#   The value of GIT_MODIFIED can be overriden by defining the GIT_MODIFIED environment variable
+#	If the git binary is found and the git work tree is intact, GIT_MODIFIED is worked out by checking if output of `git status --porcelain -z` command is empty
+#   The value of GIT_MODIFIED cannot be overriden
 
 find_package(Git)
 
 set(GIT_HASH "GIT-REPOSITORY-NOT-FOUND")
 set(GIT_COMMIT "GIT-REPOSITORY-NOT-FOUND")
 set(GIT_RELEASE "${PROJECT_VERSION}")
-set(GIT_MODIFIED "")
+set(GIT_MODIFIED 0)
 
 if (GIT_EXECUTABLE)
     execute_process(
@@ -57,11 +57,15 @@ if (GIT_EXECUTABLE)
         execute_process(
                 COMMAND ${GIT_EXECUTABLE} status --porcelain -z
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                OUTPUT_VARIABLE GIT_MODIFIED
+                OUTPUT_VARIABLE GIT_MODIFIED_OUTPUT
                 OUTPUT_STRIP_TRAILING_WHITESPACE
         )
     endif (GIT_REPOSITORY_FOUND)
 endif (GIT_EXECUTABLE)
+
+if (GIT_MODIFIED_OUTPUT)
+    set(GIT_MODIFIED 1)
+endif ()
 
 if (DEFINED ENV{GIT_HASH})
     set(GIT_HASH "$ENV{GIT_HASH}")
@@ -71,9 +75,6 @@ if (DEFINED ENV{GIT_COMMIT})
 endif ()
 if (DEFINED ENV{GIT_RELEASE})
     set(GIT_RELEASE "$ENV{GIT_RELEASE}")
-endif ()
-if (DEFINED ENV{GIT_MODIFIED})
-    set(GIT_MODIFIED "$ENV{GIT_MODIFIED}")
 endif ()
 
 message(STATUS "Injected git values: ${GIT_COMMIT} (${GIT_RELEASE}) ${GIT_HASH} ${GIT_MODIFIED}")

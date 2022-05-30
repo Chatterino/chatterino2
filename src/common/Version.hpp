@@ -27,7 +27,6 @@ public:
     const QString &version() const;
     const QString &commitHash() const;
     // Whether or not the vcs tree had any changes at the time of build
-    // Non-empty value of GIT_MODIFIED means it had
     const bool &isModified() const;
     // Date of build file generation (≈ date of build)
     const QString &dateOfBuild() const;
