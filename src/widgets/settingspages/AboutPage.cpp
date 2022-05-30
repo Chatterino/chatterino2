@@ -49,7 +49,7 @@ AboutPage::AboutPage()
         // Version
         auto versionInfo = layout.emplace<QGroupBox>("Version");
         {
-            auto l = versionInfo.emplace<QVBoxLayout>();
+            auto vbox = versionInfo.emplace<QVBoxLayout>();
             auto version = Version::instance();
 
             // build-related information
@@ -76,12 +76,6 @@ AboutPage::AboutPage()
                     .arg(version.fullVersion(), version.commitHash(), modified,
                          nightlyInfo, buildInfo.join(", "));
 
-            auto versionLabel = l.emplace<QLabel>(build);
-            versionLabel->setOpenExternalLinks(true);
-            versionLabel->setTextInteractionFlags(
-                Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse |
-                Qt::LinksAccessibleByKeyboard);
-
             // runtime-related information
 
             auto running = QString("running on %1, kernel: %2")
@@ -97,7 +91,9 @@ AboutPage::AboutPage()
                 running += " (unsupported OS)";
             }
 
-            l.emplace<QLabel>(running);
+            auto label = vbox.emplace<QLabel>(build + "<br>" + running);
+            label->setOpenExternalLinks(true);
+            label->setTextInteractionFlags(Qt::TextBrowserInteraction);
         }
 
         // About Chatterino
