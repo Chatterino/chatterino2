@@ -18,9 +18,8 @@ Version::Version()
 
     // Whether or not the vcs tree had any changes at the time of build
     // Non-empty value of GIT_MODIFIED means it had
-    this->isModified_ = !(QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_MODIFIED))
-                              .remove('"')
-                              .isEmpty());
+    auto modified = QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_MODIFIED));
+    this->isModified_ = !(modified.remove('"').isEmpty());
 
     // Date of build file generation (≈ date of build)
 #ifdef CHATTERINO_CMAKE_GEN_DATE
