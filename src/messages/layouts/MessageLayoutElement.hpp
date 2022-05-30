@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QPen>
 #include <QPoint>
 #include <QRect>
 #include <QString>
