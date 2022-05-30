@@ -16,9 +16,8 @@ Version::Version()
     this->commitHash_ =
         QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_HASH)).remove('"');
 
-    auto modified =
-        (QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_MODIFIED)).remove('"'));
-    this->isModified_ = !(modified.isEmpty());
+    auto modified = QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_MODIFIED));
+    this->isModified_ = !(modified.remove('"').isEmpty());
 
 #ifdef CHATTERINO_CMAKE_GEN_DATE
     this->dateOfBuild_ =
