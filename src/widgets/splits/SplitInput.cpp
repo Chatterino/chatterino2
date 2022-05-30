@@ -80,17 +80,19 @@ void SplitInput::initLayout()
     auto replyHbox = layout.emplace<QHBoxLayout>().withoutMargin().assign(
         &this->ui_.replyHbox);
 
-    auto replyCancelButton = replyHbox.emplace<EffectLabel>(nullptr, 4)
-                                 .assign(&this->ui_.cancelReplyButton);
-    replyCancelButton->getLabel().setTextFormat(Qt::RichText);
-
     auto replyLabel = replyHbox.emplace<QLabel>().assign(&this->ui_.replyLabel);
     replyLabel->setAlignment(Qt::AlignLeft);
     replyLabel->setFont(
         app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+
+    replyHbox->addStretch(1);
+
+    auto replyCancelButton = replyHbox.emplace<EffectLabel>(nullptr, 4)
+                                 .assign(&this->ui_.cancelReplyButton);
+    replyCancelButton->getLabel().setTextFormat(Qt::RichText);
+
     replyCancelButton->hide();
     replyLabel->hide();
-    replyHbox->addStretch(1);
 
     // hbox for input, right box
     auto hboxLayout =
@@ -903,8 +905,11 @@ void SplitInput::editTextChanged()
         }
     }
 
-    this->ui_.replyLabel->setVisible(this->replyThread_ != nullptr);
-    this->ui_.cancelReplyButton->setVisible(this->replyThread_ != nullptr);
+    bool hasReply = this->replyThread_ != nullptr;
+
+    this->ui_.replyLabel->setVisible(hasReply);
+    this->ui_.cancelReplyButton->setVisible(hasReply);
+    this->ui_.replyHbox->setMargin(hasReply ? 2 * this->scale() : 0);
 }
 
 void SplitInput::paintEvent(QPaintEvent *)
