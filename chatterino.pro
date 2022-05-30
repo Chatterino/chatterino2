@@ -692,4 +692,4 @@ CONFIG(debug, debug|release) {
     DEFINES += DEBUG_OFF
 }
 
-message("Injected git values: $$git_commit ($$git_release) $$git_hash $$git_modified")
+message("Injected git values: $$git_commit ($$git_release) $$git_hash")
