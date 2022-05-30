@@ -191,6 +191,9 @@ void NotificationController::fetchFakeChannels()
                 // we done fucked up.
                 qCWarning(chatterinoNotification)
                     << "Failed to fetch live status for " << batch;
+            },
+            []() {
+                // finally
             });
     }
 }

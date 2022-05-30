@@ -14,7 +14,6 @@
 #include "util/FormatTime.hpp"
 
 #include <QDateTime>
-#include <QImageReader>
 
 namespace chatterino {
 
