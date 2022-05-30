@@ -18,8 +18,6 @@ Version::Version()
 
 #ifdef CHATTERINO_GIT_MODIFIED
     this->isModified_ = true;
-#else
-    this->isModified_ = false;
 #endif
 
 #ifdef CHATTERINO_CMAKE_GEN_DATE
