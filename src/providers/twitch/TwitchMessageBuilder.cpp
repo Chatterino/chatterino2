@@ -259,7 +259,7 @@ MessagePtr TwitchMessageBuilder::build()
 
         auto &img = getResources().icons.downLeftReply;
         this->emplace<ScalingImageElement>(Image::fromPixmap(img, 0.2),
-                                           MessageElementFlag::Default);
+                                           MessageElementFlag::RepliedText);
 
         // construct reply elements
         this->emplace<TextElement>(
