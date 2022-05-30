@@ -16,7 +16,7 @@ enum class ColorType {
     AnnouncePurple,
     AnnounceBlue,
     AnnounceGreen,
-    AnnounceOrange
+    AnnounceOrange,
 };
 
 class ColorProvider
