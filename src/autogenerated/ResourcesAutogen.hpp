@@ -54,6 +54,9 @@ public:
     } buttons;
     QPixmap error;
     QPixmap icon;
+    struct {
+        QPixmap downLeftReply;
+    } icons;
     QPixmap pajaDank;
     struct {
         QPixmap downScroll;
