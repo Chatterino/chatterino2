@@ -1,6 +1,7 @@
 #pragma once
 
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "messages/MessageThread.hpp"
 #include "util/QObjectRef.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
@@ -12,6 +13,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <memory>
 
 namespace chatterino {
 
@@ -33,6 +35,8 @@ public:
     bool isEditFirstWord() const;
     QString getInputText() const;
     void insertText(const QString &text);
+
+    void setReply(const std::shared_ptr<MessageThread> &reply);
 
     pajlada::Signals::Signal<const QString &> textChanged;
 
@@ -78,6 +82,9 @@ protected:
     void insertCompletionText(const QString &text);
     void openEmotePopup();
 
+    void updateCancelReplyButton();
+    int replyBottomPadding() const;
+
     Split *const split_;
     QObjectRef<EmotePopup> emotePopup_;
     QObjectRef<InputCompletionPopup> inputCompletionPopup_;
@@ -88,7 +95,14 @@ protected:
         EffectLabel *emoteButton;
 
         QHBoxLayout *hbox;
+        QVBoxLayout *vbox;
+
+        QHBoxLayout *replyHbox;
+        QLabel *replyLabel;
+        EffectLabel *cancelReplyButton;
     } ui_;
+
+    std::shared_ptr<MessageThread> replyThread_ = nullptr;
 
     pajlada::Signals::SignalHolder managedConnections_;
     QStringList prevMsg_;

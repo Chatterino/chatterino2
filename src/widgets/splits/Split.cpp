@@ -1267,4 +1267,9 @@ void Split::drag()
     }
 }
 
+void Split::setInputReply(const std::shared_ptr<MessageThread> &reply)
+{
+    this->input_->setReply(reply);
+}
+
 }  // namespace chatterino

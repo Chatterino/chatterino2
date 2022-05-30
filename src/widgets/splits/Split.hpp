@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
+#include "messages/MessageThread.hpp"
 #include "pajlada/signals/signalholder.hpp"
 #include "widgets/BaseWidget.hpp"
 
@@ -75,6 +76,8 @@ public:
     bool isInContainer() const;
 
     void setContainer(SplitContainer *container);
+
+    void setInputReply(const std::shared_ptr<MessageThread> &reply);
 
     static pajlada::Signals::Signal<Qt::KeyboardModifiers>
         modifierStatusChanged;

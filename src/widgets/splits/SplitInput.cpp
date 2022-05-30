@@ -72,17 +72,38 @@ void SplitInput::initLayout()
     LayoutCreator<SplitInput> layoutCreator(this);
 
     auto layout =
-        layoutCreator.setLayoutType<QHBoxLayout>().withoutMargin().assign(
-            &this->ui_.hbox);
+        layoutCreator.setLayoutType<QVBoxLayout>().withoutMargin().assign(
+            &this->ui_.vbox);
+    layout->setSpacing(this->replyBottomPadding());
+
+    // reply label stuff
+    auto replyHbox = layout.emplace<QHBoxLayout>().withoutMargin().assign(
+        &this->ui_.replyHbox);
+
+    auto replyCancelButton = replyHbox.emplace<EffectLabel>(nullptr, 4)
+                                 .assign(&this->ui_.cancelReplyButton);
+    replyCancelButton->getLabel().setTextFormat(Qt::RichText);
+
+    auto replyLabel = replyHbox.emplace<QLabel>().assign(&this->ui_.replyLabel);
+    replyLabel->setAlignment(Qt::AlignLeft);
+    replyLabel->setFont(
+        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+    replyCancelButton->hide();
+    replyLabel->hide();
+    replyHbox->addStretch(1);
+
+    // hbox for input, right box
+    auto hboxLayout =
+        layout.emplace<QHBoxLayout>().withoutMargin().assign(&this->ui_.hbox);
 
     // input
     auto textEdit =
-        layout.emplace<ResizingTextEdit>().assign(&this->ui_.textEdit);
+        hboxLayout.emplace<ResizingTextEdit>().assign(&this->ui_.textEdit);
     connect(textEdit.getElement(), &ResizingTextEdit::textChanged, this,
             &SplitInput::editTextChanged);
 
     // right box
-    auto box = layout.emplace<QVBoxLayout>().withoutMargin();
+    auto box = hboxLayout.emplace<QVBoxLayout>().withoutMargin();
     box->setSpacing(0);
     {
         auto textEditLength =
@@ -108,12 +129,20 @@ void SplitInput::initLayout()
     this->managedConnections_.managedConnect(app->fonts->fontChanged, [=]() {
         this->ui_.textEdit->setFont(
             app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+        this->ui_.replyLabel->setFont(
+            app->fonts->getFont(FontStyle::ChatMediumBold, this->scale()));
     });
 
     // open emote popup
     QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [=] {
         this->openEmotePopup();
     });
+
+    // clear input and remove reply thread
+    QObject::connect(this->ui_.cancelReplyButton, &EffectLabel::leftClicked,
+                     [=] {
+                         this->hotkeyClear();
+                     });
 
     // clear channelview selection when selecting in the input
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
@@ -135,15 +164,21 @@ void SplitInput::initLayout()
 
 void SplitInput::scaleChangedEvent(float scale)
 {
-    // update the icon size of the emote button
+    auto app = getApp();
+    // update the icon size of the buttons
     this->updateEmoteButton();
+    this->updateCancelReplyButton();
 
     // set maximum height
     this->setMaximumHeight(int(150 * this->scale()));
     this->ui_.textEdit->setFont(
-        getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
     this->ui_.textEditLength->setFont(
-        getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+    this->ui_.replyLabel->setFont(
+        app->fonts->getFont(FontStyle::ChatMediumBold, this->scale()));
+
+    this->ui_.vbox->setSpacing(this->replyBottomPadding());
 }
 
 void SplitInput::themeChangedEvent()
@@ -158,6 +193,7 @@ void SplitInput::themeChangedEvent()
 #endif
 
     this->updateEmoteButton();
+    this->updateCancelReplyButton();
     this->ui_.textEditLength->setPalette(palette);
 
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
@@ -165,10 +201,19 @@ void SplitInput::themeChangedEvent()
     this->ui_.textEdit->setPalette(placeholderPalette);
 #endif
 
-    this->ui_.hbox->setMargin(
+    this->ui_.vbox->setMargin(
         int((this->theme->isLightTheme() ? 4 : 2) * this->scale()));
 
     this->ui_.emoteButton->getLabel().setStyleSheet("color: #000");
+
+    if (this->theme->isLightTheme())
+    {
+        this->ui_.replyLabel->setStyleSheet("color: #333");
+    }
+    else
+    {
+        this->ui_.replyLabel->setStyleSheet("color: #ccc");
+    }
 }
 
 void SplitInput::updateEmoteButton()
@@ -185,6 +230,22 @@ void SplitInput::updateEmoteButton()
 
     this->ui_.emoteButton->getLabel().setText(text);
     this->ui_.emoteButton->setFixedHeight(int(18 * scale));
+}
+
+void SplitInput::updateCancelReplyButton()
+{
+    float scale = this->scale();
+
+    QString text = "<img src=':/buttons/cancel.svg' width='xD' height='xD' />";
+    text.replace("xD", QString::number(int(12 * scale)));
+
+    if (this->theme->isLightTheme())
+    {
+        text.replace("cancel", "cancelDark");
+    }
+
+    this->ui_.cancelReplyButton->getLabel().setText(text);
+    this->ui_.cancelReplyButton->setFixedHeight(int(12 * scale));
 }
 
 void SplitInput::openEmotePopup()
@@ -302,15 +363,49 @@ QString SplitInput::hotkeySendMessage(std::vector<QString> &arguments)
     if (c == nullptr)
         return "";
 
-    QString message = ui_.textEdit->toPlainText();
+    if (!c->isTwitchChannel() || this->replyThread_ == nullptr)
+    {
+        // standard message send behavior
+        QString message = ui_.textEdit->toPlainText();
 
-    message = message.replace('\n', ' ');
-    QString sendMessage = getApp()->commands->execCommand(message, c, false);
+        message = message.replace('\n', ' ');
+        QString sendMessage =
+            getApp()->commands->execCommand(message, c, false);
 
-    c->sendMessage(sendMessage);
+        c->sendMessage(sendMessage);
 
-    this->postMessageSend(message, arguments);
-    return "";
+        this->postMessageSend(message, arguments);
+        return "";
+    }
+    else
+    {
+        // Reply to message
+        auto tc = dynamic_cast<TwitchChannel *>(c.get());
+        if (!tc)
+        {
+            // this should not fail
+            return "";
+        }
+
+        QString message = this->ui_.textEdit->toPlainText();
+        message.remove(0, this->replyThread_->root()->displayName.length() +
+                              1);  // remove "@username"
+
+        if (!message.isEmpty() && message.at(0) == ' ')
+        {
+            message.remove(0, 1);  // remove possible space
+        }
+
+        message = message.replace('\n', ' ');
+        QString sendMessage =
+            getApp()->commands->execCommand(message, c, false);
+
+        // Reply within TwitchChannel
+        tc->sendReply(sendMessage, this->replyThread_->rootId());
+
+        this->postMessageSend(message, arguments);
+        return "";
+    }
 }
 
 void SplitInput::postMessageSend(const QString &message,
@@ -458,6 +553,7 @@ QString SplitInput::hotkeyClear()
 {
     this->ui_.textEdit->setText("");
     this->ui_.textEdit->moveCursor(QTextCursor::Start);
+    this->replyThread_ = nullptr;
     return "";
 }
 
@@ -797,37 +893,60 @@ void SplitInput::editTextChanged()
     }
 
     this->ui_.textEditLength->setText(labelText);
+
+    if (this->replyThread_ != nullptr)
+    {
+        // Check if the input still starts with @username. If not, don't reply.
+        if (!text.startsWith("@" + this->replyThread_->root()->displayName))
+        {
+            this->replyThread_ = nullptr;
+        }
+    }
+
+    this->ui_.replyLabel->setVisible(this->replyThread_ != nullptr);
+    this->ui_.cancelReplyButton->setVisible(this->replyThread_ != nullptr);
 }
 
 void SplitInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
+    int s;
+    QColor borderColor;
+
     if (this->theme->isLightTheme())
     {
-        int s = int(3 * this->scale());
-        QRect rect = this->rect().marginsRemoved(QMargins(s - 1, s - 1, s, s));
-
-        painter.fillRect(rect, this->theme->splits.input.background);
-
-        painter.setPen(QColor("#ccc"));
-        painter.drawRect(rect);
+        s = int(3 * this->scale());
+        borderColor = QColor("#ccc");
     }
     else
     {
-        int s = int(1 * this->scale());
-        QRect rect = this->rect().marginsRemoved(QMargins(s - 1, s - 1, s, s));
-
-        painter.fillRect(rect, this->theme->splits.input.background);
-
-        painter.setPen(QColor("#333"));
-        painter.drawRect(rect);
+        s = int(1 * this->scale());
+        borderColor = QColor("#333");
     }
+
+    QRect baseRect = this->rect();
+    if (this->replyThread_ != nullptr)
+    {
+        baseRect.moveTop(baseRect.top() + this->ui_.replyLabel->height() +
+                         this->replyBottomPadding());
+    }
+
+    QRect rect = baseRect.marginsRemoved(QMargins(s - 1, s - 1, s, s));
+
+    painter.fillRect(rect, this->theme->splits.input.background);
+    painter.setPen(borderColor);
+    painter.drawRect(rect);
 
     //    int offset = 2;
     //    painter.fillRect(offset, this->height() - offset, this->width() - 2 *
     //    offset, 1,
     //                     getApp()->themes->splits.input.focusedLine);
+}
+
+int SplitInput::replyBottomPadding() const
+{
+    return int(this->scale() * 6);
 }
 
 void SplitInput::resizeEvent(QResizeEvent *)
@@ -850,6 +969,14 @@ void SplitInput::mousePressEvent(QMouseEvent *)
 void SplitInput::giveFocus(Qt::FocusReason reason)
 {
     this->ui_.textEdit->setFocus(reason);
+}
+
+void SplitInput::setReply(const std::shared_ptr<MessageThread> &reply)
+{
+    this->replyThread_ = reply;
+    this->ui_.textEdit->setPlainText("@" + reply->root()->displayName + " ");
+    this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+    this->ui_.replyLabel->setText("Replying to @" + reply->root()->displayName);
 }
 
 }  // namespace chatterino

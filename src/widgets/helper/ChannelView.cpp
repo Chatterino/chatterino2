@@ -2071,11 +2071,20 @@ void ChannelView::addMessageContextMenuItems(
     // Only display reply option where it makes sense
     if (this->canReplyToMessages())
     {
-        menu.addAction(
-            this->channel_->isWritable() ? "Reply to message" : "View thread",
-            [this, layout] {
-                this->showReplyThreadPopup(layout->getMessagePtr());
+        const auto &messagePtr = layout->getMessagePtr();
+        if (!messagePtr->loginName.isEmpty())  // guard against system messages
+        {
+            menu.addAction("Reply to message", [this, &messagePtr] {
+                this->setInputReply(messagePtr);
             });
+
+            if (messagePtr->replyThread != nullptr)
+            {
+                menu.addAction("View thread", [this, &messagePtr] {
+                    this->showReplyThreadPopup(messagePtr);
+                });
+            }
+        }
     }
 }
 
@@ -2440,7 +2449,10 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             this->underlyingChannel_.get()->reconnect();
         }
         break;
-        case Link::ReplyToMessage:
+        case Link::ReplyToMessage: {
+            this->setInputReply(layout->getMessagePtr());
+        }
+        break;
         case Link::ViewThread: {
             this->showReplyThreadPopup(layout->getMessagePtr());
         }
@@ -2567,7 +2579,7 @@ void ChannelView::scrollUpdateRequested()
     this->scrollBar_->offset(multiplier * offset);
 }
 
-void ChannelView::showReplyThreadPopup(const MessagePtr &message)
+void ChannelView::setInputReply(const MessagePtr &message)
 {
     if (message == nullptr)
     {
@@ -2603,6 +2615,7 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
         }
         else
         {
+            qCWarning(chatterinoCommon) << "Failed to create new reply thread";
             // Unable to create new reply thread.
             // TODO(dnsge): Should probably notify user?
             return;
@@ -2613,12 +2626,22 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
         thread = message->replyThread;
     }
 
+    this->split_->setInputReply(thread);
+}
+
+void ChannelView::showReplyThreadPopup(const MessagePtr &message)
+{
+    if (message == nullptr || message->replyThread == nullptr)
+    {
+        return;
+    }
+
     auto popupParent =
         static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
     auto popup = new ReplyThreadPopup(getSettings()->autoCloseThreadPopup,
                                       popupParent, this->split_);
 
-    popup->setThread(thread);
+    popup->setThread(message->replyThread);
 
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     popup->move(QCursor::pos() - offset);

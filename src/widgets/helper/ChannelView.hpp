@@ -213,6 +213,7 @@ private:
     void enableScrolling(const QPointF &scrollStart);
     void disableScrolling();
 
+    void setInputReply(const MessagePtr &message);
     void showReplyThreadPopup(const MessagePtr &message);
     bool shouldRenderFloatingElements() const;
 
