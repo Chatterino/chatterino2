@@ -4,7 +4,6 @@
 #include "common/QLogging.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
-#include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
@@ -34,33 +33,6 @@ namespace {
         {
             return QUrl("qrc:/sounds/ping2.wav");
         }
-    }
-
-    QStringList parseTagList(const QVariantMap &tags, const QString &key)
-    {
-        auto iterator = tags.find(key);
-        if (iterator == tags.end())
-            return QStringList{};
-
-        return iterator.value().toString().split(',', Qt::SkipEmptyParts);
-    }
-
-    std::vector<Badge> parseBadges(const QVariantMap &tags)
-    {
-        std::vector<Badge> badges;
-
-        for (QString badge : parseTagList(tags, "badges"))
-        {
-            QStringList parts = badge.split('/');
-            if (parts.size() != 2)
-            {
-                continue;
-            }
-
-            badges.emplace_back(parts[0], parts[1]);
-        }
-
-        return badges;
     }
 
 }  // namespace
@@ -101,6 +73,46 @@ void SharedMessageBuilder::parse()
     this->parseUsername();
 
     this->message().flags.set(MessageFlag::Collapsed);
+}
+
+// "foo/bar/baz,tri/hard" can be a valid badge-info tag
+// In that case, valid map content should be 'split by slash' only once:
+// {"foo": "bar/baz", "tri": "hard"}
+std::pair<QString, QString> SharedMessageBuilder::slashKeyValue(
+    const QString &kvStr)
+{
+    return {
+        // part before first slash (index 0 of section)
+        kvStr.section('/', 0, 0),
+        // part after first slash (index 1 of section)
+        kvStr.section('/', 1, -1),
+    };
+}
+
+std::vector<Badge> SharedMessageBuilder::parseBadgeTag(const QVariantMap &tags)
+{
+    std::vector<Badge> b;
+
+    auto badgesIt = tags.constFind("badges");
+    if (badgesIt == tags.end())
+    {
+        return b;
+    }
+
+    auto badges = badgesIt.value().toString().split(',', Qt::SkipEmptyParts);
+
+    for (const QString &badge : badges)
+    {
+        if (!badge.contains('/'))
+        {
+            continue;
+        }
+
+        auto pair = SharedMessageBuilder::slashKeyValue(badge);
+        b.emplace_back(Badge{pair.first, pair.second});
+    }
+
+    return b;
 }
 
 bool SharedMessageBuilder::isIgnored() const
@@ -332,7 +344,7 @@ void SharedMessageBuilder::parseHighlights()
     }
 
     // Highlight because of badge
-    auto badges = parseBadges(this->tags);
+    auto badges = this->parseBadgeTag(this->tags);
     auto badgeHighlights = getCSettings().highlightedBadges.readOnly();
     bool badgeHighlightSet = false;
     for (const HighlightBadge &highlight : *badgeHighlights)

@@ -7,6 +7,7 @@
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -48,51 +49,6 @@ const QSet<QString> zeroWidthEmotes{
 namespace chatterino {
 
 namespace {
-
-    QStringList parseTagList(const QVariantMap &tags, const QString &key)
-    {
-        auto iterator = tags.find(key);
-        if (iterator == tags.end())
-            return QStringList{};
-
-        return iterator.value().toString().split(',', Qt::SkipEmptyParts);
-    }
-
-    std::map<QString, QString> parseBadgeInfos(const QVariantMap &tags)
-    {
-        std::map<QString, QString> badgeInfos;
-
-        for (QString badgeInfo : parseTagList(tags, "badge-info"))
-        {
-            QStringList parts = badgeInfo.split('/');
-            if (parts.size() != 2)
-            {
-                continue;
-            }
-
-            badgeInfos.emplace(parts[0], parts[1]);
-        }
-
-        return badgeInfos;
-    }
-
-    std::vector<Badge> parseBadges(const QVariantMap &tags)
-    {
-        std::vector<Badge> badges;
-
-        for (QString badge : parseTagList(tags, "badges"))
-        {
-            QStringList parts = badge.split('/');
-            if (parts.size() != 2)
-            {
-                continue;
-            }
-
-            badges.emplace_back(parts[0], parts[1]);
-        }
-
-        return badges;
-    }
 
     QString stylizeUsername(const QString &username, const Message &message)
     {
@@ -1092,6 +1048,25 @@ boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
     return boost::none;
 }
 
+std::unordered_map<QString, QString> TwitchMessageBuilder::parseBadgeInfoTag(
+    const QVariantMap &tags)
+{
+    std::unordered_map<QString, QString> infoMap;
+
+    auto infoIt = tags.constFind("badge-info");
+    if (infoIt == tags.end())
+        return infoMap;
+
+    auto info = infoIt.value().toString().split(',', Qt::SkipEmptyParts);
+
+    for (const QString &badge : info)
+    {
+        infoMap.emplace(SharedMessageBuilder::slashKeyValue(badge));
+    }
+
+    return infoMap;
+}
+
 void TwitchMessageBuilder::appendTwitchBadges()
 {
     if (this->twitchChannel == nullptr)
@@ -1099,8 +1074,8 @@ void TwitchMessageBuilder::appendTwitchBadges()
         return;
     }
 
-    auto badgeInfos = parseBadgeInfos(this->tags);
-    auto badges = parseBadges(this->tags);
+    auto badgeInfos = TwitchMessageBuilder::parseBadgeInfoTag(this->tags);
+    auto badges = this->parseBadgeTag(this->tags);
 
     for (const auto &badge : badges)
     {
@@ -1150,7 +1125,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
                 // (tier + amount of months with leading zero if less than 100)
                 // e.g. 3054 - tier 3 4,5-year sub. 2108 - tier 2 9-year sub
                 const auto &subTier =
-                    badge.value_.length() > 3 ? badge.value_.front() : '1';
+                    badge.value_.length() > 3 ? badge.value_.at(0) : '1';
                 const auto &subMonths = badgeInfoIt->second;
                 tooltip +=
                     QString(" (%1%2 months)")
@@ -1166,9 +1141,9 @@ void TwitchMessageBuilder::appendTwitchBadges()
             {
                 auto predictionText =
                     badgeInfoIt->second
-                        .replace("\\s", " ")  // standard IRC escapes
-                        .replace("\\:", ";")
-                        .replace("\\\\", "\\")
+                        .replace(R"(\s)", " ")  // standard IRC escapes
+                        .replace(R"(\:)", ";")
+                        .replace(R"(\\)", R"(\)")
                         .replace("⸝", ",");  // twitch's comma escape
                 // Careful, the first character is RIGHT LOW PARAPHRASE BRACKET or U+2E1D, which just looks like a comma
 

@@ -264,6 +264,7 @@ SOURCES += \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/RatelimitBucket.cpp \
+    src/util/SampleData.cpp \
     src/util/SplitCommand.cpp \
     src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
@@ -531,7 +532,6 @@ HEADERS += \
     src/util/IncognitoBrowser.hpp \
     src/util/InitUpdateButton.hpp \
     src/util/IrcHelpers.hpp \
-    src/util/IsBigEndian.hpp \
     src/util/LayoutCreator.hpp \
     src/util/LayoutHelper.hpp \
     src/util/NuulsUploader.hpp \
@@ -540,13 +540,11 @@ HEADERS += \
     src/util/PostToThread.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \
-    src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RapidJsonSerializeQString.hpp \
     src/util/RatelimitBucket.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
-    src/util/SampleCheerMessages.hpp \
-    src/util/SampleLinks.hpp \
+    src/util/SampleData.hpp \
     src/util/SharedPtrElementLess.hpp \
     src/util/SplitCommand.hpp \
     src/util/StandardItemHelper.hpp \

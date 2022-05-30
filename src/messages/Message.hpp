@@ -3,6 +3,7 @@
 #include "common/FlagsEnum.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
+#include "util/QStringHash.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QTime>
@@ -68,7 +69,7 @@ struct Message : boost::noncopyable {
     QColor usernameColor;
     QDateTime serverReceivedTime;
     std::vector<Badge> badges;
-    std::map<QString, QString> badgeInfos;
+    std::unordered_map<QString, QString> badgeInfos;
     std::shared_ptr<QColor> highlightColor;
     // Each reply holds a reference to the thread. When every reply is dropped,
     // the reply thread will be cleaned up by the TwitchChannel.
