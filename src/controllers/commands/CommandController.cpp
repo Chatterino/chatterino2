@@ -17,6 +17,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Clipboard.hpp"
 #include "util/CombinePath.hpp"
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
@@ -176,6 +177,11 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
     return false;
 }
 
+const std::function<QString(const QString &, const ChannelPtr &)>
+    noOpPlaceholder = [](const auto &altText, const auto &channel) {
+        return altText;
+    };
+
 const std::map<QString,
                std::function<QString(const QString &, const ChannelPtr &)>>
     COMMAND_VARS{
@@ -239,6 +245,11 @@ const std::map<QString,
                 return name.isEmpty() ? altText : name;
             },
         },
+        // variables used in mod buttons and the like, these make no sense in normal commands, so they are left empty
+        {"input.text", noOpPlaceholder},
+        {"msg.id", noOpPlaceholder},
+        {"user.name", noOpPlaceholder},
+        {"msg.text", noOpPlaceholder},
     };
 
 }  // namespace
@@ -825,6 +836,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
         return "";
     });
+
     this->registerCommand("/setgame", [](const QStringList &words,
                                          const ChannelPtr channel) {
         if (words.size() < 2)
@@ -923,6 +935,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+
     this->registerCommand(
         "/delete", [](const QStringList &words, ChannelPtr channel) -> QString {
             // This is a wrapper over the standard Twitch /delete command
@@ -965,6 +978,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         getApp()->twitch->sendRawMessage(words.mid(1).join(" "));
         return "";
     });
+
 #ifndef NDEBUG
     this->registerCommand(
         "/fakemsg",
@@ -981,6 +995,19 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 #endif
+
+    this->registerCommand(
+        "/copy", [](const QStringList &words, ChannelPtr channel) -> QString {
+            if (words.size() < 2)
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage: /copy <text> - copies provided "
+                                      "text to clipboard."));
+                return "";
+            }
+            crossPlatformCopy(words.mid(1).join(" "));
+            return "";
+        });
 }
 
 void CommandController::save()
@@ -1134,18 +1161,18 @@ QString CommandController::execCustomCommand(const QStringList &words,
             auto varName = match.captured(4);
             auto altText = match.captured(5);  // alt text or empty string
 
-            auto var = COMMAND_VARS.find(varName);
+            auto var = context.find(varName);
 
-            if (var != COMMAND_VARS.end())
+            if (var != context.end())
             {
-                result += var->second(altText, channel);
+                result += var->second.isEmpty() ? altText : var->second;
             }
             else
             {
-                auto it = context.find(varName);
-                if (it != context.end())
+                auto it = COMMAND_VARS.find(varName);
+                if (it != COMMAND_VARS.end())
                 {
-                    result += it->second.isEmpty() ? altText : it->second;
+                    result += it->second(altText, channel);
                 }
                 else
                 {
