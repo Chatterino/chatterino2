@@ -5,6 +5,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
@@ -26,12 +27,13 @@ using namespace chatterino;
 
 // Message types below are the ones that might contain special user's message on USERNOTICE
 static const QSet<QString> specialMessageTypes{
-    "sub",            //
-    "subgift",        //
-    "resub",          // resub messages
-    "bitsbadgetier",  // bits badge upgrade
-    "ritual",         // new viewer ritual
-    "announcement",   // new mod announcement thing
+    "sub",             // first time sub
+    "subgift",         // gift to a specific viewer
+    "submysterygift",  // gift(s) to community, dont confuse with anonymous gifts
+    "resub",           // resub messages
+    "bitsbadgetier",   // bits badge upgrade
+    "ritual",          // deprecated: new viewer ritual
+    "announcement",    // messages produced by /announce
 };
 
 MessagePtr generateBannedMessage(bool confirmedBan)
@@ -610,41 +612,18 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
     std::vector<MessagePtr> builtMessages;
 
     auto tags = message->tags();
-    auto parameters = message->parameters();
 
     QString msgType = tags.value("msg-id").toString();
-    QString content;
-    if (parameters.size() >= 2)
-    {
-        content = parameters[1];
-    }
-
-    if (specialMessageTypes.contains(msgType))
-    {
-        // Messages are not required, so they might be empty
-        if (!content.isEmpty())
-        {
-            MessageParseArgs args;
-            args.trimSubscriberUsername = true;
-
-            TwitchMessageBuilder builder(channel, message, args, content,
-                                         false);
-            builder->flags.set(MessageFlag::Subscription);
-            builder->flags.unset(MessageFlag::Highlighted);
-            builtMessages.emplace_back(builder.build());
-        }
-    }
-
     auto it = tags.find("system-msg");
 
+    // By default, we return value of system-msg tag
+    QString systemMsgText;
     if (it != tags.end())
     {
-        // By default, we return value of system-msg tag
-        QString messageText = it.value().toString();
-
+        QString systemMsgText = it.value().toString();
         if (msgType == "bitsbadgetier")
         {
-            messageText =
+            systemMsgText =
                 QString("%1 just earned a new %2 Bits badge!")
                     .arg(tags.value("display-name").toString(),
                          kFormatNumbers(
@@ -652,16 +631,39 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
         }
         else if (msgType == "announcement")
         {
-            messageText = "Announcement";
+            systemMsgText = "Announcement";
         }
-
-        auto b = MessageBuilder(systemMessage, parseTagString(messageText),
-                                calculateMessageTime(message).time());
-
-        b->flags.set(MessageFlag::Subscription);
-        auto newMessage = b.release();
-        builtMessages.emplace_back(newMessage);
     }
+
+    auto builder = MessageBuilder(systemMessage, parseTagString(systemMsgText),
+                                  calculateMessageTime(message).time());
+    builder->flags.set(MessageFlag::Subscription);
+
+    // If the optional user's message is present, append it after a newline
+    QString content;
+    auto parameters = message->parameters();
+    if (parameters.size() >= 2)
+    {
+        content = parameters[1];
+    }
+
+    if (!content.isEmpty())
+    {
+        MessageParseArgs args;
+        args.trimSubscriberUsername = true;
+
+        //TwitchMessageBuilder builder2(channel, message, args, content, false);
+        builder->flags.unset(MessageFlag::Highlighted);
+        //builtMessages.emplace_back(builder.build());
+
+        builder.emplace<LinebreakElement>(MessageElementFlag::Text);
+        builder.emplace<TimestampElement>();
+        builder.emplace<TextElement>(systemMsgText, MessageElementFlag::Text);
+        //builtMessages.emplace_back(builder2.release());
+    }
+
+    auto newMessage = builder.release();
+    builtMessages.emplace_back(newMessage);
 
     return builtMessages;
 }
