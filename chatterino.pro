@@ -681,7 +681,7 @@ git_modified=$$system(git status --porcelain -z)
 DEFINES += CHATTERINO_GIT_COMMIT=\\\"$$git_commit\\\"
 DEFINES += CHATTERINO_GIT_RELEASE=\\\"$$git_release\\\"
 DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
-!isEmpty(git_modified_output) {
+!isEmpty(git_modified) {
     DEFINES += CHATTERINO_GIT_MODIFIED
 }
 

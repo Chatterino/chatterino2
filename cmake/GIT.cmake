@@ -77,4 +77,4 @@ if (DEFINED ENV{GIT_RELEASE})
     set(GIT_RELEASE "$ENV{GIT_RELEASE}")
 endif ()
 
-message(STATUS "Injected git values: ${GIT_COMMIT} (${GIT_RELEASE}) ${GIT_HASH} ${GIT_MODIFIED}")
+message(STATUS "Injected git values: ${GIT_COMMIT} (${GIT_RELEASE}) modified: ${GIT_MODIFIED}")
