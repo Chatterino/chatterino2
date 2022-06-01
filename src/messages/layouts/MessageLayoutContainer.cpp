@@ -79,8 +79,7 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element)
 void MessageLayoutContainer::addFloatingElement(
     FloatingMessageLayoutElement *element)
 {
-    this->floatingElements_.push_back(
-        std::unique_ptr<FloatingMessageLayoutElement>(element));
+    this->floatingElements_.emplace_back(element);
 }
 
 void MessageLayoutContainer::addElementNoLineBreak(

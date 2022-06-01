@@ -412,12 +412,11 @@ void TwitchChannel::sendMessage(const QString &message)
     auto app = getApp();
     if (!app->accounts->twitch.isLoggedIn())
     {
-        if (message.isEmpty())
+        if (!message.isEmpty())
         {
-            return;
+            this->showLoginMessage();
         }
 
-        this->showLoginMessage();
         return;
     }
 
@@ -446,12 +445,11 @@ void TwitchChannel::sendReply(const QString &message, const QString &replyId)
     auto app = getApp();
     if (!app->accounts->twitch.isLoggedIn())
     {
-        if (message.isEmpty())
+        if (!message.isEmpty())
         {
-            return;
+            this->showLoginMessage();
         }
 
-        this->showLoginMessage();
         return;
     }
 

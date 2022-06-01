@@ -2,9 +2,12 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
+#include "messages/MessageThread.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
+#include "widgets/splits/ReplyInput.hpp"
+#include "widgets/splits/Split.hpp"
 
 const QString TEXT_TITLE("Reply Thread - @%1 in #%2");
 

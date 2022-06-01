@@ -1,5 +1,6 @@
 #include "MessageThread.hpp"
 
+#include "messages/Message.hpp"
 #include "util/DebugCount.hpp"
 
 namespace chatterino {

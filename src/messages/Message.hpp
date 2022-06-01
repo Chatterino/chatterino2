@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
-#include "messages/MessageThread.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "util/QStringHash.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"

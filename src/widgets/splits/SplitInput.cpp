@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Link.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"

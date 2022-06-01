@@ -199,8 +199,8 @@ protected:
     int getSelectionIndexCount() const override;
 
 private:
-    QPen pen_;
-    float neededMargin_;
+    const QPen pen_;
+    const float neededMargin_;
 };
 
 }  // namespace chatterino

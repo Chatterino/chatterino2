@@ -3,7 +3,6 @@
 #include "common/Aliases.hpp"
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
-#include "messages/MessageThread.hpp"
 #include "pajlada/signals/signalholder.hpp"
 #include "widgets/BaseWidget.hpp"
 
@@ -16,6 +15,7 @@
 namespace chatterino {
 
 class ChannelView;
+class MessageThread;
 class SplitHeader;
 class SplitInput;
 class SplitContainer;

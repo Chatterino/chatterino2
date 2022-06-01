@@ -1,7 +1,5 @@
 #pragma once
 
-#include "messages/Message.hpp"
-
 #include <QString>
 
 #include <memory>

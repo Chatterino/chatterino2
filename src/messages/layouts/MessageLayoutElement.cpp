@@ -482,11 +482,9 @@ ReplyCurveLayoutElement::ReplyCurveLayoutElement(MessageElement &creator,
                                                  float thickness,
                                                  float neededMargin)
     : MessageLayoutElement(creator, size)
+    , pen_(QColor("#888"), thickness, Qt::SolidLine, Qt::RoundCap)
     , neededMargin_(neededMargin)
 {
-    this->pen_.setColor(QColor("#888"));
-    this->pen_.setWidthF(thickness);
-    this->pen_.setCapStyle(Qt::RoundCap);
 }
 
 void ReplyCurveLayoutElement::paint(QPainter &painter)

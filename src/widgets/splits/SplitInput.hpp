@@ -1,7 +1,5 @@
 #pragma once
 
-#include "controllers/hotkeys/HotkeyController.hpp"
-#include "messages/MessageThread.hpp"
 #include "util/QObjectRef.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
@@ -21,6 +19,7 @@ class Split;
 class EmotePopup;
 class InputCompletionPopup;
 class EffectLabel;
+class MessageThread;
 class ResizingTextEdit;
 
 class SplitInput : public BaseWidget

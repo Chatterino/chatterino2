@@ -1,17 +1,17 @@
 #pragma once
 
-#include "messages/MessageThread.hpp"
+#include "ForwardDecl.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/splits/ReplyInput.hpp"
-#include "widgets/splits/Split.hpp"
 
 #include <boost/signals2.hpp>
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
 
-#include <memory>
-
 namespace chatterino {
+
+class MessageThread;
+class ReplyInput;
+class Split;
 
 class ReplyThreadPopup final : public BaseWindow
 {

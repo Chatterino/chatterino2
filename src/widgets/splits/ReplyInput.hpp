@@ -1,12 +1,13 @@
 #pragma once
 
-#include "messages/MessageThread.hpp"
-#include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitInput.hpp"
 
 #include <memory>
 
 namespace chatterino {
+
+class MessageThread;
+class Split;
 
 class ReplyInput : public SplitInput
 {

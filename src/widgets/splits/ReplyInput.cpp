@@ -3,7 +3,9 @@
 #include "Application.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "messages/MessageThread.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
+#include "widgets/splits/Split.hpp"
 
 namespace chatterino {
 
