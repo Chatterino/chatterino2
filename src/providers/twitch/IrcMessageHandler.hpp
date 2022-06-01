@@ -3,6 +3,10 @@
 #include <IrcMessage>
 #include "common/Channel.hpp"
 #include "messages/Message.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
+
+#include <vector>
 
 namespace chatterino {
 
@@ -19,6 +23,10 @@ public:
     // parseMessage parses a single IRC message into 0+ Chatterino messages
     std::vector<MessagePtr> parseMessage(Channel *channel,
                                          Communi::IrcMessage *message);
+
+    std::vector<MessagePtr> parseMessageWithReply(
+        Channel *channel, Communi::IrcMessage *message,
+        const std::vector<MessagePtr> &otherLoaded);
 
     // parsePrivMessage arses a single IRC PRIVMSG into 0-1 Chatterino messages
     std::vector<MessagePtr> parsePrivMessage(
@@ -59,6 +67,10 @@ private:
     void addMessage(Communi::IrcMessage *message, const QString &target,
                     const QString &content, TwitchIrcServer &server,
                     bool isResub, bool isAction);
+
+    void populateReply(TwitchChannel *channel, Communi::IrcMessage *message,
+                       const std::vector<MessagePtr> &otherLoaded,
+                       TwitchMessageBuilder &builder);
 };
 
 }  // namespace chatterino

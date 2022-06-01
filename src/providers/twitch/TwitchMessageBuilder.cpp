@@ -318,7 +318,7 @@ MessagePtr TwitchMessageBuilder::build()
                                           Qt::gray, MessageElementFlag::Default)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
     }
-    else if (!this->historicalMessage_)
+    else
     {
         auto &img = getResources().buttons.replyDark;
         this->emplace<PrettyImageElement>(Image::fromPixmap(img, 0.15), 1,

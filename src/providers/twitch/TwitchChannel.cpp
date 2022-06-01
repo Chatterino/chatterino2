@@ -840,6 +840,7 @@ void TwitchChannel::loadRecentMessages()
             auto &handler = IrcMessageHandler::instance();
 
             std::vector<MessagePtr> allBuiltMessages;
+            auto tc = dynamic_cast<TwitchChannel *>(shared.get());
 
             for (auto message : messages)
             {
@@ -861,8 +862,10 @@ void TwitchChannel::loadRecentMessages()
                     }
                 }
 
-                for (auto builtMessage :
-                     handler.parseMessage(shared.get(), message))
+                auto builtMessages = handler.parseMessageWithReply(
+                    shared.get(), message, allBuiltMessages);
+
+                for (auto builtMessage : builtMessages)
                 {
                     builtMessage->flags.set(MessageFlag::RecentMessage);
                     allBuiltMessages.emplace_back(builtMessage);
