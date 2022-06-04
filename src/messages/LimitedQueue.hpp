@@ -52,23 +52,17 @@ public:
 
     T at(size_t index) const
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
-
         assert(index < this->buffer_.size());
         return this->buffer_[index];
     }
 
     T front() const
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
-
         return this->buffer_.front();
     }
 
     T back() const
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
-
         return this->buffer_.back();
     }
 
