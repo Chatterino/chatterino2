@@ -52,46 +52,8 @@ AboutPage::AboutPage()
             auto vbox = versionInfo.emplace<QVBoxLayout>();
             auto version = Version::instance();
 
-            // build-related information
-
-            QString modified = version.isModified() ? " modified" : "";
-
-            QString nightlyInfo;
-            if (Modes::instance().isNightly)
-            {
-                nightlyInfo = " on " + version.dateOfBuild();
-            }
-
-            QStringList buildInfo{"Qt " QT_VERSION_STR};
-#ifdef USEWINSDK
-            buildInfo.append("Windows SDK");
-#endif
-#ifdef _MSC_FULL_VER
-            buildInfo.append("MSVC " + QString::number(_MSC_FULL_VER, 10));
-#endif
-
-            auto build =
-                QString(
-                    R"(%1 (commit <a href="https://github.com/Chatterino/chatterino2/commit/%2">%2</a>%3); built%4 with %5)")
-                    .arg(version.fullVersion(), version.commitHash(), modified,
-                         nightlyInfo, buildInfo.join(", "));
-
-            // runtime-related information
-
-            auto running = QString("running on %1, kernel: %2")
-                               .arg(QSysInfo::prettyProductName(),
-                                    QSysInfo::kernelVersion());
-            if (version.isFlatpak())
-            {
-                running += ", running from Flatpak";
-            }
-
-            if (!version.isSupportedOS())
-            {
-                running += " (unsupported OS)";
-            }
-
-            auto label = vbox.emplace<QLabel>(build + "<br>" + running);
+            auto label = vbox.emplace<QLabel>(version.buildString() + "<br>" +
+                                              version.runningString());
             label->setOpenExternalLinks(true);
             label->setTextInteractionFlags(Qt::TextBrowserInteraction);
         }
