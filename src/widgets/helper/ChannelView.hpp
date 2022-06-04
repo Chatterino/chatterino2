@@ -94,7 +94,7 @@ public:
     void setSourceChannel(ChannelPtr sourceChannel);
     bool hasSourceChannel() const;
 
-    LimitedQueueSnapshot<MessageLayoutPtr> getMessagesSnapshot();
+    LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
     void queueLayout();
 
     void clearMessages();
