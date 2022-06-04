@@ -674,12 +674,16 @@ isEmpty(git_release) {
 git_release=$$system(git describe)
 }
 git_hash = $$str_member($$git_commit, 0, 8)
+git_modified=$$system(git status --porcelain -z)
 
 # Passing strings as defines requires you to use this weird triple-escape then quotation mark syntax.
 # https://stackoverflow.com/questions/3348711/add-a-define-to-qmake-with-a-value/18343449#18343449
 DEFINES += CHATTERINO_GIT_COMMIT=\\\"$$git_commit\\\"
 DEFINES += CHATTERINO_GIT_RELEASE=\\\"$$git_release\\\"
 DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
+!isEmpty(git_modified) {
+    DEFINES += CHATTERINO_GIT_MODIFIED
+}
 
 CONFIG(debug, debug|release) {
     message("Building Chatterino2 DEBUG")
