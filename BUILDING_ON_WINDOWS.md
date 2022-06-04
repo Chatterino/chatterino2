@@ -22,7 +22,7 @@ Notes:
    - Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `-64` for 64-bit systems).
      Visual Studio versions map as follows: `14.3` in the filename corresponds to MSVC 2022,`14.2` to 2019, `14.1` to 2017, `14.0` to 2015. _Anything prior to Visual Studio 2015 is unsupported. Please upgrade should you have an older installation._
 
-     **Convenience link for Visual Studio 2022: [boost_1_79_0_b1-msvc-14.3-64.exe](https://sourceforge.net/projects/boost/files/boost-binaries/1.79.0_b1/boost_1_79_0_b1-msvc-14.3-64.exe/download)**
+     **Convenience link for Visual Studio 2022: [boost_1_79_0-msvc-14.3-64.exe](https://sourceforge.net/projects/boost/files/boost-binaries/1.79.0/boost_1_79_0-msvc-14.3-64.exe/download)**
 
 2. When prompted where to install Boost, set the location to `C:\local\boost`.
 3. After the installation finishes, rename the `C:\local\boost\lib64-msvc-14.3` (or similar) directory to simply `lib` (`C:\local\boost\lib`).
