@@ -251,9 +251,13 @@ MessagePtr Channel::findMessage(QString messageID)
 {
     MessagePtr res;
 
-    this->messages_.rfind(res, [&messageID](const MessagePtr &msg) {
-        return msg->id == messageID;
-    });
+    if (auto msg = this->messages_.rfind([&messageID](const MessagePtr &msg) {
+            return msg->id == messageID;
+        });
+        msg)
+    {
+        res = *msg;
+    }
 
     return res;
 }

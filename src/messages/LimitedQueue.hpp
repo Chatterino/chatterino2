@@ -3,6 +3,7 @@
 #include "messages/LimitedQueueSnapshot.hpp"
 
 #include <boost/circular_buffer.hpp>
+#include <boost/optional.hpp>
 
 #include <cassert>
 #include <mutex>
@@ -162,10 +163,9 @@ public:
 
     // Actions
 
-    // Finds the first item that matches the given predicate. If an item is
-    // found, result is set and true is returned.
+    // Finds and returns the first item that matches the given predicate.
     template <typename Predicate>
-    bool find(T &result, Predicate pred) const
+    boost::optional<T> find(Predicate pred) const
     {
         std::shared_lock lock(this->mutex_);
 
@@ -173,18 +173,17 @@ public:
         {
             if (pred(item))
             {
-                result = item;
-                return true;
+                return item;
             }
         }
-        return false;
+
+        return boost::none;
     }
 
-    // Finds the first item that matches the given predicate, starting at the
-    // end and working towards the beginning. If an item is found, result is
-    // set and true is returned.
+    // Finds and returns the first item that matches the given predicate,
+    // starting at the end  and working towards the beginning.
     template <typename Predicate>
-    bool rfind(T &result, Predicate pred) const
+    boost::optional<T> rfind(Predicate pred) const
     {
         std::shared_lock lock(this->mutex_);
 
@@ -192,11 +191,11 @@ public:
         {
             if (pred(*it))
             {
-                result = *it;
-                return true;
+                return *it;
             }
         }
-        return false;
+
+        return boost::none;
     }
 
 private:
