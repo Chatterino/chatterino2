@@ -165,7 +165,7 @@ public:
     }
 
     /**
-     * @brief Replace the item at index  with the given item
+     * @brief Replace the item at index with the given item
      *
      * @param[in] index the index of the item to replace
      * @param[in] replacement the item to put in place of the item at index
@@ -192,7 +192,12 @@ public:
 
     // Actions
 
-    // Finds and returns the first item that matches the given predicate.
+    /**
+     * @brief Returns the first item matching a predicate, starting from the front
+     * 
+     * @param[in] pred predicate that will be applied to items
+     * @return the first item found or boost::none
+     */
     template <typename Predicate>
     [[nodiscard]] boost::optional<T> find(Predicate pred) const
     {
@@ -209,8 +214,12 @@ public:
         return boost::none;
     }
 
-    // Finds and returns the first item that matches the given predicate,
-    // starting at the end  and working towards the beginning.
+    /**
+     * @brief Returns the first item matching a predicate, starting from the back
+     * 
+     * @param[in] pred predicate that will be applied to items
+     * @return the first item found or boost::none
+     */
     template <typename Predicate>
     [[nodiscard]] boost::optional<T> rfind(Predicate pred) const
     {
