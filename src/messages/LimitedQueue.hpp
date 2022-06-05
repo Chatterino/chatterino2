@@ -70,6 +70,7 @@ public:
 
     // Modifiers
 
+    // Clear the buffer
     void clear()
     {
         std::unique_lock lock(this->mutex_);
@@ -77,8 +78,13 @@ public:
         this->buffer_.clear();
     }
 
-    // Pushes an item to the end of the queue. If an element is removed from
-    // the front, true is returned and deleted is set.
+    /**
+     * @brief Push an item to the end of the queue
+     *
+     * @param item the item to push
+     * @param[out] deleted the item that was deleted
+     * @return true if an element was deleted to make room
+     */
     bool pushBack(const T &item, T &deleted)
     {
         std::unique_lock lock(this->mutex_);
@@ -92,7 +98,12 @@ public:
         return full;
     }
 
-    // Pushes an item to the end of the queue.
+    /**
+     * @brief Push an item to the end of the queue
+     *
+     * @param item the item to push
+     * @return true if an element was deleted to make room
+     */
     bool pushBack(const T &item)
     {
         std::unique_lock lock(this->mutex_);
@@ -102,8 +113,16 @@ public:
         return full;
     }
 
-    // Pushes as many items as possible from the end of the given vector, until
-    // the queue is full. Returns the subset of items that was pushed.
+    /**
+     * @brief Push items into beginning of queue
+     *
+     * Items are inserted in reverse order.
+     * Items will only be inserted if they fit,
+     * meaning no elements can be deleted from using this function.
+     *
+     * @param items the vector of items to push
+     * @return vector of elements that were pushed
+     */
     std::vector<T> pushFront(const std::vector<T> &items)
     {
         std::unique_lock lock(this->mutex_);
@@ -123,15 +142,20 @@ public:
         return pushed;
     }
 
-    // Replaces the given item with a replacement. Returns the index of the
-    // replacement, or -1 if the item was not found.
-    int replaceItem(const T &item, const T &replacement)
+    /**
+     * @brief Replace the needle with the given item
+     *
+     * @param[in] needle the item to search for
+     * @param[in] replacement the item to replace needle with
+     * @return the index of the replaced item, or -1 if no replacement took place
+     */
+    int replaceItem(const T &needle, const T &replacement)
     {
         std::unique_lock lock(this->mutex_);
 
         for (int i = 0; i < this->buffer_.size(); ++i)
         {
-            if (this->buffer_[i] == item)
+            if (this->buffer_[i] == needle)
             {
                 this->buffer_[i] = replacement;
                 return i;
@@ -140,8 +164,13 @@ public:
         return -1;
     }
 
-    // Attempts to replace the item at the given index. Returns whether the
-    // replacement succeeded.
+    /**
+     * @brief Replace the item at index  with the given item
+     *
+     * @param[in] index the index of the item to replace
+     * @param[in] replacement the item to put in place of the item at index
+     * @return true if a replacement took place
+     */
     bool replaceItem(size_t index, const T &replacement)
     {
         std::unique_lock lock(this->mutex_);
