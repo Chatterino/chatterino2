@@ -72,7 +72,7 @@ struct Message : boost::noncopyable {
     std::shared_ptr<QColor> highlightColor;
     // Each reply holds a reference to the thread. When every reply is dropped,
     // the reply thread will be cleaned up by the TwitchChannel.
-    // The root of the thread does not have replyThread set. TODO(dnsge)
+    // The root of the thread does not have replyThread set.
     std::shared_ptr<MessageThread> replyThread;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;

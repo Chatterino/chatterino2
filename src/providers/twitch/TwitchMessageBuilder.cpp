@@ -231,6 +231,36 @@ MessagePtr TwitchMessageBuilder::build()
                 this->textColor_, FontStyle::ChatMediumSmall)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
     }
+    else if (this->tags.find("reply-parent-msg-id") != this->tags.end())
+    {
+        // Message is a reply but we couldn't find the original message.
+        // Render the message using the additional reply tags
+
+        auto replyDisplayName = this->tags.find("reply-parent-display-name");
+        auto replyBody = this->tags.find("reply-parent-msg-body");
+
+        if (replyDisplayName != this->tags.end() &&
+            replyBody != this->tags.end())
+        {
+            auto name = replyDisplayName->toString();
+            auto body = replyBody->toString();
+
+            this->emplace<ReplyCurveElement>();
+
+            this->emplace<TextElement>(
+                "Replying to", MessageElementFlag::RepliedText,
+                MessageColor::System, FontStyle::ChatMediumSmall);
+
+            this->emplace<TextElement>(
+                    "@" + name + ":", MessageElementFlag::RepliedUsername,
+                    this->textColor_, FontStyle::ChatMediumSmall)
+                ->setLink({Link::UserInfo, name});
+
+            this->emplace<SingleLineTextElement>(
+                body, MessageElementFlag::RepliedText, this->textColor_,
+                FontStyle::ChatMediumSmall);
+        }
+    }
 
     // timestamp
     this->message().serverReceivedTime = calculateMessageTime(this->ircMessage);
