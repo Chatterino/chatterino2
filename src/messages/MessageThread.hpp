@@ -11,7 +11,7 @@ struct Message;
 class MessageThread
 {
 public:
-    MessageThread(const std::shared_ptr<const Message> &rootMessage);
+    MessageThread(std::shared_ptr<const Message> rootMessage);
     ~MessageThread();
 
     void addToThread(const std::shared_ptr<const Message> &message);
@@ -39,8 +39,8 @@ public:
     }
 
 private:
-    QString rootMessageId_;
-    std::shared_ptr<const Message> rootMessage_;
+    const QString rootMessageId_;
+    const std::shared_ptr<const Message> rootMessage_;
     std::vector<std::weak_ptr<const Message>> replies_;
 };
 

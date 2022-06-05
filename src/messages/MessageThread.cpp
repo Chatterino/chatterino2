@@ -3,11 +3,13 @@
 #include "messages/Message.hpp"
 #include "util/DebugCount.hpp"
 
+#include <utility>
+
 namespace chatterino {
 
-MessageThread::MessageThread(const std::shared_ptr<const Message> &rootMessage)
+MessageThread::MessageThread(std::shared_ptr<const Message> rootMessage)
     : rootMessageId_(rootMessage->id)
-    , rootMessage_(rootMessage)
+    , rootMessage_(std::move(rootMessage))
 {
     DebugCount::increase("message threads");
 }
