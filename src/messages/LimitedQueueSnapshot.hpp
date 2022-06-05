@@ -36,12 +36,22 @@ public:
 
     auto begin() const
     {
-        return this->buffer_.cbegin();
+        return this->buffer_.begin();
     }
 
     auto end() const
     {
-        return this->buffer_.cend();
+        return this->buffer_.end();
+    }
+
+    auto rbegin() const
+    {
+        return this->buffer_.rbegin();
+    }
+
+    auto rend() const
+    {
+        return this->buffer_.rend();
     }
 
 private:
