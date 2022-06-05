@@ -111,7 +111,7 @@ void ImageLayoutElement::addCopyTextToString(QString &str, int from,
     {
         str += emoteElement->getEmote()->getCopyString();
         str = TwitchEmotes::cleanUpEmoteCode(str);
-        if (this->hasTrailingSpace())
+        if (to > 1 && this->hasTrailingSpace())
         {
             str += " ";
         }
@@ -233,7 +233,7 @@ void TextLayoutElement::addCopyTextToString(QString &str, int from,
 {
     str += this->getText().mid(from, to - from);
 
-    if (this->hasTrailingSpace())
+    if (to > this->getText().length() && this->hasTrailingSpace())
     {
         str += " ";
     }

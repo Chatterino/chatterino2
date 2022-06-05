@@ -666,7 +666,9 @@ void MessageLayoutContainer::addSelectionText(QString &str, int from, int to,
             if (element->getCreator().getFlags().hasAny(
                     {MessageElementFlag::Timestamp,
                      MessageElementFlag::Username, MessageElementFlag::Badges}))
+            {
                 continue;
+            }
         }
 
         auto indexCount = element->getSelectionIndexCount();
@@ -688,13 +690,12 @@ void MessageLayoutContainer::addSelectionText(QString &str, int from, int to,
         {
             if (index + indexCount > to)
             {
+                // Add part of string
                 element->addCopyTextToString(str, 0, to - index);
                 break;
             }
-            else
-            {
-                element->addCopyTextToString(str);
-            }
+
+            element->addCopyTextToString(str);
         }
 
         index += indexCount;

@@ -526,7 +526,7 @@ QString ChannelView::getSelectedText()
         layout->addSelectionText(result, from, to);
     }
 
-    return result.trimmed();
+    return result;
 }
 
 bool ChannelView::hasSelection()
