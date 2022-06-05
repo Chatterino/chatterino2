@@ -344,6 +344,14 @@ std::pair<bool, HighlightResult> HighlightController::check(
                 }
             }
 
+            if (checkResult->showInMentions)
+            {
+                if (!result.showInMentions)
+                {
+                    result.showInMentions = checkResult->showInMentions;
+                }
+            }
+
             if (result.full())
             {
                 // The final highlight result does not have room to add any more parameters, early out
