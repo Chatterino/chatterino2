@@ -30,6 +30,7 @@ public:
     void clearHighlights();
 
     void scrollToBottom(bool animate = false);
+    void scrollToTop(bool animate = false);
     bool isAtBottom() const;
 
     void setMaximum(qreal value);

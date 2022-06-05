@@ -1,3 +1,4 @@
+
 #include "controllers/hotkeys/HotkeyController.hpp"
 
 #include "common/QLogging.hpp"
@@ -375,6 +376,9 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
                             QKeySequence("Ctrl+End"), "scrollToBottom",
                             std::vector<QString>(), "scroll to bottom");
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
+                            QKeySequence("Ctrl+Home"), "scrollToTop",
+                            std::vector<QString>(), "scroll to top");
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
                             QKeySequence("F10"), "debug",
                             std::vector<QString>(), "open debug popup");

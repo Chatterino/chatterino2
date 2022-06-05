@@ -77,6 +77,11 @@ void Scrollbar::scrollToBottom(bool animate)
     this->setDesiredValue(this->maximum_ - this->getLargeChange(), animate);
 }
 
+void Scrollbar::scrollToTop(bool animate)
+{
+    this->setDesiredValue(this->minimum_ - this->getLargeChange(), animate);
+}
+
 bool Scrollbar::isAtBottom() const
 {
     return this->atBottom_;
