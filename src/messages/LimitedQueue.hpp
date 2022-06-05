@@ -24,27 +24,27 @@ public:
 
     // Property Accessors
 
-    size_t size() const
+    [[nodiscard]] size_t size() const
     {
         return this->buffer_.size();
     }
 
-    size_t limit() const
+    [[nodiscard]] size_t limit() const
     {
         return this->limit_;
     }
 
-    bool empty() const
+    [[nodiscard]] bool empty() const
     {
         return this->buffer_.empty();
     }
 
-    bool full() const
+    [[nodiscard]] bool full() const
     {
         return this->buffer_.full();
     }
 
-    size_t space() const
+    [[nodiscard]] size_t space() const
     {
         return this->limit() - this->size();
     }
@@ -52,18 +52,18 @@ public:
     // Value Accessors
     // copies of values are returned so that references aren't invalidated
 
-    T at(size_t index) const
+    [[nodiscard]] T at(size_t index) const
     {
         assert(index < this->buffer_.size());
         return this->buffer_[index];
     }
 
-    T front() const
+    [[nodiscard]] T front() const
     {
         return this->buffer_.front();
     }
 
-    T back() const
+    [[nodiscard]] T back() const
     {
         return this->buffer_.back();
     }
@@ -155,7 +155,7 @@ public:
         return true;
     }
 
-    LimitedQueueSnapshot<T> getSnapshot() const
+    [[nodiscard]] LimitedQueueSnapshot<T> getSnapshot() const
     {
         std::shared_lock lock(this->mutex_);
         return LimitedQueueSnapshot<T>(this->buffer_);
@@ -165,7 +165,7 @@ public:
 
     // Finds and returns the first item that matches the given predicate.
     template <typename Predicate>
-    boost::optional<T> find(Predicate pred) const
+    [[nodiscard]] boost::optional<T> find(Predicate pred) const
     {
         std::shared_lock lock(this->mutex_);
 
@@ -183,7 +183,7 @@ public:
     // Finds and returns the first item that matches the given predicate,
     // starting at the end  and working towards the beginning.
     template <typename Predicate>
-    boost::optional<T> rfind(Predicate pred) const
+    [[nodiscard]] boost::optional<T> rfind(Predicate pred) const
     {
         std::shared_lock lock(this->mutex_);
 
