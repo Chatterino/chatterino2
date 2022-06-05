@@ -81,6 +81,8 @@ set(SOURCE_FILES
         controllers/highlights/HighlightBadge.hpp
         controllers/highlights/HighlightBlacklistModel.cpp
         controllers/highlights/HighlightBlacklistModel.hpp
+        controllers/highlights/HighlightController.cpp
+        controllers/highlights/HighlightController.hpp
         controllers/highlights/HighlightModel.cpp
         controllers/highlights/HighlightModel.hpp
         controllers/highlights/HighlightPhrase.cpp
