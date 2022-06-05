@@ -157,6 +157,7 @@ SOURCES += \
     src/controllers/highlights/BadgeHighlightModel.cpp \
     src/controllers/highlights/HighlightBadge.cpp \
     src/controllers/highlights/HighlightBlacklistModel.cpp \
+    src/controllers/highlights/HighlightController.cpp \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \
     src/controllers/highlights/UserHighlightModel.cpp \
@@ -401,6 +402,7 @@ HEADERS += \
     src/controllers/highlights/HighlightBadge.hpp \
     src/controllers/highlights/HighlightBlacklistModel.hpp \
     src/controllers/highlights/HighlightBlacklistUser.hpp \
+    src/controllers/highlights/HighlightController.hpp \
     src/controllers/highlights/HighlightModel.hpp \
     src/controllers/highlights/HighlightPhrase.hpp \
     src/controllers/highlights/UserHighlightModel.hpp \

@@ -81,6 +81,8 @@ set(SOURCE_FILES
         controllers/highlights/HighlightBadge.hpp
         controllers/highlights/HighlightBlacklistModel.cpp
         controllers/highlights/HighlightBlacklistModel.hpp
+        controllers/highlights/HighlightController.cpp
+        controllers/highlights/HighlightController.hpp
         controllers/highlights/HighlightModel.cpp
         controllers/highlights/HighlightModel.hpp
         controllers/highlights/HighlightPhrase.cpp
@@ -622,7 +624,11 @@ set_target_properties(${LIBRARY_PROJECT}
 # compilation in CMake is a more involved, as documented in https://stackoverflow.com/q/24292898.
 # For CI runs, however, the date of build file generation should be consistent with the date of
 # compilation so this approximation is "good enough" for our purpose.
-string(TIMESTAMP cmake_gen_date "%Y-%m-%d")
+if (DEFINED ENV{CHATTERINO_SKIP_DATE_GEN})
+    set(cmake_gen_date "1970-01-01")
+else ()
+    string(TIMESTAMP cmake_gen_date "%Y-%m-%d")
+endif ()
 
 target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO
