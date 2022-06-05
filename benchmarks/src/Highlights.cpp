@@ -44,11 +44,56 @@ public:
     }
 };
 
-class MockApplication : BaseApplication
+class MockApplication : IApplication
 {
-    AccountController *const getAccounts() override
+public:
+    Theme *getThemes() override
+    {
+        return nullptr;
+    }
+    Fonts *getFonts() override
+    {
+        return nullptr;
+    }
+    Emotes *getEmotes() override
+    {
+        return nullptr;
+    }
+    AccountController *getAccounts() override
     {
         return &this->accounts;
+    }
+    HotkeyController *getHotkeys() override
+    {
+        return nullptr;
+    }
+    WindowManager *getWindows() override
+    {
+        return nullptr;
+    }
+    Toasts *getToasts() override
+    {
+        return nullptr;
+    }
+    CommandController *getCommands() override
+    {
+        return nullptr;
+    }
+    NotificationController *getNotifications() override
+    {
+        return nullptr;
+    }
+    TwitchIrcServer *getTwitch() override
+    {
+        return nullptr;
+    }
+    ChatterinoBadges *getChatterinoBadges() override
+    {
+        return nullptr;
+    }
+    FfzBadges *getFfzBadges() override
+    {
+        return nullptr;
     }
 
     AccountController accounts;
