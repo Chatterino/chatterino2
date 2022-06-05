@@ -121,6 +121,22 @@ struct HighlightResult {
                this->customSoundUrl.has_value() && this->color &&
                this->showInMentions;
     }
+
+    friend std::ostream &operator<<(std::ostream &os,
+                                    const HighlightResult &result)
+    {
+        os << "Alert: " << (result.alert ? "Yes" : "No") << ", "
+           << "Play sound: " << (result.playSound ? "Yes" : "No") << " ("
+           << (result.customSoundUrl
+                   ? result.customSoundUrl.get().toString().toStdString()
+                   : "")
+           << ")"
+           << ", "
+           << "Color: "
+           << (result.color ? result.color->name().toStdString() : "") << ", "
+           << "Show in mentions: " << (result.showInMentions ? "Yes" : "No");
+        return os;
+    }
 };
 
 struct HighlightCheck {
