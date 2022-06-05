@@ -104,19 +104,22 @@ public:
     MOCK_METHOD(void, fetchStreams,
                 (QStringList userIds, QStringList userLogins,
                  ResultCallback<std::vector<HelixStream>> successCallback,
-                 HelixFailureCallback failureCallback),
+                 HelixFailureCallback failureCallback,
+                 std::function<void()> finallyCallback),
                 (override));
 
     MOCK_METHOD(void, getStreamById,
                 (QString userId,
                  (ResultCallback<bool, HelixStream> successCallback),
-                 HelixFailureCallback failureCallback),
+                 HelixFailureCallback failureCallback,
+                 std::function<void()> finallyCallback),
                 (override));
 
     MOCK_METHOD(void, getStreamByName,
                 (QString userName,
                  (ResultCallback<bool, HelixStream> successCallback),
-                 HelixFailureCallback failureCallback),
+                 HelixFailureCallback failureCallback,
+                 std::function<void()> finallyCallback),
                 (override));
 
     MOCK_METHOD(void, fetchGames,
