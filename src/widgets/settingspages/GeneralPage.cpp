@@ -336,14 +336,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
-        "Chatterino can automatically change behavior if it detects that \"OBS "
-        "Studio\" is running.\nSelect which things you want to change while "
-        "streaming");
+        "Chatterino can automatically change behavior if it detects that any "
+        "streaming software is running.\nSelect which things you want to "
+        "change while streaming");
 
     ComboBox *dankDropdown =
         layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
             "Enable Streamer Mode",
-            {"Disabled", "Enabled", "Automatic (Detect OBS)"},
+            {"Disabled", "Enabled", "Automatic (Detect streaming software)"},
             s.enableStreamerMode,
             [](int value) {
                 return value;
@@ -352,7 +352,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                 return static_cast<StreamerModeSetting>(args.index);
             },
             false);
-    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 10);
+    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 30);
 
     layout.addCheckbox("Hide usercard avatars",
                        s.streamerModeHideUsercardAvatars);

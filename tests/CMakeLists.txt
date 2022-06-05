@@ -19,6 +19,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchPubSubClient.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchMessageBuilder.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightController.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/FormatTime.cpp
     # Add your new file above this line!
     )
 

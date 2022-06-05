@@ -33,7 +33,6 @@
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
-#include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "widgets/Notebook.hpp"

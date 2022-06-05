@@ -30,9 +30,11 @@ bool shouldShowWarning = true;
 const QStringList &broadcastingBinaries()
 {
 #ifdef USEWINSDK
-    static QStringList bins = {"obs.exe", "obs64.exe"};
+    static QStringList bins = {
+        "obs.exe",         "obs64.exe",        "PRISMLiveStudio.exe",
+        "XSplit.Core.exe", "TwitchStudio.exe", "vMix64.exe"};
 #else
-    static QStringList bins = {"obs"};
+    static QStringList bins = {"obs", "Twitch Studio", "Streamlabs Desktop"};
 #endif
     return bins;
 }
@@ -45,7 +47,7 @@ bool isInStreamerMode()
             return true;
         case StreamerModeSetting::Disabled:
             return false;
-        case StreamerModeSetting::DetectObs:
+        case StreamerModeSetting::DetectStreamingSoftware:
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
 
