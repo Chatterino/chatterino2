@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <mutex>
+#include <shared_mutex>
 #include <vector>
 
 namespace chatterino {
@@ -70,7 +71,7 @@ public:
 
     void clear()
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
+        std::unique_lock lock(this->mutex_);
 
         this->buffer_.clear();
     }
@@ -79,7 +80,7 @@ public:
     // the front, true is returned and deleted is set.
     bool pushBack(const T &item, T &deleted)
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
+        std::unique_lock lock(this->mutex_);
 
         bool full = this->buffer_.full();
         if (full)
@@ -93,7 +94,7 @@ public:
     // Pushes an item to the end of the queue.
     bool pushBack(const T &item)
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
+        std::unique_lock lock(this->mutex_);
 
         bool full = this->buffer_.full();
         this->buffer_.push_back(item);
@@ -104,7 +105,7 @@ public:
     // the queue is full. Returns the subset of items that was pushed.
     std::vector<T> pushFront(const std::vector<T> &items)
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
+        std::unique_lock lock(this->mutex_);
 
         size_t numToPush = std::min(items.size(), this->space());
         std::vector<T> pushed;
@@ -125,7 +126,7 @@ public:
     // replacement, or -1 if the item was not found.
     int replaceItem(const T &item, const T &replacement)
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
+        std::unique_lock lock(this->mutex_);
 
         for (int i = 0; i < this->buffer_.size(); ++i)
         {
@@ -142,7 +143,7 @@ public:
     // replacement succeeded.
     bool replaceItem(size_t index, const T &replacement)
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
+        std::unique_lock lock(this->mutex_);
 
         if (index >= this->buffer_.size())
         {
@@ -155,7 +156,7 @@ public:
 
     LimitedQueueSnapshot<T> getSnapshot() const
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
+        std::shared_lock lock(this->mutex_);
         return LimitedQueueSnapshot<T>(this->buffer_);
     }
 
@@ -166,7 +167,7 @@ public:
     template <typename Predicate>
     bool find(T &result, Predicate pred) const
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
+        std::shared_lock lock(this->mutex_);
 
         for (const auto &item : this->buffer_)
         {
@@ -185,7 +186,7 @@ public:
     template <typename Predicate>
     bool rfind(T &result, Predicate pred) const
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
+        std::shared_lock lock(this->mutex_);
 
         for (auto it = this->buffer_.rbegin(); it != this->buffer_.rend(); ++it)
         {
@@ -199,7 +200,7 @@ public:
     }
 
 private:
-    mutable std::mutex mutex_;
+    mutable std::shared_mutex mutex_;
 
     size_t limit_;
     boost::circular_buffer<T> buffer_;
