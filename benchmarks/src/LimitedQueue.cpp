@@ -1,11 +1,10 @@
 #include "messages/LimitedQueue.hpp"
+
 #include <benchmark/benchmark.h>
 
-#include <boost/circular_buffer.hpp>
-
-#include <deque>
 #include <memory>
 #include <numeric>
+#include <vector>
 
 using namespace chatterino;
 
