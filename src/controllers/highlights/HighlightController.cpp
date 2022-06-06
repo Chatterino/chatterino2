@@ -170,11 +170,9 @@ void rebuildUserHighlights(Settings &settings,
                 }
 
                 return HighlightResult{
-                    highlight.hasAlert(),
-                    highlight.hasSound(),
-                    highlightSoundUrl,
-                    highlight.getColor(),
-                    false,  // showInMentions
+                    highlight.hasAlert(),       highlight.hasSound(),
+                    highlightSoundUrl,          highlight.getColor(),
+                    highlight.showInMentions(),
                 };
             }});
     }
@@ -341,6 +339,14 @@ std::pair<bool, HighlightResult> HighlightController::check(
                 if (!result.color)
                 {
                     result.color = checkResult->color;
+                }
+            }
+
+            if (checkResult->showInMentions)
+            {
+                if (!result.showInMentions)
+                {
+                    result.showInMentions = checkResult->showInMentions;
                 }
             }
 
