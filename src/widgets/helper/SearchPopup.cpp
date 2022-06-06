@@ -109,17 +109,17 @@ void SearchPopup::updateWindowTitle()
 {
     QString historyName;
 
-    if (this->channelName_ == "/whispers")
+    if (this->searchChannels_.size() > 1)
     {
-        historyName = "whispers";
+        historyName = "multiple channels'";
     }
     else if (this->channelName_ == "/mentions")
     {
         historyName = "mentions";
     }
-    else if (this->searchChannels_.size() > 1)
+    else if (this->channelName_ == "/whispers")
     {
-        historyName = "multiple channels'";
+        historyName = "whispers";
     }
     else if (this->channelName_.isEmpty())
     {

@@ -177,6 +177,11 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
     return false;
 }
 
+const std::function<QString(const QString &, const ChannelPtr &)>
+    noOpPlaceholder = [](const auto &altText, const auto &channel) {
+        return altText;
+    };
+
 const std::map<QString,
                std::function<QString(const QString &, const ChannelPtr &)>>
     COMMAND_VARS{
@@ -240,6 +245,11 @@ const std::map<QString,
                 return name.isEmpty() ? altText : name;
             },
         },
+        // variables used in mod buttons and the like, these make no sense in normal commands, so they are left empty
+        {"input.text", noOpPlaceholder},
+        {"msg.id", noOpPlaceholder},
+        {"user.name", noOpPlaceholder},
+        {"msg.text", noOpPlaceholder},
     };
 
 }  // namespace
@@ -1151,18 +1161,18 @@ QString CommandController::execCustomCommand(const QStringList &words,
             auto varName = match.captured(4);
             auto altText = match.captured(5);  // alt text or empty string
 
-            auto var = COMMAND_VARS.find(varName);
+            auto var = context.find(varName);
 
-            if (var != COMMAND_VARS.end())
+            if (var != context.end())
             {
-                result += var->second(altText, channel);
+                result += var->second.isEmpty() ? altText : var->second;
             }
             else
             {
-                auto it = context.find(varName);
-                if (it != context.end())
+                auto it = COMMAND_VARS.find(varName);
+                if (it != COMMAND_VARS.end())
                 {
-                    result += it->second.isEmpty() ? altText : it->second;
+                    result += it->second(altText, channel);
                 }
                 else
                 {

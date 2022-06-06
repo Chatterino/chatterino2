@@ -2129,7 +2129,7 @@ void ChannelView::addCommandExecutionContextMenuItems(
 
         inputText.push_front(cmd.name + " ");
 
-        cmdMenu->addAction(cmd.name, [this, inputText] {
+        cmdMenu->addAction(cmd.name, [this, layout, cmd, inputText] {
             ChannelPtr channel;
 
             /* Search popups and user message history's underlyingChannels aren't of type TwitchChannel, but
@@ -2142,9 +2142,29 @@ void ChannelView::addCommandExecutionContextMenuItems(
             {
                 channel = this->underlyingChannel_;
             }
+            auto split = dynamic_cast<Split *>(this->parentWidget());
+            QString userText;
+            if (split)
+            {
+                userText = split->getInput().getInputText();
+            }
+            QString value = getApp()->commands->execCustomCommand(
+                inputText.split(' '), cmd, true, channel,
+                {
+                    {"user.name", layout->getMessage()->loginName},
+                    {"msg.id", layout->getMessage()->id},
+                    {"msg.text", layout->getMessage()->messageText},
+                    {"input.text", userText},
 
-            QString value =
-                getApp()->commands->execCommand(inputText, channel, false);
+                    // old placeholders
+                    {"user", layout->getMessage()->loginName},
+                    {"msg-id", layout->getMessage()->id},
+                    {"message", layout->getMessage()->messageText},
+
+                    {"channel", this->channel()->getName()},
+                });
+
+            value = getApp()->commands->execCommand(value, channel, false);
 
             channel->sendMessage(value);
         });

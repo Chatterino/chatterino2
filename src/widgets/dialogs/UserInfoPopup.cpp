@@ -35,7 +35,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-const QString TEXT_VIEWS("Views: %1");
 const QString TEXT_FOLLOWERS("Followers: %1");
 const QString TEXT_CREATED("Created: %1");
 const QString TEXT_TITLE("%1's Usercard - #%2");
@@ -358,8 +357,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
             }
 
             // items on the left
-            vbox.emplace<Label>(TEXT_VIEWS.arg(""))
-                .assign(&this->ui_.viewCountLabel);
             vbox.emplace<Label>(TEXT_FOLLOWERS.arg(""))
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED.arg(""))
@@ -859,7 +856,6 @@ void UserInfoPopup::updateUserData()
         // this can occur when the account doesn't exist.
         this->ui_.followerCountLabel->setText(
             TEXT_FOLLOWERS.arg(TEXT_UNAVAILABLE));
-        this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(TEXT_UNAVAILABLE));
         this->ui_.createdDateLabel->setText(TEXT_CREATED.arg(TEXT_UNAVAILABLE));
 
         this->ui_.nameLabel->setText(this->userName_);
@@ -896,8 +892,6 @@ void UserInfoPopup::updateUserData()
 
         this->setWindowTitle(TEXT_TITLE.arg(
             user.displayName, this->underlyingChannel_->getName()));
-        this->ui_.viewCountLabel->setText(
-            TEXT_VIEWS.arg(localizeNumbers(user.viewCount)));
         this->ui_.createdDateLabel->setText(
             TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
         this->ui_.userIDLabel->setText(TEXT_USER_ID + user.id);

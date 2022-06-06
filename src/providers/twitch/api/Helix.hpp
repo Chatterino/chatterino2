@@ -27,7 +27,6 @@ struct HelixUser {
     QString createdAt;
     QString description;
     QString profileImageUrl;
-    int viewCount;
 
     explicit HelixUser(QJsonObject jsonObject)
         : id(jsonObject.value("id").toString())
@@ -36,7 +35,6 @@ struct HelixUser {
         , createdAt(jsonObject.value("created_at").toString())
         , description(jsonObject.value("description").toString())
         , profileImageUrl(jsonObject.value("profile_image_url").toString())
-        , viewCount(jsonObject.value("view_count").toInt())
     {
     }
 };

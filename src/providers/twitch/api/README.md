@@ -12,7 +12,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-users
 
 Used in:
 
-- `UserInfoPopup` to get ID, viewCount, displayName, createdAt of username we clicked
+- `UserInfoPopup` to get ID, displayName, createdAt of username we clicked
 - `CommandController` to power any commands that need to get a user ID
 - `Toasts` to get the profile picture of a streamer who just went live
 - `TwitchAccount` block and unblock features to translate user name to user ID

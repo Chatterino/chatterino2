@@ -89,7 +89,6 @@ private:
 
         Label *nameLabel = nullptr;
         Label *localizedNameLabel = nullptr;
-        Label *viewCountLabel = nullptr;
         Label *followerCountLabel = nullptr;
         Label *createdDateLabel = nullptr;
         Label *userIDLabel = nullptr;

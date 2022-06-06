@@ -157,6 +157,7 @@ SOURCES += \
     src/controllers/highlights/BadgeHighlightModel.cpp \
     src/controllers/highlights/HighlightBadge.cpp \
     src/controllers/highlights/HighlightBlacklistModel.cpp \
+    src/controllers/highlights/HighlightController.cpp \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \
     src/controllers/highlights/UserHighlightModel.cpp \
@@ -266,6 +267,7 @@ SOURCES += \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/RatelimitBucket.cpp \
+    src/util/SampleData.cpp \
     src/util/SplitCommand.cpp \
     src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
@@ -405,6 +407,7 @@ HEADERS += \
     src/controllers/highlights/HighlightBadge.hpp \
     src/controllers/highlights/HighlightBlacklistModel.hpp \
     src/controllers/highlights/HighlightBlacklistUser.hpp \
+    src/controllers/highlights/HighlightController.hpp \
     src/controllers/highlights/HighlightModel.hpp \
     src/controllers/highlights/HighlightPhrase.hpp \
     src/controllers/highlights/UserHighlightModel.hpp \
@@ -535,7 +538,6 @@ HEADERS += \
     src/util/IncognitoBrowser.hpp \
     src/util/InitUpdateButton.hpp \
     src/util/IrcHelpers.hpp \
-    src/util/IsBigEndian.hpp \
     src/util/LayoutCreator.hpp \
     src/util/LayoutHelper.hpp \
     src/util/NuulsUploader.hpp \
@@ -544,13 +546,11 @@ HEADERS += \
     src/util/PostToThread.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \
-    src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RapidJsonSerializeQString.hpp \
     src/util/RatelimitBucket.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
-    src/util/SampleCheerMessages.hpp \
-    src/util/SampleLinks.hpp \
+    src/util/SampleData.hpp \
     src/util/SharedPtrElementLess.hpp \
     src/util/SplitCommand.hpp \
     src/util/StandardItemHelper.hpp \
@@ -687,12 +687,16 @@ isEmpty(git_release) {
 git_release=$$system(git describe)
 }
 git_hash = $$str_member($$git_commit, 0, 8)
+git_modified=$$system(git status --porcelain -z)
 
 # Passing strings as defines requires you to use this weird triple-escape then quotation mark syntax.
 # https://stackoverflow.com/questions/3348711/add-a-define-to-qmake-with-a-value/18343449#18343449
 DEFINES += CHATTERINO_GIT_COMMIT=\\\"$$git_commit\\\"
 DEFINES += CHATTERINO_GIT_RELEASE=\\\"$$git_release\\\"
 DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
+!isEmpty(git_modified) {
+    DEFINES += CHATTERINO_GIT_MODIFIED
+}
 
 CONFIG(debug, debug|release) {
     message("Building Chatterino2 DEBUG")

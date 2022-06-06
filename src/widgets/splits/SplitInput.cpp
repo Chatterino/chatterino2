@@ -652,7 +652,8 @@ void SplitInput::insertCompletionText(const QString &input_)
         if (done)
         {
             auto cursor = edit.textCursor();
-            edit.setText(text.remove(i, position - i + 1).insert(i, input));
+            edit.setPlainText(
+                text.remove(i, position - i + 1).insert(i, input));
 
             cursor.setPosition(i + input.size());
             edit.setTextCursor(cursor);

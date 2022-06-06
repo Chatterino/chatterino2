@@ -7,6 +7,7 @@
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
@@ -35,7 +36,6 @@
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
-#include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "widgets/Notebook.hpp"
@@ -71,6 +71,7 @@ Application::Application(Settings &_settings, Paths &_paths)
 
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
+    , highlights(&this->emplace<HighlightController>())
     , twitch(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , dankerinoBadges(&this->emplace<DankerinoBadges>())
