@@ -23,12 +23,6 @@ public:
     }
 
     // Property Accessors
-
-    [[nodiscard]] size_t size() const
-    {
-        return this->buffer_.size();
-    }
-
     [[nodiscard]] size_t limit() const
     {
         return this->limit_;
@@ -46,11 +40,32 @@ public:
 
     [[nodiscard]] size_t space() const
     {
-        return this->limit() - this->size();
+        return this->limit() - this->buffer_.size();
     }
 
     // Value Accessors
     // copies of values are returned so that references aren't invalidated
+
+    /**
+     * @brief Get the item at the given syntax safely
+     *
+     * Use at() if you know the size of the container beforehand
+     *
+     * @param[in] index the index of the item to fetch
+     * @param[out] deleted the item that was deleted
+     * @return the item at the index if it's populated, or none if it's not
+     */
+    [[nodiscard]] boost::optional<T> get(size_t index) const
+    {
+        std::shared_lock lock(this->mutex_);
+
+        if (index >= this->buffer_.size())
+        {
+            return boost::none;
+        }
+
+        return this->buffer_[index];
+    }
 
     [[nodiscard]] T at(size_t index) const
     {

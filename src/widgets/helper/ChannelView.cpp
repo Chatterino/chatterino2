@@ -910,14 +910,15 @@ void ChannelView::messageRemoveFromStart(MessagePtr &message)
 
 void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
 {
-    if (index >= this->messages_.size())
+    auto oMessage = this->messages_.get(index);
+    if (!oMessage)
     {
         return;
     }
 
+    auto message = *oMessage;
+
     MessageLayoutPtr newItem(new MessageLayout(replacement));
-    // there always will be an element at index
-    auto message = this->messages_.at(index);
 
     if (message->flags.has(MessageLayoutFlag::AlternateBackground))
     {
