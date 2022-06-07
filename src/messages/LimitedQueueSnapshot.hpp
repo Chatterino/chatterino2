@@ -17,7 +17,7 @@ private:
     friend class LimitedQueue<T>;
 
     LimitedQueueSnapshot(const boost::circular_buffer<T> &buf)
-        : buffer_(buf)
+        : buffer_(buf.begin(), buf.end())
     {
     }
 
@@ -55,7 +55,7 @@ public:
     }
 
 private:
-    boost::circular_buffer<T> buffer_;
+    std::vector<T> buffer_;
 };
 
 }  // namespace chatterino
