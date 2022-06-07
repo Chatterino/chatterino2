@@ -451,6 +451,47 @@ TEST_F(HighlightControllerTest, A)
                 },
             },
         },
+        {
+            // User mention with showInMentions
+            {
+                // input
+                MessageParseArgs{},  // no special args
+                {},                  // no badges
+                "gempir",            // sender name
+                "a",                 // original message
+            },
+            {
+                // expected
+                true,  // state
+                {
+                    true,                                   // alert
+                    false,                                  // playsound
+                    boost::none,                            // custom sound url
+                    std::make_shared<QColor>("#7ff19900"),  // color
+                    true,                                   // showInMentions
+                },
+            },
+        },
+        {
+            {
+                // input
+                MessageParseArgs{},  // no special args
+                {},                  // no badges
+                "a",                 // sender name
+                "!testmanxd",        // original message
+            },
+            {
+                // expected
+                true,  // state
+                {
+                    true,                                   // alert
+                    true,                                   // playsound
+                    boost::none,                            // custom sound url
+                    std::make_shared<QColor>("#7f7f3f49"),  // color
+                    true,                                   // showInMentions
+                },
+            },
+        },
     };
 
     for (const auto &[input, expected] : tests)
