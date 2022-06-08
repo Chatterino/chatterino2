@@ -520,6 +520,8 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 
 add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         Qt${MAJOR_QT_VERSION}::Core
