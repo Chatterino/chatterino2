@@ -11,6 +11,9 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  VERBOSE: 1
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
