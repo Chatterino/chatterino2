@@ -26,19 +26,41 @@ public:
 
     const QString &version() const;
     const QString &commitHash() const;
+    // Whether or not the vcs tree had any changes at the time of build
+    const bool &isModified() const;
+    // Date of build file generation (≈ date of build)
     const QString &dateOfBuild() const;
+    // "Full" version string, as displayed in window title
     const QString &fullVersion() const;
     const bool &isSupportedOS() const;
     bool isFlatpak() const;
+
+    // Returns a list of tags for this build, e.g. what compiler was used, what Qt version etc
+    QStringList buildTags() const;
+
+    // Returns a string containing build information of this Chatterino binary
+    const QString &buildString() const;
+
+    // Returns a string about the current running system
+    const QString &runningString() const;
 
 private:
     Version();
 
     QString version_;
     QString commitHash_;
+    bool isModified_{false};
     QString dateOfBuild_;
     QString fullVersion_;
     bool isSupportedOS_;
+
+    QString buildString_;
+    // Generate a build string (e.g. Chatterino 2.3.5 (commit ...)) and store it in buildString_ for future use
+    void generateBuildString();
+
+    QString runningString_;
+    // Generate a running string (e.g. Running on Arch Linux, kernel 5.14.3) and store it in runningString_ for future use
+    void generateRunningString();
 };
 
 };  // namespace chatterino

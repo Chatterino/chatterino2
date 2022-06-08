@@ -7,6 +7,7 @@
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
@@ -69,6 +70,7 @@ Application::Application(Settings &_settings, Paths &_paths)
 
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
+    , highlights(&this->emplace<HighlightController>())
     , twitch(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
