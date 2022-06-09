@@ -2,6 +2,7 @@
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/Message.hpp"
 #include "messages/SharedMessageBuilder.hpp"
@@ -83,6 +84,10 @@ public:
     {
         return nullptr;
     }
+    HighlightController *getHighlights() override
+    {
+        return &this->highlights;
+    }
     TwitchIrcServer *getTwitch() override
     {
         return nullptr;
@@ -97,6 +102,7 @@ public:
     }
 
     AccountController accounts;
+    HighlightController highlights;
     // TODO: Figure this out
 };
 
