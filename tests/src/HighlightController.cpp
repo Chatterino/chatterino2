@@ -54,6 +54,10 @@ public:
     {
         return nullptr;
     }
+    HighlightController *getHighlights() override
+    {
+        return &this->highlights;
+    }
     TwitchIrcServer *getTwitch() override
     {
         return nullptr;
@@ -68,6 +72,7 @@ public:
     }
 
     AccountController accounts;
+    HighlightController highlights;
     // TODO: Figure this out
 };
 
@@ -127,6 +132,25 @@ public:
                  (ResultCallback<std::vector<HelixGame>> successCallback),
                  HelixFailureCallback failureCallback),
                 (override));
+
+    MOCK_METHOD(void, updateStreamTags,
+                (QString broadcasterId, QStringList tags,
+                 std::function<void()> successCallback,
+                 HelixFailureCallback failureCallback),
+                (override));
+
+    MOCK_METHOD(void, getStreamTags,
+                (QString broadcasterId,
+                 ResultCallback<std::vector<HelixTag>> successCallback,
+                 HelixFailureCallback failureCallback),
+                (override));
+
+    MOCK_METHOD(
+        void, fetchStreamTags,
+        (QString after,
+         (ResultCallback<std::vector<HelixTag>, QString> successCallback),
+         HelixFailureCallback failureCallback),
+        (override));
 
     MOCK_METHOD(void, searchGames,
                 (QString gameName,
