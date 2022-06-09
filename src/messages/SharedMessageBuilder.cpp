@@ -155,7 +155,7 @@ void SharedMessageBuilder::parseHighlights()
     }
 
     auto badges = SharedMessageBuilder::parseBadgeTag(this->tags);
-    auto [highlighted, highlightResult] = getApp()->highlights->check(
+    auto [highlighted, highlightResult] = getIApp()->getHighlights()->check(
         this->args, badges, this->ircMessage->nick(), this->originalMessage_);
 
     if (!highlighted)

@@ -48,6 +48,7 @@ public:
     virtual WindowManager *getWindows() = 0;
     virtual Toasts *getToasts() = 0;
     virtual CommandController *getCommands() = 0;
+    virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual TwitchIrcServer *getTwitch() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
@@ -127,6 +128,10 @@ public:
     NotificationController *getNotifications() override
     {
         return this->notifications;
+    }
+    HighlightController *getHighlights() override
+    {
+        return this->highlights;
     }
     TwitchIrcServer *getTwitch() override
     {
