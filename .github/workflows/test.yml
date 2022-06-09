@@ -3,6 +3,8 @@ name: Test
 
 on:
   pull_request:
+  push:
+    - 'zneix/chore/experiment*'
 
 env:
   TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.3
