@@ -934,9 +934,9 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
 
 void ChannelView::updateLastReadMessage()
 {
-    if (!this->messages_.empty())
+    if (auto lastMessage = this->messages_.last())
     {
-        this->lastReadMessage_ = this->messages_.back();
+        this->lastReadMessage_ = *lastMessage;
     }
 
     this->update();

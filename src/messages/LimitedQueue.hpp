@@ -89,6 +89,34 @@ public:
         return this->buffer_.back();
     }
 
+    [[nodiscard]] boost::optional<T> first() const
+    {
+        std::shared_lock lock(this->mutex_);
+
+        if (this->buffer_.empty())
+        {
+            return boost::none;
+        }
+        else
+        {
+            return this->buffer_.front();
+        }
+    }
+
+    [[nodiscard]] boost::optional<T> last() const
+    {
+        std::shared_lock lock(this->mutex_);
+
+        if (this->buffer_.empty())
+        {
+            return boost::none;
+        }
+        else
+        {
+            return this->buffer_.back();
+        }
+    }
+
     // Modifiers
 
     // Clear the buffer
@@ -214,7 +242,12 @@ public:
     // Actions
 
     /**
-     * @brief Returns the first item matching a predicate, starting from the front
+     * @brief Returns the first item matching a predicate
+     * 
+     * The contents of the LimitedQueue are iterated over from front to back 
+     * until the first element that satisfies `pred(item)`. If no item 
+     * satisfies the predicate, or if the queue is empty, then boost::none
+     * is returned.
      * 
      * @param[in] pred predicate that will be applied to items
      * @return the first item found or boost::none
@@ -236,7 +269,12 @@ public:
     }
 
     /**
-     * @brief Returns the first item matching a predicate, starting from the back
+     * @brief Returns the first item matching a predicate, checking in reverse
+     * 
+     * The contents of the LimitedQueue are iterated over from back to front 
+     * until the first element that satisfies `pred(item)`. If no item 
+     * satisfies the predicate, or if the queue is empty, then boost::none
+     * is returned.
      * 
      * @param[in] pred predicate that will be applied to items
      * @return the first item found or boost::none

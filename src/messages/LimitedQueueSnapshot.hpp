@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/circular_buffer.hpp>
+
 #include <cassert>
 #include <memory>
 #include <vector>
