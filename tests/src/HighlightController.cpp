@@ -128,6 +128,25 @@ public:
                  HelixFailureCallback failureCallback),
                 (override));
 
+    MOCK_METHOD(void, updateStreamTags,
+                (QString broadcasterId, QStringList tags,
+                 std::function<void()> successCallback,
+                 HelixFailureCallback failureCallback),
+                (override));
+
+    MOCK_METHOD(void, getStreamTags,
+                (QString broadcasterId,
+                 ResultCallback<std::vector<HelixTag>> successCallback,
+                 HelixFailureCallback failureCallback),
+                (override));
+
+    MOCK_METHOD(
+        void, fetchStreamTags,
+        (QString after,
+         (ResultCallback<std::vector<HelixTag>, QString> successCallback),
+         HelixFailureCallback failureCallback),
+        (override));
+
     MOCK_METHOD(void, searchGames,
                 (QString gameName,
                  ResultCallback<std::vector<HelixGame>> successCallback,
