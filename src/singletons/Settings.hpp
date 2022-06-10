@@ -344,8 +344,8 @@ public:
                                        "Choose"};
     QStringSetting streamlinkOpts = {"/external/streamlink/options", ""};
     BoolSetting streamlinkOptsLatency = {"/external/streamlink/optionsLatency",
-                                         true};
-    BoolSetting streamlinkOptsAds = {"/external/streamlink/optionsAds", true};
+                                         false};
+    BoolSetting streamlinkOptsAds = {"/external/streamlink/optionsAds", false};
 
     // Custom URI Scheme
     QStringSetting customURIScheme = {"/external/urischeme"};
