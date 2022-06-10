@@ -54,7 +54,7 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
             ImageSet{
                 Image::fromUrl(getEmoteLink(id, "1.0"), 1),
                 Image::fromUrl(getEmoteLink(id, "2.0"), 0.5),
-                Image::fromUrl(getEmoteLink(id, "3.0"), 0.25),
+                Image::fromUrl(getEmoteLink(id, "3.0"), 0.286),
             },
             Tooltip{name.toHtmlEscaped() + "<br>Twitch Emote"},
         });

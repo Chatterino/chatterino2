@@ -301,7 +301,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Enable emote auto-completion by typing :",
                        s.emoteCompletionWithColon);
     layout.addDropdown<float>(
-        "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
+        "Size",
+        {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x", "3x", "4x", "5x"},
         s.emoteScale,
         [](auto val) {
             if (val == 1)
