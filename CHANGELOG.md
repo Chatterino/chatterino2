@@ -9,6 +9,7 @@
 - Minor: Fixed being unable to load Twitch Usercards from the `/mentions` tab. (#3623)
 - Minor: Add information about the user's operating system in the About page. (#3663)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
+- Minor: Added ability to keep longer channel message history on-screen or for logs (#3811)
 - Minor: Added chatter count for each category in viewer list. (#3683, #3719)
 - Minor: Sorted usernames in /vips message to be case-insensitive. (#3696)
 - Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
