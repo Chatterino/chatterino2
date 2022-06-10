@@ -272,7 +272,7 @@ void openStreamlinkForChannel(const QString &channel)
         args << "--stream-sorting-excludes" << exclude;
     }
 
-    // Append any extra options to to our streamlink command
+    // Append any extra options to our streamlink command
     if (getSettings()->streamlinkOptsLatency)
     {
         args << "--twitch-low-latency";
