@@ -21,6 +21,7 @@
 - Minor: Added ability to execute commands on chat messages using the message context menu. (#3738, #3765)
 - Minor: Added `/copy` command. Usage: `/copy <text>`. Copies provided text to clipboard - can be useful with custom commands. (#3763)
 - Minor: Removed total views from the usercard, as Twitch no longer updates the number. (#3792)
+- Bugfix: Fixed FFZ 4x emotes having wrong scale factor, explictly use 4x links (#3812)
 - Bugfix: Fixed viewers list search not working when used before loading finishes. (#3774)
 - Bugfix: Fixed live notifications for usernames containing uppercase characters. (#3646)
 - Bugfix: Fixed live notifications not getting updated for closed streams going offline. (#3678)
