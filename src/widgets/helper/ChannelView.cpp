@@ -125,6 +125,9 @@ ChannelView::ChannelView(BaseWidget *parent)
 {
     this->setMouseTracking(true);
 
+    this->messages_ = std::make_shared<LimitedQueue<MessageLayoutPtr>>(
+        getSettings()->twitchMessageOnScreenLimit);
+
     this->initializeLayout();
     this->initializeScrollbar();
     this->initializeSignals();
@@ -485,7 +488,7 @@ void ChannelView::updateScrollbar(
 void ChannelView::clearMessages()
 {
     // Clear all stored messages in this chat widget
-    this->messages_.clear();
+    this->messages_->clear();
     this->scrollBar_->clearHighlights();
     this->queueLayout();
 
@@ -565,7 +568,7 @@ LimitedQueueSnapshot<MessageLayoutPtr> ChannelView::getMessagesSnapshot()
 {
     if (!this->paused() /*|| this->scrollBar_->isVisible()*/)
     {
-        this->snapshot_ = this->messages_.getSnapshot();
+        this->snapshot_ = this->messages_->getSnapshot();
     }
 
     return this->snapshot_;
@@ -700,7 +703,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
             messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
         }
 
-        this->messages_.pushBack(MessageLayoutPtr(messageLayout), deleted);
+        this->messages_->pushBack(MessageLayoutPtr(messageLayout), deleted);
         if (this->showScrollbarHighlights())
         {
             this->scrollBar_->addHighlight(
@@ -809,7 +812,7 @@ void ChannelView::messageAppended(MessagePtr &message,
         loop.exec();
     }
 
-    if (this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted))
+    if (this->messages_->pushBack(MessageLayoutPtr(messageRef), deleted))
     {
         if (this->paused())
         {
@@ -872,7 +875,7 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     }
 
     /// Add the messages at the start
-    if (this->messages_.pushFront(messageRefs).size() > 0)
+    if (this->messages_->pushFront(messageRefs).size() > 0)
     {
         if (this->scrollBar_->isAtBottom())
             this->scrollBar_->scrollToBottom();
@@ -915,13 +918,13 @@ void ChannelView::messageRemoveFromStart(MessagePtr &message)
 
 void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
 {
-    if (index >= this->messages_.getSnapshot().size())
+    if (index >= this->messages_->getSnapshot().size())
     {
         return;
     }
 
     MessageLayoutPtr newItem(new MessageLayout(replacement));
-    auto snapshot = this->messages_.getSnapshot();
+    auto snapshot = this->messages_->getSnapshot();
     if (index >= snapshot.size())
     {
         qCDebug(chatterinoWidget)
@@ -939,7 +942,7 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     this->scrollBar_->replaceHighlight(index,
                                        replacement->getScrollBarHighlight());
 
-    this->messages_.replaceItem(message, newItem);
+    this->messages_->replaceItem(message, newItem);
     this->queueLayout();
 }
 

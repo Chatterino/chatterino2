@@ -28,6 +28,8 @@ Channel::Channel(const QString &name, Type type)
     , name_(name)
     , type_(type)
 {
+    this->messages_ = std::make_shared<LimitedQueue<MessagePtr>>(
+        getSettings()->twitchMessageLogLimit);
 }
 
 Channel::~Channel()
@@ -67,12 +69,12 @@ bool Channel::isEmpty() const
 
 bool Channel::hasMessages() const
 {
-    return !this->messages_.empty();
+    return !this->messages_->empty();
 }
 
 LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
 {
-    return this->messages_.getSnapshot();
+    return this->messages_->getSnapshot();
 }
 
 void Channel::addMessage(MessagePtr message,
@@ -88,7 +90,7 @@ void Channel::addMessage(MessagePtr message,
         app->logging->addMessage(this->name_, message);
     }
 
-    if (this->messages_.pushBack(message, deleted))
+    if (this->messages_->pushBack(message, deleted))
     {
         this->messageRemovedFromStart.invoke(deleted);
     }
@@ -212,7 +214,7 @@ void Channel::disableAllMessages()
 void Channel::addMessagesAtStart(std::vector<MessagePtr> &_messages)
 {
     std::vector<MessagePtr> addedMessages =
-        this->messages_.pushFront(_messages);
+        this->messages_->pushFront(_messages);
 
     if (addedMessages.size() != 0)
     {
@@ -222,7 +224,7 @@ void Channel::addMessagesAtStart(std::vector<MessagePtr> &_messages)
 
 void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
 {
-    int index = this->messages_.replaceItem(message, replacement);
+    int index = this->messages_->replaceItem(message, replacement);
 
     if (index >= 0)
     {
@@ -232,7 +234,7 @@ void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
 
 void Channel::replaceMessage(size_t index, MessagePtr replacement)
 {
-    if (this->messages_.replaceItem(index, replacement))
+    if (this->messages_->replaceItem(index, replacement))
     {
         this->messageReplaced.invoke(index, replacement);
     }
