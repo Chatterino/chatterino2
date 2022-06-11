@@ -918,6 +918,10 @@ void TwitchChannel::fetchDisplayName()
             }
             channel->addRecentChatter(channel->getDisplayName());
             channel->displayNameChanged.invoke();
+            if (channel->roomId().isEmpty())
+            {
+                channel->setRoomId(user.id);
+            }
         },
         [] {});
 }
