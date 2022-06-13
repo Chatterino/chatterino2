@@ -18,25 +18,26 @@ void FfzBadges::initialize(Settings &settings, Paths &paths)
     this->loadFfzBadges();
 }
 
-boost::optional<EmotePtr> FfzBadges::getBadge(const UserId &id)
+boost::optional<EmotePtr> FfzBadges::getBadge(const UserId &id, const int index)
 {
     std::shared_lock lock(this->mutex_);
 
     auto it = this->badgeMap.find(id.string);
     if (it != this->badgeMap.end())
     {
-        return this->badges[it->second];
+        return this->badges[it->second.at(index)];
     }
     return boost::none;
 }
-boost::optional<QColor> FfzBadges::getBadgeColor(const UserId &id)
+boost::optional<QColor> FfzBadges::getBadgeColor(const UserId &id,
+                                                 const int index)
 {
     std::shared_lock lock(this->mutex_);
 
     auto badgeIt = this->badgeMap.find(id.string);
     if (badgeIt != this->badgeMap.end())
     {
-        auto colorIt = this->colorMap.find(badgeIt->second);
+        auto colorIt = this->colorMap.find(badgeIt->second.at(index));
         if (colorIt != this->colorMap.end())
         {
             return colorIt->second;
@@ -45,7 +46,17 @@ boost::optional<QColor> FfzBadges::getBadgeColor(const UserId &id)
     }
     return boost::none;
 }
+int FfzBadges::getNumBadges(const UserId &id)
+{
+    std::shared_lock lock(this->mutex_);
 
+    auto it = this->badgeMap.find(id.string);
+    if (it != this->badgeMap.end())
+    {
+        return it->second.size();
+    }
+    return 0;
+}
 void FfzBadges::loadFfzBadges()
 {
     static QUrl url("https://api.frankerfacez.com/v1/badges/ids");
@@ -81,7 +92,19 @@ void FfzBadges::loadFfzBadges()
                                             .value(badgeId)
                                             .toArray())
                 {
-                    this->badgeMap[QString::number(user.toInt())] = index;
+                    if (this->badgeMap.find(QString::number(user.toInt())) !=
+                        this->badgeMap.end())
+                    {
+                        this->badgeMap[QString::number(user.toInt())].push_back(
+                            jsonBadge.value("id").toInt() - 1);
+                    }
+                    else
+                    {
+                        this->badgeMap[QString::number(user.toInt())] =
+                            std::vector<int>();
+                        this->badgeMap[QString::number(user.toInt())].push_back(
+                            jsonBadge.value("id").toInt() - 1);
+                    }
                 }
                 ++index;
             }

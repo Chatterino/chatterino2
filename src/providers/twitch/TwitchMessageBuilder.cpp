@@ -1107,12 +1107,18 @@ void TwitchMessageBuilder::appendChatterinoBadges()
 
 void TwitchMessageBuilder::appendFfzBadges()
 {
-    if (auto badge = getApp()->ffzBadges->getBadge({this->userId_}))
+    int numBadges = getApp()->ffzBadges->getNumBadges({this->userId_});
+
+    for (int i = 0; i < numBadges; i++)
     {
-        if (auto color = getApp()->ffzBadges->getBadgeColor({this->userId_}))
+        if (auto badge = getApp()->ffzBadges->getBadge({this->userId_}, i))
         {
-            this->emplace<FfzBadgeElement>(*badge, MessageElementFlag::BadgeFfz,
-                                           color.get());
+            if (auto color =
+                    getApp()->ffzBadges->getBadgeColor({this->userId_}, i))
+            {
+                this->emplace<FfzBadgeElement>(
+                    *badge, MessageElementFlag::BadgeFfz, color.get());
+            }
         }
     }
 }
