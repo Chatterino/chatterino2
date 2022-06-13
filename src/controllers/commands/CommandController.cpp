@@ -334,6 +334,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         auto target = words.at(1);
+        stripChannelName(target);
 
         getHelix()->getUserByName(
             target,
@@ -379,6 +380,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         auto target = words.at(1);
+        stripChannelName(target);
 
         getHelix()->getUserByName(
             target,
