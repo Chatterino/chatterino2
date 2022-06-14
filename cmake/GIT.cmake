@@ -19,6 +19,10 @@ set(GIT_COMMIT "GIT-REPOSITORY-NOT-FOUND")
 set(GIT_RELEASE "${PROJECT_VERSION}")
 set(GIT_MODIFIED 0)
 
+if (DEFINED ENV{CHATTERINO_SKIP_GIT_GEN})
+    return()
+endif ()
+
 if (GIT_EXECUTABLE)
     execute_process(
             COMMAND ${GIT_EXECUTABLE} rev-parse --is-inside-work-tree
