@@ -37,4 +37,26 @@ QColor getRandomColor(const QString &userId);
 QString formatUserMention(const QString &userName, bool isFirstWord,
                           bool mentionUsersWithComma);
 
+template <typename T>
+std::vector<T> splitListIntoBatches(const T list, int batchSize = 100)
+{
+    std::vector<T> batches;
+
+    auto it = list.cbegin();
+
+    while (it != list.end())
+    {
+        T batch;
+
+        for (int i = 0; i < batchSize && it != list.end(); i++)
+        {
+            batch.append(*it);
+            it++;
+        }
+        batches.emplace_back(std::move(batch));
+    }
+
+    return batches;
+}
+
 }  // namespace chatterino

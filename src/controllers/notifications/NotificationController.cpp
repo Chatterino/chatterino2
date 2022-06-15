@@ -10,6 +10,7 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "widgets/Window.hpp"
 
 #ifdef Q_OS_WIN
@@ -35,15 +36,6 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
     this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {
         this->twitchSetting_.setValue(this->channelMap[Platform::Twitch].raw());
     });
-    /*
-    for (const QString &channelName : this->mixerSetting_.getValue()) {
-        this->channelMap[Platform::Mixer].appendItem(channelName);
-    }
-
-    this->channelMap[Platform::Mixer].delayedItemsChanged.connect([this] {
-        this->mixerSetting_.setValue(
-            this->channelMap[Platform::Mixer]);
-    });*/
 
     liveStatusTimer_ = new QTimer();
 
@@ -161,7 +153,7 @@ void NotificationController::fetchFakeChannels()
     qCDebug(chatterinoNotification) << "fetching fake channels";
     QStringList channels;
     for (std::vector<int>::size_type i = 0;
-         i != channelMap[Platform::Twitch].raw().size(); i++)
+         i < channelMap[Platform::Twitch].raw().size(); i++)
     {
         auto chan = getApp()->twitch->getChannelOrEmpty(
             channelMap[Platform::Twitch].raw()[i]);
@@ -170,10 +162,11 @@ void NotificationController::fetchFakeChannels()
             channels.push_back(channelMap[Platform::Twitch].raw()[i]);
         }
     }
-    for (const auto &batch : getChannelsInBatches(channels))
+
+    for (const auto &batch : splitListIntoBatches(channels))
     {
         getHelix()->fetchStreams(
-            QStringList(), batch,
+            {}, batch,
             [batch, this](std::vector<HelixStream> streams) {
                 std::unordered_set<QString> liveStreams;
                 for (const auto &stream : streams)
