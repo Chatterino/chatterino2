@@ -40,7 +40,7 @@ QString formatUserMention(const QString &userName, bool isFirstWord,
                           bool mentionUsersWithComma);
 
 template <typename T>
-std::vector<T> splitListIntoBatches(const T list, int batchSize = 100)
+std::vector<T> splitListIntoBatches(const T &list, int batchSize = 100)
 {
     std::vector<T> batches;
     int batchCount = std::ceil(list.size() / batchSize);
