@@ -43,7 +43,7 @@ template <typename T>
 std::vector<T> splitListIntoBatches(const T &list, int batchSize = 100)
 {
     std::vector<T> batches;
-    int batchCount = std::ceil(list.size() / batchSize);
+    int batchCount = std::ceil(static_cast<double>(list.size()) / batchSize);
     batches.reserve(batchCount);
 
     auto it = list.cbegin();
