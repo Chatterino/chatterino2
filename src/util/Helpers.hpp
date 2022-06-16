@@ -3,6 +3,8 @@
 #include <QColor>
 #include <QString>
 
+#include <cmath>
+
 namespace chatterino {
 
 /**
@@ -41,10 +43,12 @@ template <typename T>
 std::vector<T> splitListIntoBatches(const T list, int batchSize = 100)
 {
     std::vector<T> batches;
+    int batchCount = std::ceil(list.size() / batchSize);
+    batches.reserve(batchCount);
 
     auto it = list.cbegin();
 
-    while (it != list.end())
+    for (int j = 0; j < batchCount; j++)
     {
         T batch;
 
