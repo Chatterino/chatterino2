@@ -57,6 +57,10 @@ std::vector<T> splitListIntoBatches(const T &list, int batchSize = 100)
             batch.append(*it);
             it++;
         }
+        if (batch.empty())
+        {
+            break;
+        }
         batches.emplace_back(std::move(batch));
     }
 
