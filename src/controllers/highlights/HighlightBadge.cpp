@@ -1,5 +1,6 @@
 #include "HighlightBadge.hpp"
 
+#include "messages/SharedMessageBuilder.hpp"
 #include "singletons/Resources.hpp"
 
 namespace chatterino {
@@ -86,21 +87,12 @@ bool HighlightBadge::compare(const QString &id, const Badge &badge) const
 {
     if (this->hasVersions_)
     {
-        auto parts = id.split("/");
-        if (parts.size() == 2)
-        {
-            return parts.at(0).compare(badge.key_, Qt::CaseInsensitive) == 0 &&
-                   parts.at(1).compare(badge.value_, Qt::CaseInsensitive) == 0;
-        }
-        else
-        {
-            return parts.at(0).compare(badge.key_, Qt::CaseInsensitive) == 0;
-        }
+        auto parts = SharedMessageBuilder::slashKeyValue(id);
+        return parts.first.compare(badge.key_, Qt::CaseInsensitive) == 0 &&
+               parts.second.compare(badge.value_, Qt::CaseInsensitive) == 0;
     }
-    else
-    {
-        return id.compare(badge.key_, Qt::CaseInsensitive) == 0;
-    }
+
+    return id.compare(badge.key_, Qt::CaseInsensitive) == 0;
 }
 
 bool HighlightBadge::hasCustomSound() const

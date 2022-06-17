@@ -33,11 +33,11 @@ public:
     void removeCurrentPage();
 
     int indexOf(QWidget *page) const;
-    virtual void select(QWidget *page);
-    void selectIndex(int index);
-    void selectNextTab();
-    void selectPreviousTab();
-    void selectLastTab();
+    virtual void select(QWidget *page, bool focusPage = true);
+    void selectIndex(int index, bool focusPage = true);
+    void selectNextTab(bool focusPage = true);
+    void selectPreviousTab(bool focusPage = true);
+    void selectLastTab(bool focusPage = true);
 
     int getPageCount() const;
     QWidget *getPageAt(int index) const;
@@ -59,6 +59,11 @@ public:
     void performLayout(bool animate = false);
 
     void setTabDirection(NotebookTabDirection direction);
+
+    bool isNotebookLayoutLocked() const;
+    void setLockNotebookLayout(bool value);
+
+    void addNotebookActionsToMenu(QMenu *menu);
 
 protected:
     virtual void scaleChangedEvent(float scale_) override;
@@ -98,7 +103,9 @@ private:
     bool showTabs_ = true;
     bool showAddButton_ = false;
     int lineOffset_ = 20;
+    bool lockNotebookLayout_ = false;
     NotebookTabDirection tabDirection_ = NotebookTabDirection::Horizontal;
+    QAction *lockNotebookLayoutAction_;
 };
 
 class SplitNotebook : public Notebook
@@ -108,7 +115,7 @@ public:
 
     SplitContainer *addPage(bool select = false);
     SplitContainer *getOrAddSelectedPage();
-    void select(QWidget *page) override;
+    void select(QWidget *page, bool focusPage = true) override;
 
 protected:
     void showEvent(QShowEvent *event) override;

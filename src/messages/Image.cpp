@@ -138,22 +138,21 @@ namespace detail {
     {
         QVector<Frame<QImage>> frames;
 
-        if (reader.imageCount() == 0)
-        {
-            qCDebug(chatterinoImage)
-                << "Error while reading image" << url.string << ": '"
-                << reader.errorString() << "'";
-            return frames;
-        }
-
         QImage image;
         for (int index = 0; index < reader.imageCount(); ++index)
         {
             if (reader.read(&image))
             {
                 QPixmap::fromImage(image);
-
-                int duration = std::max(20, reader.nextImageDelay());
+                // It seems that browsers have special logic for fast animations.
+                // This implements Chrome and Firefox's behavior which uses
+                // a duration of 100 ms for any frames that specify a duration of <= 10 ms.
+                // See http://webkit.org/b/36082 for more information.
+                // https://github.com/SevenTV/chatterino7/issues/46#issuecomment-1010595231
+                int duration = reader.nextImageDelay();
+                if (duration <= 10)
+                    duration = 100;
+                duration = std::max(20, duration);
                 frames.push_back(Frame<QImage>{image, duration});
             }
         }
@@ -406,8 +405,30 @@ void Image::actuallyLoad()
             buffer.open(QIODevice::ReadOnly);
             QImageReader reader(&buffer);
 
+            if (!reader.canRead())
+            {
+                qCDebug(chatterinoImage)
+                    << "Error: image cant be read " << shared->url().string;
+                return Failure;
+            }
+
+            const auto size = reader.size();
+            if (size.isEmpty())
+            {
+                return Failure;
+            }
+
+            // returns 1 for non-animated formats
+            if (reader.imageCount() <= 0)
+            {
+                qCDebug(chatterinoImage)
+                    << "Error: image has less than 1 frame "
+                    << shared->url().string << ": " << reader.errorString();
+                return Failure;
+            }
+
             // use "double" to prevent int overflows
-            if (double(reader.size().width()) * double(reader.size().height()) *
+            if (double(size.width()) * double(size.height()) *
                     double(reader.imageCount()) * 4.0 >
                 double(Image::maxBytesRam))
             {

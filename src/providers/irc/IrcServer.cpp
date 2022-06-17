@@ -196,7 +196,7 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
             if (highlighted && showInMentions)
             {
-                getApp()->twitch2->mentionsChannel->addMessage(msg);
+                getApp()->twitch->mentionsChannel->addMessage(msg);
             }
         }
         else
@@ -271,7 +271,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 MessageBuilder builder;
 
                 builder.emplace<TimestampElement>(
-                    calculateMessageTimestamp(message));
+                    calculateMessageTime(message).time());
                 builder.emplace<TextElement>(message->toData(),
                                              MessageElementFlag::Text);
                 builder->flags.set(MessageFlag::Debug);

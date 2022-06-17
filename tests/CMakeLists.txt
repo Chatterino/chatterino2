@@ -10,10 +10,15 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightPhrase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ExponentialBackoff.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchAccount.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Helpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/RatelimitBucket.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Hotkeys.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/UtilTwitch.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/IrcHelpers.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchPubSubClient.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchMessageBuilder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightController.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/FormatTime.cpp
     # Add your new file above this line!
     )
 
@@ -22,7 +27,7 @@ add_sanitizers(${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-lib)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE gtest)
+target_link_libraries(${PROJECT_NAME} PRIVATE gtest gmock)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     CHATTERINO_TEST

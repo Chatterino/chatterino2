@@ -1,5 +1,7 @@
 #include "messages/search/MessageFlagsPredicate.hpp"
 
+#include "util/Qt.hpp"
+
 namespace chatterino {
 
 MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
@@ -27,6 +29,10 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
         else if (flag == "system")
         {
             this->flags_.set(MessageFlag::System);
+        }
+        else if (flag == "first-msg")
+        {
+            this->flags_.set(MessageFlag::FirstMessage);
         }
     }
 }

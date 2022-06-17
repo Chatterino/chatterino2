@@ -137,7 +137,7 @@ void Emojis::load()
 
 void Emojis::loadEmojis()
 {
-    // Current version: https://github.com/iamcal/emoji-data/blob/v7.0.2/emoji.json (Emoji version 13.1 (2021))
+    // Current version: https://github.com/iamcal/emoji-data/blob/v14.0.0/emoji.json (Emoji version 14.0 (2022))
     QFile file(":/emoji.json");
     file.open(QFile::ReadOnly);
     QTextStream s1(&file);

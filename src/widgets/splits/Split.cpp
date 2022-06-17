@@ -103,10 +103,10 @@ Split::Split(QWidget *parent)
     this->input_->ui_.textEdit->installEventFilter(parent);
 
     // update placeholder text on Twitch account change and channel change
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [this] {
+    this->bSignals_.emplace_back(
+        getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->updateInputPlaceholder();
-        });
+        }));
     this->signalHolder_.managedConnect(channelChanged, [this] {
         this->updateInputPlaceholder();
     });
@@ -125,8 +125,7 @@ Split::Split(QWidget *parent)
     this->view_->openChannelIn.connect([this](
                                            QString twitchChannel,
                                            FromTwitchLinkOpenChannelIn openIn) {
-        ChannelPtr channel =
-            getApp()->twitch.server->getOrAddChannel(twitchChannel);
+        ChannelPtr channel = getApp()->twitch->getOrAddChannel(twitchChannel);
         switch (openIn)
         {
             case FromTwitchLinkOpenChannelIn::Split:
@@ -220,7 +219,7 @@ Split::Split(QWidget *parent)
 
             if (getSettings()->askOnImageUpload.getValue())
             {
-                QMessageBox msgBox;
+                QMessageBox msgBox(this->window());
                 msgBox.setWindowTitle("Chatterino");
                 msgBox.setText("Image upload");
                 msgBox.setInformativeText(
@@ -274,7 +273,12 @@ void Split::addShortcuts()
          }},
         {"showSearch",
          [this](std::vector<QString>) -> QString {
-             this->showSearch();
+             this->showSearch(true);
+             return "";
+         }},
+        {"showGlobalSearch",
+         [this](std::vector<QString>) -> QString {
+             this->showSearch(false);
              return "";
          }},
         {"reconnect",
@@ -984,14 +988,34 @@ void Split::showViewerList()
     static QStringList jsonLabels = {"broadcaster", "moderators", "vips",
                                      "staff",       "admins",     "global_mods",
                                      "viewers"};
-    QList<QListWidgetItem *> labelList;
-    for (auto &x : labels)
-    {
-        auto label = formatListItemText(x);
-        label->setForeground(this->theme->accent);
-        labelList.append(label);
-    }
     auto loadingLabel = new QLabel("Loading...");
+
+    searchBar->setPlaceholderText("Search User...");
+
+    auto performListSearch = [=]() {
+        auto query = searchBar->text();
+        if (query.isEmpty())
+        {
+            resultList->hide();
+            chattersList->show();
+            return;
+        }
+
+        auto results = chattersList->findItems(query, Qt::MatchContains);
+        chattersList->hide();
+        resultList->clear();
+        for (auto &item : results)
+        {
+            if (!item->text().contains("("))
+            {
+                resultList->addItem(formatListItemText(item->text()));
+            }
+        }
+        resultList->show();
+    };
+
+    QObject::connect(searchBar, &QLineEdit::textEdited, this,
+                     performListSearch);
 
     NetworkRequest::twitchRequest("https://tmi.twitch.tv/group/user/" +
                                   this->getChannel()->getName() + "/chatters")
@@ -1015,7 +1039,10 @@ void Split::showViewerList()
                 if (currentCategory.empty())
                     continue;
 
-                chattersList->addItem(labelList.at(i));
+                auto label = formatListItemText(QString("%1 (%2)").arg(
+                    labels.at(i), localizeNumbers(currentCategory.size())));
+                label->setForeground(this->theme->accent);
+                chattersList->addItem(label);
                 foreach (const QJsonValue &v, currentCategory)
                 {
                     chattersList->addItem(formatListItemText(v.toString()));
@@ -1023,52 +1050,52 @@ void Split::showViewerList()
                 chattersList->addItem(new QListWidgetItem());
             }
 
+            performListSearch();
             return Success;
         })
         .execute();
-
-    searchBar->setPlaceholderText("Search User...");
-    QObject::connect(searchBar, &QLineEdit::textEdited, this, [=]() {
-        auto query = searchBar->text();
-        if (!query.isEmpty())
-        {
-            auto results = chattersList->findItems(query, Qt::MatchContains);
-            chattersList->hide();
-            resultList->clear();
-            for (auto &item : results)
-            {
-                if (!labels.contains(item->text()))
-                {
-                    resultList->addItem(formatListItemText(item->text()));
-                }
-            }
-            resultList->show();
-        }
-        else
-        {
-            resultList->hide();
-            chattersList->show();
-        }
-    });
 
     QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {
         viewerDock->setMinimumWidth(300);
     });
 
-    auto listDoubleClick = [=](QString userName) {
-        if (!labels.contains(userName) && !userName.isEmpty())
+    auto listDoubleClick = [this](const QModelIndex &index) {
+        const auto itemText = index.data().toString();
+
+        // if the list item contains a parentheses it means that
+        // it's a category label so don't show a usercard
+        if (!itemText.contains("(") && !itemText.isEmpty())
         {
-            this->view_->showUserInfoPopup(userName);
+            this->view_->showUserInfoPopup(itemText);
         }
     };
 
-    QObject::connect(chattersList, &QListWidget::doubleClicked, this, [=]() {
-        listDoubleClick(chattersList->currentItem()->text());
-    });
+    QObject::connect(chattersList, &QListWidget::doubleClicked, this,
+                     listDoubleClick);
 
-    QObject::connect(resultList, &QListWidget::doubleClicked, this, [=]() {
-        listDoubleClick(resultList->currentItem()->text());
-    });
+    QObject::connect(resultList, &QListWidget::doubleClicked, this,
+                     listDoubleClick);
+
+    HotkeyController::HotkeyMap actions{
+        {"delete",
+         [viewerDock](std::vector<QString>) -> QString {
+             viewerDock->close();
+             return "";
+         }},
+        {"accept", nullptr},
+        {"reject", nullptr},
+        {"scrollPage", nullptr},
+        {"openTab", nullptr},
+        {"search",
+         [searchBar](std::vector<QString>) -> QString {
+             searchBar->setFocus();
+             searchBar->selectAll();
+             return "";
+         }},
+    };
+
+    getApp()->hotkeys->shortcutsForCategory(HotkeyCategory::PopupWindow,
+                                            actions, viewerDock);
 
     dockVbox->addWidget(searchBar);
     dockVbox->addWidget(loadingLabel);
@@ -1137,13 +1164,29 @@ const QList<QUuid> Split::getFilters() const
     return this->view_->getFilterIds();
 }
 
-void Split::showSearch()
+void Split::showSearch(bool singleChannel)
 {
-    SearchPopup *popup = new SearchPopup(this);
-
-    popup->setChannelFilters(this->view_->getFilterSet());
+    auto *popup = new SearchPopup(this);
     popup->setAttribute(Qt::WA_DeleteOnClose);
-    popup->setChannel(this->getChannel());
+
+    if (singleChannel)
+    {
+        popup->addChannel(this->getChannelView());
+        popup->show();
+        return;
+    }
+
+    // Pass every ChannelView for every Split across the app to the search popup
+    auto &notebook = getApp()->windows->getMainWindow().getNotebook();
+    for (int i = 0; i < notebook.getPageCount(); ++i)
+    {
+        auto container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
+        for (auto split : container->getSplits())
+        {
+            popup->addChannel(split->getChannelView());
+        }
+    }
+
     popup->show();
 }
 

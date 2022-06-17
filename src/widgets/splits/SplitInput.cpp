@@ -40,9 +40,9 @@ SplitInput::SplitInput(Split *_chatWidget)
         new QCompleter(&this->split_->getChannel().get()->completionModel);
     this->ui_.textEdit->setCompleter(completer);
 
-    this->split_->channelChanged.connect([this] {
-        auto completer =
-            new QCompleter(&this->split_->getChannel()->completionModel);
+    this->signalHolder_.managedConnect(this->split_->channelChanged, [this] {
+        auto channel = this->split_->getChannel();
+        auto completer = new QCompleter(&channel->completionModel);
         this->ui_.textEdit->setCompleter(completer);
     });
 
@@ -154,10 +154,10 @@ void SplitInput::themeChangedEvent()
     this->updateEmoteButton();
     this->ui_.textEditLength->setPalette(palette);
 
+    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     this->ui_.textEdit->setPalette(placeholderPalette);
 #endif
-    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 
     int scale = (this->theme->isLightTheme() ? 4 : 2) * this->scale();
     this->ui_.hbox->setContentsMargins(scale, scale, scale, scale);
@@ -210,6 +210,7 @@ void SplitInput::openEmotePopup()
                               int(500 * this->emotePopup_->scale()));
     this->emotePopup_->loadChannel(this->split_->getChannel());
     this->emotePopup_->show();
+    this->emotePopup_->raise();
     this->emotePopup_->activateWindow();
 }
 
@@ -456,6 +457,13 @@ void SplitInput::addShortcuts()
              this->ui_.textEdit->selectAll();
              return "";
          }},
+        {"selectWord",
+         [this](std::vector<QString>) -> QString {
+             auto cursor = this->ui_.textEdit->textCursor();
+             cursor.select(QTextCursor::WordUnderCursor);
+             this->ui_.textEdit->setTextCursor(cursor);
+             return "";
+         }},
     };
 
     this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
@@ -645,7 +653,8 @@ void SplitInput::insertCompletionText(const QString &input_)
         if (done)
         {
             auto cursor = edit.textCursor();
-            edit.setText(text.remove(i, position - i + 1).insert(i, input));
+            edit.setPlainText(
+                text.remove(i, position - i + 1).insert(i, input));
 
             cursor.setPosition(i + input.size());
             edit.setTextCursor(cursor);
@@ -689,7 +698,7 @@ void SplitInput::editTextChanged()
     if (text.startsWith("/r ", Qt::CaseInsensitive) &&
         this->split_->getChannel()->isTwitchChannel())
     {
-        QString lastUser = app->twitch.server->lastUserThatWhisperedMe.get();
+        QString lastUser = app->twitch->lastUserThatWhisperedMe.get();
         if (!lastUser.isEmpty())
         {
             this->ui_.textEdit->setPlainText("/w " + lastUser + text.mid(2));

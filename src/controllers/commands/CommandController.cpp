@@ -1,6 +1,7 @@
 #include "CommandController.hpp"
 
 #include "Application.hpp"
+#include "common/Env.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
@@ -16,10 +17,12 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Clipboard.hpp"
 #include "util/CombinePath.hpp"
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/Qt.hpp"
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
@@ -35,38 +38,20 @@
 namespace {
 using namespace chatterino;
 
-// stripUserName removes any @ prefix or , suffix to make it more suitable for command use
-void stripUserName(QString &userName)
-{
-    if (userName.startsWith('@'))
-    {
-        userName.remove(0, 1);
-    }
-    if (userName.endsWith(','))
-    {
-        userName.chop(1);
-    }
-}
-
-// stripChannelName removes any @ prefix or , suffix to make it more suitable for command use
-void stripChannelName(QString &channelName)
-{
-    if (channelName.startsWith('@') || channelName.startsWith('#'))
-    {
-        channelName.remove(0, 1);
-    }
-    if (channelName.endsWith(','))
-    {
-        channelName.chop(1);
-    }
-}
-
 void sendWhisperMessage(const QString &text)
 {
     // (hemirt) pajlada: "we should not be sending whispers through jtv, but
     // rather to your own username"
     auto app = getApp();
-    app->twitch.server->sendMessage("jtv", text.simplified());
+    QString toSend = text.simplified();
+
+    // This is to make sure that combined emoji go through properly, see
+    // https://github.com/Chatterino/chatterino2/issues/3384 and
+    // https://mm2pl.github.io/emoji_rfc.pdf for more details
+    // Constants used here are defined in TwitchChannel.hpp
+    toSend.replace(ZERO_WIDTH_JOINER, ESCAPE_TAG);
+
+    app->twitch->sendMessage("jtv", toSend);
 }
 
 bool appendWhisperMessageWordsLocally(const QStringList &words)
@@ -86,8 +71,8 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
 
     const auto &acc = app->accounts->twitch.getCurrent();
     const auto &accemotes = *acc->accessEmotes();
-    const auto &bttvemotes = app->twitch.server->getBttvEmotes();
-    const auto &ffzemotes = app->twitch.server->getFfzEmotes();
+    const auto &bttvemotes = app->twitch->getBttvEmotes();
+    const auto &ffzemotes = app->twitch->getFfzEmotes();
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
@@ -154,14 +139,14 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     b->flags.set(MessageFlag::Whisper);
     auto messagexD = b.release();
 
-    app->twitch.server->whispersChannel->addMessage(messagexD);
+    app->twitch->whispersChannel->addMessage(messagexD);
 
     auto overrideFlags = boost::optional<MessageFlags>(messagexD->flags);
     overrideFlags->set(MessageFlag::DoNotLog);
 
     if (getSettings()->inlineWhispers)
     {
-        app->twitch.server->forEachChannel(
+        app->twitch->forEachChannel(
             [&messagexD, overrideFlags](ChannelPtr _channel) {
                 _channel->addMessage(messagexD, overrideFlags);
             });
@@ -191,6 +176,11 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
     }
     return false;
 }
+
+const std::function<QString(const QString &, const ChannelPtr &)>
+    noOpPlaceholder = [](const auto &altText, const auto &channel) {
+        return altText;
+    };
 
 const std::map<QString,
                std::function<QString(const QString &, const ChannelPtr &)>>
@@ -255,6 +245,11 @@ const std::map<QString,
                 return name.isEmpty() ? altText : name;
             },
         },
+        // variables used in mod buttons and the like, these make no sense in normal commands, so they are left empty
+        {"input.text", noOpPlaceholder},
+        {"msg.id", noOpPlaceholder},
+        {"user.name", noOpPlaceholder},
+        {"msg.text", noOpPlaceholder},
     };
 
 }  // namespace
@@ -457,6 +452,29 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
+    this->registerCommand("/debug-env", [](const auto & /*words*/,
+                                           ChannelPtr channel) {
+        auto env = Env::get();
+
+        QStringList debugMessages{
+            "recentMessagesApiUrl: " + env.recentMessagesApiUrl,
+            "linkResolverUrl: " + env.linkResolverUrl,
+            "twitchServerHost: " + env.twitchServerHost,
+            "twitchServerPort: " + QString::number(env.twitchServerPort),
+            "twitchServerSecure: " + QString::number(env.twitchServerSecure),
+        };
+
+        for (QString &str : debugMessages)
+        {
+            MessageBuilder builder;
+            builder.emplace<TimestampElement>(QTime::currentTime());
+            builder.emplace<TextElement>(str, MessageElementFlag::Text,
+                                         MessageColor::System);
+            channel->addMessage(builder.release());
+        }
+        return "";
+    });
+
     this->registerCommand("/uptime", [](const auto & /*words*/, auto channel) {
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
         if (twitchChannel == nullptr)
@@ -519,7 +537,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             stripChannelName(channelName);
 
             ChannelPtr channelTemp =
-                getApp()->twitch2->getChannelOrEmpty(channelName);
+                getApp()->twitch->getChannelOrEmpty(channelName);
 
             if (channelTemp->isEmpty())
             {
@@ -538,6 +556,36 @@ void CommandController::initialize(Settings &, Paths &paths)
         userPopup->setData(userName, channel);
         userPopup->move(QCursor::pos());
         userPopup->show();
+        return "";
+    });
+
+    this->registerCommand("/requests", [](const QStringList &words,
+                                          ChannelPtr channel) {
+        QString target(words.value(1));
+
+        if (target.isEmpty())
+        {
+            if (channel->getType() == Channel::Type::Twitch &&
+                !channel->isEmpty())
+            {
+                target = channel->getName();
+            }
+            else
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /requests [channel]. You can also use the command "
+                    "without arguments in any Twitch channel to open its "
+                    "channel points requests queue. Only the broadcaster and "
+                    "moderators have permission to view the queue."));
+                return "";
+            }
+        }
+
+        stripChannelName(target);
+        QDesktopServices::openUrl(
+            QUrl(QString("https://www.twitch.tv/popout/%1/reward-queue")
+                     .arg(target)));
+
         return "";
     });
 
@@ -647,34 +695,45 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand(
-        "/streamlink", [](const QStringList &words, ChannelPtr channel) {
-            QString target(words.size() < 2 ? channel->getName() : words[1]);
+    this->registerCommand("/streamlink", [](const QStringList &words,
+                                            ChannelPtr channel) {
+        QString target(words.value(1));
 
-            if (words.size() < 2 &&
-                (!channel->isTwitchChannel() || channel->isEmpty()))
+        if (target.isEmpty())
+        {
+            if (channel->getType() == Channel::Type::Twitch &&
+                !channel->isEmpty())
+            {
+                target = channel->getName();
+            }
+            else
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /streamlink <channel>. You can also use the "
-                    "command without arguments in any Twitch channel to open "
-                    "it in streamlink."));
+                    "/streamlink [channel]. Open specified Twitch channel in "
+                    "streamlink. If no channel argument is specified, open the "
+                    "current Twitch channel instead."));
                 return "";
             }
+        }
 
-            stripChannelName(target);
-            channel->addMessage(makeSystemMessage(
-                QString("Opening %1 in streamlink...").arg(target)));
-            openStreamlinkForChannel(target);
+        stripChannelName(target);
+        openStreamlinkForChannel(target);
 
-            return "";
-        });
+        return "";
+    });
 
-    this->registerCommand(
-        "/popout", [](const QStringList &words, ChannelPtr channel) {
-            QString target(words.size() < 2 ? channel->getName() : words[1]);
+    this->registerCommand("/popout", [](const QStringList &words,
+                                        ChannelPtr channel) {
+        QString target(words.value(1));
 
-            if (words.size() < 2 &&
-                (!channel->isTwitchChannel() || channel->isEmpty()))
+        if (target.isEmpty())
+        {
+            if (channel->getType() == Channel::Type::Twitch &&
+                !channel->isEmpty())
+            {
+                target = channel->getName();
+            }
+            else
             {
                 channel->addMessage(makeSystemMessage(
                     "Usage: /popout <channel>. You can also use the command "
@@ -682,14 +741,60 @@ void CommandController::initialize(Settings &, Paths &paths)
                     "popout chat."));
                 return "";
             }
+        }
 
-            stripChannelName(target);
-            QDesktopServices::openUrl(
-                QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
-                         .arg(target)));
+        stripChannelName(target);
+        QDesktopServices::openUrl(
+            QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
+                     .arg(target)));
 
+        return "";
+    });
+
+    this->registerCommand("/popup", [](const QStringList &words,
+                                       ChannelPtr channel) {
+        static const auto *usageMessage =
+            "Usage: /popup [channel]. Open specified Twitch channel in "
+            "a new window. If no channel argument is specified, open "
+            "the currently selected split instead.";
+
+        QString target(words.value(1));
+        stripChannelName(target);
+
+        if (target.isEmpty())
+        {
+            auto *currentPage =
+                dynamic_cast<SplitContainer *>(getApp()
+                                                   ->windows->getMainWindow()
+                                                   .getNotebook()
+                                                   .getSelectedPage());
+            if (currentPage != nullptr)
+            {
+                auto *currentSplit = currentPage->getSelectedSplit();
+                if (currentSplit != nullptr)
+                {
+                    currentSplit->popup();
+
+                    return "";
+                }
+            }
+
+            channel->addMessage(makeSystemMessage(usageMessage));
             return "";
-        });
+        }
+
+        auto *app = getApp();
+        Window &window = app->windows->createWindow(WindowType::Popup, true);
+
+        auto *split = new Split(static_cast<SplitContainer *>(
+            window.getNotebook().getOrAddSelectedPage()));
+
+        split->setChannel(app->twitch->getOrAddChannel(target));
+
+        window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+
+        return "";
+    });
 
     this->registerCommand("/clearmessages", [](const auto & /*words*/,
                                                ChannelPtr channel) {
@@ -731,6 +836,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
         return "";
     });
+
     this->registerCommand("/setgame", [](const QStringList &words,
                                          const ChannelPtr channel) {
         if (words.size() < 2)
@@ -829,6 +935,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+
     this->registerCommand(
         "/delete", [](const QStringList &words, ChannelPtr channel) -> QString {
             // This is a wrapper over the standard Twitch /delete command
@@ -868,9 +975,39 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
 
     this->registerCommand("/raw", [](const QStringList &words, ChannelPtr) {
-        getApp()->twitch2->sendRawMessage(words.mid(1).join(" "));
+        getApp()->twitch->sendRawMessage(words.mid(1).join(" "));
         return "";
     });
+
+#ifndef NDEBUG
+    this->registerCommand(
+        "/fakemsg",
+        [](const QStringList &words, ChannelPtr channel) -> QString {
+            if (words.size() < 2)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /fakemsg (raw irc text) - injects raw irc text as "
+                    "if it was a message received from TMI"));
+                return "";
+            }
+            auto ircText = words.mid(1).join(" ");
+            getApp()->twitch->addFakeMessage(ircText);
+            return "";
+        });
+#endif
+
+    this->registerCommand(
+        "/copy", [](const QStringList &words, ChannelPtr channel) -> QString {
+            if (words.size() < 2)
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage: /copy <text> - copies provided "
+                                      "text to clipboard."));
+                return "";
+            }
+            crossPlatformCopy(words.mid(1).join(" "));
+            return "";
+        });
 }
 
 void CommandController::save()
@@ -908,6 +1045,11 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             {
                 appendWhisperMessageWordsLocally(words);
                 sendWhisperMessage(text);
+            }
+            else
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage: /w <username> <message>"));
             }
 
             return "";
@@ -955,6 +1097,13 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         {
             return this->execCustomCommand(words, it.value(), dryRun, channel);
         }
+    }
+
+    if (!dryRun && channel->getType() == Channel::Type::TwitchWhispers)
+    {
+        channel->addMessage(
+            makeSystemMessage("Use /w <username> <message> to whisper"));
+        return "";
     }
 
     return text;
@@ -1013,18 +1162,18 @@ QString CommandController::execCustomCommand(const QStringList &words,
             auto varName = match.captured(4);
             auto altText = match.captured(5);  // alt text or empty string
 
-            auto var = COMMAND_VARS.find(varName);
+            auto var = context.find(varName);
 
-            if (var != COMMAND_VARS.end())
+            if (var != context.end())
             {
-                result += var->second(altText, channel);
+                result += var->second.isEmpty() ? altText : var->second;
             }
             else
             {
-                auto it = context.find(varName);
-                if (it != context.end())
+                auto it = COMMAND_VARS.find(varName);
+                if (it != COMMAND_VARS.end())
                 {
-                    result += it->second.isEmpty() ? altText : it->second;
+                    result += it->second(altText, channel);
                 }
                 else
                 {

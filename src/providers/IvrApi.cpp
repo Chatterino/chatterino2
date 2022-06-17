@@ -35,8 +35,7 @@ void IvrApi::getSubage(QString userName, QString channelName,
 
 void IvrApi::getBulkEmoteSets(QString emoteSetList,
                               ResultCallback<QJsonArray> successCallback,
-                              IvrFailureCallback failureCallback,
-                              std::function<void()> finallyCallback)
+                              IvrFailureCallback failureCallback)
 {
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("set_id", emoteSetList);
@@ -55,7 +54,6 @@ void IvrApi::getBulkEmoteSets(QString emoteSetList,
                 << QString(result.getData());
             failureCallback();
         })
-        .finally(std::move(finallyCallback))
         .execute();
 }
 

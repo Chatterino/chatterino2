@@ -11,11 +11,11 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
-#include "providers/twitch/PubsubClient.hpp"
+#include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
-#include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
@@ -106,9 +106,11 @@ namespace {
 
         for (const auto jsonMessage : jsonMessages)
         {
-            auto content = jsonMessage.toString().toUtf8();
+            auto content = jsonMessage.toString();
+            content.replace(COMBINED_FIXER, ZERO_WIDTH_JOINER);
 
-            auto message = Communi::IrcMessage::fromData(content, nullptr);
+            auto message =
+                Communi::IrcMessage::fromData(content.toUtf8(), nullptr);
 
             if (message->command() == "CLEARCHAT")
             {
@@ -158,24 +160,20 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [=] {
+    this->bSignals_.emplace_back(
+        getApp()->accounts->twitch.currentUserChanged.connect([=] {
             this->setMod(false);
-        });
+            this->refreshPubSub();
+        }));
 
-    // pubsub
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [=] {
-            this->refreshPubsub();
-        });
-    this->refreshPubsub();
+    this->refreshPubSub();
     this->userStateChanged.connect([this] {
-        this->refreshPubsub();
+        this->refreshPubSub();
     });
 
     // room id loaded -> refresh live status
     this->roomIdChanged.connect([this]() {
-        this->refreshPubsub();
+        this->refreshPubSub();
         this->refreshTitle();
         this->refreshLiveStatus();
         this->refreshBadges();
@@ -189,11 +187,6 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->refreshChatters();
     });
     this->chattersListTimer_.start(5 * 60 * 1000);
-
-    QObject::connect(&this->liveStatusTimer_, &QTimer::timeout, [=] {
-        this->refreshLiveStatus();
-    });
-    this->liveStatusTimer_.start(60 * 1000);
 
     // debugging
 #if 0
@@ -280,11 +273,6 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
 {
     assertInGuiThread();
 
-    if (!reward.hasParsedSuccessfully)
-    {
-        return;
-    }
-
     if (!reward.isUserInputRequired)
     {
         MessageBuilder builder;
@@ -294,7 +282,7 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
         return;
     }
 
-    bool result;
+    bool result = false;
     {
         auto channelPointRewards = this->channelPointRewards_.access();
         result = channelPointRewards->try_emplace(reward.id, reward).second;
@@ -365,6 +353,10 @@ void TwitchChannel::sendMessage(const QString &message)
     // Do last message processing
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
 
+    // This is to make sure that combined emoji go through properly, see
+    // https://github.com/Chatterino/chatterino2/issues/3384 and
+    // https://mm2pl.github.io/emoji_rfc.pdf for more details
+    parsedMessage.replace(ZERO_WIDTH_JOINER, ESCAPE_TAG);
     parsedMessage = parsedMessage.simplified();
 
     if (parsedMessage.isEmpty())
@@ -477,7 +469,7 @@ bool TwitchChannel::canReconnect() const
 
 void TwitchChannel::reconnect()
 {
-    getApp()->twitch.server->connect();
+    getApp()->twitch->connect();
 }
 
 QString TwitchChannel::roomId() const
@@ -606,7 +598,7 @@ void TwitchChannel::setLive(bool newLiveStatus)
                 MessageBuilder builder2;
                 TwitchMessageBuilder::liveMessage(this->getDisplayName(),
                                                   &builder2);
-                getApp()->twitch2->liveChannel->addMessage(builder2.release());
+                getApp()->twitch->liveChannel->addMessage(builder2.release());
 
                 // Notify on all channels with a ping sound
                 if (getSettings()->notificationOnAnyChannel &&
@@ -626,7 +618,7 @@ void TwitchChannel::setLive(bool newLiveStatus)
 
                 // "delete" old 'CHANNEL is live' message
                 LimitedQueueSnapshot<MessagePtr> snapshot =
-                    getApp()->twitch2->liveChannel->getMessageSnapshot();
+                    getApp()->twitch->liveChannel->getMessageSnapshot();
                 int snapshotLength = snapshot.size();
 
                 // MSVC hates this code if the parens are not there
@@ -716,6 +708,9 @@ void TwitchChannel::refreshLiveStatus()
         },
         [] {
             // failure
+        },
+        [] {
+            // finally
         });
 }
 
@@ -730,31 +725,8 @@ void TwitchChannel::parseLiveStatus(bool live, const HelixStream &stream)
     {
         auto status = this->streamStatus_.access();
         status->viewerCount = stream.viewerCount;
-        if (status->gameId != stream.gameId)
-        {
-            status->gameId = stream.gameId;
-
-            // Resolve game ID to game name
-            getHelix()->getGameById(
-                stream.gameId,
-                [this, weak = weakOf<Channel>(this)](const auto &game) {
-                    ChannelPtr shared = weak.lock();
-                    if (!shared)
-                    {
-                        return;
-                    }
-
-                    {
-                        auto status = this->streamStatus_.access();
-                        status->game = game.name;
-                    }
-
-                    this->liveStatusChanged.invoke();
-                },
-                [] {
-                    // failure
-                });
-        }
+        status->gameId = stream.gameId;
+        status->game = stream.gameName;
         status->title = stream.title;
         QDateTime since = QDateTime::fromString(stream.startedAt, Qt::ISODate);
         auto diff = since.secsTo(QDateTime::currentDateTime());
@@ -865,17 +837,21 @@ void TwitchChannel::loadRecentMessages()
         .execute();
 }
 
-void TwitchChannel::refreshPubsub()
+void TwitchChannel::refreshPubSub()
 {
     auto roomId = this->roomId();
     if (roomId.isEmpty())
+    {
         return;
+    }
 
-    auto account = getApp()->accounts->twitch.getCurrent();
-    getApp()->twitch2->pubsub->listenToChannelModerationActions(roomId,
-                                                                account);
-    getApp()->twitch2->pubsub->listenToAutomod(roomId, account);
-    getApp()->twitch2->pubsub->listenToChannelPointRewards(roomId, account);
+    auto currentAccount = getApp()->accounts->twitch.getCurrent();
+
+    getApp()->twitch->pubsub->setAccount(currentAccount);
+
+    getApp()->twitch->pubsub->listenToChannelModerationActions(roomId);
+    getApp()->twitch->pubsub->listenToAutomod(roomId);
+    getApp()->twitch->pubsub->listenToChannelPointRewards(roomId);
 }
 
 void TwitchChannel::refreshChatters()

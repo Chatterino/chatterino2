@@ -1,5 +1,7 @@
 #include "messages/search/LinkPredicate.hpp"
+
 #include "common/LinkParser.hpp"
+#include "util/Qt.hpp"
 
 namespace chatterino {
 

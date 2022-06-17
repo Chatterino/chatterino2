@@ -1,5 +1,7 @@
 #include "messages/search/ChannelPredicate.hpp"
 
+#include "util/Qt.hpp"
+
 namespace chatterino {
 
 ChannelPredicate::ChannelPredicate(const QStringList &channels)

@@ -1,5 +1,7 @@
 #include "messages/search/AuthorPredicate.hpp"
 
+#include "util/Qt.hpp"
+
 namespace chatterino {
 
 AuthorPredicate::AuthorPredicate(const QStringList &authors)
