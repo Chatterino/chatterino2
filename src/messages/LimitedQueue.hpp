@@ -49,8 +49,6 @@ public:
     /**
      * @brief Get the item at the given syntax safely
      *
-     * Use at() if you know the size of the container beforehand
-     *
      * @param[in] index the index of the item to fetch
      * @param[out] deleted the item that was deleted
      * @return the item at the index if it's populated, or none if it's not
@@ -64,14 +62,6 @@ public:
             return boost::none;
         }
 
-        return this->buffer_[index];
-    }
-
-    [[nodiscard]] T at(size_t index) const
-    {
-        std::shared_lock lock(this->mutex_);
-
-        assert(index < this->buffer_.size());
         return this->buffer_[index];
     }
 
