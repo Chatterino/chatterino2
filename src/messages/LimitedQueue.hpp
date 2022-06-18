@@ -74,6 +74,11 @@ public:
         return this->buffer_[index];
     }
 
+    /**
+     * @brief Get the first item from the queue
+     *
+     * @return the item at the front of the queue if it's populated, or none the queue is empty
+     */
     [[nodiscard]] boost::optional<T> first() const
     {
         std::shared_lock lock(this->mutex_);
