@@ -22,25 +22,35 @@ public:
     {
     }
 
-    // Property Accessors
+private:
+    /// Property Accessors
+    /**
+     * @brief Return the limit of the internal buffer
+     */
     [[nodiscard]] size_t limit() const
     {
         return this->limit_;
     }
 
-    [[nodiscard]] bool empty() const
-    {
-        return this->buffer_.empty();
-    }
-
-    [[nodiscard]] bool full() const
-    {
-        return this->buffer_.full();
-    }
-
+    /**
+     * @brief Return the amount of space left in the buffer
+     *
+     * This does not lock
+     */
     [[nodiscard]] size_t space() const
     {
         return this->limit() - this->buffer_.size();
+    }
+
+public:
+    /**
+     * @brief Return true if the buffer is empty
+     */
+    [[nodiscard]] bool empty() const
+    {
+        std::shared_lock lock(this->mutex_);
+
+        return this->buffer_.empty();
     }
 
     /// Value Accessors
