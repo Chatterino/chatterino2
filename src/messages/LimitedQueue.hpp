@@ -74,13 +74,6 @@ public:
         return this->buffer_[index];
     }
 
-    [[nodiscard]] T front() const
-    {
-        std::shared_lock lock(this->mutex_);
-
-        return this->buffer_.front();
-    }
-
     [[nodiscard]] T back() const
     {
         std::shared_lock lock(this->mutex_);
