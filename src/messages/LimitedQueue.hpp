@@ -43,8 +43,8 @@ public:
         return this->limit() - this->buffer_.size();
     }
 
-    // Value Accessors
-    // copies of values are returned so that references aren't invalidated
+    /// Value Accessors
+    // Copies of values are returned so that references aren't invalidated
 
     /**
      * @brief Get the item at the given syntax safely
@@ -113,7 +113,7 @@ public:
         return this->buffer_.back();
     }
 
-    // Modifiers
+    /// Modifiers
 
     // Clear the buffer
     void clear()
