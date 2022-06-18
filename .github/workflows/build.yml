@@ -6,6 +6,7 @@ on:
     branches:
       - master
   pull_request:
+  workflow_dispatch:
 
 concurrency: 
   group: build-${{ github.ref }}
@@ -17,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        qt-version: [5.15.2, 5.12.10]
+        qt-version: [5.15.2, 5.12.12]
         build-system: [qmake, cmake]
         pch: [true]
         include:
@@ -47,10 +48,6 @@ jobs:
           key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
 
       # LINUX
-      - name: Install p7zip (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get update && sudo apt-get -y install p7zip-full
-
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
