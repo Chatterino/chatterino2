@@ -5,6 +5,7 @@
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. [Ctrl+Shift+F by default] (#3694)
 - Minor: Added `is:first-msg` search option. (#3700)
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
+- Minor: Added a `Scroll to top` keyboard shortcut for splits. (#3802)
 - Minor: Adjust large stream thumbnail to 16:9 (#3655)
 - Minor: Fixed being unable to load Twitch Usercards from the `/mentions` tab. (#3623)
 - Minor: Add information about the user's operating system in the About page. (#3663)
