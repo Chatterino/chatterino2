@@ -298,7 +298,7 @@ public:
 private:
     mutable std::shared_mutex mutex_;
 
-    size_t limit_;
+    const size_t limit_;
     boost::circular_buffer<T> buffer_;
 };
 
