@@ -47,10 +47,9 @@ public:
     // Copies of values are returned so that references aren't invalidated
 
     /**
-     * @brief Get the item at the given syntax safely
+     * @brief Get the item at the given index safely
      *
      * @param[in] index the index of the item to fetch
-     * @param[out] deleted the item that was deleted
      * @return the item at the index if it's populated, or none if it's not
      */
     [[nodiscard]] boost::optional<T> get(size_t index) const
