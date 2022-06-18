@@ -97,10 +97,8 @@ public:
         {
             return boost::none;
         }
-        else
-        {
-            return this->buffer_.front();
-        }
+
+        return this->buffer_.front();
     }
 
     [[nodiscard]] boost::optional<T> last() const
@@ -111,10 +109,8 @@ public:
         {
             return boost::none;
         }
-        else
-        {
-            return this->buffer_.back();
-        }
+
+        return this->buffer_.back();
     }
 
     // Modifiers
