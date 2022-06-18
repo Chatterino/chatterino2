@@ -67,7 +67,7 @@ protected:
 private:
     Q_PROPERTY(qreal currentValue_ READ getCurrentValue WRITE setCurrentValue)
 
-    LimitedQueueSnapshot<ScrollbarHighlight> getHighlightSnapshot();
+    LimitedQueueSnapshot<ScrollbarHighlight> &getHighlightSnapshot();
     void updateScroll();
 
     QMutex mutex_;

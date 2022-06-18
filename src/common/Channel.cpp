@@ -246,23 +246,20 @@ void Channel::deleteMessage(QString messageID)
         msg->flags.set(MessageFlag::Disabled);
     }
 }
+
 MessagePtr Channel::findMessage(QString messageID)
 {
-    LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
-    int snapshotLength = snapshot.size();
+    MessagePtr res;
 
-    int end = std::max(0, snapshotLength - 200);
-
-    for (int i = snapshotLength - 1; i >= end; --i)
+    if (auto msg = this->messages_.rfind([&messageID](const MessagePtr &msg) {
+            return msg->id == messageID;
+        });
+        msg)
     {
-        auto &s = snapshot[i];
-
-        if (s->id == messageID)
-        {
-            return s;
-        }
+        res = *msg;
     }
-    return nullptr;
+
+    return res;
 }
 
 bool Channel::canSendMessage() const
