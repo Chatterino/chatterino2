@@ -91,6 +91,11 @@ public:
         return this->buffer_.front();
     }
 
+    /**
+     * @brief Get the last item from the queue
+     *
+     * @return the item at the back of the queue if it's populated, or none the queue is empty
+     */
     [[nodiscard]] boost::optional<T> last() const
     {
         std::shared_lock lock(this->mutex_);
