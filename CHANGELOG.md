@@ -10,6 +10,7 @@
 - Minor: Add information about the user's operating system in the About page. (#3663)
 - Minor: Added chatter count for each category in viewer list. (#3683, #3719)
 - Minor: Sorted usernames in /vips message to be case-insensitive. (#3696)
+- Minor: Strip leading @ and trailing , from usernames in the `/block` and `/unblock` commands. (#3816)
 - Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
 - Minor: Fixed tag parsing for consecutive escaped characters. (#3711)
 - Minor: Prevent user from entering incorrect characters in Live Notifications channels list. (#3715, #3730)
