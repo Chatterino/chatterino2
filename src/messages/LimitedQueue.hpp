@@ -74,13 +74,6 @@ public:
         return this->buffer_[index];
     }
 
-    [[nodiscard]] T back() const
-    {
-        std::shared_lock lock(this->mutex_);
-
-        return this->buffer_.back();
-    }
-
     [[nodiscard]] boost::optional<T> first() const
     {
         std::shared_lock lock(this->mutex_);
