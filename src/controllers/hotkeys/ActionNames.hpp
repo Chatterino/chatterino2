@@ -89,6 +89,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               1,
           }},
          {"scrollToBottom", ActionDefinition{"Scroll to the bottom"}},
+         {"scrollToTop", ActionDefinition{"Scroll to the top"}},
          {"setChannelNotification",
           ActionDefinition{
               "Set channel live notification",

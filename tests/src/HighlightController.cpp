@@ -54,6 +54,10 @@ public:
     {
         return nullptr;
     }
+    HighlightController *getHighlights() override
+    {
+        return &this->highlights;
+    }
     TwitchIrcServer *getTwitch() override
     {
         return nullptr;
@@ -68,6 +72,7 @@ public:
     }
 
     AccountController accounts;
+    HighlightController highlights;
     // TODO: Figure this out
 };
 

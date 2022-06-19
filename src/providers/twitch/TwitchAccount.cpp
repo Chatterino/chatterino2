@@ -17,35 +17,11 @@
 #include "providers/twitch/TwitchUser.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
+#include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
-
-std::vector<QStringList> getEmoteSetBatches(QStringList emoteSetKeys)
-{
-    // splitting emoteSetKeys to batches of 100, because Ivr API endpoint accepts a maximum of 100 emotesets at once
-    constexpr int batchSize = 100;
-
-    int batchCount = (emoteSetKeys.size() / batchSize) + 1;
-
-    std::vector<QStringList> batches;
-    batches.reserve(batchCount);
-
-    for (int i = 0; i < batchCount; i++)
-    {
-        QStringList batch;
-
-        int last = std::min(batchSize, emoteSetKeys.size() - batchSize * i);
-        for (int j = 0; j < last; j++)
-        {
-            batch.push_back(emoteSetKeys.at(j + (batchSize * i)));
-        }
-        batches.emplace_back(batch);
-    }
-
-    return batches;
-}
 
 TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
                              const QString &oauthClient, const QString &userID)
@@ -268,7 +244,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
     }
 
     // requesting emotes
-    auto batches = getEmoteSetBatches(newEmoteSetKeys);
+    auto batches = splitListIntoBatches(newEmoteSetKeys);
     for (int i = 0; i < batches.size(); i++)
     {
         qCDebug(chatterinoTwitch)
