@@ -2125,20 +2125,11 @@ void ChannelView::addCommandExecutionContextMenuItems(
             {
                 userText = split->getInput().getInputText();
             }
+
             QString value = getApp()->commands->execCustomCommand(
-                inputText.split(' '), cmd, true, channel,
+                inputText.split(' '), cmd, true, channel, layout->getMessage(),
                 {
-                    {"user.name", layout->getMessage()->loginName},
-                    {"msg.id", layout->getMessage()->id},
-                    {"msg.text", layout->getMessage()->messageText},
                     {"input.text", userText},
-
-                    // old placeholders
-                    {"user", layout->getMessage()->loginName},
-                    {"msg-id", layout->getMessage()->id},
-                    {"message", layout->getMessage()->messageText},
-
-                    {"channel", this->channel()->getName()},
                 });
 
             value = getApp()->commands->execCommand(value, channel, false);
@@ -2285,19 +2276,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
 
             value = getApp()->commands->execCustomCommand(
                 QStringList(), Command{"(modaction)", value}, true, channel,
-                {
-                    {"user.name", layout->getMessage()->loginName},
-                    {"msg.id", layout->getMessage()->id},
-                    {"msg.text", layout->getMessage()->messageText},
-
-                    // old placeholders
-                    {"user", layout->getMessage()->loginName},
-                    {"msg-id", layout->getMessage()->id},
-                    {"message", layout->getMessage()->messageText},
-
-                    // new version of this is inside execCustomCommand
-                    {"channel", this->channel()->getName()},
-                });
+                layout->getMessage());
 
             value = getApp()->commands->execCommand(value, channel, false);
 

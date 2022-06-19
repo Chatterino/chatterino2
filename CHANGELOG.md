@@ -39,6 +39,7 @@
 - Dev: Overhaul highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 - Dev: Batch checking live status for all channels after startup. (#3757, #3762, #3767)
+- Dev: Move most command context into the command controller. (#3824)
 
 ## 2.3.5
 
