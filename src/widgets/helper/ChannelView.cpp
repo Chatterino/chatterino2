@@ -2126,6 +2126,7 @@ void ChannelView::addCommandExecutionContextMenuItems(
                 userText = split->getInput().getInputText();
             }
 
+            // Execute command through right-clicking a message -> Execute command
             QString value = getApp()->commands->execCustomCommand(
                 inputText.split(' '), cmd, true, channel, layout->getMessage(),
                 {
@@ -2274,6 +2275,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                 }
             }
 
+            // Execute command clicking a moderator button
             value = getApp()->commands->execCustomCommand(
                 QStringList(), Command{"(modaction)", value}, true, channel,
                 layout->getMessage());
