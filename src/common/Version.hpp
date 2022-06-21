@@ -26,6 +26,7 @@ public:
 
     const QString &version() const;
     const QString &commitHash() const;
+    const QString &upstreamCommitHash() const;
     // Whether or not the vcs tree had any changes at the time of build
     const bool &isModified() const;
     // Date of build file generation (≈ date of build)
@@ -49,6 +50,7 @@ private:
 
     QString version_;
     QString commitHash_;
+    QString upstreamCommitHash_;
     bool isModified_{false};
     QString dateOfBuild_;
     QString fullVersion_;

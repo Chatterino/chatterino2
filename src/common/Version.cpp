@@ -16,6 +16,8 @@ Version::Version()
     this->commitHash_ =
         QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_HASH)).remove('"');
 
+    this->upstreamCommitHash_ =
+        QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_UPSTREAM_HASH)).remove('"');
 #ifdef CHATTERINO_GIT_MODIFIED
     this->isModified_ = true;
 #endif
@@ -67,6 +69,10 @@ const QString &Version::fullVersion() const
 const QString &Version::commitHash() const
 {
     return this->commitHash_;
+}
+const QString &Version::upstreamCommitHash() const
+{
+    return this->upstreamCommitHash_;
 }
 
 const bool &Version::isModified() const
@@ -123,8 +129,8 @@ void Version::generateBuildString()
     // Add commit information
     s +=
         QString(
-            R"( (commit <a href="https://github.com/Chatterino/chatterino2/commit/%1">%1</a>)")
-            .arg(this->commitHash());
+            R"( (commit <a href="https://github.com/Mm2PL/dankerino/commit/%1">%1</a>; based on <a href="https://github.com/chatterino/chatterino2/commit/%2">%2</a>)")
+            .arg(this->commitHash(), this->upstreamCommitHash());
     if (this->isModified())
     {
         s += " modified)";
