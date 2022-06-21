@@ -338,6 +338,12 @@ void Split::addShortcuts()
                  getSettings()->enableSmoothScrollingNewMessages.getValue());
              return "";
          }},
+        {"scrollToTop",
+         [this](std::vector<QString>) -> QString {
+             this->getChannelView().getScrollBar().scrollToTop(
+                 getSettings()->enableSmoothScrollingNewMessages.getValue());
+             return "";
+         }},
         {"scrollPage",
          [this](std::vector<QString> arguments) -> QString {
              if (arguments.size() == 0)

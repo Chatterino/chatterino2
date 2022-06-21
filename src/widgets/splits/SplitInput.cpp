@@ -40,9 +40,9 @@ SplitInput::SplitInput(Split *_chatWidget)
         new QCompleter(&this->split_->getChannel().get()->completionModel);
     this->ui_.textEdit->setCompleter(completer);
 
-    this->split_->channelChanged.connect([this] {
-        auto completer =
-            new QCompleter(&this->split_->getChannel()->completionModel);
+    this->signalHolder_.managedConnect(this->split_->channelChanged, [this] {
+        auto channel = this->split_->getChannel();
+        auto completer = new QCompleter(&channel->completionModel);
         this->ui_.textEdit->setCompleter(completer);
     });
 

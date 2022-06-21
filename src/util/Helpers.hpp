@@ -3,6 +3,8 @@
 #include <QColor>
 #include <QString>
 
+#include <cmath>
+
 namespace chatterino {
 
 /**
@@ -37,5 +39,33 @@ QColor getRandomColor(const QString &userId);
  **/
 QString formatUserMention(const QString &userName, bool isFirstWord,
                           bool mentionUsersWithComma, bool lowercaseUsernames);
+
+template <typename T>
+std::vector<T> splitListIntoBatches(const T &list, int batchSize = 100)
+{
+    std::vector<T> batches;
+    int batchCount = std::ceil(static_cast<double>(list.size()) / batchSize);
+    batches.reserve(batchCount);
+
+    auto it = list.cbegin();
+
+    for (int j = 0; j < batchCount; j++)
+    {
+        T batch;
+
+        for (int i = 0; i < batchSize && it != list.end(); i++)
+        {
+            batch.append(*it);
+            it++;
+        }
+        if (batch.empty())
+        {
+            break;
+        }
+        batches.emplace_back(std::move(batch));
+    }
+
+    return batches;
+}
 
 }  // namespace chatterino
