@@ -6,6 +6,7 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/dialogs/switcher/NewPopupItem.hpp"
 #include "widgets/dialogs/switcher/NewTabItem.hpp"
 #include "widgets/dialogs/switcher/SwitchSplitItem.hpp"
 #include "widgets/helper/NotebookTab.hpp"
@@ -113,11 +114,14 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     nextPage:;
     }
 
-    // Add item for opening a channel in a new tab
+    // Add item for opening a channel in a new tab or new popup
     if (!text.isEmpty())
     {
-        auto item = std::make_unique<NewTabItem>(text);
-        this->switcherModel_.addItem(std::move(item));
+        auto newTabItem = std::make_unique<NewTabItem>(text);
+        this->switcherModel_.addItem(std::move(newTabItem));
+
+        auto newPopupItem = std::make_unique<NewPopupItem>(text);
+        this->switcherModel_.addItem(std::move(newPopupItem));
     }
 
     const auto &startIdx = this->switcherModel_.index(0);
