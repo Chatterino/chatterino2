@@ -25,7 +25,11 @@ public:
         COUNT  // keep this as last member of enum
     };
 
+    constexpr static int SELF_HIGHLIGHT_ROW = 0;
     constexpr static int WHISPER_ROW = 1;
+    constexpr static int SUB_ROW = 2;
+    constexpr static int REDEEMED_ROW = 3;
+    constexpr static int FIRSTMESSAGE_ROW = 4;
 
 protected:
     // turn a vector item into a model row
