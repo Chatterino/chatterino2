@@ -353,7 +353,8 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
             using Column = HighlightModel::Column;
             bool restrictColorRow =
                 (tab == HighlightTab::Messages &&
-                 clicked.row() == HighlightModel::WhisperRow);
+                 clicked.row() ==
+                     HighlightModel::HighlightRowIndexes::WhisperRow);
             if (clicked.column() == Column::SoundPath)
             {
                 this->openSoundDialog(clicked, view, Column::SoundPath);
