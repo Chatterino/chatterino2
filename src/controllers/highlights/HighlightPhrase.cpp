@@ -10,6 +10,8 @@ namespace {
 }  // namespace
 
 QColor HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR = QColor(127, 63, 73, 127);
+QColor HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR =
+    QColor(0, 118, 221, 115);
 QColor HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR =
     QColor(28, 126, 141, 60);
 QColor HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR =

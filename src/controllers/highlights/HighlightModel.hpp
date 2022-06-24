@@ -27,10 +27,11 @@ public:
 
     enum HighlightRowIndexes {
         SelfHighlightRow = 0,
-        WhisperRow = 1,
-        SubRow = 2,
-        RedeemedRow = 3,
-        FirstMessageRow = 4,
+        SelfMessageRow = 1,
+        WhisperRow = 2,
+        SubRow = 3,
+        RedeemedRow = 4,
+        FirstMessageRow = 5,
     };
 
 protected:

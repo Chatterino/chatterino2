@@ -251,6 +251,19 @@ public:
     QStringSetting selfHighlightColor = {"/highlighting/selfHighlightColor",
                                          ""};
 
+    BoolSetting enableSelfMessagesHighlight = {
+        "/highlighting/selfMessagesHighlight/nameIsHighlightKeyword", true};
+    BoolSetting showSelfMessagesHighlightInMentions = {
+        "/highlighting/selfMessagesHighlight/showSelfMessagesInMentions", true};
+    //    BoolSetting enableSelfMessagesHighlightSound = {
+    //        "/highlighting/selfMessagesHighlight/enableSound", true};
+    //    BoolSetting enableSelfMessagesHighlightTaskbar = {
+    //        "/highlighting/selfMessagesHighlight/enableTaskbarFlashing", true};
+    //    QStringSetting selfMessagesHighlightSoundUrl = {
+    //        "/highlighting/selfMessagesHighlight", ""};
+    QStringSetting selfMessagesHighlightColor = {
+        "/highlighting/selfMessagesHighlightColor", ""};
+
     BoolSetting enableWhisperHighlight = {
         "/highlighting/whisperHighlight/whispersHighlighted", true};
     BoolSetting enableWhisperHighlightSound = {

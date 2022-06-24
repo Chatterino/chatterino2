@@ -79,6 +79,20 @@ void ColorProvider::initTypeColorMap()
                  HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR)});
     }
 
+    customColor = getSettings()->selfMessagesHighlightColor;
+    if (QColor(customColor).isValid())
+    {
+        this->typeColorMap_.insert(
+            {ColorType::SelfMessage, std::make_shared<QColor>(customColor)});
+    }
+    else
+    {
+        this->typeColorMap_.insert(
+            {ColorType::SelfMessage,
+             std::make_shared<QColor>(
+                 HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR)});
+    }
+
     customColor = getSettings()->subHighlightColor;
     if (QColor(customColor).isValid())
     {
