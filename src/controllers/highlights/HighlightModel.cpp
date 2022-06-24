@@ -179,7 +179,8 @@ void HighlightModel::afterInit()
         ColorProvider::instance().color(ColorType::FirstMessageHighlight);
     setColorItem(firstMessageRow[Column::Color], *FirstMessageColor, false);
 
-    this->insertCustomRow(firstMessageRow, HighlightRowIndexes::FirstMessageRow);
+    this->insertCustomRow(firstMessageRow,
+                          HighlightRowIndexes::FirstMessageRow);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
