@@ -21,7 +21,7 @@ class Window : public BaseWindow
     Q_OBJECT
 
 public:
-    explicit Window(WindowType type, QWidget *parent = nullptr);
+    explicit Window(WindowType type, QWidget *parent);
 
     WindowType getType();
     SplitNotebook &getNotebook();
