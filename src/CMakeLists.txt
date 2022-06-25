@@ -395,6 +395,8 @@ set(SOURCE_FILES
         widgets/dialogs/UserInfoPopup.hpp
         widgets/dialogs/WelcomeDialog.cpp
         widgets/dialogs/WelcomeDialog.hpp
+        widgets/dialogs/switcher/NewPopupItem.cpp
+        widgets/dialogs/switcher/NewPopupItem.hpp
         widgets/dialogs/switcher/NewTabItem.cpp
         widgets/dialogs/switcher/NewTabItem.hpp
         widgets/dialogs/switcher/QuickSwitcherModel.cpp

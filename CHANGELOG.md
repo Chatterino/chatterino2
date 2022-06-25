@@ -22,6 +22,7 @@
 - Minor: Added ability to execute commands on chat messages using the message context menu. (#3738, #3765)
 - Minor: Added `/copy` command. Usage: `/copy <text>`. Copies provided text to clipboard - can be useful with custom commands. (#3763)
 - Minor: Removed total views from the usercard, as Twitch no longer updates the number. (#3792)
+- Minor: Add Quick Switcher item to open a channel in a new popup window. (#3828)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fix crash that can occur when changing channels. (#3799)
 - Bugfix: Fixed viewers list search not working when used before loading finishes. (#3774)
