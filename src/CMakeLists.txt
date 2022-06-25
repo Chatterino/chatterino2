@@ -555,7 +555,11 @@ else()
 endif()
 
 if (BUILD_APP)
-    add_executable(${EXECUTABLE_PROJECT} main.cpp)
+    if (APPLE)
+        add_executable(${EXECUTABLE_PROJECT} ${MACOS_BUNDLE_ICON_FILE} main.cpp)
+    else()
+        add_executable(${EXECUTABLE_PROJECT} main.cpp)
+    endif()
     add_sanitizers(${EXECUTABLE_PROJECT})
 
     target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
