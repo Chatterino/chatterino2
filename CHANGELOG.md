@@ -37,6 +37,7 @@
 - Bugfix: Fixed viewer list not closing after pressing escape key. (#3734)
 - Bugfix: Fixed links with no thumbnail having previous link's thumbnail. (#3720)
 - Bugfix: Add icon in the CMake macOS bundle. (#3832)
+- Bugfix: Adopt popup windows in order to force floating behavior on some window managers. (#3836)
 - Dev: Rewrite LimitedQueue (#3798)
 - Dev: Overhaul highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
