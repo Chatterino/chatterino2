@@ -2,9 +2,15 @@
 # GIT_HASH
 #   If the git binary is found and the git work tree is intact, GIT_HASH is worked out using the `git rev-parse --short HEAD` command
 #   The value of GIT_HASH can be overriden by defining the GIT_HASH environment variable
+# GIT_UPSTREAM_HASH
+#   If the git binary is found and the git work tree is intact, GIT_HASH is worked out using the `git rev-parse --short ${GIT_UPSTREAM_COMMIT}` command
+#   The value of GIT_HASH can be overriden by defining the GIT_UPSTREAM_HASH environment variable
 # GIT_COMMIT
 #   If the git binary is found and the git work tree is intact, GIT_COMMIT is worked out using the `git rev-parse HEAD` command
 #   The value of GIT_COMMIT can be overriden by defining the GIT_COMMIT environment variable
+# GIT_UPSTREAM_COMMIT
+#   If the git binary is found and the git work tree is intact, GIT_UPSTREAM_COMMIT is worked out using `git log` and `git show` commands
+#   The value of GIT_UPSTREAM_COMMIT can be overriden by defining the GIT_UPSTREAM_COMMIT environment variable
 # GIT_RELEASE
 #   If the git binary is found and the git work tree is intact, GIT_RELEASE is worked out using the `git describe` command
 #   The value of GIT_RELEASE can be overriden by defining the GIT_RELEASE environment variable
@@ -15,7 +21,9 @@
 find_package(Git)
 
 set(GIT_HASH "GIT-REPOSITORY-NOT-FOUND")
+set(GIT_UPSTREAM_HASH "GIT-REPOSITORY-NOT-FOUND")
 set(GIT_COMMIT "GIT-REPOSITORY-NOT-FOUND")
+set(GIT_UPSTREAM_COMMIT "GIT-REPOSITORY-NOT-FOUND")
 set(GIT_RELEASE "${PROJECT_VERSION}")
 set(GIT_MODIFIED 0)
 
@@ -48,6 +56,19 @@ if (GIT_EXECUTABLE)
                 COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                 OUTPUT_VARIABLE GIT_COMMIT
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+
+        execute_process(
+                COMMAND ${GIT_EXECUTABLE} merge-base HEAD master
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                OUTPUT_VARIABLE GIT_UPSTREAM_COMMIT
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        execute_process(
+                COMMAND ${GIT_EXECUTABLE} rev-parse --short ${GIT_UPSTREAM_COMMIT}
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                OUTPUT_VARIABLE GIT_UPSTREAM_HASH
                 OUTPUT_STRIP_TRAILING_WHITESPACE
         )
 
