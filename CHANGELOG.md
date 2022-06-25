@@ -37,7 +37,7 @@
 - Bugfix: Fixed links with no thumbnail having previous link's thumbnail. (#3720)
 - Bugfix: Add icon in the CMake macOS bundle. (#3832)
 - Dev: Rewrite LimitedQueue (#3798)
-- Dev: Overhaul highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801)
+- Dev: Overhaul highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801, #3834)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 - Dev: Batch checking live status for all channels after startup. (#3757, #3762, #3767)
 
