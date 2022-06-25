@@ -248,11 +248,31 @@ Window &WindowManager::getSelectedWindow()
     return *this->selectedWindow_;
 }
 
-Window &WindowManager::createWindow(WindowType type, bool show)
+Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
 {
     assertInGuiThread();
 
-    auto *window = new Window(type);
+    auto *const realParent = [this, type, parent]() -> QWidget * {
+        if (parent)
+        {
+            // If a parent is explicitly specified, we use that immediately.
+            return parent;
+        }
+
+        if (type == WindowType::Popup)
+        {
+            // On some window managers, popup windows require a parent to behave correctly. See
+            // https://github.com/Chatterino/chatterino2/pull/1843 for additional context.
+            return &(this->getMainWindow());
+        }
+
+        // If no parent is set and something other than a popup window is being created, we fall
+        // back to the default behavior of no parent.
+        return nullptr;
+    }();
+
+    auto *window = new Window(type, realParent);
+
     this->windows_.push_back(window);
     if (show)
     {
