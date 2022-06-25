@@ -3,6 +3,7 @@ name: Test
 
 on:
   pull_request:
+  workflow_dispatch:
 
 env:
   TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.3
@@ -17,6 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04]
+        qt-version: [5.15.2]
       fail-fast: false
 
     steps:
@@ -28,20 +30,16 @@ jobs:
         id: cache-qt
         uses: actions/cache@v3
         with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache-20201005
+          path: "${{ github.workspace }}/qt/"
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
 
       # LINUX
-      - name: Install p7zip (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get update && sudo apt-get -y install p7zip-full
-
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          aqtversion: '==1.1.1'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          extra: --external 7z
+          version: ${{ matrix.qt-version }}
+          dir: "${{ github.workspace }}/qt/"
 
       # LINUX
       - name: Install dependencies (Ubuntu)

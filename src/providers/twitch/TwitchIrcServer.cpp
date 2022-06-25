@@ -15,6 +15,7 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
+#include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 
 #include <QMetaEnum>
@@ -25,35 +26,6 @@ using namespace std::chrono_literals;
 #define TWITCH_PUBSUB_URL "wss://pubsub-edge.twitch.tv"
 
 namespace chatterino {
-
-namespace {
-    // TODO: combine this with getEmoteSetBatches in TwitchAccount.cpp, maybe some templated thing
-    template <class T>
-    std::vector<T> getChannelsInBatches(T channels)
-    {
-        constexpr int batchSize = 100;
-
-        int batchCount = (channels.size() / batchSize) + 1;
-
-        std::vector<T> batches;
-        batches.reserve(batchCount);
-
-        for (int i = 0; i < batchCount; i++)
-        {
-            T batch;
-
-            // I hate you, msvc
-            int last = (std::min)(batchSize, channels.size() - batchSize * i);
-            for (int j = 0; j < last; j++)
-            {
-                batch.push_back(channels.at(j + (batchSize * i)));
-            }
-            batches.emplace_back(batch);
-        }
-
-        return batches;
-    }
-}  // namespace
 
 TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
@@ -344,7 +316,7 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
     });
 
     // iterate over batches of channel IDs
-    for (const auto &batch : getChannelsInBatches(twitchChans->keys()))
+    for (const auto &batch : splitListIntoBatches(twitchChans->keys()))
     {
         getHelix()->fetchStreams(
             batch, {},
