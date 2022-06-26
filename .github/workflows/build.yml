@@ -274,7 +274,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./windows/chatterino-windows-x86-64.zip
-          asset_name: test-chatterino-windows-x86-64.zip
+          asset_name: chatterino-windows-x86-64.zip
           asset_content_type: application/zip
 
       - name: Upload release asset (Ubuntu)
@@ -294,7 +294,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./linux/Chatterino-x86_64.AppImage
-          asset_name: test-Chatterino-x86_64.AppImage
+          asset_name: Chatterino-x86_64.AppImage
           asset_content_type: application/x-executable
 
       - name: Upload release asset (Ubuntu .deb)
@@ -314,7 +314,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./ubuntu/Chatterino.deb
-          asset_name: test-Chatterino-x86_64.deb
+          asset_name: Chatterino-x86_64.deb
           asset_content_type: application/vnd.debian.binary-package
 
       - name: Upload release asset (MacOS)
@@ -334,5 +334,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./macos/chatterino-osx.dmg
-          asset_name: test-chatterino-osx.dmg
+          asset_name: chatterino-osx.dmg
           asset_content_type: application/x-bzip2
