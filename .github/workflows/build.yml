@@ -19,12 +19,10 @@ jobs:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
         qt-version: [5.15.2, 5.12.12]
-        build-system: [cmake]
         pch: [true]
         include:
           - os: ubuntu-latest
             qt-version: 5.15.2
-            build-system: cmake
             pch: false
       fail-fast: false
 
@@ -83,8 +81,8 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: ilammy/msvc-dev-cmd@v1.10.0
 
-      - name: Build with CMake (Windows)
-        if: startsWith(matrix.os, 'windows') && matrix.build-system == 'cmake'
+      - name: Build (Windows)
+        if: startsWith(matrix.os, 'windows')
         run: |
             mkdir build
             cd build
@@ -101,7 +99,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/upload-artifact@v3
         with:
-          name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ matrix.build-system }}.zip
+          name: chatterino-windows-x86-64-${{ matrix.qt-version }}.zip
           path: build/chatterino-windows-x86-64.zip
 
       - name: Clean Conan pkgs
@@ -134,8 +132,8 @@ jobs:
                 libxcb-render-util0 \
                 libxcb-xinerama0
 
-      - name: Build with CMake (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.build-system == 'cmake'
+      - name: Build (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
             mkdir build
             cd build
@@ -166,14 +164,14 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ matrix.build-system }}.AppImage
+          name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-${{ matrix.qt-version }}-${{ matrix.build-system }}.deb
+          name: Chatterino-${{ matrix.qt-version }}.deb
           path: build/Chatterino.deb
 
       # MACOS
@@ -183,8 +181,8 @@ jobs:
             brew install boost openssl rapidjson p7zip create-dmg cmake tree
         shell: bash
 
-      - name: Build with CMake (MacOS)
-        if: startsWith(matrix.os, 'macos') && matrix.build-system == 'cmake'
+      - name: Build (MacOS)
+        if: startsWith(matrix.os, 'macos')
         run: |
             mkdir build
             cd build
@@ -210,7 +208,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v3
         with:
-          name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
+          name: chatterino-osx-${{ matrix.qt-version }}.dmg
           path: build/chatterino-osx.dmg
 
   create-release:
@@ -234,23 +232,23 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: chatterino-windows-x86-64-5.15.2-cmake.zip
-          path: windows-cmake/
+          name: chatterino-windows-x86-64-5.15.2.zip
+          path: windows/
 
       - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-x86_64-5.15.2-cmake.AppImage
-          path: linux-cmake/
+          name: Chatterino-x86_64-5.15.2.AppImage
+          path: linux/
 
       - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-5.15.2-cmake.deb
-          path: ubuntu-cmake/
+          name: Chatterino-5.15.2.deb
+          path: ubuntu/
 
       - uses: actions/download-artifact@v3
         with:
-          name: chatterino-osx-5.15.2-cmake.dmg
-          path: macos-cmake/
+          name: chatterino-osx-5.15.2.dmg
+          path: macos/
 
       # TODO: Extract dmg and appimage
 
@@ -269,14 +267,14 @@ jobs:
           asset_name: chatterino-windows-x86-64.zip
           asset_content_type: application/zip
 
-      - name: Upload release asset (Windows) CMake
+      - name: Upload release asset (Windows)
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows-cmake/chatterino-windows-x86-64.zip
-          asset_name: test-cmake-chatterino-windows-x86-64.zip
+          asset_path: ./windows/chatterino-windows-x86-64.zip
+          asset_name: test-chatterino-windows-x86-64.zip
           asset_content_type: application/zip
 
       - name: Upload release asset (Ubuntu)
@@ -289,14 +287,14 @@ jobs:
           asset_name: Chatterino-x86_64.AppImage
           asset_content_type: application/x-executable
 
-      - name: Upload release asset (Ubuntu) CMake
+      - name: Upload release asset (Ubuntu)
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux-cmake/Chatterino-x86_64.AppImage
-          asset_name: test-cmake-Chatterino-x86_64.AppImage
+          asset_path: ./linux/Chatterino-x86_64.AppImage
+          asset_name: test-Chatterino-x86_64.AppImage
           asset_content_type: application/x-executable
 
       - name: Upload release asset (Ubuntu .deb)
@@ -309,14 +307,14 @@ jobs:
           asset_name: Chatterino-x86_64.deb
           asset_content_type: application/vnd.debian.binary-package
 
-      - name: Upload release asset (Ubuntu .deb) CMake
+      - name: Upload release asset (Ubuntu .deb)
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ubuntu-cmake/Chatterino.deb
-          asset_name: test-cmake-Chatterino-x86_64.deb
+          asset_path: ./ubuntu/Chatterino.deb
+          asset_name: test-Chatterino-x86_64.deb
           asset_content_type: application/vnd.debian.binary-package
 
       - name: Upload release asset (MacOS)
@@ -329,12 +327,12 @@ jobs:
           asset_name: chatterino-osx.dmg
           asset_content_type: application/x-bzip2
 
-      - name: Upload release asset (MacOS) CMake
+      - name: Upload release asset (MacOS)
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos-cmake/chatterino-osx.dmg
-          asset_name: test-cmake-chatterino-osx.dmg
+          asset_path: ./macos/chatterino-osx.dmg
+          asset_name: test-chatterino-osx.dmg
           asset_content_type: application/x-bzip2
