@@ -14,7 +14,6 @@
 1. Create a build folder and go into it (`mkdir build && cd build`)
 1. Compile using `cmake .. && make`
 
-
 If the Project does not build at this point, you might need to add additional Paths/Libs, because brew does not install openssl and boost in the common path. You can get their path using
 
 `brew info openssl`
