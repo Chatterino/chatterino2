@@ -46,10 +46,13 @@ public:
      **/
     void show();
 
-    // isHidden returns the hidden/shown state of the SplitInput
-    // Hidden in this context means "has 0 height", meaning it won't be visible
-    // but Qt still treats the widget as "technically visible" so we receive events
-    // as if the widget is visible
+    /**
+     * @brief Returns the hidden or shown state of the SplitInput
+     *
+     * Hidden in this context means "has 0 height", meaning it won't be visible
+     * but Qt still treats the widget as "technically visible" so we receive events
+     * as if the widget is visible
+     **/
     bool isHidden() const;
 
     pajlada::Signals::Signal<const QString &> textChanged;
