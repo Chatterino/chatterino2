@@ -125,7 +125,7 @@ public:
     IndirectChannel(ChannelPtr channel,
                     Channel::Type type = Channel::Type::Direct);
 
-    ChannelPtr get();
+    ChannelPtr get() const;
     void reset(ChannelPtr channel);
     pajlada::Signals::NoArgSignal &getChannelChanged();
     Channel::Type getType();

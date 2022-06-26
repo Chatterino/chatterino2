@@ -336,7 +336,7 @@ IndirectChannel::IndirectChannel(ChannelPtr channel, Channel::Type type)
 {
 }
 
-ChannelPtr IndirectChannel::get()
+ChannelPtr IndirectChannel::get() const
 {
     return data_->channel;
 }
