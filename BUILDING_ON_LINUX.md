@@ -11,7 +11,7 @@ _Most likely works the same for other Debian-like distros_
 ### Compiling through Qt Creator
 
 1. Install C++ IDE Qt Creator by using `sudo apt install qtcreator`
-1. Open `chatterino.pro` with Qt Creator and select build
+1. Open `CMakeLists.txt` with Qt Creator and select build
 
 ### Manually
 
@@ -22,10 +22,6 @@ _Most likely works the same for other Debian-like distros_
 ### Using CMake
 
 `cmake .. && make`
-
-### Using QMake
-
-`qmake .. && make`
 
 ## Arch Linux
 
@@ -44,10 +40,6 @@ _Most likely works the same for other Debian-like distros_
 
 `cmake .. && make`
 
-### Using QMake
-
-`qmake .. && make`
-
 ## Fedora 28 and above
 
 _Most likely works the same for other Red Hat-like distros. Substitute `dnf` with `yum`._
@@ -61,10 +53,6 @@ _Most likely works the same for other Red Hat-like distros. Substitute `dnf` wit
 
 `cmake .. && make -j$(nproc)`
 
-### Using QMake
-
-`qmake-qt5 .. && make -j$(nproc)`
-
 ## NixOS 18.09+
 
 1. Enter the development environment with all of the dependencies: `nix-shell -p openssl boost qt5.full pkg-config cmake`
@@ -76,6 +64,3 @@ _Most likely works the same for other Red Hat-like distros. Substitute `dnf` wit
 
 `cmake .. && make`
 
-### Using QMake
-
-`qmake .. && make`
