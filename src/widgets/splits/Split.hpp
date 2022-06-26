@@ -10,6 +10,7 @@
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <boost/signals2.hpp>
 
 namespace chatterino {
 
@@ -50,7 +51,7 @@ public:
     SplitInput &getInput();
 
     IndirectChannel getIndirectChannel();
-    ChannelPtr getChannel();
+    ChannelPtr getChannel() const;
     void setChannel(IndirectChannel newChannel);
 
     void setFilters(const QList<QUuid> ids);
@@ -63,8 +64,6 @@ public:
 
     void showChangeChannelPopup(const char *dialogTitle, bool empty,
                                 std::function<void(bool)> callback);
-    void giveFocus(Qt::FocusReason reason);
-    bool hasFocus() const;
     void updateGifEmotes();
     void updateLastReadMessage();
     void setIsTopRightSplit(bool value);
@@ -105,7 +104,6 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
     void enterEvent(QEvent *event) override;
     void leaveEvent(QEvent *event) override;
-    void focusInEvent(QFocusEvent *event) override;
 
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
@@ -137,11 +135,11 @@ private:
     bool isMouseOver_{};
     bool isDragging_{};
 
-    QVBoxLayout *vbox_;
-    SplitHeader *header_;
-    ChannelView *view_;
-    SplitInput *input_;
-    SplitOverlay *overlay_;
+    QVBoxLayout *const vbox_;
+    SplitHeader *const header_;
+    ChannelView *const view_;
+    SplitInput *const input_;
+    SplitOverlay *const overlay_;
 
     NullablePtr<SelectChannelDialog> selectChannelDialog_;
 
@@ -151,6 +149,7 @@ private:
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
     pajlada::Signals::SignalHolder signalHolder_;
+    std::vector<boost::signals2::scoped_connection> bSignals_;
 
 public slots:
     void addSibling();
@@ -169,7 +168,7 @@ public slots:
     void copyToClipboard();
     void startWatching();
     void setFiltersDialog();
-    void showSearch();
+    void showSearch(bool singleChannel);
     void showViewerList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
@@ -177,3 +176,6 @@ public slots:
 };
 
 }  // namespace chatterino
+
+QDebug operator<<(QDebug dbg, const chatterino::Split &split);
+QDebug operator<<(QDebug dbg, const chatterino::Split *split);

@@ -10,6 +10,7 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "widgets/Window.hpp"
 
 #ifdef Q_OS_WIN
@@ -35,15 +36,6 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
     this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {
         this->twitchSetting_.setValue(this->channelMap[Platform::Twitch].raw());
     });
-    /*
-    for (const QString &channelName : this->mixerSetting_.getValue()) {
-        this->channelMap[Platform::Mixer].appendItem(channelName);
-    }
-
-    this->channelMap[Platform::Mixer].delayedItemsChanged.connect([this] {
-        this->mixerSetting_.setValue(
-            this->channelMap[Platform::Mixer]);
-    });*/
 
     liveStatusTimer_ = new QTimer();
 
@@ -128,62 +120,35 @@ NotificationModel *NotificationController::createModel(QObject *parent,
     return model;
 }
 
-namespace {
-    // TODO: combine this with getEmoteSetBatches in TwitchAccount.cpp, maybe some templated thing
-    std::vector<QStringList> getChannelsInBatches(QStringList channels)
-    {
-        constexpr int batchSize = 100;
-
-        int batchCount = (channels.size() / batchSize) + 1;
-
-        std::vector<QStringList> batches;
-        batches.reserve(batchCount);
-
-        for (int i = 0; i < batchCount; i++)
-        {
-            QStringList batch;
-
-            // I hate you, msvc
-            int last = (std::min)(batchSize, channels.size() - batchSize * i);
-            for (int j = 0; j < last; j++)
-            {
-                batch.push_back(channels.at(j + (batchSize * i)));
-            }
-            batches.emplace_back(batch);
-        }
-
-        return batches;
-    }
-}  // namespace
-
 void NotificationController::fetchFakeChannels()
 {
     qCDebug(chatterinoNotification) << "fetching fake channels";
     QStringList channels;
     for (std::vector<int>::size_type i = 0;
-         i != channelMap[Platform::Twitch].raw().size(); i++)
+         i < channelMap[Platform::Twitch].raw().size(); i++)
     {
-        auto chan = getApp()->twitch.server->getChannelOrEmpty(
+        auto chan = getApp()->twitch->getChannelOrEmpty(
             channelMap[Platform::Twitch].raw()[i]);
         if (chan->isEmpty())
         {
             channels.push_back(channelMap[Platform::Twitch].raw()[i]);
         }
     }
-    for (const auto &batch : getChannelsInBatches(channels))
+
+    for (const auto &batch : splitListIntoBatches(channels))
     {
         getHelix()->fetchStreams(
-            QStringList(), batch,
+            {}, batch,
             [batch, this](std::vector<HelixStream> streams) {
                 std::unordered_set<QString> liveStreams;
                 for (const auto &stream : streams)
                 {
-                    liveStreams.insert(stream.userName);
+                    liveStreams.insert(stream.userLogin);
                 }
 
                 for (const auto &name : batch)
                 {
-                    auto it = liveStreams.find(name);
+                    auto it = liveStreams.find(name.toLower());
                     this->checkStream(it != liveStreams.end(), name);
                 }
             },
@@ -191,6 +156,9 @@ void NotificationController::fetchFakeChannels()
                 // we done fucked up.
                 qCWarning(chatterinoNotification)
                     << "Failed to fetch live status for " << batch;
+            },
+            []() {
+                // finally
             });
     }
 }
@@ -236,7 +204,7 @@ void NotificationController::checkStream(bool live, QString channelName)
     }
     MessageBuilder builder;
     TwitchMessageBuilder::liveMessage(channelName, &builder);
-    getApp()->twitch2->liveChannel->addMessage(builder.release());
+    getApp()->twitch->liveChannel->addMessage(builder.release());
 
     // Indicate that we have pushed notifications for this stream
     fakeTwitchChannels.push_back(channelName);
@@ -249,6 +217,26 @@ void NotificationController::removeFakeChannel(const QString channelName)
     if (i != fakeTwitchChannels.end())
     {
         fakeTwitchChannels.erase(i);
+        // "delete" old 'CHANNEL is live' message
+        LimitedQueueSnapshot<MessagePtr> snapshot =
+            getApp()->twitch->liveChannel->getMessageSnapshot();
+        int snapshotLength = snapshot.size();
+
+        // MSVC hates this code if the parens are not there
+        int end = (std::max)(0, snapshotLength - 200);
+        // this assumes that channelName is a login name therefore will only delete messages from fake channels
+        auto liveMessageSearchText = QString("%1 is live!").arg(channelName);
+
+        for (int i = snapshotLength - 1; i >= end; --i)
+        {
+            auto &s = snapshot[i];
+
+            if (s->messageText == liveMessageSearchText)
+            {
+                s->flags.set(MessageFlag::Disabled);
+                break;
+            }
+        }
     }
 }
 

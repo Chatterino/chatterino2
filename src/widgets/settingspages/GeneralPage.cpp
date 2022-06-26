@@ -144,30 +144,34 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToFloat(args.value, 1.f);
         });
-    layout.addDropdown<int>(
-        "Tab layout", {"Horizontal", "Vertical"}, s.tabDirection,
-        [](auto val) {
-            switch (val)
-            {
-                case NotebookTabDirection::Horizontal:
-                    return "Horizontal";
-                case NotebookTabDirection::Vertical:
-                    return "Vertical";
-            }
+    ComboBox *tabDirectionDropdown =
+        layout.addDropdown<std::underlying_type<NotebookTabDirection>::type>(
+            "Tab layout", {"Horizontal", "Vertical"}, s.tabDirection,
+            [](auto val) {
+                switch (val)
+                {
+                    case NotebookTabDirection::Horizontal:
+                        return "Horizontal";
+                    case NotebookTabDirection::Vertical:
+                        return "Vertical";
+                }
 
-            return "";
-        },
-        [](auto args) {
-            if (args.value == "Vertical")
-            {
-                return NotebookTabDirection::Vertical;
-            }
-            else
-            {
-                // default to horizontal
-                return NotebookTabDirection::Horizontal;
-            }
-        });
+                return "";
+            },
+            [](auto args) {
+                if (args.value == "Vertical")
+                {
+                    return NotebookTabDirection::Vertical;
+                }
+                else
+                {
+                    // default to horizontal
+                    return NotebookTabDirection::Horizontal;
+                }
+            },
+            false);
+    tabDirectionDropdown->setMinimumWidth(
+        tabDirectionDropdown->minimumSizeHint().width());
 
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost);
@@ -332,14 +336,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
-        "Chatterino can automatically change behavior if it detects that \"OBS "
-        "Studio\" is running.\nSelect which things you want to change while "
-        "streaming");
+        "Chatterino can automatically change behavior if it detects that any "
+        "streaming software is running.\nSelect which things you want to "
+        "change while streaming");
 
     ComboBox *dankDropdown =
         layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
             "Enable Streamer Mode",
-            {"Disabled", "Enabled", "Automatic (Detect OBS)"},
+            {"Disabled", "Enabled", "Automatic (Detect streaming software)"},
             s.enableStreamerMode,
             [](int value) {
                 return value;
@@ -348,7 +352,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                 return static_cast<StreamerModeSetting>(args.index);
             },
             false);
-    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 10);
+    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 30);
 
     layout.addCheckbox("Hide usercard avatars",
                        s.streamerModeHideUsercardAvatars);
@@ -731,10 +735,8 @@ QString GeneralPage::getFont(const DropdownArgs &args) const
         args.combobox->setEditText("Choosing...");
         QFontDialog dialog(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.));
 
-        dialog.setWindowFlag(Qt::WindowStaysOnTopHint);
-
         auto ok = bool();
-        auto font = dialog.getFont(&ok);
+        auto font = dialog.getFont(&ok, this->window());
 
         if (ok)
             return font.family();

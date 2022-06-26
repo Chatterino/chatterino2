@@ -1,12 +1,13 @@
 #ifndef AB_SETTINGS_H
 #define AB_SETTINGS_H
 
+#include "common/ChatterinoSetting.hpp"
+
 #include <rapidjson/document.h>
 #include <QString>
-#include <memory>
 #include <pajlada/settings/settingdata.hpp>
 
-#include "common/ChatterinoSetting.hpp"
+#include <memory>
 
 #ifdef AB_CUSTOM_SETTINGS
 #    define AB_SETTINGS_CLASS ABSettings

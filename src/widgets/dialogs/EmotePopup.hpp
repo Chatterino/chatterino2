@@ -46,6 +46,8 @@ private:
 
     void loadEmojis(ChannelView &view, EmojiMap &emojiMap);
     void loadEmojis(Channel &channel, EmojiMap &emojiMap, const QString &title);
+    void filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
+                            const QString &searchText);
     void filterEmotes(const QString &text);
     EmoteMap *filterEmoteMap(const QString &text,
                              std::shared_ptr<const EmoteMap> emotes);

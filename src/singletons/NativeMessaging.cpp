@@ -240,8 +240,8 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
             postToThread([=] {
                 if (!name.isEmpty())
                 {
-                    app->twitch.server->watchingChannel.reset(
-                        app->twitch.server->getOrAddChannel(name));
+                    app->twitch->watchingChannel.reset(
+                        app->twitch->getOrAddChannel(name));
                 }
 
                 if (attach || attachFullscreen)
@@ -252,8 +252,7 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
                         AttachedWindow::get(::GetForegroundWindow(), args);
                     if (!name.isEmpty())
                     {
-                        window->setChannel(
-                            app->twitch.server->getOrAddChannel(name));
+                        window->setChannel(app->twitch->getOrAddChannel(name));
                     }
 //                    }
 //                    window->show();

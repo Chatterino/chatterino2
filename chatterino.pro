@@ -96,6 +96,7 @@ include(lib/signals.pri)
 include(lib/settings.pri)
 include(lib/serialize.pri)
 include(lib/lrucache.pri)
+include(lib/magic_enum.pri)
 include(lib/winsdk.pri)
 include(lib/rapidjson.pri)
 include(lib/qtkeychain.pri)
@@ -156,6 +157,7 @@ SOURCES += \
     src/controllers/highlights/BadgeHighlightModel.cpp \
     src/controllers/highlights/HighlightBadge.cpp \
     src/controllers/highlights/HighlightBlacklistModel.cpp \
+    src/controllers/highlights/HighlightController.cpp \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \
     src/controllers/highlights/UserHighlightModel.cpp \
@@ -210,12 +212,18 @@ SOURCES += \
     src/providers/IvrApi.cpp \
     src/providers/LinkResolver.cpp \
     src/providers/twitch/api/Helix.cpp \
-    src/providers/twitch/api/Kraken.cpp \
     src/providers/twitch/ChannelPointReward.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
-    src/providers/twitch/PubsubActions.cpp \
-    src/providers/twitch/PubsubClient.cpp \
-    src/providers/twitch/PubsubHelpers.cpp \
+    src/providers/twitch/PubSubActions.cpp \
+    src/providers/twitch/PubSubClient.cpp \
+    src/providers/twitch/PubSubManager.cpp \
+    src/providers/twitch/pubsubmessages/AutoMod.cpp \
+    src/providers/twitch/pubsubmessages/Base.cpp \
+    src/providers/twitch/pubsubmessages/ChannelPoints.cpp \
+    src/providers/twitch/pubsubmessages/ChatModeratorAction.cpp \
+    src/providers/twitch/pubsubmessages/Listen.cpp \
+    src/providers/twitch/pubsubmessages/Unlisten.cpp \
+    src/providers/twitch/pubsubmessages/Whisper.cpp \
     src/providers/twitch/TwitchAccount.cpp \
     src/providers/twitch/TwitchAccountManager.cpp \
     src/providers/twitch/TwitchBadge.cpp \
@@ -256,6 +264,7 @@ SOURCES += \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/RatelimitBucket.cpp \
+    src/util/SampleData.cpp \
     src/util/SplitCommand.cpp \
     src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
@@ -280,6 +289,7 @@ SOURCES += \
     src/widgets/dialogs/SelectChannelDialog.cpp \
     src/widgets/dialogs/SelectChannelFiltersDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
+    src/widgets/dialogs/switcher/NewPopupItem.cpp \
     src/widgets/dialogs/switcher/NewTabItem.cpp \
     src/widgets/dialogs/switcher/QuickSwitcherModel.cpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.cpp \
@@ -298,6 +308,8 @@ SOURCES += \
     src/widgets/helper/NotebookButton.cpp \
     src/widgets/helper/NotebookTab.cpp \
     src/widgets/helper/QColorPicker.cpp \
+    src/widgets/helper/RegExpItemDelegate.cpp \
+    src/widgets/helper/TrimRegExpValidator.cpp \
     src/widgets/helper/ResizingTextEdit.cpp \
     src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/SearchPopup.cpp \
@@ -391,6 +403,7 @@ HEADERS += \
     src/controllers/highlights/HighlightBadge.hpp \
     src/controllers/highlights/HighlightBlacklistModel.hpp \
     src/controllers/highlights/HighlightBlacklistUser.hpp \
+    src/controllers/highlights/HighlightController.hpp \
     src/controllers/highlights/HighlightModel.hpp \
     src/controllers/highlights/HighlightPhrase.hpp \
     src/controllers/highlights/UserHighlightModel.hpp \
@@ -433,6 +446,7 @@ HEADERS += \
     src/messages/search/LinkPredicate.hpp \
     src/messages/search/MessageFlagsPredicate.hpp \
     src/messages/search/MessagePredicate.hpp \
+    src/messages/search/RegexPredicate.hpp \
     src/messages/search/SubstringPredicate.hpp \
     src/messages/Selection.hpp \
     src/messages/SharedMessageBuilder.hpp \
@@ -455,14 +469,25 @@ HEADERS += \
     src/providers/IvrApi.hpp \
     src/providers/LinkResolver.hpp \
     src/providers/twitch/api/Helix.hpp \
-    src/providers/twitch/api/Kraken.hpp \
     src/providers/twitch/ChannelPointReward.hpp \
     src/providers/twitch/ChatterinoWebSocketppLogger.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
-    src/providers/twitch/PubsubActions.hpp \
-    src/providers/twitch/PubsubClient.hpp \
-    src/providers/twitch/PubsubHelpers.hpp \
+    src/providers/twitch/PubSubActions.hpp \
+    src/providers/twitch/PubSubClient.hpp \
+    src/providers/twitch/PubSubClientOptions.hpp \
+    src/providers/twitch/PubSubHelpers.hpp \
+    src/providers/twitch/PubSubManager.hpp \
+    src/providers/twitch/PubSubMessages.hpp \
+    src/providers/twitch/pubsubmessages/AutoMod.hpp \
+    src/providers/twitch/pubsubmessages/Base.hpp \
+    src/providers/twitch/pubsubmessages/ChannelPoints.hpp \
+    src/providers/twitch/pubsubmessages/ChatModeratorAction.hpp \
+    src/providers/twitch/pubsubmessages/Listen.hpp \
+    src/providers/twitch/pubsubmessages/Message.hpp \
+    src/providers/twitch/pubsubmessages/Unlisten.hpp \
+    src/providers/twitch/pubsubmessages/Whisper.hpp \
+    src/providers/twitch/PubSubWebsocket.hpp \
     src/providers/twitch/TwitchAccount.hpp \
     src/providers/twitch/TwitchAccountManager.hpp \
     src/providers/twitch/TwitchBadge.hpp \
@@ -506,7 +531,6 @@ HEADERS += \
     src/util/IncognitoBrowser.hpp \
     src/util/InitUpdateButton.hpp \
     src/util/IrcHelpers.hpp \
-    src/util/IsBigEndian.hpp \
     src/util/LayoutCreator.hpp \
     src/util/LayoutHelper.hpp \
     src/util/NuulsUploader.hpp \
@@ -515,13 +539,11 @@ HEADERS += \
     src/util/PostToThread.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \
-    src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RapidJsonSerializeQString.hpp \
     src/util/RatelimitBucket.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
-    src/util/SampleCheerMessages.hpp \
-    src/util/SampleLinks.hpp \
+    src/util/SampleData.hpp \
     src/util/SharedPtrElementLess.hpp \
     src/util/SplitCommand.hpp \
     src/util/StandardItemHelper.hpp \
@@ -549,6 +571,7 @@ HEADERS += \
     src/widgets/dialogs/SelectChannelFiltersDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \
     src/widgets/dialogs/switcher/AbstractSwitcherItem.hpp \
+    src/widgets/dialogs/switcher/NewPopupItem.hpp \
     src/widgets/dialogs/switcher/NewTabItem.hpp \
     src/widgets/dialogs/switcher/QuickSwitcherModel.hpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.hpp \
@@ -569,6 +592,8 @@ HEADERS += \
     src/widgets/helper/NotebookButton.hpp \
     src/widgets/helper/NotebookTab.hpp \
     src/widgets/helper/QColorPicker.hpp \
+    src/widgets/helper/RegExpItemDelegate.hpp \
+    src/widgets/helper/TrimRegExpValidator.hpp \
     src/widgets/helper/ResizingTextEdit.hpp \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \
@@ -653,12 +678,16 @@ isEmpty(git_release) {
 git_release=$$system(git describe)
 }
 git_hash = $$str_member($$git_commit, 0, 8)
+git_modified=$$system(git status --porcelain -z)
 
 # Passing strings as defines requires you to use this weird triple-escape then quotation mark syntax.
 # https://stackoverflow.com/questions/3348711/add-a-define-to-qmake-with-a-value/18343449#18343449
 DEFINES += CHATTERINO_GIT_COMMIT=\\\"$$git_commit\\\"
 DEFINES += CHATTERINO_GIT_RELEASE=\\\"$$git_release\\\"
 DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
+!isEmpty(git_modified) {
+    DEFINES += CHATTERINO_GIT_MODIFIED
+}
 
 CONFIG(debug, debug|release) {
     message("Building Chatterino2 DEBUG")

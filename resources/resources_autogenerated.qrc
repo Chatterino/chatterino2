@@ -2,8 +2,12 @@
   <qresource prefix="/">
     <file>avatars/_1xelerate.png</file>
     <file>avatars/alazymeme.png</file>
+    <file>avatars/brian6932.png</file>
     <file>avatars/fourtf.png</file>
+    <file>avatars/hicupalot.png</file>
+    <file>avatars/iprodigy.png</file>
     <file>avatars/kararty.png</file>
+    <file>avatars/karlpolice.png</file>
     <file>avatars/matthewde.jpg</file>
     <file>avatars/mm2pl.png</file>
     <file>avatars/pajlada.png</file>
@@ -55,6 +59,7 @@
     <file>licenses/emoji-data-source.txt</file>
     <file>licenses/libcommuni_BSD3.txt</file>
     <file>licenses/lrucache.txt</file>
+    <file>licenses/magic_enum.txt</file>
     <file>licenses/openssl.txt</file>
     <file>licenses/pajlada_settings.txt</file>
     <file>licenses/pajlada_signals.txt</file>
@@ -94,6 +99,7 @@
     <file>split/up.png</file>
     <file>streamerMode.png</file>
     <file>switcher/plus.svg</file>
+    <file>switcher/popup.svg</file>
     <file>switcher/switch.svg</file>
     <file>tlds.txt</file>
     <file>twitch/admin.png</file>

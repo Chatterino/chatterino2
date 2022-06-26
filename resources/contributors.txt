@@ -11,6 +11,7 @@
 
 fourtf | https://fourtf.com | :/avatars/fourtf.png | Author, main developer
 pajlada | https://pajlada.se | :/avatars/pajlada.png | Collaborator, co-developer
+zneix | https://github.com/zneix | :/avatars/zneix.png | Collaborator
 
 Cranken | https://github.com/Cranken | | Contributor
 hemirt | https://github.com/hemirt | | Contributor
@@ -36,7 +37,6 @@ Mm2PL | https://github.com/mm2pl | :/avatars/mm2pl.png | Contributor
 gempir | https://github.com/gempir | | Contributor
 mfmarlow | https://github.com/mfmarlow | | Contributor
 dnsge | https://github.com/dnsge | | Contributor
-zneix | https://github.com/zneix | :/avatars/zneix.png | Contributor
 y0dax | https://github.com/y0dax | | Contributor
 Iulian Onofrei | https://github.com/revolter | :/avatars/revolter.jpg | Contributor
 matthewde | https://github.com/m4tthewde | :/avatars/matthewde.jpg | Contributor
@@ -47,6 +47,10 @@ ALazyMeme | https://github.com/alazymeme | :/avatars/alazymeme.png | Contributor
 xHeaveny_ | https://github.com/xHeaveny | :/avatars/xheaveny.png | Contributor
 1xelerate | https://github.com/1xelerate | :/avatars/_1xelerate.png | Contributor
 acdvs | https://github.com/acdvs | | Contributor
+karl-police | https://github.com/karl-police | :/avatars/karlpolice.png | Contributor
+brian6932 | https://github.com/brian6932 | :/avatars/brian6932.png | Contributor
+hicupalot | https://github.com/hicupalot | :/avatars/hicupalot.png | Contributor
+iProdigy | https://github.com/iProdigy | :/avatars/iprodigy.png | Contributor
 
 # If you are a contributor add yourself above this line
 

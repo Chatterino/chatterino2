@@ -98,8 +98,8 @@ public:
         "/appearance/messages/usernameDisplayMode",
         UsernameDisplayMode::UsernameAndLocalizedName};
 
-    IntSetting tabDirection = {"/appearance/tabDirection",
-                               NotebookTabDirection::Horizontal};
+    EnumSetting<NotebookTabDirection> tabDirection = {
+        "/appearance/tabDirection", NotebookTabDirection::Horizontal};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
@@ -208,7 +208,7 @@ public:
 
     /// Streamer Mode
     EnumSetting<StreamerModeSetting> enableStreamerMode = {
-        "/streamerMode/enabled", StreamerModeSetting::DetectObs};
+        "/streamerMode/enabled", StreamerModeSetting::DetectStreamingSoftware};
     BoolSetting streamerModeHideUsercardAvatars = {
         "/streamerMode/hideUsercardAvatars", true};
     BoolSetting streamerModeHideLinkThumbnails = {
@@ -386,6 +386,7 @@ public:
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
     BoolSetting informOnTabVisibilityToggle = {"/misc/askOnTabVisibilityToggle",
                                                true};
+    BoolSetting lockNotebookLayout = {"/misc/lockNotebookLayout", false};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",

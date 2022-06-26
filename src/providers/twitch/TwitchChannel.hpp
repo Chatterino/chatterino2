@@ -16,12 +16,29 @@
 #include <QElapsedTimer>
 #include <QRegularExpression>
 #include <boost/optional.hpp>
+#include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
 #include <mutex>
 #include <unordered_map>
 
 namespace chatterino {
+
+// This is to make sure that combined emoji go through properly, see
+// https://github.com/Chatterino/chatterino2/issues/3384 and
+// https://mm2pl.github.io/emoji_rfc.pdf for more details
+const QString ZERO_WIDTH_JOINER = QString(QChar(0x200D));
+
+// Here be MSVC: Do NOT replace with "\U" literal, it will fail silently.
+namespace {
+    const QChar ESCAPE_TAG_CHARS[2] = {QChar::highSurrogate(0xE0002),
+                                       QChar::lowSurrogate(0xE0002)};
+}
+const QString ESCAPE_TAG = QString(ESCAPE_TAG_CHARS, 2);
+
+const static QRegularExpression COMBINED_FIXER(
+    QString("(?<!%1)%1").arg(ESCAPE_TAG),
+    QRegularExpression::UseUnicodePropertiesOption);
 
 enum class HighlightState;
 
@@ -128,7 +145,7 @@ private:
     // Methods
     void refreshLiveStatus();
     void parseLiveStatus(bool live, const HelixStream &stream);
-    void refreshPubsub();
+    void refreshPubSub();
     void refreshChatters();
     void refreshBadges();
     void refreshCheerEmotes();
@@ -176,13 +193,13 @@ private:
     // --
     QString lastSentMessage_;
     QObject lifetimeGuard_;
-    QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
     QElapsedTimer titleRefreshedTimer_;
     QElapsedTimer clipCreationTimer_;
     bool isClipCreationInProgress{false};
 
     pajlada::Signals::SignalHolder signalHolder_;
+    std::vector<boost::signals2::scoped_connection> bSignals_;
 
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;

@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/MessageColor.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
 #include <QColor>
@@ -31,6 +32,11 @@ public:
     // triggerHighlights triggers any alerts or sounds parsed by parseHighlights
     virtual void triggerHighlights();
     virtual MessagePtr build() = 0;
+
+    static std::pair<QString, QString> slashKeyValue(const QString &kvStr);
+
+    // Parses "badges" tag which contains a comma separated list of key-value elements
+    static std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
 
 protected:
     virtual void parse();

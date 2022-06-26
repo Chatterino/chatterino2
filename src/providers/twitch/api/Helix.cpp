@@ -7,7 +7,7 @@
 
 namespace chatterino {
 
-static Helix *instance = nullptr;
+static IHelix *instance = nullptr;
 
 void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
                        ResultCallback<std::vector<HelixUser>> successCallback,
@@ -145,7 +145,7 @@ void Helix::getUserFollowers(
 void Helix::fetchStreams(
     QStringList userIds, QStringList userLogins,
     ResultCallback<std::vector<HelixStream>> successCallback,
-    HelixFailureCallback failureCallback)
+    HelixFailureCallback failureCallback, std::function<void()> finallyCallback)
 {
     QUrlQuery urlQuery;
 
@@ -186,19 +186,21 @@ void Helix::fetchStreams(
             // TODO: make better xd
             failureCallback();
         })
+        .finally(finallyCallback)
         .execute();
 }
 
 void Helix::getStreamById(QString userId,
                           ResultCallback<bool, HelixStream> successCallback,
-                          HelixFailureCallback failureCallback)
+                          HelixFailureCallback failureCallback,
+                          std::function<void()> finallyCallback)
 {
     QStringList userIds{std::move(userId)};
     QStringList userLogins;
 
     this->fetchStreams(
         userIds, userLogins,
-        [successCallback, failureCallback](const auto &streams) {
+        [successCallback](const auto &streams) {
             if (streams.empty())
             {
                 successCallback(false, HelixStream());
@@ -206,12 +208,13 @@ void Helix::getStreamById(QString userId,
             }
             successCallback(true, streams[0]);
         },
-        failureCallback);
+        failureCallback, finallyCallback);
 }
 
 void Helix::getStreamByName(QString userName,
                             ResultCallback<bool, HelixStream> successCallback,
-                            HelixFailureCallback failureCallback)
+                            HelixFailureCallback failureCallback,
+                            std::function<void()> finallyCallback)
 {
     QStringList userIds;
     QStringList userLogins{std::move(userName)};
@@ -226,7 +229,7 @@ void Helix::getStreamByName(QString userName,
             }
             successCallback(true, streams[0]);
         },
-        failureCallback);
+        failureCallback, finallyCallback);
 }
 
 ///
@@ -808,10 +811,17 @@ void Helix::initialize()
 {
     assert(instance == nullptr);
 
-    instance = new Helix();
+    initializeHelix(new Helix());
 }
 
-Helix *getHelix()
+void initializeHelix(IHelix *_instance)
+{
+    assert(_instance != nullptr);
+
+    instance = _instance;
+}
+
+IHelix *getHelix()
 {
     assert(instance != nullptr);
 

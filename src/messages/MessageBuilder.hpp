@@ -34,6 +34,7 @@ struct MessageParseArgs {
     bool isSentWhisper = false;
     bool trimSubscriberUsername = false;
     bool isStaffOrBroadcaster = false;
+    bool isSubscriptionMessage = false;
     QString channelPointRewardId = "";
 };
 
@@ -63,7 +64,10 @@ public:
     void addLink(const QString &origLink, const QString &matchedLink);
 
     template <typename T, typename... Args>
-    T *emplace(Args &&... args)
+    // clang-format off
+    // clang-format can be enabled once clang-format v11+ has been installed in CI
+    T *emplace(Args &&...args)
+    // clang-format on
     {
         static_assert(std::is_base_of<MessageElement, T>::value,
                       "T must extend MessageElement");

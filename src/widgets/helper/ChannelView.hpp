@@ -81,6 +81,8 @@ public:
     void pause(PauseReason reason, boost::optional<uint> msecs = boost::none);
     void unpause(PauseReason reason);
 
+    MessageElementFlags getFlags() const;
+
     ChannelPtr channel();
     void setChannel(ChannelPtr channel_);
 
@@ -92,11 +94,19 @@ public:
     void setSourceChannel(ChannelPtr sourceChannel);
     bool hasSourceChannel() const;
 
-    LimitedQueueSnapshot<MessageLayoutPtr> getMessagesSnapshot();
+    LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
     void queueLayout();
 
     void clearMessages();
-    void showUserInfoPopup(const QString &userName);
+
+    /**
+     * @brief Creates and shows a UserInfoPopup dialog
+     *
+     * @param userName The login name of the user
+     * @param alternativePopoutChannel Optional parameter containing the channel name to use for context
+     **/
+    void showUserInfoPopup(const QString &userName,
+                           QString alternativePopoutChannel = QString());
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
@@ -150,17 +160,35 @@ private:
 
     void drawMessages(QPainter &painter);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
-    MessageElementFlags getFlags() const;
     void selectWholeMessage(MessageLayout *layout, int &messageIndex);
     void getWordBounds(MessageLayout *layout,
                        const MessageLayoutElement *element,
                        const QPoint &relativePos, int &wordStart, int &wordEnd);
 
     void handleMouseClick(QMouseEvent *event,
-                          const MessageLayoutElement *hoverLayoutElement,
+                          const MessageLayoutElement *hoveredElement,
                           MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
-                             MessageLayoutPtr layout);
+                             MessageLayoutPtr layout, QMouseEvent *event);
+    void addImageContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                  MessageLayoutPtr layout, QMouseEvent *event,
+                                  QMenu &menu);
+    void addLinkContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                 MessageLayoutPtr layout, QMouseEvent *event,
+                                 QMenu &menu);
+    void addMessageContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                    MessageLayoutPtr layout, QMouseEvent *event,
+                                    QMenu &menu);
+    void addTwitchLinkContextMenuItems(
+        const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
+        QMouseEvent *event, QMenu &menu);
+    void addHiddenContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                   MessageLayoutPtr layout, QMouseEvent *event,
+                                   QMenu &menu);
+    void addCommandExecutionContextMenuItems(
+        const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
+        QMouseEvent *event, QMenu &menu);
+
     int getLayoutWidth() const;
     void updatePauses();
     void unpaused();
