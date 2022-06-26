@@ -22,6 +22,7 @@
 - Minor: Added ability to execute commands on chat messages using the message context menu. (#3738, #3765)
 - Minor: Added `/copy` command. Usage: `/copy <text>`. Copies provided text to clipboard - can be useful with custom commands. (#3763)
 - Minor: Removed total views from the usercard, as Twitch no longer updates the number. (#3792)
+- Minor: Add Quick Switcher item to open a channel in a new popup window. (#3828)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fix crash that can occur when changing channels. (#3799)
 - Bugfix: Fixed viewers list search not working when used before loading finishes. (#3774)
@@ -36,10 +37,12 @@
 - Bugfix: Fixed viewer list not closing after pressing escape key. (#3734)
 - Bugfix: Fixed links with no thumbnail having previous link's thumbnail. (#3720)
 - Bugfix: Add icon in the CMake macOS bundle. (#3832)
+- Bugfix: Adopt popup windows in order to force floating behavior on some window managers. (#3836)
 - Dev: Rewrite LimitedQueue (#3798)
 - Dev: Overhaul highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801, #3835)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 - Dev: Batch checking live status for all channels after startup. (#3757, #3762, #3767)
+- Dev: Move most command context into the command controller. (#3824)
 
 ## 2.3.5
 
