@@ -252,9 +252,10 @@ public:
                                          ""};
 
     BoolSetting enableSelfMessagesHighlight = {
-        "/highlighting/selfMessagesHighlight/nameIsHighlightKeyword", true};
+        "/highlighting/selfMessagesHighlight/nameIsHighlightKeyword", false};
     BoolSetting showSelfMessagesHighlightInMentions = {
-        "/highlighting/selfMessagesHighlight/showSelfMessagesInMentions", true};
+        "/highlighting/selfMessagesHighlight/showSelfMessagesInMentions",
+        false};
     //    BoolSetting enableSelfMessagesHighlightSound = {
     //        "/highlighting/selfMessagesHighlight/enableSound", true};
     //    BoolSetting enableSelfMessagesHighlightTaskbar = {
