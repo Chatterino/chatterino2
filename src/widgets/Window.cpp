@@ -43,8 +43,8 @@
 
 namespace chatterino {
 
-Window::Window(WindowType type)
-    : BaseWindow(BaseWindow::EnableCustomFrame)
+Window::Window(WindowType type, QWidget *parent)
+    : BaseWindow(BaseWindow::EnableCustomFrame, parent)
     , type_(type)
     , notebook_(new SplitNotebook(this))
 {
