@@ -7,13 +7,13 @@
 1. Install Xcode and Xcode Command Line Utilities
 2. Start Xcode, go into Settings -> Locations, and activate your Command Line Tools
 3. Install brew https://brew.sh/
-4. Install the dependencies using `brew install boost openssl rapidjson`
+4. Install the dependencies using `brew install boost openssl rapidjson cmake`
 5. Install Qt5 using `brew install qt@5`
-6. Step 5 should output some directions to add Qt to your path
-7. (_OPTIONAL_) Install [ccache](https://ccache.dev) (used to speed up compilation by using cached results from previous builds) using `brew install ccache`
-8. Go into the project directory
-9. Create a build folder and go into it (`mkdir build && cd build`)
-10. Compile using `cmake .. && make`
+6. (_OPTIONAL_) Install [ccache](https://ccache.dev) (used to speed up compilation by using cached results from previous builds) using `brew install ccache`
+7. Go into the project directory
+8. Create a build folder and go into it (`mkdir build && cd build`)
+9. Compile using `cmake .. && make`
+
 
 If the Project does not build at this point, you might need to add additional Paths/Libs, because brew does not install openssl and boost in the common path. You can get their path using
 
