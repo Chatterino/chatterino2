@@ -47,7 +47,7 @@ Note: This installation will take about 2.1 GB of disk space.
 6. Add `C:\local\bin` to your path folder ([Follow the guide here if you don't know how to do it](https://www.computerhope.com/issues/ch000549.htm#windows10))
 
 **If the 1.1.x download link above does not work, try downloading the similar 1.1.x version found [here](https://slproweb.com/products/Win32OpenSSL.html). Note: Don't download the "light" installer, it does not have the required files.**
-[Screenshot Slproweb layout](https://user-images.githubusercontent.com/41973452/175827529-97802939-5549-4ab1-95c4-d39f012d06e9.png)
+![Screenshot Slproweb layout](https://user-images.githubusercontent.com/41973452/175827529-97802939-5549-4ab1-95c4-d39f012d06e9.png)
 
 Note: This installation will take about 200 MB of disk space.
 
