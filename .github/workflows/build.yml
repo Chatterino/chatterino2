@@ -267,16 +267,6 @@ jobs:
           asset_name: chatterino-windows-x86-64.zip
           asset_content_type: application/zip
 
-      - name: Upload release asset (Windows)
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows/chatterino-windows-x86-64.zip
-          asset_name: chatterino-windows-x86-64.zip
-          asset_content_type: application/zip
-
       - name: Upload release asset (Ubuntu)
         uses: actions/upload-release-asset@v1.0.2
         env:
@@ -286,26 +276,6 @@ jobs:
           asset_path: ./linux/Chatterino-x86_64.AppImage
           asset_name: Chatterino-x86_64.AppImage
           asset_content_type: application/x-executable
-
-      - name: Upload release asset (Ubuntu)
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux/Chatterino-x86_64.AppImage
-          asset_name: Chatterino-x86_64.AppImage
-          asset_content_type: application/x-executable
-
-      - name: Upload release asset (Ubuntu .deb)
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ubuntu/Chatterino.deb
-          asset_name: Chatterino-x86_64.deb
-          asset_content_type: application/vnd.debian.binary-package
 
       - name: Upload release asset (Ubuntu .deb)
         uses: actions/upload-release-asset@v1.0.2
@@ -327,12 +297,3 @@ jobs:
           asset_name: chatterino-osx.dmg
           asset_content_type: application/x-bzip2
 
-      - name: Upload release asset (MacOS)
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos/chatterino-osx.dmg
-          asset_name: chatterino-osx.dmg
-          asset_content_type: application/x-bzip2
