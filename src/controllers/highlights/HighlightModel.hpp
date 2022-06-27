@@ -33,7 +33,7 @@ public:
         FirstMessageRow = 4,
     };
 
-    enum UserHighlightRowIndexes { SelfMessageRow = 1 };
+    enum UserHighlightRowIndexes { SelfMessageRow = 0 };
 
 protected:
     // turn a vector item into a model row
