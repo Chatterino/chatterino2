@@ -43,7 +43,8 @@ private:
     QCompleter *completer_ = nullptr;
     bool completionInProgress_ = false;
 
-    bool eventFilter(QObject *widget, QEvent *event) override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
 private slots:
     void insertCompletion(const QString &completion);
 };

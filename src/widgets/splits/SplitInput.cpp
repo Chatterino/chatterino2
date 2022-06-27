@@ -133,7 +133,10 @@ void SplitInput::scaleChangedEvent(float scale)
     this->updateEmoteButton();
 
     // set maximum height
-    this->setMaximumHeight(int(150 * this->scale()));
+    if (!this->hidden)
+    {
+        this->setMaximumHeight(this->scaledMaxHeight());
+    }
     this->ui_.textEdit->setFont(
         getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale()));
     this->ui_.textEditLength->setFont(
@@ -212,6 +215,11 @@ void SplitInput::openEmotePopup()
     this->emotePopup_->show();
     this->emotePopup_->raise();
     this->emotePopup_->activateWindow();
+}
+
+int SplitInput::scaledMaxHeight() const
+{
+    return int(150 * this->scale());
 }
 
 void SplitInput::addShortcuts()
@@ -687,6 +695,35 @@ void SplitInput::insertText(const QString &text)
     this->ui_.textEdit->insertPlainText(text);
 }
 
+void SplitInput::hide()
+{
+    if (this->isHidden())
+    {
+        return;
+    }
+
+    this->hidden = true;
+    this->setMaximumHeight(0);
+    this->updateGeometry();
+}
+
+void SplitInput::show()
+{
+    if (!this->isHidden())
+    {
+        return;
+    }
+
+    this->hidden = false;
+    this->setMaximumHeight(this->scaledMaxHeight());
+    this->updateGeometry();
+}
+
+bool SplitInput::isHidden() const
+{
+    return this->hidden;
+}
+
 void SplitInput::editTextChanged()
 {
     auto app = getApp();
@@ -747,7 +784,7 @@ void SplitInput::editTextChanged()
     this->ui_.textEditLength->setText(labelText);
 }
 
-void SplitInput::paintEvent(QPaintEvent *)
+void SplitInput::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
@@ -788,11 +825,6 @@ void SplitInput::resizeEvent(QResizeEvent *)
     {
         this->ui_.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
-}
-
-void SplitInput::mousePressEvent(QMouseEvent *)
-{
-    this->split_->giveFocus(Qt::MouseFocusReason);
 }
 
 }  // namespace chatterino

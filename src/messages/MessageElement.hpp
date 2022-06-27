@@ -321,12 +321,12 @@ class FfzBadgeElement : public BadgeElement
 {
 public:
     FfzBadgeElement(const EmotePtr &data, MessageElementFlags flags_,
-                    QColor &color);
+                    QColor color_);
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
                                                  const QSize &size) override;
-    QColor color;
+    const QColor color;
 };
 
 // contains a text, formated depending on the preferences

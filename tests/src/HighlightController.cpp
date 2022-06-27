@@ -265,6 +265,16 @@ static QString DEFAULT_SETTINGS = R"!(
                 "color": "#7fffffff"
             },
             {
+                "pattern": "testaccount_420",
+                "showInMentions": false,
+                "alert": false,
+                "sound": false,
+                "regex": false,
+                "case": false,
+                "soundUrl": "",
+                "color": "#6fffffff"
+            },
+            {
                 "pattern": "gempir",
                 "showInMentions": true,
                 "alert": true,
@@ -516,6 +526,27 @@ TEST_F(HighlightControllerTest, A)
                 },
             },
         },
+        {
+            // TEST CASE: Message phrase from sender should be ignored (so showInMentions false), but since it's a user highlight, it should set a color
+            {
+                // input
+                MessageParseArgs{},  // no special args
+                {},                  // no badges
+                "testaccount_420",   // sender name
+                "!testmanxd",        // original message
+            },
+            {
+                // expected
+                true,  // state
+                {
+                    false,                                  // alert
+                    false,                                  // playsound
+                    boost::none,                            // custom sound url
+                    std::make_shared<QColor>("#6fffffff"),  // color
+                    false,
+                },
+            },
+        },
     };
 
     for (const auto &[input, expected] : tests)
@@ -523,7 +554,9 @@ TEST_F(HighlightControllerTest, A)
         auto [isMatch, matchResult] = this->controller->check(
             input.args, input.badges, input.senderName, input.originalMessage);
 
-        EXPECT_EQ(isMatch, expected.state);
+        EXPECT_EQ(isMatch, expected.state)
+            << qUtf8Printable(input.senderName) << ": "
+            << qUtf8Printable(input.originalMessage);
         EXPECT_EQ(matchResult, expected.result);
     }
 }

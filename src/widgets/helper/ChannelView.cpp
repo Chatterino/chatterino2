@@ -164,6 +164,11 @@ ChannelView::ChannelView(BaseWidget *parent)
     QObject::connect(&this->scrollTimer_, &QTimer::timeout, this,
                      &ChannelView::scrollUpdateRequested);
 
+    // TODO: Figure out if we need this, and if so, why
+    // StrongFocus means we can focus this event through clicking it
+    // and tabbing to it from another widget. I don't currently know
+    // of any place where you can, or where it would make sense,
+    // to tab to a ChannelVieChannelView
     this->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
 }
 
