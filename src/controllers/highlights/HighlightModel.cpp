@@ -76,27 +76,6 @@ void HighlightModel::afterInit()
 
     this->insertCustomRow(usernameRow, HighlightRowIndexes::SelfHighlightRow);
 
-    // Highlight settings for own messages
-    std::vector<QStandardItem *> messagesRow = this->createRow();
-    setBoolItem(messagesRow[Column::Pattern],
-                getSettings()->enableSelfMessagesHighlight.getValue(), true,
-                false);
-    messagesRow[Column::Pattern]->setData("Your messages (automatic)",
-                                          Qt::DisplayRole);
-    setBoolItem(messagesRow[Column::ShowInMentions],
-                getSettings()->showSelfMessagesHighlightInMentions.getValue(),
-                true, false);
-    messagesRow[Column::FlashTaskbar]->setFlags({});
-    messagesRow[Column::PlaySound]->setFlags({});
-    messagesRow[Column::UseRegex]->setFlags({});
-    messagesRow[Column::CaseSensitive]->setFlags({});
-
-    auto selfMessagesColor =
-        ColorProvider::instance().color(ColorType::SelfMessage);
-    setColorItem(messagesRow[Column::Color], *selfMessagesColor, false);
-
-    this->insertCustomRow(messagesRow, HighlightRowIndexes::SelfMessageRow);
-
     // Highlight settings for whispers
     std::vector<QStandardItem *> whisperRow = this->createRow();
     setBoolItem(whisperRow[Column::Pattern],
@@ -247,11 +226,6 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->showSelfHighlightInMentions.setValue(
                         value.toBool());
                 }
-                else if (rowIndex == HighlightRowIndexes::SelfMessageRow)
-                {
-                    getSettings()->showSelfMessagesHighlightInMentions.setValue(
-                        value.toBool());
-                }
             }
         }
         break;
@@ -370,11 +344,6 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 //                {
                 //                    getSettings()->whisperHighlightColor.setValue(colorName);
                 //                }
-                else if (rowIndex == HighlightRowIndexes::SelfMessageRow)
-                {
-                    getSettings()->selfMessagesHighlightColor.setValue(
-                        colorName);
-                }
                 else if (rowIndex == HighlightRowIndexes::SubRow)
                 {
                     getSettings()->subHighlightColor.setValue(colorName);

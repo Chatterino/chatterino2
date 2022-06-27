@@ -27,12 +27,13 @@ public:
 
     enum HighlightRowIndexes {
         SelfHighlightRow = 0,
-        SelfMessageRow = 1,
-        WhisperRow = 2,
-        SubRow = 3,
-        RedeemedRow = 4,
-        FirstMessageRow = 5,
+        WhisperRow = 1,
+        SubRow = 2,
+        RedeemedRow = 3,
+        FirstMessageRow = 4,
     };
+
+    enum UserHighlightRowIndexes { SelfMessageRow = 1 };
 
 protected:
     // turn a vector item into a model row

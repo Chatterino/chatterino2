@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
@@ -34,6 +35,80 @@ HighlightPhrase UserHighlightModel::getItemFromRow(
         row[Column::CaseSensitive]->data(Qt::CheckStateRole).toBool(),
         row[Column::SoundPath]->data(Qt::UserRole).toString(),
         highlightColor};
+}
+
+void UserHighlightModel::afterInit()
+{
+    // User highlight settings for your own messages
+    std::vector<QStandardItem *> messagesRow = this->createRow();
+    setBoolItem(messagesRow[Column::Pattern],
+                getSettings()->enableSelfMessagesHighlight.getValue(), true,
+                false);
+    messagesRow[Column::Pattern]->setData("Your messages (automatic)",
+                                          Qt::DisplayRole);
+    setBoolItem(messagesRow[Column::ShowInMentions],
+                getSettings()->showSelfMessagesHighlightInMentions.getValue(),
+                true, false);
+    messagesRow[Column::FlashTaskbar]->setFlags({});
+    messagesRow[Column::PlaySound]->setFlags({});
+    messagesRow[Column::UseRegex]->setFlags({});
+    messagesRow[Column::CaseSensitive]->setFlags({});
+    messagesRow[Column::SoundPath]->setFlags({});
+
+    auto selfColor = ColorProvider::instance().color(ColorType::SelfMessage);
+    setColorItem(messagesRow[Column::Color], *selfColor, false);
+
+    this->insertCustomRow(
+        messagesRow, HighlightModel::UserHighlightRowIndexes::SelfMessageRow);
+}
+
+void UserHighlightModel::customRowSetData(
+    const std::vector<QStandardItem *> &row, int column, const QVariant &value,
+    int role, int rowIndex)
+{
+    switch (column)
+    {
+        case Column::Pattern: {
+            if (role == Qt::CheckStateRole)
+            {
+                if (rowIndex ==
+                    HighlightModel::UserHighlightRowIndexes::SelfMessageRow)
+                {
+                    getSettings()->enableSelfMessagesHighlight.setValue(
+                        value.toBool());
+                }
+            }
+        }
+        break;
+        case Column::ShowInMentions: {
+            if (role == Qt::CheckStateRole)
+            {
+                if (rowIndex ==
+                    HighlightModel::UserHighlightRowIndexes::SelfMessageRow)
+                {
+                    getSettings()->showSelfMessagesHighlightInMentions.setValue(
+                        value.toBool());
+                }
+            }
+        }
+        break;
+        case Column::Color: {
+            // Custom color
+            if (role == Qt::DecorationRole)
+            {
+                auto colorName = value.value<QColor>().name(QColor::HexArgb);
+                if (rowIndex ==
+                    HighlightModel::UserHighlightRowIndexes::SelfMessageRow)
+                {
+                    getSettings()->selfMessagesHighlightColor.setValue(
+                        colorName);
+                }
+            }
+        }
+        break;
+    }
+
+    getApp()->windows->forceLayoutChannelViews();
 }
 
 // row into vector item
