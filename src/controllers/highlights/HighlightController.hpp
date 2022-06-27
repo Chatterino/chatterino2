@@ -142,7 +142,7 @@ struct HighlightResult {
 struct HighlightCheck {
     using Checker = std::function<boost::optional<HighlightResult>(
         const MessageParseArgs &args, const std::vector<Badge> &badges,
-        const QString &senderName, const QString &originalMessage)>;
+        const QString &senderName, const QString &originalMessage, bool self)>;
     Checker cb;
 };
 
