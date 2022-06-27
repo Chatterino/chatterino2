@@ -167,7 +167,16 @@ void rebuildUserHighlights(Settings &settings,
                 (void)args;             // unused
                 (void)badges;           // unused
                 (void)originalMessage;  // unused
-                (void)self;             // unused
+
+                if (self && getSettings()->enableSelfMessagesHighlight)
+                {
+                    auto customColor =
+                        getSettings()->selfMessagesHighlightColor;
+                    return HighlightResult{
+                        false, false, (QUrl) nullptr,
+                        std::make_shared<QColor>(customColor),
+                        getSettings()->showSelfMessagesHighlightInMentions};
+                }
 
                 if (!highlight.isMatch(senderName))
                 {

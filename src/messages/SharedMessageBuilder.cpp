@@ -147,28 +147,6 @@ void SharedMessageBuilder::parseHighlights()
         return;
     }
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
-    if (this->ircMessage->nick() == currentUser->getUserName())
-    {
-        bool selfMessagesHighlights =
-            getSettings()->enableSelfMessagesHighlight;
-
-        if (selfMessagesHighlights)
-        {
-            this->message().flags.set(MessageFlag::Highlighted);
-            this->message().highlightColor = std::make_shared<QColor>(
-                (getSettings()->selfMessagesHighlightColor));
-
-            if (getSettings()->showSelfMessagesHighlightInMentions)
-            {
-                this->message().flags.set(MessageFlag::ShowInMentions);
-            }
-        }
-
-        // Do nothing else. We ignore any other highlights from the logged in user
-        return;
-    }
-
     auto badges = SharedMessageBuilder::parseBadgeTag(this->tags);
     auto [highlighted, highlightResult] = getIApp()->getHighlights()->check(
         this->args, badges, this->ircMessage->nick(), this->originalMessage_);
