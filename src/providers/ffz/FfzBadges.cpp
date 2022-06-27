@@ -15,38 +15,42 @@ namespace chatterino {
 
 void FfzBadges::initialize(Settings &settings, Paths &paths)
 {
-    this->loadFfzBadges();
+    this->load();
 }
 
-boost::optional<EmotePtr> FfzBadges::getBadge(const UserId &id)
+std::vector<FfzBadges::Badge> FfzBadges::getUserBadges(const UserId &id)
 {
+    std::vector<Badge> badges;
+
     std::shared_lock lock(this->mutex_);
 
-    auto it = this->badgeMap.find(id.string);
-    if (it != this->badgeMap.end())
+    auto it = this->userBadges.find(id.string);
+    if (it != this->userBadges.end())
     {
-        return this->badges[it->second];
-    }
-    return boost::none;
-}
-boost::optional<QColor> FfzBadges::getBadgeColor(const UserId &id)
-{
-    std::shared_lock lock(this->mutex_);
-
-    auto badgeIt = this->badgeMap.find(id.string);
-    if (badgeIt != this->badgeMap.end())
-    {
-        auto colorIt = this->colorMap.find(badgeIt->second);
-        if (colorIt != this->colorMap.end())
+        for (const auto &badgeID : it->second)
         {
-            return colorIt->second;
+            if (auto badge = this->getBadge(badgeID); badge)
+            {
+                badges.emplace_back(*badge);
+            }
         }
-        return boost::none;
     }
+
+    return badges;
+}
+
+boost::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID)
+{
+    auto it = this->badges.find(badgeID);
+    if (it != this->badges.end())
+    {
+        return it->second;
+    }
+
     return boost::none;
 }
 
-void FfzBadges::loadFfzBadges()
+void FfzBadges::load()
 {
     static QUrl url("https://api.frankerfacez.com/v1/badges/ids");
 
@@ -55,7 +59,6 @@ void FfzBadges::loadFfzBadges()
             std::unique_lock lock(this->mutex_);
 
             auto jsonRoot = result.parseJson();
-            int index = 0;
             for (const auto &jsonBadge_ : jsonRoot.value("badges").toArray())
             {
                 auto jsonBadge = jsonBadge_.toObject();
@@ -70,20 +73,33 @@ void FfzBadges::loadFfzBadges()
                             jsonUrls.value("4").toString()}},
                     Tooltip{jsonBadge.value("title").toString()}, Url{}};
 
-                this->badges.push_back(
-                    std::make_shared<const Emote>(std::move(emote)));
-                this->colorMap[index] =
-                    QColor(jsonBadge.value("color").toString());
+                Badge badge;
 
-                auto badgeId = QString::number(jsonBadge.value("id").toInt());
+                int badgeID = jsonBadge.value("id").toInt();
+
+                this->badges[badgeID] = Badge{
+                    std::make_shared<const Emote>(std::move(emote)),
+                    QColor(jsonBadge.value("color").toString()),
+                };
+
+                // Find users with this badge
+                auto badgeIDString = QString::number(badgeID);
                 for (const auto &user : jsonRoot.value("users")
                                             .toObject()
-                                            .value(badgeId)
+                                            .value(badgeIDString)
                                             .toArray())
                 {
-                    this->badgeMap[QString::number(user.toInt())] = index;
+                    auto userIDString = QString::number(user.toInt());
+
+                    auto [userBadges, created] = this->userBadges.emplace(
+                        std::make_pair<QString, std::vector<int>>(
+                            std::move(userIDString), {badgeID}));
+                    if (!created)
+                    {
+                        // User already had a badge assigned
+                        userBadges->second.push_back(badgeID);
+                    }
                 }
-                ++index;
             }
 
             return Success;
