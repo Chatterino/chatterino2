@@ -1134,13 +1134,11 @@ void TwitchMessageBuilder::appendSeventvBadges()
 
 void TwitchMessageBuilder::appendFfzBadges()
 {
-    if (auto badge = getApp()->ffzBadges->getBadge({this->userId_}))
+    for (const auto &badge :
+         getApp()->ffzBadges->getUserBadges({this->userId_}))
     {
-        if (auto color = getApp()->ffzBadges->getBadgeColor({this->userId_}))
-        {
-            this->emplace<FfzBadgeElement>(*badge, MessageElementFlag::BadgeFfz,
-                                           color.get());
-        }
+        this->emplace<FfzBadgeElement>(
+            badge.emote, MessageElementFlag::BadgeFfz, badge.color);
     }
 }
 

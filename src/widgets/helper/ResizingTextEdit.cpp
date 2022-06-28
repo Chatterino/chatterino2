@@ -96,8 +96,10 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
     return lastWord;
 }
 
-bool ResizingTextEdit::eventFilter(QObject *, QEvent *event)
+bool ResizingTextEdit::eventFilter(QObject *obj, QEvent *event)
 {
+    (void)obj;  // unused
+
     // makes QShortcuts work in the ResizingTextEdit
     if (event->type() != QEvent::ShortcutOverride)
     {
