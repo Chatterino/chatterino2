@@ -55,7 +55,8 @@ void UserHighlightModel::afterInit()
     messagesRow[Column::CaseSensitive]->setFlags({});
     messagesRow[Column::SoundPath]->setFlags({});
 
-    auto selfColor = ColorProvider::instance().color(ColorType::SelfMessage);
+    auto selfColor =
+        ColorProvider::instance().color(ColorType::SelfMessageHighlight);
     setColorItem(messagesRow[Column::Color], *selfColor, false);
 
     this->insertCustomRow(

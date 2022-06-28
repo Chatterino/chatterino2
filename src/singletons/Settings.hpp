@@ -256,12 +256,6 @@ public:
     BoolSetting showSelfMessagesHighlightInMentions = {
         "/highlighting/selfMessagesHighlight/showSelfMessagesInMentions",
         false};
-    //    BoolSetting enableSelfMessagesHighlightSound = {
-    //        "/highlighting/selfMessagesHighlight/enableSound", true};
-    //    BoolSetting enableSelfMessagesHighlightTaskbar = {
-    //        "/highlighting/selfMessagesHighlight/enableTaskbarFlashing", true};
-    //    QStringSetting selfMessagesHighlightSoundUrl = {
-    //        "/highlighting/selfMessagesHighlight", ""};
     QStringSetting selfMessagesHighlightColor = {
         "/highlighting/selfMessagesHighlightColor", ""};
 

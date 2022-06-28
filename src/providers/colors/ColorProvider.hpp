@@ -13,7 +13,8 @@ enum class ColorType {
     Whisper,
     RedeemedHighlight,
     FirstMessageHighlight,
-    SelfMessage,
+    // Used in automatic self messages highlighing
+    SelfMessageHighlight,
 };
 
 class ColorProvider
