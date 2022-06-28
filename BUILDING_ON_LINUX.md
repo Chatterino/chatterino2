@@ -6,7 +6,7 @@ Note on Qt version compatibility: If you are installing Qt from a package manage
 
 _Most likely works the same for other Debian-like distros_
 
-1. Install all of the dependencies using `sudo apt install qttools5-dev qtmultimedia5-dev qt5-image-formats-plugin libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev libboost-filesystem-dev cmake g++`
+1. Install all of the dependencies using `sudo apt install qttools5-dev qtmultimedia5-dev qt5-image-formats-plugins libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev libboost-filesystem-dev cmake g++`
 
 ### Compiling through Qt Creator
 
