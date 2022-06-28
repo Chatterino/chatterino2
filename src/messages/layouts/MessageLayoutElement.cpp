@@ -1,15 +1,22 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 
 #include "Application.hpp"
+#include "BaseSettings.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/seventv/SeventvPaints.hpp"
+#include "providers/seventv/paints/PaintDropShadow.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 
 #include <QDebug>
+#include <QGraphicsDropShadowEffect>
+#include <QGraphicsPixmapItem>
+#include <QLabel>
 #include <QPainter>
+#include <QPixmap>
 
 namespace chatterino {
 
@@ -246,19 +253,70 @@ int TextLayoutElement::getSelectionIndexCount() const
 
 void TextLayoutElement::paint(QPainter &painter)
 {
-    auto app = getApp();
+    if (this->getRect().isEmpty())
+        return;
 
-    painter.setPen(this->color_);
+    const auto font = getApp()->getFonts()->getFont(this->style_, this->scale_);
 
-    painter.setFont(app->fonts->getFont(this->style_, this->scale_));
+    const bool isNametag =
+        this->getLink().type == chatterino::Link::UserInfo ||
+        this->getLink().type == chatterino::Link::UserWhisper;
+    const bool drawPaint = isNametag && getSettings()->displaySevenTVPaints;
+    const auto seventvPaint =
+        getApp()->seventvPaints->getPaint(this->getLink().value.toLower());
+    if (drawPaint && seventvPaint.has_value())
+    {
+        if (seventvPaint.value()->animated())
+            return;
 
-    painter.drawText(
-        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
-        this->getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
+        const auto paint = seventvPaint.value();
+
+        const auto paintPixmap =
+            paint->getPixmap(this->getText(), font, this->color_,
+                             this->getRect().size(), this->scale_);
+
+        painter.drawPixmap(QRect(this->getRect().x(), this->getRect().y(),
+                                 paintPixmap.width(), paintPixmap.height()),
+                           paintPixmap);
+    }
+    else
+    {
+        painter.setPen(this->color_);
+        painter.setFont(font);
+
+        painter.drawText(
+            QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
+            this->getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
+    }
 }
 
-void TextLayoutElement::paintAnimated(QPainter &, int)
+void TextLayoutElement::paintAnimated(QPainter &painter, const int yOffset)
 {
+    if (this->getRect().isEmpty())
+        return;
+
+    const auto font = getApp()->getFonts()->getFont(this->style_, this->scale_);
+
+    const bool isNametag =
+        this->getLink().type == chatterino::Link::UserInfo ||
+        this->getLink().type == chatterino::Link::UserWhisper;
+    const bool drawPaint = isNametag && getSettings()->displaySevenTVPaints;
+    const auto seventvPaint =
+        getApp()->seventvPaints->getPaint(this->getLink().value.toLower());
+
+    if (drawPaint && seventvPaint.has_value() &&
+        seventvPaint.value()->animated())
+    {
+        const auto paint = seventvPaint.value();
+
+        const auto paintPixmap =
+            paint->getPixmap(this->getText(), font, this->color_,
+                             this->getRect().size(), this->scale_);
+
+        auto rect = this->getRect();
+        rect.moveTop(rect.y() + yOffset);
+        painter.drawPixmap(rect, paintPixmap, QRectF());
+    }
 }
 
 int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const

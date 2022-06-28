@@ -652,6 +652,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Automatically close user popup when it loses focus",
                        s.autoCloseUserPopup);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
+    layout.addCheckbox("Display 7TV Paints", s.displaySevenTVPaints);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
     layout.addCheckbox("Color @usernames", s.colorUsernames);
     layout.addCheckbox("Try to find usernames without @ prefix",

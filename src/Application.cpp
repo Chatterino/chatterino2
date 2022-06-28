@@ -20,6 +20,7 @@
 #include "providers/irc/Irc2.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/seventv/SeventvPaints.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -74,6 +75,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , twitch(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
+    , seventvPaints(&this->emplace<SeventvPaints>())
     , ffzBadges(&this->emplace<FfzBadges>())
     , logging(&this->emplace<Logging>())
 {
