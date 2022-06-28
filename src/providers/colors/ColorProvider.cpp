@@ -82,8 +82,8 @@ void ColorProvider::initTypeColorMap()
     customColor = getSettings()->selfMessagesHighlightColor;
     if (QColor(customColor).isValid())
     {
-        this->typeColorMap_.insert(
-            {ColorType::SelfMessageHighlight, std::make_shared<QColor>(customColor)});
+        this->typeColorMap_.insert({ColorType::SelfMessageHighlight,
+                                    std::make_shared<QColor>(customColor)});
     }
     else
     {
