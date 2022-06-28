@@ -158,6 +158,31 @@ void rebuildUserHighlights(Settings &settings,
 {
     auto userHighlights = settings.highlightedUsers.readOnly();
 
+    if (settings.enableSelfMessagesHighlight)
+    {
+        bool showInMentions = settings.showSelfMessagesHighlightInMentions;
+        auto customColor = settings.selfMessagesHighlightColor;
+
+        checks.emplace_back(HighlightCheck{
+            [=](const auto &args, const auto &badges, const auto &senderName,
+                const auto &originalMessage,
+                const auto self) -> boost::optional<HighlightResult> {
+                (void)args;             //unused
+                (void)badges;           //unused
+                (void)senderName;       //unused
+                (void)originalMessage;  //unused
+
+                if (!self)
+                {
+                    return boost::none;
+                }
+
+                return HighlightResult{false, false, (QUrl) nullptr,
+                                       std::make_shared<QColor>(customColor),
+                                       showInMentions};
+            }});
+    }
+
     for (const auto &highlight : *userHighlights)
     {
         checks.emplace_back(HighlightCheck{
@@ -167,16 +192,7 @@ void rebuildUserHighlights(Settings &settings,
                 (void)args;             // unused
                 (void)badges;           // unused
                 (void)originalMessage;  // unused
-
-                if (self && getSettings()->enableSelfMessagesHighlight)
-                {
-                    auto customColor =
-                        getSettings()->selfMessagesHighlightColor;
-                    return HighlightResult{
-                        false, false, (QUrl) nullptr,
-                        std::make_shared<QColor>(customColor),
-                        getSettings()->showSelfMessagesHighlightInMentions};
-                }
+                (void)self;             // unused
 
                 if (!highlight.isMatch(senderName))
                 {
@@ -254,6 +270,10 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
     this->rebuildListener_.addSetting(settings.enableSubHighlight);
     this->rebuildListener_.addSetting(settings.enableSubHighlightSound);
     this->rebuildListener_.addSetting(settings.enableSubHighlightTaskbar);
+    this->rebuildListener_.addSetting(settings.enableSelfMessagesHighlight);
+    this->rebuildListener_.addSetting(
+        settings.showSelfMessagesHighlightInMentions);
+    this->rebuildListener_.addSetting(settings.selfMessagesHighlightColor);
 
     this->rebuildListener_.setCB([this, &settings] {
         qCDebug(chatterinoHighlights)
