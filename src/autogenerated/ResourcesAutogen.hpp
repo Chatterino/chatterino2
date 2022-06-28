@@ -15,6 +15,7 @@ public:
         QPixmap fourtf;
         QPixmap hicupalot;
         QPixmap iprodigy;
+        QPixmap jaxkey;
         QPixmap kararty;
         QPixmap karlpolice;
         QPixmap mm2pl;
