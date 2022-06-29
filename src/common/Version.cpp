@@ -32,7 +32,7 @@ Version::Version()
     {
         this->fullVersion_ += "Nightly ";
     }
-    this->fullVersion_ += " + Dankerino patches ";
+    this->fullVersion_ += "+ Dankerino patches ";
 
     this->fullVersion_ += this->version_;
 
