@@ -18,7 +18,8 @@ void SeventvPaints::initialize(Settings &settings, Paths &paths)
     this->loadSeventvCosmetics();
 }
 
-std::optional<Paint *> SeventvPaints::getPaint(const QString &userName) const
+std::optional<std::shared_ptr<Paint>> SeventvPaints::getPaint(
+    const QString &userName) const
 {
     const auto it = this->paints_.find(userName);
     if (it != this->paints_.end())
@@ -54,7 +55,7 @@ void SeventvPaints::loadSeventvPaints(const QJsonArray paints)
 {
     for (const auto &jsonPaint : paints)
     {
-        Paint *paint;
+        std::shared_ptr<Paint> paint;
         const auto paintObject = jsonPaint.toObject();
 
         const QString name = paintObject.value("name").toString();
@@ -74,14 +75,15 @@ void SeventvPaints::loadSeventvPaints(const QJsonArray paints)
         const QString function = paintObject.value("function").toString();
         if (function == "linear-gradient")
         {
-            paint = new LinearGradientPaint(name, color, stops, repeat, angle,
-                                            shadows);
+            paint = std::make_shared<LinearGradientPaint>(
+                name, color, stops, repeat, angle, shadows);
         }
         else if (function == "radial-gradient")
         {
             const QString shape = paintObject.value("shape").toString();
 
-            paint = new RadialGradientPaint(name, stops, repeat, shadows);
+            paint = std::make_shared<RadialGradientPaint>(name, stops, repeat,
+                                                          shadows);
         }
         else if (function == "url")
         {
@@ -92,7 +94,7 @@ void SeventvPaints::loadSeventvPaints(const QJsonArray paints)
                 continue;
             }
 
-            paint = new UrlPaint(name, image, shadows);
+            paint = std::make_shared<UrlPaint>(name, image, shadows);
         }
         else
         {

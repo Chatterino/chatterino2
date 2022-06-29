@@ -16,7 +16,8 @@ class SeventvPaints : public Singleton
 public:
     virtual void initialize(Settings &settings, Paths &paths) override;
 
-    std::optional<Paint *> getPaint(const QString &userName) const;
+    std::optional<std::shared_ptr<Paint>> getPaint(
+        const QString &userName) const;
 
 private:
     void loadSeventvCosmetics();
@@ -30,7 +31,7 @@ private:
 
     QColor decimalColorToQColor(const uint32_t color) const;
 
-    std::map<QString, Paint *> paints_;
+    std::map<QString, std::shared_ptr<Paint>> paints_;
 };
 
 }  // namespace chatterino
