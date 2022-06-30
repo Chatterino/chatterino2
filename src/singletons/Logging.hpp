@@ -24,7 +24,11 @@ public:
                     const QString &platformName);
 
 private:
-    std::map<QString, std::unique_ptr<LoggingChannel>> loggingChannels_;
+    using PlatformName = QString;
+    using ChannelName = QString;
+    std::map<PlatformName,
+             std::map<ChannelName, std::unique_ptr<LoggingChannel>>>
+        loggingChannels_;
 };
 
 }  // namespace chatterino
