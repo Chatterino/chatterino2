@@ -784,7 +784,7 @@ void SplitNotebook::showEvent(QShowEvent *)
     {
         if (auto split = page->findChild<Split *>())
         {
-            split->giveFocus(Qt::OtherFocusReason);
+            split->setFocus(Qt::FocusReason::OtherFocusReason);
         }
     }
 }

@@ -92,7 +92,8 @@ Split::Split(QWidget *parent)
 {
     this->setMouseTracking(true);
     this->view_->setPausable(true);
-    this->view_->setFocusPolicy(Qt::FocusPolicy::NoFocus);
+    this->view_->setFocusProxy(this->input_->ui_.textEdit);
+    this->setFocusProxy(this->input_->ui_.textEdit);
 
     this->vbox_->setSpacing(0);
     this->vbox_->setMargin(1);
@@ -113,9 +114,6 @@ Split::Split(QWidget *parent)
     });
     this->updateInputPlaceholder();
 
-    this->view_->mouseDown.connect([this](QMouseEvent *) {
-        this->giveFocus(Qt::MouseFocusReason);
-    });
     this->view_->selectionChanged.connect([this]() {
         if (view_->hasSelection())
         {
@@ -151,28 +149,33 @@ Split::Split(QWidget *parent)
     this->input_->textChanged.connect([=](const QString &newText) {
         if (getSettings()->showEmptyInput)
         {
+            // We always show the input regardless of the text, so we can early out here
             return;
         }
 
-        if (newText.length() == 0)
+        if (newText.isEmpty())
         {
             this->input_->hide();
         }
         else if (this->input_->isHidden())
         {
+            // Text updated and the input was previously hidden, show it
             this->input_->show();
         }
     });
 
     getSettings()->showEmptyInput.connect(
         [this](const bool &showEmptyInput, auto) {
-            if (!showEmptyInput && this->input_->getInputText().length() == 0)
+            if (showEmptyInput)
             {
-                this->input_->hide();
+                this->input_->show();
             }
             else
             {
-                this->input_->show();
+                if (this->input_->getInputText().isEmpty())
+                {
+                    this->input_->hide();
+                }
             }
         },
         this->signalHolder_);
@@ -208,9 +211,11 @@ Split::Split(QWidget *parent)
         });
 
     this->input_->ui_.textEdit->focused.connect([this] {
+        // Forward textEdit's focused event
         this->focused.invoke();
     });
     this->input_->ui_.textEdit->focusLost.connect([this] {
+        // Forward textEdit's focusLost event
         this->focusLost.invoke();
     });
     this->input_->ui_.textEdit->imagePasted.connect(
@@ -331,6 +336,12 @@ void Split::addShortcuts()
         {"scrollToBottom",
          [this](std::vector<QString>) -> QString {
              this->getChannelView().getScrollBar().scrollToBottom(
+                 getSettings()->enableSmoothScrollingNewMessages.getValue());
+             return "";
+         }},
+        {"scrollToTop",
+         [this](std::vector<QString>) -> QString {
+             this->getChannelView().getScrollBar().scrollToTop(
                  getSettings()->enableSmoothScrollingNewMessages.getValue());
              return "";
          }},
@@ -635,7 +646,7 @@ IndirectChannel Split::getIndirectChannel()
     return this->channel_;
 }
 
-ChannelPtr Split::getChannel()
+ChannelPtr Split::getChannel() const
 {
     return this->channel_.get();
 }
@@ -752,16 +763,6 @@ void Split::updateLastReadMessage()
     this->view_->updateLastReadMessage();
 }
 
-void Split::giveFocus(Qt::FocusReason reason)
-{
-    this->input_->ui_.textEdit->setFocus(reason);
-}
-
-bool Split::hasFocus() const
-{
-    return this->input_->ui_.textEdit->hasFocus();
-}
-
 void Split::paintEvent(QPaintEvent *)
 {
     // color the background of the chat
@@ -821,11 +822,6 @@ void Split::leaveEvent(QEvent *event)
     TooltipWidget::instance()->hide();
 
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
-}
-
-void Split::focusInEvent(QFocusEvent *event)
-{
-    this->giveFocus(event->reason());
 }
 
 void Split::handleModifiers(Qt::KeyboardModifiers modifiers)
@@ -1278,3 +1274,31 @@ void Split::setInputReply(const std::shared_ptr<MessageThread> &reply)
 }
 
 }  // namespace chatterino
+
+QDebug operator<<(QDebug dbg, const chatterino::Split &split)
+{
+    auto channel = split.getChannel();
+    if (channel)
+    {
+        dbg.nospace() << "Split(" << (void *)&split
+                      << ", channel:" << channel->getName() << ")";
+    }
+    else
+    {
+        dbg.nospace() << "Split(" << (void *)&split << ", no channel)";
+    }
+
+    return dbg;
+}
+
+QDebug operator<<(QDebug dbg, const chatterino::Split *split)
+{
+    if (split != nullptr)
+    {
+        return operator<<(dbg, *split);
+    }
+
+    dbg.nospace() << "Split(nullptr)";
+
+    return dbg;
+}

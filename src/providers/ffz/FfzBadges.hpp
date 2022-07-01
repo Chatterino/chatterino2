@@ -4,6 +4,7 @@
 #include <common/Singleton.hpp>
 
 #include "common/Aliases.hpp"
+#include "common/UniqueAccess.hpp"
 #include "util/QStringHash.hpp"
 
 #include <map>
@@ -25,17 +26,25 @@ public:
     virtual void initialize(Settings &settings, Paths &paths) override;
     FfzBadges() = default;
 
-    boost::optional<EmotePtr> getBadge(const UserId &id);
-    boost::optional<QColor> getBadgeColor(const UserId &id);
+    struct Badge {
+        EmotePtr emote;
+        QColor color;
+    };
+
+    std::vector<Badge> getUserBadges(const UserId &id);
 
 private:
-    void loadFfzBadges();
+    boost::optional<Badge> getBadge(int badgeID);
+
+    void load();
 
     std::shared_mutex mutex_;
 
-    std::unordered_map<QString, int> badgeMap;
-    std::vector<EmotePtr> badges;
-    std::unordered_map<int, QColor> colorMap;
+    // userBadges points a user ID to the list of badges they have
+    std::unordered_map<QString, std::vector<int>> userBadges;
+
+    // badges points a badge ID to the information about the badge
+    std::unordered_map<int, Badge> badges;
 };
 
 }  // namespace chatterino

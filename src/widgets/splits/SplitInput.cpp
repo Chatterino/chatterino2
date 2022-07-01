@@ -47,9 +47,9 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget)
         new QCompleter(&this->split_->getChannel().get()->completionModel);
     this->ui_.textEdit->setCompleter(completer);
 
-    this->split_->channelChanged.connect([this] {
-        auto completer =
-            new QCompleter(&this->split_->getChannel()->completionModel);
+    this->signalHolder_.managedConnect(this->split_->channelChanged, [this] {
+        auto channel = this->split_->getChannel();
+        auto completer = new QCompleter(&channel->completionModel);
         this->ui_.textEdit->setCompleter(completer);
     });
 
@@ -173,7 +173,10 @@ void SplitInput::scaleChangedEvent(float scale)
     this->updateCancelReplyButton();
 
     // set maximum height
-    this->setMaximumHeight(int(150 * this->scale()));
+    if (!this->hidden)
+    {
+        this->setMaximumHeight(this->scaledMaxHeight());
+    }
     this->ui_.textEdit->setFont(
         app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
     this->ui_.textEditLength->setFont(
@@ -574,6 +577,11 @@ QString SplitInput::hotkeySelectWord()
     return "";
 }
 
+int SplitInput::scaledMaxHeight() const
+{
+    return int(150 * this->scale());
+}
+
 void SplitInput::addShortcuts()
 {
     HotkeyController::HotkeyMap actions{
@@ -851,6 +859,35 @@ void SplitInput::insertText(const QString &text)
     this->ui_.textEdit->insertPlainText(text);
 }
 
+void SplitInput::hide()
+{
+    if (this->isHidden())
+    {
+        return;
+    }
+
+    this->hidden = true;
+    this->setMaximumHeight(0);
+    this->updateGeometry();
+}
+
+void SplitInput::show()
+{
+    if (!this->isHidden())
+    {
+        return;
+    }
+
+    this->hidden = false;
+    this->setMaximumHeight(this->scaledMaxHeight());
+    this->updateGeometry();
+}
+
+bool SplitInput::isHidden() const
+{
+    return this->hidden;
+}
+
 void SplitInput::editTextChanged()
 {
     auto app = getApp();
@@ -914,7 +951,7 @@ void SplitInput::editTextChanged()
     this->ui_.replyHbox->setMargin(hasReply ? 2 * this->scale() : 0);
 }
 
-void SplitInput::paintEvent(QPaintEvent *)
+void SplitInput::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
@@ -966,11 +1003,6 @@ void SplitInput::resizeEvent(QResizeEvent *)
     {
         this->ui_.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
-}
-
-void SplitInput::mousePressEvent(QMouseEvent *)
-{
-    this->split_->giveFocus(Qt::MouseFocusReason);
 }
 
 void SplitInput::giveFocus(Qt::FocusReason reason)

@@ -147,15 +147,8 @@ void SharedMessageBuilder::parseHighlights()
         return;
     }
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
-    if (this->ircMessage->nick() == currentUser->getUserName())
-    {
-        // Do nothing. We ignore any potential highlights from the logged in user
-        return;
-    }
-
     auto badges = SharedMessageBuilder::parseBadgeTag(this->tags);
-    auto [highlighted, highlightResult] = getApp()->highlights->check(
+    auto [highlighted, highlightResult] = getIApp()->getHighlights()->check(
         this->args, badges, this->ircMessage->nick(), this->originalMessage_);
 
     if (!highlighted)
