@@ -63,26 +63,31 @@ namespace {
             visibilityFlags.has(SeventvEmoteVisibilityFlag::ZeroWidth);
 
         auto heightArr = jsonEmote.toObject().value("height").toArray();
-        auto size2x = heightArr.at(1).toDouble();
-        auto size3x = heightArr.at(2).toDouble();
-        auto size4x = heightArr.at(3).toDouble();
-        if (heightArr.size() != 4 || size2x <= 48)
+
+        auto size1x = heightArr.at(0).toDouble();
+        auto size2x = size1x * 2;
+        auto size3x = size1x * 3;
+        auto size4x = size1x * 4;
+
+        if (heightArr.size() >= 2)
         {
-            size2x = 0.66;
-            size3x = 0.42;
+            size2x = heightArr.at(1).toDouble();
         }
-        else
+        if (heightArr.size() >= 3)
         {
-            size2x = 0.5;
-            size3x = 0.33;
+            size3x = heightArr.at(2).toDouble();
+        }
+        if (heightArr.size() >= 4)
+        {
+            size4x = heightArr.at(3).toDouble();
         }
 
         auto emote = Emote(
             {name,
-             ImageSet{Image::fromUrl(getEmoteLink(id, "1x"), 1),
-                      Image::fromUrl(getEmoteLink(id, "2x"), size2x),
-                      Image::fromUrl(getEmoteLink(id, "3x"), size3x),
-                      Image::fromUrl(getEmoteLink(id, "4x"), 0.25)},
+             ImageSet{Image::fromUrl(getEmoteLink(id, "1x"), size1x / size1x),
+                      Image::fromUrl(getEmoteLink(id, "2x"), size1x / size2x),
+                      Image::fromUrl(getEmoteLink(id, "3x"), size1x / size3x),
+                      Image::fromUrl(getEmoteLink(id, "4x"), size1x / size4x)},
              Tooltip{QString("%1<br>%2 7TV Emote<br>By: %3")
                          .arg(name.string, (isGlobal ? "Global" : "Channel"),
                               author.string)},
