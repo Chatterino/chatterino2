@@ -59,8 +59,13 @@ QBrush LinearGradientPaint::asBrush(const QColor userColor,
 
     QPointF gradientStart;
     QPointF gradientEnd;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     gradientAxis.intersects(colorStartAxis, &gradientStart);
     gradientAxis.intersects(colorStopAxis, &gradientEnd);
+#else
+    gradientAxis.intersect(colorStartAxis, &gradientStart);
+    gradientAxis.intersect(colorStopAxis, &gradientEnd);
+#endif
 
     if (this->repeat_)
     {
