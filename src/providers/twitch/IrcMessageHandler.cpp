@@ -391,21 +391,16 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         else
         {
             // Thread does not yet exist, find root reply and create thread.
-            // Linear search is justified by the infrequent use of replies
-            auto snapshot = channel->getMessageSnapshot();
-            for (size_t i = 0; i < snapshot.size(); ++i)
+            auto root = channel->findMessage(replyID);
+            if (root)
             {
-                if (snapshot[i]->id == replyID)
-                {
-                    // Found root reply message
-                    std::shared_ptr<MessageThread> newThread =
-                        std::make_shared<MessageThread>(snapshot[i]);
+                // Found root reply message
+                std::shared_ptr<MessageThread> newThread =
+                    std::make_shared<MessageThread>(root);
 
-                    // Store weak reference to thread
-                    builder.setThread(newThread);
-                    channel->addReplyThread(newThread);
-                    break;
-                }
+                // Store weak reference to thread
+                builder.setThread(newThread);
+                channel->addReplyThread(newThread);
             }
         }
     }
