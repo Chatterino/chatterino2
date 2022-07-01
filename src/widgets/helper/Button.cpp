@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QPainter>
-#include <QPalette>
 
 #include "BaseTheme.hpp"
 #include "util/FunctionEventFilter.hpp"
@@ -35,7 +34,6 @@ Button::Button(BaseWidget *parent)
     this->effectTimer_.start();
 
     this->setMouseTracking(true);
-    this->setBackgroundRole(QPalette::Window);
 }
 
 void Button::setMouseEffectColor(boost::optional<QColor> color)

@@ -248,6 +248,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
         // avatar
         auto avatar =
             head.emplace<Button>(nullptr).assign(&this->ui_.avatarButton);
+
+        this->avatarDestroyed = false;
+        QObject::connect(avatar.getElement(), &QObject::destroyed, [=] {
+            this->avatarDestroyed = true;
+        });
+
         avatar->setScaleIndependantSize(100, 100);
         avatar->setDim(Button::Dim::None);
         QObject::connect(
@@ -794,7 +800,7 @@ void UserInfoPopup::updateUserData()
         }
 
         this->userId_ = user.id;
-        this->avatarUrl_ = QString();
+        this->avatarUrl_ = user.profileImageUrl;
 
         // copyable button for login name of users with a localized username
         if (user.displayName.toLower() != user.login)
@@ -924,21 +930,20 @@ void UserInfoPopup::updateUserData()
 
 void UserInfoPopup::loadAvatar(const HelixUser &user)
 {
-    this->avatarUrl_ = user.profileImageUrl;
-    auto filename = this->getFilename(user.profileImageUrl);
-    auto loaded = false;
-    auto sevenTVEnabled = getSettings()->displaySevenTVAnimatedProfile;
-
+    auto filename =
+        getPaths()->cacheDirectory() + "/" +
+        user.profileImageUrl.right(user.profileImageUrl.lastIndexOf('/'))
+            .replace('/', 'a');
     QFile cacheFile(filename);
     if (cacheFile.exists())
     {
         cacheFile.open(QIODevice::ReadOnly);
         QPixmap avatar{};
+
         avatar.loadFromData(cacheFile.readAll());
         this->ui_.avatarButton->setPixmap(avatar);
-        loaded = true;
     }
-    if (!loaded)
+    else
     {
         QNetworkRequest req(user.profileImageUrl);
         static auto manager = new QNetworkAccessManager();
@@ -947,18 +952,12 @@ void UserInfoPopup::loadAvatar(const HelixUser &user)
         QObject::connect(reply, &QNetworkReply::finished, this, [=] {
             if (reply->error() == QNetworkReply::NoError)
             {
-                auto data = reply->readAll();
-                auto twitchFilename = this->getFilename(user.profileImageUrl);
+                const auto data = reply->readAll();
 
                 QPixmap avatar;
                 avatar.loadFromData(data);
                 this->ui_.avatarButton->setPixmap(avatar);
-                this->saveCacheAvatar(data, twitchFilename);
-
-                if (sevenTVEnabled)
-                {
-                    this->fetchSevenTVAvatar(user);
-                }
+                this->saveCacheAvatar(data, filename);
             }
             else
             {
@@ -966,51 +965,69 @@ void UserInfoPopup::loadAvatar(const HelixUser &user)
             }
         });
     }
-    else if (sevenTVEnabled)
+
+    this->avatarUrl_ = user.profileImageUrl;
+
+    if (getSettings()->displaySevenTVAnimatedProfile)
     {
-        this->fetchSevenTVAvatar(user);
+        this->loadSevenTVAvatar(user);
     }
 }
 
-void UserInfoPopup::fetchSevenTVAvatar(const HelixUser &user)
+void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
 {
     NetworkRequest(SEVENTV_USER_API.arg(user.login))
         .timeout(20000)
         .header("Content-Type", "application/json")
-        .onSuccess([=](NetworkResult result) -> Outcome {
+        .onSuccess([this, hack = std::weak_ptr<bool>(this->hack_)](
+                       NetworkResult result) -> Outcome {
+            if (!hack.lock())
+            {
+                return Success;
+            }
+
             auto root = result.parseJson();
             auto id = root.value(QStringLiteral("id")).toString();
             auto profile_picture_id =
                 root.value(QStringLiteral("profile_picture_id")).toString();
 
-            if (profile_picture_id.length() > 0)
+            if (profile_picture_id.length() == 0)
             {
-                auto URI = SEVENTV_CDR_PP.arg(id, profile_picture_id);
-
-                NetworkRequest(URI)
-                    .timeout(20000)
-                    .onSuccess([=](NetworkResult outcome) -> Outcome {
-                        auto data = outcome.getData();
-                        QCryptographicHash hash(
-                            QCryptographicHash::Algorithm::Sha1);
-                        auto SHA = QString(data.size()).toUtf8();
-                        hash.addData(SHA.data(), SHA.size() + 1);
-
-                        auto filename =
-                            this->getFilename(hash.result().toHex());
-
-                        this->saveCacheAvatar(data, filename);
-
-                        if (this->ui_.avatarButton != nullptr)
-                        {
-                            this->avatarUrl_ = URI;
-                            this->setSevenTVAvatar(filename);
-                        }
-
-                        return Success;
-                    })
-                    .execute();
+                return Success;
             }
+
+            auto URI = SEVENTV_CDR_PP.arg(id, profile_picture_id);
+            auto filename = getPaths()->cacheDirectory() + "/" + "7tv-pp-" +
+                            id + "-" + profile_picture_id;
+
+            QFile cacheFile(filename);
+            if (cacheFile.exists())
+            {
+                this->avatarUrl_ = URI;
+                this->setSevenTVAvatar(filename);
+            }
+            else
+            {
+                QNetworkRequest req(URI);
+                static auto manager = new QNetworkAccessManager();
+                auto *reply = manager->get(req);
+
+                QObject::connect(reply, &QNetworkReply::finished, this, [=] {
+                    if (reply->error() == QNetworkReply::NoError)
+                    {
+                        this->avatarUrl_ = URI;
+                        this->saveCacheAvatar(reply->readAll(), filename);
+                        this->setSevenTVAvatar(filename);
+                    }
+                    else
+                    {
+                        qCWarning(chatterinoSeventv)
+                            << "Error fetching Profile Picture, "
+                            << reply->error();
+                    }
+                });
+            }
+
             return Success;
         })
         .execute();
@@ -1018,20 +1035,35 @@ void UserInfoPopup::fetchSevenTVAvatar(const HelixUser &user)
 
 void UserInfoPopup::setSevenTVAvatar(const QString &filename)
 {
-    auto movie = new QMovie(filename);
+    auto hack = std::weak_ptr<bool>(this->hack_);
+
+    if (this->avatarDestroyed || !hack.lock())
+        return;
+
+    auto movie = new QMovie(filename, {});
     if (!movie->isValid())
     {
-        qCWarning(chatterinoImage) << "Error reading SevenTV Profile Picture, "
-                                   << movie->lastErrorString();
-        this->ui_.avatarButton->setPixmap(QPixmap());
+        qCWarning(chatterinoSeventv)
+            << "Error reading Profile Picture, " << movie->lastErrorString();
+        return;
     }
-    else
-    {
-        QObject::connect(movie, &QMovie::frameChanged, this, [=] {
-            this->ui_.avatarButton->setPixmap(movie->currentPixmap());
-        });
-        movie->start();
-    }
+
+    QObject::connect(movie, &QMovie::frameChanged, [this, movie, hack] {
+        auto destroyed = this->avatarDestroyed || !hack.lock();
+
+        if (destroyed)
+        {
+            movie->disconnect();
+            movie->stop();
+            delete movie;
+
+            return;
+        };
+
+        this->ui_.avatarButton->setPixmap(movie->currentPixmap());
+    });
+
+    movie->start();
 }
 
 void UserInfoPopup::saveCacheAvatar(const QByteArray &avatar,
@@ -1051,13 +1083,6 @@ void UserInfoPopup::saveCacheAvatar(const QByteArray &avatar,
         qCWarning(chatterinoImage) << "Error writing to cache" << filename;
         this->ui_.avatarButton->setPixmap(QPixmap());
     }
-}
-
-QString UserInfoPopup::getFilename(const QString &url)
-{
-    auto filename = getPaths()->cacheDirectory() + "/" +
-                    url.right(url.lastIndexOf('/')).replace('/', 'a');
-    return filename;
 }
 
 //
