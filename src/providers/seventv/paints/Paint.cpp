@@ -59,10 +59,12 @@ QPixmap Paint::getPixmap(const QString text, const QFont font,
 
         auto dropShadow = scaledShadow.getGraphicsEffect();
         label.setGraphicsEffect(dropShadow);
-        delete dropShadow;
 
         pixmap = label.grab();
         pixmap.setDevicePixelRatio(1);
+
+        label.deleteLater();
+        delete dropShadow;
     }
 
     if (drawColon)
