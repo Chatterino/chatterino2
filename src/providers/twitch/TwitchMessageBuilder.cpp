@@ -243,7 +243,7 @@ MessagePtr TwitchMessageBuilder::build()
             replyBody != this->tags.end())
         {
             auto name = replyDisplayName->toString();
-            auto body = replyBody->toString();
+            auto body = parseTagString(replyBody->toString());
 
             this->emplace<ReplyCurveElement>();
 
