@@ -294,14 +294,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                         menu->addAction(
                             "Open channel in a new popup window", this,
                             [loginName] {
-                                auto app = getApp();
-                                auto &window = app->windows->createWindow(
-                                    WindowType::Popup, true);
-                                auto split = window.getNotebook()
-                                                 .getOrAddSelectedPage()
-                                                 ->appendNewSplit(false);
-                                split->setChannel(app->twitch->getOrAddChannel(
-                                    loginName.toLower()));
+                                getApp()->windows->createChannelWindow(
+                                    loginName);
                             });
 
                         menu->addAction(

@@ -295,6 +295,32 @@ Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
     return *window;
 }
 
+Window &WindowManager::createChannelWindow(ChannelPtr channel)
+{
+    Window &window = this->createWindow(WindowType::Popup, true);
+    auto split =
+        window.getNotebook().getOrAddSelectedPage()->appendNewSplit(false);
+    split->setChannel(channel);
+    window.getNotebook().getOrAddSelectedPage()->refreshTab();
+    return window;
+}
+
+Window &WindowManager::createChannelWindow(QString channelName)
+{
+    return this->createChannelWindow(
+        getApp()->twitch->getOrAddChannel(channelName));
+}
+
+Window &WindowManager::createChannelWindow(Split *split)
+{
+    Window &window =
+        this->createChannelWindow(split->getIndirectChannel().get());
+    Split *_split = window.getNotebook().getOrAddSelectedPage()->getSplits()[0];
+    _split->setModerationMode(split->getModerationMode());
+    _split->setFilters(split->getFilters());
+    return window;
+}
+
 void WindowManager::select(Split *split)
 {
     this->selectSplit.invoke(split);

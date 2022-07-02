@@ -60,6 +60,11 @@ public:
     Window &createWindow(WindowType type, bool show = true,
                          QWidget *parent = nullptr);
 
+    // Opens a channel in new popup window
+    Window &createChannelWindow(ChannelPtr channel);
+    Window &createChannelWindow(QString channelName);
+    Window &createChannelWindow(Split *split);
+
     void select(Split *split);
     void select(SplitContainer *container);
 
