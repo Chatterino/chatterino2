@@ -869,9 +869,19 @@ void Notebook::paintEvent(QPaintEvent *event)
     {
         if (this->customButtons_.size() > 0)
         {
-            painter.fillRect(0, int(NOTEBOOK_TAB_HEIGHT * scale),
-                             this->lineOffset_, int(2 * scale),
-                             this->theme->tabs.dividerLine);
+            if (this->tabLocation_ == NotebookTabLocation::Left)
+            {
+                painter.fillRect(0, int(NOTEBOOK_TAB_HEIGHT * scale),
+                                 this->lineOffset_, int(2 * scale),
+                                 this->theme->tabs.dividerLine);
+            }
+            else
+            {
+                painter.fillRect(this->lineOffset_,
+                                 int(NOTEBOOK_TAB_HEIGHT * scale),
+                                 width() - this->lineOffset_, int(2 * scale),
+                                 this->theme->tabs.dividerLine);
+            }
         }
 
         /// vertical line
