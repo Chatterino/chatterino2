@@ -427,7 +427,7 @@ void Notebook::performLayout(bool animated)
     const auto minimumTabAreaSpace = int(tabHeight * 0.5);
     const auto addButtonWidth = this->showAddButton_ ? tabHeight : 0;
 
-    if (this->tabDirection_ == NotebookTabDirection::Horizontal)
+    if (this->tabLocation_ == NotebookTabLocation::Top)
     {
         auto x = left;
         auto y = 0;
@@ -527,7 +527,7 @@ void Notebook::performLayout(bool animated)
             this->selectedPage_->raise();
         }
     }
-    else
+    else if (this->tabLocation_ == NotebookTabLocation::Left)
     {
         const int lineThickness = int(2 * scale);
         auto x = left;
@@ -651,11 +651,11 @@ void Notebook::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void Notebook::setTabDirection(NotebookTabDirection direction)
+void Notebook::setTabLocation(NotebookTabLocation location)
 {
-    if (direction != this->tabDirection_)
+    if (location != this->tabLocation_)
     {
-        this->tabDirection_ = direction;
+        this->tabLocation_ = location;
         this->performLayout();
     }
 }
@@ -666,13 +666,13 @@ void Notebook::paintEvent(QPaintEvent *event)
     auto scale = this->scale();
 
     QPainter painter(this);
-    if (this->tabDirection_ == NotebookTabDirection::Horizontal)
+    if (this->tabLocation_ == NotebookTabLocation::Top)
     {
         /// horizontal line
         painter.fillRect(0, this->lineOffset_, this->width(), int(2 * scale),
                          this->theme->tabs.dividerLine);
     }
-    else
+    else if (this->tabLocation_ == NotebookTabLocation::Left)
     {
         if (this->customButtons_.size() > 0)
         {
