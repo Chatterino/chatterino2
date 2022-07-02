@@ -20,10 +20,15 @@ public:
 
     virtual void initialize(Settings &settings, Paths &paths) override;
 
-    void addMessage(const QString &channelName, MessagePtr message);
+    void addMessage(const QString &channelName, MessagePtr message,
+                    const QString &platformName);
 
 private:
-    std::map<QString, std::unique_ptr<LoggingChannel>> loggingChannels_;
+    using PlatformName = QString;
+    using ChannelName = QString;
+    std::map<PlatformName,
+             std::map<ChannelName, std::unique_ptr<LoggingChannel>>>
+        loggingChannels_;
 };
 
 }  // namespace chatterino
