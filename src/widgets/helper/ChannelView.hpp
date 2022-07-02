@@ -216,8 +216,6 @@ private:
     void setInputReply(const MessagePtr &message);
     void showReplyThreadPopup(const MessagePtr &message);
     bool shouldRenderFloatingElements() const;
-
-    void configureMessageLayout(MessageLayoutPtr &messageLayout) const;
     bool canReplyToMessages() const;
 
     QTimer *layoutCooldown_;

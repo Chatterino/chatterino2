@@ -115,6 +115,23 @@ private:
     QColor color_;
 };
 
+class ImageWithCircleBackgroundLayoutElement : public ImageLayoutElement
+{
+public:
+    ImageWithCircleBackgroundLayoutElement(MessageElement &creator,
+                                           ImagePtr image,
+                                           const QSize &imageSize, QColor color,
+                                           int padding);
+
+protected:
+    void paint(QPainter &painter) override;
+
+private:
+    QColor color_;
+    QSize imageSize_;
+    int padding_;
+};
+
 class PrettyFloatingImageLayoutElement : public FloatingMessageLayoutElement
 {
 public:

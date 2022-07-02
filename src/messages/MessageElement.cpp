@@ -134,9 +134,9 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
-PrettyImageElement::PrettyImageElement(ImagePtr image, int padding,
-                                       QColor background,
-                                       MessageElementFlags flags)
+CircularImageElement::CircularImageElement(ImagePtr image, int padding,
+                                           QColor background,
+                                           MessageElementFlags flags)
     : MessageElement(flags)
     , image_(image)
     , padding_(padding)
@@ -144,18 +144,18 @@ PrettyImageElement::PrettyImageElement(ImagePtr image, int padding,
 {
 }
 
-void PrettyImageElement::addToContainer(MessageLayoutContainer &container,
-                                        MessageElementFlags flags)
+void CircularImageElement::addToContainer(MessageLayoutContainer &container,
+                                          MessageElementFlags flags)
 {
     if (flags.hasAny(this->getFlags()))
     {
-        auto size = QSize(this->image_->width(), this->image_->height()) *
-                    container.getScale();
+        auto imgSize = QSize(this->image_->width(), this->image_->height()) *
+                       container.getScale();
 
-        container.addFloatingElement(
-            (new PrettyFloatingImageLayoutElement(
-                 *this, this->image_, size, this->padding_, this->background_))
-                ->setLink(this->getLink()));
+        container.addElement((new ImageWithCircleBackgroundLayoutElement(
+                                  *this, this->image_, imgSize,
+                                  this->background_, this->padding_))
+                                 ->setLink(this->getLink()));
     }
 }
 
@@ -668,14 +668,14 @@ ReplyCurveElement::ReplyCurveElement()
 }
 
 ReplyCurveElement::ReplyCurveElement(int neededMargin, int size)
-    : MessageElement(MessageElementFlag::RepliedText)
+    : MessageElement(MessageElementFlag::RepliedMessage)
     , neededMargin_(neededMargin)
     , size_(size, size)
 {
 }
 
 ReplyCurveElement::ReplyCurveElement(int neededMargin, int width, int height)
-    : MessageElement(MessageElementFlag::RepliedText)
+    : MessageElement(MessageElementFlag::RepliedMessage)
     , neededMargin_(neededMargin)
     , size_(width, height)
 {

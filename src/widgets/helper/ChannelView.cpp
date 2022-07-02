@@ -711,10 +711,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
             messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
         }
 
-        MessageLayoutPtr mlp(messageLayout);
-        this->configureMessageLayout(mlp);
-        this->messages_.pushBack(mlp);
-
+        this->messages_.pushBack(MessageLayoutPtr(messageLayout));
         if (this->showScrollbarHighlights())
         {
             this->scrollBar_->addHighlight(msg->getScrollBarHighlight());
@@ -820,9 +817,7 @@ void ChannelView::messageAppended(MessagePtr &message,
         loop.exec();
     }
 
-    MessageLayoutPtr mlp(messageRef);
-    this->configureMessageLayout(mlp);
-    if (this->messages_.pushBack(mlp))
+    if (this->messages_.pushBack(MessageLayoutPtr(messageRef)))
     {
         if (this->paused())
         {
@@ -881,9 +876,7 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
         this->lastMessageHasAlternateBackgroundReverse_ =
             !this->lastMessageHasAlternateBackgroundReverse_;
 
-        MessageLayoutPtr mlp(layout);
-        this->configureMessageLayout(mlp);
-        messageRefs.at(i) = mlp;
+        messageRefs.at(i) = MessageLayoutPtr(layout);
     }
 
     /// Add the messages at the start
@@ -939,7 +932,6 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     auto message = *oMessage;
 
     MessageLayoutPtr newItem(new MessageLayout(replacement));
-    this->configureMessageLayout(newItem);
 
     if (message->flags.has(MessageLayoutFlag::AlternateBackground))
     {
@@ -1034,6 +1026,16 @@ MessageElementFlags ChannelView::getFlags() const
 
     if (this->sourceChannel_ == app->twitch->mentionsChannel)
         flags.set(MessageElementFlag::ChannelName);
+
+    if (this->context_ != Context::ReplyThread)
+    {
+        flags.set(MessageElementFlag::RepliedMessage);
+    }
+
+    if (getSettings()->showReplyButton && this->canReplyToMessages())
+    {
+        flags.set(MessageElementFlag::ReplyButton);
+    }
 
     return flags;
 }
@@ -2645,22 +2647,7 @@ void ChannelView::setFloatingVisible(bool visible)
 
 bool ChannelView::shouldRenderFloatingElements() const
 {
-    return this->floatingVisible_ && getSettings()->showMessageButtons;
-}
-
-void ChannelView::configureMessageLayout(MessageLayoutPtr &messageLayout) const
-{
-    if (this->context_ == ChannelView::Context::ReplyThread)
-    {
-        // don't render in-line message being replied to
-        messageLayout->setRenderReplies(false);
-    }
-
-    if (!this->canReplyToMessages() || !messageLayout->isReplyable())
-    {
-        // hide floating reply button
-        messageLayout->setRenderFloatingElements(false);
-    }
+    return this->floatingVisible_;
 }
 
 ChannelView::Context ChannelView::getContext() const
@@ -2675,12 +2662,19 @@ bool ChannelView::canReplyToMessages() const
     {
         return false;
     }
-    else if (!this->channel_->isTwitchChannel())
+
+    if (this->channel_ == nullptr)
     {
         return false;
     }
-    else if (this->channel_->getType() == Channel::Type::TwitchWhispers ||
-             this->channel_->getType() == Channel::Type::TwitchLive)
+
+    if (!this->channel_->isTwitchChannel())
+    {
+        return false;
+    }
+
+    if (this->channel_->getType() == Channel::Type::TwitchWhispers ||
+        this->channel_->getType() == Channel::Type::TwitchLive)
     {
         return false;
     }

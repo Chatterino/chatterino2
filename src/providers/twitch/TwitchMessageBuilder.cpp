@@ -217,17 +217,17 @@ MessagePtr TwitchMessageBuilder::build()
 
         // construct reply elements
         this->emplace<TextElement>(
-                "Replying to", MessageElementFlag::RepliedText,
+                "Replying to", MessageElementFlag::RepliedMessage,
                 MessageColor::System, FontStyle::ChatMediumSmall)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
 
         this->emplace<TextElement>(
-                "@" + usernameText + ":", MessageElementFlag::RepliedUsername,
+                "@" + usernameText + ":", MessageElementFlag::RepliedMessage,
                 threadRoot->usernameColor, FontStyle::ChatMediumSmall)
             ->setLink({Link::UserInfo, threadRoot->displayName});
 
         this->emplace<SingleLineTextElement>(
-                threadRoot->messageText, MessageElementFlag::RepliedText,
+                threadRoot->messageText, MessageElementFlag::RepliedMessage,
                 this->textColor_, FontStyle::ChatMediumSmall)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
     }
@@ -248,16 +248,16 @@ MessagePtr TwitchMessageBuilder::build()
             this->emplace<ReplyCurveElement>();
 
             this->emplace<TextElement>(
-                "Replying to", MessageElementFlag::RepliedText,
+                "Replying to", MessageElementFlag::RepliedMessage,
                 MessageColor::System, FontStyle::ChatMediumSmall);
 
             this->emplace<TextElement>(
-                    "@" + name + ":", MessageElementFlag::RepliedUsername,
+                    "@" + name + ":", MessageElementFlag::RepliedMessage,
                     this->textColor_, FontStyle::ChatMediumSmall)
                 ->setLink({Link::UserInfo, name});
 
             this->emplace<SingleLineTextElement>(
-                body, MessageElementFlag::RepliedText, this->textColor_,
+                body, MessageElementFlag::RepliedMessage, this->textColor_,
                 FontStyle::ChatMediumSmall);
         }
     }
@@ -344,15 +344,17 @@ MessagePtr TwitchMessageBuilder::build()
     if (this->thread_)
     {
         auto &img = getResources().buttons.replyThreadDark;
-        this->emplace<PrettyImageElement>(Image::fromPixmap(img, 0.15), 1,
-                                          Qt::gray, MessageElementFlag::Default)
+        this->emplace<CircularImageElement>(Image::fromPixmap(img, 0.15), 2,
+                                            Qt::gray,
+                                            MessageElementFlag::ReplyButton)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
     }
     else
     {
         auto &img = getResources().buttons.replyDark;
-        this->emplace<PrettyImageElement>(Image::fromPixmap(img, 0.15), 1,
-                                          Qt::gray, MessageElementFlag::Default)
+        this->emplace<CircularImageElement>(Image::fromPixmap(img, 0.15), 2,
+                                            Qt::gray,
+                                            MessageElementFlag::ReplyButton)
             ->setLink({Link::ReplyToMessage, this->message().id});
     }
 

@@ -128,8 +128,9 @@ enum class MessageElementFlag : int64_t {
 
     // for elements of the message reply
     RepliedMessage = (1LL << 32),
-    RepliedText = Text | RepliedMessage,
-    RepliedUsername = Username | RepliedMessage,
+
+    // for the reply button element
+    ReplyButton = (1LL << 33),
 
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
@@ -214,12 +215,12 @@ private:
     ImagePtr image_;
 };
 
-// contains a floating image with a background color
-class PrettyImageElement : public MessageElement
+// contains a image with a circular background color
+class CircularImageElement : public MessageElement
 {
 public:
-    PrettyImageElement(ImagePtr image, int padding, QColor background,
-                       MessageElementFlags flags);
+    CircularImageElement(ImagePtr image, int padding, QColor background,
+                         MessageElementFlags flags);
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;

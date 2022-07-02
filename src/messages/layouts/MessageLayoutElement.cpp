@@ -245,6 +245,44 @@ void ImageWithBackgroundLayoutElement::paint(QPainter &painter)
     }
 }
 
+//
+// IMAGE WITH CIRCLE BACKGROUND
+//
+ImageWithCircleBackgroundLayoutElement::ImageWithCircleBackgroundLayoutElement(
+    MessageElement &creator, ImagePtr image, const QSize &imageSize,
+    QColor color, int padding)
+    : ImageLayoutElement(creator, image,
+                         imageSize + QSize(padding, padding) * 2)
+    , color_(color)
+    , imageSize_(imageSize)
+    , padding_(padding)
+{
+}
+
+void ImageWithCircleBackgroundLayoutElement::paint(QPainter &painter)
+{
+    if (this->image_ == nullptr)
+    {
+        return;
+    }
+
+    auto pixmap = this->image_->pixmapOrLoad();
+    if (pixmap && !this->image_->animated())
+    {
+        QRectF boxRect(this->getRect());
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QBrush(this->color_, Qt::SolidPattern));
+        painter.drawEllipse(boxRect);
+
+        QRectF imgRect;
+        imgRect.setTopLeft(boxRect.topLeft());
+        imgRect.setSize(this->imageSize_);
+        imgRect.translate(this->padding_, this->padding_);
+
+        painter.drawPixmap(imgRect, *pixmap, QRectF());
+    }
+}
+
 PrettyFloatingImageLayoutElement::PrettyFloatingImageLayoutElement(
     MessageElement &creator, ImagePtr image, const QSize &size, int padding,
     QColor background)

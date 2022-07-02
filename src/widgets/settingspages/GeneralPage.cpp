@@ -173,7 +173,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     tabDirectionDropdown->setMinimumWidth(
         tabDirectionDropdown->minimumSizeHint().width());
 
-    layout.addCheckbox("Show message reply button", s.showMessageButtons);
+    layout.addCheckbox("Show message reply button", s.showReplyButton);
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost);
 #ifdef USEWINSDK
