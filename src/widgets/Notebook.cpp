@@ -423,10 +423,12 @@ void Notebook::performLayout(bool animated)
 {
     const auto left = int(2 * this->scale());
     const auto right = width();
+    const auto bottom = height();
     const auto scale = this->scale();
     const auto tabHeight = int(NOTEBOOK_TAB_HEIGHT * scale);
     const auto minimumTabAreaSpace = int(tabHeight * 0.5);
     const auto addButtonWidth = this->showAddButton_ ? tabHeight : 0;
+    const auto lineThickness = int(2 * scale);
 
     const auto buttonWidth = tabHeight;
     const auto buttonHeight = tabHeight - 1;
@@ -533,7 +535,6 @@ void Notebook::performLayout(bool animated)
     }
     else if (this->tabLocation_ == NotebookTabLocation::Left)
     {
-        const int lineThickness = int(2 * scale);
         auto x = left;
         auto y = 0;
 
@@ -642,7 +643,6 @@ void Notebook::performLayout(bool animated)
     }
     else if (this->tabLocation_ == NotebookTabLocation::Right)
     {
-        const int lineThickness = int(2 * scale);
         auto x = right;
         auto y = 0;
 
@@ -760,6 +760,101 @@ void Notebook::performLayout(bool animated)
     }
     else if (this->tabLocation_ == NotebookTabLocation::Bottom)
     {
+        auto x = left;
+        auto y = bottom - buttonHeight - 1;
+        auto consumedButtonHeights = 0;
+
+        // set size of custom buttons (settings, user, ...)
+        for (auto *btn : this->customButtons_)
+        {
+            if (!btn->isVisible())
+            {
+                continue;
+            }
+
+            btn->setFixedSize(buttonWidth, buttonHeight);
+            btn->move(x, y);
+            x += buttonWidth;
+
+            consumedButtonHeights = tabHeight;
+        }
+
+        if (this->showTabs_)
+        {
+            // layout tabs
+            /// Notebook tabs need to know if they are in the last row.
+            auto firstInBottomRow =
+                this->items_.size() ? &this->items_.front() : nullptr;
+
+            for (auto &item : this->items_)
+            {
+                /// Break line if element doesn't fit.
+                auto isFirst = &item == &this->items_.front();
+                auto isLast = &item == &this->items_.back();
+
+                auto fitsInLine = ((isLast ? addButtonWidth : 0) + x +
+                                   item.tab->width()) <= width();
+
+                if (!isFirst && !fitsInLine)
+                {
+                    y -= item.tab->height();
+                    x = left;
+                    firstInBottomRow = &item;
+                }
+
+                /// Layout tab
+                item.tab->growWidth(0);
+                item.tab->moveAnimated(QPoint(x, y), animated);
+                x += item.tab->width() + std::max<int>(1, int(scale * 1));
+            }
+
+            /// Update which tabs are in the last row
+            auto inLastRow = false;
+            for (const auto &item : this->items_)
+            {
+                if (&item == firstInBottomRow)
+                {
+                    inLastRow = true;
+                }
+                item.tab->setInLastRow(inLastRow);
+            }
+
+            // move misc buttons
+            if (this->showAddButton_)
+            {
+                this->addButton_->move(x, y);
+            }
+
+            // raise elements
+            for (auto &i : this->items_)
+            {
+                i.tab->raise();
+            }
+
+            if (this->showAddButton_)
+            {
+                this->addButton_->raise();
+            }
+        }
+
+        y -= lineThickness;
+        int consumedBottomSpace =
+            std::max({bottom - y, consumedButtonHeights, minimumTabAreaSpace});
+        int tabsStart = bottom - consumedBottomSpace;
+
+        if (this->lineOffset_ != tabsStart)
+        {
+            this->lineOffset_ = tabsStart;
+            this->update();
+        }
+
+        // set page bounds
+        if (this->selectedPage_ != nullptr)
+        {
+            this->selectedPage_->move(0, 0);
+            this->selectedPage_->resize(width(), tabsStart);
+            this->selectedPage_->raise();
+        }
     }
 }
 
