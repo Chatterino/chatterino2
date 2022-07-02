@@ -299,6 +299,7 @@ SOURCES += \
     src/widgets/dialogs/UpdateDialog.cpp \
     src/widgets/dialogs/UserInfoPopup.cpp \
     src/widgets/dialogs/WelcomeDialog.cpp \
+    src/widgets/DraggablePopup.cpp \
     src/widgets/FramelessEmbedWindow.cpp \
     src/widgets/helper/Button.cpp \
     src/widgets/helper/ChannelView.cpp \
@@ -311,13 +312,13 @@ SOURCES += \
     src/widgets/helper/NotebookTab.cpp \
     src/widgets/helper/QColorPicker.cpp \
     src/widgets/helper/RegExpItemDelegate.cpp \
-    src/widgets/helper/TrimRegExpValidator.cpp \
     src/widgets/helper/ResizingTextEdit.cpp \
     src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/SearchPopup.cpp \
     src/widgets/helper/SettingsDialogTab.cpp \
     src/widgets/helper/SignalLabel.cpp \
     src/widgets/helper/TitlebarButton.cpp \
+    src/widgets/helper/TrimRegExpValidator.cpp \
     src/widgets/Label.cpp \
     src/widgets/listview/GenericItemDelegate.cpp \
     src/widgets/listview/GenericListItem.cpp \
@@ -543,6 +544,7 @@ HEADERS += \
     src/util/PostToThread.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \
+    src/util/Qt.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RapidJsonSerializeQString.hpp \
     src/util/RatelimitBucket.hpp \
@@ -564,6 +566,7 @@ HEADERS += \
     src/widgets/dialogs/BadgePickerDialog.hpp \
     src/widgets/dialogs/ChannelFilterEditorDialog.hpp \
     src/widgets/dialogs/ColorPickerDialog.hpp \
+    src/widgets/dialogs/DraggablePopup.hpp \
     src/widgets/dialogs/EditHotkeyDialog.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
     src/widgets/dialogs/IrcConnectionEditor.hpp \
@@ -598,13 +601,13 @@ HEADERS += \
     src/widgets/helper/NotebookTab.hpp \
     src/widgets/helper/QColorPicker.hpp \
     src/widgets/helper/RegExpItemDelegate.hpp \
-    src/widgets/helper/TrimRegExpValidator.hpp \
     src/widgets/helper/ResizingTextEdit.hpp \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \
     src/widgets/helper/SettingsDialogTab.hpp \
     src/widgets/helper/SignalLabel.hpp \
     src/widgets/helper/TitlebarButton.hpp \
+    src/widgets/helper/TrimRegExpValidator.hpp \
     src/widgets/Label.hpp \
     src/widgets/listview/GenericItemDelegate.hpp \
     src/widgets/listview/GenericListItem.hpp \

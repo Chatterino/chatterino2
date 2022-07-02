@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ForwardDecl.hpp"
-#include "widgets/BaseWindow.hpp"
+#include "widgets/DraggablePopup.hpp"
 
 #include <boost/signals2.hpp>
 #include <pajlada/signals/scoped-connection.hpp>
@@ -13,7 +13,7 @@ class MessageThread;
 class ReplyInput;
 class Split;
 
-class ReplyThreadPopup final : public BaseWindow
+class ReplyThreadPopup final : public DraggablePopup
 {
     Q_OBJECT
 

@@ -16,40 +16,13 @@ const QString TEXT_TITLE("Reply Thread - @%1 in #%2");
 
 namespace chatterino {
 
-namespace {
-
-// Duplicate of UserInfoPopup.cpp
-#ifdef Q_OS_LINUX
-    FlagsEnum<BaseWindow::Flags> popupFlags{BaseWindow::Dialog,
-                                            BaseWindow::EnableCustomFrame};
-    FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
-        BaseWindow::EnableCustomFrame};
-#else
-    FlagsEnum<BaseWindow::Flags> popupFlags{BaseWindow::EnableCustomFrame};
-    FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
-        BaseWindow::EnableCustomFrame, BaseWindow::Frameless,
-        BaseWindow::FramelessDraggable};
-#endif
-
-}  // namespace
-
 ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
                                    Split *split)
-    : BaseWindow(closeAutomatically ? popupFlagsCloseAutomatically : popupFlags,
-                 parent)
+    : DraggablePopup(closeAutomatically, parent)
     , split_(split)
 {
     this->setWindowTitle("Reply Thread");
     this->setStayInScreenRect(true);
-
-    if (closeAutomatically)
-    {
-        this->setActionOnFocusLoss(BaseWindow::Delete);
-    }
-    else
-    {
-        this->setAttribute(Qt::WA_DeleteOnClose);
-    }
 
     HotkeyController::HotkeyMap actions{
         {"delete",
@@ -116,7 +89,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
         }));
 
     layout->setSpacing(0);
-    layout->setMargin(1);
+    // provide draggable margin if frameless
+    layout->setMargin(closeAutomatically ? 15 : 1);
     layout->addWidget(this->ui_.threadView, 1);
     layout->addWidget(this->ui_.replyInput);
 }
