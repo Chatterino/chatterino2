@@ -2060,21 +2060,18 @@ void ChannelView::addMessageContextMenuItems(
     });
 
     // Only display reply option where it makes sense
-    if (this->canReplyToMessages())
+    if (this->canReplyToMessages() && layout->isReplyable())
     {
         const auto &messagePtr = layout->getMessagePtr();
-        if (!messagePtr->loginName.isEmpty())  // guard against system messages
-        {
-            menu.addAction("Reply to message", [this, &messagePtr] {
-                this->setInputReply(messagePtr);
-            });
+        menu.addAction("Reply to message", [this, &messagePtr] {
+            this->setInputReply(messagePtr);
+        });
 
-            if (messagePtr->replyThread != nullptr)
-            {
-                menu.addAction("View thread", [this, &messagePtr] {
-                    this->showReplyThreadPopup(messagePtr);
-                });
-            }
+        if (messagePtr->replyThread != nullptr)
+        {
+            menu.addAction("View thread", [this, &messagePtr] {
+                this->showReplyThreadPopup(messagePtr);
+            });
         }
     }
 }
@@ -2655,12 +2652,14 @@ void ChannelView::configureMessageLayout(MessageLayoutPtr &messageLayout) const
 {
     if (this->context_ == ChannelView::Context::ReplyThread)
     {
+        // don't render in-line message being replied to
         messageLayout->setRenderReplies(false);
     }
 
-    if (!this->canReplyToMessages())
+    if (!this->canReplyToMessages() || !messageLayout->isReplyable())
     {
-        messageLayout->setRenderFloatingElements(false);  // hide reply button
+        // hide floating reply button
+        messageLayout->setRenderFloatingElements(false);
     }
 }
 

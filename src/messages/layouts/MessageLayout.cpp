@@ -437,6 +437,23 @@ void MessageLayout::addSelectionText(QString &str, int from, int to,
     this->container_->addSelectionText(str, from, to, copymode);
 }
 
+bool MessageLayout::isReplyable() const
+{
+    if (this->message_->loginName.isEmpty())
+    {
+        return false;
+    }
+
+    if (this->message_->flags.hasAny(
+            {MessageFlag::System, MessageFlag::Subscription,
+             MessageFlag::Timeout, MessageFlag::Whisper}))
+    {
+        return false;
+    }
+
+    return true;
+}
+
 void MessageLayout::setRenderReplies(bool render)
 {
     this->renderReplies_ = render;

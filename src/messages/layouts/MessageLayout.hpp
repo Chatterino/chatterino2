@@ -65,6 +65,7 @@ public:
 
     // Misc
     bool isDisabled() const;
+    bool isReplyable() const;
     void setRenderReplies(bool render);
     void setRenderFloatingElements(bool render);
 
