@@ -82,9 +82,9 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
              }
              return "";
          }},
-        {"execModeratorAction", nullptr},
 
-        // these actions make no sense in the context of a usercard, so they aren't implemented
+        // these actions make no sense in the context of a reply thread, so they aren't implemented
+        {"execModeratorAction", nullptr},
         {"reject", nullptr},
         {"accept", nullptr},
         {"openTab", nullptr},
