@@ -36,6 +36,7 @@
 - Bugfix: Fixed automod queue pubsub topic persisting after user change. (#3718)
 - Bugfix: Fixed viewer list not closing after pressing escape key. (#3734)
 - Bugfix: Fixed links with no thumbnail having previous link's thumbnail. (#3720)
+- Bugfix: Fixed message only showing a maximum of one global FrankerFaceZ badge even if the user has multiple. (#3818)
 - Bugfix: Add icon in the CMake macOS bundle. (#3832)
 - Bugfix: Adopt popup windows in order to force floating behavior on some window managers. (#3836)
 - Bugfix: Fix split focusing being broken in certain circumstances when the "Show input when it's empty" setting was disabled. (#3838)

@@ -10,6 +10,7 @@ Resources2::Resources2()
     this->avatars.fourtf = QPixmap(":/avatars/fourtf.png");
     this->avatars.hicupalot = QPixmap(":/avatars/hicupalot.png");
     this->avatars.iprodigy = QPixmap(":/avatars/iprodigy.png");
+    this->avatars.jaxkey = QPixmap(":/avatars/jaxkey.png");
     this->avatars.kararty = QPixmap(":/avatars/kararty.png");
     this->avatars.karlpolice = QPixmap(":/avatars/karlpolice.png");
     this->avatars.mm2pl = QPixmap(":/avatars/mm2pl.png");
