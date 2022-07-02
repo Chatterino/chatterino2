@@ -263,10 +263,10 @@ MessageLayoutElement *VipBadgeElement::makeImageLayoutElement(
 
 // FFZ Badge
 FfzBadgeElement::FfzBadgeElement(const EmotePtr &data,
-                                 MessageElementFlags flags_, QColor &color)
+                                 MessageElementFlags flags_, QColor color_)
     : BadgeElement(data, flags_)
+    , color(std::move(color_))
 {
-    this->color = color;
 }
 
 MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
