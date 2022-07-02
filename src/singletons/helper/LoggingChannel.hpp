@@ -15,7 +15,8 @@ class Logging;
 
 class LoggingChannel : boost::noncopyable
 {
-    explicit LoggingChannel(const QString &_channelName);
+    explicit LoggingChannel(const QString &_channelName,
+                            const QString &platform);
 
 public:
     ~LoggingChannel();
@@ -34,6 +35,7 @@ private:
     QString generateDateString(const QDateTime &now);
 
     const QString channelName;
+    const QString platform;
     QString baseDirectory;
     QString subDirectory;
 

@@ -3,6 +3,8 @@
 #include "Application.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/irc/IrcChannel2.hpp"
+#include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
@@ -81,11 +83,20 @@ void Channel::addMessage(MessagePtr message,
     auto app = getApp();
     MessagePtr deleted;
 
-    // FOURTF: change this when adding more providers
-    if (this->isTwitchChannel() &&
-        (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog)))
+    if (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog))
     {
-        app->logging->addMessage(this->name_, message);
+        QString channelPlatform("other");
+        if (this->type_ == Type::Irc)
+        {
+            auto irc = static_cast<IrcChannel *>(this);
+            channelPlatform =
+                QString("irc-%1").arg(irc->server()->userFriendlyIdentifier());
+        }
+        else if (this->isTwitchChannel())
+        {
+            channelPlatform = "twitch";
+        }
+        app->logging->addMessage(this->name_, message, channelPlatform);
     }
 
     if (this->messages_.pushBack(message, deleted))
