@@ -501,17 +501,6 @@ void Notebook::performLayout(bool animated)
             }
 
             y += tabHeight;
-
-            // raise elements
-            for (auto &i : this->items_)
-            {
-                i.tab->raise();
-            }
-
-            if (this->showAddButton_)
-            {
-                this->addButton_->raise();
-            }
         }
 
         y = std::max({y, consumedButtonHeights, minimumTabAreaSpace});
@@ -622,17 +611,6 @@ void Notebook::performLayout(bool animated)
             this->update();
         }
 
-        // raise elements
-        for (auto &i : this->items_)
-        {
-            i.tab->raise();
-        }
-
-        if (this->showAddButton_)
-        {
-            this->addButton_->raise();
-        }
-
         // set page bounds
         if (this->selectedPage_ != nullptr)
         {
@@ -739,17 +717,6 @@ void Notebook::performLayout(bool animated)
             this->update();
         }
 
-        // raise elements
-        for (auto &i : this->items_)
-        {
-            i.tab->raise();
-        }
-
-        if (this->showAddButton_)
-        {
-            this->addButton_->raise();
-        }
-
         // set page bounds
         if (this->selectedPage_ != nullptr)
         {
@@ -824,17 +791,6 @@ void Notebook::performLayout(bool animated)
             {
                 this->addButton_->move(x, y);
             }
-
-            // raise elements
-            for (auto &i : this->items_)
-            {
-                i.tab->raise();
-            }
-
-            if (this->showAddButton_)
-            {
-                this->addButton_->raise();
-            }
         }
 
         y -= lineThickness;
@@ -854,6 +810,20 @@ void Notebook::performLayout(bool animated)
             this->selectedPage_->move(0, 0);
             this->selectedPage_->resize(width(), tabsStart);
             this->selectedPage_->raise();
+        }
+    }
+
+    if (this->showTabs_)
+    {
+        // raise elements
+        for (auto &i : this->items_)
+        {
+            i.tab->raise();
+        }
+
+        if (this->showAddButton_)
+        {
+            this->addButton_->raise();
         }
     }
 }
