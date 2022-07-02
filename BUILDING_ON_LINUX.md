@@ -35,6 +35,16 @@ Enter the development environment with all of the dependencies: `nix-shell -p op
 
 ## Manually
 
-1. Go into the project directory
-1. Create a build folder and go into it (`mkdir build && cd build`)
-1. Use one of the options below to compile it
+1. In the project directory, create a build directory and enter it  
+    ```sh
+    mkdir build
+    cd build
+    ```
+1. Generate build files  
+    ```sh
+    cmake ..
+    ```
+1. Build the project  
+    ```sh
+    make
+    ```
