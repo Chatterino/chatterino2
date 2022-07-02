@@ -1137,9 +1137,9 @@ void CommandController::initialize(Settings &, Paths &paths)
             stripChannelName(username);
 
             auto snapshot = twitchChannel->getMessageSnapshot();
-            for (size_t i = snapshot.size(); i-- > 0;)
+            for (auto it = snapshot.rbegin(); it != snapshot.rend(); ++it)
             {
-                auto &msg = snapshot[i];
+                const auto &msg = *it;
                 if (msg->loginName.compare(username, Qt::CaseInsensitive) == 0)
                 {
                     std::shared_ptr<MessageThread> thread;
