@@ -39,7 +39,7 @@
 - Bugfix: Add icon in the CMake macOS bundle. (#3832)
 - Bugfix: Adopt popup windows in order to force floating behavior on some window managers. (#3836)
 - Bugfix: Fix split focusing being broken in certain circumstances when the "Show input when it's empty" setting was disabled. (#3838)
-- Dev: QMake is no longer supported (#3839)
+- Dev: Remove official support for QMake. (#3839)
 - Dev: Rewrite LimitedQueue (#3798)
 - Dev: Overhaul highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801, #3835)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
