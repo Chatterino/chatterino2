@@ -1134,10 +1134,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             }
 
             QString username = words[1];
-            if (username.startsWith('@'))
-            {
-                username.remove(0, 1);
-            }
+            stripChannelName(username);
 
             auto snapshot = twitchChannel->getMessageSnapshot();
             for (size_t i = snapshot.size(); i-- > 0;)
