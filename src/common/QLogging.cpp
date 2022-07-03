@@ -41,3 +41,5 @@ Q_LOGGING_CATEGORY(chatterinoWidget, "chatterino.widget", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoWindowmanager, "chatterino.windowmanager",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoHighlights, "chatterino.highlights", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoSeventvEventApi, "chatterino.seventv-event-api",
+                   logThreshold);

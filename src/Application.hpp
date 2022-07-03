@@ -149,6 +149,7 @@ public:
 private:
     void addSingleton(Singleton *singleton);
     void initPubSub();
+    void initEventApi();
     void initNm(Paths &paths);
 
     template <typename T,

@@ -13,6 +13,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QThread>
+#include <utility>
 
 namespace chatterino {
 namespace {
@@ -25,6 +26,9 @@ namespace {
     // maximum pageSize that 7tv's API accepts
     constexpr int maxPageSize = 150;
 
+    static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> emoteCache;
+    static std::mutex emoteCacheMutex;
+
     Url getEmoteLink(const EmoteId &id, const QString &emoteScale)
 
     {
@@ -35,10 +39,8 @@ namespace {
 
     EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
     {
-        static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
-        static std::mutex mutex;
-
-        return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
+        return cachedOrMakeEmotePtr(std::move(emote), emoteCache,
+                                    emoteCacheMutex, id);
     }
 
     struct CreateEmoteResult {
@@ -47,7 +49,7 @@ namespace {
         Emote emote;
     };
 
-    CreateEmoteResult createEmote(QJsonValue jsonEmote, bool isGlobal)
+    CreateEmoteResult createEmote(const QJsonValue &jsonEmote, bool isGlobal)
     {
         auto id = EmoteId{jsonEmote.toObject().value("id").toString()};
         auto name = EmoteName{jsonEmote.toObject().value("name").toString()};
@@ -113,6 +115,15 @@ namespace {
         return {Success, std::move(emotes)};
     }
 
+    bool checkEmoteVisibility(const QJsonObject &emoteJson)
+    {
+        int64_t visibility = emoteJson.value("visibility").toInt();
+        auto visibilityFlags =
+            SeventvEmoteVisibilityFlags(SeventvEmoteVisibilityFlag(visibility));
+        return !visibilityFlags.has(SeventvEmoteVisibilityFlag::Unlisted) ||
+               getSettings()->showUnlistedEmotes;
+    }
+
     EmoteMap parseChannelEmotes(const QJsonObject &root,
                                 const QString &channelName)
     {
@@ -123,12 +134,7 @@ namespace {
         {
             auto jsonEmote = jsonEmote_.toObject();
 
-            // Check our visibility of this emote, don't display if unlisted
-            int64_t visibility = jsonEmote.value("visibility").toInt();
-            auto visibilityFlags = SeventvEmoteVisibilityFlags(
-                SeventvEmoteVisibilityFlag(visibility));
-            if (!getSettings()->showUnlistedEmotes &&
-                visibilityFlags.has(SeventvEmoteVisibilityFlag::Unlisted))
+            if (!checkEmoteVisibility(jsonEmote))
             {
                 continue;
             }
@@ -139,6 +145,57 @@ namespace {
 
         return emotes;
     }
+
+    void updateEmoteMapPtr(Atomic<std::shared_ptr<const EmoteMap>> &map,
+                           EmoteMap &&updatedMap)
+    {
+        map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
+    }
+
+    boost::optional<EmotePtr> findEmote(
+        const std::shared_ptr<const EmoteMap> &map,
+        const QString &emoteBaseName, const QJsonObject &emoteJson)
+    {
+        auto id = emoteJson["id"].toString();
+
+        // Step 1: check if the emote is added with the base name
+        auto mapIt = map->find(EmoteName{emoteBaseName});
+        // We still need to check for the id!
+        if (mapIt != map->end() && mapIt->second->homePage.string.endsWith(id))
+        {
+            return mapIt->second;
+        }
+
+        std::lock_guard<std::mutex> guard(emoteCacheMutex);
+
+        // Step 2: check the cache for the emote
+        auto emote = emoteCache[EmoteId{id}].lock();
+        if (emote)
+        {
+            auto cacheIt = map->find(emote->name);
+            // Same as above, make sure it's actually the correct emote
+            if (cacheIt != map->end() &&
+                cacheIt->second->homePage.string.endsWith(id))
+            {
+                return cacheIt->second;
+            }
+        }
+        // Step 3: Since the emote is not added, and it's not even in the cache,
+        //         we need to check if the emote is added.
+        //         This is expensive but the cache entry may be corrupted
+        //         when an emote was added with a different alias in some other
+        //         channel.
+        for (const auto &[_, value] : *map)
+        {
+            // since the url ends with the emote id we can check this
+            if (value->homePage.string.endsWith(id))
+            {
+                return value;
+            }
+        }
+        return boost::none;
+    }
+
 }  // namespace
 
 SeventvEmotes::SeventvEmotes()
@@ -215,6 +272,64 @@ void SeventvEmotes::loadEmotes()
             return pair.first;
         })
         .execute();
+}
+
+boost::optional<EmotePtr> SeventvEmotes::addEmote(
+    Atomic<std::shared_ptr<const EmoteMap>> &map, const QJsonValue &emoteJson)
+{
+    // Check for visibility first, so we don't copy the map.
+    if (!checkEmoteVisibility(emoteJson.toObject()))
+    {
+        return boost::none;
+    }
+
+    EmoteMap updatedMap = *map.get();
+    auto emote = createEmote(emoteJson, false);
+    auto emotePtr = cachedOrMake(std::move(emote.emote), emote.id);
+    updatedMap[emote.name] = emotePtr;
+    updateEmoteMapPtr(map, std::move(updatedMap));
+
+    return emotePtr;
+}
+
+boost::optional<EmotePtr> SeventvEmotes::updateEmote(
+    Atomic<std::shared_ptr<const EmoteMap>> &map, QString *emoteBaseName,
+    const QJsonValue &emoteJson)
+{
+    auto oldMap = map.get();
+    auto foundEmote = findEmote(oldMap, *emoteBaseName, emoteJson.toObject());
+    if (!foundEmote)
+    {
+        return boost::none;
+    }
+
+    *emoteBaseName = foundEmote->get()->getCopyString();
+
+    EmoteMap updatedMap = *map.get();
+    updatedMap.erase(foundEmote.value()->name);
+
+    auto emote = createEmote(emoteJson, false);
+    auto emotePtr = cachedOrMake(std::move(emote.emote), emote.id);
+    updatedMap[emote.name] = emotePtr;
+    updateEmoteMapPtr(map, std::move(updatedMap));
+
+    return emotePtr;
+}
+
+bool SeventvEmotes::removeEmote(Atomic<std::shared_ptr<const EmoteMap>> &map,
+                                const QString &emoteName)
+{
+    EmoteMap updatedMap = *map.get();
+    auto it = updatedMap.find(EmoteName{emoteName});
+    if (it == updatedMap.end())
+    {
+        // We already copied the map at this point and are now discarding the copy.
+        // This is fine, because this case should be really rare.
+        return false;
+    }
+    updatedMap.erase(it);
+    updateEmoteMapPtr(map, std::move(updatedMap));
+    return true;
 }
 
 void SeventvEmotes::loadChannel(std::weak_ptr<Channel> channel,

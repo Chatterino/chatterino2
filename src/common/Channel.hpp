@@ -74,6 +74,7 @@ public:
         boost::optional<MessageFlags> overridingFlags = boost::none);
     void addMessagesAtStart(std::vector<MessagePtr> &messages_);
     void addOrReplaceTimeout(MessagePtr message);
+    void addOrReplaceSevenTvEventAddRemove(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
     void replaceMessage(size_t index, MessagePtr replacement);

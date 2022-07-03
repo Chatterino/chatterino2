@@ -151,6 +151,11 @@ void Application::initialize(Settings &settings, Paths &paths)
         this->initNm(paths);
     }
     this->initPubSub();
+
+    if (settings.enableSevenTVEventApi)
+    {
+        this->initEventApi();
+    }
 }
 
 int Application::run(QApplication &qtApp)
@@ -527,6 +532,40 @@ void Application::initPubSub()
     this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);
 
     RequestModerationActions();
+}
+
+void Application::initEventApi()
+{
+    this->twitch->eventApi->signals_.emoteAdded.connect([&](const auto &data) {
+        auto chan = this->twitch->getChannelOrEmpty(data.channel);
+        postToThread([chan, data] {
+            if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+            {
+                channel->addSeventvEmote(data);
+            }
+        });
+    });
+    this->twitch->eventApi->signals_.emoteUpdated.connect(
+        [&](const auto &data) {
+            auto chan = this->twitch->getChannelOrEmpty(data.channel);
+            postToThread([chan, data] {
+                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->updateSeventvEmote(data);
+                }
+            });
+        });
+    this->twitch->eventApi->signals_.emoteRemoved.connect(
+        [&](const auto &data) {
+            auto chan = this->twitch->getChannelOrEmpty(data.channel);
+            postToThread([chan, data] {
+                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->removeSeventvEmote(data);
+                }
+            });
+        });
+    this->twitch->eventApi->start();
 }
 
 Application *getApp()

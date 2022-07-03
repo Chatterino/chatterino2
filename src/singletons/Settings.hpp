@@ -381,6 +381,8 @@ public:
     BoolSetting displaySevenTVAnimatedProfile = {
         "/misc/displaySevenTVAnimatedProfile", true};
 
+    BoolSetting enableSevenTVEventApi = {"/misc/enableSevenTVEventApi", true};
+
     IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 1};
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 

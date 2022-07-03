@@ -1221,7 +1221,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         }
     }
 
-    auto maxSpaces = std::min(this->maxSpaces_, words.length() - 1);
+    auto maxSpaces = std::min<int>(this->maxSpaces_, words.length() - 1);
     for (int i = 0; i < maxSpaces; ++i)
     {
         commandName += ' ' + words[i + 1];

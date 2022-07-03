@@ -7,6 +7,7 @@
 #include "common/ChatterSet.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
+#include "providers/seventv/SeventvEventApiMessages.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -109,6 +110,10 @@ public:
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
 
+    void addSeventvEmote(const EventApiEmoteUpdate &action);
+    void updateSeventvEmote(const EventApiEmoteUpdate &action);
+    void removeSeventvEmote(const EventApiEmoteUpdate &action);
+
     virtual void refresh7TVChannelEmotes(bool manualRefresh);
     virtual void refreshBTTVChannelEmotes(bool manualRefresh);
     virtual void refreshFFZChannelEmotes(bool manualRefresh);
@@ -155,6 +160,7 @@ private:
     void refreshCheerEmotes();
     void loadRecentMessages();
     void fetchDisplayName();
+    void listenSeventv();
 
     void setLive(bool newLiveStatus);
     void setMod(bool value);

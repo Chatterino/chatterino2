@@ -105,8 +105,8 @@ static float relativeSimilarity(const QString &str1, const QString &str2)
 
     // ensure that no div by 0
     return z == 0 ? 0.f
-                  : float(z) /
-                        std::max<int>(1, std::max(str1.size(), str2.size()));
+                  : float(z) / std::max<int>(
+                                   1, std::max<int>(str1.size(), str2.size()));
 };
 
 float IrcMessageHandler::similarity(
@@ -132,7 +132,7 @@ float IrcMessageHandler::similarity(
             continue;
         }
         ++checked;
-        similarityPercent = std::max(
+        similarityPercent = std::max<float>(
             similarityPercent,
             relativeSimilarity(msg->messageText, prevMsg->messageText));
     }

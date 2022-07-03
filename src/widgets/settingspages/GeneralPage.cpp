@@ -639,6 +639,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Show 7TV Animated Profile Picture",
                        s.displaySevenTVAnimatedProfile);
+    layout.addCheckbox("Enable 7TV EventApi (requires restart)",
+                       s.enableSevenTVEventApi);
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
     layout.addCheckbox("Show deletions of single messages",

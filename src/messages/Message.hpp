@@ -40,6 +40,9 @@ enum class MessageFlag : uint32_t {
     RedeemedChannelPointReward = (1 << 21),
     ShowInMentions = (1 << 22),
     FirstMessage = (1 << 23),
+    SevenTvEventApiAddEmoteMessage = (1 << 24),
+    SevenTvEventApiRemoveEmoteMessage = (1 << 25),
+    SevenTvEventApiUpdateEmoteMessage = (1 << 26),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
@@ -70,6 +73,7 @@ struct Message : boost::noncopyable {
     std::shared_ptr<QColor> highlightColor;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;
+    std::vector<QString> seventvEventTargetEmotes;
 
     ScrollbarHighlight getScrollBarHighlight() const;
 };
