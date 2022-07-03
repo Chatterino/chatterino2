@@ -1027,14 +1027,15 @@ MessageElementFlags ChannelView::getFlags() const
     if (this->sourceChannel_ == app->twitch->mentionsChannel)
         flags.set(MessageElementFlag::ChannelName);
 
-    if (this->context_ != Context::ReplyThread)
+    if (this->context_ == Context::ReplyThread)
     {
-        flags.set(MessageElementFlag::RepliedMessage);
+        // Don't show inline replies within the ReplyThreadPopup
+        flags.unset(MessageElementFlag::RepliedMessage);
     }
 
-    if (getSettings()->showReplyButton && this->canReplyToMessages())
+    if (!this->canReplyToMessages())
     {
-        flags.set(MessageElementFlag::ReplyButton);
+        flags.unset(MessageElementFlag::ReplyButton);
     }
 
     return flags;
