@@ -699,6 +699,7 @@ void Split::setChannel(IndirectChannel newChannel)
     });
 
     this->channelChanged.invoke();
+    this->actionRequested.invoke(Action::RefreshTab);
 
     // Queue up save because: Split channel changed
     getApp()->windows->queueSave();
@@ -743,7 +744,6 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
         if (dialog->hasSeletedChannel())
         {
             this->setChannel(dialog->getSelectedChannel());
-            this->actionRequested.invoke(Action::RefreshTab);
         }
 
         callback(dialog->hasSeletedChannel());
