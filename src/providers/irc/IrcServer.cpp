@@ -58,6 +58,11 @@ const QString &IrcServer::nick()
     return this->data_->nick.isEmpty() ? this->data_->user : this->data_->nick;
 }
 
+const QString &IrcServer::userFriendlyIdentifier()
+{
+    return this->data_->host;
+}
+
 void IrcServer::initializeConnectionSignals(IrcConnection *connection,
                                             ConnectionType type)
 {
