@@ -805,7 +805,7 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
     switch (event->button())
     {
         case Qt::LeftButton: {
-            this->split_->giveFocus(Qt::MouseFocusReason);
+            this->split_->setFocus(Qt::MouseFocusReason);
 
             this->dragging_ = true;
 
@@ -814,7 +814,7 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
         break;
 
         case Qt::RightButton: {
-            auto menu = this->createMainMenu().release();
+            auto *menu = this->createMainMenu().release();
             menu->setAttribute(Qt::WA_DeleteOnClose);
             menu->popup(this->mapToGlobal(event->pos() + QPoint(0, 4)));
         }
@@ -822,6 +822,10 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
 
         case Qt::MiddleButton: {
             this->split_->openInBrowser();
+        }
+        break;
+
+        default: {
         }
         break;
     }

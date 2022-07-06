@@ -57,7 +57,8 @@ public:
 
     Window &getMainWindow();
     Window &getSelectedWindow();
-    Window &createWindow(WindowType type, bool show = true);
+    Window &createWindow(WindowType type, bool show = true,
+                         QWidget *parent = nullptr);
 
     void select(Split *split);
     void select(SplitContainer *container);

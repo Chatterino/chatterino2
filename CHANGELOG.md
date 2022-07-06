@@ -22,6 +22,7 @@
 - Minor: Added ability to execute commands on chat messages using the message context menu. (#3738, #3765)
 - Minor: Added `/copy` command. Usage: `/copy <text>`. Copies provided text to clipboard - can be useful with custom commands. (#3763)
 - Minor: Removed total views from the usercard, as Twitch no longer updates the number. (#3792)
+- Minor: Add Quick Switcher item to open a channel in a new popup window. (#3828)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fix crash that can occur when changing channels. (#3799)
 - Bugfix: Fixed viewers list search not working when used before loading finishes. (#3774)
@@ -35,10 +36,15 @@
 - Bugfix: Fixed automod queue pubsub topic persisting after user change. (#3718)
 - Bugfix: Fixed viewer list not closing after pressing escape key. (#3734)
 - Bugfix: Fixed links with no thumbnail having previous link's thumbnail. (#3720)
+- Bugfix: Fixed message only showing a maximum of one global FrankerFaceZ badge even if the user has multiple. (#3818)
+- Bugfix: Add icon in the CMake macOS bundle. (#3832)
+- Bugfix: Adopt popup windows in order to force floating behavior on some window managers. (#3836)
+- Bugfix: Fix split focusing being broken in certain circumstances when the "Show input when it's empty" setting was disabled. (#3838)
 - Dev: Rewrite LimitedQueue (#3798)
-- Dev: Overhaul highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801)
+- Dev: Overhaul highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801, #3835)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 - Dev: Batch checking live status for all channels after startup. (#3757, #3762, #3767)
+- Dev: Move most command context into the command controller. (#3824)
 
 ## 2.3.5
 
@@ -78,6 +84,7 @@
 - Minor: Made join and part message have links to usercards. (#3358)
 - Minor: Show picked outcome in prediction badges. (#3357)
 - Minor: Add support for Emoji in IRC (#3354)
+- Minor: Added logging to experimental IRC (#2996)
 - Minor: Moved `/live` logs to its own subdirectory. (Logs from before this change will still be available in `Channels -> live`). (#3393)
 - Minor: Added clear button to settings search bar. (#3403)
 - Minor: Added autocompletion for default Twitch commands starting with the dot (e.g. `.mods` which does the same as `/mods`). (#3144)

@@ -6,15 +6,21 @@ namespace {
 
 using namespace chatterino;
 
-auto highlightPhraseCheck(HighlightPhrase highlight) -> HighlightCheck
+auto highlightPhraseCheck(const HighlightPhrase &highlight) -> HighlightCheck
 {
     return HighlightCheck{
-        [highlight](
-            const auto &args, const auto &badges, const auto &senderName,
-            const auto &originalMessage) -> boost::optional<HighlightResult> {
-            (void)args;             // unused
-            (void)badges;           // unused
-            (void)originalMessage;  // unused
+        [highlight](const auto &args, const auto &badges,
+                    const auto &senderName, const auto &originalMessage,
+                    const auto self) -> boost::optional<HighlightResult> {
+            (void)args;        // unused
+            (void)badges;      // unused
+            (void)senderName;  // unused
+
+            if (self)
+            {
+                // Phrase checks should ignore highlights from the user
+                return boost::none;
+            }
 
             if (!highlight.isMatch(originalMessage))
             {
@@ -54,11 +60,13 @@ void rebuildSubscriptionHighlights(Settings &settings,
 
         checks.emplace_back(HighlightCheck{
             [=](const auto &args, const auto &badges, const auto &senderName,
-                const auto &originalMessage)
-                -> boost::optional<HighlightResult> {
+                const auto &originalMessage,
+                const auto self) -> boost::optional<HighlightResult> {
                 (void)badges;           // unused
                 (void)senderName;       // unused
                 (void)originalMessage;  // unused
+                (void)self;             // unused
+
                 if (!args.isSubscriptionMessage)
                 {
                     return boost::none;
@@ -97,11 +105,13 @@ void rebuildWhisperHighlights(Settings &settings,
 
         checks.emplace_back(HighlightCheck{
             [=](const auto &args, const auto &badges, const auto &senderName,
-                const auto &originalMessage)
-                -> boost::optional<HighlightResult> {
+                const auto &originalMessage,
+                const auto self) -> boost::optional<HighlightResult> {
                 (void)badges;           // unused
                 (void)senderName;       // unused
                 (void)originalMessage;  // unused
+                (void)self;             // unused
+
                 if (!args.isReceivedWhisper)
                 {
                     return boost::none;
@@ -152,11 +162,12 @@ void rebuildUserHighlights(Settings &settings,
     {
         checks.emplace_back(HighlightCheck{
             [highlight](const auto &args, const auto &badges,
-                        const auto &senderName, const auto &originalMessage)
-                -> boost::optional<HighlightResult> {
+                        const auto &senderName, const auto &originalMessage,
+                        const auto self) -> boost::optional<HighlightResult> {
                 (void)args;             // unused
                 (void)badges;           // unused
                 (void)originalMessage;  // unused
+                (void)self;             // unused
 
                 if (!highlight.isMatch(senderName))
                 {
@@ -187,11 +198,13 @@ void rebuildBadgeHighlights(Settings &settings,
     {
         checks.emplace_back(HighlightCheck{
             [highlight](const auto &args, const auto &badges,
-                        const auto &senderName, const auto &originalMessage)
-                -> boost::optional<HighlightResult> {
+                        const auto &senderName, const auto &originalMessage,
+                        const auto self) -> boost::optional<HighlightResult> {
                 (void)args;             // unused
                 (void)senderName;       // unused
                 (void)originalMessage;  // unused
+                (void)self;             // unused
+
                 for (const Badge &badge : badges)
                 {
                     if (highlight.isMatch(badge))
@@ -302,10 +315,13 @@ std::pair<bool, HighlightResult> HighlightController::check(
     // Access for checking
     const auto checks = this->checks_.accessConst();
 
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto self = (senderName == currentUser->getUserName());
+
     for (const auto &check : *checks)
     {
         if (auto checkResult =
-                check.cb(args, badges, senderName, originalMessage);
+                check.cb(args, badges, senderName, originalMessage, self);
             checkResult)
         {
             highlighted = true;
