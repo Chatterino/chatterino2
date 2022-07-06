@@ -549,41 +549,41 @@ void Notebook::performLayout(bool animated)
 
         // zneix: if we were to remove buttons when tabs are hidden
         // stuff below to "set page bounds" part should be in conditional statement
-        int verticalRowSpace = (this->height() - top) / tabHeight;
-        if (verticalRowSpace == 0)  // window hasn't properly rendered yet
+        int tabsPerColumn = (this->height() - top) / tabHeight;
+        if (tabsPerColumn == 0)  // window hasn't properly rendered yet
         {
             return;
         }
         int count = this->items_.size() + (this->showAddButton_ ? 1 : 0);
-        int columnCount = ceil((float)count / verticalRowSpace);
+        int columnCount = ceil((float)count / tabsPerColumn);
 
         // only add width of all the tabs if they are not hidden
         if (this->showTabs_)
         {
             for (int col = 0; col < columnCount; col++)
             {
+                bool isLastColumn = col == columnCount - 1;
                 auto largestWidth = 0;
-                int colStart = col * verticalRowSpace;
-                int colEnd =
-                    std::min((col + 1) * verticalRowSpace, this->items_.size());
+                int tabStart = col * tabsPerColumn;
+                int tabEnd =
+                    std::min((col + 1) * tabsPerColumn, this->items_.size());
 
-                for (int i = colStart; i < colEnd; i++)
+                for (int i = tabStart; i < tabEnd; i++)
                 {
                     largestWidth = std::max(
                         this->items_.at(i).tab->normalTabWidth(), largestWidth);
                 }
 
-                if (col == columnCount - 1 && this->showAddButton_ &&
-                    largestWidth == 0)
+                if (isLastColumn && this->showAddButton_)
                 {
-                    largestWidth = this->addButton_->width();
+                    largestWidth =
+                        std::max(largestWidth, this->addButton_->width());
                 }
 
-                if (largestWidth + x < totalButtonWidths &&
-                    col == columnCount - 1)
+                if (isLastColumn && largestWidth + x < totalButtonWidths)
                     largestWidth = totalButtonWidths - x;
 
-                for (int i = colStart; i < colEnd; i++)
+                for (int i = tabStart; i < tabEnd; i++)
                 {
                     auto item = this->items_.at(i);
 
@@ -593,7 +593,7 @@ void Notebook::performLayout(bool animated)
                     y += tabHeight;
                 }
 
-                if (col == columnCount - 1 && this->showAddButton_)
+                if (isLastColumn && this->showAddButton_)
                 {
                     this->addButton_->move(x, y);
                 }
@@ -648,45 +648,46 @@ void Notebook::performLayout(bool animated)
 
         // zneix: if we were to remove buttons when tabs are hidden
         // stuff below to "set page bounds" part should be in conditional statement
-        int verticalRowSpace = (this->height() - top) / tabHeight;
-        if (verticalRowSpace == 0)  // window hasn't properly rendered yet
+        int tabsPerColumn = (this->height() - top) / tabHeight;
+        if (tabsPerColumn == 0)  // window hasn't properly rendered yet
         {
             return;
         }
         int count = this->items_.size() + (this->showAddButton_ ? 1 : 0);
-        int columnCount = ceil((float)count / verticalRowSpace);
+        int columnCount = ceil((float)count / tabsPerColumn);
 
         // only add width of all the tabs if they are not hidden
         if (this->showTabs_)
         {
             for (int col = 0; col < columnCount; col++)
             {
+                bool isLastColumn = col == columnCount - 1;
                 auto largestWidth = 0;
-                int colStart = col * verticalRowSpace;
-                int colEnd =
-                    std::min((col + 1) * verticalRowSpace, this->items_.size());
+                int tabStart = col * tabsPerColumn;
+                int tabEnd =
+                    std::min((col + 1) * tabsPerColumn, this->items_.size());
 
-                for (int i = colStart; i < colEnd; i++)
+                for (int i = tabStart; i < tabEnd; i++)
                 {
                     largestWidth = std::max(
                         this->items_.at(i).tab->normalTabWidth(), largestWidth);
                 }
 
-                if (col == columnCount - 1 && this->showAddButton_ &&
-                    largestWidth == 0)
+                if (isLastColumn && this->showAddButton_)
                 {
-                    largestWidth = this->addButton_->width();
+                    largestWidth =
+                        std::max(largestWidth, this->addButton_->width());
                 }
 
                 int distanceFromRight = width() - x;
 
-                if (largestWidth + distanceFromRight < consumedButtonWidths &&
-                    col == columnCount - 1)
+                if (isLastColumn &&
+                    largestWidth + distanceFromRight < consumedButtonWidths)
                     largestWidth = consumedButtonWidths - distanceFromRight;
 
                 x -= largestWidth + lineThickness;
 
-                for (int i = colStart; i < colEnd; i++)
+                for (int i = tabStart; i < tabEnd; i++)
                 {
                     auto item = this->items_.at(i);
 
@@ -696,7 +697,7 @@ void Notebook::performLayout(bool animated)
                     y += tabHeight;
                 }
 
-                if (col == columnCount - 1 && this->showAddButton_)
+                if (isLastColumn && this->showAddButton_)
                 {
                     this->addButton_->move(x, y);
                 }
@@ -793,7 +794,6 @@ void Notebook::performLayout(bool animated)
             }
         }
 
-        y -= lineThickness;
         int consumedBottomSpace =
             std::max({bottom - y, consumedButtonHeights, minimumTabAreaSpace});
         int tabsStart = bottom - consumedBottomSpace;
