@@ -932,7 +932,11 @@ void CommandController::initialize(Settings &, Paths &paths)
         auto *currentPage = dynamic_cast<SplitContainer *>(
             getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
 
-        currentPage->getSelectedSplit()->getChannelView().clearMessages();
+        if (auto split = currentPage->getSelectedSplit())
+        {
+            split->getChannelView().clearMessages();
+        }
+
         return "";
     });
 
