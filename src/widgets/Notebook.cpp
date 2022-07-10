@@ -49,6 +49,11 @@ Notebook::Notebook(QWidget *parent)
                      });
 
     this->addNotebookActionsToMenu(&this->menu_);
+
+    // Manually resize the add button so the initial paint uses the correct
+    // width when computing the maximum width occupied per column in vertical
+    // tab rendering.
+    this->resizeAddButton();
 }
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
@@ -402,12 +407,15 @@ void Notebook::setShowAddButton(bool value)
     this->addButton_->setHidden(!value);
 }
 
-void Notebook::scaleChangedEvent(float scale)
+void Notebook::resizeAddButton()
 {
     float h = (NOTEBOOK_TAB_HEIGHT - 1) * this->scale();
-
     this->addButton_->setFixedSize(h, h);
+}
 
+void Notebook::scaleChangedEvent(float)
+{
+    this->resizeAddButton();
     for (auto &i : this->items_)
     {
         i.tab->updateSize();
@@ -540,7 +548,7 @@ void Notebook::performLayout(bool animated)
             x += buttonWidth;
         }
 
-        if (this->customButtons_.size() > 0)
+        if (this->visibleButtonCount() > 0)
             y = tabHeight;
 
         int totalButtonWidths = x;
@@ -639,7 +647,7 @@ void Notebook::performLayout(bool animated)
             btn->move(x, y);
         }
 
-        if (this->customButtons_.size() > 0)
+        if (this->visibleButtonCount() > 0)
             y = tabHeight;
 
         int consumedButtonWidths = right - x;
@@ -867,7 +875,7 @@ void Notebook::paintEvent(QPaintEvent *event)
     else if (this->tabLocation_ == NotebookTabLocation::Left ||
              this->tabLocation_ == NotebookTabLocation::Right)
     {
-        if (this->customButtons_.size() > 0)
+        if (this->visibleButtonCount() > 0)
         {
             if (this->tabLocation_ == NotebookTabLocation::Left)
             {
@@ -940,6 +948,19 @@ NotebookTab *Notebook::getTabFromPage(QWidget *page)
     }
 
     return nullptr;
+}
+
+size_t Notebook::visibleButtonCount() const
+{
+    size_t i = 0;
+    for (auto *btn : this->customButtons_)
+    {
+        if (btn->isVisible())
+        {
+            ++i;
+        }
+    }
+    return i;
 }
 
 SplitNotebook::SplitNotebook(Window *parent)

@@ -86,11 +86,15 @@ protected:
     }
 
 private:
+    void resizeAddButton();
+
     bool containsPage(QWidget *page);
     Item &findItem(QWidget *page);
 
     static bool containsChild(const QObject *obj, const QObject *child);
     NotebookTab *getTabFromPage(QWidget *page);
+
+    size_t visibleButtonCount() const;
 
     QList<Item> items_;
     QMenu menu_;
