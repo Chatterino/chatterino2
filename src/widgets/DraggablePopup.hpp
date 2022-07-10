@@ -17,7 +17,7 @@ public:
     /// DraggablePopup implements the automatic dragging behavior when clicking
     /// anywhere in the window (that doesn't have some other widget).
     ///
-    /// If closeAutomatically is set, the window will close when clicking off it,
+    /// If closeAutomatically is set, the window will close when losing focus,
     /// and the window will be frameless.
     DraggablePopup(bool closeAutomatically, QWidget *parent);
 

@@ -124,6 +124,12 @@ public:
     boost::optional<CheerEmote> cheerEmote(const QString &string);
 
     // Replies
+    /**
+     * Stores the given thread in this channel. 
+     * 
+     * Note: This method not take ownership of the MessageThread; this 
+     * TwitchChannel instance will store a weak_ptr to the thread.
+     */
     void addReplyThread(const std::shared_ptr<MessageThread> &thread);
     const std::unordered_map<QString, std::weak_ptr<MessageThread>> &threads()
         const;
@@ -173,7 +179,7 @@ private:
     const QString &getDisplayName() const override;
     const QString &getLocalizedName() const override;
 
-    QString prepareMessage(Application *app, const QString &message) const;
+    QString prepareMessage(const QString &message) const;
 
     // Data
     const QString subscriptionUrl_;

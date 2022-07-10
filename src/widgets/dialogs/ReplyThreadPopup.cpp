@@ -21,7 +21,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     : DraggablePopup(closeAutomatically, parent)
     , split_(split)
 {
-    this->setWindowTitle("Reply Thread");
+    this->setWindowTitle(QStringLiteral("Reply Thread"));
     this->setStayInScreenRect(true);
 
     HotkeyController::HotkeyMap actions{
@@ -94,11 +94,10 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     layout->addWidget(this->ui_.replyInput);
 }
 
-void ReplyThreadPopup::setThread(
-    const std::shared_ptr<const MessageThread> &thread)
+void ReplyThreadPopup::setThread(std::shared_ptr<const MessageThread> thread)
 {
-    this->thread_ = thread;
-    this->ui_.replyInput->setThread(thread);
+    this->thread_ = std::move(thread);
+    this->ui_.replyInput->setThread(this->thread_);
     this->addMessagesFromThread();
     this->updateInputUI();
 }
@@ -168,12 +167,12 @@ void ReplyThreadPopup::updateInputUI()
 
     if (user->isAnon())
     {
-        placeholderText = "Log in to send messages...";
+        placeholderText = QStringLiteral("Log in to send messages...");
     }
     else
     {
         placeholderText =
-            QString("Reply as %1...")
+            QStringLiteral("Reply as %1...")
                 .arg(getApp()->accounts->twitch.getCurrent()->getUserName());
     }
 

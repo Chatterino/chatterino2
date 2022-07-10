@@ -1122,7 +1122,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             if (twitchChannel == nullptr)
             {
                 channel->addMessage(makeSystemMessage(
-                    "The /reply command only works in Twitch Channels"));
+                    "The /reply command only works in Twitch channels"));
                 return "";
             }
 
@@ -1154,12 +1154,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                         thread = msg->replyThread;
                     }
 
-                    QString reply;
-                    for (int n = 2; n < words.size(); ++n)
-                    {
-                        reply += words[n] + ' ';
-                    }
-
+                    QString reply = words.mid(2).join(" ");
                     twitchChannel->sendReply(reply, thread->rootId());
                     return "";
                 }

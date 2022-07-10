@@ -379,7 +379,6 @@ bool TwitchIrcServer::prepareToSend(TwitchChannel *channel)
 {
     std::lock_guard<std::mutex> guard(this->lastMessageMutex_);
 
-    //        std::queue<std::chrono::steady_clock::time_point>
     auto &lastMessage = channel->hasHighRateLimit() ? this->lastMessageMod_
                                                     : this->lastMessagePleb_;
     size_t maxMessageCount = channel->hasHighRateLimit() ? 99 : 19;

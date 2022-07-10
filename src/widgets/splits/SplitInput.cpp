@@ -242,8 +242,10 @@ void SplitInput::updateCancelReplyButton()
 {
     float scale = this->scale();
 
-    QString text = "<img src=':/buttons/cancel.svg' width='xD' height='xD' />";
-    text.replace("xD", QString::number(int(12 * scale)));
+    QString text =
+        QStringLiteral(
+            "<img src=':/buttons/cancel.svg' width='%1' height='%1' />")
+            .arg(QString::number(int(12 * scale)));
 
     if (this->theme->isLightTheme())
     {
@@ -1010,12 +1012,14 @@ void SplitInput::giveFocus(Qt::FocusReason reason)
     this->ui_.textEdit->setFocus(reason);
 }
 
-void SplitInput::setReply(const std::shared_ptr<MessageThread> &reply)
+void SplitInput::setReply(std::shared_ptr<MessageThread> reply)
 {
-    this->replyThread_ = reply;
-    this->ui_.textEdit->setPlainText("@" + reply->root()->displayName + " ");
+    this->replyThread_ = std::move(reply);
+    this->ui_.textEdit->setPlainText(
+        "@" + this->replyThread_->root()->displayName + " ");
     this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
-    this->ui_.replyLabel->setText("Replying to @" + reply->root()->displayName);
+    this->ui_.replyLabel->setText("Replying to @" +
+                                  this->replyThread_->root()->displayName);
 }
 
 }  // namespace chatterino

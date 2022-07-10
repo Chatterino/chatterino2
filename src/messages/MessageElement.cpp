@@ -433,7 +433,6 @@ SingleLineTextElement::SingleLineTextElement(const QString &text,
     for (const auto &word : text.split(' '))
     {
         this->words_.push_back({word, -1});
-        // fourtf: add logic to store multiple spaces after message
     }
 }
 
@@ -468,7 +467,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
             return e;
         };
 
-        QString ellipsis = "...";
+        static const auto ellipsis = QStringLiteral("...");
         auto addEllipsis = [&]() {
             int ellipsisSize = metrics.horizontalAdvance(ellipsis);
             container.addElementNoLineBreak(

@@ -338,9 +338,9 @@ void TwitchChannel::showLoginMessage()
     const auto accountsLink = Link(Link::OpenAccountsPage, QString());
     const auto currentUser = getApp()->accounts->twitch.getCurrent();
     const auto expirationText =
-        QString("You need to log in to send messages. You can link your "
-                "Twitch account");
-    const auto loginPromptText = QString("in the settings.");
+        QStringLiteral("You need to log in to send messages. You can link your "
+                       "Twitch account");
+    const auto loginPromptText = QStringLiteral("in the settings.");
 
     auto builder = MessageBuilder();
     builder.message().flags.set(MessageFlag::System);
@@ -357,9 +357,9 @@ void TwitchChannel::showLoginMessage()
     this->addMessage(builder.release());
 }
 
-QString TwitchChannel::prepareMessage(Application *app,
-                                      const QString &message) const
+QString TwitchChannel::prepareMessage(const QString &message) const
 {
+    auto app = getApp();
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
 
     // This is to make sure that combined emoji go through properly, see
@@ -424,7 +424,7 @@ void TwitchChannel::sendMessage(const QString &message)
         << "[TwitchChannel" << this->getName() << "] Send message:" << message;
 
     // Do last message processing
-    QString parsedMessage = this->prepareMessage(app, message);
+    QString parsedMessage = this->prepareMessage(message);
     if (parsedMessage.isEmpty())
     {
         return;
@@ -457,7 +457,7 @@ void TwitchChannel::sendReply(const QString &message, const QString &replyId)
                               << "] Send reply message:" << message;
 
     // Do last message processing
-    QString parsedMessage = this->prepareMessage(app, message);
+    QString parsedMessage = this->prepareMessage(message);
 
     bool messageSent = false;
     this->sendReplySignal.invoke(this->getName(), parsedMessage, replyId,
@@ -838,7 +838,6 @@ void TwitchChannel::loadRecentMessages()
             auto &handler = IrcMessageHandler::instance();
 
             std::vector<MessagePtr> allBuiltMessages;
-            auto tc = dynamic_cast<TwitchChannel *>(shared.get());
 
             for (auto message : messages)
             {

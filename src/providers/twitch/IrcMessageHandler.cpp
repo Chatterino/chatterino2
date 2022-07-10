@@ -293,28 +293,31 @@ void IrcMessageHandler::populateReply(
     {
         const QString replyID = it.value().toString();
         auto threadIt = channel->threads_.find(replyID);
-        if (threadIt != channel->threads_.end() && !threadIt->second.expired())
+        if (threadIt != channel->threads_.end())
         {
-            // Thread already exists (has a reply)
-            builder.setThread(threadIt->second.lock());
-        }
-        else
-        {
-            // Thread does not yet exist, find root reply and create thread.
-            // Linear search is justified by the infrequent use of replies
-            for (auto &otherMsg : otherLoaded)
+            const auto owned = threadIt->second.lock();
+            if (owned)
             {
-                if (otherMsg->id == replyID)
-                {
-                    // Found root reply message
-                    std::shared_ptr<MessageThread> newThread =
-                        std::make_shared<MessageThread>(otherMsg);
+                // Thread already exists (has a reply)
+                builder.setThread(owned);
+                return;
+            }
+        }
 
-                    // Store weak reference to thread
-                    builder.setThread(newThread);
-                    channel->addReplyThread(newThread);
-                    break;
-                }
+        // Thread does not yet exist, find root reply and create thread.
+        // Linear search is justified by the infrequent use of replies
+        for (auto &otherMsg : otherLoaded)
+        {
+            if (otherMsg->id == replyID)
+            {
+                // Found root reply message
+                std::shared_ptr<MessageThread> newThread =
+                    std::make_shared<MessageThread>(otherMsg);
+
+                builder.setThread(newThread);
+                // Store weak reference to thread in channel
+                channel->addReplyThread(newThread);
+                break;
             }
         }
     }
@@ -398,8 +401,8 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                 std::shared_ptr<MessageThread> newThread =
                     std::make_shared<MessageThread>(root);
 
-                // Store weak reference to thread
                 builder.setThread(newThread);
+                // Store weak reference to thread in channel
                 channel->addReplyThread(newThread);
             }
         }

@@ -15,9 +15,9 @@ ReplyInput::ReplyInput(QWidget *parent, Split *split)
 {
 }
 
-void ReplyInput::setThread(const std::shared_ptr<const MessageThread> &thread)
+void ReplyInput::setThread(std::shared_ptr<const MessageThread> thread)
 {
-    this->thread_ = thread;
+    this->thread_ = std::move(thread);
 }
 
 QString ReplyInput::hotkeySendMessage(std::vector<QString> &arguments)

@@ -20,7 +20,7 @@ class ReplyThreadPopup final : public DraggablePopup
 public:
     ReplyThreadPopup(bool closeAutomatically, QWidget *parent, Split *split);
 
-    void setThread(const std::shared_ptr<const MessageThread> &thread);
+    void setThread(std::shared_ptr<const MessageThread> thread);
     void giveFocus(Qt::FocusReason reason);
 
 protected:

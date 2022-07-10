@@ -46,7 +46,7 @@ public:
     void triggerHighlights() override;
     MessagePtr build() override;
 
-    void setThread(const std::shared_ptr<MessageThread> &thread);
+    void setThread(std::shared_ptr<MessageThread> thread);
 
     static void appendChannelPointRewardMessage(
         const ChannelPointReward &reward, MessageBuilder *builder, bool isMod,

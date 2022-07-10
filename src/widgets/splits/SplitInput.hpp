@@ -35,7 +35,7 @@ public:
     QString getInputText() const;
     void insertText(const QString &text);
 
-    void setReply(const std::shared_ptr<MessageThread> &reply);
+    void setReply(std::shared_ptr<MessageThread> reply);
 
     /**
      * @brief Hide the widget

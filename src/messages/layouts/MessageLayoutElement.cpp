@@ -488,11 +488,6 @@ int ReplyCurveLayoutElement::getXFromIndex(int index)
     {
         return this->getRect().left();
     }
-    else if (index == 1)
-    {
-        // fourtf: remove space width
-        return this->getRect().right();
-    }
     else
     {
         return this->getRect().right();

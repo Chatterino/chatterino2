@@ -16,7 +16,7 @@ class ReplyInput : public SplitInput
 public:
     ReplyInput(QWidget *parent, Split *split);
 
-    void setThread(const std::shared_ptr<const MessageThread> &thread);
+    void setThread(std::shared_ptr<const MessageThread> thread);
 
     void setPlaceholderText(const QString &text);
 

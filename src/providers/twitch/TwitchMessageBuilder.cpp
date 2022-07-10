@@ -1574,10 +1574,9 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(QString prefix,
     }
 }
 
-void TwitchMessageBuilder::setThread(
-    const std::shared_ptr<MessageThread> &thread)
+void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)
 {
-    this->thread_ = thread;
+    this->thread_ = std::move(thread);
 }
 
 }  // namespace chatterino
