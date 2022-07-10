@@ -180,8 +180,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 // Painting
 void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                           Selection &selection, bool isLastReadMessage,
-                          bool isWindowFocused, bool isMentions,
-                          bool paintFloating)
+                          bool isWindowFocused, bool isMentions)
 {
     auto app = getApp();
     QPixmap *pixmap = this->buffer_.get();
@@ -206,7 +205,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 
     if (!this->bufferValid_ || !selection.isEmpty())
     {
-        this->updateBuffer(pixmap, messageIndex, selection, paintFloating);
+        this->updateBuffer(pixmap, messageIndex, selection);
     }
 
     // draw on buffer
@@ -282,7 +281,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 }
 
 void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
-                                 Selection & /*selection*/, bool paintFloating)
+                                 Selection & /*selection*/)
 {
     if (buffer->isNull())
         return;
@@ -352,10 +351,6 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
 
     // draw message
     this->container_->paintElements(painter);
-    if (paintFloating && this->renderFloatingElements_)
-    {
-        this->container_->paintFloatingElements(painter, buffer->rect());
-    }
 
 #ifdef FOURTF
     // debug
@@ -409,13 +404,6 @@ const MessageLayoutElement *MessageLayout::getElementAt(QPoint point)
     return this->container_->getElementAt(point);
 }
 
-const FloatingMessageLayoutElement *MessageLayout::getFloatingElementAt(
-    QPoint point)
-{
-    // go through all words and return the first one that contains the point.
-    return this->container_->getFloatingElementAt(point);
-}
-
 int MessageLayout::getLastCharacterIndex() const
 {
     return this->container_->getLastCharacterIndex();
@@ -457,11 +445,6 @@ bool MessageLayout::isReplyable() const
 void MessageLayout::setRenderReplies(bool render)
 {
     this->renderReplies_ = render;
-}
-
-void MessageLayout::setRenderFloatingElements(bool render)
-{
-    this->renderFloatingElements_ = render;
 }
 
 }  // namespace chatterino

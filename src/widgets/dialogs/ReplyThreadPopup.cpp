@@ -73,7 +73,6 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     // initialize UI
     this->ui_.threadView =
         new ChannelView(this, this->split_, ChannelView::Context::ReplyThread);
-    this->ui_.threadView->setFloatingVisible(false);
     this->ui_.threadView->setMinimumSize(400, 100);
     this->ui_.threadView->setSizePolicy(QSizePolicy::Expanding,
                                         QSizePolicy::Expanding);

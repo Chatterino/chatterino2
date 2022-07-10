@@ -16,7 +16,6 @@ using MessagePtr = std::shared_ptr<const Message>;
 struct Selection;
 struct MessageLayoutContainer;
 class MessageLayoutElement;
-class FloatingMessageLayoutElement;
 
 enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
@@ -49,14 +48,13 @@ public:
     // Painting
     void paint(QPainter &painter, int width, int y, int messageIndex,
                Selection &selection, bool isLastReadMessage,
-               bool isWindowFocused, bool isMentions, bool paintFloating);
+               bool isWindowFocused, bool isMentions);
     void invalidateBuffer();
     void deleteBuffer();
     void deleteCache();
 
     // Elements
     const MessageLayoutElement *getElementAt(QPoint point);
-    const FloatingMessageLayoutElement *getFloatingElementAt(QPoint point);
     int getLastCharacterIndex() const;
     int getFirstMessageCharacterIndex() const;
     int getSelectionIndex(QPoint position);
@@ -67,7 +65,6 @@ public:
     bool isDisabled() const;
     bool isReplyable() const;
     void setRenderReplies(bool render);
-    void setRenderFloatingElements(bool render);
 
 private:
     // variables
@@ -76,7 +73,6 @@ private:
     std::shared_ptr<QPixmap> buffer_{};
     bool bufferValid_ = false;
     bool renderReplies_ = true;
-    bool renderFloatingElements_ = true;
 
     int height_ = 0;
 
@@ -92,8 +88,7 @@ private:
 
     // methods
     void actuallyLayout(int width, MessageElementFlags flags);
-    void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection,
-                      bool paintFloating);
+    void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection);
 };
 
 using MessageLayoutPtr = std::shared_ptr<MessageLayout>;

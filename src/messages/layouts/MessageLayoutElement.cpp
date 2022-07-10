@@ -92,45 +92,6 @@ FlagsEnum<MessageElementFlag> MessageLayoutElement::getFlags() const
 }
 
 //
-// Floating Layout Element
-//
-
-const QRect &FloatingMessageLayoutElement::getRect() const
-{
-    return this->rect_;
-}
-
-FloatingMessageLayoutElement::FloatingMessageLayoutElement(
-    MessageElement &creator, const QSize &size)
-    : creator_(creator)
-{
-    this->rect_.setSize(size);
-    DebugCount::increase("message layout elements");
-}
-
-FloatingMessageLayoutElement::~FloatingMessageLayoutElement()
-{
-    DebugCount::decrease("message layout elements");
-}
-
-MessageElement &FloatingMessageLayoutElement::getCreator() const
-{
-    return this->creator_;
-}
-
-FloatingMessageLayoutElement *FloatingMessageLayoutElement::setLink(
-    const Link &_link)
-{
-    this->link_ = _link;
-    return this;
-}
-
-const Link &FloatingMessageLayoutElement::getLink() const
-{
-    return this->link_;
-}
-
-//
 // IMAGE
 //
 
@@ -273,41 +234,6 @@ void ImageWithCircleBackgroundLayoutElement::paint(QPainter &painter)
         painter.setPen(Qt::NoPen);
         painter.setBrush(QBrush(this->color_, Qt::SolidPattern));
         painter.drawEllipse(boxRect);
-
-        QRectF imgRect;
-        imgRect.setTopLeft(boxRect.topLeft());
-        imgRect.setSize(this->imageSize_);
-        imgRect.translate(this->padding_, this->padding_);
-
-        painter.drawPixmap(imgRect, *pixmap, QRectF());
-    }
-}
-
-PrettyFloatingImageLayoutElement::PrettyFloatingImageLayoutElement(
-    MessageElement &creator, ImagePtr image, const QSize &size, int padding,
-    QColor background)
-    : FloatingMessageLayoutElement(creator, size + QSize(padding, padding) * 2)
-    , image_(std::move(image))
-    , padding_(padding)
-    , background_(background)
-    , imageSize_(size)
-{
-}
-
-void PrettyFloatingImageLayoutElement::paint(QPainter &painter)
-{
-    if (this->image_ == nullptr)
-    {
-        return;
-    }
-
-    auto pixmap = this->image_->pixmapOrLoad();
-    if (pixmap && !this->image_->animated())
-    {
-        QRectF boxRect(this->getRect());
-        QPainterPath path;
-        path.addRoundedRect(boxRect, this->padding_, this->padding_);
-        painter.fillPath(path, this->background_);
 
         QRectF imgRect;
         imgRect.setTopLeft(boxRect.topLeft());

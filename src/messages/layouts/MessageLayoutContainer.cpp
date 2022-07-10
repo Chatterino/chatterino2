@@ -76,12 +76,6 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element)
     this->_addElement(element);
 }
 
-void MessageLayoutContainer::addFloatingElement(
-    FloatingMessageLayoutElement *element)
-{
-    this->floatingElements_.emplace_back(element);
-}
-
 void MessageLayoutContainer::addElementNoLineBreak(
     MessageLayoutElement *element)
 {
@@ -352,20 +346,6 @@ MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point)
     return nullptr;
 }
 
-FloatingMessageLayoutElement *MessageLayoutContainer::getFloatingElementAt(
-    QPoint point)
-{
-    for (const auto &element : this->floatingElements_)
-    {
-        if (element->getRect().contains(point))
-        {
-            return element.get();
-        }
-    }
-
-    return nullptr;
-}
-
 // painting
 void MessageLayoutContainer::paintElements(QPainter &painter)
 {
@@ -575,15 +555,6 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
 
         painter.fillRect(rect, selectionColor);
         break;
-    }
-}
-
-void MessageLayoutContainer::paintFloatingElements(QPainter &painter,
-                                                   const QRect &rect)
-{
-    for (const auto &element : this->floatingElements_)
-    {
-        element->paint(painter);
     }
 }
 

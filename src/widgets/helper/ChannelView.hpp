@@ -39,7 +39,6 @@ class Scrollbar;
 class EffectLabel;
 struct Link;
 class MessageLayoutElement;
-class FloatingMessageLayoutElement;
 class Split;
 
 enum class PauseReason {
@@ -120,8 +119,6 @@ public:
     void showUserInfoPopup(const QString &userName,
                            QString alternativePopoutChannel = QString());
 
-    void setFloatingVisible(bool visible);
-
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
@@ -182,9 +179,6 @@ private:
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoveredElement,
                           MessageLayoutPtr layout);
-    void handleMouseClick(QMouseEvent *event,
-                          const FloatingMessageLayoutElement *hoveredElement,
-                          MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
                              MessageLayoutPtr layout, QMouseEvent *event);
     void addImageContextMenuItems(const MessageLayoutElement *hoveredElement,
@@ -215,7 +209,6 @@ private:
 
     void setInputReply(const MessagePtr &message);
     void showReplyThreadPopup(const MessagePtr &message);
-    bool shouldRenderFloatingElements() const;
     bool canReplyToMessages() const;
 
     QTimer *layoutCooldown_;
@@ -260,8 +253,6 @@ private:
     // "Show latest messages" button
     bool showingLatestMessages_ = true;
     bool enableScrollingToBottom_ = true;
-
-    bool floatingVisible_ = true;
 
     bool onlyUpdateEmotes_ = false;
 

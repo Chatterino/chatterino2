@@ -164,11 +164,6 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
     // of any place where you can, or where it would make sense,
     // to tab to a ChannelVieChannelView
     this->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
-
-    if (this->split_ == nullptr)
-    {
-        this->setFloatingVisible(false);  // prevent a whole bunch of problems
-    }
 }
 
 void ChannelView::initializeLayout()
@@ -1095,9 +1090,7 @@ void ChannelView::drawMessages(QPainter &painter)
         }
 
         layout->paint(painter, DRAW_WIDTH, y, i, this->selection_,
-                      isLastMessage, windowFocused, isMentions,
-                      this->shouldRenderFloatingElements() &&
-                          this->channel_->isTwitchChannel());
+                      isLastMessage, windowFocused, isMentions);
 
         y += layout->getHeight();
 
@@ -1304,25 +1297,6 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         this->setCursor(Qt::PointingHandCursor);
         tooltipWidget->hide();
         return;
-    }
-
-    if (this->shouldRenderFloatingElements())
-    {
-        const FloatingMessageLayoutElement *floatingHoverElement =
-            layout->getFloatingElementAt(relativePos);
-
-        if (floatingHoverElement != nullptr)
-        {
-            if (floatingHoverElement->getLink().isValid())
-            {
-                this->setCursor(Qt::PointingHandCursor);
-            }
-            else
-            {
-                this->setCursor(Qt::ArrowCursor);
-            }
-            return;
-        }
     }
 
     // check if word underneath cursor
@@ -1783,19 +1757,6 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
-    if (this->shouldRenderFloatingElements())
-    {
-        const FloatingMessageLayoutElement *floatingHoverElement =
-            layout->getFloatingElementAt(relativePos);
-
-        if (floatingHoverElement != nullptr)
-        {
-            this->handleMouseClick(event, floatingHoverElement, layout);
-            this->update();
-            return;
-        }
-    }
-
     const MessageLayoutElement *hoverLayoutElement =
         layout->getElementAt(relativePos);
     // Triple-clicking a message selects the whole message
@@ -1895,26 +1856,6 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             {
                 this->handleLinkClick(event, link, layout.get());
             }
-        }
-        break;
-        default:;
-    }
-}
-
-void ChannelView::handleMouseClick(
-    QMouseEvent *event, const FloatingMessageLayoutElement *hoveredElement,
-    MessageLayoutPtr layout)
-{
-    if (hoveredElement == nullptr)
-    {
-        return;
-    }
-
-    switch (event->button())
-    {
-        case Qt::LeftButton: {
-            const auto &link = hoveredElement->getLink();
-            this->handleLinkClick(event, link, layout.get());
         }
         break;
         default:;
@@ -2639,16 +2580,6 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
     popup->move(QCursor::pos() - offset);
     popup->show();
     popup->giveFocus(Qt::MouseFocusReason);
-}
-
-void ChannelView::setFloatingVisible(bool visible)
-{
-    this->floatingVisible_ = visible;
-}
-
-bool ChannelView::shouldRenderFloatingElements() const
-{
-    return this->floatingVisible_;
 }
 
 ChannelView::Context ChannelView::getContext() const
