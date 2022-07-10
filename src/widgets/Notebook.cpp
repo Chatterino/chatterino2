@@ -737,7 +737,7 @@ void Notebook::performLayout(bool animated)
     else if (this->tabLocation_ == NotebookTabLocation::Bottom)
     {
         auto x = left;
-        auto y = bottom - buttonHeight - 1;
+        auto y = bottom;
         auto consumedButtonHeights = 0;
 
         // set size of custom buttons (settings, user, ...)
@@ -748,6 +748,9 @@ void Notebook::performLayout(bool animated)
                 continue;
             }
 
+            // move upward to place button below location (x, y)
+            y = bottom - tabHeight;
+
             btn->setFixedSize(buttonWidth, buttonHeight);
             btn->move(x, y);
             x += buttonWidth;
@@ -757,6 +760,9 @@ void Notebook::performLayout(bool animated)
 
         if (this->showTabs_)
         {
+            // reset vertical position regardless
+            y = bottom - tabHeight;
+
             // layout tabs
             /// Notebook tabs need to know if they are in the last row.
             auto firstInBottomRow =
