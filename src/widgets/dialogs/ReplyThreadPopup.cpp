@@ -154,6 +154,8 @@ void ReplyThreadPopup::addMessagesFromThread()
 void ReplyThreadPopup::updateInputUI()
 {
     auto channel = this->split_->getChannel();
+    // Bail out if not a twitch channel.
+    // Special twitch channels will hide their reply input box.
     if (!channel || !channel->isTwitchChannel())
     {
         return;
