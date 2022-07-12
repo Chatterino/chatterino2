@@ -106,9 +106,9 @@ protected:
     void paint(QPainter &painter) override;
 
 private:
-    QColor color_;
-    QSize imageSize_;
-    int padding_;
+    const QColor color_;
+    const QSize imageSize_;
+    const int padding_;
 };
 
 // TEXT

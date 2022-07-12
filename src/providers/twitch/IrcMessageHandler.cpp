@@ -398,8 +398,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             if (root)
             {
                 // Found root reply message
-                std::shared_ptr<MessageThread> newThread =
-                    std::make_shared<MessageThread>(root);
+                const auto newThread = std::make_shared<MessageThread>(root);
 
                 builder.setThread(newThread);
                 // Store weak reference to thread in channel
