@@ -408,12 +408,13 @@ void Window::addShortcuts()
              {
                  splitContainer = this->notebook_->getOrAddSelectedPage();
              }
-             this->notebook_->select(splitContainer);
              Split *split = new Split(splitContainer);
              split->setChannel(
                  getApp()->twitch->getOrAddChannel(si.channelName));
              split->setFilters(si.filters);
              splitContainer->appendSplit(split);
+             splitContainer->setSelected(split);
+             this->notebook_->select(splitContainer);
              return "";
          }},
         {"toggleLocalR9K",
