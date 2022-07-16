@@ -56,6 +56,13 @@ AboutPage::AboutPage()
                                               version.runningString());
             label->setOpenExternalLinks(true);
             label->setTextInteractionFlags(Qt::TextBrowserInteraction);
+
+            auto disclaimer = vbox.emplace<QLabel>(
+                "Send bugs to the <a "
+                "href=https://github.com/mm2pl/dankerino>Dankerino repo</a> "
+                "not upstream Chatterino.");
+            disclaimer->setStyleSheet("color: red");
+            disclaimer->setOpenExternalLinks(true);
         }
 
         // About Chatterino

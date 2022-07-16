@@ -6,6 +6,7 @@
 ### Dankerino
 - Minor: Added a link to the upstream commit (Mm2PL/Dankerino#127)
 - Minor: Added RaccAttack URL to Twitch Emote context menu (Mm2PL/Dankerino#122)
+- Minor: Added a warning to not send bug reports to upstream (Mm2PL/Dankerino#128)
 
 ### Chatterino
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. [Ctrl+Shift+F by default] (#3694)
