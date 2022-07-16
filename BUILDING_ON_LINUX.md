@@ -52,7 +52,7 @@ _Most likely works the same for other Debian-like distros_
 
 _Most likely works the same for other Red Hat-like distros. Substitute `dnf` with `yum`._
 
-1. Install all of the dependencies using `sudo dnf install qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qtimageformats-devel qt5-qtsvg-devel libsecret-devel openssl-devel boost-devel cmake`
+1. Install all of the dependencies using `sudo dnf install qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qtsvg-devel qt5-qtimageformats-devel qt5-linguist libsecret-devel openssl-devel boost-devel cmake`
 1. Go into the project directory
 1. Create a build folder and go into it (`mkdir build && cd build`)
 1. Use one of the options below to compile it

@@ -299,6 +299,16 @@ Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
     return *window;
 }
 
+Window &WindowManager::openInPopup(ChannelPtr channel)
+{
+    auto &popup = this->createWindow(WindowType::Popup, true);
+    auto *split =
+        popup.getNotebook().getOrAddSelectedPage()->appendNewSplit(false);
+    split->setChannel(channel);
+
+    return popup;
+}
+
 void WindowManager::select(Split *split)
 {
     this->selectSplit.invoke(split);
