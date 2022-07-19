@@ -654,6 +654,17 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                 this->channel_->replaceMessage(index, replacement);
         });
 
+    this->channelConnections_.managedConnect(
+        underlyingChannel->arbitraryMessageUpdate, [this]() {
+            std::vector<MessagePtr> filtered;
+            auto snapshot = this->underlyingChannel_->getMessageSnapshot();
+            std::copy_if(snapshot.begin(), snapshot.end(),
+                         std::back_inserter(filtered), [this](MessagePtr msg) {
+                             return this->shouldIncludeMessage(msg);
+                         });
+            this->channel_->copyMessagesFrom(filtered);
+        });
+
     //
     // Standard channel connections
     //
@@ -670,6 +681,11 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
         this->channel_->messagesAddedAtStart,
         [this](std::vector<MessagePtr> &messages) {
             this->messageAddedAtStart(messages);
+        });
+
+    this->channelConnections_.managedConnect(
+        this->channel_->arbitraryMessageUpdate, [this]() {
+            this->messagesInserted();
         });
 
     // on message removed
@@ -934,6 +950,41 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
                                        replacement->getScrollBarHighlight());
 
     this->messages_.replaceItem(message, newItem);
+    this->queueLayout();
+}
+
+void ChannelView::messagesInserted()
+{
+    auto snapshot = this->channel_->getMessageSnapshot();
+
+    this->messages_.clear();
+    this->scrollBar_->clearHighlights();
+    this->lastMessageHasAlternateBackground_ = false;
+    this->lastMessageHasAlternateBackgroundReverse_ = true;
+
+    for (const auto &msg : snapshot)
+    {
+        auto messageLayout = new MessageLayout(msg);
+
+        if (this->lastMessageHasAlternateBackground_)
+        {
+            messageLayout->flags.set(MessageLayoutFlag::AlternateBackground);
+        }
+        this->lastMessageHasAlternateBackground_ =
+            !this->lastMessageHasAlternateBackground_;
+
+        if (this->channel_->shouldIgnoreHighlights())
+        {
+            messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
+        }
+
+        this->messages_.pushBack(MessageLayoutPtr(messageLayout));
+        if (this->showScrollbarHighlights())
+        {
+            this->scrollBar_->addHighlight(msg->getScrollBarHighlight());
+        }
+    }
+
     this->queueLayout();
 }
 

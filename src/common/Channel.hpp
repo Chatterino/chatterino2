@@ -54,8 +54,10 @@ public:
         messageAppended;
     pajlada::Signals::Signal<std::vector<MessagePtr> &> messagesAddedAtStart;
     pajlada::Signals::Signal<size_t, MessagePtr &> messageReplaced;
+    pajlada::Signals::NoArgSignal arbitraryMessageUpdate;
     pajlada::Signals::NoArgSignal destroyed;
     pajlada::Signals::NoArgSignal displayNameChanged;
+    pajlada::Signals::NoArgSignal reconnected;
 
     Type getType() const;
     const QString &getName() const;
@@ -73,11 +75,16 @@ public:
         MessagePtr message,
         boost::optional<MessageFlags> overridingFlags = boost::none);
     void addMessagesAtStart(std::vector<MessagePtr> &messages_);
+    void insertMessageBefore(const MessagePtr &before,
+                             const MessagePtr &message, bool notify = true);
+    void insertMessageAfter(const MessagePtr &after, const MessagePtr &message,
+                            bool notify = true);
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
     void replaceMessage(size_t index, MessagePtr replacement);
     void deleteMessage(QString messageID);
+    void copyMessagesFrom(const std::vector<MessagePtr> &messages);
     MessagePtr findMessage(QString messageID);
 
     bool hasMessages() const;

@@ -144,6 +144,21 @@ namespace {
 
         return {Success, std::move(usernames)};
     }
+
+    QUrl constructRecentMessagesUrl(const QString &name)
+    {
+        QUrl url(Env::get().recentMessagesApiUrl.arg(name));
+        QUrlQuery urlQuery(url);
+        if (!urlQuery.hasQueryItem("limit"))
+        {
+            urlQuery.addQueryItem(
+                "limit",
+                QString::number(getSettings()->twitchMessageHistoryLimit));
+        }
+        url.setQuery(urlQuery);
+        return url;
+    }
+
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name)
@@ -180,6 +195,17 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->refreshCheerEmotes();
         this->refreshFFZChannelEmotes(false);
         this->refreshBTTVChannelEmotes(false);
+    });
+
+    this->reconnected.connect([this]() {
+        if (this->roomId().isEmpty())
+        {
+            // if we get a reconnected event when the room id is not set, we probably
+            // just connected for the first time
+            return;
+        }
+
+        this->loadRecentMessagesReconnect();
     });
 
     // timers
@@ -743,22 +769,107 @@ void TwitchChannel::parseLiveStatus(bool live, const HelixStream &stream)
     this->liveStatusChanged.invoke();
 }
 
+std::vector<MessagePtr> TwitchChannel::buildRecentMessages(
+    std::vector<Communi::IrcMessage *> &messages)
+{
+    auto &handler = IrcMessageHandler::instance();
+    std::vector<MessagePtr> allBuiltMessages;
+
+    for (auto message : messages)
+    {
+        if (message->tags().contains("rm-received-ts"))
+        {
+            QDate msgDate =
+                QDateTime::fromMSecsSinceEpoch(
+                    message->tags().value("rm-received-ts").toLongLong())
+                    .date();
+            if (msgDate != this->lastDate_)
+            {
+                this->lastDate_ = msgDate;
+                auto msg = makeSystemMessage(
+                    QLocale().toString(msgDate, QLocale::LongFormat),
+                    QTime(0, 0));
+                msg->flags.set(MessageFlag::RecentMessage);
+                allBuiltMessages.emplace_back(msg);
+            }
+        }
+
+        for (auto builtMessage : handler.parseMessage(this, message))
+        {
+            builtMessage->flags.set(MessageFlag::RecentMessage);
+            allBuiltMessages.emplace_back(builtMessage);
+        }
+    }
+
+    return allBuiltMessages;
+}
+
+void TwitchChannel::fillInMissingMessages(
+    const std::vector<MessagePtr> &messages)
+{
+    qCDebug(chatterinoUpdate) << "filling in missing messages";
+
+    auto snapshot = this->getMessageSnapshot();
+
+    std::unordered_set<QString> existingMessageIds;
+    existingMessageIds.reserve(snapshot.size());
+
+    for (auto &msg : snapshot)
+    {
+        if (msg->flags.has(MessageFlag::System))
+        {
+            continue;
+        }
+
+        existingMessageIds.insert(msg->id);
+    }
+
+    auto lastMsg = snapshot[snapshot.size() - 1];
+    for (auto &msg : messages)
+    {
+        // check if message already exists
+        if (existingMessageIds.count(msg->id) != 0)
+        {
+            continue;
+        }
+
+        bool insertedFlag = false;
+        for (auto &snapshotMsg : snapshot)
+        {
+            if (snapshotMsg->flags.has(MessageFlag::System))
+            {
+                continue;
+            }
+
+            if (msg->serverReceivedTime < snapshotMsg->serverReceivedTime)
+            {
+                this->insertMessageBefore(snapshotMsg, msg, false);
+                insertedFlag = true;
+                break;
+            }
+        }
+
+        if (!insertedFlag)
+        {
+            this->insertMessageAfter(lastMsg, msg, false);
+            lastMsg = msg;
+        }
+    }
+
+    // invoke at end
+    this->arbitraryMessageUpdate.invoke();
+}
+
 void TwitchChannel::loadRecentMessages()
 {
-    if (!getSettings()->loadTwitchMessageHistoryOnConnect)
+    if (!getSettings()->loadTwitchMessageHistoryOnConnect ||
+        this->loadingRecentMessages_)
     {
         return;
     }
 
-    QUrl url(Env::get().recentMessagesApiUrl.arg(this->getName()));
-    QUrlQuery urlQuery(url);
-    if (!urlQuery.hasQueryItem("limit"))
-    {
-        urlQuery.addQueryItem(
-            "limit", QString::number(getSettings()->twitchMessageHistoryLimit));
-    }
-    url.setQuery(urlQuery);
-
+    this->loadingRecentMessages_ = true;
+    QUrl url = constructRecentMessagesUrl(this->getName());
     auto weak = weakOf<Channel>(this);
 
     NetworkRequest(url)
@@ -767,41 +878,18 @@ void TwitchChannel::loadRecentMessages()
             if (!shared)
                 return Failure;
 
+            auto tc = dynamic_cast<TwitchChannel *>(shared.get());
+            if (!tc)
+                return Failure;
+
             auto root = result.parseJson();
             auto messages = parseRecentMessages(root, shared);
 
-            auto &handler = IrcMessageHandler::instance();
+            // build the Communi messages into chatterino messages
+            std::vector<MessagePtr> allBuiltMessages =
+                tc->buildRecentMessages(messages);
 
-            std::vector<MessagePtr> allBuiltMessages;
-
-            for (auto message : messages)
-            {
-                if (message->tags().contains("rm-received-ts"))
-                {
-                    QDate msgDate = QDateTime::fromMSecsSinceEpoch(
-                                        message->tags()
-                                            .value("rm-received-ts")
-                                            .toLongLong())
-                                        .date();
-                    if (msgDate != shared.get()->lastDate_)
-                    {
-                        shared.get()->lastDate_ = msgDate;
-                        auto msg = makeSystemMessage(
-                            QLocale().toString(msgDate, QLocale::LongFormat),
-                            QTime(0, 0));
-                        msg->flags.set(MessageFlag::RecentMessage);
-                        allBuiltMessages.emplace_back(msg);
-                    }
-                }
-
-                for (auto builtMessage :
-                     handler.parseMessage(shared.get(), message))
-                {
-                    builtMessage->flags.set(MessageFlag::RecentMessage);
-                    allBuiltMessages.emplace_back(builtMessage);
-                }
-            }
-
+            tc->loadingRecentMessages_ = false;
             postToThread([this, shared, root,
                           messages = std::move(allBuiltMessages)]() mutable {
                 shared->addMessagesAtStart(messages);
@@ -830,6 +918,85 @@ void TwitchChannel::loadRecentMessages()
             if (!shared)
                 return;
 
+            auto tc = dynamic_cast<TwitchChannel *>(shared.get());
+            if (!tc)
+                return;
+
+            tc->loadingRecentMessages_ = false;
+            shared->addMessage(makeSystemMessage(
+                QString("Message history service unavailable (Error %1)")
+                    .arg(result.status())));
+        })
+        .execute();
+}
+
+void TwitchChannel::loadRecentMessagesReconnect()
+{
+    if (!getSettings()->loadTwitchMessageHistoryOnConnect ||
+        this->loadingRecentMessages_)
+    {
+        return;
+    }
+
+    this->loadingRecentMessages_ = true;
+    QUrl url = constructRecentMessagesUrl(this->getName());
+    auto weak = weakOf<Channel>(this);
+
+    NetworkRequest(url)
+        .onSuccess([this, weak](NetworkResult result) -> Outcome {
+            auto shared = weak.lock();
+            if (!shared)
+                return Failure;
+
+            auto tc = dynamic_cast<TwitchChannel *>(shared.get());
+            if (!tc)
+                return Failure;
+
+            auto root = result.parseJson();
+            auto messages = parseRecentMessages(root, shared);
+
+            // build the Communi messages into chatterino messages
+            std::vector<MessagePtr> allBuiltMessages =
+                tc->buildRecentMessages(messages);
+
+            tc->loadingRecentMessages_ = false;
+            postToThread([this, shared, root,
+                          messages = std::move(allBuiltMessages)]() mutable {
+                auto tc = dynamic_cast<TwitchChannel *>(shared.get());
+                if (!tc)
+                    return;
+
+                tc->fillInMissingMessages(messages);
+
+                // Notify user about a possible gap in logs if it returned some messages
+                // but isn't currently joined to a channel
+                if (QString errorCode = root.value("error_code").toString();
+                    !errorCode.isEmpty())
+                {
+                    qCDebug(chatterinoTwitch)
+                        << QString("rm error_code=%1, channel=%2")
+                               .arg(errorCode, this->getName());
+                    if (errorCode == "channel_not_joined" && !messages.empty())
+                    {
+                        shared->addMessage(makeSystemMessage(
+                            "Message history service recovering, there may be "
+                            "gaps in the message history."));
+                    }
+                }
+            });
+
+            return Success;
+        })
+        .onError([weak](NetworkResult result) {
+            auto shared = weak.lock();
+            if (!shared)
+                return;
+
+            auto tc = dynamic_cast<TwitchChannel *>(shared.get());
+            if (!tc)
+                return;
+
+            tc->loadingRecentMessages_ = false;
             shared->addMessage(makeSystemMessage(
                 QString("Message history service unavailable (Error %1)")
                     .arg(result.status())));

@@ -12,6 +12,7 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "util/QStringHash.hpp"
 
+#include <IrcMessage>
 #include <QColor>
 #include <QElapsedTimer>
 #include <QRegularExpression>
@@ -150,6 +151,8 @@ private:
     void refreshBadges();
     void refreshCheerEmotes();
     void loadRecentMessages();
+    void loadRecentMessagesReconnect();
+    void fillInMissingMessages(const std::vector<MessagePtr> &messages);
     void fetchDisplayName();
 
     void setLive(bool newLiveStatus);
@@ -164,6 +167,9 @@ private:
     const QString &getDisplayName() const override;
     const QString &getLocalizedName() const override;
 
+    std::vector<MessagePtr> buildRecentMessages(
+        std::vector<Communi::IrcMessage *> &messages);
+
     // Data
     const QString subscriptionUrl_;
     const QString channelUrl_;
@@ -171,6 +177,7 @@ private:
     int chatterCount_;
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
+    bool loadingRecentMessages_{false};
 
 protected:
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;

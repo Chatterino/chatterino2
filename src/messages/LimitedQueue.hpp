@@ -5,6 +5,7 @@
 #include <boost/circular_buffer.hpp>
 #include <boost/optional.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <mutex>
 #include <shared_mutex>
@@ -119,6 +120,46 @@ public:
     }
 
     /**
+     * @brief Replaces the contents of the queue with as many items that will fit
+     * 
+     * If more items than can fit in the queue are provided, the first n that 
+     * fit in the queue will be used.
+     * 
+     * @param items the vector of items to replace with
+     */
+    void setContents(const std::vector<T> &items)
+    {
+        std::unique_lock lock(this->mutex_);
+
+        this->buffer_.clear();
+        size_t numToPush = std::min(items.size(), this->limit());
+        for (size_t i = 0; i < numToPush; ++i)
+        {
+            this->buffer_.push_back(items[i]);
+        }
+    }
+
+    /**
+     * @brief Replaces the contents of the queue with as many items that will fit
+     * 
+     * If more items than can fit in the queue are provided, the first n that 
+     * fit in the queue will be used.
+     * 
+     * @param snapshot the snapshot to replace with
+     */
+    void setContents(const LimitedQueueSnapshot<T> &snapshot)
+    {
+        std::unique_lock lock(this->mutex_);
+
+        this->buffer_.clear();
+        size_t numToPush = std::min(snapshot.size(), this->limit());
+        for (size_t i = 0; i < numToPush; ++i)
+        {
+            this->buffer_.push_back(snapshot[i]);
+        }
+    }
+
+    /**
      * @brief Push an item to the end of the queue
      *
      * @param item the item to push
@@ -189,13 +230,15 @@ public:
      * @param[in] replacement the item to replace needle with
      * @return the index of the replaced item, or -1 if no replacement took place
      */
+    template <typename Equals = std::equal_to<T>>
     int replaceItem(const T &needle, const T &replacement)
     {
         std::unique_lock lock(this->mutex_);
 
+        Equals eq;
         for (int i = 0; i < this->buffer_.size(); ++i)
         {
-            if (this->buffer_[i] == needle)
+            if (eq(this->buffer_[i], needle))
             {
                 this->buffer_[i] = replacement;
                 return i;
@@ -222,6 +265,43 @@ public:
 
         this->buffer_[index] = replacement;
         return true;
+    }
+
+    template <typename Equals = std::equal_to<T>>
+    bool insertBefore(const T &needle, const T &item)
+    {
+        std::unique_lock lock(this->mutex_);
+
+        Equals eq;
+        for (auto it = this->buffer_.begin(); it != this->buffer_.end(); ++it)
+        {
+            if (eq(*it, needle))
+            {
+                this->buffer_.insert(it, item);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    template <typename Equals = std::equal_to<T>>
+    bool insertAfter(const T &needle, const T &item)
+    {
+        std::unique_lock lock(this->mutex_);
+
+        Equals eq;
+        for (auto it = this->buffer_.begin(); it != this->buffer_.end(); ++it)
+        {
+            if (eq(*it, needle))
+            {
+                ++it;  // advance to insert after it
+                this->buffer_.insert(it, item);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     [[nodiscard]] LimitedQueueSnapshot<T> getSnapshot() const

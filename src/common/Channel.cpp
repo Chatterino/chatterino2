@@ -231,6 +231,32 @@ void Channel::addMessagesAtStart(std::vector<MessagePtr> &_messages)
     }
 }
 
+void Channel::copyMessagesFrom(const std::vector<MessagePtr> &messages)
+{
+    this->messages_.setContents(messages);
+    this->arbitraryMessageUpdate.invoke();
+}
+
+void Channel::insertMessageBefore(const MessagePtr &before,
+                                  const MessagePtr &message, bool notify)
+{
+    this->messages_.insertBefore(before, message);
+    if (notify)
+    {
+        this->arbitraryMessageUpdate.invoke();
+    }
+}
+
+void Channel::insertMessageAfter(const MessagePtr &after,
+                                 const MessagePtr &message, bool notify)
+{
+    this->messages_.insertAfter(after, message);
+    if (notify)
+    {
+        this->arbitraryMessageUpdate.invoke();
+    }
+}
+
 void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
 {
     int index = this->messages_.replaceItem(message, replacement);

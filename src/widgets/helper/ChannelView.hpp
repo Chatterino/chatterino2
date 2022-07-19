@@ -151,6 +151,7 @@ private:
     void messageAddedAtStart(std::vector<MessagePtr> &messages);
     void messageRemoveFromStart(MessagePtr &message);
     void messageReplaced(size_t index, MessagePtr &replacement);
+    void messagesInserted();
 
     void performLayout(bool causedByScollbar = false);
     void layoutVisibleMessages(
