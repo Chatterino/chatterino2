@@ -685,7 +685,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
 
     this->channelConnections_.managedConnect(
         this->channel_->arbitraryMessageUpdate, [this]() {
-            this->messagesInserted();
+            this->messagesUpdated();
         });
 
     // on message removed
@@ -953,7 +953,7 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     this->queueLayout();
 }
 
-void ChannelView::messagesInserted()
+void ChannelView::messagesUpdated()
 {
     auto snapshot = this->channel_->getMessageSnapshot();
 
