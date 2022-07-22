@@ -886,8 +886,7 @@ void TwitchChannel::loadRecentMessages()
             auto messages = parseRecentMessages(root, shared);
 
             // build the Communi messages into chatterino messages
-            std::vector<MessagePtr> allBuiltMessages =
-                tc->buildRecentMessages(messages);
+            auto allBuiltMessages = tc->buildRecentMessages(messages);
 
             tc->loadingRecentMessages_ = false;
             postToThread([this, shared, root,
@@ -956,8 +955,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
             auto messages = parseRecentMessages(root, shared);
 
             // build the Communi messages into chatterino messages
-            std::vector<MessagePtr> allBuiltMessages =
-                tc->buildRecentMessages(messages);
+            auto allBuiltMessages = tc->buildRecentMessages(messages);
 
             tc->loadingRecentMessages_ = false;
             postToThread([this, shared, root,
