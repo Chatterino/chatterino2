@@ -228,6 +228,7 @@ public:
      *
      * @param[in] needle the item to search for
      * @param[in] replacement the item to replace needle with
+     * @tparam Equality function object to use for comparison
      * @return the index of the replaced item, or -1 if no replacement took place
      */
     template <typename Equals = std::equal_to<T>>
@@ -267,6 +268,14 @@ public:
         return true;
     }
 
+    /**
+     * @brief Inserts the given item before another item
+     * 
+     * @param[in] needle the item to use as positional reference
+     * @param[in] item the item to insert before needle
+     * @tparam Equality function object to use for comparison
+     * @return true if an insertion took place
+     */
     template <typename Equals = std::equal_to<T>>
     bool insertBefore(const T &needle, const T &item)
     {
@@ -285,6 +294,14 @@ public:
         return false;
     }
 
+    /**
+     * @brief Inserts the given item after another item
+     * 
+     * @param[in] needle the item to use as positional reference
+     * @param[in] item the item to insert after needle
+     * @tparam Equality function object to use for comparison
+     * @return true if an insertion took place
+     */
     template <typename Equals = std::equal_to<T>>
     bool insertAfter(const T &needle, const T &item)
     {
