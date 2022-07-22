@@ -240,8 +240,8 @@ void Channel::copyMessagesFrom(const std::vector<MessagePtr> &messages)
 void Channel::insertMessageBefore(const MessagePtr &before,
                                   const MessagePtr &message, bool notify)
 {
-    this->messages_.insertBefore(before, message);
-    if (notify)
+    bool inserted = this->messages_.insertBefore(before, message);
+    if (inserted && notify)
     {
         this->arbitraryMessageUpdate.invoke();
     }
@@ -250,8 +250,8 @@ void Channel::insertMessageBefore(const MessagePtr &before,
 void Channel::insertMessageAfter(const MessagePtr &after,
                                  const MessagePtr &message, bool notify)
 {
-    this->messages_.insertAfter(after, message);
-    if (notify)
+    bool inserted = this->messages_.insertAfter(after, message);
+    if (inserted && notify)
     {
         this->arbitraryMessageUpdate.invoke();
     }

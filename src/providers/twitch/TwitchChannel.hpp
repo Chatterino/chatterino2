@@ -20,6 +20,7 @@
 #include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
+#include <atomic>
 #include <mutex>
 #include <unordered_map>
 
@@ -177,7 +178,7 @@ private:
     int chatterCount_;
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
-    bool loadingRecentMessages_{false};
+    std::atomic_bool loadingRecentMessages_{false};
 
 protected:
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;

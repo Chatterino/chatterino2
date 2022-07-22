@@ -807,16 +807,15 @@ std::vector<MessagePtr> TwitchChannel::buildRecentMessages(
 void TwitchChannel::fillInMissingMessages(
     const std::vector<MessagePtr> &messages)
 {
-    qCDebug(chatterinoUpdate) << "filling in missing messages";
-
     auto snapshot = this->getMessageSnapshot();
 
     std::unordered_set<QString> existingMessageIds;
     existingMessageIds.reserve(snapshot.size());
 
+    // First, collect the ids of every message already present in the channel
     for (auto &msg : snapshot)
     {
-        if (msg->flags.has(MessageFlag::System))
+        if (msg->flags.has(MessageFlag::System) || msg->id.isEmpty())
         {
             continue;
         }
@@ -824,6 +823,10 @@ void TwitchChannel::fillInMissingMessages(
         existingMessageIds.insert(msg->id);
     }
 
+    // Keep track of the last message in the channel. We need this value
+    // to allow concurrent appends to the end of the channel while still
+    // being able to insert just-loaded historical messages at the end
+    // in the correct place.
     auto lastMsg = snapshot[snapshot.size() - 1];
     for (auto &msg : messages)
     {
@@ -843,6 +846,8 @@ void TwitchChannel::fillInMissingMessages(
 
             if (msg->serverReceivedTime < snapshotMsg->serverReceivedTime)
             {
+                // We found the first message that comes after the current message.
+                // Therefore, we can put the current message directly before.
                 this->insertMessageBefore(snapshotMsg, msg, false);
                 insertedFlag = true;
                 break;
@@ -851,24 +856,31 @@ void TwitchChannel::fillInMissingMessages(
 
         if (!insertedFlag)
         {
+            // We never found a message already in the channel that came after
+            // the current message. Put it at the end and make sure to update
+            // which message is considered "the end".
             this->insertMessageAfter(lastMsg, msg, false);
             lastMsg = msg;
         }
     }
 
-    // invoke at end
+    // invoke at end to avoid unnecessary re-layouts
     this->arbitraryMessageUpdate.invoke();
 }
 
 void TwitchChannel::loadRecentMessages()
 {
-    if (!getSettings()->loadTwitchMessageHistoryOnConnect ||
-        this->loadingRecentMessages_)
+    if (!getSettings()->loadTwitchMessageHistoryOnConnect)
     {
         return;
     }
 
-    this->loadingRecentMessages_ = true;
+    bool expected = false;
+    if (!this->loadingRecentMessages_.compare_exchange_strong(expected, true))
+    {
+        return;  // already loading
+    }
+
     QUrl url = constructRecentMessagesUrl(this->getName());
     auto weak = weakOf<Channel>(this);
 
@@ -931,13 +943,17 @@ void TwitchChannel::loadRecentMessages()
 
 void TwitchChannel::loadRecentMessagesReconnect()
 {
-    if (!getSettings()->loadTwitchMessageHistoryOnConnect ||
-        this->loadingRecentMessages_)
+    if (!getSettings()->loadTwitchMessageHistoryOnConnect)
     {
         return;
     }
 
-    this->loadingRecentMessages_ = true;
+    bool expected = false;
+    if (!this->loadingRecentMessages_.compare_exchange_strong(expected, true))
+    {
+        return;  // already loading
+    }
+
     QUrl url = constructRecentMessagesUrl(this->getName());
     auto weak = weakOf<Channel>(this);
 
