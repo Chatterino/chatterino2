@@ -210,14 +210,16 @@ Split::Split(QWidget *parent)
             }
         });
 
-    this->input_->ui_.textEdit->focused.connect([this] {
-        // Forward textEdit's focused event
-        this->focused.invoke();
-    });
-    this->input_->ui_.textEdit->focusLost.connect([this] {
-        // Forward textEdit's focusLost event
-        this->focusLost.invoke();
-    });
+    this->signalHolder_.managedConnect(this->input_->ui_.textEdit->focused,
+                                       [this] {
+                                           // Forward textEdit's focused event
+                                           this->focused.invoke();
+                                       });
+    this->signalHolder_.managedConnect(this->input_->ui_.textEdit->focusLost,
+                                       [this] {
+                                           // Forward textEdit's focusLost event
+                                           this->focusLost.invoke();
+                                       });
     this->input_->ui_.textEdit->imagePasted.connect(
         [this](const QMimeData *source) {
             if (!getSettings()->imageUploaderEnabled)
