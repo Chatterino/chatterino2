@@ -40,7 +40,7 @@
 - Bugfix: Fixed message only showing a maximum of one global FrankerFaceZ badge even if the user has multiple. (#3818)
 - Bugfix: Add icon in the CMake macOS bundle. (#3832)
 - Bugfix: Adopt popup windows in order to force floating behavior on some window managers. (#3836)
-- Bugfix: Fix split focusing being broken in certain circumstances when the "Show input when it's empty" setting was disabled. (#3838)
+- Bugfix: Fix split focusing being broken in certain circumstances when the "Show input when it's empty" setting was disabled. (#3838, #3860)
 - Bugfix: Always refresh tab when a contained split's channel is set. (#3849)
 - Dev: Remove official support for QMake. (#3839)
 - Dev: Rewrite LimitedQueue (#3798)
