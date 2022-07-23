@@ -951,7 +951,14 @@ void SplitInput::editTextChanged()
         if (this->replyThread_ != nullptr)
         {
             // Check if the input still starts with @username. If not, don't reply.
-            if (!text.startsWith("@" + this->replyThread_->root()->displayName))
+            //
+            // We need to verify that
+            // 1. the @username prefix exists and
+            // 2. if a character exists after the @username, it is a space
+            QString replyPrefix = "@" + this->replyThread_->root()->displayName;
+            if (!text.startsWith(replyPrefix) ||
+                (text.length() > replyPrefix.length() &&
+                 text.at(replyPrefix.length()) != ' '))
             {
                 this->replyThread_ = nullptr;
             }
