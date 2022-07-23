@@ -33,7 +33,7 @@ Note: This installation will take about 2.1 GB of disk space.
 
 ### For our websocket library, we need OpenSSL 1.1
 
-1. Download OpenSSL for windows, version `1.1.1p`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1p.exe)**
+1. Download OpenSSL for windows, version `1.1.1q`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1q.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 
@@ -83,7 +83,7 @@ Compiling with Breakpad support enables crash reports that can be of use for dev
 
 ## Run the build in Qt Creator
 
-1. Open the `chatterino.pro` file by double-clicking it, or by opening it via Qt Creator.
+1. Open the `CMakeLists.txt` file by double-clicking it, or by opening it via Qt Creator.
 2. You will be presented with a screen that is titled "Configure Project". In this screen, you should have at least one option present ready to be configured, like this:
    ![Qt Create Configure Project screenshot](https://user-images.githubusercontent.com/69117321/169887645-2ae0871a-fe8a-4eb9-98db-7b996dea3a54.png)
 3. Select the profile(s) you want to build with and click "Configure Project".
