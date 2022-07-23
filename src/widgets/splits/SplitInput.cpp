@@ -31,14 +31,16 @@
 namespace chatterino {
 const int TWITCH_MESSAGE_LIMIT = 500;
 
-SplitInput::SplitInput(Split *_chatWidget)
-    : SplitInput(_chatWidget, _chatWidget)
+SplitInput::SplitInput(Split *_chatWidget, bool showInlineReplying)
+    : SplitInput(_chatWidget, _chatWidget, showInlineReplying)
 {
 }
 
-SplitInput::SplitInput(QWidget *parent, Split *_chatWidget)
+SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
+                       bool showInlineReplying)
     : BaseWidget(parent)
     , split_(_chatWidget)
+    , showInlineReplying_(showInlineReplying)
 {
     this->installEventFilter(this);
     this->initLayout();
@@ -396,12 +398,17 @@ QString SplitInput::hotkeySendMessage(std::vector<QString> &arguments)
         }
 
         QString message = this->ui_.textEdit->toPlainText();
-        message.remove(0, this->replyThread_->root()->displayName.length() +
-                              1);  // remove "@username"
 
-        if (!message.isEmpty() && message.at(0) == ' ')
+        if (this->showInlineReplying_)
         {
-            message.remove(0, 1);  // remove possible space
+            // Remove @username prefix that is inserted when doing inline replies
+            message.remove(0, this->replyThread_->root()->displayName.length() +
+                                  1);  // remove "@username"
+
+            if (!message.isEmpty() && message.at(0) == ' ')
+            {
+                message.remove(0, 1);  // remove possible space
+            }
         }
 
         message = message.replace('\n', ' ');
@@ -937,20 +944,23 @@ void SplitInput::editTextChanged()
 
     this->ui_.textEditLength->setText(labelText);
 
-    if (this->replyThread_ != nullptr)
+    if (this->showInlineReplying_)
     {
-        // Check if the input still starts with @username. If not, don't reply.
-        if (!text.startsWith("@" + this->replyThread_->root()->displayName))
+        if (this->replyThread_ != nullptr)
         {
-            this->replyThread_ = nullptr;
+            // Check if the input still starts with @username. If not, don't reply.
+            if (!text.startsWith("@" + this->replyThread_->root()->displayName))
+            {
+                this->replyThread_ = nullptr;
+            }
         }
+
+        // Show/hide reply label if inline replies are possible
+        bool hasReply = this->replyThread_ != nullptr;
+        this->ui_.replyLabel->setVisible(hasReply);
+        this->ui_.cancelReplyButton->setVisible(hasReply);
+        this->ui_.replyHbox->setMargin(hasReply ? 2 * this->scale() : 0);
     }
-
-    bool hasReply = this->replyThread_ != nullptr;
-
-    this->ui_.replyLabel->setVisible(hasReply);
-    this->ui_.cancelReplyButton->setVisible(hasReply);
-    this->ui_.replyHbox->setMargin(hasReply ? 2 * this->scale() : 0);
 }
 
 void SplitInput::paintEvent(QPaintEvent * /*event*/)
@@ -972,7 +982,7 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
     }
 
     QRect baseRect = this->rect();
-    if (this->replyThread_ != nullptr)
+    if (this->showInlineReplying_ && this->replyThread_ != nullptr)
     {
         baseRect.moveTop(baseRect.top() + this->ui_.replyLabel->height() +
                          this->replyBottomPadding());
@@ -1012,14 +1022,25 @@ void SplitInput::giveFocus(Qt::FocusReason reason)
     this->ui_.textEdit->setFocus(reason);
 }
 
-void SplitInput::setReply(std::shared_ptr<MessageThread> reply)
+void SplitInput::setReply(std::shared_ptr<MessageThread> reply,
+                          bool showReplyingLabel)
 {
     this->replyThread_ = std::move(reply);
-    this->ui_.textEdit->setPlainText(
-        "@" + this->replyThread_->root()->displayName + " ");
-    this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
-    this->ui_.replyLabel->setText("Replying to @" +
-                                  this->replyThread_->root()->displayName);
+
+    if (this->showInlineReplying_)
+    {
+        // Only enable reply label if inline replying
+        this->ui_.textEdit->setPlainText(
+            "@" + this->replyThread_->root()->displayName + " ");
+        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+        this->ui_.replyLabel->setText("Replying to @" +
+                                      this->replyThread_->root()->displayName);
+    }
+}
+
+void SplitInput::setPlaceholderText(const QString &text)
+{
+    this->ui_.textEdit->setPlaceholderText(text);
 }
 
 }  // namespace chatterino

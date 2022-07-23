@@ -493,8 +493,6 @@ set(SOURCE_FILES
         widgets/splits/InputCompletionItem.hpp
         widgets/splits/InputCompletionPopup.cpp
         widgets/splits/InputCompletionPopup.hpp
-        widgets/splits/ReplyInput.cpp
-        widgets/splits/ReplyInput.hpp
         widgets/splits/Split.cpp
         widgets/splits/Split.hpp
         widgets/splits/SplitContainer.cpp

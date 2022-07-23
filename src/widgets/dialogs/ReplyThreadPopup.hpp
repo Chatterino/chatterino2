@@ -10,8 +10,8 @@
 namespace chatterino {
 
 class MessageThread;
-class ReplyInput;
 class Split;
+class SplitInput;
 
 class ReplyThreadPopup final : public DraggablePopup
 {
@@ -20,7 +20,7 @@ class ReplyThreadPopup final : public DraggablePopup
 public:
     ReplyThreadPopup(bool closeAutomatically, QWidget *parent, Split *split);
 
-    void setThread(std::shared_ptr<const MessageThread> thread);
+    void setThread(std::shared_ptr<MessageThread> thread);
     void giveFocus(Qt::FocusReason reason);
 
 protected:
@@ -31,14 +31,14 @@ private:
     void updateInputUI();
 
     // The message reply thread
-    std::shared_ptr<const MessageThread> thread_;
+    std::shared_ptr<MessageThread> thread_;
     // The channel that the reply thread is in
     ChannelPtr channel_;
     Split *split_;
 
     struct {
         ChannelView *threadView = nullptr;
-        ReplyInput *replyInput = nullptr;
+        SplitInput *replyInput = nullptr;
     } ui_;
 
     std::unique_ptr<pajlada::Signals::ScopedConnection> messageConnection_;

@@ -27,15 +27,18 @@ class SplitInput : public BaseWidget
     Q_OBJECT
 
 public:
-    SplitInput(Split *_chatWidget);
-    SplitInput(QWidget *parent, Split *_chatWidget);
+    SplitInput(Split *_chatWidget, bool showInlineReplying = true);
+    SplitInput(QWidget *parent, Split *_chatWidget,
+               bool showInlineReplying = true);
 
     void clearSelection();
     bool isEditFirstWord() const;
     QString getInputText() const;
     void insertText(const QString &text);
 
-    void setReply(std::shared_ptr<MessageThread> reply);
+    void setReply(std::shared_ptr<MessageThread> reply,
+                  bool showInlineReplying = true);
+    void setPlaceholderText(const QString &text);
 
     /**
      * @brief Hide the widget
@@ -127,6 +130,7 @@ protected:
     } ui_;
 
     std::shared_ptr<MessageThread> replyThread_ = nullptr;
+    bool showInlineReplying_;
 
     pajlada::Signals::SignalHolder managedConnections_;
     QStringList prevMsg_;

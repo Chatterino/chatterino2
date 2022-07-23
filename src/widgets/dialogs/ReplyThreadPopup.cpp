@@ -9,8 +9,8 @@
 #include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
-#include "widgets/splits/ReplyInput.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 const QString TEXT_TITLE("Reply Thread - @%1 in #%2");
 
@@ -80,7 +80,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
         this->giveFocus(Qt::MouseFocusReason);
     });
 
-    this->ui_.replyInput = new ReplyInput(this, this->split_);
+    // Create SplitInput with inline replying disabled
+    this->ui_.replyInput = new SplitInput(this, this->split_, false);
 
     this->bSignals_.emplace_back(
         getApp()->accounts->twitch.currentUserChanged.connect([this] {
@@ -94,10 +95,10 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     layout->addWidget(this->ui_.replyInput);
 }
 
-void ReplyThreadPopup::setThread(std::shared_ptr<const MessageThread> thread)
+void ReplyThreadPopup::setThread(std::shared_ptr<MessageThread> thread)
 {
     this->thread_ = std::move(thread);
-    this->ui_.replyInput->setThread(this->thread_);
+    this->ui_.replyInput->setReply(this->thread_);
     this->addMessagesFromThread();
     this->updateInputUI();
 }
