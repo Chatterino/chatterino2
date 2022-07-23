@@ -106,7 +106,6 @@ protected:
     void openEmotePopup();
 
     void updateCancelReplyButton();
-    int replyBottomPadding() const;
 
     // scaledMaxHeight returns the height in pixels that this widget can grow to
     // This does not take hidden into account, so callers must take hidden into account themselves
@@ -124,6 +123,7 @@ protected:
         QHBoxLayout *hbox;
         QVBoxLayout *vbox;
 
+        QWidget *replyWrapper;
         QHBoxLayout *replyHbox;
         QLabel *replyLabel;
         EffectLabel *cancelReplyButton;

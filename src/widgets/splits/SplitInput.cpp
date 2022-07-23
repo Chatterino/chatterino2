@@ -77,10 +77,13 @@ void SplitInput::initLayout()
     auto layout =
         layoutCreator.setLayoutType<QVBoxLayout>().withoutMargin().assign(
             &this->ui_.vbox);
-    layout->setSpacing(this->replyBottomPadding());
 
     // reply label stuff
-    auto replyHbox = layout.emplace<QHBoxLayout>().withoutMargin().assign(
+    auto replyWrapper =
+        layout.emplace<QWidget>().assign(&this->ui_.replyWrapper);
+    this->ui_.replyWrapper->setContentsMargins(0, 0, 0, 0);
+
+    auto replyHbox = replyWrapper.emplace<QHBoxLayout>().withoutMargin().assign(
         &this->ui_.replyHbox);
 
     auto replyLabel = replyHbox.emplace<QLabel>().assign(&this->ui_.replyLabel);
@@ -185,8 +188,6 @@ void SplitInput::scaleChangedEvent(float scale)
         app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
     this->ui_.replyLabel->setFont(
         app->fonts->getFont(FontStyle::ChatMediumBold, this->scale()));
-
-    this->ui_.vbox->setSpacing(this->replyBottomPadding());
 }
 
 void SplitInput::themeChangedEvent()
@@ -944,6 +945,7 @@ void SplitInput::editTextChanged()
 
     this->ui_.textEditLength->setText(labelText);
 
+    bool hasReply = false;
     if (this->showInlineReplying_)
     {
         if (this->replyThread_ != nullptr)
@@ -956,11 +958,12 @@ void SplitInput::editTextChanged()
         }
 
         // Show/hide reply label if inline replies are possible
-        bool hasReply = this->replyThread_ != nullptr;
-        this->ui_.replyLabel->setVisible(hasReply);
-        this->ui_.cancelReplyButton->setVisible(hasReply);
-        this->ui_.replyHbox->setMargin(hasReply ? 2 * this->scale() : 0);
+        hasReply = this->replyThread_ != nullptr;
     }
+
+    this->ui_.replyWrapper->setVisible(hasReply);
+    this->ui_.replyLabel->setVisible(hasReply);
+    this->ui_.cancelReplyButton->setVisible(hasReply);
 }
 
 void SplitInput::paintEvent(QPaintEvent * /*event*/)
@@ -981,28 +984,24 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
         borderColor = QColor("#333");
     }
 
+    QMargins removeMargins(s - 1, s - 1, s, s);
     QRect baseRect = this->rect();
+
+    // completeAreaRect includes the reply label
+    QRect completeAreaRect = baseRect.marginsRemoved(removeMargins);
+    painter.fillRect(completeAreaRect, this->theme->splits.input.background);
+    painter.setPen(borderColor);
+    painter.drawRect(completeAreaRect);
+
     if (this->showInlineReplying_ && this->replyThread_ != nullptr)
     {
-        baseRect.moveTop(baseRect.top() + this->ui_.replyLabel->height() +
-                         this->replyBottomPadding());
+        // Move top of rect down to not include reply label
+        baseRect.setTop(baseRect.top() + this->ui_.replyWrapper->height());
+
+        QRect onlyInputRect = baseRect.marginsRemoved(removeMargins);
+        painter.setPen(borderColor);
+        painter.drawRect(onlyInputRect);
     }
-
-    QRect rect = baseRect.marginsRemoved(QMargins(s - 1, s - 1, s, s));
-
-    painter.fillRect(rect, this->theme->splits.input.background);
-    painter.setPen(borderColor);
-    painter.drawRect(rect);
-
-    //    int offset = 2;
-    //    painter.fillRect(offset, this->height() - offset, this->width() - 2 *
-    //    offset, 1,
-    //                     getApp()->themes->splits.input.focusedLine);
-}
-
-int SplitInput::replyBottomPadding() const
-{
-    return int(this->scale() * 6);
 }
 
 void SplitInput::resizeEvent(QResizeEvent *)
