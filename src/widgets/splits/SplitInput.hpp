@@ -27,9 +27,9 @@ class SplitInput : public BaseWidget
     Q_OBJECT
 
 public:
-    SplitInput(Split *_chatWidget, bool showInlineReplying = true);
+    SplitInput(Split *_chatWidget, bool enableInlineReplying = true);
     SplitInput(QWidget *parent, Split *_chatWidget,
-               bool showInlineReplying = true);
+               bool enableInlineReplying = true);
 
     void clearSelection();
     bool isEditFirstWord() const;
@@ -74,24 +74,14 @@ protected:
 
     virtual void giveFocus(Qt::FocusReason reason);
 
+    QString handleSendMessage(std::vector<QString> &arguments);
     void postMessageSend(const QString &message,
                          const std::vector<QString> &arguments);
 
-protected:
-    virtual QString hotkeyCursorToStart(std::vector<QString> &arguments);
-    virtual QString hotkeyCursorToEnd(std::vector<QString> &arguments);
-    virtual QString hotkeyOpenEmotesPopup();
-    virtual QString hotkeySendMessage(std::vector<QString> &arguments);
-    virtual QString hotkeyPreviousMessage();
-    virtual QString hotkeyNextMessage();
-    virtual QString hotkeyUndo();
-    virtual QString hotkeyRedo();
-    virtual QString hotkeyCopy(std::vector<QString> &arguments);
-    virtual QString hotkeyPaste();
-    virtual QString hotkeyClear();
-    virtual QString hotkeySelectAll();
-    virtual QString hotkeySelectWord();
+    /// Clears the input box, clears reply thread if inline replies are enabled
+    void clearInput();
 
+protected:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
@@ -130,7 +120,7 @@ protected:
     } ui_;
 
     std::shared_ptr<MessageThread> replyThread_ = nullptr;
-    bool showInlineReplying_;
+    bool enableInlineReplying_;
 
     pajlada::Signals::SignalHolder managedConnections_;
     QStringList prevMsg_;

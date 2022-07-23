@@ -31,16 +31,16 @@
 namespace chatterino {
 const int TWITCH_MESSAGE_LIMIT = 500;
 
-SplitInput::SplitInput(Split *_chatWidget, bool showInlineReplying)
-    : SplitInput(_chatWidget, _chatWidget, showInlineReplying)
+SplitInput::SplitInput(Split *_chatWidget, bool enableInlineReplying)
+    : SplitInput(_chatWidget, _chatWidget, enableInlineReplying)
 {
 }
 
 SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
-                       bool showInlineReplying)
+                       bool enableInlineReplying)
     : BaseWidget(parent)
     , split_(_chatWidget)
-    , showInlineReplying_(showInlineReplying)
+    , enableInlineReplying_(enableInlineReplying)
 {
     this->installEventFilter(this);
     this->initLayout();
@@ -149,7 +149,7 @@ void SplitInput::initLayout()
     // clear input and remove reply thread
     QObject::connect(this->ui_.cancelReplyButton, &EffectLabel::leftClicked,
                      [=] {
-                         this->hotkeyClear();
+                         this->clearInput();
                      });
 
     // clear channelview selection when selecting in the input
@@ -292,83 +292,7 @@ void SplitInput::openEmotePopup()
     this->emotePopup_->activateWindow();
 }
 
-QString SplitInput::hotkeyCursorToStart(std::vector<QString> &arguments)
-{
-    if (arguments.size() != 1)
-    {
-        qCWarning(chatterinoHotkeys)
-            << "Invalid cursorToStart arguments. Argument 0: select "
-               "(\"withSelection\" or \"withoutSelection\")";
-        return "Invalid cursorToStart arguments. Argument 0: select "
-               "(\"withSelection\" or \"withoutSelection\")";
-    }
-    QTextCursor cursor = this->ui_.textEdit->textCursor();
-    auto place = QTextCursor::Start;
-    auto stringTakeSelection = arguments.at(0);
-    bool select;
-    if (stringTakeSelection == "withSelection")
-    {
-        select = true;
-    }
-    else if (stringTakeSelection == "withoutSelection")
-    {
-        select = false;
-    }
-    else
-    {
-        qCWarning(chatterinoHotkeys)
-            << "Invalid cursorToStart select argument (0)!";
-        return "Invalid cursorToStart select argument (0)!";
-    }
-
-    cursor.movePosition(place, select ? QTextCursor::MoveMode::KeepAnchor
-                                      : QTextCursor::MoveMode::MoveAnchor);
-    this->ui_.textEdit->setTextCursor(cursor);
-    return "";
-}
-
-QString SplitInput::hotkeyCursorToEnd(std::vector<QString> &arguments)
-{
-    if (arguments.size() != 1)
-    {
-        qCWarning(chatterinoHotkeys)
-            << "Invalid cursorToEnd arguments. Argument 0: select "
-               "(\"withSelection\" or \"withoutSelection\")";
-        return "Invalid cursorToEnd arguments. Argument 0: select "
-               "(\"withSelection\" or \"withoutSelection\")";
-    }
-    QTextCursor cursor = this->ui_.textEdit->textCursor();
-    auto place = QTextCursor::End;
-    auto stringTakeSelection = arguments.at(0);
-    bool select;
-    if (stringTakeSelection == "withSelection")
-    {
-        select = true;
-    }
-    else if (stringTakeSelection == "withoutSelection")
-    {
-        select = false;
-    }
-    else
-    {
-        qCWarning(chatterinoHotkeys)
-            << "Invalid cursorToEnd select argument (0)!";
-        return "Invalid cursorToEnd select argument (0)!";
-    }
-
-    cursor.movePosition(place, select ? QTextCursor::MoveMode::KeepAnchor
-                                      : QTextCursor::MoveMode::MoveAnchor);
-    this->ui_.textEdit->setTextCursor(cursor);
-    return "";
-}
-
-QString SplitInput::hotkeyOpenEmotesPopup()
-{
-    this->openEmotePopup();
-    return "";
-}
-
-QString SplitInput::hotkeySendMessage(std::vector<QString> &arguments)
+QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
 {
     auto c = this->split_->getChannel();
     if (c == nullptr)
@@ -400,7 +324,7 @@ QString SplitInput::hotkeySendMessage(std::vector<QString> &arguments)
 
         QString message = this->ui_.textEdit->toPlainText();
 
-        if (this->showInlineReplying_)
+        if (this->enableInlineReplying_)
         {
             // Remove @username prefix that is inserted when doing inline replies
             message.remove(0, this->replyThread_->root()->displayName.length() +
@@ -436,155 +360,9 @@ void SplitInput::postMessageSend(const QString &message,
 
     if (arguments.empty() || arguments.at(0) != "keepInput")
     {
-        this->currMsg_ = QString();
-        this->ui_.textEdit->setPlainText(QString());
+        this->clearInput();
     }
     this->prevIndex_ = this->prevMsg_.size();
-}
-
-QString SplitInput::hotkeyPreviousMessage()
-{
-    if (this->prevMsg_.size() && this->prevIndex_)
-    {
-        if (this->prevIndex_ == (this->prevMsg_.size()))
-        {
-            this->currMsg_ = ui_.textEdit->toPlainText();
-        }
-
-        this->prevIndex_--;
-        this->ui_.textEdit->setPlainText(this->prevMsg_.at(this->prevIndex_));
-
-        QTextCursor cursor = this->ui_.textEdit->textCursor();
-        cursor.movePosition(QTextCursor::End);
-        this->ui_.textEdit->setTextCursor(cursor);
-    }
-    return "";
-}
-
-QString SplitInput::hotkeyNextMessage()
-{
-    // If user did not write anything before then just do nothing.
-    if (this->prevMsg_.isEmpty())
-    {
-        return "";
-    }
-    bool cursorToEnd = true;
-    QString message = ui_.textEdit->toPlainText();
-
-    if (this->prevIndex_ != (this->prevMsg_.size() - 1) &&
-        this->prevIndex_ != this->prevMsg_.size())
-    {
-        this->prevIndex_++;
-        this->ui_.textEdit->setPlainText(this->prevMsg_.at(this->prevIndex_));
-    }
-    else
-    {
-        this->prevIndex_ = this->prevMsg_.size();
-        if (message == this->prevMsg_.at(this->prevIndex_ - 1))
-        {
-            // If user has just come from a message history
-            // Then simply get currMsg_.
-            this->ui_.textEdit->setPlainText(this->currMsg_);
-        }
-        else if (message != this->currMsg_)
-        {
-            // If user are already in current message
-            // And type something new
-            // Then replace currMsg_ with new one.
-            this->currMsg_ = message;
-        }
-        // If user is already in current message
-        // Then don't touch cursos.
-        cursorToEnd = (message == this->prevMsg_.at(this->prevIndex_ - 1));
-    }
-
-    if (cursorToEnd)
-    {
-        QTextCursor cursor = this->ui_.textEdit->textCursor();
-        cursor.movePosition(QTextCursor::End);
-        this->ui_.textEdit->setTextCursor(cursor);
-    }
-    return "";
-}
-
-QString SplitInput::hotkeyUndo()
-{
-    this->ui_.textEdit->undo();
-    return "";
-}
-
-QString SplitInput::hotkeyRedo()
-{
-    this->ui_.textEdit->redo();
-    return "";
-}
-
-QString SplitInput::hotkeyCopy(std::vector<QString> &arguments)
-{
-    // XXX: this action is unused at the moment, a qt standard shortcut is used instead
-    if (arguments.size() == 0)
-    {
-        return "copy action takes only one argument: the source "
-               "of the copy \"split\", \"input\" or "
-               "\"auto\". If the source is \"split\", only text "
-               "from the chat will be copied. If it is "
-               "\"splitInput\", text from the input box will be "
-               "copied. Automatic will pick whichever has a "
-               "selection";
-    }
-    bool copyFromSplit = false;
-    auto mode = arguments.at(0);
-    if (mode == "split")
-    {
-        copyFromSplit = true;
-    }
-    else if (mode == "splitInput")
-    {
-        copyFromSplit = false;
-    }
-    else if (mode == "auto")
-    {
-        const auto &cursor = this->ui_.textEdit->textCursor();
-        copyFromSplit = !cursor.hasSelection();
-    }
-
-    if (copyFromSplit)
-    {
-        this->split_->copyToClipboard();
-    }
-    else
-    {
-        this->ui_.textEdit->copy();
-    }
-    return "";
-}
-
-QString SplitInput::hotkeyPaste()
-{
-    this->ui_.textEdit->paste();
-    return "";
-}
-
-QString SplitInput::hotkeyClear()
-{
-    this->ui_.textEdit->setText("");
-    this->ui_.textEdit->moveCursor(QTextCursor::Start);
-    this->replyThread_ = nullptr;
-    return "";
-}
-
-QString SplitInput::hotkeySelectAll()
-{
-    this->ui_.textEdit->selectAll();
-    return "";
-}
-
-QString SplitInput::hotkeySelectWord()
-{
-    auto cursor = this->ui_.textEdit->textCursor();
-    cursor.select(QTextCursor::WordUnderCursor);
-    this->ui_.textEdit->setTextCursor(cursor);
-    return "";
 }
 
 int SplitInput::scaledMaxHeight() const
@@ -597,55 +375,219 @@ void SplitInput::addShortcuts()
     HotkeyController::HotkeyMap actions{
         {"cursorToStart",
          [this](std::vector<QString> arguments) -> QString {
-             return this->hotkeyCursorToStart(arguments);
+             if (arguments.size() != 1)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid cursorToStart arguments. Argument 0: select "
+                        "(\"withSelection\" or \"withoutSelection\")";
+                 return "Invalid cursorToStart arguments. Argument 0: select "
+                        "(\"withSelection\" or \"withoutSelection\")";
+             }
+             QTextCursor cursor = this->ui_.textEdit->textCursor();
+             auto place = QTextCursor::Start;
+             auto stringTakeSelection = arguments.at(0);
+             bool select;
+             if (stringTakeSelection == "withSelection")
+             {
+                 select = true;
+             }
+             else if (stringTakeSelection == "withoutSelection")
+             {
+                 select = false;
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid cursorToStart select argument (0)!";
+                 return "Invalid cursorToStart select argument (0)!";
+             }
+
+             cursor.movePosition(place,
+                                 select ? QTextCursor::MoveMode::KeepAnchor
+                                        : QTextCursor::MoveMode::MoveAnchor);
+             this->ui_.textEdit->setTextCursor(cursor);
+             return "";
          }},
         {"cursorToEnd",
          [this](std::vector<QString> arguments) -> QString {
-             return this->hotkeyCursorToEnd(arguments);
+             if (arguments.size() != 1)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid cursorToEnd arguments. Argument 0: select "
+                        "(\"withSelection\" or \"withoutSelection\")";
+                 return "Invalid cursorToEnd arguments. Argument 0: select "
+                        "(\"withSelection\" or \"withoutSelection\")";
+             }
+             QTextCursor cursor = this->ui_.textEdit->textCursor();
+             auto place = QTextCursor::End;
+             auto stringTakeSelection = arguments.at(0);
+             bool select;
+             if (stringTakeSelection == "withSelection")
+             {
+                 select = true;
+             }
+             else if (stringTakeSelection == "withoutSelection")
+             {
+                 select = false;
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid cursorToEnd select argument (0)!";
+                 return "Invalid cursorToEnd select argument (0)!";
+             }
+
+             cursor.movePosition(place,
+                                 select ? QTextCursor::MoveMode::KeepAnchor
+                                        : QTextCursor::MoveMode::MoveAnchor);
+             this->ui_.textEdit->setTextCursor(cursor);
+             return "";
          }},
         {"openEmotesPopup",
          [this](std::vector<QString>) -> QString {
-             return this->hotkeyOpenEmotesPopup();
+             this->openEmotePopup();
+             return "";
          }},
         {"sendMessage",
          [this](std::vector<QString> arguments) -> QString {
-             return this->hotkeySendMessage(arguments);
+             return this->handleSendMessage(arguments);
          }},
         {"previousMessage",
          [this](std::vector<QString>) -> QString {
-             return this->hotkeyPreviousMessage();
+             if (this->prevMsg_.size() && this->prevIndex_)
+             {
+                 if (this->prevIndex_ == (this->prevMsg_.size()))
+                 {
+                     this->currMsg_ = ui_.textEdit->toPlainText();
+                 }
+
+                 this->prevIndex_--;
+                 this->ui_.textEdit->setPlainText(
+                     this->prevMsg_.at(this->prevIndex_));
+
+                 QTextCursor cursor = this->ui_.textEdit->textCursor();
+                 cursor.movePosition(QTextCursor::End);
+                 this->ui_.textEdit->setTextCursor(cursor);
+             }
+             return "";
          }},
         {"nextMessage",
          [this](std::vector<QString>) -> QString {
-             return this->hotkeyNextMessage();
+             // If user did not write anything before then just do nothing.
+             if (this->prevMsg_.isEmpty())
+             {
+                 return "";
+             }
+             bool cursorToEnd = true;
+             QString message = ui_.textEdit->toPlainText();
+
+             if (this->prevIndex_ != (this->prevMsg_.size() - 1) &&
+                 this->prevIndex_ != this->prevMsg_.size())
+             {
+                 this->prevIndex_++;
+                 this->ui_.textEdit->setPlainText(
+                     this->prevMsg_.at(this->prevIndex_));
+             }
+             else
+             {
+                 this->prevIndex_ = this->prevMsg_.size();
+                 if (message == this->prevMsg_.at(this->prevIndex_ - 1))
+                 {
+                     // If user has just come from a message history
+                     // Then simply get currMsg_.
+                     this->ui_.textEdit->setPlainText(this->currMsg_);
+                 }
+                 else if (message != this->currMsg_)
+                 {
+                     // If user are already in current message
+                     // And type something new
+                     // Then replace currMsg_ with new one.
+                     this->currMsg_ = message;
+                 }
+                 // If user is already in current message
+                 // Then don't touch cursos.
+                 cursorToEnd =
+                     (message == this->prevMsg_.at(this->prevIndex_ - 1));
+             }
+
+             if (cursorToEnd)
+             {
+                 QTextCursor cursor = this->ui_.textEdit->textCursor();
+                 cursor.movePosition(QTextCursor::End);
+                 this->ui_.textEdit->setTextCursor(cursor);
+             }
+             return "";
          }},
         {"undo",
          [this](std::vector<QString>) -> QString {
-             return this->hotkeyUndo();
+             this->ui_.textEdit->undo();
+             return "";
          }},
         {"redo",
          [this](std::vector<QString>) -> QString {
-             return this->hotkeyRedo();
+             this->ui_.textEdit->paste();
+             return "";
          }},
         {"copy",
          [this](std::vector<QString> arguments) -> QString {
-             return this->hotkeyCopy(arguments);
+             // XXX: this action is unused at the moment, a qt standard shortcut is used instead
+             if (arguments.size() == 0)
+             {
+                 return "copy action takes only one argument: the source "
+                        "of the copy \"split\", \"input\" or "
+                        "\"auto\". If the source is \"split\", only text "
+                        "from the chat will be copied. If it is "
+                        "\"splitInput\", text from the input box will be "
+                        "copied. Automatic will pick whichever has a "
+                        "selection";
+             }
+             bool copyFromSplit = false;
+             auto mode = arguments.at(0);
+             if (mode == "split")
+             {
+                 copyFromSplit = true;
+             }
+             else if (mode == "splitInput")
+             {
+                 copyFromSplit = false;
+             }
+             else if (mode == "auto")
+             {
+                 const auto &cursor = this->ui_.textEdit->textCursor();
+                 copyFromSplit = !cursor.hasSelection();
+             }
+
+             if (copyFromSplit)
+             {
+                 this->split_->copyToClipboard();
+             }
+             else
+             {
+                 this->ui_.textEdit->copy();
+             }
+             return "";
          }},
         {"paste",
          [this](std::vector<QString>) -> QString {
-             return this->hotkeyPaste();
+             this->ui_.textEdit->paste();
+             return "";
          }},
         {"clear",
          [this](std::vector<QString>) -> QString {
-             return this->hotkeyClear();
+             this->clearInput();
+             return "";
          }},
         {"selectAll",
          [this](std::vector<QString>) -> QString {
-             return this->hotkeySelectAll();
+             this->ui_.textEdit->selectAll();
+             return "";
          }},
         {"selectWord",
          [this](std::vector<QString>) -> QString {
-             return this->hotkeySelectWord();
+             auto cursor = this->ui_.textEdit->textCursor();
+             cursor.select(QTextCursor::WordUnderCursor);
+             this->ui_.textEdit->setTextCursor(cursor);
+             return "";
          }},
     };
 
@@ -946,7 +888,7 @@ void SplitInput::editTextChanged()
     this->ui_.textEditLength->setText(labelText);
 
     bool hasReply = false;
-    if (this->showInlineReplying_)
+    if (this->enableInlineReplying_)
     {
         if (this->replyThread_ != nullptr)
         {
@@ -1000,7 +942,7 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
     painter.setPen(borderColor);
     painter.drawRect(completeAreaRect);
 
-    if (this->showInlineReplying_ && this->replyThread_ != nullptr)
+    if (this->enableInlineReplying_ && this->replyThread_ != nullptr)
     {
         // Move top of rect down to not include reply label
         baseRect.setTop(baseRect.top() + this->ui_.replyWrapper->height());
@@ -1033,7 +975,7 @@ void SplitInput::setReply(std::shared_ptr<MessageThread> reply,
 {
     this->replyThread_ = std::move(reply);
 
-    if (this->showInlineReplying_)
+    if (this->enableInlineReplying_)
     {
         // Only enable reply label if inline replying
         this->ui_.textEdit->setPlainText(
@@ -1047,6 +989,17 @@ void SplitInput::setReply(std::shared_ptr<MessageThread> reply,
 void SplitInput::setPlaceholderText(const QString &text)
 {
     this->ui_.textEdit->setPlaceholderText(text);
+}
+
+void SplitInput::clearInput()
+{
+    this->currMsg_ = "";
+    this->ui_.textEdit->setText("");
+    this->ui_.textEdit->moveCursor(QTextCursor::Start);
+    if (this->enableInlineReplying_)
+    {
+        this->replyThread_ = nullptr;
+    }
 }
 
 }  // namespace chatterino
