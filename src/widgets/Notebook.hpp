@@ -94,6 +94,7 @@ private:
     static bool containsChild(const QObject *obj, const QObject *child);
     NotebookTab *getTabFromPage(QWidget *page);
 
+    // Returns the number of buttons in `customButtons_` that are visible
     size_t visibleButtonCount() const;
 
     QList<Item> items_;
