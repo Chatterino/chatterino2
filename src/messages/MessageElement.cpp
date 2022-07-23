@@ -661,22 +661,10 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
 }
 
 ReplyCurveElement::ReplyCurveElement()
+    : MessageElement(MessageElementFlag::RepliedMessage)
     // these values nicely align with a single badge
-    : ReplyCurveElement(3, 18, 14)
-{
-}
-
-ReplyCurveElement::ReplyCurveElement(int neededMargin, int size)
-    : MessageElement(MessageElementFlag::RepliedMessage)
-    , neededMargin_(neededMargin)
-    , size_(size, size)
-{
-}
-
-ReplyCurveElement::ReplyCurveElement(int neededMargin, int width, int height)
-    : MessageElement(MessageElementFlag::RepliedMessage)
-    , neededMargin_(neededMargin)
-    , size_(width, height)
+    , neededMargin_(3)
+    , size_(18, 14)
 {
 }
 
