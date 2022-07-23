@@ -22,10 +22,8 @@ NewPopupItem::NewPopupItem(const QString &channelName)
 void NewPopupItem::action()
 {
     auto *app = getApp();
-    auto &popup = app->windows->createWindow(WindowType::Popup, true);
-    auto *split =
-        popup.getNotebook().getOrAddSelectedPage()->appendNewSplit(false);
-    split->setChannel(app->twitch->getOrAddChannel(this->channelName_));
+    auto channel = app->twitch->getOrAddChannel(this->channelName_);
+    app->windows->openInPopup(channel);
 }
 
 void NewPopupItem::paint(QPainter *painter, const QRect &rect) const

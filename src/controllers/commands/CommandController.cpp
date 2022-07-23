@@ -887,7 +887,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     });
 
     this->registerCommand("/popup", [](const QStringList &words,
-                                       ChannelPtr channel) {
+                                       ChannelPtr sourceChannel) {
         static const auto *usageMessage =
             "Usage: /popup [channel]. Open specified Twitch channel in "
             "a new window. If no channel argument is specified, open "
@@ -896,6 +896,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         QString target(words.value(1));
         stripChannelName(target);
 
+        // Popup the current split
         if (target.isEmpty())
         {
             auto *currentPage =
@@ -914,19 +915,14 @@ void CommandController::initialize(Settings &, Paths &paths)
                 }
             }
 
-            channel->addMessage(makeSystemMessage(usageMessage));
+            sourceChannel->addMessage(makeSystemMessage(usageMessage));
             return "";
         }
 
+        // Open channel passed as argument in a popup
         auto *app = getApp();
-        Window &window = app->windows->createWindow(WindowType::Popup, true);
-
-        auto *split = new Split(static_cast<SplitContainer *>(
-            window.getNotebook().getOrAddSelectedPage()));
-
-        split->setChannel(app->twitch->getOrAddChannel(target));
-
-        window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+        auto targetChannel = app->twitch->getOrAddChannel(target);
+        app->windows->openInPopup(targetChannel);
 
         return "";
     });
@@ -936,7 +932,11 @@ void CommandController::initialize(Settings &, Paths &paths)
         auto *currentPage = dynamic_cast<SplitContainer *>(
             getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
 
-        currentPage->getSelectedSplit()->getChannelView().clearMessages();
+        if (auto split = currentPage->getSelectedSplit())
+        {
+            split->getChannelView().clearMessages();
+        }
+
         return "";
     });
 
