@@ -3,7 +3,6 @@ openssl/1.1.1m
 boost/1.78.0
 
 [generators]
-qmake
 cmake
 
 [options]
