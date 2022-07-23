@@ -458,6 +458,10 @@ void TwitchChannel::sendReply(const QString &message, const QString &replyId)
 
     // Do last message processing
     QString parsedMessage = this->prepareMessage(message);
+    if (parsedMessage.isEmpty())
+    {
+        return;
+    }
 
     bool messageSent = false;
     this->sendReplySignal.invoke(this->getName(), parsedMessage, replyId,
