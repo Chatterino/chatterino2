@@ -563,10 +563,12 @@ target_link_libraries(${LIBRARY_PROJECT}
         MagicEnum
         )
 if (BUILD_WITH_QTKEYCHAIN)
-    target_link_libraries(${LIBRARY_PROJECT}
-            PUBLIC
-            qt${MAJOR_QT_VERSION}keychain
-            )
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC qt5keychain)
+    # SOURCE_DIR contains the keychain.h file
+    # BINARY_DIR contains the qkeychain_export.h file
+    target_include_directories(${LIBRARY_PROJECT} PUBLIC
+        ${qtkeychain_SOURCE_DIR}
+        ${qtkeychain_BINARY_DIR})
 else()
     target_compile_definitions(${LIBRARY_PROJECT}
         PUBLIC

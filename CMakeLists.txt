@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 cmake_policy(SET CMP0087 NEW)
 include(FeatureSummary)
+include(FetchContent)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
@@ -18,6 +19,9 @@ option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
 option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key chain" ON)
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
+option(C2_BUILD_SHARED_LIBS "Try to build and use shared libraries where possible" OFF)
+
+set(BUILD_SHARED_LIBS ${C2_BUILD_SHARED_LIBS})
 
 option(USE_CONAN "Use conan" OFF)
 
@@ -81,21 +85,21 @@ else()
     add_subdirectory("${LIBCOMMUNI_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
 endif()
 
+
 if (BUILD_WITH_QTKEYCHAIN)
     # Link QtKeychain statically
-    option(QTKEYCHAIN_STATIC "" ON)
     if (USE_SYSTEM_QTKEYCHAIN)
         find_package(Qt${MAJOR_QT_VERSION}Keychain REQUIRED)
     else()
-        set(QTKEYCHAIN_ROOT_LIB_FOLDER "${CMAKE_SOURCE_DIR}/lib/qtkeychain")
-        if (NOT EXISTS "${QTKEYCHAIN_ROOT_LIB_FOLDER}/CMakeLists.txt")
-            message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/qtkeychain/CMakeLists.txt")
-        endif()
+        FetchContent_Declare(
+            QtKeychain
+            GIT_REPOSITORY  https://github.com/frankosterfeld/qtkeychain.git
+            GIT_TAG         67fb08e89194ed3a6cd2b2e4ae24509ea4714fa1
+            )
 
-        add_subdirectory("${QTKEYCHAIN_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
-        if (NOT TARGET qt${MAJOR_QT_VERSION}keychain)
-            message(FATAL_ERROR "qt${MAJOR_QT_VERSION}keychain target was not created :@")
-        endif()
+
+        FetchContent_MakeAvailable(QtKeychain)
+
     endif()
 endif()
 
