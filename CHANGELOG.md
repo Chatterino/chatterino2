@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694)
+- Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
 - Minor: Added option to display tabs on the right and bottom. (#3847)
 - Minor: Added `is:first-msg` search option. (#3700)
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
