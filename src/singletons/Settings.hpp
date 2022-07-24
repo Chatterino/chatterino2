@@ -25,7 +25,7 @@ class IgnorePhrase;
 class FilterRecord;
 class Nickname;
 
-/// Settings which are availlable for reading on all threads.
+/// Settings which are available for reading on all threads.
 class ConcurrentSettings
 {
 public:
@@ -98,8 +98,8 @@ public:
         "/appearance/messages/usernameDisplayMode",
         UsernameDisplayMode::UsernameAndLocalizedName};
 
-    EnumSetting<NotebookTabDirection> tabDirection = {
-        "/appearance/tabDirection", NotebookTabDirection::Horizontal};
+    EnumSetting<NotebookTabLocation> tabDirection = {"/appearance/tabDirection",
+                                                     NotebookTabLocation::Top};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};

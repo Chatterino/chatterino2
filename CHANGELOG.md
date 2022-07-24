@@ -2,7 +2,8 @@
 
 ## Unversioned
 
-- Major: Added multi-channel searching to search dialog via keyboard shortcut. [Ctrl+Shift+F by default] (#3694)
+- Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
+- Minor: Added option to display tabs on the right and bottom. (#3847)
 - Minor: Added `is:first-msg` search option. (#3700)
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
 - Minor: Added a `Scroll to top` keyboard shortcut for splits. (#3802)
@@ -40,8 +41,9 @@
 - Bugfix: Fixed message only showing a maximum of one global FrankerFaceZ badge even if the user has multiple. (#3818)
 - Bugfix: Add icon in the CMake macOS bundle. (#3832)
 - Bugfix: Adopt popup windows in order to force floating behavior on some window managers. (#3836)
-- Bugfix: Fix split focusing being broken in certain circumstances when the "Show input when it's empty" setting was disabled. (#3838)
+- Bugfix: Fix split focusing being broken in certain circumstances when the "Show input when it's empty" setting was disabled. (#3838, #3860)
 - Bugfix: Always refresh tab when a contained split's channel is set. (#3849)
+- Dev: Remove official support for QMake. (#3839)
 - Dev: Rewrite LimitedQueue (#3798)
 - Dev: Overhaul highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801, #3835)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
