@@ -93,13 +93,11 @@ if (BUILD_WITH_QTKEYCHAIN)
     else()
         FetchContent_Declare(
             QtKeychain
-            GIT_REPOSITORY  https://github.com/frankosterfeld/qtkeychain.git
-            GIT_TAG         67fb08e89194ed3a6cd2b2e4ae24509ea4714fa1
+
+            SOURCE_DIR      ${CMAKE_SOURCE_DIR}/lib/qtkeychain
             )
 
-
         FetchContent_MakeAvailable(QtKeychain)
-
     endif()
 endif()
 
