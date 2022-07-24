@@ -163,7 +163,7 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
     // and tabbing to it from another widget. I don't currently know
     // of any place where you can, or where it would make sense,
     // to tab to a ChannelVieChannelView
-    this->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
+    this->setFocusPolicy(Qt::FocusPolicy::ClickFocus);
 }
 
 void ChannelView::initializeLayout()
