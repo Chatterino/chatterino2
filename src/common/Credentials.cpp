@@ -10,10 +10,10 @@
 #include <QJsonObject>
 
 #ifndef NO_QTKEYCHAIN
-#    ifdef CMAKE_BUILD
-#        include "qt5keychain/keychain.h"
+#    ifdef SYSTEM_QTKEYCHAIN
+#        include <qt5keychain/keychain.h>
 #    else
-#        include "keychain.h"
+#        include <keychain.h>
 #    endif
 #endif
 #include <QSaveFile>
