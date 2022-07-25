@@ -59,7 +59,9 @@ public:
     pajlada::Signals::NoArgSignal arbitraryMessageUpdate;
     pajlada::Signals::NoArgSignal destroyed;
     pajlada::Signals::NoArgSignal displayNameChanged;
-    pajlada::Signals::NoArgSignal reconnected;
+
+    /// Invoked when AbstractIrcServer::onReadConnected occurs
+    pajlada::Signals::NoArgSignal connected;
 
     Type getType() const;
     const QString &getName() const;

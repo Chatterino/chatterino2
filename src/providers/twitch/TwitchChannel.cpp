@@ -197,7 +197,7 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->refreshBTTVChannelEmotes(false);
     });
 
-    this->reconnected.connect([this]() {
+    this->connected.connect([this]() {
         if (this->roomId().isEmpty())
         {
             // if we get a reconnected event when the room id is not set, we probably
