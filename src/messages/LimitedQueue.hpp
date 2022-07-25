@@ -5,7 +5,6 @@
 #include <boost/circular_buffer.hpp>
 #include <boost/optional.hpp>
 
-#include <algorithm>
 #include <cassert>
 #include <mutex>
 #include <shared_mutex>
