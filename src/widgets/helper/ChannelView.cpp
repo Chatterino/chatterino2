@@ -658,6 +658,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
         underlyingChannel->arbitraryMessageUpdate, [this]() {
             std::vector<MessagePtr> filtered;
             auto snapshot = this->underlyingChannel_->getMessageSnapshot();
+            filtered.reserve(snapshot.size());
             std::copy_if(snapshot.begin(), snapshot.end(),
                          std::back_inserter(filtered), [this](MessagePtr msg) {
                              return this->shouldIncludeMessage(msg);
