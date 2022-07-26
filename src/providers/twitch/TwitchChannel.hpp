@@ -178,7 +178,7 @@ private:
     int chatterCount_;
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
-    std::atomic_bool loadingRecentMessages_{false};
+    std::atomic_flag loadingRecentMessages_ = ATOMIC_FLAG_INIT;
 
 protected:
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;

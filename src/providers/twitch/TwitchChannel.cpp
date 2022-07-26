@@ -788,8 +788,7 @@ void TwitchChannel::loadRecentMessages()
         return;
     }
 
-    bool expected = false;
-    if (!this->loadingRecentMessages_.compare_exchange_strong(expected, true))
+    if (this->loadingRecentMessages_.test_and_set())
     {
         return;  // already loading
     }
@@ -807,7 +806,7 @@ void TwitchChannel::loadRecentMessages()
                 return;
 
             tc->addMessagesAtStart(messages);
-            tc->loadingRecentMessages_ = false;
+            tc->loadingRecentMessages_.clear();
         },
         [weak]() {
             auto shared = weak.lock();
@@ -818,7 +817,7 @@ void TwitchChannel::loadRecentMessages()
             if (!tc)
                 return;
 
-            tc->loadingRecentMessages_ = false;
+            tc->loadingRecentMessages_.clear();
         });
 }
 
@@ -829,8 +828,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
         return;
     }
 
-    bool expected = false;
-    if (!this->loadingRecentMessages_.compare_exchange_strong(expected, true))
+    if (this->loadingRecentMessages_.test_and_set())
     {
         return;  // already loading
     }
@@ -848,7 +846,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
                 return;
 
             tc->fillInMissingMessages(messages);
-            tc->loadingRecentMessages_ = false;
+            tc->loadingRecentMessages_.clear();
         },
         [weak]() {
             auto shared = weak.lock();
@@ -859,7 +857,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
             if (!tc)
                 return;
 
-            tc->loadingRecentMessages_ = false;
+            tc->loadingRecentMessages_.clear();
         });
 }
 
