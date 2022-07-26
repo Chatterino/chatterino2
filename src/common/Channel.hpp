@@ -78,7 +78,7 @@ public:
     void addMessage(
         MessagePtr message,
         boost::optional<MessageFlags> overridingFlags = boost::none);
-    void addMessagesAtStart(std::vector<MessagePtr> &messages_);
+    void addMessagesAtStart(const std::vector<MessagePtr> &messages_);
 
     /// Inserts the given message before another message. If notify is true,
     /// arbitraryMessageUpdate will be invoked if an insertion takes place.

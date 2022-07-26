@@ -220,7 +220,7 @@ void Channel::disableAllMessages()
     }
 }
 
-void Channel::addMessagesAtStart(std::vector<MessagePtr> &_messages)
+void Channel::addMessagesAtStart(const std::vector<MessagePtr> &_messages)
 {
     std::vector<MessagePtr> addedMessages =
         this->messages_.pushFront(_messages);

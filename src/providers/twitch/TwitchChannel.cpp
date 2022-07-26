@@ -8,6 +8,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/Message.hpp"
+#include "providers/RecentMessagesApi.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
@@ -20,7 +21,6 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/FormatTime.hpp"
 #include "util/PostToThread.hpp"
 #include "util/QStringHash.hpp"
 #include "widgets/Window.hpp"
@@ -49,79 +49,6 @@ namespace {
     const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
     const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
 
-    // convertClearchatToNotice takes a Communi::IrcMessage that is a CLEARCHAT command and converts it to a readable NOTICE message
-    // This has historically been done in the Recent Messages API, but this functionality is being moved to Chatterino instead
-    auto convertClearchatToNotice(Communi::IrcMessage *message)
-    {
-        auto channelName = message->parameter(0);
-        QString noticeMessage{};
-        if (message->tags().contains("target-user-id"))
-        {
-            auto target = message->parameter(1);
-
-            if (message->tags().contains("ban-duration"))
-            {
-                // User was timed out
-                noticeMessage =
-                    QString("%1 has been timed out for %2.")
-                        .arg(target)
-                        .arg(formatTime(
-                            message->tag("ban-duration").toString()));
-            }
-            else
-            {
-                // User was permanently banned
-                noticeMessage =
-                    QString("%1 has been permanently banned.").arg(target);
-            }
-        }
-        else
-        {
-            // Chat was cleared
-            noticeMessage = "Chat has been cleared by a moderator.";
-        }
-
-        // rebuild the raw IRC message so we can convert it back to an ircmessage again!
-        // this could probably be done in a smarter way
-
-        auto s = QString(":tmi.twitch.tv NOTICE %1 :%2")
-                     .arg(channelName)
-                     .arg(noticeMessage);
-
-        auto newMessage = Communi::IrcMessage::fromData(s.toUtf8(), nullptr);
-        newMessage->setTags(message->tags());
-
-        return newMessage;
-    }
-
-    // parseRecentMessages takes a json object and returns a vector of
-    // Communi IrcMessages
-    auto parseRecentMessages(const QJsonObject &jsonRoot, ChannelPtr channel)
-    {
-        QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
-        std::vector<Communi::IrcMessage *> messages;
-
-        if (jsonMessages.empty())
-            return messages;
-
-        for (const auto jsonMessage : jsonMessages)
-        {
-            auto content = jsonMessage.toString();
-            content.replace(COMBINED_FIXER, ZERO_WIDTH_JOINER);
-
-            auto message =
-                Communi::IrcMessage::fromData(content.toUtf8(), nullptr);
-
-            if (message->command() == "CLEARCHAT")
-            {
-                message = convertClearchatToNotice(message);
-            }
-
-            messages.emplace_back(std::move(message));
-        }
-
-        return messages;
-    }
     std::pair<Outcome, std::unordered_set<QString>> parseChatters(
         const QJsonObject &jsonRoot)
     {
@@ -143,20 +70,6 @@ namespace {
         }
 
         return {Success, std::move(usernames)};
-    }
-
-    QUrl constructRecentMessagesUrl(const QString &name)
-    {
-        QUrl url(Env::get().recentMessagesApiUrl.arg(name));
-        QUrlQuery urlQuery(url);
-        if (!urlQuery.hasQueryItem("limit"))
-        {
-            urlQuery.addQueryItem(
-                "limit",
-                QString::number(getSettings()->twitchMessageHistoryLimit));
-        }
-        url.setQuery(urlQuery);
-        return url;
     }
 
 }  // namespace
@@ -881,50 +794,22 @@ void TwitchChannel::loadRecentMessages()
         return;  // already loading
     }
 
-    QUrl url = constructRecentMessagesUrl(this->getName());
     auto weak = weakOf<Channel>(this);
-
-    NetworkRequest(url)
-        .onSuccess([this, weak](NetworkResult result) -> Outcome {
+    RecentMessagesApi::loadRecentMessages(
+        this->getName(), weak,
+        [weak](const auto &messages) {
             auto shared = weak.lock();
             if (!shared)
-                return Failure;
+                return;
 
             auto tc = dynamic_cast<TwitchChannel *>(shared.get());
             if (!tc)
-                return Failure;
+                return;
 
-            auto root = result.parseJson();
-            auto messages = parseRecentMessages(root, shared);
-
-            // build the Communi messages into chatterino messages
-            auto allBuiltMessages = tc->buildRecentMessages(messages);
-
+            tc->addMessagesAtStart(messages);
             tc->loadingRecentMessages_ = false;
-            postToThread([this, shared, root,
-                          messages = std::move(allBuiltMessages)]() mutable {
-                shared->addMessagesAtStart(messages);
-
-                // Notify user about a possible gap in logs if it returned some messages
-                // but isn't currently joined to a channel
-                if (QString errorCode = root.value("error_code").toString();
-                    !errorCode.isEmpty())
-                {
-                    qCDebug(chatterinoTwitch)
-                        << QString("rm error_code=%1, channel=%2")
-                               .arg(errorCode, this->getName());
-                    if (errorCode == "channel_not_joined" && !messages.empty())
-                    {
-                        shared->addMessage(makeSystemMessage(
-                            "Message history service recovering, there may be "
-                            "gaps in the message history."));
-                    }
-                }
-            });
-
-            return Success;
-        })
-        .onError([weak](NetworkResult result) {
+        },
+        [weak]() {
             auto shared = weak.lock();
             if (!shared)
                 return;
@@ -934,11 +819,7 @@ void TwitchChannel::loadRecentMessages()
                 return;
 
             tc->loadingRecentMessages_ = false;
-            shared->addMessage(makeSystemMessage(
-                QString("Message history service unavailable (Error %1)")
-                    .arg(result.status())));
-        })
-        .execute();
+        });
 }
 
 void TwitchChannel::loadRecentMessagesReconnect()
@@ -954,54 +835,22 @@ void TwitchChannel::loadRecentMessagesReconnect()
         return;  // already loading
     }
 
-    QUrl url = constructRecentMessagesUrl(this->getName());
     auto weak = weakOf<Channel>(this);
-
-    NetworkRequest(url)
-        .onSuccess([this, weak](NetworkResult result) -> Outcome {
+    RecentMessagesApi::loadRecentMessages(
+        this->getName(), weak,
+        [weak](const auto &messages) {
             auto shared = weak.lock();
             if (!shared)
-                return Failure;
+                return;
 
             auto tc = dynamic_cast<TwitchChannel *>(shared.get());
             if (!tc)
-                return Failure;
+                return;
 
-            auto root = result.parseJson();
-            auto messages = parseRecentMessages(root, shared);
-
-            // build the Communi messages into chatterino messages
-            auto allBuiltMessages = tc->buildRecentMessages(messages);
-
+            tc->fillInMissingMessages(messages);
             tc->loadingRecentMessages_ = false;
-            postToThread([this, shared, root,
-                          messages = std::move(allBuiltMessages)]() mutable {
-                auto tc = dynamic_cast<TwitchChannel *>(shared.get());
-                if (!tc)
-                    return;
-
-                tc->fillInMissingMessages(messages);
-
-                // Notify user about a possible gap in logs if it returned some messages
-                // but isn't currently joined to a channel
-                if (QString errorCode = root.value("error_code").toString();
-                    !errorCode.isEmpty())
-                {
-                    qCDebug(chatterinoTwitch)
-                        << QString("rm error_code=%1, channel=%2")
-                               .arg(errorCode, this->getName());
-                    if (errorCode == "channel_not_joined" && !messages.empty())
-                    {
-                        shared->addMessage(makeSystemMessage(
-                            "Message history service recovering, there may be "
-                            "gaps in the message history."));
-                    }
-                }
-            });
-
-            return Success;
-        })
-        .onError([weak](NetworkResult result) {
+        },
+        [weak]() {
             auto shared = weak.lock();
             if (!shared)
                 return;
@@ -1011,11 +860,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
                 return;
 
             tc->loadingRecentMessages_ = false;
-            shared->addMessage(makeSystemMessage(
-                QString("Message history service unavailable (Error %1)")
-                    .arg(result.status())));
-        })
-        .execute();
+        });
 }
 
 void TwitchChannel::refreshPubSub()
