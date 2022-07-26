@@ -10,6 +10,7 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Settings.hpp"
 #include "util/FormatTime.hpp"
+#include "util/PostToThread.hpp"
 
 #include <IrcMessage>
 #include <QJsonArray>
