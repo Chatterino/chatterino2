@@ -90,12 +90,16 @@ public:
     void insertMessageAfter(const MessagePtr &after, const MessagePtr &message,
                             bool notify = true);
 
+    /// Clears all present messages and replaces the contents of the channel
+    /// with the passed vector.
+    void replaceMessagesWith(const std::vector<MessagePtr> &messages);
+
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
     void replaceMessage(size_t index, MessagePtr replacement);
     void deleteMessage(QString messageID);
-    void copyMessagesFrom(const std::vector<MessagePtr> &messages);
+
     MessagePtr findMessage(QString messageID);
 
     bool hasMessages() const;

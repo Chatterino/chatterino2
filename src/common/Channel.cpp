@@ -231,7 +231,7 @@ void Channel::addMessagesAtStart(const std::vector<MessagePtr> &_messages)
     }
 }
 
-void Channel::copyMessagesFrom(const std::vector<MessagePtr> &messages)
+void Channel::replaceMessagesWith(const std::vector<MessagePtr> &messages)
 {
     this->messages_.setContents(messages);
     this->arbitraryMessageUpdate.invoke();

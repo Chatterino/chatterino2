@@ -113,8 +113,10 @@ TwitchChannel::TwitchChannel(const QString &name)
     this->connected.connect([this]() {
         if (this->roomId().isEmpty())
         {
-            // if we get a reconnected event when the room id is not set, we probably
-            // just connected for the first time
+            // If we get a reconnected event when the room id is not set, we
+            // just connected for the first time. After receiving the first
+            // message from a channel, setRoomId is called and further
+            // invocations of this event will load recent messages.
             return;
         }
 

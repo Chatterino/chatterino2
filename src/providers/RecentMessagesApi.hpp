@@ -100,6 +100,8 @@ namespace {
         return messages;
     }
 
+    // Build Communi messages retrieved from the recent messages API into
+    // proper chatterino messages.
     std::vector<MessagePtr> buildRecentMessages(
         std::vector<Communi::IrcMessage *> &messages, Channel *channel)
     {
@@ -154,6 +156,14 @@ namespace {
 class RecentMessagesApi
 {
 public:
+    /**
+     * @brief Loads recent messages for a channel using the Recent Messages API
+     * 
+     * @param channelName Name of Twitch channel
+     * @param channelPtr Weak pointer to Channel to use to build messages
+     * @param onLoaded Callback taking the built messages as a std::vector<MessagePtr>
+     * @param onError Callback called when the network request fails
+     */
     template <typename OnLoaded, typename OnError>
     static void loadRecentMessages(const QString &channelName,
                                    std::weak_ptr<Channel> channelPtr,

@@ -663,7 +663,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                          std::back_inserter(filtered), [this](MessagePtr msg) {
                              return this->shouldIncludeMessage(msg);
                          });
-            this->channel_->copyMessagesFrom(filtered);
+            this->channel_->replaceMessagesWith(filtered);
         });
 
     //
