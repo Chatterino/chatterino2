@@ -160,6 +160,9 @@ public:
                                    std::weak_ptr<Channel> channelPtr,
                                    OnLoaded onLoaded, OnError onError)
     {
+        qCDebug(chatterinoRecentMessages)
+            << "Loading recent messages for" << channelName;
+
         QUrl url = constructRecentMessagesUrl(channelName);
 
         NetworkRequest(url)
@@ -167,6 +170,11 @@ public:
                 auto shared = channelPtr.lock();
                 if (!shared)
                     return Failure;
+
+                qCDebug(chatterinoRecentMessages)
+                    << "Successfully "
+                       "loaded recent messages for"
+                    << shared->getName();
 
                 auto root = result.parseJson();
                 auto parsedMessages = parseRecentMessages(root, shared);
@@ -182,8 +190,9 @@ public:
                     if (QString errorCode = root.value("error_code").toString();
                         !errorCode.isEmpty())
                     {
-                        qCDebug(chatterinoTwitch)
-                            << QString("rm error_code=%1, channel=%2")
+                        qCDebug(chatterinoRecentMessages)
+                            << QString("Got error from API: error_code=%1, "
+                                       "channel=%2")
                                    .arg(errorCode, shared->getName());
                         if (errorCode == "channel_not_joined" &&
                             !messages.empty())
@@ -204,6 +213,10 @@ public:
                 auto shared = channelPtr.lock();
                 if (!shared)
                     return;
+
+                qCDebug(chatterinoRecentMessages)
+                    << "Failed to load recent messages for"
+                    << shared->getName();
 
                 shared->addMessage(makeSystemMessage(
                     QString("Message history service unavailable (Error %1)")
