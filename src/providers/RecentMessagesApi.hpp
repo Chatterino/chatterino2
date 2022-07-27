@@ -73,7 +73,7 @@ namespace {
 
     // Parse the IRC messages returned in JSON form into Communi messages
     std::vector<Communi::IrcMessage *> parseRecentMessages(
-        const QJsonObject &jsonRoot, ChannelPtr channel)
+        const QJsonObject &jsonRoot)
     {
         QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
         std::vector<Communi::IrcMessage *> messages;
@@ -101,7 +101,7 @@ namespace {
     }
 
     std::vector<MessagePtr> buildRecentMessages(
-        std::vector<Communi::IrcMessage *> &messages, ChannelPtr channelPtr)
+        std::vector<Communi::IrcMessage *> &messages, Channel *channel)
     {
         auto &handler = IrcMessageHandler::instance();
         std::vector<MessagePtr> allBuiltMessages;
@@ -114,9 +114,9 @@ namespace {
                     QDateTime::fromMSecsSinceEpoch(
                         message->tags().value("rm-received-ts").toLongLong())
                         .date();
-                if (msgDate != channelPtr->lastDate_)
+                if (msgDate != channel->lastDate_)
                 {
-                    channelPtr->lastDate_ = msgDate;
+                    channel->lastDate_ = msgDate;
                     auto msg = makeSystemMessage(
                         QLocale().toString(msgDate, QLocale::LongFormat),
                         QTime(0, 0));
@@ -125,8 +125,7 @@ namespace {
                 }
             }
 
-            for (auto builtMessage :
-                 handler.parseMessage(channelPtr.get(), message))
+            for (auto builtMessage : handler.parseMessage(channel, message))
             {
                 builtMessage->flags.set(MessageFlag::RecentMessage);
                 allBuiltMessages.emplace_back(builtMessage);
@@ -177,14 +176,16 @@ public:
                     << shared->getName();
 
                 auto root = result.parseJson();
-                auto parsedMessages = parseRecentMessages(root, shared);
+                auto parsedMessages = parseRecentMessages(root);
 
                 // build the Communi messages into chatterino messages
                 auto builtMessages =
-                    buildRecentMessages(parsedMessages, shared);
+                    buildRecentMessages(parsedMessages, shared.get());
 
-                postToThread([shared, root, onLoaded,
-                              messages = std::move(builtMessages)]() mutable {
+                postToThread([shared = std::move(shared),
+                              root = std::move(root),
+                              messages = std::move(builtMessages),
+                              onLoaded]() mutable {
                     // Notify user about a possible gap in logs if it returned some messages
                     // but isn't currently joined to a channel
                     if (QString errorCode = root.value("error_code").toString();
