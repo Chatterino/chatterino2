@@ -168,9 +168,6 @@ private:
     const QString &getDisplayName() const override;
     const QString &getLocalizedName() const override;
 
-    std::vector<MessagePtr> buildRecentMessages(
-        std::vector<Communi::IrcMessage *> &messages);
-
     // Data
     const QString subscriptionUrl_;
     const QString channelUrl_;

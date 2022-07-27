@@ -682,41 +682,6 @@ void TwitchChannel::parseLiveStatus(bool live, const HelixStream &stream)
     this->liveStatusChanged.invoke();
 }
 
-std::vector<MessagePtr> TwitchChannel::buildRecentMessages(
-    std::vector<Communi::IrcMessage *> &messages)
-{
-    auto &handler = IrcMessageHandler::instance();
-    std::vector<MessagePtr> allBuiltMessages;
-
-    for (auto message : messages)
-    {
-        if (message->tags().contains("rm-received-ts"))
-        {
-            QDate msgDate =
-                QDateTime::fromMSecsSinceEpoch(
-                    message->tags().value("rm-received-ts").toLongLong())
-                    .date();
-            if (msgDate != this->lastDate_)
-            {
-                this->lastDate_ = msgDate;
-                auto msg = makeSystemMessage(
-                    QLocale().toString(msgDate, QLocale::LongFormat),
-                    QTime(0, 0));
-                msg->flags.set(MessageFlag::RecentMessage);
-                allBuiltMessages.emplace_back(msg);
-            }
-        }
-
-        for (auto builtMessage : handler.parseMessage(this, message))
-        {
-            builtMessage->flags.set(MessageFlag::RecentMessage);
-            allBuiltMessages.emplace_back(builtMessage);
-        }
-    }
-
-    return allBuiltMessages;
-}
-
 void TwitchChannel::fillInMissingMessages(
     const std::vector<MessagePtr> &messages)
 {
