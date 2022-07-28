@@ -264,7 +264,7 @@ private:
     Selection selection_;
     bool selecting_ = false;
 
-    std::shared_ptr<LimitedQueue<MessageLayoutPtr>> messages_;
+    LimitedQueue<MessageLayoutPtr> messages_;
 
     pajlada::Signals::SignalHolder signalHolder_;
 

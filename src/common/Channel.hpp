@@ -104,7 +104,7 @@ protected:
 
 private:
     const QString name_;
-    std::shared_ptr<LimitedQueue<MessagePtr>> messages_;
+    LimitedQueue<MessagePtr> messages_;
     Type type_;
     QTimer clearCompletionModelTimer_;
 };
