@@ -729,3 +729,55 @@ if (LIBRT)
         )
 endif ()
 
+
+# Configure compiler warnings
+if (MSVC)
+    # 4714 - function marked as __forceinline not inlined
+    # 4996 - occurs when the compiler encounters a function or variable that is marked as deprecated.
+    #        These functions may have a different preferred name, may be insecure or have
+    #        a more secure variant, or may be obsolete.
+    # 4505 - unreferenced local version has been removed
+    # 4127 - conditional expression is constant
+    # 4503 - decorated name length exceeded, name was truncated
+    # 4100 - unreferences formal parameter
+    # 4305 - possible truncation of data
+    # 4267 - possible loss of data in return
+    target_compile_options(${LIBRARY_PROJECT} PUBLIC
+        /W4
+        # Disable the following warnings
+        /wd4714
+        /wd4996
+        /wd4505
+        /wd4127
+        /wd4503
+        /wd4100
+        /wd4305
+        /wd4267
+    )
+else ()
+    target_compile_options(${LIBRARY_PROJECT} PUBLIC
+        -Wall
+        # Disable the following warnings
+        -Wno-unused-function
+        -Wno-switch
+        -Wno-deprecated-declarations
+        -Wno-sign-compare
+        # -Wno-unused-variable
+
+        # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
+        -Wno-strict-aliasing
+
+        -Werror=return-type
+    )
+
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${LIBRARY_PROJECT} PUBLIC
+            -Wno-unused-local-typedef
+            -Wno-unused-private-field
+        )
+    else ()
+        target_compile_options(${LIBRARY_PROJECT} PUBLIC
+            -Wno-class-memaccess
+        )
+    endif()
+endif ()
