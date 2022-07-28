@@ -15,7 +15,6 @@ class NotificationModel;
 
 enum class Platform : uint8_t {
     Twitch,  // 0
-    // Mixer,   // 1
 };
 
 class NotificationController final : public Singleton, private QObject
@@ -49,10 +48,6 @@ private:
 
     ChatterinoSetting<std::vector<QString>> twitchSetting_ = {
         "/notifications/twitch"};
-    /*
-    ChatterinoSetting<std::vector<QString>> mixerSetting_ = {
-        "/notifications/mixer"};
-    */
 };
 
 }  // namespace chatterino

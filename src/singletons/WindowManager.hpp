@@ -57,7 +57,12 @@ public:
 
     Window &getMainWindow();
     Window &getSelectedWindow();
-    Window &createWindow(WindowType type, bool show = true);
+    Window &createWindow(WindowType type, bool show = true,
+                         QWidget *parent = nullptr);
+
+    // Use this method if you want to open a "new" channel in a popup. If you want to popup an
+    // existing Split or SplitContainer, consider using Split::popup() or SplitContainer::popup().
+    Window &openInPopup(ChannelPtr channel);
 
     void select(Split *split);
     void select(SplitContainer *container);

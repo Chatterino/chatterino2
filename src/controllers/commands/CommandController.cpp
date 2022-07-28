@@ -177,80 +177,213 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
     return false;
 }
 
-const std::function<QString(const QString &, const ChannelPtr &)>
-    noOpPlaceholder = [](const auto &altText, const auto &channel) {
+using VariableReplacer = std::function<QString(
+    const QString &, const ChannelPtr &, const Message *)>;
+
+const VariableReplacer NO_OP_PLACEHOLDER =
+    [](const auto &altText, const auto &channel, const auto *message) {
         return altText;
     };
 
-const std::map<QString,
-               std::function<QString(const QString &, const ChannelPtr &)>>
-    COMMAND_VARS{
-        {
-            "channel.name",
-            [](const auto &altText, const auto &channel) {
-                (void)(altText);  //unused
-                return channel->getName();
-            },
+const std::unordered_map<QString, VariableReplacer> COMMAND_VARS{
+    {
+        "channel.name",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(altText);  //unused
+            (void)(message);  //unused
+            return channel->getName();
         },
-        {
-            "channel.id",
-            [](const auto &altText, const auto &channel) {
-                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-                if (tc == nullptr)
-                {
-                    return altText;
-                }
+    },
+    {
+        "channel.id",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(message);  //unused
+            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc == nullptr)
+            {
+                return altText;
+            }
 
-                return tc->roomId();
-            },
+            return tc->roomId();
         },
-        {
-            "stream.game",
-            [](const auto &altText, const auto &channel) {
-                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-                if (tc == nullptr)
-                {
-                    return altText;
-                }
-                const auto &status = tc->accessStreamStatus();
-                return status->live ? status->game : altText;
-            },
+    },
+    {
+        // NOTE: The use of {channel} is deprecated and support for it will drop at some point
+        // Users should be encouraged to use {channel.name} instead.
+        "channel",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(altText);  //unused
+            (void)(message);  //unused
+            return channel->getName();
         },
-        {
-            "stream.title",
-            [](const auto &altText, const auto &channel) {
-                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-                if (tc == nullptr)
-                {
-                    return altText;
-                }
-                const auto &status = tc->accessStreamStatus();
-                return status->live ? status->title : altText;
-            },
+    },
+    {
+        "stream.game",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(message);  //unused
+            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc == nullptr)
+            {
+                return altText;
+            }
+            const auto &status = tc->accessStreamStatus();
+            return status->live ? status->game : altText;
         },
-        {
-            "my.id",
-            [](const auto &altText, const auto &channel) {
-                (void)(channel);  //unused
-                auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
-                return uid.isEmpty() ? altText : uid;
-            },
+    },
+    {
+        "stream.title",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(message);  //unused
+            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc == nullptr)
+            {
+                return altText;
+            }
+            const auto &status = tc->accessStreamStatus();
+            return status->live ? status->title : altText;
         },
-        {
-            "my.name",
-            [](const auto &altText, const auto &channel) {
-                (void)(channel);  //unused
-                auto name =
-                    getApp()->accounts->twitch.getCurrent()->getUserName();
-                return name.isEmpty() ? altText : name;
-            },
+    },
+    {
+        "my.id",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            (void)(message);  //unused
+            auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
+            return uid.isEmpty() ? altText : uid;
         },
-        // variables used in mod buttons and the like, these make no sense in normal commands, so they are left empty
-        {"input.text", noOpPlaceholder},
-        {"msg.id", noOpPlaceholder},
-        {"user.name", noOpPlaceholder},
-        {"msg.text", noOpPlaceholder},
-    };
+    },
+    {
+        "my.name",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            (void)(message);  //unused
+            auto name = getApp()->accounts->twitch.getCurrent()->getUserName();
+            return name.isEmpty() ? altText : name;
+        },
+    },
+    {
+        "user.name",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            if (message == nullptr)
+            {
+                return altText;
+            }
+
+            const auto &v = message->loginName;
+
+            if (v.isEmpty())
+            {
+                return altText;
+            }
+
+            return v;
+        },
+    },
+    {
+        // NOTE: The use of {user} is deprecated and support for it will drop at some point
+        // Users should be encouraged to use {user.name} instead.
+        "user",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            if (message == nullptr)
+            {
+                return altText;
+            }
+
+            const auto &v = message->loginName;
+
+            if (v.isEmpty())
+            {
+                return altText;
+            }
+
+            return v;
+        },
+    },
+    {
+        "msg.id",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            if (message == nullptr)
+            {
+                return altText;
+            }
+
+            const auto &v = message->id;
+
+            if (v.isEmpty())
+            {
+                return altText;
+            }
+
+            return v;
+        },
+    },
+    {
+        // NOTE: The use of {msg-id} is deprecated and support for it will drop at some point
+        // Users should be encouraged to use {msg.id} instead.
+        "msg-id",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            if (message == nullptr)
+            {
+                return altText;
+            }
+
+            const auto &v = message->id;
+
+            if (v.isEmpty())
+            {
+                return altText;
+            }
+
+            return v;
+        },
+    },
+    {
+        "msg.text",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            if (message == nullptr)
+            {
+                return altText;
+            }
+
+            const auto &v = message->messageText;
+
+            if (v.isEmpty())
+            {
+                return altText;
+            }
+
+            return v;
+        },
+    },
+    {
+        // NOTE: The use of {message} is deprecated and support for it will drop at some point
+        // Users should be encouraged to use {msg.text} instead.
+        "message",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            if (message == nullptr)
+            {
+                return altText;
+            }
+
+            const auto &v = message->messageText;
+
+            if (v.isEmpty())
+            {
+                return altText;
+            }
+
+            return v;
+        },
+    },
+    // variables used in mod buttons and the like, these make no sense in normal commands, so they are left empty
+    {"input.text", NO_OP_PLACEHOLDER},
+};
 
 }  // namespace
 
@@ -334,6 +467,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         auto target = words.at(1);
+        stripChannelName(target);
 
         getHelix()->getUserByName(
             target,
@@ -379,6 +513,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         auto target = words.at(1);
+        stripChannelName(target);
 
         getHelix()->getUserByName(
             target,
@@ -752,7 +887,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     });
 
     this->registerCommand("/popup", [](const QStringList &words,
-                                       ChannelPtr channel) {
+                                       ChannelPtr sourceChannel) {
         static const auto *usageMessage =
             "Usage: /popup [channel]. Open specified Twitch channel in "
             "a new window. If no channel argument is specified, open "
@@ -761,6 +896,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         QString target(words.value(1));
         stripChannelName(target);
 
+        // Popup the current split
         if (target.isEmpty())
         {
             auto *currentPage =
@@ -779,19 +915,14 @@ void CommandController::initialize(Settings &, Paths &paths)
                 }
             }
 
-            channel->addMessage(makeSystemMessage(usageMessage));
+            sourceChannel->addMessage(makeSystemMessage(usageMessage));
             return "";
         }
 
+        // Open channel passed as argument in a popup
         auto *app = getApp();
-        Window &window = app->windows->createWindow(WindowType::Popup, true);
-
-        auto *split = new Split(static_cast<SplitContainer *>(
-            window.getNotebook().getOrAddSelectedPage()));
-
-        split->setChannel(app->twitch->getOrAddChannel(target));
-
-        window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+        auto targetChannel = app->twitch->getOrAddChannel(target);
+        app->windows->openInPopup(targetChannel);
 
         return "";
     });
@@ -801,7 +932,11 @@ void CommandController::initialize(Settings &, Paths &paths)
         auto *currentPage = dynamic_cast<SplitContainer *>(
             getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
 
-        currentPage->getSelectedSplit()->getChannelView().clearMessages();
+        if (auto split = currentPage->getSelectedSplit())
+        {
+            split->getChannelView().clearMessages();
+        }
+
         return "";
     });
 
@@ -1118,10 +1253,10 @@ void CommandController::registerCommand(QString commandName,
     this->defaultChatterinoCommandAutoCompletions_.append(commandName);
 }
 
-QString CommandController::execCustomCommand(const QStringList &words,
-                                             const Command &command,
-                                             bool dryRun, ChannelPtr channel,
-                                             std::map<QString, QString> context)
+QString CommandController::execCustomCommand(
+    const QStringList &words, const Command &command, bool dryRun,
+    ChannelPtr channel, const Message *message,
+    std::unordered_map<QString, QString> context)
 {
     QString result;
 
@@ -1165,20 +1300,21 @@ QString CommandController::execCustomCommand(const QStringList &words,
 
             if (var != context.end())
             {
+                // Found variable in `context`
                 result += var->second.isEmpty() ? altText : var->second;
+                continue;
             }
-            else
+
+            auto it = COMMAND_VARS.find(varName);
+            if (it != COMMAND_VARS.end())
             {
-                auto it = COMMAND_VARS.find(varName);
-                if (it != COMMAND_VARS.end())
-                {
-                    result += it->second(altText, channel);
-                }
-                else
-                {
-                    result += "{" + match.captured(3) + "}";
-                }
+                // Found variable in `COMMAND_VARS`
+                result += it->second(altText, channel, message);
+                continue;
             }
+
+            // Fall back to replacing it with the actual matched string
+            result += "{" + match.captured(3) + "}";
             continue;
         }
 

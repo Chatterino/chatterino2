@@ -32,8 +32,7 @@ Scrollbar::Scrollbar(ChannelView *parent)
 
 void Scrollbar::addHighlight(ScrollbarHighlight highlight)
 {
-    ScrollbarHighlight deleted;
-    this->highlights_.pushBack(highlight, deleted);
+    this->highlights_.pushBack(highlight);
 }
 
 void Scrollbar::addHighlightsAtStart(
@@ -62,7 +61,7 @@ void Scrollbar::clearHighlights()
     this->highlights_.clear();
 }
 
-LimitedQueueSnapshot<ScrollbarHighlight> Scrollbar::getHighlightSnapshot()
+LimitedQueueSnapshot<ScrollbarHighlight> &Scrollbar::getHighlightSnapshot()
 {
     if (!this->highlightsPaused_)
     {
@@ -75,6 +74,11 @@ LimitedQueueSnapshot<ScrollbarHighlight> Scrollbar::getHighlightSnapshot()
 void Scrollbar::scrollToBottom(bool animate)
 {
     this->setDesiredValue(this->maximum_ - this->getLargeChange(), animate);
+}
+
+void Scrollbar::scrollToTop(bool animate)
+{
+    this->setDesiredValue(this->minimum_ - this->getLargeChange(), animate);
 }
 
 bool Scrollbar::isAtBottom() const
@@ -275,7 +279,7 @@ void Scrollbar::paintEvent(QPaintEvent *)
     }
 
     // draw highlights
-    auto snapshot = this->getHighlightSnapshot();
+    auto &snapshot = this->getHighlightSnapshot();
     size_t snapshotLength = snapshot.size();
 
     if (snapshotLength == 0)

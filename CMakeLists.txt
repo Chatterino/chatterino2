@@ -30,6 +30,8 @@ endif()
 if (USE_CONAN OR CONAN_EXPORTED)
     include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
+else ()
+    set(QT_CREATOR_SKIP_CONAN_SETUP ON)
 endif()
 
 find_program(CCACHE_PROGRAM ccache)

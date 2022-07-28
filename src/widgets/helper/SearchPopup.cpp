@@ -188,7 +188,8 @@ LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
     auto uniqueIterator =
         std::unique(combinedSnapshot.begin(), combinedSnapshot.end(),
                     [](MessagePtr &a, MessagePtr &b) {
-                        return a->id == b->id;
+                        // nullptr check prevents system messages from being dropped
+                        return (a->id != nullptr) && a->id == b->id;
                     });
 
     combinedSnapshot.erase(uniqueIterator, combinedSnapshot.end());

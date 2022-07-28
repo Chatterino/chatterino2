@@ -3,6 +3,8 @@
 #include "Application.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/irc/IrcChannel2.hpp"
+#include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
@@ -82,11 +84,20 @@ void Channel::addMessage(MessagePtr message,
     auto app = getApp();
     MessagePtr deleted;
 
-    // FOURTF: change this when adding more providers
-    if (this->isTwitchChannel() &&
-        (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog)))
+    if (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog))
     {
-        app->logging->addMessage(this->name_, message);
+        QString channelPlatform("other");
+        if (this->type_ == Type::Irc)
+        {
+            auto irc = static_cast<IrcChannel *>(this);
+            channelPlatform =
+                QString("irc-%1").arg(irc->server()->userFriendlyIdentifier());
+        }
+        else if (this->isTwitchChannel())
+        {
+            channelPlatform = "twitch";
+        }
+        app->logging->addMessage(this->name_, message, channelPlatform);
     }
 
     if (this->messages_.pushBack(message, deleted))
@@ -247,23 +258,20 @@ void Channel::deleteMessage(QString messageID)
         msg->flags.set(MessageFlag::Disabled);
     }
 }
+
 MessagePtr Channel::findMessage(QString messageID)
 {
-    LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
-    int snapshotLength = snapshot.size();
+    MessagePtr res;
 
-    int end = std::max(0, snapshotLength - 200);
-
-    for (int i = snapshotLength - 1; i >= end; --i)
+    if (auto msg = this->messages_.rfind([&messageID](const MessagePtr &msg) {
+            return msg->id == messageID;
+        });
+        msg)
     {
-        auto &s = snapshot[i];
-
-        if (s->id == messageID)
-        {
-            return s;
-        }
+        res = *msg;
     }
-    return nullptr;
+
+    return res;
 }
 
 bool Channel::canSendMessage() const
@@ -340,7 +348,7 @@ IndirectChannel::IndirectChannel(ChannelPtr channel, Channel::Type type)
 {
 }
 
-ChannelPtr IndirectChannel::get()
+ChannelPtr IndirectChannel::get() const
 {
     return data_->channel;
 }

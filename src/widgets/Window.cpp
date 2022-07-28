@@ -43,8 +43,8 @@
 
 namespace chatterino {
 
-Window::Window(WindowType type)
-    : BaseWindow(BaseWindow::EnableCustomFrame)
+Window::Window(WindowType type, QWidget *parent)
+    : BaseWindow(BaseWindow::EnableCustomFrame, parent)
     , type_(type)
     , notebook_(new SplitNotebook(this))
 {
@@ -79,7 +79,7 @@ Window::Window(WindowType type)
     if (type == WindowType::Main || type == WindowType::Popup)
     {
         getSettings()->tabDirection.connect([this](int val) {
-            this->notebook_->setTabDirection(NotebookTabDirection(val));
+            this->notebook_->setTabLocation(NotebookTabLocation(val));
         });
     }
 }
@@ -408,12 +408,13 @@ void Window::addShortcuts()
              {
                  splitContainer = this->notebook_->getOrAddSelectedPage();
              }
-             this->notebook_->select(splitContainer);
              Split *split = new Split(splitContainer);
              split->setChannel(
                  getApp()->twitch->getOrAddChannel(si.channelName));
              split->setFilters(si.filters);
              splitContainer->appendSplit(split);
+             splitContainer->setSelected(split);
+             this->notebook_->select(splitContainer);
              return "";
          }},
         {"toggleLocalR9K",
