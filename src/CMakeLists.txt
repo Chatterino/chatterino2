@@ -762,7 +762,7 @@ else ()
         -Wno-switch
         -Wno-deprecated-declarations
         -Wno-sign-compare
-        # -Wno-unused-variable
+        -Wno-unused-variable
 
         # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
         -Wno-strict-aliasing
