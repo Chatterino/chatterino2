@@ -46,8 +46,10 @@ private:
     QString userName_;
     QString userId_;
     QString avatarUrl_;
+
     // The channel the popup was opened from (e.g. /mentions or #forsen). Can be a special channel.
     ChannelPtr channel_;
+
     // The channel the messages are rendered from (e.g. #forsen). Can be a special channel, but will try to not be where possible.
     ChannelPtr underlyingChannel_;
 
@@ -68,6 +70,9 @@ private:
 
     std::unique_ptr<pajlada::Signals::ScopedConnection> refreshConnection_;
 
+    // If we should close the dialog automatically if the user clicks out
+    bool closeAutomatically_;
+
     std::shared_ptr<bool> hack_;
 
     struct {
@@ -79,6 +84,7 @@ private:
         Label *followerCountLabel = nullptr;
         Label *createdDateLabel = nullptr;
         Label *userIDLabel = nullptr;
+        Button *pinButton = nullptr;
         Label *followageLabel = nullptr;
         Label *subageLabel = nullptr;
 

@@ -25,6 +25,9 @@ Resources2::Resources2()
     this->buttons.clearSearch = QPixmap(":/buttons/clearSearch.png");
     this->buttons.copyDark = QPixmap(":/buttons/copyDark.png");
     this->buttons.copyLight = QPixmap(":/buttons/copyLight.png");
+    this->buttons.pinDark = QPixmap(":/buttons/pinDisabledDark.png");
+    this->buttons.pinLight = QPixmap(":/buttons/pinDisabledLight.png");
+    this->buttons.pinEnabled = QPixmap(":/buttons/pinEnabled.png");
     this->buttons.menuDark = QPixmap(":/buttons/menuDark.png");
     this->buttons.menuLight = QPixmap(":/buttons/menuLight.png");
     this->buttons.mod = QPixmap(":/buttons/mod.png");

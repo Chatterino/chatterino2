@@ -134,13 +134,14 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
     : BaseWindow(closeAutomatically ? userInfoPopupFlagsCloseAutomatically
                                     : userInfoPopupFlags,
                  parent)
+    , closeAutomatically_(closeAutomatically)
     , hack_(new bool)
     , dragTimer_(this)
 {
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
 
-    if (closeAutomatically)
+    if (this->closeAutomatically_)
         this->setActionOnFocusLoss(BaseWindow::Delete);
     else
         this->setAttribute(Qt::WA_DeleteOnClose);
@@ -354,6 +355,33 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
                 this->ui_.localizedNameLabel->setVisible(false);
                 this->ui_.localizedNameCopyButton->setVisible(false);
+
+                // button to pin the window (only if we close automatically)
+                if (this->closeAutomatically_)
+                {
+                    this->ui_.pinButton = box.emplace<Button>().getElement();
+                    this->ui_.pinButton->setPixmap(
+                        getApp()->themes->buttons.pin);
+                    this->ui_.pinButton->setScaleIndependantSize(18, 18);
+                    this->ui_.pinButton->setToolTip("Pin Window");
+                    QObject::connect(
+                        this->ui_.pinButton, &Button::leftClicked, [&] {
+                            this->closeAutomatically_ =
+                                !this->closeAutomatically_;
+                            if (this->closeAutomatically_)
+                            {
+                                this->setActionOnFocusLoss(BaseWindow::Delete);
+                                this->ui_.pinButton->setPixmap(
+                                    getApp()->themes->buttons.pin);
+                            }
+                            else
+                            {
+                                this->setActionOnFocusLoss(BaseWindow::Nothing);
+                                this->ui_.pinButton->setPixmap(
+                                    getResources().buttons.pinEnabled);
+                            }
+                        });
+                }
             }
 
             // items on the left
