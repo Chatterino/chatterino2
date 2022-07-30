@@ -525,7 +525,7 @@ void SplitInput::addShortcuts()
          }},
         {"redo",
          [this](std::vector<QString>) -> QString {
-             this->ui_.textEdit->paste();
+             this->ui_.textEdit->redo();
              return "";
          }},
         {"copy",
