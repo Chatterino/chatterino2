@@ -147,28 +147,40 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return fuzzyToFloat(args.value, 1.f);
         });
     ComboBox *tabDirectionDropdown =
-        layout.addDropdown<std::underlying_type<NotebookTabDirection>::type>(
-            "Tab layout", {"Horizontal", "Vertical"}, s.tabDirection,
+        layout.addDropdown<std::underlying_type<NotebookTabLocation>::type>(
+            "Tab layout", {"Top", "Left", "Right", "Bottom"}, s.tabDirection,
             [](auto val) {
                 switch (val)
                 {
-                    case NotebookTabDirection::Horizontal:
-                        return "Horizontal";
-                    case NotebookTabDirection::Vertical:
-                        return "Vertical";
+                    case NotebookTabLocation::Top:
+                        return "Top";
+                    case NotebookTabLocation::Left:
+                        return "Left";
+                    case NotebookTabLocation::Right:
+                        return "Right";
+                    case NotebookTabLocation::Bottom:
+                        return "Bottom";
                 }
 
                 return "";
             },
             [](auto args) {
-                if (args.value == "Vertical")
+                if (args.value == "Bottom")
                 {
-                    return NotebookTabDirection::Vertical;
+                    return NotebookTabLocation::Bottom;
+                }
+                else if (args.value == "Left")
+                {
+                    return NotebookTabLocation::Left;
+                }
+                else if (args.value == "Right")
+                {
+                    return NotebookTabLocation::Right;
                 }
                 else
                 {
-                    // default to horizontal
-                    return NotebookTabDirection::Horizontal;
+                    // default to top
+                    return NotebookTabLocation::Top;
                 }
             },
             false);
