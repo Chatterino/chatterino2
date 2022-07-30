@@ -655,15 +655,14 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
         });
 
     this->channelConnections_.managedConnect(
-        underlyingChannel->arbitraryMessageUpdate, [this]() {
+        underlyingChannel->filledInMessages, [this](const auto &messages) {
             std::vector<MessagePtr> filtered;
-            auto snapshot = this->underlyingChannel_->getMessageSnapshot();
-            filtered.reserve(snapshot.size());
-            std::copy_if(snapshot.begin(), snapshot.end(),
+            filtered.reserve(messages.size());
+            std::copy_if(messages.begin(), messages.end(),
                          std::back_inserter(filtered), [this](MessagePtr msg) {
                              return this->shouldIncludeMessage(msg);
                          });
-            this->channel_->replaceMessagesWith(filtered);
+            this->channel_->fillInMissingMessages(filtered);
         });
 
     //
@@ -684,11 +683,6 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
             this->messageAddedAtStart(messages);
         });
 
-    this->channelConnections_.managedConnect(
-        this->channel_->arbitraryMessageUpdate, [this]() {
-            this->messagesUpdated();
-        });
-
     // on message removed
     this->channelConnections_.managedConnect(
         this->channel_->messageRemovedFromStart, [this](MessagePtr &message) {
@@ -701,6 +695,12 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
         [this](size_t index, MessagePtr replacement) {
             this->messageReplaced(index, replacement);
         });
+
+    // on messages filled in
+    this->channelConnections_.managedConnect(this->channel_->filledInMessages,
+                                             [this](const auto &) {
+                                                 this->messagesUpdated();
+                                             });
 
     auto snapshot = underlyingChannel->getMessageSnapshot();
 

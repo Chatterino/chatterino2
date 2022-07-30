@@ -231,30 +231,67 @@ void Channel::addMessagesAtStart(const std::vector<MessagePtr> &_messages)
     }
 }
 
-void Channel::replaceMessagesWith(const std::vector<MessagePtr> &messages)
+void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
 {
-    this->messages_.setContents(messages);
-    this->arbitraryMessageUpdate.invoke();
-}
+    auto snapshot = this->getMessageSnapshot();
 
-void Channel::insertMessageBefore(const MessagePtr &before,
-                                  const MessagePtr &message, bool notify)
-{
-    bool inserted = this->messages_.insertBefore(before, message);
-    if (inserted && notify)
-    {
-        this->arbitraryMessageUpdate.invoke();
-    }
-}
+    std::unordered_set<QString> existingMessageIds;
+    existingMessageIds.reserve(snapshot.size());
 
-void Channel::insertMessageAfter(const MessagePtr &after,
-                                 const MessagePtr &message, bool notify)
-{
-    bool inserted = this->messages_.insertAfter(after, message);
-    if (inserted && notify)
+    // First, collect the ids of every message already present in the channel
+    for (auto &msg : snapshot)
     {
-        this->arbitraryMessageUpdate.invoke();
+        if (msg->flags.has(MessageFlag::System) || msg->id.isEmpty())
+        {
+            continue;
+        }
+
+        existingMessageIds.insert(msg->id);
     }
+
+    // Keep track of the last message in the channel. We need this value
+    // to allow concurrent appends to the end of the channel while still
+    // being able to insert just-loaded historical messages at the end
+    // in the correct place.
+    auto lastMsg = snapshot[snapshot.size() - 1];
+    for (auto &msg : messages)
+    {
+        // check if message already exists
+        if (existingMessageIds.count(msg->id) != 0)
+        {
+            continue;
+        }
+
+        bool insertedFlag = false;
+        for (auto &snapshotMsg : snapshot)
+        {
+            if (snapshotMsg->flags.has(MessageFlag::System))
+            {
+                continue;
+            }
+
+            if (msg->serverReceivedTime < snapshotMsg->serverReceivedTime)
+            {
+                // We found the first message that comes after the current message.
+                // Therefore, we can put the current message directly before.
+                this->messages_.insertBefore(snapshotMsg, msg);
+                insertedFlag = true;
+                break;
+            }
+        }
+
+        if (!insertedFlag)
+        {
+            // We never found a message already in the channel that came after
+            // the current message. Put it at the end and make sure to update
+            // which message is considered "the end".
+            this->messages_.insertAfter(lastMsg, msg);
+            lastMsg = msg;
+        }
+    }
+
+    // invoke at end to avoid unnecessary re-layouts
+    this->filledInMessages.invoke(messages);
 }
 
 void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)

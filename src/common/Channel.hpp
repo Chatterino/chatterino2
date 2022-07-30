@@ -54,9 +54,7 @@ public:
         messageAppended;
     pajlada::Signals::Signal<std::vector<MessagePtr> &> messagesAddedAtStart;
     pajlada::Signals::Signal<size_t, MessagePtr &> messageReplaced;
-    /// Invoked when arbitrary updates to the messages which can't easily
-    /// or simply be expressed by a single insertion or append occurs.
-    pajlada::Signals::NoArgSignal arbitraryMessageUpdate;
+    pajlada::Signals::Signal<const std::vector<MessagePtr> &> filledInMessages;
     pajlada::Signals::NoArgSignal destroyed;
     pajlada::Signals::NoArgSignal displayNameChanged;
 
@@ -80,19 +78,8 @@ public:
         boost::optional<MessageFlags> overridingFlags = boost::none);
     void addMessagesAtStart(const std::vector<MessagePtr> &messages_);
 
-    /// Inserts the given message before another message. If notify is true,
-    /// arbitraryMessageUpdate will be invoked if an insertion takes place.
-    void insertMessageBefore(const MessagePtr &before,
-                             const MessagePtr &message, bool notify = true);
-
-    /// Inserts the given message after another message. If notify is true,
-    /// arbitraryMessageUpdate will be invoked if an insertion takes place.
-    void insertMessageAfter(const MessagePtr &after, const MessagePtr &message,
-                            bool notify = true);
-
-    /// Clears all present messages and replaces the contents of the channel
-    /// with the passed vector.
-    void replaceMessagesWith(const std::vector<MessagePtr> &messages);
+    /// Inserts the given messages in order by Message::serverReceivedTime.
+    void fillInMissingMessages(const std::vector<MessagePtr> &messages);
 
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();

@@ -153,7 +153,7 @@ private:
     void refreshCheerEmotes();
     void loadRecentMessages();
     void loadRecentMessagesReconnect();
-    void fillInMissingMessages(const std::vector<MessagePtr> &messages);
+    // void fillInMissingMessages(const std::vector<MessagePtr> &messages);
     void fetchDisplayName();
 
     void setLive(bool newLiveStatus);
