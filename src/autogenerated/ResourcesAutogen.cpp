@@ -25,9 +25,6 @@ Resources2::Resources2()
     this->buttons.clearSearch = QPixmap(":/buttons/clearSearch.png");
     this->buttons.copyDark = QPixmap(":/buttons/copyDark.png");
     this->buttons.copyLight = QPixmap(":/buttons/copyLight.png");
-    this->buttons.pinDark = QPixmap(":/buttons/pinDisabledDark.png");
-    this->buttons.pinLight = QPixmap(":/buttons/pinDisabledLight.png");
-    this->buttons.pinEnabled = QPixmap(":/buttons/pinEnabled.png");
     this->buttons.menuDark = QPixmap(":/buttons/menuDark.png");
     this->buttons.menuLight = QPixmap(":/buttons/menuLight.png");
     this->buttons.mod = QPixmap(":/buttons/mod.png");
@@ -35,6 +32,9 @@ Resources2::Resources2()
     this->buttons.modModeDisabled2 = QPixmap(":/buttons/modModeDisabled2.png");
     this->buttons.modModeEnabled = QPixmap(":/buttons/modModeEnabled.png");
     this->buttons.modModeEnabled2 = QPixmap(":/buttons/modModeEnabled2.png");
+    this->buttons.pinDisabledDark = QPixmap(":/buttons/pinDisabledDark.png");
+    this->buttons.pinDisabledLight = QPixmap(":/buttons/pinDisabledLight.png");
+    this->buttons.pinEnabled = QPixmap(":/buttons/pinEnabled.png");
     this->buttons.search = QPixmap(":/buttons/search.png");
     this->buttons.timeout = QPixmap(":/buttons/timeout.png");
     this->buttons.trashCan = QPixmap(":/buttons/trashCan.png");

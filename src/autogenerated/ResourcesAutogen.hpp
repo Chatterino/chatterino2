@@ -32,9 +32,6 @@ public:
         QPixmap clearSearch;
         QPixmap copyDark;
         QPixmap copyLight;
-        QPixmap pinDark;
-        QPixmap pinLight;
-        QPixmap pinEnabled;
         QPixmap menuDark;
         QPixmap menuLight;
         QPixmap mod;
@@ -42,6 +39,9 @@ public:
         QPixmap modModeDisabled2;
         QPixmap modModeEnabled;
         QPixmap modModeEnabled2;
+        QPixmap pinDisabledDark;
+        QPixmap pinDisabledLight;
+        QPixmap pinEnabled;
         QPixmap search;
         QPixmap timeout;
         QPixmap trashCan;
