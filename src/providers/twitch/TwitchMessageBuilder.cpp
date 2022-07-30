@@ -1010,13 +1010,20 @@ void TwitchMessageBuilder::appendTwitchEmote(
             return;
         }
 
-        auto start =
-            correctPositions[coords.at(0).toUInt() - this->messageOffset_];
-        auto end =
-            correctPositions[coords.at(1).toUInt() - this->messageOffset_];
-
-        if (start >= end || start < 0 || end > this->originalMessage_.length())
+        auto from = coords.at(0).toUInt() - this->messageOffset_;
+        auto to = coords.at(1).toUInt() - this->messageOffset_;
+        auto maxPositions = correctPositions.size();
+        if (from > to || to >= maxPositions)
         {
+            // Emote coords are out of range
+            return;
+        }
+
+        auto start = correctPositions[from];
+        auto end = correctPositions[to];
+        if (start > end || start < 0 || end > this->originalMessage_.length())
+        {
+            // Emote coords are out of range from the modified character positions
             return;
         }
 
