@@ -57,8 +57,6 @@ namespace {
         const QString &localizedName = message.localizedName;
         bool hasLocalizedName = !localizedName.isEmpty();
 
-        auto newTestApp = getApp();
-
         // The full string that will be rendered in the chat widget
         QString usernameText;
 
