@@ -91,8 +91,16 @@ namespace {
         LimitedQueueSnapshot<MessagePtr> snapshot =
             channel->getMessageSnapshot();
 
-        ChannelPtr channelPtr(
-            new Channel(channel->getName(), Channel::Type::None));
+        ChannelPtr channelPtr;
+        if (channel->isTwitchChannel())
+        {
+            channelPtr = std::make_shared<TwitchChannel>(channel->getName());
+        }
+        else
+        {
+            channelPtr = std::make_shared<Channel>(channel->getName(),
+                                                   Channel::Type::None);
+        }
 
         for (size_t i = 0; i < snapshot.size(); i++)
         {
@@ -118,32 +126,13 @@ namespace {
 
 }  // namespace
 
-#ifdef Q_OS_LINUX
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::Dialog,
-                                                BaseWindow::EnableCustomFrame};
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
-    BaseWindow::EnableCustomFrame};
-#else
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::EnableCustomFrame};
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
-    BaseWindow::EnableCustomFrame, BaseWindow::Frameless,
-    BaseWindow::FramelessDraggable};
-#endif
-
-UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
-    : BaseWindow(closeAutomatically ? userInfoPopupFlagsCloseAutomatically
-                                    : userInfoPopupFlags,
-                 parent)
-    , hack_(new bool)
-    , dragTimer_(this)
+UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
+                             Split *split)
+    : DraggablePopup(closeAutomatically, parent)
+    , split_(split)
 {
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
-
-    if (closeAutomatically)
-        this->setActionOnFocusLoss(BaseWindow::Delete);
-    else
-        this->setAttribute(Qt::WA_DeleteOnClose);
 
     HotkeyController::HotkeyMap actions{
         {"delete",
@@ -504,7 +493,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
         this->ui_.noMessagesLabel = new Label("No recent messages");
         this->ui_.noMessagesLabel->setVisible(false);
 
-        this->ui_.latestMessages = new ChannelView(this);
+        this->ui_.latestMessages =
+            new ChannelView(this, this->split_, ChannelView::Context::UserCard);
         this->ui_.latestMessages->setMinimumSize(400, 275);
         this->ui_.latestMessages->setSizePolicy(QSizePolicy::Expanding,
                                                 QSizePolicy::Expanding);
@@ -516,21 +506,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
     this->installEvents();
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
-
-    this->dragTimer_.callOnTimeout(
-        [this, hack = std::weak_ptr<bool>(this->hack_)] {
-            if (!hack.lock())
-            {
-                // Ensure this timer is never called after the object has been destroyed
-                return;
-            }
-            if (!this->isMoving_)
-            {
-                return;
-            }
-
-            this->move(this->requestedDragPos_);
-        });
 }
 
 void UserInfoPopup::themeChangedEvent()
@@ -554,36 +529,6 @@ void UserInfoPopup::scaleChangedEvent(float /*scale*/)
 
         this->setGeometry(geo);
     });
-}
-
-void UserInfoPopup::mousePressEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::MouseButton::LeftButton)
-    {
-        this->dragTimer_.start(std::chrono::milliseconds(17));
-        this->startPosDrag_ = event->pos();
-        this->movingRelativePos = event->localPos();
-    }
-}
-
-void UserInfoPopup::mouseReleaseEvent(QMouseEvent *event)
-{
-    this->dragTimer_.stop();
-    this->isMoving_ = false;
-}
-
-void UserInfoPopup::mouseMoveEvent(QMouseEvent *event)
-{
-    // Drag the window by the amount changed from inital position
-    // Note that we provide a few *units* of deadzone so people don't
-    // start dragging the window if they are slow at clicking.
-    auto movePos = event->pos() - this->startPosDrag_;
-    if (this->isMoving_ || movePos.manhattanLength() > 10.0)
-    {
-        this->requestedDragPos_ =
-            (event->screenPos() - this->movingRelativePos).toPoint();
-        this->isMoving_ = true;
-    }
 }
 
 void UserInfoPopup::installEvents()
@@ -771,7 +716,7 @@ void UserInfoPopup::updateLatestMessages()
 
 void UserInfoPopup::updateUserData()
 {
-    std::weak_ptr<bool> hack = this->hack_;
+    std::weak_ptr<bool> hack = this->lifetimeHack_;
     auto currentUser = getApp()->accounts->twitch.getCurrent();
 
     const auto onUserFetchFailed = [this, hack] {
@@ -979,7 +924,7 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
     NetworkRequest(SEVENTV_USER_API.arg(user.login))
         .timeout(20000)
         .header("Content-Type", "application/json")
-        .onSuccess([this, hack = std::weak_ptr<bool>(this->hack_)](
+        .onSuccess([this, hack = std::weak_ptr<bool>(this->lifetimeHack_)](
                        NetworkResult result) -> Outcome {
             if (!hack.lock())
             {
@@ -1035,7 +980,7 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
 
 void UserInfoPopup::setSevenTVAvatar(const QString &filename)
 {
-    auto hack = std::weak_ptr<bool>(this->hack_);
+    auto hack = std::weak_ptr<bool>(this->lifetimeHack_);
 
     if (this->avatarDestroyed || !hack.lock())
         return;

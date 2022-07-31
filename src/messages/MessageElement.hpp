@@ -142,8 +142,13 @@ enum class MessageElementFlag : int64_t {
     // e.g. BTTV's SoSnowy during christmas season or zerowidth 7TV emotes
     ZeroWidthEmote = (1LL << 31),
 
-    // (1LL << 32) is used by SeventvEmoteImage, it is next to FfzEmote
-    // (1LL << 33) is used by SeventvEmoteText, it is next to SeventvEmoteImage
+    // (1LL << 34) is used by SeventvEmoteImage, it is next to FfzEmote
+    // (1LL << 35) is used by SeventvEmoteText, it is next to SeventvEmoteImage
+    // for elements of the message reply
+    RepliedMessage = (1LL << 32),
+
+    // for the reply button element
+    ReplyButton = (1LL << 33),
 
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | SeventvEmoteImage | TwitchEmoteImage |
@@ -228,6 +233,22 @@ private:
     ImagePtr image_;
 };
 
+// contains a image with a circular background color
+class CircularImageElement : public MessageElement
+{
+public:
+    CircularImageElement(ImagePtr image, int padding, QColor background,
+                         MessageElementFlags flags);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+private:
+    ImagePtr image_;
+    int padding_;
+    QColor background_;
+};
+
 // contains a text, it will split it into words
 class TextElement : public MessageElement
 {
@@ -236,6 +257,29 @@ public:
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::ChatMedium);
     ~TextElement() override = default;
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+private:
+    MessageColor color_;
+    FontStyle style_;
+
+    struct Word {
+        QString text;
+        int width = -1;
+    };
+    std::vector<Word> words_;
+};
+
+// contains a text that will be truncated to one line
+class SingleLineTextElement : public MessageElement
+{
+public:
+    SingleLineTextElement(const QString &text, MessageElementFlags flags,
+                          const MessageColor &color = MessageColor::Text,
+                          FontStyle style = FontStyle::ChatMedium);
+    ~SingleLineTextElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
@@ -374,4 +418,18 @@ public:
 private:
     ImageSet images_;
 };
+
+class ReplyCurveElement : public MessageElement
+{
+public:
+    ReplyCurveElement();
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+private:
+    int neededMargin_;
+    QSize size_;
+};
+
 }  // namespace chatterino

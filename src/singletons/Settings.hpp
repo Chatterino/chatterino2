@@ -103,6 +103,7 @@ public:
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
+    BoolSetting showReplyButton = {"/appearance/showReplyButton", false};
     IntSetting collpseMessagesMinLines = {
         "/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessages = {
@@ -160,6 +161,8 @@ public:
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier",
                                           1.0};
     BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", true};
+    BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
+                                        false};
     // BoolSetting twitchSeperateWriteConnection =
     // {"/behaviour/twitchSeperateWriteConnection", false};
 

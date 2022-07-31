@@ -44,6 +44,7 @@
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -124,9 +125,11 @@ namespace {
     }
 }  // namespace
 
-ChannelView::ChannelView(BaseWidget *parent)
+ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
     : BaseWidget(parent)
     , scrollBar_(new Scrollbar(this))
+    , split_(split)
+    , context_(context)
 {
     this->setMouseTracking(true);
 
@@ -165,7 +168,7 @@ ChannelView::ChannelView(BaseWidget *parent)
     // and tabbing to it from another widget. I don't currently know
     // of any place where you can, or where it would make sense,
     // to tab to a ChannelVieChannelView
-    this->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
+    this->setFocusPolicy(Qt::FocusPolicy::ClickFocus);
 }
 
 void ChannelView::initializeLayout()
@@ -1023,6 +1026,17 @@ MessageElementFlags ChannelView::getFlags() const
 
     if (this->sourceChannel_ == app->twitch->mentionsChannel)
         flags.set(MessageElementFlag::ChannelName);
+
+    if (this->context_ == Context::ReplyThread)
+    {
+        // Don't show inline replies within the ReplyThreadPopup
+        flags.unset(MessageElementFlag::RepliedMessage);
+    }
+
+    if (!this->canReplyToMessages())
+    {
+        flags.unset(MessageElementFlag::ReplyButton);
+    }
 
     return flags;
 }
@@ -1988,10 +2002,27 @@ void ChannelView::addMessageContextMenuItems(
 
     menu.addAction("Copy full message", [layout] {
         QString copyString;
-        layout->addSelectionText(copyString);
+        layout->addSelectionText(copyString, 0, INT_MAX,
+                                 CopyMode::EverythingButReplies);
 
         crossPlatformCopy(copyString);
     });
+
+    // Only display reply option where it makes sense
+    if (this->canReplyToMessages() && layout->isReplyable())
+    {
+        const auto &messagePtr = layout->getMessagePtr();
+        menu.addAction("Reply to message", [this, &messagePtr] {
+            this->setInputReply(messagePtr);
+        });
+
+        if (messagePtr->replyThread != nullptr)
+        {
+            menu.addAction("View thread", [this, &messagePtr] {
+                this->showReplyThreadPopup(messagePtr);
+            });
+        }
+    }
 }
 
 void ChannelView::addTwitchLinkContextMenuItems(
@@ -2229,8 +2260,8 @@ void ChannelView::showUserInfoPopup(const QString &userName,
 {
     auto *userCardParent =
         static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
-    auto *userPopup =
-        new UserInfoPopup(getSettings()->autoCloseUserPopup, userCardParent);
+    auto *userPopup = new UserInfoPopup(getSettings()->autoCloseUserPopup,
+                                        userCardParent, this->split_);
 
     auto contextChannel =
         getApp()->twitch->getChannelOrEmpty(alternativePopoutChannel);
@@ -2356,6 +2387,14 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             this->underlyingChannel_.get()->reconnect();
         }
         break;
+        case Link::ReplyToMessage: {
+            this->setInputReply(layout->getMessagePtr());
+        }
+        break;
+        case Link::ViewThread: {
+            this->showReplyThreadPopup(layout->getMessagePtr());
+        }
+        break;
 
         default:;
     }
@@ -2476,6 +2515,108 @@ void ChannelView::scrollUpdateRequested()
     // "Good" feeling multiplier found by trial-and-error
     const qreal multiplier = qreal(0.02);
     this->scrollBar_->offset(multiplier * offset);
+}
+
+void ChannelView::setInputReply(const MessagePtr &message)
+{
+    if (message == nullptr)
+    {
+        return;
+    }
+
+    std::shared_ptr<MessageThread> thread;
+
+    if (message->replyThread == nullptr)
+    {
+        auto getThread = [&](TwitchChannel *tc) {
+            auto threadIt = tc->threads().find(message->id);
+            if (threadIt != tc->threads().end() && !threadIt->second.expired())
+            {
+                return threadIt->second.lock();
+            }
+            else
+            {
+                auto thread = std::make_shared<MessageThread>(message);
+                tc->addReplyThread(thread);
+                return thread;
+            }
+        };
+
+        if (auto tc =
+                dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get()))
+        {
+            thread = getThread(tc);
+        }
+        else if (auto tc = dynamic_cast<TwitchChannel *>(this->channel_.get()))
+        {
+            thread = getThread(tc);
+        }
+        else
+        {
+            qCWarning(chatterinoCommon) << "Failed to create new reply thread";
+            // Unable to create new reply thread.
+            // TODO(dnsge): Should probably notify user?
+            return;
+        }
+    }
+    else
+    {
+        thread = message->replyThread;
+    }
+
+    this->split_->setInputReply(thread);
+}
+
+void ChannelView::showReplyThreadPopup(const MessagePtr &message)
+{
+    if (message == nullptr || message->replyThread == nullptr)
+    {
+        return;
+    }
+
+    auto popupParent =
+        static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
+    auto popup = new ReplyThreadPopup(getSettings()->autoCloseThreadPopup,
+                                      popupParent, this->split_);
+
+    popup->setThread(message->replyThread);
+
+    QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
+    popup->move(QCursor::pos() - offset);
+    popup->show();
+    popup->giveFocus(Qt::MouseFocusReason);
+}
+
+ChannelView::Context ChannelView::getContext() const
+{
+    return this->context_;
+}
+
+bool ChannelView::canReplyToMessages() const
+{
+    if (this->context_ == ChannelView::Context::ReplyThread ||
+        this->context_ == ChannelView::Context::Search)
+    {
+        return false;
+    }
+
+    if (this->channel_ == nullptr)
+    {
+        return false;
+    }
+
+    if (!this->channel_->isTwitchChannel())
+    {
+        return false;
+    }
+
+    if (this->channel_->getType() == Channel::Type::TwitchWhispers ||
+        this->channel_->getType() == Channel::Type::TwitchLive)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 }  // namespace chatterino

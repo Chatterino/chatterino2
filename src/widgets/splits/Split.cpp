@@ -9,6 +9,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "messages/MessageThread.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -85,7 +86,7 @@ Split::Split(QWidget *parent)
     , channel_(Channel::getEmpty())
     , vbox_(new QVBoxLayout(this))
     , header_(new SplitHeader(this))
-    , view_(new ChannelView(this))
+    , view_(new ChannelView(this, this))
     , input_(new SplitInput(this))
     , overlay_(new SplitOverlay(this))
 {
@@ -1164,7 +1165,7 @@ const QList<QUuid> Split::getFilters() const
 
 void Split::showSearch(bool singleChannel)
 {
-    auto *popup = new SearchPopup(this);
+    auto *popup = new SearchPopup(this, this);
     popup->setAttribute(Qt::WA_DeleteOnClose);
 
     if (singleChannel)
@@ -1268,6 +1269,11 @@ void Split::drag()
 
         SplitContainer::isDraggingSplit = false;
     }
+}
+
+void Split::setInputReply(const std::shared_ptr<MessageThread> &reply)
+{
+    this->input_->setReply(reply);
 }
 
 }  // namespace chatterino

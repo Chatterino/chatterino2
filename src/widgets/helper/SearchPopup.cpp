@@ -49,8 +49,9 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
     return channel;
 }
 
-SearchPopup::SearchPopup(QWidget *parent)
+SearchPopup::SearchPopup(QWidget *parent, Split *split)
     : BasePopup({}, parent)
+    , split_(split)
 {
     this->initLayout();
     this->resize(400, 600);
@@ -238,7 +239,8 @@ void SearchPopup::initLayout()
 
         // CHANNELVIEW
         {
-            this->channelView_ = new ChannelView(this);
+            this->channelView_ = new ChannelView(this, this->split_,
+                                                 ChannelView::Context::Search);
 
             layout1->addWidget(this->channelView_);
         }

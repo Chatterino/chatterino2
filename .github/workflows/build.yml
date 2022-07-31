@@ -142,9 +142,18 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release \
               -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
               -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
+              -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
               ..
             make -j$(nproc)
         shell: bash
+
+      - name: clang-tidy review
+        if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
+        uses: ZedThree/clang-tidy-review@v0.8.4
+        id: review
+        with:
+          build_dir: build
+          config_file: '.clang-tidy'
 
       - name: Package - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
