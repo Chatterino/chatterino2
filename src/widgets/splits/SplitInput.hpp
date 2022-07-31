@@ -11,6 +11,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <memory>
 
 namespace chatterino {
 
@@ -18,6 +19,7 @@ class Split;
 class EmotePopup;
 class InputCompletionPopup;
 class EffectLabel;
+class MessageThread;
 class ResizingTextEdit;
 
 class SplitInput : public BaseWidget
@@ -25,12 +27,18 @@ class SplitInput : public BaseWidget
     Q_OBJECT
 
 public:
-    SplitInput(Split *_chatWidget);
+    SplitInput(Split *_chatWidget, bool enableInlineReplying = true);
+    SplitInput(QWidget *parent, Split *_chatWidget,
+               bool enableInlineReplying = true);
 
     void clearSelection();
     bool isEditFirstWord() const;
     QString getInputText() const;
     void insertText(const QString &text);
+
+    void setReply(std::shared_ptr<MessageThread> reply,
+                  bool showInlineReplying = true);
+    void setPlaceholderText(const QString &text);
 
     /**
      * @brief Hide the widget
@@ -64,7 +72,16 @@ protected:
     void paintEvent(QPaintEvent * /*event*/) override;
     void resizeEvent(QResizeEvent * /*event*/) override;
 
-private:
+    virtual void giveFocus(Qt::FocusReason reason);
+
+    QString handleSendMessage(std::vector<QString> &arguments);
+    void postMessageSend(const QString &message,
+                         const std::vector<QString> &arguments);
+
+    /// Clears the input box, clears reply thread if inline replies are enabled
+    void clearInput();
+
+protected:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
@@ -77,6 +94,8 @@ private:
     void hideCompletionPopup();
     void insertCompletionText(const QString &text);
     void openEmotePopup();
+
+    void updateCancelReplyButton();
 
     // scaledMaxHeight returns the height in pixels that this widget can grow to
     // This does not take hidden into account, so callers must take hidden into account themselves
@@ -92,7 +111,16 @@ private:
         EffectLabel *emoteButton;
 
         QHBoxLayout *hbox;
+        QVBoxLayout *vbox;
+
+        QWidget *replyWrapper;
+        QHBoxLayout *replyHbox;
+        QLabel *replyLabel;
+        EffectLabel *cancelReplyButton;
     } ui_;
+
+    std::shared_ptr<MessageThread> replyThread_ = nullptr;
+    bool enableInlineReplying_;
 
     pajlada::Signals::SignalHolder managedConnections_;
     QStringList prevMsg_;
@@ -109,6 +137,7 @@ private slots:
     void editTextChanged();
 
     friend class Split;
+    friend class ReplyThreadPopup;
 };
 
 }  // namespace chatterino

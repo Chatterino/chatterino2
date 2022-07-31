@@ -140,10 +140,10 @@ set(SOURCE_FILES
         messages/MessageBuilder.hpp
         messages/MessageColor.cpp
         messages/MessageColor.hpp
-        messages/MessageContainer.cpp
-        messages/MessageContainer.hpp
         messages/MessageElement.cpp
         messages/MessageElement.hpp
+        messages/MessageThread.cpp
+        messages/MessageThread.hpp
 
         messages/SharedMessageBuilder.cpp
         messages/SharedMessageBuilder.hpp
@@ -348,6 +348,8 @@ set(SOURCE_FILES
         widgets/BaseWidget.hpp
         widgets/BaseWindow.cpp
         widgets/BaseWindow.hpp
+        widgets/DraggablePopup.cpp
+        widgets/DraggablePopup.hpp
         widgets/FramelessEmbedWindow.cpp
         widgets/FramelessEmbedWindow.hpp
         widgets/Label.cpp
@@ -384,6 +386,8 @@ set(SOURCE_FILES
         widgets/dialogs/NotificationPopup.hpp
         widgets/dialogs/QualityPopup.cpp
         widgets/dialogs/QualityPopup.hpp
+        widgets/dialogs/ReplyThreadPopup.cpp
+        widgets/dialogs/ReplyThreadPopup.hpp
         widgets/dialogs/SelectChannelDialog.cpp
         widgets/dialogs/SelectChannelDialog.hpp
         widgets/dialogs/SelectChannelFiltersDialog.cpp

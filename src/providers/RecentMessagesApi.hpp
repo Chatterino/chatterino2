@@ -127,7 +127,10 @@ namespace {
                 }
             }
 
-            for (auto builtMessage : handler.parseMessage(channel, message))
+            auto builtMessages = handler.parseMessageWithReply(
+                channel, message, allBuiltMessages);
+
+            for (auto builtMessage : builtMessages)
             {
                 builtMessage->flags.set(MessageFlag::RecentMessage);
                 allBuiltMessages.emplace_back(builtMessage);

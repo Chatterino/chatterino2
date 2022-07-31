@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722)
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
 - Minor: Load missing messages from Recent Messages API upon reconnecting (#3878)
 - Minor: Added option to display tabs on the right and bottom. (#3847)
@@ -44,6 +45,7 @@
 - Bugfix: Adopt popup windows in order to force floating behavior on some window managers. (#3836)
 - Bugfix: Fix split focusing being broken in certain circumstances when the "Show input when it's empty" setting was disabled. (#3838, #3860)
 - Bugfix: Always refresh tab when a contained split's channel is set. (#3849)
+- Bugfix: Drop trailing whitespace from Twitch system messages. (#3888)
 - Dev: Remove official support for QMake. (#3839, #3883)
 - Dev: Rewrite LimitedQueue (#3798)
 - Dev: Overhaul highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801, #3835)

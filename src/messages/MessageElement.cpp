@@ -5,6 +5,8 @@
 #include "messages/Emote.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
+#include "providers/emoji/Emojis.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
@@ -128,6 +130,31 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
                           this->image_->height() * container.getScale());
 
         container.addElement((new ImageLayoutElement(*this, this->image_, size))
+                                 ->setLink(this->getLink()));
+    }
+}
+
+CircularImageElement::CircularImageElement(ImagePtr image, int padding,
+                                           QColor background,
+                                           MessageElementFlags flags)
+    : MessageElement(flags)
+    , image_(image)
+    , padding_(padding)
+    , background_(background)
+{
+}
+
+void CircularImageElement::addToContainer(MessageLayoutContainer &container,
+                                          MessageElementFlags flags)
+{
+    if (flags.hasAny(this->getFlags()))
+    {
+        auto imgSize = QSize(this->image_->width(), this->image_->height()) *
+                       container.getScale();
+
+        container.addElement((new ImageWithCircleBackgroundLayoutElement(
+                                  *this, this->image_, imgSize,
+                                  this->background_, this->padding_))
                                  ->setLink(this->getLink()));
     }
 }
@@ -395,6 +422,137 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+SingleLineTextElement::SingleLineTextElement(const QString &text,
+                                             MessageElementFlags flags,
+                                             const MessageColor &color,
+                                             FontStyle style)
+    : MessageElement(flags)
+    , color_(color)
+    , style_(style)
+{
+    for (const auto &word : text.split(' '))
+    {
+        this->words_.push_back({word, -1});
+    }
+}
+
+void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
+                                           MessageElementFlags flags)
+{
+    auto app = getApp();
+
+    if (flags.hasAny(this->getFlags()))
+    {
+        QFontMetrics metrics =
+            app->fonts->getFontMetrics(this->style_, container.getScale());
+
+        auto getTextLayoutElement = [&](QString text, int width,
+                                        bool hasTrailingSpace) {
+            auto color = this->color_.getColor(*app->themes);
+            app->themes->normalizeColor(color);
+
+            auto e = (new TextLayoutElement(
+                          *this, text, QSize(width, metrics.height()), color,
+                          this->style_, container.getScale()))
+                         ->setLink(this->getLink());
+            e->setTrailingSpace(hasTrailingSpace);
+            e->setText(text);
+
+            // If URL link was changed,
+            // Should update it in MessageLayoutElement too!
+            if (this->getLink().type == Link::Url)
+            {
+                static_cast<TextLayoutElement *>(e)->listenToLinkChanges();
+            }
+            return e;
+        };
+
+        static const auto ellipsis = QStringLiteral("...");
+        auto addEllipsis = [&]() {
+            int ellipsisSize = metrics.horizontalAdvance(ellipsis);
+            container.addElementNoLineBreak(
+                getTextLayoutElement(ellipsis, ellipsisSize, false));
+        };
+
+        for (Word &word : this->words_)
+        {
+            auto parsedWords = app->emotes->emojis.parse(word.text);
+            if (parsedWords.size() == 0)
+            {
+                continue;  // sanity check
+            }
+
+            auto &parsedWord = parsedWords[0];
+            if (parsedWord.type() == typeid(EmotePtr))
+            {
+                auto emote = boost::get<EmotePtr>(parsedWord);
+                auto image =
+                    emote->images.getImageOrLoaded(container.getScale());
+                if (!image->isEmpty())
+                {
+                    auto emoteScale = getSettings()->emoteScale.getValue();
+
+                    auto size = QSize(image->width(), image->height()) *
+                                (emoteScale * container.getScale());
+
+                    if (!container.fitsInLine(size.width()))
+                    {
+                        addEllipsis();
+                        break;
+                    }
+
+                    container.addElementNoLineBreak(
+                        (new ImageLayoutElement(*this, image, size))
+                            ->setLink(this->getLink()));
+                }
+            }
+            else if (parsedWord.type() == typeid(QString))
+            {
+                word.width = metrics.horizontalAdvance(word.text);
+
+                // see if the text fits in the current line
+                if (container.fitsInLine(word.width))
+                {
+                    container.addElementNoLineBreak(getTextLayoutElement(
+                        word.text, word.width, this->hasTrailingSpace()));
+                }
+                else
+                {
+                    // word overflows, try minimum truncation
+                    bool cutSuccess = false;
+                    for (size_t cut = 1; cut < word.text.length(); ++cut)
+                    {
+                        // Cut off n characters and append the ellipsis.
+                        // Try removing characters one by one until the word fits.
+                        QString truncatedWord =
+                            word.text.chopped(cut) + ellipsis;
+                        int newSize = metrics.horizontalAdvance(truncatedWord);
+                        if (container.fitsInLine(newSize))
+                        {
+                            container.addElementNoLineBreak(
+                                getTextLayoutElement(truncatedWord, newSize,
+                                                     false));
+                            cutSuccess = true;
+                            break;
+                        }
+                    }
+
+                    if (!cutSuccess)
+                    {
+                        // We weren't able to show any part of the current word, so
+                        // just append the ellipsis.
+                        addEllipsis();
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        container.breakLine();
+    }
+}
+
 // TIMESTAMP
 TimestampElement::TimestampElement(QTime time)
     : MessageElement(MessageElementFlag::Timestamp)
@@ -499,6 +657,26 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
 
         container.addElement((new ImageLayoutElement(*this, image, size))
                                  ->setLink(this->getLink()));
+    }
+}
+
+ReplyCurveElement::ReplyCurveElement()
+    : MessageElement(MessageElementFlag::RepliedMessage)
+    // these values nicely align with a single badge
+    , neededMargin_(3)
+    , size_(18, 14)
+{
+}
+
+void ReplyCurveElement::addToContainer(MessageLayoutContainer &container,
+                                       MessageElementFlags flags)
+{
+    if (flags.hasAny(this->getFlags()))
+    {
+        QSize boxSize = this->size_ * container.getScale();
+        container.addElement(new ReplyCurveLayoutElement(
+            *this, boxSize, 1.5 * container.getScale(),
+            this->neededMargin_ * container.getScale()));
     }
 }
 
