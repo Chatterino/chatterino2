@@ -140,8 +140,6 @@ set(SOURCE_FILES
         messages/MessageBuilder.hpp
         messages/MessageColor.cpp
         messages/MessageColor.hpp
-        messages/MessageContainer.cpp
-        messages/MessageContainer.hpp
         messages/MessageElement.cpp
         messages/MessageElement.hpp
         messages/MessageThread.cpp
