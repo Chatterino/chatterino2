@@ -49,8 +49,8 @@ enum class MessageElementFlag : int64_t {
     FfzEmoteText = (1LL << 10),
     FfzEmote = FfzEmoteImage | FfzEmoteText,
 
-    SeventvEmoteImage = (1LL << 32),
-    SeventvEmoteText = (1LL << 33),
+    SeventvEmoteImage = (1LL << 41),
+    SeventvEmoteText = (1LL << 42),
     SeventvEmote = SeventvEmoteImage | SeventvEmoteText,
 
     EmoteImages =
@@ -142,8 +142,6 @@ enum class MessageElementFlag : int64_t {
     // e.g. BTTV's SoSnowy during christmas season or zerowidth 7TV emotes
     ZeroWidthEmote = (1LL << 31),
 
-    // (1LL << 34) is used by SeventvEmoteImage, it is next to FfzEmote
-    // (1LL << 35) is used by SeventvEmoteText, it is next to SeventvEmoteImage
     // for elements of the message reply
     RepliedMessage = (1LL << 32),
 
