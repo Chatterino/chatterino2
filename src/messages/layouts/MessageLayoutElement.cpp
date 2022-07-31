@@ -16,8 +16,8 @@
 #include <QGraphicsPixmapItem>
 #include <QLabel>
 #include <QPainter>
-#include <QPixmap>
 #include <QPainterPath>
+#include <QPixmap>
 
 namespace chatterino {
 
