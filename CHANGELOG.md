@@ -25,6 +25,7 @@
 - Minor: Added `/copy` command. Usage: `/copy <text>`. Copies provided text to clipboard - can be useful with custom commands. (#3763)
 - Minor: Removed total views from the usercard, as Twitch no longer updates the number. (#3792)
 - Minor: Add Quick Switcher item to open a channel in a new popup window. (#3828)
+- Minor: Reduced GIF frame window from 30ms to 20ms, causing fewer frame skips in animated emotes. (#3886)
 - Bugfix: Fix crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fix crash that can occur when changing channels. (#3799)
