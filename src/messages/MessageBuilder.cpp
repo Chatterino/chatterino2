@@ -190,15 +190,14 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
     for (const auto &word : textFragments)
     {
         const auto linkString = this->matchLink(word);
-        if (linkString.isEmpty())
-        {
-            this->emplace<TextElement>(word, MessageElementFlag::Text,
-                                       MessageColor::System);
-        }
-        else
+        if (!linkString.isEmpty())
         {
             this->addLink(word, linkString);
+            continue;
         }
+
+        this->emplace<TextElement>(word, MessageElementFlag::Text,
+                                   MessageColor::System);
     }
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);
