@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722)
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
 - Minor: Added option to display tabs on the right and bottom. (#3847)
 - Minor: Added `is:first-msg` search option. (#3700)
