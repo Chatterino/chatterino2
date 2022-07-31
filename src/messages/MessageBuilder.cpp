@@ -12,6 +12,7 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
 #include "util/FormatTime.hpp"
+#include "util/Qt.hpp"
 
 #include <QDateTime>
 
