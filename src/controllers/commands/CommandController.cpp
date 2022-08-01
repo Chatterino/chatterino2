@@ -29,6 +29,7 @@
 #include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 
 #include <QApplication>
 #include <QDesktopServices>
@@ -685,11 +686,44 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             channel = channelTemp;
         }
+        Split *currentSplit = nullptr;
+        auto *currentPage = dynamic_cast<SplitContainer *>(
+            getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+        if (currentPage != nullptr)
+        {
+            currentSplit = currentPage->getSelectedSplit();
+        }
+
+        auto differentChannel =
+            currentSplit != nullptr && currentSplit->getChannel() != channel;
+        if (differentChannel || currentSplit == nullptr)
+        {
+            // just find a split 4HEad
+            auto *notebook = &getApp()->windows->getMainWindow().getNotebook();
+            auto count = notebook->getPageCount();
+            for (int i = 0; i < count; i++)
+            {
+                auto *page = notebook->getPageAt(i);
+                auto *container = dynamic_cast<SplitContainer *>(page);
+                if (container == nullptr)
+                {
+                    continue;
+                }
+                for (auto *split : container->getSplits())
+                {
+                    if (split->getChannel() == channel)
+                    {
+                        currentSplit = split;
+                        break;
+                    }
+                }
+            }
+        }
 
         auto *userPopup = new UserInfoPopup(
             getSettings()->autoCloseUserPopup,
             static_cast<QWidget *>(&(getApp()->windows->getMainWindow())),
-            nullptr);
+            currentSplit);
         userPopup->setData(userName, channel);
         userPopup->move(QCursor::pos());
         userPopup->show();
