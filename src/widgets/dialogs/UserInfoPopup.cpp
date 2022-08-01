@@ -131,6 +131,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
     : DraggablePopup(closeAutomatically, parent)
     , split_(split)
 {
+    assert(split != nullptr &&
+           "split being nullptr causes lots of bugs down the road");
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
 
