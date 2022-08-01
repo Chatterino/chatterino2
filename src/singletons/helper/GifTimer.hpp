@@ -5,7 +5,7 @@
 
 namespace chatterino {
 
-constexpr long unsigned gifFrameLength = 33;
+constexpr long unsigned gifFrameLength = 20;
 
 class GIFTimer
 {
