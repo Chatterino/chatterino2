@@ -2,6 +2,7 @@
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
+#include "messages/MessageThread.hpp"
 #include "messages/SharedMessageBuilder.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/PubSubActions.hpp"
@@ -44,6 +45,8 @@ public:
     [[nodiscard]] bool isIgnored() const override;
     void triggerHighlights() override;
     MessagePtr build() override;
+
+    void setThread(std::shared_ptr<MessageThread> thread);
 
     static void appendChannelPointRewardMessage(
         const ChannelPointReward &reward, MessageBuilder *builder, bool isMod,
@@ -107,6 +110,7 @@ private:
     int bitsLeft;
     bool bitsStacked = false;
     bool historicalMessage_ = false;
+    std::shared_ptr<MessageThread> thread_;
 
     QString userId_;
     bool senderIsBroadcaster{};

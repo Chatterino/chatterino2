@@ -278,6 +278,13 @@ bool Channel::canSendMessage() const
     return false;
 }
 
+bool Channel::isWritable() const
+{
+    using Type = Channel::Type;
+    auto type = this->getType();
+    return type != Type::TwitchMentions && type != Type::TwitchLive;
+}
+
 void Channel::sendMessage(const QString &message)
 {
 }

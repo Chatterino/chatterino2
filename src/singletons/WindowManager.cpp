@@ -115,6 +115,7 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
+    this->wordFlagsListener_.addSetting(settings->showReplyButton);
     this->wordFlagsListener_.setCB([this] {
         this->updateWordTypeMask();
     });
@@ -185,6 +186,10 @@ void WindowManager::updateWordTypeMask()
 
     // username
     flags.set(MEF::Username);
+
+    // replies
+    flags.set(MEF::RepliedMessage);
+    flags.set(settings->showReplyButton ? MEF::ReplyButton : MEF::None);
 
     // misc
     flags.set(MEF::AlwaysShow);

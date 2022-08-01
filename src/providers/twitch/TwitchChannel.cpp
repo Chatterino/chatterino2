@@ -1,6 +1,5 @@
 #include "providers/twitch/TwitchChannel.hpp"
 
-#include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
@@ -185,11 +184,33 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->refreshBTTVChannelEmotes(false);
     });
 
+    this->messageRemovedFromStart.connect([this](MessagePtr &msg) {
+        if (msg->replyThread)
+        {
+            if (msg->replyThread->liveCount(msg) == 0)
+            {
+                this->threads_.erase(msg->replyThread->rootId());
+            }
+        }
+    });
+
     // timers
     QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [=] {
         this->refreshChatters();
     });
     this->chattersListTimer_.start(5 * 60 * 1000);
+
+    QObject::connect(&this->threadClearTimer_, &QTimer::timeout, [=] {
+        // We periodically check for any dangling reply threads that missed
+        // being cleaned up on messageRemovedFromStart. This could occur if
+        // some other part of the program, like a user card, held a reference
+        // to the message.
+        //
+        // It seems difficult to actually replicate a situation where things
+        // are actually cleaned up, but I've verified that cleanups DO happen.
+        this->cleanUpReplyThreads();
+    });
+    this->threadClearTimer_.start(5 * 60 * 1000);
 
     // debugging
 #if 0
@@ -330,46 +351,34 @@ boost::optional<ChannelPointReward> TwitchChannel::channelPointReward(
     return it->second;
 }
 
-void TwitchChannel::sendMessage(const QString &message)
+void TwitchChannel::showLoginMessage()
+{
+    const auto linkColor = MessageColor(MessageColor::Link);
+    const auto accountsLink = Link(Link::OpenAccountsPage, QString());
+    const auto currentUser = getApp()->accounts->twitch.getCurrent();
+    const auto expirationText =
+        QStringLiteral("You need to log in to send messages. You can link your "
+                       "Twitch account");
+    const auto loginPromptText = QStringLiteral("in the settings.");
+
+    auto builder = MessageBuilder();
+    builder.message().flags.set(MessageFlag::System);
+    builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+    builder.emplace<TimestampElement>();
+    builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
+                                 MessageColor::System);
+    builder
+        .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
+                              linkColor)
+        ->setLink(accountsLink);
+
+    this->addMessage(builder.release());
+}
+
+QString TwitchChannel::prepareMessage(const QString &message) const
 {
     auto app = getApp();
-
-    if (!app->accounts->twitch.isLoggedIn())
-    {
-        if (message.isEmpty())
-        {
-            return;
-        }
-
-        const auto linkColor = MessageColor(MessageColor::Link);
-        const auto accountsLink = Link(Link::OpenAccountsPage, QString());
-        const auto currentUser = getApp()->accounts->twitch.getCurrent();
-        const auto expirationText =
-            QString("You need to log in to send messages. You can link your "
-                    "Twitch account");
-        const auto loginPromptText = QString("in the settings.");
-
-        auto builder = MessageBuilder();
-        builder.message().flags.set(MessageFlag::System);
-        builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
-
-        builder.emplace<TimestampElement>();
-        builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
-                                     MessageColor::System);
-        builder
-            .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
-                                  linkColor)
-            ->setLink(accountsLink);
-
-        this->addMessage(builder.release());
-
-        return;
-    }
-
-    qCDebug(chatterinoTwitch)
-        << "[TwitchChannel" << this->getName() << "] Send message:" << message;
-
-    // Do last message processing
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
 
     // This is to make sure that combined emoji go through properly, see
@@ -380,7 +389,7 @@ void TwitchChannel::sendMessage(const QString &message)
 
     if (parsedMessage.isEmpty())
     {
-        return;
+        return "";
     }
 
     if (!this->hasHighRateLimit())
@@ -414,8 +423,68 @@ void TwitchChannel::sendMessage(const QString &message)
         }
     }
 
+    return parsedMessage;
+}
+
+void TwitchChannel::sendMessage(const QString &message)
+{
+    auto app = getApp();
+    if (!app->accounts->twitch.isLoggedIn())
+    {
+        if (!message.isEmpty())
+        {
+            this->showLoginMessage();
+        }
+
+        return;
+    }
+
+    qCDebug(chatterinoTwitch)
+        << "[TwitchChannel" << this->getName() << "] Send message:" << message;
+
+    // Do last message processing
+    QString parsedMessage = this->prepareMessage(message);
+    if (parsedMessage.isEmpty())
+    {
+        return;
+    }
+
     bool messageSent = false;
     this->sendMessageSignal.invoke(this->getName(), parsedMessage, messageSent);
+
+    if (messageSent)
+    {
+        qCDebug(chatterinoTwitch) << "sent";
+        this->lastSentMessage_ = parsedMessage;
+    }
+}
+
+void TwitchChannel::sendReply(const QString &message, const QString &replyId)
+{
+    auto app = getApp();
+    if (!app->accounts->twitch.isLoggedIn())
+    {
+        if (!message.isEmpty())
+        {
+            this->showLoginMessage();
+        }
+
+        return;
+    }
+
+    qCDebug(chatterinoTwitch) << "[TwitchChannel" << this->getName()
+                              << "] Send reply message:" << message;
+
+    // Do last message processing
+    QString parsedMessage = this->prepareMessage(message);
+    if (parsedMessage.isEmpty())
+    {
+        return;
+    }
+
+    bool messageSent = false;
+    this->sendReplySignal.invoke(this->getName(), parsedMessage, replyId,
+                                 messageSent);
 
     if (messageSent)
     {
@@ -829,8 +898,10 @@ void TwitchChannel::loadRecentMessages()
                     }
                 }
 
-                for (auto builtMessage :
-                     handler.parseMessage(shared.get(), message))
+                auto builtMessages = handler.parseMessageWithReply(
+                    shared.get(), message, allBuiltMessages);
+
+                for (auto builtMessage : builtMessages)
                 {
                     builtMessage->flags.set(MessageFlag::RecentMessage);
                     allBuiltMessages.emplace_back(builtMessage);
@@ -955,6 +1026,39 @@ void TwitchChannel::fetchDisplayName()
             channel->displayNameChanged.invoke();
         },
         [] {});
+}
+
+void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)
+{
+    this->threads_[thread->rootId()] = thread;
+}
+
+const std::unordered_map<QString, std::weak_ptr<MessageThread>>
+    &TwitchChannel::threads() const
+{
+    return this->threads_;
+}
+
+void TwitchChannel::cleanUpReplyThreads()
+{
+    for (auto it = this->threads_.begin(), last = this->threads_.end();
+         it != last;)
+    {
+        bool doErase = true;
+        if (auto thread = it->second.lock())
+        {
+            doErase = thread->liveCount() == 0;
+        }
+
+        if (doErase)
+        {
+            it = this->threads_.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 void TwitchChannel::refreshBadges()

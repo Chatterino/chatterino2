@@ -10,6 +10,7 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <QPainterPath>
 
 namespace chatterino {
 
@@ -202,6 +203,44 @@ void ImageWithBackgroundLayoutElement::paint(QPainter &painter)
 
         // fourtf: make it use qreal values
         painter.drawPixmap(QRectF(this->getRect()), *pixmap, QRectF());
+    }
+}
+
+//
+// IMAGE WITH CIRCLE BACKGROUND
+//
+ImageWithCircleBackgroundLayoutElement::ImageWithCircleBackgroundLayoutElement(
+    MessageElement &creator, ImagePtr image, const QSize &imageSize,
+    QColor color, int padding)
+    : ImageLayoutElement(creator, image,
+                         imageSize + QSize(padding, padding) * 2)
+    , color_(color)
+    , imageSize_(imageSize)
+    , padding_(padding)
+{
+}
+
+void ImageWithCircleBackgroundLayoutElement::paint(QPainter &painter)
+{
+    if (this->image_ == nullptr)
+    {
+        return;
+    }
+
+    auto pixmap = this->image_->pixmapOrLoad();
+    if (pixmap && !this->image_->animated())
+    {
+        QRectF boxRect(this->getRect());
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QBrush(this->color_, Qt::SolidPattern));
+        painter.drawEllipse(boxRect);
+
+        QRectF imgRect;
+        imgRect.setTopLeft(boxRect.topLeft());
+        imgRect.setSize(this->imageSize_);
+        imgRect.translate(this->padding_, this->padding_);
+
+        painter.drawPixmap(imgRect, *pixmap, QRectF());
     }
 }
 
@@ -400,6 +439,69 @@ int TextIconLayoutElement::getXFromIndex(int index)
     {
         return this->getRect().right();
     }
+}
+
+ReplyCurveLayoutElement::ReplyCurveLayoutElement(MessageElement &creator,
+                                                 const QSize &size,
+                                                 float thickness,
+                                                 float neededMargin)
+    : MessageLayoutElement(creator, size)
+    , pen_(QColor("#888"), thickness, Qt::SolidLine, Qt::RoundCap)
+    , neededMargin_(neededMargin)
+{
+}
+
+void ReplyCurveLayoutElement::paint(QPainter &painter)
+{
+    QRectF paintRect(this->getRect());
+    QPainterPath bezierPath;
+
+    qreal top = paintRect.top() + paintRect.height() * 0.25;  // 25% from top
+    qreal left = paintRect.left() + this->neededMargin_;
+    qreal bottom = paintRect.bottom() - this->neededMargin_;
+    QPointF startPoint(left, bottom);
+    QPointF controlPoint(left, top);
+    QPointF endPoint(paintRect.right(), top);
+
+    // Create curve path
+    bezierPath.moveTo(startPoint);
+    bezierPath.quadTo(controlPoint, endPoint);
+
+    // Render curve
+    painter.setPen(this->pen_);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.drawPath(bezierPath);
+}
+
+void ReplyCurveLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+{
+}
+
+int ReplyCurveLayoutElement::getMouseOverIndex(const QPoint &abs) const
+{
+    return 0;
+}
+
+int ReplyCurveLayoutElement::getXFromIndex(int index)
+{
+    if (index <= 0)
+    {
+        return this->getRect().left();
+    }
+    else
+    {
+        return this->getRect().right();
+    }
+}
+
+void ReplyCurveLayoutElement::addCopyTextToString(QString &str, int from,
+                                                  int to) const
+{
+}
+
+int ReplyCurveLayoutElement::getSelectionIndexCount() const
+{
+    return 1;
 }
 
 }  // namespace chatterino

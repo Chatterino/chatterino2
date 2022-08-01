@@ -55,6 +55,11 @@ const Message *MessageLayout::getMessage()
     return this->message_.get();
 }
 
+const MessagePtr &MessageLayout::getMessagePtr() const
+{
+    return this->message_;
+}
+
 // Height
 int MessageLayout::getHeight() const
 {
@@ -143,6 +148,12 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 
         if (getSettings()->hideSimilar &&
             this->message_->flags.has(MessageFlag::Similar))
+        {
+            continue;
+        }
+
+        if (!this->renderReplies_ &&
+            element->getFlags().has(MessageElementFlag::RepliedMessage))
         {
             continue;
         }
@@ -419,6 +430,28 @@ void MessageLayout::addSelectionText(QString &str, int from, int to,
                                      CopyMode copymode)
 {
     this->container_->addSelectionText(str, from, to, copymode);
+}
+
+bool MessageLayout::isReplyable() const
+{
+    if (this->message_->loginName.isEmpty())
+    {
+        return false;
+    }
+
+    if (this->message_->flags.hasAny(
+            {MessageFlag::System, MessageFlag::Subscription,
+             MessageFlag::Timeout, MessageFlag::Whisper}))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void MessageLayout::setRenderReplies(bool render)
+{
+    this->renderReplies_ = render;
 }
 
 }  // namespace chatterino

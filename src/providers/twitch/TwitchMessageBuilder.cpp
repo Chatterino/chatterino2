@@ -67,6 +67,66 @@ bool isAbnormalNonce(const QString &nonce)
 
 namespace chatterino {
 
+namespace {
+
+    QString stylizeUsername(const QString &username, const Message &message)
+    {
+        auto app = getApp();
+
+        const QString &localizedName = message.localizedName;
+        bool hasLocalizedName = !localizedName.isEmpty();
+
+        // The full string that will be rendered in the chat widget
+        QString usernameText;
+
+        switch (getSettings()->usernameDisplayMode.getValue())
+        {
+            case UsernameDisplayMode::Username: {
+                usernameText = username;
+            }
+            break;
+
+            case UsernameDisplayMode::LocalizedName: {
+                if (hasLocalizedName)
+                {
+                    usernameText = localizedName;
+                }
+                else
+                {
+                    usernameText = username;
+                }
+            }
+            break;
+
+            default:
+            case UsernameDisplayMode::UsernameAndLocalizedName: {
+                if (hasLocalizedName)
+                {
+                    usernameText = username + "(" + localizedName + ")";
+                }
+                else
+                {
+                    usernameText = username;
+                }
+            }
+            break;
+        }
+
+        auto nicknames = getCSettings().nicknames.readOnly();
+
+        for (const auto &nickname : *nicknames)
+        {
+            if (nickname.match(usernameText))
+            {
+                break;
+            }
+        }
+
+        return usernameText;
+    }
+
+}  // namespace
+
 TwitchMessageBuilder::TwitchMessageBuilder(
     Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
     const MessageParseArgs &_args)
@@ -179,6 +239,70 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::FirstMessage);
     }
 
+    // reply threads
+    if (this->thread_)
+    {
+        // set references
+        this->message().replyThread = this->thread_;
+        this->thread_->addToThread(this->weakOf());
+
+        // enable reply flag
+        this->message().flags.set(MessageFlag::ReplyMessage);
+
+        const auto &threadRoot = this->thread_->root();
+
+        QString usernameText =
+            stylizeUsername(threadRoot->loginName, *threadRoot.get());
+
+        this->emplace<ReplyCurveElement>();
+
+        // construct reply elements
+        this->emplace<TextElement>(
+                "Replying to", MessageElementFlag::RepliedMessage,
+                MessageColor::System, FontStyle::ChatMediumSmall)
+            ->setLink({Link::ViewThread, this->thread_->rootId()});
+
+        this->emplace<TextElement>(
+                "@" + usernameText + ":", MessageElementFlag::RepliedMessage,
+                threadRoot->usernameColor, FontStyle::ChatMediumSmall)
+            ->setLink({Link::UserInfo, threadRoot->displayName});
+
+        this->emplace<SingleLineTextElement>(
+                threadRoot->messageText, MessageElementFlag::RepliedMessage,
+                this->textColor_, FontStyle::ChatMediumSmall)
+            ->setLink({Link::ViewThread, this->thread_->rootId()});
+    }
+    else if (this->tags.find("reply-parent-msg-id") != this->tags.end())
+    {
+        // Message is a reply but we couldn't find the original message.
+        // Render the message using the additional reply tags
+
+        auto replyDisplayName = this->tags.find("reply-parent-display-name");
+        auto replyBody = this->tags.find("reply-parent-msg-body");
+
+        if (replyDisplayName != this->tags.end() &&
+            replyBody != this->tags.end())
+        {
+            auto name = replyDisplayName->toString();
+            auto body = parseTagString(replyBody->toString());
+
+            this->emplace<ReplyCurveElement>();
+
+            this->emplace<TextElement>(
+                "Replying to", MessageElementFlag::RepliedMessage,
+                MessageColor::System, FontStyle::ChatMediumSmall);
+
+            this->emplace<TextElement>(
+                    "@" + name + ":", MessageElementFlag::RepliedMessage,
+                    this->textColor_, FontStyle::ChatMediumSmall)
+                ->setLink({Link::UserInfo, name});
+
+            this->emplace<SingleLineTextElement>(
+                body, MessageElementFlag::RepliedMessage, this->textColor_,
+                FontStyle::ChatMediumSmall);
+        }
+    }
+
     // timestamp
     this->message().serverReceivedTime = calculateMessageTime(this->ircMessage);
     this->emplace<TimestampElement>(this->message().serverReceivedTime.time());
@@ -258,6 +382,23 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::HighlightedWhisper, true);
         this->message().highlightColor =
             ColorProvider::instance().color(ColorType::Whisper);
+    }
+
+    if (this->thread_)
+    {
+        auto &img = getResources().buttons.replyThreadDark;
+        this->emplace<CircularImageElement>(Image::fromPixmap(img, 0.15), 2,
+                                            Qt::gray,
+                                            MessageElementFlag::ReplyButton)
+            ->setLink({Link::ViewThread, this->thread_->rootId()});
+    }
+    else
+    {
+        auto &img = getResources().buttons.replyDark;
+        this->emplace<CircularImageElement>(Image::fromPixmap(img, 0.15), 2,
+                                            Qt::gray,
+                                            MessageElementFlag::ReplyButton)
+            ->setLink({Link::ReplyToMessage, this->message().id});
     }
 
     return this->release();
@@ -602,53 +743,7 @@ void TwitchMessageBuilder::appendUsername()
         }
     }
 
-    bool hasLocalizedName = !localizedName.isEmpty();
-
-    // The full string that will be rendered in the chat widget
-    QString usernameText;
-
-    switch (getSettings()->usernameDisplayMode.getValue())
-    {
-        case UsernameDisplayMode::Username: {
-            usernameText = username;
-        }
-        break;
-
-        case UsernameDisplayMode::LocalizedName: {
-            if (hasLocalizedName)
-            {
-                usernameText = localizedName;
-            }
-            else
-            {
-                usernameText = username;
-            }
-        }
-        break;
-
-        default:
-        case UsernameDisplayMode::UsernameAndLocalizedName: {
-            if (hasLocalizedName)
-            {
-                usernameText = username + "(" + localizedName + ")";
-            }
-            else
-            {
-                usernameText = username;
-            }
-        }
-        break;
-    }
-
-    auto nicknames = getCSettings().nicknames.readOnly();
-
-    for (const auto &nickname : *nicknames)
-    {
-        if (nickname.match(usernameText))
-        {
-            break;
-        }
-    }
+    QString usernameText = stylizeUsername(username, this->message());
 
     if (this->args.isSentWhisper)
     {
@@ -1554,6 +1649,11 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(QString prefix,
             ->setLink({Link::UserInfo, username})
             ->setTrailingSpace(false);
     }
+}
+
+void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)
+{
+    this->thread_ = std::move(thread);
 }
 
 }  // namespace chatterino

@@ -147,34 +147,47 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return fuzzyToFloat(args.value, 1.f);
         });
     ComboBox *tabDirectionDropdown =
-        layout.addDropdown<std::underlying_type<NotebookTabDirection>::type>(
-            "Tab layout", {"Horizontal", "Vertical"}, s.tabDirection,
+        layout.addDropdown<std::underlying_type<NotebookTabLocation>::type>(
+            "Tab layout", {"Top", "Left", "Right", "Bottom"}, s.tabDirection,
             [](auto val) {
                 switch (val)
                 {
-                    case NotebookTabDirection::Horizontal:
-                        return "Horizontal";
-                    case NotebookTabDirection::Vertical:
-                        return "Vertical";
+                    case NotebookTabLocation::Top:
+                        return "Top";
+                    case NotebookTabLocation::Left:
+                        return "Left";
+                    case NotebookTabLocation::Right:
+                        return "Right";
+                    case NotebookTabLocation::Bottom:
+                        return "Bottom";
                 }
 
                 return "";
             },
             [](auto args) {
-                if (args.value == "Vertical")
+                if (args.value == "Bottom")
                 {
-                    return NotebookTabDirection::Vertical;
+                    return NotebookTabLocation::Bottom;
+                }
+                else if (args.value == "Left")
+                {
+                    return NotebookTabLocation::Left;
+                }
+                else if (args.value == "Right")
+                {
+                    return NotebookTabLocation::Right;
                 }
                 else
                 {
-                    // default to horizontal
-                    return NotebookTabDirection::Horizontal;
+                    // default to top
+                    return NotebookTabLocation::Top;
                 }
             },
             false);
     tabDirectionDropdown->setMinimumWidth(
         tabDirectionDropdown->minimumSizeHint().width());
 
+    layout.addCheckbox("Show message reply button", s.showReplyButton);
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost);
 #ifdef USEWINSDK
@@ -652,6 +665,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
     layout.addCheckbox("Automatically close user popup when it loses focus",
                        s.autoCloseUserPopup);
+    layout.addCheckbox(
+        "Automatically close reply thread popup when it loses focus",
+        s.autoCloseThreadPopup);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
     layout.addCheckbox("Color @usernames", s.colorUsernames);

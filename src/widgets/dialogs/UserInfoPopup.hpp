@@ -1,14 +1,13 @@
 #pragma once
 
-#include <QMovie>
-
 #include "singletons/Paths.hpp"
-#include "widgets/BaseWindow.hpp"
+#include "widgets/DraggablePopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
 
+#include <QMovie>
 #include <chrono>
 
 class QCheckBox;
@@ -23,12 +22,13 @@ class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 class Label;
 
-class UserInfoPopup final : public BaseWindow
+class UserInfoPopup final : public DraggablePopup
 {
     Q_OBJECT
 
 public:
-    UserInfoPopup(bool closeAutomatically, QWidget *parent);
+    UserInfoPopup(bool closeAutomatically, QWidget *parent,
+                  Split *split = nullptr);
 
     void setData(const QString &name, const ChannelPtr &channel);
     void setData(const QString &name, const ChannelPtr &contextChannel,
@@ -37,9 +37,6 @@ public:
 protected:
     virtual void themeChangedEvent() override;
     virtual void scaleChangedEvent(float scale) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
     void installEvents();
@@ -55,6 +52,8 @@ private:
     bool isMod_;
     bool isBroadcaster_;
 
+    Split *split_;
+
     QString userName_;
     QString userId_;
     QString avatarUrl_;
@@ -63,24 +62,10 @@ private:
     // The channel the messages are rendered from (e.g. #forsen). Can be a special channel, but will try to not be where possible.
     ChannelPtr underlyingChannel_;
 
-    // isMoving_ is set to true if the user is holding the left mouse button down and has moved the mouse a small amount away from the original click point (startPosDrag_)
-    bool isMoving_ = false;
-
-    // startPosDrag_ is the coordinates where the user originally pressed the mouse button down to start dragging
-    QPoint startPosDrag_;
-
-    // requestDragPos_ is the final screen coordinates where the widget should be moved to.
-    // Takes the relative position of where the user originally clicked the widget into account
-    QPoint requestedDragPos_;
-
-    // dragTimer_ is called ~60 times per second once the user has initiated dragging
-    QTimer dragTimer_;
-
     pajlada::Signals::NoArgSignal userStateChanged_;
 
     std::unique_ptr<pajlada::Signals::ScopedConnection> refreshConnection_;
 
-    std::shared_ptr<bool> hack_;
     std::mutex checkAfkRateLimiter_;
 
     struct {

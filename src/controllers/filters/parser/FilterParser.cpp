@@ -88,6 +88,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
          m->flags.has(MessageFlag::RedeemedChannelPointReward)},
         {"flags.first_message", m->flags.has(MessageFlag::FirstMessage)},
         {"flags.whisper", m->flags.has(MessageFlag::Whisper)},
+        {"flags.reply", m->flags.has(MessageFlag::ReplyMessage)},
 
         {"message.content", m->messageText},
         {"message.length", m->messageText.length()},

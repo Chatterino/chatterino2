@@ -8,7 +8,7 @@ namespace chatterino {
 
 void GIFTimer::initialize()
 {
-    this->timer.setInterval(30);
+    this->timer.setInterval(gifFrameLength);
 
     getSettings()->animateEmotes.connect([this](bool enabled, auto) {
         if (enabled)

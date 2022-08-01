@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Application.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
@@ -7,6 +8,7 @@
 #include "common/ChatterSet.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
+#include "messages/MessageThread.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -75,12 +77,15 @@ public:
         int slowMode = 0;
     };
 
+    explicit TwitchChannel(const QString &channelName);
+
     void initialize();
 
     // Channel methods
     virtual bool isEmpty() const override;
     virtual bool canSendMessage() const override;
     virtual void sendMessage(const QString &message) override;
+    virtual void sendReply(const QString &message, const QString &replyId);
     virtual bool isMod() const override;
     bool isVip() const;
     bool isStaff() const;
@@ -122,6 +127,17 @@ public:
     // Cheers
     boost::optional<CheerEmote> cheerEmote(const QString &string);
 
+    // Replies
+    /**
+     * Stores the given thread in this channel. 
+     * 
+     * Note: This method not take ownership of the MessageThread; this 
+     * TwitchChannel instance will store a weak_ptr to the thread.
+     */
+    void addReplyThread(const std::shared_ptr<MessageThread> &thread);
+    const std::unordered_map<QString, std::weak_ptr<MessageThread>> &threads()
+        const;
+
     // Signals
     pajlada::Signals::NoArgSignal roomIdChanged;
     pajlada::Signals::NoArgSignal userStateChanged;
@@ -142,9 +158,6 @@ private:
         QString localizedName;
     } nameOptions;
 
-protected:
-    explicit TwitchChannel(const QString &channelName);
-
 private:
     // Methods
     void refreshLiveStatus();
@@ -155,6 +168,8 @@ private:
     void refreshCheerEmotes();
     void loadRecentMessages();
     void fetchDisplayName();
+    void cleanUpReplyThreads();
+    void showLoginMessage();
 
     void setLive(bool newLiveStatus);
     void setMod(bool value);
@@ -168,6 +183,8 @@ private:
     const QString &getDisplayName() const override;
     const QString &getLocalizedName() const override;
 
+    QString prepareMessage(const QString &message) const;
+
     // Data
     const QString subscriptionUrl_;
     const QString channelUrl_;
@@ -175,6 +192,7 @@ private:
     int chatterCount_;
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
+    std::unordered_map<QString, std::weak_ptr<MessageThread>> threads_;
 
 protected:
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;
@@ -199,6 +217,7 @@ private:
     QString lastSentMessage_;
     QObject lifetimeGuard_;
     QTimer chattersListTimer_;
+    QTimer threadClearTimer_;
     QElapsedTimer titleRefreshedTimer_;
     QElapsedTimer clipCreationTimer_;
     bool isClipCreationInProgress{false};

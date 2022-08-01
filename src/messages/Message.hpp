@@ -13,6 +13,7 @@
 
 namespace chatterino {
 class MessageElement;
+class MessageThread;
 
 enum class MessageFlag : uint32_t {
     None = 0,
@@ -40,7 +41,8 @@ enum class MessageFlag : uint32_t {
     RedeemedChannelPointReward = (1 << 21),
     ShowInMentions = (1 << 22),
     FirstMessage = (1 << 23),
-    WebchatDetected = (1 << 24)
+    ReplyMessage = (1 << 24),
+    WebchatDetected = (1 << 25),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
@@ -69,6 +71,10 @@ struct Message : boost::noncopyable {
     std::vector<Badge> badges;
     std::unordered_map<QString, QString> badgeInfos;
     std::shared_ptr<QColor> highlightColor;
+    // Each reply holds a reference to the thread. When every reply is dropped,
+    // the reply thread will be cleaned up by the TwitchChannel.
+    // The root of the thread does not have replyThread set.
+    std::shared_ptr<MessageThread> replyThread;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;
 

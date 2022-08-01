@@ -15,6 +15,7 @@
 namespace chatterino {
 
 class ChannelView;
+class MessageThread;
 class SplitHeader;
 class SplitInput;
 class SplitContainer;
@@ -73,6 +74,8 @@ public:
     bool isInContainer() const;
 
     void setContainer(SplitContainer *container);
+
+    void setInputReply(const std::shared_ptr<MessageThread> &reply);
 
     static pajlada::Signals::Signal<Qt::KeyboardModifiers>
         modifierStatusChanged;
