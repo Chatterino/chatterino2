@@ -116,6 +116,8 @@ namespace {
                     QDateTime::fromMSecsSinceEpoch(
                         message->tags().value("rm-received-ts").toLongLong())
                         .date();
+
+                // Check if we need to insert a message stating that a new day began
                 if (msgDate != channel->lastDate_)
                 {
                     channel->lastDate_ = msgDate;
@@ -140,6 +142,8 @@ namespace {
         return allBuiltMessages;
     }
 
+    // Returns the URL to be used for querying the Recent Messages API for the
+    // given channel.
     QUrl constructRecentMessagesUrl(const QString &name)
     {
         QUrl url(Env::get().recentMessagesApiUrl.arg(name));

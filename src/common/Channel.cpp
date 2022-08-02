@@ -290,7 +290,8 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
         }
     }
 
-    // invoke at end to avoid unnecessary re-layouts
+    // We only invoke a signal once at the end of filling all messages to
+    // prevent doing any unnecessary repaints.
     this->filledInMessages.invoke(messages);
 }
 
