@@ -184,8 +184,7 @@ public:
                     return Failure;
 
                 qCDebug(chatterinoRecentMessages)
-                    << "Successfully "
-                       "loaded recent messages for"
+                    << "Successfully loaded recent messages for"
                     << shared->getName();
 
                 auto root = result.parseJson();
@@ -213,8 +212,7 @@ public:
                         {
                             shared->addMessage(makeSystemMessage(
                                 "Message history service recovering, there may "
-                                "be "
-                                "gaps in the message history."));
+                                "be gaps in the message history."));
                         }
                     }
 
