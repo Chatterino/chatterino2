@@ -35,7 +35,7 @@ AbstractIrcServer::AbstractIrcServer()
         }
         this->readConnection_->sendRaw("JOIN #" + message);
     };
-    this->joinBucket_.reset(new RatelimitBucket(
+    this->joinBucket_.reset(new RatelimitBucket<QString>(
         JOIN_RATELIMIT_BUDGET, JOIN_RATELIMIT_COOLDOWN, actuallyJoin, this));
 
     QObject::connect(this->writeConnection_.get(),
@@ -240,7 +240,7 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
         {
             if (this->readConnection_->isConnected())
             {
-                this->joinBucket_->send(channelName);
+                this->joinBucket_->submit(channelName);
             }
         }
     }
@@ -300,7 +300,7 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
     {
         if (auto channel = weak.lock())
         {
-            this->joinBucket_->send(channel->getName());
+            this->joinBucket_->submit(channel->getName());
         }
     }
 

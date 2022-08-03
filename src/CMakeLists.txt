@@ -322,7 +322,6 @@ set(SOURCE_FILES
         util/NuulsUploader.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
-        util/RatelimitBucket.cpp
         util/RatelimitBucket.hpp
         util/SampleData.cpp
         util/SampleData.hpp
