@@ -75,13 +75,38 @@ namespace {
         return defaultValue;
     }
 
+    uint32_t readUint32Env(const char *envName, uint32_t defaultValue)
+    {
+        const auto *envString = std::getenv(envName);
+        if (envString != nullptr)
+        {
+            bool ok;
+            const auto val = QString(envString).toUInt(&ok);
+            if (ok)
+            {
+                return val;
+            }
+            else
+            {
+                warn(envName, defaultValue);
+            }
+        }
+
+        return defaultValue;
+    }
+
 }  // namespace
 
 Env::Env()
-    : recentMessagesApiUrl(
-          readStringEnv("CHATTERINO2_RECENT_MESSAGES_URL",
-                        "https://recent-messages.robotty.de/api/v2/"
-                        "recent-messages/%1"))
+    : recentMessages{readStringEnv("CHATTERINO2_RECENT_MESSAGES_URL",
+                                   "https://recent-messages.robotty.de/api/v2/"
+                                   "recent-messages/%1"),
+                     // TODO(leon): Figure out reasonable values for these.
+                     readUint32Env(
+                         "CHATTERINO2_RECENT_MESSAGES_RATE_LIMIT_BUDGET", 10),
+                     readUint32Env(
+                         "CHATTERINO2_RECENT_MESSAGES_RATE_LIMIT_COOLDOWN",
+                         1000)}
     , linkResolverUrl(readStringEnv(
           "CHATTERINO2_LINK_RESOLVER_URL",
           "https://braize.pajlada.com/chatterino/link_resolver/%1"))

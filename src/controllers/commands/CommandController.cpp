@@ -593,7 +593,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         auto env = Env::get();
 
         QStringList debugMessages{
-            "recentMessagesApiUrl: " + env.recentMessagesApiUrl,
+            "recentMessagesApiUrl: " + env.recentMessages.url,
             "linkResolverUrl: " + env.linkResolverUrl,
             "twitchServerHost: " + env.twitchServerHost,
             "twitchServerPort: " + QString::number(env.twitchServerPort),

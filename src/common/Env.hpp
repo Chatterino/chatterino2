@@ -11,7 +11,12 @@ class Env
 public:
     static const Env &get();
 
-    const QString recentMessagesApiUrl;
+    const struct {
+        QString url;
+        uint32_t budget;
+        uint32_t cooldown;
+    } recentMessages;
+
     const QString linkResolverUrl;
     const QString twitchServerHost;
     const uint16_t twitchServerPort;

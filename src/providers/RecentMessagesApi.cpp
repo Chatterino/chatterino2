@@ -143,7 +143,7 @@ namespace {
     // given channel.
     QUrl constructRecentMessagesUrl(const QString &name)
     {
-        QUrl url(Env::get().recentMessagesApiUrl.arg(name));
+        QUrl url(Env::get().recentMessages.url.arg(name));
         QUrlQuery urlQuery(url);
         if (!urlQuery.hasQueryItem("limit"))
         {
@@ -157,73 +157,98 @@ namespace {
 
 }  // namespace
 
+RecentMessagesApi::RecentMessagesApi()
+    : requestBucket_(Env::get().recentMessages.budget,
+                     Env::get().recentMessages.cooldown, &doMessageLoad)
+{
+}
+
+RecentMessagesApi &RecentMessagesApi::instance()
+{
+    static RecentMessagesApi instance;
+    return instance;
+}
+
 void RecentMessagesApi::loadRecentMessages(const QString &channelName,
                                            std::weak_ptr<Channel> channelPtr,
                                            ResultCallback onLoaded,
                                            ErrorCallback onError)
 {
+    this->requestBucket_.submit(
+        RequestContext{channelName, channelPtr, onLoaded, onError});
+}
+
+void RecentMessagesApi::doMessageLoad(const RequestContext &ctx)
+{
+    auto [channelName, channelPtr, onLoaded, onError] = ctx;
+
     qCDebug(chatterinoRecentMessages)
         << "Loading recent messages for" << channelName;
 
     QUrl url = constructRecentMessagesUrl(channelName);
 
     NetworkRequest(url)
-        .onSuccess([channelPtr, onLoaded](NetworkResult result) -> Outcome {
-            auto shared = channelPtr.lock();
-            if (!shared)
-                return Failure;
+        .onSuccess(
+            [channelPtr, onLoaded](NetworkResult result) -> Outcome {
+                auto shared = channelPtr.lock();
+                if (!shared)
+                    return Failure;
 
-            qCDebug(chatterinoRecentMessages)
-                << "Successfully loaded recent messages for"
-                << shared->getName();
+                qCDebug(chatterinoRecentMessages)
+                    << "Successfully loaded recent messages for"
+                    << shared->getName();
 
-            auto root = result.parseJson();
-            auto parsedMessages = parseRecentMessages(root);
+                auto root = result.parseJson();
+                auto parsedMessages = parseRecentMessages(root);
 
-            // build the Communi messages into chatterino messages
-            auto builtMessages =
-                buildRecentMessages(parsedMessages, shared.get());
+                // build the Communi messages into chatterino messages
+                auto builtMessages =
+                    buildRecentMessages(parsedMessages, shared.get());
 
-            postToThread([shared = std::move(shared), root = std::move(root),
-                          messages = std::move(builtMessages),
-                          onLoaded]() mutable {
-                // Notify user about a possible gap in logs if it returned some messages
-                // but isn't currently joined to a channel
-                if (QString errorCode = root.value("error_code").toString();
-                    !errorCode.isEmpty())
-                {
-                    qCDebug(chatterinoRecentMessages)
-                        << QString("Got error from API: error_code=%1, "
-                                   "channel=%2")
-                               .arg(errorCode, shared->getName());
-                    if (errorCode == "channel_not_joined" && !messages.empty())
+                postToThread([shared = std::move(shared),
+                              root = std::move(root),
+                              messages = std::move(builtMessages),
+                              onLoaded]() mutable {
+                    // Notify user about a possible gap in logs if it returned some messages
+                    // but isn't currently joined to a channel
+                    if (QString errorCode = root.value("error_code").toString();
+                        !errorCode.isEmpty())
                     {
-                        shared->addMessage(makeSystemMessage(
-                            "Message history service recovering, there may "
-                            "be gaps in the message history."));
+                        qCDebug(chatterinoRecentMessages)
+                            << QString("Got error from API: error_code=%1, "
+                                       "channel=%2")
+                                   .arg(errorCode, shared->getName());
+                        if (errorCode == "channel_not_joined" &&
+                            !messages.empty())
+                        {
+                            shared->addMessage(makeSystemMessage(
+                                "Message history service recovering, there may "
+                                "be gaps in the message history."));
+                        }
                     }
-                }
 
-                onLoaded(messages);
-            });
+                    onLoaded(messages);
+                });
 
-            return Success;
-        })
-        .onError([channelPtr, onError](NetworkResult result) {
-            auto shared = channelPtr.lock();
-            if (!shared)
-                return;
+                return Success;
+            })
+        .onError(
+            [channelPtr, onError](NetworkResult result) {
+                auto shared = channelPtr.lock();
+                if (!shared)
+                    return;
 
-            qCDebug(chatterinoRecentMessages)
-                << "Failed to load recent messages for" << shared->getName();
+                qCDebug(chatterinoRecentMessages)
+                    << "Failed to load recent messages for"
+                    << shared->getName();
 
-            shared->addMessage(makeSystemMessage(
-                QString("Message history service unavailable (Error %1)")
-                    .arg(result.status())));
+                shared->addMessage(makeSystemMessage(
+                    QString("Message history service unavailable (Error %1)")
+                        .arg(result.status())));
 
-            onError();
-        })
+                onError();
+            })
         .execute();
-}
+    }
 
 }  // namespace chatterino

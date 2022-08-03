@@ -163,6 +163,7 @@ void TwitchChannel::initialize()
     this->fetchDisplayName();
     this->refreshChatters();
     this->refreshBadges();
+    this->loadRecentMessages();
 }
 
 bool TwitchChannel::isEmpty() const
@@ -493,7 +494,6 @@ void TwitchChannel::setRoomId(const QString &id)
     {
         *this->roomID_.access() = id;
         this->roomIdChanged.invoke();
-        this->loadRecentMessages();
     }
 }
 
@@ -766,7 +766,7 @@ void TwitchChannel::loadRecentMessages()
     }
 
     auto weak = weakOf<Channel>(this);
-    RecentMessagesApi::loadRecentMessages(
+    RecentMessagesApi::instance().loadRecentMessages(
         this->getName(), weak,
         [weak](const auto &messages) {
             auto shared = weak.lock();
@@ -806,7 +806,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
     }
 
     auto weak = weakOf<Channel>(this);
-    RecentMessagesApi::loadRecentMessages(
+    RecentMessagesApi::instance().loadRecentMessages(
         this->getName(), weak,
         [weak](const auto &messages) {
             auto shared = weak.lock();
