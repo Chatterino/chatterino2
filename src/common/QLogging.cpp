@@ -43,3 +43,5 @@ Q_LOGGING_CATEGORY(chatterinoWebsocket, "chatterino.websocket", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoWidget, "chatterino.widget", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoWindowmanager, "chatterino.windowmanager",
                    logThreshold);
+
+Q_LOGGING_CATEGORY(chatterinoDevel, "chatterino.devel", logThreshold);

@@ -33,3 +33,9 @@ Q_DECLARE_LOGGING_CATEGORY(chatterinoUpdate);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoWebsocket);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoWidget);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoWindowmanager);
+
+/* Run with environment variable
+ * `QT_LOGGING_RULES="chatterino.*=false;chatterino.devel=true"` to only show
+ * output from this category when prototyping and developing a feature
+ */
+Q_DECLARE_LOGGING_CATEGORY(chatterinoDevel);
