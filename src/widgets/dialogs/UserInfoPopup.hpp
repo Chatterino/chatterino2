@@ -38,6 +38,7 @@ private:
     void installEvents();
     void updateUserData();
     void updateLatestMessages();
+    void updateFocusLoss();
 
     void loadAvatar(const QUrl &url);
     bool isMod_;

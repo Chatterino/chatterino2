@@ -140,10 +140,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 {
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
+    this->updateFocusLoss();
 
-    if (this->closeAutomatically_)
-        this->setActionOnFocusLoss(BaseWindow::Delete);
-    else
+    if (!closeAutomatically)
         this->setAttribute(Qt::WA_DeleteOnClose);
 
     HotkeyController::HotkeyMap actions{
@@ -364,23 +363,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                         getApp()->themes->buttons.pin);
                     this->ui_.pinButton->setScaleIndependantSize(18, 18);
                     this->ui_.pinButton->setToolTip("Pin Window");
-                    QObject::connect(
-                        this->ui_.pinButton, &Button::leftClicked, [&] {
-                            this->closeAutomatically_ =
-                                !this->closeAutomatically_;
-                            if (this->closeAutomatically_)
-                            {
-                                this->setActionOnFocusLoss(BaseWindow::Delete);
-                                this->ui_.pinButton->setPixmap(
-                                    getApp()->themes->buttons.pin);
-                            }
-                            else
-                            {
-                                this->setActionOnFocusLoss(BaseWindow::Nothing);
-                                this->ui_.pinButton->setPixmap(
-                                    getResources().buttons.pinEnabled);
-                            }
-                        });
+                    QObject::connect(this->ui_.pinButton, &Button::leftClicked,
+                                     [&] {
+                                         this->closeAutomatically_ =
+                                             !this->closeAutomatically_;
+                                         this->updateFocusLoss();
+                                     });
                 }
             }
 
@@ -948,6 +936,22 @@ void UserInfoPopup::updateUserData()
 
     this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
+}
+
+void UserInfoPopup::updateFocusLoss()
+{
+    if (this->closeAutomatically_)
+    {
+        this->setActionOnFocusLoss(BaseWindow::Delete);
+        if (this->ui_.pinButton != nullptr)
+            this->ui_.pinButton->setPixmap(getApp()->themes->buttons.pin);
+    }
+    else
+    {
+        this->setActionOnFocusLoss(BaseWindow::Nothing);
+        if (this->ui_.pinButton != nullptr)
+            this->ui_.pinButton->setPixmap(getResources().buttons.pinEnabled);
+    }
 }
 
 void UserInfoPopup::loadAvatar(const QUrl &url)
