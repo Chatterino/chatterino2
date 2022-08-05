@@ -332,6 +332,7 @@ set(SOURCE_FILES
         util/StreamerMode.hpp
         util/Twitch.cpp
         util/Twitch.hpp
+        util/TypeName.hpp
         util/WindowsHelper.cpp
         util/WindowsHelper.hpp
 
