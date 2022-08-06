@@ -709,7 +709,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
 
     for (const auto &msg : snapshot)
     {
-        auto messageLayout = new MessageLayout(msg);
+        auto messageLayout = std::make_shared<MessageLayout>(msg);
 
         if (this->lastMessageHasAlternateBackground_)
         {
@@ -723,7 +723,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
             messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
         }
 
-        this->messages_.pushBack(MessageLayoutPtr(messageLayout));
+        this->messages_.pushBack(messageLayout);
         if (this->showScrollbarHighlights())
         {
             this->scrollBar_->addHighlight(msg->getScrollBarHighlight());
@@ -804,7 +804,7 @@ void ChannelView::messageAppended(MessagePtr &message,
         messageFlags = overridingFlags.get_ptr();
     }
 
-    auto messageRef = new MessageLayout(message);
+    auto messageRef = std::make_shared<MessageLayout>(message);
 
     if (this->lastMessageHasAlternateBackground_)
     {
@@ -829,7 +829,7 @@ void ChannelView::messageAppended(MessagePtr &message,
         loop.exec();
     }
 
-    if (this->messages_.pushBack(MessageLayoutPtr(messageRef)))
+    if (this->messages_.pushBack(messageRef))
     {
         if (this->paused())
         {
@@ -880,7 +880,7 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     for (size_t i = 0; i < messages.size(); i++)
     {
         auto message = messages.at(i);
-        auto layout = new MessageLayout(message);
+        auto layout = std::make_shared<MessageLayout>(message);
 
         // alternate color
         if (!this->lastMessageHasAlternateBackgroundReverse_)
@@ -888,7 +888,7 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
         this->lastMessageHasAlternateBackgroundReverse_ =
             !this->lastMessageHasAlternateBackgroundReverse_;
 
-        messageRefs.at(i) = MessageLayoutPtr(layout);
+        messageRefs.at(i) = std::move(layout);
     }
 
     /// Add the messages at the start
@@ -943,7 +943,7 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
 
     auto message = *oMessage;
 
-    MessageLayoutPtr newItem(new MessageLayout(replacement));
+    auto newItem = std::make_shared<MessageLayout>(replacement);
 
     if (message->flags.has(MessageLayoutFlag::AlternateBackground))
     {
@@ -968,7 +968,7 @@ void ChannelView::messagesUpdated()
 
     for (const auto &msg : snapshot)
     {
-        auto messageLayout = new MessageLayout(msg);
+        auto messageLayout = std::make_shared<MessageLayout>(msg);
 
         if (this->lastMessageHasAlternateBackground_)
         {
@@ -982,7 +982,7 @@ void ChannelView::messagesUpdated()
             messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
         }
 
-        this->messages_.pushBack(MessageLayoutPtr(messageLayout));
+        this->messages_.pushBack(messageLayout);
         if (this->showScrollbarHighlights())
         {
             this->scrollBar_->addHighlight(msg->getScrollBarHighlight());
