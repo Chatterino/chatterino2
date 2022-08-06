@@ -304,6 +304,8 @@ void IrcMessageHandler::populateReply(
             }
         }
 
+        MessagePtr foundMessage;
+
         // Thread does not yet exist, find root reply and create thread.
         // Linear search is justified by the infrequent use of replies
         for (auto &otherMsg : otherLoaded)
@@ -311,14 +313,28 @@ void IrcMessageHandler::populateReply(
             if (otherMsg->id == replyID)
             {
                 // Found root reply message
-                std::shared_ptr<MessageThread> newThread =
-                    std::make_shared<MessageThread>(otherMsg);
-
-                builder.setThread(newThread);
-                // Store weak reference to thread in channel
-                channel->addReplyThread(newThread);
+                foundMessage = otherMsg;
                 break;
             }
+        }
+
+        if (!foundMessage)
+        {
+            // We didn't find the reply root message in the otherLoaded messages
+            // which are typically the already-parsed recent messages from the
+            // Recent Messages API. We could have a really old message that
+            // still exists being replied to, so check for that here.
+            foundMessage = channel->findMessage(replyID);
+        }
+
+        if (foundMessage)
+        {
+            std::shared_ptr<MessageThread> newThread =
+                std::make_shared<MessageThread>(foundMessage);
+
+            builder.setThread(newThread);
+            // Store weak reference to thread in channel
+            channel->addReplyThread(newThread);
         }
     }
 }

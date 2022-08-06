@@ -1,10 +1,37 @@
 #include "common/Env.hpp"
 
+#include "common/QLogging.hpp"
+#include "util/TypeName.hpp"
+
 #include <QVariant>
 
 namespace chatterino {
 
 namespace {
+
+    template <typename T>
+    void warn(const char *envName, T defaultValue)
+    {
+        auto *envString = std::getenv(envName);
+        if (!envString)
+        {
+            // This function is not supposed to be used for non-existant
+            // environment variables.
+            return;
+        }
+
+        const auto typeName = QString::fromStdString(
+            std::string(type_name<decltype(defaultValue)>()));
+
+        qCWarning(chatterinoEnv).noquote()
+            << QStringLiteral(
+                   "Cannot parse value '%1' of environment variable '%2' "
+                   "as a %3, reverting to default value '%4'")
+                   .arg(envString)
+                   .arg(envName)
+                   .arg(typeName)
+                   .arg(defaultValue);
+    }
 
     QString readStringEnv(const char *envName, QString defaultValue)
     {
@@ -27,6 +54,10 @@ namespace {
             if (ok)
             {
                 return val;
+            }
+            else
+            {
+                warn(envName, defaultValue);
             }
         }
 

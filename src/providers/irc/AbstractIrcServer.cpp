@@ -349,10 +349,13 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
         if (replaceMessage)
         {
             chan->replaceMessage(snapshot[snapshot.size() - 1], reconnected);
-            continue;
+        }
+        else
+        {
+            chan->addMessage(connectedMsg);
         }
 
-        chan->addMessage(connectedMsg);
+        chan->connected.invoke();
     }
 
     this->falloffCounter_ = 1;
