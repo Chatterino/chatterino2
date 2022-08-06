@@ -129,11 +129,12 @@ namespace {
 UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                              Split *split)
     : DraggablePopup(closeAutomatically, parent)
-    , closeAutomatically_(closeAutomatically)
     , split_(split)
+    , closeAutomatically_(closeAutomatically)
 {
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
+    this->updateFocusLoss();
 
     HotkeyController::HotkeyMap actions{
         {"delete",
@@ -355,6 +356,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                     this->ui_.pinButton->setToolTip("Pin Window");
                     QObject::connect(this->ui_.pinButton, &Button::leftClicked,
                                      [this]() {
+                                         this->closeAutomatically_ =
+                                             !this->closeAutomatically_;
                                          this->updateFocusLoss();
                                      });
                 }
@@ -884,7 +887,6 @@ void UserInfoPopup::updateUserData()
 
 void UserInfoPopup::updateFocusLoss()
 {
-    this->closeAutomatically_ = !this->closeAutomatically_;
     if (this->closeAutomatically_)
     {
         this->setActionOnFocusLoss(BaseWindow::Delete);
