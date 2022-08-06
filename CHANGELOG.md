@@ -4,7 +4,6 @@
 
 - Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722)
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
-- Minor: Load missing messages from Recent Messages API upon reconnecting (#3878)
 - Minor: Added option to display tabs on the right and bottom. (#3847)
 - Minor: Added `is:first-msg` search option. (#3700)
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
@@ -26,6 +25,7 @@
 - Minor: Added `/copy` command. Usage: `/copy <text>`. Copies provided text to clipboard - can be useful with custom commands. (#3763)
 - Minor: Removed total views from the usercard, as Twitch no longer updates the number. (#3792)
 - Minor: Add Quick Switcher item to open a channel in a new popup window. (#3828)
+- Minor: Load missing messages from Recent Messages API upon reconnecting (#3878)
 - Bugfix: Fix crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fix crash that can occur when changing channels. (#3799)
