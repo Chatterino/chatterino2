@@ -12,6 +12,7 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
 #include "util/FormatTime.hpp"
+#include "util/Qt.hpp"
 
 #include <QDateTime>
 
@@ -185,19 +186,19 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
 
     // check system message for links
     // (e.g. needed for sub ticket message in sub only mode)
-    const QStringList textFragments = text.split(QRegularExpression("\\s"));
+    const QStringList textFragments =
+        text.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
     for (const auto &word : textFragments)
     {
         const auto linkString = this->matchLink(word);
-        if (linkString.isEmpty())
-        {
-            this->emplace<TextElement>(word, MessageElementFlag::Text,
-                                       MessageColor::System);
-        }
-        else
+        if (!linkString.isEmpty())
         {
             this->addLink(word, linkString);
+            continue;
         }
+
+        this->emplace<TextElement>(word, MessageElementFlag::Text,
+                                   MessageColor::System);
     }
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);

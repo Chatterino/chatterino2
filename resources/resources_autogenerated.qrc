@@ -20,6 +20,8 @@
     <file>buttons/addSplitDark.png</file>
     <file>buttons/ban.png</file>
     <file>buttons/banRed.png</file>
+    <file>buttons/cancel.svg</file>
+    <file>buttons/cancelDark.svg</file>
     <file>buttons/clearSearch.png</file>
     <file>buttons/copyDark.png</file>
     <file>buttons/copyDark.svg</file>
@@ -34,6 +36,10 @@
     <file>buttons/modModeDisabled2.png</file>
     <file>buttons/modModeEnabled.png</file>
     <file>buttons/modModeEnabled2.png</file>
+    <file>buttons/replyDark.png</file>
+    <file>buttons/replyDark.svg</file>
+    <file>buttons/replyThreadDark.png</file>
+    <file>buttons/replyThreadDark.svg</file>
     <file>buttons/search.png</file>
     <file>buttons/timeout.png</file>
     <file>buttons/trashCan.png</file>
