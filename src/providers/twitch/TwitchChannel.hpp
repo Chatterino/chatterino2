@@ -14,7 +14,6 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "util/QStringHash.hpp"
 
-#include <IrcMessage>
 #include <QColor>
 #include <QElapsedTimer>
 #include <QRegularExpression>
@@ -166,7 +165,6 @@ private:
     void refreshCheerEmotes();
     void loadRecentMessages();
     void loadRecentMessagesReconnect();
-    // void fillInMissingMessages(const std::vector<MessagePtr> &messages);
     void fetchDisplayName();
     void cleanUpReplyThreads();
     void showLoginMessage();
