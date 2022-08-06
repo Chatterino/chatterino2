@@ -1,0 +1,66 @@
+---
+name: Build on macOS
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        qt-version: [5.15.2, 5.12.12]
+        pch: [true]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0  # allows for tags access
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v3
+        with:
+          path: "${{ github.workspace }}/qt/"
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: ${{ matrix.qt-version }}
+          dir: "${{ github.workspace }}/qt/"
+
+      - name: Install dependencies (MacOS)
+        run: |
+          brew install boost openssl rapidjson p7zip create-dmg cmake tree
+        shell: bash
+
+      - name: Build (MacOS)
+        run: |
+          mkdir build
+          cd build
+          cmake \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
+              ..
+          make -j$(sysctl -n hw.logicalcpu)
+        shell: bash
+
+      - name: Package (MacOS)
+        run: |
+          ls -la
+          pwd
+          ls -la build || true
+          cd build
+          sh ./../.CI/CreateDMG.sh
+        shell: bash
+
+      - name: Upload artifact (MacOS)
+        uses: actions/upload-artifact@v3
+        with:
+          name: chatterino-osx-${{ matrix.qt-version }}.dmg
+          path: build/chatterino-osx.dmg

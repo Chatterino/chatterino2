@@ -1,0 +1,114 @@
+---
+name: Build on Linux
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        qt-version: [5.15.2, 5.12.12]
+        pch: [true]
+        include:
+          - os: ubuntu-latest
+            qt-version: 5.15.2
+            pch: false
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v2.4.0
+        with:
+          submodules: true
+          fetch-depth: 0  # allows for tags access
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v3
+        with:
+          path: "${{ github.workspace }}/qt/"
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: ${{ matrix.qt-version }}
+          dir: "${{ github.workspace }}/qt/"
+
+      - name: Install dependencies (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install \
+              cmake \
+              virtualenv \
+              rapidjson-dev \
+              libssl-dev \
+              libboost-dev \
+              libxcb-randr0-dev \
+              libboost-system-dev \
+              libboost-filesystem-dev \
+              libpulse-dev \
+              libxkbcommon-x11-0 \
+              libgstreamer-plugins-base1.0-0 \
+              build-essential \
+              libgl1-mesa-dev \
+              libxcb-icccm4 \
+              libxcb-image0 \
+              libxcb-keysyms1 \
+              libxcb-render-util0 \
+              libxcb-xinerama0
+
+      - name: Build (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          mkdir build
+          cd build
+          cmake \
+            -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
+            -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
+            ..
+          make -j$(nproc)
+        shell: bash
+
+      - name: clang-tidy review
+        if: (matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
+        uses: ZedThree/clang-tidy-review@v0.8.4
+        id: review
+        with:
+          build_dir: build
+          config_file: '.clang-tidy'
+
+      - name: Package - AppImage (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          cd build
+          sh ./../.CI/CreateAppImage.sh
+        shell: bash
+
+      - name: Package - .deb (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          cd build
+          sh ./../.CI/CreateUbuntuDeb.sh
+        shell: bash
+
+      - name: Upload artifact - AppImage (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v3
+        with:
+          name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
+          path: build/Chatterino-x86_64.AppImage
+
+      - name: Upload artifact - .deb (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v3
+        with:
+          name: Chatterino-${{ matrix.qt-version }}.deb
+          path: build/Chatterino.deb
+

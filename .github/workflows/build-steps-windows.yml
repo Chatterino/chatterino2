@@ -1,0 +1,83 @@
+---
+name: Build on Windows
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        qt-version: [5.15.2, 5.12.12]
+        pch: [true]
+
+    steps:
+      - name: Set environment variables for windows-latest
+        run: |
+          echo "vs_version=2022" >> $GITHUB_ENV
+        shell: bash
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0  # allows for tags access
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v3
+        with:
+          path: "${{ github.workspace }}/qt/"
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: ${{ matrix.qt-version }}
+          dir: "${{ github.workspace }}/qt/"
+
+      - name: Cache conan packages part 1
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.txt') }}
+          path:  ~/.conan/
+
+      - name: Cache conan packages part 2
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
+          path: C:/.conan/
+
+      - name: Add Conan to path
+        run: echo "C:\Program Files\Conan\conan\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Install dependencies (Windows)
+        run: |
+          choco install conan -y
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1.10.0
+
+      - name: Build (Windows)
+        run: |
+          mkdir build
+          cd build
+          conan install ..  -b missing
+          cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..
+          set cl=/MP
+          nmake /S /NOLOGO
+          windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
+          cp bin/chatterino.exe Chatterino2/
+          echo nightly > Chatterino2/modes
+          7z a chatterino-windows-x86-64.zip Chatterino2/
+
+      - name: Upload artifact (Windows)
+        uses: actions/upload-artifact@v3
+        with:
+          name: chatterino-windows-x86-64-${{ matrix.qt-version }}.zip
+          path: build/chatterino-windows-x86-64.zip
+
+      - name: Clean Conan pkgs
+        run: conan remove "*" -fsb
+        shell: bash
