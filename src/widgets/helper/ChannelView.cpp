@@ -125,7 +125,7 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
     , scrollBar_(new Scrollbar(this))
     , split_(split)
     , context_(context)
-    , messages_(getSettings()->twitchMessageOnScreenLimit)
+    , messages_(getSettings()->scrollbackOnScreenLimit)
 {
     this->setMouseTracking(true);
 

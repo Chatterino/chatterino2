@@ -28,7 +28,7 @@ Channel::Channel(const QString &name, Type type)
     : completionModel(*this)
     , lastDate_(QDate::currentDate())
     , name_(name)
-    , messages_(getSettings()->twitchMessageLogLimit)
+    , messages_(getSettings()->scrollbackUsercardLogLimit)
     , type_(type)
 {
 }

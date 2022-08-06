@@ -378,13 +378,14 @@ public:
         "/misc/twitch/messageHistoryLimit",
         800,
     };
-    IntSetting twitchMessageLogLimit = {
-        "/misc/twitch/messageLogLimit",
-        8000,
-    };
-    IntSetting twitchMessageOnScreenLimit = {
-        "/misc/twitch/messageOnScreenLimit",
+
+    IntSetting scrollbackOnScreenLimit = {
+        "/misc/scrollbackOnScreenLimit",
         1000,
+    };
+    IntSetting scrollbackUsercardLogLimit = {
+        "/misc/scrollbackUsercardLogLimit",
+        8000,
     };
 
     IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 1};
