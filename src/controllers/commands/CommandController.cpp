@@ -26,6 +26,7 @@
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/splits/Split.hpp"
 
@@ -687,7 +688,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         auto *userPopup = new UserInfoPopup(
             getSettings()->autoCloseUserPopup,
-            static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
+            static_cast<QWidget *>(&(getApp()->windows->getMainWindow())),
+            nullptr);
         userPopup->setData(userName, channel);
         userPopup->move(QCursor::pos());
         userPopup->show();
@@ -1113,6 +1115,56 @@ void CommandController::initialize(Settings &, Paths &paths)
         getApp()->twitch->sendRawMessage(words.mid(1).join(" "));
         return "";
     });
+
+    this->registerCommand(
+        "/reply", [](const QStringList &words, ChannelPtr channel) {
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /reply command only works in Twitch channels"));
+                return "";
+            }
+
+            if (words.size() < 3)
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage: /reply <username> <message>"));
+                return "";
+            }
+
+            QString username = words[1];
+            stripChannelName(username);
+
+            auto snapshot = twitchChannel->getMessageSnapshot();
+            for (auto it = snapshot.rbegin(); it != snapshot.rend(); ++it)
+            {
+                const auto &msg = *it;
+                if (msg->loginName.compare(username, Qt::CaseInsensitive) == 0)
+                {
+                    std::shared_ptr<MessageThread> thread;
+                    // found most recent message by user
+                    if (msg->replyThread == nullptr)
+                    {
+                        thread = std::make_shared<MessageThread>(msg);
+                        twitchChannel->addReplyThread(thread);
+                    }
+                    else
+                    {
+                        thread = msg->replyThread;
+                    }
+
+                    QString reply = words.mid(2).join(" ");
+                    twitchChannel->sendReply(reply, thread->rootId());
+                    return "";
+                }
+            }
+
+            channel->addMessage(
+                makeSystemMessage("A message from that user wasn't found"));
+
+            return "";
+        });
 
 #ifndef NDEBUG
     this->registerCommand(

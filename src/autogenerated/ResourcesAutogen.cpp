@@ -35,6 +35,8 @@ Resources2::Resources2()
     this->buttons.pinDisabledDark = QPixmap(":/buttons/pinDisabledDark.png");
     this->buttons.pinDisabledLight = QPixmap(":/buttons/pinDisabledLight.png");
     this->buttons.pinEnabled = QPixmap(":/buttons/pinEnabled.png");
+    this->buttons.replyDark = QPixmap(":/buttons/replyDark.png");
+    this->buttons.replyThreadDark = QPixmap(":/buttons/replyThreadDark.png");
     this->buttons.search = QPixmap(":/buttons/search.png");
     this->buttons.timeout = QPixmap(":/buttons/timeout.png");
     this->buttons.trashCan = QPixmap(":/buttons/trashCan.png");

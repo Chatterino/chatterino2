@@ -5,6 +5,7 @@
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/search/MessagePredicate.hpp"
 #include "widgets/BasePopup.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <memory>
 
@@ -15,7 +16,7 @@ namespace chatterino {
 class SearchPopup : public BasePopup
 {
 public:
-    SearchPopup(QWidget *parent);
+    SearchPopup(QWidget *parent, Split *split = nullptr);
 
     virtual void addChannel(ChannelView &channel);
 
@@ -58,6 +59,7 @@ private:
     QLineEdit *searchInput_{};
     ChannelView *channelView_{};
     QString channelName_{};
+    Split *split_ = nullptr;
     QList<std::reference_wrapper<ChannelView>> searchChannels_;
 };
 

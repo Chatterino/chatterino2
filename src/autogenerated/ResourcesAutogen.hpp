@@ -42,6 +42,8 @@ public:
         QPixmap pinDisabledDark;
         QPixmap pinDisabledLight;
         QPixmap pinEnabled;
+        QPixmap replyDark;
+        QPixmap replyThreadDark;
         QPixmap search;
         QPixmap timeout;
         QPixmap trashCan;

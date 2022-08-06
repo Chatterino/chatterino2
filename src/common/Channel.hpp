@@ -49,6 +49,9 @@ public:
     // SIGNALS
     pajlada::Signals::Signal<const QString &, const QString &, bool &>
         sendMessageSignal;
+    pajlada::Signals::Signal<const QString &, const QString &, const QString &,
+                             bool &>
+        sendReplySignal;
     pajlada::Signals::Signal<MessagePtr &> messageRemovedFromStart;
     pajlada::Signals::Signal<MessagePtr &, boost::optional<MessageFlags>>
         messageAppended;
@@ -84,6 +87,7 @@ public:
 
     // CHANNEL INFO
     virtual bool canSendMessage() const;
+    virtual bool isWritable() const;  // whether split input will be usable
     virtual void sendMessage(const QString &message);
     virtual bool isMod() const;
     virtual bool isBroadcaster() const;
