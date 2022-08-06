@@ -171,6 +171,7 @@ set(SOURCE_FILES
         providers/IvrApi.hpp
         providers/LinkResolver.cpp
         providers/LinkResolver.hpp
+        providers/RecentMessagesApi.cpp
         providers/RecentMessagesApi.hpp
 
         providers/bttv/BttvEmotes.cpp
