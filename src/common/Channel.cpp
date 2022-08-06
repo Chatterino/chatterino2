@@ -249,6 +249,8 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
         existingMessageIds.insert(msg->id);
     }
 
+    bool anyInserted = false;
+
     // Keep track of the last message in the channel. We need this value
     // to allow concurrent appends to the end of the channel while still
     // being able to insert just-loaded historical messages at the end
@@ -262,6 +264,9 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
             continue;
         }
 
+        // If we get to this point, we know we'll be inserting a message
+        anyInserted = true;
+
         bool insertedFlag = false;
         for (auto &snapshotMsg : snapshot)
         {
@@ -273,7 +278,9 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
             if (msg->serverReceivedTime < snapshotMsg->serverReceivedTime)
             {
                 // We found the first message that comes after the current message.
-                // Therefore, we can put the current message directly before.
+                // Therefore, we can put the current message directly before. We
+                // assume that the messages we are filling in are in ascending
+                // order by serverReceivedTime.
                 this->messages_.insertBefore(snapshotMsg, msg);
                 insertedFlag = true;
                 break;
@@ -290,9 +297,12 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
         }
     }
 
-    // We only invoke a signal once at the end of filling all messages to
-    // prevent doing any unnecessary repaints.
-    this->filledInMessages.invoke(messages);
+    if (anyInserted)
+    {
+        // We only invoke a signal once at the end of filling all messages to
+        // prevent doing any unnecessary repaints.
+        this->filledInMessages.invoke(messages);
+    }
 }
 
 void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
