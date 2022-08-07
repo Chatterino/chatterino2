@@ -10,7 +10,6 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightPhrase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ExponentialBackoff.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchAccount.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Helpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/RatelimitBucket.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Hotkeys.cpp
@@ -18,7 +17,9 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/IrcHelpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchPubSubClient.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchMessageBuilder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightController.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/FormatTime.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/LimitedQueue.cpp
     # Add your new file above this line!
     )
 

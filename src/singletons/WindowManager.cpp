@@ -113,6 +113,7 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
+    this->wordFlagsListener_.addSetting(settings->showReplyButton);
     this->wordFlagsListener_.setCB([this] {
         this->updateWordTypeMask();
     });
@@ -182,6 +183,10 @@ void WindowManager::updateWordTypeMask()
     // username
     flags.set(MEF::Username);
 
+    // replies
+    flags.set(MEF::RepliedMessage);
+    flags.set(settings->showReplyButton ? MEF::ReplyButton : MEF::None);
+
     // misc
     flags.set(MEF::AlwaysShow);
     flags.set(MEF::Collapsed);
@@ -244,11 +249,31 @@ Window &WindowManager::getSelectedWindow()
     return *this->selectedWindow_;
 }
 
-Window &WindowManager::createWindow(WindowType type, bool show)
+Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
 {
     assertInGuiThread();
 
-    auto *window = new Window(type);
+    auto *const realParent = [this, type, parent]() -> QWidget * {
+        if (parent)
+        {
+            // If a parent is explicitly specified, we use that immediately.
+            return parent;
+        }
+
+        if (type == WindowType::Popup)
+        {
+            // On some window managers, popup windows require a parent to behave correctly. See
+            // https://github.com/Chatterino/chatterino2/pull/1843 for additional context.
+            return &(this->getMainWindow());
+        }
+
+        // If no parent is set and something other than a popup window is being created, we fall
+        // back to the default behavior of no parent.
+        return nullptr;
+    }();
+
+    auto *window = new Window(type, realParent);
+
     this->windows_.push_back(window);
     if (show)
     {
@@ -273,6 +298,16 @@ Window &WindowManager::createWindow(WindowType type, bool show)
     }
 
     return *window;
+}
+
+Window &WindowManager::openInPopup(ChannelPtr channel)
+{
+    auto &popup = this->createWindow(WindowType::Popup, true);
+    auto *split =
+        popup.getNotebook().getOrAddSelectedPage()->appendNewSplit(false);
+    split->setChannel(channel);
+
+    return popup;
 }
 
 void WindowManager::select(Split *split)

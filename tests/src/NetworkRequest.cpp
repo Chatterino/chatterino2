@@ -13,9 +13,17 @@ using namespace chatterino;
 
 namespace {
 
-static QString getStatusURL(int code)
+// Change to http://httpbin.org if you don't want to run the docker image yourself to test this
+const char *const HTTPBIN_BASE_URL = "http://127.0.0.1:9051";
+
+QString getStatusURL(int code)
 {
-    return QString("http://httpbin.org/status/%1").arg(code);
+    return QString("%1/status/%2").arg(HTTPBIN_BASE_URL).arg(code);
+}
+
+QString getDelayURL(int delay)
+{
+    return QString("%1/delay/%2").arg(HTTPBIN_BASE_URL).arg(delay);
 }
 
 }  // namespace
@@ -201,7 +209,7 @@ TEST(NetworkRequest, TimeoutTimingOut)
 {
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
 
-    auto url = "http://httpbin.org/delay/5";
+    auto url = getDelayURL(5);
 
     std::mutex mut;
     bool requestDone = false;
@@ -248,7 +256,7 @@ TEST(NetworkRequest, TimeoutNotTimingOut)
 {
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
 
-    auto url = "http://httpbin.org/delay/1";
+    auto url = getDelayURL(1);
 
     std::mutex mut;
     bool requestDone = false;
@@ -293,7 +301,7 @@ TEST(NetworkRequest, FinallyCallbackOnTimeout)
 {
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
 
-    auto url = "http://httpbin.org/delay/5";
+    auto url = getDelayURL(5);
 
     std::mutex mut;
     bool requestDone = false;

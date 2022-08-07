@@ -15,6 +15,7 @@
 namespace chatterino {
 
 class ChannelView;
+class MessageThread;
 class SplitHeader;
 class SplitInput;
 class SplitContainer;
@@ -51,7 +52,7 @@ public:
     SplitInput &getInput();
 
     IndirectChannel getIndirectChannel();
-    ChannelPtr getChannel();
+    ChannelPtr getChannel() const;
     void setChannel(IndirectChannel newChannel);
 
     void setFilters(const QList<QUuid> ids);
@@ -64,8 +65,6 @@ public:
 
     void showChangeChannelPopup(const char *dialogTitle, bool empty,
                                 std::function<void(bool)> callback);
-    void giveFocus(Qt::FocusReason reason);
-    bool hasFocus() const;
     void updateGifEmotes();
     void updateLastReadMessage();
     void setIsTopRightSplit(bool value);
@@ -75,6 +74,8 @@ public:
     bool isInContainer() const;
 
     void setContainer(SplitContainer *container);
+
+    void setInputReply(const std::shared_ptr<MessageThread> &reply);
 
     static pajlada::Signals::Signal<Qt::KeyboardModifiers>
         modifierStatusChanged;
@@ -106,7 +107,6 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
     void enterEvent(QEvent *event) override;
     void leaveEvent(QEvent *event) override;
-    void focusInEvent(QFocusEvent *event) override;
 
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
@@ -138,11 +138,11 @@ private:
     bool isMouseOver_{};
     bool isDragging_{};
 
-    QVBoxLayout *vbox_;
-    SplitHeader *header_;
-    ChannelView *view_;
-    SplitInput *input_;
-    SplitOverlay *overlay_;
+    QVBoxLayout *const vbox_;
+    SplitHeader *const header_;
+    ChannelView *const view_;
+    SplitInput *const input_;
+    SplitOverlay *const overlay_;
 
     NullablePtr<SelectChannelDialog> selectChannelDialog_;
 
@@ -179,3 +179,6 @@ public slots:
 };
 
 }  // namespace chatterino
+
+QDebug operator<<(QDebug dbg, const chatterino::Split &split);
+QDebug operator<<(QDebug dbg, const chatterino::Split *split);

@@ -51,6 +51,7 @@ karl-police | https://github.com/karl-police | :/avatars/karlpolice.png | Contri
 brian6932 | https://github.com/brian6932 | :/avatars/brian6932.png | Contributor
 hicupalot | https://github.com/hicupalot | :/avatars/hicupalot.png | Contributor
 iProdigy | https://github.com/iProdigy | :/avatars/iprodigy.png | Contributor
+Jaxkey | https://github.com/Jaxkey | :/avatars/jaxkey.png | Contributor
 
 # If you are a contributor add yourself above this line
 

@@ -35,7 +35,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-const QString TEXT_VIEWS("Views: %1");
 const QString TEXT_FOLLOWERS("Followers: %1");
 const QString TEXT_CREATED("Created: %1");
 const QString TEXT_TITLE("%1's Usercard - #%2");
@@ -92,8 +91,16 @@ namespace {
         LimitedQueueSnapshot<MessagePtr> snapshot =
             channel->getMessageSnapshot();
 
-        ChannelPtr channelPtr(
-            new Channel(channel->getName(), Channel::Type::None));
+        ChannelPtr channelPtr;
+        if (channel->isTwitchChannel())
+        {
+            channelPtr = std::make_shared<TwitchChannel>(channel->getName());
+        }
+        else
+        {
+            channelPtr = std::make_shared<Channel>(channel->getName(),
+                                                   Channel::Type::None);
+        }
 
         for (size_t i = 0; i < snapshot.size(); i++)
         {
@@ -119,32 +126,13 @@ namespace {
 
 }  // namespace
 
-#ifdef Q_OS_LINUX
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::Dialog,
-                                                BaseWindow::EnableCustomFrame};
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
-    BaseWindow::EnableCustomFrame};
-#else
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::EnableCustomFrame};
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
-    BaseWindow::EnableCustomFrame, BaseWindow::Frameless,
-    BaseWindow::FramelessDraggable};
-#endif
-
-UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
-    : BaseWindow(closeAutomatically ? userInfoPopupFlagsCloseAutomatically
-                                    : userInfoPopupFlags,
-                 parent)
-    , hack_(new bool)
-    , dragTimer_(this)
+UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
+                             Split *split)
+    : DraggablePopup(closeAutomatically, parent)
+    , split_(split)
 {
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
-
-    if (closeAutomatically)
-        this->setActionOnFocusLoss(BaseWindow::Delete);
-    else
-        this->setAttribute(Qt::WA_DeleteOnClose);
 
     HotkeyController::HotkeyMap actions{
         {"delete",
@@ -358,8 +346,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
             }
 
             // items on the left
-            vbox.emplace<Label>(TEXT_VIEWS.arg(""))
-                .assign(&this->ui_.viewCountLabel);
             vbox.emplace<Label>(TEXT_FOLLOWERS.arg(""))
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED.arg(""))
@@ -501,7 +487,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
         this->ui_.noMessagesLabel = new Label("No recent messages");
         this->ui_.noMessagesLabel->setVisible(false);
 
-        this->ui_.latestMessages = new ChannelView(this);
+        this->ui_.latestMessages =
+            new ChannelView(this, this->split_, ChannelView::Context::UserCard);
         this->ui_.latestMessages->setMinimumSize(400, 275);
         this->ui_.latestMessages->setSizePolicy(QSizePolicy::Expanding,
                                                 QSizePolicy::Expanding);
@@ -513,21 +500,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
     this->installEvents();
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
-
-    this->dragTimer_.callOnTimeout(
-        [this, hack = std::weak_ptr<bool>(this->hack_)] {
-            if (!hack.lock())
-            {
-                // Ensure this timer is never called after the object has been destroyed
-                return;
-            }
-            if (!this->isMoving_)
-            {
-                return;
-            }
-
-            this->move(this->requestedDragPos_);
-        });
 }
 
 void UserInfoPopup::themeChangedEvent()
@@ -551,36 +523,6 @@ void UserInfoPopup::scaleChangedEvent(float /*scale*/)
 
         this->setGeometry(geo);
     });
-}
-
-void UserInfoPopup::mousePressEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::MouseButton::LeftButton)
-    {
-        this->dragTimer_.start(std::chrono::milliseconds(17));
-        this->startPosDrag_ = event->pos();
-        this->movingRelativePos = event->localPos();
-    }
-}
-
-void UserInfoPopup::mouseReleaseEvent(QMouseEvent *event)
-{
-    this->dragTimer_.stop();
-    this->isMoving_ = false;
-}
-
-void UserInfoPopup::mouseMoveEvent(QMouseEvent *event)
-{
-    // Drag the window by the amount changed from inital position
-    // Note that we provide a few *units* of deadzone so people don't
-    // start dragging the window if they are slow at clicking.
-    auto movePos = event->pos() - this->startPosDrag_;
-    if (this->isMoving_ || movePos.manhattanLength() > 10.0)
-    {
-        this->requestedDragPos_ =
-            (event->screenPos() - this->movingRelativePos).toPoint();
-        this->isMoving_ = true;
-    }
 }
 
 void UserInfoPopup::installEvents()
@@ -768,7 +710,7 @@ void UserInfoPopup::updateLatestMessages()
 
 void UserInfoPopup::updateUserData()
 {
-    std::weak_ptr<bool> hack = this->hack_;
+    std::weak_ptr<bool> hack = this->lifetimeHack_;
     auto currentUser = getApp()->accounts->twitch.getCurrent();
 
     const auto onUserFetchFailed = [this, hack] {
@@ -780,7 +722,6 @@ void UserInfoPopup::updateUserData()
         // this can occur when the account doesn't exist.
         this->ui_.followerCountLabel->setText(
             TEXT_FOLLOWERS.arg(TEXT_UNAVAILABLE));
-        this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(TEXT_UNAVAILABLE));
         this->ui_.createdDateLabel->setText(TEXT_CREATED.arg(TEXT_UNAVAILABLE));
 
         this->ui_.nameLabel->setText(this->userName_);
@@ -817,8 +758,6 @@ void UserInfoPopup::updateUserData()
 
         this->setWindowTitle(TEXT_TITLE.arg(
             user.displayName, this->underlyingChannel_->getName()));
-        this->ui_.viewCountLabel->setText(
-            TEXT_VIEWS.arg(localizeNumbers(user.viewCount)));
         this->ui_.createdDateLabel->setText(
             TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
         this->ui_.userIDLabel->setText(TEXT_USER_ID + user.id);

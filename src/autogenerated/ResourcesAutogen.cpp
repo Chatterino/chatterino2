@@ -10,6 +10,7 @@ Resources2::Resources2()
     this->avatars.fourtf = QPixmap(":/avatars/fourtf.png");
     this->avatars.hicupalot = QPixmap(":/avatars/hicupalot.png");
     this->avatars.iprodigy = QPixmap(":/avatars/iprodigy.png");
+    this->avatars.jaxkey = QPixmap(":/avatars/jaxkey.png");
     this->avatars.kararty = QPixmap(":/avatars/kararty.png");
     this->avatars.karlpolice = QPixmap(":/avatars/karlpolice.png");
     this->avatars.mm2pl = QPixmap(":/avatars/mm2pl.png");
@@ -31,6 +32,8 @@ Resources2::Resources2()
     this->buttons.modModeDisabled2 = QPixmap(":/buttons/modModeDisabled2.png");
     this->buttons.modModeEnabled = QPixmap(":/buttons/modModeEnabled.png");
     this->buttons.modModeEnabled2 = QPixmap(":/buttons/modModeEnabled2.png");
+    this->buttons.replyDark = QPixmap(":/buttons/replyDark.png");
+    this->buttons.replyThreadDark = QPixmap(":/buttons/replyThreadDark.png");
     this->buttons.search = QPixmap(":/buttons/search.png");
     this->buttons.timeout = QPixmap(":/buttons/timeout.png");
     this->buttons.trashCan = QPixmap(":/buttons/trashCan.png");

@@ -22,10 +22,10 @@ Notes:
    - Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `-64` for 64-bit systems).
      Visual Studio versions map as follows: `14.3` in the filename corresponds to MSVC 2022,`14.2` to 2019, `14.1` to 2017, `14.0` to 2015. _Anything prior to Visual Studio 2015 is unsupported. Please upgrade should you have an older installation._
 
-     **Convenience link for Visual Studio 2022: [boost_1_79_0_b1-msvc-14.3-64.exe](https://sourceforge.net/projects/boost/files/boost-binaries/1.79.0_b1/boost_1_79_0_b1-msvc-14.3-64.exe/download)**
+     **Convenience link for Visual Studio 2022: [boost_1_79_0-msvc-14.3-64.exe](https://sourceforge.net/projects/boost/files/boost-binaries/1.79.0/boost_1_79_0-msvc-14.3-64.exe/download)**
 
 2. When prompted where to install Boost, set the location to `C:\local\boost`.
-3. After the installation finishes, rename the `C:\local\boost\boost_1_79_0_b1_rc1` (or similar) directory to simply `lib` (`C:\local\boost\lib`).
+3. After the installation finishes, rename the `C:\local\boost\lib64-msvc-14.3` (or similar) directory to simply `lib` (`C:\local\boost\lib`).
 
 Note: This installation will take about 2.1 GB of disk space.
 
@@ -33,7 +33,7 @@ Note: This installation will take about 2.1 GB of disk space.
 
 ### For our websocket library, we need OpenSSL 1.1
 
-1. Download OpenSSL for windows, version `1.1.1n`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1n.exe)**
+1. Download OpenSSL for windows, version `1.1.1q`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1q.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 
@@ -46,7 +46,8 @@ Note: This installation will take about 2.1 GB of disk space.
 5. Then copy the OpenSSL 1.1 files from its `\bin` folder to `C:\local\bin` (Overwrite any duplicate files)
 6. Add `C:\local\bin` to your path folder ([Follow the guide here if you don't know how to do it](https://www.computerhope.com/issues/ch000549.htm#windows10))
 
-**If the download links above do not work, try downloading similar 1.1.x & 1.0.x versions [here](https://slproweb.com/products/Win32OpenSSL.html). Note: Don't download the "light" installers, they do not have the required files.**
+**If the 1.1.x download link above does not work, try downloading the similar 1.1.x version found [here](https://slproweb.com/products/Win32OpenSSL.html). Note: Don't download the "light" installer, it does not have the required files.**
+![Screenshot Slproweb layout](https://user-images.githubusercontent.com/41973452/175827529-97802939-5549-4ab1-95c4-d39f012d06e9.png)
 
 Note: This installation will take about 200 MB of disk space.
 
@@ -82,7 +83,7 @@ Compiling with Breakpad support enables crash reports that can be of use for dev
 
 ## Run the build in Qt Creator
 
-1. Open the `chatterino.pro` file by double-clicking it, or by opening it via Qt Creator.
+1. Open the `CMakeLists.txt` file by double-clicking it, or by opening it via Qt Creator.
 2. You will be presented with a screen that is titled "Configure Project". In this screen, you should have at least one option present ready to be configured, like this:
    ![Qt Create Configure Project screenshot](https://user-images.githubusercontent.com/69117321/169887645-2ae0871a-fe8a-4eb9-98db-7b996dea3a54.png)
 3. Select the profile(s) you want to build with and click "Configure Project".
