@@ -33,8 +33,8 @@ namespace detail {
         DebugCount::increase("images");
     }
 
-    Frames::Frames(const QVector<Frame<QPixmap>> &frames)
-        : items_(frames)
+    Frames::Frames(QVector<Frame<QPixmap>> &&frames)
+        : items_(std::move(frames))
     {
         assertInGuiThread();
         DebugCount::increase("images");
@@ -137,13 +137,13 @@ namespace detail {
     QVector<Frame<QImage>> readFrames(QImageReader &reader, const Url &url)
     {
         QVector<Frame<QImage>> frames;
+        frames.reserve(reader.imageCount());
 
         QImage image;
         for (int index = 0; index < reader.imageCount(); ++index)
         {
             if (reader.read(&image))
             {
-                QPixmap::fromImage(image);
                 // It seems that browsers have special logic for fast animations.
                 // This implements Chrome and Firefox's behavior which uses
                 // a duration of 100 ms for any frames that specify a duration of <= 10 ms.
@@ -153,7 +153,7 @@ namespace detail {
                 if (duration <= 10)
                     duration = 100;
                 duration = std::max(20, duration);
-                frames.push_back(Frame<QImage>{image, duration});
+                frames.push_back(Frame<QImage>{std::move(image), duration});
             }
         }
 
@@ -178,8 +178,11 @@ namespace detail {
 
         while (!queued.empty())
         {
-            queued.front().first(queued.front().second);
+            auto front = std::move(queued.front());
             queued.pop();
+
+            // Call Assign with the vector of frames
+            front.first(std::move(front.second));
 
             if (++i > 50)
             {
@@ -200,9 +203,14 @@ namespace detail {
     auto makeConvertCallback(const QVector<Frame<QImage>> &parsed,
                              Assign assign)
     {
+        static std::queue<std::pair<Assign, QVector<Frame<QPixmap>>>> queued;
+        static std::mutex mutex;
+        static std::atomic_bool loadedEventQueued{false};
+
         return [parsed, assign] {
             // convert to pixmap
-            auto frames = QVector<Frame<QPixmap>>();
+            QVector<Frame<QPixmap>> frames;
+            frames.reserve(parsed.size());
             std::transform(parsed.begin(), parsed.end(),
                            std::back_inserter(frames), [](auto &frame) {
                                return Frame<QPixmap>{
@@ -211,14 +219,8 @@ namespace detail {
                            });
 
             // put into stack
-            static std::queue<std::pair<Assign, QVector<Frame<QPixmap>>>>
-                queued;
-            static std::mutex mutex;
-
             std::lock_guard<std::mutex> lock(mutex);
-            queued.emplace(assign, frames);
-
-            static std::atomic_bool loadedEventQueued{false};
+            queued.push(std::make_pair(assign, std::move(frames)));
 
             if (!loadedEventQueued)
             {
@@ -439,9 +441,12 @@ void Image::actuallyLoad()
 
             auto parsed = detail::readFrames(reader, shared->url());
 
-            postToThread(makeConvertCallback(parsed, [weak](auto frames) {
+            postToThread(makeConvertCallback(parsed, [weak](auto &&frames) {
                 if (auto shared = weak.lock())
-                    shared->frames_ = std::make_unique<detail::Frames>(frames);
+                {
+                    shared->frames_ =
+                        std::make_unique<detail::Frames>(std::move(frames));
+                }
             }));
 
             return Success;

@@ -26,7 +26,7 @@ namespace detail {
     {
     public:
         Frames();
-        Frames(const QVector<Frame<QPixmap>> &frames);
+        Frames(QVector<Frame<QPixmap>> &&frames);
         ~Frames();
 
         bool animated() const;
