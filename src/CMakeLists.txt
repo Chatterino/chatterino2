@@ -171,6 +171,8 @@ set(SOURCE_FILES
         providers/IvrApi.hpp
         providers/LinkResolver.cpp
         providers/LinkResolver.hpp
+        providers/RecentMessagesApi.cpp
+        providers/RecentMessagesApi.hpp
 
         providers/seventv/SeventvBadges.cpp
         providers/seventv/SeventvBadges.hpp
@@ -362,6 +364,7 @@ set(SOURCE_FILES
         util/StreamerMode.hpp
         util/Twitch.cpp
         util/Twitch.hpp
+        util/TypeName.hpp
         util/WindowsHelper.cpp
         util/WindowsHelper.hpp
 
@@ -762,7 +765,6 @@ if (LIBRT)
         ${LIBRT}
         )
 endif ()
-
 
 # Configure compiler warnings
 if (MSVC)

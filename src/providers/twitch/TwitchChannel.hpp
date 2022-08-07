@@ -22,6 +22,7 @@
 #include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
+#include <atomic>
 #include <mutex>
 #include <unordered_map>
 
@@ -172,6 +173,7 @@ private:
     void refreshBadges();
     void refreshCheerEmotes();
     void loadRecentMessages();
+    void loadRecentMessagesReconnect();
     void fetchDisplayName();
     void listenSeventv();
     void cleanUpReplyThreads();
@@ -198,6 +200,7 @@ private:
     int chatterCount_;
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
+    std::atomic_flag loadingRecentMessages_ = ATOMIC_FLAG_INIT;
     std::unordered_map<QString, std::weak_ptr<MessageThread>> threads_;
 
 protected:
