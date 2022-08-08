@@ -260,6 +260,8 @@ void Updates::installUpdates()
             QUrl fileUrl = QUrl("file://" + filename, QUrl::TolerantMode);
             QDesktopServices::openUrl(fileUrl);
             return Success;
+#else
+            return Success;
 #endif
         })
         .execute();
