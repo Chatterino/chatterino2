@@ -78,10 +78,10 @@ namespace {
         return false;
     }
 
-    void showPopupMessage(const QString &title, const QString &body, bool block)
+    void showPopupMessage(QMessageBox::Icon icon, const QString &title,
+                          const QString &body, bool block)
     {
-        QMessageBox *box =
-            new QMessageBox(QMessageBox::Information, title, body);
+        QMessageBox *box = new QMessageBox(icon, title, body);
         box->setAttribute(Qt::WA_DeleteOnClose);
         if (block)
         {
@@ -152,7 +152,7 @@ void Updates::installUpdates()
         return;
     }
 
-    showPopupMessage("Chatterino Update",
+    showPopupMessage(QMessageBox::Information, "Chatterino Update",
                      "Chatterino is downloading the update "
                      "in the background and will run the "
                      "updater once it is finished.",
@@ -162,6 +162,7 @@ void Updates::installUpdates()
                               << this->releaseAsset_.downloadURL;
 
     bool portable = getPaths()->isPortable();
+    this->setStatus_(Downloading);
     NetworkRequest(this->releaseAsset_.downloadURL)
         .followRedirects(true)
         .timeout(600000)
@@ -200,7 +201,7 @@ void Updates::installUpdates()
 
             auto onInstallError = [this]() {
                 showPopupMessage(
-                    "Chatterino Update",
+                    QMessageBox::Critical, "Chatterino Update",
                     "Failed to save the update file. This could be due to "
                     "window settings or antivirus software.\n\nA link will "
                     "open allowing you to manually download the update.",
@@ -226,6 +227,8 @@ void Updates::installUpdates()
 #ifdef Q_OS_WIN
             if (portable)
             {
+                qCDebug(chatterinoUpdate)
+                    << "Starting portable updater" << filename;
                 QProcess::startDetached(
                     combinePath(QCoreApplication::applicationDirPath(),
                                 "updater.1/ChatterinoUpdater.exe"),
@@ -237,6 +240,8 @@ void Updates::installUpdates()
             else
             {
                 // Attempt to launch installer
+                qCDebug(chatterinoUpdate)
+                    << "Starting updater executable" << filename;
                 if (QProcess::startDetached(filename))
                 {
                     QApplication::exit(0);
@@ -244,14 +249,39 @@ void Updates::installUpdates()
                 }
                 else
                 {
-                    qCWarning(chatterinoUpdate) << "Failed to launch installer";
-                    onInstallError();
-                    return Failure;
+                    showPopupMessage(
+                        QMessageBox::Warning, "Chatterino Update",
+                        "The updater was downloaded successfully but "
+                        "Chatterino wasn't able to start it automatically.\n\n"
+                        "An explorer window will open with the Updater "
+                        "executable. Run this executable to finish the update.",
+                        true);
+
+                    // Open explorer with the executable highlighted
+                    QString showExecutableCommand =
+                        "C:\\Windows\\explorer.exe /select," +
+                        QDir::toNativeSeparators(filename);
+                    bool openedExplorer =
+                        QProcess::startDetached(showExecutableCommand);
+
+                    if (!openedExplorer)
+                    {
+                        showPopupMessage(
+                            QMessageBox::Warning, "Chatterino Update",
+                            "Well, this is embarassing. Chatterino was also "
+                            "unable to open the explorer window. A link will "
+                            "open allowing you to manually download the "
+                            "update.",
+                            true);
+                        QDesktopServices::openUrl(this->releaseURL_);
+                        return Failure;
+                    }
+                    return Success;
                 }
             }
 #elif defined Q_OS_MACOS
             showPopupMessage(
-                "Chatterino Update",
+                QMessageBox::Information, "Chatterino Update",
                 "Finished downloading the Chatterino update. You may need to "
                 "close Chatterino before copying the updated version into your "
                 "Applications folder.",
