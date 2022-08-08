@@ -47,11 +47,11 @@ struct GitHubRelease {
         }
     }
 
-    GitHubReleaseAsset assetByName(const QString &name) const
+    GitHubReleaseAsset assetByName(const QString &assetName) const
     {
         for (const auto &asset : this->assets)
         {
-            if (asset.name == name)
+            if (asset.name == assetName)
             {
                 return asset;
             }
