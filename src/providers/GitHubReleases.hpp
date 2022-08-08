@@ -60,19 +60,49 @@ struct GitHubRelease {
     }
 };
 
-using ReleaseCallback = std::function<void(const GitHubRelease &)>;
-using FailureCallback = std::function<void()>;
-
 class GitHubReleases
 {
+    using ReleasePredicate = std::function<bool(const GitHubRelease &)>;
+    using ReleaseCallback = std::function<void(const GitHubRelease &)>;
+    using FailureCallback = std::function<void()>;
+
 private:
     static const QString RELEASES_API_URL;
 
     GitHubReleases();
 
 public:
+    /**
+     * @brief Gets the most latest release that was not a prerelease
+     *
+     * @param releaseCallback Callback on got matching release
+     * @param failureCallback Callback on failure
+     */
+    static void getLatestNotPrerelease(ReleaseCallback releaseCallback,
+                                       FailureCallback failureCallback);
+    /**
+     * @brief Gets the most latest release that was a prerelease
+     *
+     * @param releaseCallback Callback on got matching prerelease
+     * @param failureCallback Callback on failure
+     */
+    static void getLatestPrerelease(ReleaseCallback releaseCallback,
+                                    FailureCallback failureCallback);
+    /**
+     * @brief Gets the latest release
+     *
+     * @param releaseCallback Callback on got release
+     * @param failureCallback Callback on failure
+     */
     static void getLatestRelease(ReleaseCallback releaseCallback,
                                  FailureCallback failureCallback);
+    /**
+     * @brief Gets a release by its Git tag
+     *
+     * @param tag Git tag to query
+     * @param releaseCallback Callback on got release
+     * @param failureCallback Callback on failure
+     */
     static void getReleaseByTag(const QString &tag,
                                 ReleaseCallback releaseCallback,
                                 FailureCallback failureCallback);
@@ -82,6 +112,9 @@ private:
     static void executeAndHandleCallbacks(const QString &path,
                                           ReleaseCallback releaseCallback,
                                           FailureCallback failureCallback);
+    static void executeAndHandleFirstMatching(ReleasePredicate predicate,
+                                              ReleaseCallback releaseCallback,
+                                              FailureCallback failureCallback);
 };
 
 }  // namespace chatterino
