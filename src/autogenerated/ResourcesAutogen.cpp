@@ -4,6 +4,7 @@ namespace chatterino {
 
 Resources2::Resources2()
 {
+    // clang-format off
     this->avatars._1xelerate = QPixmap(":/avatars/_1xelerate.png");
     this->avatars.alazymeme = QPixmap(":/avatars/alazymeme.png");
     this->avatars.brian6932 = QPixmap(":/avatars/brian6932.png");
@@ -71,6 +72,7 @@ Resources2::Resources2()
     this->twitch.turbo = QPixmap(":/twitch/turbo.png");
     this->twitch.verified = QPixmap(":/twitch/verified.png");
     this->twitch.vip = QPixmap(":/twitch/vip.png");
+    // clang-format on
 }
 
 }  // namespace chatterino

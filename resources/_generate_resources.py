@@ -31,9 +31,11 @@ namespace chatterino {
 
 Resources2::Resources2()
 {
+    // clang-format off
 '''
 
 source_footer = \
-'''}
+'''    // clang-format on
+}
 
 }  // namespace chatterino\n'''
