@@ -249,6 +249,7 @@ void Updates::installUpdates()
                 }
                 else
                 {
+                    this->setStatus_(Status::None);
                     showPopupMessage(
                         QMessageBox::Warning, "Chatterino Update",
                         "The updater was downloaded successfully but "
@@ -280,6 +281,7 @@ void Updates::installUpdates()
                 }
             }
 #elif defined Q_OS_MACOS
+            this->setStatus_(Status::None);
             showPopupMessage(
                 QMessageBox::Information, "Chatterino Update",
                 "Finished downloading the Chatterino update. You may need to "
@@ -385,20 +387,6 @@ bool Updates::shouldShowUpdateButton() const
         case UpdateAvailable:
         case SearchFailed:
         case Downloading:
-        case DownloadFailed:
-        case WriteFileFailed:
-            return true;
-
-        default:
-            return false;
-    }
-}
-
-bool Updates::isError() const
-{
-    switch (this->getStatus())
-    {
-        case SearchFailed:
         case DownloadFailed:
         case WriteFileFailed:
             return true;

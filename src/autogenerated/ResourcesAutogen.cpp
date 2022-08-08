@@ -41,6 +41,7 @@ Resources2::Resources2()
     this->buttons.unmod = QPixmap(":/buttons/unmod.png");
     this->buttons.unvip = QPixmap(":/buttons/unvip.png");
     this->buttons.update = QPixmap(":/buttons/update.png");
+    this->buttons.updateDownloading = QPixmap(":/buttons/updateDownloading.png");
     this->buttons.updateError = QPixmap(":/buttons/updateError.png");
     this->buttons.viewersDark = QPixmap(":/buttons/viewersDark.png");
     this->buttons.viewersLight = QPixmap(":/buttons/viewersLight.png");

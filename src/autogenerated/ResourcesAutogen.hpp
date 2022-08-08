@@ -48,6 +48,7 @@ public:
         QPixmap unmod;
         QPixmap unvip;
         QPixmap update;
+        QPixmap updateDownloading;
         QPixmap updateError;
         QPixmap viewersDark;
         QPixmap viewersLight;

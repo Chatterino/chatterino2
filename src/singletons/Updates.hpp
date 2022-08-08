@@ -33,7 +33,6 @@ public:
     Status getStatus() const;
 
     bool shouldShowUpdateButton() const;
-    bool isError() const;
     bool isDowngrade() const;
 
     pajlada::Signals::Signal<Status> statusUpdated;

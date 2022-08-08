@@ -47,13 +47,30 @@ void initUpdateButton(Button &button,
     });
 
     // update image when state changes
-    auto updateChange = [&button](auto) {
-        button.setVisible(Updates::instance().shouldShowUpdateButton());
+    auto updateChange = [&button](Updates::Status status) {
+        using Status = Updates::Status;
 
-        auto imageUrl = Updates::instance().isError()
-                            ? ":/buttons/updateError.png"
-                            : ":/buttons/update.png";
-        button.setPixmap(QPixmap(imageUrl));
+        bool shouldShow = Updates::instance().shouldShowUpdateButton();
+        if (shouldShow)
+        {
+            QString imageUrl;
+            switch (status)
+            {
+                case Status::SearchFailed:
+                case Status::DownloadFailed:
+                case Status::WriteFileFailed:
+                    imageUrl = ":/buttons/updateError.png";
+                    break;
+                case Status::Downloading:
+                    imageUrl = ":/buttons/updateDownloading.png";
+                    break;
+                default:
+                    imageUrl = ":/buttons/update.png";
+                    break;
+            }
+            button.setPixmap(QPixmap(imageUrl));
+        }
+        button.setVisible(shouldShow);
     };
 
     updateChange(Updates::instance().getStatus());
