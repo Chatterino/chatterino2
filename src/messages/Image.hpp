@@ -10,10 +10,10 @@
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <chrono>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <pajlada/signals/signal.hpp>
-#include <set>
 
 #include "common/Aliases.hpp"
 #include "common/Common.hpp"
@@ -50,13 +50,13 @@ namespace detail {
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
 
-class ImagePool
+class ImageExpirationPool
 {
 private:
     friend class Image;
 
-    ImagePool();
-    static ImagePool &instance();
+    ImageExpirationPool();
+    static ImageExpirationPool &instance();
 
     /**
      * @brief Stores a reference to the given Image in the ImagePool.
@@ -65,12 +65,12 @@ private:
      * it exists within ImagePool. This generally means it must call removeImagePtr
      * before the Image's destructor is ran. 
      */
-    void addImagePtr(Image *imgPtr);
+    void addImagePtr(ImagePtr imgPtr);
 
     /**
      * @brief Removes the reference for the given Image, if it exists.
      */
-    void removeImagePtr(Image *imgPtr);
+    void removeImagePtr(Image *rawPtr);
 
     /**
      * @brief Frees frame data for all images that ImagePool deems to have expired.
@@ -84,7 +84,7 @@ private:
     QTimer freeTimer_;
     // Set of all tracked Images. We use an ordered set for its lower memory usage
     // and O(log n) arbitrary removal time.
-    std::set<Image *> allImages_;
+    std::map<Image *, std::weak_ptr<Image>> allImages_;
 };
 
 /// This class is thread safe.
@@ -129,12 +129,11 @@ private:
 
     mutable std::chrono::time_point<std::chrono::steady_clock> lastUsed_;
 
-    bool canExpire_;
     bool shouldLoad_{false};
 
     // gui thread only
     std::unique_ptr<detail::Frames> frames_{};
 
-    friend class ImagePool;
+    friend class ImageExpirationPool;
 };
 }  // namespace chatterino

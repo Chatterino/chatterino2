@@ -244,7 +244,7 @@ namespace detail {
     }
 }  // namespace detail
 
-ImagePool::ImagePool()
+ImageExpirationPool::ImageExpirationPool()
 {
     QObject::connect(&this->freeTimer_, &QTimer::timeout, [this] {
         this->freeOld();
@@ -255,23 +255,24 @@ ImagePool::ImagePool()
             IMAGE_POOL_CLEANUP_INTERVAL));
 }
 
-ImagePool &ImagePool::instance()
+ImageExpirationPool &ImageExpirationPool::instance()
 {
-    static ImagePool instance;
+    static ImageExpirationPool instance;
     return instance;
 }
 
-void ImagePool::addImagePtr(Image *imgPtr)
+void ImageExpirationPool::addImagePtr(ImagePtr imgPtr)
 {
-    this->allImages_.insert(imgPtr);
+    this->allImages_.insert(
+        std::make_pair(imgPtr.get(), std::weak_ptr<Image>(imgPtr)));
 }
 
-void ImagePool::removeImagePtr(Image *imgPtr)
+void ImageExpirationPool::removeImagePtr(Image *rawPtr)
 {
-    this->allImages_.erase(imgPtr);
+    this->allImages_.erase(rawPtr);
 }
 
-void ImagePool::freeOld()
+void ImageExpirationPool::freeOld()
 {
 #ifndef NDEBUG
     size_t numExpired = 0;
@@ -281,12 +282,18 @@ void ImagePool::freeOld()
     auto now = std::chrono::steady_clock::now();
     for (auto it = this->allImages_.begin(); it != this->allImages_.end();)
     {
-        auto img = *it;
-
-        // Check if we should even consider expiring the frame data for this image
-        if (!img->canExpire_ || img->frames_->empty())
+        auto img = it->second.lock();
+        if (!img)
         {
-            // no frame data
+            // This can only really happen from a race condition because ~Image
+            // should remove itself from the ImageExpirationPool automatically.
+            it = this->allImages_.erase(it);
+            continue;
+        }
+
+        if (img->frames_->empty())
+        {
+            // No frame data, nothing to do
             ++it;
             continue;
         }
@@ -317,7 +324,7 @@ void ImagePool::freeOld()
 // IMAGE2
 Image::~Image()
 {
-    ImagePool::instance().removeImagePtr(this);
+    ImageExpirationPool::instance().removeImagePtr(this);
 
     if (this->empty_ && !this->frames_)
     {
@@ -347,6 +354,9 @@ ImagePtr Image::fromUrl(const Url &url, qreal scale)
     if (!shared)
     {
         cache[url] = shared = ImagePtr(new Image(url, scale));
+        // We only track images created from a URL for expiration because only
+        // these kinds can be loaded again after expiring
+        ImageExpirationPool::instance().addImagePtr(shared);
     }
 
     return shared;
@@ -369,28 +379,22 @@ ImagePtr Image::getEmpty()
 
 Image::Image()
     : empty_(true)
-    , canExpire_(false)  // Empty never expires
     , frames_(nullptr)
 {
-    ImagePool::instance().addImagePtr(this);
 }
 
 Image::Image(const Url &url, qreal scale)
     : url_(url)
     , scale_(scale)
-    , canExpire_(true)
     , shouldLoad_(true)
     , frames_(std::make_unique<detail::Frames>())
 {
-    ImagePool::instance().addImagePtr(this);
 }
 
 Image::Image(qreal scale)
     : scale_(scale)
-    , canExpire_(false)  // Don't expire when storing a given pixmap
     , frames_(std::make_unique<detail::Frames>())
 {
-    ImagePool::instance().addImagePtr(this);
 }
 
 void Image::setPixmap(const QPixmap &pixmap)
