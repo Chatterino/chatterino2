@@ -3,14 +3,17 @@
 #include <QPixmap>
 #include <QString>
 #include <QThread>
+#include <QTimer>
 #include <QVector>
 #include <atomic>
 #include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
+#include <chrono>
 #include <memory>
 #include <mutex>
 #include <pajlada/signals/signal.hpp>
+#include <set>
 
 #include "common/Aliases.hpp"
 #include "common/Common.hpp"
@@ -29,6 +32,7 @@ namespace detail {
         Frames(QVector<Frame<QPixmap>> &&frames);
         ~Frames();
 
+        bool empty() const;
         bool animated() const;
         void advance();
         boost::optional<QPixmap> current() const;
@@ -45,6 +49,43 @@ namespace detail {
 
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
+
+class ImagePool : private QObject
+{
+private:
+    friend class Image;
+
+    ImagePool();
+    static ImagePool &instance();
+
+    /**
+     * @brief Stores a reference to the given Image in the ImagePool.
+     * 
+     * The caller is responsible that the pointer will be valid for as long as
+     * it exists within ImagePool. This generally means it must call removeImagePtr
+     * before the Image's destructor is ran. 
+     */
+    void addImagePtr(Image *imgPtr);
+
+    /**
+     * @brief Removes the reference for the given Image, if it exists.
+     */
+    void removeImagePtr(Image *imgPtr);
+
+    /**
+     * @brief Frees frame data for all images that ImagePool deems to have expired.
+     * 
+     * Expiration is based on last accessed time of the Image, stored in Image::lastUsed_.
+     */
+    void freeOld();
+
+private:
+    // Timer to periodically run freeOld()
+    QTimer *freeTimer_;
+    // Set of all tracked Images. We use an ordered set for its lower memory usage
+    // and O(log n) arbitrary removal time.
+    std::set<Image *> allImages_;
+};
 
 /// This class is thread safe.
 class Image : public std::enable_shared_from_this<Image>, boost::noncopyable
@@ -80,13 +121,20 @@ private:
 
     void setPixmap(const QPixmap &pixmap);
     void actuallyLoad();
+    void expireFrames();
 
     const Url url_{};
     const qreal scale_{1};
     std::atomic_bool empty_{false};
 
-    // gui thread only
+    mutable std::chrono::time_point<std::chrono::steady_clock> lastUsed_;
+
+    bool canExpire_;
     bool shouldLoad_{false};
+
+    // gui thread only
     std::unique_ptr<detail::Frames> frames_{};
+
+    friend class ImagePool;
 };
 }  // namespace chatterino

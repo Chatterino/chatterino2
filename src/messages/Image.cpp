@@ -25,6 +25,11 @@
 
 #include <queue>
 
+// Duration between each check of every Image instance
+const auto IMAGE_POOL_CLEANUP_INTERVAL = std::chrono::minutes(1);
+// Duration since last usage of Image pixmap before expiration of frames
+const auto IMAGE_POOL_IMAGE_LIFETIME = std::chrono::minutes(10);
+
 namespace chatterino {
 namespace detail {
     // Frames
@@ -112,6 +117,11 @@ namespace detail {
                 break;
             }
         }
+    }
+
+    bool Frames::empty() const
+    {
+        return this->items_.empty();
     }
 
     bool Frames::animated() const
@@ -234,10 +244,71 @@ namespace detail {
     }
 }  // namespace detail
 
+ImagePool::ImagePool()
+    : freeTimer_(new QTimer(this))
+{
+    QObject::connect(this->freeTimer_, &QTimer::timeout, this, [this] {
+        this->freeOld();
+    });
+
+    this->freeTimer_->start(
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            IMAGE_POOL_CLEANUP_INTERVAL));
+}
+
+ImagePool &ImagePool::instance()
+{
+    static ImagePool instance;
+    return instance;
+}
+
+void ImagePool::addImagePtr(Image *imgPtr)
+{
+    this->allImages_.insert(imgPtr);
+}
+
+void ImagePool::removeImagePtr(Image *imgPtr)
+{
+    this->allImages_.erase(imgPtr);
+}
+
+void ImagePool::freeOld()
+{
+    size_t numExpired = 0;
+    auto now = std::chrono::steady_clock::now();
+    for (auto it = this->allImages_.begin(); it != this->allImages_.end();)
+    {
+        auto img = *it;
+
+        // Check if we should even consider expiring the frame data for this image
+        if (!img->canExpire_ || img->frames_->empty())
+        {
+            // no frame data
+            ++it;
+            continue;
+        }
+
+        // Check if image has expired and, if so, expire its frame data
+        auto diff = now - img->lastUsed_;
+        if (diff > IMAGE_POOL_IMAGE_LIFETIME)
+        {
+            img->expireFrames();
+            ++numExpired;
+        }
+
+        ++it;
+    }
+
+    qCDebug(chatterinoImage)
+        << "freed frame data for" << numExpired << "images";
+}
+
 // IMAGE2
 Image::~Image()
 {
-    if (this->empty_)
+    ImagePool::instance().removeImagePtr(this);
+
+    if (this->empty_ && !this->frames_)
     {
         // No data in this image, don't bother trying to release it
         // The reason we do this check is that we keep a few (or one) static empty image around that are deconstructed at the end of the programs lifecycle, and we want to prevent the isGuiThread call to be called after the QApplication has been exited
@@ -287,21 +358,28 @@ ImagePtr Image::getEmpty()
 
 Image::Image()
     : empty_(true)
+    , canExpire_(false)  // Empty never expires
+    , frames_(nullptr)
 {
+    ImagePool::instance().addImagePtr(this);
 }
 
 Image::Image(const Url &url, qreal scale)
     : url_(url)
     , scale_(scale)
+    , canExpire_(true)
     , shouldLoad_(true)
     , frames_(std::make_unique<detail::Frames>())
 {
+    ImagePool::instance().addImagePtr(this);
 }
 
 Image::Image(qreal scale)
     : scale_(scale)
+    , canExpire_(false)  // Don't expire when storing a given pixmap
     , frames_(std::make_unique<detail::Frames>())
 {
+    ImagePool::instance().addImagePtr(this);
 }
 
 void Image::setPixmap(const QPixmap &pixmap)
@@ -336,6 +414,11 @@ bool Image::loaded() const
 boost::optional<QPixmap> Image::pixmapOrLoad() const
 {
     assertInGuiThread();
+
+    // Mark the image as just used.
+    // Any time this Image is painted, this method is invoked.
+    // See src/messages/layouts/MessageLayoutElement.cpp ImageLayoutElement::paint, for example.
+    this->lastUsed_ = std::chrono::steady_clock::now();
 
     this->load();
 
@@ -462,6 +545,22 @@ void Image::actuallyLoad()
             return true;
         })
         .execute();
+}
+
+void Image::expireFrames()
+{
+    if (isGuiThread())
+    {
+        this->frames_ = std::make_unique<detail::Frames>();
+        this->shouldLoad_ = true;  // Mark as needing load again
+    }
+    else
+    {
+        postToThread([this] {
+            this->frames_ = std::make_unique<detail::Frames>();
+            this->shouldLoad_ = true;  // Mark as needing load again
+        });
+    }
 }
 
 bool Image::operator==(const Image &other) const
