@@ -245,13 +245,12 @@ namespace detail {
 }  // namespace detail
 
 ImagePool::ImagePool()
-    : freeTimer_(new QTimer(this))
 {
-    QObject::connect(this->freeTimer_, &QTimer::timeout, this, [this] {
+    QObject::connect(&this->freeTimer_, &QTimer::timeout, [this] {
         this->freeOld();
     });
 
-    this->freeTimer_->start(
+    this->freeTimer_.start(
         std::chrono::duration_cast<std::chrono::milliseconds>(
             IMAGE_POOL_CLEANUP_INTERVAL));
 }
@@ -274,7 +273,11 @@ void ImagePool::removeImagePtr(Image *imgPtr)
 
 void ImagePool::freeOld()
 {
+#ifndef NDEBUG
     size_t numExpired = 0;
+    size_t eligible = 0;
+#endif
+
     auto now = std::chrono::steady_clock::now();
     for (auto it = this->allImages_.begin(); it != this->allImages_.end();)
     {
@@ -288,19 +291,27 @@ void ImagePool::freeOld()
             continue;
         }
 
+#ifndef NDEBUG
+        ++eligible;
+#endif
+
         // Check if image has expired and, if so, expire its frame data
         auto diff = now - img->lastUsed_;
         if (diff > IMAGE_POOL_IMAGE_LIFETIME)
         {
             img->expireFrames();
+#ifndef NDEBUG
             ++numExpired;
+#endif
         }
 
         ++it;
     }
 
-    qCDebug(chatterinoImage)
-        << "freed frame data for" << numExpired << "images";
+#ifndef NDEBUG
+    qCDebug(chatterinoImage) << "freed frame data for" << numExpired << "/"
+                             << eligible << "eligible images";
+#endif
 }
 
 // IMAGE2

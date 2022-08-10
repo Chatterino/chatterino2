@@ -50,7 +50,7 @@ namespace detail {
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
 
-class ImagePool : private QObject
+class ImagePool
 {
 private:
     friend class Image;
@@ -81,7 +81,7 @@ private:
 
 private:
     // Timer to periodically run freeOld()
-    QTimer *freeTimer_;
+    QTimer freeTimer_;
     // Set of all tracked Images. We use an ordered set for its lower memory usage
     // and O(log n) arbitrary removal time.
     std::set<Image *> allImages_;
