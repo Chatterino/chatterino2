@@ -88,9 +88,12 @@ void Channel::addMessage(MessagePtr message,
         QString channelPlatform("other");
         if (this->type_ == Type::Irc)
         {
-            auto irc = static_cast<IrcChannel *>(this);
-            channelPlatform =
-                QString("irc-%1").arg(irc->server()->userFriendlyIdentifier());
+            auto *irc = dynamic_cast<IrcChannel *>(this);
+            if (irc != nullptr)
+            {
+                channelPlatform = QString("irc-%1").arg(
+                    irc->server()->userFriendlyIdentifier());
+            }
         }
         else if (this->isTwitchChannel())
         {
