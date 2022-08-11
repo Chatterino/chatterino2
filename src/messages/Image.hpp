@@ -51,43 +51,6 @@ namespace detail {
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
 
-class ImageExpirationPool
-{
-private:
-    friend class Image;
-
-    ImageExpirationPool();
-    static ImageExpirationPool &instance();
-
-    /**
-     * @brief Stores a reference to the given Image in the ImagePool.
-     * 
-     * The caller is responsible that the pointer will be valid for as long as
-     * it exists within ImagePool. This generally means it must call removeImagePtr
-     * before the Image's destructor is ran. 
-     */
-    void addImagePtr(ImagePtr imgPtr);
-
-    /**
-     * @brief Removes the reference for the given Image, if it exists.
-     */
-    void removeImagePtr(Image *rawPtr);
-
-    /**
-     * @brief Frees frame data for all images that ImagePool deems to have expired.
-     * 
-     * Expiration is based on last accessed time of the Image, stored in Image::lastUsed_.
-     */
-    void freeOld();
-
-private:
-    // Timer to periodically run freeOld()
-    QTimer freeTimer_;
-    // Set of all tracked Images. We use an ordered set for its lower memory usage
-    // and O(log n) arbitrary removal time.
-    std::map<Image *, std::weak_ptr<Image>> allImages_;
-};
-
 /// This class is thread safe.
 class Image : public std::enable_shared_from_this<Image>, boost::noncopyable
 {
@@ -137,4 +100,41 @@ private:
 
     friend class ImageExpirationPool;
 };
+
+class ImageExpirationPool
+{
+private:
+    friend class Image;
+
+    ImageExpirationPool();
+    static ImageExpirationPool &instance();
+
+    /**
+     * @brief Stores a reference to the given Image in the ImagePool.
+     * 
+     * The caller is responsible that the pointer will be valid for as long as
+     * it exists within ImagePool. This generally means it must call removeImagePtr
+     * before the Image's destructor is ran. 
+     */
+    void addImagePtr(ImagePtr imgPtr);
+
+    /**
+     * @brief Removes the reference for the given Image, if it exists.
+     */
+    void removeImagePtr(Image *rawPtr);
+
+    /**
+     * @brief Frees frame data for all images that ImagePool deems to have expired.
+     * 
+     * Expiration is based on last accessed time of the Image, stored in Image::lastUsed_.
+     * Must be ran in the GUI thread.
+     */
+    void freeOld();
+
+private:
+    // Timer to periodically run freeOld()
+    QTimer freeTimer_;
+    std::map<Image *, std::weak_ptr<Image>> allImages_;
+};
+
 }  // namespace chatterino

@@ -253,92 +253,6 @@ namespace detail {
     }
 }  // namespace detail
 
-ImageExpirationPool::ImageExpirationPool()
-{
-    QObject::connect(&this->freeTimer_, &QTimer::timeout, [this] {
-        if (isGuiThread())
-        {
-            this->freeOld();
-        }
-        else
-        {
-            postToThread([this] {
-                this->freeOld();
-            });
-        }
-    });
-
-    this->freeTimer_.start(
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            IMAGE_POOL_CLEANUP_INTERVAL));
-}
-
-ImageExpirationPool &ImageExpirationPool::instance()
-{
-    static ImageExpirationPool instance;
-    return instance;
-}
-
-void ImageExpirationPool::addImagePtr(ImagePtr imgPtr)
-{
-    this->allImages_.insert(
-        std::make_pair(imgPtr.get(), std::weak_ptr<Image>(imgPtr)));
-}
-
-void ImageExpirationPool::removeImagePtr(Image *rawPtr)
-{
-    this->allImages_.erase(rawPtr);
-}
-
-void ImageExpirationPool::freeOld()
-{
-#ifndef NDEBUG
-    size_t numExpired = 0;
-    size_t eligible = 0;
-#endif
-
-    auto now = std::chrono::steady_clock::now();
-    for (auto it = this->allImages_.begin(); it != this->allImages_.end();)
-    {
-        auto img = it->second.lock();
-        if (!img)
-        {
-            // This can only really happen from a race condition because ~Image
-            // should remove itself from the ImageExpirationPool automatically.
-            it = this->allImages_.erase(it);
-            continue;
-        }
-
-        if (img->frames_->empty())
-        {
-            // No frame data, nothing to do
-            ++it;
-            continue;
-        }
-
-#ifndef NDEBUG
-        ++eligible;
-#endif
-
-        // Check if image has expired and, if so, expire its frame data
-        auto diff = now - img->lastUsed_;
-        if (diff > IMAGE_POOL_IMAGE_LIFETIME)
-        {
-            img->expireFrames();
-#ifndef NDEBUG
-            ++numExpired;
-#endif
-        }
-
-        ++it;
-    }
-
-#ifndef NDEBUG
-    qCDebug(chatterinoImage) << "freed frame data for" << numExpired << "/"
-                             << eligible << "eligible images";
-#endif
-}
-
 // IMAGE2
 Image::~Image()
 {
@@ -602,6 +516,92 @@ bool Image::operator==(const Image &other) const
 bool Image::operator!=(const Image &other) const
 {
     return !this->operator==(other);
+}
+
+ImageExpirationPool::ImageExpirationPool()
+{
+    QObject::connect(&this->freeTimer_, &QTimer::timeout, [this] {
+        if (isGuiThread())
+        {
+            this->freeOld();
+        }
+        else
+        {
+            postToThread([this] {
+                this->freeOld();
+            });
+        }
+    });
+
+    this->freeTimer_.start(
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            IMAGE_POOL_CLEANUP_INTERVAL));
+}
+
+ImageExpirationPool &ImageExpirationPool::instance()
+{
+    static ImageExpirationPool instance;
+    return instance;
+}
+
+void ImageExpirationPool::addImagePtr(ImagePtr imgPtr)
+{
+    this->allImages_.insert(
+        std::make_pair(imgPtr.get(), std::weak_ptr<Image>(imgPtr)));
+}
+
+void ImageExpirationPool::removeImagePtr(Image *rawPtr)
+{
+    this->allImages_.erase(rawPtr);
+}
+
+void ImageExpirationPool::freeOld()
+{
+#ifndef NDEBUG
+    size_t numExpired = 0;
+    size_t eligible = 0;
+#endif
+
+    auto now = std::chrono::steady_clock::now();
+    for (auto it = this->allImages_.begin(); it != this->allImages_.end();)
+    {
+        auto img = it->second.lock();
+        if (!img)
+        {
+            // This can only really happen from a race condition because ~Image
+            // should remove itself from the ImageExpirationPool automatically.
+            it = this->allImages_.erase(it);
+            continue;
+        }
+
+        if (img->frames_->empty())
+        {
+            // No frame data, nothing to do
+            ++it;
+            continue;
+        }
+
+#ifndef NDEBUG
+        ++eligible;
+#endif
+
+        // Check if image has expired and, if so, expire its frame data
+        auto diff = now - img->lastUsed_;
+        if (diff > IMAGE_POOL_IMAGE_LIFETIME)
+        {
+            img->expireFrames();
+#ifndef NDEBUG
+            ++numExpired;
+#endif
+        }
+
+        ++it;
+    }
+
+#ifndef NDEBUG
+    qCDebug(chatterinoImage) << "freed frame data for" << numExpired << "/"
+                             << eligible << "eligible images";
+#endif
 }
 
 }  // namespace chatterino
