@@ -121,6 +121,7 @@ namespace detail {
 
     void Frames::clear()
     {
+        assertInGuiThread();
         this->items_.clear();
         this->index_ = 0;
         this->durationOffset_ = 0;
@@ -255,7 +256,16 @@ namespace detail {
 ImageExpirationPool::ImageExpirationPool()
 {
     QObject::connect(&this->freeTimer_, &QTimer::timeout, [this] {
-        this->freeOld();
+        if (isGuiThread())
+        {
+            this->freeOld();
+        }
+        else
+        {
+            postToThread([this] {
+                this->freeOld();
+            });
+        }
     });
 
     this->freeTimer_.start(
@@ -572,18 +582,9 @@ void Image::actuallyLoad()
 
 void Image::expireFrames()
 {
-    if (isGuiThread())
-    {
-        this->frames_->clear();
-        this->shouldLoad_ = true;  // Mark as needing load again
-    }
-    else
-    {
-        postToThread([this] {
-            this->frames_->clear();
-            this->shouldLoad_ = true;  // Mark as needing load again
-        });
-    }
+    assertInGuiThread();
+    this->frames_->clear();
+    this->shouldLoad_ = true;  // Mark as needing load again
 }
 
 bool Image::operator==(const Image &other) const
