@@ -119,6 +119,14 @@ namespace detail {
         }
     }
 
+    void Frames::clear()
+    {
+        this->items_.clear();
+        this->index_ = 0;
+        this->durationOffset_ = 0;
+        this->gifTimerConnection_.disconnect();
+    }
+
     bool Frames::empty() const
     {
         return this->items_.empty();
@@ -566,13 +574,13 @@ void Image::expireFrames()
 {
     if (isGuiThread())
     {
-        this->frames_ = std::make_unique<detail::Frames>();
+        this->frames_->clear();
         this->shouldLoad_ = true;  // Mark as needing load again
     }
     else
     {
         postToThread([this] {
-            this->frames_ = std::make_unique<detail::Frames>();
+            this->frames_->clear();
             this->shouldLoad_ = true;  // Mark as needing load again
         });
     }

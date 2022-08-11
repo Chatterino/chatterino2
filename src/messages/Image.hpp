@@ -32,6 +32,7 @@ namespace detail {
         Frames(QVector<Frame<QPixmap>> &&frames);
         ~Frames();
 
+        void clear();
         bool empty() const;
         bool animated() const;
         void advance();
