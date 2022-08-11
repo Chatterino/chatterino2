@@ -27,7 +27,7 @@
 - Minor: Add Quick Switcher item to open a channel in a new popup window. (#3828)
 - Minor: Warn when parsing an environment variable fails. (#3904)
 - Minor: Load missing messages from Recent Messages API upon reconnecting (#3878)
-- Minor: Reduced memory usage while running Chatterino for a long time. (#3915)
+- Minor: Reduced image memory usage when running Chatterino for a long time. (#3915)
 - Bugfix: Fix crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fix crash that can occur when changing channels. (#3799)
