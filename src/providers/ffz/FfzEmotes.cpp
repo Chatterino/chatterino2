@@ -56,7 +56,7 @@ namespace {
         const QJsonObject &jsonRoot, const EmoteMap &currentEmotes)
     {
         // Load default sets from the `default_sets` object
-        std::unordered_set<int> defaultSets;
+        std::unordered_set<int> defaultSets{};
         auto jsonDefaultSets = jsonRoot.value("default_sets").toArray();
         for (auto jsonDefaultSet : jsonDefaultSets)
         {
