@@ -286,9 +286,6 @@ ImagePtr Image::fromUrl(const Url &url, qreal scale)
     if (!shared)
     {
         cache[url] = shared = ImagePtr(new Image(url, scale));
-        // We only track images created from a URL for expiration because only
-        // these kinds can be loaded again after expiring
-        ImageExpirationPool::instance().addImagePtr(shared);
     }
 
     return shared;
@@ -378,8 +375,10 @@ void Image::load() const
 
     if (this->shouldLoad_)
     {
-        const_cast<Image *>(this)->shouldLoad_ = false;
-        const_cast<Image *>(this)->actuallyLoad();
+        Image *this2 = const_cast<Image *>(this);
+        this2->shouldLoad_ = false;
+        this2->actuallyLoad();
+        ImageExpirationPool::instance().addImagePtr(this2->shared_from_this());
     }
 }
 
@@ -546,17 +545,21 @@ ImageExpirationPool &ImageExpirationPool::instance()
 
 void ImageExpirationPool::addImagePtr(ImagePtr imgPtr)
 {
+    std::lock_guard<std::mutex> lock(this->mutex_);
     this->allImages_.insert(
         std::make_pair(imgPtr.get(), std::weak_ptr<Image>(imgPtr)));
 }
 
 void ImageExpirationPool::removeImagePtr(Image *rawPtr)
 {
+    std::lock_guard<std::mutex> lock(this->mutex_);
     this->allImages_.erase(rawPtr);
 }
 
 void ImageExpirationPool::freeOld()
 {
+    std::lock_guard<std::mutex> lock(this->mutex_);
+
 #ifndef NDEBUG
     size_t numExpired = 0;
     size_t eligible = 0;
@@ -589,10 +592,13 @@ void ImageExpirationPool::freeOld()
         auto diff = now - img->lastUsed_;
         if (diff > IMAGE_POOL_IMAGE_LIFETIME)
         {
-            img->expireFrames();
 #ifndef NDEBUG
             ++numExpired;
 #endif
+            img->expireFrames();
+            // erase without mutex locking issue
+            it = this->allImages_.erase(it);
+            continue;
         }
 
         ++it;
