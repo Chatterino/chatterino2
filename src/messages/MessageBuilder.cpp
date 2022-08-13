@@ -211,20 +211,20 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
                                const QTime &time)
     : MessageBuilder()
 {
-    QString usernamePart = systemMessageText.split(" ").at(0);
-    QString remainder = systemMessageText.mid(usernamePart.length() + 1);
+    QString usernameText = systemMessageText.split(" ").at(0);
+    QString remainder = systemMessageText.mid(usernameText.length() + 1);
 
-    QString text;
+    QString messageText;
 
     this->emplace<TimestampElement>(time);
-    this->emplaceSystemTextAndUpdate(
-            usernamePart, text)  // NOLINT(readability-suspicious-call-argument)
+    this->emplaceSystemTextAndUpdate(usernameText, messageText)
         ->setLink({Link::UserInfo, username});
     this->emplaceSystemTextAndUpdate(
-        QString("%1 (%2 times)").arg(remainder.trimmed()).arg(times), text);
+        QString("%1 (%2 times)").arg(remainder.trimmed()).arg(times),
+        messageText);
 
-    this->message().messageText = text;
-    this->message().searchText = text;
+    this->message().messageText = messageText;
+    this->message().searchText = messageText;
 }
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
