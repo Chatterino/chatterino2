@@ -206,19 +206,39 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
     this->message().searchText = text;
 }
 
-MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
+MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
+                               const QString &sourceUser,
                                const QString &systemMessageText, int times,
                                const QTime &time)
     : MessageBuilder()
 {
     QString usernameText = systemMessageText.split(" ").at(0);
     QString remainder = systemMessageText.mid(usernameText.length() + 1);
-
+    bool timeoutUserIsFirst =
+        usernameText == "You" || timeoutUser == usernameText;
     QString messageText;
 
     this->emplace<TimestampElement>(time);
     this->emplaceSystemTextAndUpdate(usernameText, messageText)
-        ->setLink({Link::UserInfo, username});
+        ->setLink(
+            {Link::UserInfo, timeoutUserIsFirst ? timeoutUser : sourceUser});
+
+    if (!sourceUser.isEmpty())
+    {
+        // the second username in the message
+        const auto &targetUsername =
+            timeoutUserIsFirst ? sourceUser : timeoutUser;
+        int userPos = remainder.indexOf(targetUsername);
+
+        QString mid = remainder.mid(0, userPos - 1);
+        QString username = remainder.mid(userPos, targetUsername.length());
+        remainder = remainder.mid(userPos + targetUsername.length() + 1);
+
+        this->emplaceSystemTextAndUpdate(mid, messageText);
+        this->emplaceSystemTextAndUpdate(username, messageText)
+            ->setLink({Link::UserInfo, username});
+    }
+
     this->emplaceSystemTextAndUpdate(
         QString("%1 (%2 times)").arg(remainder.trimmed()).arg(times),
         messageText);
@@ -285,6 +305,7 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::Timeout);
     this->message().timeoutUser = action.target.login;
+    this->message().loginName = action.source.login;
     this->message().count = count;
 
     QString text;
