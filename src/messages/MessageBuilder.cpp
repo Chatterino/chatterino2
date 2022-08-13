@@ -206,18 +206,19 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
     this->message().searchText = text;
 }
 
-MessageBuilder::MessageBuilder(TimeoutMessageTag,
+MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
                                const QString &systemMessageText, int times,
                                const QTime &time)
     : MessageBuilder()
 {
-    QString username = systemMessageText.split(" ").at(0);
-    QString remainder = systemMessageText.mid(username.length() + 1);
+    QString usernamePart = systemMessageText.split(" ").at(0);
+    QString remainder = systemMessageText.mid(usernamePart.length() + 1);
 
     QString text;
 
     this->emplace<TimestampElement>(time);
-    this->emplaceSystemTextAndUpdate(username, text)
+    this->emplaceSystemTextAndUpdate(
+            usernamePart, text)  // NOLINT(readability-suspicious-call-argument)
         ->setLink({Link::UserInfo, username});
     this->emplaceSystemTextAndUpdate(
         QString("%1 (%2 times)").arg(remainder.trimmed()).arg(times), text);
@@ -290,7 +291,9 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
 
     if (action.target.id == current->getUserId())
     {
-        this->emplaceSystemTextAndUpdate("You were", text);
+        this->emplaceSystemTextAndUpdate("You", text)
+            ->setLink({Link::UserInfo, current->getUserName()});
+        this->emplaceSystemTextAndUpdate("were", text);
         if (action.isBan())
         {
             this->emplaceSystemTextAndUpdate("banned", text);

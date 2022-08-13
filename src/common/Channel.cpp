@@ -168,8 +168,8 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
 
             int count = s->count + 1;
 
-            MessageBuilder replacement(timeoutMessage, message->searchText,
-                                       count);
+            MessageBuilder replacement(timeoutMessage, message->timeoutUser,
+                                       message->searchText, count);
 
             replacement->timeoutUser = message->timeoutUser;
             replacement->count = count;
