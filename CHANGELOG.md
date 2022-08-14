@@ -48,6 +48,7 @@
 - Bugfix: Always refresh tab when a contained split's channel is set. (#3849)
 - Bugfix: Drop trailing whitespace from Twitch system messages. (#3888)
 - Bugfix: Fix crash related to logging IRC channels (#3918)
+- Bugfix: Mentions of "You" in timeouts will link to your own user now instead of the user "You". (#3922)
 - Dev: Remove official support for QMake. (#3839, #3883)
 - Dev: Rewrite LimitedQueue (#3798)
 - Dev: Overhaul highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801, #3835)
