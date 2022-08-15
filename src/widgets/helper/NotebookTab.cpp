@@ -32,6 +32,29 @@ namespace {
         return 1.0;
 #endif
     }
+
+    // Translates the given rectangle by an amount in the direction to appear like the tab is selected.
+    // For example, if location is Top, the rectangle will be translated in the negative Y direction,
+    // or "up" on the screen, by amount.
+    void translateRectForLocation(QRectF &rect, NotebookTabLocation location,
+                                  int amount)
+    {
+        switch (location)
+        {
+            case NotebookTabLocation::Top:
+                rect.translate(0, -amount);
+                break;
+            case NotebookTabLocation::Left:
+                rect.translate(-amount, 0);
+                break;
+            case NotebookTabLocation::Right:
+                rect.translate(amount, 0);
+                break;
+            case NotebookTabLocation::Bottom:
+                rect.translate(0, amount);
+                break;
+        }
+    }
 }  // namespace
 
 NotebookTab::NotebookTab(Notebook *notebook)
@@ -288,6 +311,15 @@ void NotebookTab::setInLastRow(bool value)
     }
 }
 
+void NotebookTab::setTabLocation(NotebookTabLocation location)
+{
+    if (this->tabLocation_ != location)
+    {
+        this->tabLocation_ = location;
+        this->update();
+    }
+}
+
 void NotebookTab::setLive(bool isLive)
 {
     if (this->isLive_ != isLive)
@@ -395,19 +427,56 @@ void NotebookTab::paintEvent(QPaintEvent *)
         (windowFocused ? colors.backgrounds.regular
                        : colors.backgrounds.unfocused);
 
+    auto selectionOffset = ceil((this->selected_ ? 0.f : 1.f) * scale);
+
     // fill the tab background
     auto bgRect = this->rect();
-    bgRect.setTop(ceil((this->selected_ ? 0.f : 1.f) * scale));
+    switch (this->tabLocation_)
+    {
+        case NotebookTabLocation::Top:
+            bgRect.setTop(selectionOffset);
+            break;
+        case NotebookTabLocation::Left:
+            bgRect.setLeft(selectionOffset);
+            break;
+        case NotebookTabLocation::Right:
+            bgRect.setRight(bgRect.width() - selectionOffset);
+            break;
+        case NotebookTabLocation::Bottom:
+            bgRect.setBottom(bgRect.height() - selectionOffset);
+            break;
+    }
 
     painter.fillRect(bgRect, tabBackground);
 
-    // top line
-    painter.fillRect(
-        QRectF(0, ceil((this->selected_ ? 0.f : 1.f) * scale), this->width(),
-               ceil((this->selected_ ? 2.f : 1.f) * scale)),
-        this->mouseOver_
-            ? colors.line.hover
-            : (windowFocused ? colors.line.regular : colors.line.unfocused));
+    // draw color indicator line
+    auto lineThickness = ceil((this->selected_ ? 2.f : 1.f) * scale);
+    auto lineColor = this->mouseOver_ ? colors.line.hover
+                                      : (windowFocused ? colors.line.regular
+                                                       : colors.line.unfocused);
+
+    QRect lineRect;
+    switch (this->tabLocation_)
+    {
+        case NotebookTabLocation::Top:
+            lineRect =
+                QRect(bgRect.left(), bgRect.y(), bgRect.width(), lineThickness);
+            break;
+        case NotebookTabLocation::Left:
+            lineRect =
+                QRect(bgRect.x(), bgRect.top(), lineThickness, bgRect.height());
+            break;
+        case NotebookTabLocation::Right:
+            lineRect = QRect(bgRect.right() - lineThickness, bgRect.top(),
+                             lineThickness, bgRect.height());
+            break;
+        case NotebookTabLocation::Bottom:
+            lineRect = QRect(bgRect.left(), bgRect.bottom() - lineThickness,
+                             bgRect.width(), lineThickness);
+            break;
+    }
+
+    painter.fillRect(lineRect, lineColor);
 
     // draw live indicator
     if (this->isLive_ && getSettings()->showTabLive)
@@ -420,9 +489,12 @@ void NotebookTab::paintEvent(QPaintEvent *)
         painter.setBrush(b);
 
         auto x = this->width() - (7 * scale);
-        auto y = 4 * scale + (this->isSelected() ? 0 : 1);
+        auto y = 4 * scale;
         auto diameter = 4 * scale;
-        painter.drawEllipse(QRectF(x, y, diameter, diameter));
+        QRectF liveIndicatorRect(x, y, diameter, diameter);
+        translateRectForLocation(liveIndicatorRect, this->tabLocation_,
+                                 this->selected_ ? 0 : -1);
+        painter.drawEllipse(liveIndicatorRect);
     }
 
     // set the pen color
@@ -434,8 +506,9 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     // draw text
     int offset = int(scale * 8);
-    QRect textRect(offset, this->selected_ ? 1 : 2,
-                   this->width() - offset - offset, height);
+    QRectF textRect(offset, 0, this->width() - offset - offset, height);
+    translateRectForLocation(textRect, this->tabLocation_,
+                             this->selected_ ? -1 : -2);
 
     if (this->shouldDrawXButton())
     {
@@ -456,11 +529,13 @@ void NotebookTab::paintEvent(QPaintEvent *)
     {
         painter.setRenderHint(QPainter::Antialiasing, false);
 
-        QRect xRect = this->getXRect();
+        QRectF xRect = this->getXRect();
         if (!xRect.isNull())
         {
             if (this->selected_)
-                xRect.moveTop(xRect.top() - 1);
+            {
+                translateRectForLocation(xRect, this->tabLocation_, 1);
+            }
 
             painter.setBrush(QColor("#fff"));
 
@@ -489,11 +564,26 @@ void NotebookTab::paintEvent(QPaintEvent *)
         this->fancyPaint(painter);
     }
 
-    // draw line at bottom
+    // draw line at border
     if (!this->selected_ && this->isInLastRow_)
     {
-        painter.fillRect(0, this->height() - 1, this->width(), 1,
-                         app->themes->window.background);
+        QRect borderRect;
+        switch (this->tabLocation_)
+        {
+            case NotebookTabLocation::Top:
+                borderRect = QRect(0, this->height() - 1, this->width(), 1);
+                break;
+            case NotebookTabLocation::Left:
+                borderRect = QRect(this->width() - 1, 0, 1, this->height());
+                break;
+            case NotebookTabLocation::Right:
+                borderRect = QRect(0, 0, 1, this->height());
+                break;
+            case NotebookTabLocation::Bottom:
+                borderRect = QRect(0, 0, this->width(), 1);
+                break;
+        }
+        painter.fillRect(borderRect, app->themes->window.background);
     }
 }
 
