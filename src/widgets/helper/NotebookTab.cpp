@@ -36,7 +36,7 @@ namespace {
     // Translates the given rectangle by an amount in the direction to appear like the tab is selected.
     // For example, if location is Top, the rectangle will be translated in the negative Y direction,
     // or "up" on the screen, by amount.
-    void translateRectForLocation(QRectF &rect, NotebookTabLocation location,
+    void translateRectForLocation(QRect &rect, NotebookTabLocation location,
                                   int amount)
     {
         switch (location)
@@ -491,7 +491,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
         auto x = this->width() - (7 * scale);
         auto y = 4 * scale;
         auto diameter = 4 * scale;
-        QRectF liveIndicatorRect(x, y, diameter, diameter);
+        QRect liveIndicatorRect(x, y, diameter, diameter);
         translateRectForLocation(liveIndicatorRect, this->tabLocation_,
                                  this->selected_ ? 0 : -1);
         painter.drawEllipse(liveIndicatorRect);
@@ -506,7 +506,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     // draw text
     int offset = int(scale * 8);
-    QRectF textRect(offset, 0, this->width() - offset - offset, height);
+    QRect textRect(offset, 0, this->width() - offset - offset, height);
     translateRectForLocation(textRect, this->tabLocation_,
                              this->selected_ ? -1 : -2);
 
@@ -529,14 +529,9 @@ void NotebookTab::paintEvent(QPaintEvent *)
     {
         painter.setRenderHint(QPainter::Antialiasing, false);
 
-        QRectF xRect = this->getXRect();
+        QRect xRect = this->getXRect();
         if (!xRect.isNull())
         {
-            if (this->selected_)
-            {
-                translateRectForLocation(xRect, this->tabLocation_, 1);
-            }
-
             painter.setBrush(QColor("#fff"));
 
             if (this->mouseOverX_)
@@ -767,14 +762,26 @@ void NotebookTab::wheelEvent(QWheelEvent *event)
 
 QRect NotebookTab::getXRect()
 {
-    //    if (!this->notebook->getAllowUserTabManagement()) {
-    //        return QRect();
-    //    }
-
+    QRect rect = this->rect();
     float s = this->scale();
-    return QRect(this->width() - static_cast<int>(20 * s),
-                 static_cast<int>(9 * s), static_cast<int>(16 * s),
-                 static_cast<int>(16 * s));
+    int size = static_cast<int>(16 * s);
+
+    int centerAdjustment =
+        this->tabLocation_ ==
+                (NotebookTabLocation::Top ||
+                 this->tabLocation_ == NotebookTabLocation::Bottom)
+            ? (size / 3)   // slightly off true center
+            : (size / 2);  // true center
+
+    QRect xRect(rect.right() - static_cast<int>(20 * s),
+                rect.center().y() - centerAdjustment, size, size);
+
+    if (this->selected_)
+    {
+        translateRectForLocation(xRect, this->tabLocation_, 1);
+    }
+
+    return xRect;
 }
 
 }  // namespace chatterino
