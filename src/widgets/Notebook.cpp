@@ -551,11 +551,10 @@ void Notebook::performLayout(bool animated)
         }
 
         if (this->visibleButtonCount() > 0)
-            y = tabHeight;
+            y = tabHeight + lineThickness;  // account for divider line
 
         int totalButtonWidths = x;
-        // account for divider line and margin
-        const int top = y + lineThickness + tabSpacer;
+        const int top = y + tabSpacer;  // add margin
 
         y = top;
         x = left;
@@ -654,11 +653,10 @@ void Notebook::performLayout(bool animated)
         }
 
         if (this->visibleButtonCount() > 0)
-            y = tabHeight;
+            y = tabHeight + lineThickness;  // account for divider line
 
         int consumedButtonWidths = right - x;
-        // account for divider line and margin
-        const int top = y + lineThickness + tabSpacer;
+        const int top = y + tabSpacer;  // add margin
 
         y = top;
         x = right;
