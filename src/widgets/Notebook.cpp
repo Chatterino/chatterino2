@@ -554,7 +554,10 @@ void Notebook::performLayout(bool animated)
             y = tabHeight;
 
         int totalButtonWidths = x;
-        int top = y;
+        // account for divider line and margin
+        const int top = y + lineThickness + tabSpacer;
+
+        y = top;
         x = left;
 
         // zneix: if we were to remove buttons when tabs are hidden
@@ -654,7 +657,10 @@ void Notebook::performLayout(bool animated)
             y = tabHeight;
 
         int consumedButtonWidths = right - x;
-        int top = y;
+        // account for divider line and margin
+        const int top = y + lineThickness + tabSpacer;
+
+        y = top;
         x = right;
 
         // zneix: if we were to remove buttons when tabs are hidden
