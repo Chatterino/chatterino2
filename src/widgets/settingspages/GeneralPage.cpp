@@ -377,6 +377,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
     layout.addCheckbox("Suppress Live Notifications",
                        s.streamerModeSuppressLiveNotifications);
+    layout.addCheckbox("Hide moderation actions",
+                       s.streamerModeSuppressModActions);
 
     layout.addTitle("Link Previews");
     layout.addDescription(

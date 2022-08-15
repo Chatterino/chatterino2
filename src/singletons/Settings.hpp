@@ -221,6 +221,8 @@ public:
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
     BoolSetting streamerModeSuppressLiveNotifications = {
         "/streamerMode/supressLiveNotifications", false};
+    BoolSetting streamerModeSuppressModActions = {
+        "/streamerMode/streamerModeSuppressModActions", true};
 
     /// Ignored Phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",

@@ -10,6 +10,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
+#include "util/StreamerMode.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -139,11 +140,15 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
             continue;
         }
 
-        if (getSettings()->hideModerationActions &&
-            (this->message_->flags.has(MessageFlag::Timeout) ||
-             this->message_->flags.has(MessageFlag::Untimeout)))
+        if (this->message_->flags.has(MessageFlag::Timeout) ||
+            this->message_->flags.has(MessageFlag::Untimeout))
         {
-            continue;
+            if (getSettings()->hideModerationActions ||
+                (getSettings()->streamerModeSuppressModActions &&
+                 isInStreamerMode()))
+            {
+                continue;
+            }
         }
 
         if (getSettings()->hideSimilar &&
