@@ -27,6 +27,7 @@
 - Minor: Add Quick Switcher item to open a channel in a new popup window. (#3828)
 - Minor: Warn when parsing an environment variable fails. (#3904)
 - Minor: Load missing messages from Recent Messages API upon reconnecting (#3878)
+- Minor: Improved look of tabs when using a layout other than top. (#3925)
 - Bugfix: Fix crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fix crash that can occur when changing channels. (#3799)
