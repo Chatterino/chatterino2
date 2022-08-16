@@ -222,7 +222,7 @@ public:
     BoolSetting streamerModeSuppressLiveNotifications = {
         "/streamerMode/supressLiveNotifications", false};
     BoolSetting streamerModeSuppressModActions = {
-        "/streamerMode/streamerModeSuppressModActions", true};
+        "/streamerMode/suppressModActions", true};
 
     /// Ignored Phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
