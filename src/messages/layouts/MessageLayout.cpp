@@ -143,6 +143,8 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         if (this->message_->flags.has(MessageFlag::Timeout) ||
             this->message_->flags.has(MessageFlag::Untimeout))
         {
+            // This condition has been set up to execute isInStreamerMode() as the last thing
+            // as it could end up being expensive.
             if (getSettings()->hideModerationActions ||
                 (getSettings()->streamerModeSuppressModActions &&
                  isInStreamerMode()))
