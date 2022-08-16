@@ -44,7 +44,8 @@ public:
     MessageBuilder();
     MessageBuilder(SystemMessageTag, const QString &text,
                    const QTime &time = QTime::currentTime());
-    MessageBuilder(TimeoutMessageTag, const QString &systemMessageText,
+    MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
+                   const QString &sourceUser, const QString &systemMessageText,
                    int times, const QTime &time = QTime::currentTime());
     MessageBuilder(TimeoutMessageTag, const QString &username,
                    const QString &durationInSeconds, bool multipleTimes,
