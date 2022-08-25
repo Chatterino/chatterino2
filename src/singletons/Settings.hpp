@@ -201,6 +201,11 @@ public:
     BoolSetting removeSpacesBetweenEmotes = {
         "/emotes/removeSpacesBetweenEmotes", false};
 
+    BoolSetting bttvGlobalEmotes = {"/emotes/bttvGlobal", true};
+    BoolSetting bttvChannelEmotes = {"/emotes/bttvChannel", true};
+    BoolSetting ffzGlobalEmotes = {"/emotes/ffzGlobal", true};
+    BoolSetting ffzChannelEmotes = {"/emotes/ffzChannel", true};
+
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
     BoolSetting linkInfoTooltip = {"/links/linkInfoTooltip", false};

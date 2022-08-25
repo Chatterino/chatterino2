@@ -346,6 +346,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            "Google",
                        },
                        s.emojiSet);
+    layout.addCheckbox("Show BTTV global emotes", s.bttvGlobalEmotes);
+    layout.addCheckbox("Show BTTV channel emotes", s.bttvChannelEmotes);
+    layout.addCheckbox("Show FFZ global emotes", s.ffzGlobalEmotes);
+    layout.addCheckbox("Show FFZ channel emotes", s.ffzChannelEmotes);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(

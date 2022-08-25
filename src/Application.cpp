@@ -179,6 +179,19 @@ int Application::run(QApplication &qtApp)
         this->windows->forceLayoutChannelViews();
     });
 
+    getSettings()->bttvGlobalEmotes.connect([this] {
+        this->twitch->reloadBttvGlobalEmotes();
+    });
+    getSettings()->bttvChannelEmotes.connect([this] {
+        this->twitch->reloadAllBttvChannelEmotes();
+    });
+    getSettings()->ffzGlobalEmotes.connect([this] {
+        this->twitch->reloadFfzGlobalEmotes();
+    });
+    getSettings()->ffzChannelEmotes.connect([this] {
+        this->twitch->reloadAllFfzChannelEmotes();
+    });
+
     return qtApp.exec();
 }
 

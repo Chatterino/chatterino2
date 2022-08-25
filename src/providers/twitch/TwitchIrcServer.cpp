@@ -52,8 +52,8 @@ void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
         });
     });
 
-    this->bttv.loadEmotes();
-    this->ffz.loadEmotes();
+    this->reloadBttvGlobalEmotes();
+    this->reloadFfzGlobalEmotes();
 
     /* Refresh all twitch channel's live status in bulk every 30 seconds after starting chatterino */
     QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [=] {
@@ -468,4 +468,33 @@ const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
     return this->ffz;
 }
 
+void TwitchIrcServer::reloadBttvGlobalEmotes()
+{
+    this->bttv.loadEmotes();
+}
+
+void TwitchIrcServer::reloadAllBttvChannelEmotes()
+{
+    this->forEachChannel([](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->refreshBTTVChannelEmotes(false);
+        }
+    });
+}
+
+void TwitchIrcServer::reloadFfzGlobalEmotes()
+{
+    this->ffz.loadEmotes();
+}
+
+void TwitchIrcServer::reloadAllFfzChannelEmotes()
+{
+    this->forEachChannel([](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->refreshFFZChannelEmotes(false);
+        }
+    });
+}
 }  // namespace chatterino
