@@ -197,7 +197,7 @@ void TwitchChannel::setLocalizedName(const QString &name)
 
 void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
 {
-    if (!Settings::instance().bttvChannelEmotes)
+    if (!Settings::instance().enableBTTVChannelEmotes)
     {
         this->bttvEmotes_.set(EMPTY_EMOTE_MAP);
         return;
@@ -215,7 +215,7 @@ void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
 
 void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
 {
-    if (!Settings::instance().ffzChannelEmotes)
+    if (!Settings::instance().enableFFZChannelEmotes)
     {
         this->ffzEmotes_.set(EMPTY_EMOTE_MAP);
         return;

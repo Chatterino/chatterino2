@@ -142,7 +142,7 @@ boost::optional<EmotePtr> BttvEmotes::emote(const EmoteName &name) const
 
 void BttvEmotes::loadEmotes()
 {
-    if (!Settings::instance().bttvGlobalEmotes)
+    if (!Settings::instance().enableBTTVGlobalEmotes)
     {
         this->global_.set(EMPTY_EMOTE_MAP);
         return;

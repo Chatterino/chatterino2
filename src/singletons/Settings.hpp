@@ -201,10 +201,10 @@ public:
     BoolSetting removeSpacesBetweenEmotes = {
         "/emotes/removeSpacesBetweenEmotes", false};
 
-    BoolSetting bttvGlobalEmotes = {"/emotes/bttvGlobal", true};
-    BoolSetting bttvChannelEmotes = {"/emotes/bttvChannel", true};
-    BoolSetting ffzGlobalEmotes = {"/emotes/ffzGlobal", true};
-    BoolSetting ffzChannelEmotes = {"/emotes/ffzChannel", true};
+    BoolSetting enableBTTVGlobalEmotes = {"/emotes/bttv/global", true};
+    BoolSetting enableBTTVChannelEmotes = {"/emotes/bttv/channel", true};
+    BoolSetting enableFFZGlobalEmotes = {"/emotes/ffz/global", true};
+    BoolSetting enableFFZChannelEmotes = {"/emotes/ffz/channel", true};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};

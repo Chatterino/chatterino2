@@ -182,7 +182,7 @@ boost::optional<EmotePtr> FfzEmotes::emote(const EmoteName &name) const
 
 void FfzEmotes::loadEmotes()
 {
-    if (!Settings::instance().ffzGlobalEmotes)
+    if (!Settings::instance().enableFFZGlobalEmotes)
     {
         this->global_.set(EMPTY_EMOTE_MAP);
         return;

@@ -349,24 +349,24 @@ void EmotePopup::loadChannel(ChannelPtr channel)
         *globalChannel, *subChannel, this->channel_->getName());
 
     // global
-    if (Settings::instance().bttvGlobalEmotes)
+    if (Settings::instance().enableBTTVGlobalEmotes)
     {
         addEmotes(*globalChannel, *getApp()->twitch->getBttvEmotes().emotes(),
                   "BetterTTV", MessageElementFlag::BttvEmote);
     }
-    if (Settings::instance().ffzGlobalEmotes)
+    if (Settings::instance().enableFFZGlobalEmotes)
     {
         addEmotes(*globalChannel, *getApp()->twitch->getFfzEmotes().emotes(),
                   "FrankerFaceZ", MessageElementFlag::FfzEmote);
     }
 
     // channel
-    if (Settings::instance().bttvChannelEmotes)
+    if (Settings::instance().enableBTTVChannelEmotes)
     {
         addEmotes(*channelChannel, *this->twitchChannel_->bttvEmotes(),
                   "BetterTTV", MessageElementFlag::BttvEmote);
     }
-    if (Settings::instance().ffzChannelEmotes)
+    if (Settings::instance().enableFFZChannelEmotes)
     {
         addEmotes(*channelChannel, *this->twitchChannel_->ffzEmotes(),
                   "FrankerFaceZ", MessageElementFlag::FfzEmote);
