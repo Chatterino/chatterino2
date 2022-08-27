@@ -109,18 +109,7 @@ private:
     ImageExpirationPool();
     static ImageExpirationPool &instance();
 
-    /**
-     * @brief Stores a reference to the given Image in the ImagePool.
-     * 
-     * The caller is responsible that the pointer will be valid for as long as
-     * it exists within ImagePool. This generally means it must call removeImagePtr
-     * before the Image's destructor is ran. 
-     */
     void addImagePtr(ImagePtr imgPtr);
-
-    /**
-     * @brief Removes the reference for the given Image, if it exists.
-     */
     void removeImagePtr(Image *rawPtr);
 
     /**

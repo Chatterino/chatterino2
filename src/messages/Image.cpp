@@ -7,6 +7,7 @@
 #include <QNetworkRequest>
 #include <QTimer>
 #include <functional>
+#include <queue>
 #include <thread>
 
 #include "Application.hpp"
@@ -22,8 +23,6 @@
 #include "singletons/helper/GifTimer.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
-
-#include <queue>
 
 // Duration between each check of every Image instance
 const auto IMAGE_POOL_CLEANUP_INTERVAL = std::chrono::minutes(1);
@@ -239,7 +238,7 @@ namespace detail {
 
             // put into stack
             std::lock_guard<std::mutex> lock(mutex);
-            queued.push(std::make_pair(assign, std::move(frames)));
+            queued.emplace(assign, frames);
 
             if (!loadedEventQueued)
             {
@@ -308,7 +307,6 @@ ImagePtr Image::getEmpty()
 
 Image::Image()
     : empty_(true)
-    , frames_(nullptr)
 {
 }
 
@@ -546,8 +544,7 @@ ImageExpirationPool &ImageExpirationPool::instance()
 void ImageExpirationPool::addImagePtr(ImagePtr imgPtr)
 {
     std::lock_guard<std::mutex> lock(this->mutex_);
-    this->allImages_.insert(
-        std::make_pair(imgPtr.get(), std::weak_ptr<Image>(imgPtr)));
+    this->allImages_.emplace(imgPtr.get(), std::weak_ptr<Image>(imgPtr));
 }
 
 void ImageExpirationPool::removeImagePtr(Image *rawPtr)
