@@ -33,10 +33,10 @@ public:
 
     void bulkRefreshLiveStatus();
 
-    void reloadBttvGlobalEmotes();
-    void reloadAllBttvChannelEmotes();
-    void reloadFfzGlobalEmotes();
-    void reloadAllFfzChannelEmotes();
+    void reloadBTTVGlobalEmotes();
+    void reloadAllBTTVChannelEmotes();
+    void reloadFFZGlobalEmotes();
+    void reloadAllFFZChannelEmotes();
 
     Atomic<QString> lastUserThatWhisperedMe;
 

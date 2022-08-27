@@ -180,16 +180,16 @@ int Application::run(QApplication &qtApp)
     });
 
     getSettings()->bttvGlobalEmotes.connect([this] {
-        this->twitch->reloadBttvGlobalEmotes();
+        this->twitch->reloadBTTVGlobalEmotes();
     });
     getSettings()->bttvChannelEmotes.connect([this] {
-        this->twitch->reloadAllBttvChannelEmotes();
+        this->twitch->reloadAllBTTVChannelEmotes();
     });
     getSettings()->ffzGlobalEmotes.connect([this] {
-        this->twitch->reloadFfzGlobalEmotes();
+        this->twitch->reloadFFZGlobalEmotes();
     });
     getSettings()->ffzChannelEmotes.connect([this] {
-        this->twitch->reloadAllFfzChannelEmotes();
+        this->twitch->reloadAllFFZChannelEmotes();
     });
 
     return qtApp.exec();
