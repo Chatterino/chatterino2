@@ -168,7 +168,8 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
 
             int count = s->count + 1;
 
-            MessageBuilder replacement(timeoutMessage, message->searchText,
+            MessageBuilder replacement(timeoutMessage, message->timeoutUser,
+                                       message->loginName, message->searchText,
                                        count);
 
             replacement->timeoutUser = message->timeoutUser;
@@ -236,7 +237,20 @@ void Channel::addMessagesAtStart(const std::vector<MessagePtr> &_messages)
 
 void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
 {
+    if (messages.empty())
+    {
+        return;
+    }
+
     auto snapshot = this->getMessageSnapshot();
+    if (snapshot.size() == 0)
+    {
+        // There are no messages in this channel yet so we can just insert them
+        // at the front in order
+        this->messages_.pushFront(messages);
+        this->filledInMessages.invoke(messages);
+        return;
+    }
 
     std::unordered_set<QString> existingMessageIds;
     existingMessageIds.reserve(snapshot.size());
