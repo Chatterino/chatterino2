@@ -84,26 +84,44 @@ const std::shared_ptr<Image> &getImagePriv(const ImageSet &set, float scale)
     return set.getImage1();
 }
 
-const ImagePtr &ImageSet::getImageOrLoaded(float scale) const
+bool ImageSet::anyExist() const
 {
-    auto &&result = getImagePriv(*this, scale);
-
-    // get best image based on scale
-    result->load();
-
-    // prefer other image if selected image is not loaded yet
-    if (result->loaded())
-        return result;
-    else if (this->imageX3_ && !this->imageX3_->isEmpty() &&
-             this->imageX3_->loaded())
-        return this->imageX3_;
-    else if (this->imageX2_ && !this->imageX2_->isEmpty() &&
-             this->imageX2_->loaded())
-        return this->imageX2_;
-    else if (this->imageX1_->loaded())
-        return this->imageX1_;
+    if (this->imageX3_ && !this->imageX3_->isEmpty())
+    {
+        return true;
+    }
+    else if (this->imageX2_ && !this->imageX2_->isEmpty())
+    {
+        return true;
+    }
+    else if (this->imageX1_ && !this->imageX1_->isEmpty())
+    {
+        return true;
+    }
     else
-        return result;
+    {
+        return false;
+    }
+}
+
+QSize ImageSet::firstAvailableSize() const
+{
+    if (this->imageX3_ && !this->imageX3_->isEmpty())
+    {
+        return this->imageX3_->size();
+    }
+    else if (this->imageX2_ && !this->imageX2_->isEmpty())
+    {
+        return this->imageX2_->size();
+    }
+    else if (this->imageX1_ && !this->imageX1_->isEmpty())
+    {
+        return this->imageX1_->size();
+    }
+    else
+    {
+        return {16, 16};
+    }
 }
 
 const ImagePtr &ImageSet::getImage(float scale) const

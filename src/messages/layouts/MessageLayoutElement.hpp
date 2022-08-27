@@ -6,6 +6,7 @@
 #include <QString>
 #include <boost/noncopyable.hpp>
 #include <climits>
+#include <vector>
 
 #include "common/FlagsEnum.hpp"
 #include "messages/Link.hpp"
@@ -52,6 +53,8 @@ public:
     FlagsEnum<MessageElementFlag> getFlags() const;
 
 protected:
+    void setSize(const QSize &size);
+
     bool trailingSpace = true;
 
 private:
@@ -79,6 +82,28 @@ protected:
     int getXFromIndex(int index) override;
 
     ImagePtr image_;
+};
+
+class PriorityImageLayoutElement : public MessageLayoutElement
+{
+public:
+    PriorityImageLayoutElement(MessageElement &creator,
+                               const std::vector<ImagePtr> &images,
+                               const QSize &size);
+
+protected:
+    void addCopyTextToString(QString &str, int from = 0,
+                             int to = INT_MAX) const override;
+    int getSelectionIndexCount() const override;
+    void paint(QPainter &painter) override;
+    void paintAnimated(QPainter &painter, int yOffset) override;
+    int getMouseOverIndex(const QPoint &abs) const override;
+    int getXFromIndex(int index) override;
+
+    const ImagePtr &firstLoadedImage() const;
+    const ImagePtr &getLoadedAndQueue() const;
+
+    const std::vector<ImagePtr> images_;
 };
 
 class ImageWithBackgroundLayoutElement : public ImageLayoutElement

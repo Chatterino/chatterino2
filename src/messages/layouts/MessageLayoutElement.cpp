@@ -42,6 +42,11 @@ void MessageLayoutElement::setPosition(QPoint point)
     this->rect_.moveTopLeft(point);
 }
 
+void MessageLayoutElement::setSize(const QSize &size)
+{
+    this->rect_.setSize(size);
+}
+
 bool MessageLayoutElement::hasTrailingSpace() const
 {
     return this->trailingSpace;
@@ -163,6 +168,115 @@ int ImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
 }
 
 int ImageLayoutElement::getXFromIndex(int index)
+{
+    if (index <= 0)
+    {
+        return this->getRect().left();
+    }
+    else if (index == 1)
+    {
+        // fourtf: remove space width
+        return this->getRect().right();
+    }
+    else
+    {
+        return this->getRect().right();
+    }
+}
+
+PriorityImageLayoutElement::PriorityImageLayoutElement(
+    MessageElement &creator, const std::vector<ImagePtr> &images,
+    const QSize &size)
+    : MessageLayoutElement(creator, size)
+    , images_(images)
+{
+    assert(!this->images_.empty());
+    this->trailingSpace = creator.hasTrailingSpace();
+}
+
+void PriorityImageLayoutElement::addCopyTextToString(QString &str, int from,
+                                                     int to) const
+{
+    const auto *emoteElement =
+        dynamic_cast<EmoteElement *>(&this->getCreator());
+    if (emoteElement)
+    {
+        str += emoteElement->getEmote()->getCopyString();
+        str = TwitchEmotes::cleanUpEmoteCode(str);
+        if (this->hasTrailingSpace())
+        {
+            str += " ";
+        }
+    }
+}
+
+int PriorityImageLayoutElement::getSelectionIndexCount() const
+{
+    return this->trailingSpace ? 2 : 1;
+}
+
+const ImagePtr &PriorityImageLayoutElement::firstLoadedImage() const
+{
+    for (auto &img : this->images_)
+    {
+        if (img != nullptr && !img->isEmpty() && img->loaded())
+        {
+            return img;
+        }
+    }
+
+    // fallback to first image
+    return this->images_.front();
+}
+
+const ImagePtr &PriorityImageLayoutElement::getLoadedAndQueue() const
+{
+    auto &firstLoaded = this->firstLoadedImage();
+    if (firstLoaded != this->images_.front())
+    {
+        // The image we have already loaded isn't the desired image.
+        // Queue up loading the desired image, but use the already loaded one
+        // for painting this time around.
+        this->images_.front()->loadIfUnloaded();
+    }
+
+    return firstLoaded;
+}
+
+void PriorityImageLayoutElement::paint(QPainter &painter)
+{
+    auto &imageToUse = this->getLoadedAndQueue();
+
+    if (!imageToUse->animated())
+    {
+        if (auto pixmap = imageToUse->pixmapOrLoad())
+        {
+            painter.drawPixmap(QRectF(this->getRect()), *pixmap, QRectF());
+        }
+    }
+}
+
+void PriorityImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+{
+    auto &imageToUse = this->getLoadedAndQueue();
+
+    if (imageToUse->animated())
+    {
+        if (auto pixmap = imageToUse->pixmapOrLoad())
+        {
+            auto rect = this->getRect();
+            rect.moveTop(rect.y() + yOffset);
+            painter.drawPixmap(QRectF(rect), *pixmap, QRectF());
+        }
+    }
+}
+
+int PriorityImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
+{
+    return 0;
+}
+
+int PriorityImageLayoutElement::getXFromIndex(int index)
 {
     if (index <= 0)
     {
