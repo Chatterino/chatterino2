@@ -414,7 +414,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     if (this->highlightState_ == HighlightState::Highlighted &&
         this->highlightColor_ != nullptr)
     {
-        auto col = *this->highlightColor_.get();
+        QColor col = *this->highlightColor_;
         col.setAlpha(255);
         colors.line = {col, col, col};
     }
