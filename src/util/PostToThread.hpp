@@ -17,7 +17,7 @@ class LambdaRunnable : public QRunnable
 public:
     LambdaRunnable(std::function<void()> action)
     {
-        this->action_ = action;
+        this->action_ = std::move(action);
     }
 
     void run()

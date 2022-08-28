@@ -12,12 +12,18 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
-#include "singletons/Emotes.hpp"
+#ifndef CHATTERINO_TEST
+#    include "singletons/Emotes.hpp"
+#endif
 #include "singletons/WindowManager.hpp"
+#include "singletons/helper/GifTimer.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
+
+#include <queue>
 
 namespace chatterino {
 namespace detail {
@@ -37,14 +43,19 @@ namespace detail {
         {
             DebugCount::increase("animated images");
 
+#ifndef CHATTERINO_TEST
             this->gifTimerConnection_ =
-                getApp()->emotes->gifTimer.signal.connect(
-                    [this] { this->advance(); });
+                getApp()->emotes->gifTimer.signal.connect([this] {
+                    this->advance();
+                });
+#endif
         }
 
-        auto totalLength = std::accumulate(
-            this->items_.begin(), this->items_.end(), 0UL,
-            [](auto init, auto &&frame) { return init + frame.duration; });
+        auto totalLength =
+            std::accumulate(this->items_.begin(), this->items_.end(), 0UL,
+                            [](auto init, auto &&frame) {
+                                return init + frame.duration;
+                            });
 
         if (totalLength == 0)
         {
@@ -52,9 +63,11 @@ namespace detail {
         }
         else
         {
+#ifndef CHATTERINO_TEST
             this->durationOffset_ = std::min<int>(
                 int(getApp()->emotes->gifTimer.position() % totalLength),
                 60000);
+#endif
         }
         this->processOffset();
     }
@@ -125,29 +138,30 @@ namespace detail {
     {
         QVector<Frame<QImage>> frames;
 
-        if (reader.imageCount() == 0)
-        {
-            qDebug() << "Error while reading image" << url.string << ": '"
-                     << reader.errorString() << "'";
-            return frames;
-        }
-
         QImage image;
         for (int index = 0; index < reader.imageCount(); ++index)
         {
             if (reader.read(&image))
             {
                 QPixmap::fromImage(image);
-
-                int duration = std::max(20, reader.nextImageDelay());
+                // It seems that browsers have special logic for fast animations.
+                // This implements Chrome and Firefox's behavior which uses
+                // a duration of 100 ms for any frames that specify a duration of <= 10 ms.
+                // See http://webkit.org/b/36082 for more information.
+                // https://github.com/SevenTV/chatterino7/issues/46#issuecomment-1010595231
+                int duration = reader.nextImageDelay();
+                if (duration <= 10)
+                    duration = 100;
+                duration = std::max(20, duration);
                 frames.push_back(Frame<QImage>{image, duration});
             }
         }
 
         if (frames.size() == 0)
         {
-            qDebug() << "Error while reading image" << url.string << ": '"
-                     << reader.errorString() << "'";
+            qCDebug(chatterinoImage)
+                << "Error while reading image" << url.string << ": '"
+                << reader.errorString() << "'";
         }
 
         return frames;
@@ -176,7 +190,9 @@ namespace detail {
             }
         }
 
+#ifndef CHATTERINO_TEST
         getApp()->windows->forceLayoutChannelViews();
+#endif
         loadedEventQueued = false;
     }
 
@@ -219,10 +235,19 @@ namespace detail {
 // IMAGE2
 Image::~Image()
 {
+    if (this->empty_)
+    {
+        // No data in this image, don't bother trying to release it
+        // The reason we do this check is that we keep a few (or one) static empty image around that are deconstructed at the end of the programs lifecycle, and we want to prevent the isGuiThread call to be called after the QApplication has been exited
+        return;
+    }
+
     // run destructor of Frames in gui thread
     if (!isGuiThread())
     {
-        postToThread([frames = this->frames_.release()]() { delete frames; });
+        postToThread([frames = this->frames_.release()]() {
+            delete frames;
+        });
     }
 }
 
@@ -379,6 +404,39 @@ void Image::actuallyLoad()
             QBuffer buffer(const_cast<QByteArray *>(&data));
             buffer.open(QIODevice::ReadOnly);
             QImageReader reader(&buffer);
+
+            if (!reader.canRead())
+            {
+                qCDebug(chatterinoImage)
+                    << "Error: image cant be read " << shared->url().string;
+                return Failure;
+            }
+
+            const auto size = reader.size();
+            if (size.isEmpty())
+            {
+                return Failure;
+            }
+
+            // returns 1 for non-animated formats
+            if (reader.imageCount() <= 0)
+            {
+                qCDebug(chatterinoImage)
+                    << "Error: image has less than 1 frame "
+                    << shared->url().string << ": " << reader.errorString();
+                return Failure;
+            }
+
+            // use "double" to prevent int overflows
+            if (double(size.width()) * double(size.height()) *
+                    double(reader.imageCount()) * 4.0 >
+                double(Image::maxBytesRam))
+            {
+                qCDebug(chatterinoImage) << "image too large in RAM";
+
+                return Failure;
+            }
+
             auto parsed = detail::readFrames(reader, shared->url());
 
             postToThread(makeConvertCallback(parsed, [weak](auto frames) {

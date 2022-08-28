@@ -24,14 +24,16 @@ AccountsPage::AccountsPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
     EditableModelView *view =
-        layout.emplace<EditableModelView>(app->accounts->createModel(nullptr))
+        layout
+            .emplace<EditableModelView>(app->accounts->createModel(nullptr),
+                                        false)
             .getElement();
 
     view->getTableView()->horizontalHeader()->setVisible(false);
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
 
-    view->addButtonPressed.connect([] {
-        static auto loginWidget = new LoginWidget();
+    view->addButtonPressed.connect([this] {
+        static auto loginWidget = new LoginWidget(this);
 
         loginWidget->show();
         loginWidget->raise();

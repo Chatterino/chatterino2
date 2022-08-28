@@ -5,15 +5,22 @@
 #include <QScrollArea>
 
 #include "Application.hpp"
+#include "common/Version.hpp"
 #include "singletons/Fonts.hpp"
+#include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/StreamerMode.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/settingspages/GeneralPageView.hpp"
+
+#include <QDesktopServices>
+#include <QFileDialog>
 
 #define CHROME_EXTENSION_LINK                                           \
     "https://chrome.google.com/webstore/detail/chatterino-native-host/" \
@@ -23,6 +30,7 @@
 
 // define to highlight sections in editor
 #define addTitle addTitle
+#define addSubtitle addSubtitle
 
 #ifdef Q_OS_WIN
 #    define META_KEY "Windows"
@@ -32,7 +40,7 @@
 
 namespace chatterino {
 namespace {
-    void addKeyboardModifierSetting(SettingsLayout &layout,
+    void addKeyboardModifierSetting(GeneralPageView &layout,
                                     const QString &title,
                                     EnumSetting<Qt::KeyboardModifier> &setting)
     {
@@ -72,206 +80,32 @@ namespace {
     }
 }  // namespace
 
-TitleLabel *SettingsLayout::addTitle(const QString &title)
-{
-    // space
-    if (!this->groups_.empty())
-        this->addWidget(this->groups_.back().space = new Space);
-
-    // title
-    auto label = new TitleLabel(title + ":");
-    this->addWidget(label);
-
-    // groups
-    this->groups_.push_back(Group{title, label, nullptr, {}});
-
-    return label;
-}
-
-QCheckBox *SettingsLayout::addCheckbox(const QString &text,
-                                       BoolSetting &setting, bool inverse)
-{
-    auto check = new QCheckBox(text);
-
-    // update when setting changes
-    setting.connect(
-        [inverse, check](const bool &value, auto) {
-            check->setChecked(inverse ^ value);
-        },
-        this->managedConnections_);
-
-    // update setting on toggle
-    QObject::connect(
-        check, &QCheckBox::toggled, this,
-        [&setting, inverse](bool state) { setting = inverse ^ state; });
-
-    this->addWidget(check);
-
-    // groups
-    this->groups_.back().widgets.push_back({check, {text}});
-
-    return check;
-}
-
-ComboBox *SettingsLayout::addDropdown(const QString &text,
-                                      const QStringList &list)
-{
-    auto layout = new QHBoxLayout;
-    auto combo = new ComboBox;
-    combo->setFocusPolicy(Qt::StrongFocus);
-    combo->addItems(list);
-
-    auto label = new QLabel(text + ":");
-    layout->addWidget(label);
-    layout->addStretch(1);
-    layout->addWidget(combo);
-
-    this->addLayout(layout);
-
-    // groups
-    this->groups_.back().widgets.push_back({combo, {text}});
-    this->groups_.back().widgets.push_back({label, {text}});
-
-    return combo;
-}
-
-ComboBox *SettingsLayout::addDropdown(
-    const QString &text, const QStringList &items,
-    pajlada::Settings::Setting<QString> &setting, bool editable)
-{
-    auto combo = this->addDropdown(text, items);
-
-    if (editable)
-        combo->setEditable(true);
-
-    // update when setting changes
-    setting.connect(
-        [combo](const QString &value, auto) { combo->setCurrentText(value); },
-        this->managedConnections_);
-
-    QObject::connect(combo, &QComboBox::currentTextChanged,
-                     [&setting](const QString &newValue) {
-                         setting = newValue;
-                         getApp()->windows->forceLayoutChannelViews();
-                     });
-
-    return combo;
-}
-
-DescriptionLabel *SettingsLayout::addDescription(const QString &text)
-{
-    auto label = new DescriptionLabel(text);
-
-    label->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                   Qt::LinksAccessibleByKeyboard);
-    label->setOpenExternalLinks(true);
-    label->setWordWrap(true);
-
-    this->addWidget(label);
-
-    // groups
-    this->groups_.back().widgets.push_back({label, {text}});
-
-    return label;
-}
-
-void SettingsLayout::addSeperator()
-{
-    this->addWidget(new Line(false));
-}
-
-bool SettingsLayout::filterElements(const QString &query)
-{
-    bool any{};
-
-    for (auto &&group : this->groups_)
-    {
-        // if a description in a group matches `query` then show the entire group
-        bool descriptionMatches{};
-        for (auto &&widget : group.widgets)
-        {
-            if (auto x = dynamic_cast<DescriptionLabel *>(widget.element); x)
-            {
-                if (x->text().contains(query, Qt::CaseInsensitive))
-                {
-                    descriptionMatches = true;
-                    break;
-                }
-            }
-        }
-
-        // if group name matches then all should be visible
-        if (group.name.contains(query, Qt::CaseInsensitive) ||
-            descriptionMatches)
-        {
-            for (auto &&widget : group.widgets)
-                widget.element->show();
-            group.title->show();
-            any = true;
-        }
-        // check if any match
-        else
-        {
-            auto groupAny = false;
-
-            for (auto &&widget : group.widgets)
-            {
-                for (auto &&keyword : widget.keywords)
-                {
-                    if (keyword.contains(query, Qt::CaseInsensitive))
-                    {
-                        widget.element->show();
-                        groupAny = true;
-                    }
-                    else
-                    {
-                        widget.element->hide();
-                    }
-                }
-            }
-
-            if (group.space)
-                group.space->setVisible(groupAny);
-            group.title->setVisible(groupAny);
-            any |= groupAny;
-        }
-    }
-
-    return any;
-}
-
 GeneralPage::GeneralPage()
 {
     auto y = new QVBoxLayout;
-    auto scroll = new QScrollArea;
-    scroll->setWidgetResizable(true);
-    y->addWidget(scroll);
     auto x = new QHBoxLayout;
-    auto layout = new SettingsLayout;
-    this->settingsLayout_ = layout;
-    x->addLayout(layout, 0);
-    x->addStretch(1);
+    auto view = new GeneralPageView;
+    this->view_ = view;
+    x->addWidget(view);
     auto z = new QFrame;
     z->setLayout(x);
-    scroll->setWidget(z);
+    y->addWidget(z);
     this->setLayout(y);
 
-    this->initLayout(*layout);
-
-    layout->addStretch(1);
+    this->initLayout(*view);
 
     this->initExtra();
 }
 
 bool GeneralPage::filterElements(const QString &query)
 {
-    if (this->settingsLayout_)
-        return this->settingsLayout_->filterElements(query) || query.isEmpty();
+    if (this->view_)
+        return this->view_->filterElements(query) || query.isEmpty();
     else
         return false;
 }
 
-void GeneralPage::initLayout(SettingsLayout &layout)
+void GeneralPage::initLayout(GeneralPageView &layout)
 {
     auto &s = *getSettings();
 
@@ -280,15 +114,24 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        getApp()->themes->themeName);
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},
-        getApp()->fonts->chatFontFamily, [](auto val) { return val; },
-        [this](auto args) { return this->getFont(args); });
+        getApp()->fonts->chatFontFamily,
+        [](auto val) {
+            return val;
+        },
+        [this](auto args) {
+            return this->getFont(args);
+        });
     layout.addDropdown<int>(
         "Font size", {"9pt", "10pt", "12pt", "14pt", "16pt", "20pt"},
         getApp()->fonts->chatFontSize,
-        [](auto val) { return QString::number(val) + "pt"; },
-        [](auto args) { return fuzzyToInt(args.value, 10); });
+        [](auto val) {
+            return QString::number(val) + "pt";
+        },
+        [](auto args) {
+            return fuzzyToInt(args.value, 10);
+        });
     layout.addDropdown<float>(
-        "UI Scale",
+        "Zoom",
         {"0.5x", "0.6x", "0.7x", "0.8x", "0.9x", "Default", "1.2x", "1.4x",
          "1.6x", "1.8x", "2x", "2.33x", "2.66x", "3x", "3.5x", "4x"},
         s.uiScale,
@@ -298,37 +141,68 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             else
                 return QString::number(val) + "x";
         },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+        [](auto args) {
+            return fuzzyToFloat(args.value, 1.f);
+        });
+    ComboBox *tabDirectionDropdown =
+        layout.addDropdown<std::underlying_type<NotebookTabLocation>::type>(
+            "Tab layout", {"Top", "Left", "Right", "Bottom"}, s.tabDirection,
+            [](auto val) {
+                switch (val)
+                {
+                    case NotebookTabLocation::Top:
+                        return "Top";
+                    case NotebookTabLocation::Left:
+                        return "Left";
+                    case NotebookTabLocation::Right:
+                        return "Right";
+                    case NotebookTabLocation::Bottom:
+                        return "Bottom";
+                }
+
+                return "";
+            },
+            [](auto args) {
+                if (args.value == "Bottom")
+                {
+                    return NotebookTabLocation::Bottom;
+                }
+                else if (args.value == "Left")
+                {
+                    return NotebookTabLocation::Left;
+                }
+                else if (args.value == "Right")
+                {
+                    return NotebookTabLocation::Right;
+                }
+                else
+                {
+                    // default to top
+                    return NotebookTabLocation::Top;
+                }
+            },
+            false);
+    tabDirectionDropdown->setMinimumWidth(
+        tabDirectionDropdown->minimumSizeHint().width());
+
+    layout.addCheckbox("Show message reply button", s.showReplyButton);
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost);
 #ifdef USEWINSDK
     layout.addCheckbox("Start with Windows", s.autorun);
 #endif
-    layout.addCheckbox("Restart on crash", s.restartOnCrash);
     if (!BaseWindow::supportsCustomWindowFrame())
     {
         layout.addCheckbox("Show preferences button (Ctrl+P to show)",
                            s.hidePreferencesButton, true);
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
+    layout.addCheckbox("Show which channels are live in tabs", s.showTabLive);
 
     layout.addTitle("Chat");
 
     layout.addDropdown<float>(
-        "Mouse scroll speed", {"0.5x", "0.75x", "Default", "1.5x", "2x"},
-        s.mouseScrollMultiplier,
-        [](auto val) {
-            if (val == 1)
-                return QString("Default");
-            else
-                return QString::number(val) + "x";
-        },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
-    layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
-    layout.addCheckbox("Smooth scrolling on new messages",
-                       s.enableSmoothScrollingNewMessages);
-    layout.addDropdown<float>(
-        "Pause after hover",
+        "Pause on mouse hover",
         {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
         s.pauseOnHoverDuration,
         [](auto val) {
@@ -350,21 +224,35 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         });
     addKeyboardModifierSetting(layout, "Pause while holding a key",
                                s.pauseChatModifier);
+    layout.addDropdown<float>(
+        "Mousewheel scroll speed", {"0.5x", "0.75x", "Default", "1.5x", "2x"},
+        s.mouseScrollMultiplier,
+        [](auto val) {
+            if (val == 1)
+                return QString("Default");
+            else
+                return QString::number(val) + "x";
+        },
+        [](auto args) {
+            return fuzzyToFloat(args.value, 1.f);
+        });
+    layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
+    layout.addCheckbox("Smooth scrolling on new messages",
+                       s.enableSmoothScrollingNewMessages);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
+    layout.addCheckbox("Allow sending duplicate messages",
+                       s.allowDuplicateMessages);
 
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
     layout.addCheckbox("Alternate background color", s.alternateMessages);
-    // layout.addCheckbox("Mark last message you read");
-    // layout.addDropdown("Last read message style", {"Default"});
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
-    layout.addCheckbox("Highlight messages redeemed with Channel Points",
-                       s.enableRedeemedHighlight);
     layout.addDropdown<QString>(
-        "Timestamps",
+        "Timestamp format (a = am/pm, zzz = milliseconds)",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
-         "h:mm:ss a", "hh:mm:ss a"},
+         "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
+         "hh:mm:ss.zzz", "hh:mm:ss.zzz a"},
         s.timestampFormat,
         [](auto val) {
             return getSettings()->showTimestamps.getValue()
@@ -378,26 +266,53 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                                    : args.value;
         });
     layout.addDropdown<int>(
-        "Collapse messages",
-        {"Never", "After 2 lines", "After 3 lines", "After 4 lines",
-         "After 5 lines"},
+        "Limit message height",
+        {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
         s.collpseMessagesMinLines,
         [](auto val) {
-            return val ? QString("After ") + QString::number(val) + " lines"
-                       : QString("Never");
+            return val ? QString::number(val) + " lines" : QString("Never");
         },
-        [](auto args) { return fuzzyToInt(args.value, 0); });
-    layout.addDropdown<int>(
-        "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
-        s.timeoutStackStyle, [](int index) { return index; },
-        [](auto args) { return args.index; }, false);
+        [](auto args) {
+            return fuzzyToInt(args.value, 0);
+        });
+    layout.addSeperator();
+    layout.addCheckbox("Draw a line below the most recent message before "
+                       "switching applications.",
+                       s.showLastMessageIndicator);
+    layout.addDropdown<std::underlying_type<Qt::BrushStyle>::type>(
+        "Line style", {"Dotted", "Solid"}, s.lastMessagePattern,
+        [](int value) {
+            switch (value)
+            {
+                case Qt::VerPattern:
+                    return 0;
+                case Qt::SolidPattern:
+                default:
+                    return 1;
+            }
+        },
+        [](DropdownArgs args) {
+            switch (args.index)
+            {
+                case 0:
+                    return Qt::VerPattern;
+                case 1:
+                default:
+                    return Qt::SolidPattern;
+            }
+        },
+        false);
+    layout.addColorButton("Line color",
+                          QColor(getSettings()->lastMessageColor.getValue()),
+                          getSettings()->lastMessageColor);
 
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);
     layout.addCheckbox("Animate", s.animateEmotes);
     layout.addCheckbox("Animate only when Chatterino is focused",
                        s.animationsWhenFocused);
-    layout.addCheckbox("Stack bits", s.stackBits);
+    layout.addCheckbox("Enable emote auto-completion by typing :",
+                       s.emoteCompletionWithColon);
     layout.addDropdown<float>(
         "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
         s.emoteScale,
@@ -407,127 +322,82 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             else
                 return QString::number(val) + "x";
         },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+        [](auto args) {
+            return fuzzyToFloat(args.value, 1.f);
+        });
 
+    layout.addCheckbox("Remove spaces between emotes",
+                       s.removeSpacesBetweenEmotes);
     layout.addDropdown<int>(
-        "Preview on hover", {"Don't show", "Always show", "Hold shift"},
-        s.emotesTooltipPreview, [](int index) { return index; },
-        [](auto args) { return args.index; }, false);
-    layout.addDropdown("Emoji set",
-                       {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
-                        "Apple", "Google", "Messenger"},
-                       s.emojiSet);
-
-    layout.addTitle("R9K");
-    layout.addDescription(
-        "Hide similar messages by the same user. Temporarily show hidden "
-        "messages by pressing Ctrl+H.");
-    layout.addCheckbox("Hide similar messages", s.similarityEnabled);
-    //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
-    layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
-    layout.addCheckbox("Receive notification sounds from hidden messages",
-                       s.shownSimilarTriggerHighlights);
-    s.hideSimilar.connect(
-        []() { getApp()->windows->forceLayoutChannelViews(); }, false);
-    layout.addDropdown<float>(
-        "Similarity threshold", {"0.5", "0.75", "0.9"}, s.similarityPercentage,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToFloat(args.value, 0.9f); });
-    layout.addDropdown<int>(
-        "Maximum delay between messages",
-        {"5s", "10s", "15s", "30s", "60s", "120s"}, s.hideSimilarMaxDelay,
-        [](auto val) { return QString::number(val) + "s"; },
-        [](auto args) { return fuzzyToInt(args.value, 5); });
-    layout.addDropdown<int>(
-        "Amount of previous messages to check", {"1", "2", "3", "4", "5"},
-        s.hideSimilarMaxMessagesToCheck,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToInt(args.value, 3); });
-
-    layout.addTitle("Visible badges");
-    layout.addCheckbox("Authority (staff, admin)",
-                       getSettings()->showBadgesGlobalAuthority);
-    layout.addCheckbox("Channel (broadcaster, moderator)",
-                       getSettings()->showBadgesChannelAuthority);
-    layout.addCheckbox("Subscriber ", getSettings()->showBadgesSubscription);
-    layout.addCheckbox("Vanity (prime, bits, subgifter)",
-                       getSettings()->showBadgesVanity);
-    layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
-
-    layout.addTitle("Chat title");
-    layout.addDescription("In live channels show:");
-    layout.addCheckbox("Uptime", s.headerUptime);
-    layout.addCheckbox("Viewer count", s.headerViewerCount);
-    layout.addCheckbox("Category", s.headerGame);
-    layout.addCheckbox("Title", s.headerStreamTitle);
-
-    layout.addTitle("Beta");
-    layout.addDescription(
-        "You can receive updates earlier by ticking the box below. Report "
-        "issues <a href='https://chatterino.com/link/issues'>here</a>.");
-    layout.addCheckbox("Receive beta updates", s.betaUpdates);
-
-#ifdef Q_OS_WIN
-    layout.addTitle("Browser Integration");
-    layout.addDescription("The browser extension replaces the default "
-                          "Twitch.tv chat with chatterino.");
-
-    layout.addDescription(formatRichNamedLink(
-        CHROME_EXTENSION_LINK,
-        "Download for Google Chrome and similar browsers."));
-    layout.addDescription(
-        formatRichNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
-
-    layout.addDescription("Chatterino only attaches to known browsers to avoid "
-                          "attaching to other windows by accident.");
-    layout.addCheckbox("Attach to any browser (may cause issues).",
-                       s.attachExtensionToAnyProcess);
-#endif
-
-    layout.addTitle("Miscellaneous");
-
-    if (supportsIncognitoLinks())
-    {
-        layout.addCheckbox("Open links in incognito/private mode",
-                           s.openLinksIncognito);
-    }
-
-#ifdef Q_OS_LINUX
-    if (!getPaths()->isPortable())
-    {
-        layout.addCheckbox(
-            "Use libsecret/KWallet/Gnome keychain to secure passwords",
-            s.useKeyring);
-    }
-#endif
-
-    layout.addCheckbox("Show moderation messages", s.hideModerationActions,
-                       true);
-    layout.addCheckbox("Random username color for users who never set a color",
-                       s.colorizeNicknames);
-    layout.addCheckbox("Mention users with a comma (User,)",
-                       s.mentionUsersWithComma);
-    layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
-    layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
-    layout.addCheckbox("Automatically close user popup when it loses focus",
-                       s.autoCloseUserPopup);
-    layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
-    layout.addCheckbox("Bold @usernames", s.boldUsernames);
-    layout.addCheckbox("Try to find usernames without @ prefix",
-                       s.findAllUsernames);
-    layout.addDropdown<float>(
-        "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
-        [](auto val) {
-            if (val == 63)
-                return QString("Default");
-            else
-                return QString::number(val);
+        "Show info on hover", {"Don't show", "Always show", "Hold shift"},
+        s.emotesTooltipPreview,
+        [](int index) {
+            return index;
         },
-        [](auto args) { return fuzzyToFloat(args.value, 63.f); });
-    layout.addCheckbox("Show link info when hovering", s.linkInfoTooltip);
+        [](auto args) {
+            return args.index;
+        },
+        false);
+    layout.addDropdown("Emoji style",
+                       {
+                           "Twitter",
+                           "Facebook",
+                           "Apple",
+                           "Google",
+                       },
+                       s.emojiSet);
+    layout.addCheckbox("Show BTTV global emotes", s.enableBTTVGlobalEmotes);
+    layout.addCheckbox("Show BTTV channel emotes", s.enableBTTVChannelEmotes);
+    layout.addCheckbox("Show FFZ global emotes", s.enableFFZGlobalEmotes);
+    layout.addCheckbox("Show FFZ channel emotes", s.enableFFZChannelEmotes);
+
+    layout.addTitle("Streamer Mode");
+    layout.addDescription(
+        "Chatterino can automatically change behavior if it detects that any "
+        "streaming software is running.\nSelect which things you want to "
+        "change while streaming");
+
+    ComboBox *dankDropdown =
+        layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
+            "Enable Streamer Mode",
+            {"Disabled", "Enabled", "Automatic (Detect streaming software)"},
+            s.enableStreamerMode,
+            [](int value) {
+                return value;
+            },
+            [](DropdownArgs args) {
+                return static_cast<StreamerModeSetting>(args.index);
+            },
+            false);
+    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 30);
+
+    layout.addCheckbox("Hide usercard avatars",
+                       s.streamerModeHideUsercardAvatars);
+    layout.addCheckbox("Hide link thumbnails",
+                       s.streamerModeHideLinkThumbnails);
+    layout.addCheckbox(
+        "Hide viewer count and stream length while hovering over split header",
+        s.streamerModeHideViewerCountAndDuration);
+    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
+    layout.addCheckbox("Suppress Live Notifications",
+                       s.streamerModeSuppressLiveNotifications);
+
+    layout.addTitle("Link Previews");
+    layout.addDescription(
+        "Extra information like \"youtube video stats\" or title of webpages "
+        "can be loaded for all links if enabled. Optionally you can also show "
+        "thumbnails for emotes, videos and more. The information is pulled "
+        "from our servers. The Link Previews are loaded through <a "
+        "href=\"https://github.com/Chatterino/api\">an API</a> hosted by the "
+        "Chatterino developers. These are the API <a "
+        "href=\"https://braize.pajlada.com/chatterino/legal/"
+        "terms-of-service\">Terms of Services</a> and <a "
+        "href=\"https://braize.pajlada.com/chatterino/legal/"
+        "privacy-policy\">Privacy Policy</a>.");
+    layout.addCheckbox("Enable", s.linkInfoTooltip);
     layout.addDropdown<int>(
-        "Show link thumbnail", {"Off", "Small", "Medium", "Large"},
-        s.thumbnailSize,
+        "Also show thumbnails if available",
+        {"Off", "Small", "Medium", "Large"}, s.thumbnailSize,
         [](auto val) {
             if (val == 0)
                 return QString("Off");
@@ -551,7 +421,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             return fuzzyToInt(args.value, 0);
         });
     layout.addDropdown<int>(
-        "Show stream thumbnail", {"Off", "Small", "Medium", "Large"},
+        "Show thumbnails of streams", {"Off", "Small", "Medium", "Large"},
         s.thumbnailSizeStream,
         [](auto val) {
             if (val == 0)
@@ -575,35 +445,65 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
             return fuzzyToInt(args.value, 0);
         });
-    layout.addCheckbox("Double click to open links and other elements in chat",
-                       s.linksDoubleClickOnly);
-    layout.addCheckbox("Unshorten links", s.unshortLinks);
-    layout.addCheckbox("Show live indicator in tabs", s.showTabLive);
 
-    layout.addCheckbox(
-        "Only search for emote autocompletion at the start of emote names",
-        s.prefixOnlyEmoteCompletion);
-    layout.addCheckbox("Only search for username autocompletion with an @",
-                       s.userCompletionOnlyWithAt);
+    layout.addNavigationSpacing();
+    layout.addTitle("Beta");
+    if (Version::instance().isSupportedOS())
+    {
+        layout.addDescription(
+            "You can receive updates earlier by ticking the box below. Report "
+            "issues <a href='https://chatterino.com/link/issues'>here</a>.");
+        layout.addCheckbox("Receive beta updates", s.betaUpdates);
+    }
+    else
+    {
+        layout.addDescription(
+            "Your operating system is not officially supplied with builds. For "
+            "updates, please rebuild Chatterino from sources. Report "
+            "issues <a href='https://chatterino.com/link/issues'>here</a>.");
+    }
 
-    layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
-    layout.addCheckbox("Highlight received inline whispers",
-                       s.highlightInlineWhispers);
-    layout.addCheckbox("Load message history on connect",
-                       s.loadTwitchMessageHistoryOnConnect);
+#ifdef Q_OS_WIN
+    layout.addTitle("Browser Integration");
+    layout.addDescription("The browser extension replaces the default "
+                          "Twitch.tv chat with Chatterino.");
 
-    layout.addCheckbox("Enable experimental IRC support (requires restart)",
-                       s.enableExperimentalIrc);
-    layout.addCheckbox("Show unhandled IRC messages",
-                       s.showUnhandledIrcMessages);
-    layout.addCheckbox(
-        "Hide viewercount and stream length while hovering the split",
-        s.hideViewerCountAndDuration);
-    layout.addCheckbox(
-        "Ask for confirmation when uploading an image to i.nuuls.com",
-        s.askOnImageUpload);
+    {
+        if (auto err = nmIpcError().get())
+        {
+            layout.addDescription(
+                "An error happened during initialization of the "
+                "browser extension: " +
+                *err);
+        }
+    }
 
-    layout.addTitle("Cache");
+    layout.addDescription(formatRichNamedLink(
+        CHROME_EXTENSION_LINK,
+        "Download for Google Chrome and similar browsers."));
+    layout.addDescription(
+        formatRichNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
+
+    layout.addDescription("Chatterino only attaches to known browsers to avoid "
+                          "attaching to other windows by accident.");
+    layout.addCheckbox("Attach to any browser (may cause issues)",
+                       s.attachExtensionToAnyProcess);
+#endif
+
+    layout.addTitle("AppData & Cache");
+
+    layout.addSubtitle("Application Data");
+    layout.addDescription("All local files like settings and cache files are "
+                          "store in this directory.");
+    layout.addButton("Open AppData directory", [] {
+#ifdef Q_OS_DARWIN
+        QDesktopServices::openUrl("file://" + getPaths()->rootAppDataDirectory);
+#else
+        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
+#endif
+    });
+
+    layout.addSubtitle("Temporary files (Cache)");
     layout.addDescription(
         "Files that are used often (such as emotes) are saved to disk to "
         "reduce bandwidth usage and to speed up loading.");
@@ -627,23 +527,204 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         box->addWidget(layout.makeButton("Choose cache path", [this]() {
             getSettings()->cachePath = QFileDialog::getExistingDirectory(this);
         }));
-        box->addWidget(layout.makeButton(
-            "Reset", []() { getSettings()->cachePath = ""; }));
+        box->addWidget(layout.makeButton("Reset", []() {
+            getSettings()->cachePath = "";
+        }));
+        box->addWidget(layout.makeButton("Clear Cache", [&layout]() {
+            auto reply = QMessageBox::question(
+                layout.window(), "Clear cache",
+                "Are you sure that you want to clear your cache? Emotes may "
+                "take longer to load next time Chatterino is started.",
+                QMessageBox::Yes | QMessageBox::No);
+
+            if (reply == QMessageBox::Yes)
+            {
+                auto cacheDir = QDir(getPaths()->cacheDirectory());
+                cacheDir.removeRecursively();
+                cacheDir.mkdir(getPaths()->cacheDirectory());
+            }
+        }));
         box->addStretch(1);
 
         layout.addLayout(box);
     }
 
-    layout.addTitle("AppData");
-    layout.addDescription("All local files like settings and cache files are "
-                          "store in this directory.");
-    layout.addButton("Open AppData directory", [] {
-        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
-    });
+    layout.addTitle("Advanced");
+
+    layout.addSubtitle("Chat title");
+    layout.addDescription("In live channels show:");
+    layout.addCheckbox("Uptime", s.headerUptime);
+    layout.addCheckbox("Viewer count", s.headerViewerCount);
+    layout.addCheckbox("Category", s.headerGame);
+    layout.addCheckbox("Title", s.headerStreamTitle);
+
+    layout.addSubtitle("R9K");
+    layout.addDescription("Hide similar messages. Toggle hidden "
+                          "messages by pressing Ctrl+H.");
+    layout.addCheckbox("Hide similar messages", s.similarityEnabled);
+    //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
+    layout.addCheckbox("By the same user", s.hideSimilarBySameUser);
+    layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
+    layout.addCheckbox("Receive notification sounds from hidden messages",
+                       s.shownSimilarTriggerHighlights);
+    s.hideSimilar.connect(
+        []() {
+            getApp()->windows->forceLayoutChannelViews();
+        },
+        false);
+    layout.addDropdown<float>(
+        "Similarity threshold", {"0.5", "0.75", "0.9"}, s.similarityPercentage,
+        [](auto val) {
+            return QString::number(val);
+        },
+        [](auto args) {
+            return fuzzyToFloat(args.value, 0.9f);
+        });
+    layout.addDropdown<int>(
+        "Maximum delay between messages",
+        {"5s", "10s", "15s", "30s", "60s", "120s"}, s.hideSimilarMaxDelay,
+        [](auto val) {
+            return QString::number(val) + "s";
+        },
+        [](auto args) {
+            return fuzzyToInt(args.value, 5);
+        });
+    layout.addDropdown<int>(
+        "Amount of previous messages to check", {"1", "2", "3", "4", "5"},
+        s.hideSimilarMaxMessagesToCheck,
+        [](auto val) {
+            return QString::number(val);
+        },
+        [](auto args) {
+            return fuzzyToInt(args.value, 3);
+        });
+
+    layout.addSubtitle("Visible badges");
+    layout.addCheckbox("Authority (staff, admin)", s.showBadgesGlobalAuthority);
+    layout.addCheckbox("Predictions", s.showBadgesPredictions);
+    layout.addCheckbox("Channel (broadcaster, moderator)",
+                       s.showBadgesChannelAuthority);
+    layout.addCheckbox("Subscriber ", s.showBadgesSubscription);
+    layout.addCheckbox("Vanity (prime, bits, subgifter)", s.showBadgesVanity);
+    layout.addCheckbox("Chatterino", s.showBadgesChatterino);
+    layout.addCheckbox("FrankerFaceZ (Bot, FFZ Supporter, FFZ Developer)",
+                       s.showBadgesFfz);
+    layout.addSeperator();
+    layout.addCheckbox("Use custom FrankerFaceZ moderator badges",
+                       s.useCustomFfzModeratorBadges);
+    layout.addCheckbox("Use custom FrankerFaceZ VIP badges",
+                       s.useCustomFfzVipBadges);
+
+    layout.addSubtitle("Miscellaneous");
+
+    if (supportsIncognitoLinks())
+    {
+        layout.addCheckbox("Open links in incognito/private mode",
+                           s.openLinksIncognito);
+    }
+
+    layout.addCheckbox("Restart on crash", s.restartOnCrash);
+
+#if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
+    if (!getPaths()->isPortable())
+    {
+        layout.addCheckbox(
+            "Use libsecret/KWallet/Gnome keychain to secure passwords",
+            s.useKeyring);
+    }
+#endif
+
+    layout.addCheckbox("Show moderation messages", s.hideModerationActions,
+                       true);
+    layout.addCheckbox("Show deletions of single messages",
+                       s.hideDeletionActions, true);
+    layout.addCheckbox("Colorize users without color set (gray names)",
+                       s.colorizeNicknames);
+    layout.addCheckbox("Mention users with a comma (User,)",
+                       s.mentionUsersWithComma);
+    layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
+    layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
+    layout.addCheckbox("Automatically close user popup when it loses focus",
+                       s.autoCloseUserPopup);
+    layout.addCheckbox(
+        "Automatically close reply thread popup when it loses focus",
+        s.autoCloseThreadPopup);
+    layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
+    layout.addCheckbox("Bold @usernames", s.boldUsernames);
+    layout.addCheckbox("Color @usernames", s.colorUsernames);
+    layout.addCheckbox("Try to find usernames without @ prefix",
+                       s.findAllUsernames);
+    layout.addCheckbox("Show username autocompletion popup menu",
+                       s.showUsernameCompletionMenu);
+    const QStringList usernameDisplayModes = {"Username", "Localized name",
+                                              "Username and localized name"};
+
+    ComboBox *nameDropdown =
+        layout.addDropdown<std::underlying_type<UsernameDisplayMode>::type>(
+            "Username style", usernameDisplayModes, s.usernameDisplayMode,
+            [usernameDisplayModes](auto val) {
+                return usernameDisplayModes.at(val - 1);
+                // UsernameDisplayMode enum indexes from 1
+            },
+            [](auto args) {
+                return args.index + 1;
+            },
+            false);
+    nameDropdown->setMinimumWidth(nameDropdown->minimumSizeHint().width());
+
+    layout.addDropdown<float>(
+        "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
+        [](auto val) {
+            if (val == 63)
+                return QString("Default");
+            else
+                return QString::number(val);
+        },
+        [](auto args) {
+            return fuzzyToFloat(args.value, 63.f);
+        });
+    layout.addCheckbox("Double click to open links and other elements in chat",
+                       s.linksDoubleClickOnly);
+    layout.addCheckbox("Unshorten links", s.unshortLinks);
+
+    layout.addCheckbox(
+        "Only search for emote autocompletion at the start of emote names",
+        s.prefixOnlyEmoteCompletion);
+    layout.addCheckbox("Only search for username autocompletion with an @",
+                       s.userCompletionOnlyWithAt);
+
+    layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers);
+    layout.addCheckbox("Highlight received inline whispers",
+                       s.highlightInlineWhispers);
+    layout.addCheckbox("Load message history on connect",
+                       s.loadTwitchMessageHistoryOnConnect);
+    // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history
+    layout.addIntInput("Max number of history messages to load on connect",
+                       s.twitchMessageHistoryLimit, 10, 800, 10);
+
+    layout.addCheckbox("Enable experimental IRC support (requires restart)",
+                       s.enableExperimentalIrc);
+    layout.addCheckbox("Show unhandled IRC messages",
+                       s.showUnhandledIrcMessages);
+    layout.addDropdown<int>(
+        "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
+        s.timeoutStackStyle,
+        [](int index) {
+            return index;
+        },
+        [](auto args) {
+            return args.index;
+        },
+        false);
+    layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
+    layout.addCheckbox("Messages in /mentions highlights tab",
+                       s.highlightMentions);
+
+    layout.addStretch();
 
     // invisible element for width
     auto inv = new BaseWidget(this);
-    inv->setScaleIndependantWidth(500);
+    //    inv->setScaleIndependantWidth(600);
     layout.addWidget(inv);
 }
 
@@ -674,10 +755,8 @@ QString GeneralPage::getFont(const DropdownArgs &args) const
         args.combobox->setEditText("Choosing...");
         QFontDialog dialog(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.));
 
-        dialog.setWindowFlag(Qt::WindowStaysOnTopHint);
-
         auto ok = bool();
-        auto font = dialog.getFont(&ok);
+        auto font = dialog.getFont(&ok, this->window());
 
         if (ok)
             return font.family();

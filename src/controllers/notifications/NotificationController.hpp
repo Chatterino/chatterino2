@@ -15,7 +15,6 @@ class NotificationModel;
 
 enum class Platform : uint8_t {
     Twitch,  // 0
-    // Mixer,   // 1
 };
 
 class NotificationController final : public Singleton, private QObject
@@ -41,7 +40,7 @@ private:
 
     void fetchFakeChannels();
     void removeFakeChannel(const QString channelName);
-    void getFakeTwitchChannelLiveStatus(const QString &channelName);
+    void checkStream(bool live, QString channelName);
 
     // fakeTwitchChannels is a list of streams who are live that we have already sent out a notification for
     std::vector<QString> fakeTwitchChannels;
@@ -49,10 +48,6 @@ private:
 
     ChatterinoSetting<std::vector<QString>> twitchSetting_ = {
         "/notifications/twitch"};
-    /*
-    ChatterinoSetting<std::vector<QString>> mixerSetting_ = {
-        "/notifications/mixer"};
-    */
 };
 
 }  // namespace chatterino

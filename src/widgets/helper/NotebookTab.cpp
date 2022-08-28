@@ -10,15 +10,17 @@
 #include "util/Helpers.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
-#include "widgets/dialogs/TextInputDialog.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <QApplication>
 #include <QDebug>
+#include <QDialogButtonBox>
+#include <QLabel>
+#include <QLineEdit>
 #include <QLinearGradient>
 #include <QMimeData>
 #include <QPainter>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 namespace chatterino {
 namespace {
@@ -46,37 +48,94 @@ NotebookTab::NotebookTab(Notebook *notebook)
     getSettings()->showTabCloseButton.connectSimple(
         boost::bind(&NotebookTab::hideTabXChanged, this),
         this->managedConnections_);
-    getSettings()->showTabLive.connect([this](auto, auto) { this->update(); },
-                                       this->managedConnections_);
+    getSettings()->showTabLive.connect(
+        [this](auto, auto) {
+            this->update();
+        },
+        this->managedConnections_);
 
     this->setMouseTracking(true);
 
-    this->menu_.addAction("Rename", [this]() { this->showRenameDialog(); });
+    this->menu_.addAction("Rename Tab", [this]() {
+        this->showRenameDialog();
+    });
 
-    this->menu_.addAction("Close",
-                          [=]() { this->notebook_->removePage(this->page); });
+    this->menu_.addAction(
+        "Close Tab",
+        [=]() {
+            this->notebook_->removePage(this->page);
+        },
+        QKeySequence("Ctrl+Shift+W"));
+
+    this->menu_.addAction(
+        "Popup Tab",
+        [=]() {
+            if (auto container = dynamic_cast<SplitContainer *>(this->page))
+            {
+                container->popup();
+            }
+        },
+        QKeySequence("Ctrl+Shift+N"));
 
     highlightNewMessagesAction_ =
-        new QAction("Enable highlights on new messages", &this->menu_);
+        new QAction("Mark Tab as Unread on New Messages", &this->menu_);
     highlightNewMessagesAction_->setCheckable(true);
     highlightNewMessagesAction_->setChecked(highlightEnabled_);
-    QObject::connect(
-        highlightNewMessagesAction_, &QAction::triggered,
-        [this](bool checked) { this->highlightEnabled_ = checked; });
+    QObject::connect(highlightNewMessagesAction_, &QAction::triggered,
+                     [this](bool checked) {
+                         this->highlightEnabled_ = checked;
+                     });
     this->menu_.addAction(highlightNewMessagesAction_);
+
+    this->menu_.addSeparator();
+
+    this->notebook_->addNotebookActionsToMenu(&this->menu_);
 }
 
 void NotebookTab::showRenameDialog()
 {
-    TextInputDialog d(this);
+    auto dialog = new QDialog(this);
 
-    d.setWindowTitle("Choose tab title (Empty for default)");
-    d.setText(this->getCustomTitle());
-    d.highlightText();
+    auto vbox = new QVBoxLayout;
 
-    if (d.exec() == QDialog::Accepted)
+    auto lineEdit = new QLineEdit;
+    lineEdit->setText(this->getCustomTitle());
+    lineEdit->setPlaceholderText(this->getDefaultTitle());
+    lineEdit->selectAll();
+
+    vbox->addWidget(new QLabel("Name:"));
+    vbox->addWidget(lineEdit);
+    vbox->addStretch(1);
+
+    auto buttonBox =
+        new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+    vbox->addWidget(buttonBox);
+    dialog->setLayout(vbox);
+
+    QObject::connect(buttonBox, &QDialogButtonBox::accepted, [dialog] {
+        dialog->accept();
+        dialog->close();
+    });
+
+    QObject::connect(buttonBox, &QDialogButtonBox::rejected, [dialog] {
+        dialog->reject();
+        dialog->close();
+    });
+
+    dialog->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    dialog->setMinimumSize(dialog->minimumSizeHint().width() + 50,
+                           dialog->minimumSizeHint().height() + 10);
+
+    dialog->setWindowFlags(
+        (dialog->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
+        Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+
+    dialog->setWindowTitle("Rename Tab");
+
+    if (dialog->exec() == QDialog::Accepted)
     {
-        QString newTitle = d.getText();
+        QString newTitle = lineEdit->text();
         this->setCustomTitle(newTitle);
     }
 }
@@ -89,7 +148,20 @@ void NotebookTab::themeChangedEvent()
     this->setMouseEffectColor(this->theme->tabs.regular.text);
 }
 
-void NotebookTab::updateSize()
+void NotebookTab::growWidth(int width)
+{
+    if (this->growWidth_ != width)
+    {
+        this->growWidth_ = width;
+        this->updateSize();
+    }
+    else
+    {
+        this->growWidth_ = width;
+    }
+}
+
+int NotebookTab::normalTabWidth()
 {
     float scale = this->scale();
     int width;
@@ -99,11 +171,11 @@ void NotebookTab::updateSize()
 
     if (this->hasXButton())
     {
-        width = (metrics.width(this->getTitle()) + int(32 * scale));
+        width = (metrics.horizontalAdvance(this->getTitle()) + int(32 * scale));
     }
     else
     {
-        width = (metrics.width(this->getTitle()) + int(16 * scale));
+        width = (metrics.horizontalAdvance(this->getTitle()) + int(16 * scale));
     }
 
     if (this->height() > 150 * scale)
@@ -114,7 +186,20 @@ void NotebookTab::updateSize()
     {
         width = clamp(width, this->height(), int(150 * scale));
     }
+
+    return width;
+}
+
+void NotebookTab::updateSize()
+{
+    float scale = this->scale();
+    int width = this->normalTabWidth();
     auto height = int(NOTEBOOK_TAB_HEIGHT * scale);
+
+    if (width < this->growWidth_)
+    {
+        width = this->growWidth_;
+    }
 
     if (this->width() != width || this->height() != height)
     {
@@ -175,7 +260,7 @@ void NotebookTab::titleUpdated()
 {
     // Queue up save because: Tab title changed
     getApp()->windows->queueSave();
-
+    this->notebook_->performLayout();
     this->updateSize();
     this->update();
 }
@@ -375,7 +460,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
         textRect.setRight(textRect.right() - this->height() / 2);
     }
 
-    int width = metrics.width(this->getTitle());
+    int width = metrics.horizontalAdvance(this->getTitle());
     Qt::Alignment alignment = width > textRect.width()
                                   ? Qt::AlignLeft | Qt::AlignVCenter
                                   : Qt::AlignHCenter | Qt::AlignVCenter;
@@ -458,7 +543,7 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
         switch (event->button())
         {
             case Qt::RightButton: {
-                this->menu_.popup(event->globalPos());
+                this->menu_.popup(event->globalPos() + QPoint(0, 8));
             }
             break;
             default:;
@@ -551,7 +636,7 @@ void NotebookTab::dragEnterEvent(QDragEnterEvent *event)
 void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 {
     if (getSettings()->showTabCloseButton &&
-        this->notebook_->getAllowUserTabManagement())  //
+        this->notebook_->getAllowUserTabManagement())
     {
         bool overX = this->getXRect().contains(event->pos());
 
@@ -567,7 +652,7 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
     QPoint relPoint = this->mapToParent(event->pos());
 
     if (this->mouseDown_ && !this->getDesiredRect().contains(relPoint) &&
-        this->notebook_->getAllowUserTabManagement())  //
+        this->notebook_->getAllowUserTabManagement())
     {
         int index;
         QWidget *clickedPage =
@@ -585,7 +670,7 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 void NotebookTab::wheelEvent(QWheelEvent *event)
 {
     const auto defaultMouseDelta = 120;
-    const auto delta = event->delta();
+    const auto verticalDelta = event->angleDelta().y();
     const auto selectTab = [this](int delta) {
         delta > 0 ? this->notebook_->selectPreviousTab()
                   : this->notebook_->selectNextTab();
@@ -593,9 +678,9 @@ void NotebookTab::wheelEvent(QWheelEvent *event)
     // If it's true
     // Then the user uses the trackpad or perhaps the most accurate mouse
     // Which has small delta.
-    if (std::abs(delta) < defaultMouseDelta)
+    if (std::abs(verticalDelta) < defaultMouseDelta)
     {
-        this->mouseWheelDelta_ += delta;
+        this->mouseWheelDelta_ += verticalDelta;
         if (std::abs(this->mouseWheelDelta_) >= defaultMouseDelta)
         {
             selectTab(this->mouseWheelDelta_);
@@ -604,7 +689,7 @@ void NotebookTab::wheelEvent(QWheelEvent *event)
     }
     else
     {
-        selectTab(delta);
+        selectTab(verticalDelta);
     }
 }
 

@@ -50,6 +50,9 @@ using ImagePtr = std::shared_ptr<Image>;
 class Image : public std::enable_shared_from_this<Image>, boost::noncopyable
 {
 public:
+    // Maximum amount of RAM used by the image in bytes.
+    static constexpr int maxBytesRam = 20 * 1024 * 1024;
+
     ~Image();
 
     static ImagePtr fromUrl(const Url &url, qreal scale = 1);

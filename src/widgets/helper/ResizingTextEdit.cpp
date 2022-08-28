@@ -5,6 +5,7 @@
 #include "singletons/Settings.hpp"
 
 #include <QMimeData>
+#include <QMimeDatabase>
 
 namespace chatterino {
 
@@ -21,10 +22,12 @@ ResizingTextEdit::ResizingTextEdit()
 
     // Whenever the setting for emote completion changes, force a
     // refresh on the completion model the next time "Tab" is pressed
-    getSettings()->prefixOnlyEmoteCompletion.connect(
-        [this] { this->completionInProgress_ = false; });
+    getSettings()->prefixOnlyEmoteCompletion.connect([this] {
+        this->completionInProgress_ = false;
+    });
 
     this->setFocusPolicy(Qt::ClickFocus);
+    this->installEventFilter(this);
 }
 
 QSize ResizingTextEdit::sizeHint() const
@@ -36,6 +39,13 @@ bool ResizingTextEdit::hasHeightForWidth() const
 {
     return true;
 }
+
+bool ResizingTextEdit::isFirstWord() const
+{
+    QString plainText = this->toPlainText();
+    QString portionBeforeCursor = plainText.left(this->textCursor().position());
+    return !portionBeforeCursor.contains(' ');
+};
 
 int ResizingTextEdit::heightForWidth(int) const
 {
@@ -86,6 +96,24 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
     return lastWord;
 }
 
+bool ResizingTextEdit::eventFilter(QObject *obj, QEvent *event)
+{
+    (void)obj;  // unused
+
+    // makes QShortcuts work in the ResizingTextEdit
+    if (event->type() != QEvent::ShortcutOverride)
+    {
+        return false;
+    }
+    auto ev = static_cast<QKeyEvent *>(event);
+    ev->ignore();
+    if ((ev->key() == Qt::Key_C || ev->key() == Qt::Key_Insert) &&
+        ev->modifiers() == Qt::ControlModifier)
+    {
+        return false;
+    }
+    return true;
+}
 void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 {
     event->ignore();
@@ -94,7 +122,8 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
     bool doComplete =
         (event->key() == Qt::Key_Tab || event->key() == Qt::Key_Backtab) &&
-        (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier;
+        (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier &&
+        !event->isAccepted();
 
     if (doComplete)
     {
@@ -105,17 +134,6 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         }
 
         QString currentCompletionPrefix = this->textUnderCursor();
-        bool isFirstWord = [&] {
-            QString plainText = this->toPlainText();
-            for (int i = this->textCursor().position(); i >= 0; i--)
-            {
-                if (plainText[i] == ' ')
-                {
-                    return false;
-                }
-            }
-            return true;
-        }();
 
         // check if there is something to complete
         if (currentCompletionPrefix.size() <= 1)
@@ -131,7 +149,8 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             // First type pressing tab after modifying a message, we refresh our
             // completion model
             this->completer_->setModel(completionModel);
-            completionModel->refresh(currentCompletionPrefix, isFirstWord);
+            completionModel->refresh(currentCompletionPrefix,
+                                     this->isFirstWord());
             this->completionInProgress_ = true;
             this->completer_->setCompletionPrefix(currentCompletionPrefix);
             this->completer_->complete();
@@ -163,14 +182,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         return;
     }
 
-    // (hemirt)
-    // this resets the selection in the completion list, it should probably only
-    // trigger on actual chat input (space, character) and not on every key
-    // input (pressing alt for example) (fourtf) fixed for shift+tab, there
-    // might be a better solution but nobody is gonna bother anyways
-    if (event->key() != Qt::Key_Shift && event->key() != Qt::Key_Control &&
-        event->key() != Qt::Key_Alt && event->key() != Qt::Key_Super_L &&
-        event->key() != Qt::Key_Super_R)
+    if (!event->text().isEmpty())
     {
         this->completionInProgress_ = false;
     }
@@ -269,14 +281,33 @@ bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
 
 void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 {
-    if (source->hasImage() || source->hasUrls())
+    if (source->hasImage())
     {
         this->imagePasted.invoke(source);
+        return;
     }
-    else
+    else if (source->hasUrls())
     {
-        insertPlainText(source->text());
+        bool hasUploadable = false;
+        auto mimeDb = QMimeDatabase();
+        for (const QUrl url : source->urls())
+        {
+            QMimeType mime = mimeDb.mimeTypeForUrl(url);
+            if (mime.name().startsWith("image"))
+            {
+                hasUploadable = true;
+                break;
+            }
+        }
+
+        if (hasUploadable)
+        {
+            this->imagePasted.invoke(source);
+            return;
+        }
     }
+
+    insertPlainText(source->text());
 }
 
 QCompleter *ResizingTextEdit::getCompleter() const

@@ -3,6 +3,8 @@
 #include "Application.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/irc/IrcChannel2.hpp"
+#include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
@@ -24,6 +26,7 @@ namespace chatterino {
 //
 Channel::Channel(const QString &name, Type type)
     : completionModel(*this)
+    , lastDate_(QDate::currentDate())
     , name_(name)
     , type_(type)
 {
@@ -45,6 +48,11 @@ const QString &Channel::getName() const
 }
 
 const QString &Channel::getDisplayName() const
+{
+    return this->getName();
+}
+
+const QString &Channel::getLocalizedName() const
 {
     return this->getName();
 }
@@ -75,11 +83,23 @@ void Channel::addMessage(MessagePtr message,
     auto app = getApp();
     MessagePtr deleted;
 
-    // FOURTF: change this when adding more providers
-    if (this->isTwitchChannel() &&
-        (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog)))
+    if (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog))
     {
-        app->logging->addMessage(this->name_, message);
+        QString channelPlatform("other");
+        if (this->type_ == Type::Irc)
+        {
+            auto *irc = dynamic_cast<IrcChannel *>(this);
+            if (irc != nullptr)
+            {
+                channelPlatform = QString("irc-%1").arg(
+                    irc->server()->userFriendlyIdentifier());
+            }
+        }
+        else if (this->isTwitchChannel())
+        {
+            channelPlatform = "twitch";
+        }
+        app->logging->addMessage(this->name_, message, channelPlatform);
     }
 
     if (this->messages_.pushBack(message, deleted))
@@ -130,17 +150,17 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
         }
 
         if (s->flags.has(MessageFlag::Timeout) &&
-            s->timeoutUser == message->timeoutUser)  //
+            s->timeoutUser == message->timeoutUser)
         {
             if (message->flags.has(MessageFlag::PubSub) &&
-                !s->flags.has(MessageFlag::PubSub))  //
+                !s->flags.has(MessageFlag::PubSub))
             {
                 this->replaceMessage(s, message);
                 addMessage = false;
                 break;
             }
             if (!message->flags.has(MessageFlag::PubSub) &&
-                s->flags.has(MessageFlag::PubSub))  //
+                s->flags.has(MessageFlag::PubSub))
             {
                 addMessage = timeoutStackStyle == TimeoutStackStyle::DontStack;
                 break;
@@ -148,7 +168,8 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
 
             int count = s->count + 1;
 
-            MessageBuilder replacement(timeoutMessage, message->searchText,
+            MessageBuilder replacement(timeoutMessage, message->timeoutUser,
+                                       message->loginName, message->searchText,
                                        count);
 
             replacement->timeoutUser = message->timeoutUser;
@@ -203,7 +224,7 @@ void Channel::disableAllMessages()
     }
 }
 
-void Channel::addMessagesAtStart(std::vector<MessagePtr> &_messages)
+void Channel::addMessagesAtStart(const std::vector<MessagePtr> &_messages)
 {
     std::vector<MessagePtr> addedMessages =
         this->messages_.pushFront(_messages);
@@ -211,6 +232,93 @@ void Channel::addMessagesAtStart(std::vector<MessagePtr> &_messages)
     if (addedMessages.size() != 0)
     {
         this->messagesAddedAtStart.invoke(addedMessages);
+    }
+}
+
+void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
+{
+    if (messages.empty())
+    {
+        return;
+    }
+
+    auto snapshot = this->getMessageSnapshot();
+    if (snapshot.size() == 0)
+    {
+        // There are no messages in this channel yet so we can just insert them
+        // at the front in order
+        this->messages_.pushFront(messages);
+        this->filledInMessages.invoke(messages);
+        return;
+    }
+
+    std::unordered_set<QString> existingMessageIds;
+    existingMessageIds.reserve(snapshot.size());
+
+    // First, collect the ids of every message already present in the channel
+    for (auto &msg : snapshot)
+    {
+        if (msg->flags.has(MessageFlag::System) || msg->id.isEmpty())
+        {
+            continue;
+        }
+
+        existingMessageIds.insert(msg->id);
+    }
+
+    bool anyInserted = false;
+
+    // Keep track of the last message in the channel. We need this value
+    // to allow concurrent appends to the end of the channel while still
+    // being able to insert just-loaded historical messages at the end
+    // in the correct place.
+    auto lastMsg = snapshot[snapshot.size() - 1];
+    for (auto &msg : messages)
+    {
+        // check if message already exists
+        if (existingMessageIds.count(msg->id) != 0)
+        {
+            continue;
+        }
+
+        // If we get to this point, we know we'll be inserting a message
+        anyInserted = true;
+
+        bool insertedFlag = false;
+        for (auto &snapshotMsg : snapshot)
+        {
+            if (snapshotMsg->flags.has(MessageFlag::System))
+            {
+                continue;
+            }
+
+            if (msg->serverReceivedTime < snapshotMsg->serverReceivedTime)
+            {
+                // We found the first message that comes after the current message.
+                // Therefore, we can put the current message directly before. We
+                // assume that the messages we are filling in are in ascending
+                // order by serverReceivedTime.
+                this->messages_.insertBefore(snapshotMsg, msg);
+                insertedFlag = true;
+                break;
+            }
+        }
+
+        if (!insertedFlag)
+        {
+            // We never found a message already in the channel that came after
+            // the current message. Put it at the end and make sure to update
+            // which message is considered "the end".
+            this->messages_.insertAfter(lastMsg, msg);
+            lastMsg = msg;
+        }
+    }
+
+    if (anyInserted)
+    {
+        // We only invoke a signal once at the end of filling all messages to
+        // prevent doing any unnecessary repaints.
+        this->filledInMessages.invoke(messages);
     }
 }
 
@@ -224,28 +332,48 @@ void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
     }
 }
 
+void Channel::replaceMessage(size_t index, MessagePtr replacement)
+{
+    if (this->messages_.replaceItem(index, replacement))
+    {
+        this->messageReplaced.invoke(index, replacement);
+    }
+}
+
 void Channel::deleteMessage(QString messageID)
 {
-    LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
-    int snapshotLength = snapshot.size();
-
-    int end = std::max(0, snapshotLength - 200);
-
-    for (int i = snapshotLength - 1; i >= end; --i)
+    auto msg = this->findMessage(messageID);
+    if (msg != nullptr)
     {
-        auto &s = snapshot[i];
-
-        if (s->id == messageID)
-        {
-            s->flags.set(MessageFlag::Disabled);
-            break;
-        }
+        msg->flags.set(MessageFlag::Disabled);
     }
+}
+
+MessagePtr Channel::findMessage(QString messageID)
+{
+    MessagePtr res;
+
+    if (auto msg = this->messages_.rfind([&messageID](const MessagePtr &msg) {
+            return msg->id == messageID;
+        });
+        msg)
+    {
+        res = *msg;
+    }
+
+    return res;
 }
 
 bool Channel::canSendMessage() const
 {
     return false;
+}
+
+bool Channel::isWritable() const
+{
+    using Type = Channel::Type;
+    auto type = this->getType();
+    return type != Type::TwitchMentions && type != Type::TwitchLive;
 }
 
 void Channel::sendMessage(const QString &message)
@@ -307,17 +435,17 @@ void Channel::onConnected()
 // Indirect channel
 //
 IndirectChannel::Data::Data(ChannelPtr _channel, Channel::Type _type)
-    : channel(_channel)
+    : channel(std::move(_channel))
     , type(_type)
 {
 }
 
 IndirectChannel::IndirectChannel(ChannelPtr channel, Channel::Type type)
-    : data_(std::make_unique<Data>(channel, type))
+    : data_(std::make_unique<Data>(std::move(channel), type))
 {
 }
 
-ChannelPtr IndirectChannel::get()
+ChannelPtr IndirectChannel::get() const
 {
     return data_->channel;
 }
@@ -326,7 +454,7 @@ void IndirectChannel::reset(ChannelPtr channel)
 {
     assert(this->data_->type != Channel::Type::Direct);
 
-    this->data_->channel = channel;
+    this->data_->channel = std::move(channel);
     this->data_->changed.invoke();
 }
 

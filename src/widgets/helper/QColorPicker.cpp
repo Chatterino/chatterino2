@@ -38,6 +38,9 @@
 ****************************************************************************/
 #include "widgets/helper/QColorPicker.hpp"
 
+#include <QMouseEvent>
+#include <QPainter>
+
 #include <qdrawutil.h>
 
 /*

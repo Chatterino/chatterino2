@@ -1,10 +1,13 @@
 #include "providers/twitch/api/Helix.hpp"
 
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
+
+#include <QJsonDocument>
 
 namespace chatterino {
 
-static Helix *instance = nullptr;
+static IHelix *instance = nullptr;
 
 void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
                        ResultCallback<std::vector<HelixUser>> successCallback,
@@ -45,19 +48,19 @@ void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto /*result*/) {
             // TODO: make better xd
             failureCallback();
         })
         .execute();
 }
 
-void Helix::getUserByName(QString userId,
+void Helix::getUserByName(QString userName,
                           ResultCallback<HelixUser> successCallback,
                           HelixFailureCallback failureCallback)
 {
     QStringList userIds;
-    QStringList userLogins{userId};
+    QStringList userLogins{std::move(userName)};
 
     this->fetchUsers(
         userIds, userLogins,
@@ -77,7 +80,7 @@ void Helix::getUserById(QString userId,
                         ResultCallback<HelixUser> successCallback,
                         HelixFailureCallback failureCallback)
 {
-    QStringList userIds{userId};
+    QStringList userIds{std::move(userId)};
     QStringList userLogins;
 
     this->fetchUsers(
@@ -124,7 +127,7 @@ void Helix::fetchUsersFollows(
             successCallback(HelixUsersFollowsResponse(root));
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto /*result*/) {
             // TODO: make better xd
             failureCallback();
         })
@@ -135,32 +138,14 @@ void Helix::getUserFollowers(
     QString userId, ResultCallback<HelixUsersFollowsResponse> successCallback,
     HelixFailureCallback failureCallback)
 {
-    this->fetchUsersFollows("", userId, successCallback, failureCallback);
-}
-
-void Helix::getUserFollow(
-    QString userId, QString targetId,
-    ResultCallback<bool, HelixUsersFollowsRecord> successCallback,
-    HelixFailureCallback failureCallback)
-{
-    this->fetchUsersFollows(
-        userId, targetId,
-        [successCallback](const auto &response) {
-            if (response.data.empty())
-            {
-                successCallback(false, HelixUsersFollowsRecord());
-                return;
-            }
-
-            successCallback(true, response.data[0]);
-        },
-        failureCallback);
+    this->fetchUsersFollows("", std::move(userId), std::move(successCallback),
+                            std::move(failureCallback));
 }
 
 void Helix::fetchStreams(
     QStringList userIds, QStringList userLogins,
     ResultCallback<std::vector<HelixStream>> successCallback,
-    HelixFailureCallback failureCallback)
+    HelixFailureCallback failureCallback, std::function<void()> finallyCallback)
 {
     QUrlQuery urlQuery;
 
@@ -197,23 +182,25 @@ void Helix::fetchStreams(
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto /*result*/) {
             // TODO: make better xd
             failureCallback();
         })
+        .finally(finallyCallback)
         .execute();
 }
 
 void Helix::getStreamById(QString userId,
                           ResultCallback<bool, HelixStream> successCallback,
-                          HelixFailureCallback failureCallback)
+                          HelixFailureCallback failureCallback,
+                          std::function<void()> finallyCallback)
 {
-    QStringList userIds{userId};
+    QStringList userIds{std::move(userId)};
     QStringList userLogins;
 
     this->fetchStreams(
         userIds, userLogins,
-        [successCallback, failureCallback](const auto &streams) {
+        [successCallback](const auto &streams) {
             if (streams.empty())
             {
                 successCallback(false, HelixStream());
@@ -221,15 +208,16 @@ void Helix::getStreamById(QString userId,
             }
             successCallback(true, streams[0]);
         },
-        failureCallback);
+        failureCallback, finallyCallback);
 }
 
 void Helix::getStreamByName(QString userName,
                             ResultCallback<bool, HelixStream> successCallback,
-                            HelixFailureCallback failureCallback)
+                            HelixFailureCallback failureCallback,
+                            std::function<void()> finallyCallback)
 {
     QStringList userIds;
-    QStringList userLogins{userName};
+    QStringList userLogins{std::move(userName)};
 
     this->fetchStreams(
         userIds, userLogins,
@@ -241,7 +229,7 @@ void Helix::getStreamByName(QString userName,
             }
             successCallback(true, streams[0]);
         },
-        failureCallback);
+        failureCallback, finallyCallback);
 }
 
 ///
@@ -287,7 +275,43 @@ void Helix::fetchGames(QStringList gameIds, QStringList gameNames,
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto /*result*/) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::searchGames(QString gameName,
+                        ResultCallback<std::vector<HelixGame>> successCallback,
+                        HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("query", gameName);
+
+    this->makeRequest("search/categories", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixGame> games;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                games.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(games);
+
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
             // TODO: make better xd
             failureCallback();
         })
@@ -298,7 +322,7 @@ void Helix::getGameById(QString gameId,
                         ResultCallback<HelixGame> successCallback,
                         HelixFailureCallback failureCallback)
 {
-    QStringList gameIds{gameId};
+    QStringList gameIds{std::move(gameId)};
     QStringList gameNames;
 
     this->fetchGames(
@@ -314,20 +338,452 @@ void Helix::getGameById(QString gameId,
         failureCallback);
 }
 
+void Helix::createClip(QString channelId,
+                       ResultCallback<HelixClip> successCallback,
+                       std::function<void(HelixClipError)> failureCallback,
+                       std::function<void()> finallyCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", channelId);
+
+    this->makeRequest("clips", urlQuery)
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback(HelixClipError::Unknown);
+                return Failure;
+            }
+
+            HelixClip clip(data.toArray()[0].toObject());
+
+            successCallback(clip);
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            switch (result.status())
+            {
+                case 503: {
+                    // Channel has disabled clip-creation, or channel has made cliops only creatable by followers and the user is not a follower (or subscriber)
+                    failureCallback(HelixClipError::ClipsDisabled);
+                }
+                break;
+
+                case 401: {
+                    // User does not have the required scope to be able to create clips, user must reauthenticate
+                    failureCallback(HelixClipError::UserNotAuthenticated);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Failed to create a clip: " << result.status()
+                        << result.getData();
+                    failureCallback(HelixClipError::Unknown);
+                }
+                break;
+            }
+        })
+        .finally(std::move(finallyCallback))
+        .execute();
+}
+
+void Helix::getChannel(QString broadcasterId,
+                       ResultCallback<HelixChannel> successCallback,
+                       HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+
+    this->makeRequest("channels", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            HelixChannel channel(data.toArray()[0].toObject());
+
+            successCallback(channel);
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::createStreamMarker(
+    QString broadcasterId, QString description,
+    ResultCallback<HelixStreamMarker> successCallback,
+    std::function<void(HelixStreamMarkerError)> failureCallback)
+{
+    QJsonObject payload;
+
+    if (!description.isEmpty())
+    {
+        payload.insert("description", QJsonValue(description));
+    }
+    payload.insert("user_id", QJsonValue(broadcasterId));
+
+    this->makeRequest("streams/markers", QUrlQuery())
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback(HelixStreamMarkerError::Unknown);
+                return Failure;
+            }
+
+            HelixStreamMarker streamMarker(data.toArray()[0].toObject());
+
+            successCallback(streamMarker);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            switch (result.status())
+            {
+                case 403: {
+                    // User isn't a Channel Editor, so he can't create markers
+                    failureCallback(HelixStreamMarkerError::UserNotAuthorized);
+                }
+                break;
+
+                case 401: {
+                    // User does not have the required scope to be able to create stream markers, user must reauthenticate
+                    failureCallback(
+                        HelixStreamMarkerError::UserNotAuthenticated);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Failed to create a stream marker: "
+                        << result.status() << result.getData();
+                    failureCallback(HelixStreamMarkerError::Unknown);
+                }
+                break;
+            }
+        })
+        .execute();
+};
+
+void Helix::loadBlocks(QString userId,
+                       ResultCallback<std::vector<HelixBlock>> successCallback,
+                       HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", userId);
+    urlQuery.addQueryItem("first", "100");
+
+    this->makeRequest("users/blocks", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixBlock> ignores;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                ignores.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(ignores);
+
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::blockUser(QString targetUserId,
+                      std::function<void()> successCallback,
+                      HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("target_user_id", targetUserId);
+
+    this->makeRequest("users/blocks", urlQuery)
+        .type(NetworkRequestType::Put)
+        .onSuccess([successCallback](auto /*result*/) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::unblockUser(QString targetUserId,
+                        std::function<void()> successCallback,
+                        HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("target_user_id", targetUserId);
+
+    this->makeRequest("users/blocks", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback](auto /*result*/) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::updateChannel(QString broadcasterId, QString gameId,
+                          QString language, QString title,
+                          std::function<void(NetworkResult)> successCallback,
+                          HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    auto data = QJsonDocument();
+    auto obj = QJsonObject();
+    if (!gameId.isEmpty())
+    {
+        obj.insert("game_id", gameId);
+    }
+    if (!language.isEmpty())
+    {
+        obj.insert("broadcaster_language", language);
+    }
+    if (!title.isEmpty())
+    {
+        obj.insert("title", title);
+    }
+
+    if (title.isEmpty() && gameId.isEmpty() && language.isEmpty())
+    {
+        qCDebug(chatterinoCommon) << "Tried to update channel with no changes!";
+        return;
+    }
+
+    data.setObject(obj);
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+    this->makeRequest("channels", urlQuery)
+        .type(NetworkRequestType::Patch)
+        .header("Content-Type", "application/json")
+        .payload(data.toJson())
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            successCallback(result);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::manageAutoModMessages(
+    QString userID, QString msgID, QString action,
+    std::function<void()> successCallback,
+    std::function<void(HelixAutoModMessageError)> failureCallback)
+{
+    QJsonObject payload;
+
+    payload.insert("user_id", userID);
+    payload.insert("msg_id", msgID);
+    payload.insert("action", action);
+
+    this->makeRequest("moderation/automod/message", QUrlQuery())
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback, msgID, action](NetworkResult result) {
+            switch (result.status())
+            {
+                case 400: {
+                    // Message was already processed
+                    failureCallback(
+                        HelixAutoModMessageError::MessageAlreadyProcessed);
+                }
+                break;
+
+                case 401: {
+                    // User is missing the required scope
+                    failureCallback(
+                        HelixAutoModMessageError::UserNotAuthenticated);
+                }
+                break;
+
+                case 403: {
+                    // Requesting user is not authorized to manage messages
+                    failureCallback(
+                        HelixAutoModMessageError::UserNotAuthorized);
+                }
+                break;
+
+                case 404: {
+                    // Message not found or invalid msgID
+                    failureCallback(HelixAutoModMessageError::MessageNotFound);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Failed to manage automod message: " << action
+                        << msgID << result.status() << result.getData();
+                    failureCallback(HelixAutoModMessageError::Unknown);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
+void Helix::getCheermotes(
+    QString broadcasterId,
+    ResultCallback<std::vector<HelixCheermoteSet>> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+
+    this->makeRequest("bits/cheermotes", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixCheermoteSet> cheermoteSets;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                cheermoteSets.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(cheermoteSets);
+            return Success;
+        })
+        .onError([broadcasterId, failureCallback](NetworkResult result) {
+            qCDebug(chatterinoTwitch)
+                << "Failed to get cheermotes(broadcaster_id=" << broadcasterId
+                << "): " << result.status() << result.getData();
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::getEmoteSetData(QString emoteSetId,
+                            ResultCallback<HelixEmoteSetData> successCallback,
+                            HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("emote_set_id", emoteSetId);
+
+    this->makeRequest("chat/emotes/set", urlQuery)
+        .onSuccess([successCallback, failureCallback,
+                    emoteSetId](auto result) -> Outcome {
+            QJsonObject root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray() || data.toArray().isEmpty())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            HelixEmoteSetData emoteSetData(data.toArray()[0].toObject());
+
+            successCallback(emoteSetData);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::getChannelEmotes(
+    QString broadcasterId,
+    ResultCallback<std::vector<HelixChannelEmote>> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+
+    this->makeRequest("chat/emotes", urlQuery)
+        .onSuccess([successCallback,
+                    failureCallback](NetworkResult result) -> Outcome {
+            QJsonObject root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixChannelEmote> channelEmotes;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                channelEmotes.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(channelEmotes);
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
 
     if (this->clientId.isEmpty())
     {
-        qDebug()
+        qCDebug(chatterinoTwitch)
             << "Helix::makeRequest called without a client ID set BabyRage";
         // return boost::none;
     }
 
     if (this->oauthToken.isEmpty())
     {
-        qDebug()
+        qCDebug(chatterinoTwitch)
             << "Helix::makeRequest called without an oauth token set BabyRage";
         // return boost::none;
     }
@@ -347,18 +803,25 @@ NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 
 void Helix::update(QString clientId, QString oauthToken)
 {
-    this->clientId = clientId;
-    this->oauthToken = oauthToken;
+    this->clientId = std::move(clientId);
+    this->oauthToken = std::move(oauthToken);
 }
 
 void Helix::initialize()
 {
     assert(instance == nullptr);
 
-    instance = new Helix();
+    initializeHelix(new Helix());
 }
 
-Helix *getHelix()
+void initializeHelix(IHelix *_instance)
+{
+    assert(_instance != nullptr);
+
+    instance = _instance;
+}
+
+IHelix *getHelix()
 {
     assert(instance != nullptr);
 

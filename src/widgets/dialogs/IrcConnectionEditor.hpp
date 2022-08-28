@@ -5,6 +5,8 @@
 #include "providers/irc/Irc2.hpp"
 #include "widgets/BaseWindow.hpp"
 
+#include <QDialog>
+
 namespace Ui {
 class IrcConnectionEditor;
 }

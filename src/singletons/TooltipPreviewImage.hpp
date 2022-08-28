@@ -2,6 +2,8 @@
 
 #include "messages/Image.hpp"
 
+#include <pajlada/signals/signalholder.hpp>
+
 namespace chatterino {
 
 class TooltipPreviewImage
@@ -21,7 +23,7 @@ private:
     int imageWidth_ = 0;
     int imageHeight_ = 0;
 
-    std::vector<pajlada::Signals::ScopedConnection> connections_;
+    pajlada::Signals::SignalHolder connections_;
 
     // attemptRefresh is set to true in case we want to preview an image that has not loaded yet (if pixmapOrLoad fails)
     bool attemptRefresh{false};

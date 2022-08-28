@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "MessageElement.hpp"
-#include "providers/twitch/PubsubActions.hpp"
+#include "providers/twitch/PubSubActions.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 #include "util/IrcHelpers.hpp"
@@ -35,11 +35,18 @@ SBHighlight Message::getScrollBarHighlight() const
         return SBHighlight(
             ColorProvider::instance().color(ColorType::Subscription));
     }
-    else if (this->flags.has(MessageFlag::RedeemedHighlight))
+    else if (this->flags.has(MessageFlag::RedeemedHighlight) ||
+             this->flags.has(MessageFlag::RedeemedChannelPointReward))
     {
         return SBHighlight(
             ColorProvider::instance().color(ColorType::RedeemedHighlight),
             SBHighlight::Default, true);
+    }
+    else if (this->flags.has(MessageFlag::FirstMessage))
+    {
+        return SBHighlight(
+            ColorProvider::instance().color(ColorType::FirstMessageHighlight),
+            SBHighlight::Default, false, true);
     }
     return SBHighlight();
 }

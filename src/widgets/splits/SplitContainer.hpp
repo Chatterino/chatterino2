@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/WindowDescriptors.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QDragEnterEvent>
@@ -13,6 +14,7 @@
 #include <functional>
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <unordered_map>
 #include <vector>
 
 class QJsonObject;
@@ -28,7 +30,7 @@ class Notebook;
 // inside but it doesn't expose any of it publicly.
 //
 
-class SplitContainer final : public BaseWidget, pajlada::Signals::SignalHolder
+class SplitContainer final : public BaseWidget
 {
     Q_OBJECT
 
@@ -177,12 +179,12 @@ public:
     void insertSplit(Split *split, Direction direction, Split *relativeTo);
     void insertSplit(Split *split, Direction direction,
                      Node *relativeTo = nullptr);
+    Split *getSelectedSplit() const;
     Position releaseSplit(Split *split);
     Position deleteSplit(Split *split);
 
     void selectNextSplit(Direction direction);
-
-    void decodeFromJson(QJsonObject &obj);
+    void setSelected(Split *selected_);
 
     int getSplitCount();
     const std::vector<Split *> getSplits() const;
@@ -199,6 +201,10 @@ public:
     static bool isDraggingSplit;
     static Split *draggingSplit;
 
+    void applyFromDescriptor(const NodeDescriptor &rootNode);
+
+    void popup();
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 
@@ -212,15 +218,16 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
+    void applyFromDescriptorRecursively(const NodeDescriptor &rootNode,
+                                        Node *node);
+
     void layout();
-    void setSelected(Split *selected_);
     void selectSplitRecursive(Node *node, Direction direction);
-    void focusSplitRecursive(Node *node, Direction direction);
+    void focusSplitRecursive(Node *node);
     void setPreferedTargetRecursive(Node *node);
 
     void addSplit(Split *split);
 
-    void decodeNodeRecusively(QJsonObject &obj, Node *node);
     Split *getTopRightSplit(Node &node);
 
     void refreshTabTitle();
@@ -244,11 +251,17 @@ private:
     QPoint mouseOverPoint_;
 
     Node baseNode_;
-    Split *selected_;
+    Split *selected_{};
     Split *topRight_{};
+    bool disableLayouting_{};
 
     NotebookTab *tab_;
     std::vector<Split *> splits_;
+
+    std::unordered_map<Split *, pajlada::Signals::SignalHolder>
+        connectionsPerSplit_;
+
+    pajlada::Signals::SignalHolder signalHolder_;
 
     bool isDragging_ = false;
 };

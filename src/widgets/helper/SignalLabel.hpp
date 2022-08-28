@@ -12,14 +12,14 @@ class SignalLabel : public QLabel
     Q_OBJECT
 
 public:
-    explicit SignalLabel(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
+    explicit SignalLabel(QWidget *parent = nullptr, Qt::WindowFlags f = {});
     virtual ~SignalLabel() override = default;
 
 signals:
     void mouseDoubleClick(QMouseEvent *ev);
 
-    void mouseDown();
-    void mouseUp();
+    void leftMouseDown();
+    void leftMouseUp();
     void mouseMove(QMouseEvent *event);
 
 protected:

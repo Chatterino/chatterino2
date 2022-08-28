@@ -2,11 +2,16 @@
 
 #include "singletons/NativeMessaging.hpp"
 
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QStringList>
 #include <QTimer>
+
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <thread>
 
 #ifdef Q_OS_WIN
 #    include <fcntl.h>
@@ -53,19 +58,6 @@ namespace {
 
             auto size = *reinterpret_cast<uint32_t *>(size_c);
 
-#if 0
-    bool bigEndian = isBigEndian();
-        // To avoid breaking strict-aliasing rules and potentially inducing undefined behaviour, the following code can be run instead
-        uint32_t size = 0;
-        if (bigEndian) {
-            size = size_c[3] | static_cast<uint32_t>(size_c[2]) << 8 |
-                   static_cast<uint32_t>(size_c[1]) << 16 | static_cast<uint32_t>(size_c[0]) << 24;
-        } else {
-            size = size_c[0] | static_cast<uint32_t>(size_c[1]) << 8 |
-                   static_cast<uint32_t>(size_c[2]) << 16 | static_cast<uint32_t>(size_c[3]) << 24;
-        }
-#endif
-
             std::unique_ptr<char[]> buffer(new char[size + 1]);
             std::cin.read(buffer.get(), size);
             *(buffer.get() + size) = '\0';
@@ -85,12 +77,6 @@ namespace {
         }
     }
 }  // namespace
-
-bool shouldRunBrowserExtensionHost(const QStringList &args)
-{
-    return args.size() > 0 && (args[0].startsWith("chrome-extension://") ||
-                               args[0].endsWith(".json"));
-}
 
 void runBrowserExtensionHost()
 {

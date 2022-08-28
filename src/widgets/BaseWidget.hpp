@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QShortcut>
 #include <QWidget>
 #include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -15,7 +16,8 @@ class BaseWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BaseWidget(QWidget *parent, Qt::WindowFlags f = Qt::WindowFlags());
+    explicit BaseWidget(QWidget *parent = nullptr,
+                        Qt::WindowFlags f = Qt::WindowFlags());
 
     virtual float scale() const;
     pajlada::Signals::Signal<float> scaleChanged;
@@ -39,10 +41,18 @@ protected:
 
     virtual void scaleChangedEvent(float newScale);
     virtual void themeChangedEvent();
+    [[deprecated("addShortcuts called without overriding it")]] virtual void
+        addShortcuts()
+    {
+    }
 
     void setScale(float value);
 
     Theme *theme;
+
+    std::vector<QShortcut *> shortcuts_;
+    void clearShortcuts();
+    pajlada::Signals::SignalHolder signalHolder_;
 
 private:
     float scale_{1.f};
@@ -50,8 +60,6 @@ private:
     QSize scaleIndependantSize_;
 
     std::vector<BaseWidget *> widgets_;
-
-    pajlada::Signals::SignalHolder signalHolder_;
 
     friend class BaseWindow;
 };

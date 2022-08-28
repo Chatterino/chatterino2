@@ -1,28 +1,31 @@
+---
 name: Check formatting
 
 on:
   push:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
+    branches:
+      - master
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
+
+concurrency: 
+  group: check-formatting-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:19.10
+  check:
+    runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v1
-    - name: apt-get update
-      run: apt-get update
+      - uses: actions/checkout@v3
 
-    - name: Install clang-format
-      run: apt-get -y install clang-format
+      - name: apt-get update
+        run: sudo apt-get update
 
-    - name: Check formatting
-      run: ./tools/check-format.sh
+      - name: Install clang-format
+        run: sudo apt-get -y install clang-format dos2unix
+
+      - name: Check formatting
+        run: ./tools/check-format.sh
+
+      - name: Check line-endings
+        run: ./tools/check-line-endings.sh

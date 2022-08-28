@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QWidget>
+#include "widgets/BasePopup.hpp"
 
 namespace chatterino {
 
-class DebugPopup : public QWidget
+class DebugPopup : public BasePopup
 {
 public:
     DebugPopup();

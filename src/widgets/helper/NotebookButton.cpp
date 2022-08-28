@@ -10,6 +10,8 @@
 #include <QPainterPath>
 #include <QRadialGradient>
 
+#include <QMimeData>
+
 #define nuuls nullptr
 
 namespace chatterino {
@@ -160,7 +162,7 @@ void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
 
     auto e = new QMouseEvent(QMouseEvent::MouseButtonPress,
                              QPointF(this->width() / 2, this->height() / 2),
-                             Qt::LeftButton, Qt::LeftButton, 0);
+                             Qt::LeftButton, Qt::LeftButton, {});
     Button::mousePressEvent(e);
     delete e;
 }
@@ -172,7 +174,7 @@ void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
 
     auto e = new QMouseEvent(QMouseEvent::MouseButtonRelease,
                              QPointF(this->width() / 2, this->height() / 2),
-                             Qt::LeftButton, Qt::LeftButton, 0);
+                             Qt::LeftButton, Qt::LeftButton, {});
     Button::mouseReleaseEvent(e);
     delete e;
 }

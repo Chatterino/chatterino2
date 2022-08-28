@@ -1,0 +1,90 @@
+---
+name: Test
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.3
+
+concurrency: 
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        qt-version: [5.15.2]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v3
+        with:
+          path: "${{ github.workspace }}/qt/"
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
+
+      # LINUX
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: ${{ matrix.qt-version }}
+          dir: "${{ github.workspace }}/qt/"
+
+      # LINUX
+      - name: Install dependencies (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            sudo apt-get update
+            sudo apt-get -y install \
+                cmake \
+                rapidjson-dev \
+                libssl-dev \
+                libboost-dev \
+                libboost-system-dev \
+                libboost-filesystem-dev \
+                libpulse-dev \
+                libxkbcommon-x11-0 \
+                libgstreamer-plugins-base1.0-0 \
+                build-essential \
+                libgl1-mesa-dev \
+                libxcb-icccm4 \
+                libxcb-image0 \
+                libxcb-keysyms1 \
+                libxcb-render-util0 \
+                libxcb-xinerama0
+
+      - name: Create build directory (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            mkdir build-test
+        shell: bash
+
+      - name: Build (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            cmake -DBUILD_TESTS=On -DBUILD_APP=OFF ..
+            cmake --build . --config Release
+        working-directory: build-test
+        shell: bash
+
+      - name: Test (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            docker pull kennethreitz/httpbin
+            docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
+            docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
+            docker run -p 9051:80 --detach kennethreitz/httpbin
+            ./bin/chatterino-test --platform minimal
+        working-directory: build-test
+        shell: bash

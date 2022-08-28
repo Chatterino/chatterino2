@@ -27,7 +27,7 @@ public:
     {
         QPainter painter(this);
 
-        painter.setPen(QColor("#999"));
+        painter.setPen(QColor(153, 153, 153, 153));
 
         if (this->vertical_)
         {

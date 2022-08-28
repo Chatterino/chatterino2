@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QStandardItem>
+#include <QUrl>
 
 namespace chatterino {
 

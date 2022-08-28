@@ -8,8 +8,12 @@
 #include "common/Aliases.hpp"
 #include "common/UniqueAccess.hpp"
 
+#include <memory>
+
+// NB: "default" can be replaced with "static" to always get a non-animated
+// variant
 #define TWITCH_EMOTE_TEMPLATE \
-    "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
+    "https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/{scale}"
 
 namespace chatterino {
 struct Emote;
@@ -32,7 +36,7 @@ struct CheerEmoteSet {
 class TwitchEmotes
 {
 public:
-    static QString cleanUpEmoteCode(const EmoteName &dirtyEmoteCode);
+    static QString cleanUpEmoteCode(const QString &dirtyEmoteCode);
     TwitchEmotes();
 
     EmotePtr getOrCreateEmote(const EmoteId &id, const EmoteName &name);

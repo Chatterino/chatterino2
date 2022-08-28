@@ -1,0 +1,25 @@
+---
+name: Lint
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+concurrency: 
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Lint Markdown files
+        uses: actionsx/prettier@v2
+        with:
+          # prettier CLI arguments.
+          args: --check '**/*.md'

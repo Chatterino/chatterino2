@@ -10,6 +10,8 @@
 #include <pajlada/settings/setting.hpp>
 #include "widgets/helper/SettingsDialogTab.hpp"
 
+#include <QFrame>
+
 class QLineEdit;
 
 namespace chatterino {
@@ -31,10 +33,11 @@ enum class SettingsDialogPreference {
 
 class SettingsDialog : public BaseWindow
 {
-    SettingsDialog();
+    SettingsDialog(QWidget *parent);
 
 public:
-    static void showDialog(SettingsDialogPreference preferredTab =
+    static void showDialog(QWidget *parent,
+                           SettingsDialogPreference preferredTab =
                                SettingsDialogPreference::NoPreference);
 
 protected:
@@ -57,6 +60,7 @@ private:
 
     void onOkClicked();
     void onCancelClicked();
+    void addShortcuts() override;
 
     struct {
         QWidget *tabContainerContainer{};

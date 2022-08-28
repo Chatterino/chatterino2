@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "controllers/moderationactions/ModerationActionModel.hpp"
-#include "controllers/taggedusers/TaggedUsersModel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
 #include "util/Helpers.hpp"
@@ -24,22 +23,17 @@
 
 namespace chatterino {
 
-qint64 dirSize(QString dirPath)
+qint64 dirSize(QString &dirPath)
 {
+    QDirIterator it(dirPath, QDirIterator::Subdirectories);
     qint64 size = 0;
-    QDir dir(dirPath);
-    // calculate total size of current directories' files
-    QDir::Filters fileFilters = QDir::Files | QDir::System | QDir::Hidden;
-    for (QString filePath : dir.entryList(fileFilters))
+
+    while (it.hasNext())
     {
-        QFileInfo fi(dir, filePath);
-        size += fi.size();
+        size += it.fileInfo().size();
+        it.next();
     }
-    // add size of child directories recursively
-    QDir::Filters dirFilters =
-        QDir::Dirs | QDir::NoDotAndDotDot | QDir::System | QDir::Hidden;
-    for (QString childDirPath : dir.entryList(dirFilters))
-        size += dirSize(dirPath + QDir::separator() + childDirPath);
+
     return size;
 }
 
@@ -59,20 +53,18 @@ QString formatSize(qint64 size)
 
 QString fetchLogDirectorySize()
 {
-    QString logPathDirectory = getSettings()->logPath.getValue().isEmpty()
-                                   ? getPaths()->messageLogDirectory
-                                   : getSettings()->logPath;
+    QString logsDirectoryPath = getSettings()->logPath.getValue().isEmpty()
+                                    ? getPaths()->messageLogDirectory
+                                    : getSettings()->logPath;
 
-    qint64 logsSize = dirSize(logPathDirectory);
-    QString logsSizeLabel = "Your logs currently take up ";
-    logsSizeLabel += formatSize(logsSize);
-    logsSizeLabel += " of space";
-    return logsSizeLabel;
+    auto logsSize = dirSize(logsDirectoryPath);
+
+    return QString("Your logs currently take up %1 of space")
+        .arg(formatSize(logsSize));
 }
 
 ModerationPage::ModerationPage()
 {
-    auto app = getApp();
     LayoutCreator<ModerationPage> layoutCreator(this);
 
     auto tabs = layoutCreator.emplace<QTabWidget>();
@@ -120,21 +112,23 @@ ModerationPage::ModerationPage()
 
         // Show how big (size-wise) the logs are
         auto logsPathSizeLabel = logs.emplace<QLabel>();
-        logsPathSizeLabel->setText(
-            QtConcurrent::run([] { return fetchLogDirectorySize(); }));
+        logsPathSizeLabel->setText(QtConcurrent::run([] {
+            return fetchLogDirectorySize();
+        }));
 
         // Select event
-        QObject::connect(
-            selectDir.getElement(), &QPushButton::clicked, this,
-            [this, logsPathSizeLabel]() mutable {
-                auto dirName = QFileDialog::getExistingDirectory(this);
+        QObject::connect(selectDir.getElement(), &QPushButton::clicked, this,
+                         [this, logsPathSizeLabel]() mutable {
+                             auto dirName =
+                                 QFileDialog::getExistingDirectory(this);
 
-                getSettings()->logPath = dirName;
+                             getSettings()->logPath = dirName;
 
-                // Refresh: Show how big (size-wise) the logs are
-                logsPathSizeLabel->setText(
-                    QtConcurrent::run([] { return fetchLogDirectorySize(); }));
-            });
+                             // Refresh: Show how big (size-wise) the logs are
+                             logsPathSizeLabel->setText(QtConcurrent::run([] {
+                                 return fetchLogDirectorySize();
+                             }));
+                         });
 
         buttons->addSpacing(16);
 
@@ -144,8 +138,9 @@ ModerationPage::ModerationPage()
                              getSettings()->logPath = "";
 
                              // Refresh: Show how big (size-wise) the logs are
-                             logsPathSizeLabel->setText(QtConcurrent::run(
-                                 [] { return fetchLogDirectorySize(); }));
+                             logsPathSizeLabel->setText(QtConcurrent::run([] {
+                                 return fetchLogDirectorySize();
+                             }));
                          });
 
     }  // logs end
@@ -155,8 +150,10 @@ ModerationPage::ModerationPage()
         // clang-format off
         auto label = modMode.emplace<QLabel>(
             "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/modModeDisabled.png'> in a channel that you moderate.<br><br>"
-            "Moderation buttons can be bound to chat commands such as \"/ban {user}\", \"/timeout {user} 1000\", \"/w someusername !report {user} was bad in channel {channel}\" or any other custom text commands.<br>"
-            "For deleting messages use /delete {msg-id}.");
+            "Moderation buttons can be bound to chat commands such as \"/ban {user.name}\", \"/timeout {user.name} 1000\", \"/w someusername !report {user.name} was bad in channel {channel.name}\" or any other custom text commands.<br>"
+            "For deleting messages use /delete {msg.id}.<br><br>"
+            "More information can be found <a href='https://wiki.chatterino.com/Moderation/#moderation-mode'>here</a>.");
+        label->setOpenExternalLinks(true);
         label->setWordWrap(true);
         label->setStyleSheet("color: #bbb");
         // clang-format on
@@ -184,26 +181,101 @@ ModerationPage::ModerationPage()
 
         view->addButtonPressed.connect([] {
             getSettings()->moderationActions.append(
-                ModerationAction("/timeout {user} 300"));
+                ModerationAction("/timeout {user.name} 300"));
         });
-
-        /*auto taggedUsers = tabs.appendTab(new QVBoxLayout, "Tagged users");
-        {
-            EditableModelView *view = *taggedUsers.emplace<EditableModelView>(
-                app->taggedUsers->createModel(nullptr));
-
-            view->setTitles({"Name"});
-            view->getTableView()->horizontalHeader()->setStretchLastSection(true);
-
-            view->addButtonPressed.connect([] {
-                getApp()->taggedUsers->users.appendItem(
-                    TaggedUser(ProviderId::Twitch, "example", "xD"));
-            });
-        }*/
     }
+
+    this->addModerationButtonSettings(tabs);
 
     // ---- misc
     this->itemsChangedTimer_.setSingleShot(true);
+}
+
+void ModerationPage::addModerationButtonSettings(
+    LayoutCreator<QTabWidget> &tabs)
+{
+    auto timeoutLayout =
+        tabs.appendTab(new QVBoxLayout, "User Timeout Buttons");
+    auto texts = timeoutLayout.emplace<QVBoxLayout>().withoutMargin();
+    {
+        auto infoLabel = texts.emplace<QLabel>();
+        infoLabel->setText(
+            "Customize the timeout buttons in the user popup (accessible "
+            "through clicking a username).\nUse seconds (s), "
+            "minutes (m), hours (h), days (d) or weeks (w).");
+
+        infoLabel->setAlignment(Qt::AlignCenter);
+
+        auto maxLabel = texts.emplace<QLabel>();
+        maxLabel->setText("(maximum timeout duration = 2 w)");
+        maxLabel->setAlignment(Qt::AlignCenter);
+    }
+    texts->setContentsMargins(0, 0, 0, 15);
+    texts->setSizeConstraint(QLayout::SetMaximumSize);
+
+    const auto valueChanged = [=] {
+        const auto index = QObject::sender()->objectName().toInt();
+
+        const auto line = this->durationInputs_[index];
+        const auto duration = line->text().toInt();
+        const auto unit = this->unitInputs_[index]->currentText();
+
+        // safety mechanism for setting days and weeks
+        if (unit == "d" && duration > 14)
+        {
+            line->setText("14");
+            return;
+        }
+        else if (unit == "w" && duration > 2)
+        {
+            line->setText("2");
+            return;
+        }
+
+        auto timeouts = getSettings()->timeoutButtons.getValue();
+        timeouts[index] = TimeoutButton{unit, duration};
+        getSettings()->timeoutButtons.setValue(timeouts);
+    };
+
+    // build one line for each customizable button
+    auto i = 0;
+    for (const auto tButton : getSettings()->timeoutButtons.getValue())
+    {
+        const auto buttonNumber = QString::number(i);
+        auto timeout = timeoutLayout.emplace<QHBoxLayout>().withoutMargin();
+
+        auto buttonLabel = timeout.emplace<QLabel>();
+        buttonLabel->setText(QString("Button %1: ").arg(++i));
+
+        auto *lineEditDurationInput = new QLineEdit();
+        lineEditDurationInput->setObjectName(buttonNumber);
+        lineEditDurationInput->setValidator(new QIntValidator(1, 99, this));
+        lineEditDurationInput->setText(QString::number(tButton.second));
+        lineEditDurationInput->setAlignment(Qt::AlignRight);
+        lineEditDurationInput->setMaximumWidth(30);
+        timeout.append(lineEditDurationInput);
+
+        auto *timeoutDurationUnit = new QComboBox();
+        timeoutDurationUnit->setObjectName(buttonNumber);
+        timeoutDurationUnit->addItems({"s", "m", "h", "d", "w"});
+        timeoutDurationUnit->setCurrentText(tButton.first);
+        timeout.append(timeoutDurationUnit);
+
+        QObject::connect(lineEditDurationInput, &QLineEdit::textChanged, this,
+                         valueChanged);
+
+        QObject::connect(timeoutDurationUnit, &QComboBox::currentTextChanged,
+                         this, valueChanged);
+
+        timeout->addStretch();
+
+        this->durationInputs_.push_back(lineEditDurationInput);
+        this->unitInputs_.push_back(timeoutDurationUnit);
+
+        timeout->setContentsMargins(40, 0, 0, 0);
+        timeout->setSizeConstraint(QLayout::SetMaximumSize);
+    }
+    timeoutLayout->addStretch();
 }
 
 void ModerationPage::selectModerationActions()

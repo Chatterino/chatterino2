@@ -12,6 +12,8 @@
 #    include <Windows.h>
 #endif
 
+#include <QPainter>
+
 namespace chatterino {
 
 TooltipWidget *TooltipWidget::instance()
@@ -21,7 +23,7 @@ TooltipWidget *TooltipWidget::instance()
 }
 
 TooltipWidget::TooltipWidget(BaseWidget *parent)
-    : BaseWindow(BaseWindow::TopMost, parent)
+    : BaseWindow({BaseWindow::TopMost, BaseWindow::DontFocus}, parent)
     , displayImage_(new QLabel())
     , displayText_(new QLabel())
 {
@@ -30,15 +32,6 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     //this->setWindowOpacity(0.8);
     this->updateFont();
     this->setStayInScreenRect(true);
-
-    this->setAttribute(Qt::WA_ShowWithoutActivating);
-#ifdef Q_OS_LINUX
-    this->setWindowFlags(Qt::ToolTip);
-#else
-    this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
-                         Qt::X11BypassWindowManagerHint |
-                         Qt::BypassWindowManagerHint);
-#endif
 
     displayImage_->hide();
     displayImage_->setAlignment(Qt::AlignHCenter);
@@ -52,8 +45,9 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     layout->addWidget(displayText_);
     this->setLayout(layout);
 
-    this->fontChangedConnection_ =
-        getFonts()->fontChanged.connect([this] { this->updateFont(); });
+    this->fontChangedConnection_ = getFonts()->fontChanged.connect([this] {
+        this->updateFont();
+    });
 }
 
 TooltipWidget::~TooltipWidget()

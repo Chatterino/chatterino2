@@ -95,7 +95,7 @@ namespace rj {
     bool getSafeObject(rapidjson::Value &obj, const char *key,
                        rapidjson::Value &out);
 
-    std::string stringify(const rapidjson::Value &value);
+    QString stringify(const rapidjson::Value &value);
 
 }  // namespace rj
 }  // namespace chatterino

@@ -3,6 +3,9 @@
 #include "providers/colors/ColorProvider.hpp"
 #include "singletons/Theme.hpp"
 
+#include <QDialogButtonBox>
+#include <QLineEdit>
+
 namespace chatterino {
 
 ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
@@ -90,15 +93,21 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         layout.emplace<QHBoxLayout>().emplace<QDialogButtonBox>(this);
     {
         auto *button_ok = buttons->addButton(QDialogButtonBox::Ok);
-        QObject::connect(button_ok, &QPushButton::clicked,
-                         [=](bool) { this->ok(); });
+        QObject::connect(button_ok, &QPushButton::clicked, [=](bool) {
+            this->ok();
+        });
         auto *button_cancel = buttons->addButton(QDialogButtonBox::Cancel);
-        QObject::connect(button_cancel, &QAbstractButton::clicked,
-                         [=](bool) { this->close(); });
+        QObject::connect(button_cancel, &QAbstractButton::clicked, [=](bool) {
+            this->close();
+        });
     }
 
     this->themeChangedEvent();
     this->selectColor(initial, false);
+}
+
+void ColorPickerDialog::addShortcuts()
+{
 }
 
 ColorPickerDialog::~ColorPickerDialog()
@@ -123,7 +132,7 @@ QColor ColorPickerDialog::selectedColor() const
 
 void ColorPickerDialog::closeEvent(QCloseEvent *)
 {
-    this->closed.invoke();
+    this->closed.invoke(this->selectedColor());
 }
 
 void ColorPickerDialog::themeChangedEvent()
@@ -216,8 +225,9 @@ void ColorPickerDialog::initRecentColors(LayoutCreator<QWidget> &creator)
 
         grid->addWidget(button, rowInd, columnInd);
 
-        QObject::connect(button, &QPushButton::clicked,
-                         [=] { this->selectColor(button->color(), false); });
+        QObject::connect(button, &QPushButton::clicked, [=] {
+            this->selectColor(button->color(), false);
+        });
 
         ++it;
         ++ind;
@@ -249,8 +259,9 @@ void ColorPickerDialog::initDefaultColors(LayoutCreator<QWidget> &creator)
 
         grid->addWidget(button, rowInd, columnInd);
 
-        QObject::connect(button, &QPushButton::clicked,
-                         [=] { this->selectColor(button->color(), false); });
+        QObject::connect(button, &QPushButton::clicked, [=] {
+            this->selectColor(button->color(), false);
+        });
 
         ++it;
         ++ind;
@@ -264,6 +275,7 @@ void ColorPickerDialog::initDefaultColors(LayoutCreator<QWidget> &creator)
 
 void ColorPickerDialog::initColorPicker(LayoutCreator<QWidget> &creator)
 {
+    this->setWindowTitle("Chatterino - color picker");
     auto cpPanel = creator.setLayoutType<QHBoxLayout>();
 
     /*
@@ -357,12 +369,11 @@ void ColorPickerDialog::initHtmlColor(LayoutCreator<QWidget> &creator)
     html->addWidget(htmlLabel, 0, 0);
     html->addWidget(htmlEdit, 0, 1);
 
-    QObject::connect(htmlEdit, &QLineEdit::textEdited,
-                     [=](const QString &text) {
-                         QColor col(text);
-                         if (col.isValid())
-                             this->selectColor(col, false);
-                     });
+    QObject::connect(htmlEdit, &QLineEdit::editingFinished, [this] {
+        const QColor col(this->ui_.picker.htmlEdit->text());
+        if (col.isValid())
+            this->selectColor(col, false);
+    });
 }
 
 }  // namespace chatterino

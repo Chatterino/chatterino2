@@ -27,6 +27,7 @@ public:
         std::weak_ptr<Channel> channel, const QString &channelId,
         std::function<void(EmoteMap &&)> emoteCallback,
         std::function<void(boost::optional<EmotePtr>)> modBadgeCallback,
+        std::function<void(boost::optional<EmotePtr>)> vipBadgeCallback,
         bool manualRefresh);
 
 private:

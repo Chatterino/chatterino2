@@ -14,10 +14,15 @@ script_path=$(readlink -f "$0")
 script_dir=$(dirname "$script_path")
 chatterino_dir=$(dirname "$script_dir")
 
-qmake_path=$(command -v qmake)
 
+echo "Running LDD on chatterino binary:"
 ldd ./bin/chatterino
+echo ""
+
+echo "Running make install in the appdir"
 make INSTALL_ROOT=appdir -j"$(nproc)" install ; find appdir/
+echo ""
+
 cp "$chatterino_dir"/resources/icon.png ./appdir/chatterino.png
 
 linuxdeployqt_path="linuxdeployqt-6-x86_64.AppImage"
@@ -31,15 +36,17 @@ if [ ! -f appimagetool-x86_64.AppImage ]; then
     wget -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
     chmod a+x appimagetool-x86_64.AppImage
 fi
+echo "Run LinuxDeployQT"
 ./"$linuxdeployqt_path" \
     appdir/usr/share/applications/*.desktop \
     -no-translations \
     -bundle-non-qt-libs \
-    -unsupported-allow-new-glibc \
-    -qmake="$qmake_path"
+    -unsupported-allow-new-glibc
 
 rm -rf appdir/home
 rm -f appdir/AppRun
+
+echo "Run AppImageTool"
 
 # shellcheck disable=SC2016
 echo '#!/bin/sh

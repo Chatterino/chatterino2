@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <boost/optional.hpp>
 #include <boost/preprocessor.hpp>
+#include <memory>
 #include <string>
 
 #include "common/Aliases.hpp"
@@ -29,6 +30,14 @@ const Qt::KeyboardModifiers showAddSplitRegions =
     Qt::ControlModifier | Qt::AltModifier;
 const Qt::KeyboardModifiers showResizeHandlesModifiers = Qt::ControlModifier;
 
+#ifndef ATTR_UNUSED
+#    ifdef Q_OS_WIN
+#        define ATTR_UNUSED
+#    else
+#        define ATTR_UNUSED __attribute__((unused))
+#    endif
+#endif
+
 static const char *ANONYMOUS_USERNAME_LABEL ATTR_UNUSED = " - anonymous - ";
 
 template <typename T>
@@ -42,6 +51,7 @@ using MessagePtr = std::shared_ptr<const Message>;
 
 enum class CopyMode {
     Everything,
+    EverythingButReplies,
     OnlyTextAndEmotes,
 };
 

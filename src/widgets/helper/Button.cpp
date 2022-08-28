@@ -9,6 +9,20 @@
 #include "util/FunctionEventFilter.hpp"
 
 namespace chatterino {
+namespace {
+
+    // returns a new resized image or the old one if the size didn't change
+    auto resizePixmap(const QPixmap &current, const QPixmap resized,
+                      const QSize &size) -> QPixmap
+    {
+        if (resized.size() == size)
+            return resized;
+        else
+            return current.scaled(size, Qt::IgnoreAspectRatio,
+                                  Qt::SmoothTransformation);
+    }
+
+}  // namespace
 
 Button::Button(BaseWidget *parent)
     : BaseWidget(parent)
@@ -24,12 +38,13 @@ Button::Button(BaseWidget *parent)
 
 void Button::setMouseEffectColor(boost::optional<QColor> color)
 {
-    this->mouseEffectColor_ = color;
+    this->mouseEffectColor_ = std::move(color);
 }
 
 void Button::setPixmap(const QPixmap &_pixmap)
 {
     this->pixmap_ = _pixmap;
+    this->resizedPixmap_ = {};
     this->update();
 }
 
@@ -98,14 +113,18 @@ const QColor &Button::getBorderColor() const
 
 void Button::setMenu(std::unique_ptr<QMenu> menu)
 {
+    if (this->menu_)
+        this->menu_.release()->deleteLater();
+
     this->menu_ = std::move(menu);
 
     this->menu_->installEventFilter(
         new FunctionEventFilter(this, [this](QObject *, QEvent *event) {
             if (event->type() == QEvent::Hide)
             {
-                QTimer::singleShot(20, this,
-                                   [this] { this->menuVisible_ = false; });
+                QTimer::singleShot(20, this, [this] {
+                    this->menuVisible_ = false;
+                });
             }
             return false;
         }));
@@ -123,6 +142,9 @@ void Button::paintEvent(QPaintEvent *)
 
         QRect rect = this->rect();
 
+        this->resizedPixmap_ =
+            resizePixmap(this->pixmap_, this->resizedPixmap_, rect.size());
+
         int margin = this->height() < 22 * this->scale() ? 3 : 6;
 
         int s = this->enableMargin_ ? int(margin * this->scale()) : 0;
@@ -132,7 +154,7 @@ void Button::paintEvent(QPaintEvent *)
         rect.moveTop(s);
         rect.setBottom(rect.bottom() - s - s);
 
-        painter.drawPixmap(rect, this->pixmap_);
+        painter.drawPixmap(rect, this->resizedPixmap_);
 
         painter.setOpacity(1);
     }
@@ -225,7 +247,9 @@ void Button::mousePressEvent(QMouseEvent *event)
 
     if (this->menu_ && !this->menuVisible_)
     {
-        QTimer::singleShot(80, this, [this] { this->showMenu(); });
+        QTimer::singleShot(80, this, [this] {
+            this->showMenu();
+        });
         this->mouseDown_ = false;
         this->mouseOver_ = false;
     }

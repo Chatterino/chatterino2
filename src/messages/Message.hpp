@@ -1,6 +1,8 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
+#include "util/QStringHash.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QTime>
@@ -11,6 +13,7 @@
 
 namespace chatterino {
 class MessageElement;
+class MessageThread;
 
 enum class MessageFlag : uint32_t {
     None = 0,
@@ -36,6 +39,9 @@ enum class MessageFlag : uint32_t {
     Similar = (1 << 19),
     RedeemedHighlight = (1 << 20),
     RedeemedChannelPointReward = (1 << 21),
+    ShowInMentions = (1 << 22),
+    FirstMessage = (1 << 23),
+    ReplyMessage = (1 << 24),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
@@ -58,7 +64,16 @@ struct Message : boost::noncopyable {
     QString displayName;
     QString localizedName;
     QString timeoutUser;
+    QString channelName;
+    QColor usernameColor;
+    QDateTime serverReceivedTime;
+    std::vector<Badge> badges;
+    std::unordered_map<QString, QString> badgeInfos;
     std::shared_ptr<QColor> highlightColor;
+    // Each reply holds a reference to the thread. When every reply is dropped,
+    // the reply thread will be cleaned up by the TwitchChannel.
+    // The root of the thread does not have replyThread set.
+    std::shared_ptr<MessageThread> replyThread;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;
 

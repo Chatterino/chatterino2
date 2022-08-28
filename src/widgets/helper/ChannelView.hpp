@@ -11,6 +11,7 @@
 #include <unordered_set>
 
 #include "common/FlagsEnum.hpp"
+#include "controllers/filters/FilterSet.hpp"
 #include "messages/Image.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
@@ -32,19 +33,27 @@ using MessageFlags = FlagsEnum<MessageFlag>;
 class MessageLayout;
 using MessageLayoutPtr = std::shared_ptr<MessageLayout>;
 
-enum class MessageElementFlag;
+enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 class Scrollbar;
 class EffectLabel;
 struct Link;
 class MessageLayoutElement;
+class Split;
 
 enum class PauseReason {
     Mouse,
     Selection,
     DoubleClick,
     KeyboardModifier,
+};
+
+enum class FromTwitchLinkOpenChannelIn {
+    Split,
+    Tab,
+    BrowserPlayer,
+    Streamlink,
 };
 
 using SteadyClock = std::chrono::steady_clock;
@@ -54,7 +63,15 @@ class ChannelView final : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit ChannelView(BaseWidget *parent = nullptr);
+    enum class Context {
+        None,
+        UserCard,
+        ReplyThread,
+        Search,
+    };
+
+    explicit ChannelView(BaseWidget *parent = nullptr, Split *split = nullptr,
+                         Context context = Context::None);
 
     void queueUpdate();
     Scrollbar &getScrollBar();
@@ -74,18 +91,34 @@ public:
     void pause(PauseReason reason, boost::optional<uint> msecs = boost::none);
     void unpause(PauseReason reason);
 
+    MessageElementFlags getFlags() const;
+
     ChannelPtr channel();
     void setChannel(ChannelPtr channel_);
+
+    void setFilters(const QList<QUuid> &ids);
+    const QList<QUuid> getFilterIds() const;
+    FilterSetPtr getFilterSet() const;
 
     ChannelPtr sourceChannel() const;
     void setSourceChannel(ChannelPtr sourceChannel);
     bool hasSourceChannel() const;
 
-    LimitedQueueSnapshot<MessageLayoutPtr> getMessagesSnapshot();
+    LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
     void queueLayout();
 
     void clearMessages();
-    void showUserInfoPopup(const QString &userName);
+
+    Context getContext() const;
+
+    /**
+     * @brief Creates and shows a UserInfoPopup dialog
+     *
+     * @param userName The login name of the user
+     * @param alternativePopoutChannel Optional parameter containing the channel name to use for context
+     **/
+    void showUserInfoPopup(const QString &userName,
+                           QString alternativePopoutChannel = QString());
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
@@ -93,7 +126,8 @@ public:
         tabHighlightRequested;
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::Signal<const Link &> linkClicked;
-    pajlada::Signals::Signal<QString> joinToChannel;
+    pajlada::Signals::Signal<QString, FromTwitchLinkOpenChannelIn>
+        openChannelIn;
 
 protected:
     void themeChangedEvent() override;
@@ -130,6 +164,7 @@ private:
     void messageAddedAtStart(std::vector<MessagePtr> &messages);
     void messageRemoveFromStart(MessagePtr &message);
     void messageReplaced(size_t index, MessagePtr &replacement);
+    void messagesUpdated();
 
     void performLayout(bool causedByScollbar = false);
     void layoutVisibleMessages(
@@ -139,23 +174,45 @@ private:
 
     void drawMessages(QPainter &painter);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
-    MessageElementFlags getFlags() const;
     void selectWholeMessage(MessageLayout *layout, int &messageIndex);
     void getWordBounds(MessageLayout *layout,
                        const MessageLayoutElement *element,
                        const QPoint &relativePos, int &wordStart, int &wordEnd);
 
     void handleMouseClick(QMouseEvent *event,
-                          const MessageLayoutElement *hoverLayoutElement,
+                          const MessageLayoutElement *hoveredElement,
                           MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
-                             MessageLayoutPtr layout);
+                             MessageLayoutPtr layout, QMouseEvent *event);
+    void addImageContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                  MessageLayoutPtr layout, QMouseEvent *event,
+                                  QMenu &menu);
+    void addLinkContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                 MessageLayoutPtr layout, QMouseEvent *event,
+                                 QMenu &menu);
+    void addMessageContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                    MessageLayoutPtr layout, QMouseEvent *event,
+                                    QMenu &menu);
+    void addTwitchLinkContextMenuItems(
+        const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
+        QMouseEvent *event, QMenu &menu);
+    void addHiddenContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                   MessageLayoutPtr layout, QMouseEvent *event,
+                                   QMenu &menu);
+    void addCommandExecutionContextMenuItems(
+        const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
+        QMouseEvent *event, QMenu &menu);
+
     int getLayoutWidth() const;
     void updatePauses();
     void unpaused();
 
     void enableScrolling(const QPointF &scrollStart);
     void disableScrolling();
+
+    void setInputReply(const MessagePtr &message);
+    void showReplyThreadPopup(const MessagePtr &message);
+    bool canReplyToMessages() const;
 
     QTimer *layoutCooldown_;
     bool layoutQueued_;
@@ -179,11 +236,21 @@ private:
 
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
-    ChannelPtr channel_;
-    ChannelPtr sourceChannel_;
+    ChannelPtr channel_ = nullptr;
+    ChannelPtr underlyingChannel_ = nullptr;
+    ChannelPtr sourceChannel_ = nullptr;
+    Split *split_ = nullptr;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
+
+    FilterSetPtr channelFilters_;
+
+    // Returns true if message should be included
+    bool shouldIncludeMessage(const MessagePtr &m) const;
+
+    // Returns whether the scrollbar should have highlights
+    bool showScrollbarHighlights() const;
 
     // This variable can be used to decide whether or not we should render the
     // "Show latest messages" button
@@ -216,10 +283,14 @@ private:
     Selection selection_;
     bool selecting_ = false;
 
+    const Context context_;
+
     LimitedQueue<MessageLayoutPtr> messages_;
 
-    std::vector<pajlada::Signals::ScopedConnection> connections_;
-    std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
+    pajlada::Signals::SignalHolder signalHolder_;
+
+    // channelConnections_ will be cleared when the underlying channel of the channelview changes
+    pajlada::Signals::SignalHolder channelConnections_;
 
     std::unordered_set<std::shared_ptr<MessageLayout>> messagesOnScreen_;
 

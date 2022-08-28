@@ -2,6 +2,8 @@
 
 #include "BaseTheme.hpp"
 
+#include <QPainterPath>
+
 namespace chatterino {
 
 TitleBarButton::TitleBarButton()

@@ -1,20 +1,25 @@
 #include "EditableModelView.hpp"
+#include "widgets/helper/RegExpItemDelegate.hpp"
 
+#include <QAbstractItemView>
 #include <QAbstractTableModel>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QModelIndex>
 #include <QPushButton>
 #include <QTableView>
 #include <QVBoxLayout>
 
+#include <QLabel>
+
 namespace chatterino {
 
-EditableModelView::EditableModelView(QAbstractTableModel *model)
+EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     : tableView_(new QTableView(this))
     , model_(model)
 {
     this->model_->setParent(this);
-    this->tableView_->setModel(model);
+    this->tableView_->setModel(model_);
     this->tableView_->setSelectionMode(QAbstractItemView::SingleSelection);
     this->tableView_->setSelectionBehavior(QAbstractItemView::SelectRows);
     this->tableView_->setDragDropMode(QTableView::DragDropMode::InternalMove);
@@ -34,8 +39,9 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
     // add
     QPushButton *add = new QPushButton("Add");
     buttons->addWidget(add);
-    QObject::connect(add, &QPushButton::clicked,
-                     [this] { this->addButtonPressed.invoke(); });
+    QObject::connect(add, &QPushButton::clicked, [this] {
+        this->addButtonPressed.invoke();
+    });
 
     // remove
     QPushButton *remove = new QPushButton("Remove");
@@ -54,13 +60,40 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
             model_->removeRow(row);
     });
 
+    if (movable)
+    {
+        // move up
+        QPushButton *moveUp = new QPushButton("Move up");
+        buttons->addWidget(moveUp);
+        QObject::connect(moveUp, &QPushButton::clicked, this, [this] {
+            this->moveRow(-1);
+        });
+
+        // move down
+        QPushButton *moveDown = new QPushButton("Move down");
+        buttons->addWidget(moveDown);
+        QObject::connect(moveDown, &QPushButton::clicked, this, [this] {
+            this->moveRow(1);
+        });
+    }
+
     buttons->addStretch();
+
+    QObject::connect(this->model_, &QAbstractTableModel::rowsMoved, this,
+                     [this](const QModelIndex &parent, int start, int end,
+                            const QModelIndex &destination, int row) {
+                         this->selectRow(row);
+                     });
 
     // add tableview
     vbox->addWidget(this->tableView_);
 
     // finish button layout
     buttons->addStretch(1);
+}
+void EditableModelView::setValidationRegexp(QRegularExpression regexp)
+{
+    this->tableView_->setItemDelegate(new RegExpItemDelegate(this, regexp));
 }
 
 void EditableModelView::setTitles(std::initializer_list<QString> titles)
@@ -95,12 +128,36 @@ void EditableModelView::addCustomButton(QWidget *widget)
 
 void EditableModelView::addRegexHelpLink()
 {
-    auto regexHelpLabel = new QLabel(
-        "<a href='"
-        "https://github.com/Chatterino/chatterino2/blob/master/docs/Regex.md'>"
-        "<span style='color:#99f'>regex info</span></a>");
+    auto regexHelpLabel =
+        new QLabel("<a href='"
+                   "https://chatterino.com/help/regex'>"
+                   "<span style='color:#99f'>regex info</span></a>");
     regexHelpLabel->setOpenExternalLinks(true);
     this->addCustomButton(regexHelpLabel);
+}
+
+void EditableModelView::moveRow(int dir)
+{
+    auto selected = this->getTableView()->selectionModel()->selectedRows(0);
+
+    int row;
+    if (selected.size() == 0 ||
+        (row = selected.at(0).row()) + dir >=
+            this->model_->rowCount(QModelIndex()) ||
+        row + dir < 0)
+        return;
+
+    model_->moveRows(model_->index(row, 0), row, selected.size(),
+                     model_->index(row + dir, 0), row + dir);
+    this->selectRow(row + dir);
+}
+
+void EditableModelView::selectRow(int row)
+{
+    this->getTableView()->selectionModel()->clear();
+    this->getTableView()->selectionModel()->select(
+        this->model_->index(row, 0),
+        QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 }
 
 }  // namespace chatterino

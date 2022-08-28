@@ -28,7 +28,7 @@ public:
     // Hash of QCoreApplication::applicationFilePath()
     QString applicationFilePathHash;
 
-    // Profile avatars for twitch <appDataDirectory>/cache/twitch
+    // Profile avatars for Twitch <appDataDirectory>/cache/twitch
     QString twitchProfileAvatars;
 
     bool createFolder(const QString &folderPath);

@@ -30,6 +30,7 @@ public:
     void clearHighlights();
 
     void scrollToBottom(bool animate = false);
+    void scrollToTop(bool animate = false);
     bool isAtBottom() const;
 
     void setMaximum(qreal value);
@@ -43,6 +44,8 @@ public:
     qreal getSmallChange() const;
     qreal getDesiredValue() const;
     qreal getCurrentValue() const;
+
+    const QPropertyAnimation &getCurrentValueAnimation() const;
 
     // offset the desired value without breaking smooth scolling
     void offset(qreal value);
@@ -65,7 +68,7 @@ protected:
 private:
     Q_PROPERTY(qreal currentValue_ READ getCurrentValue WRITE setCurrentValue)
 
-    LimitedQueueSnapshot<ScrollbarHighlight> getHighlightSnapshot();
+    LimitedQueueSnapshot<ScrollbarHighlight> &getHighlightSnapshot();
     void updateScroll();
 
     QMutex mutex_;

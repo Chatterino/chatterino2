@@ -1,13 +1,20 @@
 #include "util/StreamLink.hpp"
 
 #include "Application.hpp"
+#include "providers/irc/IrcMessageBuilder.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
+#include "util/SplitCommand.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QErrorMessage>
 #include <QFileInfo>
 #include <QProcess>
+#include "common/QLogging.hpp"
+#include "common/Version.hpp"
 
 #include <functional>
 
@@ -33,18 +40,6 @@ namespace {
 #endif
     }
 
-    QString getStreamlinkProgram()
-    {
-        if (getSettings()->streamlinkUseCustomPath)
-        {
-            return getSettings()->streamlinkPath + "/" + getBinaryName();
-        }
-        else
-        {
-            return getBinaryName();
-        }
-    }
-
     bool checkStreamlinkPath(const QString &path)
     {
         QFileInfo fileinfo(path);
@@ -62,14 +57,13 @@ namespace {
     void showStreamlinkNotFoundError()
     {
         static QErrorMessage *msg = new QErrorMessage;
+        msg->setWindowTitle("Chatterino - streamlink not found");
 
         if (getSettings()->streamlinkUseCustomPath)
         {
-            msg->showMessage(
-                "Unable to find Streamlink executable\nMake sure your custom "
-                "path "
-                "is pointing "
-                "to the DIRECTORY where the streamlink executable is located");
+            msg->showMessage("Unable to find Streamlink executable\nMake sure "
+                             "your custom path is pointing to the DIRECTORY "
+                             "where the streamlink executable is located");
         }
         else
         {
@@ -82,7 +76,27 @@ namespace {
     QProcess *createStreamlinkProcess()
     {
         auto p = new QProcess;
-        p->setProgram(getStreamlinkProgram());
+
+        const QString path = [] {
+            if (getSettings()->streamlinkUseCustomPath)
+            {
+                return getSettings()->streamlinkPath + "/" + getBinaryName();
+            }
+            else
+            {
+                return QString{getBinaryName()};
+            }
+        }();
+
+        if (Version::instance().isFlatpak())
+        {
+            p->setProgram("flatpak-spawn");
+            p->setArguments({"--host", path});
+        }
+        else
+        {
+            p->setProgram(path);
+        }
 
         QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
             if (err == QProcess::FailedToStart)
@@ -91,16 +105,18 @@ namespace {
             }
             else
             {
-                qDebug() << "Error occured" << err;
+                qCWarning(chatterinoStreamlink) << "Error occurred" << err;
             }
 
             p->deleteLater();
         });
 
         QObject::connect(
-            p, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
-            [=](int res) {
-                p->deleteLater();  //
+            p,
+            static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+                &QProcess::finished),
+            [=](int /*exitCode*/, QProcess::ExitStatus /*exitStatus*/) {
+                p->deleteLater();
             });
 
         return p;
@@ -114,11 +130,13 @@ void getStreamQualities(const QString &channelURL,
     auto p = createStreamlinkProcess();
 
     QObject::connect(
-        p, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
-        [=](int res) {
-            if (res != 0)
+        p,
+        static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+            &QProcess::finished),
+        [=](int exitCode, QProcess::ExitStatus /*exitStatus*/) {
+            if (exitCode != 0)
             {
-                qDebug() << "Got error code" << res;
+                qCWarning(chatterinoStreamlink) << "Got error code" << exitCode;
                 // return;
             }
             QString lastLine = QString(p->readAllStandardOutput());
@@ -160,7 +178,8 @@ void getStreamQualities(const QString &channelURL,
             }
         });
 
-    p->setArguments({channelURL, "--default-stream=KKona"});
+    p->setArguments(p->arguments() +
+                    QStringList{channelURL, "--default-stream=KKona"});
 
     p->start();
 }
@@ -168,25 +187,19 @@ void getStreamQualities(const QString &channelURL,
 void openStreamlink(const QString &channelURL, const QString &quality,
                     QStringList extraArguments)
 {
-    QStringList arguments;
+    auto proc = createStreamlinkProcess();
+    auto arguments = proc->arguments()
+                     << extraArguments << channelURL << quality;
+
+    // Remove empty arguments before appending additional streamlink options
+    // as the options might purposely contain empty arguments
+    arguments.removeAll(QString());
 
     QString additionalOptions = getSettings()->streamlinkOpts.getValue();
-    if (!additionalOptions.isEmpty())
-    {
-        arguments << getSettings()->streamlinkOpts;
-    }
+    arguments << splitCommand(additionalOptions);
 
-    arguments.append(extraArguments);
-
-    arguments << channelURL;
-
-    if (!quality.isEmpty())
-    {
-        arguments << quality;
-    }
-
-    bool res = QProcess::startDetached(getStreamlinkProgram() + " " +
-                                       QString(arguments.join(' ')));
+    proc->setArguments(std::move(arguments));
+    bool res = proc->startDetached();
 
     if (!res)
     {
@@ -196,6 +209,20 @@ void openStreamlink(const QString &channelURL, const QString &quality,
 
 void openStreamlinkForChannel(const QString &channel)
 {
+    static const QString INFO_TEMPLATE("Opening %1 in Streamlink ...");
+
+    auto *currentPage = dynamic_cast<SplitContainer *>(
+        getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+    if (currentPage != nullptr)
+    {
+        if (auto currentSplit = currentPage->getSelectedSplit();
+            currentSplit != nullptr)
+        {
+            currentSplit->getChannel()->addMessage(
+                makeSystemMessage(INFO_TEMPLATE.arg(channel)));
+        }
+    }
+
     QString channelURL = "twitch.tv/" + channel;
 
     QString preferredQuality = getSettings()->preferredQuality.getValue();
@@ -204,7 +231,7 @@ void openStreamlinkForChannel(const QString &channel)
     if (preferredQuality == "choose")
     {
         getStreamQualities(channelURL, [=](QStringList qualityOptions) {
-            QualityPopup::showDialog(channel, qualityOptions);
+            QualityPopup::showDialog(channelURL, qualityOptions);
         });
 
         return;

@@ -2,33 +2,45 @@
 
 namespace chatterino {
 
+namespace {
+
+    const QString REGEX_START_BOUNDARY("(\\b|\\s|^)");
+    const QString REGEX_END_BOUNDARY("(\\b|\\s|$)");
+
+}  // namespace
+
 QColor HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR = QColor(127, 63, 73, 127);
 QColor HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR =
-    QColor(28, 126, 141, 90);
+    QColor(28, 126, 141, 60);
+QColor HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR =
+    QColor(72, 127, 63, 60);
 QColor HighlightPhrase::FALLBACK_SUB_COLOR = QColor(196, 102, 255, 100);
 
 bool HighlightPhrase::operator==(const HighlightPhrase &other) const
 {
-    return std::tie(this->pattern_, this->hasSound_, this->hasAlert_,
-                    this->isRegex_, this->isCaseSensitive_, this->soundUrl_,
-                    this->color_) == std::tie(other.pattern_, other.hasSound_,
-                                              other.hasAlert_, other.isRegex_,
-                                              other.isCaseSensitive_,
-                                              other.soundUrl_, other.color_);
+    return std::tie(this->pattern_, this->showInMentions_, this->hasSound_,
+                    this->hasAlert_, this->isRegex_, this->isCaseSensitive_,
+                    this->soundUrl_, this->color_) ==
+           std::tie(other.pattern_, other.showInMentions_, other.hasSound_,
+                    other.hasAlert_, other.isRegex_, other.isCaseSensitive_,
+                    other.soundUrl_, other.color_);
 }
 
-HighlightPhrase::HighlightPhrase(const QString &pattern, bool hasAlert,
-                                 bool hasSound, bool isRegex,
+HighlightPhrase::HighlightPhrase(const QString &pattern, bool showInMentions,
+                                 bool hasAlert, bool hasSound, bool isRegex,
                                  bool isCaseSensitive, const QString &soundUrl,
                                  QColor color)
     : pattern_(pattern)
+    , showInMentions_(showInMentions)
     , hasAlert_(hasAlert)
     , hasSound_(hasSound)
     , isRegex_(isRegex)
     , isCaseSensitive_(isCaseSensitive)
     , soundUrl_(soundUrl)
-    , regex_(isRegex_ ? pattern
-                      : "\\b" + QRegularExpression::escape(pattern) + "\\b",
+    , regex_(isRegex_
+                 ? pattern
+                 : REGEX_START_BOUNDARY + QRegularExpression::escape(pattern) +
+                       REGEX_END_BOUNDARY,
              QRegularExpression::UseUnicodePropertiesOption |
                  (isCaseSensitive_ ? QRegularExpression::NoPatternOption
                                    : QRegularExpression::CaseInsensitiveOption))
@@ -36,19 +48,22 @@ HighlightPhrase::HighlightPhrase(const QString &pattern, bool hasAlert,
     this->color_ = std::make_shared<QColor>(color);
 }
 
-HighlightPhrase::HighlightPhrase(const QString &pattern, bool hasAlert,
-                                 bool hasSound, bool isRegex,
+HighlightPhrase::HighlightPhrase(const QString &pattern, bool showInMentions,
+                                 bool hasAlert, bool hasSound, bool isRegex,
                                  bool isCaseSensitive, const QString &soundUrl,
                                  std::shared_ptr<QColor> color)
     : pattern_(pattern)
+    , showInMentions_(showInMentions)
     , hasAlert_(hasAlert)
     , hasSound_(hasSound)
     , isRegex_(isRegex)
     , isCaseSensitive_(isCaseSensitive)
     , soundUrl_(soundUrl)
-    , color_(color)
-    , regex_(isRegex_ ? pattern
-                      : "\\b" + QRegularExpression::escape(pattern) + "\\b",
+    , color_(std::move(color))
+    , regex_(isRegex_
+                 ? pattern
+                 : REGEX_START_BOUNDARY + QRegularExpression::escape(pattern) +
+                       REGEX_END_BOUNDARY,
              QRegularExpression::UseUnicodePropertiesOption |
                  (isCaseSensitive_ ? QRegularExpression::NoPatternOption
                                    : QRegularExpression::CaseInsensitiveOption))
@@ -58,6 +73,11 @@ HighlightPhrase::HighlightPhrase(const QString &pattern, bool hasAlert,
 const QString &HighlightPhrase::getPattern() const
 {
     return this->pattern_;
+}
+
+bool HighlightPhrase::showInMentions() const
+{
+    return this->showInMentions_;
 }
 
 bool HighlightPhrase::hasAlert() const

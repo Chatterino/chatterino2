@@ -6,6 +6,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/Twitch.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QCheckBox>
@@ -29,27 +30,33 @@ NotificationPage::NotificationPage()
         {
             auto settings = tabs.appendTab(new QVBoxLayout, "Options");
             {
-                settings.emplace<QLabel>("Enable for selected channels");
+                settings.emplace<QLabel>(
+                    "You can be informed when certain channels go live. You "
+                    "can be informed in multiple ways:");
+
                 settings.append(this->createCheckBox(
                     "Flash taskbar", getSettings()->notificationFlashTaskbar));
-                settings.append(this->createCheckBox(
-                    "Play sound", getSettings()->notificationPlaySound));
-#ifdef Q_OS_WIN
                 settings.append(
-                    this->createCheckBox("Enable toasts (Windows 8 or later)",
-                                         getSettings()->notificationToast));
+                    this->createCheckBox("Play sound for selected channels",
+                                         getSettings()->notificationPlaySound));
+                settings.append(this->createCheckBox(
+                    "Play sound for any channel going live",
+                    getSettings()->notificationOnAnyChannel));
+#ifdef Q_OS_WIN
+                settings.append(this->createCheckBox(
+                    "Show notification", getSettings()->notificationToast));
                 auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
                 {
-                    openIn.emplace<QLabel>("Open stream from Toast:  ")
+                    openIn
+                        .emplace<QLabel>(
+                            "Action when clicking on a notification:  ")
                         ->setSizePolicy(QSizePolicy::Maximum,
                                         QSizePolicy::Preferred);
 
                     // implementation of custom combobox done
                     // because addComboBox only can handle strings-settings
                     // int setting for the ToastReaction is desired
-                    openIn
-                        .append(this->createToastReactionComboBox(
-                            this->managedConnections_))
+                    openIn.append(this->createToastReactionComboBox())
                         ->setSizePolicy(QSizePolicy::Maximum,
                                         QSizePolicy::Preferred);
                 }
@@ -77,8 +84,12 @@ NotificationPage::NotificationPage()
                 settings->addStretch(1);
             }
             auto twitchChannels =
-                tabs.appendTab(new QVBoxLayout, "Channel going live");
+                tabs.appendTab(new QVBoxLayout, "Selected Channels");
             {
+                twitchChannels.emplace<QLabel>(
+                    "These are the channels for which you will be informed "
+                    "when they go live:");
+
                 EditableModelView *view =
                     twitchChannels
                         .emplace<EditableModelView>(
@@ -86,6 +97,7 @@ NotificationPage::NotificationPage()
                                 nullptr, Platform::Twitch))
                         .getElement();
                 view->setTitles({"Twitch channels"});
+                view->setValidationRegexp(twitchUserNameRegexp());
 
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
@@ -103,39 +115,10 @@ NotificationPage::NotificationPage()
                         .append("channel");
                 });
             }
-            /*
-            auto mixerChannels = tabs.appendTab(new QVBoxLayout, "Mixer");
-            {
-                EditableModelView *view =
-                    mixerChannels
-                        .emplace<EditableModelView>(
-                            getApp()->notifications->createModel(
-                                nullptr, Platform::Mixer))
-                        .getElement();
-                view->setTitles({"Mixer channels"});
-
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    QHeaderView::Fixed);
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    0, QHeaderView::Stretch);
-
-                QTimer::singleShot(1, [view] {
-                    view->getTableView()->resizeColumnsToContents();
-                    view->getTableView()->setColumnWidth(0, 200);
-                });
-
-                view->addButtonPressed.connect([] {
-                    getApp()
-                        ->notifications->channelMap[Platform::Mixer]
-                        .appendItem("channel");
-                });
-            }
-            */
         }
     }
 }
-QComboBox *NotificationPage::createToastReactionComboBox(
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections)
+QComboBox *NotificationPage::createToastReactionComboBox()
 {
     QComboBox *toastReactionOptions = new QComboBox();
 
@@ -151,7 +134,7 @@ QComboBox *NotificationPage::createToastReactionComboBox(
         [toastReactionOptions](const int &index, auto) {
             toastReactionOptions->setCurrentIndex(index);
         },
-        managedConnections);
+        this->managedConnections_);
 
     QObject::connect(toastReactionOptions,
                      QOverload<int>::of(&QComboBox::currentIndexChanged),

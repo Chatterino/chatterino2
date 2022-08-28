@@ -8,6 +8,8 @@
 #include <QDesktopWidget>
 #include <QScreen>
 
+#include <QVBoxLayout>
+
 namespace chatterino {
 
 NotificationPopup::NotificationPopup()
@@ -45,7 +47,7 @@ void NotificationPopup::updatePosition()
 
 void NotificationPopup::addMessage(MessagePtr msg)
 {
-    this->channel_->addMessage(msg);
+    this->channel_->addMessage(std::move(msg));
 
     //    QTimer::singleShot(5000, this, [this, msg] { this->channel->remove });
 }

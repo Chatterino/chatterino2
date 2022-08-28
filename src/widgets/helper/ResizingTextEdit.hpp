@@ -15,6 +15,7 @@ public:
     QSize sizeHint() const override;
 
     bool hasHeightForWidth() const override;
+    bool isFirstWord() const;
 
     pajlada::Signals::Signal<QKeyEvent *> keyPressed;
     pajlada::Signals::NoArgSignal focused;
@@ -41,6 +42,8 @@ private:
 
     QCompleter *completer_ = nullptr;
     bool completionInProgress_ = false;
+
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private slots:
     void insertCompletion(const QString &completion);
