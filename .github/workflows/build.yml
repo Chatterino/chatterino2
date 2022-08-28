@@ -149,11 +149,20 @@ jobs:
 
       - name: clang-tidy review
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        uses: ZedThree/clang-tidy-review@v0.9.0
+        uses: pajlada/clang-tidy-review@feat/split-up-review-and-post-workflows
         id: review
         with:
           build_dir: build
           config_file: '.clang-tidy'
+          split_workflow: true
+
+      - uses: actions/upload-artifact@v3
+        if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
+        with:
+          name: clang-tidy-review
+          path: |
+            clang-tidy-review-output.json
+            clang-tidy-review-metadata.json
 
       - name: Package - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
