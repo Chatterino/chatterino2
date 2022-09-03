@@ -30,8 +30,8 @@ namespace chatterino {
 TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
-    , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
     , liveChannel(new Channel("/live", Channel::Type::TwitchLive))
+    , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
 {
     this->initializeIrc();
 
