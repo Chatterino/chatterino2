@@ -46,7 +46,7 @@ class TwitchEmotes : public ITwitchEmotes
 {
 public:
     static QString cleanUpEmoteCode(const QString &dirtyEmoteCode);
-    TwitchEmotes();
+    TwitchEmotes() = default;
 
     EmotePtr getOrCreateEmote(const EmoteId &id, const EmoteName &name);
 

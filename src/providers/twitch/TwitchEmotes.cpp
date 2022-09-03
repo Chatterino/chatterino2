@@ -5,10 +5,6 @@
 
 namespace chatterino {
 
-TwitchEmotes::TwitchEmotes()
-{
-}
-
 QString TwitchEmotes::cleanUpEmoteCode(const QString &dirtyEmoteCode)
 {
     auto cleanCode = dirtyEmoteCode;
