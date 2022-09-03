@@ -774,6 +774,7 @@ else ()
         -Wno-strict-aliasing
 
         -Werror=return-type
+        -Werror=reorder
     )
 
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
