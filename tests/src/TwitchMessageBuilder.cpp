@@ -202,6 +202,19 @@ TEST(TwitchMessageBuilder, ParseTwitchEmotes)
 
     std::vector<TestCase> testCases{
         {
+            // action /me message
+            R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=90ef1e46-8baa-4bf2-9c54-272f39d6fa11;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662206235860;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :ACTION Kappa)",
+            {
+                {{
+                    0,  // start
+                    4,  // end
+                    twitchEmotes->getOrCreateEmote(EmoteId{"25"},
+                                                   EmoteName{"Kappa"}),  // ptr
+                    EmoteName{"Kappa"},                                  // name
+                }},
+            },
+        },
+        {
             R"(@badge-info=subscriber/17;badges=subscriber/12,no_audio/1;color=#EBA2C0;display-name=jammehcow;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662201093248;turbo=0;user-id=82674227;user-type= :jammehcow!jammehcow@jammehcow.tmi.twitch.tv PRIVMSG #pajlada :Kappa)",
             {
                 {{
