@@ -1016,6 +1016,9 @@ void TwitchMessageBuilder::appendTwitchEmote(
         if (from > to || to >= maxPositions)
         {
             // Emote coords are out of range
+            qCDebug(chatterinoTwitch)
+                << "Emote coords" << from << "-" << to << "are out of range ("
+                << maxPositions << ")";
             return;
         }
 
@@ -1024,6 +1027,9 @@ void TwitchMessageBuilder::appendTwitchEmote(
         if (start > end || start < 0 || end > this->originalMessage_.length())
         {
             // Emote coords are out of range from the modified character positions
+            qCDebug(chatterinoTwitch) << "Emote coords" << from << "-" << to
+                                      << "are out of range after offsets ("
+                                      << this->originalMessage_.length() << ")";
             return;
         }
 
