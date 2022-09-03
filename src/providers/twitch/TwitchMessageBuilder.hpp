@@ -82,11 +82,6 @@ public:
     static std::unordered_map<QString, QString> parseBadgeInfoTag(
         const QVariantMap &tags);
 
-    static void appendTwitchEmoteOccurences(
-        const QString &emote, std::vector<TwitchEmoteOccurence> &vec,
-        const std::vector<int> &correctPositions,
-        const QString &originalMessage, int messageOffset);
-
     static std::vector<TwitchEmoteOccurence> parseTwitchEmotes(
         const QVariantMap &tags, const QString &originalMessage,
         int messageOffset);
