@@ -195,7 +195,7 @@ TEST(TwitchMessageBuilder, ParseTwitchEmotes)
     auto mockApplication = std::make_unique<MockApplication>();
     struct TestCase {
         QByteArray input;
-        std::vector<TwitchEmoteOccurence> expectedTwitchEmotes;
+        std::vector<TwitchEmoteOccurrence> expectedTwitchEmotes;
     };
 
     auto *twitchEmotes = mockApplication->getEmotes()->getTwitchEmotes();
