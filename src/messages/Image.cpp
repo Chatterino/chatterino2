@@ -43,6 +43,10 @@ namespace detail {
     {
         assertInGuiThread();
         DebugCount::increase("images");
+        if (!this->empty())
+        {
+            DebugCount::increase("loaded images");
+        }
 
         if (this->animated())
         {
@@ -81,6 +85,10 @@ namespace detail {
     {
         assertInGuiThread();
         DebugCount::decrease("images");
+        if (!this->empty())
+        {
+            DebugCount::decrease("loaded images");
+        }
 
         if (this->animated())
         {
@@ -122,6 +130,11 @@ namespace detail {
     void Frames::clear()
     {
         assertInGuiThread();
+        if (!this->empty())
+        {
+            DebugCount::decrease("loaded images");
+        }
+
         this->items_.clear();
         this->index_ = 0;
         this->durationOffset_ = 0;
