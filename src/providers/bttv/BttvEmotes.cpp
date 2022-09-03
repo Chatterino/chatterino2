@@ -11,6 +11,7 @@
 #include "messages/ImageSet.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Settings.hpp"
 
 namespace chatterino {
 namespace {
@@ -141,6 +142,12 @@ boost::optional<EmotePtr> BttvEmotes::emote(const EmoteName &name) const
 
 void BttvEmotes::loadEmotes()
 {
+    if (!Settings::instance().enableBTTVGlobalEmotes)
+    {
+        this->global_.set(EMPTY_EMOTE_MAP);
+        return;
+    }
+
     NetworkRequest(QString(globalEmoteApiUrl))
         .timeout(30000)
         .onSuccess([this](auto result) -> Outcome {
