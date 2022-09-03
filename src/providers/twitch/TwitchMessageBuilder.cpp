@@ -1089,7 +1089,7 @@ void TwitchMessageBuilder::appendTwitchEmoteOccurences(
 
     auto occurences = parameters.at(1).split(',');
 
-    for (QString occurence : occurences)
+    for (const QString &occurence : occurences)
     {
         auto coords = occurence.split('-');
 
@@ -1157,7 +1157,7 @@ std::vector<TwitchEmoteOccurence> TwitchMessageBuilder::parseTwitchEmotes(
             correctPositions.push_back(i);
         }
     }
-    for (QString emote : emoteString)
+    for (const QString &emote : emoteString)
     {
         TwitchMessageBuilder::appendTwitchEmoteOccurences(
             emote, twitchEmotes, correctPositions, originalMessage,
