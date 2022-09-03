@@ -27,7 +27,7 @@ public:
     {
         return nullptr;
     }
-    Emotes *getEmotes() override
+    IEmotes *getEmotes() override
     {
         return nullptr;
     }
