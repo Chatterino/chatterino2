@@ -1,10 +1,7 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 
-#include "common/NetworkRequest.hpp"
-#include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
-#include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
 
