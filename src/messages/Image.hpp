@@ -61,7 +61,7 @@ public:
     ~Image();
 
     static ImagePtr fromUrl(const Url &url, qreal scale = 1);
-    static ImagePtr fromPixmap(const QPixmap &pixmap, qreal scale = 1);
+    static ImagePtr fromResourcePixmap(const QPixmap &pixmap, qreal scale = 1);
     static ImagePtr getEmpty();
 
     const Url &url() const;

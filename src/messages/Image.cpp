@@ -6,6 +6,7 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QTimer>
+#include <boost/functional/hash.hpp>
 #include <functional>
 #include <queue>
 #include <thread>
@@ -290,13 +291,37 @@ ImagePtr Image::fromUrl(const Url &url, qreal scale)
     return shared;
 }
 
-ImagePtr Image::fromPixmap(const QPixmap &pixmap, qreal scale)
+ImagePtr Image::fromResourcePixmap(const QPixmap &pixmap, qreal scale)
 {
-    auto result = ImagePtr(new Image(scale));
+    using key_t = std::pair<const QPixmap *, qreal>;
+    static std::unordered_map<key_t, std::weak_ptr<Image>, boost::hash<key_t>>
+        cache;
+    static std::mutex mutex;
 
-    result->setPixmap(pixmap);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    return result;
+    auto it = cache.find({&pixmap, scale});
+    if (it != cache.end())
+    {
+        auto shared = it->second.lock();
+        if (shared)
+        {
+            return shared;
+        }
+        else
+        {
+            cache.erase(it);
+        }
+    }
+
+    auto newImage = ImagePtr(new Image(scale));
+
+    newImage->setPixmap(pixmap);
+
+    // store in cache
+    cache.insert({{&pixmap, scale}, std::weak_ptr<Image>(newImage)});
+
+    return newImage;
 }
 
 ImagePtr Image::getEmpty()

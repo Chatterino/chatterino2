@@ -1567,7 +1567,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     !element->getThumbnail()->url().string.isEmpty();
                 auto thumb =
                     shouldHideThumbnail
-                        ? Image::fromPixmap(getResources().streamerMode)
+                        ? Image::fromResourcePixmap(getResources().streamerMode)
                         : element->getThumbnail();
                 tooltipPreviewImage.setImage(std::move(thumb));
 
