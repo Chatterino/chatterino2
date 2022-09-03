@@ -982,7 +982,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
 void TwitchMessageBuilder::appendTwitchEmote(
     const QString &emote, std::vector<TwitchEmoteOccurence> &vec,
-    std::vector<int> &correctPositions) const
+    const std::vector<int> &correctPositions) const
 {
     auto app = getApp();
     if (!emote.contains(':'))

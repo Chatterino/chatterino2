@@ -88,7 +88,7 @@ private:
     boost::optional<EmotePtr> getTwitchBadge(const Badge &badge);
     void appendTwitchEmote(const QString &emote,
                            std::vector<TwitchEmoteOccurence> &vec,
-                           std::vector<int> &correctPositions) const;
+                           const std::vector<int> &correctPositions) const;
     Outcome tryAppendEmote(const EmoteName &name) override;
 
     void addWords(const QStringList &words,
