@@ -304,25 +304,8 @@ MessagePtr TwitchMessageBuilder::build()
     }
 
     // Twitch emotes
-    std::vector<TwitchEmoteOccurence> twitchEmotes;
-
-    iterator = this->tags.find("emotes");
-    if (iterator != this->tags.end())
-    {
-        QStringList emoteString = iterator.value().toString().split('/');
-        std::vector<int> correctPositions;
-        for (int i = 0; i < this->originalMessage_.size(); ++i)
-        {
-            if (!this->originalMessage_.at(i).isLowSurrogate())
-            {
-                correctPositions.push_back(i);
-            }
-        }
-        for (QString emote : emoteString)
-        {
-            this->appendTwitchEmote(emote, twitchEmotes, correctPositions);
-        }
-    }
+    auto twitchEmotes = TwitchMessageBuilder::parseTwitchEmotes(
+        this->tags, this->originalMessage_, this->messageOffset_);
 
     // This runs through all ignored phrases and runs its replacements on this->originalMessage_
     this->runIgnoreReplaces(twitchEmotes);
@@ -980,72 +963,6 @@ void TwitchMessageBuilder::runIgnoreReplaces(
     }
 }
 
-void TwitchMessageBuilder::appendTwitchEmote(
-    const QString &emote, std::vector<TwitchEmoteOccurence> &vec,
-    const std::vector<int> &correctPositions) const
-{
-    auto app = getApp();
-    if (!emote.contains(':'))
-    {
-        return;
-    }
-
-    auto parameters = emote.split(':');
-
-    if (parameters.length() < 2)
-    {
-        return;
-    }
-
-    auto id = EmoteId{parameters.at(0)};
-
-    auto occurences = parameters.at(1).split(',');
-
-    for (QString occurence : occurences)
-    {
-        auto coords = occurence.split('-');
-
-        if (coords.length() < 2)
-        {
-            return;
-        }
-
-        auto from = coords.at(0).toUInt() - this->messageOffset_;
-        auto to = coords.at(1).toUInt() - this->messageOffset_;
-        auto maxPositions = correctPositions.size();
-        if (from > to || to >= maxPositions)
-        {
-            // Emote coords are out of range
-            qCDebug(chatterinoTwitch)
-                << "Emote coords" << from << "-" << to << "are out of range ("
-                << maxPositions << ")";
-            return;
-        }
-
-        auto start = correctPositions[from];
-        auto end = correctPositions[to];
-        if (start > end || start < 0 || end > this->originalMessage_.length())
-        {
-            // Emote coords are out of range from the modified character positions
-            qCDebug(chatterinoTwitch) << "Emote coords" << from << "-" << to
-                                      << "are out of range after offsets ("
-                                      << this->originalMessage_.length() << ")";
-            return;
-        }
-
-        auto name =
-            EmoteName{this->originalMessage_.mid(start, end - start + 1)};
-        TwitchEmoteOccurence emoteOccurence{
-            start, end, app->emotes->twitch.getOrCreateEmote(id, name), name};
-        if (emoteOccurence.ptr == nullptr)
-        {
-            qCDebug(chatterinoTwitch)
-                << "nullptr" << emoteOccurence.name.string;
-        }
-        vec.push_back(std::move(emoteOccurence));
-    }
-}
-
 Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
     auto *app = getApp();
@@ -1148,6 +1065,106 @@ std::unordered_map<QString, QString> TwitchMessageBuilder::parseBadgeInfoTag(
     }
 
     return infoMap;
+}
+
+void TwitchMessageBuilder::appendTwitchEmoteOccurences(
+    const QString &emote, std::vector<TwitchEmoteOccurence> &vec,
+    const std::vector<int> &correctPositions, const QString &originalMessage,
+    int messageOffset)
+{
+    auto *app = getIApp();
+    if (!emote.contains(':')
+    {
+        return;
+    }
+
+    auto parameters = emote.split(':');
+
+    if (parameters.length() < 2)
+    {
+        return;
+    }
+
+    auto id = EmoteId{parameters.at(0)};
+
+    auto occurences = parameters.at(1).split(',');
+
+    for (QString occurence : occurences)
+    {
+        auto coords = occurence.split('-');
+
+        if (coords.length() < 2)
+        {
+            return;
+        }
+
+        auto from = coords.at(0).toUInt() - messageOffset;
+        auto to = coords.at(1).toUInt() - messageOffset;
+        auto maxPositions = correctPositions.size();
+        if (from > to || to >= maxPositions)
+        {
+            // Emote coords are out of range
+            qCDebug(chatterinoTwitch)
+                << "Emote coords" << from << "-" << to << "are out of range ("
+                << maxPositions << ")";
+            return;
+        }
+
+        auto start = correctPositions[from];
+        auto end = correctPositions[to];
+        if (start > end || start < 0 || end > originalMessage.length())
+        {
+            // Emote coords are out of range from the modified character positions
+            qCDebug(chatterinoTwitch) << "Emote coords" << from << "-" << to
+                                      << "are out of range after offsets ("
+                                      << originalMessage.length() << ")";
+            return;
+        }
+
+        auto name = EmoteName{originalMessage.mid(start, end - start + 1)};
+        TwitchEmoteOccurence emoteOccurence{
+            start, end,
+            app->getEmotes()->getTwitchEmotes()->getOrCreateEmote(id, name),
+            name};
+        if (emoteOccurence.ptr == nullptr)
+        {
+            qCDebug(chatterinoTwitch)
+                << "nullptr" << emoteOccurence.name.string;
+        }
+        vec.push_back(std::move(emoteOccurence));
+    }
+}
+
+std::vector<TwitchEmoteOccurence> TwitchMessageBuilder::parseTwitchEmotes(
+    const QVariantMap &tags, const QString &originalMessage, int messageOffset)
+{
+    // Twitch emotes
+    std::vector<TwitchEmoteOccurence> twitchEmotes;
+
+    auto emotesTag = tags.find("emotes");
+
+    if (emotesTag == tags.end())
+    {
+        return twitchEmotes;
+    }
+
+    QStringList emoteString = emotesTag.value().toString().split('/');
+    std::vector<int> correctPositions;
+    for (int i = 0; i < originalMessage.size(); ++i)
+    {
+        if (!originalMessage.at(i).isLowSurrogate())
+        {
+            correctPositions.push_back(i);
+        }
+    }
+    for (QString emote : emoteString)
+    {
+        TwitchMessageBuilder::appendTwitchEmoteOccurences(
+            emote, twitchEmotes, correctPositions, originalMessage,
+            messageOffset);
+    }
+
+    return twitchEmotes;
 }
 
 void TwitchMessageBuilder::appendTwitchBadges()
