@@ -25,6 +25,12 @@ struct TwitchEmoteOccurence {
     int end;
     EmotePtr ptr;
     EmoteName name;
+
+    bool operator==(const TwitchEmoteOccurence &other) const
+    {
+        return std::tie(this->start, this->end, this->ptr, this->name) ==
+               std::tie(other.start, other.end, other.ptr, other.name);
+    }
 };
 
 class TwitchMessageBuilder : public SharedMessageBuilder
