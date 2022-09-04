@@ -220,6 +220,12 @@ boost::optional<EmotePtr> SeventvEmotes::emote(const EmoteName &name) const
 
 void SeventvEmotes::loadEmotes()
 {
+    if (!Settings::instance().enableSevenTVGlobalEmotes)
+    {
+        this->global_.set(EMPTY_EMOTE_MAP);
+        return;
+    }
+
     qCDebug(chatterinoSeventv) << "Loading 7TV Emotes";
 
     QJsonObject payload, variables;

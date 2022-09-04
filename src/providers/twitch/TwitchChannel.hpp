@@ -120,7 +120,7 @@ public:
     void updateSeventvEmote(const EventApiEmoteUpdate &action);
     void removeSeventvEmote(const EventApiEmoteUpdate &action);
 
-    virtual void refresh7TVChannelEmotes(bool manualRefresh);
+    virtual void refreshSevenTVChannelEmotes(bool manualRefresh);
     virtual void refreshBTTVChannelEmotes(bool manualRefresh);
     virtual void refreshFFZChannelEmotes(bool manualRefresh);
 

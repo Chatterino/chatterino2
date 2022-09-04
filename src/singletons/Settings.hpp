@@ -204,6 +204,13 @@ public:
     BoolSetting removeSpacesBetweenEmotes = {
         "/emotes/removeSpacesBetweenEmotes", false};
 
+    BoolSetting enableBTTVGlobalEmotes = {"/emotes/bttv/global", true};
+    BoolSetting enableBTTVChannelEmotes = {"/emotes/bttv/channel", true};
+    BoolSetting enableFFZGlobalEmotes = {"/emotes/ffz/global", true};
+    BoolSetting enableFFZChannelEmotes = {"/emotes/ffz/channel", true};
+    BoolSetting enableSevenTVGlobalEmotes = { "/emotes/seventv/global", true };
+    BoolSetting enableSevenTVChannelEmotes = { "/emotes/seventv/channel", true };
+
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
     BoolSetting linkInfoTooltip = {"/links/linkInfoTooltip", false};

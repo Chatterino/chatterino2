@@ -31,7 +31,8 @@ MessagePtr makeSystemMessage(const QString &text, const QTime &time)
 EmotePtr makeAutoModBadge()
 {
     return std::make_shared<Emote>(Emote{
-        EmoteName{}, ImageSet{Image::fromPixmap(getResources().twitch.automod)},
+        EmoteName{},
+        ImageSet{Image::fromResourcePixmap(getResources().twitch.automod)},
         Tooltip{"AutoMod"},
         Url{"https://dashboard.twitch.tv/settings/moderation/automod"}});
 }

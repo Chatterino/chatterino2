@@ -341,7 +341,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                         auto channel = dynamic_cast<TwitchChannel *>(c.get());
                         if (channel != nullptr)
                         {
-                            channel->refresh7TVChannelEmotes(false);
+                            channel->refreshSevenTVChannelEmotes(false);
                         }
                     }
                 });
@@ -365,6 +365,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            "Google",
                        },
                        s.emojiSet);
+    layout.addCheckbox("Show BTTV global emotes", s.enableBTTVGlobalEmotes);
+    layout.addCheckbox("Show BTTV channel emotes", s.enableBTTVChannelEmotes);
+    layout.addCheckbox("Show FFZ global emotes", s.enableFFZGlobalEmotes);
+    layout.addCheckbox("Show FFZ channel emotes", s.enableFFZChannelEmotes);
+    layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);
+    layout.addCheckbox("Show 7TV channel emotes", s.enableSevenTVChannelEmotes);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
