@@ -38,7 +38,7 @@ public:
     SignalVector(std::function<bool(const T &, const T &)> &&compare)
         : SignalVector()
     {
-        itemCompare_ = std::move(compare);
+        this->itemCompare_ = std::move(compare);
     }
 
     virtual bool isSorted() const
