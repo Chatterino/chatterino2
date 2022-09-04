@@ -87,7 +87,7 @@ namespace detail {
 
     void Frames::advance()
     {
-        this->durationOffset_ += gifFrameLength;
+        this->durationOffset_ += GIF_FRAME_LENGTH;
         this->processOffset();
     }
 
