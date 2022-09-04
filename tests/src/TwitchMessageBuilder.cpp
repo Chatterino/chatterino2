@@ -122,6 +122,22 @@ TEST(TwitchMessageBuilder, CommaSeparatedListTagParsing)
     }
 }
 
+class TestTwitchMessageBuilder : public ::testing::Test
+{
+protected:
+    void SetUp() override
+    {
+        this->mockApplication = std::make_unique<MockApplication>();
+    }
+
+    void TearDown() override
+    {
+        this->mockApplication.reset();
+    }
+
+    std::unique_ptr<MockApplication> mockApplication;
+};
+
 TEST(TwitchMessageBuilder, BadgeInfoParsing)
 {
     struct TestCase {
@@ -194,15 +210,14 @@ TEST(TwitchMessageBuilder, BadgeInfoParsing)
     }
 }
 
-TEST(TwitchMessageBuilder, ParseTwitchEmotes)
+TEST_F(TestTwitchMessageBuilder, ParseTwitchEmotes)
 {
-    auto mockApplication = std::make_unique<MockApplication>();
     struct TestCase {
         QByteArray input;
         std::vector<TwitchEmoteOccurrence> expectedTwitchEmotes;
     };
 
-    auto *twitchEmotes = mockApplication->getEmotes()->getTwitchEmotes();
+    auto *twitchEmotes = this->mockApplication->getEmotes()->getTwitchEmotes();
 
     std::vector<TestCase> testCases{
         {
