@@ -76,9 +76,13 @@ public:
         else
         {
             if (index == -1)
+            {
                 index = this->items_.size();
+            }
             else
+            {
                 assert(index >= 0 && index <= this->items_.size());
+            }
 
             this->items_.insert(this->items_.begin() + index, item);
         }
