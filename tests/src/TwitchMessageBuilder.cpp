@@ -16,6 +16,8 @@
 
 using namespace chatterino;
 
+namespace {
+
 class MockApplication : IApplication
 {
 public:
@@ -74,6 +76,8 @@ public:
 
     Emotes emotes;
 };
+
+}  // namespace
 
 TEST(TwitchMessageBuilder, CommaSeparatedListTagParsing)
 {
