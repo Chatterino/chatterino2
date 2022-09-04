@@ -31,6 +31,7 @@
 - Minor: Reduced image memory usage when running Chatterino for a long time. (#3915)
 - Minor: Add settings to toggle BTTV/FFZ global/channel emotes (#3935)
 - Minor: Add AutoMod message flag filter. (#3938)
+- Minor: Added whitespace trim to username field in nicknames (#3946)
 - Bugfix: Fix crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fix crash that can occur when changing channels. (#3799)
