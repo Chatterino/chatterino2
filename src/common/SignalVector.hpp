@@ -41,7 +41,7 @@ public:
         this->itemCompare_ = std::move(compare);
     }
 
-    virtual bool isSorted() const
+    bool isSorted() const
     {
         return bool(this->itemCompare_);
     }
