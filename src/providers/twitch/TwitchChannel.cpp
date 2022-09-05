@@ -208,6 +208,12 @@ void TwitchChannel::setLocalizedName(const QString &name)
 
 void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
 {
+    if (!Settings::instance().enableSevenTVChannelEmotes)
+    {
+        this->seventvEmotes_.set(EMPTY_EMOTE_MAP);
+        return;
+    }
+
     SeventvEmotes::loadChannel(
         weakOf<Channel>(this), this->roomId(),
         [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {

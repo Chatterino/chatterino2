@@ -201,6 +201,12 @@ int Application::run(QApplication &qtApp)
     getSettings()->enableFFZChannelEmotes.connect([this] {
         this->twitch->reloadAllFFZChannelEmotes();
     });
+    getSettings()->enableSevenTVGlobalEmotes.connect([this] {
+        this->twitch->reloadSevenTVGlobalEmotes();
+    });
+    getSettings()->enableSevenTVChannelEmotes.connect([this] {
+        this->twitch->reloadAllSevenTVChannelEmotes();
+    });
 
     return qtApp.exec();
 }
