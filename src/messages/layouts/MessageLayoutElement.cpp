@@ -185,12 +185,10 @@ int ImageLayoutElement::getXFromIndex(int index)
 }
 
 PriorityImageLayoutElement::PriorityImageLayoutElement(
-    MessageElement &creator, const std::vector<ImagePtr> &images,
-    const QSize &size)
+    MessageElement &creator, ImagePriorityOrder &&order, const QSize &size)
     : MessageLayoutElement(creator, size)
-    , images_(images)
+    , order_(std::move(order))
 {
-    assert(!this->images_.empty());
     this->trailingSpace = creator.hasTrailingSpace();
 }
 
@@ -215,37 +213,9 @@ int PriorityImageLayoutElement::getSelectionIndexCount() const
     return this->trailingSpace ? 2 : 1;
 }
 
-const ImagePtr &PriorityImageLayoutElement::firstLoadedImage() const
-{
-    for (auto &img : this->images_)
-    {
-        if (img != nullptr && !img->isEmpty() && img->loaded())
-        {
-            return img;
-        }
-    }
-
-    // fallback to first image
-    return this->images_.front();
-}
-
-const ImagePtr &PriorityImageLayoutElement::getLoadedAndQueue() const
-{
-    auto &firstLoaded = this->firstLoadedImage();
-    if (firstLoaded != this->images_.front())
-    {
-        // The image we have already loaded isn't the desired image.
-        // Queue up loading the desired image, but use the already loaded one
-        // for painting this time around.
-        this->images_.front()->loadIfUnloaded();
-    }
-
-    return firstLoaded;
-}
-
 void PriorityImageLayoutElement::paint(QPainter &painter)
 {
-    auto &imageToUse = this->getLoadedAndQueue();
+    const auto &imageToUse = this->order_.getLoadedAndQueue();
 
     if (!imageToUse->animated())
     {
@@ -258,8 +228,15 @@ void PriorityImageLayoutElement::paint(QPainter &painter)
 
 void PriorityImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
-    auto &imageToUse = this->getLoadedAndQueue();
+    if (this->order_.notAnimated())
+    {
+        // paintAnimated will be called on non-animated images. If the image has
+        // been unloaded but doesn't need to be repainted yet, we don't want to
+        // accidentally load it again by calling getLoadedAndQueue.
+        return;
+    }
 
+    const auto &imageToUse = this->order_.getLoadedAndQueue();
     if (imageToUse->animated())
     {
         if (auto pixmap = imageToUse->pixmapOrLoad())

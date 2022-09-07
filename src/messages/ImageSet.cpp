@@ -1,8 +1,16 @@
-#include "messages/ImageSet.hpp"
+#include "ImageSet.hpp"
 
+#include "messages/ImagePriorityOrder.hpp"
 #include "singletons/Settings.hpp"
 
 namespace chatterino {
+
+namespace {
+    bool isValidImagePtr(const ImagePtr &img)
+    {
+        return img && !img->isEmpty();
+    }
+}  // namespace
 
 ImageSet::ImageSet()
     : imageX1_(Image::getEmpty())
@@ -84,49 +92,34 @@ const std::shared_ptr<Image> &getImagePriv(const ImageSet &set, float scale)
     return set.getImage1();
 }
 
-bool ImageSet::anyExist() const
-{
-    if (this->imageX3_ && !this->imageX3_->isEmpty())
-    {
-        return true;
-    }
-    else if (this->imageX2_ && !this->imageX2_->isEmpty())
-    {
-        return true;
-    }
-    else if (this->imageX1_ && !this->imageX1_->isEmpty())
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-QSize ImageSet::firstAvailableSize() const
-{
-    if (this->imageX3_ && !this->imageX3_->isEmpty())
-    {
-        return this->imageX3_->size();
-    }
-    else if (this->imageX2_ && !this->imageX2_->isEmpty())
-    {
-        return this->imageX2_->size();
-    }
-    else if (this->imageX1_ && !this->imageX1_->isEmpty())
-    {
-        return this->imageX1_->size();
-    }
-    else
-    {
-        return {16, 16};
-    }
-}
-
 const ImagePtr &ImageSet::getImage(float scale) const
 {
     return getImagePriv(*this, scale);
+}
+
+boost::optional<ImagePriorityOrder> ImageSet::getPriority(float scale) const
+{
+    std::vector<const ImagePtr> result;
+    result.reserve(4);
+
+    auto pushIfNotEmpty = [&result](const ImagePtr &img) {
+        if (isValidImagePtr(img))
+        {
+            result.push_back(img);
+        }
+    };
+
+    pushIfNotEmpty(this->getImage(scale));
+    pushIfNotEmpty(this->imageX3_);
+    pushIfNotEmpty(this->imageX2_);
+    pushIfNotEmpty(this->imageX1_);
+
+    if (result.empty())
+    {
+        return boost::none;
+    }
+
+    return ImagePriorityOrder(std::move(result));
 }
 
 bool ImageSet::operator==(const ImageSet &other) const

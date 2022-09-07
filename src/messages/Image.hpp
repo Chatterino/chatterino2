@@ -51,7 +51,7 @@ namespace detail {
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
 
-class PriorityImageLayoutElement;
+class ImagePriorityOrder;
 
 /// This class is thread safe.
 class Image : public std::enable_shared_from_this<Image>, boost::noncopyable
@@ -102,7 +102,7 @@ private:
     std::unique_ptr<detail::Frames> frames_{};
 
     friend class ImageExpirationPool;
-    friend class PriorityImageLayoutElement;
+    friend class ImagePriorityOrder;
 };
 
 class ImageExpirationPool

@@ -130,6 +130,8 @@ set(SOURCE_FILES
         messages/Emote.hpp
         messages/Image.cpp
         messages/Image.hpp
+        messages/ImagePriorityOrder.cpp
+        messages/ImagePriorityOrder.hpp
         messages/ImageSet.cpp
         messages/ImageSet.hpp
         messages/Link.cpp

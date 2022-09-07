@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "common/FlagsEnum.hpp"
+#include "messages/ImagePriorityOrder.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
@@ -88,8 +89,7 @@ class PriorityImageLayoutElement : public MessageLayoutElement
 {
 public:
     PriorityImageLayoutElement(MessageElement &creator,
-                               const std::vector<ImagePtr> &images,
-                               const QSize &size);
+                               ImagePriorityOrder &&order, const QSize &size);
 
 protected:
     void addCopyTextToString(QString &str, int from = 0,
@@ -100,10 +100,7 @@ protected:
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
 
-    const ImagePtr &firstLoadedImage() const;
-    const ImagePtr &getLoadedAndQueue() const;
-
-    const std::vector<ImagePtr> images_;
+    const ImagePriorityOrder order_;
 };
 
 class ImageWithBackgroundLayoutElement : public ImageLayoutElement

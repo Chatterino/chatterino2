@@ -2,7 +2,12 @@
 
 #include "messages/Image.hpp"
 
+#include <boost/optional.hpp>
+#include <vector>
+
 namespace chatterino {
+
+class ImagePriorityOrder;
 
 class ImageSet
 {
@@ -20,8 +25,7 @@ public:
     const ImagePtr &getImage3() const;
 
     const ImagePtr &getImage(float scale) const;
-    bool anyExist() const;
-    QSize firstAvailableSize() const;
+    boost::optional<ImagePriorityOrder> getPriority(float scale) const;
 
     bool operator==(const ImageSet &other) const;
     bool operator!=(const ImageSet &other) const;

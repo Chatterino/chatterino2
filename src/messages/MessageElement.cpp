@@ -14,49 +14,21 @@
 namespace chatterino {
 
 namespace {
-    std::vector<ImagePtr> imageSetPriority(const ImageSet &imageSet)
-    {
-        // TODO: Update with Image4 for 7tv support
-        std::vector<ImagePtr> images;
-        images.reserve(3);
-        auto i1 = imageSet.getImage1();
-        auto i2 = imageSet.getImage2();
-        auto i3 = imageSet.getImage3();
-        if (i3 && !i3->isEmpty())
-        {
-            images.push_back(std::move(i3));
-        }
-        if (i2 && !i2->isEmpty())
-        {
-            images.push_back(std::move(i2));
-        }
-        if (i1 && !i1->isEmpty())
-        {
-            images.push_back(std::move(i1));
-        }
-        return images;
-    }
-
     void addImageSetToContainer(MessageLayoutContainer &container,
                                 MessageElement &element,
                                 const ImageSet &imageSet, float scale)
     {
-        if (!imageSet.anyExist())
+        auto priority = imageSet.getPriority(scale);
+        if (!priority)
         {
             return;
         }
 
-        const auto priority = imageSetPriority(imageSet);
-        if (priority.empty())
-        {
-            return;
-        }
+        auto size = priority->firstLoadedImageSize() * container.getScale();
 
-        auto size = imageSet.firstAvailableSize() * container.getScale();
-
-        container.addElement(
-            (new PriorityImageLayoutElement(element, priority, size))
-                ->setLink(element.getLink()));
+        container.addElement((new PriorityImageLayoutElement(
+                                  element, std::move(*priority), size))
+                                 ->setLink(element.getLink()));
     }
 }  // namespace
 
@@ -517,29 +489,26 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
             if (parsedWord.type() == typeid(EmotePtr))
             {
                 auto emote = boost::get<EmotePtr>(parsedWord);
-                if (emote->images.anyExist())
+
+                float overallScale =
+                    getSettings()->emoteScale.getValue() * container.getScale();
+                auto priority = emote->images.getPriority(overallScale);
+                if (!priority)
                 {
-                    const auto priority = imageSetPriority(emote->images);
-                    if (priority.empty())
-                    {
-                        return;
-                    }
-
-                    auto overallScale = getSettings()->emoteScale.getValue() *
-                                        container.getScale();
-                    auto size =
-                        emote->images.firstAvailableSize() * overallScale;
-
-                    if (!container.fitsInLine(size.width()))
-                    {
-                        addEllipsis();
-                        break;
-                    }
-
-                    container.addElementNoLineBreak(
-                        (new PriorityImageLayoutElement(*this, priority, size))
-                            ->setLink(this->getLink()));
+                    return;
                 }
+
+                auto size = priority->firstLoadedImageSize() * overallScale;
+                if (!container.fitsInLine(size.width()))
+                {
+                    addEllipsis();
+                    break;
+                }
+
+                container.addElementNoLineBreak(
+                    (new PriorityImageLayoutElement(*this, std::move(*priority),
+                                                    size))
+                        ->setLink(this->getLink()));
             }
             else if (parsedWord.type() == typeid(QString))
             {
