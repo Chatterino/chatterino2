@@ -34,6 +34,13 @@ public:
 
     void bulkRefreshLiveStatus();
 
+    void reloadSevenTVGlobalEmotes();
+    void reloadAllSevenTVChannelEmotes();
+    void reloadBTTVGlobalEmotes();
+    void reloadAllBTTVChannelEmotes();
+    void reloadFFZGlobalEmotes();
+    void reloadAllFFZChannelEmotes();
+
     Atomic<QString> lastUserThatWhisperedMe;
 
     const ChannelPtr whispersChannel;

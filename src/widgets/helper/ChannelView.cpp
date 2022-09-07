@@ -131,8 +131,8 @@ namespace {
 
 ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
     : BaseWidget(parent)
-    , scrollBar_(new Scrollbar(this))
     , split_(split)
+    , scrollBar_(new Scrollbar(this))
     , context_(context)
 {
     this->setMouseTracking(true);
@@ -1576,7 +1576,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     !element->getThumbnail()->url().string.isEmpty();
                 auto thumb =
                     shouldHideThumbnail
-                        ? Image::fromPixmap(getResources().streamerMode)
+                        ? Image::fromResourcePixmap(getResources().streamerMode)
                         : element->getThumbnail();
                 tooltipPreviewImage.setImage(std::move(thumb));
 

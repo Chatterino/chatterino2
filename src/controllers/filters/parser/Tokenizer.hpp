@@ -26,6 +26,7 @@ static const QMap<QString, QString> validIdentifiersMap = {
     {"flags.first_message", "first message?"},
     {"flags.whisper", "whisper message?"},
     {"flags.reply", "reply message?"},
+    {"flags.automod", "automod message?"},
     {"message.content", "message text"},
     {"message.length", "message length"},
     {"flags.webchat_detected", "Webchat detected"}};

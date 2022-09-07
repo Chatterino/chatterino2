@@ -31,7 +31,8 @@ MessagePtr makeSystemMessage(const QString &text, const QTime &time)
 EmotePtr makeAutoModBadge()
 {
     return std::make_shared<Emote>(Emote{
-        EmoteName{}, ImageSet{Image::fromPixmap(getResources().twitch.automod)},
+        EmoteName{},
+        ImageSet{Image::fromResourcePixmap(getResources().twitch.automod)},
         Tooltip{"AutoMod"},
         Url{"https://dashboard.twitch.tv/settings/moderation/automod"}});
 }
@@ -206,24 +207,45 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
     this->message().searchText = text;
 }
 
-MessageBuilder::MessageBuilder(TimeoutMessageTag,
+MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
+                               const QString &sourceUser,
                                const QString &systemMessageText, int times,
                                const QTime &time)
     : MessageBuilder()
 {
-    QString username = systemMessageText.split(" ").at(0);
-    QString remainder = systemMessageText.mid(username.length() + 1);
-
-    QString text;
+    QString usernameText = systemMessageText.split(" ").at(0);
+    QString remainder = systemMessageText.mid(usernameText.length() + 1);
+    bool timeoutUserIsFirst =
+        usernameText == "You" || timeoutUser == usernameText;
+    QString messageText;
 
     this->emplace<TimestampElement>(time);
-    this->emplaceSystemTextAndUpdate(username, text)
-        ->setLink({Link::UserInfo, username});
-    this->emplaceSystemTextAndUpdate(
-        QString("%1 (%2 times)").arg(remainder.trimmed()).arg(times), text);
+    this->emplaceSystemTextAndUpdate(usernameText, messageText)
+        ->setLink(
+            {Link::UserInfo, timeoutUserIsFirst ? timeoutUser : sourceUser});
 
-    this->message().messageText = text;
-    this->message().searchText = text;
+    if (!sourceUser.isEmpty())
+    {
+        // the second username in the message
+        const auto &targetUsername =
+            timeoutUserIsFirst ? sourceUser : timeoutUser;
+        int userPos = remainder.indexOf(targetUsername);
+
+        QString mid = remainder.mid(0, userPos - 1);
+        QString username = remainder.mid(userPos, targetUsername.length());
+        remainder = remainder.mid(userPos + targetUsername.length() + 1);
+
+        this->emplaceSystemTextAndUpdate(mid, messageText);
+        this->emplaceSystemTextAndUpdate(username, messageText)
+            ->setLink({Link::UserInfo, username});
+    }
+
+    this->emplaceSystemTextAndUpdate(
+        QString("%1 (%2 times)").arg(remainder.trimmed()).arg(times),
+        messageText);
+
+    this->message().messageText = messageText;
+    this->message().searchText = messageText;
 }
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
@@ -284,13 +306,16 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::Timeout);
     this->message().timeoutUser = action.target.login;
+    this->message().loginName = action.source.login;
     this->message().count = count;
 
     QString text;
 
     if (action.target.id == current->getUserId())
     {
-        this->emplaceSystemTextAndUpdate("You were", text);
+        this->emplaceSystemTextAndUpdate("You", text)
+            ->setLink({Link::UserInfo, current->getUserName()});
+        this->emplaceSystemTextAndUpdate("were", text);
         if (action.isBan())
         {
             this->emplaceSystemTextAndUpdate("banned", text);

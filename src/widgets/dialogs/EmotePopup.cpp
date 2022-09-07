@@ -8,6 +8,7 @@
 #include "debug/Benchmark.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
@@ -349,27 +350,39 @@ void EmotePopup::loadChannel(ChannelPtr channel)
         *globalChannel, *subChannel, this->channel_->getName());
 
     // global
-    if (getSettings()->enableLoadingSevenTV)
+    if (Settings::instance().enableLoadingSevenTV)
     {
         addEmotes(*globalChannel,
                   *getApp()->twitch->getSeventvEmotes().emotes(), "7TV",
                   MessageElementFlag::SeventvEmote);
     }
-    addEmotes(*globalChannel, *getApp()->twitch->getBttvEmotes().emotes(),
-              "BetterTTV", MessageElementFlag::BttvEmote);
-    addEmotes(*globalChannel, *getApp()->twitch->getFfzEmotes().emotes(),
-              "FrankerFaceZ", MessageElementFlag::FfzEmote);
+    if (Settings::instance().enableBTTVGlobalEmotes)
+    {
+        addEmotes(*globalChannel, *getApp()->twitch->getBttvEmotes().emotes(),
+                  "BetterTTV", MessageElementFlag::BttvEmote);
+    }
+    if (Settings::instance().enableFFZGlobalEmotes)
+    {
+        addEmotes(*globalChannel, *getApp()->twitch->getFfzEmotes().emotes(),
+                  "FrankerFaceZ", MessageElementFlag::FfzEmote);
+    }
 
     // channel
-    if (getSettings()->enableLoadingSevenTV)
+    if (Settings::instance().enableLoadingSevenTV)
     {
         addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
                   "7TV", MessageElementFlag::SeventvEmote);
     }
-    addEmotes(*channelChannel, *this->twitchChannel_->bttvEmotes(), "BetterTTV",
-              MessageElementFlag::BttvEmote);
-    addEmotes(*channelChannel, *this->twitchChannel_->ffzEmotes(),
-              "FrankerFaceZ", MessageElementFlag::FfzEmote);
+    if (Settings::instance().enableBTTVChannelEmotes)
+    {
+        addEmotes(*channelChannel, *this->twitchChannel_->bttvEmotes(),
+                  "BetterTTV", MessageElementFlag::BttvEmote);
+    }
+    if (Settings::instance().enableFFZChannelEmotes)
+    {
+        addEmotes(*channelChannel, *this->twitchChannel_->ffzEmotes(),
+                  "FrankerFaceZ", MessageElementFlag::FfzEmote);
+    }
 
     this->globalEmotesView_->setChannel(globalChannel);
     this->subEmotesView_->setChannel(subChannel);

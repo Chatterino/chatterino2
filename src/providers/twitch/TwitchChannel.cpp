@@ -216,6 +216,12 @@ void TwitchChannel::refresh7TVChannelEmotes(bool manualRefresh)
 
 void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
 {
+    if (!Settings::instance().enableBTTVChannelEmotes)
+    {
+        this->bttvEmotes_.set(EMPTY_EMOTE_MAP);
+        return;
+    }
+
     BttvEmotes::loadChannel(
         weakOf<Channel>(this), this->roomId(), this->getLocalizedName(),
         [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
@@ -228,6 +234,12 @@ void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
 
 void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
 {
+    if (!Settings::instance().enableFFZChannelEmotes)
+    {
+        this->ffzEmotes_.set(EMPTY_EMOTE_MAP);
+        return;
+    }
+
     FfzEmotes::loadChannel(
         weakOf<Channel>(this), this->roomId(),
         [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {

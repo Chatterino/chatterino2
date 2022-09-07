@@ -31,8 +31,8 @@ namespace chatterino {
 TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
-    , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
     , liveChannel(new Channel("/live", Channel::Type::TwitchLive))
+    , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
 {
     this->initializeIrc();
 
@@ -53,9 +53,9 @@ void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
         });
     });
 
-    this->seventv.loadEmotes();
-    this->bttv.loadEmotes();
-    this->ffz.loadEmotes();
+    this->reloadSevenTVGlobalEmotes();
+    this->reloadBTTVGlobalEmotes();
+    this->reloadFFZGlobalEmotes();
 
     /* Refresh all twitch channel's live status in bulk every 30 seconds after starting chatterino */
     QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [=] {
@@ -486,4 +486,48 @@ const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
     return this->ffz;
 }
 
+void TwitchIrcServer::reloadBTTVGlobalEmotes()
+{
+    this->bttv.loadEmotes();
+}
+
+void TwitchIrcServer::reloadAllBTTVChannelEmotes()
+{
+    this->forEachChannel([](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->refreshBTTVChannelEmotes(false);
+        }
+    });
+}
+
+void TwitchIrcServer::reloadFFZGlobalEmotes()
+{
+    this->ffz.loadEmotes();
+}
+
+void TwitchIrcServer::reloadAllFFZChannelEmotes()
+{
+    this->forEachChannel([](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->refreshFFZChannelEmotes(false);
+        }
+    });
+}
+
+void TwitchIrcServer::reloadSevenTVGlobalEmotes()
+{
+    this->seventv.loadEmotes();
+}
+
+void TwitchIrcServer::reloadAllSevenTVChannelEmotes()
+{
+    this->forEachChannel([](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->refresh7TVChannelEmotes(false);
+        }
+    });
+}
 }  // namespace chatterino

@@ -95,7 +95,7 @@ jobs:
         
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.10.0
+        uses: ilammy/msvc-dev-cmd@v1.11.0
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -166,11 +166,20 @@ jobs:
 
       - name: clang-tidy review
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        uses: ZedThree/clang-tidy-review@v0.8.4
+        uses: pajlada/clang-tidy-review@feat/split-up-review-and-post-workflows
         id: review
         with:
           build_dir: build
           config_file: '.clang-tidy'
+          split_workflow: true
+
+      - uses: actions/upload-artifact@v3
+        if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
+        with:
+          name: clang-tidy-review
+          path: |
+            clang-tidy-review-output.json
+            clang-tidy-review-metadata.json
 
       - name: Package - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
@@ -214,6 +223,7 @@ jobs:
             cd build
             cmake \
                 -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
                 -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
                 -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
                 ..

@@ -9,6 +9,7 @@
 #include "messages/Image.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Settings.hpp"
 
 namespace chatterino {
 namespace {
@@ -181,6 +182,12 @@ boost::optional<EmotePtr> FfzEmotes::emote(const EmoteName &name) const
 
 void FfzEmotes::loadEmotes()
 {
+    if (!Settings::instance().enableFFZGlobalEmotes)
+    {
+        this->global_.set(EMPTY_EMOTE_MAP);
+        return;
+    }
+
     QString url("https://api.frankerfacez.com/v1/set/global");
 
     NetworkRequest(url)

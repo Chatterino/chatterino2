@@ -387,17 +387,17 @@ MessagePtr TwitchMessageBuilder::build()
     if (this->thread_)
     {
         auto &img = getResources().buttons.replyThreadDark;
-        this->emplace<CircularImageElement>(Image::fromPixmap(img, 0.15), 2,
-                                            Qt::gray,
-                                            MessageElementFlag::ReplyButton)
+        this->emplace<CircularImageElement>(
+                Image::fromResourcePixmap(img, 0.15), 2, Qt::gray,
+                MessageElementFlag::ReplyButton)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
     }
     else
     {
         auto &img = getResources().buttons.replyDark;
-        this->emplace<CircularImageElement>(Image::fromPixmap(img, 0.15), 2,
-                                            Qt::gray,
-                                            MessageElementFlag::ReplyButton)
+        this->emplace<CircularImageElement>(
+                Image::fromResourcePixmap(img, 0.15), 2, Qt::gray,
+                MessageElementFlag::ReplyButton)
             ->setLink({Link::ReplyToMessage, this->message().id});
     }
 
