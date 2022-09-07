@@ -106,6 +106,14 @@ void SearchPopup::addChannel(ChannelView &channel)
     this->updateWindowTitle();
 }
 
+void SearchPopup::goToMessage(const MessagePtr &message)
+{
+    for (const auto &channel : this->searchChannels_)
+    {
+        channel.get().scrollToMessage(message);
+    }
+}
+
 void SearchPopup::updateWindowTitle()
 {
     QString historyName;

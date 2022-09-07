@@ -1088,6 +1088,37 @@ MessageElementFlags ChannelView::getFlags() const
     return flags;
 }
 
+void ChannelView::scrollToMessage(const MessagePtr &message)
+{
+    auto &messagesSnapshot = this->getMessagesSnapshot();
+    if (messagesSnapshot.size() == 0)
+    {
+        return;
+    }
+
+    // TODO: Figure out if we can somehow binary-search here.
+    //       Currently, a message only sometimes stores a QDateTime,
+    //       but always a QTime (inaccurate on midnight).
+    //
+    // We're searching from the bottom since it's more likely for a user
+    // wanting to go to a message that recently scrolled out of view.
+    size_t messageIdx = messagesSnapshot.size() - 1;
+    for (; messageIdx < SIZE_MAX; messageIdx--)
+    {
+        if (messagesSnapshot[messageIdx]->getMessagePtr() == message)
+        {
+            break;
+        }
+    }
+
+    if (messageIdx == SIZE_MAX)
+    {
+        return;
+    }
+
+    this->getScrollBar().setDesiredValue(messageIdx);
+}
+
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
 {
     //    BenchmarkGuard benchmark("paint");
@@ -2069,6 +2100,18 @@ void ChannelView::addMessageContextMenuItems(
                 this->showReplyThreadPopup(messagePtr);
             });
         }
+    }
+
+    if (this->context_ == Context::Search)
+    {
+        const auto &messagePtr = layout->getMessagePtr();
+        menu.addAction("Go to message", [this, &messagePtr] {
+            if (const auto &search =
+                    dynamic_cast<SearchPopup *>(this->parentWidget()))
+            {
+                search->goToMessage(messagePtr);
+            }
+        });
     }
 }
 

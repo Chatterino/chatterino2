@@ -19,6 +19,7 @@ public:
     SearchPopup(QWidget *parent, Split *split = nullptr);
 
     virtual void addChannel(ChannelView &channel);
+    void goToMessage(const MessagePtr &message);
 
 protected:
     virtual void updateWindowTitle();

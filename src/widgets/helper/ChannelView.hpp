@@ -83,6 +83,8 @@ public:
     const boost::optional<MessageElementFlags> &getOverrideFlags() const;
     void updateLastReadMessage();
 
+    void scrollToMessage(const MessagePtr &message);
+
     /// Pausing
     bool pausable() const;
     void setPausable(bool value);
