@@ -10,7 +10,7 @@ namespace chatterino {
 class ImagePriorityOrder
 {
 public:
-    ImagePriorityOrder(std::vector<const ImagePtr> &&order);
+    ImagePriorityOrder(std::vector<ImagePtr> &&order);
     ImagePriorityOrder(ImagePriorityOrder &&other);
 
     ImagePriorityOrder(const ImagePriorityOrder &other) = delete;
@@ -25,7 +25,7 @@ public:
 private:
     enum AnimationFlag { Unknown, No, Yes };
 
-    std::vector<const ImagePtr> order_;
+    std::vector<ImagePtr> order_;
     mutable AnimationFlag animated_ = AnimationFlag::Unknown;
 };
 

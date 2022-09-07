@@ -99,7 +99,7 @@ const ImagePtr &ImageSet::getImage(float scale) const
 
 boost::optional<ImagePriorityOrder> ImageSet::getPriority(float scale) const
 {
-    std::vector<const ImagePtr> result;
+    std::vector<ImagePtr> result;
     result.reserve(4);
 
     auto pushIfNotEmpty = [&result](const ImagePtr &img) {

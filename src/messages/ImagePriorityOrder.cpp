@@ -5,7 +5,7 @@
 
 namespace chatterino {
 
-ImagePriorityOrder::ImagePriorityOrder(std::vector<const ImagePtr> &&order)
+ImagePriorityOrder::ImagePriorityOrder(std::vector<ImagePtr> &&order)
     : order_(std::move(order))
 {
     assert(!this->order_.empty());
