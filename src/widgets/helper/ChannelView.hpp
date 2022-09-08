@@ -243,6 +243,7 @@ private:
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
+    bool showScrollBar_ = false;
 
     FilterSetPtr channelFilters_;
 

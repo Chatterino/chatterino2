@@ -475,6 +475,7 @@ void ChannelView::updateScrollbar(
     {
         this->scrollBar_->setDesiredValue(0);
     }
+    this->showScrollBar_ = showScrollbar;
 
     this->scrollBar_->setMaximum(messages.size());
 
@@ -1091,7 +1092,7 @@ MessageElementFlags ChannelView::getFlags() const
 void ChannelView::scrollToMessage(const MessagePtr &message)
 {
     auto &messagesSnapshot = this->getMessagesSnapshot();
-    if (messagesSnapshot.size() == 0)
+    if (messagesSnapshot.size() == 0 || !this->showScrollBar_)
     {
         return;
     }
