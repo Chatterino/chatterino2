@@ -392,7 +392,8 @@ void ChannelView::performLayout(bool causedByScrollbar)
     auto &messages = this->getMessagesSnapshot();
 
     this->showingLatestMessages_ =
-        this->scrollBar_->isAtBottom() || !this->scrollBar_->isVisible();
+        this->scrollBar_->isAtBottom() ||
+        (!this->scrollBar_->isVisible() && !causedByScrollbar);
 
     /// Layout visible messages
     this->layoutVisibleMessages(messages);
