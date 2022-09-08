@@ -272,6 +272,55 @@ void MessageLayoutContainer::breakLine()
     this->height_ = this->currentY_ + int(this->margin.bottom * this->scale_);
     this->lineHeight_ = 0;
     this->line_++;
+
+    // correct RTL order
+    int startIndex = this->lines_.back().startIndex;
+    int endIndex = this->elements_.size() - 1;
+    if (this->line_ - 1 == 0)
+    {
+        for (int i = 0; i < this->elements_.size(); i++)
+        {
+            if (this->elements_[i]->getFlags().has(MessageElementFlag::Text))
+            {
+                startIndex = i;
+                break;
+            }
+        }
+    }
+
+    std::vector<int> swapped;
+    std::stack<int> rtlStack;
+
+    for (int i = startIndex; i <= endIndex; i++)
+    {
+        if (this->elements_[i]->getText().isRightToLeft())
+        {
+            rtlStack.push(i);
+        }
+        else
+        {
+            while (rtlStack.size() > 0)
+            {
+                swapped.push_back(rtlStack.top());
+                rtlStack.pop();
+            }
+            swapped.push_back(i);
+        }
+    }
+    while (rtlStack.size() > 0)
+    {
+        swapped.push_back(rtlStack.top());
+        rtlStack.pop();
+    }
+
+    int currentY = this->elements_[endIndex]->getRect().top();
+    int currentX = this->elements_[startIndex]->getRect().left();
+    for (int i = 0; i < swapped.size(); i++)
+    {
+        this->elements_[swapped[i]]->setPosition(QPoint(currentX, currentY));
+        currentX += (this->elements_[swapped[i]])->getRect().width() +
+                    this->spaceWidth_;
+    }
 }
 
 bool MessageLayoutContainer::atStartOfLine()
