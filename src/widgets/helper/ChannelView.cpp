@@ -1,13 +1,16 @@
 #include "ChannelView.hpp"
 
 #include <QClipboard>
+#include <QColor>
 #include <QDate>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QEasingCurve>
 #include <QGraphicsBlurEffect>
 #include <QMessageBox>
 #include <QPainter>
 #include <QScreen>
+#include <QVariantAnimation>
 #include <algorithm>
 #include <chrono>
 #include <cmath>

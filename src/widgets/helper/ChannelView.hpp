@@ -3,6 +3,7 @@
 #include <QPaintEvent>
 #include <QScroller>
 #include <QTimer>
+#include <QVariantAnimation>
 #include <QWheelEvent>
 #include <QWidget>
 #include <pajlada/signals/signal.hpp>
