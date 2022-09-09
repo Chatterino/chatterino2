@@ -137,8 +137,8 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
     : BaseWidget(parent)
     , split_(split)
     , scrollBar_(new Scrollbar(this))
-    , context_(context)
     , highlightAnimation_(this)
+    , context_(context)
 {
     this->setMouseTracking(true);
 
