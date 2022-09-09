@@ -118,6 +118,16 @@ namespace {
             addPageLink("FFZ");
         }
     }
+
+    // Current function: https://www.desmos.com/calculator/vdyamchjwh
+    qreal highlightEasingFunction(qreal progress)
+    {
+        if (progress <= 0.1)
+        {
+            return 1.0 - pow(10.0 * progress, 3.0);
+        }
+        return 1.0 + pow((20.0 / 9.0) * (0.5 * progress - 0.5), 3.0);
+    }
 }  // namespace
 
 ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
@@ -125,6 +135,7 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
     , split_(split)
     , scrollBar_(new Scrollbar(this))
     , context_(context)
+    , highlightAnimation_(this)
 {
     this->setMouseTracking(true);
 
@@ -164,6 +175,12 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
     // of any place where you can, or where it would make sense,
     // to tab to a ChannelVieChannelView
     this->setFocusPolicy(Qt::FocusPolicy::ClickFocus);
+
+    this->setupHighlightAnimationColors();
+    this->highlightAnimation_.setDuration(1500);
+    auto curve = QEasingCurve();
+    curve.setCustomType(highlightEasingFunction);
+    this->highlightAnimation_.setEasingCurve(curve);
 }
 
 void ChannelView::initializeLayout()
@@ -339,7 +356,24 @@ void ChannelView::themeChangedEvent()
 {
     BaseWidget::themeChangedEvent();
 
+    this->setupHighlightAnimationColors();
     this->queueLayout();
+}
+
+void ChannelView::setupHighlightAnimationColors()
+{
+    constexpr int maxOpacity = 110;
+    if (this->theme->isLightTheme())
+    {
+        this->highlightAnimation_.setStartValue(QColor(20, 20, 20, maxOpacity));
+        this->highlightAnimation_.setEndValue(QColor(20, 20, 20, 0));
+    }
+    else
+    {
+        this->highlightAnimation_.setStartValue(
+            QColor(230, 230, 230, maxOpacity));
+        this->highlightAnimation_.setEndValue(QColor(230, 230, 230, 0));
+    }
 }
 
 void ChannelView::scaleChangedEvent(float scale)
@@ -1093,7 +1127,7 @@ MessageElementFlags ChannelView::getFlags() const
 void ChannelView::scrollToMessage(const MessagePtr &message)
 {
     auto &messagesSnapshot = this->getMessagesSnapshot();
-    if (messagesSnapshot.size() == 0 || !this->showScrollBar_)
+    if (messagesSnapshot.size() == 0)
     {
         return;
     }
@@ -1118,7 +1152,13 @@ void ChannelView::scrollToMessage(const MessagePtr &message)
         return;
     }
 
-    this->getScrollBar().setDesiredValue(messageIdx);
+    this->highlightedMessage_ = messagesSnapshot[messageIdx].get();
+    this->highlightAnimation_.start(QAbstractAnimation::KeepWhenStopped);
+
+    if (this->showScrollBar_)
+    {
+        this->getScrollBar().setDesiredValue(messageIdx);
+    }
 }
 
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
@@ -1176,6 +1216,17 @@ void ChannelView::drawMessages(QPainter &painter)
 
         layout->paint(painter, DRAW_WIDTH, y, i, this->selection_,
                       isLastMessage, windowFocused, isMentions);
+
+        if (this->highlightedMessage_ == layout)
+        {
+            painter.fillRect(
+                0, y, layout->getWidth(), layout->getHeight(),
+                this->highlightAnimation_.currentValue().value<QColor>());
+            if (this->highlightAnimation_.state() == QVariantAnimation::Stopped)
+            {
+                this->highlightedMessage_ = nullptr;
+            }
+        }
 
         y += layout->getHeight();
 

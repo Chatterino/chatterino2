@@ -275,6 +275,11 @@ private:
     QPointF currentMousePosition_;
     QTimer scrollTimer_;
 
+    // We're only interested in the pointer, not the contents
+    MessageLayout *highlightedMessage_;
+    QVariantAnimation highlightAnimation_;
+    void setupHighlightAnimationColors();
+
     struct {
         QCursor neutral;
         QCursor up;
