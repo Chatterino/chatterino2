@@ -282,44 +282,64 @@ void MessageLayoutContainer::breakLine()
         {
             if (this->elements_[i]->getFlags().has(MessageElementFlag::Text))
             {
+                this->isRTL_ = this->elements_[i]->getText().isRightToLeft();
                 startIndex = i;
                 break;
             }
         }
     }
 
-    std::vector<int> swapped;
-    std::stack<int> rtlStack;
+    std::vector<int> correctOrder;
+    std::stack<int> swappedWords;
 
     for (int i = startIndex; i <= endIndex; i++)
     {
-        if (this->elements_[i]->getText().isRightToLeft())
+        if (this->elements_[i]->getText().isRightToLeft() != this->isRTL_)
         {
-            rtlStack.push(i);
+            swappedWords.push(i);
         }
         else
         {
-            while (rtlStack.size() > 0)
+            while (swappedWords.size() > 0)
             {
-                swapped.push_back(rtlStack.top());
-                rtlStack.pop();
+                correctOrder.push_back(swappedWords.top());
+                swappedWords.pop();
             }
-            swapped.push_back(i);
+            correctOrder.push_back(i);
         }
     }
-    while (rtlStack.size() > 0)
+    while (swappedWords.size() > 0)
     {
-        swapped.push_back(rtlStack.top());
-        rtlStack.pop();
+        correctOrder.push_back(swappedWords.top());
+        swappedWords.pop();
     }
 
     int currentY = this->elements_[endIndex]->getRect().top();
-    int currentX = this->elements_[startIndex]->getRect().left();
-    for (int i = 0; i < swapped.size(); i++)
+
+    if (this->isRTL_)
     {
-        this->elements_[swapped[i]]->setPosition(QPoint(currentX, currentY));
-        currentX += (this->elements_[swapped[i]])->getRect().width() +
-                    this->spaceWidth_;
+        int currentX = this->elements_[endIndex]->getRect().right();
+        for (int i = 0; i < correctOrder.size(); i++)
+        {
+            QPoint topRight(currentX, currentY);
+            QPoint widthOffset(
+                this->elements_[correctOrder[i]]->getRect().width(), 0);
+            this->elements_[correctOrder[i]]->setPosition(topRight -
+                                                          widthOffset);
+            currentX -= (this->elements_[correctOrder[i]])->getRect().width() +
+                        this->spaceWidth_;
+        }
+    }
+    else
+    {
+        int currentX = this->elements_[startIndex]->getRect().left();
+        for (int i = 0; i < correctOrder.size(); i++)
+        {
+            this->elements_[correctOrder[i]]->setPosition(
+                QPoint(currentX, currentY));
+            currentX += (this->elements_[correctOrder[i]])->getRect().width() +
+                        this->spaceWidth_;
+        }
     }
 }
 
