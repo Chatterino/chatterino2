@@ -1019,6 +1019,8 @@ SplitNotebook::SplitNotebook(Window *parent)
                     auto split = std::find_if(
                         splits.begin(), splits.end(), [pair](Split *split) {
                             return &split->getChannelView() != pair.second &&
+                                   split->getChannel()->getType() !=
+                                       Channel::Type::TwitchMentions &&
                                    split->getChannelView().scrollToMessage(
                                        pair.first);
                         });

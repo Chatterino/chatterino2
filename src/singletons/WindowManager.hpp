@@ -68,7 +68,8 @@ public:
     void select(Split *split);
     void select(SplitContainer *container);
     /**
-     * Selects the first channel-view that's not <code>source</code> with this message and scrolls to it.
+     * Selects the first channel-view that's not <code>source</code>
+     * or a twitch-mentions view with this message and scrolls to it.
      * @param message Message to scroll to.
      * @param source (nullable) source channel-view.
      */
