@@ -84,7 +84,11 @@ public:
     const boost::optional<MessageElementFlags> &getOverrideFlags() const;
     void updateLastReadMessage();
 
-    void scrollToMessage(const MessagePtr &message);
+    /**
+     * Attempts to scroll to a message in this channel.
+     * @return <code>true</code> iff the message was found and highlighted.
+     */
+    bool scrollToMessage(const MessagePtr &message);
 
     /// Pausing
     bool pausable() const;

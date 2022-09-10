@@ -15,6 +15,7 @@ class Settings;
 class Paths;
 class Window;
 class SplitContainer;
+class ChannelView;
 
 enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
@@ -66,6 +67,13 @@ public:
 
     void select(Split *split);
     void select(SplitContainer *container);
+    /**
+     * Selects the first channel-view that's not <code>source</code> with this message and scrolls to it.
+     * @param message Message to scroll to.
+     * @param source (nullable) source channel-view.
+     */
+    void selectAndScrollToMessage(const MessagePtr &message,
+                                  ChannelView *source);
 
     QPoint emotePopupPos();
     void setEmotePopupPos(QPoint pos);
@@ -105,6 +113,8 @@ public:
 
     pajlada::Signals::Signal<Split *> selectSplit;
     pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
+    pajlada::Signals::Signal<std::pair<const MessagePtr &, ChannelView *>>
+        selectScrollToMessage;
 
 private:
     static void encodeNodeRecursively(SplitContainer::Node *node,

@@ -1127,17 +1127,17 @@ MessageElementFlags ChannelView::getFlags() const
     return flags;
 }
 
-void ChannelView::scrollToMessage(const MessagePtr &message)
+bool ChannelView::scrollToMessage(const MessagePtr &message)
 {
     if (!this->mayContainMessage(message))
     {
-        return;
+        return false;
     }
 
     auto &messagesSnapshot = this->getMessagesSnapshot();
     if (messagesSnapshot.size() == 0)
     {
-        return;
+        return false;
     }
 
     // TODO: Figure out if we can somehow binary-search here.
@@ -1157,7 +1157,7 @@ void ChannelView::scrollToMessage(const MessagePtr &message)
 
     if (messageIdx == SIZE_MAX)
     {
-        return;
+        return false;
     }
 
     this->highlightedMessage_ = messagesSnapshot[messageIdx].get();
@@ -1167,6 +1167,8 @@ void ChannelView::scrollToMessage(const MessagePtr &message)
     {
         this->getScrollBar().setDesiredValue(messageIdx);
     }
+
+    return true;
 }
 
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
@@ -2163,14 +2165,25 @@ void ChannelView::addMessageContextMenuItems(
         }
     }
 
-    if (this->context_ == Context::Search)
+    bool isSearch = this->context_ == Context::Search;
+    bool isMentions =
+        this->channel()->getType() == Channel::Type::TwitchMentions;
+    if (isSearch || isMentions)
     {
         const auto &messagePtr = layout->getMessagePtr();
-        menu.addAction("Go to message", [this, &messagePtr] {
-            if (const auto &search =
-                    dynamic_cast<SearchPopup *>(this->parentWidget()))
+        menu.addAction("Go to message", [this, &messagePtr, isSearch,
+                                         isMentions] {
+            if (isSearch)
             {
-                search->goToMessage(messagePtr);
+                if (const auto &search =
+                        dynamic_cast<SearchPopup *>(this->parentWidget()))
+                {
+                    search->goToMessage(messagePtr);
+                }
+            }
+            else if (isMentions)
+            {
+                getApp()->windows->selectAndScrollToMessage(messagePtr, this);
             }
         });
     }

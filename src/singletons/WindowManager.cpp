@@ -320,6 +320,12 @@ void WindowManager::select(SplitContainer *container)
     this->selectSplitContainer.invoke(container);
 }
 
+void WindowManager::selectAndScrollToMessage(const MessagePtr &message,
+                                             ChannelView *source)
+{
+    this->selectScrollToMessage.invoke(std::make_pair(message, source));
+}
+
 QPoint WindowManager::emotePopupPos()
 {
     return this->emotePopupPos_;

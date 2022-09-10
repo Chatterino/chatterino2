@@ -8,6 +8,7 @@
 #include "util/InitUpdateButton.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookButton.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/Split.hpp"
@@ -1006,6 +1007,30 @@ SplitNotebook::SplitNotebook(Window *parent)
                                        [this](SplitContainer *sc) {
                                            this->select(sc);
                                        });
+
+    this->signalHolder_.managedConnect(
+        getApp()->windows->selectScrollToMessage,
+        [this](std::pair<const MessagePtr &, ChannelView *> pair) {
+            for (auto &&item : this->items())
+            {
+                if (auto sc = dynamic_cast<SplitContainer *>(item.page))
+                {
+                    auto &&splits = sc->getSplits();
+                    auto split = std::find_if(
+                        splits.begin(), splits.end(), [pair](Split *split) {
+                            return &split->getChannelView() != pair.second &&
+                                   split->getChannelView().scrollToMessage(
+                                       pair.first);
+                        });
+                    if (split != splits.end())
+                    {
+                        this->select(item.page);
+                        (*split)->setFocus();
+                        break;
+                    }
+                }
+            }
+        });
 }
 
 void SplitNotebook::showEvent(QShowEvent *)
