@@ -1195,6 +1195,7 @@ bool ChannelView::scrollToMessageId(const QString &messageId)
 void ChannelView::scrollToMessage(MessageLayout *layout, size_t messageIdx)
 {
     this->highlightedMessage_ = layout;
+    this->highlightAnimation_.setCurrentTime(0);
     this->highlightAnimation_.start(QAbstractAnimation::KeepWhenStopped);
 
     if (this->showScrollBar_)
