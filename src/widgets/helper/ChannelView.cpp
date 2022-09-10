@@ -2166,14 +2166,16 @@ void ChannelView::addMessageContextMenuItems(
     }
 
     bool isSearch = this->context_ == Context::Search;
-    bool isReply = this->context_ == Context::ReplyThread && this->split_;
+    bool isReplyOrUserCard = (this->context_ == Context::ReplyThread ||
+                              this->context_ == Context::UserCard) &&
+                             this->split_;
     bool isMentions =
         this->channel()->getType() == Channel::Type::TwitchMentions;
-    if (isSearch || isMentions || isReply)
+    if (isSearch || isMentions || isReplyOrUserCard)
     {
         const auto &messagePtr = layout->getMessagePtr();
         menu.addAction("Go to message", [this, &messagePtr, isSearch,
-                                         isMentions, isReply] {
+                                         isMentions, isReplyOrUserCard] {
             if (isSearch)
             {
                 if (const auto &search =
@@ -2186,7 +2188,7 @@ void ChannelView::addMessageContextMenuItems(
             {
                 getApp()->windows->selectAndScrollToMessage(messagePtr);
             }
-            else if (isReply)
+            else if (isReplyOrUserCard)
             {
                 // If the thread is in the mentions channel,
                 // we need to find the original split.
