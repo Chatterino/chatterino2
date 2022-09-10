@@ -1010,19 +1010,18 @@ SplitNotebook::SplitNotebook(Window *parent)
 
     this->signalHolder_.managedConnect(
         getApp()->windows->selectScrollToMessage,
-        [this](std::pair<const MessagePtr &, ChannelView *> pair) {
+        [this](const MessagePtr &message) {
             for (auto &&item : this->items())
             {
                 if (auto sc = dynamic_cast<SplitContainer *>(item.page))
                 {
                     auto &&splits = sc->getSplits();
                     auto split = std::find_if(
-                        splits.begin(), splits.end(), [pair](Split *split) {
-                            return &split->getChannelView() != pair.second &&
-                                   split->getChannel()->getType() !=
+                        splits.begin(), splits.end(), [message](Split *split) {
+                            return split->getChannel()->getType() !=
                                        Channel::Type::TwitchMentions &&
                                    split->getChannelView().scrollToMessage(
-                                       pair.first);
+                                       message);
                         });
                     if (split != splits.end())
                     {
