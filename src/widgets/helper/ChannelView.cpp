@@ -1160,15 +1160,47 @@ bool ChannelView::scrollToMessage(const MessagePtr &message)
         return false;
     }
 
-    this->highlightedMessage_ = messagesSnapshot[messageIdx].get();
+    this->scrollToMessage(messagesSnapshot[messageIdx].get(), messageIdx);
+    return true;
+}
+
+bool ChannelView::scrollToMessageId(const QString &messageId)
+{
+    auto &messagesSnapshot = this->getMessagesSnapshot();
+    if (messagesSnapshot.size() == 0)
+    {
+        return false;
+    }
+
+    // We're searching from the bottom since it's more likely for a user
+    // wanting to go to a message that recently scrolled out of view.
+    size_t messageIdx = messagesSnapshot.size() - 1;
+    for (; messageIdx < SIZE_MAX; messageIdx--)
+    {
+        if (messagesSnapshot[messageIdx]->getMessagePtr()->id == messageId)
+        {
+            break;
+        }
+    }
+
+    if (messageIdx == SIZE_MAX)
+    {
+        return false;
+    }
+
+    this->scrollToMessage(messagesSnapshot[messageIdx].get(), messageIdx);
+    return true;
+}
+
+void ChannelView::scrollToMessage(MessageLayout *layout, size_t messageIdx)
+{
+    this->highlightedMessage_ = layout;
     this->highlightAnimation_.start(QAbstractAnimation::KeepWhenStopped);
 
     if (this->showScrollBar_)
     {
         this->getScrollBar().setDesiredValue(messageIdx);
     }
-
-    return true;
 }
 
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
@@ -2171,6 +2203,8 @@ void ChannelView::addMessageContextMenuItems(
                              this->split_;
     bool isMentions =
         this->channel()->getType() == Channel::Type::TwitchMentions;
+    bool isDeletedMessage =
+        layout->getMessage()->flags.has(MessageFlag::Disabled);
     if (isSearch || isMentions || isReplyOrUserCard)
     {
         const auto &messagePtr = layout->getMessagePtr();
@@ -2596,6 +2630,10 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         break;
         case Link::ViewThread: {
             this->showReplyThreadPopup(layout->getMessagePtr());
+        }
+        break;
+        case Link::MessageId: {
+            this->scrollToMessageId(link.value);
         }
         break;
 

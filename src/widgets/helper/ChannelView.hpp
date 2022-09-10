@@ -89,6 +89,11 @@ public:
      * @return <code>true</code> iff the message was found and highlighted.
      */
     bool scrollToMessage(const MessagePtr &message);
+    /**
+     * Attempts to scroll to a message id in this channel.
+     * @return <code>true</code> iff the message was found and highlighted.
+     */
+    bool scrollToMessageId(const QString &id);
 
     /// Pausing
     bool pausable() const;
@@ -221,6 +226,12 @@ private:
 
     void enableScrolling(const QPointF &scrollStart);
     void disableScrolling();
+
+    /**
+     * @param layout Must be from this channel.
+     * @param messageIdx Must be an index into this channel.
+     */
+    void scrollToMessage(MessageLayout *layout, size_t messageIdx);
 
     void setInputReply(const MessagePtr &message);
     void showReplyThreadPopup(const MessagePtr &message);
