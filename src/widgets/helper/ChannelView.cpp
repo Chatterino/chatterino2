@@ -2509,6 +2509,8 @@ bool ChannelView::mayContainMessage(const MessagePtr &message)
         case Channel::Type::None:       // Unspecific
         case Channel::Type::Misc:       // Unspecific
             return true;
+        default:
+            return true;  // unreachable
     }
 }
 
