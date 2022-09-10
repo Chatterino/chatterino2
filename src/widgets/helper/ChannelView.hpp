@@ -122,6 +122,13 @@ public:
     void showUserInfoPopup(const QString &userName,
                            QString alternativePopoutChannel = QString());
 
+    /**
+     * @brief This method is meant to be used when filtering out channels.
+     *        It <b>must</b> return true if a message belongs in this channel.
+     *        It <b>might</b> return true if a message doesn't belong in this channel.
+     */
+    bool mayContainMessage(const MessagePtr &message);
+
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;

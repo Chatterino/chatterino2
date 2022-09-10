@@ -1129,6 +1129,11 @@ MessageElementFlags ChannelView::getFlags() const
 
 void ChannelView::scrollToMessage(const MessagePtr &message)
 {
+    if (!this->mayContainMessage(message))
+    {
+        return;
+    }
+
     auto &messagesSnapshot = this->getMessagesSnapshot();
     if (messagesSnapshot.size() == 0)
     {
@@ -2418,6 +2423,28 @@ void ChannelView::showUserInfoPopup(const QString &userName,
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     userPopup->move(QCursor::pos() - offset);
     userPopup->show();
+}
+
+bool ChannelView::mayContainMessage(const MessagePtr &message)
+{
+    switch (this->channel()->getType())
+    {
+        case Channel::Type::Direct:
+        case Channel::Type::Twitch:
+        case Channel::Type::TwitchWatching:
+        case Channel::Type::Irc:
+            return this->channel()->getName() == message->channelName;
+        case Channel::Type::TwitchWhispers:
+            return message->flags.has(MessageFlag::Whisper);
+        case Channel::Type::TwitchMentions:
+            return message->flags.has(MessageFlag::Highlighted);
+        case Channel::Type::TwitchLive:
+            return message->flags.has(MessageFlag::System);
+        case Channel::Type::TwitchEnd:  // TODO: not used?
+        case Channel::Type::None:       // Unspecific
+        case Channel::Type::Misc:       // Unspecific
+            return true;
+    }
 }
 
 void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
