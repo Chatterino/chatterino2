@@ -2166,13 +2166,14 @@ void ChannelView::addMessageContextMenuItems(
     }
 
     bool isSearch = this->context_ == Context::Search;
+    bool isReply = this->context_ == Context::ReplyThread && this->split_;
     bool isMentions =
         this->channel()->getType() == Channel::Type::TwitchMentions;
-    if (isSearch || isMentions)
+    if (isSearch || isMentions || isReply)
     {
         const auto &messagePtr = layout->getMessagePtr();
         menu.addAction("Go to message", [this, &messagePtr, isSearch,
-                                         isMentions] {
+                                         isMentions, isReply] {
             if (isSearch)
             {
                 if (const auto &search =
@@ -2184,6 +2185,21 @@ void ChannelView::addMessageContextMenuItems(
             else if (isMentions)
             {
                 getApp()->windows->selectAndScrollToMessage(messagePtr, this);
+            }
+            else if (isReply)
+            {
+                // If the thread is in the mentions channel,
+                // we need to find the original split.
+                if (this->split_->getChannel()->getType() ==
+                    Channel::Type::TwitchMentions)
+                {
+                    getApp()->windows->selectAndScrollToMessage(messagePtr,
+                                                                nullptr);
+                }
+                else
+                {
+                    this->split_->getChannelView().scrollToMessage(messagePtr);
+                }
             }
         });
     }
