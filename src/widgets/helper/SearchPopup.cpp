@@ -12,6 +12,7 @@
 #include "messages/search/MessageFlagsPredicate.hpp"
 #include "messages/search/RegexPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
+#include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {
@@ -108,9 +109,15 @@ void SearchPopup::addChannel(ChannelView &channel)
 
 void SearchPopup::goToMessage(const MessagePtr &message)
 {
-    for (const auto &channel : this->searchChannels_)
+    for (const auto &view : this->searchChannels_)
     {
-        channel.get().scrollToMessage(message);
+        if (view.get().channel()->getType() == Channel::Type::TwitchMentions)
+        {
+            getApp()->windows->selectAndScrollToMessage(message);
+            return;
+        }
+
+        view.get().scrollToMessage(message);
     }
 }
 
