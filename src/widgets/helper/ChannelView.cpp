@@ -1161,6 +1161,7 @@ bool ChannelView::scrollToMessage(const MessagePtr &message)
     }
 
     this->scrollToMessage(messagesSnapshot[messageIdx].get(), messageIdx);
+    getApp()->windows->select(this->split_);
     return true;
 }
 
@@ -1189,6 +1190,7 @@ bool ChannelView::scrollToMessageId(const QString &messageId)
     }
 
     this->scrollToMessage(messagesSnapshot[messageIdx].get(), messageIdx);
+    getApp()->windows->select(this->split_);
     return true;
 }
 

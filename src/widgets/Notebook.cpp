@@ -1025,8 +1025,6 @@ SplitNotebook::SplitNotebook(Window *parent)
                         });
                     if (split != splits.end())
                     {
-                        this->select(item.page);
-                        (*split)->setFocus();
                         break;
                     }
                 }

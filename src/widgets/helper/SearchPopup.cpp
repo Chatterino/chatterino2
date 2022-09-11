@@ -117,7 +117,10 @@ void SearchPopup::goToMessage(const MessagePtr &message)
             return;
         }
 
-        view.get().scrollToMessage(message);
+        if (view.get().scrollToMessage(message))
+        {
+            return;
+        }
     }
 }
 
