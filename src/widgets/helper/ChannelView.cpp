@@ -2635,7 +2635,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             this->showReplyThreadPopup(layout->getMessagePtr());
         }
         break;
-        case Link::MessageId: {
+        case Link::JumpToMessage: {
             this->scrollToMessageId(link.value);
         }
         break;

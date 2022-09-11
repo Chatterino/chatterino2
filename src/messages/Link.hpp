@@ -25,7 +25,7 @@ public:
         CopyToClipboard,
         ReplyToMessage,
         ViewThread,
-        MessageId,
+        JumpToMessage,
     };
 
     Link();

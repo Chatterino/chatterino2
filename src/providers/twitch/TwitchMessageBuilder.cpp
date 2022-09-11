@@ -1474,14 +1474,14 @@ void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
         builder
             ->emplace<TextElement>(originalMessage->messageText.left(50) + "…",
                                    MessageElementFlag::Text, MessageColor::Text)
-            ->setLink({Link::MessageId, originalMessage->id});
+            ->setLink({Link::JumpToMessage, originalMessage->id});
     }
     else
     {
         builder
             ->emplace<TextElement>(originalMessage->messageText,
                                    MessageElementFlag::Text, MessageColor::Text)
-            ->setLink({Link::MessageId, originalMessage->id});
+            ->setLink({Link::JumpToMessage, originalMessage->id});
     }
     builder->message().timeoutUser = "msg:" + originalMessage->id;
 }
@@ -1516,14 +1516,14 @@ void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
         builder
             ->emplace<TextElement>(action.messageText.left(50) + "…",
                                    MessageElementFlag::Text, MessageColor::Text)
-            ->setLink({Link::MessageId, action.messageId});
+            ->setLink({Link::JumpToMessage, action.messageId});
     }
     else
     {
         builder
             ->emplace<TextElement>(action.messageText, MessageElementFlag::Text,
                                    MessageColor::Text)
-            ->setLink({Link::MessageId, action.messageId});
+            ->setLink({Link::JumpToMessage, action.messageId});
     }
     builder->message().timeoutUser = "msg:" + action.messageId;
 }
