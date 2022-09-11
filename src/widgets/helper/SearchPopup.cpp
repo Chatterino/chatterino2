@@ -113,7 +113,7 @@ void SearchPopup::goToMessage(const MessagePtr &message)
     {
         if (view.get().channel()->getType() == Channel::Type::TwitchMentions)
         {
-            getApp()->windows->selectAndScrollToMessage(message);
+            getApp()->windows->scrollToMessage(message);
             return;
         }
 

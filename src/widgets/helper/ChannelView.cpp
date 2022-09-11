@@ -2221,7 +2221,7 @@ void ChannelView::addMessageContextMenuItems(
             }
             else if (isMentions)
             {
-                getApp()->windows->selectAndScrollToMessage(messagePtr);
+                getApp()->windows->scrollToMessage(messagePtr);
             }
             else if (isReplyOrUserCard)
             {
@@ -2230,7 +2230,7 @@ void ChannelView::addMessageContextMenuItems(
                 if (this->split_->getChannel()->getType() ==
                     Channel::Type::TwitchMentions)
                 {
-                    getApp()->windows->selectAndScrollToMessage(messagePtr);
+                    getApp()->windows->scrollToMessage(messagePtr);
                 }
                 else
                 {

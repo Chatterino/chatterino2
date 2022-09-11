@@ -68,12 +68,12 @@ public:
     void select(Split *split);
     void select(SplitContainer *container);
     /**
-     * Selects the first channel-view that's not a twitch-mentions view
-     * with this message and scrolls to it.
+     * Scrolls to the message in a split that's not
+     * a mentions view and focuses the split.
      *
      * @param message Message to scroll to.
      */
-    void selectAndScrollToMessage(const MessagePtr &message);
+    void scrollToMessage(const MessagePtr &message);
 
     QPoint emotePopupPos();
     void setEmotePopupPos(QPoint pos);
@@ -113,7 +113,7 @@ public:
 
     pajlada::Signals::Signal<Split *> selectSplit;
     pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
-    pajlada::Signals::Signal<const MessagePtr &> selectScrollToMessage;
+    pajlada::Signals::Signal<const MessagePtr &> scrollToMessageSignal;
 
 private:
     static void encodeNodeRecursively(SplitContainer::Node *node,

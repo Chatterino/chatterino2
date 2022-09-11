@@ -1009,7 +1009,7 @@ SplitNotebook::SplitNotebook(Window *parent)
                                        });
 
     this->signalHolder_.managedConnect(
-        getApp()->windows->selectScrollToMessage,
+        getApp()->windows->scrollToMessageSignal,
         [this](const MessagePtr &message) {
             for (auto &&item : this->items())
             {

@@ -320,9 +320,9 @@ void WindowManager::select(SplitContainer *container)
     this->selectSplitContainer.invoke(container);
 }
 
-void WindowManager::selectAndScrollToMessage(const MessagePtr &message)
+void WindowManager::scrollToMessage(const MessagePtr &message)
 {
-    this->selectScrollToMessage.invoke(message);
+    this->scrollToMessageSignal.invoke(message);
 }
 
 QPoint WindowManager::emotePopupPos()
