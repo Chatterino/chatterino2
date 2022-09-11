@@ -124,6 +124,17 @@ void SearchPopup::goToMessage(const MessagePtr &message)
     }
 }
 
+void SearchPopup::goToMessageId(const QString &messageId)
+{
+    for (const auto &view : this->searchChannels_)
+    {
+        if (view.get().scrollToMessageId(messageId))
+        {
+            return;
+        }
+    }
+}
+
 void SearchPopup::updateWindowTitle()
 {
     QString historyName;

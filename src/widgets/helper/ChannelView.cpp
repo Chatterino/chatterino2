@@ -2637,7 +2637,18 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         }
         break;
         case Link::JumpToMessage: {
-            this->scrollToMessageId(link.value);
+            if (this->context_ == Context::Search)
+            {
+                if (auto search =
+                        dynamic_cast<SearchPopup *>(this->parentWidget()))
+                {
+                    search->goToMessageId(link.value);
+                }
+            }
+            else
+            {
+                this->scrollToMessageId(link.value);
+            }
         }
         break;
 
