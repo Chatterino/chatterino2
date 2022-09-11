@@ -1020,8 +1020,11 @@ SplitNotebook::SplitNotebook(Window *parent)
                         if (split->getChannel()->getType() !=
                             Channel::Type::TwitchMentions)
                         {
-                            split->getChannelView().scrollToMessage(message);
-                            return;
+                            if (split->getChannelView().scrollToMessage(
+                                    message))
+                            {
+                                return;
+                            }
                         }
                     }
                 }
