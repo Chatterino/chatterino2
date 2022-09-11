@@ -228,10 +228,12 @@ private:
     void disableScrolling();
 
     /**
+     * Scrolls to a message layout that must be from this view.
+     *
      * @param layout Must be from this channel.
      * @param messageIdx Must be an index into this channel.
      */
-    void scrollToMessage(MessageLayout *layout, size_t messageIdx);
+    void scrollToMessageLayout(MessageLayout *layout, size_t messageIdx);
 
     void setInputReply(const MessagePtr &message);
     void showReplyThreadPopup(const MessagePtr &message);

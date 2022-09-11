@@ -1160,7 +1160,7 @@ bool ChannelView::scrollToMessage(const MessagePtr &message)
         return false;
     }
 
-    this->scrollToMessage(messagesSnapshot[messageIdx].get(), messageIdx);
+    this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
     getApp()->windows->select(this->split_);
     return true;
 }
@@ -1189,12 +1189,13 @@ bool ChannelView::scrollToMessageId(const QString &messageId)
         return false;
     }
 
-    this->scrollToMessage(messagesSnapshot[messageIdx].get(), messageIdx);
+    this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
     getApp()->windows->select(this->split_);
     return true;
 }
 
-void ChannelView::scrollToMessage(MessageLayout *layout, size_t messageIdx)
+void ChannelView::scrollToMessageLayout(MessageLayout *layout,
+                                        size_t messageIdx)
 {
     this->highlightedMessage_ = layout;
     this->highlightAnimation_.setCurrentTime(0);
