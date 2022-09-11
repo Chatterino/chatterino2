@@ -86,12 +86,12 @@ public:
 
     /**
      * Attempts to scroll to a message in this channel.
-     * @return <code>true</code> iff the message was found and highlighted.
+     * @return <code>true</code> if the message was found and highlighted.
      */
     bool scrollToMessage(const MessagePtr &message);
     /**
      * Attempts to scroll to a message id in this channel.
-     * @return <code>true</code> iff the message was found and highlighted.
+     * @return <code>true</code> if the message was found and highlighted.
      */
     bool scrollToMessageId(const QString &id);
 
