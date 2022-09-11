@@ -3,11 +3,21 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+#include <unordered_map>
+
 namespace chatterino {
 
 namespace {
 
     const auto TWITCH_USER_LOGIN_PATTERN = R"(^[a-z0-9]\w{0,24}$)";
+
+    const std::unordered_map<QString, QString> HELIX_COLOR_REPLACEMENTS{
+        {"blueviolet", "blue_violet"},   {"cadetblue", "cadet_blue"},
+        {"dodgerblue", "dodger_blue"},   {"goldenrod", "golden_rod"},
+        {"hotpink", "hot_pink"},         {"orangered", "orange_red"},
+        {"seagreen", "sea_green"},       {"springgreen", "spring_green"},
+        {"yellowgreen", "yellow_green"},
+    };
 
 }  // namespace
 
@@ -55,6 +65,19 @@ QRegularExpression twitchUserLoginRegexp()
     static QRegularExpression re(TWITCH_USER_LOGIN_PATTERN);
 
     return re;
+}
+
+void cleanHelixColorName(QString &color)
+{
+    color = color.toLower();
+    auto it = HELIX_COLOR_REPLACEMENTS.find(color);
+
+    if (it == HELIX_COLOR_REPLACEMENTS.end())
+    {
+        return;
+    }
+
+    color = it->second;
 }
 
 }  // namespace chatterino

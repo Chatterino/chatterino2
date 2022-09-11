@@ -25,4 +25,9 @@ QRegularExpression twitchUserLoginRegexp();
 // Must not start with an underscore
 QRegularExpression twitchUserNameRegexp();
 
+// Cleans up a color name input for use in the Helix API
+// Will help massage color names like BlueViolet to the helix-acceptible blue_violet
+// Will also lowercase the color
+void cleanHelixColorName(QString &color);
+
 }  // namespace chatterino

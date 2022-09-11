@@ -1208,8 +1208,6 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         }
 
-        auto rawColorString = words.value(1);
-
         // Colors retreived from https://dev.twitch.tv/docs/api/reference#update-user-chat-color 2022-09-11
         const QStringList validColors{
             "blue",      "blue_violet",  "cadet_blue",   "chocolate",
@@ -1218,7 +1216,9 @@ void CommandController::initialize(Settings &, Paths &paths)
             "sea_green", "spring_green", "yellow_green",
         };
 
-        if (rawColorString.isEmpty())
+        auto colorString = words.value(1);
+
+        if (colorString.isEmpty())
         {
             channel->addMessage(makeSystemMessage(
                 QString("Usage: /color <color> - Color must be one of Twitch's "
@@ -1228,18 +1228,19 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         }
 
+        cleanHelixColorName(colorString);
+
         getHelix()->updateUserChatColor(
-            user->getUserId(), rawColorString,
-            [rawColorString, channel] {
+            user->getUserId(), colorString,
+            [colorString, channel] {
                 QString successMessage =
                     QString("Your color has been changed to %1.")
-                        .arg(rawColorString);
+                        .arg(colorString);
                 channel->addMessage(makeSystemMessage(successMessage));
             },
-            [rawColorString, channel](auto error, auto message) {
+            [colorString, channel](auto error, auto message) {
                 QString errorMessage =
-                    QString("Failed to change color to %1 - ")
-                        .arg(rawColorString);
+                    QString("Failed to change color to %1 - ").arg(colorString);
 
                 switch (error)
                 {
