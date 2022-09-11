@@ -2204,8 +2204,6 @@ void ChannelView::addMessageContextMenuItems(
                              this->split_;
     bool isMentions =
         this->channel()->getType() == Channel::Type::TwitchMentions;
-    bool isDeletedMessage =
-        layout->getMessage()->flags.has(MessageFlag::Disabled);
     if (isSearch || isMentions || isReplyOrUserCard)
     {
         const auto &messagePtr = layout->getMessagePtr();
