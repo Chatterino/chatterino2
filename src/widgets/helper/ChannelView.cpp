@@ -365,18 +365,10 @@ void ChannelView::themeChangedEvent()
 
 void ChannelView::setupHighlightAnimationColors()
 {
-    constexpr int maxOpacity = 110;
-    if (this->theme->isLightTheme())
-    {
-        this->highlightAnimation_.setStartValue(QColor(20, 20, 20, maxOpacity));
-        this->highlightAnimation_.setEndValue(QColor(20, 20, 20, 0));
-    }
-    else
-    {
-        this->highlightAnimation_.setStartValue(
-            QColor(230, 230, 230, maxOpacity));
-        this->highlightAnimation_.setEndValue(QColor(230, 230, 230, 0));
-    }
+    this->highlightAnimation_.setStartValue(
+        this->theme->messages.highlightAnimationStart);
+    this->highlightAnimation_.setEndValue(
+        this->theme->messages.highlightAnimationEnd);
 }
 
 void ChannelView::scaleChangedEvent(float scale)
