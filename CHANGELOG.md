@@ -60,6 +60,7 @@
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 - Dev: Batch checking live status for all channels after startup. (#3757, #3762, #3767)
 - Dev: Move most command context into the command controller. (#3824)
+- Dev: Error NetworkResults now include the body data. (#3987)
 
 ## 2.3.5
 
