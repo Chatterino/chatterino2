@@ -1015,17 +1015,14 @@ SplitNotebook::SplitNotebook(Window *parent)
             {
                 if (auto sc = dynamic_cast<SplitContainer *>(item.page))
                 {
-                    auto &&splits = sc->getSplits();
-                    auto split = std::find_if(
-                        splits.begin(), splits.end(), [message](Split *split) {
-                            return split->getChannel()->getType() !=
-                                       Channel::Type::TwitchMentions &&
-                                   split->getChannelView().scrollToMessage(
-                                       message);
-                        });
-                    if (split != splits.end())
+                    for (auto *split : sc->getSplits())
                     {
-                        break;
+                        if (split->getChannel()->getType() !=
+                            Channel::Type::TwitchMentions)
+                        {
+                            split->getChannelView().scrollToMessage(message);
+                            return;
+                        }
                     }
                 }
             }
