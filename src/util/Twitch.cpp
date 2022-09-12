@@ -1,5 +1,7 @@
 #include "util/Twitch.hpp"
 
+#include "util/QStringHash.hpp"
+
 #include <QDesktopServices>
 #include <QUrl>
 
