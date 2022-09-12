@@ -804,7 +804,16 @@ void Helix::updateUserChatColor(
             switch (result.status())
             {
                 case 400: {
-                    failureCallback(Error::Forwarded, message);
+                    if (message.startsWith("invalid color",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically since it allows us to list out the available colors
+                        failureCallback(Error::InvalidColor, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
                 }
                 break;
 

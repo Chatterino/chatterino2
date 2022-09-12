@@ -323,6 +323,7 @@ enum class HelixAutoModMessageError {
 enum class HelixUpdateUserChatColorError {
     Unknown,
     UserMissingScope,
+    InvalidColor,
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,

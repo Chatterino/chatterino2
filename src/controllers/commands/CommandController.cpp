@@ -1238,7 +1238,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                         .arg(colorString);
                 channel->addMessage(makeSystemMessage(successMessage));
             },
-            [colorString, channel](auto error, auto message) {
+            [colorString, channel, validColors](auto error, auto message) {
                 QString errorMessage =
                     QString("Failed to change color to %1 - ").arg(colorString);
 
@@ -1248,6 +1248,15 @@ void CommandController::initialize(Settings &, Paths &paths)
                         errorMessage +=
                             "missing required scope. Reauthenticate with your "
                             "user and try again.";
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::InvalidColor: {
+                        errorMessage += QString("color must be one of Twitch's "
+                                                "supported colors (%1) or a "
+                                                "hex code (#000000) if you "
+                                                "have Turbo or Prime.")
+                                            .arg(validColors.join(", "));
                     }
                     break;
 
