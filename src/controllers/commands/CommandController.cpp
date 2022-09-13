@@ -1223,7 +1223,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel->addMessage(makeSystemMessage(
                 QString("Usage: /color <color> - Color must be one of Twitch's "
                         "supported colors (%1) or a hex code (#000000) if you "
-                        "have Turbo.")
+                        "have Turbo or Prime.")
                     .arg(validColors.join(", "))));
             return "";
         }
@@ -1255,7 +1255,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                         errorMessage += QString("color must be one of Twitch's "
                                                 "supported colors (%1) or a "
                                                 "hex code (#000000) if you "
-                                                "have Turbo.")
+                                                "have Turbo or Prime.")
                                             .arg(validColors.join(", "));
                     }
                     break;
