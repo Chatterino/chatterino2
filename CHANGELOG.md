@@ -29,7 +29,7 @@
 - Minor: Warn when parsing an environment variable fails. (#3904)
 - Minor: Load missing messages from Recent Messages API upon reconnecting (#3878, #3932)
 - Minor: Reduced image memory usage when running Chatterino for a long time. (#3915)
-- Minor: Add settings to toggle BTTV/FFZ global/channel emotes (#3935)
+- Minor: Add settings to toggle BTTV/FFZ global/channel emotes (#3935, #3990)
 - Minor: Add AutoMod message flag filter. (#3938)
 - Minor: Added whitespace trim to username field in nicknames (#3946)
 - Minor: Added `Go to message` context menu action to search popup, mentions, usercard and reply threads. (#3953)
