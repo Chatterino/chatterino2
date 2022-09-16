@@ -27,7 +27,7 @@ public:
 template <typename OkType, typename ErrorType>
 class APIRequest
 {
-    using APISuceessCallback = std::function<Outcome(NetworkResult, OkType)>;
+    using APISuccessCallback = std::function<Outcome(NetworkResult, OkType)>;
     using APIErrorCallback = std::function<void(NetworkResult, ErrorType)>;
     using APIFinallyCallback = std::function<void()>;
 
@@ -104,7 +104,7 @@ public:
         return std::move(*this);
     };
 
-    APIRequest<OkType, ErrorType> onSuccess(const APISuceessCallback &cb) &&
+    APIRequest<OkType, ErrorType> onSuccess(const APISuccessCallback &cb) &&
     {
         this->data_->onSuccess = cb;
         return std::move(*this);
