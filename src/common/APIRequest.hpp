@@ -44,6 +44,15 @@ public:
     APIRequest(const APIRequest<OkType, ErrorType> &other) = delete;
     APIRequest &operator=(const APIRequest<OkType, ErrorType> &other) = delete;
 
+    /**
+     * @brief Constructs an APIRequest instance and a APIRequestData.
+     *
+     * @param[successTransformer] a function that will transform a NetworkResult into the desired type (OkType), for example decode JSON
+     * @param[errorTransformer] an optional function that will transform a NetworkResult into the desired type (ErrorType)
+     * @param[onFinally] an optional function that will be called regardless of the status. This is explicitly different from calling finally(...) as this is for cleanup of the decoding/transformer logic, they are separate
+     *
+     * APIRequest is a wrapper around NetworkRequest
+     */
     explicit APIRequest(
         QUrl url, NetworkRequestType requestType,
         std::function<OkType(NetworkResult)> successTransformer,
