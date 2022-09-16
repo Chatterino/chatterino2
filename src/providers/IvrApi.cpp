@@ -1,5 +1,4 @@
 #include "IvrApi.hpp"
-#include <qurl.h>
 
 #include "common/APIRequest.hpp"
 #include "common/NetworkCommon.hpp"
@@ -7,6 +6,7 @@
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 
+#include <QUrl>
 #include <QUrlQuery>
 
 namespace chatterino {
