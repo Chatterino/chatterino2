@@ -320,9 +320,21 @@ enum class HelixAutoModMessageError {
     MessageNotFound,
 };
 
+enum class HelixUpdateUserChatColorError {
+    Unknown,
+    UserMissingScope,
+    InvalidColor,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 class IHelix
 {
 public:
+    template <typename... T>
+    using FailureCallback = std::function<void(T...)>;
+
     // https://dev.twitch.tv/docs/api/reference#get-users
     virtual void fetchUsers(
         QStringList userIds, QStringList userLogins,
@@ -440,6 +452,12 @@ public:
         ResultCallback<std::vector<HelixChannelEmote>> successCallback,
         HelixFailureCallback failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference#update-user-chat-color
+    virtual void updateUserChatColor(
+        QString userID, QString color, ResultCallback<> successCallback,
+        FailureCallback<HelixUpdateUserChatColorError, QString>
+            failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
 
@@ -555,6 +573,12 @@ public:
         QString broadcasterId,
         ResultCallback<std::vector<HelixChannelEmote>> successCallback,
         HelixFailureCallback failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#update-user-chat-color
+    void updateUserChatColor(
+        QString userID, QString color, ResultCallback<> successCallback,
+        FailureCallback<HelixUpdateUserChatColorError, QString> failureCallback)
+        final;
 
     void update(QString clientId, QString oauthToken) final;
 

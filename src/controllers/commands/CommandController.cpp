@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Env.hpp"
+#include "common/QLogging.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
@@ -1195,6 +1196,79 @@ void CommandController::initialize(Settings &, Paths &paths)
             crossPlatformCopy(words.mid(1).join(" "));
             return "";
         });
+
+    this->registerCommand("/color", [](const QStringList &words, auto channel) {
+        auto user = getApp()->accounts->twitch.getCurrent();
+
+        // Avoid Helix calls without Client ID and/or OAuth Token
+        if (user->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You must be logged in to use the /color command"));
+            return "";
+        }
+
+        auto colorString = words.value(1);
+
+        if (colorString.isEmpty())
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("Usage: /color <color> - Color must be one of Twitch's "
+                        "supported colors (%1) or a hex code (#000000) if you "
+                        "have Turbo or Prime.")
+                    .arg(VALID_HELIX_COLORS.join(", "))));
+            return "";
+        }
+
+        cleanHelixColorName(colorString);
+
+        getHelix()->updateUserChatColor(
+            user->getUserId(), colorString,
+            [colorString, channel] {
+                QString successMessage =
+                    QString("Your color has been changed to %1.")
+                        .arg(colorString);
+                channel->addMessage(makeSystemMessage(successMessage));
+            },
+            [colorString, channel](auto error, auto message) {
+                QString errorMessage =
+                    QString("Failed to change color to %1 - ").arg(colorString);
+
+                switch (error)
+                {
+                    case HelixUpdateUserChatColorError::UserMissingScope: {
+                        errorMessage +=
+                            "Missing required scope. Re-login with your "
+                            "account and try again.";
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::InvalidColor: {
+                        errorMessage += QString("Color must be one of Twitch's "
+                                                "supported colors (%1) or a "
+                                                "hex code (#000000) if you "
+                                                "have Turbo or Prime.")
+                                            .arg(VALID_HELIX_COLORS.join(", "));
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::Forwarded: {
+                        errorMessage += message + ".";
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::Unknown:
+                    default: {
+                        errorMessage += "An unknown error has occurred.";
+                    }
+                    break;
+                }
+
+                channel->addMessage(makeSystemMessage(errorMessage));
+            });
+
+        return "";
+    });
 }
 
 void CommandController::save()
