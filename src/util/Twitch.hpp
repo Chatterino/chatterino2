@@ -2,8 +2,11 @@
 
 #include <QRegularExpression>
 #include <QString>
+#include <QStringList>
 
 namespace chatterino {
+
+extern const QStringList VALID_HELIX_COLORS;
 
 void openTwitchUsercard(const QString channel, const QString username);
 

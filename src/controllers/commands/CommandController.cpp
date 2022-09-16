@@ -1208,14 +1208,6 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         }
 
-        // Colors retreived from https://dev.twitch.tv/docs/api/reference#update-user-chat-color 2022-09-11
-        const QStringList validColors{
-            "blue",      "blue_violet",  "cadet_blue",   "chocolate",
-            "coral",     "dodger_blue",  "firebrick",    "golden_rod",
-            "green",     "hot_pink",     "orange_red",   "red",
-            "sea_green", "spring_green", "yellow_green",
-        };
-
         auto colorString = words.value(1);
 
         if (colorString.isEmpty())
@@ -1224,7 +1216,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 QString("Usage: /color <color> - Color must be one of Twitch's "
                         "supported colors (%1) or a hex code (#000000) if you "
                         "have Turbo or Prime.")
-                    .arg(validColors.join(", "))));
+                    .arg(VALID_HELIX_COLORS.join(", "))));
             return "";
         }
 
@@ -1238,7 +1230,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                         .arg(colorString);
                 channel->addMessage(makeSystemMessage(successMessage));
             },
-            [colorString, channel, validColors](auto error, auto message) {
+            [colorString, channel](auto error, auto message) {
                 QString errorMessage =
                     QString("Failed to change color to %1 - ").arg(colorString);
 
@@ -1256,7 +1248,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                                                 "supported colors (%1) or a "
                                                 "hex code (#000000) if you "
                                                 "have Turbo or Prime.")
-                                            .arg(validColors.join(", "));
+                                            .arg(VALID_HELIX_COLORS.join(", "));
                     }
                     break;
 
