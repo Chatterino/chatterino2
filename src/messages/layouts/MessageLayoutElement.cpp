@@ -286,6 +286,12 @@ int TextLayoutElement::getSelectionIndexCount() const
 void TextLayoutElement::paint(QPainter &painter)
 {
     auto app = getApp();
+    QString text = this->getText();
+    if (text.isRightToLeft())
+    {
+        text.prepend("\u061c");
+        text.append("\u061c");
+    }
 
     painter.setPen(this->color_);
 
@@ -293,7 +299,7 @@ void TextLayoutElement::paint(QPainter &painter)
 
     painter.drawText(
         QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
-        this->getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
+        text, QTextOption(Qt::AlignLeft | Qt::AlignTop));
 }
 
 void TextLayoutElement::paintAnimated(QPainter &, int)
