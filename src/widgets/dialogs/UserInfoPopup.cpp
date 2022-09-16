@@ -860,6 +860,7 @@ void UserInfoPopup::updateUserData()
                 }
                 return Success;
             })
+            .caller(this)
             .execute();
     };
 

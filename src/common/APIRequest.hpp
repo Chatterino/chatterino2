@@ -115,6 +115,12 @@ public:
         return std::move(*this);
     };
 
+    APIRequest<OkType, ErrorType> caller(const QObject *caller) &&
+    {
+        this->underlying_ = std::move(this->underlying_).caller(caller);
+        return std::move(*this);
+    }
+
     void execute()
     {
         this->underlying_.execute();
