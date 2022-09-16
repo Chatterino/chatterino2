@@ -48,6 +48,8 @@ struct MessageLayoutContainer {
     Margin margin = {4, 8, 4, 8};
     bool centered = false;
     bool enableCompactEmotes = false;
+    bool startsWithRTL = false;
+    bool containsRTL = false;
 
     int getHeight() const;
     int getWidth() const;
@@ -64,6 +66,7 @@ struct MessageLayoutContainer {
     void breakLine();
     bool atStartOfLine();
     bool fitsInLine(int width_);
+    void reorderRTL();
     MessageLayoutElement *getElementAt(QPoint point);
 
     // painting
@@ -90,7 +93,8 @@ private:
     };
 
     // helpers
-    void _addElement(MessageLayoutElement *element, bool forceAdd = false);
+    void _addElement(MessageLayoutElement *element, bool forceAdd = false,
+                     int prevIndex = -2);
     bool canCollapse();
 
     // variables
@@ -109,7 +113,6 @@ private:
     int dotdotdotWidth_ = 0;
     bool canAddMessages_ = true;
     bool isCollapsed_ = false;
-    bool isRTL_ = false;
 
     std::vector<std::unique_ptr<MessageLayoutElement>> elements_;
     std::vector<Line> lines_;

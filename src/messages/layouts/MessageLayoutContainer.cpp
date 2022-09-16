@@ -88,7 +88,7 @@ bool MessageLayoutContainer::canAddElements()
 }
 
 void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
-                                         bool forceAdd)
+                                         bool forceAdd, int prevIndex)
 {
     if (!this->canAddElements() && !forceAdd)
     {
@@ -96,15 +96,19 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         return;
     }
 
+    bool isRTLMode = this->startsWithRTL && prevIndex != -2;
+    bool isAddingMode = prevIndex == -2;
+
     // This lambda contains the logic for when to step one 'space width' back for compact x emotes
-    auto shouldRemoveSpaceBetweenEmotes = [this]() -> bool {
-        if (this->elements_.empty())
+    auto shouldRemoveSpaceBetweenEmotes = [this, prevIndex]() -> bool {
+        if (prevIndex == -1 || this->elements_.empty())
         {
             // No previous element found
             return false;
         }
 
-        const auto &lastElement = this->elements_.back();
+        const auto &lastElement = prevIndex == -2 ? this->elements_.back()
+                                                  : this->elements_[prevIndex];
 
         if (!lastElement)
         {
@@ -153,7 +157,7 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     bool isZeroWidthEmote = element->getCreator().getFlags().has(
         MessageElementFlag::ZeroWidthEmote);
 
-    if (isZeroWidthEmote)
+    if (isZeroWidthEmote && !isRTLMode)
     {
         xOffset -= element->getRect().width() + this->spaceWidth_;
     }
@@ -173,7 +177,21 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         !isZeroWidthEmote && shouldRemoveSpaceBetweenEmotes())
     {
         // Move cursor one 'space width' to the left to combine hug the previous emote
-        this->currentX_ -= this->spaceWidth_;
+        if (isRTLMode)
+        {
+            this->currentX_ += this->spaceWidth_;
+        }
+        else
+        {
+            this->currentX_ -= this->spaceWidth_;
+        }
+    }
+
+    if (isRTLMode)
+    {
+        // shift by width since we are calculating according to top right in RTL mode
+        // but setPosition wants top left
+        xOffset -= element->getRect().width();
     }
 
     // set move element
@@ -184,22 +202,107 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     element->setLine(this->line_);
 
     // add element
-    this->elements_.push_back(std::unique_ptr<MessageLayoutElement>(element));
+    if (isAddingMode)
+    {
+        this->elements_.push_back(
+            std::unique_ptr<MessageLayoutElement>(element));
+    }
 
     // set current x
     if (!isZeroWidthEmote)
     {
-        this->currentX_ += element->getRect().width();
+        if (isRTLMode)
+        {
+            this->currentX_ -= element->getRect().width();
+        }
+        else
+        {
+            this->currentX_ += element->getRect().width();
+        }
     }
 
     if (element->hasTrailingSpace())
     {
-        this->currentX_ += this->spaceWidth_;
+        if (isRTLMode)
+        {
+            this->currentX_ -= this->spaceWidth_;
+        }
+        else
+        {
+            this->currentX_ += this->spaceWidth_;
+        }
+    }
+}
+
+void MessageLayoutContainer::reorderRTL()
+{
+    if (this->elements_.empty())
+        return;
+
+    int startIndex = this->lineStart_;
+    int endIndex = this->elements_.size() - 1;
+    if (this->line_ == 0)
+    {
+        for (int i = 0; i < this->elements_.size(); i++)
+        {
+            if (this->elements_[i]->getFlags().has(MessageElementFlag::Text))
+            {
+                this->startsWithRTL =
+                    this->elements_[i]->getText().isRightToLeft();
+                startIndex = i;
+                break;
+            }
+        }
+    }
+
+    std::vector<int> correctOrder;
+    std::stack<int> swappedWords;
+
+    for (int i = startIndex; i <= endIndex; i++)
+    {
+        if (this->elements_[i]->getText().isRightToLeft() !=
+            this->startsWithRTL)
+        {
+            swappedWords.push(i);
+        }
+        else
+        {
+            while (swappedWords.size() > 0)
+            {
+                correctOrder.push_back(swappedWords.top());
+                swappedWords.pop();
+            }
+            correctOrder.push_back(i);
+        }
+    }
+    while (swappedWords.size() > 0)
+    {
+        correctOrder.push_back(swappedWords.top());
+        swappedWords.pop();
+    }
+
+    if (this->startsWithRTL)
+    {
+        this->currentX_ = this->elements_[endIndex]->getRect().right();
+    }
+    else
+    {
+        this->currentX_ = this->elements_[startIndex]->getRect().left();
+    }
+    for (int i = 0; i < correctOrder.size(); i++)
+    {
+        this->_addElement(this->elements_[correctOrder[i]].get(), false,
+                          correctOrder[i - 1]);
     }
 }
 
 void MessageLayoutContainer::breakLine()
 {
+    if (this->containsRTL)
+    {
+        this->reorderRTL();
+    }
+
     int xOffset = 0;
 
     if (this->flags_.has(MessageFlag::Centered) && this->elements_.size() > 0)
@@ -272,75 +375,6 @@ void MessageLayoutContainer::breakLine()
     this->height_ = this->currentY_ + int(this->margin.bottom * this->scale_);
     this->lineHeight_ = 0;
     this->line_++;
-
-    // correct RTL order
-    int startIndex = this->lines_.back().startIndex;
-    int endIndex = this->elements_.size() - 1;
-    if (this->line_ - 1 == 0)
-    {
-        for (int i = 0; i < this->elements_.size(); i++)
-        {
-            if (this->elements_[i]->getFlags().has(MessageElementFlag::Text))
-            {
-                this->isRTL_ = this->elements_[i]->getText().isRightToLeft();
-                startIndex = i;
-                break;
-            }
-        }
-    }
-
-    std::vector<int> correctOrder;
-    std::stack<int> swappedWords;
-
-    for (int i = startIndex; i <= endIndex; i++)
-    {
-        if (this->elements_[i]->getText().isRightToLeft() != this->isRTL_)
-        {
-            swappedWords.push(i);
-        }
-        else
-        {
-            while (swappedWords.size() > 0)
-            {
-                correctOrder.push_back(swappedWords.top());
-                swappedWords.pop();
-            }
-            correctOrder.push_back(i);
-        }
-    }
-    while (swappedWords.size() > 0)
-    {
-        correctOrder.push_back(swappedWords.top());
-        swappedWords.pop();
-    }
-
-    int currentY = this->elements_[endIndex]->getRect().top();
-
-    if (this->isRTL_)
-    {
-        int currentX = this->elements_[endIndex]->getRect().right();
-        for (int i = 0; i < correctOrder.size(); i++)
-        {
-            QPoint topRight(currentX, currentY);
-            QPoint widthOffset(
-                this->elements_[correctOrder[i]]->getRect().width(), 0);
-            this->elements_[correctOrder[i]]->setPosition(topRight -
-                                                          widthOffset);
-            currentX -= (this->elements_[correctOrder[i]])->getRect().width() +
-                        this->spaceWidth_;
-        }
-    }
-    else
-    {
-        int currentX = this->elements_[startIndex]->getRect().left();
-        for (int i = 0; i < correctOrder.size(); i++)
-        {
-            this->elements_[correctOrder[i]]->setPosition(
-                QPoint(currentX, currentY));
-            currentX += (this->elements_[correctOrder[i]])->getRect().width() +
-                        this->spaceWidth_;
-        }
-    }
 }
 
 bool MessageLayoutContainer::atStartOfLine()

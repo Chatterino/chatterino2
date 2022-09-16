@@ -332,6 +332,10 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
         for (Word &word : this->words_)
         {
+            if (word.text.isRightToLeft())
+            {
+                container.containsRTL = true;
+            }
             auto getTextLayoutElement = [&](QString text, int width,
                                             bool hasTrailingSpace) {
                 auto color = this->color_.getColor(*app->themes);
