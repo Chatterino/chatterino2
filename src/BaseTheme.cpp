@@ -168,6 +168,12 @@ void AB_THEME_CLASS::actuallyUpdate(double hue, double multiplier)
     // this->messages.seperator =
     // this->messages.seperatorInner =
 
+    int complementaryGray = this->isLightTheme() ? 20 : 230;
+    this->messages.highlightAnimationStart =
+        QColor(complementaryGray, complementaryGray, complementaryGray, 110);
+    this->messages.highlightAnimationEnd =
+        QColor(complementaryGray, complementaryGray, complementaryGray, 0);
+
     // Scrollbar
     this->scrollbars.background = QColor(0, 0, 0, 0);
     //    this->scrollbars.background = splits.background;

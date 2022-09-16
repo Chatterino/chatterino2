@@ -264,3 +264,39 @@ TEST(UtilTwitch, UserNameRegexp)
             << qUtf8Printable(inputUserLogin) << " did not match as expected";
     }
 }
+
+TEST(UtilTwitch, CleanHelixColor)
+{
+    struct TestCase {
+        QString inputColor;
+        QString expectedColor;
+    };
+
+    std::vector<TestCase> tests{
+        {"foo", "foo"},
+        {"BlueViolet", "blue_violet"},
+        {"blueviolet", "blue_violet"},
+        {"DODGERBLUE", "dodger_blue"},
+        {"blUEviolet", "blue_violet"},
+        {"caDEtblue", "cadet_blue"},
+        {"doDGerblue", "dodger_blue"},
+        {"goLDenrod", "golden_rod"},
+        {"hoTPink", "hot_pink"},
+        {"orANgered", "orange_red"},
+        {"seAGreen", "sea_green"},
+        {"spRInggreen", "spring_green"},
+        {"yeLLowgreen", "yellow_green"},
+        {"xDxD", "xdxd"},
+    };
+
+    for (const auto &[inputColor, expectedColor] : tests)
+    {
+        QString actualColor = inputColor;
+        cleanHelixColorName(actualColor);
+
+        EXPECT_EQ(actualColor, expectedColor)
+            << qUtf8Printable(inputColor) << " cleaned up to "
+            << qUtf8Printable(actualColor) << " instead of "
+            << qUtf8Printable(expectedColor);
+    }
+}

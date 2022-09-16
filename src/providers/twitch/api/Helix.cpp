@@ -770,6 +770,79 @@ void Helix::getChannelEmotes(
         .execute();
 }
 
+void Helix::updateUserChatColor(
+    QString userID, QString color, ResultCallback<> successCallback,
+    FailureCallback<HelixUpdateUserChatColorError, QString> failureCallback)
+{
+    using Error = HelixUpdateUserChatColorError;
+
+    QJsonObject payload;
+
+    payload.insert("user_id", QJsonValue(userID));
+    payload.insert("color", QJsonValue(color));
+
+    this->makeRequest("chat/color", QUrlQuery())
+        .type(NetworkRequestType::Put)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto obj = result.parseJson();
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for updating chat color was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.startsWith("invalid color",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically since it allows us to list out the available colors
+                        failureCallback(Error::InvalidColor, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error changing user color:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+};
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
