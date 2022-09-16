@@ -55,9 +55,10 @@ public:
      */
     explicit APIRequest(
         QUrl url, NetworkRequestType requestType,
-        std::function<OkType(NetworkResult)> successTransformer,
-        std::function<ErrorType(NetworkResult)> errorTransformer = nullptr,
-        std::function<void()> onFinally = nullptr)
+        const std::function<OkType(NetworkResult)> &successTransformer,
+        const std::function<ErrorType(NetworkResult)> &errorTransformer =
+            nullptr,
+        const std::function<void()> &onFinally = nullptr)
         : underlying_(std::move(url), requestType)
         , data_(std::make_shared<APIRequestData<OkType, ErrorType>>())
     {
@@ -97,19 +98,19 @@ public:
         return std::move(*this);
     }
 
-    APIRequest<OkType, ErrorType> onError(APIErrorCallback cb) &&
+    APIRequest<OkType, ErrorType> onError(const APIErrorCallback &cb) &&
     {
         this->data_->onError = cb;
         return std::move(*this);
     };
 
-    APIRequest<OkType, ErrorType> onSuccess(APISuceessCallback cb) &&
+    APIRequest<OkType, ErrorType> onSuccess(const APISuceessCallback &cb) &&
     {
         this->data_->onSuccess = cb;
         return std::move(*this);
     };
 
-    APIRequest<OkType, ErrorType> finally(APIFinallyCallback cb) &&
+    APIRequest<OkType, ErrorType> finally(const APIFinallyCallback &cb) &&
     {
         this->data_->finally = cb;
         return std::move(*this);
