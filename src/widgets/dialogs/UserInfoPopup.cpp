@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
@@ -821,12 +822,13 @@ void UserInfoPopup::updateUserData()
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
 
         // get followage and subage
-        getIvr()->getSubage(
-            this->userName_, this->underlyingChannel_->getName(),
-            [this, hack](const IvrSubage &subageInfo) {
+        getIvr()
+            ->subage(this->userName_, this->underlyingChannel_->getName())
+            .onSuccess([this, hack](NetworkResult,
+                                    const IvrSubage &subageInfo) -> Outcome {
                 if (!hack.lock())
                 {
-                    return;
+                    return Success;
                 }
 
                 if (!subageInfo.followingSince.isEmpty())
@@ -856,8 +858,9 @@ void UserInfoPopup::updateUserData()
                         QString("★ Previously subscribed for %1 months")
                             .arg(subageInfo.totalSubMonths));
                 }
-            },
-            [] {});
+                return Success;
+            })
+            .execute();
     };
 
     getHelix()->getUserByName(this->userName_, onUserFetched,

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/APIRequest.hpp"
 #include "common/NetworkRequest.hpp"
 #include "messages/Link.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
@@ -77,9 +78,8 @@ class IvrApi final : boost::noncopyable
 {
 public:
     // https://api.ivr.fi/docs#tag/Twitch/paths/~1twitch~1subage~1{username}~1{channel}/get
-    void getSubage(QString userName, QString channelName,
-                   ResultCallback<IvrSubage> resultCallback,
-                   IvrFailureCallback failureCallback);
+    APIRequest<IvrSubage, APIRequestNoErrorValue> subage(
+        const QString &userName, const QString &channelName);
 
     // https://api.ivr.fi/v2/docs/static/index.html#/Twitch/get_twitch_emotes_sets
     void getBulkEmoteSets(QString emoteSetList,

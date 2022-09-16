@@ -1,5 +1,9 @@
 #include "IvrApi.hpp"
+#include <qurl.h>
 
+#include "common/APIRequest.hpp"
+#include "common/NetworkCommon.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 
@@ -9,28 +13,24 @@ namespace chatterino {
 
 static IvrApi *instance = nullptr;
 
-void IvrApi::getSubage(QString userName, QString channelName,
-                       ResultCallback<IvrSubage> successCallback,
-                       IvrFailureCallback failureCallback)
+APIRequest<IvrSubage, APIRequestNoErrorValue> IvrApi::subage(
+    const QString &userName, const QString &channelName)
 {
     assert(!userName.isEmpty() && !channelName.isEmpty());
-
-    this->makeRequest(
-            QString("twitch/subage/%1/%2").arg(userName).arg(channelName), {})
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
-            auto root = result.parseJson();
-
-            successCallback(root);
-
-            return Success;
-        })
-        .onError([failureCallback](auto result) {
+    auto url = QString("https://api.ivr.fi/twitch/subage/%1/%2")
+                   .arg(userName)
+                   .arg(channelName);
+    return APIRequest<IvrSubage, APIRequestNoErrorValue>(
+        QUrl(url), NetworkRequestType::Get,
+        [](NetworkResult result) -> IvrSubage {
+            return result.parseJson();
+        },
+        [](NetworkResult result) {
             qCWarning(chatterinoIvr)
                 << "Failed IVR API Call!" << result.status()
                 << QString(result.getData());
-            failureCallback();
-        })
-        .execute();
+            return APIRequestNoErrorValue{};
+        });
 }
 
 void IvrApi::getBulkEmoteSets(QString emoteSetList,
