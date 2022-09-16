@@ -1238,13 +1238,13 @@ void CommandController::initialize(Settings &, Paths &paths)
                 {
                     case HelixUpdateUserChatColorError::UserMissingScope: {
                         errorMessage +=
-                            "missing required scope. Reauthenticate with your "
+                            "Missing required scope. Reauthenticate with your "
                             "user and try again.";
                     }
                     break;
 
                     case HelixUpdateUserChatColorError::InvalidColor: {
-                        errorMessage += QString("color must be one of Twitch's "
+                        errorMessage += QString("Color must be one of Twitch's "
                                                 "supported colors (%1) or a "
                                                 "hex code (#000000) if you "
                                                 "have Turbo or Prime.")
@@ -1259,7 +1259,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
                     case HelixUpdateUserChatColorError::Unknown:
                     default: {
-                        errorMessage += "an unknown error has occurred.";
+                        errorMessage += "An unknown error has occurred.";
                     }
                     break;
                 }
