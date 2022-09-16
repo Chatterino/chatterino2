@@ -1238,8 +1238,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                 {
                     case HelixUpdateUserChatColorError::UserMissingScope: {
                         errorMessage +=
-                            "Missing required scope. Reauthenticate with your "
-                            "user and try again.";
+                            "Missing required scope. Re-login with your "
+                            "account and try again.";
                     }
                     break;
 
