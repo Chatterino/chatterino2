@@ -1271,7 +1271,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     });
 
     auto deleteMessagesLambda = [](auto channel, QString messageID) {
-        auto commandName = messageID.isEmpty() ? "/clear" : "/delete";
+        const auto *commandName = messageID.isEmpty() ? "/clear" : "/delete";
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
         if (twitchChannel == nullptr)
         {
