@@ -1350,10 +1350,12 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     };
 
-    this->registerCommand("/clear", [deleteMessagesLambda](const QStringList &words, auto channel) {
-        deleteMessagesLambda(channel, QString());
-        return "";
-    });
+    this->registerCommand(
+        "/clear",
+        [deleteMessagesLambda](const QStringList &words, auto channel) {
+            deleteMessagesLambda(channel, QString());
+            return "";
+        });
 }
 
 void CommandController::save()
