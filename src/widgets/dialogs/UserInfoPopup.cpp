@@ -824,7 +824,7 @@ void UserInfoPopup::updateUserData()
         // get followage and subage
         getIvr()
             ->subage(this->userName_, this->underlyingChannel_->getName())
-            .onSuccess([this, hack](NetworkResult,
+            .onSuccess([this, hack](const NetworkResult & /* result */,
                                     const IvrSubage &subageInfo) -> Outcome {
                 if (!hack.lock())
                 {
