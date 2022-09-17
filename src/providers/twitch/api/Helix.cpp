@@ -843,6 +843,77 @@ void Helix::updateUserChatColor(
         .execute();
 };
 
+void Helix::deleteChatMessages(
+    QString broadcasterID, QString moderatorID, QString messageID,
+    ResultCallback<> successCallback,
+    FailureCallback<HelixDeleteChatMessagesError, QString> failureCallback)
+{
+    using Error = HelixDeleteChatMessagesError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    if (!messageID.isEmpty())
+    {
+        // If message ID is empty, it's equivalent to /clear
+        urlQuery.addQueryItem("message_id", messageID);
+    }
+
+    this->makeRequest("moderation/chat", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto obj = result.parseJson();
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for deleting chat messages was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 404: {
+                    // A 404 on this endpoint means message id is invalid or unable to be deleted.
+                    // See: https://dev.twitch.tv/docs/api/reference#delete-chat-messages
+                    failureCallback(Error::MessageUnavailable, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error deleting chat messages:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+};
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

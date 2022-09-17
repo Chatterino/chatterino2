@@ -329,6 +329,17 @@ enum class HelixUpdateUserChatColorError {
     Forwarded,
 };
 
+enum class HelixDeleteChatMessagesError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthenticated,
+    UserNotAuthorized,
+    MessageUnavailable,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 class IHelix
 {
 public:
@@ -458,6 +469,13 @@ public:
         FailureCallback<HelixUpdateUserChatColorError, QString>
             failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference#delete-chat-messages
+    virtual void deleteChatMessages(
+        QString broadcasterID, QString moderatorID, QString messageID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixDeleteChatMessagesError, QString>
+            failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
 
@@ -578,6 +596,13 @@ public:
     void updateUserChatColor(
         QString userID, QString color, ResultCallback<> successCallback,
         FailureCallback<HelixUpdateUserChatColorError, QString> failureCallback)
+        final;
+
+    // https://dev.twitch.tv/docs/api/reference#delete-chat-messages
+    void deleteChatMessages(
+        QString broadcasterID, QString moderatorID, QString messageID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixDeleteChatMessagesError, QString> failureCallback)
         final;
 
     void update(QString clientId, QString oauthToken) final;
