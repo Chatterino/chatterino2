@@ -236,11 +236,12 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
 
 void MessageLayoutContainer::reorderRTL()
 {
-    if (this->elements_.empty())
+    if (this->elements_.empty()) {
         return;
+    }
 
-    int startIndex = this->lineStart_;
-    int endIndex = this->elements_.size() - 1;
+    size_t startIndex = this->lineStart_;
+    size_t endIndex = this->elements_.size() - 1;
     if (this->line_ == 0)
     {
         for (int i = 0; i < this->elements_.size(); i++)
