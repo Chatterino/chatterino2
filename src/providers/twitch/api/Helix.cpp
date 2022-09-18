@@ -912,7 +912,7 @@ void Helix::deleteChatMessages(
             }
         })
         .execute();
-};
+}
 
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
