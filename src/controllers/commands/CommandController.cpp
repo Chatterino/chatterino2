@@ -1353,6 +1353,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand(
         "/clear",
         [deleteMessagesLambda](const QStringList &words, auto channel) {
+            (void)words;  // unused
             deleteMessagesLambda(channel, QString());
             return "";
         });
