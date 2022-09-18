@@ -5,6 +5,8 @@
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
@@ -326,7 +328,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Enable emote auto-completion by typing :",
                        s.emoteCompletionWithColon);
     layout.addDropdown<float>(
-        "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
+        "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x", "3x", "4x"},
         s.emoteScale,
         [](auto val) {
             if (val == 1)
@@ -340,6 +342,23 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Remove spaces between emotes",
                        s.removeSpacesBetweenEmotes);
+    layout.addCheckbox("Show unlisted / unapproved emotes (7TV only)",
+                       s.showUnlistedEmotes);
+    s.showUnlistedEmotes.connect(
+        []() {
+            getApp()->twitch->forEachChannelAndSpecialChannels(
+                [](const auto &c) {
+                    if (c->isTwitchChannel())
+                    {
+                        auto channel = dynamic_cast<TwitchChannel *>(c.get());
+                        if (channel != nullptr)
+                        {
+                            channel->refreshSevenTVChannelEmotes(false);
+                        }
+                    }
+                });
+        },
+        false);
     layout.addDropdown<int>(
         "Show info on hover", {"Don't show", "Always show", "Hold shift"},
         s.emotesTooltipPreview,
@@ -362,6 +381,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show BTTV channel emotes", s.enableBTTVChannelEmotes);
     layout.addCheckbox("Show FFZ global emotes", s.enableFFZGlobalEmotes);
     layout.addCheckbox("Show FFZ channel emotes", s.enableFFZChannelEmotes);
+    layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);
+    layout.addCheckbox("Show 7TV channel emotes", s.enableSevenTVChannelEmotes);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
@@ -636,6 +657,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.useCustomFfzModeratorBadges);
     layout.addCheckbox("Use custom FrankerFaceZ VIP badges",
                        s.useCustomFfzVipBadges);
+    layout.addCheckbox("7TV", s.showBadgesSeventv);
 
     layout.addSubtitle("Miscellaneous");
 

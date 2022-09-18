@@ -37,6 +37,7 @@ enum class MessageElementFlag : int64_t {
     TwitchEmoteImage = (1LL << 4),
     TwitchEmoteText = (1LL << 5),
     TwitchEmote = TwitchEmoteImage | TwitchEmoteText,
+
     BttvEmoteImage = (1LL << 6),
     BttvEmoteText = (1LL << 7),
     BttvEmote = BttvEmoteImage | BttvEmoteText,
@@ -47,38 +48,45 @@ enum class MessageElementFlag : int64_t {
     FfzEmoteImage = (1LL << 9),
     FfzEmoteText = (1LL << 10),
     FfzEmote = FfzEmoteImage | FfzEmoteText,
-    EmoteImages = TwitchEmoteImage | BttvEmoteImage | FfzEmoteImage,
-    EmoteText = TwitchEmoteText | BttvEmoteText | FfzEmoteText,
 
-    BitsStatic = (1LL << 11),
-    BitsAnimated = (1LL << 12),
+    SeventvEmoteImage = (1LL << 11),
+    SeventvEmoteText = (1LL << 12),
+    SeventvEmote = SeventvEmoteImage | SeventvEmoteText,
+
+    EmoteImages =
+        TwitchEmoteImage | BttvEmoteImage | FfzEmoteImage | SeventvEmoteImage,
+    EmoteText =
+        TwitchEmoteText | BttvEmoteText | FfzEmoteText | SeventvEmoteText,
+
+    BitsStatic = (1LL << 13),
+    BitsAnimated = (1LL << 14),
 
     // Slot 1: Twitch
     // - Staff badge
     // - Admin badge
     // - Global Moderator badge
-    BadgeGlobalAuthority = (1LL << 13),
+    BadgeGlobalAuthority = (1LL << 15),
 
     // Slot 2: Twitch
     // - Predictions badge
-    BadgePredictions = (1LL << 14),
+    BadgePredictions = (1LL << 16),
 
     // Slot 3: Twitch
     // - VIP badge
     // - Moderator badge
     // - Broadcaster badge
-    BadgeChannelAuthority = (1LL << 15),
+    BadgeChannelAuthority = (1LL << 17),
 
     // Slot 4: Twitch
     // - Subscription badges
-    BadgeSubscription = (1LL << 16),
+    BadgeSubscription = (1LL << 18),
 
     // Slot 5: Twitch
     // - Turbo badge
     // - Prime badge
     // - Bit badges
     // - Game badges
-    BadgeVanity = (1LL << 17),
+    BadgeVanity = (1LL << 19),
 
     // Slot 6: Chatterino
     // - Chatterino developer badge
@@ -87,54 +95,64 @@ enum class MessageElementFlag : int64_t {
     // - Chatterino top donator badge
     // - Chatterino special pepe badge
     // - Chatterino gnome badge
-    BadgeChatterino = (1LL << 18),
+    BadgeChatterino = (1LL << 20),
 
-    // Slot 7: FrankerFaceZ
+    // Slot 7: Seventv
+    // - Seventv Admin
+    // - Seventv Dungeon Mistress
+    // - Seventv Moderator
+    // - Seventv Subscriber
+    // - Seventv Translator
+    // - Seventv Contributor
+    BadgeSeventv = (1LL << 21),
+
+    // Slot 8: FrankerFaceZ
     // - FFZ developer badge
     // - FFZ bot badge
     // - FFZ donator badge
-    BadgeFfz = (1LL << 19),
+    BadgeFfz = (1LL << 22),
 
     Badges = BadgeGlobalAuthority | BadgePredictions | BadgeChannelAuthority |
-             BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeFfz,
+             BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeSeventv |
+             BadgeFfz,
 
-    ChannelName = (1LL << 20),
+    ChannelName = (1LL << 23),
 
-    BitsAmount = (1LL << 21),
+    BitsAmount = (1LL << 24),
 
-    ModeratorTools = (1LL << 22),
+    ModeratorTools = (1LL << 25),
 
-    EmojiImage = (1LL << 23),
-    EmojiText = (1LL << 24),
+    EmojiImage = (1LL << 26),
+    EmojiText = (1LL << 27),
     EmojiAll = EmojiImage | EmojiText,
 
-    AlwaysShow = (1LL << 25),
+    AlwaysShow = (1LL << 28),
 
     // used in the ChannelView class to make the collapse buttons visible if
     // needed
-    Collapsed = (1LL << 26),
+    Collapsed = (1LL << 29),
 
     // used for dynamic bold usernames
-    BoldUsername = (1LL << 27),
-    NonBoldUsername = (1LL << 28),
+    BoldUsername = (1LL << 30),
+    NonBoldUsername = (1LL << 31),
 
     // for links
-    LowercaseLink = (1LL << 29),
-    OriginalLink = (1LL << 30),
+    LowercaseLink = (1LL << 32),
+    OriginalLink = (1LL << 33),
 
     // ZeroWidthEmotes are emotes that are supposed to overlay over any pre-existing emotes
-    // e.g. BTTV's SoSnowy during christmas season
-    ZeroWidthEmote = (1LL << 31),
+    // e.g. BTTV's SoSnowy during christmas season or zerowidth 7TV emotes
+    ZeroWidthEmote = (1LL << 34),
 
     // for elements of the message reply
-    RepliedMessage = (1LL << 32),
+    RepliedMessage = (1LL << 35),
 
     // for the reply button element
-    ReplyButton = (1LL << 33),
+    ReplyButton = (1LL << 36),
 
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
-              BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
-              AlwaysShow,
+              BttvEmoteImage | SeventvEmoteImage | TwitchEmoteImage |
+              BitsAmount | Text | AlwaysShow,
 };
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 

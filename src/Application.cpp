@@ -18,6 +18,8 @@
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/Irc2.hpp"
+#include "providers/seventv/SeventvBadges.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -72,6 +74,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , twitch(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , ffzBadges(&this->emplace<FfzBadges>())
+    , seventvBadges(&this->emplace<SeventvBadges>())
     , logging(&this->emplace<Logging>())
 {
     this->instance = this;
@@ -197,6 +200,16 @@ int Application::run(QApplication &qtApp)
     getSettings()->enableFFZChannelEmotes.connect(
         [this] {
             this->twitch->reloadAllFFZChannelEmotes();
+        },
+        false);
+    getSettings()->enableSevenTVGlobalEmotes.connect(
+        [this] {
+            this->twitch->reloadSevenTVGlobalEmotes();
+        },
+        false);
+    getSettings()->enableSevenTVChannelEmotes.connect(
+        [this] {
+            this->twitch->reloadAllSevenTVChannelEmotes();
         },
         false);
 
