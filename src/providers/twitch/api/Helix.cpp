@@ -888,6 +888,15 @@ void Helix::deleteChatMessages(
                 }
                 break;
 
+                case 403: {
+                    // 403 endpoint means the user does not have permission to perform this action in that channel
+                    // Most likely to missing moderator permissions
+                    // Missing documentation issue: https://github.com/twitchdev/issues/issues/659
+                    // `message` value is well-formed so no need for a specific error type
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
                 case 401: {
                     if (message.startsWith("Missing scope",
                                            Qt::CaseInsensitive))
