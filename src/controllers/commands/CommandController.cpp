@@ -1269,6 +1269,73 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+
+    this->registerCommand(
+        "/commercial", [](const QStringList &words, auto channel) {
+            auto user = getApp()->accounts->twitch.getCurrent();
+
+            // Avoid Helix calls without Client ID and/or OAuth Token
+            if (user->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to use the /commercial command"));
+                return "";
+            }
+
+            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc == nullptr)
+            {
+                return "";
+            }
+
+            auto broadcasterID = tc->roomId();
+            auto length = 30;  // TODO: Parse from words
+
+            using Error = HelixStartCommercialError;
+
+            getHelix()->startCommercial(
+                broadcasterID, length,
+                [channel](auto response) {
+                    qDebug() << "commercial success";
+                },
+                [channel](auto error, auto message) {
+                    MessageBuilder messageBuilder(
+                        systemMessage, "Failed to start commercial - ");
+
+                    messageBuilder
+                        .emplace<TextElement>(QString("test xD"),
+                                              MessageElementFlag::Text)
+                        ->setLink({Link::Url, "https://pajlada.se"});
+
+                    switch (error)
+                    {
+                        case Error::Forwarded: {
+                            messageBuilder.emplace<TextElement>(
+                                message, MessageElementFlag::Text);
+                        }
+                        break;
+
+                        case Error::TokenMustMatchBroadcaster: {
+                            messageBuilder.emplace<TextElement>(
+                                message, MessageElementFlag::Text);
+                        }
+                        break;
+
+                        case Error::Unknown:
+                        default: {
+                            messageBuilder.emplace<TextElement>(
+                                QString("An unknown error has occurred (%1).")
+                                    .arg(message),
+                                MessageElementFlag::Text);
+                        }
+                        break;
+                    }
+
+                    channel->addMessage(messageBuilder.release());
+                });
+
+            return "";
+        });
 }
 
 void CommandController::save()

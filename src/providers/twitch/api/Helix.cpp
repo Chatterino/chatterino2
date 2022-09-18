@@ -843,6 +843,69 @@ void Helix::updateUserChatColor(
         .execute();
 };
 
+void Helix::startCommercial(
+    QString broadcasterID, int length,
+    ResultCallback<HelixStartCommercialResponse> successCallback,
+    FailureCallback<HelixStartCommercialError, QString> failureCallback)
+{
+    using Error = HelixStartCommercialError;
+
+    QJsonObject payload;
+
+    payload.insert("broadcaster_id", QJsonValue(broadcasterID));
+    payload.insert("length", QJsonValue(length));
+
+    this->makeRequest("channels/commercial", QUrlQuery())
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto obj = result.parseJson();
+            if (obj.isEmpty())
+            {
+                failureCallback(Error::Unknown, "no json object");
+                return Failure;
+            }
+
+            qDebug() << "Success obj:" << obj;
+
+            successCallback(HelixStartCommercialResponse(obj));
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+            qDebug() << "failure obj: " << obj << "nmessage: " << message;
+
+            switch (result.status())
+            {
+                case 401: {
+                    if (message.contains(
+                            "The ID in broadcaster_id must match the user ID "
+                            "found in the request's OAuth token.",
+                            Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::TokenMustMatchBroadcaster,
+                                        message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error starting commercial:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

@@ -329,6 +329,32 @@ enum class HelixUpdateUserChatColorError {
     Forwarded,
 };
 
+struct HelixStartCommercialResponse {
+    // Length of the triggered commercial
+    int length;
+    // Provides contextual information on why the request failed
+    QString message;
+    // Seconds until the next commercial can be served on this channel
+    int retryAfter;
+
+    explicit HelixStartCommercialResponse(QJsonObject jsonObject)
+    {
+        auto jsonData = jsonObject.value("data").toArray().at(0).toObject();
+        this->length = jsonData.value("length").toInt();
+        this->message = jsonData.value("message").toString();
+        this->retryAfter = jsonData.value("retry_after").toInt();
+    }
+};
+
+enum class HelixStartCommercialError {
+    Unknown,
+    TokenMustMatchBroadcaster,
+    UserMissingScope,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 class IHelix
 {
 public:
@@ -458,6 +484,13 @@ public:
         FailureCallback<HelixUpdateUserChatColorError, QString>
             failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference#start-commercial
+    virtual void startCommercial(
+        QString broadcasterID, int length,
+        ResultCallback<HelixStartCommercialResponse> successCallback,
+        FailureCallback<HelixStartCommercialError, QString>
+            failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
 
@@ -578,6 +611,13 @@ public:
     void updateUserChatColor(
         QString userID, QString color, ResultCallback<> successCallback,
         FailureCallback<HelixUpdateUserChatColorError, QString> failureCallback)
+        final;
+
+    // https://dev.twitch.tv/docs/api/reference#start-commercial
+    void startCommercial(
+        QString broadcasterID, int length,
+        ResultCallback<HelixStartCommercialResponse> successCallback,
+        FailureCallback<HelixStartCommercialError, QString> failureCallback)
         final;
 
     void update(QString clientId, QString oauthToken) final;
