@@ -864,7 +864,6 @@ void Helix::deleteChatMessages(
     this->makeRequest("moderation/chat", urlQuery)
         .type(NetworkRequestType::Delete)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
-            auto obj = result.parseJson();
             if (result.status() != 204)
             {
                 qCWarning(chatterinoTwitch)
