@@ -1270,7 +1270,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    auto deleteMessagesLambda = [](auto channel, const QString &messageID) {
+    auto deleteMessages = [](auto channel, const QString &messageID) {
         const auto *commandName = messageID.isEmpty() ? "/clear" : "/delete";
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
         if (twitchChannel == nullptr)
@@ -1351,10 +1351,9 @@ void CommandController::initialize(Settings &, Paths &paths)
     };
 
     this->registerCommand(
-        "/clear",
-        [deleteMessagesLambda](const QStringList &words, auto channel) {
+        "/clear", [deleteMessages](const QStringList &words, auto channel) {
             (void)words;  // unused
-            deleteMessagesLambda(channel, QString());
+            deleteMessages(channel, QString());
             return "";
         });
 }
