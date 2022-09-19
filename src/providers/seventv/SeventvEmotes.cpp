@@ -17,6 +17,35 @@
 #include <utility>
 
 namespace chatterino {
+/**
+ * # Caching
+ *
+ *
+ *                                   (activeEmote, emoteData)
+ *                                             |
+ *                                          is aliased?
+ *                 +------------------------y--+--n-------------------------------+
+ *                 |                                                              |
+ *            non-aliased                                                    emote cached?
+ *            emote cached?                                    +---------------y--+--n--------------+
+ *       +-----y--+--n-------------+                           |                                    |
+ *       |                         |                      use cached emote                      images cached?
+ *  fork emote                 images cached?                                          +---------y--+--n-----------+
+ *  (use images         +------ y--+--n-------+                                        |                           |
+ *  and homepage)       |                     |                                    use images,                create emote,
+ *                  use cached            create emote,                           create emote,                cache emote
+ *                    images,             cache images,                         remove cache entry,
+ *                  don't cache           don't cache                              cache emote
+ *                  emote itself          emote itself
+ *
+ * # References
+ *
+ * - EmoteSet: https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/emote-set.model.go#L8-L18
+ * - ActiveEmote: https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/emote-set.model.go#L20-L27
+ * - EmotePartial (emoteData): https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/emote.model.go#L24-L34
+ * - ImageHost: https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/model.go#L36-L39
+ * - ImageFile: https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/model.go#L41-L48
+ */
 namespace {
     const QRegularExpression whitespaceRegex(R"(\s+)");
 
