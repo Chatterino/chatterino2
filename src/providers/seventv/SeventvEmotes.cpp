@@ -47,8 +47,6 @@ namespace chatterino {
  * - ImageFile: https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/model.go#L41-L48
  */
 namespace {
-    const QRegularExpression whitespaceRegex(R"(\s+)");
-
     const QString CHANNEL_HAS_NO_EMOTES(
         "This channel has no 7TV channel emotes.");
     const QString emoteLinkFormat("https://7tv.app/emotes/%1");
