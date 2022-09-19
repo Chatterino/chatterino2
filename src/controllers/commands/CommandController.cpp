@@ -1295,7 +1295,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                     break;
 
                     case HelixDeleteChatMessagesError::Forwarded: {
-                        errorMessage += message + ".";
+                        errorMessage += message;
                     }
                     break;
 
