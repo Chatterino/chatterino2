@@ -300,6 +300,16 @@ struct HelixChannelEmote {
     }
 };
 
+enum class HelixAnnouncementColor {
+    Blue,
+    Green,
+    Orange,
+    Purple,
+
+    // this is the executor's chat color
+    Primary,
+};
+
 enum class HelixClipError {
     Unknown,
     ClipsDisabled,
@@ -337,6 +347,14 @@ enum class HelixDeleteChatMessagesError {
     MessageUnavailable,
 
     // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+enum class HelixAnnouncementError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+
     Forwarded,
 };
 
@@ -476,6 +494,12 @@ public:
         FailureCallback<HelixDeleteChatMessagesError, QString>
             failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference#send-chat-announcement
+    virtual void sendChatAnnoucement(
+        QString broadcasterID, QString moderatorID, QString message,
+        HelixAnnouncementColor color, ResultCallback<> successCallback,
+        FailureCallback<HelixAnnouncementError, QString> failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
 
@@ -604,6 +628,11 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixDeleteChatMessagesError, QString> failureCallback)
         final;
+    // https://dev.twitch.tv/docs/api/reference#send-chat-announcement
+    void sendChatAnnoucement(
+        QString broadcasterID, QString moderatorID, QString message,
+        HelixAnnouncementColor color, ResultCallback<> successCallback,
+        FailureCallback<HelixAnnouncementError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 
