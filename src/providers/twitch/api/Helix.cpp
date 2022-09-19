@@ -953,7 +953,8 @@ void Helix::removeChannelModerator(
             switch (result.status())
             {
                 case 400: {
-                    if (message.compare("user is not a mod", Qt::CaseInsensitive) == 0)
+                    if (message.compare("user is not a mod",
+                                        Qt::CaseInsensitive) == 0)
                     {
                         // This error message is particularly ugly, so we handle it differently
                         failureCallback(Error::NotModded, message);
