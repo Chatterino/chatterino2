@@ -1361,7 +1361,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         {
             channel->addMessage(makeSystemMessage(
                 "Usage: \"/mod <username>\" - Grant moderator status to a "
-                "user. Use \"mods\" to list the moderators of this channel."));
+                "user. Use \"/mods\" to list the moderators of this channel."));
             return "";
         }
 
