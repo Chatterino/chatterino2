@@ -40,6 +40,7 @@ public:
     const MessagePtr &getMessagePtr() const;
 
     int getHeight() const;
+    int getWidth() const;
 
     MessageLayoutFlags flags;
 

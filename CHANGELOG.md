@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722)
+- Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722, #3989)
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
 - Minor: Added option to display tabs on the right and bottom. (#3847)
 - Minor: Added `is:first-msg` search option. (#3700)
@@ -26,7 +26,17 @@
 - Minor: Added `/copy` command. Usage: `/copy <text>`. Copies provided text to clipboard - can be useful with custom commands. (#3763)
 - Minor: Removed total views from the usercard, as Twitch no longer updates the number. (#3792)
 - Minor: Add Quick Switcher item to open a channel in a new popup window. (#3828)
-- Minor: Reduced GIF frame window from 30ms to 20ms, causing fewer frame skips in animated emotes. (#3886)
+- Minor: Reduced GIF frame window from 30ms to 20ms, causing fewer frame skips in animated emotes. (#3886, #3907)
+- Minor: Warn when parsing an environment variable fails. (#3904)
+- Minor: Load missing messages from Recent Messages API upon reconnecting (#3878, #3932)
+- Minor: Reduced image memory usage when running Chatterino for a long time. (#3915)
+- Minor: Add settings to toggle BTTV/FFZ global/channel emotes (#3935, #3990)
+- Minor: Add AutoMod message flag filter. (#3938)
+- Minor: Added whitespace trim to username field in nicknames (#3946)
+- Minor: Added `Go to message` context menu action to search popup, mentions, usercard and reply threads. (#3953)
+- Minor: Added link back to original message that was deleted. (#3953)
+- Minor: Migrate /color command to Helix API. (#3988)
+- Minor: Migrate /clear command to Helix API. (#3994)
 - Bugfix: Fix crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fix crash that can occur when changing channels. (#3799)
@@ -47,12 +57,15 @@
 - Bugfix: Fix split focusing being broken in certain circumstances when the "Show input when it's empty" setting was disabled. (#3838, #3860)
 - Bugfix: Always refresh tab when a contained split's channel is set. (#3849)
 - Bugfix: Drop trailing whitespace from Twitch system messages. (#3888)
+- Bugfix: Fix crash related to logging IRC channels (#3918)
+- Bugfix: Mentions of "You" in timeouts will link to your own user now instead of the user "You". (#3922)
 - Dev: Remove official support for QMake. (#3839, #3883)
 - Dev: Rewrite LimitedQueue (#3798)
 - Dev: Overhaul highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801, #3835)
 - Dev: Use Game Name returned by Get Streams instead of querying it from the Get Games API. (#3662)
 - Dev: Batch checking live status for all channels after startup. (#3757, #3762, #3767)
 - Dev: Move most command context into the command controller. (#3824)
+- Dev: Error NetworkResults now include the body data. (#3987)
 
 ## 2.3.5
 

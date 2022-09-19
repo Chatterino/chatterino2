@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Env.hpp"
+#include "common/QLogging.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
@@ -1194,6 +1195,165 @@ void CommandController::initialize(Settings &, Paths &paths)
             }
             crossPlatformCopy(words.mid(1).join(" "));
             return "";
+        });
+
+    this->registerCommand("/color", [](const QStringList &words, auto channel) {
+        auto user = getApp()->accounts->twitch.getCurrent();
+
+        // Avoid Helix calls without Client ID and/or OAuth Token
+        if (user->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You must be logged in to use the /color command"));
+            return "";
+        }
+
+        auto colorString = words.value(1);
+
+        if (colorString.isEmpty())
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("Usage: /color <color> - Color must be one of Twitch's "
+                        "supported colors (%1) or a hex code (#000000) if you "
+                        "have Turbo or Prime.")
+                    .arg(VALID_HELIX_COLORS.join(", "))));
+            return "";
+        }
+
+        cleanHelixColorName(colorString);
+
+        getHelix()->updateUserChatColor(
+            user->getUserId(), colorString,
+            [colorString, channel] {
+                QString successMessage =
+                    QString("Your color has been changed to %1.")
+                        .arg(colorString);
+                channel->addMessage(makeSystemMessage(successMessage));
+            },
+            [colorString, channel](auto error, auto message) {
+                QString errorMessage =
+                    QString("Failed to change color to %1 - ").arg(colorString);
+
+                switch (error)
+                {
+                    case HelixUpdateUserChatColorError::UserMissingScope: {
+                        errorMessage +=
+                            "Missing required scope. Re-login with your "
+                            "account and try again.";
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::InvalidColor: {
+                        errorMessage += QString("Color must be one of Twitch's "
+                                                "supported colors (%1) or a "
+                                                "hex code (#000000) if you "
+                                                "have Turbo or Prime.")
+                                            .arg(VALID_HELIX_COLORS.join(", "));
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::Forwarded: {
+                        errorMessage += message + ".";
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::Unknown:
+                    default: {
+                        errorMessage += "An unknown error has occurred.";
+                    }
+                    break;
+                }
+
+                channel->addMessage(makeSystemMessage(errorMessage));
+            });
+
+        return "";
+    });
+
+    auto deleteMessages = [](auto channel, const QString &messageID) {
+        const auto *commandName = messageID.isEmpty() ? "/clear" : "/delete";
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The %1 command only works in Twitch channels")
+                    .arg(commandName)));
+            return "";
+        }
+
+        auto user = getApp()->accounts->twitch.getCurrent();
+
+        // Avoid Helix calls without Client ID and/or OAuth Token
+        if (user->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("You must be logged in to use the %1 command.")
+                    .arg(commandName)));
+            return "";
+        }
+
+        getHelix()->deleteChatMessages(
+            twitchChannel->roomId(), user->getUserId(), messageID,
+            []() {
+                // Success handling, we do nothing: IRC/pubsub-edge will dispatch the correct
+                // events to update state for us.
+            },
+            [channel, messageID](auto error, auto message) {
+                QString errorMessage =
+                    QString("Failed to delete chat messages - ");
+
+                switch (error)
+                {
+                    case HelixDeleteChatMessagesError::UserMissingScope: {
+                        errorMessage +=
+                            "Missing required scope. Re-login with your "
+                            "account and try again.";
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::UserNotAuthorized: {
+                        errorMessage +=
+                            "you don't have permission to perform that action.";
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::MessageUnavailable: {
+                        // Override default message prefix to match with IRC message format
+                        errorMessage =
+                            QString(
+                                "The message %1 does not exist, was deleted, "
+                                "or is too old to be deleted.")
+                                .arg(messageID);
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::UserNotAuthenticated: {
+                        errorMessage += "you need to re-authenticate.";
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::Forwarded: {
+                        errorMessage += message + ".";
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::Unknown:
+                    default: {
+                        errorMessage += "An unknown error has occurred.";
+                    }
+                    break;
+                }
+
+                channel->addMessage(makeSystemMessage(errorMessage));
+            });
+
+        return "";
+    };
+
+    this->registerCommand(
+        "/clear", [deleteMessages](const QStringList &words, auto channel) {
+            (void)words;  // unused
+            return deleteMessages(channel, QString());
         });
 }
 
