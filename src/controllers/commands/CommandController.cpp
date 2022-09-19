@@ -1377,7 +1377,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (twitchChannel == nullptr)
         {
             channel->addMessage(makeSystemMessage(
-                "The /unmod command only works in Twitch channels"));
+                "The /mod command only works in Twitch channels"));
             return "";
         }
 
