@@ -257,12 +257,12 @@ namespace {
 
     bool checkEmoteVisibility(const QJsonObject &emoteData)
     {
-        if (!emoteData.value("listed").toBool())
+        if (!emoteData["listed"].toBool() && !getSettings()->showUnlistedEmotes)
         {
-            return getSettings()->showUnlistedEmotes;
+            return false;
         }
-        auto flags = SeventvEmoteFlags(
-            SeventvEmoteFlag(emoteData.value("flags").toInt()));
+        auto flags =
+            SeventvEmoteFlags(SeventvEmoteFlag(emoteData["flags"].toInt()));
         return !flags.has(SeventvEmoteFlag::ContentTwitchDisallowed);
     }
 
