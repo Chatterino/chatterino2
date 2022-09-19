@@ -1319,7 +1319,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
 
     this->registerCommand("/delete", [deleteMessages](const QStringList &words,
-                                                      ChannelPtr channel) {
+                                                      auto channel) {
         // This is a wrapper over the Helix delete messages endpoint
         // We use this to ensure the user gets better error messages for missing or malformed arguments
         if (words.size() < 2)
