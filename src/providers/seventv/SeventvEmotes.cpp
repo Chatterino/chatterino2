@@ -167,7 +167,7 @@ namespace {
     std::pair<ImageSet, bool> lockOrCreateImageSet(const QJsonObject &emoteData,
                                                    WeakImageSet *cached)
     {
-        if (cached)
+        if (cached != nullptr)
         {
             if (auto locked = cached->lock())
             {
