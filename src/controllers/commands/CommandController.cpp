@@ -1355,6 +1355,126 @@ void CommandController::initialize(Settings &, Paths &paths)
             (void)words;  // unused
             return deleteMessages(channel, QString());
         });
+
+    this->registerCommand("/mod", [](const QStringList &words, auto channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(
+                "Usage: \"/mod <username>\" - Grant moderator status to a "
+                "user. Use \"mods\" to list the moderators of this channel."));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to mod someone!"));
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /reply command only works in Twitch channels"));
+            return "";
+        }
+
+        if (twitchChannel->roomId() != currentUser->getUserId())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You may only mod people in your own channel."));
+            return "";
+        }
+
+        auto target = words.at(1);
+        stripChannelName(target);
+
+        getHelix()->getUserByName(
+            target,
+            [currentUser, channel](const HelixUser &targetUser) {
+                getHelix()->addChannelModerator(
+                    currentUser->getUserId(), targetUser.id,
+                    [channel, targetUser] {
+                        channel->addMessage(makeSystemMessage(
+                            QString("You have added %1 as a moderator of this "
+                                    "channel.")
+                                .arg(targetUser.displayName)));
+                    },
+                    [channel, targetUser](auto error, auto message) {
+                        QString errorMessage =
+                            QString("Failed to add channel moderator - ");
+
+                        switch (error)
+                        {
+                            case HelixAddChannelModeratorError::
+                                UserMissingScope: {
+                                errorMessage += "Missing required scope. "
+                                                "Re-login with your "
+                                                "account and try again.";
+                            }
+                            break;
+
+                            case HelixAddChannelModeratorError::
+                                UserNotAuthorized: {
+                                errorMessage += "you don't have permission to "
+                                                "perform that action.";
+                            }
+                            break;
+
+                            case HelixAddChannelModeratorError::Ratelimited: {
+                                errorMessage +=
+                                    "You are being ratelimited by Twitch. Try "
+                                    "again in a few seconds.";
+                            }
+                            break;
+
+                            case HelixAddChannelModeratorError::UserIsVIP: {
+                                errorMessage +=
+                                    "User is currently a VIP. Unvip them and "
+                                    "retry this command.";
+                            }
+                            break;
+
+                            case HelixAddChannelModeratorError::AlreadyModded: {
+                                // Equivalent irc error
+                                errorMessage +=
+                                    QString("%1 is already a moderator of this "
+                                            "channel.")
+                                        .arg(targetUser.displayName);
+                            }
+                            break;
+
+                            case HelixAddChannelModeratorError::
+                                UserNotAuthenticated: {
+                                errorMessage += "you need to re-authenticate.";
+                            }
+                            break;
+
+                            case HelixAddChannelModeratorError::Forwarded: {
+                                errorMessage += message;
+                            }
+                            break;
+
+                            case HelixAddChannelModeratorError::Unknown:
+                            default: {
+                                errorMessage +=
+                                    "An unknown error has occurred.";
+                            }
+                            break;
+                        }
+                        channel->addMessage(makeSystemMessage(errorMessage));
+                    });
+            },
+            [channel, target] {
+                // Equivalent error from IRC
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid username: %1").arg(target)));
+            });
+
+        return "";
+    });
 }
 
 void CommandController::save()
