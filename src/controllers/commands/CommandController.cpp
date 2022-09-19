@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Env.hpp"
+#include "common/QLogging.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
@@ -26,6 +27,7 @@
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/splits/Split.hpp"
 
@@ -177,80 +179,213 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
     return false;
 }
 
-const std::function<QString(const QString &, const ChannelPtr &)>
-    noOpPlaceholder = [](const auto &altText, const auto &channel) {
+using VariableReplacer = std::function<QString(
+    const QString &, const ChannelPtr &, const Message *)>;
+
+const VariableReplacer NO_OP_PLACEHOLDER =
+    [](const auto &altText, const auto &channel, const auto *message) {
         return altText;
     };
 
-const std::map<QString,
-               std::function<QString(const QString &, const ChannelPtr &)>>
-    COMMAND_VARS{
-        {
-            "channel.name",
-            [](const auto &altText, const auto &channel) {
-                (void)(altText);  //unused
-                return channel->getName();
-            },
+const std::unordered_map<QString, VariableReplacer> COMMAND_VARS{
+    {
+        "channel.name",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(altText);  //unused
+            (void)(message);  //unused
+            return channel->getName();
         },
-        {
-            "channel.id",
-            [](const auto &altText, const auto &channel) {
-                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-                if (tc == nullptr)
-                {
-                    return altText;
-                }
+    },
+    {
+        "channel.id",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(message);  //unused
+            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc == nullptr)
+            {
+                return altText;
+            }
 
-                return tc->roomId();
-            },
+            return tc->roomId();
         },
-        {
-            "stream.game",
-            [](const auto &altText, const auto &channel) {
-                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-                if (tc == nullptr)
-                {
-                    return altText;
-                }
-                const auto &status = tc->accessStreamStatus();
-                return status->live ? status->game : altText;
-            },
+    },
+    {
+        // NOTE: The use of {channel} is deprecated and support for it will drop at some point
+        // Users should be encouraged to use {channel.name} instead.
+        "channel",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(altText);  //unused
+            (void)(message);  //unused
+            return channel->getName();
         },
-        {
-            "stream.title",
-            [](const auto &altText, const auto &channel) {
-                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-                if (tc == nullptr)
-                {
-                    return altText;
-                }
-                const auto &status = tc->accessStreamStatus();
-                return status->live ? status->title : altText;
-            },
+    },
+    {
+        "stream.game",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(message);  //unused
+            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc == nullptr)
+            {
+                return altText;
+            }
+            const auto &status = tc->accessStreamStatus();
+            return status->live ? status->game : altText;
         },
-        {
-            "my.id",
-            [](const auto &altText, const auto &channel) {
-                (void)(channel);  //unused
-                auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
-                return uid.isEmpty() ? altText : uid;
-            },
+    },
+    {
+        "stream.title",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(message);  //unused
+            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc == nullptr)
+            {
+                return altText;
+            }
+            const auto &status = tc->accessStreamStatus();
+            return status->live ? status->title : altText;
         },
-        {
-            "my.name",
-            [](const auto &altText, const auto &channel) {
-                (void)(channel);  //unused
-                auto name =
-                    getApp()->accounts->twitch.getCurrent()->getUserName();
-                return name.isEmpty() ? altText : name;
-            },
+    },
+    {
+        "my.id",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            (void)(message);  //unused
+            auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
+            return uid.isEmpty() ? altText : uid;
         },
-        // variables used in mod buttons and the like, these make no sense in normal commands, so they are left empty
-        {"input.text", noOpPlaceholder},
-        {"msg.id", noOpPlaceholder},
-        {"user.name", noOpPlaceholder},
-        {"msg.text", noOpPlaceholder},
-    };
+    },
+    {
+        "my.name",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            (void)(message);  //unused
+            auto name = getApp()->accounts->twitch.getCurrent()->getUserName();
+            return name.isEmpty() ? altText : name;
+        },
+    },
+    {
+        "user.name",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            if (message == nullptr)
+            {
+                return altText;
+            }
+
+            const auto &v = message->loginName;
+
+            if (v.isEmpty())
+            {
+                return altText;
+            }
+
+            return v;
+        },
+    },
+    {
+        // NOTE: The use of {user} is deprecated and support for it will drop at some point
+        // Users should be encouraged to use {user.name} instead.
+        "user",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            if (message == nullptr)
+            {
+                return altText;
+            }
+
+            const auto &v = message->loginName;
+
+            if (v.isEmpty())
+            {
+                return altText;
+            }
+
+            return v;
+        },
+    },
+    {
+        "msg.id",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            if (message == nullptr)
+            {
+                return altText;
+            }
+
+            const auto &v = message->id;
+
+            if (v.isEmpty())
+            {
+                return altText;
+            }
+
+            return v;
+        },
+    },
+    {
+        // NOTE: The use of {msg-id} is deprecated and support for it will drop at some point
+        // Users should be encouraged to use {msg.id} instead.
+        "msg-id",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            if (message == nullptr)
+            {
+                return altText;
+            }
+
+            const auto &v = message->id;
+
+            if (v.isEmpty())
+            {
+                return altText;
+            }
+
+            return v;
+        },
+    },
+    {
+        "msg.text",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            if (message == nullptr)
+            {
+                return altText;
+            }
+
+            const auto &v = message->messageText;
+
+            if (v.isEmpty())
+            {
+                return altText;
+            }
+
+            return v;
+        },
+    },
+    {
+        // NOTE: The use of {message} is deprecated and support for it will drop at some point
+        // Users should be encouraged to use {msg.text} instead.
+        "message",
+        [](const auto &altText, const auto &channel, const auto *message) {
+            (void)(channel);  //unused
+            if (message == nullptr)
+            {
+                return altText;
+            }
+
+            const auto &v = message->messageText;
+
+            if (v.isEmpty())
+            {
+                return altText;
+            }
+
+            return v;
+        },
+    },
+    // variables used in mod buttons and the like, these make no sense in normal commands, so they are left empty
+    {"input.text", NO_OP_PLACEHOLDER},
+};
 
 }  // namespace
 
@@ -334,6 +469,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         auto target = words.at(1);
+        stripChannelName(target);
 
         getHelix()->getUserByName(
             target,
@@ -379,6 +515,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         auto target = words.at(1);
+        stripChannelName(target);
 
         getHelix()->getUserByName(
             target,
@@ -552,7 +689,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         auto *userPopup = new UserInfoPopup(
             getSettings()->autoCloseUserPopup,
-            static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
+            static_cast<QWidget *>(&(getApp()->windows->getMainWindow())),
+            nullptr);
         userPopup->setData(userName, channel);
         userPopup->move(QCursor::pos());
         userPopup->show();
@@ -752,7 +890,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     });
 
     this->registerCommand("/popup", [](const QStringList &words,
-                                       ChannelPtr channel) {
+                                       ChannelPtr sourceChannel) {
         static const auto *usageMessage =
             "Usage: /popup [channel]. Open specified Twitch channel in "
             "a new window. If no channel argument is specified, open "
@@ -761,6 +899,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         QString target(words.value(1));
         stripChannelName(target);
 
+        // Popup the current split
         if (target.isEmpty())
         {
             auto *currentPage =
@@ -779,19 +918,14 @@ void CommandController::initialize(Settings &, Paths &paths)
                 }
             }
 
-            channel->addMessage(makeSystemMessage(usageMessage));
+            sourceChannel->addMessage(makeSystemMessage(usageMessage));
             return "";
         }
 
+        // Open channel passed as argument in a popup
         auto *app = getApp();
-        Window &window = app->windows->createWindow(WindowType::Popup, true);
-
-        auto *split = new Split(static_cast<SplitContainer *>(
-            window.getNotebook().getOrAddSelectedPage()));
-
-        split->setChannel(app->twitch->getOrAddChannel(target));
-
-        window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+        auto targetChannel = app->twitch->getOrAddChannel(target);
+        app->windows->openInPopup(targetChannel);
 
         return "";
     });
@@ -801,7 +935,11 @@ void CommandController::initialize(Settings &, Paths &paths)
         auto *currentPage = dynamic_cast<SplitContainer *>(
             getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
 
-        currentPage->getSelectedSplit()->getChannelView().clearMessages();
+        if (auto split = currentPage->getSelectedSplit())
+        {
+            split->getChannelView().clearMessages();
+        }
+
         return "";
     });
 
@@ -936,48 +1074,60 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand(
-        "/delete", [](const QStringList &words, ChannelPtr channel) -> QString {
-            // This is a wrapper over the standard Twitch /delete command
-            // We use this to ensure the user gets better error messages for missing or malformed arguments
-            if (words.size() < 2)
-            {
-                channel->addMessage(
-                    makeSystemMessage("Usage: /delete <msg-id> - Deletes the "
-                                      "specified message."));
-                return "";
-            }
-
-            auto messageID = words.at(1);
-            auto uuid = QUuid(messageID);
-            if (uuid.isNull())
-            {
-                // The message id must be a valid UUID
-                channel->addMessage(makeSystemMessage(
-                    QString("Invalid msg-id: \"%1\"").arg(messageID)));
-                return "";
-            }
-
-            auto msg = channel->findMessage(messageID);
-            if (msg != nullptr)
-            {
-                if (msg->loginName == channel->getName() &&
-                    !channel->isBroadcaster())
-                {
-                    channel->addMessage(makeSystemMessage(
-                        "You cannot delete the broadcaster's messages unless "
-                        "you are the broadcaster."));
-                    return "";
-                }
-            }
-
-            return QString("/delete ") + messageID;
-        });
-
     this->registerCommand("/raw", [](const QStringList &words, ChannelPtr) {
         getApp()->twitch->sendRawMessage(words.mid(1).join(" "));
         return "";
     });
+
+    this->registerCommand(
+        "/reply", [](const QStringList &words, ChannelPtr channel) {
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /reply command only works in Twitch channels"));
+                return "";
+            }
+
+            if (words.size() < 3)
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage: /reply <username> <message>"));
+                return "";
+            }
+
+            QString username = words[1];
+            stripChannelName(username);
+
+            auto snapshot = twitchChannel->getMessageSnapshot();
+            for (auto it = snapshot.rbegin(); it != snapshot.rend(); ++it)
+            {
+                const auto &msg = *it;
+                if (msg->loginName.compare(username, Qt::CaseInsensitive) == 0)
+                {
+                    std::shared_ptr<MessageThread> thread;
+                    // found most recent message by user
+                    if (msg->replyThread == nullptr)
+                    {
+                        thread = std::make_shared<MessageThread>(msg);
+                        twitchChannel->addReplyThread(thread);
+                    }
+                    else
+                    {
+                        thread = msg->replyThread;
+                    }
+
+                    QString reply = words.mid(2).join(" ");
+                    twitchChannel->sendReply(reply, thread->rootId());
+                    return "";
+                }
+            }
+
+            channel->addMessage(
+                makeSystemMessage("A message from that user wasn't found"));
+
+            return "";
+        });
 
 #ifndef NDEBUG
     this->registerCommand(
@@ -1008,6 +1158,203 @@ void CommandController::initialize(Settings &, Paths &paths)
             crossPlatformCopy(words.mid(1).join(" "));
             return "";
         });
+
+    this->registerCommand("/color", [](const QStringList &words, auto channel) {
+        auto user = getApp()->accounts->twitch.getCurrent();
+
+        // Avoid Helix calls without Client ID and/or OAuth Token
+        if (user->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You must be logged in to use the /color command"));
+            return "";
+        }
+
+        auto colorString = words.value(1);
+
+        if (colorString.isEmpty())
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("Usage: /color <color> - Color must be one of Twitch's "
+                        "supported colors (%1) or a hex code (#000000) if you "
+                        "have Turbo or Prime.")
+                    .arg(VALID_HELIX_COLORS.join(", "))));
+            return "";
+        }
+
+        cleanHelixColorName(colorString);
+
+        getHelix()->updateUserChatColor(
+            user->getUserId(), colorString,
+            [colorString, channel] {
+                QString successMessage =
+                    QString("Your color has been changed to %1.")
+                        .arg(colorString);
+                channel->addMessage(makeSystemMessage(successMessage));
+            },
+            [colorString, channel](auto error, auto message) {
+                QString errorMessage =
+                    QString("Failed to change color to %1 - ").arg(colorString);
+
+                switch (error)
+                {
+                    case HelixUpdateUserChatColorError::UserMissingScope: {
+                        errorMessage +=
+                            "Missing required scope. Re-login with your "
+                            "account and try again.";
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::InvalidColor: {
+                        errorMessage += QString("Color must be one of Twitch's "
+                                                "supported colors (%1) or a "
+                                                "hex code (#000000) if you "
+                                                "have Turbo or Prime.")
+                                            .arg(VALID_HELIX_COLORS.join(", "));
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::Forwarded: {
+                        errorMessage += message + ".";
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::Unknown:
+                    default: {
+                        errorMessage += "An unknown error has occurred.";
+                    }
+                    break;
+                }
+
+                channel->addMessage(makeSystemMessage(errorMessage));
+            });
+
+        return "";
+    });
+
+    auto deleteMessages = [](auto channel, const QString &messageID) {
+        const auto *commandName = messageID.isEmpty() ? "/clear" : "/delete";
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The %1 command only works in Twitch channels")
+                    .arg(commandName)));
+            return "";
+        }
+
+        auto user = getApp()->accounts->twitch.getCurrent();
+
+        // Avoid Helix calls without Client ID and/or OAuth Token
+        if (user->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("You must be logged in to use the %1 command.")
+                    .arg(commandName)));
+            return "";
+        }
+
+        getHelix()->deleteChatMessages(
+            twitchChannel->roomId(), user->getUserId(), messageID,
+            []() {
+                // Success handling, we do nothing: IRC/pubsub-edge will dispatch the correct
+                // events to update state for us.
+            },
+            [channel, messageID](auto error, auto message) {
+                QString errorMessage =
+                    QString("Failed to delete chat messages - ");
+
+                switch (error)
+                {
+                    case HelixDeleteChatMessagesError::UserMissingScope: {
+                        errorMessage +=
+                            "Missing required scope. Re-login with your "
+                            "account and try again.";
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::UserNotAuthorized: {
+                        errorMessage +=
+                            "you don't have permission to perform that action.";
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::MessageUnavailable: {
+                        // Override default message prefix to match with IRC message format
+                        errorMessage =
+                            QString(
+                                "The message %1 does not exist, was deleted, "
+                                "or is too old to be deleted.")
+                                .arg(messageID);
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::UserNotAuthenticated: {
+                        errorMessage += "you need to re-authenticate.";
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::Forwarded: {
+                        errorMessage += message;
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::Unknown:
+                    default: {
+                        errorMessage += "An unknown error has occurred.";
+                    }
+                    break;
+                }
+
+                channel->addMessage(makeSystemMessage(errorMessage));
+            });
+
+        return "";
+    };
+
+    this->registerCommand(
+        "/clear", [deleteMessages](const QStringList &words, auto channel) {
+            (void)words;  // unused
+            return deleteMessages(channel, QString());
+        });
+
+    this->registerCommand("/delete", [deleteMessages](const QStringList &words,
+                                                      auto channel) {
+        // This is a wrapper over the Helix delete messages endpoint
+        // We use this to ensure the user gets better error messages for missing or malformed arguments
+        if (words.size() < 2)
+        {
+            channel->addMessage(
+                makeSystemMessage("Usage: /delete <msg-id> - Deletes the "
+                                  "specified message."));
+            return "";
+        }
+
+        auto messageID = words.at(1);
+        auto uuid = QUuid(messageID);
+        if (uuid.isNull())
+        {
+            // The message id must be a valid UUID
+            channel->addMessage(makeSystemMessage(
+                QString("Invalid msg-id: \"%1\"").arg(messageID)));
+            return "";
+        }
+
+        auto msg = channel->findMessage(messageID);
+        if (msg != nullptr)
+        {
+            if (msg->loginName == channel->getName() &&
+                !channel->isBroadcaster())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You cannot delete the broadcaster's messages unless "
+                    "you are the broadcaster."));
+                return "";
+            }
+        }
+
+        return deleteMessages(channel, messageID);
+    });
 }
 
 void CommandController::save()
@@ -1118,10 +1465,10 @@ void CommandController::registerCommand(QString commandName,
     this->defaultChatterinoCommandAutoCompletions_.append(commandName);
 }
 
-QString CommandController::execCustomCommand(const QStringList &words,
-                                             const Command &command,
-                                             bool dryRun, ChannelPtr channel,
-                                             std::map<QString, QString> context)
+QString CommandController::execCustomCommand(
+    const QStringList &words, const Command &command, bool dryRun,
+    ChannelPtr channel, const Message *message,
+    std::unordered_map<QString, QString> context)
 {
     QString result;
 
@@ -1165,20 +1512,21 @@ QString CommandController::execCustomCommand(const QStringList &words,
 
             if (var != context.end())
             {
+                // Found variable in `context`
                 result += var->second.isEmpty() ? altText : var->second;
+                continue;
             }
-            else
+
+            auto it = COMMAND_VARS.find(varName);
+            if (it != COMMAND_VARS.end())
             {
-                auto it = COMMAND_VARS.find(varName);
-                if (it != COMMAND_VARS.end())
-                {
-                    result += it->second(altText, channel);
-                }
-                else
-                {
-                    result += "{" + match.captured(3) + "}";
-                }
+                // Found variable in `COMMAND_VARS`
+                result += it->second(altText, channel, message);
+                continue;
             }
+
+            // Fall back to replacing it with the actual matched string
+            result += "{" + match.captured(3) + "}";
             continue;
         }
 

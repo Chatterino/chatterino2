@@ -145,6 +145,11 @@ TEST(NetworkRequest, Error)
             .onError([code, &mut, &requestDone, &requestDoneCondition,
                       url](NetworkResult result) {
                 EXPECT_EQ(result.status(), code);
+                if (code == 402)
+                {
+                    EXPECT_EQ(result.getData(),
+                              QString("Fuck you, pay me!").toUtf8());
+                }
 
                 {
                     std::unique_lock lck(mut);

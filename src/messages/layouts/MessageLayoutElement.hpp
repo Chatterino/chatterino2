@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QPen>
 #include <QPoint>
 #include <QRect>
 #include <QString>
@@ -93,6 +94,23 @@ private:
     QColor color_;
 };
 
+class ImageWithCircleBackgroundLayoutElement : public ImageLayoutElement
+{
+public:
+    ImageWithCircleBackgroundLayoutElement(MessageElement &creator,
+                                           ImagePtr image,
+                                           const QSize &imageSize, QColor color,
+                                           int padding);
+
+protected:
+    void paint(QPainter &painter) override;
+
+private:
+    const QColor color_;
+    const QSize imageSize_;
+    const int padding_;
+};
+
 // TEXT
 class TextLayoutElement : public MessageLayoutElement
 {
@@ -140,6 +158,26 @@ private:
     float scale;
     QString line1;
     QString line2;
+};
+
+class ReplyCurveLayoutElement : public MessageLayoutElement
+{
+public:
+    ReplyCurveLayoutElement(MessageElement &creator, const QSize &size,
+                            float thickness, float lMargin);
+
+protected:
+    void paint(QPainter &painter) override;
+    void paintAnimated(QPainter &painter, int yOffset) override;
+    int getMouseOverIndex(const QPoint &abs) const override;
+    int getXFromIndex(int index) override;
+    void addCopyTextToString(QString &str, int from = 0,
+                             int to = INT_MAX) const override;
+    int getSelectionIndexCount() const override;
+
+private:
+    const QPen pen_;
+    const float neededMargin_;
 };
 
 }  // namespace chatterino

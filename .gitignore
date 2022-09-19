@@ -111,3 +111,7 @@ Dependencies_*
 
 # vcpkg
 vcpkg_installed/
+
+# NatVis files
+qt5.natvis
+qt6.natvis

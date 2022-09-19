@@ -15,6 +15,7 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
+#include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 
 #include <QMetaEnum>
@@ -26,40 +27,11 @@ using namespace std::chrono_literals;
 
 namespace chatterino {
 
-namespace {
-    // TODO: combine this with getEmoteSetBatches in TwitchAccount.cpp, maybe some templated thing
-    template <class T>
-    std::vector<T> getChannelsInBatches(T channels)
-    {
-        constexpr int batchSize = 100;
-
-        int batchCount = (channels.size() / batchSize) + 1;
-
-        std::vector<T> batches;
-        batches.reserve(batchCount);
-
-        for (int i = 0; i < batchCount; i++)
-        {
-            T batch;
-
-            // I hate you, msvc
-            int last = (std::min)(batchSize, channels.size() - batchSize * i);
-            for (int j = 0; j < last; j++)
-            {
-                batch.push_back(channels.at(j + (batchSize * i)));
-            }
-            batches.emplace_back(batch);
-        }
-
-        return batches;
-    }
-}  // namespace
-
 TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
-    , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
     , liveChannel(new Channel("/live", Channel::Type::TwitchLive))
+    , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
 {
     this->initializeIrc();
 
@@ -80,8 +52,8 @@ void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
         });
     });
 
-    this->bttv.loadEmotes();
-    this->ffz.loadEmotes();
+    this->reloadBTTVGlobalEmotes();
+    this->reloadFFZGlobalEmotes();
 
     /* Refresh all twitch channel's live status in bulk every 30 seconds after starting chatterino */
     QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [=] {
@@ -148,6 +120,11 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
     channel->sendMessageSignal.connect(
         [this, channel = channel.get()](auto &chan, auto &msg, bool &sent) {
             this->onMessageSendRequested(channel, msg, sent);
+        });
+    channel->sendReplySignal.connect(
+        [this, channel = channel.get()](auto &chan, auto &msg, auto &replyId,
+                                        bool &sent) {
+            this->onReplySendRequested(channel, msg, replyId, sent);
         });
 
     return std::shared_ptr<Channel>(channel);
@@ -344,7 +321,7 @@ void TwitchIrcServer::bulkRefreshLiveStatus()
     });
 
     // iterate over batches of channel IDs
-    for (const auto &batch : getChannelsInBatches(twitchChans->keys()))
+    for (const auto &batch : splitListIntoBatches(twitchChans->keys()))
     {
         getHelix()->fetchStreams(
             batch, {},
@@ -398,63 +375,87 @@ bool TwitchIrcServer::hasSeparateWriteConnection() const
     // return getSettings()->twitchSeperateWriteConnection;
 }
 
+bool TwitchIrcServer::prepareToSend(TwitchChannel *channel)
+{
+    std::lock_guard<std::mutex> guard(this->lastMessageMutex_);
+
+    auto &lastMessage = channel->hasHighRateLimit() ? this->lastMessageMod_
+                                                    : this->lastMessagePleb_;
+    size_t maxMessageCount = channel->hasHighRateLimit() ? 99 : 19;
+    auto minMessageOffset = (channel->hasHighRateLimit() ? 100ms : 1100ms);
+
+    auto now = std::chrono::steady_clock::now();
+
+    // check if you are sending messages too fast
+    if (!lastMessage.empty() && lastMessage.back() + minMessageOffset > now)
+    {
+        if (this->lastErrorTimeSpeed_ + 30s < now)
+        {
+            auto errorMessage =
+                makeSystemMessage("You are sending messages too quickly.");
+
+            channel->addMessage(errorMessage);
+
+            this->lastErrorTimeSpeed_ = now;
+        }
+        return false;
+    }
+
+    // remove messages older than 30 seconds
+    while (!lastMessage.empty() && lastMessage.front() + 32s < now)
+    {
+        lastMessage.pop();
+    }
+
+    // check if you are sending too many messages
+    if (lastMessage.size() >= maxMessageCount)
+    {
+        if (this->lastErrorTimeAmount_ + 30s < now)
+        {
+            auto errorMessage =
+                makeSystemMessage("You are sending too many messages.");
+
+            channel->addMessage(errorMessage);
+
+            this->lastErrorTimeAmount_ = now;
+        }
+        return false;
+    }
+
+    lastMessage.push(now);
+    return true;
+}
+
 void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
                                              const QString &message, bool &sent)
 {
     sent = false;
 
+    bool canSend = this->prepareToSend(channel);
+    if (!canSend)
     {
-        std::lock_guard<std::mutex> guard(this->lastMessageMutex_);
-
-        //        std::queue<std::chrono::steady_clock::time_point>
-        auto &lastMessage = channel->hasHighRateLimit()
-                                ? this->lastMessageMod_
-                                : this->lastMessagePleb_;
-        size_t maxMessageCount = channel->hasHighRateLimit() ? 99 : 19;
-        auto minMessageOffset = (channel->hasHighRateLimit() ? 100ms : 1100ms);
-
-        auto now = std::chrono::steady_clock::now();
-
-        // check if you are sending messages too fast
-        if (!lastMessage.empty() && lastMessage.back() + minMessageOffset > now)
-        {
-            if (this->lastErrorTimeSpeed_ + 30s < now)
-            {
-                auto errorMessage =
-                    makeSystemMessage("You are sending messages too quickly.");
-
-                channel->addMessage(errorMessage);
-
-                this->lastErrorTimeSpeed_ = now;
-            }
-            return;
-        }
-
-        // remove messages older than 30 seconds
-        while (!lastMessage.empty() && lastMessage.front() + 32s < now)
-        {
-            lastMessage.pop();
-        }
-
-        // check if you are sending too many messages
-        if (lastMessage.size() >= maxMessageCount)
-        {
-            if (this->lastErrorTimeAmount_ + 30s < now)
-            {
-                auto errorMessage =
-                    makeSystemMessage("You are sending too many messages.");
-
-                channel->addMessage(errorMessage);
-
-                this->lastErrorTimeAmount_ = now;
-            }
-            return;
-        }
-
-        lastMessage.push(now);
+        return;
     }
 
     this->sendMessage(channel->getName(), message);
+    sent = true;
+}
+
+void TwitchIrcServer::onReplySendRequested(TwitchChannel *channel,
+                                           const QString &message,
+                                           const QString &replyId, bool &sent)
+{
+    sent = false;
+
+    bool canSend = this->prepareToSend(channel);
+    if (!canSend)
+    {
+        return;
+    }
+
+    this->sendRawMessage("@reply-parent-msg-id=" + replyId + " PRIVMSG #" +
+                         channel->getName() + " :" + message);
+
     sent = true;
 }
 
@@ -467,4 +468,33 @@ const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
     return this->ffz;
 }
 
+void TwitchIrcServer::reloadBTTVGlobalEmotes()
+{
+    this->bttv.loadEmotes();
+}
+
+void TwitchIrcServer::reloadAllBTTVChannelEmotes()
+{
+    this->forEachChannel([](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->refreshBTTVChannelEmotes(false);
+        }
+    });
+}
+
+void TwitchIrcServer::reloadFFZGlobalEmotes()
+{
+    this->ffz.loadEmotes();
+}
+
+void TwitchIrcServer::reloadAllFFZChannelEmotes()
+{
+    this->forEachChannel([](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->refreshFFZChannelEmotes(false);
+        }
+    });
+}
 }  // namespace chatterino

@@ -33,7 +33,7 @@ Note: This installation will take about 2.1 GB of disk space.
 
 ### For our websocket library, we need OpenSSL 1.1
 
-1. Download OpenSSL for windows, version `1.1.1o`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1o.exe)**
+1. Download OpenSSL for windows, version `1.1.1q`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1q.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 
@@ -46,7 +46,8 @@ Note: This installation will take about 2.1 GB of disk space.
 5. Then copy the OpenSSL 1.1 files from its `\bin` folder to `C:\local\bin` (Overwrite any duplicate files)
 6. Add `C:\local\bin` to your path folder ([Follow the guide here if you don't know how to do it](https://www.computerhope.com/issues/ch000549.htm#windows10))
 
-**If the download links above do not work, try downloading similar 1.1.x & 1.0.x versions [here](https://slproweb.com/products/Win32OpenSSL.html). Note: Don't download the "light" installers, they do not have the required files.**
+**If the 1.1.x download link above does not work, try downloading the similar 1.1.x version found [here](https://slproweb.com/products/Win32OpenSSL.html). Note: Don't download the "light" installer, it does not have the required files.**
+![Screenshot Slproweb layout](https://user-images.githubusercontent.com/41973452/175827529-97802939-5549-4ab1-95c4-d39f012d06e9.png)
 
 Note: This installation will take about 200 MB of disk space.
 
@@ -82,7 +83,7 @@ Compiling with Breakpad support enables crash reports that can be of use for dev
 
 ## Run the build in Qt Creator
 
-1. Open the `chatterino.pro` file by double-clicking it, or by opening it via Qt Creator.
+1. Open the `CMakeLists.txt` file by double-clicking it, or by opening it via Qt Creator.
 2. You will be presented with a screen that is titled "Configure Project". In this screen, you should have at least one option present ready to be configured, like this:
    ![Qt Create Configure Project screenshot](https://user-images.githubusercontent.com/69117321/169887645-2ae0871a-fe8a-4eb9-98db-7b996dea3a54.png)
 3. Select the profile(s) you want to build with and click "Configure Project".
@@ -149,7 +150,6 @@ Now open the project in CLion. You will be greeted with the _Open Project Wizard
 ```
 -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64\lib\cmake\Qt5
 -DUSE_CONAN=ON
--DCMAKE_CXX_FLAGS=/bigobj
 ```
 
 and the _Build Directory_ to `build`.
@@ -188,3 +188,29 @@ Now you can run the `chatterino | Debug` configuration.
 
 If you want to run the portable version of Chatterino, create a file called `modes` inside of `build/bin` and
 write `portable` into it.
+
+### Debugging
+
+To visualize QT types like `QString`, you need to inform CLion and LLDB
+about these types.
+
+1. Set `Enable NatVis renderers for LLDB option`
+   in `Settings | Build, Execution, Deployment | Debugger | Data Views | C/C++` (should be enabled by default).
+2. Use the official NatVis file for QT from [`qt-labs/vstools`](https://github.com/qt-labs/vstools) by saving them to
+   the project root using PowerShell:
+
+<!--
+When switching to QT6 these need to be updated to qt6.natvis.xml.
+We need to do the replacement as the QT tools:
+https://github.com/qt-labs/vstools/blob/0769d945f8d0040917d654d9731e6b65951e102c/QtVsTools.Package/QtVsToolsPackage.cs#L390-L393
+-->
+
+```powershell
+(iwr "https://github.com/qt-labs/vstools/raw/dev/QtVsTools.Package/qt5.natvis.xml").Content -replace '##NAMESPACE##::', '' | Out-File qt5.natvis
+# [OR] using the permalink
+(iwr "https://github.com/qt-labs/vstools/raw/0769d945f8d0040917d654d9731e6b65951e102c/QtVsTools.Package/qt5.natvis.xml").Content -replace '##NAMESPACE##::', '' | Out-File qt5.natvis
+```
+
+Now you can debug the application and see QT types rendered correctly.
+If this didn't work for you, try following
+the [tutorial from JetBrains](https://www.jetbrains.com/help/clion/qt-tutorial.html#debug-renderers).

@@ -9,7 +9,6 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
@@ -19,6 +18,7 @@
 
 #include <IrcMessage>
 
+#include <memory>
 #include <unordered_set>
 
 namespace {
@@ -242,6 +242,103 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
         false, message->isAction());
 }
 
+std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
+    Channel *channel, Communi::IrcMessage *message,
+    const std::vector<MessagePtr> &otherLoaded)
+{
+    std::vector<MessagePtr> builtMessages;
+
+    auto command = message->command();
+
+    if (command == "PRIVMSG")
+    {
+        auto privMsg = static_cast<Communi::IrcPrivateMessage *>(message);
+        auto tc = dynamic_cast<TwitchChannel *>(channel);
+        if (!tc)
+        {
+            return this->parsePrivMessage(channel, privMsg);
+        }
+
+        MessageParseArgs args;
+        TwitchMessageBuilder builder(channel, message, args, privMsg->content(),
+                                     privMsg->isAction());
+
+        this->populateReply(tc, message, otherLoaded, builder);
+
+        if (!builder.isIgnored())
+        {
+            builtMessages.emplace_back(builder.build());
+            builder.triggerHighlights();
+        }
+    }
+    else if (command == "USERNOTICE")
+    {
+        return this->parseUserNoticeMessage(channel, message);
+    }
+    else if (command == "NOTICE")
+    {
+        return this->parseNoticeMessage(
+            static_cast<Communi::IrcNoticeMessage *>(message));
+    }
+
+    return builtMessages;
+}
+
+void IrcMessageHandler::populateReply(
+    TwitchChannel *channel, Communi::IrcMessage *message,
+    const std::vector<MessagePtr> &otherLoaded, TwitchMessageBuilder &builder)
+{
+    const auto &tags = message->tags();
+    if (const auto it = tags.find("reply-parent-msg-id"); it != tags.end())
+    {
+        const QString replyID = it.value().toString();
+        auto threadIt = channel->threads_.find(replyID);
+        if (threadIt != channel->threads_.end())
+        {
+            const auto owned = threadIt->second.lock();
+            if (owned)
+            {
+                // Thread already exists (has a reply)
+                builder.setThread(owned);
+                return;
+            }
+        }
+
+        MessagePtr foundMessage;
+
+        // Thread does not yet exist, find root reply and create thread.
+        // Linear search is justified by the infrequent use of replies
+        for (auto &otherMsg : otherLoaded)
+        {
+            if (otherMsg->id == replyID)
+            {
+                // Found root reply message
+                foundMessage = otherMsg;
+                break;
+            }
+        }
+
+        if (!foundMessage)
+        {
+            // We didn't find the reply root message in the otherLoaded messages
+            // which are typically the already-parsed recent messages from the
+            // Recent Messages API. We could have a really old message that
+            // still exists being replied to, so check for that here.
+            foundMessage = channel->findMessage(replyID);
+        }
+
+        if (foundMessage)
+        {
+            std::shared_ptr<MessageThread> newThread =
+                std::make_shared<MessageThread>(foundMessage);
+
+            builder.setThread(newThread);
+            // Store weak reference to thread in channel
+            channel->addReplyThread(newThread);
+        }
+    }
+}
+
 void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                                    const QString &target,
                                    const QString &content,
@@ -276,7 +373,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
     auto channel = dynamic_cast<TwitchChannel *>(chan.get());
 
     const auto &tags = _message->tags();
-    if (const auto &it = tags.find("custom-reward-id"); it != tags.end())
+    if (const auto it = tags.find("custom-reward-id"); it != tags.end())
     {
         const auto rewardId = it.value().toString();
         if (!channel->isChannelPointRewardKnown(rewardId))
@@ -300,6 +397,31 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
     }
 
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
+
+    if (const auto it = tags.find("reply-parent-msg-id"); it != tags.end())
+    {
+        const QString replyID = it.value().toString();
+        auto threadIt = channel->threads_.find(replyID);
+        if (threadIt != channel->threads_.end() && !threadIt->second.expired())
+        {
+            // Thread already exists (has a reply)
+            builder.setThread(threadIt->second.lock());
+        }
+        else
+        {
+            // Thread does not yet exist, find root reply and create thread.
+            auto root = channel->findMessage(replyID);
+            if (root)
+            {
+                // Found root reply message
+                const auto newThread = std::make_shared<MessageThread>(root);
+
+                builder.setThread(newThread);
+                // Store weak reference to thread in channel
+                channel->addReplyThread(newThread);
+            }
+        }
+    }
 
     if (isSub || !builder.isIgnored())
     {

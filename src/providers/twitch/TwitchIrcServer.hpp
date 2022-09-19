@@ -33,6 +33,11 @@ public:
 
     void bulkRefreshLiveStatus();
 
+    void reloadBTTVGlobalEmotes();
+    void reloadAllBTTVChannelEmotes();
+    void reloadFFZGlobalEmotes();
+    void reloadAllFFZChannelEmotes();
+
     Atomic<QString> lastUserThatWhisperedMe;
 
     const ChannelPtr whispersChannel;
@@ -67,6 +72,10 @@ protected:
 private:
     void onMessageSendRequested(TwitchChannel *channel, const QString &message,
                                 bool &sent);
+    void onReplySendRequested(TwitchChannel *channel, const QString &message,
+                              const QString &replyId, bool &sent);
+
+    bool prepareToSend(TwitchChannel *channel);
 
     std::mutex lastMessageMutex_;
     std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;

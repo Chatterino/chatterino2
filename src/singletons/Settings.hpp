@@ -25,7 +25,7 @@ class IgnorePhrase;
 class FilterRecord;
 class Nickname;
 
-/// Settings which are availlable for reading on all threads.
+/// Settings which are available for reading on all threads.
 class ConcurrentSettings
 {
 public:
@@ -98,11 +98,12 @@ public:
         "/appearance/messages/usernameDisplayMode",
         UsernameDisplayMode::UsernameAndLocalizedName};
 
-    EnumSetting<NotebookTabDirection> tabDirection = {
-        "/appearance/tabDirection", NotebookTabDirection::Horizontal};
+    EnumSetting<NotebookTabLocation> tabDirection = {"/appearance/tabDirection",
+                                                     NotebookTabLocation::Top};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
+    BoolSetting showReplyButton = {"/appearance/showReplyButton", false};
     IntSetting collpseMessagesMinLines = {
         "/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessages = {
@@ -158,6 +159,8 @@ public:
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier",
                                           1.0};
     BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", true};
+    BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
+                                        false};
     // BoolSetting twitchSeperateWriteConnection =
     // {"/behaviour/twitchSeperateWriteConnection", false};
 
@@ -197,6 +200,11 @@ public:
     BoolSetting stackBits = {"/emotes/stackBits", false};
     BoolSetting removeSpacesBetweenEmotes = {
         "/emotes/removeSpacesBetweenEmotes", false};
+
+    BoolSetting enableBTTVGlobalEmotes = {"/emotes/bttv/global", true};
+    BoolSetting enableBTTVChannelEmotes = {"/emotes/bttv/channel", true};
+    BoolSetting enableFFZGlobalEmotes = {"/emotes/ffz/global", true};
+    BoolSetting enableFFZChannelEmotes = {"/emotes/ffz/channel", true};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};

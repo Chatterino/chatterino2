@@ -74,6 +74,9 @@ public:
         //        QColor seperator;
         //        QColor seperatorInner;
         QColor selection;
+
+        QColor highlightAnimationStart;
+        QColor highlightAnimationEnd;
     } messages;
 
     /// SCROLLBAR

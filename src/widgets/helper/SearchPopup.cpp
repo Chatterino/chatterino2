@@ -12,6 +12,7 @@
 #include "messages/search/MessageFlagsPredicate.hpp"
 #include "messages/search/RegexPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
+#include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {
@@ -49,8 +50,9 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
     return channel;
 }
 
-SearchPopup::SearchPopup(QWidget *parent)
+SearchPopup::SearchPopup(QWidget *parent, Split *split)
     : BasePopup({}, parent)
+    , split_(split)
 {
     this->initLayout();
     this->resize(400, 600);
@@ -103,6 +105,34 @@ void SearchPopup::addChannel(ChannelView &channel)
     this->searchChannels_.append(std::ref(channel));
 
     this->updateWindowTitle();
+}
+
+void SearchPopup::goToMessage(const MessagePtr &message)
+{
+    for (const auto &view : this->searchChannels_)
+    {
+        if (view.get().channel()->getType() == Channel::Type::TwitchMentions)
+        {
+            getApp()->windows->scrollToMessage(message);
+            return;
+        }
+
+        if (view.get().scrollToMessage(message))
+        {
+            return;
+        }
+    }
+}
+
+void SearchPopup::goToMessageId(const QString &messageId)
+{
+    for (const auto &view : this->searchChannels_)
+    {
+        if (view.get().scrollToMessageId(messageId))
+        {
+            return;
+        }
+    }
 }
 
 void SearchPopup::updateWindowTitle()
@@ -188,7 +218,8 @@ LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
     auto uniqueIterator =
         std::unique(combinedSnapshot.begin(), combinedSnapshot.end(),
                     [](MessagePtr &a, MessagePtr &b) {
-                        return a->id == b->id;
+                        // nullptr check prevents system messages from being dropped
+                        return (a->id != nullptr) && a->id == b->id;
                     });
 
     combinedSnapshot.erase(uniqueIterator, combinedSnapshot.end());
@@ -237,7 +268,8 @@ void SearchPopup::initLayout()
 
         // CHANNELVIEW
         {
-            this->channelView_ = new ChannelView(this);
+            this->channelView_ = new ChannelView(this, this->split_,
+                                                 ChannelView::Context::Search);
 
             layout1->addWidget(this->channelView_);
         }

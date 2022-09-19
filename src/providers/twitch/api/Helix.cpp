@@ -770,6 +770,165 @@ void Helix::getChannelEmotes(
         .execute();
 }
 
+void Helix::updateUserChatColor(
+    QString userID, QString color, ResultCallback<> successCallback,
+    FailureCallback<HelixUpdateUserChatColorError, QString> failureCallback)
+{
+    using Error = HelixUpdateUserChatColorError;
+
+    QJsonObject payload;
+
+    payload.insert("user_id", QJsonValue(userID));
+    payload.insert("color", QJsonValue(color));
+
+    this->makeRequest("chat/color", QUrlQuery())
+        .type(NetworkRequestType::Put)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto obj = result.parseJson();
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for updating chat color was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.startsWith("invalid color",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically since it allows us to list out the available colors
+                        failureCallback(Error::InvalidColor, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error changing user color:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+};
+
+void Helix::deleteChatMessages(
+    QString broadcasterID, QString moderatorID, QString messageID,
+    ResultCallback<> successCallback,
+    FailureCallback<HelixDeleteChatMessagesError, QString> failureCallback)
+{
+    using Error = HelixDeleteChatMessagesError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    if (!messageID.isEmpty())
+    {
+        // If message ID is empty, it's equivalent to /clear
+        urlQuery.addQueryItem("message_id", messageID);
+    }
+
+    this->makeRequest("moderation/chat", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for deleting chat messages was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 404: {
+                    // A 404 on this endpoint means message id is invalid or unable to be deleted.
+                    // See: https://dev.twitch.tv/docs/api/reference#delete-chat-messages
+                    failureCallback(Error::MessageUnavailable, message);
+                }
+                break;
+
+                case 400: {
+                    // These errors are generally well formatted, so we just forward them.
+                    // This is currently undocumented behaviour, see: https://github.com/twitchdev/issues/issues/660
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 403: {
+                    // 403 endpoint means the user does not have permission to perform this action in that channel
+                    // Most likely to missing moderator permissions
+                    // Missing documentation issue: https://github.com/twitchdev/issues/issues/659
+                    // `message` value is well-formed so no need for a specific error type
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error deleting chat messages:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
