@@ -1381,21 +1381,14 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         }
 
-        if (twitchChannel->roomId() != currentUser->getUserId())
-        {
-            channel->addMessage(makeSystemMessage(
-                "You may only mod people in your own channel."));
-            return "";
-        }
-
         auto target = words.at(1);
         stripChannelName(target);
 
         getHelix()->getUserByName(
             target,
-            [currentUser, channel](const HelixUser &targetUser) {
+            [twitchChannel, channel](const HelixUser &targetUser) {
                 getHelix()->addChannelModerator(
-                    currentUser->getUserId(), targetUser.id,
+                    twitchChannel->roomId(), targetUser.id,
                     [channel, targetUser] {
                         channel->addMessage(makeSystemMessage(
                             QString("You have added %1 as a moderator of this "
@@ -1430,25 +1423,22 @@ void CommandController::initialize(Settings &, Paths &paths)
                             }
                             break;
 
-                            case HelixAddChannelModeratorError::UserIsVIP: {
+                            case HelixAddChannelModeratorError::TargetIsVIP: {
                                 errorMessage +=
-                                    "User is currently a VIP. Unvip them and "
-                                    "retry this command.";
-                            }
-                            break;
-
-                            case HelixAddChannelModeratorError::AlreadyModded: {
-                                // Equivalent irc error
-                                errorMessage +=
-                                    QString("%1 is already a moderator of this "
-                                            "channel.")
+                                    QString("%1 is currently a VIP, \"/unvip\" "
+                                            "them and "
+                                            "retry this command.")
                                         .arg(targetUser.displayName);
                             }
                             break;
 
                             case HelixAddChannelModeratorError::
-                                UserNotAuthenticated: {
-                                errorMessage += "you need to re-authenticate.";
+                                TargetAlreadyModded: {
+                                // Equivalent irc error
+                                errorMessage =
+                                    QString("%1 is already a moderator of this "
+                                            "channel.")
+                                        .arg(targetUser.displayName);
                             }
                             break;
 

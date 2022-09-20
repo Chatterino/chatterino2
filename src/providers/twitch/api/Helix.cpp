@@ -959,21 +959,18 @@ void Helix::addChannelModerator(
 
             switch (result.status())
             {
-                case 403: {
-                    // 403 endpoint means the user does not have permission to perform this action in that channel
-                    // Most likely to missing moderator permissions
-                    // Missing documentation issue: https://github.com/twitchdev/issues/issues/659
-                    // `message` value is well-formed so no need for a specific error type
-                    failureCallback(Error::Forwarded, message);
-                }
-                break;
-
                 case 401: {
                     if (message.startsWith("Missing scope",
                                            Qt::CaseInsensitive))
                     {
                         // Handle this error specifically because its API error is especially unfriendly
                         failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare("incorrect user authorization",
+                                             Qt::CaseInsensitive) == 0)
+                    {
+                        // This error is pretty ugly, but essentially means they're not authorized to mod people in this channel
+                        failureCallback(Error::UserNotAuthorized, message);
                     }
                     else
                     {
@@ -987,7 +984,7 @@ void Helix::addChannelModerator(
                                         Qt::CaseInsensitive) == 0)
                     {
                         // This error is particularly ugly, handle it separately
-                        failureCallback(Error::AlreadyModded, message);
+                        failureCallback(Error::TargetAlreadyModded, message);
                     }
                     else
                     {
@@ -998,8 +995,8 @@ void Helix::addChannelModerator(
                 break;
 
                 case 422: {
-                    // User is already a VIP
-                    failureCallback(Error::UserIsVIP, message);
+                    // Target is already a VIP
+                    failureCallback(Error::TargetIsVIP, message);
                 }
                 break;
 
