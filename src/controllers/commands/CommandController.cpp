@@ -1074,44 +1074,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand(
-        "/delete", [](const QStringList &words, ChannelPtr channel) -> QString {
-            // This is a wrapper over the standard Twitch /delete command
-            // We use this to ensure the user gets better error messages for missing or malformed arguments
-            if (words.size() < 2)
-            {
-                channel->addMessage(
-                    makeSystemMessage("Usage: /delete <msg-id> - Deletes the "
-                                      "specified message."));
-                return "";
-            }
-
-            auto messageID = words.at(1);
-            auto uuid = QUuid(messageID);
-            if (uuid.isNull())
-            {
-                // The message id must be a valid UUID
-                channel->addMessage(makeSystemMessage(
-                    QString("Invalid msg-id: \"%1\"").arg(messageID)));
-                return "";
-            }
-
-            auto msg = channel->findMessage(messageID);
-            if (msg != nullptr)
-            {
-                if (msg->loginName == channel->getName() &&
-                    !channel->isBroadcaster())
-                {
-                    channel->addMessage(makeSystemMessage(
-                        "You cannot delete the broadcaster's messages unless "
-                        "you are the broadcaster."));
-                    return "";
-                }
-            }
-
-            return QString("/delete ") + messageID;
-        });
-
     this->registerCommand("/raw", [](const QStringList &words, ChannelPtr) {
         getApp()->twitch->sendRawMessage(words.mid(1).join(" "));
         return "";
@@ -1333,7 +1295,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                     break;
 
                     case HelixDeleteChatMessagesError::Forwarded: {
-                        errorMessage += message + ".";
+                        errorMessage += message;
                     }
                     break;
 
@@ -1356,12 +1318,50 @@ void CommandController::initialize(Settings &, Paths &paths)
             return deleteMessages(channel, QString());
         });
 
+    this->registerCommand("/delete", [deleteMessages](const QStringList &words,
+                                                      auto channel) {
+        // This is a wrapper over the Helix delete messages endpoint
+        // We use this to ensure the user gets better error messages for missing or malformed arguments
+        if (words.size() < 2)
+        {
+            channel->addMessage(
+                makeSystemMessage("Usage: /delete <msg-id> - Deletes the "
+                                  "specified message."));
+            return "";
+        }
+
+        auto messageID = words.at(1);
+        auto uuid = QUuid(messageID);
+        if (uuid.isNull())
+        {
+            // The message id must be a valid UUID
+            channel->addMessage(makeSystemMessage(
+                QString("Invalid msg-id: \"%1\"").arg(messageID)));
+            return "";
+        }
+
+        auto msg = channel->findMessage(messageID);
+        if (msg != nullptr)
+        {
+            if (msg->loginName == channel->getName() &&
+                !channel->isBroadcaster())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You cannot delete the broadcaster's messages unless "
+                    "you are the broadcaster."));
+                return "";
+            }
+        }
+
+        return deleteMessages(channel, messageID);
+    });
+
     this->registerCommand("/unmod", [](const QStringList &words, auto channel) {
         if (words.size() < 2)
         {
             channel->addMessage(makeSystemMessage(
                 "Usage: \"/unmod <username>\" - Revoke moderator status from a "
-                "user. Use \"mods\" to list the moderators of this channel."));
+                "user. Use \"/mods\" to list the moderators of this channel."));
             return "";
         }
 
@@ -1381,21 +1381,14 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         }
 
-        if (twitchChannel->roomId() != currentUser->getUserId())
-        {
-            channel->addMessage(makeSystemMessage(
-                "You may only unmod people in your own channel."));
-            return "";
-        }
-
         auto target = words.at(1);
         stripChannelName(target);
 
         getHelix()->getUserByName(
             target,
-            [currentUser, channel](const HelixUser &targetUser) {
+            [twitchChannel, channel](const HelixUser &targetUser) {
                 getHelix()->removeChannelModerator(
-                    currentUser->getUserId(), targetUser.id,
+                    twitchChannel->roomId(), targetUser.id,
                     [channel, targetUser] {
                         channel->addMessage(makeSystemMessage(
                             QString("You have removed %1 as a moderator of "
