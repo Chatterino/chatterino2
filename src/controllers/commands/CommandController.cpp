@@ -1424,7 +1424,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                             }
                             break;
 
-                            case HelixRemoveChannelModeratorError::TargetNotModded: {
+                            case HelixRemoveChannelModeratorError::
+                                TargetNotModded: {
                                 // Equivalent irc error
                                 errorMessage +=
                                     QString("%1 is not a moderator of this "
