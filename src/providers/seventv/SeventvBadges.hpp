@@ -16,15 +16,14 @@ using EmotePtr = std::shared_ptr<const Emote>;
 class SeventvBadges : public Singleton
 {
 public:
-    virtual void initialize(Settings &settings, Paths &paths) override;
-    SeventvBadges();
+    void initialize(Settings &settings, Paths &paths) override;
 
     boost::optional<EmotePtr> getBadge(const UserId &id);
 
 private:
     void loadSeventvBadges();
-    std::map<QString, int> badgeMap;
-    std::vector<EmotePtr> emotes;
+    std::map<QString, int> badgeMap_;
+    std::vector<EmotePtr> emotes_;
 };
 
 }  // namespace chatterino

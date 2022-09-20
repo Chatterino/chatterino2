@@ -259,8 +259,8 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
         [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
             {
-                this->seventvEmotes_.set(
-                    std::make_shared<EmoteMap>(std::move(emoteMap)));
+                this->seventvEmotes_.set(std::make_shared<EmoteMap>(
+                    std::forward<decltype(emoteMap)>(emoteMap)));
             }
         },
         manualRefresh);
@@ -583,7 +583,9 @@ boost::optional<EmotePtr> TwitchChannel::seventvEmote(
     auto it = emotes->find(name);
 
     if (it == emotes->end())
+    {
         return boost::none;
+    }
     return it->second;
 }
 

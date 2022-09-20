@@ -1046,7 +1046,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     {
         flags = MessageElementFlag::FfzEmote;
     }
-    else if (this->twitchChannel &&
+    else if (this->twitchChannel != nullptr &&
              (emote = this->twitchChannel->seventvEmote(name)))
     {
         flags = MessageElementFlag::SeventvEmote;

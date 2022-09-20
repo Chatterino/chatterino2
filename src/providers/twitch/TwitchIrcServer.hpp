@@ -89,7 +89,7 @@ private:
 
     BttvEmotes bttv;
     FfzEmotes ffz;
-    SeventvEmotes seventv;
+    SeventvEmotes seventv_;
     QTimer bulkLiveStatusTimer_;
 
     pajlada::Signals::SignalHolder signalHolder_;

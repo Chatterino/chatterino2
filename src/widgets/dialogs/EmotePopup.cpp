@@ -440,7 +440,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
         searchText, getApp()->twitch->getBttvEmotes().emotes());
     auto ffzGlobalEmotes = this->filterEmoteMap(
         searchText, getApp()->twitch->getFfzEmotes().emotes());
-    auto seventvGlobalEmotes = this->filterEmoteMap(
+    auto *seventvGlobalEmotes = this->filterEmoteMap(
         searchText, getApp()->twitch->getSeventvEmotes().globalEmotes());
 
     // twitch
@@ -464,7 +464,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
         this->filterEmoteMap(searchText, this->twitchChannel_->bttvEmotes());
     auto ffzChannelEmotes =
         this->filterEmoteMap(searchText, this->twitchChannel_->ffzEmotes());
-    auto seventvChannelEmotes =
+    auto *seventvChannelEmotes =
         this->filterEmoteMap(searchText, this->twitchChannel_->seventvEmotes());
 
     // channel
@@ -474,7 +474,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     if (ffzChannelEmotes->size() > 0)
         addEmotes(*searchChannel, *ffzChannelEmotes, "FrankerFaceZ (Channel)",
                   MessageElementFlag::FfzEmote);
-    if (seventvChannelEmotes->size() > 0)
+    if (!seventvChannelEmotes->empty())
     {
         addEmotes(*searchChannel, *seventvChannelEmotes, "SevenTV (Channel)",
                   MessageElementFlag::SeventvEmote);

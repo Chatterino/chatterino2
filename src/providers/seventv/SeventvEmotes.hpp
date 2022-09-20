@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SeventvEmoteCache.hpp"
 #include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
@@ -61,7 +62,7 @@ public:
     std::shared_ptr<const EmoteMap> globalEmotes() const;
     boost::optional<EmotePtr> globalEmote(const EmoteName &name) const;
     void loadGlobalEmotes();
-    static void loadChannelEmotes(std::weak_ptr<Channel> channel,
+    static void loadChannelEmotes(const std::weak_ptr<Channel> &channel,
                                   const QString &channelId,
                                   std::function<void(EmoteMap &&)> callback,
                                   bool manualRefresh);

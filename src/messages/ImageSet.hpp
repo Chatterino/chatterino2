@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/optional.hpp>
+#include <boost/optional.hpp>  // NOLINT(llvm-include-order) -- conflicts with clang-format
 #include "messages/Image.hpp"
 
 namespace chatterino {
@@ -9,9 +9,9 @@ class ImageSet
 {
 public:
     ImageSet();
-    ImageSet(const ImagePtr &image1, const ImagePtr &image2 = Image::getEmpty(),
-             const ImagePtr &image3 = Image::getEmpty(),
-             const ImagePtr &image4 = Image::getEmpty());
+    ImageSet(ImagePtr image1, ImagePtr image2 = Image::getEmpty(),
+             ImagePtr image3 = Image::getEmpty(),
+             ImagePtr image4 = Image::getEmpty());
     ImageSet(const Url &image1, const Url &image2 = {}, const Url &image3 = {},
              const Url &image4 = {});
 

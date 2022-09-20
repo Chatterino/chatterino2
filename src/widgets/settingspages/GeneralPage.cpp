@@ -350,7 +350,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                 [](const auto &c) {
                     if (c->isTwitchChannel())
                     {
-                        auto channel = dynamic_cast<TwitchChannel *>(c.get());
+                        auto *channel = dynamic_cast<TwitchChannel *>(c.get());
                         if (channel != nullptr)
                         {
                             channel->refreshSevenTVChannelEmotes(false);

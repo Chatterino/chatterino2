@@ -1,6 +1,5 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 
-#include "SeventvEmoteCache.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
@@ -47,16 +46,24 @@ namespace chatterino {
  * - ImageFile: https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/model.go#L41-L48
  */
 namespace {
+    // These declarations won't throw an exception.
+    // NOLINTBEGIN(cert-err58-cpp)
     const QString CHANNEL_HAS_NO_EMOTES(
         "This channel has no 7TV channel emotes.");
-    const QString emoteLinkFormat("https://7tv.app/emotes/%1");
+    const QString EMOTE_LINK_FORMAT("https://7tv.app/emotes/%1");
 
     // TODO(nerix): add links to documentation (7tv.io)
-    const QString apiUrlUser("https://7tv.io/v3/users/twitch/%1");
-    const QString apiUrlGlobalEmoteSet("https://7tv.io/v3/emote-sets/global");
+    const QString API_URL_USER("https://7tv.io/v3/users/twitch/%1");
+    const QString API_URL_GLOBAL_EMOTE_SET(
+        "https://7tv.io/v3/emote-sets/global");
 
-    static SeventvEmoteCache emoteCache;
-    static std::mutex emoteCacheMutex;
+    // We can't declare these as const, but we make sure to only
+    // access `EMOTE_CACHE` while locking `EMOTE_CACHE_MUTEX`.
+    // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
+    SeventvEmoteCache EMOTE_CACHE;
+    std::mutex EMOTE_CACHE_MUTEX;
+    // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
+    // NOLINTEND(cert-err58-cpp)
 
     /**
      * This decides whether an emote should be displayed
@@ -120,7 +127,7 @@ namespace {
                 {QString("https:%1/%2").arg(baseUrl, file["name"].toString())},
                 scale);
 
-            sizes[nextSize] = image;
+            sizes.at(nextSize) = image;
             nextSize++;
         }
 
@@ -138,7 +145,7 @@ namespace {
             }
             for (; nextSize < sizes.size(); nextSize++)
             {
-                sizes[nextSize] = Image::getEmpty();
+                sizes.at(nextSize) = Image::getEmpty();
             }
         }
 
@@ -195,7 +202,7 @@ namespace {
 
         auto emote = Emote({name, imageSet,
                             createTooltip(name.string, author.string, false),
-                            Url{emoteLinkFormat.arg(id.string)}, zeroWidth});
+                            Url{EMOTE_LINK_FORMAT.arg(id.string)}, zeroWidth});
 
         return emote;
     }
@@ -204,11 +211,12 @@ namespace {
      * Creates a new aliased or global emote where the base
      * emote isn't cached. The emote's images may be cached
      * already.
+     *
+     * @return (emote, imagesFromCache)
      */
-    Emote createAliasedOrGlobalEmote(const EmoteId &id, bool isGlobal,
-                                     const QJsonObject &activeEmote,
-                                     const QJsonObject &emoteData,
-                                     WeakImageSet *cachedImages)
+    std::pair<Emote, bool> createAliasedOrGlobalEmote(
+        const EmoteId &id, bool isGlobal, const QJsonObject &activeEmote,
+        const QJsonObject &emoteData, WeakImageSet *cachedImages)
     {
         auto name = EmoteName{activeEmote["name"].toString()};
         auto author = EmoteAuthor{
@@ -221,15 +229,11 @@ namespace {
                                                author.string, isGlobal)
                         : createTooltip(name.string, author.string, isGlobal);
         auto imageSet = lockOrCreateImageSet(emoteData, cachedImages);
-        if (!imageSet.second)
-        {
-            emoteCache.putImageSet(id, imageSet.first);
-        }
 
         auto emote = Emote({name, imageSet.first, tooltip,
-                            Url{emoteLinkFormat.arg(id.string)}, zeroWidth});
+                            Url{EMOTE_LINK_FORMAT.arg(id.string)}, zeroWidth});
 
-        return emote;
+        return std::make_pair(emote, imageSet.second);
     }
 
     /**
@@ -266,9 +270,6 @@ namespace {
         return !flags.has(SeventvEmoteFlag::ContentTwitchDisallowed);
     }
 
-    /**
-     * This assumes the emoteCacheMutex is locked by the caller.
-     */
     EmotePtr createEmote(const QJsonObject &activeEmote,
                          const QJsonObject &emoteData, bool isGlobal)
     {
@@ -278,7 +279,7 @@ namespace {
             isZeroWidthActive(activeEmote) != isZeroWidthRecommended(emoteData);
         bool isCacheable = !isAliased && !isGlobal;
 
-        if (auto cached = emoteCache.getEmote(emoteId))
+        if (auto cached = EMOTE_CACHE.getEmote(emoteId))
         {
             if (isCacheable)
             {
@@ -288,20 +289,22 @@ namespace {
                 forkExistingEmote(activeEmote, emoteData, cached, isGlobal));
         }
 
-        auto *cachedImages = emoteCache.getImageSet(emoteId);
+        auto *cachedImages = EMOTE_CACHE.getImageSet(emoteId);
         if (isCacheable)
         {
             // Cache the entire emote
-            return emoteCache.putEmote(
+            return EMOTE_CACHE.putEmote(
                 emoteId, createBaseEmote(emoteId, emoteData, cachedImages));
         }
 
-        auto emote = std::make_shared<const Emote>(createAliasedOrGlobalEmote(
-            emoteId, isGlobal, activeEmote, emoteData, cachedImages));
-        if (cachedImages == nullptr)
+        auto emoteResult = createAliasedOrGlobalEmote(
+            emoteId, isGlobal, activeEmote, emoteData, cachedImages);
+
+        auto emote = std::make_shared<const Emote>(emoteResult.first);
+        if (!emoteResult.second)
         {
             // Only cache the images, not the entire emote
-            emoteCache.putImageSet(emoteId, emote->images);
+            EMOTE_CACHE.putImageSet(emoteId, emote->images);
         }
         return emote;
     }
@@ -309,11 +312,11 @@ namespace {
     EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal)
     {
         auto emotes = EmoteMap();
-        std::lock_guard<std::mutex> guard(emoteCacheMutex);
+        std::lock_guard<std::mutex> guard(EMOTE_CACHE_MUTEX);
 
-        for (auto activeEmote_ : emoteSetEmotes)
+        for (auto activeEmoteJson : emoteSetEmotes)
         {
-            auto activeEmote = activeEmote_.toObject();
+            auto activeEmote = activeEmoteJson.toObject();
             auto emoteData = activeEmote["data"].toObject();
 
             if (!checkEmoteVisibility(emoteData))
@@ -362,9 +365,9 @@ void SeventvEmotes::loadGlobalEmotes()
 
     qCDebug(chatterinoSeventv) << "Loading 7TV Global Emotes";
 
-    NetworkRequest(apiUrlGlobalEmoteSet, NetworkRequestType::Get)
+    NetworkRequest(API_URL_GLOBAL_EMOTE_SET, NetworkRequestType::Get)
         .timeout(30000)
-        .onSuccess([this](NetworkResult result) -> Outcome {
+        .onSuccess([this](const NetworkResult &result) -> Outcome {
             QJsonArray parsedEmotes = result.parseJson()["emotes"].toArray();
 
             auto emoteMap = parseEmotes(parsedEmotes, true);
@@ -374,14 +377,14 @@ void SeventvEmotes::loadGlobalEmotes()
 
             return Success;
         })
-        .onError([](NetworkResult result) {
+        .onError([](const NetworkResult &result) {
             qCWarning(chatterinoSeventv)
                 << "Couldn't load 7TV global emotes" << result.getData();
         })
         .execute();
 }
 
-void SeventvEmotes::loadChannelEmotes(std::weak_ptr<Channel> channel,
+void SeventvEmotes::loadChannelEmotes(const std::weak_ptr<Channel> &channel,
                                       const QString &channelId,
                                       std::function<void(EmoteMap &&)> callback,
                                       bool manualRefresh)
@@ -389,10 +392,10 @@ void SeventvEmotes::loadChannelEmotes(std::weak_ptr<Channel> channel,
     qCDebug(chatterinoSeventv)
         << "Reloading 7TV Channel Emotes" << channelId << manualRefresh;
 
-    NetworkRequest(apiUrlUser.arg(channelId), NetworkRequestType::Get)
+    NetworkRequest(API_URL_USER.arg(channelId), NetworkRequestType::Get)
         .timeout(20000)
         .onSuccess([callback = std::move(callback), channel, channelId,
-                    manualRefresh](NetworkResult result) -> Outcome {
+                    manualRefresh](const NetworkResult &result) -> Outcome {
             auto json = result.parseJson();
             auto emoteSet = json["emote_set"].toObject();
             auto parsedEmotes = emoteSet["emotes"].toArray();
@@ -423,38 +426,43 @@ void SeventvEmotes::loadChannelEmotes(std::weak_ptr<Channel> channel,
             }
             return Success;
         })
-        .onError([channelId, channel, manualRefresh](NetworkResult result) {
-            auto shared = channel.lock();
-            if (!shared)
-                return;
-            if (result.status() == 400)
-            {
-                qCWarning(chatterinoSeventv)
-                    << "Error occurred fetching 7TV emotes: "
-                    << result.parseJson();
-                if (manualRefresh)
+        .onError(
+            [channelId, channel, manualRefresh](const NetworkResult &result) {
+                auto shared = channel.lock();
+                if (!shared)
+                {
+                    return;
+                }
+                if (result.status() == 400)
+                {
+                    qCWarning(chatterinoSeventv)
+                        << "Error occurred fetching 7TV emotes: "
+                        << result.parseJson();
+                    if (manualRefresh)
+                    {
+                        shared->addMessage(
+                            makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                    }
+                }
+                else if (result.status() == NetworkResult::timedoutStatus)
+                {
+                    // TODO: Auto retry in case of a timeout, with a delay
+                    qCWarning(chatterinoSeventv)
+                        << "Fetching 7TV emotes for channel" << channelId
+                        << "failed due to timeout";
+                    shared->addMessage(makeSystemMessage(
+                        "Failed to fetch 7TV channel emotes. (timed out)"));
+                }
+                else
+                {
+                    qCWarning(chatterinoSeventv)
+                        << "Error fetching 7TV emotes for channel" << channelId
+                        << ", error" << result.status();
                     shared->addMessage(
-                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
-            }
-            else if (result.status() == NetworkResult::timedoutStatus)
-            {
-                // TODO: Auto retry in case of a timeout, with a delay
-                qCWarning(chatterinoSeventv)
-                    << "Fetching 7TV emotes for channel" << channelId
-                    << "failed due to timeout";
-                shared->addMessage(makeSystemMessage(
-                    "Failed to fetch 7TV channel emotes. (timed out)"));
-            }
-            else
-            {
-                qCWarning(chatterinoSeventv)
-                    << "Error fetching 7TV emotes for channel" << channelId
-                    << ", error" << result.status();
-                shared->addMessage(
-                    makeSystemMessage("Failed to fetch 7TV channel "
-                                      "emotes. (unknown error)"));
-            }
-        })
+                        makeSystemMessage("Failed to fetch 7TV channel "
+                                          "emotes. (unknown error)"));
+                }
+            })
         .execute();
 }
 
