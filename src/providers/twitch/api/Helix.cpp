@@ -964,7 +964,7 @@ void Helix::removeChannelModerator(
                                         Qt::CaseInsensitive) == 0)
                     {
                         // This error message is particularly ugly, so we handle it differently
-                        failureCallback(Error::NotModded, message);
+                        failureCallback(Error::TargetNotModded, message);
                     }
                     else
                     {
@@ -979,6 +979,11 @@ void Helix::removeChannelModerator(
                     {
                         // Handle this error specifically because its API error is especially unfriendly
                         failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare("incorrect user authorization",
+                                             Qt::CaseInsensitive) == 0)
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
                     }
                     else
                     {

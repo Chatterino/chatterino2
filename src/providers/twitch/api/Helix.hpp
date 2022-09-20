@@ -343,9 +343,8 @@ enum class HelixDeleteChatMessagesError {
 enum class HelixRemoveChannelModeratorError {
     Unknown,
     UserMissingScope,
-    UserNotAuthenticated,
     UserNotAuthorized,
-    NotModded,
+    TargetNotModded,
     Ratelimited,
 
     // The error message is forwarded directly from the Twitch API

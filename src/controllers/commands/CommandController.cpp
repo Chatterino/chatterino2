@@ -1424,18 +1424,12 @@ void CommandController::initialize(Settings &, Paths &paths)
                             }
                             break;
 
-                            case HelixRemoveChannelModeratorError::NotModded: {
+                            case HelixRemoveChannelModeratorError::TargetNotModded: {
                                 // Equivalent irc error
                                 errorMessage +=
                                     QString("%1 is not a moderator of this "
                                             "channel.")
                                         .arg(targetUser.displayName);
-                            }
-                            break;
-
-                            case HelixRemoveChannelModeratorError::
-                                UserNotAuthenticated: {
-                                errorMessage += "you need to re-authenticate.";
                             }
                             break;
 
