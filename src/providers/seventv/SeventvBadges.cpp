@@ -27,8 +27,8 @@ boost::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id)
 
 void SeventvBadges::loadSeventvBadges()
 {
-    // TODO(nerix): Migrate to v3.
-    //              Status: waiting for cosmetics api.
+    // Cosmetics will work differently in v3, until this is ready
+    // we'll use this endpoint.
     static QUrl url("https://api.7tv.app/v2/badges");
 
     static QUrlQuery urlQuery;
