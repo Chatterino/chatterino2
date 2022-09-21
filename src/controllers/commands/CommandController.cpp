@@ -1399,31 +1399,31 @@ void CommandController::initialize(Settings &, Paths &paths)
                         QString errorMessage =
                             QString("Failed to add channel moderator - ");
 
+                        using Error = HelixAddChannelModeratorError;
+
                         switch (error)
                         {
-                            case HelixAddChannelModeratorError::
-                                UserMissingScope: {
+                            case Error::UserMissingScope: {
                                 errorMessage += "Missing required scope. "
                                                 "Re-login with your "
                                                 "account and try again.";
                             }
                             break;
 
-                            case HelixAddChannelModeratorError::
-                                UserNotAuthorized: {
+                            case Error::UserNotAuthorized: {
                                 errorMessage += "you don't have permission to "
                                                 "perform that action.";
                             }
                             break;
 
-                            case HelixAddChannelModeratorError::Ratelimited: {
+                            case Error::Ratelimited: {
                                 errorMessage +=
                                     "You are being ratelimited by Twitch. Try "
                                     "again in a few seconds.";
                             }
                             break;
 
-                            case HelixAddChannelModeratorError::TargetIsVIP: {
+                            case Error::TargetIsVIP: {
                                 errorMessage +=
                                     QString("%1 is currently a VIP, \"/unvip\" "
                                             "them and "
@@ -1442,12 +1442,12 @@ void CommandController::initialize(Settings &, Paths &paths)
                             }
                             break;
 
-                            case HelixAddChannelModeratorError::Forwarded: {
+                            case Error::Forwarded: {
                                 errorMessage += message;
                             }
                             break;
 
-                            case HelixAddChannelModeratorError::Unknown:
+                            case Error::Unknown:
                             default: {
                                 errorMessage +=
                                     "An unknown error has occurred.";
