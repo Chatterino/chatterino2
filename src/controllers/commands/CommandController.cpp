@@ -1399,33 +1399,31 @@ void CommandController::initialize(Settings &, Paths &paths)
                         QString errorMessage =
                             QString("Failed to remove channel moderator - ");
 
+                        using Error = HelixRemoveChannelModeratorError;
+
                         switch (error)
                         {
-                            case HelixRemoveChannelModeratorError::
-                                UserMissingScope: {
+                            case Error::UserMissingScope: {
                                 errorMessage += "Missing required scope. "
                                                 "Re-login with your "
                                                 "account and try again.";
                             }
                             break;
 
-                            case HelixRemoveChannelModeratorError::
-                                UserNotAuthorized: {
+                            case Error::UserNotAuthorized: {
                                 errorMessage += "you don't have permission to "
                                                 "perform that action.";
                             }
                             break;
 
-                            case HelixRemoveChannelModeratorError::
-                                Ratelimited: {
+                            case Error::Ratelimited: {
                                 errorMessage +=
                                     "You are being ratelimited by Twitch. Try "
                                     "again in a few seconds.";
                             }
                             break;
 
-                            case HelixRemoveChannelModeratorError::
-                                TargetNotModded: {
+                            case Error::TargetNotModded: {
                                 // Equivalent irc error
                                 errorMessage +=
                                     QString("%1 is not a moderator of this "
@@ -1434,12 +1432,12 @@ void CommandController::initialize(Settings &, Paths &paths)
                             }
                             break;
 
-                            case HelixRemoveChannelModeratorError::Forwarded: {
+                            case Error::Forwarded: {
                                 errorMessage += message;
                             }
                             break;
 
-                            case HelixRemoveChannelModeratorError::Unknown:
+                            case Error::Unknown:
                             default: {
                                 errorMessage +=
                                     "An unknown error has occurred.";
