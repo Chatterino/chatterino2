@@ -1432,8 +1432,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                             }
                             break;
 
-                            case HelixAddChannelModeratorError::
-                                TargetAlreadyModded: {
+                            case Error::TargetAlreadyModded: {
                                 // Equivalent irc error
                                 errorMessage =
                                     QString("%1 is already a moderator of this "
