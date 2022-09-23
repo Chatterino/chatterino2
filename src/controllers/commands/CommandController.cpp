@@ -1411,7 +1411,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                             break;
 
                             case Error::UserNotAuthorized: {
-                                errorMessage += "you don't have permission to "
+                                errorMessage += "You don't have permission to "
                                                 "perform that action.";
                             }
                             break;
