@@ -1404,6 +1404,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                         switch (error)
                         {
                             case Error::UserMissingScope: {
+                                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
                                 errorMessage += "Missing required scope. "
                                                 "Re-login with your "
                                                 "account and try again.";
@@ -1411,6 +1412,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                             break;
 
                             case Error::UserNotAuthorized: {
+                                // TODO(pajlada): Phrase MISSING_PERMISSION
                                 errorMessage += "You don't have permission to "
                                                 "perform that action.";
                             }
