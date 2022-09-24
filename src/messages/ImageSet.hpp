@@ -39,15 +39,4 @@ private:
     ImagePtr imageX4_;
 };
 
-struct WeakImageSet {
-    std::weak_ptr<Image> size1x;
-    std::weak_ptr<Image> size2x;
-    std::weak_ptr<Image> size3x;
-    std::weak_ptr<Image> size4x;
-
-    WeakImageSet(const ImageSet &imageSet);
-
-    boost::optional<ImageSet> lock() const;
-};
-
 }  // namespace chatterino

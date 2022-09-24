@@ -167,25 +167,4 @@ bool ImageSet::operator!=(const ImageSet &other) const
     return !this->operator==(other);
 }
 
-WeakImageSet::WeakImageSet(const ImageSet &imageSet)
-    : size1x(imageSet.getImage1())
-    , size2x(imageSet.getImage2())
-    , size3x(imageSet.getImage3())
-    , size4x(imageSet.getImage4())
-{
-}
-
-boost::optional<ImageSet> WeakImageSet::lock() const
-{
-    auto size1 = this->size1x.lock();
-    auto size2 = this->size2x.lock();
-    auto size3 = this->size3x.lock();
-    auto size4 = this->size4x.lock();
-    if (size1 || size2 || size3 || size4)
-    {
-        return boost::none;
-    }
-    return ImageSet(size1, size2, size3, size4);
-}
-
 }  // namespace chatterino
