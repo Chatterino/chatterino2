@@ -1037,30 +1037,22 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 
     // Emote order:
     //  - FrankerFaceZ Channel
-    //  - 7TV Channel
     //  - BetterTTV Channel
-    //  - 7TV Global
+    //  - 7TV Channel
     //  - FrankerFaceZ Global
     //  - BetterTTV Global
+    //  - 7TV Global
     if (this->twitchChannel && (emote = this->twitchChannel->ffzEmote(name)))
     {
         flags = MessageElementFlag::FfzEmote;
-    }
-    else if (this->twitchChannel != nullptr &&
-             (emote = this->twitchChannel->seventvEmote(name)))
-    {
-        flags = MessageElementFlag::SeventvEmote;
-        if (emote.value()->zeroWidth)
-        {
-            flags.set(MessageElementFlag::ZeroWidthEmote);
-        }
     }
     else if (this->twitchChannel &&
              (emote = this->twitchChannel->bttvEmote(name)))
     {
         flags = MessageElementFlag::BttvEmote;
     }
-    else if ((emote = globalSeventvEmotes.globalEmote(name)))
+    else if (this->twitchChannel != nullptr &&
+             (emote = this->twitchChannel->seventvEmote(name)))
     {
         flags = MessageElementFlag::SeventvEmote;
         if (emote.value()->zeroWidth)
@@ -1077,6 +1069,14 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
         flags = MessageElementFlag::BttvEmote;
 
         if (zeroWidthEmotes.contains(name.string))
+        {
+            flags.set(MessageElementFlag::ZeroWidthEmote);
+        }
+    }
+    else if ((emote = globalSeventvEmotes.globalEmote(name)))
+    {
+        flags = MessageElementFlag::SeventvEmote;
+        if (emote.value()->zeroWidth)
         {
             flags.set(MessageElementFlag::ZeroWidthEmote);
         }
