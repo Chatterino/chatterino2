@@ -1138,6 +1138,13 @@ void Helix::sendChatAnnouncement(
 
             switch (result.status())
             {
+                case 400: {
+                    // These errors are generally well formatted, so we just forward them.
+                    // This is currently undocumented behaviour, see: https://github.com/twitchdev/issues/issues/660
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
                 case 403: {
                     // 403 endpoint means the user does not have permission to perform this action in that channel
                     // `message` value is well-formed so no need for a specific error type
