@@ -10,6 +10,7 @@
 #include <map>
 
 namespace chatterino {
+
 void SeventvBadges::initialize(Settings & /*settings*/, Paths & /*paths*/)
 {
     this->loadSeventvBadges();

@@ -16,6 +16,7 @@
 #include <utility>
 
 namespace chatterino {
+
 /**
  * # References
  *
