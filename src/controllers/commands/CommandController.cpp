@@ -1317,78 +1317,6 @@ void CommandController::initialize(Settings &, Paths &paths)
             (void)words;  // unused
             return deleteMessages(channel, QString());
         });
-    this->registerCommand(
-        "/announce", [](const QStringList &words, auto channel) -> QString {
-            auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "This command can only be used in Twitch channels."));
-                return "";
-            }
-            if (words.size() < 2)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Usage: /announce <message> - Call attention to your "
-                    "message with a highlight."));
-                return "";
-            }
-            auto user = getApp()->accounts->twitch.getCurrent();
-            if (user->isAnon())
-            {
-                channel->addMessage(makeSystemMessage(
-                    "You must be logged in to use the /announce command"));
-                return "";
-            }
-            getHelix()->sendChatAnnouncement(
-                twitchChannel->roomId(), user->getUserId(),
-                words.mid(1).join(" "), HelixAnnouncementColor::Primary,
-                []() {
-                    // do nothing.
-                },
-                [channel](HelixAnnouncementError error, QString message) {
-                    using ErrorT = HelixAnnouncementError;
-                    QString errorMessage =
-                        QString("Failed to send announcement - ");
-
-                    switch (error)
-                    {
-                        case ErrorT::UserMissingScope: {
-                            errorMessage +=
-                                "Missing required scope. Re-login with your "
-                                "account and try again.";
-                        }
-                        break;
-                            /*
-                        case ErrorT::UserNotAuthorized: {
-                            errorMessage += "you don't have permission to "
-                                            "perform that action.";
-                        }
-                        break;
-                        */
-                            /*
-                        case ErrorT::UserNotAuthenticated: {
-                            errorMessage += "you need to re-authenticate.";
-                        }
-                        break;
-                        */
-
-                        case ErrorT::Forwarded: {
-                            errorMessage += message + ".";
-                        }
-                        break;
-
-                        case ErrorT::Unknown:
-                        default: {
-                            errorMessage += "An unknown error has occurred.";
-                        }
-                        break;
-                    }
-
-                    channel->addMessage(makeSystemMessage(errorMessage));
-                });
-            return "";
-        });
 
     this->registerCommand("/delete", [deleteMessages](const QStringList &words,
                                                       auto channel) {
@@ -1640,6 +1568,79 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+
+    this->registerCommand(
+        "/announce", [](const QStringList &words, auto channel) -> QString {
+            auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "This command can only be used in Twitch channels."));
+                return "";
+            }
+            if (words.size() < 2)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /announce <message> - Call attention to your "
+                    "message with a highlight."));
+                return "";
+            }
+            auto user = getApp()->accounts->twitch.getCurrent();
+            if (user->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to use the /announce command"));
+                return "";
+            }
+            getHelix()->sendChatAnnouncement(
+                twitchChannel->roomId(), user->getUserId(),
+                words.mid(1).join(" "), HelixAnnouncementColor::Primary,
+                []() {
+                    // do nothing.
+                },
+                [channel](HelixAnnouncementError error, QString message) {
+                    using ErrorT = HelixAnnouncementError;
+                    QString errorMessage =
+                        QString("Failed to send announcement - ");
+
+                    switch (error)
+                    {
+                        case ErrorT::UserMissingScope: {
+                            errorMessage +=
+                                "Missing required scope. Re-login with your "
+                                "account and try again.";
+                        }
+                        break;
+                            /*
+                        case ErrorT::UserNotAuthorized: {
+                            errorMessage += "you don't have permission to "
+                                            "perform that action.";
+                        }
+                        break;
+                        */
+                            /*
+                        case ErrorT::UserNotAuthenticated: {
+                            errorMessage += "you need to re-authenticate.";
+                        }
+                        break;
+                        */
+
+                        case ErrorT::Forwarded: {
+                            errorMessage += message + ".";
+                        }
+                        break;
+
+                        case ErrorT::Unknown:
+                        default: {
+                            errorMessage += "An unknown error has occurred.";
+                        }
+                        break;
+                    }
+
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
+            return "";
+        });
 }
 
 void CommandController::save()

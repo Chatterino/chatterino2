@@ -518,12 +518,6 @@ public:
         FailureCallback<HelixDeleteChatMessagesError, QString>
             failureCallback) = 0;
 
-    // https://dev.twitch.tv/docs/api/reference#send-chat-announcement
-    virtual void sendChatAnnouncement(
-        QString broadcasterID, QString moderatorID, QString message,
-        HelixAnnouncementColor color, ResultCallback<> successCallback,
-        FailureCallback<HelixAnnouncementError, QString> failureCallback) = 0;
-
     // https://dev.twitch.tv/docs/api/reference#add-channel-moderator
     virtual void addChannelModerator(
         QString broadcasterID, QString userID, ResultCallback<> successCallback,
@@ -535,6 +529,12 @@ public:
         QString broadcasterID, QString userID, ResultCallback<> successCallback,
         FailureCallback<HelixRemoveChannelModeratorError, QString>
             failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#send-chat-announcement
+    virtual void sendChatAnnouncement(
+        QString broadcasterID, QString moderatorID, QString message,
+        HelixAnnouncementColor color, ResultCallback<> successCallback,
+        FailureCallback<HelixAnnouncementError, QString> failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
@@ -664,11 +664,6 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixDeleteChatMessagesError, QString> failureCallback)
         final;
-    // https://dev.twitch.tv/docs/api/reference#send-chat-announcement
-    void sendChatAnnouncement(
-        QString broadcasterID, QString moderatorID, QString message,
-        HelixAnnouncementColor color, ResultCallback<> successCallback,
-        FailureCallback<HelixAnnouncementError, QString> failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#add-channel-moderator
     void addChannelModerator(
@@ -681,6 +676,12 @@ public:
         QString broadcasterID, QString userID, ResultCallback<> successCallback,
         FailureCallback<HelixRemoveChannelModeratorError, QString>
             failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#send-chat-announcement
+    void sendChatAnnouncement(
+        QString broadcasterID, QString moderatorID, QString message,
+        HelixAnnouncementColor color, ResultCallback<> successCallback,
+        FailureCallback<HelixAnnouncementError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 
