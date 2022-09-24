@@ -342,9 +342,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Remove spaces between emotes",
                        s.removeSpacesBetweenEmotes);
-    layout.addCheckbox("Show unlisted / unapproved emotes (7TV only)",
-                       s.showUnlistedEmotes);
-    s.showUnlistedEmotes.connect(
+    layout.addCheckbox("Show unlisted 7TV emotes", s.showUnlistedSevenTVEmotes);
+    s.showUnlistedSevenTVEmotes.connect(
         []() {
             getApp()->twitch->forEachChannelAndSpecialChannels(
                 [](const auto &c) {
@@ -657,7 +656,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.useCustomFfzModeratorBadges);
     layout.addCheckbox("Use custom FrankerFaceZ VIP badges",
                        s.useCustomFfzVipBadges);
-    layout.addCheckbox("7TV", s.showBadgesSeventv);
+    layout.addCheckbox("7TV", s.showBadgesSevenTV);
 
     layout.addSubtitle("Miscellaneous");
 

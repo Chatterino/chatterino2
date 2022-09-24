@@ -180,7 +180,8 @@ namespace {
 
     bool checkEmoteVisibility(const QJsonObject &emoteData)
     {
-        if (!emoteData["listed"].toBool() && !getSettings()->showUnlistedEmotes)
+        if (!emoteData["listed"].toBool() &&
+            !getSettings()->showUnlistedSevenTVEmotes)
         {
             return false;
         }

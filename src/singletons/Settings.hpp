@@ -164,7 +164,7 @@ public:
         "/appearance/badges/useCustomFfzModeratorBadges", true};
     BoolSetting useCustomFfzVipBadges = {
         "/appearance/badges/useCustomFfzVipBadges", true};
-    BoolSetting showBadgesSeventv = {"/appearance/badges/seventv", true};
+    BoolSetting showBadgesSevenTV = {"/appearance/badges/seventv", true};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
@@ -210,7 +210,8 @@ public:
     BoolSetting enableEmoteImages = {"/emotes/enableEmoteImages", true};
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
-    BoolSetting showUnlistedEmotes = {"/emotes/showUnlistedEmotes", false};
+    BoolSetting showUnlistedSevenTVEmotes = {
+        "/emotes/showUnlistedSevenTVEmotes", false};
 
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
