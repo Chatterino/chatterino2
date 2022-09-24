@@ -1018,6 +1018,86 @@ void Helix::addChannelModerator(
         .execute();
 }
 
+void Helix::removeChannelModerator(
+    QString broadcasterID, QString userID, ResultCallback<> successCallback,
+    FailureCallback<HelixRemoveChannelModeratorError, QString> failureCallback)
+{
+    using Error = HelixRemoveChannelModeratorError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("user_id", userID);
+
+    this->makeRequest("moderation/moderators", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for unmodding user was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.compare("user is not a mod",
+                                        Qt::CaseInsensitive) == 0)
+                    {
+                        // This error message is particularly ugly, so we handle it differently
+                        failureCallback(Error::TargetNotModded, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare("incorrect user authorization",
+                                             Qt::CaseInsensitive) == 0)
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error unmodding user:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
