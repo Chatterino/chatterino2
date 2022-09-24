@@ -1609,6 +1609,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                     switch (error)
                     {
                         case Error::UserMissingScope: {
+                            // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
                             errorMessage +=
                                 "Missing required scope. Re-login with your "
                                 "account and try again.";
