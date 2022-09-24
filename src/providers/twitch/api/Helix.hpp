@@ -355,6 +355,30 @@ enum class HelixAnnouncementError {
     UserMissingScope,
     UserNotAuthorized,
 
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+enum class HelixAddChannelModeratorError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+    TargetAlreadyModded,
+    TargetIsVIP,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+enum class HelixRemoveChannelModeratorError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    TargetNotModded,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
     Forwarded,
 };
 
@@ -500,6 +524,18 @@ public:
         HelixAnnouncementColor color, ResultCallback<> successCallback,
         FailureCallback<HelixAnnouncementError, QString> failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference#add-channel-moderator
+    virtual void addChannelModerator(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixAddChannelModeratorError, QString>
+            failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#remove-channel-moderator
+    virtual void removeChannelModerator(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixRemoveChannelModeratorError, QString>
+            failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
 
@@ -633,6 +669,18 @@ public:
         QString broadcasterID, QString moderatorID, QString message,
         HelixAnnouncementColor color, ResultCallback<> successCallback,
         FailureCallback<HelixAnnouncementError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#add-channel-moderator
+    void addChannelModerator(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixAddChannelModeratorError, QString> failureCallback)
+        final;
+
+    // https://dev.twitch.tv/docs/api/reference#remove-channel-moderator
+    void removeChannelModerator(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixRemoveChannelModeratorError, QString>
+            failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 
