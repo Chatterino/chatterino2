@@ -34,6 +34,7 @@
 - Minor: Added whitespace trim to username field in nicknames (#3946)
 - Minor: Added `Go to message` context menu action to search popup, mentions, usercard and reply threads. (#3953)
 - Minor: Added link back to original message that was deleted. (#3953)
+- Minor: Migrate /announce command to Helix API. (#4003)
 - Minor: Migrate /color command to Helix API. (#3988)
 - Minor: Migrate /clear command to Helix API. (#3994)
 - Minor: Migrate /delete command to Helix API. (#3999)
