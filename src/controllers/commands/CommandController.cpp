@@ -1578,6 +1578,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                     "This command can only be used in Twitch channels."));
                 return "";
             }
+
             if (words.size() < 2)
             {
                 channel->addMessage(makeSystemMessage(
@@ -1585,6 +1586,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                     "message with a highlight."));
                 return "";
             }
+
             auto user = getApp()->accounts->twitch.getCurrent();
             if (user->isAnon())
             {
@@ -1592,6 +1594,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                     "You must be logged in to use the /announce command"));
                 return "";
             }
+
             getHelix()->sendChatAnnouncement(
                 twitchChannel->roomId(), user->getUserId(),
                 words.mid(1).join(" "), HelixAnnouncementColor::Primary,
@@ -1599,38 +1602,25 @@ void CommandController::initialize(Settings &, Paths &paths)
                     // do nothing.
                 },
                 [channel](auto error, auto message) {
-                    using ErrorT = HelixAnnouncementError;
+                    using Error = HelixSendChatAnnouncementError;
                     QString errorMessage =
                         QString("Failed to send announcement - ");
 
                     switch (error)
                     {
-                        case ErrorT::UserMissingScope: {
+                        case Error::UserMissingScope: {
                             errorMessage +=
                                 "Missing required scope. Re-login with your "
                                 "account and try again.";
                         }
                         break;
-                            /*
-                        case ErrorT::UserNotAuthorized: {
-                            errorMessage += "you don't have permission to "
-                                            "perform that action.";
-                        }
-                        break;
-                        */
-                            /*
-                        case ErrorT::UserNotAuthenticated: {
-                            errorMessage += "you need to re-authenticate.";
-                        }
-                        break;
-                        */
 
-                        case ErrorT::Forwarded: {
-                            errorMessage += message + ".";
+                        case Error::Forwarded: {
+                            errorMessage += message;
                         }
                         break;
 
-                        case ErrorT::Unknown:
+                        case Error::Unknown:
                         default: {
                             errorMessage += "An unknown error has occurred.";
                         }

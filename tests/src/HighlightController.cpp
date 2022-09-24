@@ -245,7 +245,7 @@ public:
     MOCK_METHOD(void, sendChatAnnouncement,
                 (QString broadcasterID, QString moderatorID, QString message,
                  HelixAnnouncementColor color, ResultCallback<> successCallback,
-                 (FailureCallback<HelixDeleteChatMessagesError, QString>
+                 (FailureCallback<HelixSendChatAnnouncementError, QString>
                       failureCallback)),
                 (override));
 
