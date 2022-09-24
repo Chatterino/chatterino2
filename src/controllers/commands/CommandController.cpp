@@ -1598,7 +1598,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 []() {
                     // do nothing.
                 },
-                [channel](HelixAnnouncementError error, QString message) {
+                [channel](auto error, auto message) {
                     using ErrorT = HelixAnnouncementError;
                     QString errorMessage =
                         QString("Failed to send announcement - ");
