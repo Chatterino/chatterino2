@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/Aliases.hpp"
+#include "util/QStringHash.hpp"
 
 #include <boost/optional.hpp>
 #include <common/Singleton.hpp>
