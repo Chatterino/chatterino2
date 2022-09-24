@@ -121,7 +121,7 @@ namespace {
         {
             addPageLink("FFZ");
         }
-        else if (creatorFlags.has(MessageElementFlag::SeventvEmote))
+        else if (creatorFlags.has(MessageElementFlag::SevenTVEmote))
         {
             addPageLink("7TV");
         }

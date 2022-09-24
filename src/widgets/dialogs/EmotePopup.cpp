@@ -363,7 +363,7 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     {
         addEmotes(*globalChannel,
                   *getApp()->twitch->getSeventvEmotes().globalEmotes(), "7TV",
-                  MessageElementFlag::SeventvEmote);
+                  MessageElementFlag::SevenTVEmote);
     }
 
     // channel
@@ -380,7 +380,7 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     if (Settings::instance().enableSevenTVChannelEmotes)
     {
         addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
-                  "7TV", MessageElementFlag::SeventvEmote);
+                  "7TV", MessageElementFlag::SevenTVEmote);
     }
 
     this->globalEmotesView_->setChannel(globalChannel);
@@ -477,7 +477,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     if (!seventvChannelEmotes->empty())
     {
         addEmotes(*searchChannel, *seventvChannelEmotes, "SevenTV (Channel)",
-                  MessageElementFlag::SeventvEmote);
+                  MessageElementFlag::SevenTVEmote);
     }
 }
 

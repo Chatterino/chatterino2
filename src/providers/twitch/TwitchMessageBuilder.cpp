@@ -1054,7 +1054,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     else if (this->twitchChannel != nullptr &&
              (emote = this->twitchChannel->seventvEmote(name)))
     {
-        flags = MessageElementFlag::SeventvEmote;
+        flags = MessageElementFlag::SevenTVEmote;
         if (emote.value()->zeroWidth)
         {
             flags.set(MessageElementFlag::ZeroWidthEmote);
@@ -1075,7 +1075,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     }
     else if ((emote = globalSeventvEmotes.globalEmote(name)))
     {
-        flags = MessageElementFlag::SeventvEmote;
+        flags = MessageElementFlag::SevenTVEmote;
         if (emote.value()->zeroWidth)
         {
             flags.set(MessageElementFlag::ZeroWidthEmote);
@@ -1243,7 +1243,7 @@ void TwitchMessageBuilder::appendSeventvBadges()
 {
     if (auto badge = getApp()->seventvBadges->getBadge({this->userId_}))
     {
-        this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeSeventv);
+        this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeSevenTV);
     }
 }
 

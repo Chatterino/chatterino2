@@ -180,7 +180,7 @@ void WindowManager::updateWordTypeMask()
     flags.set(settings->showBadgesChatterino ? MEF::BadgeChatterino
                                              : MEF::None);
     flags.set(settings->showBadgesFfz ? MEF::BadgeFfz : MEF::None);
-    flags.set(settings->showBadgesSevenTV ? MEF::BadgeSeventv : MEF::None);
+    flags.set(settings->showBadgesSevenTV ? MEF::BadgeSevenTV : MEF::None);
 
     // username
     flags.set(MEF::Username);
