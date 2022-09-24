@@ -194,7 +194,7 @@ namespace {
     {
         auto emotes = EmoteMap();
 
-        for (auto activeEmoteJson : emoteSetEmotes)
+        for (const auto &activeEmoteJson : emoteSetEmotes)
         {
             auto activeEmote = activeEmoteJson.toObject();
             auto emoteData = activeEmote["data"].toObject();
