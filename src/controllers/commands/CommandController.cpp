@@ -1571,7 +1571,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand(
         "/announce", [](const QStringList &words, auto channel) -> QString {
-            auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
             if (twitchChannel == nullptr)
             {
                 channel->addMessage(makeSystemMessage(
