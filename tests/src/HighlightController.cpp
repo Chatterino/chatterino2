@@ -241,6 +241,14 @@ public:
                       failureCallback)),
                 (override));
 
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, sendChatAnnouncement,
+                (QString broadcasterID, QString moderatorID, QString message,
+                 HelixAnnouncementColor color, ResultCallback<> successCallback,
+                 (FailureCallback<HelixSendChatAnnouncementError, QString>
+                      failureCallback)),
+                (override));
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 };

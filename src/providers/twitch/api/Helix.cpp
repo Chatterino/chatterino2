@@ -4,6 +4,7 @@
 #include "common/QLogging.hpp"
 
 #include <QJsonDocument>
+#include <magic_enum.hpp>
 
 namespace chatterino {
 
@@ -1090,6 +1091,85 @@ void Helix::removeChannelModerator(
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error unmodding user:" << result.status()
                         << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
+void Helix::sendChatAnnouncement(
+    QString broadcasterID, QString moderatorID, QString message,
+    HelixAnnouncementColor color, ResultCallback<> successCallback,
+    FailureCallback<HelixSendChatAnnouncementError, QString> failureCallback)
+{
+    using Error = HelixSendChatAnnouncementError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    QJsonObject body;
+    body.insert("message", message);
+    const auto colorStr =
+        std::string{magic_enum::enum_name<HelixAnnouncementColor>(color)};
+    body.insert("color", QString::fromStdString(colorStr).toLower());
+
+    this->makeRequest("chat/announcements", urlQuery)
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(body).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for sending an announcement was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    // These errors are generally well formatted, so we just forward them.
+                    // This is currently undocumented behaviour, see: https://github.com/twitchdev/issues/issues/660
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 403: {
+                    // 403 endpoint means the user does not have permission to perform this action in that channel
+                    // `message` value is well-formed so no need for a specific error type
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error sending an announcement:"
+                        << result.status() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;

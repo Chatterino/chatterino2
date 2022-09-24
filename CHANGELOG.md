@@ -39,6 +39,7 @@
 - Minor: Migrate /delete command to Helix API. (#3999)
 - Minor: Migrate /mod command to Helix API. (#4000)
 - Minor: Migrate /unmod command to Helix API. (#4001)
+- Minor: Migrate /announce command to Helix API. (#4003)
 - Bugfix: Fix crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fix crash that can occur when changing channels. (#3799)
