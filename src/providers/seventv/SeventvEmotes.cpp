@@ -17,26 +17,6 @@
 
 namespace chatterino {
 /**
- * # Caching
- *
- *
- *                                   (activeEmote, emoteData)
- *                                             |
- *                                          is aliased?
- *                 +------------------------y--+--n-------------------------------+
- *                 |                                                              |
- *            non-aliased                                                    emote cached?
- *            emote cached?                                    +---------------y--+--n--------------+
- *       +-----y--+--n-------------+                           |                                    |
- *       |                         |                      use cached emote                      images cached?
- *  fork emote                 images cached?                                          +---------y--+--n-----------+
- *  (use images         +------ y--+--n-------+                                        |                           |
- *  and homepage)       |                     |                                    use images,                create emote,
- *                  use cached            create emote,                           create emote,                cache emote
- *                    images,             cache images,                         remove cache entry,
- *                  don't cache           don't cache                              cache emote
- *                  emote itself          emote itself
- *
  * # References
  *
  * - EmoteSet: https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/emote-set.model.go#L8-L18
@@ -47,7 +27,6 @@ namespace chatterino {
  */
 namespace {
     // These declarations won't throw an exception.
-    // NOLINTBEGIN(cert-err58-cpp)
     const QString CHANNEL_HAS_NO_EMOTES(
         "This channel has no 7TV channel emotes.");
     const QString EMOTE_LINK_FORMAT("https://7tv.app/emotes/%1");
@@ -57,18 +36,24 @@ namespace {
     const QString API_URL_GLOBAL_EMOTE_SET(
         "https://7tv.io/v3/emote-sets/global");
 
-    // We can't declare these as const, but we make sure to only
-    // access `EMOTE_CACHE` while locking `EMOTE_CACHE_MUTEX`.
-    // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
-    SeventvEmoteCache EMOTE_CACHE;
-    std::mutex EMOTE_CACHE_MUTEX;
-    // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
-    // NOLINTEND(cert-err58-cpp)
+    struct CreateEmoteResult {
+        Emote emote;
+        EmoteId id;
+        EmoteName name;
+    };
+
+    EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
+    {
+        static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
+        static std::mutex mutex;
+
+        return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
+    }
 
     /**
-     * This decides whether an emote should be displayed
-     * as zero-width
-     */
+         * This decides whether an emote should be displayed
+         * as zero-width
+         */
     bool isZeroWidthActive(const QJsonObject &activeEmote)
     {
         auto flags = SeventvActiveEmoteFlags(
@@ -77,9 +62,9 @@ namespace {
     }
 
     /**
-     * This is only an indicator if an emote should be added
-     * as zero-width or not. The user can still overwrite this.
-     */
+         * This is only an indicator if an emote should be added
+         * as zero-width or not. The user can still overwrite this.
+         */
     bool isZeroWidthRecommended(const QJsonObject &emoteData)
     {
         auto flags = SeventvEmoteFlags(
@@ -168,95 +153,28 @@ namespace {
                                 author.isEmpty() ? "<deleted>" : author)};
     }
 
-    /**
-     * @return (imageSet, fromCache)
-     */
-    std::pair<ImageSet, bool> lockOrCreateImageSet(const QJsonObject &emoteData,
-                                                   WeakImageSet *cached)
+    CreateEmoteResult createEmote(const QJsonObject &activeEmote,
+                                  const QJsonObject &emoteData, bool isGlobal)
     {
-        if (cached != nullptr)
-        {
-            if (auto locked = cached->lock())
-            {
-                return std::make_pair(locked.get(), true);
-            }
-        }
-        return std::make_pair(makeImageSet(emoteData), false);
-    }
-
-    /**
-     * Creates a "regular" (i.e. not aliased or global) emote
-     * that may be added to the cache.
-     */
-    Emote createBaseEmote(const EmoteId &id, const QJsonObject &emoteData,
-                          WeakImageSet *cached)
-    {
-        auto name = EmoteName{emoteData.value("name").toString()};
-        auto author = EmoteAuthor{emoteData.value("owner")
-                                      .toObject()
-                                      .value("display_name")
-                                      .toString()};
-        bool zeroWidth = isZeroWidthRecommended(emoteData);
-        // This isn't cached since the entire emote will be cached
-        auto imageSet = lockOrCreateImageSet(emoteData, cached).first;
-
-        auto emote = Emote({name, imageSet,
-                            createTooltip(name.string, author.string, false),
-                            Url{EMOTE_LINK_FORMAT.arg(id.string)}, zeroWidth});
-
-        return emote;
-    }
-
-    /**
-     * Creates a new aliased or global emote where the base
-     * emote isn't cached. The emote's images may be cached
-     * already.
-     *
-     * @return (emote, imagesFromCache)
-     */
-    std::pair<Emote, bool> createAliasedOrGlobalEmote(
-        const EmoteId &id, bool isGlobal, const QJsonObject &activeEmote,
-        const QJsonObject &emoteData, WeakImageSet *cachedImages)
-    {
-        auto name = EmoteName{activeEmote["name"].toString()};
+        auto emoteId = EmoteId{activeEmote["id"].toString()};
+        auto emoteName = EmoteName{activeEmote["name"].toString()};
         auto author = EmoteAuthor{
             emoteData["owner"].toObject()["display_name"].toString()};
         auto baseEmoteName = emoteData["name"].toString();
         bool zeroWidth = isZeroWidthActive(activeEmote);
-        bool aliasedName = name.string != baseEmoteName;
+        bool aliasedName = emoteName.string != baseEmoteName;
         auto tooltip =
-            aliasedName ? createAliasedTooltip(name.string, baseEmoteName,
-                                               author.string, isGlobal)
-                        : createTooltip(name.string, author.string, isGlobal);
-        auto imageSet = lockOrCreateImageSet(emoteData, cachedImages);
+            aliasedName
+                ? createAliasedTooltip(emoteName.string, baseEmoteName,
+                                       author.string, isGlobal)
+                : createTooltip(emoteName.string, author.string, isGlobal);
+        auto imageSet = makeImageSet(emoteData);
 
-        auto emote = Emote({name, imageSet.first, tooltip,
-                            Url{EMOTE_LINK_FORMAT.arg(id.string)}, zeroWidth});
+        auto emote =
+            Emote({emoteName, imageSet, tooltip,
+                   Url{EMOTE_LINK_FORMAT.arg(emoteId.string)}, zeroWidth});
 
-        return std::make_pair(emote, imageSet.second);
-    }
-
-    /**
-     * Creates an aliased or global emote where
-     * the base emote is cached.
-     */
-    Emote forkExistingEmote(const QJsonObject &activeEmote,
-                            const QJsonObject &emoteData,
-                            const EmotePtr &baseEmote, bool isGlobal)
-    {
-        auto name = EmoteName{activeEmote["name"].toString()};
-        auto author = emoteData["owner"].toObject()["display_name"].toString();
-        bool isAliased =
-            activeEmote["name"].toString() != baseEmote->name.string;
-        auto tooltip = isAliased ? createAliasedTooltip(name.string,
-                                                        baseEmote->name.string,
-                                                        author, isGlobal)
-                                 : createTooltip(name.string, author, isGlobal);
-        bool zeroWidth = isZeroWidthActive(activeEmote);
-
-        auto emote = Emote(
-            {name, baseEmote->images, tooltip, baseEmote->homePage, zeroWidth});
-        return emote;
+        return {emote, emoteId, emoteName};
     }
 
     bool checkEmoteVisibility(const QJsonObject &emoteData)
@@ -270,49 +188,9 @@ namespace {
         return !flags.has(SeventvEmoteFlag::ContentTwitchDisallowed);
     }
 
-    EmotePtr createEmote(const QJsonObject &activeEmote,
-                         const QJsonObject &emoteData, bool isGlobal)
-    {
-        auto emoteId = EmoteId{activeEmote["id"].toString()};
-        bool isAliased =
-            activeEmote["name"].toString() != emoteData["name"].toString() ||
-            isZeroWidthActive(activeEmote) != isZeroWidthRecommended(emoteData);
-        bool isCacheable = !isAliased && !isGlobal;
-
-        if (auto cached = EMOTE_CACHE.getEmote(emoteId))
-        {
-            if (isCacheable)
-            {
-                return cached;
-            }
-            return std::make_shared<const Emote>(
-                forkExistingEmote(activeEmote, emoteData, cached, isGlobal));
-        }
-
-        auto *cachedImages = EMOTE_CACHE.getImageSet(emoteId);
-        if (isCacheable)
-        {
-            // Cache the entire emote
-            return EMOTE_CACHE.putEmote(
-                emoteId, createBaseEmote(emoteId, emoteData, cachedImages));
-        }
-
-        auto emoteResult = createAliasedOrGlobalEmote(
-            emoteId, isGlobal, activeEmote, emoteData, cachedImages);
-
-        auto emote = std::make_shared<const Emote>(emoteResult.first);
-        if (!emoteResult.second)
-        {
-            // Only cache the images, not the entire emote
-            EMOTE_CACHE.putImageSet(emoteId, emote->images);
-        }
-        return emote;
-    }
-
     EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal)
     {
         auto emotes = EmoteMap();
-        std::lock_guard<std::mutex> guard(EMOTE_CACHE_MUTEX);
 
         for (auto activeEmoteJson : emoteSetEmotes)
         {
@@ -323,8 +201,9 @@ namespace {
             {
                 continue;
             }
-            auto emote = createEmote(activeEmote, emoteData, isGlobal);
-            emotes[emote->name] = emote;
+            auto result = createEmote(activeEmote, emoteData, isGlobal);
+            auto ptr = cachedOrMake(std::move(result.emote), result.id);
+            emotes[result.name] = ptr;
         }
 
         return emotes;

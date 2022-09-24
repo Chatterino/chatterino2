@@ -1,6 +1,5 @@
 #pragma once
 
-#include "SeventvEmoteCache.hpp"
 #include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
