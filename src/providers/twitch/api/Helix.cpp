@@ -923,7 +923,7 @@ void Helix::deleteChatMessages(
         .execute();
 }
 
-void Helix::sendChatAnnoucement(
+void Helix::sendChatAnnouncement(
     QString broadcasterID, QString moderatorID, QString message,
     HelixAnnouncementColor color, ResultCallback<> successCallback,
     FailureCallback<HelixAnnouncementError, QString> failureCallback)

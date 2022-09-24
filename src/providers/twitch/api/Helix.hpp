@@ -495,7 +495,7 @@ public:
             failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#send-chat-announcement
-    virtual void sendChatAnnoucement(
+    virtual void sendChatAnnouncement(
         QString broadcasterID, QString moderatorID, QString message,
         HelixAnnouncementColor color, ResultCallback<> successCallback,
         FailureCallback<HelixAnnouncementError, QString> failureCallback) = 0;
@@ -629,7 +629,7 @@ public:
         FailureCallback<HelixDeleteChatMessagesError, QString> failureCallback)
         final;
     // https://dev.twitch.tv/docs/api/reference#send-chat-announcement
-    void sendChatAnnoucement(
+    void sendChatAnnouncement(
         QString broadcasterID, QString moderatorID, QString message,
         HelixAnnouncementColor color, ResultCallback<> successCallback,
         FailureCallback<HelixAnnouncementError, QString> failureCallback) final;

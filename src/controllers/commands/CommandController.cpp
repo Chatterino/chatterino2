@@ -1378,7 +1378,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                     "You must be logged in to use the /announce command"));
                 return "";
             }
-            getHelix()->sendChatAnnoucement(
+            getHelix()->sendChatAnnouncement(
                 twitchChannel->roomId(), user->getUserId(),
                 words.mid(1).join(" "), HelixAnnouncementColor::Primary,
                 []() {
