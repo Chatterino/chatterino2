@@ -1195,7 +1195,7 @@ void Helix::addChannelVIP(
             if (result.status() != 204)
             {
                 qCWarning(chatterinoTwitch)
-                    << "Success result for deleting chat messages was"
+                    << "Success result for adding channel VIP was"
                     << result.status() << "but we only expected it to be 204";
             }
 
