@@ -1178,6 +1178,85 @@ void Helix::sendChatAnnouncement(
         .execute();
 }
 
+void Helix::addChannelVIP(
+    QString broadcasterID, QString userID, ResultCallback<> successCallback,
+    FailureCallback<HelixAddChannelVIPError, QString> failureCallback)
+{
+    using Error = HelixAddChannelVIPError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("user_id", userID);
+
+    this->makeRequest("channels/vips", urlQuery)
+        .type(NetworkRequestType::Post)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for adding channel VIP was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400:
+                case 409:
+                case 422:
+                case 425: {
+                    // Most of the errors returned by this endpoint are pretty good. We can rely on Twitch's API messages
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare("incorrect user authorization",
+                                             Qt::CaseInsensitive) == 0 ||
+                             message.startsWith("the id in broadcaster_id must "
+                                                "match the user id",
+                                                Qt::CaseInsensitive))
+                    {
+                        // This error is particularly ugly, but is the equivalent to a user not having permissions
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error adding channel VIP:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
