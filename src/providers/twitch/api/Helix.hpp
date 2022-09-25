@@ -527,11 +527,6 @@ public:
         FailureCallback<HelixDeleteChatMessagesError, QString>
             failureCallback) = 0;
 
-    // https://dev.twitch.tv/docs/api/reference#add-channel-vip
-    virtual void addChannelVIP(
-        QString broadcasterID, QString userID, ResultCallback<> successCallback,
-        FailureCallback<HelixAddChannelVIPError, QString> failureCallback) = 0;
-
     // https://dev.twitch.tv/docs/api/reference#add-channel-moderator
     virtual void addChannelModerator(
         QString broadcasterID, QString userID, ResultCallback<> successCallback,
@@ -550,6 +545,11 @@ public:
         HelixAnnouncementColor color, ResultCallback<> successCallback,
         FailureCallback<HelixSendChatAnnouncementError, QString>
             failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#add-channel-vip
+    virtual void addChannelVIP(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixAddChannelVIPError, QString> failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
@@ -680,12 +680,6 @@ public:
         FailureCallback<HelixDeleteChatMessagesError, QString> failureCallback)
         final;
 
-    // https://dev.twitch.tv/docs/api/reference#add-channel-vip
-    void addChannelVIP(QString broadcasterID, QString userID,
-                       ResultCallback<> successCallback,
-                       FailureCallback<HelixAddChannelVIPError, QString>
-                           failureCallback) final;
-
     // https://dev.twitch.tv/docs/api/reference#add-channel-moderator
     void addChannelModerator(
         QString broadcasterID, QString userID, ResultCallback<> successCallback,
@@ -704,6 +698,12 @@ public:
         HelixAnnouncementColor color, ResultCallback<> successCallback,
         FailureCallback<HelixSendChatAnnouncementError, QString>
             failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#add-channel-vip
+    void addChannelVIP(QString broadcasterID, QString userID,
+                       ResultCallback<> successCallback,
+                       FailureCallback<HelixAddChannelVIPError, QString>
+                           failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 
