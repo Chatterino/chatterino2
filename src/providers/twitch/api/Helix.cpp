@@ -1208,8 +1208,11 @@ void Helix::addChannelVIP(
 
             switch (result.status())
             {
-                case 400: {
-                    // Error messages from Twitch API are sufficient here
+                case 400:
+                case 409:
+                case 422:
+                case 425: {
+                    // Most of the errors returned by this endpoint are pretty good. We can rely on Twitch's API messages
                     failureCallback(Error::Forwarded, message);
                 }
                 break;
@@ -1231,14 +1234,6 @@ void Helix::addChannelVIP(
                     {
                         failureCallback(Error::Forwarded, message);
                     }
-                }
-                break;
-
-                case 409:
-                case 422:
-                case 425: {
-                    // Most of the errors returned by this endpoint are pretty good. We can rely on Twitch's API messages
-                    failureCallback(Error::Forwarded, message);
                 }
                 break;
 
