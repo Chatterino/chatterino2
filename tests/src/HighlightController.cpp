@@ -225,7 +225,7 @@ public:
                       failureCallback)),
                 (override));
 
-            // The extra parenthesis around the failure callback is because its type contains a comma
+    // The extra parenthesis around the failure callback is because its type contains a comma
     MOCK_METHOD(void, addChannelVIP,
                 (QString broadcasterID, QString userID,
                  ResultCallback<> successCallback,

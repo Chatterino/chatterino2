@@ -350,17 +350,6 @@ enum class HelixDeleteChatMessagesError {
     Forwarded,
 };
 
-enum class HelixDeleteChatMessagesError {
-    Unknown,
-    UserMissingScope,
-    UserNotAuthenticated,
-    UserNotAuthorized,
-    MessageUnavailable,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
 enum class HelixSendChatAnnouncementError {
     Unknown,
     UserMissingScope,
@@ -715,7 +704,6 @@ public:
         HelixAnnouncementColor color, ResultCallback<> successCallback,
         FailureCallback<HelixSendChatAnnouncementError, QString>
             failureCallback) final;
-
 
     void update(QString clientId, QString oauthToken) final;
 

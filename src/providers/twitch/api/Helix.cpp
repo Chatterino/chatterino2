@@ -935,6 +935,7 @@ void Helix::addChannelModerator(
     FailureCallback<HelixAddChannelModeratorError, QString> failureCallback)
 {
     using Error = HelixAddChannelModeratorError;
+
     QUrlQuery urlQuery;
 
     urlQuery.addQueryItem("broadcaster_id", broadcasterID);
@@ -959,9 +960,6 @@ void Helix::addChannelModerator(
 
             switch (result.status())
             {
-                case 400: {
-                    // Error messages from Twitch API are sufficient here
-                    failureCallback(Error::Forwarded, message);
                 case 401: {
                     if (message.startsWith("Missing scope",
                                            Qt::CaseInsensitive))
@@ -1075,21 +1073,12 @@ void Helix::removeChannelModerator(
                     else if (message.compare("incorrect user authorization",
                                              Qt::CaseInsensitive) == 0)
                     {
-                        // This error is particularly ugly, but is the equivalent to a user not having permissions
                         failureCallback(Error::UserNotAuthorized, message);
                     }
                     else
                     {
                         failureCallback(Error::Forwarded, message);
                     }
-                }
-                break;
-
-                case 409:
-                case 422:
-                case 425: {
-                    // Most of the errors returned by this endpoint are pretty good. We can rely on Twitch's API messages
-                    failureCallback(Error::Forwarded, message);
                 }
                 break;
 
