@@ -1225,7 +1225,10 @@ void Helix::addChannelVIP(
                         failureCallback(Error::UserMissingScope, message);
                     }
                     else if (message.compare("incorrect user authorization",
-                                             Qt::CaseInsensitive) == 0)
+                                             Qt::CaseInsensitive) == 0 ||
+                             message.startsWith("the id in broadcaster_id must "
+                                                "match the user id",
+                                                Qt::CaseInsensitive))
                     {
                         // This error is particularly ugly, but is the equivalent to a user not having permissions
                         failureCallback(Error::UserNotAuthorized, message);
