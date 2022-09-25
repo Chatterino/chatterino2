@@ -947,7 +947,7 @@ void Helix::addChannelModerator(
             if (result.status() != 204)
             {
                 qCWarning(chatterinoTwitch)
-                    << "Success result for deleting chat messages was"
+                    << "Success result for adding a moderator was"
                     << result.status() << "but we only expected it to be 204";
             }
 
