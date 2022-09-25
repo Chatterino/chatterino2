@@ -340,6 +340,16 @@ enum class HelixDeleteChatMessagesError {
     Forwarded,
 };
 
+enum class HelixAddChannelVIPError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 class IHelix
 {
 public:
@@ -476,6 +486,11 @@ public:
         FailureCallback<HelixDeleteChatMessagesError, QString>
             failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference#add-channel-vip
+    virtual void addChannelVIP(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixAddChannelVIPError, QString> failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
 
@@ -604,6 +619,12 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixDeleteChatMessagesError, QString> failureCallback)
         final;
+
+    // https://dev.twitch.tv/docs/api/reference#add-channel-vip
+    void addChannelVIP(QString broadcasterID, QString userID,
+                       ResultCallback<> successCallback,
+                       FailureCallback<HelixAddChannelVIPError, QString>
+                           failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

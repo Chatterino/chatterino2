@@ -1355,6 +1355,98 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return deleteMessages(channel, messageID);
     });
+
+    this->registerCommand("/vip", [](const QStringList &words, auto channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(
+                "Usage: \"/vip <username>\" - Grant VIP status to a user. Use "
+                "\"/vips\" to list the VIPs of this channel."));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to VIP someone!"));
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /vip command only works in Twitch channels"));
+            return "";
+        }
+
+        auto target = words.at(1);
+        stripChannelName(target);
+
+        getHelix()->getUserByName(
+            target,
+            [twitchChannel, channel](const HelixUser &targetUser) {
+                getHelix()->addChannelVIP(
+                    twitchChannel->roomId(), targetUser.id,
+                    [channel, targetUser] {
+                        channel->addMessage(makeSystemMessage(
+                            QString(
+                                "You have added %1 as a vip of this channel.")
+                                .arg(targetUser.displayName)));
+                    },
+                    [channel, targetUser](auto error, auto message) {
+                        QString errorMessage = QString("Failed to add VIP - ");
+
+                        using Error = HelixAddChannelVIPError;
+
+                        switch (error)
+                        {
+                            case Error::UserMissingScope: {
+                                errorMessage += "Missing required scope. "
+                                                "Re-login with your "
+                                                "account and try again.";
+                            }
+                            break;
+
+                            case Error::UserNotAuthorized: {
+                                // The IRC message is formed without a prefix
+                                errorMessage = "You don't have permission to "
+                                               "perform that action.";
+                            }
+                            break;
+
+                            case Error::Ratelimited: {
+                                errorMessage +=
+                                    "You are being ratelimited by Twitch. Try "
+                                    "again in a few seconds.";
+                            }
+                            break;
+
+                            case Error::Forwarded: {
+                                // These are actually the IRC equivalents, so we can ditch the prefix
+                                errorMessage = message;
+                            }
+                            break;
+
+                            case Error::Unknown:
+                            default: {
+                                errorMessage +=
+                                    "An unknown error has occurred.";
+                            }
+                            break;
+                        }
+                        channel->addMessage(makeSystemMessage(errorMessage));
+                    });
+            },
+            [channel, target] {
+                // Equivalent error from IRC
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid username: %1").arg(target)));
+            });
+
+        return "";
+    });
 }
 
 void CommandController::save()
