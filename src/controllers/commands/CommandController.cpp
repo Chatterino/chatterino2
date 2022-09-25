@@ -1392,7 +1392,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                     [channel, targetUser] {
                         channel->addMessage(makeSystemMessage(
                             QString(
-                                "You have added %1 as a vip of this channel.")
+                                "You have added %1 as a VIP of this channel.")
                                 .arg(targetUser.displayName)));
                     },
                     [channel, targetUser](auto error, auto message) {
