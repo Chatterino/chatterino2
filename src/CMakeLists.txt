@@ -168,6 +168,8 @@ set(SOURCE_FILES
         messages/search/RegexPredicate.hpp
         messages/search/SubstringPredicate.cpp
         messages/search/SubstringPredicate.hpp
+        messages/search/SubtierPredicate.cpp
+        messages/search/SubtierPredicate.hpp
 
         providers/IvrApi.cpp
         providers/IvrApi.hpp

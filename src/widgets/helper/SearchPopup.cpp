@@ -13,6 +13,7 @@
 #include "messages/search/MessageFlagsPredicate.hpp"
 #include "messages/search/RegexPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
+#include "messages/search/SubtierPredicate.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
@@ -299,6 +300,7 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     QStringList authors;
     QStringList channels;
     QStringList badges;
+    QStringList subtiers;
 
     while (it.hasNext())
     {
@@ -317,6 +319,10 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
         else if (name == "badge")
         {
             badges.append(value);
+        }
+        else if (name == "subtier" || name == "tier")
+        {
+            subtiers.append(value);
         }
         else if (name == "has" && value == "link")
         {
@@ -355,6 +361,11 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     if (!badges.empty())
     {
         predicates.push_back(std::make_unique<BadgePredicate>(badges));
+    }
+
+    if (!subtiers.empty())
+    {
+        predicates.push_back(std::make_unique<SubtierPredicate>(subtiers));
     }
 
     return predicates;
