@@ -7,6 +7,7 @@
 #include "common/Channel.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/search/AuthorPredicate.hpp"
+#include "messages/search/BadgePredicate.hpp"
 #include "messages/search/ChannelPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
 #include "messages/search/MessageFlagsPredicate.hpp"
@@ -297,6 +298,7 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     std::vector<std::unique_ptr<MessagePredicate>> predicates;
     QStringList authors;
     QStringList channels;
+    QStringList badges;
 
     while (it.hasNext())
     {
@@ -311,6 +313,10 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
         if (name == "from")
         {
             authors.append(value);
+        }
+        else if (name == "badge")
+        {
+            badges.append(value);
         }
         else if (name == "has" && value == "link")
         {
@@ -337,10 +343,19 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     }
 
     if (!authors.empty())
+    {
         predicates.push_back(std::make_unique<AuthorPredicate>(authors));
+    }
 
     if (!channels.empty())
+    {
         predicates.push_back(std::make_unique<ChannelPredicate>(channels));
+    }
+
+    if (!badges.empty())
+    {
+        predicates.push_back(std::make_unique<BadgePredicate>(badges));
+    }
 
     return predicates;
 }

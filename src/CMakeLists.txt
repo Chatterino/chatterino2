@@ -156,6 +156,8 @@ set(SOURCE_FILES
         messages/layouts/MessageLayoutElement.hpp
         messages/search/AuthorPredicate.cpp
         messages/search/AuthorPredicate.hpp
+        messages/search/BadgePredicate.cpp
+        messages/search/BadgePredicate.hpp
         messages/search/ChannelPredicate.cpp
         messages/search/ChannelPredicate.hpp
         messages/search/LinkPredicate.cpp
