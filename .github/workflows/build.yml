@@ -61,7 +61,6 @@ jobs:
           path: "${{ github.workspace }}/qt/"
           key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
 
-      # LINUX
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:

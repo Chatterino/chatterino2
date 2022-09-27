@@ -321,6 +321,16 @@ struct HelixChannelEmote {
     }
 };
 
+enum class HelixAnnouncementColor {
+    Blue,
+    Green,
+    Orange,
+    Purple,
+
+    // this is the executor's chat color
+    Primary,
+};
+
 enum class HelixClipError {
     Unknown,
     ClipsDisabled,
@@ -341,9 +351,73 @@ enum class HelixAutoModMessageError {
     MessageNotFound,
 };
 
+enum class HelixUpdateUserChatColorError {
+    Unknown,
+    UserMissingScope,
+    InvalidColor,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+enum class HelixDeleteChatMessagesError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthenticated,
+    UserNotAuthorized,
+    MessageUnavailable,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+enum class HelixSendChatAnnouncementError {
+    Unknown,
+    UserMissingScope,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+enum class HelixAddChannelModeratorError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+    TargetAlreadyModded,
+    TargetIsVIP,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+enum class HelixRemoveChannelModeratorError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    TargetNotModded,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+enum class HelixAddChannelVIPError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 class IHelix
 {
 public:
+    template <typename... T>
+    using FailureCallback = std::function<void(T...)>;
+
     // https://dev.twitch.tv/docs/api/reference#get-users
     virtual void fetchUsers(
         QStringList userIds, QStringList userLogins,
@@ -474,6 +548,43 @@ public:
         QString broadcasterId,
         ResultCallback<std::vector<HelixChannelEmote>> successCallback,
         HelixFailureCallback failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#update-user-chat-color
+    virtual void updateUserChatColor(
+        QString userID, QString color, ResultCallback<> successCallback,
+        FailureCallback<HelixUpdateUserChatColorError, QString>
+            failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#delete-chat-messages
+    virtual void deleteChatMessages(
+        QString broadcasterID, QString moderatorID, QString messageID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixDeleteChatMessagesError, QString>
+            failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#add-channel-moderator
+    virtual void addChannelModerator(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixAddChannelModeratorError, QString>
+            failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#remove-channel-moderator
+    virtual void removeChannelModerator(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixRemoveChannelModeratorError, QString>
+            failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#send-chat-announcement
+    virtual void sendChatAnnouncement(
+        QString broadcasterID, QString moderatorID, QString message,
+        HelixAnnouncementColor color, ResultCallback<> successCallback,
+        FailureCallback<HelixSendChatAnnouncementError, QString>
+            failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#add-channel-vip
+    virtual void addChannelVIP(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixAddChannelVIPError, QString> failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
@@ -606,6 +717,44 @@ public:
         QString broadcasterId,
         ResultCallback<std::vector<HelixChannelEmote>> successCallback,
         HelixFailureCallback failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#update-user-chat-color
+    void updateUserChatColor(
+        QString userID, QString color, ResultCallback<> successCallback,
+        FailureCallback<HelixUpdateUserChatColorError, QString> failureCallback)
+        final;
+
+    // https://dev.twitch.tv/docs/api/reference#delete-chat-messages
+    void deleteChatMessages(
+        QString broadcasterID, QString moderatorID, QString messageID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixDeleteChatMessagesError, QString> failureCallback)
+        final;
+
+    // https://dev.twitch.tv/docs/api/reference#add-channel-moderator
+    void addChannelModerator(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixAddChannelModeratorError, QString> failureCallback)
+        final;
+
+    // https://dev.twitch.tv/docs/api/reference#remove-channel-moderator
+    void removeChannelModerator(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixRemoveChannelModeratorError, QString>
+            failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#send-chat-announcement
+    void sendChatAnnouncement(
+        QString broadcasterID, QString moderatorID, QString message,
+        HelixAnnouncementColor color, ResultCallback<> successCallback,
+        FailureCallback<HelixSendChatAnnouncementError, QString>
+            failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#add-channel-vip
+    void addChannelVIP(QString broadcasterID, QString userID,
+                       ResultCallback<> successCallback,
+                       FailureCallback<HelixAddChannelVIPError, QString>
+                           failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

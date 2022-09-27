@@ -4,6 +4,7 @@
 #include "common/QLogging.hpp"
 
 #include <QJsonDocument>
+#include <magic_enum.hpp>
 
 namespace chatterino {
 
@@ -879,6 +880,492 @@ void Helix::getChannelEmotes(
         .onError([failureCallback](auto result) {
             // TODO: make better xd
             failureCallback();
+        })
+        .execute();
+}
+
+void Helix::updateUserChatColor(
+    QString userID, QString color, ResultCallback<> successCallback,
+    FailureCallback<HelixUpdateUserChatColorError, QString> failureCallback)
+{
+    using Error = HelixUpdateUserChatColorError;
+
+    QJsonObject payload;
+
+    payload.insert("user_id", QJsonValue(userID));
+    payload.insert("color", QJsonValue(color));
+
+    this->makeRequest("chat/color", QUrlQuery())
+        .type(NetworkRequestType::Put)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto obj = result.parseJson();
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for updating chat color was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.startsWith("invalid color",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically since it allows us to list out the available colors
+                        failureCallback(Error::InvalidColor, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error changing user color:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+};
+
+void Helix::deleteChatMessages(
+    QString broadcasterID, QString moderatorID, QString messageID,
+    ResultCallback<> successCallback,
+    FailureCallback<HelixDeleteChatMessagesError, QString> failureCallback)
+{
+    using Error = HelixDeleteChatMessagesError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    if (!messageID.isEmpty())
+    {
+        // If message ID is empty, it's equivalent to /clear
+        urlQuery.addQueryItem("message_id", messageID);
+    }
+
+    this->makeRequest("moderation/chat", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for deleting chat messages was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 404: {
+                    // A 404 on this endpoint means message id is invalid or unable to be deleted.
+                    // See: https://dev.twitch.tv/docs/api/reference#delete-chat-messages
+                    failureCallback(Error::MessageUnavailable, message);
+                }
+                break;
+
+                case 400: {
+                    // These errors are generally well formatted, so we just forward them.
+                    // This is currently undocumented behaviour, see: https://github.com/twitchdev/issues/issues/660
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 403: {
+                    // 403 endpoint means the user does not have permission to perform this action in that channel
+                    // Most likely to missing moderator permissions
+                    // Missing documentation issue: https://github.com/twitchdev/issues/issues/659
+                    // `message` value is well-formed so no need for a specific error type
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error deleting chat messages:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
+void Helix::addChannelModerator(
+    QString broadcasterID, QString userID, ResultCallback<> successCallback,
+    FailureCallback<HelixAddChannelModeratorError, QString> failureCallback)
+{
+    using Error = HelixAddChannelModeratorError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("user_id", userID);
+
+    this->makeRequest("moderation/moderators", urlQuery)
+        .type(NetworkRequestType::Post)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for adding a moderator was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare("incorrect user authorization",
+                                             Qt::CaseInsensitive) == 0)
+                    {
+                        // This error is pretty ugly, but essentially means they're not authorized to mod people in this channel
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 400: {
+                    if (message.compare("user is already a mod",
+                                        Qt::CaseInsensitive) == 0)
+                    {
+                        // This error is particularly ugly, handle it separately
+                        failureCallback(Error::TargetAlreadyModded, message);
+                    }
+                    else
+                    {
+                        // The Twitch API error sufficiently tells the user what went wrong
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 422: {
+                    // Target is already a VIP
+                    failureCallback(Error::TargetIsVIP, message);
+                }
+                break;
+
+                case 429: {
+                    // Endpoint has a strict ratelimit
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error adding channel moderator:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
+void Helix::removeChannelModerator(
+    QString broadcasterID, QString userID, ResultCallback<> successCallback,
+    FailureCallback<HelixRemoveChannelModeratorError, QString> failureCallback)
+{
+    using Error = HelixRemoveChannelModeratorError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("user_id", userID);
+
+    this->makeRequest("moderation/moderators", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for unmodding user was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.compare("user is not a mod",
+                                        Qt::CaseInsensitive) == 0)
+                    {
+                        // This error message is particularly ugly, so we handle it differently
+                        failureCallback(Error::TargetNotModded, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare("incorrect user authorization",
+                                             Qt::CaseInsensitive) == 0)
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error unmodding user:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
+void Helix::sendChatAnnouncement(
+    QString broadcasterID, QString moderatorID, QString message,
+    HelixAnnouncementColor color, ResultCallback<> successCallback,
+    FailureCallback<HelixSendChatAnnouncementError, QString> failureCallback)
+{
+    using Error = HelixSendChatAnnouncementError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    QJsonObject body;
+    body.insert("message", message);
+    const auto colorStr =
+        std::string{magic_enum::enum_name<HelixAnnouncementColor>(color)};
+    body.insert("color", QString::fromStdString(colorStr).toLower());
+
+    this->makeRequest("chat/announcements", urlQuery)
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(body).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for sending an announcement was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    // These errors are generally well formatted, so we just forward them.
+                    // This is currently undocumented behaviour, see: https://github.com/twitchdev/issues/issues/660
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 403: {
+                    // 403 endpoint means the user does not have permission to perform this action in that channel
+                    // `message` value is well-formed so no need for a specific error type
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error sending an announcement:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
+void Helix::addChannelVIP(
+    QString broadcasterID, QString userID, ResultCallback<> successCallback,
+    FailureCallback<HelixAddChannelVIPError, QString> failureCallback)
+{
+    using Error = HelixAddChannelVIPError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("user_id", userID);
+
+    this->makeRequest("channels/vips", urlQuery)
+        .type(NetworkRequestType::Post)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for adding channel VIP was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400:
+                case 409:
+                case 422:
+                case 425: {
+                    // Most of the errors returned by this endpoint are pretty good. We can rely on Twitch's API messages
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare("incorrect user authorization",
+                                             Qt::CaseInsensitive) == 0 ||
+                             message.startsWith("the id in broadcaster_id must "
+                                                "match the user id",
+                                                Qt::CaseInsensitive))
+                    {
+                        // This error is particularly ugly, but is the equivalent to a user not having permissions
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error adding channel VIP:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
         })
         .execute();
 }

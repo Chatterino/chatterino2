@@ -66,6 +66,11 @@ int MessageLayout::getHeight() const
     return container_->getHeight();
 }
 
+int MessageLayout::getWidth() const
+{
+    return this->container_->getWidth();
+}
+
 // Layout
 // return true if redraw is required
 bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)

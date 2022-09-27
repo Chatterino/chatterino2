@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Env.hpp"
+#include "common/QLogging.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
@@ -1073,44 +1074,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand(
-        "/delete", [](const QStringList &words, ChannelPtr channel) -> QString {
-            // This is a wrapper over the standard Twitch /delete command
-            // We use this to ensure the user gets better error messages for missing or malformed arguments
-            if (words.size() < 2)
-            {
-                channel->addMessage(
-                    makeSystemMessage("Usage: /delete <msg-id> - Deletes the "
-                                      "specified message."));
-                return "";
-            }
-
-            auto messageID = words.at(1);
-            auto uuid = QUuid(messageID);
-            if (uuid.isNull())
-            {
-                // The message id must be a valid UUID
-                channel->addMessage(makeSystemMessage(
-                    QString("Invalid msg-id: \"%1\"").arg(messageID)));
-                return "";
-            }
-
-            auto msg = channel->findMessage(messageID);
-            if (msg != nullptr)
-            {
-                if (msg->loginName == channel->getName() &&
-                    !channel->isBroadcaster())
-                {
-                    channel->addMessage(makeSystemMessage(
-                        "You cannot delete the broadcaster's messages unless "
-                        "you are the broadcaster."));
-                    return "";
-                }
-            }
-
-            return QString("/delete ") + messageID;
-        });
-
     this->registerCommand("/raw", [](const QStringList &words, ChannelPtr) {
         getApp()->twitch->sendRawMessage(words.mid(1).join(" "));
         return "";
@@ -1195,6 +1158,573 @@ void CommandController::initialize(Settings &, Paths &paths)
             crossPlatformCopy(words.mid(1).join(" "));
             return "";
         });
+
+    this->registerCommand("/color", [](const QStringList &words, auto channel) {
+        auto user = getApp()->accounts->twitch.getCurrent();
+
+        // Avoid Helix calls without Client ID and/or OAuth Token
+        if (user->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You must be logged in to use the /color command"));
+            return "";
+        }
+
+        auto colorString = words.value(1);
+
+        if (colorString.isEmpty())
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("Usage: /color <color> - Color must be one of Twitch's "
+                        "supported colors (%1) or a hex code (#000000) if you "
+                        "have Turbo or Prime.")
+                    .arg(VALID_HELIX_COLORS.join(", "))));
+            return "";
+        }
+
+        cleanHelixColorName(colorString);
+
+        getHelix()->updateUserChatColor(
+            user->getUserId(), colorString,
+            [colorString, channel] {
+                QString successMessage =
+                    QString("Your color has been changed to %1.")
+                        .arg(colorString);
+                channel->addMessage(makeSystemMessage(successMessage));
+            },
+            [colorString, channel](auto error, auto message) {
+                QString errorMessage =
+                    QString("Failed to change color to %1 - ").arg(colorString);
+
+                switch (error)
+                {
+                    case HelixUpdateUserChatColorError::UserMissingScope: {
+                        errorMessage +=
+                            "Missing required scope. Re-login with your "
+                            "account and try again.";
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::InvalidColor: {
+                        errorMessage += QString("Color must be one of Twitch's "
+                                                "supported colors (%1) or a "
+                                                "hex code (#000000) if you "
+                                                "have Turbo or Prime.")
+                                            .arg(VALID_HELIX_COLORS.join(", "));
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::Forwarded: {
+                        errorMessage += message + ".";
+                    }
+                    break;
+
+                    case HelixUpdateUserChatColorError::Unknown:
+                    default: {
+                        errorMessage += "An unknown error has occurred.";
+                    }
+                    break;
+                }
+
+                channel->addMessage(makeSystemMessage(errorMessage));
+            });
+
+        return "";
+    });
+
+    auto deleteMessages = [](auto channel, const QString &messageID) {
+        const auto *commandName = messageID.isEmpty() ? "/clear" : "/delete";
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The %1 command only works in Twitch channels")
+                    .arg(commandName)));
+            return "";
+        }
+
+        auto user = getApp()->accounts->twitch.getCurrent();
+
+        // Avoid Helix calls without Client ID and/or OAuth Token
+        if (user->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("You must be logged in to use the %1 command.")
+                    .arg(commandName)));
+            return "";
+        }
+
+        getHelix()->deleteChatMessages(
+            twitchChannel->roomId(), user->getUserId(), messageID,
+            []() {
+                // Success handling, we do nothing: IRC/pubsub-edge will dispatch the correct
+                // events to update state for us.
+            },
+            [channel, messageID](auto error, auto message) {
+                QString errorMessage =
+                    QString("Failed to delete chat messages - ");
+
+                switch (error)
+                {
+                    case HelixDeleteChatMessagesError::UserMissingScope: {
+                        errorMessage +=
+                            "Missing required scope. Re-login with your "
+                            "account and try again.";
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::UserNotAuthorized: {
+                        errorMessage +=
+                            "you don't have permission to perform that action.";
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::MessageUnavailable: {
+                        // Override default message prefix to match with IRC message format
+                        errorMessage =
+                            QString(
+                                "The message %1 does not exist, was deleted, "
+                                "or is too old to be deleted.")
+                                .arg(messageID);
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::UserNotAuthenticated: {
+                        errorMessage += "you need to re-authenticate.";
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::Forwarded: {
+                        errorMessage += message;
+                    }
+                    break;
+
+                    case HelixDeleteChatMessagesError::Unknown:
+                    default: {
+                        errorMessage += "An unknown error has occurred.";
+                    }
+                    break;
+                }
+
+                channel->addMessage(makeSystemMessage(errorMessage));
+            });
+
+        return "";
+    };
+
+    this->registerCommand(
+        "/clear", [deleteMessages](const QStringList &words, auto channel) {
+            (void)words;  // unused
+            return deleteMessages(channel, QString());
+        });
+
+    this->registerCommand("/delete", [deleteMessages](const QStringList &words,
+                                                      auto channel) {
+        // This is a wrapper over the Helix delete messages endpoint
+        // We use this to ensure the user gets better error messages for missing or malformed arguments
+        if (words.size() < 2)
+        {
+            channel->addMessage(
+                makeSystemMessage("Usage: /delete <msg-id> - Deletes the "
+                                  "specified message."));
+            return "";
+        }
+
+        auto messageID = words.at(1);
+        auto uuid = QUuid(messageID);
+        if (uuid.isNull())
+        {
+            // The message id must be a valid UUID
+            channel->addMessage(makeSystemMessage(
+                QString("Invalid msg-id: \"%1\"").arg(messageID)));
+            return "";
+        }
+
+        auto msg = channel->findMessage(messageID);
+        if (msg != nullptr)
+        {
+            if (msg->loginName == channel->getName() &&
+                !channel->isBroadcaster())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You cannot delete the broadcaster's messages unless "
+                    "you are the broadcaster."));
+                return "";
+            }
+        }
+
+        return deleteMessages(channel, messageID);
+    });
+
+    this->registerCommand("/mod", [](const QStringList &words, auto channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(
+                "Usage: \"/mod <username>\" - Grant moderator status to a "
+                "user. Use \"/mods\" to list the moderators of this channel."));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to mod someone!"));
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /mod command only works in Twitch channels"));
+            return "";
+        }
+
+        auto target = words.at(1);
+        stripChannelName(target);
+
+        getHelix()->getUserByName(
+            target,
+            [twitchChannel, channel](const HelixUser &targetUser) {
+                getHelix()->addChannelModerator(
+                    twitchChannel->roomId(), targetUser.id,
+                    [channel, targetUser] {
+                        channel->addMessage(makeSystemMessage(
+                            QString("You have added %1 as a moderator of this "
+                                    "channel.")
+                                .arg(targetUser.displayName)));
+                    },
+                    [channel, targetUser](auto error, auto message) {
+                        QString errorMessage =
+                            QString("Failed to add channel moderator - ");
+
+                        using Error = HelixAddChannelModeratorError;
+
+                        switch (error)
+                        {
+                            case Error::UserMissingScope: {
+                                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                                errorMessage += "Missing required scope. "
+                                                "Re-login with your "
+                                                "account and try again.";
+                            }
+                            break;
+
+                            case Error::UserNotAuthorized: {
+                                // TODO(pajlada): Phrase MISSING_PERMISSION
+                                errorMessage += "You don't have permission to "
+                                                "perform that action.";
+                            }
+                            break;
+
+                            case Error::Ratelimited: {
+                                errorMessage +=
+                                    "You are being ratelimited by Twitch. Try "
+                                    "again in a few seconds.";
+                            }
+                            break;
+
+                            case Error::TargetIsVIP: {
+                                errorMessage +=
+                                    QString("%1 is currently a VIP, \"/unvip\" "
+                                            "them and "
+                                            "retry this command.")
+                                        .arg(targetUser.displayName);
+                            }
+                            break;
+
+                            case Error::TargetAlreadyModded: {
+                                // Equivalent irc error
+                                errorMessage =
+                                    QString("%1 is already a moderator of this "
+                                            "channel.")
+                                        .arg(targetUser.displayName);
+                            }
+                            break;
+
+                            case Error::Forwarded: {
+                                errorMessage += message;
+                            }
+                            break;
+
+                            case Error::Unknown:
+                            default: {
+                                errorMessage +=
+                                    "An unknown error has occurred.";
+                            }
+                            break;
+                        }
+                        channel->addMessage(makeSystemMessage(errorMessage));
+                    });
+            },
+            [channel, target] {
+                // Equivalent error from IRC
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid username: %1").arg(target)));
+            });
+
+        return "";
+    });
+
+    this->registerCommand("/unmod", [](const QStringList &words, auto channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(
+                "Usage: \"/unmod <username>\" - Revoke moderator status from a "
+                "user. Use \"/mods\" to list the moderators of this channel."));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to unmod someone!"));
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /unmod command only works in Twitch channels"));
+            return "";
+        }
+
+        auto target = words.at(1);
+        stripChannelName(target);
+
+        getHelix()->getUserByName(
+            target,
+            [twitchChannel, channel](const HelixUser &targetUser) {
+                getHelix()->removeChannelModerator(
+                    twitchChannel->roomId(), targetUser.id,
+                    [channel, targetUser] {
+                        channel->addMessage(makeSystemMessage(
+                            QString("You have removed %1 as a moderator of "
+                                    "this channel.")
+                                .arg(targetUser.displayName)));
+                    },
+                    [channel, targetUser](auto error, auto message) {
+                        QString errorMessage =
+                            QString("Failed to remove channel moderator - ");
+
+                        using Error = HelixRemoveChannelModeratorError;
+
+                        switch (error)
+                        {
+                            case Error::UserMissingScope: {
+                                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                                errorMessage += "Missing required scope. "
+                                                "Re-login with your "
+                                                "account and try again.";
+                            }
+                            break;
+
+                            case Error::UserNotAuthorized: {
+                                // TODO(pajlada): Phrase MISSING_PERMISSION
+                                errorMessage += "You don't have permission to "
+                                                "perform that action.";
+                            }
+                            break;
+
+                            case Error::Ratelimited: {
+                                errorMessage +=
+                                    "You are being ratelimited by Twitch. Try "
+                                    "again in a few seconds.";
+                            }
+                            break;
+
+                            case Error::TargetNotModded: {
+                                // Equivalent irc error
+                                errorMessage +=
+                                    QString("%1 is not a moderator of this "
+                                            "channel.")
+                                        .arg(targetUser.displayName);
+                            }
+                            break;
+
+                            case Error::Forwarded: {
+                                errorMessage += message;
+                            }
+                            break;
+
+                            case Error::Unknown:
+                            default: {
+                                errorMessage +=
+                                    "An unknown error has occurred.";
+                            }
+                            break;
+                        }
+                        channel->addMessage(makeSystemMessage(errorMessage));
+                    });
+            },
+            [channel, target] {
+                // Equivalent error from IRC
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid username: %1").arg(target)));
+            });
+
+        return "";
+    });
+
+    this->registerCommand(
+        "/announce", [](const QStringList &words, auto channel) -> QString {
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "This command can only be used in Twitch channels."));
+                return "";
+            }
+
+            if (words.size() < 2)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /announce <message> - Call attention to your "
+                    "message with a highlight."));
+                return "";
+            }
+
+            auto user = getApp()->accounts->twitch.getCurrent();
+            if (user->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to use the /announce command"));
+                return "";
+            }
+
+            getHelix()->sendChatAnnouncement(
+                twitchChannel->roomId(), user->getUserId(),
+                words.mid(1).join(" "), HelixAnnouncementColor::Primary,
+                []() {
+                    // do nothing.
+                },
+                [channel](auto error, auto message) {
+                    using Error = HelixSendChatAnnouncementError;
+                    QString errorMessage =
+                        QString("Failed to send announcement - ");
+
+                    switch (error)
+                    {
+                        case Error::UserMissingScope: {
+                            // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                            errorMessage +=
+                                "Missing required scope. Re-login with your "
+                                "account and try again.";
+                        }
+                        break;
+
+                        case Error::Forwarded: {
+                            errorMessage += message;
+                        }
+                        break;
+
+                        case Error::Unknown:
+                        default: {
+                            errorMessage += "An unknown error has occurred.";
+                        }
+                        break;
+                    }
+
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
+            return "";
+        });
+
+    this->registerCommand("/vip", [](const QStringList &words, auto channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(
+                "Usage: \"/vip <username>\" - Grant VIP status to a user. Use "
+                "\"/vips\" to list the VIPs of this channel."));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to VIP someone!"));
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /vip command only works in Twitch channels"));
+            return "";
+        }
+
+        auto target = words.at(1);
+        stripChannelName(target);
+
+        getHelix()->getUserByName(
+            target,
+            [twitchChannel, channel](const HelixUser &targetUser) {
+                getHelix()->addChannelVIP(
+                    twitchChannel->roomId(), targetUser.id,
+                    [channel, targetUser] {
+                        channel->addMessage(makeSystemMessage(
+                            QString(
+                                "You have added %1 as a VIP of this channel.")
+                                .arg(targetUser.displayName)));
+                    },
+                    [channel, targetUser](auto error, auto message) {
+                        QString errorMessage = QString("Failed to add VIP - ");
+
+                        using Error = HelixAddChannelVIPError;
+
+                        switch (error)
+                        {
+                            case Error::UserMissingScope: {
+                                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                                errorMessage += "Missing required scope. "
+                                                "Re-login with your "
+                                                "account and try again.";
+                            }
+                            break;
+
+                            case Error::UserNotAuthorized: {
+                                // TODO(pajlada): Phrase MISSING_PERMISSION
+                                errorMessage += "You don't have permission to "
+                                                "perform that action.";
+                            }
+                            break;
+
+                            case Error::Ratelimited: {
+                                errorMessage +=
+                                    "You are being ratelimited by Twitch. Try "
+                                    "again in a few seconds.";
+                            }
+                            break;
+
+                            case Error::Forwarded: {
+                                // These are actually the IRC equivalents, so we can ditch the prefix
+                                errorMessage = message;
+                            }
+                            break;
+
+                            case Error::Unknown:
+                            default: {
+                                errorMessage +=
+                                    "An unknown error has occurred.";
+                            }
+                            break;
+                        }
+                        channel->addMessage(makeSystemMessage(errorMessage));
+                    });
+            },
+            [channel, target] {
+                // Equivalent error from IRC
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid username: %1").arg(target)));
+            });
+
+        return "";
+    });
 }
 
 void CommandController::save()

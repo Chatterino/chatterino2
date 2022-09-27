@@ -3,6 +3,7 @@
 #include <QPaintEvent>
 #include <QScroller>
 #include <QTimer>
+#include <QVariantAnimation>
 #include <QWheelEvent>
 #include <QWidget>
 #include <pajlada/signals/signal.hpp>
@@ -83,6 +84,17 @@ public:
     const boost::optional<MessageElementFlags> &getOverrideFlags() const;
     void updateLastReadMessage();
 
+    /**
+     * Attempts to scroll to a message in this channel.
+     * @return <code>true</code> if the message was found and highlighted.
+     */
+    bool scrollToMessage(const MessagePtr &message);
+    /**
+     * Attempts to scroll to a message id in this channel.
+     * @return <code>true</code> if the message was found and highlighted.
+     */
+    bool scrollToMessageId(const QString &id);
+
     /// Pausing
     bool pausable() const;
     void setPausable(bool value);
@@ -118,6 +130,13 @@ public:
      **/
     void showUserInfoPopup(const QString &userName,
                            QString alternativePopoutChannel = QString());
+
+    /**
+     * @brief This method is meant to be used when filtering out channels.
+     *        It <b>must</b> return true if a message belongs in this channel.
+     *        It <b>might</b> return true if a message doesn't belong in this channel.
+     */
+    bool mayContainMessage(const MessagePtr &message);
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
@@ -208,6 +227,14 @@ private:
     void enableScrolling(const QPointF &scrollStart);
     void disableScrolling();
 
+    /**
+     * Scrolls to a message layout that must be from this view.
+     *
+     * @param layout Must be from this channel.
+     * @param messageIdx Must be an index into this channel.
+     */
+    void scrollToMessageLayout(MessageLayout *layout, size_t messageIdx);
+
     void setInputReply(const MessagePtr &message);
     void showReplyThreadPopup(const MessagePtr &message);
     bool canReplyToMessages() const;
@@ -241,6 +268,7 @@ private:
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
+    bool showScrollBar_ = false;
 
     FilterSetPtr channelFilters_;
 
@@ -271,6 +299,11 @@ private:
     QPointF lastMiddlePressPosition_;
     QPointF currentMousePosition_;
     QTimer scrollTimer_;
+
+    // We're only interested in the pointer, not the contents
+    MessageLayout *highlightedMessage_;
+    QVariantAnimation highlightAnimation_;
+    void setupHighlightAnimationColors();
 
     struct {
         QCursor neutral;

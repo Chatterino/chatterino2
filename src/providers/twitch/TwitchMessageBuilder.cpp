@@ -1548,15 +1548,17 @@ void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
                                   MessageColor::System);
     if (originalMessage->messageText.length() > 50)
     {
-        builder->emplace<TextElement>(
-            originalMessage->messageText.left(50) + "…",
-            MessageElementFlag::Text, MessageColor::Text);
+        builder
+            ->emplace<TextElement>(originalMessage->messageText.left(50) + "…",
+                                   MessageElementFlag::Text, MessageColor::Text)
+            ->setLink({Link::JumpToMessage, originalMessage->id});
     }
     else
     {
-        builder->emplace<TextElement>(originalMessage->messageText,
-                                      MessageElementFlag::Text,
-                                      MessageColor::Text);
+        builder
+            ->emplace<TextElement>(originalMessage->messageText,
+                                   MessageElementFlag::Text, MessageColor::Text)
+            ->setLink({Link::JumpToMessage, originalMessage->id});
     }
     builder->message().timeoutUser = "msg:" + originalMessage->id;
 }
@@ -1588,14 +1590,17 @@ void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
                                   MessageColor::System);
     if (action.messageText.length() > 50)
     {
-        builder->emplace<TextElement>(action.messageText.left(50) + "…",
-                                      MessageElementFlag::Text,
-                                      MessageColor::Text);
+        builder
+            ->emplace<TextElement>(action.messageText.left(50) + "…",
+                                   MessageElementFlag::Text, MessageColor::Text)
+            ->setLink({Link::JumpToMessage, action.messageId});
     }
     else
     {
-        builder->emplace<TextElement>(
-            action.messageText, MessageElementFlag::Text, MessageColor::Text);
+        builder
+            ->emplace<TextElement>(action.messageText, MessageElementFlag::Text,
+                                   MessageColor::Text)
+            ->setLink({Link::JumpToMessage, action.messageId});
     }
     builder->message().timeoutUser = "msg:" + action.messageId;
 }
