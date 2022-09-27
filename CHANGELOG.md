@@ -14,7 +14,7 @@
 - Minor: Added `/copy` command. Usage: `/copy <text>`. Copies provided text to clipboard - can be useful with custom commands. (#3763)
 - Minor: Added `/requests` command. Usage: `/requests [channel]`. Opens the channel points requests queue for the provided channel or the current channel if no input is provided. (#3746)
 - Minor: Added `Go to message` context menu action to search popup, mentions, usercard and reply threads. (#3953)
-- Minor: Added link back to original message that was deleted. (#3953)
+- Minor: Clicking `A message from x was deleted` messages will now jump to the message in question. (#3953)
 - Minor: Added `is:first-msg` search option. (#3700)
 - Minor: Added AutoMod message flag filter. (#3938)
 - Minor: Added chatter count for each category in viewer list. (#3683, #3719)
