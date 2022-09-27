@@ -60,7 +60,7 @@
 - Bugfix: Adopted popup windows in order to force floating behavior on some window managers. (#3836)
 - Bugfix: Fixed split focusing being broken in certain circumstances when the "Show input when it's empty" setting was disabled. (#3838, #3860)
 - Bugfix: Always refresh tab when a contained split's channel is set. (#3849)
-- Bugfix: Dropped trailing whitespace from Twitch system messages. (#3888)
+- Bugfix: Fixed an issue where Anonymous gift messages appeared larger than normal gift messages. (#3888)
 - Bugfix: Fixed crash related to logging IRC channels (#3918)
 - Bugfix: Mentions of "You" in timeouts will link to your own user now instead of the user "You". (#3922)
 - Dev: Removed official support for QMake. (#3839, #3883)
