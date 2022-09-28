@@ -1766,41 +1766,42 @@ void CommandController::initialize(Settings &, Paths &paths)
             }
             return errorMessage;
         };
-    this->registerCommand(
-        "/emoteonly", [formatChatSettingsError](const QStringList & /* words */,
-                                                auto channel) {
-            auto currentUser = getApp()->accounts->twitch.getCurrent();
-            if (currentUser->isAnon())
-            {
-                channel->addMessage(makeSystemMessage(
-                    "You must be logged in to update chat settings!"));
-                return "";
-            }
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /emoteonly command only works in Twitch channels"));
-                return "";
-            }
-
-            // don't early-out here, we still want to modify the settings
-            bool wasEmoteOnly = twitchChannel->accessRoomModes()->emoteOnly;
-            getHelix()->updateEmoteMode(
-                twitchChannel->roomId(), currentUser->getUserId(), true,
-                [channel, wasEmoteOnly](auto) {
-                    if (wasEmoteOnly)
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "This room is already in emote-only mode."));
-                    }  // else, we'll get a message from irc
-                },
-                [channel, formatChatSettingsError](auto error, auto message) {
-                    channel->addMessage(makeSystemMessage(
-                        formatChatSettingsError(error, message)));
-                });
+    this->registerCommand("/emoteonly", [formatChatSettingsError](
+                                            const QStringList & /* words */,
+                                            auto channel) {
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You must be logged in to update chat settings!"));
             return "";
-        });
+        }
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /emoteonly command only works in Twitch channels"));
+            return "";
+        }
+
+        if (twitchChannel->accessRoomModes()->emoteOnly)
+        {
+            channel->addMessage(
+                makeSystemMessage("This room is already in emote-only mode."));
+            return "";
+        }
+
+        getHelix()->updateEmoteMode(
+            twitchChannel->roomId(), currentUser->getUserId(), true,
+            [](auto) {
+                //we'll get a message from irc
+            },
+            [channel, formatChatSettingsError](auto error, auto message) {
+                channel->addMessage(
+                    makeSystemMessage(formatChatSettingsError(error, message)));
+            });
+        return "";
+    });
     this->registerCommand(
         "/emoteonlyoff", [formatChatSettingsError](
                              const QStringList & /* words */, auto channel) {
@@ -1819,16 +1820,17 @@ void CommandController::initialize(Settings &, Paths &paths)
                 return "";
             }
 
-            // don't early-out here, we still want to modify the settings
-            bool wasEmoteOnly = twitchChannel->accessRoomModes()->emoteOnly;
+            if (!twitchChannel->accessRoomModes()->emoteOnly)
+            {
+                channel->addMessage(
+                    makeSystemMessage("This room is not in emote-only mode."));
+                return "";
+            }
+
             getHelix()->updateEmoteMode(
                 twitchChannel->roomId(), currentUser->getUserId(), false,
-                [channel, wasEmoteOnly](auto) {
-                    if (!wasEmoteOnly)
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "This room is not in emote-only mode."));
-                    }  // else, we'll get a message from irc
+                [](auto) {
+                    // we'll get a message from irc
                 },
                 [channel, formatChatSettingsError](auto error, auto message) {
                     channel->addMessage(makeSystemMessage(
@@ -1836,7 +1838,6 @@ void CommandController::initialize(Settings &, Paths &paths)
                 });
             return "";
         });
-#undef GET_USER_AND_CHANNEL
 }
 
 void CommandController::save()
