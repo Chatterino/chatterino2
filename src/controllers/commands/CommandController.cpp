@@ -1726,22 +1726,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-#define GET_USER_AND_CHANNEL(command)                                    \
-    auto currentUser = getApp()->accounts->twitch.getCurrent();          \
-    if (currentUser->isAnon())                                           \
-    {                                                                    \
-        channel->addMessage(makeSystemMessage(                           \
-            "You must be logged in to update chat settings!"));          \
-        return "";                                                       \
-    }                                                                    \
-    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());  \
-    if (twitchChannel == nullptr)                                        \
-    {                                                                    \
-        channel->addMessage(makeSystemMessage(                           \
-            "The /" #command " command only works in Twitch channels")); \
-        return "";                                                       \
-    }
-
     const auto formatChatSettingsError =
         [](const HelixUpdateChatSettingsError error, const QString &message) {
             QString errorMessage = QString("Failed to update - ");
@@ -1785,7 +1769,20 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand(
         "/emoteonly", [formatChatSettingsError](const QStringList & /* words */,
                                                 auto channel) {
-            GET_USER_AND_CHANNEL(emoteonly)
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (currentUser->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to update chat settings!"));
+                return "";
+            }
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /emoteonly command only works in Twitch channels"));
+                return "";
+            }
 
             // don't early-out here, we still want to modify the settings
             bool wasEmoteOnly = twitchChannel->accessRoomModes()->emoteOnly;
@@ -1807,7 +1804,20 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand(
         "/emoteonlyoff", [formatChatSettingsError](
                              const QStringList & /* words */, auto channel) {
-            GET_USER_AND_CHANNEL(emoteonlyff)
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (currentUser->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to update chat settings!"));
+                return "";
+            }
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /emoteonlyoff command only works in Twitch channels"));
+                return "";
+            }
 
             // don't early-out here, we still want to modify the settings
             bool wasEmoteOnly = twitchChannel->accessRoomModes()->emoteOnly;
