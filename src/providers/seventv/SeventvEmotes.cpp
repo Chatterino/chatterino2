@@ -41,6 +41,7 @@ namespace {
         Emote emote;
         EmoteId id;
         EmoteName name;
+        bool hasImages;
     };
 
     EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
@@ -123,10 +124,9 @@ namespace {
             // this means we didn't get all sizes of an emote
             if (nextSize == 0)
             {
-                qCWarning(chatterinoSeventv)
+                qCDebug(chatterinoSeventv)
                     << "Got file list without any eligible files";
                 // When this emote is typed, chatterino will segfault.
-                // TODO: provide fallback?
                 return ImageSet{};
             }
             for (; nextSize < sizes.size(); nextSize++)
@@ -175,7 +175,8 @@ namespace {
             Emote({emoteName, imageSet, tooltip,
                    Url{EMOTE_LINK_FORMAT.arg(emoteId.string)}, zeroWidth});
 
-        return {emote, emoteId, emoteName};
+        return {emote, emoteId, emoteName,
+                !emote.images.getImage1()->isEmpty()};
     }
 
     bool checkEmoteVisibility(const QJsonObject &emoteData)
@@ -204,6 +205,14 @@ namespace {
                 continue;
             }
             auto result = createEmote(activeEmote, emoteData, isGlobal);
+            if (!result.hasImages)
+            {
+                // this shouldn't happen but if it does, it will crash,
+                // so we don't add the emote
+                qCDebug(chatterinoSeventv)
+                    << "Emote without images:" << activeEmote;
+                continue;
+            }
             auto ptr = cachedOrMake(std::move(result.emote), result.id);
             emotes[result.name] = ptr;
         }
