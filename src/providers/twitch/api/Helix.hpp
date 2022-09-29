@@ -303,12 +303,11 @@ struct HelixChannelEmote {
 struct HelixChatSettings {
     const QString broadcasterId;
     const bool emoteMode;
-    // time is minutes, boost::none if disabled
-    const boost::optional<int> followerModeDuration;
-    // time in seconds, boost::none if disabled
-    const boost::optional<int> nonModeratorChatDelayDuration;
-    // time in seconds, boost::none if disabled
-    const boost::optional<int> slowModeWaitTime;
+    // boost::none if disabled
+    const boost::optional<int> followerModeDuration;  // time in minutes
+    const boost::optional<int>
+        nonModeratorChatDelayDuration;            // time in seconds
+    const boost::optional<int> slowModeWaitTime;  // time in seconds
     const bool subscriberMode;
     const bool uniqueChatMode;
 

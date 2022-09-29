@@ -1397,6 +1397,7 @@ void Helix::updateChatSettings(
                     }
                 }
                 break;
+
                 case 403: {
                     failureCallback(Error::UserNotAuthorized, message);
                 }

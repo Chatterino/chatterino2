@@ -1776,6 +1776,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 "You must be logged in to update chat settings!"));
             return "";
         }
+
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
         if (twitchChannel == nullptr)
         {
@@ -1802,6 +1803,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             });
         return "";
     });
+
     this->registerCommand(
         "/emoteonlyoff", [formatChatSettingsError](
                              const QStringList & /* words */, auto channel) {
