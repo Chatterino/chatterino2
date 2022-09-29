@@ -1766,6 +1766,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             }
             return errorMessage;
         };
+
     this->registerCommand("/emoteonly", [formatChatSettingsError](
                                             const QStringList & /* words */,
                                             auto channel) {
