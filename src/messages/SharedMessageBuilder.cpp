@@ -22,11 +22,12 @@ namespace {
     QUrl getFallbackHighlightSound()
     {
         QString path = getSettings()->pathHighlightSound;
-        bool fileExists = QFileInfo::exists(path) && QFileInfo(path).isFile();
+        bool fileExists = !path.isEmpty() && QFileInfo::exists(path) &&
+                          QFileInfo(path).isFile();
 
-        // Use fallback sound when checkbox is not checked
-        // or custom file doesn't exist
-        if (getSettings()->customHighlightSound && fileExists)
+        // Use fallback sound when no custom sound is set
+        // or if the file doesn't exist.
+        if (fileExists)
         {
             return QUrl::fromLocalFile(path);
         }

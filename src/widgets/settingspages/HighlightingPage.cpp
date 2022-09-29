@@ -76,8 +76,8 @@ HighlightingPage::HighlightingPage()
                         .getElement();
                 view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Show in\nMentions",
-                                 "Flash\ntaskbar", "Play\nsound",
-                                 "Enable\nregex", "Case-\nsensitive",
+                                 "Flash\ntaskbar", "Enable\nregex",
+                                 "Case-\nsensitive", "Play\nsound",
                                  "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
@@ -127,8 +127,8 @@ HighlightingPage::HighlightingPage()
                 // Case-sensitivity doesn't make sense for user names so it is
                 // set to "false" by default & the column is hidden
                 view->setTitles({"Username", "Show in\nMentions",
-                                 "Flash\ntaskbar", "Play\nsound",
-                                 "Enable\nregex", "Case-\nsensitive",
+                                 "Flash\ntaskbar", "Enable\nregex",
+                                 "Case-\nsensitive", "Play\nsound",
                                  "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
@@ -247,33 +247,35 @@ HighlightingPage::HighlightingPage()
         // MISC
         auto customSound = layout.emplace<QHBoxLayout>().withoutMargin();
         {
-            auto fallbackSound = customSound.append(this->createCheckBox(
-                "Fallback sound (played when no other sound is set)",
-                getSettings()->customHighlightSound));
+            auto label = customSound.append(this->createLabel<QString>(
+                [](const auto &value) {
+                    return QString("Default sound: %1")
+                        .arg(value.isEmpty()
+                                 ? "Chatterino Ping"
+                                 : QUrl::fromLocalFile(value).fileName());
+                },
+                getSettings()->pathHighlightSound));
+            label->setToolTip(
+                "This sound will play for all highlight phrases that have "
+                "sound enabled and don't have a custom sound set.");
+            customSound->setStretchFactor(label.getElement(), 1);
 
-            auto getSelectFileText = [] {
-                const QString value = getSettings()->pathHighlightSound;
-                return value.isEmpty() ? "Select custom fallback sound"
-                                       : QUrl::fromLocalFile(value).fileName();
-            };
+            auto selectFile = customSound.emplace<QPushButton>("Change...");
+            auto clearSound = customSound.emplace<QPushButton>(
+                QIcon(":/buttons/cancel.svg"), "Clear");
 
-            auto selectFile =
-                customSound.emplace<QPushButton>(getSelectFileText());
+            QObject::connect(selectFile.getElement(), &QPushButton::clicked,
+                             this, [=]() mutable {
+                                 auto fileName = QFileDialog::getOpenFileName(
+                                     this, tr("Open Sound"), "",
+                                     tr("Audio Files (*.mp3 *.wav)"));
 
-            QObject::connect(
-                selectFile.getElement(), &QPushButton::clicked, this,
-                [=]() mutable {
-                    auto fileName = QFileDialog::getOpenFileName(
-                        this, tr("Open Sound"), "",
-                        tr("Audio Files (*.mp3 *.wav)"));
-
-                    getSettings()->pathHighlightSound = fileName;
-                    selectFile.getElement()->setText(getSelectFileText());
-
-                    // Set check box according to updated value
-                    fallbackSound->setCheckState(
-                        fileName.isEmpty() ? Qt::Unchecked : Qt::Checked);
-                });
+                                 getSettings()->pathHighlightSound = fileName;
+                             });
+            QObject::connect(clearSound.getElement(), &QPushButton::clicked,
+                             this, [=]() mutable {
+                                 getSettings()->pathHighlightSound = QString();
+                             });
         }
 
         layout.append(createCheckBox(ALWAYS_PLAY,
