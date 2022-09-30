@@ -299,9 +299,9 @@ public:
     //    BoolSetting enableElevatedMessageHighlightTaskbar = {
     //        "/highlighting/elevatedMessageHighlight/enableTaskbarFlashing", false};
     QStringSetting elevatedMessageHighlightSoundUrl = {
-        "/highlighting/elevatedMessageHighlightSoundUrl", ""};
+        "/highlighting/elevatedMessageHighlight/SoundUrl", ""};
     QStringSetting elevatedMessageHighlightColor = {
-        "/highlighting/elevatedMessageHighlightColor", ""};
+        "/highlighting/elevatedMessageHighlight/Color", ""};
 
     BoolSetting enableSubHighlight = {
         "/highlighting/subHighlight/subsHighlighted", true};
