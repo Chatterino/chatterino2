@@ -52,7 +52,7 @@ SBHighlight Message::getScrollBarHighlight() const
     {
         return SBHighlight(ColorProvider::instance().color(
                                ColorType::ElevatedMessageHighlight),
-                           SBHighlight::Default, false, true);
+                           SBHighlight::Default, false, false, true);
     }
 
     return SBHighlight();
