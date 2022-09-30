@@ -29,6 +29,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * flags.system_message
      * flags.reward_message
      * flags.first_message
+     * flags.elevated_message
      * flags.whisper
      * flags.reply
      * flags.automod
@@ -83,6 +84,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
         {"flags.reward_message",
          m->flags.has(MessageFlag::RedeemedChannelPointReward)},
         {"flags.first_message", m->flags.has(MessageFlag::FirstMessage)},
+        {"flags.elevated_message", m->flags.has(MessageFlag::ElevatedMessage)},
         {"flags.whisper", m->flags.has(MessageFlag::Whisper)},
         {"flags.reply", m->flags.has(MessageFlag::ReplyMessage)},
         {"flags.automod", m->flags.has(MessageFlag::AutoMod)},
