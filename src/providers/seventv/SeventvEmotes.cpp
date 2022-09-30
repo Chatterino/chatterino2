@@ -200,10 +200,11 @@ namespace {
             auto activeEmote = activeEmoteJson.toObject();
             auto emoteData = activeEmote["data"].toObject();
 
-            if (!checkEmoteVisibility(emoteData))
+            if (emoteData.empty() || !checkEmoteVisibility(emoteData))
             {
                 continue;
             }
+
             auto result = createEmote(activeEmote, emoteData, isGlobal);
             if (!result.hasImages)
             {
