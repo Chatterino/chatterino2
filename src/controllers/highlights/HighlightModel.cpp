@@ -201,14 +201,14 @@ void HighlightModel::afterInit()
     elevatedMessageRow[Column::UseRegex]->setFlags({});
     elevatedMessageRow[Column::CaseSensitive]->setFlags({});
 
-    QUrl ElevatedMessageSound =
+    QUrl elevatedMessageSound =
         QUrl(getSettings()->elevatedMessageHighlightSoundUrl.getValue());
-    setFilePathItem(elevatedMessageRow[Column::SoundPath], ElevatedMessageSound,
+    setFilePathItem(elevatedMessageRow[Column::SoundPath], elevatedMessageSound,
                     false);
 
-    auto ElevatedMessageColor =
+    auto elevatedMessageColor =
         ColorProvider::instance().color(ColorType::ElevatedMessageHighlight);
-    setColorItem(elevatedMessageRow[Column::Color], *ElevatedMessageColor,
+    setColorItem(elevatedMessageRow[Column::Color], *elevatedMessageColor,
                  false);
 
     this->insertCustomRow(elevatedMessageRow,
