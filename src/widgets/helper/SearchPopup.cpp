@@ -320,7 +320,7 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
         {
             badges.append(value);
         }
-        else if (name == "subtier" || name == "tier")
+        else if (name == "subtier")
         {
             subtiers.append(value);
         }
