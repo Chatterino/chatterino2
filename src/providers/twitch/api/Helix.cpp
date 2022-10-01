@@ -1262,6 +1262,7 @@ void Helix::removeChannelVIP(
     FailureCallback<HelixRemoveChannelVIPError, QString> failureCallback)
 {
     using Error = HelixRemoveChannelVIPError;
+
     QUrlQuery urlQuery;
 
     urlQuery.addQueryItem("broadcaster_id", broadcasterID);
