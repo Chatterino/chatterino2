@@ -1296,7 +1296,8 @@ void Helix::updateNonModeratorChatDelay(
         nonModeratorChatDelayDuration.has_value();
     if (nonModeratorChatDelayDuration)
     {
-        json["slow_mode_wait_time"] = *nonModeratorChatDelayDuration;
+        json["non_moderator_chat_delay_duration"] =
+            *nonModeratorChatDelayDuration;
     }
 
     this->updateChatSettings(broadcasterID, moderatorID, json, successCallback,
