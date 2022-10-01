@@ -1334,6 +1334,16 @@ void Helix::removeChannelVIP(
         .execute();
 }
 
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
 void Helix::unbanUser(
     QString broadcasterID, QString moderatorID, QString userID,
     ResultCallback<> successCallback,
@@ -1423,7 +1433,18 @@ void Helix::unbanUser(
             }
         })
         .execute();
-}
+}  // These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
 
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {

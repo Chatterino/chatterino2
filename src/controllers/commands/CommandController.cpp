@@ -1820,6 +1820,17 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
     auto unbanLambda = [](auto words, auto channel) {
         auto commandName = words.at(0).toLower();
         if (words.size() < 2)
@@ -1928,17 +1939,27 @@ void CommandController::initialize(Settings &, Paths &paths)
             });
 
         return "";
-    };
+    };  // These changes are from the helix-command-migration/unban-untimeout branch
 
-    this->registerCommand(
-        "/unban", [unbanLambda](const QStringList &words, auto channel) {
-            return unbanLambda(words, channel);
-        });
+    this->registerCommand("/unban", [unbanLambda](const QStringList &words,
+                                                  auto channel) {
+        return unbanLambda(words, channel);
+    });  // These changes are from the helix-command-migration/unban-untimeout branch
 
-    this->registerCommand(
-        "/untimeout", [unbanLambda](const QStringList &words, auto channel) {
-            return unbanLambda(words, channel);
-        });
+    this->registerCommand("/untimeout", [unbanLambda](const QStringList &words,
+                                                      auto channel) {
+        return unbanLambda(words, channel);
+    });  // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
 }
 
 void CommandController::save()
