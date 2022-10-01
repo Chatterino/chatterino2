@@ -16,14 +16,6 @@
 #include "util/IrcHelpers.hpp"
 #include "widgets/Window.hpp"
 
-namespace {
-
-QRegularExpression IRC_COLOR_PARSE_REGEX(
-    "(\u0003(\\d{1,2})?(,(\\d{1,2}))?|\u000f)",
-    QRegularExpression::UseUnicodePropertiesOption);
-
-}  // namespace
-
 namespace chatterino {
 
 IrcMessageBuilder::IrcMessageBuilder(
