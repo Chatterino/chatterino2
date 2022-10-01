@@ -195,10 +195,11 @@ HighlightingPage::HighlightingPage()
                         {
                             return;
                         }
-                        getSettings()->highlightedBadges.append(HighlightBadge{
-                            s->badgeName(), s->displayName(), false, false, "",
-                            *ColorProvider::instance().color(
-                                ColorType::SelfHighlight)});
+                        getSettings()->highlightedBadges.append(
+                            HighlightBadge{s->badgeName(), s->displayName(),
+                                           false, false, false, "",
+                                           *ColorProvider::instance().color(
+                                               ColorType::SelfHighlight)});
                     }
                 });
 
