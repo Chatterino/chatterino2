@@ -99,6 +99,7 @@
 - Minor: Fixed `/streamlink` command not stripping leading @'s or #'s (#3215)
 - Minor: Strip leading @ and trailing , from username in `/popout` command. (#3217)
 - Minor: Added `flags.reward_message` filter variable (#3231)
+- Minor: Added `flags.elevated_message` filter variable. (#4017)
 - Minor: Added chatter count to viewer list popout (#3261)
 - Minor: Ignore out of bounds check for tiling wms (#3270)
 - Minor: Add clear cache button to cache settings section (#3277)
