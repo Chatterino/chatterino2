@@ -590,12 +590,16 @@ public:
         QString broadcasterID, QString userID, ResultCallback<> successCallback,
         FailureCallback<HelixAddChannelVIPError, QString> failureCallback) = 0;
 
+    // Updates the emote mode using
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     virtual void updateEmoteMode(
         QString broadcasterID, QString moderatorID, bool emoteMode,
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString>
             failureCallback) = 0;
 
+    // Updates the follower mode using
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     virtual void updateFollowerMode(
         QString broadcasterID, QString moderatorID,
         boost::optional<int> followerModeDuration,
@@ -603,6 +607,8 @@ public:
         FailureCallback<HelixUpdateChatSettingsError, QString>
             failureCallback) = 0;
 
+    // Updates the non-moderator chat delay using
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     virtual void updateNonModeratorChatDelay(
         QString broadcasterID, QString moderatorID,
         boost::optional<int> nonModeratorChatDelayDuration,
@@ -610,6 +616,8 @@ public:
         FailureCallback<HelixUpdateChatSettingsError, QString>
             failureCallback) = 0;
 
+    // Updates the slow mode using
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     virtual void updateSlowMode(
         QString broadcasterID, QString moderatorID,
         boost::optional<int> slowModeWaitTime,
@@ -617,12 +625,16 @@ public:
         FailureCallback<HelixUpdateChatSettingsError, QString>
             failureCallback) = 0;
 
+    // Updates the subscriber mode using
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     virtual void updateSubscriberMode(
         QString broadcasterID, QString moderatorID, bool subscriberMode,
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString>
             failureCallback) = 0;
 
+    // Updates the unique chat mode using
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     virtual void updateUniqueChatMode(
         QString broadcasterID, QString moderatorID, bool uniqueChatMode,
         ResultCallback<HelixChatSettings> successCallback,
@@ -791,12 +803,16 @@ public:
                        FailureCallback<HelixAddChannelVIPError, QString>
                            failureCallback) final;
 
+    // Updates the emote mode using
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     void updateEmoteMode(QString broadcasterID, QString moderatorID,
                          bool emoteMode,
                          ResultCallback<HelixChatSettings> successCallback,
                          FailureCallback<HelixUpdateChatSettingsError, QString>
                              failureCallback) final;
 
+    // Updates the follower mode using
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     void updateFollowerMode(
         QString broadcasterID, QString moderatorID,
         boost::optional<int> followerModeDuration,
@@ -804,6 +820,8 @@ public:
         FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
         final;
 
+    // Updates the non-moderator chat delay using
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     void updateNonModeratorChatDelay(
         QString broadcasterID, QString moderatorID,
         boost::optional<int> nonModeratorChatDelayDuration,
@@ -811,18 +829,24 @@ public:
         FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
         final;
 
+    // Updates the slow mode using
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     void updateSlowMode(QString broadcasterID, QString moderatorID,
                         boost::optional<int> slowModeWaitTime,
                         ResultCallback<HelixChatSettings> successCallback,
                         FailureCallback<HelixUpdateChatSettingsError, QString>
                             failureCallback) final;
 
+    // Updates the subscriber mode using
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     void updateSubscriberMode(
         QString broadcasterID, QString moderatorID, bool subscriberMode,
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
         final;
 
+    // Updates the unique chat mode using
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     void updateUniqueChatMode(
         QString broadcasterID, QString moderatorID, bool uniqueChatMode,
         ResultCallback<HelixChatSettings> successCallback,
