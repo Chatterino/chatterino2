@@ -661,8 +661,7 @@ void SplitInput::updateCompletionPopup()
 {
     auto channel = this->split_->getChannel().get();
     auto tc = dynamic_cast<TwitchChannel *>(channel);
-    bool showEmoteCompletion =
-        channel->isTwitchChannel() && getSettings()->emoteCompletionWithColon;
+    bool showEmoteCompletion = getSettings()->emoteCompletionWithColon;
     bool showUsernameCompletion =
         tc && getSettings()->showUsernameCompletionMenu;
     if (!showEmoteCompletion && !showUsernameCompletion)
