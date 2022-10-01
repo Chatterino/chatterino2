@@ -46,6 +46,8 @@
 - Minor: Migrated /unmod command to Helix API. (#4001)
 - Minor: Migrated /vip command to Helix API. (#4010)
 - Minor: Migrated /unvip command to Helix API. (#4025)
+- Minor: Migrated /untimeout to Helix API. (#4026)
+- Minor: Migrated /unban to Helix API. (#4026)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fixed a crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
 - Bugfix: Fixed a crash that can occur when changing channels. (#3799)

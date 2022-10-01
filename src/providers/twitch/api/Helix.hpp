@@ -401,6 +401,19 @@ enum class HelixRemoveChannelVIPError {
     Forwarded,
 };
 
+// These changes are from the helix-command-migration/unban-untimeout branch
+enum class HelixUnbanUserError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+    ConflictingOperation,
+    TargetNotBanned,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // These changes are from the helix-command-migration/unban-untimeout branch
+
 class IHelix
 {
 public:
@@ -567,6 +580,15 @@ public:
         FailureCallback<HelixRemoveChannelVIPError, QString>
             failureCallback) = 0;
 
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // https://dev.twitch.tv/docs/api/reference#unban-user
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    virtual void unbanUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixUnbanUserError, QString> failureCallback) = 0;
+    // These changes are from the helix-command-migration/unban-untimeout branch
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
 
@@ -726,6 +748,15 @@ public:
                           ResultCallback<> successCallback,
                           FailureCallback<HelixRemoveChannelVIPError, QString>
                               failureCallback) final;
+
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // https://dev.twitch.tv/docs/api/reference#unban-user
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    void unbanUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixUnbanUserError, QString> failureCallback) final;
+    // These changes are from the helix-command-migration/unban-untimeout branch
 
     void update(QString clientId, QString oauthToken) final;
 
