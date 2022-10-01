@@ -42,6 +42,7 @@ enum class MessageFlag : uint32_t {
     ShowInMentions = (1 << 22),
     FirstMessage = (1 << 23),
     ReplyMessage = (1 << 24),
+    ElevatedMessage = (1 << 25),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

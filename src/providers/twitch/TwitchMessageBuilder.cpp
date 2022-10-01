@@ -198,6 +198,11 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::FirstMessage);
     }
 
+    if (this->tags.contains("pinned-chat-paid-amount"))
+    {
+        this->message().flags.set(MessageFlag::ElevatedMessage);
+    }
+
     // reply threads
     if (this->thread_)
     {

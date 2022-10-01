@@ -106,6 +106,9 @@ const QStringList &getSampleMiscMessages()
 
         // mod announcement
         R"(@badge-info=subscriber/47;badges=broadcaster/1,subscriber/3012,twitchconAmsterdam2020/1;color=#FF0000;display-name=Supinic;emotes=;flags=;id=8c26e1ab-b50c-4d9d-bc11-3fd57a941d90;login=supinic;mod=0;msg-id=announcement;msg-param-color=PRIMARY;room-id=31400525;subscriber=1;system-msg=;tmi-sent-ts=1648762219962;user-id=31400525;user-type= :tmi.twitch.tv USERNOTICE #supinic :mm test lol)",
+
+        // Elevated Message (Paid option for keeping a message in chat longer)
+        R"(@badge-info=subscriber/3;badges=subscriber/0,bits-charity/1;color=#0000FF;display-name=SnoopyTheBot;emotes=;first-msg=0;flags=;id=8779a9e5-cf1b-47b3-b9fe-67a5b1b605f6;mod=0;pinned-chat-paid-amount=500;pinned-chat-paid-canonical-amount=5;pinned-chat-paid-currency=USD;pinned-chat-paid-exponent=2;returning-chatter=0;room-id=36340781;subscriber=1;tmi-sent-ts=1664505974154;turbo=0;user-id=136881249;user-type= :snoopythebot!snoopythebot@snoopythebot.tmi.twitch.tv PRIVMSG #pajlada :-$5)",
     };
     return list;
 }
