@@ -104,12 +104,16 @@ find_package(RapidJSON REQUIRED)
 find_package(Websocketpp REQUIRED)
 
 if (BUILD_TESTS)
+    # For MSVC: Prevent overriding the parent project's compiler/linker settings
+    # See https://github.com/google/googletest/blob/main/googletest/README.md#visual-studio-dynamic-vs-static-runtimes
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
     add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib/googletest" "lib/googletest")
 
     mark_as_advanced(
-        BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
-        gmock_build_tests gtest_build_samples gtest_build_tests
-        gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
+            BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
+            gmock_build_tests gtest_build_samples gtest_build_tests
+            gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
     )
 
     set_target_properties(gtest PROPERTIES FOLDER lib)
