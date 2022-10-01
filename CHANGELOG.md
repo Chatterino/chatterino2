@@ -65,6 +65,7 @@
 - Bugfix: Fixed crash related to logging IRC channels (#3918)
 - Bugfix: Mentions of "You" in timeouts will link to your own user now instead of the user "You". (#3922)
 - Bugfix: Fixed emoji popup not being shown in IRC channels (#4021)
+- Bugfix: Fixed `Smooth scrolling on new messages` setting hiding messages (#4028)
 - Dev: Removed official support for QMake. (#3839, #3883)
 - Dev: Rewrote LimitedQueue (#3798)
 - Dev: Overhauled highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801, #3835)
