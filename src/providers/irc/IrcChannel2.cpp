@@ -54,7 +54,7 @@ void IrcChannel::sendMessage(const QString &message)
             auto username = this->server()->nick();
             builder
                 .emplace<TextElement>(
-                    username + ": ", MessageElementFlag::Username,
+                    username + ":", MessageElementFlag::Username,
                     getRandomColor(username), FontStyle::ChatMediumBold)
                 ->setLink({Link::UserInfo, username});
             builder.message().loginName = username;
