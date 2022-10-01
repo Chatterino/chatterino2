@@ -259,7 +259,7 @@ public:
 
     // The extra parenthesis around the failure callback is because its type contains a comma
     MOCK_METHOD(
-        void, removeChannleVIP,
+        void, removeChannelVIP,
         (QString broadcasterID, QString userID,
          ResultCallback<> successCallback,
          (FailureCallback<HelixRemoveChannelVIPError, QString> failureCallback)),
