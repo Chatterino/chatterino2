@@ -1257,6 +1257,89 @@ void Helix::addChannelVIP(
         .execute();
 }
 
+void Helix::startRaid(
+    QString fromBroadcasterID, QString toBroadcasterID,
+    ResultCallback<> successCallback,
+    FailureCallback<HelixStartRaidError, QString> failureCallback)
+{
+    using Error = HelixStartRaidError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("from_broadcaster_id", fromBroadcasterID);
+    urlQuery.addQueryItem("to_broadcaster_id", toBroadcasterID);
+
+    this->makeRequest("raids", urlQuery)
+        .type(NetworkRequestType::Post)
+        .onSuccess(
+            [successCallback, failureCallback](auto /*result*/) -> Outcome {
+                successCallback();
+                return Success;
+            })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.compare("The IDs in from_broadcaster_id and "
+                                        "to_broadcaster_id cannot be the same.",
+                                        Qt::CaseInsensitive) == 0)
+                    {
+                        failureCallback(Error::CantRaidYourself, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare(
+                                 "The ID in broadcaster_id must match the user "
+                                 "ID "
+                                 "found in the request's OAuth token.",
+                                 Qt::CaseInsensitive) == 0)
+                    {
+                        // Must be the broadcaster.
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 409: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error while starting a raid:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
