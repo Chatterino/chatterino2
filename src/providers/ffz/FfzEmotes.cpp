@@ -56,12 +56,30 @@ namespace {
     std::pair<Outcome, EmoteMap> parseGlobalEmotes(
         const QJsonObject &jsonRoot, const EmoteMap &currentEmotes)
     {
+        // Load default sets from the `default_sets` object
+        std::unordered_set<int> defaultSets{};
+        auto jsonDefaultSets = jsonRoot.value("default_sets").toArray();
+        for (auto jsonDefaultSet : jsonDefaultSets)
+        {
+            defaultSets.insert(jsonDefaultSet.toInt());
+        }
+
         auto jsonSets = jsonRoot.value("sets").toObject();
         auto emotes = EmoteMap();
 
         for (auto jsonSet : jsonSets)
         {
-            auto jsonEmotes = jsonSet.toObject().value("emoticons").toArray();
+            auto jsonSetObject = jsonSet.toObject();
+            const auto emoteSetID = jsonSetObject.value("id").toInt();
+            if (defaultSets.find(emoteSetID) == defaultSets.end())
+            {
+                qCDebug(chatterinoFfzemotes)
+                    << "Skipping global emote set" << emoteSetID
+                    << "as it's not part of the default sets";
+                continue;
+            }
+
+            auto jsonEmotes = jsonSetObject.value("emoticons").toArray();
 
             for (auto jsonEmoteValue : jsonEmotes)
             {
