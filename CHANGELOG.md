@@ -17,6 +17,7 @@
 - Minor: Added `Go to message` context menu action to search popup, mentions, usercard and reply threads. (#3953)
 - Minor: Clicking `A message from x was deleted` messages will now jump to the message in question. (#3953)
 - Minor: Added `is:first-msg` search option. (#3700)
+- Minor: Added `is:elevated-msg` search option. (#4018)
 - Minor: Added AutoMod message flag filter. (#3938)
 - Minor: Added chatter count for each category in viewer list. (#3683, #3719)
 - Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
