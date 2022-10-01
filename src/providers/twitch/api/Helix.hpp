@@ -391,6 +391,17 @@ enum class HelixAddChannelVIPError {
     Forwarded,
 };
 
+enum class HelixCancelRaidError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    NoRaidPending,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 class IHelix
 {
 public:
@@ -551,6 +562,11 @@ public:
         QString broadcasterID, QString userID, ResultCallback<> successCallback,
         FailureCallback<HelixAddChannelVIPError, QString> failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference#cancel-a-raid
+    virtual void cancelRaid(
+        QString broadcasterID, ResultCallback<> successCallback,
+        FailureCallback<HelixCancelRaidError, QString> failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
 
@@ -704,6 +720,11 @@ public:
                        ResultCallback<> successCallback,
                        FailureCallback<HelixAddChannelVIPError, QString>
                            failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#cancel-a-raid
+    void cancelRaid(
+        QString broadcasterID, ResultCallback<> successCallback,
+        FailureCallback<HelixCancelRaidError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 
