@@ -42,6 +42,7 @@
 - Minor: Migrated /mod command to Helix API. (#4000)
 - Minor: Migrated /unmod command to Helix API. (#4001)
 - Minor: Migrated /vip command to Helix API. (#4010)
+- Minor: Migrated /unraid command to Helix API. (#4030)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fixed a crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
 - Bugfix: Fixed a crash that can occur when changing channels. (#3799)
