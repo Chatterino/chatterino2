@@ -661,8 +661,7 @@ void SplitInput::updateCompletionPopup()
 {
     auto channel = this->split_->getChannel().get();
     auto tc = dynamic_cast<TwitchChannel *>(channel);
-    bool showEmoteCompletion =
-        channel->isTwitchChannel() && getSettings()->emoteCompletionWithColon;
+    bool showEmoteCompletion = getSettings()->emoteCompletionWithColon;
     bool showUsernameCompletion =
         tc && getSettings()->showUsernameCompletionMenu;
     if (!showEmoteCompletion && !showUsernameCompletion)
@@ -978,9 +977,13 @@ void SplitInput::setReply(std::shared_ptr<MessageThread> reply,
     if (this->enableInlineReplying_)
     {
         // Only enable reply label if inline replying
-        this->ui_.textEdit->setPlainText(
-            "@" + this->replyThread_->root()->displayName + " ");
-        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+        auto replyPrefix = "@" + this->replyThread_->root()->displayName + " ";
+        auto plainText = this->ui_.textEdit->toPlainText().trimmed();
+        if (!plainText.startsWith(replyPrefix))
+        {
+            this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
+            this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+        }
         this->ui_.replyLabel->setText("Replying to @" +
                                       this->replyThread_->root()->displayName);
     }

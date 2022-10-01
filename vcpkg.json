@@ -10,6 +10,7 @@
     "boost-interprocess",
     "boost-random",
     "boost-variant",
+    "boost-circular-buffer",
     "gtest",
     "openssl",
     "qt5-multimedia",

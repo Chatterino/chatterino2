@@ -110,9 +110,9 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
             addEmotes(emotes, *bttvG, text, "Global BetterTTV");
         if (auto ffzG = getApp()->twitch->getFfzEmotes().emotes())
             addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
-
-        addEmojis(emotes, getApp()->emotes->emojis.emojis, text);
     }
+
+    addEmojis(emotes, getApp()->emotes->emojis.emojis, text);
 
     // if there is an exact match, put that emote first
     for (size_t i = 1; i < emotes.size(); i++)

@@ -201,6 +201,11 @@ public:
     BoolSetting removeSpacesBetweenEmotes = {
         "/emotes/removeSpacesBetweenEmotes", false};
 
+    BoolSetting enableBTTVGlobalEmotes = {"/emotes/bttv/global", true};
+    BoolSetting enableBTTVChannelEmotes = {"/emotes/bttv/channel", true};
+    BoolSetting enableFFZGlobalEmotes = {"/emotes/ffz/global", true};
+    BoolSetting enableFFZChannelEmotes = {"/emotes/ffz/channel", true};
+
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
     BoolSetting linkInfoTooltip = {"/links/linkInfoTooltip", false};
@@ -286,6 +291,17 @@ public:
         "/highlighting/firstMessageHighlightSoundUrl", ""};
     QStringSetting firstMessageHighlightColor = {
         "/highlighting/firstMessageHighlightColor", ""};
+
+    BoolSetting enableElevatedMessageHighlight = {
+        "/highlighting/elevatedMessageHighlight/highlighted", true};
+    //    BoolSetting enableElevatedMessageHighlightSound = {
+    //        "/highlighting/elevatedMessageHighlight/enableSound", false};
+    //    BoolSetting enableElevatedMessageHighlightTaskbar = {
+    //        "/highlighting/elevatedMessageHighlight/enableTaskbarFlashing", false};
+    QStringSetting elevatedMessageHighlightSoundUrl = {
+        "/highlighting/elevatedMessageHighlight/soundUrl", ""};
+    QStringSetting elevatedMessageHighlightColor = {
+        "/highlighting/elevatedMessageHighlight/color", ""};
 
     BoolSetting enableSubHighlight = {
         "/highlighting/subHighlight/subsHighlighted", true};
