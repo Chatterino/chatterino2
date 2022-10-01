@@ -1274,7 +1274,7 @@ void Helix::removeChannelVIP(
             if (result.status() != 204)
             {
                 qCWarning(chatterinoTwitch)
-                    << "Success result for adding channel VIP was"
+                    << "Success result for removing channel VIP was"
                     << result.status() << "but we only expected it to be 204";
             }
 
@@ -1325,7 +1325,7 @@ void Helix::removeChannelVIP(
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Unhandled error adding channel VIP:"
+                        << "Unhandled error removing channel VIP:"
                         << result.status() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
