@@ -18,6 +18,8 @@
 - Minor: Clicking `A message from x was deleted` messages will now jump to the message in question. (#3953)
 - Minor: Added `is:first-msg` search option. (#3700)
 - Minor: Added `is:elevated-msg` search option. (#4018)
+- Minor: Added `subtier:` search option (e.g. `subtier:3` to find Tier 3 subs). (#4013)
+- Minor: Added `badge:` search option (e.g. `badge:mod` to users with the moderator badge). (#4013)
 - Minor: Added AutoMod message flag filter. (#3938)
 - Minor: Added chatter count for each category in viewer list. (#3683, #3719)
 - Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
