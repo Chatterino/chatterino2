@@ -153,6 +153,10 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
                     0.0001;
                 setCurrentValue(value);
             }
+            else
+            {
+                this->currentValueAnimation_.setEndValue(value);
+            }
         }
     }
 
