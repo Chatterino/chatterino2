@@ -142,8 +142,12 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
         }
         else
         {
-            if (this->currentValueAnimation_.state() !=
+            if (this->currentValueAnimation_.state() ==
                 QPropertyAnimation::Running)
+            {
+                this->currentValueAnimation_.setEndValue(value);
+            }
+            else
             {
                 this->smoothScrollingOffset_ = 0;
                 this->desiredValue_ = value;
@@ -152,10 +156,6 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
                     ((this->getMaximum() - this->getLargeChange()) - value) <=
                     0.0001;
                 setCurrentValue(value);
-            }
-            else
-            {
-                this->currentValueAnimation_.setEndValue(value);
             }
         }
     }
