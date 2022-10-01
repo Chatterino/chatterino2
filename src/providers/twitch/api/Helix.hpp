@@ -401,6 +401,18 @@ enum class HelixRemoveChannelVIPError {
     Forwarded,
 };
 
+enum class HelixUnbanUserError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+    ConflictingOperation,
+    TargetNotBanned,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 class IHelix
 {
 public:
@@ -567,6 +579,12 @@ public:
         FailureCallback<HelixRemoveChannelVIPError, QString>
             failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference#unban-user
+    virtual void unbanUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixUnbanUserError, QString> failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
 
@@ -726,6 +744,12 @@ public:
                           ResultCallback<> successCallback,
                           FailureCallback<HelixRemoveChannelVIPError, QString>
                               failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#unban-user
+    void unbanUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixUnbanUserError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

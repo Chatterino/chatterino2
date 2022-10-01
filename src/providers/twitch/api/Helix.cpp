@@ -1262,7 +1262,6 @@ void Helix::removeChannelVIP(
     FailureCallback<HelixRemoveChannelVIPError, QString> failureCallback)
 {
     using Error = HelixRemoveChannelVIPError;
-
     QUrlQuery urlQuery;
 
     urlQuery.addQueryItem("broadcaster_id", broadcasterID);
@@ -1327,6 +1326,97 @@ void Helix::removeChannelVIP(
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error removing channel VIP:"
                         << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
+void Helix::unbanUser(
+    QString broadcasterID, QString moderatorID, QString userID,
+    ResultCallback<> successCallback,
+    FailureCallback<HelixUnbanUserError, QString> failureCallback)
+{
+    using Error = HelixUnbanUserError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+    urlQuery.addQueryItem("user_id", userID);
+
+    this->makeRequest("moderation/bans", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for unbanning user was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.startsWith("The user in the user_id query "
+                                           "parameter is not banned",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::TargetNotBanned, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 409: {
+                    failureCallback(Error::ConflictingOperation, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare("incorrect user authorization",
+                                             Qt::CaseInsensitive) == 0 ||
+                             message.startsWith("the id in broadcaster_id must "
+                                                "match the user id",
+                                                Qt::CaseInsensitive))
+                    {
+                        // This error is particularly ugly, but is the equivalent to a user not having permissions
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error unbanning user:" << result.status()
+                        << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
