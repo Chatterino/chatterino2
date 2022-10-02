@@ -391,7 +391,30 @@ enum class HelixAddChannelVIPError {
     Forwarded,
 };
 
-enum class HelixStartRaidError {
+enum class HelixRemoveChannelVIPError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+// These changes are from the helix-command-migration/unban-untimeout branch
+enum class HelixUnbanUserError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+    ConflictingOperation,
+    TargetNotBanned,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // These changes are from the helix-command-migration/unban-untimeout branch
+
+enum class HelixStartRaidError {  // /raid
     Unknown,
     UserMissingScope,
     UserNotAuthorized,
@@ -400,7 +423,7 @@ enum class HelixStartRaidError {
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
-};
+};  // /raid
 
 class IHelix
 {
@@ -562,11 +585,27 @@ public:
         QString broadcasterID, QString userID, ResultCallback<> successCallback,
         FailureCallback<HelixAddChannelVIPError, QString> failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference#remove-channel-vip
+    virtual void removeChannelVIP(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixRemoveChannelVIPError, QString>
+            failureCallback) = 0;
+
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // https://dev.twitch.tv/docs/api/reference#unban-user
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    virtual void unbanUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixUnbanUserError, QString> failureCallback) = 0;
+    // These changes are from the helix-command-migration/unban-untimeout branch
+
     // https://dev.twitch.tv/docs/api/reference#start-a-raid
     virtual void startRaid(
         QString fromBroadcasterID, QString toBroadcasterID,
         ResultCallback<> successCallback,
         FailureCallback<HelixStartRaidError, QString> failureCallback) = 0;
+    // https://dev.twitch.tv/docs/api/reference#start-a-raid
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
@@ -722,11 +761,27 @@ public:
                        FailureCallback<HelixAddChannelVIPError, QString>
                            failureCallback) final;
 
+    // https://dev.twitch.tv/docs/api/reference#remove-channel-vip
+    void removeChannelVIP(QString broadcasterID, QString userID,
+                          ResultCallback<> successCallback,
+                          FailureCallback<HelixRemoveChannelVIPError, QString>
+                              failureCallback) final;
+
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // https://dev.twitch.tv/docs/api/reference#unban-user
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    void unbanUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixUnbanUserError, QString> failureCallback) final;
+    // These changes are from the helix-command-migration/unban-untimeout branch
+
     // https://dev.twitch.tv/docs/api/reference#start-a-raid
     void startRaid(
         QString fromBroadcasterID, QString toBroadcasterID,
         ResultCallback<> successCallback,
         FailureCallback<HelixStartRaidError, QString> failureCallback) final;
+    // https://dev.twitch.tv/docs/api/reference#start-a-raid
 
     void update(QString clientId, QString oauthToken) final;
 
