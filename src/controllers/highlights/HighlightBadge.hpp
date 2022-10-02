@@ -102,7 +102,7 @@ struct Deserialize<chatterino::HighlightBadge> {
 
         QString _name;
         QString _displayName;
-        bool _showInMentions;
+        bool _showInMentions = false;
         bool _hasAlert = true;
         bool _hasSound = false;
         QString _soundUrl;
