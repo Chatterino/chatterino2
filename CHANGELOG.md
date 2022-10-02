@@ -24,6 +24,7 @@
 - Minor: Added chatter count for each category in viewer list. (#3683, #3719)
 - Minor: Added option to open a user's chat in a new tab from the usercard profile picture context menu. (#3625)
 - Minor: Added scrollbar to `Select filters` dialog. (#3737)
+- Minor: Added `showInMentions` toggle for Badge Highlights. (#4034)
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
 - Minor: Added Quick Switcher item to open a channel in a new popup window. (#3828)
 - Minor: Added information about the user's operating system in the About page. (#3663)
