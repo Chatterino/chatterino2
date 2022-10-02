@@ -367,6 +367,15 @@ static QString DEFAULT_SETTINGS = R"!(
                 "sound": false,
                 "soundUrl": "",
                 "color": "#7fe8b7eb"
+            },
+            {
+                "name": "vip",
+                "displayName": "VIP",
+                "showInMentions": true,
+                "alert": false,
+                "sound": false,
+                "soundUrl": "",
+                "color": "#7fe8b7ec"
             }
         ],
         "subHighlightColor": "#64ffd641"
@@ -531,6 +540,32 @@ TEST_F(HighlightControllerTest, A)
             },
         },
         {
+            // Badge highlight with showInMentions only
+            {
+                // input
+                MessageParseArgs{},  // no special args
+                {
+                    {
+                        "vip",
+                        "0",
+                    },
+                },
+                "badge",                  // sender name
+                "show in mentions only",  // original message
+            },
+            {
+                // expected
+                true,  // state
+                {
+                    false,                                  // alert
+                    false,                                  // playsound
+                    boost::none,                            // custom sound url
+                    std::make_shared<QColor>("#7fe8b7ec"),  // color
+                    true,                                   // showInMentions
+                },
+            },
+        },
+        {
             // User mention with showInMentions
             {
                 // input
@@ -602,6 +637,8 @@ TEST_F(HighlightControllerTest, A)
         EXPECT_EQ(isMatch, expected.state)
             << qUtf8Printable(input.senderName) << ": "
             << qUtf8Printable(input.originalMessage);
-        EXPECT_EQ(matchResult, expected.result);
+        EXPECT_EQ(matchResult, expected.result)
+            << qUtf8Printable(input.senderName) << ": "
+            << qUtf8Printable(input.originalMessage);
     }
 }
