@@ -9,10 +9,12 @@ QColor HighlightBadge::FALLBACK_HIGHLIGHT_COLOR = QColor(127, 63, 73, 127);
 
 bool HighlightBadge::operator==(const HighlightBadge &other) const
 {
-    return std::tie(this->badgeName_, this->displayName_, this->hasSound_,
-                    this->hasAlert_, this->soundUrl_, this->color_) ==
-           std::tie(other.badgeName_, other.displayName_, other.hasSound_,
-                    other.hasAlert_, other.soundUrl_, other.color_);
+    return std::tie(this->badgeName_, this->displayName_, this->showInMentions_,
+                    this->hasSound_, this->hasAlert_, this->soundUrl_,
+                    this->color_) ==
+           std::tie(other.badgeName_, other.displayName_, other.showInMentions_,
+                    other.hasSound_, other.hasAlert_, other.soundUrl_,
+                    other.color_);
 }
 
 HighlightBadge::HighlightBadge(const QString &badgeName,
@@ -54,6 +56,11 @@ const QString &HighlightBadge::badgeName() const
 const QString &HighlightBadge::displayName() const
 {
     return this->displayName_;
+}
+
+bool HighlightBadge::showInMentions() const
+{
+    return this->showInMentions_;
 }
 
 bool HighlightBadge::hasAlert() const
