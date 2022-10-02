@@ -273,6 +273,14 @@ public:
          (FailureCallback<HelixUnbanUserError, QString> failureCallback)),
         (override));
 
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(  // /raid
+        void, startRaid,
+        (QString fromBroadcasterID, QString toBroadcasterId,
+         ResultCallback<> successCallback,
+         (FailureCallback<HelixStartRaidError, QString> failureCallback)),
+        (override));  // /raid
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 };
