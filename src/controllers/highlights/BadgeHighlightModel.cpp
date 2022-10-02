@@ -9,7 +9,7 @@ namespace chatterino {
 
 // commandmodel
 BadgeHighlightModel::BadgeHighlightModel(QObject *parent)
-    : SignalVectorModel<HighlightBadge>(5, parent)
+    : SignalVectorModel<HighlightBadge>(6, parent)
 {
 }
 
