@@ -1530,6 +1530,170 @@ void Helix::startRaid(
         .execute();
 }
 
+void Helix::updateEmoteMode(
+    QString broadcasterID, QString moderatorID, bool emoteMode,
+    ResultCallback<HelixChatSettings> successCallback,
+    FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
+{
+    QJsonObject json;
+    json["emote_mode"] = emoteMode;
+    this->updateChatSettings(broadcasterID, moderatorID, json, successCallback,
+                             failureCallback);
+}
+
+void Helix::updateFollowerMode(
+    QString broadcasterID, QString moderatorID,
+    boost::optional<int> followerModeDuration,
+    ResultCallback<HelixChatSettings> successCallback,
+    FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
+{
+    QJsonObject json;
+    json["follower_mode"] = followerModeDuration.has_value();
+    if (followerModeDuration)
+    {
+        json["follower_mode_duration"] = *followerModeDuration;
+    }
+
+    this->updateChatSettings(broadcasterID, moderatorID, json, successCallback,
+                             failureCallback);
+}
+
+void Helix::updateNonModeratorChatDelay(
+    QString broadcasterID, QString moderatorID,
+    boost::optional<int> nonModeratorChatDelayDuration,
+    ResultCallback<HelixChatSettings> successCallback,
+    FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
+{
+    QJsonObject json;
+    json["non_moderator_chat_delay"] =
+        nonModeratorChatDelayDuration.has_value();
+    if (nonModeratorChatDelayDuration)
+    {
+        json["non_moderator_chat_delay_duration"] =
+            *nonModeratorChatDelayDuration;
+    }
+
+    this->updateChatSettings(broadcasterID, moderatorID, json, successCallback,
+                             failureCallback);
+}
+
+void Helix::updateSlowMode(
+    QString broadcasterID, QString moderatorID,
+    boost::optional<int> slowModeWaitTime,
+    ResultCallback<HelixChatSettings> successCallback,
+    FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
+{
+    QJsonObject json;
+    json["slow_mode"] = slowModeWaitTime.has_value();
+    if (slowModeWaitTime)
+    {
+        json["slow_mode_wait_time"] = *slowModeWaitTime;
+    }
+
+    this->updateChatSettings(broadcasterID, moderatorID, json, successCallback,
+                             failureCallback);
+}
+
+void Helix::updateSubscriberMode(
+    QString broadcasterID, QString moderatorID, bool subscriberMode,
+    ResultCallback<HelixChatSettings> successCallback,
+    FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
+{
+    QJsonObject json;
+    json["subscriber_mode"] = subscriberMode;
+    this->updateChatSettings(broadcasterID, moderatorID, json, successCallback,
+                             failureCallback);
+}
+
+void Helix::updateUniqueChatMode(
+    QString broadcasterID, QString moderatorID, bool uniqueChatMode,
+    ResultCallback<HelixChatSettings> successCallback,
+    FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
+{
+    QJsonObject json;
+    json["unique_chat_mode"] = uniqueChatMode;
+    this->updateChatSettings(broadcasterID, moderatorID, json, successCallback,
+                             failureCallback);
+}
+
+void Helix::updateChatSettings(
+    QString broadcasterID, QString moderatorID, QJsonObject payload,
+    ResultCallback<HelixChatSettings> successCallback,
+    FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
+{
+    using Error = HelixUpdateChatSettingsError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    this->makeRequest("chat/settings", urlQuery)
+        .type(NetworkRequestType::Patch)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback](auto result) -> Outcome {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for updating chat settings was"
+                    << result.status() << "but we expected it to be 200";
+            }
+            auto response = result.parseJson();
+            successCallback(HelixChatSettings(
+                response.value("data").toArray().first().toObject()));
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400:
+                case 409:
+                case 422:
+                case 425: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 403: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error updating chat settings:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

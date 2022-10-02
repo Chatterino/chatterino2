@@ -43,6 +43,8 @@
 - Minor: Migrated /clear command to Helix API. (#3994)
 - Minor: Migrated /color command to Helix API. (#3988)
 - Minor: Migrated /delete command to Helix API. (#3999)
+- Minor: Migrated /emoteonly command to Helix API. (#4015)
+- Minor: Migrated /emoteonlyoff command to Helix API. (#4015)
 - Minor: Migrated /mod command to Helix API. (#4000)
 - Minor: Migrated /unmod command to Helix API. (#4001)
 - Minor: Migrated /vip command to Helix API. (#4010)

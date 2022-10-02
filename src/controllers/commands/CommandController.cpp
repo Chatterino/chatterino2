@@ -2105,6 +2105,122 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             return "";
         });  // /raid
+
+    const auto formatChatSettingsError =
+        [](const HelixUpdateChatSettingsError error, const QString &message) {
+            QString errorMessage = QString("Failed to update - ");
+            using Error = HelixUpdateChatSettingsError;
+            switch (error)
+            {
+                case Error::UserMissingScope: {
+                    // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                    errorMessage += "Missing required scope. "
+                                    "Re-login with your "
+                                    "account and try again.";
+                }
+                break;
+
+                case Error::UserNotAuthorized: {
+                    // TODO(pajlada): Phrase MISSING_PERMISSION
+                    errorMessage += "You don't have permission to "
+                                    "perform that action.";
+                }
+                break;
+
+                case Error::Ratelimited: {
+                    errorMessage += "You are being ratelimited by Twitch. Try "
+                                    "again in a few seconds.";
+                }
+                break;
+
+                case Error::Forwarded: {
+                    errorMessage = message;
+                }
+                break;
+
+                case Error::Unknown:
+                default: {
+                    errorMessage += "An unknown error has occurred.";
+                }
+                break;
+            }
+            return errorMessage;
+        };
+
+    this->registerCommand("/emoteonly", [formatChatSettingsError](
+                                            const QStringList & /* words */,
+                                            auto channel) {
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You must be logged in to update chat settings!"));
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /emoteonly command only works in Twitch channels"));
+            return "";
+        }
+
+        if (twitchChannel->accessRoomModes()->emoteOnly)
+        {
+            channel->addMessage(
+                makeSystemMessage("This room is already in emote-only mode."));
+            return "";
+        }
+
+        getHelix()->updateEmoteMode(
+            twitchChannel->roomId(), currentUser->getUserId(), true,
+            [](auto) {
+                //we'll get a message from irc
+            },
+            [channel, formatChatSettingsError](auto error, auto message) {
+                channel->addMessage(
+                    makeSystemMessage(formatChatSettingsError(error, message)));
+            });
+        return "";
+    });
+
+    this->registerCommand(
+        "/emoteonlyoff", [formatChatSettingsError](
+                             const QStringList & /* words */, auto channel) {
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (currentUser->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to update chat settings!"));
+                return "";
+            }
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /emoteonlyoff command only works in Twitch channels"));
+                return "";
+            }
+
+            if (!twitchChannel->accessRoomModes()->emoteOnly)
+            {
+                channel->addMessage(
+                    makeSystemMessage("This room is not in emote-only mode."));
+                return "";
+            }
+
+            getHelix()->updateEmoteMode(
+                twitchChannel->roomId(), currentUser->getUserId(), false,
+                [](auto) {
+                    // we'll get a message from irc
+                },
+                [channel, formatChatSettingsError](auto error, auto message) {
+                    channel->addMessage(makeSystemMessage(
+                        formatChatSettingsError(error, message)));
+                });
+            return "";
+        });
 }
 
 void CommandController::save()
