@@ -367,6 +367,15 @@ static QString DEFAULT_SETTINGS = R"!(
                 "sound": false,
                 "soundUrl": "",
                 "color": "#7fe8b7eb"
+            },
+            {
+                "name": "vip",
+                "displayName": "VIP",
+                "showInMentions": true,
+                "alert": false,
+                "sound": false,
+                "soundUrl": "",
+                "color": "#7fe8b7ec"
             }
         ],
         "subHighlightColor": "#64ffd641"
@@ -527,6 +536,32 @@ TEST_F(HighlightControllerTest, A)
                     boost::none,                            // custom sound url
                     std::make_shared<QColor>("#7fffffff"),  // color
                     false,                                  //showInMentions
+                },
+            },
+        },
+        {
+            // Badge highlight with showInMentions only
+            {
+                // input
+                MessageParseArgs{},  // no special args
+                {
+                    {
+                        "vip",
+                        "0",
+                    },
+                },
+                "badge",                  // sender name
+                "show in mentions only",  // original message
+            },
+            {
+                // expected
+                true,  // state
+                {
+                    false,                                  // alert
+                    false,                                  // playsound
+                    boost::none,                            // custom sound url
+                    std::make_shared<QColor>("#7fe8b7ec"),  // color
+                    true,                                   // showInMentions
                 },
             },
         },
