@@ -10,6 +10,7 @@ const QStringList &getSampleCheerMessages();
 const QStringList &getSampleSubMessages();
 const QStringList &getSampleMiscMessages();
 const QStringList &getSampleEmoteTestMessages();
+const QStringList &getSampleSubMessages();
 
 /// Channel point reward tests
 
