@@ -38,7 +38,29 @@
 #include <QUrl>
 
 namespace {
+
 using namespace chatterino;
+
+bool areIRCCommandsStillAvailable()
+{
+    // TODO: time-gate
+    return true;
+}
+
+QString useIRCCommand(const QStringList &words)
+{
+    // Reform the original command
+    auto originalCommand = words.join(" ");
+
+    // Replace the / with a . to pass it along to TMI
+    auto newCommand = originalCommand;
+    newCommand.replace(0, 1, ".");
+
+    qCDebug(chatterinoTwitch)
+        << "Forwarding command" << originalCommand << "as" << newCommand;
+
+    return newCommand;
+}
 
 void sendWhisperMessage(const QString &text)
 {
@@ -1960,6 +1982,129 @@ void CommandController::initialize(Settings &, Paths &paths)
     // These changes are from the helix-command-migration/unban-untimeout branch
     // These changes are from the helix-command-migration/unban-untimeout branch
     // These changes are from the helix-command-migration/unban-untimeout branch
+
+    this->registerCommand(  // /raid
+        "/raid", [](const QStringList &words, auto channel) -> QString {
+            switch (getSettings()->helixTimegateRaid.getValue())
+            {
+                case HelixTimegateOverride::Timegate: {
+                    if (areIRCCommandsStillAvailable())
+                    {
+                        return useIRCCommand(words);
+                    }
+
+                    // fall through to Helix logic
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseIRC: {
+                    return useIRCCommand(words);
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseHelix: {
+                    // do nothing and fall through to Helix logic
+                }
+                break;
+            }
+
+            if (words.size() < 2)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: \"/raid <username>\" - Raid a user. "
+                    "Only the broadcaster can start a raid."));
+                return "";
+            }
+
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (currentUser->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to start a raid!"));
+                return "";
+            }
+
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /raid command only works in Twitch channels"));
+                return "";
+            }
+
+            auto target = words.at(1);
+            stripChannelName(target);
+
+            getHelix()->getUserByName(
+                target,
+                [twitchChannel, channel](const HelixUser &targetUser) {
+                    getHelix()->startRaid(
+                        twitchChannel->roomId(), targetUser.id,
+                        [channel, targetUser] {
+                            channel->addMessage(makeSystemMessage(
+                                QString("You started to raid %1.")
+                                    .arg(targetUser.displayName)));
+                        },
+                        [channel, targetUser](auto error, auto message) {
+                            QString errorMessage =
+                                QString("Failed to start a raid - ");
+
+                            using Error = HelixStartRaidError;
+
+                            switch (error)
+                            {
+                                case Error::UserMissingScope: {
+                                    // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                                    errorMessage += "Missing required scope. "
+                                                    "Re-login with your "
+                                                    "account and try again.";
+                                }
+                                break;
+
+                                case Error::UserNotAuthorized: {
+                                    errorMessage +=
+                                        "You must be the broadcaster "
+                                        "to start a raid.";
+                                }
+                                break;
+
+                                case Error::CantRaidYourself: {
+                                    errorMessage +=
+                                        "A channel cannot raid itself.";
+                                }
+                                break;
+
+                                case Error::Ratelimited: {
+                                    errorMessage += "You are being ratelimited "
+                                                    "by Twitch. Try "
+                                                    "again in a few seconds.";
+                                }
+                                break;
+
+                                case Error::Forwarded: {
+                                    errorMessage += message;
+                                }
+                                break;
+
+                                case Error::Unknown:
+                                default: {
+                                    errorMessage +=
+                                        "An unknown error has occurred.";
+                                }
+                                break;
+                            }
+                            channel->addMessage(
+                                makeSystemMessage(errorMessage));
+                        });
+                },
+                [channel, target] {
+                    // Equivalent error from IRC
+                    channel->addMessage(makeSystemMessage(
+                        QString("Invalid username: %1").arg(target)));
+                });
+
+            return "";
+        });  // /raid
 }
 
 void CommandController::save()

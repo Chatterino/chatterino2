@@ -414,6 +414,17 @@ enum class HelixUnbanUserError {
     Forwarded,
 };  // These changes are from the helix-command-migration/unban-untimeout branch
 
+enum class HelixStartRaidError {  // /raid
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    CantRaidYourself,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // /raid
+
 class IHelix
 {
 public:
@@ -589,6 +600,13 @@ public:
         FailureCallback<HelixUnbanUserError, QString> failureCallback) = 0;
     // These changes are from the helix-command-migration/unban-untimeout branch
 
+    // https://dev.twitch.tv/docs/api/reference#start-a-raid
+    virtual void startRaid(
+        QString fromBroadcasterID, QString toBroadcasterID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixStartRaidError, QString> failureCallback) = 0;
+    // https://dev.twitch.tv/docs/api/reference#start-a-raid
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 };
 
@@ -757,6 +775,13 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixUnbanUserError, QString> failureCallback) final;
     // These changes are from the helix-command-migration/unban-untimeout branch
+
+    // https://dev.twitch.tv/docs/api/reference#start-a-raid
+    void startRaid(
+        QString fromBroadcasterID, QString toBroadcasterID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixStartRaidError, QString> failureCallback) final;
+    // https://dev.twitch.tv/docs/api/reference#start-a-raid
 
     void update(QString clientId, QString oauthToken) final;
 

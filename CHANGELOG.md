@@ -49,6 +49,7 @@
 - Minor: Migrated /unvip command to Helix API. (#4025)
 - Minor: Migrated /untimeout to Helix API. (#4026)
 - Minor: Migrated /unban to Helix API. (#4026)
+- Minor: Migrated /raid command to Helix API. (#4029)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fixed `Smooth scrolling on new messages` setting sometimes hiding messages. (#4028)
 - Bugfix: Fixed a crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
