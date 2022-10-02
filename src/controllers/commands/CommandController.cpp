@@ -38,7 +38,29 @@
 #include <QUrl>
 
 namespace {
+
 using namespace chatterino;
+
+bool areIRCCommandsStillAvailable()
+{
+    // TODO: time-gate
+    return true;
+}
+
+QString useIRCCommand(const QStringList &words)
+{
+    // Reform the original command
+    auto originalCommand = words.join(" ");
+
+    // Replace the / with a . to pass it along to TMI
+    auto newCommand = originalCommand;
+    newCommand.replace(0, 1, ".");
+
+    qCDebug(chatterinoTwitch)
+        << "Forwarding command" << originalCommand << "as" << newCommand;
+
+    return newCommand;
+}
 
 void sendWhisperMessage(const QString &text)
 {
@@ -1725,6 +1747,364 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+
+    this->registerCommand("/unvip", [](const QStringList &words, auto channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(
+                "Usage: \"/unvip <username>\" - Revoke VIP status from a user. "
+                "Use \"/vips\" to list the VIPs of this channel."));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to UnVIP someone!"));
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /unvip command only works in Twitch channels"));
+            return "";
+        }
+
+        auto target = words.at(1);
+        stripChannelName(target);
+
+        getHelix()->getUserByName(
+            target,
+            [twitchChannel, channel](const HelixUser &targetUser) {
+                getHelix()->removeChannelVIP(
+                    twitchChannel->roomId(), targetUser.id,
+                    [channel, targetUser] {
+                        channel->addMessage(makeSystemMessage(
+                            QString(
+                                "You have removed %1 as a VIP of this channel.")
+                                .arg(targetUser.displayName)));
+                    },
+                    [channel, targetUser](auto error, auto message) {
+                        QString errorMessage =
+                            QString("Failed to remove VIP - ");
+
+                        using Error = HelixRemoveChannelVIPError;
+
+                        switch (error)
+                        {
+                            case Error::UserMissingScope: {
+                                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                                errorMessage += "Missing required scope. "
+                                                "Re-login with your "
+                                                "account and try again.";
+                            }
+                            break;
+
+                            case Error::UserNotAuthorized: {
+                                // TODO(pajlada): Phrase MISSING_PERMISSION
+                                errorMessage += "You don't have permission to "
+                                                "perform that action.";
+                            }
+                            break;
+
+                            case Error::Ratelimited: {
+                                errorMessage +=
+                                    "You are being ratelimited by Twitch. Try "
+                                    "again in a few seconds.";
+                            }
+                            break;
+
+                            case Error::Forwarded: {
+                                // These are actually the IRC equivalents, so we can ditch the prefix
+                                errorMessage = message;
+                            }
+                            break;
+
+                            case Error::Unknown:
+                            default: {
+                                errorMessage +=
+                                    "An unknown error has occurred.";
+                            }
+                            break;
+                        }
+                        channel->addMessage(makeSystemMessage(errorMessage));
+                    });
+            },
+            [channel, target] {
+                // Equivalent error from IRC
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid username: %1").arg(target)));
+            });
+
+        return "";
+    });
+
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    auto unbanLambda = [](auto words, auto channel) {
+        auto commandName = words.at(0).toLower();
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("Usage: \"%1 <username>\" - Removes a ban on a user.")
+                    .arg(commandName)));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to unban someone!"));
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The %1 command only works in Twitch channels")
+                    .arg(commandName)));
+            return "";
+        }
+
+        auto target = words.at(1);
+        stripChannelName(target);
+
+        getHelix()->getUserByName(
+            target,
+            [channel, currentUser, twitchChannel,
+             target](const auto &targetUser) {
+                getHelix()->unbanUser(
+                    twitchChannel->roomId(), currentUser->getUserId(),
+                    targetUser.id,
+                    [] {
+                        // No response for unbans, they're emitted over pubsub/IRC instead
+                    },
+                    [channel, target, targetUser](auto error, auto message) {
+                        using Error = HelixUnbanUserError;
+
+                        QString errorMessage =
+                            QString("Failed to unban user - ");
+
+                        switch (error)
+                        {
+                            case Error::ConflictingOperation: {
+                                errorMessage +=
+                                    "There was a conflicting ban operation on "
+                                    "this user. Please try again.";
+                            }
+                            break;
+
+                            case Error::Forwarded: {
+                                errorMessage += message;
+                            }
+                            break;
+
+                            case Error::Ratelimited: {
+                                errorMessage +=
+                                    "You are being ratelimited by Twitch. Try "
+                                    "again in a few seconds.";
+                            }
+                            break;
+
+                            case Error::TargetNotBanned: {
+                                // Equivalent IRC error
+                                errorMessage =
+                                    QString(
+                                        "%1 is not banned from this channel.")
+                                        .arg(targetUser.displayName);
+                            }
+                            break;
+
+                            case Error::UserMissingScope: {
+                                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                                errorMessage += "Missing required scope. "
+                                                "Re-login with your "
+                                                "account and try again.";
+                            }
+                            break;
+
+                            case Error::UserNotAuthorized: {
+                                // TODO(pajlada): Phrase MISSING_PERMISSION
+                                errorMessage += "You don't have permission to "
+                                                "perform that action.";
+                            }
+                            break;
+
+                            case Error::Unknown: {
+                                errorMessage +=
+                                    "An unknown error has occurred.";
+                            }
+                            break;
+                        }
+
+                        channel->addMessage(makeSystemMessage(errorMessage));
+                    });
+            },
+            [channel, target] {
+                // Equivalent error from IRC
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid username: %1").arg(target)));
+            });
+
+        return "";
+    };  // These changes are from the helix-command-migration/unban-untimeout branch
+
+    this->registerCommand("/unban", [unbanLambda](const QStringList &words,
+                                                  auto channel) {
+        return unbanLambda(words, channel);
+    });  // These changes are from the helix-command-migration/unban-untimeout branch
+
+    this->registerCommand("/untimeout", [unbanLambda](const QStringList &words,
+                                                      auto channel) {
+        return unbanLambda(words, channel);
+    });  // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // These changes are from the helix-command-migration/unban-untimeout branch
+
+    this->registerCommand(  // /raid
+        "/raid", [](const QStringList &words, auto channel) -> QString {
+            switch (getSettings()->helixTimegateRaid.getValue())
+            {
+                case HelixTimegateOverride::Timegate: {
+                    if (areIRCCommandsStillAvailable())
+                    {
+                        return useIRCCommand(words);
+                    }
+
+                    // fall through to Helix logic
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseIRC: {
+                    return useIRCCommand(words);
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseHelix: {
+                    // do nothing and fall through to Helix logic
+                }
+                break;
+            }
+
+            if (words.size() < 2)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: \"/raid <username>\" - Raid a user. "
+                    "Only the broadcaster can start a raid."));
+                return "";
+            }
+
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (currentUser->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to start a raid!"));
+                return "";
+            }
+
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /raid command only works in Twitch channels"));
+                return "";
+            }
+
+            auto target = words.at(1);
+            stripChannelName(target);
+
+            getHelix()->getUserByName(
+                target,
+                [twitchChannel, channel](const HelixUser &targetUser) {
+                    getHelix()->startRaid(
+                        twitchChannel->roomId(), targetUser.id,
+                        [channel, targetUser] {
+                            channel->addMessage(makeSystemMessage(
+                                QString("You started to raid %1.")
+                                    .arg(targetUser.displayName)));
+                        },
+                        [channel, targetUser](auto error, auto message) {
+                            QString errorMessage =
+                                QString("Failed to start a raid - ");
+
+                            using Error = HelixStartRaidError;
+
+                            switch (error)
+                            {
+                                case Error::UserMissingScope: {
+                                    // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                                    errorMessage += "Missing required scope. "
+                                                    "Re-login with your "
+                                                    "account and try again.";
+                                }
+                                break;
+
+                                case Error::UserNotAuthorized: {
+                                    errorMessage +=
+                                        "You must be the broadcaster "
+                                        "to start a raid.";
+                                }
+                                break;
+
+                                case Error::CantRaidYourself: {
+                                    errorMessage +=
+                                        "A channel cannot raid itself.";
+                                }
+                                break;
+
+                                case Error::Ratelimited: {
+                                    errorMessage += "You are being ratelimited "
+                                                    "by Twitch. Try "
+                                                    "again in a few seconds.";
+                                }
+                                break;
+
+                                case Error::Forwarded: {
+                                    errorMessage += message;
+                                }
+                                break;
+
+                                case Error::Unknown:
+                                default: {
+                                    errorMessage +=
+                                        "An unknown error has occurred.";
+                                }
+                                break;
+                            }
+                            channel->addMessage(
+                                makeSystemMessage(errorMessage));
+                        });
+                },
+                [channel, target] {
+                    // Equivalent error from IRC
+                    channel->addMessage(makeSystemMessage(
+                        QString("Invalid username: %1").arg(target)));
+                });
+
+            return "";
+        });  // /raid
 
     const auto formatChatSettingsError =
         [](const HelixUpdateChatSettingsError error, const QString &message) {

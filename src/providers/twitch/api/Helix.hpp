@@ -420,7 +420,41 @@ enum class HelixAddChannelVIPError {
     Forwarded,
 };
 
-enum class HelixUpdateChatSettingsError {
+enum class HelixRemoveChannelVIPError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+// These changes are from the helix-command-migration/unban-untimeout branch
+enum class HelixUnbanUserError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+    ConflictingOperation,
+    TargetNotBanned,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // These changes are from the helix-command-migration/unban-untimeout branch
+
+enum class HelixStartRaidError {  // /raid
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    CantRaidYourself,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // /raid
+
+enum class HelixUpdateChatSettingsError {  // update chat settings
     Unknown,
     UserMissingScope,
     UserNotAuthorized,
@@ -428,7 +462,7 @@ enum class HelixUpdateChatSettingsError {
     Forbidden,
     // The error message is forwarded directly from the Twitch API
     Forwarded,
-};
+};  // update chat settings
 
 class IHelix
 {
@@ -590,6 +624,28 @@ public:
         QString broadcasterID, QString userID, ResultCallback<> successCallback,
         FailureCallback<HelixAddChannelVIPError, QString> failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference#remove-channel-vip
+    virtual void removeChannelVIP(
+        QString broadcasterID, QString userID, ResultCallback<> successCallback,
+        FailureCallback<HelixRemoveChannelVIPError, QString>
+            failureCallback) = 0;
+
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // https://dev.twitch.tv/docs/api/reference#unban-user
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    virtual void unbanUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixUnbanUserError, QString> failureCallback) = 0;
+    // These changes are from the helix-command-migration/unban-untimeout branch
+
+    // https://dev.twitch.tv/docs/api/reference#start-a-raid
+    virtual void startRaid(
+        QString fromBroadcasterID, QString toBroadcasterID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixStartRaidError, QString> failureCallback) = 0;
+    // https://dev.twitch.tv/docs/api/reference#start-a-raid
+
     // Updates the emote mode using
     // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     virtual void updateEmoteMode(
@@ -640,6 +696,7 @@ public:
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString>
             failureCallback) = 0;
+    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 
@@ -802,6 +859,28 @@ public:
                        ResultCallback<> successCallback,
                        FailureCallback<HelixAddChannelVIPError, QString>
                            failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#remove-channel-vip
+    void removeChannelVIP(QString broadcasterID, QString userID,
+                          ResultCallback<> successCallback,
+                          FailureCallback<HelixRemoveChannelVIPError, QString>
+                              failureCallback) final;
+
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    // https://dev.twitch.tv/docs/api/reference#unban-user
+    // These changes are from the helix-command-migration/unban-untimeout branch
+    void unbanUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixUnbanUserError, QString> failureCallback) final;
+    // These changes are from the helix-command-migration/unban-untimeout branch
+
+    // https://dev.twitch.tv/docs/api/reference#start-a-raid
+    void startRaid(
+        QString fromBroadcasterID, QString toBroadcasterID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixStartRaidError, QString> failureCallback) final;
+    // https://dev.twitch.tv/docs/api/reference#start-a-raid
 
     // Updates the emote mode using
     // https://dev.twitch.tv/docs/api/reference#update-chat-settings

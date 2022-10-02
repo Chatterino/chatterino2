@@ -259,6 +259,30 @@ public:
         (override));
 
     // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, removeChannelVIP,
+                (QString broadcasterID, QString userID,
+                 ResultCallback<> successCallback,
+                 (FailureCallback<HelixRemoveChannelVIPError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, unbanUser,
+        (QString broadcasterID, QString moderatorID, QString userID,
+         ResultCallback<> successCallback,
+         (FailureCallback<HelixUnbanUserError, QString> failureCallback)),
+        (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(  // /raid
+        void, startRaid,
+        (QString fromBroadcasterID, QString toBroadcasterId,
+         ResultCallback<> successCallback,
+         (FailureCallback<HelixStartRaidError, QString> failureCallback)),
+        (override));  // /raid
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
     MOCK_METHOD(void, updateEmoteMode,
                 (QString broadcasterID, QString moderatorID, bool emoteMode,
                  ResultCallback<HelixChatSettings> successCallback,
@@ -310,6 +334,7 @@ public:
                  (FailureCallback<HelixUpdateChatSettingsError, QString>
                       failureCallback)),
                 (override));
+    // update chat settings
 
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
@@ -414,6 +439,15 @@ static QString DEFAULT_SETTINGS = R"!(
                 "sound": false,
                 "soundUrl": "",
                 "color": "#7fe8b7eb"
+            },
+            {
+                "name": "vip",
+                "displayName": "VIP",
+                "showInMentions": true,
+                "alert": false,
+                "sound": false,
+                "soundUrl": "",
+                "color": "#7fe8b7ec"
             }
         ],
         "subHighlightColor": "#64ffd641"
@@ -578,6 +612,32 @@ TEST_F(HighlightControllerTest, A)
             },
         },
         {
+            // Badge highlight with showInMentions only
+            {
+                // input
+                MessageParseArgs{},  // no special args
+                {
+                    {
+                        "vip",
+                        "0",
+                    },
+                },
+                "badge",                  // sender name
+                "show in mentions only",  // original message
+            },
+            {
+                // expected
+                true,  // state
+                {
+                    false,                                  // alert
+                    false,                                  // playsound
+                    boost::none,                            // custom sound url
+                    std::make_shared<QColor>("#7fe8b7ec"),  // color
+                    true,                                   // showInMentions
+                },
+            },
+        },
+        {
             // User mention with showInMentions
             {
                 // input
@@ -649,6 +709,8 @@ TEST_F(HighlightControllerTest, A)
         EXPECT_EQ(isMatch, expected.state)
             << qUtf8Printable(input.senderName) << ": "
             << qUtf8Printable(input.originalMessage);
-        EXPECT_EQ(matchResult, expected.result);
+        EXPECT_EQ(matchResult, expected.result)
+            << qUtf8Printable(input.senderName) << ": "
+            << qUtf8Printable(input.originalMessage);
     }
 }

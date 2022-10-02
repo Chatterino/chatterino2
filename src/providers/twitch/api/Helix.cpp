@@ -1257,6 +1257,279 @@ void Helix::addChannelVIP(
         .execute();
 }
 
+void Helix::removeChannelVIP(
+    QString broadcasterID, QString userID, ResultCallback<> successCallback,
+    FailureCallback<HelixRemoveChannelVIPError, QString> failureCallback)
+{
+    using Error = HelixRemoveChannelVIPError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("user_id", userID);
+
+    this->makeRequest("channels/vips", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for removing channel VIP was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400:
+                case 409:
+                case 422: {
+                    // Most of the errors returned by this endpoint are pretty good. We can rely on Twitch's API messages
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare("incorrect user authorization",
+                                             Qt::CaseInsensitive) == 0 ||
+                             message.startsWith("the id in broadcaster_id must "
+                                                "match the user id",
+                                                Qt::CaseInsensitive))
+                    {
+                        // This error is particularly ugly, but is the equivalent to a user not having permissions
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error removing channel VIP:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+void Helix::unbanUser(
+    QString broadcasterID, QString moderatorID, QString userID,
+    ResultCallback<> successCallback,
+    FailureCallback<HelixUnbanUserError, QString> failureCallback)
+{
+    using Error = HelixUnbanUserError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+    urlQuery.addQueryItem("user_id", userID);
+
+    this->makeRequest("moderation/bans", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for unbanning user was"
+                    << result.status() << "but we only expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.startsWith("The user in the user_id query "
+                                           "parameter is not banned",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::TargetNotBanned, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 409: {
+                    failureCallback(Error::ConflictingOperation, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare("incorrect user authorization",
+                                             Qt::CaseInsensitive) == 0 ||
+                             message.startsWith("the id in broadcaster_id must "
+                                                "match the user id",
+                                                Qt::CaseInsensitive))
+                    {
+                        // This error is particularly ugly, but is the equivalent to a user not having permissions
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error unbanning user:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}  // These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+// These changes are from the helix-command-migration/unban-untimeout branch
+
+void Helix::startRaid(
+    QString fromBroadcasterID, QString toBroadcasterID,
+    ResultCallback<> successCallback,
+    FailureCallback<HelixStartRaidError, QString> failureCallback)
+{
+    using Error = HelixStartRaidError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("from_broadcaster_id", fromBroadcasterID);
+    urlQuery.addQueryItem("to_broadcaster_id", toBroadcasterID);
+
+    this->makeRequest("raids", urlQuery)
+        .type(NetworkRequestType::Post)
+        .onSuccess(
+            [successCallback, failureCallback](auto /*result*/) -> Outcome {
+                successCallback();
+                return Success;
+            })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.compare("The IDs in from_broadcaster_id and "
+                                        "to_broadcaster_id cannot be the same.",
+                                        Qt::CaseInsensitive) == 0)
+                    {
+                        failureCallback(Error::CantRaidYourself, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare(
+                                 "The ID in broadcaster_id must match the user "
+                                 "ID "
+                                 "found in the request's OAuth token.",
+                                 Qt::CaseInsensitive) == 0)
+                    {
+                        // Must be the broadcaster.
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 409: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error while starting a raid:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 void Helix::updateEmoteMode(
     QString broadcasterID, QString moderatorID, bool emoteMode,
     ResultCallback<HelixChatSettings> successCallback,

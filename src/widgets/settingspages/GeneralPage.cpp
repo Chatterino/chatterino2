@@ -1,10 +1,7 @@
-#include "GeneralPage.hpp"
-
-#include <QFontDialog>
-#include <QLabel>
-#include <QScrollArea>
+#include "widgets/settingspages/GeneralPage.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/NativeMessaging.hpp"
@@ -21,6 +18,9 @@
 
 #include <QDesktopServices>
 #include <QFileDialog>
+#include <QFontDialog>
+#include <QLabel>
+#include <QScrollArea>
 
 #define CHROME_EXTENSION_LINK                                           \
     "https://chrome.google.com/webstore/detail/chatterino-native-host/" \
@@ -719,6 +719,52 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
+
+    // Helix timegate settings
+    auto helixTimegateGetValue = [](auto val) {
+        switch (val)
+        {
+            case HelixTimegateOverride::Timegate:
+                return "Timegate";
+            case HelixTimegateOverride::AlwaysUseIRC:
+                return "Always use IRC";
+            case HelixTimegateOverride::AlwaysUseHelix:
+                return "Always use Helix";
+            default:
+                return "Timegate";
+        }
+    };
+
+    auto helixTimegateSetValue = [](auto args) {
+        const auto &v = args.value;
+        if (v == "Timegate")
+        {
+            return HelixTimegateOverride::Timegate;
+        }
+        if (v == "Always use IRC")
+        {
+            return HelixTimegateOverride::AlwaysUseIRC;
+        }
+        if (v == "Always use Helix")
+        {
+            return HelixTimegateOverride::AlwaysUseHelix;
+        }
+
+        qCDebug(chatterinoSettings) << "Unknown Helix timegate override value"
+                                    << v << ", using default value Timegate";
+        return HelixTimegateOverride::Timegate;
+    };
+
+    auto *helixTimegateRaid =
+        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
+            "Helix timegate /raid behaviour",
+            {"Timegate", "Always use IRC", "Always use Helix"},
+            s.helixTimegateRaid,
+            helixTimegateGetValue,  //
+            helixTimegateSetValue,  //
+            false);
+    helixTimegateRaid->setMinimumWidth(
+        helixTimegateRaid->minimumSizeHint().width());
 
     layout.addStretch();
 
