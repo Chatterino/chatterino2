@@ -43,8 +43,10 @@ using namespace chatterino;
 
 bool areIRCCommandsStillAvailable()
 {
-    // TODO: time-gate
-    return true;
+    // 11th of February 2023, 06:00am UTC
+    const QDateTime migrationTime(QDate(2023, 2, 11), QTime(6, 0), Qt::UTC);
+    auto now = QDateTime::currentDateTimeUtc();
+    return now < migrationTime;
 }
 
 QString useIRCCommand(const QStringList &words)
