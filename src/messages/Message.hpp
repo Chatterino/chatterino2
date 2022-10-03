@@ -42,9 +42,12 @@ enum class MessageFlag : uint32_t {
     ShowInMentions = (1 << 22),
     FirstMessage = (1 << 23),
     ReplyMessage = (1 << 24),
-    SevenTvEventApiAddEmoteMessage = (1 << 25),
-    SevenTvEventApiRemoveEmoteMessage = (1 << 26),
-    SevenTvEventApiUpdateEmoteMessage = (1 << 27),
+    ElevatedMessage = (1 << 25),
+
+    // SevenTV Flags
+    SevenTvEventApiAddEmoteMessage = (1 << 30),
+    SevenTvEventApiRemoveEmoteMessage = (1 << 31),
+    SevenTvEventApiUpdateEmoteMessage = (1 << 32),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

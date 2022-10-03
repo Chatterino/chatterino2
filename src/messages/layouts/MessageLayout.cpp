@@ -66,6 +66,11 @@ int MessageLayout::getHeight() const
     return container_->getHeight();
 }
 
+int MessageLayout::getWidth() const
+{
+    return this->container_->getWidth();
+}
+
 // Layout
 // return true if redraw is required
 bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
@@ -305,8 +310,16 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
         }
     }();
 
-    if (this->message_->flags.has(MessageFlag::FirstMessage) &&
-        getSettings()->enableFirstMessageHighlight.getValue())
+    if (this->message_->flags.has(MessageFlag::ElevatedMessage) &&
+        getSettings()->enableElevatedMessageHighlight.getValue())
+    {
+        backgroundColor = blendColors(backgroundColor,
+                                      *ColorProvider::instance().color(
+                                          ColorType::ElevatedMessageHighlight));
+    }
+
+    else if (this->message_->flags.has(MessageFlag::FirstMessage) &&
+             getSettings()->enableFirstMessageHighlight.getValue())
     {
         backgroundColor = blendColors(
             backgroundColor,

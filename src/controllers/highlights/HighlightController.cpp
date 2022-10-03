@@ -181,9 +181,11 @@ void rebuildUserHighlights(Settings &settings,
                 }
 
                 return HighlightResult{
-                    highlight.hasAlert(),       highlight.hasSound(),
-                    highlightSoundUrl,          highlight.getColor(),
-                    highlight.showInMentions(),
+                    highlight.hasAlert(),        //
+                    highlight.hasSound(),        //
+                    highlightSoundUrl,           //
+                    highlight.getColor(),        //
+                    highlight.showInMentions(),  //
                 };
             }});
     }
@@ -216,11 +218,11 @@ void rebuildBadgeHighlights(Settings &settings,
                         }
 
                         return HighlightResult{
-                            highlight.hasAlert(),
-                            highlight.hasSound(),
-                            highlightSoundUrl,
-                            highlight.getColor(),
-                            false,  // showInMentions
+                            highlight.hasAlert(),        //
+                            highlight.hasSound(),        //
+                            highlightSoundUrl,           //
+                            highlight.getColor(),        //
+                            highlight.showInMentions(),  //
                         };
                     }
                 }

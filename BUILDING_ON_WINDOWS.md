@@ -150,7 +150,6 @@ Now open the project in CLion. You will be greeted with the _Open Project Wizard
 ```
 -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64\lib\cmake\Qt5
 -DUSE_CONAN=ON
--DCMAKE_CXX_FLAGS=/bigobj
 ```
 
 and the _Build Directory_ to `build`.
@@ -189,3 +188,29 @@ Now you can run the `chatterino | Debug` configuration.
 
 If you want to run the portable version of Chatterino, create a file called `modes` inside of `build/bin` and
 write `portable` into it.
+
+### Debugging
+
+To visualize QT types like `QString`, you need to inform CLion and LLDB
+about these types.
+
+1. Set `Enable NatVis renderers for LLDB option`
+   in `Settings | Build, Execution, Deployment | Debugger | Data Views | C/C++` (should be enabled by default).
+2. Use the official NatVis file for QT from [`qt-labs/vstools`](https://github.com/qt-labs/vstools) by saving them to
+   the project root using PowerShell:
+
+<!--
+When switching to QT6 these need to be updated to qt6.natvis.xml.
+We need to do the replacement as the QT tools:
+https://github.com/qt-labs/vstools/blob/0769d945f8d0040917d654d9731e6b65951e102c/QtVsTools.Package/QtVsToolsPackage.cs#L390-L393
+-->
+
+```powershell
+(iwr "https://github.com/qt-labs/vstools/raw/dev/QtVsTools.Package/qt5.natvis.xml").Content -replace '##NAMESPACE##::', '' | Out-File qt5.natvis
+# [OR] using the permalink
+(iwr "https://github.com/qt-labs/vstools/raw/0769d945f8d0040917d654d9731e6b65951e102c/QtVsTools.Package/qt5.natvis.xml").Content -replace '##NAMESPACE##::', '' | Out-File qt5.natvis
+```
+
+Now you can debug the application and see QT types rendered correctly.
+If this didn't work for you, try following
+the [tutorial from JetBrains](https://www.jetbrains.com/help/clion/qt-tutorial.html#debug-renderers).

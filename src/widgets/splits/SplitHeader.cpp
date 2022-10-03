@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -540,9 +541,14 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
             setFollowers->setChecked(roomModes->followerOnly != -1);
         });
 
-    auto toggle = [this](const QString &command, QAction *action) mutable {
-        this->split_->getChannel().get()->sendMessage(
-            command + (action->isChecked() ? "" : "off"));
+    auto execCommand = [this](const QString &command) {
+        auto text = getApp()->getCommands()->execCommand(
+            command, this->split_->getChannel(), false);
+        this->split_->getChannel()->sendMessage(text);
+    };
+    auto toggle = [execCommand](const QString &command,
+                                QAction *action) mutable {
+        execCommand(command + (action->isChecked() ? "" : "off"));
         action->setChecked(!action->isChecked());
     };
 
@@ -556,50 +562,50 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
                          toggle("/emoteonly", setEmote);
                      });
 
-    QObject::connect(setSlow, &QAction::triggered, this, [setSlow, this]() {
-        if (!setSlow->isChecked())
-        {
-            this->split_->getChannel().get()->sendMessage("/slowoff");
-            setSlow->setChecked(false);
-            return;
-        };
-        auto ok = bool();
-        auto seconds = QInputDialog::getInt(this, "", "Seconds:", 10, 0, 500, 1,
-                                            &ok, Qt::FramelessWindowHint);
-        if (ok)
-        {
-            this->split_->getChannel().get()->sendMessage(
-                QString("/slow %1").arg(seconds));
-        }
-        else
-        {
-            setSlow->setChecked(false);
-        }
-    });
-
     QObject::connect(
-        setFollowers, &QAction::triggered, this, [setFollowers, this]() {
-            if (!setFollowers->isChecked())
+        setSlow, &QAction::triggered, this, [setSlow, this, execCommand]() {
+            if (!setSlow->isChecked())
             {
-                this->split_->getChannel().get()->sendMessage("/followersoff");
-                setFollowers->setChecked(false);
+                execCommand("/slowoff");
+                setSlow->setChecked(false);
                 return;
             };
             auto ok = bool();
-            auto time = QInputDialog::getText(
-                this, "", "Time:", QLineEdit::Normal, "15m", &ok,
-                Qt::FramelessWindowHint,
-                Qt::ImhLowercaseOnly | Qt::ImhPreferNumbers);
+            auto seconds =
+                QInputDialog::getInt(this, "", "Seconds:", 10, 0, 500, 1, &ok,
+                                     Qt::FramelessWindowHint);
             if (ok)
             {
-                this->split_->getChannel().get()->sendMessage(
-                    QString("/followers %1").arg(time));
+                execCommand(QString("/slow %1").arg(seconds));
             }
             else
             {
-                setFollowers->setChecked(false);
+                setSlow->setChecked(false);
             }
         });
+
+    QObject::connect(setFollowers, &QAction::triggered, this,
+                     [setFollowers, this, execCommand]() {
+                         if (!setFollowers->isChecked())
+                         {
+                             execCommand("/followersoff");
+                             setFollowers->setChecked(false);
+                             return;
+                         };
+                         auto ok = bool();
+                         auto time = QInputDialog::getText(
+                             this, "", "Time:", QLineEdit::Normal, "15m", &ok,
+                             Qt::FramelessWindowHint,
+                             Qt::ImhLowercaseOnly | Qt::ImhPreferNumbers);
+                         if (ok)
+                         {
+                             execCommand(QString("/followers %1").arg(time));
+                         }
+                         else
+                         {
+                             setFollowers->setChecked(false);
+                         }
+                     });
 
     QObject::connect(setR9k, &QAction::triggered, this,
                      [setR9k, toggle]() mutable {
