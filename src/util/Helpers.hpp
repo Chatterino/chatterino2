@@ -53,11 +53,11 @@ QColor getRandomColor(const QString &userId);
 
 /**
  * Parses a duration.
- * Spaces are disallowed after a number.
- * Spaces are allowed after a unit but not mandatory.
+ * Spaces are allowed before and after a unit but not mandatory.
  * Supported units are
- *      'w' (weeks), 'd' (days),
- *      'h' (hours), 'm' (minutes), 's' (seconds).
+ *      'w[eek(s)]', 'd[ay(s)]',
+ *      'h[our(s)]', 'm[inute(s)]', 's[econd(s)]'.
+ * Units must be lowercase.
  *
  * If the entire input string is a number (e.g. "12345"),
  * then it's multiplied by noUnitMultiplier.
@@ -67,6 +67,10 @@ QColor getRandomColor(const QString &userId);
  *  - "1w 2h"
  *  - "1w 1w 0s 4d" (2weeks, 4days)
  *  - "5s3h4w" (4weeks, 3hours, 5seconds)
+ *  - "30m"
+ *  - "1 week"
+ *  - "5 days 12 hours"
+ *  - "10" (10 * noUnitMultiplier seconds)
  *
  * @param inputString A non-empty string to parse
  * @param noUnitMultiplier A multiplier if the input string only contains one number.

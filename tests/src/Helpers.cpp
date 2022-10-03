@@ -455,7 +455,6 @@ TEST(Helpers, parseDurationToSeconds)
         {"1d32s", 86432},
         {"0", 0},
         {"0 s", 0},
-        {"1week", 604800},
         {"1weeks", 604800},
         {"2 day5days", 604800},
         {"1 day", 86400},
@@ -466,6 +465,10 @@ TEST(Helpers, parseDurationToSeconds)
         {"1w 2h", 612000},
         {"1w 1w 0s 4d", 1555200},
         {"5s3h4w", 2430005},
+        // from twitch response
+        {"30m", 1800},
+        {"1 week", 604800},
+        {"5 days 12 hours", 475200},
         // noUnitMultiplier
         {"0", 0, 60},
         {
