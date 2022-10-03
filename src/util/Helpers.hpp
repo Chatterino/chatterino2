@@ -2,7 +2,7 @@
 
 #include <QColor>
 #include <QString>
-#include <QStringView>
+#include <QStringRef>
 
 #include <cmath>
 
@@ -19,17 +19,16 @@ namespace _helpers_internal {
      * @param startPos The starting position (there must be a space in the view).
      * @return The position of the last space.
      */
-    int skipSpace(const QStringView &view, int startPos);
+    int skipSpace(const QStringRef &view, int startPos);
 
     /**
      * Checks if `word` equals `expected` (singular) or `expected` + 's' (plural).
      *
-     * @param word Word to test
+     * @param word Word to test. Must not be empty.
      * @param expected Singular of the expected word.
      * @return true if `word` is singular or plural of `expected`.
      */
-    bool matchesIgnorePlural(const QStringView &word,
-                             const QStringView &expected);
+    bool matchesIgnorePlural(const QStringRef &word, const QString &expected);
 
     /**
      * Tries to find the unit starting at `pos` and returns its multiplier so
@@ -46,7 +45,7 @@ namespace _helpers_internal {
      *            if it's a valid unit, undefined otherwise.
      * @return (multiplier, ok)
      */
-    std::pair<uint64_t, bool> findUnitMultiplierToSec(const QStringView &view,
+    std::pair<uint64_t, bool> findUnitMultiplierToSec(const QStringRef &view,
                                                       int &pos);
 
 }  // namespace _helpers_internal

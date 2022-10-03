@@ -10,7 +10,7 @@ namespace chatterino {
 
 namespace _helpers_internal {
 
-    int skipSpace(const QStringView &view, int startPos)
+    int skipSpace(const QStringRef &view, int startPos)
     {
         while (startPos < view.length() && view.at(startPos).isSpace())
         {
@@ -19,8 +19,7 @@ namespace _helpers_internal {
         return startPos - 1;
     }
 
-    bool matchesIgnorePlural(const QStringView &word,
-                             const QStringView &singular)
+    bool matchesIgnorePlural(const QStringRef &word, const QString &singular)
     {
         if (!word.startsWith(singular))
         {
@@ -31,10 +30,10 @@ namespace _helpers_internal {
             return true;
         }
         return word.length() == singular.length() + 1 &&
-               word.last().toLatin1() == 's';
+               word.at(word.length() - 1).toLatin1() == 's';
     }
 
-    std::pair<uint64_t, bool> findUnitMultiplierToSec(const QStringView &view,
+    std::pair<uint64_t, bool> findUnitMultiplierToSec(const QStringRef &view,
                                                       int &pos)
     {
         // Step 1. find end of unit
@@ -62,40 +61,45 @@ namespace _helpers_internal {
         switch (first)
         {
             case 's': {
-                if (unit.length() == 1 || matchesIgnorePlural(unit, L"second"))
+                if (unit.length() == 1 ||
+                    matchesIgnorePlural(unit, QStringLiteral("second")))
                 {
                     return std::make_pair(1, true);
                 }
             }
             break;
             case 'm': {
-                if (unit.length() == 1 || matchesIgnorePlural(unit, L"minute"))
+                if (unit.length() == 1 ||
+                    matchesIgnorePlural(unit, QStringLiteral("minute")))
                 {
                     return std::make_pair(60, true);
                 }
                 if ((unit.length() == 2 && unit.at(1).toLatin1() == 'o') ||
-                    matchesIgnorePlural(unit, L"month"))
+                    matchesIgnorePlural(unit, QStringLiteral("month")))
                 {
                     return std::make_pair(60 * 60 * 24 * 30, true);
                 }
             }
             break;
             case 'h': {
-                if (unit.length() == 1 || matchesIgnorePlural(unit, L"hour"))
+                if (unit.length() == 1 ||
+                    matchesIgnorePlural(unit, QStringLiteral("hour")))
                 {
                     return std::make_pair(60 * 60, true);
                 }
             }
             break;
             case 'd': {
-                if (unit.length() == 1 || matchesIgnorePlural(unit, L"day"))
+                if (unit.length() == 1 ||
+                    matchesIgnorePlural(unit, QStringLiteral("day")))
                 {
                     return std::make_pair(60 * 60 * 24, true);
                 }
             }
             break;
             case 'w': {
-                if (unit.length() == 1 || matchesIgnorePlural(unit, L"week"))
+                if (unit.length() == 1 ||
+                    matchesIgnorePlural(unit, QStringLiteral("week")))
                 {
                     return std::make_pair(60 * 60 * 24 * 7, true);
                 }
@@ -201,7 +205,8 @@ int64_t parseDurationToSeconds(const QString &inputString,
         return -1;
     }
 
-    QStringView input(inputString);
+    // TODO(QT6): use QStringView
+    QStringRef input(&inputString);
     input = input.trimmed();
 
     uint64_t currentValue = 0;
