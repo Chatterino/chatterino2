@@ -460,6 +460,8 @@ enum class HelixUpdateChatSettingsError {  // update chat settings
     UserNotAuthorized,
     Ratelimited,
     Forbidden,
+    OutOfRange,
+
     // The error message is forwarded directly from the Twitch API
     Forwarded,
 };  // update chat settings

@@ -2108,46 +2108,73 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });  // /raid
 
-    const auto formatChatSettingsError =
-        [](const HelixUpdateChatSettingsError error, const QString &message) {
-            QString errorMessage = QString("Failed to update - ");
-            using Error = HelixUpdateChatSettingsError;
-            switch (error)
-            {
-                case Error::UserMissingScope: {
-                    // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
-                    errorMessage += "Missing required scope. "
-                                    "Re-login with your "
-                                    "account and try again.";
-                }
-                break;
+    const auto formatChatSettingsError = [](const HelixUpdateChatSettingsError
+                                                error,
+                                            const QString &message,
+                                            int durationUnitMultiplier = 1) {
+        static const QRegularExpression invalidRange("(\\d+) through (\\d+)");
 
-                case Error::UserNotAuthorized: {
-                    // TODO(pajlada): Phrase MISSING_PERMISSION
-                    errorMessage += "You don't have permission to "
-                                    "perform that action.";
-                }
-                break;
-
-                case Error::Ratelimited: {
-                    errorMessage += "You are being ratelimited by Twitch. Try "
-                                    "again in a few seconds.";
-                }
-                break;
-
-                case Error::Forwarded: {
-                    errorMessage = message;
-                }
-                break;
-
-                case Error::Unknown:
-                default: {
-                    errorMessage += "An unknown error has occurred.";
-                }
-                break;
+        QString errorMessage = QString("Failed to update - ");
+        using Error = HelixUpdateChatSettingsError;
+        switch (error)
+        {
+            case Error::UserMissingScope: {
+                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                errorMessage += "Missing required scope. "
+                                "Re-login with your "
+                                "account and try again.";
             }
-            return errorMessage;
-        };
+            break;
+
+            case Error::UserNotAuthorized: {
+                // TODO(pajlada): Phrase MISSING_PERMISSION
+                errorMessage += "You don't have permission to "
+                                "perform that action.";
+            }
+            break;
+
+            case Error::Ratelimited: {
+                errorMessage += "You are being ratelimited by Twitch. Try "
+                                "again in a few seconds.";
+            }
+            break;
+
+            case Error::OutOfRange: {
+                QRegularExpressionMatch matched = invalidRange.match(message);
+                if (matched.hasMatch())
+                {
+                    auto from = matched.captured(1).toInt();
+                    auto to = matched.captured(2).toInt();
+                    errorMessage +=
+                        QString("The duration is out of the valid range: "
+                                "%1 through %2.")
+                            .arg(from == 0 ? "0s"
+                                           : formatTime(from *
+                                                        durationUnitMultiplier),
+                                 to == 0
+                                     ? "0s"
+                                     : formatTime(to * durationUnitMultiplier));
+                }
+                else
+                {
+                    errorMessage += message;
+                }
+            }
+            break;
+
+            case Error::Forwarded: {
+                errorMessage = message;
+            }
+            break;
+
+            case Error::Unknown:
+            default: {
+                errorMessage += "An unknown error has occurred.";
+            }
+            break;
+        }
+        return errorMessage;
+    };
 
     this->registerCommand("/emoteonly", [formatChatSettingsError](
                                             const QStringList & /* words */,
@@ -2441,8 +2468,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                 //we'll get a message from irc
             },
             [channel, formatChatSettingsError](auto error, auto message) {
-                channel->addMessage(
-                    makeSystemMessage(formatChatSettingsError(error, message)));
+                channel->addMessage(makeSystemMessage(
+                    formatChatSettingsError(error, message, 60)));
             });
         return "";
     });
