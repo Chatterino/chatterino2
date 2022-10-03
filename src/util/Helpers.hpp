@@ -21,9 +21,31 @@ namespace _helpers_internal {
      */
     int skipSpace(const QStringView &view, int startPos);
 
+    /**
+     * Checks if `word` equals `expected` (singular) or `expected` + 's' (plural).
+     *
+     * @param word Word to test
+     * @param expected Singular of the expected word.
+     * @return true if `word` is singular or plural of `expected`.
+     */
     bool matchesIgnorePlural(const QStringView &word,
                              const QStringView &expected);
 
+    /**
+     * Tries to find the unit starting at `pos` and returns its multiplier so
+     * `valueInUnit * multiplier = valueInSeconds` (e.g. 60 for minutes).
+     *
+     * Supported units are
+     *      'w[eek(s)]', 'd[ay(s)]',
+     *      'h[our(s)]', 'm[inute(s)]', 's[econd(s)]'.
+     * The unit must be in lowercase.
+     *
+     * @param view A view into a string
+     * @param pos The starting position.
+     *            This is set to the last position of the unit
+     *            if it's a valid unit, undefined otherwise.
+     * @return (multiplier, ok)
+     */
     std::pair<uint64_t, bool> findUnitMultiplierToSec(const QStringView &view,
                                                       int &pos);
 
