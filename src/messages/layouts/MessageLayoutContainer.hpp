@@ -14,7 +14,7 @@ class QPainter;
 
 namespace chatterino {
 
-enum class MessageFlag : uint32_t;
+enum class MessageFlag : uint64_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 struct Margin {

@@ -15,7 +15,7 @@ namespace chatterino {
 class MessageElement;
 class MessageThread;
 
-enum class MessageFlag : uint32_t {
+enum class MessageFlag : uint64_t {
     None = 0,
     System = (1 << 0),
     Timeout = (1 << 1),
@@ -45,9 +45,11 @@ enum class MessageFlag : uint32_t {
     ElevatedMessage = (1 << 25),
 
     // SevenTV Flags
-    SevenTvEventApiAddEmoteMessage = (1 << 28),
-    SevenTvEventApiRemoveEmoteMessage = (1 << 29),
-    SevenTvEventApiUpdateEmoteMessage = (1 << 30),
+    // For some reason C++ compiler is unable to infer that these are all 64bit values so when you do 1 << 60 it thinks the 1 and the 60 are 32bit values and it overflows.
+    // So we have to explicitly cast them to 64bit values. (1ULL << 60)
+    SevenTvEventApiAddEmoteMessage = (11ULL << 60),
+    SevenTvEventApiRemoveEmoteMessage = (11ULL << 61),
+    SevenTvEventApiUpdateEmoteMessage = (11ULL << 62),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
