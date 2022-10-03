@@ -1650,7 +1650,17 @@ void Helix::updateChatSettings(
 
             switch (result.status())
             {
-                case 400:
+                case 400: {
+                    if (message.contains("must be in the range"))
+                    {
+                        failureCallback(Error::OutOfRange, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
                 case 409:
                 case 422:
                 case 425: {
