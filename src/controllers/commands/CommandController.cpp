@@ -2126,7 +2126,8 @@ void CommandController::initialize(Settings &, Paths &paths)
             }
             break;
 
-            case Error::UserNotAuthorized: {
+            case Error::UserNotAuthorized:
+            case Error::Forbidden: {
                 // TODO(pajlada): Phrase MISSING_PERMISSION
                 errorMessage += "You don't have permission to "
                                 "perform that action.";
