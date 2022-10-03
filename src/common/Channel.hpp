@@ -16,7 +16,7 @@ namespace chatterino {
 
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
-enum class MessageFlag : uint32_t;
+enum class MessageFlag : int64_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 enum class TimeoutStackStyle : int {
