@@ -2223,6 +2223,82 @@ void CommandController::initialize(Settings &, Paths &paths)
                 });
             return "";
         });
+
+    this->registerCommand(
+        "/subscribers", [formatChatSettingsError](
+                            const QStringList & /* words */, auto channel) {
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (currentUser->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to update chat settings!"));
+                return "";
+            }
+
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /subscribers command only works in Twitch channels"));
+                return "";
+            }
+
+            if (twitchChannel->accessRoomModes()->submode)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "This room is already in subscribers-only mode."));
+                return "";
+            }
+
+            getHelix()->updateSubscriberMode(
+                twitchChannel->roomId(), currentUser->getUserId(), true,
+                [](auto) {
+                    //we'll get a message from irc
+                },
+                [channel, formatChatSettingsError](auto error, auto message) {
+                    channel->addMessage(makeSystemMessage(
+                        formatChatSettingsError(error, message)));
+                });
+            return "";
+        });
+
+    this->registerCommand("/subscribersoff", [formatChatSettingsError](
+                                                 const QStringList
+                                                     & /* words */,
+                                                 auto channel) {
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You must be logged in to update chat settings!"));
+            return "";
+        }
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /subscribersoff command only works in Twitch channels"));
+            return "";
+        }
+
+        if (!twitchChannel->accessRoomModes()->submode)
+        {
+            channel->addMessage(makeSystemMessage(
+                "This room is not in subscribers-only mode."));
+            return "";
+        }
+
+        getHelix()->updateSubscriberMode(
+            twitchChannel->roomId(), currentUser->getUserId(), false,
+            [](auto) {
+                // we'll get a message from irc
+            },
+            [channel, formatChatSettingsError](auto error, auto message) {
+                channel->addMessage(
+                    makeSystemMessage(formatChatSettingsError(error, message)));
+            });
+        return "";
+    });
 }
 
 void CommandController::save()
