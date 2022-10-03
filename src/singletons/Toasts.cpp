@@ -129,7 +129,7 @@ public:
             case ToastReaction::OpenInBrowser:
                 if (platform_ == Platform::Twitch)
                 {
-                    link = "http://www.twitch.tv/" + channelName_;
+                    link = "https://www.twitch.tv/" + channelName_;
                 }
                 QDesktopServices::openUrl(QUrl(link));
                 break;

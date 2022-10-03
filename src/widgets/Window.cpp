@@ -249,6 +249,14 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         getApp()->twitch->addFakeMessage(msg);
         return "";
     });
+
+    actions.emplace("addSubMessage", [=](std::vector<QString>) -> QString {
+        const auto &messages = getSampleSubMessages();
+        static int index = 0;
+        const auto &msg = messages[index++ % messages.size()];
+        getApp()->twitch->addFakeMessage(msg);
+        return "";
+    });
 #endif
 }
 

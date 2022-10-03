@@ -2,8 +2,11 @@
 
 #include <QRegularExpression>
 #include <QString>
+#include <QStringList>
 
 namespace chatterino {
+
+extern const QStringList VALID_HELIX_COLORS;
 
 void openTwitchUsercard(const QString channel, const QString username);
 
@@ -24,5 +27,10 @@ QRegularExpression twitchUserLoginRegexp();
 // Must contain between 1 and 25 characters
 // Must not start with an underscore
 QRegularExpression twitchUserNameRegexp();
+
+// Cleans up a color name input for use in the Helix API
+// Will help massage color names like BlueViolet to the helix-acceptible blue_violet
+// Will also lowercase the color
+void cleanHelixColorName(QString &color);
 
 }  // namespace chatterino

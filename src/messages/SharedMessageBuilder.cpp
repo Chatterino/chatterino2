@@ -181,41 +181,6 @@ void SharedMessageBuilder::parseHighlights()
     }
 }
 
-void SharedMessageBuilder::addTextOrEmoji(EmotePtr emote)
-{
-    this->emplace<EmoteElement>(emote, MessageElementFlag::EmojiAll);
-}
-
-void SharedMessageBuilder::addTextOrEmoji(const QString &string_)
-{
-    auto string = QString(string_);
-
-    // Actually just text
-    auto linkString = this->matchLink(string);
-    auto link = Link();
-    auto &&textColor = this->textColor_;
-
-    if (linkString.isEmpty())
-    {
-        if (string.startsWith('@'))
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                       textColor, FontStyle::ChatMediumBold);
-            this->emplace<TextElement>(
-                string, MessageElementFlag::NonBoldUsername, textColor);
-        }
-        else
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::Text,
-                                       textColor);
-        }
-    }
-    else
-    {
-        this->addLink(string, linkString);
-    }
-}
-
 void SharedMessageBuilder::appendChannelName()
 {
     QString channelName("#" + this->channel->getName());

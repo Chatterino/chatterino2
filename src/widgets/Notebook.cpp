@@ -8,6 +8,7 @@
 #include "util/InitUpdateButton.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookButton.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/Split.hpp"
@@ -1006,6 +1007,29 @@ SplitNotebook::SplitNotebook(Window *parent)
                                        [this](SplitContainer *sc) {
                                            this->select(sc);
                                        });
+
+    this->signalHolder_.managedConnect(
+        getApp()->windows->scrollToMessageSignal,
+        [this](const MessagePtr &message) {
+            for (auto &&item : this->items())
+            {
+                if (auto sc = dynamic_cast<SplitContainer *>(item.page))
+                {
+                    for (auto *split : sc->getSplits())
+                    {
+                        if (split->getChannel()->getType() !=
+                            Channel::Type::TwitchMentions)
+                        {
+                            if (split->getChannelView().scrollToMessage(
+                                    message))
+                            {
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        });
 }
 
 void SplitNotebook::showEvent(QShowEvent *)

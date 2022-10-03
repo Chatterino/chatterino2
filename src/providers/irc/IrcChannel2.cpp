@@ -4,7 +4,9 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/IrcCommands.hpp"
+#include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/irc/IrcServer.hpp"
+#include "util/Helpers.hpp"
 
 namespace chatterino {
 
@@ -33,20 +35,42 @@ void IrcChannel::sendMessage(const QString &message)
     }
     else
     {
-        if (this->server())
+        if (this->server() != nullptr)
+        {
             this->server()->sendMessage(this->getName(), message);
 
-        MessageBuilder builder;
-        builder.emplace<TimestampElement>();
-        const auto &nick = this->server()->nick();
-        builder.emplace<TextElement>(nick + ":", MessageElementFlag::Username)
-            ->setLink({Link::UserInfo, nick});
-        builder.emplace<TextElement>(message, MessageElementFlag::Text);
-        builder.message().messageText = message;
-        builder.message().searchText = nick + ": " + message;
-        builder.message().loginName = nick;
-        builder.message().displayName = nick;
-        this->addMessage(builder.release());
+            MessageBuilder builder;
+
+            builder
+                .emplace<TextElement>("#" + this->getName(),
+                                      MessageElementFlag::ChannelName,
+                                      MessageColor::System)
+                ->setLink({Link::JumpToChannel, this->getName()});
+
+            auto now = QDateTime::currentDateTime();
+            builder.emplace<TimestampElement>(now.time());
+            builder.message().serverReceivedTime = now;
+
+            auto username = this->server()->nick();
+            builder
+                .emplace<TextElement>(
+                    username + ":", MessageElementFlag::Username,
+                    getRandomColor(username), FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, username});
+            builder.message().loginName = username;
+            builder.message().displayName = username;
+
+            // message
+            builder.addIrcMessageText(message);
+            builder.message().messageText = message;
+            builder.message().searchText = username + ": " + message;
+
+            this->addMessage(builder.release());
+        }
+        else
+        {
+            this->addMessage(makeSystemMessage("You are not connected."));
+        }
     }
 }
 

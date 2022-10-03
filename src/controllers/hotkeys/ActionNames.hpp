@@ -158,6 +158,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"addMiscMessage", ActionDefinition{"Debug: Add misc test message"}},
          {"addRewardMessage",
           ActionDefinition{"Debug: Add reward test message"}},
+         {"addSubMessage", ActionDefinition{"Debug: Add sub test message"}},
 #endif
          {"moveTab",
           ActionDefinition{

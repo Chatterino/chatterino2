@@ -27,6 +27,7 @@ Checks: '-*,
     -readability-identifier-length,
     -readability-function-cognitive-complexity,
     -bugprone-easily-swappable-parameters,
+    -cert-err58-cpp,
     '
 CheckOptions:
   - key:             readability-identifier-naming.ClassCase
