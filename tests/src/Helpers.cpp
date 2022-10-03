@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 using namespace chatterino;
+using namespace _helpers_internal;
 
 TEST(Helpers, formatUserMention)
 {
@@ -249,4 +250,251 @@ TEST(Helpers, BatchDifferentInputType)
     auto result = splitListIntoBatches(input, 6);
 
     EXPECT_EQ(result, expectation);
+}
+
+TEST(Helpers, skipSpace)
+{
+    struct TestCase {
+        QStringView input;
+        int startIdx;
+        int expected;
+    };
+
+    std::vector<TestCase> tests{{L"foo    bar", 3, 6}, {L"foo bar", 3, 3},
+                                {L"foo ", 3, 3},       {L"foo    ", 3, 6},
+                                {L"   ", 0, 2},        {L" ", 0, 0}};
+
+    for (const auto &c : tests)
+    {
+        const auto actual = skipSpace(c.input, c.startIdx);
+
+        EXPECT_EQ(actual, c.expected)
+            << actual << " (" << qUtf8Printable(c.input.toString())
+            << ") did not match expected value " << c.expected;
+    }
+}
+
+TEST(Helpers, findUnitMultiplierToSec)
+{
+    constexpr uint64_t sec = 1;
+    constexpr uint64_t min = 60;
+    constexpr uint64_t hour = min * 60;
+    constexpr uint64_t day = hour * 24;
+    constexpr uint64_t week = day * 7;
+    constexpr uint64_t month = day * 30;
+    constexpr uint64_t bad = 0;
+
+    struct TestCase {
+        QStringView input;
+        int startPos;
+        int expectedEndPos;
+        uint64_t expectedMultiplier;
+    };
+
+    std::vector<TestCase> tests{
+        {L"s", 0, 0, sec},
+        {L"m", 0, 0, min},
+        {L"h", 0, 0, hour},
+        {L"d", 0, 0, day},
+        {L"w", 0, 0, week},
+        {L"mo", 0, 1, month},
+
+        {L"s alienpls", 0, 0, sec},
+        {L"m alienpls", 0, 0, min},
+        {L"h alienpls", 0, 0, hour},
+        {L"d alienpls", 0, 0, day},
+        {L"w alienpls", 0, 0, week},
+        {L"mo alienpls", 0, 1, month},
+
+        {L"alienpls s", 9, 9, sec},
+        {L"alienpls m", 9, 9, min},
+        {L"alienpls h", 9, 9, hour},
+        {L"alienpls d", 9, 9, day},
+        {L"alienpls w", 9, 9, week},
+        {L"alienpls mo", 9, 10, month},
+
+        {L"alienpls s alienpls", 9, 9, sec},
+        {L"alienpls m alienpls", 9, 9, min},
+        {L"alienpls h alienpls", 9, 9, hour},
+        {L"alienpls d alienpls", 9, 9, day},
+        {L"alienpls w alienpls", 9, 9, week},
+        {L"alienpls mo alienpls", 9, 10, month},
+
+        {L"second", 0, 5, sec},
+        {L"minute", 0, 5, min},
+        {L"hour", 0, 3, hour},
+        {L"day", 0, 2, day},
+        {L"week", 0, 3, week},
+        {L"month", 0, 4, month},
+
+        {L"alienpls2 second", 10, 15, sec},
+        {L"alienpls2 minute", 10, 15, min},
+        {L"alienpls2 hour", 10, 13, hour},
+        {L"alienpls2 day", 10, 12, day},
+        {L"alienpls2 week", 10, 13, week},
+        {L"alienpls2 month", 10, 14, month},
+
+        {L"alienpls2 second alienpls", 10, 15, sec},
+        {L"alienpls2 minute alienpls", 10, 15, min},
+        {L"alienpls2 hour alienpls", 10, 13, hour},
+        {L"alienpls2 day alienpls", 10, 12, day},
+        {L"alienpls2 week alienpls", 10, 13, week},
+        {L"alienpls2 month alienpls", 10, 14, month},
+
+        {L"seconds", 0, 6, sec},
+        {L"minutes", 0, 6, min},
+        {L"hours", 0, 4, hour},
+        {L"days", 0, 3, day},
+        {L"weeks", 0, 4, week},
+        {L"months", 0, 5, month},
+
+        {L"alienpls2 seconds", 10, 16, sec},
+        {L"alienpls2 minutes", 10, 16, min},
+        {L"alienpls2 hours", 10, 14, hour},
+        {L"alienpls2 days", 10, 13, day},
+        {L"alienpls2 weeks", 10, 14, week},
+        {L"alienpls2 months", 10, 15, month},
+
+        {L"alienpls2 seconds alienpls", 10, 16, sec},
+        {L"alienpls2 minutes alienpls", 10, 16, min},
+        {L"alienpls2 hours alienpls", 10, 14, hour},
+        {L"alienpls2 days alienpls", 10, 13, day},
+        {L"alienpls2 weeks alienpls", 10, 14, week},
+        {L"alienpls2 months alienpls", 10, 15, month},
+
+        {L"sec", 0, 0, bad},
+        {L"min", 0, 0, bad},
+        {L"ho", 0, 0, bad},
+        {L"da", 0, 0, bad},
+        {L"we", 0, 0, bad},
+        {L"mon", 0, 0, bad},
+        {L"foo", 0, 0, bad},
+        {L"S", 0, 0, bad},
+        {L"M", 0, 0, bad},
+        {L"H", 0, 0, bad},
+        {L"D", 0, 0, bad},
+        {L"W", 0, 0, bad},
+        {L"MO", 0, 1, bad},
+
+        {L"alienpls2 sec", 10, 0, bad},
+        {L"alienpls2 min", 10, 0, bad},
+        {L"alienpls2 ho", 10, 0, bad},
+        {L"alienpls2 da", 10, 0, bad},
+        {L"alienpls2 we", 10, 0, bad},
+        {L"alienpls2 mon", 10, 0, bad},
+        {L"alienpls2 foo", 10, 0, bad},
+        {L"alienpls2 S", 10, 0, bad},
+        {L"alienpls2 M", 10, 0, bad},
+        {L"alienpls2 H", 10, 0, bad},
+        {L"alienpls2 D", 10, 0, bad},
+        {L"alienpls2 W", 10, 0, bad},
+        {L"alienpls2 MO", 10, 0, bad},
+
+        {L"alienpls2 sec alienpls", 10, 0, bad},
+        {L"alienpls2 min alienpls", 10, 0, bad},
+        {L"alienpls2 ho alienpls", 10, 0, bad},
+        {L"alienpls2 da alienpls", 10, 0, bad},
+        {L"alienpls2 we alienpls", 10, 0, bad},
+        {L"alienpls2 mon alienpls", 10, 0, bad},
+        {L"alienpls2 foo alienpls", 10, 0, bad},
+        {L"alienpls2 S alienpls", 10, 0, bad},
+        {L"alienpls2 M alienpls", 10, 0, bad},
+        {L"alienpls2 H alienpls", 10, 0, bad},
+        {L"alienpls2 D alienpls", 10, 0, bad},
+        {L"alienpls2 W alienpls", 10, 0, bad},
+        {L"alienpls2 MO alienpls", 10, 0, bad},
+    };
+
+    for (const auto &c : tests)
+    {
+        int pos = c.startPos;
+        const auto actual = findUnitMultiplierToSec(c.input, pos);
+
+        if (c.expectedMultiplier == bad)
+        {
+            EXPECT_FALSE(actual.second) << qUtf8Printable(c.input.toString());
+        }
+        else
+        {
+            EXPECT_TRUE(pos == c.expectedEndPos && actual.second &&
+                        actual.first == c.expectedMultiplier)
+                << qUtf8Printable(c.input.toString())
+                << ": Expected(end: " << c.expectedEndPos
+                << ", mult: " << c.expectedMultiplier << ") Actual(end: " << pos
+                << ", mult: " << actual.first << ")";
+        }
+    }
+}
+
+TEST(Helpers, parseDurationToSeconds)
+{
+    struct TestCase {
+        QString input;
+        int64_t output;
+        int64_t noUnitMultiplier = 1;
+    };
+
+    auto wrongInput = [](QString &&input) {
+        return TestCase{input, -1};
+    };
+
+    std::vector<TestCase> tests{
+        {"1 minutes 9s", 69},
+        {"22 m  17 s", 1337},
+        {"7d 5h 10m 52s", 623452},
+        {"2h 19m 5s  ", 8345},
+        {"3d 15 h 13m 54s", 314034},
+        {"27s", 27},
+        {
+            "9h 36 m 29s", 34589,
+            7,  // should be unused
+        },
+        {"1h 59s", 3659},
+        {"12d2h22m25s", 1045345},
+        {"2h22m25s12d", 1045345},
+        {"1d32s", 86432},
+        {"0", 0},
+        {"0 s", 0},
+        {"1week", 604800},
+        {"1weeks", 604800},
+        {"2 day5days", 604800},
+        {"1 day", 86400},
+        {"4 hours 30m 19h 30 minute", 86400},
+        {"3 months", 7776000},
+        {"1 mo 2month", 7776000},
+        // from documentation
+        {"1w 2h", 612000},
+        {"1w 1w 0s 4d", 1555200},
+        {"5s3h4w", 2430005},
+        // noUnitMultiplier
+        {"0", 0, 60},
+        {
+            "60", 3600,
+            60,  // minute
+        },
+        {
+            "1",
+            86400,  // 1d
+            86400,
+        },
+        // wrong input
+        wrongInput("1min"),
+        wrongInput(""),
+        wrongInput("1m5w+5"),
+        wrongInput("1h30"),
+        wrongInput("12 34w"),
+        wrongInput("4W"),
+        wrongInput("1min"),
+        wrongInput("4Min"),
+        wrongInput("4sec"),
+    };
+
+    for (const auto &c : tests)
+    {
+        const auto actual = parseDurationToSeconds(c.input, c.noUnitMultiplier);
+
+        EXPECT_EQ(actual, c.output)
+            << actual << " (" << qUtf8Printable(c.input)
+            << ") did not match expected value " << c.output;
+    }
 }
