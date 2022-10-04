@@ -61,6 +61,7 @@ private:
     void onOkClicked();
     void onCancelClicked();
     void addShortcuts() override;
+    void setSearchPlaceholderText();
 
     struct {
         QWidget *tabContainerContainer{};
