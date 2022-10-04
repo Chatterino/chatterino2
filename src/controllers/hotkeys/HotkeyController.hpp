@@ -33,6 +33,12 @@ public:
 
     void save() override;
     std::shared_ptr<Hotkey> getHotkeyByName(QString name);
+    /**
+     * @brief returns a QKeySequence that perfoms the actions requested
+     */
+    QKeySequence getDisplaySequence(
+        HotkeyCategory category, QString action,
+        std::vector<QString> neededArguments = {}) const;
 
     /**
      * @brief removes the hotkey with the oldName and inserts newHotkey at the end
@@ -114,6 +120,13 @@ private:
      **/
     static void showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
                                 QString warning);
+    /**
+     * @brief finds a Hotkey matching category, action and neededArguments.
+     * Accepted if and only if the category matches, the action matches and neededArguments match(TODO)
+     * */
+    std::shared_ptr<Hotkey> findLike(
+        HotkeyCategory category, const QString &action,
+        const std::vector<QString> &neededArguments = {}) const;
 
     friend class KeyboardSettingsPage;
 
