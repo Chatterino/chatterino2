@@ -549,8 +549,8 @@ void HotkeyController::showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
 }
 
 QKeySequence HotkeyController::getDisplaySequence(
-    HotkeyCategory category, QString action,
-    std::vector<QString> neededArguments) const
+    HotkeyCategory category, const QString &action,
+    const std::optional<std::vector<QString>> &neededArguments) const
 {
     const auto &found = this->findLike(category, action, neededArguments);
     if (found != nullptr)
@@ -562,14 +562,23 @@ QKeySequence HotkeyController::getDisplaySequence(
 
 std::shared_ptr<Hotkey> HotkeyController::findLike(
     HotkeyCategory category, const QString &action,
-    const std::vector<QString> &neededArguments) const
+    const std::optional<std::vector<QString>> &neededArguments) const
 {
     for (auto other : this->hotkeys_)
     {
-        if (other->category() == category && other->action() == action /*&&
-            other->arguments() == neededArguments*/) // TODO: make neededArguments actually work
+        if (other->category() == category && other->action() == action)
         {
-            return other;
+            if (neededArguments)
+            {
+                if (other->arguments() == *neededArguments)
+                {
+                    return other;
+                }
+            }
+            else
+            {
+                return other;
+            }
         }
     }
     return nullptr;

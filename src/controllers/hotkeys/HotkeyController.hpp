@@ -8,6 +8,7 @@
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
+#include <optional>
 #include <set>
 
 class QShortcut;
@@ -37,8 +38,8 @@ public:
      * @brief returns a QKeySequence that perfoms the actions requested
      */
     QKeySequence getDisplaySequence(
-        HotkeyCategory category, QString action,
-        std::vector<QString> neededArguments = {}) const;
+        HotkeyCategory category, const QString &action,
+        const std::optional<std::vector<QString>> &neededArguments = {}) const;
 
     /**
      * @brief removes the hotkey with the oldName and inserts newHotkey at the end
@@ -126,7 +127,7 @@ private:
      * */
     std::shared_ptr<Hotkey> findLike(
         HotkeyCategory category, const QString &action,
-        const std::vector<QString> &neededArguments = {}) const;
+        const std::optional<std::vector<QString>> &neededArguments = {}) const;
 
     friend class KeyboardSettingsPage;
 
