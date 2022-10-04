@@ -1731,7 +1731,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() != 1)
         {
             channel->addMessage(makeSystemMessage(
-                "Usage: \"/unraid <username>\" - Cancel the current raid. "
+                "Usage: \"/unraid\" - Cancel the current raid. "
                 "Only the broadcaster can cancel the raid."));
             return "";
         }
