@@ -84,6 +84,7 @@ public:
     static QColor FALLBACK_SUB_COLOR;
     static QColor FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR;
     static QColor FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR;
+    static QColor FALLBACK_THREAD_HIGHLIGHT_COLOR;
 
 private:
     QString pattern_;

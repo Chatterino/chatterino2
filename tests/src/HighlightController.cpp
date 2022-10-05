@@ -485,6 +485,7 @@ struct TestCase {
         std::vector<Badge> badges;
         QString senderName;
         QString originalMessage;
+        MessageFlags flags;
     } input;
 
     struct {
@@ -727,8 +728,9 @@ TEST_F(HighlightControllerTest, A)
 
     for (const auto &[input, expected] : tests)
     {
-        auto [isMatch, matchResult] = this->controller->check(
-            input.args, input.badges, input.senderName, input.originalMessage);
+        auto [isMatch, matchResult] =
+            this->controller->check(input.args, input.badges, input.senderName,
+                                    input.originalMessage, input.flags);
 
         EXPECT_EQ(isMatch, expected.state)
             << qUtf8Printable(input.senderName) << ": "

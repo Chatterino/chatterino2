@@ -71,6 +71,14 @@ private:
     void populateReply(TwitchChannel *channel, Communi::IrcMessage *message,
                        const std::vector<MessagePtr> &otherLoaded,
                        TwitchMessageBuilder &builder);
+
+    static int stripLeadingReplyMention(const QVariantMap &tags,
+                                        QString &content);
+    void updateReplyParticipatedStatus(const QVariantMap &tags,
+                                       const QString &senderLogin,
+                                       TwitchMessageBuilder &builder,
+                                       std::shared_ptr<MessageThread> &thread,
+                                       bool isNew);
 };
 
 }  // namespace chatterino

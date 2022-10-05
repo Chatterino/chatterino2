@@ -47,6 +47,7 @@ public:
     MessagePtr build() override;
 
     void setThread(std::shared_ptr<MessageThread> thread);
+    void setMessageOffset(int offset);
 
     static void appendChannelPointRewardMessage(
         const ChannelPointReward &reward, MessageBuilder *builder, bool isMod,
@@ -109,6 +110,7 @@ private:
     bool bitsStacked = false;
     bool historicalMessage_ = false;
     std::shared_ptr<MessageThread> thread_;
+    int messageOffset_ = 0;
 
     QString userId_;
     bool senderIsBroadcaster{};
