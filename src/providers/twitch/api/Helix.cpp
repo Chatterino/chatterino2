@@ -1789,6 +1789,7 @@ void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
                     }
                 }
                 break;
+
                 case 403: {
                     failureCallback(Error::UserNotAuthorized, message);
                 }
