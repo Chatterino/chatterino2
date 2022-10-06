@@ -2578,7 +2578,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             "(optional, default=s) must be one of s, m, h, d, w; maximum "
             "duration is 2 weeks. Combinations like 1d2h are also allowed. "
             "Reason is optional and will be shown to the target user and other "
-            "moderators. Use \"untimeout\" to remove a timeout.";
+            "moderators. Use \"/untimeout\" to remove a timeout.";
         if (words.size() < 2)
         {
             channel->addMessage(makeSystemMessage(usageStr));
@@ -2647,7 +2647,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         const auto *usageStr =
             "Usage: \"/ban <username> [reason]\" - Permanently prevent a user "
             "from chatting. Reason is optional and will be shown to the target "
-            "user and other moderators. Use \"unban\" to remove a ban.";
+            "user and other moderators. Use \"/unban\" to remove a ban.";
         if (words.size() < 2)
         {
             channel->addMessage(makeSystemMessage(usageStr));
