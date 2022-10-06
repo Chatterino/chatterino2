@@ -1419,6 +1419,11 @@ void Helix::unbanUser(
                 }
                 break;
 
+                case 403: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                }
+                break;
+
                 case 429: {
                     failureCallback(Error::Ratelimited, message);
                 }
