@@ -50,7 +50,7 @@
 - Minor: Migrated /vip command to Helix API. (#4010)
 - Minor: Migrated /unvip command to Helix API. (#4025)
 - Minor: Migrated /untimeout to Helix API. (#4026)
-- Minor: Migrated /unban to Helix API. (#4026)
+- Minor: Migrated /unban to Helix API. (#4026, #4050)
 - Minor: Migrated /subscribers to Helix API. (#4040)
 - Minor: Migrated /subscribersoff to Helix API. (#4040)
 - Minor: Migrated /slow to Helix API. (#4040)
