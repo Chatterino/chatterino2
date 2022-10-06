@@ -2,6 +2,8 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -374,12 +376,32 @@ void Notebook::setShowTabs(bool value)
     // show a popup upon hiding tabs
     if (!value && getSettings()->informOnTabVisibilityToggle.getValue())
     {
+        auto unhideSeq = getApp()->hotkeys->getDisplaySequence(
+            HotkeyCategory::Window, "setTabVisibility", {{}});
+        if (unhideSeq.isEmpty())
+        {
+            unhideSeq = getApp()->hotkeys->getDisplaySequence(
+                HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
+        }
+        if (unhideSeq.isEmpty())
+        {
+            unhideSeq = getApp()->hotkeys->getDisplaySequence(
+                HotkeyCategory::Window, "setTabVisibility", {{"on"}});
+        }
+        QString hotkeyInfo = "(currently unbound)";
+        if (!unhideSeq.isEmpty())
+        {
+            hotkeyInfo =
+                "(" +
+                unhideSeq.toString(QKeySequence::SequenceFormat::NativeText) +
+                ")";
+        }
         QMessageBox msgBox(this->window());
         msgBox.window()->setWindowTitle("Chatterino - hidden tabs");
         msgBox.setText("You've just hidden your tabs.");
         msgBox.setInformativeText(
-            "You can toggle tabs by using the keyboard shortcut (Ctrl+U by "
-            "default) or right-clicking the tab area and selecting \"Toggle "
+            "You can toggle tabs by using the keyboard shortcut " + hotkeyInfo +
+            " or right-clicking the tab area and selecting \"Toggle "
             "visibility of tabs\".");
         msgBox.addButton(QMessageBox::Ok);
         auto *dsaButton =
