@@ -50,6 +50,11 @@ Notebook::Notebook(QWidget *parent)
                      [this](bool value) {
                          this->setLockNotebookLayout(value);
                      });
+    this->showTabsAction_ = new QAction("Toggle visibility of tabs");
+    QObject::connect(this->showTabsAction_, &QAction::triggered, [this]() {
+        this->setShowTabs(!this->getShowTabs());
+    });
+    this->updateTabVisibilityMenuAction();
 
     this->addNotebookActionsToMenu(&this->menu_);
 
@@ -416,6 +421,34 @@ void Notebook::setShowTabs(bool value)
             getSettings()->informOnTabVisibilityToggle.setValue(false);
         }
     }
+    updateTabVisibilityMenuAction();
+}
+
+void Notebook::updateTabVisibilityMenuAction()
+{
+    auto toggleSeq = getApp()->hotkeys->getDisplaySequence(
+        HotkeyCategory::Window, "setTabVisibility", {{}});
+    if (toggleSeq.isEmpty())
+    {
+        toggleSeq = getApp()->hotkeys->getDisplaySequence(
+            HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
+    }
+
+    if (toggleSeq.isEmpty())
+    {
+        // show contextual shortcuts
+        if (this->getShowTabs())
+        {
+            toggleSeq = getApp()->hotkeys->getDisplaySequence(
+                HotkeyCategory::Window, "setTabVisibility", {{"off"}});
+        }
+        else if (!this->getShowTabs())
+        {
+            toggleSeq = getApp()->hotkeys->getDisplaySequence(
+                HotkeyCategory::Window, "setTabVisibility", {{"on"}});
+        }
+    }
+    this->showTabsAction_->setShortcut(toggleSeq);
 }
 
 bool Notebook::getShowAddButton() const
@@ -941,12 +974,7 @@ void Notebook::setLockNotebookLayout(bool value)
 
 void Notebook::addNotebookActionsToMenu(QMenu *menu)
 {
-    menu->addAction(
-        "Toggle visibility of tabs",
-        [this]() {
-            this->setShowTabs(!this->getShowTabs());
-        },
-        QKeySequence("Ctrl+U"));
+    menu->addAction(this->showTabsAction_);
 
     menu->addAction(this->lockNotebookLayoutAction_);
 }
