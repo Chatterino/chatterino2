@@ -31,6 +31,7 @@
 - Minor: Adjusted large stream thumbnail to 16:9 (#3655)
 - Minor: Prevented user from entering incorrect characters in Live Notifications channels list. (#3715, #3730)
 - Minor: Added whitespace trim to username field in nicknames (#3946)
+- Minor: Added whitespace trim to Username field in User Highlights. (#4051)
 - Minor: Sorted usernames in /vips message to be case-insensitive. (#3696)
 - Minor: Streamer mode now automatically detects if XSplit, PRISM Live Studio, Twitch Studio, or vMix are running. (#3740)
 - Minor: Fixed automod caught message notice appearing twice for mods. (#3717)
