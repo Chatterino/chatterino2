@@ -466,6 +466,18 @@ enum class HelixUpdateChatSettingsError {  // update chat settings
     Forwarded,
 };  // update chat settings
 
+enum class HelixBanUserError {  // /timeout, /ban
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+    ConflictingOperation,
+    TargetBanned,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // /timeout, /ban
+
 class IHelix
 {
 public:
@@ -698,7 +710,14 @@ public:
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString>
             failureCallback) = 0;
-    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
+
+    // Ban/timeout a user
+    // https://dev.twitch.tv/docs/api/reference#ban-user
+    virtual void banUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        boost::optional<int> duration, QString reason,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixBanUserError, QString> failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 
@@ -933,6 +952,14 @@ public:
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
         final;
+
+    // Ban/timeout a user
+    // https://dev.twitch.tv/docs/api/reference#ban-user
+    void banUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        boost::optional<int> duration, QString reason,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixBanUserError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

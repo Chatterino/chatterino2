@@ -336,6 +336,15 @@ public:
                 (override));
     // update chat settings
 
+    // /timeout, /ban
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, banUser,
+                (QString broadcasterID, QString moderatorID, QString userID,
+                 boost::optional<int> duration, QString reason,
+                 ResultCallback<> successCallback,
+                 (FailureCallback<HelixBanUserError, QString> failureCallback)),
+                (override));  // /timeout, /ban
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 

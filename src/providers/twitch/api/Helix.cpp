@@ -1709,6 +1709,108 @@ void Helix::updateChatSettings(
         .execute();
 }
 
+// Ban/timeout a user
+// https://dev.twitch.tv/docs/api/reference#ban-user
+void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
+                    boost::optional<int> duration, QString reason,
+                    ResultCallback<> successCallback,
+                    FailureCallback<HelixBanUserError, QString> failureCallback)
+{
+    using Error = HelixBanUserError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    QJsonObject payload;
+    {
+        QJsonObject data;
+        data["reason"] = reason;
+        data["user_id"] = userID;
+        if (duration)
+        {
+            data["duration"] = *duration;
+        }
+
+        payload["data"] = data;
+    }
+
+    this->makeRequest("moderation/bans", urlQuery)
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback](auto result) -> Outcome {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for banning a user was"
+                    << result.status() << "but we expected it to be 200";
+            }
+            // we don't care about the response
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.startsWith("The user specified in the user_id "
+                                           "field is already banned",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::TargetBanned, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 409: {
+                    failureCallback(Error::ConflictingOperation, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+                case 403: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error banning user:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
