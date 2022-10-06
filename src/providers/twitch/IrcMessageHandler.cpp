@@ -476,6 +476,11 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
 int IrcMessageHandler::stripLeadingReplyMention(const QVariantMap &tags,
                                                 QString &content)
 {
+    if (!getSettings()->stripReplyMention)
+    {
+        return 0;
+    }
+
     if (const auto it = tags.find("reply-parent-display-name");
         it != tags.end())
     {

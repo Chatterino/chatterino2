@@ -719,6 +719,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
+    layout.addCheckbox("Strip leading mention in replies", s.stripReplyMention);
 
     // Helix timegate settings
     auto helixTimegateGetValue = [](auto val) {
