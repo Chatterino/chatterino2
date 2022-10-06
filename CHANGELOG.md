@@ -58,6 +58,7 @@
 - Minor: Migrated /followers to Helix API. (#4040)
 - Minor: Migrated /followersoff to Helix API. (#4040)
 - Minor: Migrated /raid command to Helix API. Chat command will continue to be used until February 11th 2023. (#4029)
+- Minor: Make menus and placeholders display appropriate custom key combos. (#4045)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fixed `Smooth scrolling on new messages` setting sometimes hiding messages. (#4028)
 - Bugfix: Fixed a crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
