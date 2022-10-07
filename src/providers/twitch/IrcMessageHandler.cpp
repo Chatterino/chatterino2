@@ -502,7 +502,8 @@ void IrcMessageHandler::updateReplyParticipatedStatus(
     TwitchMessageBuilder &builder, std::shared_ptr<MessageThread> &thread,
     bool isNew)
 {
-    auto &currentLogin = getApp()->accounts->twitch.getCurrent()->getUserName();
+    const auto &currentLogin =
+        getApp()->accounts->twitch.getCurrent()->getUserName();
     if (thread->participated())
     {
         builder.message().flags.set(MessageFlag::ParticipatedThread);
@@ -511,7 +512,7 @@ void IrcMessageHandler::updateReplyParticipatedStatus(
 
     if (isNew)
     {
-        if (const auto it = tags.find("reply-parent-user-name");
+        if (const auto it = tags.find("reply-parent-user-login");
             it != tags.end())
         {
             auto name = it.value().toString();
