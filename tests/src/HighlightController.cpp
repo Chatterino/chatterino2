@@ -345,6 +345,14 @@ public:
                  (FailureCallback<HelixBanUserError, QString> failureCallback)),
                 (override));  // /timeout, /ban
 
+    // /w
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, sendWhisper,
+                (QString fromUserID, QString toUserID, QString message,
+                 ResultCallback<> successCallback,
+                 (FailureCallback<HelixWhisperError, QString> failureCallback)),
+                (override));  // /w
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 

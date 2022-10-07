@@ -181,28 +181,6 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     return true;
 }
 
-bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
-{
-    QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
-    QStringList words = text.split(' ', Qt::SkipEmptyParts);
-
-    if (words.length() == 0)
-    {
-        return false;
-    }
-
-    QString commandName = words[0];
-
-    if (TWITCH_WHISPER_COMMANDS.contains(commandName, Qt::CaseInsensitive))
-    {
-        if (words.length() > 2)
-        {
-            return appendWhisperMessageWordsLocally(words);
-        }
-    }
-    return false;
-}
-
 using VariableReplacer = std::function<QString(
     const QString &, const ChannelPtr &, const Message *)>;
 
@@ -2700,6 +2678,159 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+
+    auto runWhisperCommand = [](const QStringList &words,
+                                auto channel) -> QString {
+        auto useIrc = []() {
+            switch (getSettings()->helixTimegateWhisper.getValue())
+            {
+                case HelixTimegateOverride::Timegate: {
+                    if (areIRCCommandsStillAvailable())
+                    {
+                        return true;
+                    }
+
+                    // fall through to Helix logic
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseIRC: {
+                    return true;
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseHelix: {
+                    // do nothing and fall through to Helix logic
+                }
+                break;
+            }
+            return false;
+        };
+
+        if (words.size() < 3)
+        {
+            channel->addMessage(
+                makeSystemMessage("Usage: /w <username> <message>"));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to send a whisper!"));
+            return "";
+        }
+        auto target = words.at(1);
+        stripChannelName(target);
+        auto message = words.mid(2).join(' ');
+
+        if (useIrc())
+        {
+            if (channel->isTwitchChannel())
+            {
+                appendWhisperMessageWordsLocally(words);
+                sendWhisperMessage(words.join(' '));
+            }
+            else
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You can only send whispers from twitch channels."));
+            }
+            return "";
+        }
+
+        getHelix()->getUserByName(
+            target,
+            [channel, currentUser, target, message,
+             words](const auto &targetUser) {
+                getHelix()->sendWhisper(
+                    currentUser->getUserId(), targetUser.id, message,
+                    [words] {
+                        appendWhisperMessageWordsLocally(words);
+                    },
+                    [channel, target, targetUser](auto error, auto message) {
+                        using Error = HelixWhisperError;
+
+                        QString errorMessage = "Failed to send whisper - ";
+
+                        switch (error)
+                        {
+                            case Error::NoVerifiedPhone: {
+                                errorMessage += "You need a verified phone "
+                                                "number to send whispers. "
+                                                "You can add a number on "
+                                                "https://www.twitch.tv/"
+                                                "settings/security";
+                            };
+                            break;
+
+                            case Error::RecipientBlockedUser: {
+                                errorMessage +=
+                                    "The recipient doesn't allow whispers "
+                                    "from strangers or you directly.";
+                            };
+                            break;
+
+                            case Error::WhisperSelf: {
+                                errorMessage += "You cannot whisper yourself.";
+                            };
+                            break;
+
+                            case Error::Forwarded: {
+                                errorMessage += message;
+                            }
+                            break;
+
+                            case Error::Ratelimited: {
+                                errorMessage +=
+                                    "You may whisper to a maximum of 40 "
+                                    "unique recipients per day. Within the "
+                                    "per day limit, you may whisper a "
+                                    "maximum of 3 whispers per second and "
+                                    "a maximum of 100 whispers per minute.";
+                            }
+                            break;
+
+                            case Error::UserMissingScope: {
+                                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                                errorMessage += "Missing required scope. "
+                                                "Re-login with your "
+                                                "account and try again.";
+                            }
+                            break;
+
+                            case Error::UserNotAuthorized: {
+                                // TODO(pajlada): Phrase MISSING_PERMISSION
+                                errorMessage += "You don't have permission to "
+                                                "perform that action.";
+                            }
+                            break;
+
+                            case Error::Unknown: {
+                                errorMessage +=
+                                    "An unknown error has occurred.";
+                            }
+                            break;
+                        }
+                        channel->addMessage(makeSystemMessage(errorMessage));
+                    });
+            },
+            [channel] {
+                channel->addMessage(
+                    makeSystemMessage("No user matching that username."));
+            });
+
+        return "";
+    };
+
+    for (const auto &cmd : TWITCH_WHISPER_COMMANDS)
+    {
+        this->registerCommand(
+            cmd, [runWhisperCommand](const QStringList &words, auto channel) {
+                return runWhisperCommand(words, channel);
+            });
+    }
 }
 
 void CommandController::save()
@@ -2727,26 +2858,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     }
 
     QString commandName = words[0];
-
-    // works in a valid Twitch channel and /whispers, etc...
-    if (!dryRun && channel->isTwitchChannel())
-    {
-        if (TWITCH_WHISPER_COMMANDS.contains(commandName, Qt::CaseInsensitive))
-        {
-            if (words.length() > 2)
-            {
-                appendWhisperMessageWordsLocally(words);
-                sendWhisperMessage(text);
-            }
-            else
-            {
-                channel->addMessage(
-                    makeSystemMessage("Usage: /w <username> <message>"));
-            }
-
-            return "";
-        }
-    }
 
     {
         // check if user command exists
@@ -2811,7 +2922,7 @@ void CommandController::registerCommand(QString commandName,
 }
 
 QString CommandController::execCustomCommand(
-    const QStringList &words, const Command &command, bool dryRun,
+    const QStringList &words, const Command &command, bool /* dryRun */,
     ChannelPtr channel, const Message *message,
     std::unordered_map<QString, QString> context)
 {
@@ -2906,17 +3017,7 @@ QString CommandController::execCustomCommand(
         result = result.mid(1);
     }
 
-    auto res = result.replace("{{", "{");
-
-    if (dryRun || !appendWhisperMessageStringLocally(res))
-    {
-        return res;
-    }
-    else
-    {
-        sendWhisperMessage(res);
-        return "";
-    }
+    return result.replace("{{", "{");
 }
 
 QStringList CommandController::getDefaultChatterinoCommandList()

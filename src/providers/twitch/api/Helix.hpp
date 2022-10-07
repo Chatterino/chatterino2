@@ -478,6 +478,19 @@ enum class HelixBanUserError {  // /timeout, /ban
     Forwarded,
 };  // /timeout, /ban
 
+enum class HelixWhisperError {  // /w
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+    NoVerifiedPhone,
+    RecipientBlockedUser,
+    WhisperSelf,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // /w
+
 class IHelix
 {
 public:
@@ -718,6 +731,13 @@ public:
         boost::optional<int> duration, QString reason,
         ResultCallback<> successCallback,
         FailureCallback<HelixBanUserError, QString> failureCallback) = 0;
+
+    // Send a whisper
+    // https://dev.twitch.tv/docs/api/reference#send-whisper
+    virtual void sendWhisper(
+        QString fromUserID, QString toUserID, QString message,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixWhisperError, QString> failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 
@@ -960,6 +980,13 @@ public:
         boost::optional<int> duration, QString reason,
         ResultCallback<> successCallback,
         FailureCallback<HelixBanUserError, QString> failureCallback) final;
+
+    // Send a whisper
+    // https://dev.twitch.tv/docs/api/reference#send-whisper
+    void sendWhisper(
+        QString fromUserID, QString toUserID, QString message,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixWhisperError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 
