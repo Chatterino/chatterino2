@@ -74,11 +74,10 @@ private:
 
     static int stripLeadingReplyMention(const QVariantMap &tags,
                                         QString &content);
-    void updateReplyParticipatedStatus(const QVariantMap &tags,
-                                       const QString &senderLogin,
-                                       TwitchMessageBuilder &builder,
-                                       std::shared_ptr<MessageThread> &thread,
-                                       bool isNew);
+    static void updateReplyParticipatedStatus(
+        const QVariantMap &tags, const QString &senderLogin,
+        TwitchMessageBuilder &builder, std::shared_ptr<MessageThread> &thread,
+        bool isNew);
 };
 
 }  // namespace chatterino
