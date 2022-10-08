@@ -2009,7 +2009,7 @@ void Helix::getChannelVIPs(
     urlQuery.addQueryItem("first", "100");
 
     this->makeRequest("channel/vips", urlQuery)
-        .type(NetworkRequestType::Post)
+        .type(NetworkRequestType::Get)
         .header("Content-Type", "application/json")
         .onSuccess([successCallback](auto result) -> Outcome {
             if (result.status() != 200)
