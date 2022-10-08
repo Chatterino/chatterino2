@@ -193,7 +193,6 @@ void rebuildMessageHighlights(Settings &settings,
     {
         checks.emplace_back(highlightPhraseCheck(highlight));
     }
-    rebuildReplyThreadHighlight(settings, checks);
 }
 
 void rebuildUserHighlights(Settings &settings,
@@ -346,7 +345,7 @@ void HighlightController::rebuildChecks(Settings &settings)
     checks->clear();
 
     // CURRENT ORDER:
-    // Subscription -> Whisper -> User -> Message -> Badge
+    // Subscription -> Whisper -> User -> Message -> Reply Threads -> Badge
 
     rebuildSubscriptionHighlights(settings, *checks);
 
@@ -355,6 +354,8 @@ void HighlightController::rebuildChecks(Settings &settings)
     rebuildUserHighlights(settings, *checks);
 
     rebuildMessageHighlights(settings, *checks);
+
+    rebuildReplyThreadHighlight(settings, *checks);
 
     rebuildBadgeHighlights(settings, *checks);
 }
