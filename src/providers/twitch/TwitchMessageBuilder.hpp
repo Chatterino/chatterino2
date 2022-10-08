@@ -110,6 +110,17 @@ private:
     bool bitsStacked = false;
     bool historicalMessage_ = false;
     std::shared_ptr<MessageThread> thread_;
+
+    /**
+     * Starting offset to be used on index-based operations on `originalMessage_`.
+     *
+     * For example:
+     * originalMessage_ = "there"
+     * messageOffset_ = 4
+     * (the irc message is "hey there")
+     *
+     * then the index 6 would resolve to 6 - 4 = 2 => 'e'
+     */
     int messageOffset_ = 0;
 
     QString userId_;
