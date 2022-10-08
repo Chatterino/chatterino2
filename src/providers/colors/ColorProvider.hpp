@@ -14,7 +14,7 @@ enum class ColorType {
     RedeemedHighlight,
     FirstMessageHighlight,
     ElevatedMessageHighlight,
-    ThreadMessageHighlight
+    ThreadMessageHighlight,
 };
 
 class ColorProvider
