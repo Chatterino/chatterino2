@@ -571,8 +571,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Title", s.headerStreamTitle);
 
     layout.addSubtitle("R9K");
+    auto toggleLocalr9kSeq = getApp()->hotkeys->getDisplaySequence(
+        HotkeyCategory::Window, "toggleLocalR9K");
+    QString toggleLocalr9kShortcut =
+        "an assigned hotkey (Window -> Toggle local R9K)";
+    if (!toggleLocalr9kSeq.isEmpty())
+    {
+        toggleLocalr9kShortcut = toggleLocalr9kSeq.toString(
+            QKeySequence::SequenceFormat::NativeText);
+    }
     layout.addDescription("Hide similar messages. Toggle hidden "
-                          "messages by pressing Ctrl+H.");
+                          "messages by pressing " +
+                          toggleLocalr9kShortcut + ".");
     layout.addCheckbox("Hide similar messages", s.similarityEnabled);
     //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
     layout.addCheckbox("By the same user", s.hideSimilarBySameUser);
