@@ -2679,8 +2679,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    auto runWhisperCommand = [](const QStringList &words,
-                                auto channel) -> QString {
+    auto runWhisperCommand = [](auto words, auto channel) -> QString {
         auto useIrc = []() {
             switch (getSettings()->helixTimegateWhisper.getValue())
             {
