@@ -3,6 +3,8 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
@@ -193,7 +195,17 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 #endif
     if (!BaseWindow::supportsCustomWindowFrame())
     {
-        layout.addCheckbox("Show preferences button (Ctrl+P to show)",
+        auto settingsSeq = getApp()->hotkeys->getDisplaySequence(
+            HotkeyCategory::Window, "openSettings");
+        QString shortcut = " (no key bound to open them otherwise)";
+        // TODO: maybe prevent the user from locking themselves out of the settings?
+        if (!settingsSeq.isEmpty())
+        {
+            shortcut = QStringLiteral(" (%1 to show)")
+                           .arg(settingsSeq.toString(
+                               QKeySequence::SequenceFormat::NativeText));
+        }
+        layout.addCheckbox("Show preferences button" + shortcut,
                            s.hidePreferencesButton, true);
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
