@@ -283,6 +283,13 @@ public:
         (override));  // /raid
 
     // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(  // /unraid
+        void, cancelRaid,
+        (QString broadcasterID, ResultCallback<> successCallback,
+         (FailureCallback<HelixCancelRaidError, QString> failureCallback)),
+        (override));  // /unraid
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
     MOCK_METHOD(void, updateEmoteMode,
                 (QString broadcasterID, QString moderatorID, bool emoteMode,
                  ResultCallback<HelixChatSettings> successCallback,

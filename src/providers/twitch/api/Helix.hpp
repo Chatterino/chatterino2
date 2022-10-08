@@ -454,6 +454,17 @@ enum class HelixStartRaidError {  // /raid
     Forwarded,
 };  // /raid
 
+enum class HelixCancelRaidError {  // /unraid
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    NoRaidPending,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // /unraid
+
 enum class HelixUpdateChatSettingsError {  // update chat settings
     Unknown,
     UserMissingScope,
@@ -672,6 +683,12 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixStartRaidError, QString> failureCallback) = 0;
     // https://dev.twitch.tv/docs/api/reference#start-a-raid
+
+    // https://dev.twitch.tv/docs/api/reference#cancel-a-raid
+    virtual void cancelRaid(
+        QString broadcasterID, ResultCallback<> successCallback,
+        FailureCallback<HelixCancelRaidError, QString> failureCallback) = 0;
+    // https://dev.twitch.tv/docs/api/reference#cancel-a-raid
 
     // Updates the emote mode using
     // https://dev.twitch.tv/docs/api/reference#update-chat-settings
@@ -922,6 +939,12 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixStartRaidError, QString> failureCallback) final;
     // https://dev.twitch.tv/docs/api/reference#start-a-raid
+
+    // https://dev.twitch.tv/docs/api/reference#cancel-a-raid
+    void cancelRaid(
+        QString broadcasterID, ResultCallback<> successCallback,
+        FailureCallback<HelixCancelRaidError, QString> failureCallback) final;
+    // https://dev.twitch.tv/docs/api/reference#cancel-a-raid
 
     // Updates the emote mode using
     // https://dev.twitch.tv/docs/api/reference#update-chat-settings
