@@ -164,10 +164,8 @@ void rebuildReplyThreadHighlight(Settings &settings,
                         highlightInMentions,
                     };
                 }
-                else
-                {
-                    return boost::none;
-                }
+
+                return boost::none;
             }});
     }
 }
