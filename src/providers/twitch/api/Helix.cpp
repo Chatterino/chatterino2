@@ -2018,6 +2018,16 @@ void Helix::getChannelVIPs(
                   << "Success result for banning a user was"
                   << result.status() << "but we expected it to be 200";
           }
+
+          auto response = result.parseJson();
+
+          std::vector<HelixVip> channelVips;
+          for (const auto &jsonStream : response.value("data").toArray())
+          {
+              channelVips.emplace_back(jsonStream.toObject());
+          }
+
+          successCallback(channelVips);
           return Success;
         })
         .onError([failureCallback](auto result) {
