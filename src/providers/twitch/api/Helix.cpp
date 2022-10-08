@@ -2012,74 +2012,74 @@ void Helix::getChannelVIPs(
         .type(NetworkRequestType::Post)
         .header("Content-Type", "application/json")
         .onSuccess([successCallback](auto result) -> Outcome {
-          if (result.status() != 200)
-          {
-              qCWarning(chatterinoTwitch)
-                  << "Success result for banning a user was"
-                  << result.status() << "but we expected it to be 200";
-          }
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for banning a user was"
+                    << result.status() << "but we expected it to be 200";
+            }
 
-          auto response = result.parseJson();
+            auto response = result.parseJson();
 
-          std::vector<HelixVip> channelVips;
-          for (const auto &jsonStream : response.value("data").toArray())
-          {
-              channelVips.emplace_back(jsonStream.toObject());
-          }
+            std::vector<HelixVip> channelVips;
+            for (const auto &jsonStream : response.value("data").toArray())
+            {
+                channelVips.emplace_back(jsonStream.toObject());
+            }
 
-          successCallback(channelVips);
-          return Success;
+            successCallback(channelVips);
+            return Success;
         })
         .onError([failureCallback](auto result) {
-          auto obj = result.parseJson();
-          auto message = obj.value("message").toString();
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
 
-          switch (result.status())
-          {
-              case 400: {
-                  failureCallback(Error::Forwarded, message);
-              }
-              break;
+            switch (result.status())
+            {
+                case 400: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
 
-              case 401: {
-                  if (message.startsWith("Missing scope",
-                                         Qt::CaseInsensitive))
-                  {
-                      failureCallback(Error::UserMissingScope, message);
-                  }
-                  else if (message.compare(
-                      "The ID in broadcaster_id must match the user "
-                      "ID found in the request's OAuth token.",
-                      Qt::CaseInsensitive) == 0)
-                  {
-                      // Must be the broadcaster.
-                      failureCallback(Error::UserNotAuthorized, message);
-                  }
-                  else
-                  {
-                      failureCallback(Error::Forwarded, message);
-                  }
-              }
-              break;
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare(
+                                 "The ID in broadcaster_id must match the user "
+                                 "ID found in the request's OAuth token.",
+                                 Qt::CaseInsensitive) == 0)
+                    {
+                        // Must be the broadcaster.
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
 
-              case 403: {
-                  failureCallback(Error::UserNotAuthorized, message);
-              }
-              break;
+                case 403: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                }
+                break;
 
-              case 429: {
-                  failureCallback(Error::Ratelimited, message);
-              }
-              break;
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
 
-              default: {
-                  qCDebug(chatterinoTwitch)
-                      << "Unhandled error listing VIPs:" << result.status()
-                      << result.getData() << obj;
-                  failureCallback(Error::Unknown, message);
-              }
-              break;
-          }
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error listing VIPs:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
         })
         .execute();
 }
