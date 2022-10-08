@@ -3005,9 +3005,18 @@ void CommandController::initialize(Settings &, Paths &paths)
         getHelix()->getChannelVIPs(
             twitchChannel->roomId(),
             [channel](const std::vector<HelixVip> &vipList) {
-                // TODO: implement handler
+                // TODO: handle 0 items
+                auto message = QString("The VIPs of this channel are ");
+                auto entries = QStringList();
+
+                // TODO: sort
+                for (const auto &vip : vipList)
+                {
+                    entries.append(vip.userName);
+                }
+
                 channel->addMessage(
-                    makeSystemMessage(QString("TODO: better error message")));
+                    makeSystemMessage(message.append(entries.join(", "))));
             },
             [channel, formatVIPListError](auto error, auto message) {
                 auto errorMessage = formatVIPListError("vip", error, message);
