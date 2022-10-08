@@ -2008,7 +2008,7 @@ void Helix::getChannelVIPs(
     //   as the mod list can go over 100 (I assume, I see no limit)
     urlQuery.addQueryItem("first", "100");
 
-    this->makeRequest("channel/vips", urlQuery)
+    this->makeRequest("channels/vips", urlQuery)
         .type(NetworkRequestType::Get)
         .header("Content-Type", "application/json")
         .onSuccess([successCallback](auto result) -> Outcome {
