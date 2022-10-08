@@ -519,6 +519,16 @@ enum class HelixWhisperError {  // /w
     Forwarded,
 };  // /w
 
+enum class HelixListVIPsError {  // /vips
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // /vips
+
 class IHelix
 {
 public:
@@ -772,6 +782,12 @@ public:
         QString fromUserID, QString toUserID, QString message,
         ResultCallback<> successCallback,
         FailureCallback<HelixWhisperError, QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#get-vips
+    virtual void getChannelVIPs(
+        QString broadcasterID,
+        ResultCallback<std::vector<HelixVip>> successCallback,
+        FailureCallback<HelixListVIPsError, QString> failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 
@@ -1027,6 +1043,12 @@ public:
         QString fromUserID, QString toUserID, QString message,
         ResultCallback<> successCallback,
         FailureCallback<HelixWhisperError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#get-vips
+    void getChannelVIPs(
+        QString broadcasterID,
+        ResultCallback<std::vector<HelixVip>> successCallback,
+        FailureCallback<HelixListVIPsError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

@@ -1991,6 +1991,53 @@ void Helix::sendWhisper(
         .execute();
 }
 
+// List the VIPs of a channel
+// https://dev.twitch.tv/docs/api/reference#get-vips
+void Helix::getChannelVIPs(
+    QString broadcasterID,
+    ResultCallback<std::vector<HelixVip>> successCallback,
+    FailureCallback<HelixListVIPsError, QString> failureCallback)
+{
+    using Error = HelixListVIPsError;
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+
+    // No point pagi/pajanating, Twitch's max VIP count doesn't go over 100
+    // TODO(jammehcow): probably still implement pagination
+    //   as the mod list can go over 100 (I assume, I see no limit)
+    urlQuery.addQueryItem("first", "100");
+
+    this->makeRequest("channel/vips", urlQuery)
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .onSuccess([successCallback](auto result) -> Outcome {
+          if (result.status() != 200)
+          {
+              qCWarning(chatterinoTwitch)
+                  << "Success result for banning a user was"
+                  << result.status() << "but we expected it to be 200";
+          }
+          return Success;
+        })
+        .onError([failureCallback](auto result) {
+          auto obj = result.parseJson();
+          auto message = obj.value("message").toString();
+
+          switch (result.status())
+          {
+              default: {
+                  qCDebug(chatterinoTwitch)
+                      << "Unhandled error listing VIPs:" << result.status()
+                      << result.getData() << obj;
+                  failureCallback(Error::Unknown, message);
+              }
+              break;
+          }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
