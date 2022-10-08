@@ -2994,9 +2994,10 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (currentUser->isAnon() ||
             currentUser->getUserId() != twitchChannel->roomId())
         {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in as the broadcaster of "
-                                  "this channel to see the VIP list!"));
+            channel->addMessage(makeSystemMessage(
+                "Due to Twitch restrictions, this command can only be used by "
+                "the broadcaster. To see the list of VIPs you must use the "
+                "Twitch website."));
             return "";
         }
 
