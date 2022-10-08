@@ -2231,87 +2231,111 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });  // /raid
 
-    this->registerCommand("/unraid", [](const QStringList &words,  // unraid
-                                        auto channel) {
-        if (words.size() != 1)
-        {
-            channel->addMessage(makeSystemMessage(
-                "Usage: \"/unraid\" - Cancel the current raid. "
-                "Only the broadcaster can cancel the raid."));
-            return "";
-        }
-
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to cancel the raid!"));
-            return "";
-        }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /unraid command only works in Twitch channels"));
-            return "";
-        }
-
-        getHelix()->cancelRaid(
-            twitchChannel->roomId(),
-            [channel] {
-                channel->addMessage(
-                    makeSystemMessage(QString("You cancelled the raid.")));
-            },
-            [channel](auto error, auto message) {
-                QString errorMessage = QString("Failed to cancel the raid - ");
-
-                using Error = HelixCancelRaidError;
-
-                switch (error)
-                {
-                    case Error::UserMissingScope: {
-                        // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
-                        errorMessage += "Missing required scope. "
-                                        "Re-login with your "
-                                        "account and try again.";
+    this->registerCommand(  // /unraid
+        "/unraid", [](const QStringList &words, auto channel) -> QString {
+            switch (getSettings()->helixTimegateRaid.getValue())
+            {
+                case HelixTimegateOverride::Timegate: {
+                    if (areIRCCommandsStillAvailable())
+                    {
+                        return useIRCCommand(words);
                     }
-                    break;
 
-                    case Error::UserNotAuthorized: {
-                        errorMessage += "You must be the broadcaster "
-                                        "to cancel the raid.";
-                    }
-                    break;
-
-                    case Error::NoRaidPending: {
-                        errorMessage += "You don't have an active raid.";
-                    }
-                    break;
-
-                    case Error::Ratelimited: {
-                        errorMessage +=
-                            "You are being ratelimited by Twitch. Try "
-                            "again in a few seconds.";
-                    }
-                    break;
-
-                    case Error::Forwarded: {
-                        errorMessage += message;
-                    }
-                    break;
-
-                    case Error::Unknown:
-                    default: {
-                        errorMessage += "An unknown error has occurred.";
-                    }
-                    break;
+                    // fall through to Helix logic
                 }
-                channel->addMessage(makeSystemMessage(errorMessage));
-            });
+                break;
 
-        return "";
-    });  // unraid
+                case HelixTimegateOverride::AlwaysUseIRC: {
+                    return useIRCCommand(words);
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseHelix: {
+                    // do nothing and fall through to Helix logic
+                }
+                break;
+            }
+
+            if (words.size() != 1)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: \"/unraid\" - Cancel the current raid. "
+                    "Only the broadcaster can cancel the raid."));
+                return "";
+            }
+
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (currentUser->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to cancel the raid!"));
+                return "";
+            }
+
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /unraid command only works in Twitch channels"));
+                return "";
+            }
+
+            getHelix()->cancelRaid(
+                twitchChannel->roomId(),
+                [channel] {
+                    channel->addMessage(
+                        makeSystemMessage(QString("You cancelled the raid.")));
+                },
+                [channel](auto error, auto message) {
+                    QString errorMessage =
+                        QString("Failed to cancel the raid - ");
+
+                    using Error = HelixCancelRaidError;
+
+                    switch (error)
+                    {
+                        case Error::UserMissingScope: {
+                            // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                            errorMessage += "Missing required scope. "
+                                            "Re-login with your "
+                                            "account and try again.";
+                        }
+                        break;
+
+                        case Error::UserNotAuthorized: {
+                            errorMessage += "You must be the broadcaster "
+                                            "to cancel the raid.";
+                        }
+                        break;
+
+                        case Error::NoRaidPending: {
+                            errorMessage += "You don't have an active raid.";
+                        }
+                        break;
+
+                        case Error::Ratelimited: {
+                            errorMessage +=
+                                "You are being ratelimited by Twitch. Try "
+                                "again in a few seconds.";
+                        }
+                        break;
+
+                        case Error::Forwarded: {
+                            errorMessage += message;
+                        }
+                        break;
+
+                        case Error::Unknown:
+                        default: {
+                            errorMessage += "An unknown error has occurred.";
+                        }
+                        break;
+                    }
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
+
+            return "";
+        });  // unraid
 
     const auto formatChatSettingsError = [](const HelixUpdateChatSettingsError
                                                 error,

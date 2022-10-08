@@ -57,7 +57,7 @@
 - Minor: Migrated /followers to Helix API. (#4040)
 - Minor: Migrated /followersoff to Helix API. (#4040)
 - Minor: Migrated /raid command to Helix API. Chat command will continue to be used until February 11th 2023. (#4029)
-- Minor: Migrated /unraid command to Helix API. (#4030)
+- Minor: Migrated /unraid command to Helix API. Chat command will continue to be used until February 11th 2023. (#4030)
 - Minor: Migrated /ban to Helix API. (#4049)
 - Minor: Migrated /timeout to Helix API. (#4049)
 - Minor: Migrated /w to Helix API. Chat command will continue to be used until February 11th 2023. (#4052)
