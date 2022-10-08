@@ -2757,11 +2757,12 @@ void CommandController::initialize(Settings &, Paths &paths)
                         switch (error)
                         {
                             case Error::NoVerifiedPhone: {
-                                errorMessage += "You need a verified phone "
-                                                "number to send whispers. "
-                                                "You can add a number on "
-                                                "https://www.twitch.tv/"
-                                                "settings/security";
+                                errorMessage +=
+                                    "Due to Twitch restrictions, you are now "
+                                    "required to have a verified phone number "
+                                    "to send whispers. You can add a phone "
+                                    "number in Twitch settings. "
+                                    "https://www.twitch.tv/settings/security";
                             };
                             break;
 
@@ -2784,7 +2785,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
                             case Error::Ratelimited: {
                                 errorMessage +=
-                                    "You may whisper to a maximum of 40 "
+                                    "You may only whisper a maximum of 40 "
                                     "unique recipients per day. Within the "
                                     "per day limit, you may whisper a "
                                     "maximum of 3 whispers per second and "
