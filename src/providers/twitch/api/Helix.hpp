@@ -329,6 +329,23 @@ struct HelixChatSettings {
     }
 };
 
+struct HelixVip {
+    QString userId;
+    QString userName;
+    QString userLogin;
+
+    explicit HelixVip(const QJsonObject &jsonObject)
+        : userId(jsonObject.value("user_id").toString())
+        , userName(jsonObject.value("user_name").toString())
+        , userLogin(jsonObject.value("user_login").toString())
+    {
+    }
+};
+
+// TODO(jammehcow): when implementing mod list, just alias HelixVip to HelixMod
+//   as they share the same model.
+//   Alternatively, rename base struct to HelixUser or something and alias both
+
 enum class HelixAnnouncementColor {
     Blue,
     Green,
