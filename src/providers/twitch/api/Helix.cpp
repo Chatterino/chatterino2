@@ -1812,6 +1812,112 @@ void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
         .execute();
 }
 
+// https://dev.twitch.tv/docs/api/reference#send-whisper
+void Helix::sendWhisper(
+    QString fromUserID, QString toUserID, QString message,
+    ResultCallback<> successCallback,
+    FailureCallback<HelixWhisperError, QString> failureCallback)
+{
+    using Error = HelixWhisperError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("from_user_id", fromUserID);
+    urlQuery.addQueryItem("to_user_id", toUserID);
+
+    QJsonObject payload;
+    payload["message"] = message;
+
+    this->makeRequest("whispers", urlQuery)
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for sending a whisper was"
+                    << result.status() << "but we expected it to be 204";
+            }
+            // we don't care about the response
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.startsWith("A user cannot whisper themself",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::WhisperSelf, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        // Handle this error specifically because its API error is especially unfriendly
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.startsWith("the sender does not have a "
+                                                "verified phone number",
+                                                Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::NoVerifiedPhone, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 403: {
+                    if (message.startsWith("The recipient's settings prevent "
+                                           "this sender from whispering them",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::RecipientBlockedUser, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                }
+                break;
+
+                case 404: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error banning user:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

@@ -766,6 +766,17 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     helixTimegateRaid->setMinimumWidth(
         helixTimegateRaid->minimumSizeHint().width());
 
+    auto *helixTimegateWhisper =
+        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
+            "Helix timegate /w behaviour",
+            {"Timegate", "Always use IRC", "Always use Helix"},
+            s.helixTimegateWhisper,
+            helixTimegateGetValue,  //
+            helixTimegateSetValue,  //
+            false);
+    helixTimegateWhisper->setMinimumWidth(
+        helixTimegateWhisper->minimumSizeHint().width());
+
     layout.addStretch();
 
     // invisible element for width
