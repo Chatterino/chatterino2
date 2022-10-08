@@ -2980,8 +2980,9 @@ void CommandController::initialize(Settings &, Paths &paths)
         return errorMessage;
     };
 
-    this->registerCommand("/vips", [formatVIPListError](const QStringList &,
-                                                        auto channel) {
+    this->registerCommand("/vips", [formatVIPListError](
+                                       const QStringList & /*unused*/,
+                                       auto channel) {
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
         if (twitchChannel == nullptr)
         {
