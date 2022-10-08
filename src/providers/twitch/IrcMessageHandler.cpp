@@ -67,6 +67,65 @@ MessagePtr generateBannedMessage(bool confirmedBan)
     return builder.release();
 }
 
+int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
+{
+    if (!getSettings()->stripReplyMention)
+    {
+        return 0;
+    }
+
+    if (const auto it = tags.find("reply-parent-display-name");
+        it != tags.end())
+    {
+        auto displayName = it.value().toString();
+        if (content.startsWith('@') &&
+            content.at(1 + displayName.length()) == ' ' &&
+            content.indexOf(displayName, 1) == 1)
+        {
+            int messageOffset = 1 + displayName.length() + 1;
+            content.remove(0, messageOffset);
+            return messageOffset;
+        }
+    }
+    return 0;
+}
+
+void updateReplyParticipatedStatus(const QVariantMap &tags,
+                                   const QString &senderLogin,
+                                   TwitchMessageBuilder &builder,
+                                   std::shared_ptr<MessageThread> &thread,
+                                   bool isNew)
+{
+    const auto &currentLogin =
+        getApp()->accounts->twitch.getCurrent()->getUserName();
+    if (thread->participated())
+    {
+        builder.message().flags.set(MessageFlag::ParticipatedThread);
+        return;
+    }
+
+    if (isNew)
+    {
+        if (const auto it = tags.find("reply-parent-user-login");
+            it != tags.end())
+        {
+            auto name = it.value().toString();
+            if (name == currentLogin)
+            {
+                thread->markParticipated();
+                builder.message().flags.set(MessageFlag::ParticipatedThread);
+                return;  // already marked as participated
+            }
+        }
+    }
+
+    if (senderLogin == currentLogin)
+    {
+        thread->markParticipated();
+        // don't set the highlight here
+    }
+}
+
 }  // namespace
 namespace chatterino {
 
@@ -470,65 +529,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         {
             chatters->addRecentChatter(msg->displayName);
         }
-    }
-}
-
-int IrcMessageHandler::stripLeadingReplyMention(const QVariantMap &tags,
-                                                QString &content)
-{
-    if (!getSettings()->stripReplyMention)
-    {
-        return 0;
-    }
-
-    if (const auto it = tags.find("reply-parent-display-name");
-        it != tags.end())
-    {
-        auto displayName = it.value().toString();
-        if (content.startsWith('@') &&
-            content.at(1 + displayName.length()) == ' ' &&
-            content.indexOf(displayName, 1) == 1)
-        {
-            int messageOffset = 1 + displayName.length() + 1;
-            content.remove(0, messageOffset);
-            return messageOffset;
-        }
-    }
-    return 0;
-}
-
-void IrcMessageHandler::updateReplyParticipatedStatus(
-    const QVariantMap &tags, const QString &senderLogin,
-    TwitchMessageBuilder &builder, std::shared_ptr<MessageThread> &thread,
-    bool isNew)
-{
-    const auto &currentLogin =
-        getApp()->accounts->twitch.getCurrent()->getUserName();
-    if (thread->participated())
-    {
-        builder.message().flags.set(MessageFlag::ParticipatedThread);
-        return;
-    }
-
-    if (isNew)
-    {
-        if (const auto it = tags.find("reply-parent-user-login");
-            it != tags.end())
-        {
-            auto name = it.value().toString();
-            if (name == currentLogin)
-            {
-                thread->markParticipated();
-                builder.message().flags.set(MessageFlag::ParticipatedThread);
-                return;  // already marked as participated
-            }
-        }
-    }
-
-    if (senderLogin == currentLogin)
-    {
-        thread->markParticipated();
-        // don't set the highlight here
     }
 }
 
