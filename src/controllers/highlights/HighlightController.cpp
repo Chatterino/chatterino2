@@ -213,7 +213,7 @@ void rebuildUserHighlights(Settings &settings,
                 (void)args;             // unused
                 (void)badges;           // unused
                 (void)originalMessage;  // unused
-                (void)flags;            //unused
+                (void)flags;            // unused
                 (void)self;             // unused
 
                 if (!highlight.isMatch(senderName))
