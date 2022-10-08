@@ -2735,7 +2735,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             else
             {
                 channel->addMessage(makeSystemMessage(
-                    "You can only send whispers from twitch channels."));
+                    "You can only send whispers from Twitch channels."));
             }
             return "";
         }
