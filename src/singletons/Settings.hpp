@@ -118,6 +118,7 @@ public:
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
     BoolSetting showReplyButton = {"/appearance/showReplyButton", false};
+    BoolSetting stripReplyMention = {"/appearance/stripReplyMention", true};
     IntSetting collpseMessagesMinLines = {
         "/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessages = {
@@ -326,6 +327,19 @@ public:
     QStringSetting subHighlightSoundUrl = {"/highlighting/subHighlightSoundUrl",
                                            ""};
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
+
+    BoolSetting enableThreadHighlight = {
+        "/highlighting/thread/nameIsHighlightKeyword", true};
+    BoolSetting showThreadHighlightInMentions = {
+        "/highlighting/thread/showSelfHighlightInMentions", true};
+    BoolSetting enableThreadHighlightSound = {
+        "/highlighting/thread/enableSound", true};
+    BoolSetting enableThreadHighlightTaskbar = {
+        "/highlighting/thread/enableTaskbarFlashing", true};
+    QStringSetting threadHighlightSoundUrl = {
+        "/highlighting/threadHighlightSoundUrl", ""};
+    QStringSetting threadHighlightColor = {"/highlighting/threadHighlightColor",
+                                           ""};
 
     QStringSetting highlightColor = {"/highlighting/color", ""};
 
