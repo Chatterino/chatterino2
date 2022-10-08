@@ -1812,8 +1812,7 @@ void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
         .execute();
 }
 
-// Ban/timeout a user
-// https://dev.twitch.tv/docs/api/reference#ban-user
+// https://dev.twitch.tv/docs/api/reference#send-whisper
 void Helix::sendWhisper(
     QString fromUserID, QString toUserID, QString message,
     ResultCallback<> successCallback,
