@@ -2036,6 +2036,42 @@ void Helix::getChannelVIPs(
 
           switch (result.status())
           {
+              case 400: {
+                  failureCallback(Error::Forwarded, message);
+              }
+              break;
+
+              case 401: {
+                  if (message.startsWith("Missing scope",
+                                         Qt::CaseInsensitive))
+                  {
+                      failureCallback(Error::UserMissingScope, message);
+                  }
+                  else if (message.compare(
+                      "The ID in broadcaster_id must match the user "
+                      "ID found in the request's OAuth token.",
+                      Qt::CaseInsensitive) == 0)
+                  {
+                      // Must be the broadcaster.
+                      failureCallback(Error::UserNotAuthorized, message);
+                  }
+                  else
+                  {
+                      failureCallback(Error::Forwarded, message);
+                  }
+              }
+              break;
+
+              case 403: {
+                  failureCallback(Error::UserNotAuthorized, message);
+              }
+              break;
+
+              case 429: {
+                  failureCallback(Error::Ratelimited, message);
+              }
+              break;
+
               default: {
                   qCDebug(chatterinoTwitch)
                       << "Unhandled error listing VIPs:" << result.status()
