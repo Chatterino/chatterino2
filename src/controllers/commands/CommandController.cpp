@@ -181,6 +181,33 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     return true;
 }
 
+bool useIrcForWhisperCommand()
+{
+    switch (getSettings()->helixTimegateWhisper.getValue())
+    {
+        case HelixTimegateOverride::Timegate: {
+            if (areIRCCommandsStillAvailable())
+            {
+                return true;
+            }
+
+            // fall through to Helix logic
+        }
+        break;
+
+        case HelixTimegateOverride::AlwaysUseIRC: {
+            return true;
+        }
+        break;
+
+        case HelixTimegateOverride::AlwaysUseHelix: {
+            // do nothing and fall through to Helix logic
+        }
+        break;
+    }
+    return false;
+}
+
 using VariableReplacer = std::function<QString(
     const QString &, const ChannelPtr &, const Message *)>;
 
@@ -2680,32 +2707,6 @@ void CommandController::initialize(Settings &, Paths &paths)
     });
 
     auto runWhisperCommand = [](auto words, auto channel) -> QString {
-        auto useIrc = []() {
-            switch (getSettings()->helixTimegateWhisper.getValue())
-            {
-                case HelixTimegateOverride::Timegate: {
-                    if (areIRCCommandsStillAvailable())
-                    {
-                        return true;
-                    }
-
-                    // fall through to Helix logic
-                }
-                break;
-
-                case HelixTimegateOverride::AlwaysUseIRC: {
-                    return true;
-                }
-                break;
-
-                case HelixTimegateOverride::AlwaysUseHelix: {
-                    // do nothing and fall through to Helix logic
-                }
-                break;
-            }
-            return false;
-        };
-
         if (words.size() < 3)
         {
             channel->addMessage(
@@ -2724,7 +2725,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         stripChannelName(target);
         auto message = words.mid(2).join(' ');
 
-        if (useIrc())
+        if (useIrcForWhisperCommand())
         {
             if (channel->isTwitchChannel())
             {
