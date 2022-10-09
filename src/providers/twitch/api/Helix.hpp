@@ -775,7 +775,7 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixWhisperError, QString> failureCallback) = 0;
 
-    // Get number of chatters
+    // Get chatters list
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     virtual void getChatters(
         QString broadcasterID, QString moderatorID,
@@ -1037,7 +1037,8 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixWhisperError, QString> failureCallback) final;
 
-    // https://dev.twitch.tv/docs/api/reference#send-whisper
+    // Get chatter list
+    // https://dev.twitch.tv/docs/api/reference#get-chatters
     void getChatters(
         QString broadcasterID, QString moderatorID,
         ResultCallback<HelixChatterList> successCallback,

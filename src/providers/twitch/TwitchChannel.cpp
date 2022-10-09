@@ -868,7 +868,7 @@ void TwitchChannel::refreshChatters()
                                     const QString &message) -> QString {
         using Error = HelixChattersError;
 
-        QString errorMessage = QString("Failed to list VIPs - ");
+        QString errorMessage = QString("Failed to get list of chatters - ");
 
         switch (error)
         {

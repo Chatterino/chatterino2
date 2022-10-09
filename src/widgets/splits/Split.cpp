@@ -960,7 +960,7 @@ void Split::showViewerList()
                                     const QString &message) -> QString {
         using Error = HelixChattersError;
 
-        QString errorMessage = QString("Failed to list VIPs - ");
+        QString errorMessage = QString("Failed to get list of chatters - ");
 
         switch (error)
         {
@@ -1119,8 +1119,7 @@ void Split::showViewerList()
                 auto errorMessage = formatChatterListError(error, message);
                 channel->addMessage(makeSystemMessage(errorMessage));
             });
-
-            performListSearch();
+            
             return Success;
         })
         .execute();

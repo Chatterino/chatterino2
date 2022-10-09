@@ -2043,17 +2043,16 @@ void Helix::getChatters(
                 break;
 
                 case 401: {
-                    if (message.startsWith("Missing scope",
-                                           Qt::CaseInsensitive))
+                    if (message.startsWith("Missing scope", Qt::CaseInsensitive))
                     {
                         failureCallback(Error::UserMissingScope, message);
                     }
                     else if (message.compare(
-                                 "The ID in broadcaster_id must match the user "
+                                 "The ID in moderator_id must match the user "
                                  "ID found in the request's OAuth token.",
                                  Qt::CaseInsensitive) == 0)
                     {
-                        // Must be the broadcaster.
+                        // Must must have permission to moderate the broadcaster’s chat room.
                         failureCallback(Error::UserNotAuthorized, message);
                     }
                     else
@@ -2070,7 +2069,7 @@ void Helix::getChatters(
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Unhandled error listing chatters:" << result.status()
+                        << "Unhandled error getting chatter list:" << result.status()
                         << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
