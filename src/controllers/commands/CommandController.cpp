@@ -3028,7 +3028,11 @@ void CommandController::initialize(Settings &, Paths &paths)
         getHelix()->getChannelVIPs(
             twitchChannel->roomId(),
             [channel](const std::vector<HelixVip> &vipList) {
-                // TODO: handle 0 items
+                if (vipList.empty()) {
+                    makeSystemMessage("This channel does not have any VIPs.");
+                    return;
+                }
+
                 auto message = QString("The VIPs of this channel are ");
                 auto entries = QStringList();
 
