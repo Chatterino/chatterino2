@@ -12,6 +12,7 @@
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
@@ -3027,13 +3028,13 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         getHelix()->getChannelVIPs(
             twitchChannel->roomId(),
-            [channel](const std::vector<HelixVip> &vipList) {
+            [channel, twitchChannel](const std::vector<HelixVip> &vipList) {
                 if (vipList.empty()) {
                     makeSystemMessage("This channel does not have any VIPs.");
                     return;
                 }
 
-                auto message = QString("The VIPs of this channel are ");
+                auto messagePrefix = QString("The VIPs of this channel are");
                 auto entries = QStringList();
 
                 // TODO: sort
@@ -3044,8 +3045,11 @@ void CommandController::initialize(Settings &, Paths &paths)
 
                 entries.sort(Qt::CaseInsensitive);
 
-                channel->addMessage(
-                    makeSystemMessage(message.append(entries.join(", "))));
+                MessageBuilder builder;
+                TwitchMessageBuilder::listOfUsersSystemMessage(
+                    messagePrefix, entries, twitchChannel, &builder);
+
+                channel->addMessage(builder.release());
             },
             [channel, formatVIPListError](auto error, auto message) {
                 auto errorMessage = formatVIPListError("vip", error, message);
