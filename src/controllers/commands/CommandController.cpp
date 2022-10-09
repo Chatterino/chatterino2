@@ -2980,82 +2980,87 @@ void CommandController::initialize(Settings &, Paths &paths)
         return errorMessage;
     };
 
-    this->registerCommand("/vips", [formatVIPListError](
-                                       const QStringList & words,
-                                       auto channel) -> QString {
-        switch (getSettings()->helixTimegateVIPs.getValue())
-        {
-            case HelixTimegateOverride::Timegate: {
-                if (areIRCCommandsStillAvailable())
-                {
+    this->registerCommand(
+        "/vips",
+        [formatVIPListError](const QStringList &words,
+                             auto channel) -> QString {
+            switch (getSettings()->helixTimegateVIPs.getValue())
+            {
+                case HelixTimegateOverride::Timegate: {
+                    if (areIRCCommandsStillAvailable())
+                    {
+                        return useIRCCommand(words);
+                    }
+
+                    // fall through to Helix logic
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseIRC: {
                     return useIRCCommand(words);
                 }
+                break;
 
-                // fall through to Helix logic
-            }
-            break;
-
-            case HelixTimegateOverride::AlwaysUseIRC: {
-                return useIRCCommand(words);
-            }
-            break;
-
-            case HelixTimegateOverride::AlwaysUseHelix: {
-                // do nothing and fall through to Helix logic
-            }
-            break;
-        }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /vips command only works in Twitch channels"));
-            return "";
-        }
-
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-        if (currentUser->isAnon() ||
-            currentUser->getUserId() != twitchChannel->roomId())
-        {
-            channel->addMessage(makeSystemMessage(
-                "Due to Twitch restrictions, this command can only be used by "
-                "the broadcaster. To see the list of VIPs you must use the "
-                "Twitch website."));
-            return "";
-        }
-
-        getHelix()->getChannelVIPs(
-            twitchChannel->roomId(),
-            [channel, twitchChannel](const std::vector<HelixVip> &vipList) {
-                if (vipList.empty()) {
-                    makeSystemMessage("This channel does not have any VIPs.");
-                    return;
+                case HelixTimegateOverride::AlwaysUseHelix: {
+                    // do nothing and fall through to Helix logic
                 }
+                break;
+            }
 
-                auto messagePrefix = QString("The VIPs of this channel are");
-                auto entries = QStringList();
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /vips command only works in Twitch channels"));
+                return "";
+            }
 
-                for (const auto &vip : vipList)
-                {
-                    entries.append(vip.userName);
-                }
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (currentUser->isAnon() ||
+                currentUser->getUserId() != twitchChannel->roomId())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Due to Twitch restrictions, this command can only be used "
+                    "by "
+                    "the broadcaster. To see the list of VIPs you must use the "
+                    "Twitch website."));
+                return "";
+            }
 
-                entries.sort(Qt::CaseInsensitive);
+            getHelix()->getChannelVIPs(
+                twitchChannel->roomId(),
+                [channel, twitchChannel](const std::vector<HelixVip> &vipList) {
+                    if (vipList.empty())
+                    {
+                        makeSystemMessage(
+                            "This channel does not have any VIPs.");
+                        return;
+                    }
 
-                MessageBuilder builder;
-                TwitchMessageBuilder::listOfUsersSystemMessage(
-                    messagePrefix, entries, twitchChannel, &builder);
+                    auto messagePrefix =
+                        QString("The VIPs of this channel are");
+                    auto entries = QStringList();
 
-                channel->addMessage(builder.release());
-            },
-            [channel, formatVIPListError](auto error, auto message) {
-                auto errorMessage = formatVIPListError(error, message);
-                channel->addMessage(makeSystemMessage(errorMessage));
-            });
+                    for (const auto &vip : vipList)
+                    {
+                        entries.append(vip.userName);
+                    }
 
-        return "";
-    });
+                    entries.sort(Qt::CaseInsensitive);
+
+                    MessageBuilder builder;
+                    TwitchMessageBuilder::listOfUsersSystemMessage(
+                        messagePrefix, entries, twitchChannel, &builder);
+
+                    channel->addMessage(builder.release());
+                },
+                [channel, formatVIPListError](auto error, auto message) {
+                    auto errorMessage = formatVIPListError(error, message);
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
+
+            return "";
+        });
 }
 
 void CommandController::save()

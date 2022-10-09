@@ -782,9 +782,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
             "Helix timegate /vips behaviour",
             {"Timegate", "Always use IRC", "Always use Helix"},
-            s.helixTimegateVIPs,
-            helixTimegateGetValue,
-            helixTimegateSetValue,
+            s.helixTimegateVIPs, helixTimegateGetValue, helixTimegateSetValue,
             false);
     helixTimegateVIPs->setMinimumWidth(
         helixTimegateVIPs->minimumSizeHint().width());
