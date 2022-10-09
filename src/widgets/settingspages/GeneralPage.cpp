@@ -741,6 +741,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
+    layout.addCheckbox("Strip leading mention in replies", s.stripReplyMention);
 
     // Helix timegate settings
     auto helixTimegateGetValue = [](auto val) {
@@ -787,6 +788,17 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             false);
     helixTimegateRaid->setMinimumWidth(
         helixTimegateRaid->minimumSizeHint().width());
+
+    auto *helixTimegateWhisper =
+        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
+            "Helix timegate /w behaviour",
+            {"Timegate", "Always use IRC", "Always use Helix"},
+            s.helixTimegateWhisper,
+            helixTimegateGetValue,  //
+            helixTimegateSetValue,  //
+            false);
+    helixTimegateWhisper->setMinimumWidth(
+        helixTimegateWhisper->minimumSizeHint().width());
 
     layout.addStretch();
 

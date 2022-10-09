@@ -23,6 +23,10 @@ public:
     /// Returns the number of live reply references
     size_t liveCount(const std::shared_ptr<const Message> &exclude) const;
 
+    bool participated() const;
+
+    void markParticipated();
+
     const QString &rootId() const
     {
         return rootMessageId_;
@@ -42,6 +46,7 @@ private:
     const QString rootMessageId_;
     const std::shared_ptr<const Message> rootMessage_;
     std::vector<std::weak_ptr<const Message>> replies_;
+    bool participated_ = false;
 };
 
 }  // namespace chatterino
