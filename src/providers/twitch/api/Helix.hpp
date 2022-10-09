@@ -9,6 +9,7 @@
 #include <QStringList>
 #include <QUrl>
 #include <QUrlQuery>
+#include <unordered_set>
 #include <boost/optional.hpp>
 
 #include <functional>
@@ -329,6 +330,15 @@ struct HelixChatSettings {
     }
 };
 
+class HelixChatterList {
+    public:
+        std::unordered_set<QString> chatters;
+        int total;
+
+        // Initialize with data from /chatters
+        HelixChatterList(const QJsonObject &response);
+};
+
 enum class HelixAnnouncementColor {
     Blue,
     Green,
@@ -501,6 +511,15 @@ enum class HelixWhisperError {  // /w
     // The error message is forwarded directly from the Twitch API
     Forwarded,
 };  // /w
+
+enum class HelixChattersError { // /chat/chatters
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+}; // /chat/chatters
 
 class IHelix
 {
@@ -756,6 +775,13 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixWhisperError, QString> failureCallback) = 0;
 
+    // Get number of chatters
+    // https://dev.twitch.tv/docs/api/reference#get-chatters
+    virtual void getChatters(
+        QString broadcasterID, QString moderatorID,
+        ResultCallback<HelixChatterList> successCallback,
+        FailureCallback<HelixChattersError, QString> failureCallback) = 0;
+    
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1010,6 +1036,12 @@ public:
         QString fromUserID, QString toUserID, QString message,
         ResultCallback<> successCallback,
         FailureCallback<HelixWhisperError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#send-whisper
+    void getChatters(
+        QString broadcasterID, QString moderatorID,
+        ResultCallback<HelixChatterList> successCallback,
+        FailureCallback<HelixChattersError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

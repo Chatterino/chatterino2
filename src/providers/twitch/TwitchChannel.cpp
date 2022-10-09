@@ -864,6 +864,40 @@ void TwitchChannel::refreshPubSub()
 
 void TwitchChannel::refreshChatters()
 {
+    auto formatChatterListError = [](HelixChattersError error,
+                                    const QString &message) -> QString {
+        using Error = HelixChattersError;
+
+        QString errorMessage = QString("Failed to list VIPs - ");
+
+        switch (error)
+        {
+            case Error::Forwarded: {
+                errorMessage += message;
+            }
+            break;
+
+            case Error::UserMissingScope: {
+                errorMessage += "Missing required scope. "
+                                "Re-login with your "
+                                "account and try again.";
+            }
+            break;
+
+            case Error::UserNotAuthorized: {
+                errorMessage += "You don't have permission to "
+                                "perform that action.";
+            }
+            break;
+
+            case Error::Unknown: {
+                errorMessage += "An unknown error has occurred.";
+            }
+            break;
+        }
+        return errorMessage;
+    };
+
     // setting?
     const auto streamStatus = this->accessStreamStatus();
     const auto viewerCount = static_cast<int>(streamStatus->viewerCount);
@@ -876,31 +910,19 @@ void TwitchChannel::refreshChatters()
         }
     }
 
-    // get viewer list
-    NetworkRequest("https://tmi.twitch.tv/group/user/" + this->getName() +
-                   "/chatters")
-
-        .onSuccess(
-            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-                // channel still exists?
-                auto shared = weak.lock();
-                if (!shared)
-                {
-                    return Failure;
-                }
-
-                auto data = result.parseJson();
-                this->chatterCount_ = data.value("chatter_count").toInt();
-
-                auto pair = parseChatters(std::move(data));
-                if (pair.first)
-                {
-                    this->updateOnlineChatters(pair.second);
-                }
-
-                return pair.first;
-            })
-        .execute();
+    // Get chatter list via helix api
+    getHelix()->getChatters(
+        this->roomId(),
+        getApp()->accounts->twitch.getCurrent()->getUserId(),
+        [this](HelixChatterList chatterList) {
+            this->chatterCount_ = chatterList.total;
+            this->updateOnlineChatters(chatterList.chatters);
+        },
+        [this, formatChatterListError](auto error, auto message) {
+            auto errorMessage = formatChatterListError(error, message);
+            this->addMessage(makeSystemMessage(errorMessage));
+        }
+    );
 }
 
 void TwitchChannel::fetchDisplayName()

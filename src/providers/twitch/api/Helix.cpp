@@ -8,6 +8,17 @@
 
 namespace chatterino {
 
+HelixChatterList::HelixChatterList(const QJsonObject &response) {
+    chatters = std::unordered_set<QString>();
+    total = response.value("total").toInt();
+    for (const auto jsonStream : response.value("data").toArray()) 
+    {
+        auto chatter = jsonStream.toObject().value("user_login").toString();
+        chatters.insert(chatter);
+    }
+    chatters = std::move(chatters);
+}
+
 static IHelix *instance = nullptr;
 
 void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
@@ -1990,6 +2001,85 @@ void Helix::sendWhisper(
         })
         .execute();
 }
+
+void Helix::getChatters(
+    QString broadcasterID, QString moderatorID,
+    ResultCallback<HelixChatterList> successCallback,
+    FailureCallback<HelixChattersError, QString> failureCallback)  
+{
+    using Error = HelixChattersError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    this->makeRequest("chat/chatters", urlQuery)
+        .type(NetworkRequestType::Get)
+        .header("Content-Type", "application/json")
+        .onSuccess([successCallback](auto result) -> Outcome {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for getting chatter list data was "
+                    << result.status() << "but we expected it to be 200";
+            }
+
+            auto response = result.parseJson();
+            auto chatterList = HelixChatterList(response);
+
+            successCallback(chatterList);
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare(
+                                 "The ID in broadcaster_id must match the user "
+                                 "ID found in the request's OAuth token.",
+                                 Qt::CaseInsensitive) == 0)
+                    {
+                        // Must be the broadcaster.
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 403: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error listing chatters:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {

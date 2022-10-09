@@ -956,6 +956,40 @@ void Split::openWithCustomScheme()
 
 void Split::showViewerList()
 {
+    auto formatChatterListError = [](HelixChattersError error,
+                                    const QString &message) -> QString {
+        using Error = HelixChattersError;
+
+        QString errorMessage = QString("Failed to list VIPs - ");
+
+        switch (error)
+        {
+            case Error::Forwarded: {
+                errorMessage += message;
+            }
+            break;
+
+            case Error::UserMissingScope: {
+                errorMessage += "Missing required scope. "
+                                "Re-login with your "
+                                "account and try again.";
+            }
+            break;
+
+            case Error::UserNotAuthorized: {
+                errorMessage += "You don't have permission to "
+                                "perform that action.";
+            }
+            break;
+
+            case Error::Unknown: {
+                errorMessage += "An unknown error has occurred.";
+            }
+            break;
+        }
+        return errorMessage;
+    };
+
     auto viewerDock =
         new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
     viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
@@ -983,10 +1017,9 @@ void Split::showViewerList()
 
     static QStringList labels = {
         "Broadcaster", "Moderators",        "VIPs",   "Staff",
-        "Admins",      "Global Moderators", "Viewers"};
+        "Admins",      "Global Moderators"};
     static QStringList jsonLabels = {"broadcaster", "moderators", "vips",
-                                     "staff",       "admins",     "global_mods",
-                                     "viewers"};
+                                     "staff",       "admins",     "global_mods"};
     auto loadingLabel = new QLabel("Loading...");
 
     searchBar->setPlaceholderText("Search User...");
@@ -1048,6 +1081,44 @@ void Split::showViewerList()
                 }
                 chattersList->addItem(new QListWidgetItem());
             }
+
+            auto channel = getChannel().get();
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel);
+
+            // Get chatter list via api
+            // All data from tmi.twitch.tv/group/user/[un]/chatters endpoint
+            // except for staff, admins, and global_mods
+            // can be returned from helix api but piecemeal approach will be taken untill all
+            // endpoints are migrated
+            getHelix() -> getChatters(
+                twitchChannel->roomId(),
+                getApp()->accounts->twitch.getCurrent()->getUserId(),
+                [this, formatListItemText, performListSearch, chattersList](const HelixChatterList &chatters) {
+                
+                if (chatters.chatters.empty())
+                    return;
+
+                auto label = formatListItemText(QString("%1 (%2)").arg(
+                    "Viewers", localizeNumbers(chatters.total)));
+
+                label->setForeground(this->theme->accent);
+
+                chattersList->addItem(label);
+                auto iter = chatters.chatters.begin();
+                while (iter != chatters.chatters.end()) 
+                {
+                    auto chatter = *iter;
+                    chattersList->addItem(formatListItemText(chatter));
+                    iter++;
+                }
+                chattersList->addItem(new QListWidgetItem());
+
+                performListSearch();
+            },
+            [channel, formatChatterListError](auto error, auto message) {
+                auto errorMessage = formatChatterListError(error, message);
+                channel->addMessage(makeSystemMessage(errorMessage));
+            });
 
             performListSearch();
             return Success;
