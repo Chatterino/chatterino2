@@ -298,8 +298,8 @@ void TextLayoutElement::paint(QPainter &painter)
     painter.setFont(app->fonts->getFont(this->style_, this->scale_));
 
     painter.drawText(
-        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
-        text, QTextOption(Qt::AlignLeft | Qt::AlignTop));
+        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000), text,
+        QTextOption(Qt::AlignLeft | Qt::AlignTop));
 }
 
 void TextLayoutElement::paintAnimated(QPainter &, int)
