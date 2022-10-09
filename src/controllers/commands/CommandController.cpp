@@ -2981,8 +2981,31 @@ void CommandController::initialize(Settings &, Paths &paths)
     };
 
     this->registerCommand("/vips", [formatVIPListError](
-                                       const QStringList & /*unused*/,
-                                       auto channel) {
+                                       const QStringList & words,
+                                       auto channel) -> QString {
+        switch (getSettings()->helixTimegateVIPs.getValue())
+        {
+            case HelixTimegateOverride::Timegate: {
+                if (areIRCCommandsStillAvailable())
+                {
+                    return useIRCCommand(words);
+                }
+
+                // fall through to Helix logic
+            }
+            break;
+
+            case HelixTimegateOverride::AlwaysUseIRC: {
+                return useIRCCommand(words);
+            }
+            break;
+
+            case HelixTimegateOverride::AlwaysUseHelix: {
+                // do nothing and fall through to Helix logic
+            }
+            break;
+        }
+
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
         if (twitchChannel == nullptr)
         {
