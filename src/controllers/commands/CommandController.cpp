@@ -3036,7 +3036,6 @@ void CommandController::initialize(Settings &, Paths &paths)
                 auto messagePrefix = QString("The VIPs of this channel are");
                 auto entries = QStringList();
 
-                // TODO: sort
                 for (const auto &vip : vipList)
                 {
                     entries.append(vip.userName);
