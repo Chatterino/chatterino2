@@ -2938,12 +2938,11 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
     }
 
-    auto formatVIPListError = [](const char *operation,
-                                 HelixListVIPsError error,
+    auto formatVIPListError = [](HelixListVIPsError error,
                                  const QString &message) -> QString {
         using Error = HelixListVIPsError;
 
-        QString errorMessage = QString("Failed to %1 user - ").arg(operation);
+        QString errorMessage = QString("Failed to list VIPs - ");
 
         switch (error)
         {
@@ -3052,7 +3051,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 channel->addMessage(builder.release());
             },
             [channel, formatVIPListError](auto error, auto message) {
-                auto errorMessage = formatVIPListError("vip", error, message);
+                auto errorMessage = formatVIPListError(error, message);
                 channel->addMessage(makeSystemMessage(errorMessage));
             });
 
