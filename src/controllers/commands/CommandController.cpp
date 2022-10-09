@@ -3042,6 +3042,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                     entries.append(vip.userName);
                 }
 
+                entries.sort(Qt::CaseInsensitive);
+
                 channel->addMessage(
                     makeSystemMessage(message.append(entries.join(", "))));
             },
