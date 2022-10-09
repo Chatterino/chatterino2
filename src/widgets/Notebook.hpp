@@ -86,6 +86,7 @@ protected:
     }
 
 private:
+    void updateTabVisibilityMenuAction();
     void resizeAddButton();
 
     bool containsPage(QWidget *page);
@@ -111,6 +112,7 @@ private:
     bool lockNotebookLayout_ = false;
     NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
     QAction *lockNotebookLayoutAction_;
+    QAction *showTabsAction_;
 };
 
 class SplitNotebook : public Notebook
