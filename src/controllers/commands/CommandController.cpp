@@ -3032,8 +3032,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                 [channel, twitchChannel](const std::vector<HelixVip> &vipList) {
                     if (vipList.empty())
                     {
-                        makeSystemMessage(
-                            "This channel does not have any VIPs.");
+                        channel->addMessage(makeSystemMessage(
+                            "This channel does not have any VIPs."));
                         return;
                     }
 
