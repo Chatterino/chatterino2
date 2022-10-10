@@ -3,6 +3,8 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
@@ -193,7 +195,17 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 #endif
     if (!BaseWindow::supportsCustomWindowFrame())
     {
-        layout.addCheckbox("Show preferences button (Ctrl+P to show)",
+        auto settingsSeq = getApp()->hotkeys->getDisplaySequence(
+            HotkeyCategory::Window, "openSettings");
+        QString shortcut = " (no key bound to open them otherwise)";
+        // TODO: maybe prevent the user from locking themselves out of the settings?
+        if (!settingsSeq.isEmpty())
+        {
+            shortcut = QStringLiteral(" (%1 to show)")
+                           .arg(settingsSeq.toString(
+                               QKeySequence::SequenceFormat::NativeText));
+        }
+        layout.addCheckbox("Show preferences button" + shortcut,
                            s.hidePreferencesButton, true);
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
@@ -559,8 +571,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Title", s.headerStreamTitle);
 
     layout.addSubtitle("R9K");
+    auto toggleLocalr9kSeq = getApp()->hotkeys->getDisplaySequence(
+        HotkeyCategory::Window, "toggleLocalR9K");
+    QString toggleLocalr9kShortcut =
+        "an assigned hotkey (Window -> Toggle local R9K)";
+    if (!toggleLocalr9kSeq.isEmpty())
+    {
+        toggleLocalr9kShortcut = toggleLocalr9kSeq.toString(
+            QKeySequence::SequenceFormat::NativeText);
+    }
     layout.addDescription("Hide similar messages. Toggle hidden "
-                          "messages by pressing Ctrl+H.");
+                          "messages by pressing " +
+                          toggleLocalr9kShortcut + ".");
     layout.addCheckbox("Hide similar messages", s.similarityEnabled);
     //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
     layout.addCheckbox("By the same user", s.hideSimilarBySameUser);
@@ -719,6 +741,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
+    layout.addCheckbox("Strip leading mention in replies", s.stripReplyMention);
 
     // Helix timegate settings
     auto helixTimegateGetValue = [](auto val) {
@@ -765,6 +788,17 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             false);
     helixTimegateRaid->setMinimumWidth(
         helixTimegateRaid->minimumSizeHint().width());
+
+    auto *helixTimegateWhisper =
+        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
+            "Helix timegate /w behaviour",
+            {"Timegate", "Always use IRC", "Always use Helix"},
+            s.helixTimegateWhisper,
+            helixTimegateGetValue,  //
+            helixTimegateSetValue,  //
+            false);
+    helixTimegateWhisper->setMinimumWidth(
+        helixTimegateWhisper->minimumSizeHint().width());
 
     layout.addStretch();
 

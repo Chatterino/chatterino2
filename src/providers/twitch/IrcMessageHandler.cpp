@@ -67,6 +67,65 @@ MessagePtr generateBannedMessage(bool confirmedBan)
     return builder.release();
 }
 
+int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
+{
+    if (!getSettings()->stripReplyMention)
+    {
+        return 0;
+    }
+
+    if (const auto it = tags.find("reply-parent-display-name");
+        it != tags.end())
+    {
+        auto displayName = it.value().toString();
+        if (content.startsWith('@') &&
+            content.at(1 + displayName.length()) == ' ' &&
+            content.indexOf(displayName, 1) == 1)
+        {
+            int messageOffset = 1 + displayName.length() + 1;
+            content.remove(0, messageOffset);
+            return messageOffset;
+        }
+    }
+    return 0;
+}
+
+void updateReplyParticipatedStatus(const QVariantMap &tags,
+                                   const QString &senderLogin,
+                                   TwitchMessageBuilder &builder,
+                                   std::shared_ptr<MessageThread> &thread,
+                                   bool isNew)
+{
+    const auto &currentLogin =
+        getApp()->accounts->twitch.getCurrent()->getUserName();
+    if (thread->participated())
+    {
+        builder.message().flags.set(MessageFlag::ParticipatedThread);
+        return;
+    }
+
+    if (isNew)
+    {
+        if (const auto it = tags.find("reply-parent-user-login");
+            it != tags.end())
+        {
+            auto name = it.value().toString();
+            if (name == currentLogin)
+            {
+                thread->markParticipated();
+                builder.message().flags.set(MessageFlag::ParticipatedThread);
+                return;  // already marked as participated
+            }
+        }
+    }
+
+    if (senderLogin == currentLogin)
+    {
+        thread->markParticipated();
+        // don't set the highlight here
+    }
+}
+
 }  // namespace
 namespace chatterino {
 
@@ -259,9 +318,12 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
             return this->parsePrivMessage(channel, privMsg);
         }
 
+        QString content = privMsg->content();
+        int messageOffset = stripLeadingReplyMention(privMsg->tags(), content);
         MessageParseArgs args;
-        TwitchMessageBuilder builder(channel, message, args, privMsg->content(),
+        TwitchMessageBuilder builder(channel, message, args, content,
                                      privMsg->isAction());
+        builder.setMessageOffset(messageOffset);
 
         this->populateReply(tc, message, otherLoaded, builder);
 
@@ -295,10 +357,12 @@ void IrcMessageHandler::populateReply(
         auto threadIt = channel->threads_.find(replyID);
         if (threadIt != channel->threads_.end())
         {
-            const auto owned = threadIt->second.lock();
+            auto owned = threadIt->second.lock();
             if (owned)
             {
                 // Thread already exists (has a reply)
+                updateReplyParticipatedStatus(tags, message->nick(), builder,
+                                              owned, false);
                 builder.setThread(owned);
                 return;
             }
@@ -331,6 +395,8 @@ void IrcMessageHandler::populateReply(
         {
             std::shared_ptr<MessageThread> newThread =
                 std::make_shared<MessageThread>(foundMessage);
+            updateReplyParticipatedStatus(tags, message->nick(), builder,
+                                          newThread, true);
 
             builder.setThread(newThread);
             // Store weak reference to thread in channel
@@ -341,7 +407,7 @@ void IrcMessageHandler::populateReply(
 
 void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                                    const QString &target,
-                                   const QString &content,
+                                   const QString &content_,
                                    TwitchIrcServer &server, bool isSub,
                                    bool isAction)
 {
@@ -384,7 +450,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                 [=, &server](ChannelPointReward reward) {
                     if (reward.id == rewardId)
                     {
-                        this->addMessage(clone, target, content, server, isSub,
+                        this->addMessage(clone, target, content_, server, isSub,
                                          isAction);
                         clone->deleteLater();
                         return true;
@@ -396,7 +462,11 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         args.channelPointRewardId = rewardId;
     }
 
+    QString content = content_;
+    int messageOffset = stripLeadingReplyMention(tags, content);
+
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
+    builder.setMessageOffset(messageOffset);
 
     if (const auto it = tags.find("reply-parent-msg-id"); it != tags.end())
     {
@@ -405,7 +475,10 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         if (threadIt != channel->threads_.end() && !threadIt->second.expired())
         {
             // Thread already exists (has a reply)
-            builder.setThread(threadIt->second.lock());
+            auto thread = threadIt->second.lock();
+            updateReplyParticipatedStatus(tags, _message->nick(), builder,
+                                          thread, false);
+            builder.setThread(thread);
         }
         else
         {
@@ -414,7 +487,9 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             if (root)
             {
                 // Found root reply message
-                const auto newThread = std::make_shared<MessageThread>(root);
+                auto newThread = std::make_shared<MessageThread>(root);
+                updateReplyParticipatedStatus(tags, _message->nick(), builder,
+                                              newThread, true);
 
                 builder.setThread(newThread);
                 // Store weak reference to thread in channel
@@ -911,8 +986,20 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     // default case
     std::vector<MessagePtr> builtMessages;
 
-    builtMessages.emplace_back(makeSystemMessage(
-        message->content(), calculateMessageTime(message).time()));
+    auto content = message->content();
+    if (content.startsWith(
+            "Your settings prevent you from sending this whisper",
+            Qt::CaseInsensitive) &&
+        getSettings()->helixTimegateWhisper.getValue() ==
+            HelixTimegateOverride::Timegate)
+    {
+        content =
+            content +
+            " Consider setting the \"Helix timegate /w "
+            "behaviour\" to \"Always use Helix\" in your Chatterino settings.";
+    }
+    builtMessages.emplace_back(
+        makeSystemMessage(content, calculateMessageTime(message).time()));
 
     return builtMessages;
 }
