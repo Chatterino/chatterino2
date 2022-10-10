@@ -104,7 +104,7 @@ enum class MessageElementFlag : int64_t {
     // - 7TV Subscriber
     // - 7TV Translator
     // - 7TV Contributor
-    BadgeSevenTV = (1LL << 21),
+    BadgeSevenTV = (1LL << 36),
 
     // Slot 7: FrankerFaceZ
     // - FFZ developer badge
@@ -153,6 +153,10 @@ enum class MessageElementFlag : int64_t {
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | SevenTVEmoteImage | TwitchEmoteImage |
               BitsAmount | Text | AlwaysShow,
+
+    // SevenTVEmoteImage = (1LL << 34),
+    // SevenTVEmoteText = (1LL << 35),
+    // BadgeSevenTV = (1LL << 36),
 };
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
