@@ -651,12 +651,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Chatterino", s.showBadgesChatterino);
     layout.addCheckbox("FrankerFaceZ (Bot, FFZ Supporter, FFZ Developer)",
                        s.showBadgesFfz);
+    layout.addCheckbox("7TV", s.showBadgesSevenTV);
     layout.addSeperator();
     layout.addCheckbox("Use custom FrankerFaceZ moderator badges",
                        s.useCustomFfzModeratorBadges);
     layout.addCheckbox("Use custom FrankerFaceZ VIP badges",
                        s.useCustomFfzVipBadges);
-    layout.addCheckbox("7TV", s.showBadgesSevenTV);
 
     layout.addSubtitle("Miscellaneous");
 
