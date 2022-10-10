@@ -15,6 +15,7 @@ class QPainter;
 namespace chatterino {
 
 enum class MessageFlag : uint32_t;
+enum class FirstWord { Neutral, RTL, LTR };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 struct Margin {
@@ -48,7 +49,7 @@ struct MessageLayoutContainer {
     Margin margin = {4, 8, 4, 8};
     bool centered = false;
     bool enableCompactEmotes = false;
-    bool startsWithRTL = false;
+    FirstWord first = FirstWord::Neutral;
     bool containsRTL = false;
 
     int getHeight() const;

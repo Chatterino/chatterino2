@@ -8,6 +8,7 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "util/Helpers.hpp"
 
 #include <QDebug>
 #include <QPainter>
@@ -96,7 +97,7 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         return;
     }
 
-    bool isRTLMode = this->startsWithRTL && prevIndex != -2;
+    bool isRTLMode = this->first == FirstWord::RTL && prevIndex != -2;
     bool isAddingMode = prevIndex == -2;
 
     // This lambda contains the logic for when to step one 'space width' back for compact x emotes
@@ -130,6 +131,20 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         // Returns true if the last element was an emote image
         return lastElement->getFlags().has(MessageElementFlag::EmoteImages);
     };
+
+    // check the first non-neutral word to see if we should render RTL or LTR
+    if (isAddingMode && this->first == FirstWord::Neutral &&
+        element->getFlags().has(MessageElementFlag::Text))
+    {
+        if (element->getText().isRightToLeft())
+        {
+            this->first = FirstWord::RTL;
+        }
+        else if (!isNeutral(element->getText()))
+        {
+            this->first = FirstWord::LTR;
+        }
+    }
 
     // top margin
     if (this->elements_.size() == 0)
@@ -176,7 +191,7 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         element->getFlags().hasAny({MessageElementFlag::EmoteImages}) &&
         !isZeroWidthEmote && shouldRemoveSpaceBetweenEmotes())
     {
-        // Move cursor one 'space width' to the left to combine hug the previous emote
+        // Move cursor one 'space width' to the left (right in case of RTL) to combine hug the previous emote
         if (isRTLMode)
         {
             this->currentX_ += this->spaceWidth_;
@@ -236,53 +251,67 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
 
 void MessageLayoutContainer::reorderRTL()
 {
-    if (this->elements_.empty()) {
+    if (this->elements_.empty())
+    {
         return;
     }
 
-    size_t startIndex = this->lineStart_;
-    size_t endIndex = this->elements_.size() - 1;
+    int startIndex = static_cast<int>(this->lineStart_);
+    int endIndex = static_cast<int>(this->elements_.size()) - 1;
+
+    // skip none-text elemnts
     if (this->line_ == 0)
     {
         for (int i = 0; i < this->elements_.size(); i++)
         {
             if (this->elements_[i]->getFlags().has(MessageElementFlag::Text))
             {
-                this->startsWithRTL =
-                    this->elements_[i]->getText().isRightToLeft();
                 startIndex = i;
                 break;
             }
         }
     }
 
-    std::vector<int> correctOrder;
-    std::stack<int> swappedWords;
+    std::vector<int> correctSequence;
+    std::stack<int> swappedSequence;
+    bool wasPrevPushed = false;
 
+    // we reverse a sequence of words if it's opposite to the text direction
+    // the long condition below covers the possible three cases:
+    // 1 - if we are in RTL mode (first non-neutral word is RTL)
+    // we render RTL, reversing LTR sequences,
+    // 2 - if we are in LTR mode (first non-neautral word is LTR or all wrods are neutral)
+    // we render LTR, reversing RTL sequences
+    // 3 - neutral words follow previous words, we reverse a neutral word when the previous word was reveresed
     for (int i = startIndex; i <= endIndex; i++)
     {
-        if (this->elements_[i]->getText().isRightToLeft() !=
-            this->startsWithRTL)
+        if (((this->elements_[i]->getText().isRightToLeft() !=
+              (this->first == FirstWord::RTL)) &&
+             !isNeutral(this->elements_[i]->getText())) ||
+            (isNeutral(this->elements_[i]->getText()) && wasPrevPushed))
         {
-            swappedWords.push(i);
+            swappedSequence.push(i);
+            wasPrevPushed = true;
         }
         else
         {
-            while (swappedWords.size() > 0)
+            while (!swappedSequence.empty())
             {
-                correctOrder.push_back(swappedWords.top());
-                swappedWords.pop();
+                correctSequence.push_back(swappedSequence.top());
+                swappedSequence.pop();
             }
-            correctOrder.push_back(i);
+            correctSequence.push_back(i);
+            wasPrevPushed = false;
         }
     }
-    while (swappedWords.size() > 0)
+    while (!swappedSequence.empty())
     {
-        correctOrder.push_back(swappedWords.top());
-        swappedWords.pop();
+        correctSequence.push_back(swappedSequence.top());
+        swappedSequence.pop();
     }
 
-    if (this->startsWithRTL)
+    // render right to left if we are in RTL mode, otherwise LTR
+    if (this->first == FirstWord::RTL)
     {
         this->currentX_ = this->elements_[endIndex]->getRect().right();
     }
@@ -290,10 +319,10 @@ void MessageLayoutContainer::reorderRTL()
     {
         this->currentX_ = this->elements_[startIndex]->getRect().left();
     }
-    for (int i = 0; i < correctOrder.size(); i++)
+    for (int i = 0; i < correctSequence.size(); i++)
     {
-        this->_addElement(this->elements_[correctOrder[i]].get(), false,
-                          correctOrder[i - 1]);
+        this->_addElement(this->elements_[correctSequence[i]].get(), false,
+                          correctSequence[i - 1]);
     }
 }
 

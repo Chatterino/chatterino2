@@ -4,6 +4,7 @@
 
 - Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722, #3989)
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
+- Major: Added support for Right-to-Left Languages (#3958)
 - Minor: Added option to display tabs on the right and bottom. (#3847)
 - Minor: Added `is:first-msg` search option. (#3700)
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
@@ -35,7 +36,6 @@
 - Minor: Added `Go to message` context menu action to search popup, mentions, usercard and reply threads. (#3953)
 - Minor: Added link back to original message that was deleted. (#3953)
 - Minor: Migrate /color command to Helix API. (#3988)
-- Bugfix: Fixed Right-to-Left Languages rendering (#3958)
 - Bugfix: Fix crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fix crash that can occur when changing channels. (#3799)

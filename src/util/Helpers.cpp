@@ -19,6 +19,13 @@ bool startsWithOrContains(const QString &str1, const QString &str2,
     return str1.contains(str2, caseSensitivity);
 }
 
+bool isNeutral(const QString &s)
+{
+    const QRegularExpression re("\\p{L}");
+    const QRegularExpressionMatch match = re.match(s);
+    return !match.hasMatch();
+}
+
 QString generateUuid()
 {
     auto uuid = QUuid::createUuid();
