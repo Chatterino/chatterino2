@@ -53,9 +53,9 @@ namespace {
     }
 
     /**
-         * This decides whether an emote should be displayed
-         * as zero-width
-         */
+      * This decides whether an emote should be displayed
+      * as zero-width
+      */
     bool isZeroWidthActive(const QJsonObject &activeEmote)
     {
         auto flags = SeventvActiveEmoteFlags(
@@ -64,9 +64,9 @@ namespace {
     }
 
     /**
-         * This is only an indicator if an emote should be added
-         * as zero-width or not. The user can still overwrite this.
-         */
+      * This is only an indicator if an emote should be added
+      * as zero-width or not. The user can still overwrite this.
+      */
     bool isZeroWidthRecommended(const QJsonObject &emoteData)
     {
         auto flags = SeventvEmoteFlags(
