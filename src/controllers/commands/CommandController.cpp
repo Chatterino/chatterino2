@@ -2973,10 +2973,10 @@ void CommandController::initialize(Settings &, Paths &paths)
             break;
 
             case Error::UserNotBroadcaster: {
-                errorMessage += "Due to Twitch restrictions, "
-                                "this command can only be used by the broadcaster. "
-                                "To see the list of VIPs you must use the "
-                                "Twitch website.";
+                errorMessage +=
+                    "Due to Twitch restrictions, "
+                    "this command can only be used by the broadcaster. "
+                    "To see the list of VIPs you must use the Twitch website.";
             }
             break;
 
