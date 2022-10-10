@@ -2053,7 +2053,7 @@ void Helix::getChannelVIPs(
                                  Qt::CaseInsensitive) == 0)
                     {
                         // Must be the broadcaster.
-                        failureCallback(Error::UserNotAuthorized, message);
+                        failureCallback(Error::UserNotBroadcaster, message);
                     }
                     else
                     {

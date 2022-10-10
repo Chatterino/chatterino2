@@ -523,6 +523,7 @@ enum class HelixListVIPsError {  // /vips
     Unknown,
     UserMissingScope,
     UserNotAuthorized,
+    UserNotBroadcaster,
     Ratelimited,
 
     // The error message is forwarded directly from the Twitch API
