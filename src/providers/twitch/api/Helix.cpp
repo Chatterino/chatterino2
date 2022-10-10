@@ -2015,8 +2015,8 @@ void Helix::getChannelVIPs(
             if (result.status() != 200)
             {
                 qCWarning(chatterinoTwitch)
-                    << "Success result for getting VIPs was"
-                    << result.status() << "but we expected it to be 200";
+                    << "Success result for getting VIPs was" << result.status()
+                    << "but we expected it to be 200";
             }
 
             auto response = result.parseJson();
