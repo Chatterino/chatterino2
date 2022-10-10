@@ -1,6 +1,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "singletons/Settings.hpp"
 
@@ -545,6 +546,42 @@ void HotkeyController::showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
             .arg(hotkey->name(), warning),
         QMessageBox::Ok);
     msgBox->exec();
+}
+
+QKeySequence HotkeyController::getDisplaySequence(
+    HotkeyCategory category, const QString &action,
+    const std::optional<std::vector<QString>> &arguments) const
+{
+    const auto &found = this->findLike(category, action, arguments);
+    if (found != nullptr)
+    {
+        return found->keySequence();
+    }
+    return {};
+}
+
+std::shared_ptr<Hotkey> HotkeyController::findLike(
+    HotkeyCategory category, const QString &action,
+    const std::optional<std::vector<QString>> &arguments) const
+{
+    for (auto other : this->hotkeys_)
+    {
+        if (other->category() == category && other->action() == action)
+        {
+            if (arguments)
+            {
+                if (other->arguments() == *arguments)
+                {
+                    return other;
+                }
+            }
+            else
+            {
+                return other;
+            }
+        }
+    }
+    return nullptr;
 }
 
 }  // namespace chatterino
