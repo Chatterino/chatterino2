@@ -61,6 +61,7 @@
 - Minor: Migrated /ban to Helix API. (#4049)
 - Minor: Migrated /timeout to Helix API. (#4049)
 - Minor: Migrated /w to Helix API. Chat command will continue to be used until February 11th 2023. (#4052)
+- Minor: Migrated /vips to Helix API. Chat command will continue to be used until February 11th 2023. (#4053)
 - Minor: Make menus and placeholders display appropriate custom key combos. (#4045)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fixed `Smooth scrolling on new messages` setting sometimes hiding messages. (#4028)
