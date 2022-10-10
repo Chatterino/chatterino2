@@ -14,7 +14,7 @@ class QPainter;
 
 namespace chatterino {
 
-enum class MessageFlag : uint32_t;
+enum class MessageFlag : int64_t;
 enum class FirstWord { Neutral, RTL, LTR };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

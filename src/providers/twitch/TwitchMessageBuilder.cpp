@@ -198,6 +198,11 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::FirstMessage);
     }
 
+    if (this->tags.contains("pinned-chat-paid-amount"))
+    {
+        this->message().flags.set(MessageFlag::ElevatedMessage);
+    }
+
     // reply threads
     if (this->thread_)
     {
@@ -994,8 +999,10 @@ void TwitchMessageBuilder::appendTwitchEmote(
             return;
         }
 
-        auto start = correctPositions[coords.at(0).toUInt()];
-        auto end = correctPositions[coords.at(1).toUInt()];
+        auto start =
+            correctPositions[coords.at(0).toUInt() - this->messageOffset_];
+        auto end =
+            correctPositions[coords.at(1).toUInt() - this->messageOffset_];
 
         if (start >= end || start < 0 || end > this->originalMessage_.length())
         {
@@ -1582,6 +1589,11 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(QString prefix,
 void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)
 {
     this->thread_ = std::move(thread);
+}
+
+void TwitchMessageBuilder::setMessageOffset(int offset)
+{
+    this->messageOffset_ = offset;
 }
 
 }  // namespace chatterino
