@@ -325,7 +325,7 @@ void SeventvEmotes::loadChannelEmotes(const std::weak_ptr<Channel> &channel,
                 {
                     return;
                 }
-                if (result.status() == 400)
+                if (result.status() == 404)
                 {
                     qCWarning(chatterinoSeventv)
                         << "Error occurred fetching 7TV emotes: "
