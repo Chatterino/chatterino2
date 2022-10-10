@@ -2015,7 +2015,7 @@ void Helix::getChannelVIPs(
             if (result.status() != 200)
             {
                 qCWarning(chatterinoTwitch)
-                    << "Success result for banning a user was"
+                    << "Success result for getting VIPs was"
                     << result.status() << "but we expected it to be 200";
             }
 
