@@ -335,8 +335,10 @@ class HelixChatterList {
         std::unordered_set<QString> chatters;
         int total;
 
-        // Initialize with data from /chatters
-        HelixChatterList(const QJsonObject &response);
+        HelixChatterList();
+
+        // Add to chatter list with data from https://api.twitch.tv/helix/chat/chatters
+        AddChattersFromResponse(const QJsonObject &response);
 };
 
 struct HelixVip {
