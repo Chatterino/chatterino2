@@ -338,7 +338,7 @@ class HelixChatterList {
         HelixChatterList();
 
         // Add to chatter list with data from https://api.twitch.tv/helix/chat/chatters
-        AddChattersFromResponse(const QJsonObject &response);
+        void AddChattersFromResponse(const QJsonObject &response);
 };
 
 struct HelixVip {
@@ -809,7 +809,7 @@ public:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     virtual void getChatters(
         QString broadcasterID, QString moderatorID,
-        ResultCallback<HelixChatterList> successCallback,
+        ResultCallback<HelixChatterList*> successCallback,
         FailureCallback<HelixChattersError, QString> failureCallback) = 0;
     
     // https://dev.twitch.tv/docs/api/reference#get-vips
@@ -1077,7 +1077,7 @@ public:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     void getChatters(
         QString broadcasterID, QString moderatorID,
-        ResultCallback<HelixChatterList> successCallback,
+        ResultCallback<HelixChatterList*> successCallback,
         FailureCallback<HelixChattersError, QString> failureCallback) final;
         
     // https://dev.twitch.tv/docs/api/reference#get-vips
@@ -1100,6 +1100,15 @@ protected:
 
 private:
     NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
+
+    void getChattersRecursive(
+        HelixChatterList *chatterList,
+        int page,
+        QString paginationCursor,
+        QString broadcasterID, QString moderatorID,
+        ResultCallback<HelixChatterList*> successCallback,
+        FailureCallback<HelixChattersError, QString> failureCallback
+    );
 
     QString clientId;
     QString oauthToken;

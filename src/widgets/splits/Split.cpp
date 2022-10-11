@@ -956,40 +956,6 @@ void Split::openWithCustomScheme()
 
 void Split::showViewerList()
 {
-    auto formatChatterListError = [](HelixChattersError error,
-                                    const QString &message) -> QString {
-        using Error = HelixChattersError;
-
-        QString errorMessage = QString("Failed to get list of chatters - ");
-
-        switch (error)
-        {
-            case Error::Forwarded: {
-                errorMessage += message;
-            }
-            break;
-
-            case Error::UserMissingScope: {
-                errorMessage += "Missing required scope. "
-                                "Re-login with your "
-                                "account and try again.";
-            }
-            break;
-
-            case Error::UserNotAuthorized: {
-                errorMessage += "You don't have permission to "
-                                "perform that action.";
-            }
-            break;
-
-            case Error::Unknown: {
-                errorMessage += "An unknown error has occurred.";
-            }
-            break;
-        }
-        return errorMessage;
-    };
-
     auto viewerDock =
         new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
     viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
@@ -1049,80 +1015,41 @@ void Split::showViewerList()
     QObject::connect(searchBar, &QLineEdit::textEdited, this,
                      performListSearch);
 
-    NetworkRequest::twitchRequest("https://tmi.twitch.tv/group/user/" +
-                                  this->getChannel()->getName() + "/chatters")
-        .caller(this)
-        .onSuccess([=](auto result) -> Outcome {
-            auto obj = result.parseJson();
-            QJsonObject chattersObj = obj.value("chatters").toObject();
+    loadingLabel->hide();
 
-            viewerDock->setWindowTitle(
-                QString("Viewer List - %1 (%2 chatters)")
-                    .arg(this->getChannel()->getName())
-                    .arg(localizeNumbers(obj.value("chatter_count").toInt())));
+    auto channel = getChannel().get();
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel);
 
-            loadingLabel->hide();
-            for (int i = 0; i < jsonLabels.size(); i++)
+    // TODO: add list of vips, mods, and broadcastenr
+
+    // Refresh chatter list via helix api
+    twitchChannel->refreshChatters(
+        [this, twitchChannel, formatListItemText, chattersList, performListSearch](auto chatters) {
+
+            if (chatters.empty())
+            return;
+
+            auto label = formatListItemText(QString("%1 (%2)").arg(
+                "Viewers", localizeNumbers(twitchChannel->chatterCount())));
+
+            label->setForeground(this->theme->accent);
+
+            chattersList->addItem(label);
+            auto iter = chatters.begin();
+            while (iter != chatters.end()) 
             {
-                auto currentCategory =
-                    chattersObj.value(jsonLabels.at(i)).toArray();
-                // If current category of chatters is empty, dont show this
-                // category.
-                if (currentCategory.empty())
-                    continue;
-
-                auto label = formatListItemText(QString("%1 (%2)").arg(
-                    labels.at(i), localizeNumbers(currentCategory.size())));
-                label->setForeground(this->theme->accent);
-                chattersList->addItem(label);
-                foreach (const QJsonValue &v, currentCategory)
-                {
-                    chattersList->addItem(formatListItemText(v.toString()));
-                }
-                chattersList->addItem(new QListWidgetItem());
+                auto chatter = *iter;
+                chattersList->addItem(formatListItemText(chatter));
+                iter++;
             }
+            chattersList->addItem(new QListWidgetItem());
 
-            auto channel = getChannel().get();
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel);
-
-            // Get chatter list via api
-            // All data from tmi.twitch.tv/group/user/[un]/chatters endpoint
-            // except for staff, admins, and global_mods
-            // can be returned from helix api but piecemeal approach will be taken untill all
-            // endpoints are migrated
-            getHelix() -> getChatters(
-                twitchChannel->roomId(),
-                getApp()->accounts->twitch.getCurrent()->getUserId(),
-                [this, formatListItemText, performListSearch, chattersList](const HelixChatterList &chatters) {
-                
-                if (chatters.chatters.empty())
-                    return;
-
-                auto label = formatListItemText(QString("%1 (%2)").arg(
-                    "Viewers", localizeNumbers(chatters.total)));
-
-                label->setForeground(this->theme->accent);
-
-                chattersList->addItem(label);
-                auto iter = chatters.chatters.begin();
-                while (iter != chatters.chatters.end()) 
-                {
-                    auto chatter = *iter;
-                    chattersList->addItem(formatListItemText(chatter));
-                    iter++;
-                }
-                chattersList->addItem(new QListWidgetItem());
-
-                performListSearch();
-            },
-            [channel, formatChatterListError](auto error, auto message) {
-                auto errorMessage = formatChatterListError(error, message);
-                channel->addMessage(makeSystemMessage(errorMessage));
-            });
-            
-            return Success;
-        })
-        .execute();
+            performListSearch();
+        },
+        [chattersList, formatListItemText](auto errorMessage) { 
+            chattersList->addItem(formatListItemText(errorMessage)); 
+        }
+    );
 
     QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {
         viewerDock->setMinimumWidth(300);

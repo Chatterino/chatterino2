@@ -95,6 +95,10 @@ public:
     virtual void reconnect() override;
     void refreshTitle();
     void createClip();
+    void refreshChatters(
+        ResultCallback<std::vector<QString>> successCallback,
+        ResultCallback<QString> failureCallback
+    );
 
     // Data
     const QString &subscriptionUrl();
@@ -160,7 +164,6 @@ private:
     void refreshLiveStatus();
     void parseLiveStatus(bool live, const HelixStream &stream);
     void refreshPubSub();
-    void refreshChatters();
     void refreshBadges();
     void refreshCheerEmotes();
     void loadRecentMessages();

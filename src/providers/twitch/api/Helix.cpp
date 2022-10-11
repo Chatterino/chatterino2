@@ -12,7 +12,7 @@ HelixChatterList::HelixChatterList() {
     chatters = std::unordered_set<QString>();
 }
 
-HelixChatterList::AddChattersFromResponse(const QJsonObject &response) {
+void HelixChatterList::AddChattersFromResponse(const QJsonObject &response) {
     for (const auto jsonStream : response.value("data").toArray()) 
     {
         auto chatter = jsonStream.toObject().value("user_login").toString();
@@ -2005,12 +2005,12 @@ void Helix::sendWhisper(
 }
 
 // Recursive function with a maximun page of 50
-void getChatterList(
-    HelixChatterList &chatterList,
+void Helix::getChattersRecursive(
+    HelixChatterList *chatterList,
     int page,
-    string paginationCursor,
+    QString paginationCursor,
     QString broadcasterID, QString moderatorID,
-    ResultCallback<HelixChatterList> successCallback,
+    ResultCallback<HelixChatterList*> successCallback,
     FailureCallback<HelixChattersError, QString> failureCallback
 ) {
     using Error = HelixChattersError;
@@ -2019,14 +2019,14 @@ void getChatterList(
 
     urlQuery.addQueryItem("broadcaster_id", broadcasterID);
     urlQuery.addQueryItem("moderator_id", moderatorID);
-    if (!paginationCursor.empty()) {
+    if (!paginationCursor.isEmpty()) {
         urlQuery.addQueryItem("after", paginationCursor);
     }
 
     this->makeRequest("chat/chatters", urlQuery)
         .type(NetworkRequestType::Get)
         .header("Content-Type", "application/json")
-        .onSuccess([successCallback](auto result) -> Outcome {
+        .onSuccess([this, successCallback, failureCallback, page, chatterList, paginationCursor, moderatorID, broadcasterID](auto result) -> Outcome {
             if (result.status() != 200)
             {
                 qCWarning(chatterinoTwitch)
@@ -2040,12 +2040,12 @@ void getChatterList(
                 chatterList->total = response.value("total").toInt();
             }
 
-            paginationCursor = response.value("pagination").toObject().value("cursor").toString();
+            QString newCursor = response.value("pagination").toObject().value("cursor").toString();
             chatterList->AddChattersFromResponse(response);
 
             // Call function with next page until page 50 is reached or there are no more results
-            if (page <= 50 && !paginationCursor.empty()) {
-                getChatterList(chatterList, page+1, paginationCursor, broadcasterID, moderatorID, successCallback, failureCallback);
+            if (page <= 50 && !newCursor.isEmpty()) {
+                getChattersRecursive(chatterList, page+1, newCursor, broadcasterID, moderatorID, successCallback, failureCallback);
             } else {
                 successCallback(chatterList);
             }
@@ -2101,12 +2101,12 @@ void getChatterList(
 
 void Helix::getChatters(
     QString broadcasterID, QString moderatorID,
-    ResultCallback<HelixChatterList> successCallback,
+    ResultCallback<HelixChatterList*> successCallback,
     FailureCallback<HelixChattersError, QString> failureCallback)  
 {
     auto chatterList = new HelixChatterList();
-    std::string paginationCursor;
-    getChatterList(chatterList, 1, paginationCursor, broadcasterID, moderatorID, successCallback, failureCallback);
+    QString paginationCursor("");
+    this->getChattersRecursive(chatterList, 1, paginationCursor, broadcasterID, moderatorID, successCallback, failureCallback);
 }
 
 // List the VIPs of a channel

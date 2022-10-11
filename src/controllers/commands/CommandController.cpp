@@ -886,9 +886,16 @@ void CommandController::initialize(Settings &, Paths &paths)
                 return "";
             }
 
-            channel->addMessage(makeSystemMessage(
-                QString("Chatter count: %1")
-                    .arg(localizeNumbers(twitchChannel->chatterCount()))));
+            twitchChannel->refreshChatters(
+                [channel, twitchChannel](auto chatters) {
+                    channel->addMessage(makeSystemMessage(
+                        QString("Chatter count: %1")
+                            .arg(localizeNumbers(twitchChannel->chatterCount()))));
+                },
+                [channel](auto error) {
+                    channel->addMessage(makeSystemMessage(error));
+                }
+            );
 
             return "";
         });

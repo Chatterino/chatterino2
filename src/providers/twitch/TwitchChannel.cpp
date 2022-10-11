@@ -132,10 +132,6 @@ TwitchChannel::TwitchChannel(const QString &name)
         }
     });
 
-    // timers
-    QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [=] {
-        this->refreshChatters();
-    });
     this->chattersListTimer_.start(5 * 60 * 1000);
 
     QObject::connect(&this->threadClearTimer_, &QTimer::timeout, [=] {
@@ -161,7 +157,6 @@ TwitchChannel::TwitchChannel(const QString &name)
 void TwitchChannel::initialize()
 {
     this->fetchDisplayName();
-    this->refreshChatters();
     this->refreshBadges();
 }
 
@@ -862,13 +857,11 @@ void TwitchChannel::refreshPubSub()
     getApp()->twitch->pubsub->listenToChannelPointRewards(roomId);
 }
 
-void TwitchChannel::refreshChatters()
-{
-    // helix endpoint only works for mods
-    if (!this->mod_) return;
-    
-    auto formatChatterListError = [](HelixChattersError error,
-                                    const QString &message) -> QString {
+void TwitchChannel::refreshChatters(
+    ResultCallback<std::vector<QString>> successCallback,
+    ResultCallback<QString> failureCallback
+) {
+    auto formatChatterListError = [](HelixChattersError error, const QString &message) -> QString {
         using Error = HelixChattersError;
 
         QString errorMessage = QString("Failed to get list of chatters - ");
@@ -901,6 +894,10 @@ void TwitchChannel::refreshChatters()
         return errorMessage;
     };
 
+    // helix endpoint only works for mods
+    if (!this->hasModRights()) 
+        return failureCallback(formatChatterListError(HelixChattersError::UserNotAuthorized, ""));
+
     // setting?
     const auto streamStatus = this->accessStreamStatus();
     const auto viewerCount = static_cast<int>(streamStatus->viewerCount);
@@ -917,13 +914,15 @@ void TwitchChannel::refreshChatters()
     getHelix()->getChatters(
         this->roomId(),
         getApp()->accounts->twitch.getCurrent()->getUserId(),
-        [this](HelixChatterList chatterList) {
-            this->chatterCount_ = chatterList.total;
-            this->updateOnlineChatters(chatterList.chatters);
+        [this, successCallback](HelixChatterList *chatterList) {
+            this->chatterCount_ = chatterList->total;
+            this->updateOnlineChatters(chatterList->chatters);
+            successCallback(this->accessChatters()->filterByPrefix(""));
         },
-        [this, formatChatterListError](auto error, auto message) {
+        [this, formatChatterListError, failureCallback](auto error, auto message) {
             auto errorMessage = formatChatterListError(error, message);
             this->addMessage(makeSystemMessage(errorMessage));
+            failureCallback(errorMessage);
         }
     );
 }
