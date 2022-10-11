@@ -864,6 +864,9 @@ void TwitchChannel::refreshPubSub()
 
 void TwitchChannel::refreshChatters()
 {
+    // helix endpoint only works for mods
+    if (!this->mod_) return;
+    
     auto formatChatterListError = [](HelixChattersError error,
                                     const QString &message) -> QString {
         using Error = HelixChattersError;
