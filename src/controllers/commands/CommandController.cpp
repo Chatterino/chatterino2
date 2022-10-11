@@ -886,6 +886,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                 return "";
             }
 
+            // TODO: for non mods get number from twitch channel dynamically generated user list
+
             twitchChannel->refreshChatters(
                 [channel, twitchChannel](auto chatters) {
                     channel->addMessage(makeSystemMessage(
