@@ -2079,6 +2079,98 @@ void Helix::getChatters(
         .execute();
 }
 
+// List the VIPs of a channel
+// https://dev.twitch.tv/docs/api/reference#get-vips
+void Helix::getChannelVIPs(
+    QString broadcasterID,
+    ResultCallback<std::vector<HelixVip>> successCallback,
+    FailureCallback<HelixListVIPsError, QString> failureCallback)
+{
+    using Error = HelixListVIPsError;
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+
+    // No point pagi/pajanating, Twitch's max VIP count doesn't go over 100
+    // TODO(jammehcow): probably still implement pagination
+    //   as the mod list can go over 100 (I assume, I see no limit)
+    urlQuery.addQueryItem("first", "100");
+
+    this->makeRequest("channels/vips", urlQuery)
+        .type(NetworkRequestType::Get)
+        .header("Content-Type", "application/json")
+        .onSuccess([successCallback](auto result) -> Outcome {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for getting VIPs was" << result.status()
+                    << "but we expected it to be 200";
+            }
+
+            auto response = result.parseJson();
+
+            std::vector<HelixVip> channelVips;
+            for (const auto &jsonStream : response.value("data").toArray())
+            {
+                channelVips.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(channelVips);
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare(
+                                 "The ID in broadcaster_id must match the user "
+                                 "ID found in the request's OAuth token.",
+                                 Qt::CaseInsensitive) == 0)
+                    {
+                        // Must be the broadcaster.
+                        failureCallback(Error::UserNotBroadcaster, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 403: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error listing VIPs:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
 
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {

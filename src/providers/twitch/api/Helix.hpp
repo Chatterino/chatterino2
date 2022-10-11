@@ -339,6 +339,23 @@ class HelixChatterList {
         HelixChatterList(const QJsonObject &response);
 };
 
+struct HelixVip {
+    QString userId;
+    QString userName;
+    QString userLogin;
+
+    explicit HelixVip(const QJsonObject &jsonObject)
+        : userId(jsonObject.value("user_id").toString())
+        , userName(jsonObject.value("user_name").toString())
+        , userLogin(jsonObject.value("user_login").toString())
+    {
+    }
+};
+
+// TODO(jammehcow): when implementing mod list, just alias HelixVip to HelixMod
+//   as they share the same model.
+//   Alternatively, rename base struct to HelixUser or something and alias both
+
 enum class HelixAnnouncementColor {
     Blue,
     Green,
@@ -520,6 +537,17 @@ enum class HelixChattersError { // /chat/chatters
     // The error message is forwarded directly from the Twitch API
     Forwarded,
 }; // /chat/chatters
+
+enum class HelixListVIPsError {  // /vips
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    UserNotBroadcaster,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // /vips
 
 class IHelix
 {
@@ -782,6 +810,12 @@ public:
         ResultCallback<HelixChatterList> successCallback,
         FailureCallback<HelixChattersError, QString> failureCallback) = 0;
     
+    // https://dev.twitch.tv/docs/api/reference#get-vips
+    virtual void getChannelVIPs(
+        QString broadcasterID,
+        ResultCallback<std::vector<HelixVip>> successCallback,
+        FailureCallback<HelixListVIPsError, QString> failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1043,6 +1077,12 @@ public:
         QString broadcasterID, QString moderatorID,
         ResultCallback<HelixChatterList> successCallback,
         FailureCallback<HelixChattersError, QString> failureCallback) final;
+        
+    // https://dev.twitch.tv/docs/api/reference#get-vips
+    void getChannelVIPs(
+        QString broadcasterID,
+        ResultCallback<std::vector<HelixVip>> successCallback,
+        FailureCallback<HelixListVIPsError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

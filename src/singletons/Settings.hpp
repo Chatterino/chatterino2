@@ -432,6 +432,10 @@ public:
         "/misc/twitch/helix-timegate/whisper",
         HelixTimegateOverride::Timegate,
     };
+    EnumSetting<HelixTimegateOverride> helixTimegateVIPs = {
+        "/misc/twitch/helix-timegate/vips",
+        HelixTimegateOverride::Timegate,
+    };
 
     IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 1};
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};

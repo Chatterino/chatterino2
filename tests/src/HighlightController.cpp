@@ -360,6 +360,15 @@ public:
                  (FailureCallback<HelixWhisperError, QString> failureCallback)),
                 (override));  // /w
 
+    // /vips
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, getChannelVIPs,
+        (QString broadcasterID,
+         ResultCallback<std::vector<HelixVip>> successCallback,
+         (FailureCallback<HelixListVIPsError, QString> failureCallback)),
+        (override));  // /vips
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 
