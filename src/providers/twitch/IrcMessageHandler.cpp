@@ -78,6 +78,13 @@ int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
         it != tags.end())
     {
         auto displayName = it.value().toString();
+
+        if (content.length() <= 1 + displayName.length())
+        {
+            // The reply contains no content
+            return 0;
+        }
+
         if (content.startsWith('@') &&
             content.at(1 + displayName.length()) == ' ' &&
             content.indexOf(displayName, 1) == 1)
