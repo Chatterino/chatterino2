@@ -36,6 +36,8 @@ public:
     /// are in mixed case if available.
     std::vector<QString> filterByPrefix(const QString &prefix) const;
 
+    int getNumChatters() const;
+
 private:
     // user name in lower case -> user name in normal case
     cache::lru_cache<QString, QString> items;

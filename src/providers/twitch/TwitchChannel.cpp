@@ -575,7 +575,9 @@ const QString &TwitchChannel::popoutPlayerUrl()
 
 int TwitchChannel::chatterCount()
 {
-    return this->chatterCount_;
+    return this->hasModRights()
+        ? this->chatterCount_
+        : this->accessChatters()->getNumChatters();
 }
 
 void TwitchChannel::setLive(bool newLiveStatus)

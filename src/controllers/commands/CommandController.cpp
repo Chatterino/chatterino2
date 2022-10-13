@@ -886,13 +886,22 @@ void CommandController::initialize(Settings &, Paths &paths)
                 return "";
             }
 
-            // TODO: for non mods get number from twitch channel dynamically generated user list
+            auto addChatterCountMessage = [channel, twitchChannel]() -> void {
+                channel->addMessage(makeSystemMessage(
+                    QString("Chatter count: %1")
+                        .arg(localizeNumbers(twitchChannel->chatterCount()))));
+            };
 
+            // Fetch from chatter cache when user does not have mod rights
+            if (!twitchChannel->hasModRights()) {
+                addChatterCountMessage();
+                return "";
+            }
+
+            // Use helix api when user has mod rights
             twitchChannel->refreshChatters(
-                [channel, twitchChannel](auto chatters) {
-                    channel->addMessage(makeSystemMessage(
-                        QString("Chatter count: %1")
-                            .arg(localizeNumbers(twitchChannel->chatterCount()))));
+                [addChatterCountMessage](auto chatters) {
+                    addChatterCountMessage();
                 },
                 [channel](auto error) {
                     channel->addMessage(makeSystemMessage(error));
