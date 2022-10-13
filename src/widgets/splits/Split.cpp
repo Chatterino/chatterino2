@@ -974,6 +974,9 @@ void Split::showViewerList()
     auto chattersList = new QListWidget();
     auto resultList = new QListWidget();
 
+    auto channel = getChannel().get();
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel);
+
     auto formatListItemText = [](QString text) {
         auto item = new QListWidgetItem();
         item->setText(text);
@@ -981,14 +984,27 @@ void Split::showViewerList()
         return item;
     };
 
-    static QStringList labels = {
-        "Broadcaster", "Moderators",        "VIPs",   "Staff",
-        "Admins",      "Global Moderators"};
-    static QStringList jsonLabels = {"broadcaster", "moderators", "vips",
-                                     "staff",       "admins",     "global_mods"};
-    auto loadingLabel = new QLabel("Loading...");
+    auto addLabel = [this, formatListItemText, chattersList](QString label) {
+        auto formattedLabel = formatListItemText(label);
+        formattedLabel->setForeground(this->theme->accent);
+        chattersList->addItem(formattedLabel);
+    };
 
-    searchBar->setPlaceholderText("Search User...");
+    auto addUserList = [addLabel, formatListItemText, chattersList, twitchChannel](std::vector<QString> users, QString label) {
+        if (users.empty())
+            return;
+
+        addLabel(QString("%1 (%2)").arg(label, localizeNumbers(users.size())));
+
+        auto iter = users.begin();
+        while (iter != users.end()) 
+        {
+            auto user = *iter;
+            chattersList->addItem(formatListItemText(user));
+            iter++;
+        }
+        chattersList->addItem(new QListWidgetItem());
+    };
 
     auto performListSearch = [=]() {
         auto query = searchBar->text();
@@ -1012,44 +1028,56 @@ void Split::showViewerList()
         resultList->show();
     };
 
+    auto loadChatters = [=]() {
+        twitchChannel->refreshChatters(
+            [=](auto chatters) {
+                addUserList(chatters, QString("Viewers"));
+                performListSearch();
+            },
+            [chattersList, formatListItemText](auto errorMessage) { 
+                chattersList->addItem(formatListItemText(errorMessage)); 
+            }
+        );
+    };
+
+    auto loadingLabel = new QLabel("Loading...");
+    searchBar->setPlaceholderText("Search User...");
+
     QObject::connect(searchBar, &QLineEdit::textEdited, this,
                      performListSearch);
 
     loadingLabel->hide();
+    
+    // Add broadcaster
+    addLabel("Broadcaster");
 
-    auto channel = getChannel().get();
-    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel);
+    chattersList->addItem(channel->getName());
+    chattersList->addItem(new QListWidgetItem());
 
-    // TODO: add list of vips, mods, and broadcastenr
+    // TODO: add list of mods here
 
-    // Refresh chatter list via helix api
-    twitchChannel->refreshChatters(
-        [this, twitchChannel, formatListItemText, chattersList, performListSearch](auto chatters) {
+    // Only broadcaster can get vips, mods can get viewers
+    if (channel->isBroadcaster()) {
+        // Add vips
+        getHelix()->getChannelVIPs(
+            twitchChannel->roomId(),
+            [=](auto vips) {
+                std::vector<QString> vipVector;
+                for (auto vip : vips)
+                {
+                    vipVector.emplace_back(vip.userName);
+                }
+                addUserList(vipVector, QString("VIPs"));
 
-            if (chatters.empty())
-            return;
-
-            auto label = formatListItemText(QString("%1 (%2)").arg(
-                "Viewers", localizeNumbers(twitchChannel->chatterCount())));
-
-            label->setForeground(this->theme->accent);
-
-            chattersList->addItem(label);
-            auto iter = chatters.begin();
-            while (iter != chatters.end()) 
-            {
-                auto chatter = *iter;
-                chattersList->addItem(formatListItemText(chatter));
-                iter++;
+                loadChatters();
+            },
+            [chattersList, formatListItemText](auto error, auto errorMessage) { 
+                chattersList->addItem(formatListItemText(errorMessage)); 
             }
-            chattersList->addItem(new QListWidgetItem());
-
-            performListSearch();
-        },
-        [chattersList, formatListItemText](auto errorMessage) { 
-            chattersList->addItem(formatListItemText(errorMessage)); 
-        }
-    );
+        );
+    } else if (channel->isMod()){
+        loadChatters();
+    }
 
     QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {
         viewerDock->setMinimumWidth(300);
