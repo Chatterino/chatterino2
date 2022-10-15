@@ -7,6 +7,7 @@
 #include <common/Singleton.hpp>
 
 #include <memory>
+#include <shared_mutex>
 #include <unordered_map>
 
 namespace chatterino {
@@ -23,6 +24,10 @@ public:
 
 private:
     void loadSeventvBadges();
+
+    // Mutex for both `badgeMap_` and `emotes_`
+    std::shared_mutex mutex_;
+
     std::unordered_map<QString, int> badgeMap_;
     std::vector<EmotePtr> emotes_;
 };
