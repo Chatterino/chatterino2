@@ -300,7 +300,14 @@ void SeventvEmotes::loadChannelEmotes(const std::weak_ptr<Channel> &channel,
             {
                 callback(std::move(emoteMap));
             }
-            if (auto shared = channel.lock(); manualRefresh)
+
+            auto shared = channel.lock();
+            if (!shared)
+            {
+                return Success;
+            }
+
+            if (manualRefresh)
             {
                 if (hasEmotes)
                 {
