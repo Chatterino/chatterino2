@@ -3068,6 +3068,67 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             return "";
         });
+
+    auto uniqueChatLambda = [formatChatSettingsError](auto words, auto channel,
+                                                      bool target) {
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You must be logged in to update chat settings!"));
+            return "";
+        }
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The /%1 command only works in Twitch channels")
+                    .arg(target ? "uniquechat" : "uniquechatoff")));
+            return "";
+        }
+
+        if (twitchChannel->accessRoomModes()->r9k == target)
+        {
+            channel->addMessage(makeSystemMessage(
+                target ? "This room is already in unique-chat mode."
+                       : "This room is not in unique-chat mode."));
+            return "";
+        }
+
+        getHelix()->updateUniqueChatMode(
+            twitchChannel->roomId(), currentUser->getUserId(), target,
+            [](auto) {
+                // we'll get a message from irc
+            },
+            [channel, formatChatSettingsError](auto error, auto message) {
+                channel->addMessage(
+                    makeSystemMessage(formatChatSettingsError(error, message)));
+            });
+        return "";
+    };
+
+    this->registerCommand(
+        "/uniquechatoff",
+        [uniqueChatLambda](const QStringList &words, auto channel) {
+            return uniqueChatLambda(words, channel, false);
+        });
+
+    this->registerCommand(
+        "/r9kbetaoff",
+        [uniqueChatLambda](const QStringList &words, auto channel) {
+            return uniqueChatLambda(words, channel, false);
+        });
+
+    this->registerCommand(
+        "/uniquechat",
+        [uniqueChatLambda](const QStringList &words, auto channel) {
+            return uniqueChatLambda(words, channel, true);
+        });
+
+    this->registerCommand(
+        "/r9kbeta", [uniqueChatLambda](const QStringList &words, auto channel) {
+            return uniqueChatLambda(words, channel, true);
+        });
 }
 
 void CommandController::save()
