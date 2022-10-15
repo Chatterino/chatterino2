@@ -32,7 +32,7 @@ void SeventvBadges::loadSeventvBadges()
 {
     // Cosmetics will work differently in v3, until this is ready
     // we'll use this endpoint.
-    static QUrl url("https://api.7tv.app/v2/badges");
+    static QUrl url("https://7tv.io/v2/cosmetics");
 
     static QUrlQuery urlQuery;
     // valid user_identifier values: "object_id", "twitch_id", "login"
