@@ -126,7 +126,7 @@ ImageSet makeImageSet(const QJsonObject &emoteData)
         {
             qCDebug(chatterinoSeventv)
                 << "Got file list without any eligible files";
-            // When this emote is typed, chatterino will segfault.
+            // When this emote is typed, chatterino will crash.
             return ImageSet{};
         }
         for (; nextSize < sizes.size(); nextSize++)
