@@ -329,6 +329,23 @@ struct HelixChatSettings {
     }
 };
 
+struct HelixVip {
+    QString userId;
+    QString userName;
+    QString userLogin;
+
+    explicit HelixVip(const QJsonObject &jsonObject)
+        : userId(jsonObject.value("user_id").toString())
+        , userName(jsonObject.value("user_name").toString())
+        , userLogin(jsonObject.value("user_login").toString())
+    {
+    }
+};
+
+// TODO(jammehcow): when implementing mod list, just alias HelixVip to HelixMod
+//   as they share the same model.
+//   Alternatively, rename base struct to HelixUser or something and alias both
+
 enum class HelixAnnouncementColor {
     Blue,
     Green,
@@ -454,6 +471,17 @@ enum class HelixStartRaidError {  // /raid
     Forwarded,
 };  // /raid
 
+enum class HelixCancelRaidError {  // /unraid
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    NoRaidPending,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // /unraid
+
 enum class HelixUpdateChatSettingsError {  // update chat settings
     Unknown,
     UserMissingScope,
@@ -465,6 +493,42 @@ enum class HelixUpdateChatSettingsError {  // update chat settings
     // The error message is forwarded directly from the Twitch API
     Forwarded,
 };  // update chat settings
+
+enum class HelixBanUserError {  // /timeout, /ban
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+    ConflictingOperation,
+    TargetBanned,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // /timeout, /ban
+
+enum class HelixWhisperError {  // /w
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+    NoVerifiedPhone,
+    RecipientBlockedUser,
+    WhisperSelf,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // /w
+
+enum class HelixListVIPsError {  // /vips
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    UserNotBroadcaster,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // /vips
 
 class IHelix
 {
@@ -648,6 +712,12 @@ public:
         FailureCallback<HelixStartRaidError, QString> failureCallback) = 0;
     // https://dev.twitch.tv/docs/api/reference#start-a-raid
 
+    // https://dev.twitch.tv/docs/api/reference#cancel-a-raid
+    virtual void cancelRaid(
+        QString broadcasterID, ResultCallback<> successCallback,
+        FailureCallback<HelixCancelRaidError, QString> failureCallback) = 0;
+    // https://dev.twitch.tv/docs/api/reference#cancel-a-raid
+
     // Updates the emote mode using
     // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     virtual void updateEmoteMode(
@@ -698,7 +768,27 @@ public:
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString>
             failureCallback) = 0;
-    // https://dev.twitch.tv/docs/api/reference#update-chat-settings
+
+    // Ban/timeout a user
+    // https://dev.twitch.tv/docs/api/reference#ban-user
+    virtual void banUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        boost::optional<int> duration, QString reason,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixBanUserError, QString> failureCallback) = 0;
+
+    // Send a whisper
+    // https://dev.twitch.tv/docs/api/reference#send-whisper
+    virtual void sendWhisper(
+        QString fromUserID, QString toUserID, QString message,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixWhisperError, QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#get-vips
+    virtual void getChannelVIPs(
+        QString broadcasterID,
+        ResultCallback<std::vector<HelixVip>> successCallback,
+        FailureCallback<HelixListVIPsError, QString> failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 
@@ -884,6 +974,12 @@ public:
         FailureCallback<HelixStartRaidError, QString> failureCallback) final;
     // https://dev.twitch.tv/docs/api/reference#start-a-raid
 
+    // https://dev.twitch.tv/docs/api/reference#cancel-a-raid
+    void cancelRaid(
+        QString broadcasterID, ResultCallback<> successCallback,
+        FailureCallback<HelixCancelRaidError, QString> failureCallback) final;
+    // https://dev.twitch.tv/docs/api/reference#cancel-a-raid
+
     // Updates the emote mode using
     // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     void updateEmoteMode(QString broadcasterID, QString moderatorID,
@@ -933,6 +1029,27 @@ public:
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
         final;
+
+    // Ban/timeout a user
+    // https://dev.twitch.tv/docs/api/reference#ban-user
+    void banUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        boost::optional<int> duration, QString reason,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixBanUserError, QString> failureCallback) final;
+
+    // Send a whisper
+    // https://dev.twitch.tv/docs/api/reference#send-whisper
+    void sendWhisper(
+        QString fromUserID, QString toUserID, QString message,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixWhisperError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#get-vips
+    void getChannelVIPs(
+        QString broadcasterID,
+        ResultCallback<std::vector<HelixVip>> successCallback,
+        FailureCallback<HelixListVIPsError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

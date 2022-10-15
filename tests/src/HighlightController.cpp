@@ -283,6 +283,13 @@ public:
         (override));  // /raid
 
     // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(  // /unraid
+        void, cancelRaid,
+        (QString broadcasterID, ResultCallback<> successCallback,
+         (FailureCallback<HelixCancelRaidError, QString> failureCallback)),
+        (override));  // /unraid
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
     MOCK_METHOD(void, updateEmoteMode,
                 (QString broadcasterID, QString moderatorID, bool emoteMode,
                  ResultCallback<HelixChatSettings> successCallback,
@@ -335,6 +342,32 @@ public:
                       failureCallback)),
                 (override));
     // update chat settings
+
+    // /timeout, /ban
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, banUser,
+                (QString broadcasterID, QString moderatorID, QString userID,
+                 boost::optional<int> duration, QString reason,
+                 ResultCallback<> successCallback,
+                 (FailureCallback<HelixBanUserError, QString> failureCallback)),
+                (override));  // /timeout, /ban
+
+    // /w
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, sendWhisper,
+                (QString fromUserID, QString toUserID, QString message,
+                 ResultCallback<> successCallback,
+                 (FailureCallback<HelixWhisperError, QString> failureCallback)),
+                (override));  // /w
+
+    // /vips
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, getChannelVIPs,
+        (QString broadcasterID,
+         ResultCallback<std::vector<HelixVip>> successCallback,
+         (FailureCallback<HelixListVIPsError, QString> failureCallback)),
+        (override));  // /vips
 
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
@@ -461,6 +494,7 @@ struct TestCase {
         std::vector<Badge> badges;
         QString senderName;
         QString originalMessage;
+        MessageFlags flags;
     } input;
 
     struct {
@@ -703,8 +737,9 @@ TEST_F(HighlightControllerTest, A)
 
     for (const auto &[input, expected] : tests)
     {
-        auto [isMatch, matchResult] = this->controller->check(
-            input.args, input.badges, input.senderName, input.originalMessage);
+        auto [isMatch, matchResult] =
+            this->controller->check(input.args, input.badges, input.senderName,
+                                    input.originalMessage, input.flags);
 
         EXPECT_EQ(isMatch, expected.state)
             << qUtf8Printable(input.senderName) << ": "

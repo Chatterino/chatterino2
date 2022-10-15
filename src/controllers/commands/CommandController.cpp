@@ -12,6 +12,7 @@
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
@@ -181,26 +182,149 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     return true;
 }
 
-bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
+bool useIrcForWhisperCommand()
 {
-    QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
-    QStringList words = text.split(' ', Qt::SkipEmptyParts);
-
-    if (words.length() == 0)
+    switch (getSettings()->helixTimegateWhisper.getValue())
     {
-        return false;
-    }
+        case HelixTimegateOverride::Timegate: {
+            if (areIRCCommandsStillAvailable())
+            {
+                return true;
+            }
 
-    QString commandName = words[0];
-
-    if (TWITCH_WHISPER_COMMANDS.contains(commandName, Qt::CaseInsensitive))
-    {
-        if (words.length() > 2)
-        {
-            return appendWhisperMessageWordsLocally(words);
+            // fall through to Helix logic
         }
+        break;
+
+        case HelixTimegateOverride::AlwaysUseIRC: {
+            return true;
+        }
+        break;
+
+        case HelixTimegateOverride::AlwaysUseHelix: {
+            // do nothing and fall through to Helix logic
+        }
+        break;
     }
     return false;
+}
+
+QString runWhisperCommand(const QStringList &words, const ChannelPtr &channel)
+{
+    if (words.size() < 3)
+    {
+        channel->addMessage(
+            makeSystemMessage("Usage: /w <username> <message>"));
+        return "";
+    }
+
+    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    if (currentUser->isAnon())
+    {
+        channel->addMessage(
+            makeSystemMessage("You must be logged in to send a whisper!"));
+        return "";
+    }
+    auto target = words.at(1);
+    stripChannelName(target);
+    auto message = words.mid(2).join(' ');
+
+    if (useIrcForWhisperCommand())
+    {
+        if (channel->isTwitchChannel())
+        {
+            appendWhisperMessageWordsLocally(words);
+            sendWhisperMessage(words.join(' '));
+        }
+        else
+        {
+            channel->addMessage(makeSystemMessage(
+                "You can only send whispers from Twitch channels."));
+        }
+        return "";
+    }
+
+    getHelix()->getUserByName(
+        target,
+        [channel, currentUser, target, message, words](const auto &targetUser) {
+            getHelix()->sendWhisper(
+                currentUser->getUserId(), targetUser.id, message,
+                [words] {
+                    appendWhisperMessageWordsLocally(words);
+                },
+                [channel, target, targetUser](auto error, auto message) {
+                    using Error = HelixWhisperError;
+
+                    QString errorMessage = "Failed to send whisper - ";
+
+                    switch (error)
+                    {
+                        case Error::NoVerifiedPhone: {
+                            errorMessage +=
+                                "Due to Twitch restrictions, you are now "
+                                "required to have a verified phone number "
+                                "to send whispers. You can add a phone "
+                                "number in Twitch settings. "
+                                "https://www.twitch.tv/settings/security";
+                        };
+                        break;
+
+                        case Error::RecipientBlockedUser: {
+                            errorMessage +=
+                                "The recipient doesn't allow whispers "
+                                "from strangers or you directly.";
+                        };
+                        break;
+
+                        case Error::WhisperSelf: {
+                            errorMessage += "You cannot whisper yourself.";
+                        };
+                        break;
+
+                        case Error::Forwarded: {
+                            errorMessage += message;
+                        }
+                        break;
+
+                        case Error::Ratelimited: {
+                            errorMessage +=
+                                "You may only whisper a maximum of 40 "
+                                "unique recipients per day. Within the "
+                                "per day limit, you may whisper a "
+                                "maximum of 3 whispers per second and "
+                                "a maximum of 100 whispers per minute.";
+                        }
+                        break;
+
+                        case Error::UserMissingScope: {
+                            // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                            errorMessage += "Missing required scope. "
+                                            "Re-login with your "
+                                            "account and try again.";
+                        }
+                        break;
+
+                        case Error::UserNotAuthorized: {
+                            // TODO(pajlada): Phrase MISSING_PERMISSION
+                            errorMessage += "You don't have permission to "
+                                            "perform that action.";
+                        }
+                        break;
+
+                        case Error::Unknown: {
+                            errorMessage += "An unknown error has occurred.";
+                        }
+                        break;
+                    }
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
+        },
+        [channel] {
+            channel->addMessage(
+                makeSystemMessage("No user matching that username."));
+        });
+
+    return "";
 }
 
 using VariableReplacer = std::function<QString(
@@ -2108,6 +2232,112 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });  // /raid
 
+    this->registerCommand(  // /unraid
+        "/unraid", [](const QStringList &words, auto channel) -> QString {
+            switch (getSettings()->helixTimegateRaid.getValue())
+            {
+                case HelixTimegateOverride::Timegate: {
+                    if (areIRCCommandsStillAvailable())
+                    {
+                        return useIRCCommand(words);
+                    }
+
+                    // fall through to Helix logic
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseIRC: {
+                    return useIRCCommand(words);
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseHelix: {
+                    // do nothing and fall through to Helix logic
+                }
+                break;
+            }
+
+            if (words.size() != 1)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: \"/unraid\" - Cancel the current raid. "
+                    "Only the broadcaster can cancel the raid."));
+                return "";
+            }
+
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (currentUser->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to cancel the raid!"));
+                return "";
+            }
+
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /unraid command only works in Twitch channels"));
+                return "";
+            }
+
+            getHelix()->cancelRaid(
+                twitchChannel->roomId(),
+                [channel] {
+                    channel->addMessage(
+                        makeSystemMessage(QString("You cancelled the raid.")));
+                },
+                [channel](auto error, auto message) {
+                    QString errorMessage =
+                        QString("Failed to cancel the raid - ");
+
+                    using Error = HelixCancelRaidError;
+
+                    switch (error)
+                    {
+                        case Error::UserMissingScope: {
+                            // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                            errorMessage += "Missing required scope. "
+                                            "Re-login with your "
+                                            "account and try again.";
+                        }
+                        break;
+
+                        case Error::UserNotAuthorized: {
+                            errorMessage += "You must be the broadcaster "
+                                            "to cancel the raid.";
+                        }
+                        break;
+
+                        case Error::NoRaidPending: {
+                            errorMessage += "You don't have an active raid.";
+                        }
+                        break;
+
+                        case Error::Ratelimited: {
+                            errorMessage +=
+                                "You are being ratelimited by Twitch. Try "
+                                "again in a few seconds.";
+                        }
+                        break;
+
+                        case Error::Forwarded: {
+                            errorMessage += message;
+                        }
+                        break;
+
+                        case Error::Unknown:
+                        default: {
+                            errorMessage += "An unknown error has occurred.";
+                        }
+                        break;
+                    }
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
+
+            return "";
+        });  // unraid
+
     const auto formatChatSettingsError = [](const HelixUpdateChatSettingsError
                                                 error,
                                             const QString &message,
@@ -2511,6 +2741,394 @@ void CommandController::initialize(Settings &, Paths &paths)
             });
         return "";
     });
+
+    auto formatBanTimeoutError =
+        [](const char *operation, HelixBanUserError error,
+           const QString &message, const QString &userDisplayName) -> QString {
+        using Error = HelixBanUserError;
+
+        QString errorMessage = QString("Failed to %1 user - ").arg(operation);
+
+        switch (error)
+        {
+            case Error::ConflictingOperation: {
+                errorMessage += "There was a conflicting ban operation on "
+                                "this user. Please try again.";
+            }
+            break;
+
+            case Error::Forwarded: {
+                errorMessage += message;
+            }
+            break;
+
+            case Error::Ratelimited: {
+                errorMessage += "You are being ratelimited by Twitch. Try "
+                                "again in a few seconds.";
+            }
+            break;
+
+            case Error::TargetBanned: {
+                // Equivalent IRC error
+                errorMessage = QString("%1 is already banned in this channel.")
+                                   .arg(userDisplayName);
+            }
+            break;
+
+            case Error::UserMissingScope: {
+                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                errorMessage += "Missing required scope. "
+                                "Re-login with your "
+                                "account and try again.";
+            }
+            break;
+
+            case Error::UserNotAuthorized: {
+                // TODO(pajlada): Phrase MISSING_PERMISSION
+                errorMessage += "You don't have permission to "
+                                "perform that action.";
+            }
+            break;
+
+            case Error::Unknown: {
+                errorMessage += "An unknown error has occurred.";
+            }
+            break;
+        }
+        return errorMessage;
+    };
+
+    this->registerCommand("/timeout", [formatBanTimeoutError](
+                                          const QStringList &words,
+                                          auto channel) {
+        const auto *usageStr =
+            "Usage: \"/timeout <username> [duration][time unit] [reason]\" - "
+            "Temporarily prevent a user from chatting. Duration (optional, "
+            "default=10 minutes) must be a positive integer; time unit "
+            "(optional, default=s) must be one of s, m, h, d, w; maximum "
+            "duration is 2 weeks. Combinations like 1d2h are also allowed. "
+            "Reason is optional and will be shown to the target user and other "
+            "moderators. Use \"/untimeout\" to remove a timeout.";
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(usageStr));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to timeout someone!"));
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The /timeout command only works in Twitch channels")));
+            return "";
+        }
+
+        auto target = words.at(1);
+        stripChannelName(target);
+
+        int duration = 10 * 60;  // 10min
+        if (words.size() >= 3)
+        {
+            duration = (int)parseDurationToSeconds(words.at(2));
+            if (duration <= 0)
+            {
+                channel->addMessage(makeSystemMessage(usageStr));
+                return "";
+            }
+        }
+        auto reason = words.mid(3).join(' ');
+
+        getHelix()->getUserByName(
+            target,
+            [channel, currentUser, twitchChannel, target, duration, reason,
+             formatBanTimeoutError](const auto &targetUser) {
+                getHelix()->banUser(
+                    twitchChannel->roomId(), currentUser->getUserId(),
+                    targetUser.id, duration, reason,
+                    [] {
+                        // No response for timeouts, they're emitted over pubsub/IRC instead
+                    },
+                    [channel, target, targetUser, formatBanTimeoutError](
+                        auto error, auto message) {
+                        auto errorMessage = formatBanTimeoutError(
+                            "timeout", error, message, targetUser.displayName);
+                        channel->addMessage(makeSystemMessage(errorMessage));
+                    });
+            },
+            [channel, target] {
+                // Equivalent error from IRC
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid username: %1").arg(target)));
+            });
+
+        return "";
+    });
+
+    this->registerCommand("/ban", [formatBanTimeoutError](
+                                      const QStringList &words, auto channel) {
+        const auto *usageStr =
+            "Usage: \"/ban <username> [reason]\" - Permanently prevent a user "
+            "from chatting. Reason is optional and will be shown to the target "
+            "user and other moderators. Use \"/unban\" to remove a ban.";
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(usageStr));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to ban someone!"));
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The /ban command only works in Twitch channels")));
+            return "";
+        }
+
+        auto target = words.at(1);
+        stripChannelName(target);
+
+        auto reason = words.mid(2).join(' ');
+
+        getHelix()->getUserByName(
+            target,
+            [channel, currentUser, twitchChannel, target, reason,
+             formatBanTimeoutError](const auto &targetUser) {
+                getHelix()->banUser(
+                    twitchChannel->roomId(), currentUser->getUserId(),
+                    targetUser.id, boost::none, reason,
+                    [] {
+                        // No response for bans, they're emitted over pubsub/IRC instead
+                    },
+                    [channel, target, targetUser, formatBanTimeoutError](
+                        auto error, auto message) {
+                        auto errorMessage = formatBanTimeoutError(
+                            "ban", error, message, targetUser.displayName);
+                        channel->addMessage(makeSystemMessage(errorMessage));
+                    });
+            },
+            [channel, target] {
+                // Equivalent error from IRC
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid username: %1").arg(target)));
+            });
+
+        return "";
+    });
+
+    for (const auto &cmd : TWITCH_WHISPER_COMMANDS)
+    {
+        this->registerCommand(cmd, [](const QStringList &words, auto channel) {
+            return runWhisperCommand(words, channel);
+        });
+    }
+
+    auto formatVIPListError = [](HelixListVIPsError error,
+                                 const QString &message) -> QString {
+        using Error = HelixListVIPsError;
+
+        QString errorMessage = QString("Failed to list VIPs - ");
+
+        switch (error)
+        {
+            case Error::Forwarded: {
+                errorMessage += message;
+            }
+            break;
+
+            case Error::Ratelimited: {
+                errorMessage += "You are being ratelimited by Twitch. Try "
+                                "again in a few seconds.";
+            }
+            break;
+
+            case Error::UserMissingScope: {
+                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                errorMessage += "Missing required scope. "
+                                "Re-login with your "
+                                "account and try again.";
+            }
+            break;
+
+            case Error::UserNotAuthorized: {
+                // TODO(pajlada): Phrase MISSING_PERMISSION
+                errorMessage += "You don't have permission to "
+                                "perform that action.";
+            }
+            break;
+
+            case Error::UserNotBroadcaster: {
+                errorMessage +=
+                    "Due to Twitch restrictions, "
+                    "this command can only be used by the broadcaster. "
+                    "To see the list of VIPs you must use the Twitch website.";
+            }
+            break;
+
+            case Error::Unknown: {
+                errorMessage += "An unknown error has occurred.";
+            }
+            break;
+        }
+        return errorMessage;
+    };
+
+    this->registerCommand(
+        "/vips",
+        [formatVIPListError](const QStringList &words,
+                             auto channel) -> QString {
+            switch (getSettings()->helixTimegateVIPs.getValue())
+            {
+                case HelixTimegateOverride::Timegate: {
+                    if (areIRCCommandsStillAvailable())
+                    {
+                        return useIRCCommand(words);
+                    }
+
+                    // fall through to Helix logic
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseIRC: {
+                    return useIRCCommand(words);
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseHelix: {
+                    // do nothing and fall through to Helix logic
+                }
+                break;
+            }
+
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /vips command only works in Twitch channels"));
+                return "";
+            }
+
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (currentUser->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Due to Twitch restrictions, "  //
+                    "this command can only be used by the broadcaster. "
+                    "To see the list of VIPs you must use the "
+                    "Twitch website."));
+                return "";
+            }
+
+            getHelix()->getChannelVIPs(
+                twitchChannel->roomId(),
+                [channel, twitchChannel](const std::vector<HelixVip> &vipList) {
+                    if (vipList.empty())
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            "This channel does not have any VIPs."));
+                        return;
+                    }
+
+                    auto messagePrefix =
+                        QString("The VIPs of this channel are");
+                    auto entries = QStringList();
+
+                    for (const auto &vip : vipList)
+                    {
+                        entries.append(vip.userName);
+                    }
+
+                    entries.sort(Qt::CaseInsensitive);
+
+                    MessageBuilder builder;
+                    TwitchMessageBuilder::listOfUsersSystemMessage(
+                        messagePrefix, entries, twitchChannel, &builder);
+
+                    channel->addMessage(builder.release());
+                },
+                [channel, formatVIPListError](auto error, auto message) {
+                    auto errorMessage = formatVIPListError(error, message);
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
+
+            return "";
+        });
+
+    auto uniqueChatLambda = [formatChatSettingsError](auto words, auto channel,
+                                                      bool target) {
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You must be logged in to update chat settings!"));
+            return "";
+        }
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The /%1 command only works in Twitch channels")
+                    .arg(target ? "uniquechat" : "uniquechatoff")));
+            return "";
+        }
+
+        if (twitchChannel->accessRoomModes()->r9k == target)
+        {
+            channel->addMessage(makeSystemMessage(
+                target ? "This room is already in unique-chat mode."
+                       : "This room is not in unique-chat mode."));
+            return "";
+        }
+
+        getHelix()->updateUniqueChatMode(
+            twitchChannel->roomId(), currentUser->getUserId(), target,
+            [](auto) {
+                // we'll get a message from irc
+            },
+            [channel, formatChatSettingsError](auto error, auto message) {
+                channel->addMessage(
+                    makeSystemMessage(formatChatSettingsError(error, message)));
+            });
+        return "";
+    };
+
+    this->registerCommand(
+        "/uniquechatoff",
+        [uniqueChatLambda](const QStringList &words, auto channel) {
+            return uniqueChatLambda(words, channel, false);
+        });
+
+    this->registerCommand(
+        "/r9kbetaoff",
+        [uniqueChatLambda](const QStringList &words, auto channel) {
+            return uniqueChatLambda(words, channel, false);
+        });
+
+    this->registerCommand(
+        "/uniquechat",
+        [uniqueChatLambda](const QStringList &words, auto channel) {
+            return uniqueChatLambda(words, channel, true);
+        });
+
+    this->registerCommand(
+        "/r9kbeta", [uniqueChatLambda](const QStringList &words, auto channel) {
+            return uniqueChatLambda(words, channel, true);
+        });
 }
 
 void CommandController::save()
@@ -2538,26 +3156,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     }
 
     QString commandName = words[0];
-
-    // works in a valid Twitch channel and /whispers, etc...
-    if (!dryRun && channel->isTwitchChannel())
-    {
-        if (TWITCH_WHISPER_COMMANDS.contains(commandName, Qt::CaseInsensitive))
-        {
-            if (words.length() > 2)
-            {
-                appendWhisperMessageWordsLocally(words);
-                sendWhisperMessage(text);
-            }
-            else
-            {
-                channel->addMessage(
-                    makeSystemMessage("Usage: /w <username> <message>"));
-            }
-
-            return "";
-        }
-    }
 
     {
         // check if user command exists
@@ -2622,7 +3220,7 @@ void CommandController::registerCommand(QString commandName,
 }
 
 QString CommandController::execCustomCommand(
-    const QStringList &words, const Command &command, bool dryRun,
+    const QStringList &words, const Command &command, bool /* dryRun */,
     ChannelPtr channel, const Message *message,
     std::unordered_map<QString, QString> context)
 {
@@ -2717,17 +3315,7 @@ QString CommandController::execCustomCommand(
         result = result.mid(1);
     }
 
-    auto res = result.replace("{{", "{");
-
-    if (dryRun || !appendWhisperMessageStringLocally(res))
-    {
-        return res;
-    }
-    else
-    {
-        sendWhisperMessage(res);
-        return "";
-    }
+    return result.replace("{{", "{");
 }
 
 QStringList CommandController::getDefaultChatterinoCommandList()

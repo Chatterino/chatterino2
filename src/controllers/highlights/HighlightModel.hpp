@@ -32,6 +32,7 @@ public:
         RedeemedRow = 3,
         FirstMessageRow = 4,
         ElevatedMessageRow = 5,
+        ThreadMessageRow = 6,
     };
 
 protected:
