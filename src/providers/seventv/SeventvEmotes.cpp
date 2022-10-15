@@ -15,8 +15,6 @@
 #include <QThread>
 #include <utility>
 
-namespace chatterino {
-
 /**
  * # References
  *
@@ -27,202 +25,201 @@ namespace chatterino {
  * - ImageFile: https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/model.go#L41-L48
  */
 namespace {
-    // These declarations won't throw an exception.
-    const QString CHANNEL_HAS_NO_EMOTES(
-        "This channel has no 7TV channel emotes.");
-    const QString EMOTE_LINK_FORMAT("https://7tv.app/emotes/%1");
 
-    // TODO(nerix): add links to documentation (7tv.io)
-    const QString API_URL_USER("https://7tv.io/v3/users/twitch/%1");
-    const QString API_URL_GLOBAL_EMOTE_SET(
-        "https://7tv.io/v3/emote-sets/global");
+using namespace chatterino;
 
-    struct CreateEmoteResult {
-        Emote emote;
-        EmoteId id;
-        EmoteName name;
-        bool hasImages;
-    };
+// These declarations won't throw an exception.
+const QString CHANNEL_HAS_NO_EMOTES("This channel has no 7TV channel emotes.");
+const QString EMOTE_LINK_FORMAT("https://7tv.app/emotes/%1");
 
-    EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
+// TODO(nerix): add links to documentation (7tv.io)
+const QString API_URL_USER("https://7tv.io/v3/users/twitch/%1");
+const QString API_URL_GLOBAL_EMOTE_SET("https://7tv.io/v3/emote-sets/global");
+
+struct CreateEmoteResult {
+    Emote emote;
+    EmoteId id;
+    EmoteName name;
+    bool hasImages;
+};
+
+EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
+{
+    static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
+    static std::mutex mutex;
+
+    return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
+}
+
+/**
+  * This decides whether an emote should be displayed
+  * as zero-width
+  */
+bool isZeroWidthActive(const QJsonObject &activeEmote)
+{
+    auto flags = SeventvActiveEmoteFlags(
+        SeventvActiveEmoteFlag(activeEmote.value("flags").toInt()));
+    return flags.has(SeventvActiveEmoteFlag::ZeroWidth);
+}
+
+/**
+  * This is only an indicator if an emote should be added
+  * as zero-width or not. The user can still overwrite this.
+  */
+bool isZeroWidthRecommended(const QJsonObject &emoteData)
+{
+    auto flags =
+        SeventvEmoteFlags(SeventvEmoteFlag(emoteData.value("flags").toInt()));
+    return flags.has(SeventvEmoteFlag::ZeroWidth);
+}
+
+ImageSet makeImageSet(const QJsonObject &emoteData)
+{
+    auto host = emoteData["host"].toObject();
+    // "//cdn.7tv[...]"
+    auto baseUrl = host["url"].toString();
+    auto files = host["files"].toArray();
+
+    // TODO: emit four images
+    std::array<ImagePtr, 3> sizes;
+    double baseWidth = 0.0;
+    int nextSize = 0;
+
+    for (auto fileItem : files)
     {
-        static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
-        static std::mutex mutex;
-
-        return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
-    }
-
-    /**
-      * This decides whether an emote should be displayed
-      * as zero-width
-      */
-    bool isZeroWidthActive(const QJsonObject &activeEmote)
-    {
-        auto flags = SeventvActiveEmoteFlags(
-            SeventvActiveEmoteFlag(activeEmote.value("flags").toInt()));
-        return flags.has(SeventvActiveEmoteFlag::ZeroWidth);
-    }
-
-    /**
-      * This is only an indicator if an emote should be added
-      * as zero-width or not. The user can still overwrite this.
-      */
-    bool isZeroWidthRecommended(const QJsonObject &emoteData)
-    {
-        auto flags = SeventvEmoteFlags(
-            SeventvEmoteFlag(emoteData.value("flags").toInt()));
-        return flags.has(SeventvEmoteFlag::ZeroWidth);
-    }
-
-    ImageSet makeImageSet(const QJsonObject &emoteData)
-    {
-        auto host = emoteData["host"].toObject();
-        // "//cdn.7tv[...]"
-        auto baseUrl = host["url"].toString();
-        auto files = host["files"].toArray();
-
-        // TODO: emit four images
-        std::array<ImagePtr, 3> sizes;
-        double baseWidth = 0.0;
-        int nextSize = 0;
-
-        for (auto fileItem : files)
+        if (nextSize >= sizes.size())
         {
-            if (nextSize >= sizes.size())
-            {
-                break;
-            }
-
-            auto file = fileItem.toObject();
-            if (file["format"].toString() != "WEBP")
-            {
-                continue;  // We only use webp
-            }
-
-            double width = file["width"].toDouble();
-            double scale = 1.0;  // in relation to first image
-            if (baseWidth > 0.0)
-            {
-                scale = baseWidth / width;
-            }
-            else
-            {
-                // => this is the first image
-                baseWidth = width;
-            }
-
-            auto image = Image::fromUrl(
-                {QString("https:%1/%2").arg(baseUrl, file["name"].toString())},
-                scale);
-
-            sizes.at(nextSize) = image;
-            nextSize++;
+            break;
         }
 
-        if (nextSize < sizes.size())
+        auto file = fileItem.toObject();
+        if (file["format"].toString() != "WEBP")
         {
-            // this should be really rare
-            // this means we didn't get all sizes of an emote
-            if (nextSize == 0)
-            {
-                qCDebug(chatterinoSeventv)
-                    << "Got file list without any eligible files";
-                // When this emote is typed, chatterino will segfault.
-                return ImageSet{};
-            }
-            for (; nextSize < sizes.size(); nextSize++)
-            {
-                sizes.at(nextSize) = Image::getEmpty();
-            }
+            continue;  // We only use webp
         }
 
-        return ImageSet{sizes[0], sizes[1], sizes[2]};
-    }
-
-    Tooltip createTooltip(const QString &name, const QString &author,
-                          bool isGlobal)
-    {
-        return Tooltip{QString("%1<br>%2 7TV Emote<br>By: %3")
-                           .arg(name, isGlobal ? "Global" : "Channel",
-                                author.isEmpty() ? "<deleted>" : author)};
-    }
-
-    Tooltip createAliasedTooltip(const QString &name, const QString &baseName,
-                                 const QString &author, bool isGlobal)
-    {
-        return Tooltip{QString("%1<br>Alias to %2<br>%3 7TV Emote<br>By: %4")
-                           .arg(name, baseName, isGlobal ? "Global" : "Channel",
-                                author.isEmpty() ? "<deleted>" : author)};
-    }
-
-    CreateEmoteResult createEmote(const QJsonObject &activeEmote,
-                                  const QJsonObject &emoteData, bool isGlobal)
-    {
-        auto emoteId = EmoteId{activeEmote["id"].toString()};
-        auto emoteName = EmoteName{activeEmote["name"].toString()};
-        auto author = EmoteAuthor{
-            emoteData["owner"].toObject()["display_name"].toString()};
-        auto baseEmoteName = emoteData["name"].toString();
-        bool zeroWidth = isZeroWidthActive(activeEmote);
-        bool aliasedName = emoteName.string != baseEmoteName;
-        auto tooltip =
-            aliasedName
-                ? createAliasedTooltip(emoteName.string, baseEmoteName,
-                                       author.string, isGlobal)
-                : createTooltip(emoteName.string, author.string, isGlobal);
-        auto imageSet = makeImageSet(emoteData);
-
-        auto emote =
-            Emote({emoteName, imageSet, tooltip,
-                   Url{EMOTE_LINK_FORMAT.arg(emoteId.string)}, zeroWidth});
-
-        return {emote, emoteId, emoteName,
-                !emote.images.getImage1()->isEmpty()};
-    }
-
-    bool checkEmoteVisibility(const QJsonObject &emoteData)
-    {
-        if (!emoteData["listed"].toBool() &&
-            !getSettings()->showUnlistedSevenTVEmotes)
+        double width = file["width"].toDouble();
+        double scale = 1.0;  // in relation to first image
+        if (baseWidth > 0.0)
         {
-            return false;
+            scale = baseWidth / width;
         }
-        auto flags =
-            SeventvEmoteFlags(SeventvEmoteFlag(emoteData["flags"].toInt()));
-        return !flags.has(SeventvEmoteFlag::ContentTwitchDisallowed);
-    }
-
-    EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal)
-    {
-        auto emotes = EmoteMap();
-
-        for (const auto &activeEmoteJson : emoteSetEmotes)
+        else
         {
-            auto activeEmote = activeEmoteJson.toObject();
-            auto emoteData = activeEmote["data"].toObject();
-
-            if (emoteData.empty() || !checkEmoteVisibility(emoteData))
-            {
-                continue;
-            }
-
-            auto result = createEmote(activeEmote, emoteData, isGlobal);
-            if (!result.hasImages)
-            {
-                // this shouldn't happen but if it does, it will crash,
-                // so we don't add the emote
-                qCDebug(chatterinoSeventv)
-                    << "Emote without images:" << activeEmote;
-                continue;
-            }
-            auto ptr = cachedOrMake(std::move(result.emote), result.id);
-            emotes[result.name] = ptr;
+            // => this is the first image
+            baseWidth = width;
         }
 
-        return emotes;
+        auto image = Image::fromUrl(
+            {QString("https:%1/%2").arg(baseUrl, file["name"].toString())},
+            scale);
+
+        sizes.at(nextSize) = image;
+        nextSize++;
     }
+
+    if (nextSize < sizes.size())
+    {
+        // this should be really rare
+        // this means we didn't get all sizes of an emote
+        if (nextSize == 0)
+        {
+            qCDebug(chatterinoSeventv)
+                << "Got file list without any eligible files";
+            // When this emote is typed, chatterino will segfault.
+            return ImageSet{};
+        }
+        for (; nextSize < sizes.size(); nextSize++)
+        {
+            sizes.at(nextSize) = Image::getEmpty();
+        }
+    }
+
+    return ImageSet{sizes[0], sizes[1], sizes[2]};
+}
+
+Tooltip createTooltip(const QString &name, const QString &author, bool isGlobal)
+{
+    return Tooltip{QString("%1<br>%2 7TV Emote<br>By: %3")
+                       .arg(name, isGlobal ? "Global" : "Channel",
+                            author.isEmpty() ? "<deleted>" : author)};
+}
+
+Tooltip createAliasedTooltip(const QString &name, const QString &baseName,
+                             const QString &author, bool isGlobal)
+{
+    return Tooltip{QString("%1<br>Alias to %2<br>%3 7TV Emote<br>By: %4")
+                       .arg(name, baseName, isGlobal ? "Global" : "Channel",
+                            author.isEmpty() ? "<deleted>" : author)};
+}
+
+CreateEmoteResult createEmote(const QJsonObject &activeEmote,
+                              const QJsonObject &emoteData, bool isGlobal)
+{
+    auto emoteId = EmoteId{activeEmote["id"].toString()};
+    auto emoteName = EmoteName{activeEmote["name"].toString()};
+    auto author =
+        EmoteAuthor{emoteData["owner"].toObject()["display_name"].toString()};
+    auto baseEmoteName = emoteData["name"].toString();
+    bool zeroWidth = isZeroWidthActive(activeEmote);
+    bool aliasedName = emoteName.string != baseEmoteName;
+    auto tooltip =
+        aliasedName ? createAliasedTooltip(emoteName.string, baseEmoteName,
+                                           author.string, isGlobal)
+                    : createTooltip(emoteName.string, author.string, isGlobal);
+    auto imageSet = makeImageSet(emoteData);
+
+    auto emote = Emote({emoteName, imageSet, tooltip,
+                        Url{EMOTE_LINK_FORMAT.arg(emoteId.string)}, zeroWidth});
+
+    return {emote, emoteId, emoteName, !emote.images.getImage1()->isEmpty()};
+}
+
+bool checkEmoteVisibility(const QJsonObject &emoteData)
+{
+    if (!emoteData["listed"].toBool() &&
+        !getSettings()->showUnlistedSevenTVEmotes)
+    {
+        return false;
+    }
+    auto flags =
+        SeventvEmoteFlags(SeventvEmoteFlag(emoteData["flags"].toInt()));
+    return !flags.has(SeventvEmoteFlag::ContentTwitchDisallowed);
+}
+
+EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal)
+{
+    auto emotes = EmoteMap();
+
+    for (const auto &activeEmoteJson : emoteSetEmotes)
+    {
+        auto activeEmote = activeEmoteJson.toObject();
+        auto emoteData = activeEmote["data"].toObject();
+
+        if (emoteData.empty() || !checkEmoteVisibility(emoteData))
+        {
+            continue;
+        }
+
+        auto result = createEmote(activeEmote, emoteData, isGlobal);
+        if (!result.hasImages)
+        {
+            // this shouldn't happen but if it does, it will crash,
+            // so we don't add the emote
+            qCDebug(chatterinoSeventv)
+                << "Emote without images:" << activeEmote;
+            continue;
+        }
+        auto ptr = cachedOrMake(std::move(result.emote), result.id);
+        emotes[result.name] = ptr;
+    }
+
+    return emotes;
+}
 
 }  // namespace
+
+namespace chatterino {
 
 SeventvEmotes::SeventvEmotes()
     : global_(std::make_shared<EmoteMap>())
