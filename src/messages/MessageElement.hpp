@@ -150,13 +150,12 @@ enum class MessageElementFlag : int64_t {
     // for the reply button element
     ReplyButton = (1LL << 33),
 
+    // (1LL << 34) through (1LL << 36) are occupied by
+    // SevenTVEmoteImage, SevenTVEmoteText, and BadgeSevenTV,
+
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | SevenTVEmoteImage | TwitchEmoteImage |
               BitsAmount | Text | AlwaysShow,
-
-    // SevenTVEmoteImage = (1LL << 34),
-    // SevenTVEmoteText = (1LL << 35),
-    // BadgeSevenTV = (1LL << 36),
 };
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
