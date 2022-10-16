@@ -34,6 +34,7 @@ Q_LOGGING_CATEGORY(chatterinoPubSub, "chatterino.pubsub", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoRecentMessages, "chatterino.recentmessages",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoSettings, "chatterino.settings", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoSeventv, "chatterino.seventv", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoStreamerMode, "chatterino.streamermode",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoStreamlink, "chatterino.streamlink", logThreshold);

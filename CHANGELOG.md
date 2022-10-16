@@ -4,6 +4,7 @@
 
 - Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722, #3989, #4041, #4047, #4055)
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
+- Major: Added support for emotes and badges from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062)
 - Minor: Added highlights for `Elevated Messages`. (#4016)
 - Minor: Removed total views from the usercard, as Twitch no longer updates the number. (#3792)
 - Minor: Load missing messages from Recent Messages API upon reconnecting (#3878, #3932)
@@ -93,6 +94,7 @@
 - Bugfix: Fixed non-global FrankerFaceZ emotes from being loaded as global emotes. (#3921)
 - Bugfix: Fixed trailing spaces from preventing Nicknames from working correctly. (#3946)
 - Bugfix: Fixed trailing spaces from preventing User Highlights from working correctly. (#4051)
+- Bugfix: Fixed channel-based popups from rewriting messages to file log (#4060)
 - Dev: Removed official support for QMake. (#3839, #3883)
 - Dev: Rewrote LimitedQueue (#3798)
 - Dev: Overhauled highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801, #3835)

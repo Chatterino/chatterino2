@@ -7,6 +7,7 @@
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
+#include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -280,6 +281,7 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->appendChatterinoBadges();
     this->appendFfzBadges();
+    this->appendSeventvBadges();
 
     this->appendUsername();
 
@@ -1028,6 +1030,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 
     const auto &globalBttvEmotes = app->twitch->getBttvEmotes();
     const auto &globalFfzEmotes = app->twitch->getFfzEmotes();
+    const auto &globalSeventvEmotes = app->twitch->getSeventvEmotes();
 
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
@@ -1035,8 +1038,10 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     // Emote order:
     //  - FrankerFaceZ Channel
     //  - BetterTTV Channel
+    //  - 7TV Channel
     //  - FrankerFaceZ Global
     //  - BetterTTV Global
+    //  - 7TV Global
     if (this->twitchChannel && (emote = this->twitchChannel->ffzEmote(name)))
     {
         flags = MessageElementFlag::FfzEmote;
@@ -1045,6 +1050,15 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
              (emote = this->twitchChannel->bttvEmote(name)))
     {
         flags = MessageElementFlag::BttvEmote;
+    }
+    else if (this->twitchChannel != nullptr &&
+             (emote = this->twitchChannel->seventvEmote(name)))
+    {
+        flags = MessageElementFlag::SevenTVEmote;
+        if (emote.value()->zeroWidth)
+        {
+            flags.set(MessageElementFlag::ZeroWidthEmote);
+        }
     }
     else if ((emote = globalFfzEmotes.emote(name)))
     {
@@ -1055,6 +1069,14 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
         flags = MessageElementFlag::BttvEmote;
 
         if (zeroWidthEmotes.contains(name.string))
+        {
+            flags.set(MessageElementFlag::ZeroWidthEmote);
+        }
+    }
+    else if ((emote = globalSeventvEmotes.globalEmote(name)))
+    {
+        flags = MessageElementFlag::SevenTVEmote;
+        if (emote.value()->zeroWidth)
         {
             flags.set(MessageElementFlag::ZeroWidthEmote);
         }
@@ -1214,6 +1236,14 @@ void TwitchMessageBuilder::appendFfzBadges()
     {
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
+    }
+}
+
+void TwitchMessageBuilder::appendSeventvBadges()
+{
+    if (auto badge = getApp()->seventvBadges->getBadge({this->userId_}))
+    {
+        this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeSevenTV);
     }
 }
 

@@ -54,6 +54,7 @@ void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
 
     this->reloadBTTVGlobalEmotes();
     this->reloadFFZGlobalEmotes();
+    this->reloadSevenTVGlobalEmotes();
 
     /* Refresh all twitch channel's live status in bulk every 30 seconds after starting chatterino */
     QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [=] {
@@ -467,6 +468,10 @@ const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
 {
     return this->ffz;
 }
+const SeventvEmotes &TwitchIrcServer::getSeventvEmotes() const
+{
+    return this->seventv_;
+}
 
 void TwitchIrcServer::reloadBTTVGlobalEmotes()
 {
@@ -494,6 +499,21 @@ void TwitchIrcServer::reloadAllFFZChannelEmotes()
         if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
         {
             channel->refreshFFZChannelEmotes(false);
+        }
+    });
+}
+
+void TwitchIrcServer::reloadSevenTVGlobalEmotes()
+{
+    this->seventv_.loadGlobalEmotes();
+}
+
+void TwitchIrcServer::reloadAllSevenTVChannelEmotes()
+{
+    this->forEachChannel([](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->refreshSevenTVChannelEmotes(false);
         }
     });
 }

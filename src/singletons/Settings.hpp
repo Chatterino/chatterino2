@@ -164,6 +164,7 @@ public:
         "/appearance/badges/useCustomFfzModeratorBadges", true};
     BoolSetting useCustomFfzVipBadges = {
         "/appearance/badges/useCustomFfzVipBadges", true};
+    BoolSetting showBadgesSevenTV = {"/appearance/badges/seventv", true};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
@@ -209,6 +210,8 @@ public:
     BoolSetting enableEmoteImages = {"/emotes/enableEmoteImages", true};
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
+    BoolSetting showUnlistedSevenTVEmotes = {
+        "/emotes/showUnlistedSevenTVEmotes", false};
 
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
@@ -220,6 +223,8 @@ public:
     BoolSetting enableBTTVChannelEmotes = {"/emotes/bttv/channel", true};
     BoolSetting enableFFZGlobalEmotes = {"/emotes/ffz/global", true};
     BoolSetting enableFFZChannelEmotes = {"/emotes/ffz/channel", true};
+    BoolSetting enableSevenTVGlobalEmotes = {"/emotes/seventv/global", true};
+    BoolSetting enableSevenTVChannelEmotes = {"/emotes/seventv/channel", true};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};

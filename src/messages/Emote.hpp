@@ -14,6 +14,7 @@ struct Emote {
     ImageSet images;
     Tooltip tooltip;
     Url homePage;
+    bool zeroWidth;
 
     // FOURTF: no solution yet, to be refactored later
     const QString &getCopyString() const

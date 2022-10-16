@@ -214,6 +214,11 @@ set(SOURCE_FILES
         providers/irc/IrcServer.cpp
         providers/irc/IrcServer.hpp
 
+        providers/seventv/SeventvBadges.cpp
+        providers/seventv/SeventvBadges.hpp
+        providers/seventv/SeventvEmotes.cpp
+        providers/seventv/SeventvEmotes.hpp
+
         providers/twitch/ChannelPointReward.cpp
         providers/twitch/ChannelPointReward.hpp
         providers/twitch/IrcMessageHandler.cpp
