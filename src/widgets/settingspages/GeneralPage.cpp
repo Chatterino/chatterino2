@@ -5,6 +5,8 @@
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
@@ -340,6 +342,22 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Remove spaces between emotes",
                        s.removeSpacesBetweenEmotes);
+    layout.addCheckbox("Show unlisted 7TV emotes", s.showUnlistedSevenTVEmotes);
+    s.showUnlistedSevenTVEmotes.connect(
+        []() {
+            getApp()->twitch->forEachChannelAndSpecialChannels(
+                [](const auto &c) {
+                    if (c->isTwitchChannel())
+                    {
+                        auto *channel = dynamic_cast<TwitchChannel *>(c.get());
+                        if (channel != nullptr)
+                        {
+                            channel->refreshSevenTVChannelEmotes(false);
+                        }
+                    }
+                });
+        },
+        false);
     layout.addDropdown<int>(
         "Show info on hover", {"Don't show", "Always show", "Hold shift"},
         s.emotesTooltipPreview,
@@ -362,6 +380,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show BTTV channel emotes", s.enableBTTVChannelEmotes);
     layout.addCheckbox("Show FFZ global emotes", s.enableFFZGlobalEmotes);
     layout.addCheckbox("Show FFZ channel emotes", s.enableFFZChannelEmotes);
+    layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);
+    layout.addCheckbox("Show 7TV channel emotes", s.enableSevenTVChannelEmotes);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
@@ -631,6 +651,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Chatterino", s.showBadgesChatterino);
     layout.addCheckbox("FrankerFaceZ (Bot, FFZ Supporter, FFZ Developer)",
                        s.showBadgesFfz);
+    layout.addCheckbox("7TV", s.showBadgesSevenTV);
     layout.addSeperator();
     layout.addCheckbox("Use custom FrankerFaceZ moderator badges",
                        s.useCustomFfzModeratorBadges);
