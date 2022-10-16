@@ -54,7 +54,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 
     bool subscribed = false;
     int subLength = 0;
-    for (const QString &subBadge : {"subscriber", "founder"})
+    for (const auto &subBadge : {"subscriber", "founder"})
     {
         if (!badges.contains(subBadge))
         {
