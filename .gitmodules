@@ -23,6 +23,7 @@
 [submodule "lib/qtkeychain"]
 	path = lib/qtkeychain
 	url = https://github.com/Chatterino/qtkeychain
+	branch = chatterino-cmake
 [submodule "lib/websocketpp"]
 	path = lib/websocketpp
 	url = https://github.com/zaphoyd/websocketpp
