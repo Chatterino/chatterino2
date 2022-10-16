@@ -286,11 +286,12 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
         this->imagePasted.invoke(source);
         return;
     }
-    else if (source->hasUrls())
+
+    if (source->hasUrls())
     {
         bool hasUploadable = false;
         auto mimeDb = QMimeDatabase();
-        for (const QUrl url : source->urls())
+        for (const QUrl &url : source->urls())
         {
             QMimeType mime = mimeDb.mimeTypeForUrl(url);
             if (mime.name().startsWith("image"))
