@@ -76,7 +76,7 @@ struct IvrEmote {
 class IvrApi final : boost::noncopyable
 {
 public:
-    // https://api.ivr.fi/docs#tag/Twitch/paths/~1twitch~1subage~1{username}~1{channel}/get
+    // https://api.ivr.fi/v2/docs/static/index.html#/Twitch/get_twitch_subage__user___channel_
     void getSubage(QString userName, QString channelName,
                    ResultCallback<IvrSubage> resultCallback,
                    IvrFailureCallback failureCallback);
