@@ -31,6 +31,7 @@ class ChatterinoBadges;
 class SeventvBadges;
 class SeventvPaints;
 class FfzBadges;
+class SeventvBadges;
 
 class IApplication
 {
@@ -87,9 +88,9 @@ public:
     HighlightController *const highlights{};
     TwitchIrcServer *const twitch{};
     ChatterinoBadges *const chatterinoBadges{};
+    FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
     SeventvPaints *const seventvPaints{};
-    FfzBadges *const ffzBadges{};
 
     /*[[deprecated]]*/ Logging *const logging{};
 

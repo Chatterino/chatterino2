@@ -194,19 +194,18 @@ set(SOURCE_FILES
         providers/seventv/paints/RadialGradientPaint.cpp
         providers/seventv/paints/UrlPaint.hpp
         providers/seventv/paints/UrlPaint.cpp
+        providers/seventv/SeventvEventApi.cpp
+        providers/seventv/SeventvEventApi.hpp
         providers/seventv/SeventvEventApiClient.cpp
         providers/seventv/SeventvEventApiClient.hpp
         providers/seventv/SeventvEventApiManager.cpp
         providers/seventv/SeventvEventApiManager.hpp
-        providers/seventv/SeventvEventApiMessages.hpp
         providers/seventv/SeventvEventApiWebsocket.hpp
 
-        providers/seventv/eventapimessages/EventApiMessage.cpp
-        providers/seventv/eventapimessages/EventApiMessage.hpp
-        providers/seventv/eventapimessages/EventApiEmoteUpdate.cpp
-        providers/seventv/eventapimessages/EventApiEmoteUpdate.hpp
-        providers/seventv/eventapimessages/EventApiEmoteData.cpp
-        providers/seventv/eventapimessages/EventApiEmoteData.hpp
+        providers/seventv/eventapimessages/SeventvEventApiMessage.cpp
+        providers/seventv/eventapimessages/SeventvEventApiMessage.hpp
+        providers/seventv/eventapimessages/SeventvEventApiDispatch.cpp
+        providers/seventv/eventapimessages/SeventvEventApiDispatch.hpp
 
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp
@@ -243,6 +242,11 @@ set(SOURCE_FILES
         providers/irc/IrcMessageBuilder.hpp
         providers/irc/IrcServer.cpp
         providers/irc/IrcServer.hpp
+
+        providers/seventv/SeventvBadges.cpp
+        providers/seventv/SeventvBadges.hpp
+        providers/seventv/SeventvEmotes.cpp
+        providers/seventv/SeventvEmotes.hpp
 
         providers/twitch/ChannelPointReward.cpp
         providers/twitch/ChannelPointReward.hpp

@@ -25,7 +25,7 @@
 using namespace std::chrono_literals;
 
 #define TWITCH_PUBSUB_URL "wss://pubsub-edge.twitch.tv"
-#define SEVENTV_EVENTAPI_URL "wss://events.7tv.app/v1/channel-emotes"
+#define SEVENTV_EVENTAPI_URL "wss://events.7tv.io/v3"
 
 namespace chatterino {
 
@@ -478,7 +478,7 @@ const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
 }
 const SeventvEmotes &TwitchIrcServer::getSeventvEmotes() const
 {
-    return this->seventv;
+    return this->seventv_;
 }
 
 void TwitchIrcServer::reloadBTTVGlobalEmotes()
@@ -513,7 +513,7 @@ void TwitchIrcServer::reloadAllFFZChannelEmotes()
 
 void TwitchIrcServer::reloadSevenTVGlobalEmotes()
 {
-    this->seventv.loadEmotes();
+    this->seventv_.loadGlobalEmotes();
 }
 
 void TwitchIrcServer::reloadAllSevenTVChannelEmotes()
@@ -524,5 +524,78 @@ void TwitchIrcServer::reloadAllSevenTVChannelEmotes()
             channel->refreshSevenTVChannelEmotes(false);
         }
     });
+}
+
+void TwitchIrcServer::forEachSeventvEmoteSet(
+    const QString &emoteSetId, std::function<void(TwitchChannel &)> func)
+{
+    this->forEachChannel([emoteSetId, func](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
+            channel->seventvEmoteSetId() == emoteSetId)
+        {
+            func(*channel);
+        }
+    });
+}
+void TwitchIrcServer::forEachSeventvUser(
+    const QString &userId, std::function<void(TwitchChannel &)> func)
+{
+    this->forEachChannel([userId, func](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
+            channel->seventvUserId() == userId)
+        {
+            func(*channel);
+        }
+    });
+}
+
+void TwitchIrcServer::dropSeventvEmoteSet(const QString &id)
+{
+    std::lock_guard<std::mutex> lock(this->channelMutex);
+
+    for (std::weak_ptr<Channel> &weak : this->channels)
+    {
+        ChannelPtr chan = weak.lock();
+        if (!chan)
+        {
+            continue;
+        }
+
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
+            channel->seventvEmoteSetId() == id)
+        {
+            return;
+        }
+    }
+
+    if (this->eventApi)
+    {
+        this->eventApi->unsubscribeEmoteSet(id);
+    }
+}
+
+void TwitchIrcServer::dropSeventvUser(const QString &id)
+{
+    std::lock_guard<std::mutex> lock(this->channelMutex);
+
+    for (std::weak_ptr<Channel> &weak : this->channels)
+    {
+        ChannelPtr chan = weak.lock();
+        if (!chan)
+        {
+            continue;
+        }
+
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
+            channel->seventvUserId() == id)
+        {
+            return;
+        }
+    }
+
+    if (this->eventApi)
+    {
+        this->eventApi->unsubscribeUser(id);
+    }
 }
 }  // namespace chatterino

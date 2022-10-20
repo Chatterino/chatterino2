@@ -295,6 +295,32 @@ MessageBuilder::MessageBuilder(SevenTvEventApiUpdateEmoteMessageTag,
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);
 }
 
+MessageBuilder::MessageBuilder(SevenTvEventApiUpdateEmoteSetMessageTag,
+                               const QString &actor,
+                               const QString &emoteSetName)
+    : MessageBuilder()
+{
+    auto text = QString("switched the active 7TV Emote Set to \"%1\".")
+                    .arg(emoteSetName);
+
+    this->emplace<TimestampElement>();
+    this->emplace<TextElement>(actor, MessageElementFlag::Username,
+                               MessageColor::System)
+        ->setLink({Link::UserInfo, actor});
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
+                               MessageColor::System);
+
+    auto finalText = QString("%1 %2").arg(actor, text);
+
+    this->message().loginName = actor;
+    this->message().messageText = finalText;
+    this->message().searchText = finalText;
+
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::SevenTvEventApiUpdateEmoteMessage);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+}
+
 MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
                                const QTime &time)
     : MessageBuilder()

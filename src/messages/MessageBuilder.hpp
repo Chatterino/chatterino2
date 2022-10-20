@@ -26,11 +26,14 @@ struct SevenTvEventApiRemoveEmoteMessageTag {
 };
 struct SevenTvEventApiAddEmoteMessageTag {
 };
+struct SevenTvEventApiUpdateEmoteSetMessageTag {
+};
 const SystemMessageTag systemMessage{};
 const TimeoutMessageTag timeoutMessage{};
 const SevenTvEventApiUpdateEmoteMessageTag seventvUpdateEmoteMessage{};
 const SevenTvEventApiRemoveEmoteMessageTag seventvRemoveEmoteMessage{};
 const SevenTvEventApiAddEmoteMessageTag seventvAddEmoteMessage{};
+const SevenTvEventApiUpdateEmoteSetMessageTag seventvUpdateEmoteSetMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
 MessagePtr makeSystemMessage(const QString &text, const QTime &time);
@@ -66,6 +69,8 @@ public:
                    std::vector<QString> emoteNames);
     MessageBuilder(SevenTvEventApiUpdateEmoteMessageTag, const QString &actor,
                    const QString &emoteName, const QString &oldEmoteName);
+    MessageBuilder(SevenTvEventApiUpdateEmoteSetMessageTag,
+                   const QString &actor, const QString &emoteSetName);
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);
     MessageBuilder(const AutomodUserAction &action);

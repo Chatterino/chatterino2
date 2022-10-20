@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/optional.hpp>
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 
@@ -15,6 +16,8 @@ struct Emote {
     Tooltip tooltip;
     Url homePage;
     bool zeroWidth;
+    EmoteAuthor author;
+    boost::optional<EmoteName> baseName;
 
     // FOURTF: no solution yet, to be refactored later
     const QString &getCopyString() const

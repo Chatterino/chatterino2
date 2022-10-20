@@ -49,14 +49,14 @@ enum class MessageElementFlag : int64_t {
     FfzEmoteText = (1LL << 10),
     FfzEmote = FfzEmoteImage | FfzEmoteText,
 
-    SeventvEmoteImage = (1LL << 41),
-    SeventvEmoteText = (1LL << 42),
-    SeventvEmote = SeventvEmoteImage | SeventvEmoteText,
+    SevenTVEmoteImage = (1LL << 34),
+    SevenTVEmoteText = (1LL << 35),
+    SevenTVEmote = SevenTVEmoteImage | SevenTVEmoteText,
 
     EmoteImages =
-        TwitchEmoteImage | BttvEmoteImage | FfzEmoteImage | SeventvEmoteImage,
+        TwitchEmoteImage | BttvEmoteImage | FfzEmoteImage | SevenTVEmoteImage,
     EmoteText =
-        TwitchEmoteText | BttvEmoteText | FfzEmoteText | SeventvEmoteText,
+        TwitchEmoteText | BttvEmoteText | FfzEmoteText | SevenTVEmoteText,
 
     BitsStatic = (1LL << 11),
     BitsAnimated = (1LL << 12),
@@ -97,21 +97,23 @@ enum class MessageElementFlag : int64_t {
     // - Chatterino gnome badge
     BadgeChatterino = (1LL << 18),
 
-    // Slot 7: Seventv
-    // - Seventv Admin
-    // - Seventv Dungeon Mistress
-    // - Seventv Moderator
-    // - Seventv Subscriber
-    BadgeSeventv = (1LL << 40),
+    // Slot 7: 7TV
+    // - 7TV Admin
+    // - 7TV Dungeon Mistress
+    // - 7TV Moderator
+    // - 7TV Subscriber
+    // - 7TV Translator
+    // - 7TV Contributor
+    BadgeSevenTV = (1LL << 36),
 
-    // Slot 8: FrankerFaceZ
+    // Slot 7: FrankerFaceZ
     // - FFZ developer badge
     // - FFZ bot badge
     // - FFZ donator badge
     BadgeFfz = (1LL << 19),
 
     Badges = BadgeGlobalAuthority | BadgePredictions | BadgeChannelAuthority |
-             BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeSeventv |
+             BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeSevenTV |
              BadgeFfz,
 
     ChannelName = (1LL << 20),
@@ -139,7 +141,7 @@ enum class MessageElementFlag : int64_t {
     OriginalLink = (1LL << 30),
 
     // ZeroWidthEmotes are emotes that are supposed to overlay over any pre-existing emotes
-    // e.g. BTTV's SoSnowy during christmas season or zerowidth 7TV emotes
+    // e.g. BTTV's SoSnowy during christmas season or 7TV's RainTime
     ZeroWidthEmote = (1LL << 31),
 
     // for elements of the message reply
@@ -148,8 +150,11 @@ enum class MessageElementFlag : int64_t {
     // for the reply button element
     ReplyButton = (1LL << 33),
 
+    // (1LL << 34) through (1LL << 36) are occupied by
+    // SevenTVEmoteImage, SevenTVEmoteText, and BadgeSevenTV,
+
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
-              BttvEmoteImage | SeventvEmoteImage | TwitchEmoteImage |
+              BttvEmoteImage | SevenTVEmoteImage | TwitchEmoteImage |
               BitsAmount | Text | AlwaysShow,
 };
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;

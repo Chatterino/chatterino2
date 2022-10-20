@@ -134,6 +134,14 @@ Settings::Settings(const QString &settingsDirectory)
         },
         false);
 #endif
+
+    // migration for `/emotes/showUnlistedEmotes` -> `/emotes/showUnlistedSevenTVEmotes`
+    if (this->showUnlistedEmotesDontUse && !this->showUnlistedSevenTVEmotes)
+    {
+        this->showUnlistedSevenTVEmotes.setValue(true);
+        // reset to default, so it doesn't appear in the config
+        this->showUnlistedEmotesDontUse.remove();
+    }
 }
 
 Settings &Settings::instance()

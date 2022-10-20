@@ -43,6 +43,13 @@ public:
     void reloadSevenTVGlobalEmotes();
     void reloadAllSevenTVChannelEmotes();
 
+    void forEachSeventvEmoteSet(const QString &emoteSetId,
+                                std::function<void(TwitchChannel &)> func);
+    void forEachSeventvUser(const QString &userId,
+                            std::function<void(TwitchChannel &)> func);
+    void dropSeventvEmoteSet(const QString &id);
+    void dropSeventvUser(const QString &id);
+
     Atomic<QString> lastUserThatWhisperedMe;
 
     const ChannelPtr whispersChannel;
@@ -53,9 +60,9 @@ public:
     PubSub *pubsub;
     std::unique_ptr<SeventvEventApi> eventApi;
 
-    const SeventvEmotes &getSeventvEmotes() const;
     const BttvEmotes &getBttvEmotes() const;
     const FfzEmotes &getFfzEmotes() const;
+    const SeventvEmotes &getSeventvEmotes() const;
 
 protected:
     virtual void initializeConnection(IrcConnection *connection,
@@ -90,9 +97,9 @@ private:
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 
-    SeventvEmotes seventv;
     BttvEmotes bttv;
     FfzEmotes ffz;
+    SeventvEmotes seventv_;
     QTimer bulkLiveStatusTimer_;
 
     pajlada::Signals::SignalHolder signalHolder_;

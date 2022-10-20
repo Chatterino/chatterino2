@@ -3,10 +3,10 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
@@ -342,15 +342,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Remove spaces between emotes",
                        s.removeSpacesBetweenEmotes);
-    layout.addCheckbox("Show unlisted / unapproved emotes (7TV only)",
-                       s.showUnlistedEmotes);
-    s.showUnlistedEmotes.connect(
+    layout.addCheckbox("Show unlisted 7TV emotes", s.showUnlistedSevenTVEmotes);
+    s.showUnlistedSevenTVEmotes.connect(
         []() {
             getApp()->twitch->forEachChannelAndSpecialChannels(
                 [](const auto &c) {
                     if (c->isTwitchChannel())
                     {
-                        auto channel = dynamic_cast<TwitchChannel *>(c.get());
+                        auto *channel = dynamic_cast<TwitchChannel *>(c.get());
                         if (channel != nullptr)
                         {
                             channel->refreshSevenTVChannelEmotes(false);
@@ -650,9 +649,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Subscriber ", s.showBadgesSubscription);
     layout.addCheckbox("Vanity (prime, bits, subgifter)", s.showBadgesVanity);
     layout.addCheckbox("Chatterino", s.showBadgesChatterino);
-    layout.addCheckbox("7TV", s.showBadgesSeventv);
     layout.addCheckbox("FrankerFaceZ (Bot, FFZ Supporter, FFZ Developer)",
                        s.showBadgesFfz);
+    layout.addCheckbox("7TV", s.showBadgesSevenTV);
     layout.addSeperator();
     layout.addCheckbox("Use custom FrankerFaceZ moderator badges",
                        s.useCustomFfzModeratorBadges);

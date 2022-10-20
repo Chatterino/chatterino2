@@ -30,11 +30,13 @@ Q_LOGGING_CATEGORY(chatterinoNotification, "chatterino.notification",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoNuulsuploader, "chatterino.nuulsuploader",
                    logThreshold);
-Q_LOGGING_CATEGORY(chatterinoSeventv, "chatterino.seventv", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoPubSub, "chatterino.pubsub", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoRecentMessages, "chatterino.recentmessages",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoSettings, "chatterino.settings", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoSeventv, "chatterino.seventv", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoSeventvEventApi, "chatterino.seventv-event-api",
+                   logThreshold);
 Q_LOGGING_CATEGORY(chatterinoStreamerMode, "chatterino.streamermode",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoStreamlink, "chatterino.streamlink", logThreshold);
@@ -44,7 +46,4 @@ Q_LOGGING_CATEGORY(chatterinoUpdate, "chatterino.update", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoWebsocket, "chatterino.websocket", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoWidget, "chatterino.widget", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoWindowmanager, "chatterino.windowmanager",
-                   logThreshold);
-
-Q_LOGGING_CATEGORY(chatterinoSeventvEventApi, "chatterino.seventv-event-api",
                    logThreshold);

@@ -1,11 +1,14 @@
 #include "providers/seventv/SeventvEventApiManager.hpp"
 
 #include "common/QLogging.hpp"
-#include "providers/seventv/SeventvEventApiMessages.hpp"
+#include "providers/seventv/eventapimessages/SeventvEventApiDispatch.hpp"
+#include "providers/seventv/eventapimessages/SeventvEventApiMessage.hpp"
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 
+#include <QJsonArray>
+#include <QJsonObject>
 #include <algorithm>
 #include <exception>
 #include <thread>
@@ -41,14 +44,14 @@ SeventvEventApi::SeventvEventApi(const QString &host)
 
 void SeventvEventApi::addClient()
 {
-    if (this->addingClient)
+    if (this->addingClient_)
     {
         return;
     }
 
     qCDebug(chatterinoSeventvEventApi) << "Adding an additional client";
 
-    this->addingClient = true;
+    this->addingClient_ = true;
 
     websocketpp::lib::error_code ec;
     auto con =
@@ -66,7 +69,7 @@ void SeventvEventApi::addClient()
 
 void SeventvEventApi::start()
 {
-    this->work = std::make_shared<boost::asio::io_service::work>(
+    this->work_ = std::make_shared<boost::asio::io_service::work>(
         this->websocketClient.get_io_service());
     this->mainThread.reset(
         new std::thread(std::bind(&SeventvEventApi::runThread, this)));
@@ -76,59 +79,87 @@ void SeventvEventApi::stop()
 {
     this->stopping_ = true;
 
-    for (const auto &client : this->clients)
+    for (const auto &client : this->clients_)
     {
         client.second->close("Shutting down");
     }
 
-    this->work.reset();
+    this->work_.reset();
 
     if (this->mainThread->joinable())
     {
         this->mainThread->join();
     }
 
-    assert(this->clients.empty());
+    assert(this->clients_.empty());
 }
 
-void SeventvEventApi::joinChannel(const QString &channel)
+void SeventvEventApi::subscribeUser(const QString &userId,
+                                    const QString &emoteSetId)
 {
-    if (this->tryJoinChannel(channel))
+    if (this->subscribedUsers_.insert(userId).second)
+    {
+        this->subscribe({userId, SeventvEventApiSubscriptionType::UpdateUser});
+    }
+    if (this->subscribedEmoteSets_.insert(emoteSetId).second)
+    {
+        this->subscribe(
+            {emoteSetId, SeventvEventApiSubscriptionType::UpdateEmoteSet});
+    }
+}
+
+void SeventvEventApi::unsubscribeEmoteSet(const QString &id)
+{
+    if (this->subscribedEmoteSets_.erase(id) > 0)
+    {
+        this->unsubscribe(
+            {id, SeventvEventApiSubscriptionType::UpdateEmoteSet});
+    }
+}
+
+void SeventvEventApi::unsubscribeUser(const QString &id)
+{
+    if (this->subscribedUsers_.erase(id) > 0)
+    {
+        this->unsubscribe({id, SeventvEventApiSubscriptionType::UpdateUser});
+    }
+}
+
+void SeventvEventApi::subscribe(const SeventvEventApiSubscription &subscription)
+{
+    if (this->trySubscribe(subscription))
     {
         return;
     }
 
     this->addClient();
-    this->pendingChannels.emplace_back(channel);
-    DebugCount::increase("EventApi channel backlog");
+    this->pendingSubscriptions_.emplace_back(subscription);
+    DebugCount::increase("EventApi subscription backlog");
 }
 
-void SeventvEventApi::partChannel(const QString &channel)
+bool SeventvEventApi::trySubscribe(
+    const SeventvEventApiSubscription &subscription)
 {
-    auto client = std::find_if(
-        this->clients.begin(), this->clients.end(), [channel](auto client) {
-            return client.second->isJoinedChannel(channel);
-        });
-    if (client != this->clients.end())
+    for (auto &client : this->clients_)
     {
-        client->second->part(channel);
+        if (client.second->subscribe(subscription))
+        {
+            return true;
+        }
     }
+    return false;
 }
 
-bool SeventvEventApi::tryJoinChannel(const QString &channel)
+void SeventvEventApi::unsubscribe(
+    const SeventvEventApiSubscription &subscription)
 {
-    return std::any_of(this->clients.begin(), this->clients.end(),
-                       [channel](auto client) {
-                           return client.second->join(channel);
-                       });
-}
-
-bool SeventvEventApi::isJoinedChannel(const QString &channel)
-{
-    return std::any_of(this->clients.begin(), this->clients.end(),
-                       [channel](auto client) {
-                           return client.second->isJoinedChannel(channel);
-                       });
+    for (auto &client : this->clients_)
+    {
+        if (client.second->unsubscribe(subscription))
+        {
+            return;
+        }
+    }
 }
 
 void SeventvEventApi::onMessage(websocketpp::connection_hdl hdl,
@@ -137,7 +168,7 @@ void SeventvEventApi::onMessage(websocketpp::connection_hdl hdl,
     const auto &payload =
         QString::fromStdString(websocketMessage->get_payload());
 
-    auto pMessage = parseEventApiBaseMessage(payload);
+    auto pMessage = parseSeventvEventApiBaseMessage(payload);
 
     if (!pMessage)
     {
@@ -146,41 +177,46 @@ void SeventvEventApi::onMessage(websocketpp::connection_hdl hdl,
         return;
     }
     auto message = *pMessage;
-    switch (message.action)
+    switch (message.op)
     {
-        case EventApiMessage::Action::Ping: {
-            auto clientIt = this->clients.find(hdl);
+        case SeventvEventApiOpcode::Hello: {
+            auto clientIt = this->clients_.find(hdl);
 
             // If this assert goes off, there's something wrong with the connection
             // creation/preserving code KKona
-            assert(clientIt != this->clients.end());
+            assert(clientIt != this->clients_.end());
 
             auto &client = *clientIt;
 
-            client.second->handlePing();
+            client.second->setHeartbeatInterval(
+                message.data["heartbeat_interval"].toInt());
         }
         break;
-        case EventApiMessage::Action::Update: {
-            auto emoteUpdate = message.toInner<EventApiEmoteUpdate>();
-            if (!emoteUpdate)
+        case SeventvEventApiOpcode::Heartbeat: {
+            auto clientIt = this->clients_.find(hdl);
+
+            // If this assert goes off, there's something wrong with the connection
+            // creation/preserving code KKona
+            assert(clientIt != this->clients_.end());
+
+            auto &client = *clientIt;
+
+            client.second->handleHeartbeat();
+        }
+        break;
+        case SeventvEventApiOpcode::Dispatch: {
+            auto dispatch = message.toInner<SeventvEventApiDispatch>();
+            if (!dispatch)
             {
                 qCDebug(chatterinoSeventvEventApi)
-                    << "Malformed update" << payload;
+                    << "Malformed dispatch" << payload;
                 return;
             }
-            this->handleUpdateAction(*emoteUpdate);
+            this->handleDispatch(*dispatch);
         }
         break;
-        case EventApiMessage::Action::Success:
-            break;  // we don't get any information on the channel
-        case EventApiMessage::Action::Error: {
-            qCDebug(chatterinoSeventvEventApi)
-                << "Got an error:" << message.json.value("error").toString();
-        }
-        break;
-        case EventApiMessage::Action::INVALID: {
-            qCDebug(chatterinoSeventvEventApi)
-                << "Unknown message action:" << message.actionString;
+        default: {
+            qCDebug(chatterinoSeventvEventApi) << "Unhandled op: " << payload;
         }
         break;
     }
@@ -188,10 +224,10 @@ void SeventvEventApi::onMessage(websocketpp::connection_hdl hdl,
 
 void SeventvEventApi::onConnectionOpen(eventapi::WebsocketHandle hdl)
 {
-    DebugCount::increase("PubSub connections");
-    this->addingClient = false;
+    DebugCount::increase("EventApi connections");
+    this->addingClient_ = false;
 
-    this->connectBackoff.reset();
+    this->connectBackoff_.reset();
 
     auto client =
         std::make_shared<SeventvEventApiClient>(this->websocketClient, hdl);
@@ -200,30 +236,32 @@ void SeventvEventApi::onConnectionOpen(eventapi::WebsocketHandle hdl)
     // shared_from_this
     client->start();
 
-    this->clients.emplace(hdl, client);
+    this->clients_.emplace(hdl, client);
 
-    auto pendingChannelsToTake = (std::min)(this->pendingChannels.size(),
-                                            SeventvEventApiClient::MAX_LISTENS);
+    auto pendingSubsToTake = (std::min)(this->pendingSubscriptions_.size(),
+                                        SeventvEventApiClient::MAX_LISTENS);
 
-    qCDebug(chatterinoSeventvEventApi) << "EventApi connection opened, joining"
-                                       << pendingChannelsToTake << "channels!";
+    qCDebug(chatterinoSeventvEventApi)
+        << "EventApi connection opened, subscribing to" << pendingSubsToTake
+        << "subscriptions!";
 
-    while (pendingChannelsToTake > 0 && !this->pendingChannels.empty())
+    while (pendingSubsToTake > 0 && !this->pendingSubscriptions_.empty())
     {
-        const auto last = std::move(this->pendingChannels.back());
-        this->pendingChannels.pop_back();
-        if (!client->join(last))
+        const auto last = std::move(this->pendingSubscriptions_.back());
+        this->pendingSubscriptions_.pop_back();
+        if (!client->subscribe(last))
         {
             qCDebug(chatterinoSeventvEventApi)
-                << "Failed to join " << last << " on new client.";
+                << "Failed to subscribe to" << last.condition << "-"
+                << (int)last.type << "on new client.";
             // TODO: should we try to add a new client here?
             return;
         }
-        DebugCount::decrease("EventApi channel backlog");
-        pendingChannelsToTake--;
+        DebugCount::decrease("EventApi subscription backlog");
+        pendingSubsToTake--;
     }
 
-    if (!this->pendingChannels.empty())
+    if (!this->pendingSubscriptions_.empty())
     {
         this->addClient();
     }
@@ -244,11 +282,11 @@ void SeventvEventApi::onConnectionFail(eventapi::WebsocketHandle hdl)
             << "EventApi connection attempt failed but we can't get the "
                "connection from a handle.";
     }
-    this->addingClient = false;
-    if (!this->pendingChannels.empty())
+    this->addingClient_ = false;
+    if (!this->pendingSubscriptions_.empty())
     {
         runAfter(this->websocketClient.get_io_service(),
-                 this->connectBackoff.next(), [this](auto timer) {
+                 this->connectBackoff_.next(), [this](auto timer) {
                      this->addClient();
                  });
     }
@@ -259,24 +297,24 @@ void SeventvEventApi::onConnectionClose(eventapi::WebsocketHandle hdl)
     qCDebug(chatterinoSeventvEventApi) << "Connection closed";
 
     DebugCount::decrease("EventApi connections");
-    auto clientIt = this->clients.find(hdl);
+    auto clientIt = this->clients_.find(hdl);
 
     // If this assert goes off, there's something wrong with the connection
     // creation/preserving code KKona
-    assert(clientIt != this->clients.end());
+    assert(clientIt != this->clients_.end());
 
     auto client = clientIt->second;
 
-    this->clients.erase(clientIt);
+    this->clients_.erase(clientIt);
 
     client->stop();
 
     if (!this->stopping_)
     {
-        auto clientListeners = client->getListeners();
-        for (const auto &listener : clientListeners)
+        auto subs = client->getSubscriptions();
+        for (const auto &sub : subs)
         {
-            this->joinChannel(listener.channel);
+            this->subscribe(sub);
         }
     }
 }
@@ -302,25 +340,74 @@ SeventvEventApi::WebsocketContextPtr SeventvEventApi::onTLSInit(
     return ctx;
 }
 
-void SeventvEventApi::handleUpdateAction(const EventApiEmoteUpdate &update)
+void SeventvEventApi::handleDispatch(const SeventvEventApiDispatch &dispatch)
 {
-    switch (update.action)
+    switch (dispatch.type)
     {
-        case EventApiEmoteUpdate::Action::Add: {
-            this->signals_.emoteAdded.invoke(update);
+        case SeventvEventApiSubscriptionType::UpdateEmoteSet: {
+            for (const auto pushed_ : dispatch.body["pushed"].toArray())
+            {
+                auto pushed = pushed_.toObject();
+                if (pushed["key"].toString() != "emotes")
+                {
+                    continue;
+                }
+                SeventvEventApiEmoteAddDispatch added(
+                    dispatch, pushed["value"].toObject());
+                this->signals_.emoteAdded.invoke(added);
+            }
+            for (const auto updated_ : dispatch.body["updated"].toArray())
+            {
+                auto updated = updated_.toObject();
+                if (updated["key"].toString() != "emotes")
+                {
+                    continue;
+                }
+                SeventvEventApiEmoteUpdateDispatch update(dispatch, updated);
+                if (update.emoteName != update.oldEmoteName)
+                {
+                    this->signals_.emoteUpdated.invoke(update);
+                }
+            }
+            for (const auto pulled_ : dispatch.body["pulled"].toArray())
+            {
+                auto pulled = pulled_.toObject();
+                if (pulled["key"].toString() != "emotes")
+                {
+                    continue;
+                }
+                SeventvEventApiEmoteRemoveDispatch removed(
+                    dispatch, pulled["old_value"].toObject());
+                this->signals_.emoteRemoved.invoke(removed);
+            }
         }
         break;
-        case EventApiEmoteUpdate::Action::Update: {
-            this->signals_.emoteUpdated.invoke(update);
+        case SeventvEventApiSubscriptionType::UpdateUser: {
+            for (const auto updated_ : dispatch.body["updated"].toArray())
+            {
+                auto updated = updated_.toObject();
+                if (updated["key"].toString() != "connections")
+                {
+                    continue;
+                }
+                for (const auto value_ : updated["value"].toArray())
+                {
+                    auto value = value_.toObject();
+                    if (value["key"].toString() != "emote_set")
+                    {
+                        continue;
+                    }
+                    SeventvEventApiUserConnectionUpdateDispatch update(dispatch,
+                                                                       value);
+                    this->signals_.userUpdated.invoke(update);
+                }
+            }
         }
         break;
-        case EventApiEmoteUpdate::Action::Remove: {
-            this->signals_.emoteRemoved.invoke(update);
-        }
-        break;
-        case EventApiEmoteUpdate::Action::INVALID: {
+        default: {
             qCDebug(chatterinoSeventvEventApi)
-                << "Got invalid emote update action: " << update.actionString;
+                << "Unknown subscription type:" << (int)dispatch.type
+                << "body:" << dispatch.body;
         }
         break;
     }

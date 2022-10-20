@@ -74,9 +74,9 @@ Application::Application(Settings &_settings, Paths &_paths)
     , highlights(&this->emplace<HighlightController>())
     , twitch(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
+    , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
     , seventvPaints(&this->emplace<SeventvPaints>())
-    , ffzBadges(&this->emplace<FfzBadges>())
     , logging(&this->emplace<Logging>())
 {
     this->instance = this;
@@ -568,34 +568,37 @@ void Application::initPubSub()
 void Application::initEventApi()
 {
     this->twitch->eventApi->signals_.emoteAdded.connect([&](const auto &data) {
-        auto chan = this->twitch->getChannelOrEmpty(data.channel);
-        postToThread([chan, data] {
-            if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
-            {
-                channel->addSeventvEmote(data);
-            }
+        postToThread([this, data] {
+            this->twitch->forEachSeventvEmoteSet(data.emoteSetId,
+                                                 [data](TwitchChannel &chan) {
+                                                     chan.addSeventvEmote(data);
+                                                 });
         });
     });
     this->twitch->eventApi->signals_.emoteUpdated.connect(
         [&](const auto &data) {
-            auto chan = this->twitch->getChannelOrEmpty(data.channel);
-            postToThread([chan, data] {
-                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
-                {
-                    channel->updateSeventvEmote(data);
-                }
+            postToThread([this, data] {
+                this->twitch->forEachSeventvEmoteSet(
+                    data.emoteSetId, [data](TwitchChannel &chan) {
+                        chan.updateSeventvEmote(data);
+                    });
             });
         });
     this->twitch->eventApi->signals_.emoteRemoved.connect(
         [&](const auto &data) {
-            auto chan = this->twitch->getChannelOrEmpty(data.channel);
-            postToThread([chan, data] {
-                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
-                {
-                    channel->removeSeventvEmote(data);
-                }
+            postToThread([this, data] {
+                this->twitch->forEachSeventvEmoteSet(
+                    data.emoteSetId, [data](TwitchChannel &chan) {
+                        chan.removeSeventvEmote(data);
+                    });
             });
         });
+    this->twitch->eventApi->signals_.userUpdated.connect([&](const auto &data) {
+        this->twitch->forEachSeventvUser(data.userId,
+                                         [data](TwitchChannel &chan) {
+                                             chan.updateSeventvUser(data);
+                                         });
+    });
     this->twitch->eventApi->start();
 }
 
