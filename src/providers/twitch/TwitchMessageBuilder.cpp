@@ -204,6 +204,11 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::ElevatedMessage);
     }
 
+    if (this->tags.contains("bits"))
+    {
+        this->message().flags.set(MessageFlag::CheerMessage);
+    }
+
     // reply threads
     if (this->thread_)
     {

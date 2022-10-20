@@ -78,7 +78,7 @@ jobs:
         
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.11.0
+        uses: ilammy/msvc-dev-cmd@v1.12.0
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')

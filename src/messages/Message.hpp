@@ -44,6 +44,7 @@ enum class MessageFlag : int64_t {
     ReplyMessage = (1LL << 24),
     ElevatedMessage = (1LL << 25),
     ParticipatedThread = (1LL << 26),
+    CheerMessage = (1LL << 27),
 
     // SevenTV Flags
     // For some reason C++ compiler is unable to infer that these are all 64bit values so when you do 1 << 60 it thinks the 1 and the 60 are 32bit values and it overflows.
