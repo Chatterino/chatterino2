@@ -990,6 +990,7 @@ void SplitInput::setReply(std::shared_ptr<MessageThread> reply,
             }
             this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
             this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+            this->ui_.textEdit->resetCompletion();
         }
         this->ui_.replyLabel->setText("Replying to @" +
                                       this->replyThread_->root()->displayName);
