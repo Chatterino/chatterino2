@@ -413,6 +413,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
     layout.addCheckbox("Suppress Live Notifications",
                        s.streamerModeSuppressLiveNotifications);
+    layout.addCheckbox("Suppress Inline Whispers",
+                       s.streamerModeSuppressInlineWhispers);
 
     layout.addTitle("Link Previews");
     layout.addDescription(
