@@ -38,6 +38,10 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
         {
             this->flags_.set(MessageFlag::ElevatedMessage);
         }
+        else if (flag == "cheer-msg")
+        {
+            this->flags_.set(MessageFlag::CheerMessage);
+        }
     }
 }
 
