@@ -803,7 +803,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     if (getSettings()->inlineWhispers &&
         !(getSettings()->streamerModeSuppressInlineWhispers &&
-         isInStreamerMode()))
+          isInStreamerMode()))
     {
         getApp()->twitch->forEachChannel(
             [&_message, overrideFlags](ChannelPtr channel) {
