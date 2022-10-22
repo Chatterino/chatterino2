@@ -468,11 +468,10 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
         };
 
         static const auto ellipsis = QStringLiteral("...");
-        auto addEllipsis = [&]() {
-            int ellipsisSize = metrics.horizontalAdvance(ellipsis);
-            container.addElementNoLineBreak(
-                getTextLayoutElement(ellipsis, ellipsisSize, false));
-        };
+
+        // String to continuously append words onto until we place it in the container
+        // once we encounter an emote or reach the end of the message text. */
+        QString currentText;
 
         for (Word &word : this->words_)
         {
@@ -483,38 +482,15 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
             }
 
             auto &parsedWord = parsedWords[0];
-            if (parsedWord.type() == typeid(EmotePtr))
+            if (parsedWord.type() == typeid(QString))
             {
-                auto emote = boost::get<EmotePtr>(parsedWord);
-                auto image =
-                    emote->images.getImageOrLoaded(container.getScale());
-                if (!image->isEmpty())
-                {
-                    auto emoteScale = getSettings()->emoteScale.getValue();
-
-                    auto size = QSize(image->width(), image->height()) *
-                                (emoteScale * container.getScale());
-
-                    if (!container.fitsInLine(size.width()))
-                    {
-                        addEllipsis();
-                        break;
-                    }
-
-                    container.addElementNoLineBreak(
-                        (new ImageLayoutElement(*this, image, size))
-                            ->setLink(this->getLink()));
-                }
-            }
-            else if (parsedWord.type() == typeid(QString))
-            {
-                word.width = metrics.horizontalAdvance(word.text);
+                int nextWidth =
+                    metrics.horizontalAdvance(currentText + word.text);
 
                 // see if the text fits in the current line
-                if (container.fitsInLine(word.width))
+                if (container.fitsInLine(nextWidth))
                 {
-                    container.addElementNoLineBreak(getTextLayoutElement(
-                        word.text, word.width, this->hasTrailingSpace()));
+                    currentText += (word.text + " ");
                 }
                 else
                 {
@@ -526,12 +502,12 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                         // Try removing characters one by one until the word fits.
                         QString truncatedWord =
                             word.text.chopped(cut) + ellipsis;
-                        int newSize = metrics.horizontalAdvance(truncatedWord);
+                        int newSize = metrics.horizontalAdvance(currentText +
+                                                                truncatedWord);
                         if (container.fitsInLine(newSize))
                         {
-                            container.addElementNoLineBreak(
-                                getTextLayoutElement(truncatedWord, newSize,
-                                                     false));
+                            currentText += (truncatedWord);
+
                             cutSuccess = true;
                             break;
                         }
@@ -541,12 +517,52 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                     {
                         // We weren't able to show any part of the current word, so
                         // just append the ellipsis.
-                        addEllipsis();
+                        currentText += ellipsis;
                     }
 
                     break;
                 }
             }
+            else if (parsedWord.type() == typeid(EmotePtr))
+            {
+                auto emote = boost::get<EmotePtr>(parsedWord);
+                auto image =
+                    emote->images.getImageOrLoaded(container.getScale());
+                if (!image->isEmpty())
+                {
+                    auto emoteScale = getSettings()->emoteScale.getValue();
+
+                    int currentWidth = metrics.horizontalAdvance(currentText);
+                    auto emoteSize = QSize(image->width(), image->height()) *
+                                     (emoteScale * container.getScale());
+
+                    if (!container.fitsInLine(currentWidth + emoteSize.width()))
+                    {
+                        currentText += ellipsis;
+                        break;
+                    }
+
+                    // Add currently pending text to container, then add the emote after.
+                    container.addElementNoLineBreak(
+                        getTextLayoutElement(currentText, currentWidth, false));
+                    currentText.clear();
+
+                    container.addElementNoLineBreak(
+                        (new ImageLayoutElement(*this, image, emoteSize))
+                            ->setLink(this->getLink()));
+                }
+            }
+        }
+
+        // Add the last of the pending message text to the container.
+        if (!currentText.isEmpty())
+        {
+            // Remove trailing space.
+            currentText = currentText.trimmed();
+
+            int width = metrics.horizontalAdvance(currentText);
+            container.addElementNoLineBreak(
+                getTextLayoutElement(currentText, width, false));
         }
 
         container.breakLine();
