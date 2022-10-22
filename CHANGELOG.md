@@ -30,6 +30,7 @@
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
 - Minor: Added Quick Switcher item to open a channel in a new popup window. (#3828)
 - Minor: Added information about the user's operating system in the About page. (#3663)
+- Minor: Added option to hide inline whispers in streamer mode (#4076)
 - Minor: Adjusted large stream thumbnail to 16:9 (#3655)
 - Minor: Prevented user from entering incorrect characters in Live Notifications channels list. (#3715, #3730)
 - Minor: Sorted usernames in /vips message to be case-insensitive. (#3696)
