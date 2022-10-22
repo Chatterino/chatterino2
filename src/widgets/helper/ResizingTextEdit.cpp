@@ -246,6 +246,11 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
                      this, &ResizingTextEdit::insertCompletion);
 }
 
+void ResizingTextEdit::resetCompletion()
+{
+    this->completionInProgress_ = false;
+}
+
 void ResizingTextEdit::insertCompletion(const QString &completion)
 {
     if (this->completer_->widget() != this)

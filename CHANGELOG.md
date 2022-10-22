@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722, #3989, #4041, #4047, #4055)
+- Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722, #3989, #4041, #4047, #4055, #4067)
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
 - Major: Added support for emotes and badges from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062)
 - Minor: Added highlights for `Elevated Messages`. (#4016)
@@ -30,6 +30,7 @@
 - Minor: Added quotation marks in the permitted/blocked Automod messages for clarity. (#3654)
 - Minor: Added Quick Switcher item to open a channel in a new popup window. (#3828)
 - Minor: Added information about the user's operating system in the About page. (#3663)
+- Minor: Added option to hide inline whispers in streamer mode (#4076)
 - Minor: Adjusted large stream thumbnail to 16:9 (#3655)
 - Minor: Prevented user from entering incorrect characters in Live Notifications channels list. (#3715, #3730)
 - Minor: Sorted usernames in /vips message to be case-insensitive. (#3696)
@@ -96,6 +97,7 @@
 - Bugfix: Fixed trailing spaces from preventing Nicknames from working correctly. (#3946)
 - Bugfix: Fixed trailing spaces from preventing User Highlights from working correctly. (#4051)
 - Bugfix: Fixed channel-based popups from rewriting messages to file log (#4060)
+- Bugfix: Fixed invalid/dangling completion when cycling through previous messages or replying (#4072)
 - Dev: Removed official support for QMake. (#3839, #3883)
 - Dev: Rewrote LimitedQueue (#3798)
 - Dev: Overhauled highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801, #3835)
