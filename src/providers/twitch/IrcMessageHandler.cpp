@@ -15,6 +15,7 @@
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
+#include "util/StreamerMode.hpp"
 
 #include <IrcMessage>
 
@@ -800,7 +801,9 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     overrideFlags->set(MessageFlag::DoNotTriggerNotification);
     overrideFlags->set(MessageFlag::DoNotLog);
 
-    if (getSettings()->inlineWhispers)
+    if (getSettings()->inlineWhispers &&
+        !(getSettings()->streamerModeSuppressInlineWhispers &&
+          isInStreamerMode()))
     {
         getApp()->twitch->forEachChannel(
             [&_message, overrideFlags](ChannelPtr channel) {

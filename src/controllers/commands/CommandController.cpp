@@ -26,6 +26,7 @@
 #include "util/IncognitoBrowser.hpp"
 #include "util/Qt.hpp"
 #include "util/StreamLink.hpp"
+#include "util/StreamerMode.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/ReplyThreadPopup.hpp"
@@ -171,7 +172,9 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     auto overrideFlags = boost::optional<MessageFlags>(messagexD->flags);
     overrideFlags->set(MessageFlag::DoNotLog);
 
-    if (getSettings()->inlineWhispers)
+    if (getSettings()->inlineWhispers &&
+        !(getSettings()->streamerModeSuppressInlineWhispers &&
+          isInStreamerMode()))
     {
         app->twitch->forEachChannel(
             [&messagexD, overrideFlags](ChannelPtr _channel) {
