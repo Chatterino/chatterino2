@@ -8,17 +8,17 @@
 
 namespace chatterino {
 
-HelixChatterList::HelixChatterList() {
-    chatters = std::unordered_set<QString>();
+HelixUserList::HelixUserList() {
+    users = std::unordered_set<QString>();
 }
 
-void HelixChatterList::AddChattersFromResponse(const QJsonObject &response) {
+void HelixUserList::AddUsersFromResponse(const QJsonObject &response) {
     for (const auto jsonStream : response.value("data").toArray()) 
     {
-        auto chatter = jsonStream.toObject().value("user_login").toString();
-        chatters.insert(chatter);
+        auto user = jsonStream.toObject().value("user_login").toString();
+        users.insert(user);
     }
-    chatters = std::move(chatters);
+    users = std::move(users);
 }
 
 static IHelix *instance = nullptr;
@@ -2004,29 +2004,63 @@ void Helix::sendWhisper(
         .execute();
 }
 
-// Recursive function with a maximun page of 50
-void Helix::getChattersRecursive(
-    HelixChatterList *chatterList,
-    int page,
-    QString paginationCursor,
-    QString broadcasterID, QString moderatorID,
-    ResultCallback<HelixChatterList*> successCallback,
-    FailureCallback<HelixChattersError, QString> failureCallback
+QString formatHelixUserListErrorString(
+    HelixUserListError error,
+    QString message
 ) {
-    using Error = HelixChattersError;
+    using Error = HelixUserListError;
 
-    QUrlQuery urlQuery;
+    QString errorMessage = QString("Failed to get list of chatters - ");
 
-    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
-    urlQuery.addQueryItem("moderator_id", moderatorID);
+    switch (error)
+    {
+        case Error::Forwarded: {
+            errorMessage += message;
+        }
+        break;
+
+        case Error::UserMissingScope: {
+            errorMessage += "Missing required scope. "
+                            "Re-login with your "
+                            "account and try again.";
+        }
+        break;
+
+        case Error::UserNotAuthorized: {
+            errorMessage += "You don't have permission to "
+                            "perform that action.";
+        }
+        break;
+
+        case Error::Unknown: {
+            errorMessage += "An unknown error has occurred.";
+        }
+        break;
+    }
+    return errorMessage;
+}
+
+// Recursive function with a maximun page of 50
+void Helix::getApiListRecursive(
+    HelixUserList *list,
+    QString url, QUrlQuery urlQuery,
+    int page, QString paginationCursor,
+    ResultCallback<HelixUserList*> successCallback,
+    FailureCallback<HelixUserListError, QString> failureCallback
+) {
+    using Error = HelixUserListError;
+
     if (!paginationCursor.isEmpty()) {
+        if (urlQuery.hasQueryItem("after")) {
+            urlQuery.removeQueryItem("after");
+        }
         urlQuery.addQueryItem("after", paginationCursor);
     }
 
-    this->makeRequest("chat/chatters", urlQuery)
+    this->makeRequest(url, urlQuery)
         .type(NetworkRequestType::Get)
         .header("Content-Type", "application/json")
-        .onSuccess([this, successCallback, failureCallback, page, chatterList, paginationCursor, moderatorID, broadcasterID](auto result) -> Outcome {
+        .onSuccess([=](auto result) -> Outcome {
             if (result.status() != 200)
             {
                 qCWarning(chatterinoTwitch)
@@ -2037,17 +2071,17 @@ void Helix::getChattersRecursive(
             auto response = result.parseJson();
 
             if (page == 1) {
-                chatterList->total = response.value("total").toInt();
+                list->total = response.value("total").toInt();
             }
 
             QString newCursor = response.value("pagination").toObject().value("cursor").toString();
-            chatterList->AddChattersFromResponse(response);
+            list->AddUsersFromResponse(response);
 
             // Call function with next page until page 50 is reached or there are no more results
             if (page <= 50 && !newCursor.isEmpty()) {
-                getChattersRecursive(chatterList, page+1, newCursor, broadcasterID, moderatorID, successCallback, failureCallback);
+                getApiListRecursive(list, url, urlQuery, page+1, newCursor, successCallback, failureCallback);
             } else {
-                successCallback(chatterList);
+                successCallback(list);
             }
             return Success;
         })
@@ -2101,12 +2135,33 @@ void Helix::getChattersRecursive(
 
 void Helix::getChatters(
     QString broadcasterID, QString moderatorID,
-    ResultCallback<HelixChatterList*> successCallback,
-    FailureCallback<HelixChattersError, QString> failureCallback)  
+    ResultCallback<HelixUserList*> successCallback,
+    FailureCallback<HelixUserListError, QString> failureCallback)  
 {
-    auto chatterList = new HelixChatterList();
+    auto chatterList = new HelixUserList();
     QString paginationCursor("");
-    this->getChattersRecursive(chatterList, 1, paginationCursor, broadcasterID, moderatorID, successCallback, failureCallback);
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    this->getApiListRecursive(chatterList, "chat/chatters", urlQuery, 1, paginationCursor, successCallback, failureCallback);
+}
+
+void Helix::getChannelMods(
+    QString broadcasterID,
+    ResultCallback<HelixUserList*> successCallback,
+    FailureCallback<HelixUserListError, QString> failureCallback)  
+{
+    auto chatterList = new HelixUserList();
+    QString paginationCursor("");
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+
+    this->getApiListRecursive(chatterList, "moderation/moderators", urlQuery, 1, paginationCursor, successCallback, failureCallback);
 }
 
 // List the VIPs of a channel

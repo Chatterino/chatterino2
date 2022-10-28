@@ -990,7 +990,7 @@ void Split::showViewerList()
         chattersList->addItem(formattedLabel);
     };
 
-    auto addUserList = [addLabel, formatListItemText, chattersList, twitchChannel](std::vector<QString> users, QString label) {
+    auto addUserList = [=](std::vector<QString> users, QString label) {
         if (users.empty())
             return;
 
@@ -1054,25 +1054,43 @@ void Split::showViewerList()
     chattersList->addItem(channel->getName());
     chattersList->addItem(new QListWidgetItem());
 
-    // TODO: add list of mods here
 
     // Only broadcaster can get vips, mods can get viewers
     if (channel->isBroadcaster()) {
-        // Add vips
-        getHelix()->getChannelVIPs(
-            twitchChannel->roomId(),
-            [=](auto vips) {
-                std::vector<QString> vipVector;
-                for (auto vip : vips)
-                {
-                    vipVector.emplace_back(vip.userName);
-                }
-                addUserList(vipVector, QString("VIPs"));
+        auto helixApi = getHelix();
 
-                loadChatters();
+        // Add moderators
+        helixApi->getChannelMods(
+            twitchChannel->roomId(),
+            [=](HelixUserList *modList) {
+                std::vector<QString> modVector;
+                for (auto mod : modList->users)
+                {
+                    modVector.emplace_back(mod);
+                }
+                addUserList(modVector, QString("Moderators"));
+                
+                // Add vips
+                helixApi->getChannelVIPs(
+                    twitchChannel->roomId(),
+                    [=](auto vips) {
+                        std::vector<QString> vipVector;
+                        for (auto vip : vips)
+                        {
+                            vipVector.emplace_back(vip.userName);
+                        }
+                        addUserList(vipVector, QString("VIPs"));
+
+                        loadChatters();
+                    },
+                    [chattersList, formatListItemText](auto error, auto errorMessage) { 
+                        chattersList->addItem(formatListItemText(errorMessage)); 
+                    }
+                );
             },
-            [chattersList, formatListItemText](auto error, auto errorMessage) { 
-                chattersList->addItem(formatListItemText(errorMessage)); 
+            [this, chattersList, formatListItemText](auto error, auto message) {
+                auto errorMessage = Helix::formatHelixUserListErrorString(error, message);
+                chattersList->addItem(formatListItemText(errorMessage));
             }
         );
     } else if (channel->isMod()){

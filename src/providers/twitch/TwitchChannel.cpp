@@ -839,42 +839,10 @@ void TwitchChannel::refreshChatters(
     ResultCallback<std::vector<QString>> successCallback,
     ResultCallback<QString> failureCallback
 ) {
-    auto formatChatterListError = [](HelixChattersError error, const QString &message) -> QString {
-        using Error = HelixChattersError;
-
-        QString errorMessage = QString("Failed to get list of chatters - ");
-
-        switch (error)
-        {
-            case Error::Forwarded: {
-                errorMessage += message;
-            }
-            break;
-
-            case Error::UserMissingScope: {
-                errorMessage += "Missing required scope. "
-                                "Re-login with your "
-                                "account and try again.";
-            }
-            break;
-
-            case Error::UserNotAuthorized: {
-                errorMessage += "You don't have permission to "
-                                "perform that action.";
-            }
-            break;
-
-            case Error::Unknown: {
-                errorMessage += "An unknown error has occurred.";
-            }
-            break;
-        }
-        return errorMessage;
-    };
-
+    
     // helix endpoint only works for mods
     if (!this->hasModRights()) 
-        return failureCallback(formatChatterListError(HelixChattersError::UserNotAuthorized, ""));
+        return failureCallback(Helix::formatHelixUserListErrorString(HelixUserListError::UserNotAuthorized, ""));
 
     // setting?
     const auto streamStatus = this->accessStreamStatus();
@@ -892,13 +860,13 @@ void TwitchChannel::refreshChatters(
     getHelix()->getChatters(
         this->roomId(),
         getApp()->accounts->twitch.getCurrent()->getUserId(),
-        [this, successCallback](HelixChatterList *chatterList) {
+        [this, successCallback](HelixUserList *chatterList) {
             this->chatterCount_ = chatterList->total;
-            this->updateOnlineChatters(chatterList->chatters);
+            this->updateOnlineChatters(chatterList->users);
             successCallback(this->accessChatters()->filterByPrefix(""));
         },
-        [this, formatChatterListError, failureCallback](auto error, auto message) {
-            auto errorMessage = formatChatterListError(error, message);
+        [this, failureCallback](auto error, auto message) {
+            auto errorMessage = Helix::formatHelixUserListErrorString(error, message);
             this->addMessage(makeSystemMessage(errorMessage));
             failureCallback(errorMessage);
         }
