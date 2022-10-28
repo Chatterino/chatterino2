@@ -1633,6 +1633,48 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
+    this->registerCommand("/mods", [](const QStringList &words, auto channel) {
+        if (words.size() != 1)
+        {
+            channel->addMessage(makeSystemMessage("Usage: /mod"));
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        getHelix()->getChannelMods(
+            twitchChannel->roomId(),
+            [channel](HelixUserList *modList) {
+                auto message = QString("The moderators of this channel are ");
+                auto listSize = modList->users.size();
+                int i = 0;
+                for (auto it = modList->users.begin(); it != modList->users.end();it++)
+                {
+                    auto mod = *it;
+                    message = message + mod;
+                    
+                    if (listSize > 2 && i < listSize - 2)
+                    {
+                        message = message +  QString(", ");
+                    } else if (listSize > 2 && i == listSize - 1)
+                    {
+                        message = message + QString(", and ");
+                    } else if (listSize == 2 && i == 1) {
+                        message = message + QString(" and ");
+                    }
+
+                    i++;
+                }
+
+                channel->addMessage(makeSystemMessage(message));
+            },
+            [channel](auto error, auto message) {
+                auto errorMessage = Helix::formatHelixUserListErrorString(error, message);
+                channel->addMessage(makeSystemMessage(errorMessage));
+            }
+        );
+        return "";
+    });
+
     this->registerCommand("/unmod", [](const QStringList &words, auto channel) {
         if (words.size() < 2)
         {
