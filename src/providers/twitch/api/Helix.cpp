@@ -2004,7 +2004,7 @@ void Helix::sendWhisper(
         .execute();
 }
 
-QString formatHelixUserListErrorString(
+QString Helix::formatHelixUserListErrorString(
     HelixUserListError error,
     QString message
 ) {
