@@ -1003,10 +1003,9 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
         getSettings()->helixTimegateWhisper.getValue() ==
             HelixTimegateOverride::Timegate)
     {
-        content =
-            content +
-            " Consider setting the \"Helix timegate /w "
-            "behaviour\" to \"Always use Helix\" in your Chatterino settings.";
+        content = content +
+                  " Consider setting \"Helix timegate /w behaviour\" "
+                  "to \"Always use Helix\" in your Chatterino settings.";
     }
     builtMessages.emplace_back(
         makeSystemMessage(content, calculateMessageTime(message).time()));
