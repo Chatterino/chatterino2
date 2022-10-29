@@ -14,11 +14,6 @@
 using namespace chatterino;
 using namespace std::chrono_literals;
 
-// Waiting for PR in twitch-pubsub-server-test
-// #define RUN_PUBSUB_TESTS
-
-#ifdef RUN_PUBSUB_TESTS
-
 struct DummySubscription {
     int type;
     QString condition;
@@ -150,5 +145,3 @@ TEST(BasicPubSub, SubscriptionCycle)
     ASSERT_EQ(manager->diag.connectionsFailed, 0);
     ASSERT_EQ(manager->messagesReceived, 2);
 }
-
-#endif
