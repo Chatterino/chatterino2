@@ -14,7 +14,8 @@
 using namespace chatterino;
 using namespace std::chrono_literals;
 
-#define RUN_PUBSUB_TESTS
+// Waiting for PR in twitch-pubsub-server-test
+// #define RUN_PUBSUB_TESTS
 
 #ifdef RUN_PUBSUB_TESTS
 
