@@ -133,6 +133,7 @@ private:
     {
         assert(!this->isStarted());
         this->started_.store(true, std::memory_order_release);
+        this->onConnectionEstablished();
     }
 
     void stop()
