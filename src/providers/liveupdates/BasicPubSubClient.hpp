@@ -13,18 +13,31 @@
 
 namespace chatterino {
 
+/**
+ * This class manages a single connection
+ * that has at most #maxSubscriptions subscriptions.
+ *
+ * You can safely overload the #subscription method
+ * and e.g. add additional heartbeat logic.
+ *
+ * You can use shared_from_this to get a shared_ptr of this client.
+ *
+ * @tparam Subscription see BasicPubSubManager
+ */
 template <typename Subscription>
 class BasicPubSubClient
     : public std::enable_shared_from_this<BasicPubSubClient<Subscription>>
 {
 public:
-    // The max amount of subscriptions on a single connection
-    static constexpr size_t MAX_SUBSCRIPTIONS = 100;
+    // The maximum amount of subscriptions this connections can handle
+    const size_t maxSubscriptions;
 
     BasicPubSubClient(liveupdates::WebsocketClient &websocketClient,
-                      liveupdates::WebsocketHandle handle)
+                      liveupdates::WebsocketHandle handle,
+                      size_t maxSubscriptions = 100)
         : websocketClient_(websocketClient)
         , handle_(std::move(handle))
+        , maxSubscriptions(maxSubscriptions)
     {
     }
 
@@ -70,9 +83,17 @@ public:
         }
     }
 
+    /**
+     * @return true if this client subscribed to this subscription
+     *         and the current subscriptions don't exceed the maximum
+     *         amount.
+     *         It won't subscribe twice to the same subscription.
+     *         Don't use this in place of subscription management
+     *         in the BasicPubSubManager.
+     */
     bool subscribe(const Subscription &subscription)
     {
-        if (this->subscriptions_.size() >= BasicPubSubClient::MAX_SUBSCRIPTIONS)
+        if (this->subscriptions_.size() >= this->maxSubscriptions)
         {
             return false;
         }
@@ -94,6 +115,10 @@ public:
         return true;
     }
 
+    /**
+     * @return true if this client previously subscribed
+     *         and now unsubscribed from this subscription.
+     */
     bool unsubscribe(const Subscription &subscription)
     {
         if (this->subscriptions_.erase(subscription) <= 0)

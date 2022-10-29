@@ -25,6 +25,34 @@
 
 namespace chatterino {
 
+/**
+ * This class is the basis for connecting and interacting with
+ * simple PubSub servers over the Websocket protocol.
+ * It acts as a pool for connections (see BasicPubSubClient).
+ *
+ * You can customize the clients, by creating your custom
+ * client in ::createClient.
+ *
+ * You **must** implement #onMessage. The function gets called for every
+ * received message on every connection.
+ * If you want to get the connection this message was received on,
+ * use #findClient.
+ *
+ * You must expose your own subscribe and unsubscribe methods
+ * (e.g. [un-]subscribeTopic).
+ * This manager does not keep track of the subscriptions.
+ *
+ * @tparam Subscription
+ * The subscription has the following requirements:
+ * It must have the methods QByteArray encodeSubscribe(),
+ * and QByteArray encodeUnsubscribe().
+ * It must have an overload for
+ * QDebug &operator<< (see tests/src/BasicPubSub.cpp),
+ * a specialization for std::hash,
+ * and and overload for operator== and operator!=.
+ *
+ * @see BasicPubSubClient
+ */
 template <typename Subscription>
 class BasicPubSubManager
 {
@@ -66,6 +94,7 @@ public:
     BasicPubSubManager &operator=(const BasicPubSubManager &) = delete;
     BasicPubSubManager &operator=(const BasicPubSubManager &&) = delete;
 
+    /** This is only used for testing. */
     struct {
         std::atomic<uint32_t> connectionsClosed{0};
         std::atomic<uint32_t> connectionsOpened{0};
@@ -115,6 +144,10 @@ protected:
         return std::make_shared<BasicPubSubClient<Subscription>>(client, hdl);
     }
 
+    /**
+     * @param hdl The handle of the client.
+     * @return The client managing this connection, empty shared_ptr otherwise.
+     */
     std::shared_ptr<BasicPubSubClient<Subscription>> findClient(
         websocketpp::connection_hdl hdl)
     {
@@ -168,9 +201,8 @@ private:
 
         this->clients_.emplace(hdl, client);
 
-        auto pendingSubsToTake =
-            (std::min)(this->pendingSubscriptions_.size(),
-                       BasicPubSubClient<Subscription>::MAX_SUBSCRIPTIONS);
+        auto pendingSubsToTake = (std::min)(this->pendingSubscriptions_.size(),
+                                            client->maxSubscriptions);
 
         qCDebug(chatterinoLiveupdates)
             << "LiveUpdate connection opened, subscribing to"
