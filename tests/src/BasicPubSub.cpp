@@ -72,7 +72,7 @@ public:
     {
     }
 
-    std::atomic<int32_t> messagesReceived;
+    std::atomic<int32_t> messagesReceived{0};
 
     std::optional<QString> popMessage()
     {
