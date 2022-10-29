@@ -1089,7 +1089,7 @@ void Split::showViewerList()
                 );
             },
             [this, chattersList, formatListItemText](auto error, auto message) {
-                auto errorMessage = Helix::formatHelixUserListErrorString(error, message);
+                auto errorMessage = Helix::formatHelixUserListErrorString(QString("moderators"), error, message);
                 chattersList->addItem(formatListItemText(errorMessage));
             }
         );

@@ -842,7 +842,7 @@ void TwitchChannel::refreshChatters(
     
     // helix endpoint only works for mods
     if (!this->hasModRights()) 
-        return failureCallback(Helix::formatHelixUserListErrorString(HelixUserListError::UserNotAuthorized, ""));
+        return failureCallback(Helix::formatHelixUserListErrorString(QString("chatters"), HelixUserListError::UserNotAuthorized, ""));
 
     // setting?
     const auto streamStatus = this->accessStreamStatus();
@@ -866,7 +866,7 @@ void TwitchChannel::refreshChatters(
             successCallback(this->accessChatters()->filterByPrefix(""));
         },
         [this, failureCallback](auto error, auto message) {
-            auto errorMessage = Helix::formatHelixUserListErrorString(error, message);
+            auto errorMessage = Helix::formatHelixUserListErrorString(QString("chatters"), error, message);
             this->addMessage(makeSystemMessage(errorMessage));
             failureCallback(errorMessage);
         }

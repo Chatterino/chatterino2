@@ -1668,7 +1668,11 @@ void CommandController::initialize(Settings &, Paths &paths)
                 channel->addMessage(makeSystemMessage(message));
             },
             [channel](auto error, auto message) {
-                auto errorMessage = Helix::formatHelixUserListErrorString(error, message);
+                if (error == HelixUserListError::UserNotAuthorized) {
+                    channel->addMessage(makeSystemMessage(QString("Error: User must be broadcaster to get list of moderators")));
+                    return;
+                }
+                auto errorMessage = Helix::formatHelixUserListErrorString(QString("moderators"), error, message);
                 channel->addMessage(makeSystemMessage(errorMessage));
             }
         );

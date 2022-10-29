@@ -2005,12 +2005,13 @@ void Helix::sendWhisper(
 }
 
 QString Helix::formatHelixUserListErrorString(
+    QString userType,
     HelixUserListError error,
     QString message
 ) {
     using Error = HelixUserListError;
 
-    QString errorMessage = QString("Failed to get list of chatters - ");
+    QString errorMessage = QString("Failed to get list of ") + userType + QString(": ");
 
     switch (error)
     {
@@ -2103,6 +2104,9 @@ void Helix::getApiListRecursive(
                     }
                     else if (message.compare(
                                  "The ID in moderator_id must match the user "
+                                 "ID found in the request's OAuth token.",
+                                 Qt::CaseInsensitive) == 0 || message.compare(
+                                 "The ID in broadcaster_id must match the user "
                                  "ID found in the request's OAuth token.",
                                  Qt::CaseInsensitive) == 0)
                     {

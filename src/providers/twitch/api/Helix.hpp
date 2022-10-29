@@ -1085,12 +1085,17 @@ public:
         ResultCallback<HelixUserList*> successCallback,
         FailureCallback<HelixUserListError, QString> failureCallback) final;
 
+    // Get moderator list
+    // https://dev.twitch.tv/docs/api/reference#get-moderators
     void getChannelMods(
         QString broadcasterID,
         ResultCallback<HelixUserList*> successCallback,
         FailureCallback<HelixUserListError, QString> failureCallback) final;
         
-    static QString formatHelixUserListErrorString(HelixUserListError error, QString message);
+    static QString formatHelixUserListErrorString(
+        QString userType, 
+        HelixUserListError error, 
+        QString message);
 
     // https://dev.twitch.tv/docs/api/reference#get-vips
     void getChannelVIPs(
