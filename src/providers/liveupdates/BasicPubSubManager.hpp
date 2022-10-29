@@ -33,7 +33,7 @@ namespace chatterino {
  * You can customize the clients, by creating your custom
  * client in ::createClient.
  *
- * You **must** implement #onMessage. The function gets called for every
+ * You **must** implement #onMessage. The method gets called for every
  * received message on every connection.
  * If you want to get the connection this message was received on,
  * use #findClient.
@@ -276,8 +276,7 @@ private:
 
         if (!this->stopping_)
         {
-            auto subs = client->getSubscriptions();
-            for (const auto &sub : subs)
+            for (const auto &sub : client->subscriptions_)
             {
                 this->subscribe(sub);
             }

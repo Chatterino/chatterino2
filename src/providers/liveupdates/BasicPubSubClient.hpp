@@ -17,7 +17,7 @@ namespace chatterino {
  * This class manages a single connection
  * that has at most #maxSubscriptions subscriptions.
  *
- * You can safely overload the #subscription method
+ * You can safely overload the #onConnectionEstablished method
  * and e.g. add additional heartbeat logic.
  *
  * You can use shared_from_this to get a shared_ptr of this client.
@@ -35,9 +35,9 @@ public:
     BasicPubSubClient(liveupdates::WebsocketClient &websocketClient,
                       liveupdates::WebsocketHandle handle,
                       size_t maxSubscriptions = 100)
-        : websocketClient_(websocketClient)
+        : maxSubscriptions(maxSubscriptions)
+        , websocketClient_(websocketClient)
         , handle_(std::move(handle))
-        , maxSubscriptions(maxSubscriptions)
     {
     }
 
@@ -48,39 +48,25 @@ public:
     BasicPubSubClient &operator=(const BasicPubSubClient &) = delete;
     BasicPubSubClient &operator=(const BasicPubSubClient &&) = delete;
 
-    virtual void start()
+protected:
+    virtual void onConnectionEstablished()
     {
-        assert(!this->isStarted());
-        this->started_.store(true, std::memory_order_release);
     }
 
-    void stop()
-    {
-        assert(this->isStarted());
-        this->started_.store(false, std::memory_order_release);
-    }
-
-    void close(const std::string &reason,
-               websocketpp::close::status::value code =
-                   websocketpp::close::status::normal)
+    bool send(const char *payload)
     {
         liveupdates::WebsocketErrorCode ec;
+        this->websocketClient_.send(this->handle_, payload,
+                                    websocketpp::frame::opcode::text, ec);
 
-        auto conn = this->websocketClient_.get_con_from_hdl(this->handle_, ec);
         if (ec)
         {
-            qCDebug(chatterinoLiveupdates)
-                << "Error getting connection:" << ec.message().c_str();
-            return;
+            qCDebug(chatterinoLiveupdates) << "Error sending message" << payload
+                                           << ":" << ec.message().c_str();
+            return false;
         }
 
-        conn->close(code, reason, ec);
-        if (ec)
-        {
-            qCDebug(chatterinoLiveupdates)
-                << "Error closing:" << ec.message().c_str();
-            return;
-        }
+        return true;
     }
 
     /**
@@ -135,28 +121,6 @@ public:
         return true;
     }
 
-    std::unordered_set<Subscription> getSubscriptions() const
-    {
-        return this->subscriptions_;
-    }
-
-protected:
-    bool send(const char *payload)
-    {
-        liveupdates::WebsocketErrorCode ec;
-        this->websocketClient_.send(this->handle_, payload,
-                                    websocketpp::frame::opcode::text, ec);
-
-        if (ec)
-        {
-            qCDebug(chatterinoLiveupdates) << "Error sending message" << payload
-                                           << ":" << ec.message().c_str();
-            return false;
-        }
-
-        return true;
-    }
-
     bool isStarted() const
     {
         return this->started_.load(std::memory_order_acquire);
@@ -165,10 +129,48 @@ protected:
     liveupdates::WebsocketClient &websocketClient_;
 
 private:
+    void start()
+    {
+        assert(!this->isStarted());
+        this->started_.store(true, std::memory_order_release);
+    }
+
+    void stop()
+    {
+        assert(this->isStarted());
+        this->started_.store(false, std::memory_order_release);
+    }
+
+    void close(const std::string &reason,
+               websocketpp::close::status::value code =
+                   websocketpp::close::status::normal)
+    {
+        liveupdates::WebsocketErrorCode ec;
+
+        auto conn = this->websocketClient_.get_con_from_hdl(this->handle_, ec);
+        if (ec)
+        {
+            qCDebug(chatterinoLiveupdates)
+                << "Error getting connection:" << ec.message().c_str();
+            return;
+        }
+
+        conn->close(code, reason, ec);
+        if (ec)
+        {
+            qCDebug(chatterinoLiveupdates)
+                << "Error closing:" << ec.message().c_str();
+            return;
+        }
+    }
+
     liveupdates::WebsocketHandle handle_;
     std::unordered_set<Subscription> subscriptions_;
 
     std::atomic<bool> started_{false};
+
+    template <typename ManagerSubscription>
+    friend class BasicPubSubManager;
 };
 
 }  // namespace chatterino
