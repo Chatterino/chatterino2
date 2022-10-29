@@ -879,7 +879,13 @@ void CommandController::initialize(Settings &, Paths &paths)
     });
 
     this->registerCommand(
-        "/chatters", [](const auto & /*words*/, auto channel) {
+        "/chatters", [](const auto & words, auto channel) {
+            if (words.size() != 1)
+            {
+                channel->addMessage(makeSystemMessage("Usage: /chatters"));
+                return "";
+            }
+
             auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
             if (twitchChannel == nullptr)
