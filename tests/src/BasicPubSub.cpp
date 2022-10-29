@@ -88,12 +88,13 @@ public:
 
     void sub(const DummySubscription &sub)
     {
-        BasicPubSubManager::subscribe(sub);
+        // We don't track subscriptions in this test
+        this->subscribe(sub);
     }
 
     void unsub(const DummySubscription &sub)
     {
-        BasicPubSubManager::unsubscribe(sub);
+        this->unsubscribe(sub);
     }
 
 protected:
