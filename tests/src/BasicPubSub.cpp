@@ -118,7 +118,7 @@ private:
 
 TEST(BasicPubSub, SubscriptionCycle)
 {
-    const QString host("wss://127.0.0.1:9050/liveupdates/sub");
+    const QString host("wss://127.0.0.1:9050/liveupdates/sub-unsub");
     auto *manager = new MyManager(host);
     manager->start();
 
