@@ -42,6 +42,8 @@ CheckOptions:
     value:           .*
   - key:             readability-identifier-naming.PrivateMemberSuffix
     value:           _
+  - key:             readability-identifier-naming.ProtectedMemberSuffix
+    value:           _
   - key:             readability-identifier-naming.UnionCase
     value:           CamelCase
   - key:             readability-identifier-naming.GlobalVariableCase
