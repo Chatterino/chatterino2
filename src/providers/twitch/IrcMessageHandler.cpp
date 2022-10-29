@@ -15,6 +15,7 @@
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
+#include "util/StreamerMode.hpp"
 
 #include <IrcMessage>
 
@@ -78,6 +79,13 @@ int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
         it != tags.end())
     {
         auto displayName = it.value().toString();
+
+        if (content.length() <= 1 + displayName.length())
+        {
+            // The reply contains no content
+            return 0;
+        }
+
         if (content.startsWith('@') &&
             content.at(1 + displayName.length()) == ' ' &&
             content.indexOf(displayName, 1) == 1)
@@ -793,7 +801,9 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     overrideFlags->set(MessageFlag::DoNotTriggerNotification);
     overrideFlags->set(MessageFlag::DoNotLog);
 
-    if (getSettings()->inlineWhispers)
+    if (getSettings()->inlineWhispers &&
+        !(getSettings()->streamerModeSuppressInlineWhispers &&
+          isInStreamerMode()))
     {
         getApp()->twitch->forEachChannel(
             [&_message, overrideFlags](ChannelPtr channel) {
@@ -993,10 +1003,9 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
         getSettings()->helixTimegateWhisper.getValue() ==
             HelixTimegateOverride::Timegate)
     {
-        content =
-            content +
-            " Consider setting the \"Helix timegate /w "
-            "behaviour\" to \"Always use Helix\" in your Chatterino settings.";
+        content = content +
+                  " Consider setting \"Helix timegate /w behaviour\" "
+                  "to \"Always use Helix\" in your Chatterino settings.";
     }
     builtMessages.emplace_back(
         makeSystemMessage(content, calculateMessageTime(message).time()));

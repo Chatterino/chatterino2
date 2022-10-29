@@ -1241,6 +1241,7 @@ void Split::reloadChannelAndSubscriberEmotes()
     {
         twitchChannel->refreshBTTVChannelEmotes(true);
         twitchChannel->refreshFFZChannelEmotes(true);
+        twitchChannel->refreshSevenTVChannelEmotes(true);
     }
 }
 

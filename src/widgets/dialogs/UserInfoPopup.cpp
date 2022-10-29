@@ -105,9 +105,13 @@ namespace {
         for (size_t i = 0; i < snapshot.size(); i++)
         {
             MessagePtr message = snapshot[i];
+
+            auto overrideFlags = boost::optional<MessageFlags>(message->flags);
+            overrideFlags->set(MessageFlag::DoNotLog);
+
             if (checkMessageUserName(userName, message))
             {
-                channelPtr->addMessage(message);
+                channelPtr->addMessage(message, overrideFlags);
             }
         }
 

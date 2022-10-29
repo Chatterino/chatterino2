@@ -45,7 +45,7 @@ Talen | https://github.com/talneoran | | Contributor
 SLCH | https://github.com/SLCH | :/avatars/slch.png | Contributor
 ALazyMeme | https://github.com/alazymeme | :/avatars/alazymeme.png | Contributor
 xHeaveny_ | https://github.com/xHeaveny | :/avatars/xheaveny.png | Contributor
-1xelerate | https://github.com/1xelerate | :/avatars/_1xelerate.png | Contributor
+1xelerate | https://github.com/xel86 | :/avatars/_1xelerate.png | Contributor
 acdvs | https://github.com/acdvs | | Contributor
 karl-police | https://github.com/karl-police | :/avatars/karlpolice.png | Contributor
 brian6932 | https://github.com/brian6932 | :/avatars/brian6932.png | Contributor

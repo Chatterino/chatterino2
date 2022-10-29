@@ -78,7 +78,7 @@ jobs:
         
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.11.0
+        uses: ilammy/msvc-dev-cmd@v1.12.0
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -148,7 +148,7 @@ jobs:
 
       - name: clang-tidy review
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        uses: pajlada/clang-tidy-review@feat/split-up-review-and-post-workflows
+        uses: ZedThree/clang-tidy-review@v0.10.1
         id: review
         with:
           build_dir: build

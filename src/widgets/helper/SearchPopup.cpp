@@ -46,7 +46,12 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
 
         // If all predicates match, add the message to the channel
         if (accept)
-            channel->addMessage(message);
+        {
+            auto overrideFlags = boost::optional<MessageFlags>(message->flags);
+            overrideFlags->set(MessageFlag::DoNotLog);
+
+            channel->addMessage(message, overrideFlags);
+        }
     }
 
     return channel;
