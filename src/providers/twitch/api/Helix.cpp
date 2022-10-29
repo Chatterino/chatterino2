@@ -2065,7 +2065,7 @@ void Helix::getApiListRecursive(
             if (result.status() != 200)
             {
                 qCWarning(chatterinoTwitch)
-                    << "Success result for getting chatter list data was "
+                    << "Success result for getting user list data was "
                     << result.status() << "but we expected it to be 200";
             }
 
@@ -2110,7 +2110,8 @@ void Helix::getApiListRecursive(
                                  "ID found in the request's OAuth token.",
                                  Qt::CaseInsensitive) == 0)
                     {
-                        // Must must have permission to moderate the broadcaster’s chat room.
+                        // get moderators: Must be broadcaster
+                        // get chatters: Must must have permission to moderate the broadcaster’s chat room.
                         failureCallback(Error::UserNotAuthorized, message);
                     }
                     else
@@ -2127,7 +2128,7 @@ void Helix::getApiListRecursive(
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Unhandled error getting chatter list:" << result.status()
+                        << "Unhandled error getting user list:" << result.status()
                         << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
@@ -2137,6 +2138,7 @@ void Helix::getApiListRecursive(
         .execute();
 }
 
+// https://dev.twitch.tv/docs/api/reference#get-chatters
 void Helix::getChatters(
     QString broadcasterID, QString moderatorID,
     ResultCallback<HelixUserList*> successCallback,
@@ -2153,6 +2155,7 @@ void Helix::getChatters(
     this->getApiListRecursive(chatterList, "chat/chatters", urlQuery, 1, paginationCursor, successCallback, failureCallback);
 }
 
+// https://dev.twitch.tv/docs/api/reference#get-moderators
 void Helix::getChannelMods(
     QString broadcasterID,
     ResultCallback<HelixUserList*> successCallback,

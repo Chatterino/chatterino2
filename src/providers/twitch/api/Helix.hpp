@@ -811,6 +811,7 @@ public:
         ResultCallback<HelixUserList*> successCallback,
         FailureCallback<HelixUserListError, QString> failureCallback) = 0;
 
+    // Get moderator list
     // https://dev.twitch.tv/docs/api/reference#get-moderators
     virtual void getChannelMods(
         QString broadcasterID,

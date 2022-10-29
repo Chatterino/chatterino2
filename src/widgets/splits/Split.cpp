@@ -1030,7 +1030,7 @@ void Split::showViewerList()
 
     auto loadChatters = [=]() {
         twitchChannel->refreshChatters(
-            [=](auto chatters) {
+            [addUserList, performListSearch](auto chatters) {
                 addUserList(chatters, QString("Viewers"));
                 performListSearch();
             },
