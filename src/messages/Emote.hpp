@@ -1,8 +1,10 @@
 #pragma once
 
+#include "common/Atomic.hpp"
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 
+#include <boost/optional.hpp>
 #include <functional>
 #include <memory>
 #include <unordered_map>
@@ -15,6 +17,9 @@ struct Emote {
     Tooltip tooltip;
     Url homePage;
     bool zeroWidth;
+    EmoteId id;
+    EmoteAuthor author;
+    boost::optional<EmoteName> baseName;
 
     // FOURTF: no solution yet, to be refactored later
     const QString &getCopyString() const
@@ -30,6 +35,9 @@ using EmotePtr = std::shared_ptr<const Emote>;
 
 class EmoteMap : public std::unordered_map<EmoteName, EmotePtr>
 {
+public:
+    EmoteMap::const_iterator findEmote(const QString &emoteName,
+                                       const QString &emoteId) const;
 };
 using EmoteIdMap = std::unordered_map<EmoteId, EmotePtr>;
 using WeakEmoteMap = std::unordered_map<EmoteName, std::weak_ptr<const Emote>>;
@@ -43,5 +51,8 @@ EmotePtr cachedOrMakeEmotePtr(
     Emote &&emote,
     std::unordered_map<EmoteId, std::weak_ptr<const Emote>> &cache,
     std::mutex &mutex, const EmoteId &id);
+
+void updateEmoteMapPtr(Atomic<std::shared_ptr<const EmoteMap>> &map,
+                       EmoteMap &&updatedMap);
 
 }  // namespace chatterino

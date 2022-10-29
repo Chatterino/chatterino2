@@ -224,6 +224,17 @@ set(SOURCE_FILES
         providers/seventv/SeventvBadges.hpp
         providers/seventv/SeventvEmotes.cpp
         providers/seventv/SeventvEmotes.hpp
+        providers/seventv/SeventvEventApi.cpp
+        providers/seventv/SeventvEventApi.hpp
+
+        providers/seventv/eventapi/SeventvEventApiClient.cpp
+        providers/seventv/eventapi/SeventvEventApiClient.hpp
+        providers/seventv/eventapi/SeventvEventApiDispatch.cpp
+        providers/seventv/eventapi/SeventvEventApiDispatch.hpp
+        providers/seventv/eventapi/SeventvEventApiMessage.cpp
+        providers/seventv/eventapi/SeventvEventApiMessage.hpp
+        providers/seventv/eventapi/SeventvEventApiSubscription.cpp
+        providers/seventv/eventapi/SeventvEventApiSubscription.hpp
 
         providers/twitch/ChannelPointReward.cpp
         providers/twitch/ChannelPointReward.hpp

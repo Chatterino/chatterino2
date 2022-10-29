@@ -3,6 +3,7 @@
 #include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "providers/seventv/eventapi/SeventvEventApiDispatch.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
 #include <memory>
@@ -55,16 +56,36 @@ class EmoteMap;
 
 class SeventvEmotes final
 {
+    struct ChannelInfo {
+        QString userId;
+        QString emoteSetId;
+    };
+
 public:
     SeventvEmotes();
 
     std::shared_ptr<const EmoteMap> globalEmotes() const;
     boost::optional<EmotePtr> globalEmote(const EmoteName &name) const;
     void loadGlobalEmotes();
-    static void loadChannelEmotes(const std::weak_ptr<Channel> &channel,
-                                  const QString &channelId,
-                                  std::function<void(EmoteMap &&)> callback,
-                                  bool manualRefresh);
+    static void loadChannelEmotes(
+        const std::weak_ptr<Channel> &channel, const QString &channelId,
+        std::function<void(EmoteMap &&, ChannelInfo)> callback,
+        bool manualRefresh);
+
+    static boost::optional<EmotePtr> addEmote(
+        Atomic<std::shared_ptr<const EmoteMap>> &map,
+        const SeventvEventApiEmoteAddDispatch &dispatch);
+    static boost::optional<EmotePtr> updateEmote(
+        Atomic<std::shared_ptr<const EmoteMap>> &map,
+        const SeventvEventApiEmoteUpdateDispatch &dispatch);
+    static boost::optional<EmotePtr> removeEmote(
+        Atomic<std::shared_ptr<const EmoteMap>> &map,
+        const SeventvEventApiEmoteRemoveDispatch &dispatch);
+
+    static void updateEmoteSet(
+        const QString &emoteSetId,
+        std::function<void(EmoteMap &&, QString)> successCallback,
+        std::function<void(QString)> errorCallback);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;

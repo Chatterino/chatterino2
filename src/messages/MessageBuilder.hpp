@@ -19,8 +19,20 @@ struct SystemMessageTag {
 };
 struct TimeoutMessageTag {
 };
+struct LiveUpdatesUpdateEmoteMessageTag {
+};
+struct LiveUpdatesRemoveEmoteMessageTag {
+};
+struct LiveUpdatesAddEmoteMessageTag {
+};
+struct LiveUpdatesUpdateEmoteSetMessageTag {
+};
 const SystemMessageTag systemMessage{};
 const TimeoutMessageTag timeoutMessage{};
+const LiveUpdatesUpdateEmoteMessageTag liveUpdatesUpdateEmoteMessage{};
+const LiveUpdatesRemoveEmoteMessageTag liveUpdatesRemoveEmoteMessage{};
+const LiveUpdatesAddEmoteMessageTag liveUpdatesAddEmoteMessage{};
+const LiveUpdatesUpdateEmoteSetMessageTag liveUpdatesUpdateEmoteSetMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
 MessagePtr makeSystemMessage(const QString &text, const QTime &time);
@@ -53,6 +65,19 @@ public:
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);
     MessageBuilder(const AutomodUserAction &action);
+
+    MessageBuilder(LiveUpdatesAddEmoteMessageTag, const QString &platform,
+                   const QString &actor,
+                   const std::vector<QString> &emoteNames);
+    MessageBuilder(LiveUpdatesRemoveEmoteMessageTag, const QString &platform,
+                   const QString &actor,
+                   const std::vector<QString> &emoteNames);
+    MessageBuilder(LiveUpdatesUpdateEmoteMessageTag, const QString &platform,
+                   const QString &actor, const QString &emoteName,
+                   const QString &oldEmoteName);
+    MessageBuilder(LiveUpdatesUpdateEmoteSetMessageTag, const QString &platform,
+                   const QString &actor, const QString &emoteSetName);
+
     virtual ~MessageBuilder() = default;
 
     Message *operator->();

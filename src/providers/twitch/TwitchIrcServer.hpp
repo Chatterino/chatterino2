@@ -19,6 +19,7 @@ class Settings;
 class Paths;
 class PubSub;
 class TwitchChannel;
+class SeventvEventApi;
 
 class TwitchIrcServer final : public AbstractIrcServer, public Singleton
 {
@@ -41,6 +42,13 @@ public:
     void reloadSevenTVGlobalEmotes();
     void reloadAllSevenTVChannelEmotes();
 
+    void forEachSeventvEmoteSet(const QString &emoteSetId,
+                                std::function<void(TwitchChannel &)> func);
+    void forEachSeventvUser(const QString &userId,
+                            std::function<void(TwitchChannel &)> func);
+    void dropSeventvEmoteSet(const QString &id);
+    void dropSeventvUser(const QString &id);
+
     Atomic<QString> lastUserThatWhisperedMe;
 
     const ChannelPtr whispersChannel;
@@ -49,6 +57,7 @@ public:
     IndirectChannel watchingChannel;
 
     PubSub *pubsub;
+    std::unique_ptr<SeventvEventApi> seventvEventApi;
 
     const BttvEmotes &getBttvEmotes() const;
     const FfzEmotes &getFfzEmotes() const;

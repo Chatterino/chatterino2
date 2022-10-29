@@ -28,6 +28,7 @@ Q_DECLARE_LOGGING_CATEGORY(chatterinoPubSub);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoRecentMessages);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoSettings);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoSeventv);
+Q_DECLARE_LOGGING_CATEGORY(chatterinoSeventvEventApi);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoStreamerMode);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoStreamlink);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoTokenizer);
