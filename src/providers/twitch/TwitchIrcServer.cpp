@@ -536,7 +536,7 @@ void TwitchIrcServer::forEachSeventvEmoteSet(
 {
     this->forEachChannel([emoteSetId, func](const auto &chan) {
         if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
-            channel->seventvEmoteSetId() == emoteSetId)
+            channel->seventvEmoteSetID() == emoteSetId)
         {
             func(*channel);
         }
@@ -547,7 +547,7 @@ void TwitchIrcServer::forEachSeventvUser(
 {
     this->forEachChannel([userId, func](const auto &chan) {
         if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
-            channel->seventvUserId() == userId)
+            channel->seventvUserID() == userId)
         {
             func(*channel);
         }
@@ -571,7 +571,7 @@ void TwitchIrcServer::dropSeventvEmoteSet(const QString &id)
         }
 
         if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
-            channel->seventvEmoteSetId() == id)
+            channel->seventvEmoteSetID() == id)
         {
             return;
         }
@@ -596,7 +596,7 @@ void TwitchIrcServer::dropSeventvUser(const QString &id)
         }
 
         if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
-            channel->seventvUserId() == id)
+            channel->seventvUserID() == id)
         {
             return;
         }

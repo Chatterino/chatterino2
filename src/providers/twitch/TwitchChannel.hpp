@@ -120,15 +120,18 @@ public:
     virtual void refreshFFZChannelEmotes(bool manualRefresh);
     virtual void refreshSevenTVChannelEmotes(bool manualRefresh);
 
-    const QString &seventvUserId() const;
-    const QString &seventvEmoteSetId() const;
+    const QString &seventvUserID() const;
+    const QString &seventvEmoteSetID() const;
 
     void addSeventvEmote(const SeventvEventApiEmoteAddDispatch &dispatch);
     void updateSeventvEmote(const SeventvEventApiEmoteUpdateDispatch &dispatch);
     void removeSeventvEmote(const SeventvEventApiEmoteRemoveDispatch &dispatch);
     void updateSeventvUser(
         const SeventvEventApiUserConnectionUpdateDispatch &dispatch);
-    void updateSeventvData(const QString &userId, const QString &emoteSetId);
+
+    // Update the channel's 7TV information (the channel's 7TV user ID and emote set ID)
+    void updateSeventvData(const QString &newUserID,
+                           const QString &newEmoteSetID);
 
     // Badges
     boost::optional<EmotePtr> ffzCustomModBadge() const;
@@ -239,8 +242,8 @@ private:
     QElapsedTimer clipCreationTimer_;
     bool isClipCreationInProgress{false};
 
-    QString seventvUserId_;
-    QString seventvEmoteSetId_;
+    QString seventvUserID_;
+    QString seventvEmoteSetID_;
 
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;

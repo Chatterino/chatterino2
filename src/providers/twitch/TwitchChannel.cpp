@@ -108,8 +108,8 @@ TwitchChannel::TwitchChannel(const QString &name)
     this->destroyed.connect([this]() {
         if (getApp()->twitch->seventvEventAPI)
         {
-            getApp()->twitch->dropSeventvUser(this->seventvUserId_);
-            getApp()->twitch->dropSeventvEmoteSet(this->seventvEmoteSetId_);
+            getApp()->twitch->dropSeventvUser(this->seventvUserID_);
+            getApp()->twitch->dropSeventvEmoteSet(this->seventvEmoteSetID_);
         }
     });
 
@@ -601,13 +601,13 @@ std::shared_ptr<const EmoteMap> TwitchChannel::seventvEmotes() const
     return this->seventvEmotes_.get();
 }
 
-const QString &TwitchChannel::seventvUserId() const
+const QString &TwitchChannel::seventvUserID() const
 {
-    return this->seventvUserId_;
+    return this->seventvUserID_;
 }
-const QString &TwitchChannel::seventvEmoteSetId() const
+const QString &TwitchChannel::seventvEmoteSetID() const
 {
-    return this->seventvEmoteSetId_;
+    return this->seventvEmoteSetID_;
 }
 
 void TwitchChannel::addSeventvEmote(
@@ -659,7 +659,7 @@ void TwitchChannel::removeSeventvEmote(
 void TwitchChannel::updateSeventvUser(
     const SeventvEventApiUserConnectionUpdateDispatch &dispatch)
 {
-    updateSeventvData(this->seventvUserId_, dispatch.emoteSetId);
+    updateSeventvData(this->seventvUserID_, dispatch.emoteSetId);
     SeventvEmotes::updateEmoteSet(
         dispatch.emoteSetId,
         [this, weak = weakOf<Channel>(this), dispatch](auto &&emotes,
@@ -690,37 +690,38 @@ void TwitchChannel::updateSeventvUser(
         });
 }
 
-void TwitchChannel::updateSeventvData(const QString &userId,
-                                      const QString &emoteSetId)
+void TwitchChannel::updateSeventvData(const QString &newUserID,
+                                      const QString &newEmoteSetID)
 {
-    if (this->seventvUserId_ == userId &&
-        this->seventvEmoteSetId_ == emoteSetId)
+    if (this->seventvUserID_ == newUserID &&
+        this->seventvEmoteSetID_ == newEmoteSetID)
     {
         return;
     }
-    boost::optional<QString> oldUserId = boost::make_optional(
-        !this->seventvUserId_.isEmpty() && this->seventvUserId_ != userId,
-        this->seventvUserId_);
-    boost::optional<QString> oldEmoteSetId =
-        boost::make_optional(!this->seventvEmoteSetId_.isEmpty() &&
-                                 this->seventvEmoteSetId_ != emoteSetId,
-                             this->seventvEmoteSetId_);
 
-    this->seventvUserId_ = userId;
-    this->seventvEmoteSetId_ = emoteSetId;
-    auto fn = [this, oldUserId, oldEmoteSetId]() {
+    boost::optional<QString> oldUserID = boost::make_optional(
+        !this->seventvUserID_.isEmpty() && this->seventvUserID_ != newUserID,
+        this->seventvUserID_);
+    boost::optional<QString> oldEmoteSetID =
+        boost::make_optional(!this->seventvEmoteSetID_.isEmpty() &&
+                                 this->seventvEmoteSetID_ != newEmoteSetID,
+                             this->seventvEmoteSetID_);
+
+    this->seventvUserID_ = newUserID;
+    this->seventvEmoteSetID_ = newEmoteSetID;
+    auto fn = [this, oldUserID, oldEmoteSetID]() {
         if (getApp()->twitch->seventvEventAPI)
         {
             getApp()->twitch->seventvEventAPI->subscribeUser(
-                this->seventvUserId_, this->seventvEmoteSetId_);
+                this->seventvUserID_, this->seventvEmoteSetID_);
 
-            if (oldUserId)
+            if (oldUserID)
             {
-                getApp()->twitch->dropSeventvUser(oldUserId.get());
+                getApp()->twitch->dropSeventvUser(oldUserID.get());
             }
-            if (oldEmoteSetId)
+            if (oldEmoteSetID)
             {
-                getApp()->twitch->dropSeventvEmoteSet(oldEmoteSetId.get());
+                getApp()->twitch->dropSeventvEmoteSet(oldEmoteSetID.get());
             }
         }
     };
