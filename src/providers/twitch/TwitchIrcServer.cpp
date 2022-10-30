@@ -6,29 +6,36 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
-#include "providers/twitch/PubsubClient.hpp"
+#include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
+#include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
+
+#include <QMetaEnum>
 
 // using namespace Communi;
 using namespace std::chrono_literals;
+
+#define TWITCH_PUBSUB_URL "wss://pubsub-edge.twitch.tv"
 
 namespace chatterino {
 
 TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
+    , liveChannel(new Channel("/live", Channel::Type::TwitchLive))
     , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
 {
     this->initializeIrc();
 
-    this->pubsub = new PubSub;
+    this->pubsub = new PubSub(TWITCH_PUBSUB_URL);
 
     // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) {
     // this->connect(); },
@@ -38,12 +45,22 @@ TwitchIrcServer::TwitchIrcServer()
 
 void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
 {
-    getApp()->accounts->twitch.currentUserChanged.connect(
-        [this]() { postToThread([this] { this->connect(); }); });
+    getApp()->accounts->twitch.currentUserChanged.connect([this]() {
+        postToThread([this] {
+            this->connect();
+            this->pubsub->setAccount(getApp()->accounts->twitch.getCurrent());
+        });
+    });
 
-    this->twitchBadges.loadTwitchBadges();
-    this->bttv.loadEmotes();
-    this->ffz.loadEmotes();
+    this->reloadBTTVGlobalEmotes();
+    this->reloadFFZGlobalEmotes();
+    this->reloadSevenTVGlobalEmotes();
+
+    /* Refresh all twitch channel's live status in bulk every 30 seconds after starting chatterino */
+    QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [=] {
+        this->bulkRefreshLiveStatus();
+    });
+    this->bulkLiveStatusTimer_.start(30 * 1000);
 }
 
 void TwitchIrcServer::initializeConnection(IrcConnection *connection,
@@ -52,7 +69,20 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
     std::shared_ptr<TwitchAccount> account =
         getApp()->accounts->twitch.getCurrent();
 
-    qDebug() << "logging in as" << account->getUserName();
+    qCDebug(chatterinoTwitch) << "logging in as" << account->getUserName();
+
+    // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags
+    // twitch.tv/commands enables a bunch of miscellaneous command capabilities. See https://dev.twitch.tv/docs/irc/commands
+    // twitch.tv/membership enables the JOIN/PART/NAMES commands. See https://dev.twitch.tv/docs/irc/membership
+    // This is enabled so we receive USERSTATE messages when joining channels / typing messages, along with the other command capabilities
+    QStringList caps{"twitch.tv/tags", "twitch.tv/commands"};
+    if (type != ConnectionType::Write)
+    {
+        caps.push_back("twitch.tv/membership");
+    }
+
+    connection->network()->setSkipCapabilityValidation(true);
+    connection->network()->setRequestedCapabilities(caps);
 
     QString username = account->getUserName();
     QString oauthToken = account->getOAuthToken();
@@ -84,13 +114,18 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
 std::shared_ptr<Channel> TwitchIrcServer::createChannel(
     const QString &channelName)
 {
-    auto channel = std::shared_ptr<TwitchChannel>(new TwitchChannel(
-        channelName, this->twitchBadges, this->bttv, this->ffz));
+    auto channel =
+        std::shared_ptr<TwitchChannel>(new TwitchChannel(channelName));
     channel->initialize();
 
     channel->sendMessageSignal.connect(
         [this, channel = channel.get()](auto &chan, auto &msg, bool &sent) {
             this->onMessageSendRequested(channel, msg, sent);
+        });
+    channel->sendReplySignal.connect(
+        [this, channel = channel.get()](auto &chan, auto &msg, auto &replyId,
+                                        bool &sent) {
+            this->onReplySendRequested(channel, msg, replyId, sent);
         });
 
     return std::shared_ptr<Channel>(channel);
@@ -118,11 +153,7 @@ void TwitchIrcServer::readConnectionMessageReceived(
     auto &handler = IrcMessageHandler::instance();
 
     // Below commands enabled through the twitch.tv/membership CAP REQ
-    if (command == "MODE")
-    {
-        handler.handleModeMessage(message);
-    }
-    else if (command == "JOIN")
+    if (command == "JOIN")
     {
         handler.handleJoinMessage(message);
     }
@@ -161,6 +192,16 @@ void TwitchIrcServer::readConnectionMessageReceived(
     {
         handler.handleWhisperMessage(message);
     }
+    else if (command == "RECONNECT")
+    {
+        this->addGlobalSystemMessage(
+            "Twitch Servers requested us to reconnect, reconnecting");
+        this->connect();
+    }
+    else if (command == "GLOBALUSERSTATE")
+    {
+        handler.handleGlobalUserStateMessage(message);
+    }
 }
 
 void TwitchIrcServer::writeConnectionMessageReceived(
@@ -172,59 +213,22 @@ void TwitchIrcServer::writeConnectionMessageReceived(
     // Below commands enabled through the twitch.tv/commands CAP REQ
     if (command == "USERSTATE")
     {
-        // Received USERSTATE upon PRIVMSGing
+        // Received USERSTATE upon sending PRIVMSG messages
         handler.handleUserStateMessage(message);
     }
     else if (command == "NOTICE")
     {
-        static std::unordered_set<std::string> readConnectionOnlyIDs{
-            "host_on",
-            "host_off",
-            "host_target_went_offline",
-            "emote_only_on",
-            "emote_only_off",
-            "slow_on",
-            "slow_off",
-            "subs_on",
-            "subs_off",
-            "r9k_on",
-            "r9k_off",
-
-            // Display for user who times someone out. This implies you're a
-            // moderator, at which point you will be connected to PubSub and receive
-            // a better message from there.
-            "timeout_success",
-            "ban_success",
-
-            // Channel suspended notices
-            "msg_channel_suspended",
-        };
-
+        // List of expected NOTICE messages on write connection
+        // https://git.kotmisia.pl/Mm2PL/docs/src/branch/master/irc_msg_ids.md#command-results
         handler.handleNoticeMessage(
             static_cast<Communi::IrcNoticeMessage *>(message));
     }
-}
-
-void TwitchIrcServer::onReadConnected(IrcConnection *connection)
-{
-    // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags/
-    // twitch.tv/membership enables the JOIN/PART/MODE/NAMES commands. See https://dev.twitch.tv/docs/irc/membership/
-    // twitch.tv/commands enables a bunch of miscellaneous command capabilities. See https://dev.twitch.tv/docs/irc/commands/
-    //                    This is enabled here so we receive USERSTATE messages when joining channels
-    connection->sendRaw(
-        "CAP REQ :twitch.tv/tags twitch.tv/membership twitch.tv/commands");
-
-    AbstractIrcServer::onReadConnected(connection);
-}
-
-void TwitchIrcServer::onWriteConnected(IrcConnection *connection)
-{
-    // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags/
-    // twitch.tv/commands enables a bunch of miscellaneous command capabilities. See https://dev.twitch.tv/docs/irc/commands/
-    //                    This is enabled here so we receive USERSTATE messages when typing messages, along with the other command capabilities
-    connection->sendRaw("CAP REQ :twitch.tv/tags twitch.tv/commands");
-
-    AbstractIrcServer::onWriteConnected(connection);
+    else if (command == "RECONNECT")
+    {
+        this->addGlobalSystemMessage(
+            "Twitch Servers requested us to reconnect, reconnecting");
+        this->connect();
+    }
 }
 
 std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
@@ -238,6 +242,11 @@ std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
     if (channelName == "/mentions")
     {
         return this->mentionsChannel;
+    }
+
+    if (channelName == "/live")
+    {
+        return this->liveChannel;
     }
 
     if (channelName == "$$$")
@@ -272,6 +281,7 @@ void TwitchIrcServer::forEachChannelAndSpecialChannels(
 
     func(this->whispersChannel);
     func(this->mentionsChannel);
+    func(this->liveChannel);
 }
 
 std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
@@ -299,6 +309,59 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
     return Channel::getEmpty();
 }
 
+void TwitchIrcServer::bulkRefreshLiveStatus()
+{
+    auto twitchChans = std::make_shared<QHash<QString, TwitchChannel *>>();
+
+    this->forEachChannel([twitchChans](ChannelPtr chan) {
+        auto tc = dynamic_cast<TwitchChannel *>(chan.get());
+        if (tc && !tc->roomId().isEmpty())
+        {
+            twitchChans->insert(tc->roomId(), tc);
+        }
+    });
+
+    // iterate over batches of channel IDs
+    for (const auto &batch : splitListIntoBatches(twitchChans->keys()))
+    {
+        getHelix()->fetchStreams(
+            batch, {},
+            [twitchChans](std::vector<HelixStream> streams) {
+                for (const auto &stream : streams)
+                {
+                    // remaining channels will be used later to set their stream status as offline
+                    // so we use take(id) to remove it
+                    auto tc = twitchChans->take(stream.userId);
+                    if (tc == nullptr)
+                    {
+                        continue;
+                    }
+
+                    tc->parseLiveStatus(true, stream);
+                }
+            },
+            []() {
+                // failure
+            },
+            [batch, twitchChans] {
+                // All the channels that were not present in fetchStreams response should be assumed to be offline
+                // It is necessary to update their stream status in case they've gone live -> offline
+                // Otherwise some of them will be marked as live forever
+                for (const auto &chID : batch)
+                {
+                    auto tc = twitchChans->value(chID);
+                    // early out in case channel does not exist anymore
+                    if (tc == nullptr)
+                    {
+                        continue;
+                    }
+
+                    tc->parseLiveStatus(false, {});
+                }
+            });
+    }
+}
+
 QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)
 {
     if (dirtyChannelName.startsWith('#'))
@@ -313,63 +376,87 @@ bool TwitchIrcServer::hasSeparateWriteConnection() const
     // return getSettings()->twitchSeperateWriteConnection;
 }
 
+bool TwitchIrcServer::prepareToSend(TwitchChannel *channel)
+{
+    std::lock_guard<std::mutex> guard(this->lastMessageMutex_);
+
+    auto &lastMessage = channel->hasHighRateLimit() ? this->lastMessageMod_
+                                                    : this->lastMessagePleb_;
+    size_t maxMessageCount = channel->hasHighRateLimit() ? 99 : 19;
+    auto minMessageOffset = (channel->hasHighRateLimit() ? 100ms : 1100ms);
+
+    auto now = std::chrono::steady_clock::now();
+
+    // check if you are sending messages too fast
+    if (!lastMessage.empty() && lastMessage.back() + minMessageOffset > now)
+    {
+        if (this->lastErrorTimeSpeed_ + 30s < now)
+        {
+            auto errorMessage =
+                makeSystemMessage("You are sending messages too quickly.");
+
+            channel->addMessage(errorMessage);
+
+            this->lastErrorTimeSpeed_ = now;
+        }
+        return false;
+    }
+
+    // remove messages older than 30 seconds
+    while (!lastMessage.empty() && lastMessage.front() + 32s < now)
+    {
+        lastMessage.pop();
+    }
+
+    // check if you are sending too many messages
+    if (lastMessage.size() >= maxMessageCount)
+    {
+        if (this->lastErrorTimeAmount_ + 30s < now)
+        {
+            auto errorMessage =
+                makeSystemMessage("You are sending too many messages.");
+
+            channel->addMessage(errorMessage);
+
+            this->lastErrorTimeAmount_ = now;
+        }
+        return false;
+    }
+
+    lastMessage.push(now);
+    return true;
+}
+
 void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
                                              const QString &message, bool &sent)
 {
     sent = false;
 
+    bool canSend = this->prepareToSend(channel);
+    if (!canSend)
     {
-        std::lock_guard<std::mutex> guard(this->lastMessageMutex_);
-
-        //        std::queue<std::chrono::steady_clock::time_point>
-        auto &lastMessage = channel->hasHighRateLimit()
-                                ? this->lastMessageMod_
-                                : this->lastMessagePleb_;
-        size_t maxMessageCount = channel->hasHighRateLimit() ? 99 : 19;
-        auto minMessageOffset = (channel->hasHighRateLimit() ? 100ms : 1100ms);
-
-        auto now = std::chrono::steady_clock::now();
-
-        // check if you are sending messages too fast
-        if (!lastMessage.empty() && lastMessage.back() + minMessageOffset > now)
-        {
-            if (this->lastErrorTimeSpeed_ + 30s < now)
-            {
-                auto errorMessage =
-                    makeSystemMessage("You are sending messages too quickly.");
-
-                channel->addMessage(errorMessage);
-
-                this->lastErrorTimeSpeed_ = now;
-            }
-            return;
-        }
-
-        // remove messages older than 30 seconds
-        while (!lastMessage.empty() && lastMessage.front() + 32s < now)
-        {
-            lastMessage.pop();
-        }
-
-        // check if you are sending too many messages
-        if (lastMessage.size() >= maxMessageCount)
-        {
-            if (this->lastErrorTimeAmount_ + 30s < now)
-            {
-                auto errorMessage =
-                    makeSystemMessage("You are sending too many messages.");
-
-                channel->addMessage(errorMessage);
-
-                this->lastErrorTimeAmount_ = now;
-            }
-            return;
-        }
-
-        lastMessage.push(now);
+        return;
     }
 
     this->sendMessage(channel->getName(), message);
+    sent = true;
+}
+
+void TwitchIrcServer::onReplySendRequested(TwitchChannel *channel,
+                                           const QString &message,
+                                           const QString &replyId, bool &sent)
+{
+    sent = false;
+
+    bool canSend = this->prepareToSend(channel);
+    if (!canSend)
+    {
+        return;
+    }
+
+    this->sendRawMessage("@reply-parent-msg-id=" + replyId + " PRIVMSG #" +
+                         channel->getName() + " :" + message);
+
     sent = true;
 }
 
@@ -381,5 +468,53 @@ const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
 {
     return this->ffz;
 }
+const SeventvEmotes &TwitchIrcServer::getSeventvEmotes() const
+{
+    return this->seventv_;
+}
 
+void TwitchIrcServer::reloadBTTVGlobalEmotes()
+{
+    this->bttv.loadEmotes();
+}
+
+void TwitchIrcServer::reloadAllBTTVChannelEmotes()
+{
+    this->forEachChannel([](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->refreshBTTVChannelEmotes(false);
+        }
+    });
+}
+
+void TwitchIrcServer::reloadFFZGlobalEmotes()
+{
+    this->ffz.loadEmotes();
+}
+
+void TwitchIrcServer::reloadAllFFZChannelEmotes()
+{
+    this->forEachChannel([](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->refreshFFZChannelEmotes(false);
+        }
+    });
+}
+
+void TwitchIrcServer::reloadSevenTVGlobalEmotes()
+{
+    this->seventv_.loadGlobalEmotes();
+}
+
+void TwitchIrcServer::reloadAllSevenTVChannelEmotes()
+{
+    this->forEachChannel([](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->refreshSevenTVChannelEmotes(false);
+        }
+    });
+}
 }  // namespace chatterino

@@ -40,8 +40,9 @@ LastRunCrashDialog::LastRunCrashDialog()
 
     auto *okButton =
         buttons->addButton("Ignore", QDialogButtonBox::ButtonRole::NoRole);
-    QObject::connect(okButton, &QPushButton::clicked,
-                     [this] { this->accept(); });
+    QObject::connect(okButton, &QPushButton::clicked, [this] {
+        this->accept();
+    });
 
     // Updates
     //    auto updateUpdateLabel = [update]() mutable {
@@ -82,7 +83,7 @@ LastRunCrashDialog::LastRunCrashDialog()
     //    };
 
     //    updateUpdateLabel();
-    //    this->managedConnect(updateManager.statusUpdated,
+    //    this->signalHolder_.managedConnect(updateManager.statusUpdated,
     //    [updateUpdateLabel](auto) mutable {
     //        postToThread([updateUpdateLabel]() mutable { updateUpdateLabel();
     //        });

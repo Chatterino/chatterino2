@@ -1,13 +1,19 @@
 #include "messages/SharedMessageBuilder.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
+#include "controllers/highlights/HighlightController.hpp"
+#include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
-#include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
+#include "util/Qt.hpp"
 #include "util/StreamerMode.hpp"
+
+#include <QFileInfo>
+#include <QMediaPlayer>
 
 namespace chatterino {
 
@@ -56,45 +62,65 @@ SharedMessageBuilder::SharedMessageBuilder(
 {
 }
 
-namespace {
-
-    QColor getRandomColor(const QString &v)
-    {
-        int colorSeed = 0;
-        for (const auto &c : v)
-        {
-            colorSeed += c.digitValue();
-        }
-        const auto colorIndex = colorSeed % TWITCH_USERNAME_COLORS.size();
-        return TWITCH_USERNAME_COLORS[colorIndex];
-    }
-
-}  // namespace
-
 void SharedMessageBuilder::parse()
 {
     this->parseUsernameColor();
+
+    if (this->action_)
+    {
+        this->textColor_ = this->usernameColor_;
+    }
 
     this->parseUsername();
 
     this->message().flags.set(MessageFlag::Collapsed);
 }
 
-bool SharedMessageBuilder::isIgnored() const
+// "foo/bar/baz,tri/hard" can be a valid badge-info tag
+// In that case, valid map content should be 'split by slash' only once:
+// {"foo": "bar/baz", "tri": "hard"}
+std::pair<QString, QString> SharedMessageBuilder::slashKeyValue(
+    const QString &kvStr)
 {
-    // TODO(pajlada): Do we need to check if the phrase is valid first?
-    auto phrases = getCSettings().ignoredMessages.readOnly();
-    for (const auto &phrase : *phrases)
+    return {
+        // part before first slash (index 0 of section)
+        kvStr.section('/', 0, 0),
+        // part after first slash (index 1 of section)
+        kvStr.section('/', 1, -1),
+    };
+}
+
+std::vector<Badge> SharedMessageBuilder::parseBadgeTag(const QVariantMap &tags)
+{
+    std::vector<Badge> b;
+
+    auto badgesIt = tags.constFind("badges");
+    if (badgesIt == tags.end())
     {
-        if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
-        {
-            qDebug() << "Blocking message because it contains ignored phrase"
-                     << phrase.getPattern();
-            return true;
-        }
+        return b;
     }
 
-    return false;
+    auto badges = badgesIt.value().toString().split(',', Qt::SkipEmptyParts);
+
+    for (const QString &badge : badges)
+    {
+        if (!badge.contains('/'))
+        {
+            continue;
+        }
+
+        auto pair = SharedMessageBuilder::slashKeyValue(badge);
+        b.emplace_back(Badge{pair.first, pair.second});
+    }
+
+    return b;
+}
+
+bool SharedMessageBuilder::isIgnored() const
+{
+    return isIgnoredMessage({
+        /*.message = */ this->originalMessage_,
+    });
 }
 
 void SharedMessageBuilder::parseUsernameColor()
@@ -115,237 +141,54 @@ void SharedMessageBuilder::parseUsername()
 
 void SharedMessageBuilder::parseHighlights()
 {
-    auto app = getApp();
-
-    if (this->message().flags.has(MessageFlag::Subscription) &&
-        getSettings()->enableSubHighlight)
-    {
-        if (getSettings()->enableSubHighlightTaskbar)
-        {
-            this->highlightAlert_ = true;
-        }
-
-        if (getSettings()->enableSubHighlightSound)
-        {
-            this->highlightSound_ = true;
-
-            // Use custom sound if set, otherwise use fallback
-            if (!getSettings()->subHighlightSoundUrl.getValue().isEmpty())
-            {
-                this->highlightSoundUrl_ =
-                    QUrl(getSettings()->subHighlightSoundUrl.getValue());
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
-        }
-
-        this->message().flags.set(MessageFlag::Highlighted);
-        this->message().highlightColor =
-            ColorProvider::instance().color(ColorType::Subscription);
-
-        // This message was a subscription.
-        // Don't check for any other highlight phrases.
-        return;
-    }
-
-    // XXX: Non-common term in SharedMessageBuilder
-    auto currentUser = app->accounts->twitch.getCurrent();
-
-    QString currentUsername = currentUser->getUserName();
-
     if (getCSettings().isBlacklistedUser(this->ircMessage->nick()))
     {
         // Do nothing. We ignore highlights from this user.
         return;
     }
 
-    // Highlight because it's a whisper
-    if (this->args.isReceivedWhisper && getSettings()->enableWhisperHighlight)
+    auto badges = SharedMessageBuilder::parseBadgeTag(this->tags);
+    auto [highlighted, highlightResult] = getIApp()->getHighlights()->check(
+        this->args, badges, this->ircMessage->nick(), this->originalMessage_,
+        this->message().flags);
+
+    if (!highlighted)
     {
-        if (getSettings()->enableWhisperHighlightTaskbar)
-        {
-            this->highlightAlert_ = true;
-        }
-
-        if (getSettings()->enableWhisperHighlightSound)
-        {
-            this->highlightSound_ = true;
-
-            // Use custom sound if set, otherwise use fallback
-            if (!getSettings()->whisperHighlightSoundUrl.getValue().isEmpty())
-            {
-                this->highlightSoundUrl_ =
-                    QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
-        }
-
-        this->message().highlightColor =
-            ColorProvider::instance().color(ColorType::Whisper);
-
-        /*
-         * Do _NOT_ return yet, we might want to apply phrase/user name
-         * highlights (which override whisper color/sound).
-         */
-    }
-
-    // Highlight because of sender
-    auto userHighlights = getCSettings().highlightedUsers.readOnly();
-    for (const HighlightPhrase &userHighlight : *userHighlights)
-    {
-        if (!userHighlight.isMatch(this->ircMessage->nick()))
-        {
-            continue;
-        }
-        qDebug() << "Highlight because user" << this->ircMessage->nick()
-                 << "sent a message";
-
-        this->message().flags.set(MessageFlag::Highlighted);
-        this->message().highlightColor = userHighlight.getColor();
-
-        if (userHighlight.hasAlert())
-        {
-            this->highlightAlert_ = true;
-        }
-
-        if (userHighlight.hasSound())
-        {
-            this->highlightSound_ = true;
-            // Use custom sound if set, otherwise use the fallback sound
-            if (userHighlight.hasCustomSound())
-            {
-                this->highlightSoundUrl_ = userHighlight.getSoundUrl();
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
-        }
-
-        if (this->highlightAlert_ && this->highlightSound_)
-        {
-            /*
-             * User name highlights "beat" highlight phrases: If a message has
-             * all attributes (color, taskbar flashing, sound) set, highlight
-             * phrases will not be checked.
-             */
-            return;
-        }
-    }
-
-    if (this->ircMessage->nick() == currentUsername)
-    {
-        // Do nothing. Highlights cannot be triggered by yourself
         return;
     }
 
-    // TODO: This vector should only be rebuilt upon highlights being changed
-    // fourtf: should be implemented in the HighlightsController
-    std::vector<HighlightPhrase> activeHighlights =
-        getSettings()->highlightedMessages.cloneVector();
+    // This message triggered one or more highlights, act upon the highlight result
 
-    if (getSettings()->enableSelfHighlight && currentUsername.size() > 0)
+    this->message().flags.set(MessageFlag::Highlighted);
+
+    this->highlightAlert_ = highlightResult.alert;
+
+    this->highlightSound_ = highlightResult.playSound;
+
+    this->message().highlightColor = highlightResult.color;
+
+    if (highlightResult.customSoundUrl)
     {
-        HighlightPhrase selfHighlight(
-            currentUsername, getSettings()->enableSelfHighlightTaskbar,
-            getSettings()->enableSelfHighlightSound, false, false,
-            getSettings()->selfHighlightSoundUrl.getValue(),
-            ColorProvider::instance().color(ColorType::SelfHighlight));
-        activeHighlights.emplace_back(std::move(selfHighlight));
-    }
-
-    // Highlight because of message
-    for (const HighlightPhrase &highlight : activeHighlights)
-    {
-        if (!highlight.isMatch(this->originalMessage_))
-        {
-            continue;
-        }
-
-        this->message().flags.set(MessageFlag::Highlighted);
-        this->message().highlightColor = highlight.getColor();
-
-        if (highlight.hasAlert())
-        {
-            this->highlightAlert_ = true;
-        }
-
-        // Only set highlightSound_ if it hasn't been set by username
-        // highlights already.
-        if (highlight.hasSound() && !this->highlightSound_)
-        {
-            this->highlightSound_ = true;
-
-            // Use custom sound if set, otherwise use fallback sound
-            if (highlight.hasCustomSound())
-            {
-                this->highlightSoundUrl_ = highlight.getSoundUrl();
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
-        }
-
-        if (this->highlightAlert_ && this->highlightSound_)
-        {
-            /*
-             * Break once no further attributes (taskbar, sound) can be
-             * applied.
-             */
-            break;
-        }
-    }
-}
-
-void SharedMessageBuilder::addTextOrEmoji(EmotePtr emote)
-{
-    this->emplace<EmoteElement>(emote, MessageElementFlag::EmojiAll);
-}
-
-void SharedMessageBuilder::addTextOrEmoji(const QString &string_)
-{
-    auto string = QString(string_);
-
-    // Actually just text
-    auto linkString = this->matchLink(string);
-    auto link = Link();
-    auto textColor = this->action_ ? MessageColor(this->usernameColor_)
-                                   : MessageColor(MessageColor::Text);
-
-    if (linkString.isEmpty())
-    {
-        if (string.startsWith('@'))
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                       textColor, FontStyle::ChatMediumBold);
-            this->emplace<TextElement>(
-                string, MessageElementFlag::NonBoldUsername, textColor);
-        }
-        else
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::Text,
-                                       textColor);
-        }
+        this->highlightSoundUrl_ = highlightResult.customSoundUrl.get();
     }
     else
     {
-        this->addLink(string, linkString);
+        this->highlightSoundUrl_ = getFallbackHighlightSound();
+    }
+
+    if (highlightResult.showInMentions)
+    {
+        this->message().flags.set(MessageFlag::ShowInMentions);
     }
 }
 
 void SharedMessageBuilder::appendChannelName()
 {
     QString channelName("#" + this->channel->getName());
-    Link link(Link::Url, this->channel->getName() + "\n" + this->message().id);
+    Link link(Link::JumpToChannel, this->channel->getName());
 
     this->emplace<TextElement>(channelName, MessageElementFlag::ChannelName,
-                               MessageColor::System)  //
+                               MessageColor::System)
         ->setLink(link);
 }
 

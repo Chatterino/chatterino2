@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+
+#include <QColor>
+
 namespace chatterino {
 
 class ScrollbarHighlight
@@ -17,17 +21,23 @@ public:
     ScrollbarHighlight();
 
     ScrollbarHighlight(const std::shared_ptr<QColor> color,
-                       Style style = Default, bool isRedeemedHighlight = false);
+                       Style style = Default, bool isRedeemedHighlight = false,
+                       bool isFirstMessageHighlight = false,
+                       bool isElevatedMessageHighlight = false);
 
     QColor getColor() const;
     Style getStyle() const;
     bool isRedeemedHighlight() const;
+    bool isFirstMessageHighlight() const;
+    bool isElevatedMessageHighlight() const;
     bool isNull() const;
 
 private:
     std::shared_ptr<QColor> color_;
     Style style_;
     bool isRedeemedHighlight_;
+    bool isFirstMessageHighlight_;
+    bool isElevatedMessageHighlight_;
 };
 
 }  // namespace chatterino

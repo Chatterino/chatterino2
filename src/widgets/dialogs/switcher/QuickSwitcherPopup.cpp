@@ -6,6 +6,7 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/dialogs/switcher/NewPopupItem.hpp"
 #include "widgets/dialogs/switcher/NewTabItem.hpp"
 #include "widgets/dialogs/switcher/SwitchSplitItem.hpp"
 #include "widgets/helper/NotebookTab.hpp"
@@ -14,16 +15,14 @@
 namespace chatterino {
 
 namespace {
-    using namespace chatterino;
-
-    QSet<SplitContainer *> openPages()
+    QList<SplitContainer *> openPages()
     {
-        QSet<SplitContainer *> pages;
+        QList<SplitContainer *> pages;
 
         auto &nb = getApp()->windows->getMainWindow().getNotebook();
         for (int i = 0; i < nb.getPageCount(); ++i)
         {
-            pages.insert(static_cast<SplitContainer *>(nb.getPageAt(i)));
+            pages.append(static_cast<SplitContainer *>(nb.getPageAt(i)));
         }
 
         return pages;
@@ -65,8 +64,6 @@ void QuickSwitcherPopup::initWidgets()
         lineEdit->setPlaceholderText("Jump to a channel or open a new one");
         QObject::connect(this->ui_.searchEdit, &QLineEdit::textChanged, this,
                          &QuickSwitcherPopup::updateSuggestions);
-
-        this->ui_.searchEdit->installEventFilter(this);
     }
 
     {
@@ -74,8 +71,11 @@ void QuickSwitcherPopup::initWidgets()
         listView->setModel(&this->switcherModel_);
 
         QObject::connect(listView.getElement(),
-                         &GenericListView::closeRequested, this,
-                         [this] { this->close(); });
+                         &GenericListView::closeRequested, this, [this] {
+                             this->close();
+                         });
+
+        this->ui_.searchEdit->installEventFilter(listView.getElement());
     }
 }
 
@@ -95,7 +95,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
             if (split->getChannel()->getName().contains(text,
                                                         Qt::CaseInsensitive))
             {
-                auto item = std::make_unique<SwitchSplitItem>(split);
+                auto item = std::make_unique<SwitchSplitItem>(sc, split);
                 this->switcherModel_.addItem(std::move(item));
 
                 // We want to continue the outer loop so we need a goto
@@ -114,11 +114,14 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     nextPage:;
     }
 
-    // Add item for opening a channel in a new tab
+    // Add item for opening a channel in a new tab or new popup
     if (!text.isEmpty())
     {
-        auto item = std::make_unique<NewTabItem>(text);
-        this->switcherModel_.addItem(std::move(item));
+        auto newTabItem = std::make_unique<NewTabItem>(text);
+        this->switcherModel_.addItem(std::move(newTabItem));
+
+        auto newPopupItem = std::make_unique<NewPopupItem>(text);
+        this->switcherModel_.addItem(std::move(newPopupItem));
     }
 
     const auto &startIdx = this->switcherModel_.index(0);
@@ -128,7 +131,9 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
      * Timeout interval 0 means the call will be delayed until all window events
      * have been processed (cf. https://doc.qt.io/qt-5/qtimer.html#interval-prop).
      */
-    QTimer::singleShot(0, [this] { this->adjustSize(); });
+    QTimer::singleShot(0, [this] {
+        this->adjustSize();
+    });
 }
 
 void QuickSwitcherPopup::themeChangedEvent()

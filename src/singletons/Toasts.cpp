@@ -38,7 +38,9 @@ bool Toasts::isEnabled()
 {
 #ifdef Q_OS_WIN
     return WinToastLib::WinToast::isCompatible() &&
-           getSettings()->notificationToast;
+           getSettings()->notificationToast &&
+           !(isInStreamerMode() &&
+             getSettings()->streamerModeSuppressLiveNotifications);
 #else
     return false;
 #endif
@@ -128,7 +130,7 @@ public:
             case ToastReaction::OpenInBrowser:
                 if (platform_ == Platform::Twitch)
                 {
-                    link = "http://www.twitch.tv/" + channelName_;
+                    link = "https://www.twitch.tv/" + channelName_;
                 }
                 QDesktopServices::openUrl(QUrl(link));
                 break;
@@ -210,6 +212,8 @@ void Toasts::sendWindowsNotification(const QString &channelName,
     WinToastLib::WinToast::instance()->setAppUserModelId(
         WinToastLib::WinToast::configureAUMI(L"", L"Chatterino 2", L"",
                                              aumi_version));
+    WinToastLib::WinToast::instance()->setShortcutPolicy(
+        WinToastLib::WinToast::SHORTCUT_POLICY_IGNORE);
     WinToastLib::WinToast::instance()->initialize();
     WinToastLib::WinToast::instance()->showToast(
         templ, new CustomHandler(channelName, p));

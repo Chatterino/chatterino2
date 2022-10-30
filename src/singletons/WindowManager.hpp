@@ -1,9 +1,11 @@
 #pragma once
 
+#include <memory>
 #include "common/Channel.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
 #include "common/WindowDescriptors.hpp"
+
 #include "pajlada/settings/settinglistener.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
@@ -13,22 +15,31 @@ class Settings;
 class Paths;
 class Window;
 class SplitContainer;
+class ChannelView;
 
-enum class MessageElementFlag;
+enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 enum class WindowType;
 
 enum class SettingsDialogPreference;
+class FramelessEmbedWindow;
 
 class WindowManager final : public Singleton
 {
 public:
-    WindowManager();
+    static const QString WINDOW_LAYOUT_FILENAME;
 
+    WindowManager();
+    ~WindowManager() override;
+
+    static void encodeTab(SplitContainer *tab, bool isSelected,
+                          QJsonObject &obj);
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
+    static void encodeFilters(Split *split, QJsonArray &arr);
     static IndirectChannel decodeChannel(const SplitDescriptor &descriptor);
 
     void showSettingsDialog(
+        QWidget *parent,
         SettingsDialogPreference preference = SettingsDialogPreference());
 
     // Show the account selector widget at point
@@ -47,10 +58,22 @@ public:
 
     Window &getMainWindow();
     Window &getSelectedWindow();
-    Window &createWindow(WindowType type, bool show = true);
+    Window &createWindow(WindowType type, bool show = true,
+                         QWidget *parent = nullptr);
 
-    int windowCount();
-    Window *windowAt(int index);
+    // Use this method if you want to open a "new" channel in a popup. If you want to popup an
+    // existing Split or SplitContainer, consider using Split::popup() or SplitContainer::popup().
+    Window &openInPopup(ChannelPtr channel);
+
+    void select(Split *split);
+    void select(SplitContainer *container);
+    /**
+     * Scrolls to the message in a split that's not
+     * a mentions view and focuses the split.
+     *
+     * @param message Message to scroll to.
+     */
+    void scrollToMessage(const MessagePtr &message);
 
     QPoint emotePopupPos();
     void setEmotePopupPos(QPoint pos);
@@ -88,8 +111,13 @@ public:
     // It is currently being used by the "Tooltip Preview Image" system to recheck if an image is ready to be rendered.
     pajlada::Signals::NoArgSignal miscUpdate;
 
+    pajlada::Signals::Signal<Split *> selectSplit;
+    pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
+    pajlada::Signals::Signal<const MessagePtr &> scrollToMessageSignal;
+
 private:
-    void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
+    static void encodeNodeRecursively(SplitContainer::Node *node,
+                                      QJsonObject &obj);
 
     // Load window layout from the window-layout.json file
     WindowLayout loadWindowLayoutFromFile() const;
@@ -108,6 +136,7 @@ private:
 
     std::vector<Window *> windows_;
 
+    std::unique_ptr<FramelessEmbedWindow> framelessEmbedWindow_;
     Window *mainWindow_{};
     Window *selectedWindow_{};
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <common/UniqueAccess.hpp>
+#include "common/UniqueAccess.hpp"
 
 #include <mutex>
 #include <typeinfo>
@@ -27,6 +27,20 @@ public:
             reinterpret_cast<int64_t &>(it.value())++;
         }
     }
+    static void increase(const QString &name, const int64_t &amount)
+    {
+        auto counts = counts_.access();
+
+        auto it = counts->find(name);
+        if (it == counts->end())
+        {
+            counts->insert(name, amount);
+        }
+        else
+        {
+            reinterpret_cast<int64_t &>(it.value()) += amount;
+        }
+    }
 
     static void decrease(const QString &name)
     {
@@ -40,6 +54,20 @@ public:
         else
         {
             reinterpret_cast<int64_t &>(it.value())--;
+        }
+    }
+    static void decrease(const QString &name, const int64_t &amount)
+    {
+        auto counts = counts_.access();
+
+        auto it = counts->find(name);
+        if (it == counts->end())
+        {
+            counts->insert(name, -amount);
+        }
+        else
+        {
+            reinterpret_cast<int64_t &>(it.value()) -= amount;
         }
     }
 

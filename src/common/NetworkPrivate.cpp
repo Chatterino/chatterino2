@@ -10,22 +10,20 @@
 
 #include <QCryptographicHash>
 #include <QFile>
+#include <QNetworkReply>
 #include <QtConcurrent>
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 
 NetworkData::NetworkData()
-    : timer_(new QTimer())
-    , lifetimeManager_(new QObject)
+    : lifetimeManager_(new QObject)
 {
-    timer_->setSingleShot(true);
-
     DebugCount::increase("NetworkData");
 }
 
 NetworkData::~NetworkData()
 {
-    this->timer_->deleteLater();
     this->lifetimeManager_->deleteLater();
 
     DebugCount::decrease("NetworkData");
@@ -41,7 +39,7 @@ QString NetworkData::getHash()
     {
         QByteArray bytes;
 
-        bytes.append(this->request_.url().toString());
+        bytes.append(this->request_.url().toString().toUtf8());
 
         for (const auto &header : this->request_.rawHeaderList())
         {
@@ -83,13 +81,14 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 
     worker->moveToThread(&NetworkManager::workerThread);
 
-    if (data->hasTimeout_)
-    {
-        data->timer_->setSingleShot(true);
-        data->timer_->start();
-    }
-
     auto onUrlRequested = [data, worker]() mutable {
+        if (data->hasTimeout_)
+        {
+            data->timer_ = new QTimer();
+            data->timer_->setSingleShot(true);
+            data->timer_->start(data->timeoutMS_);
+        }
+
         auto reply = [&]() -> QNetworkReply * {
             switch (data->requestType_)
             {
@@ -117,27 +116,53 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                         return NetworkManager::accessManager.post(
                             data->request_, data->payload_);
                     }
+                case NetworkRequestType::Patch:
+                    if (data->multiPartPayload_)
+                    {
+                        assert(data->payload_.isNull());
+
+                        return NetworkManager::accessManager.sendCustomRequest(
+                            data->request_, "PATCH", data->multiPartPayload_);
+                    }
+                    else
+                    {
+                        return NetworkManager::accessManager.sendCustomRequest(
+                            data->request_, "PATCH", data->payload_);
+                    }
             }
             return nullptr;
         }();
 
         if (reply == nullptr)
         {
-            qDebug() << "Unhandled request type";
+            qCDebug(chatterinoCommon) << "Unhandled request type";
             return;
         }
 
-        if (data->timer_->isActive())
+        if (data->timer_ != nullptr && data->timer_->isActive())
         {
             QObject::connect(
                 data->timer_, &QTimer::timeout, worker, [reply, data]() {
-                    qDebug() << "Aborted!";
+                    qCDebug(chatterinoCommon) << "Aborted!";
                     reply->abort();
+                    qCDebug(chatterinoHTTP)
+                        << QString("%1 [timed out] %2")
+                               .arg(networkRequestTypes.at(
+                                        int(data->requestType_)),
+                                    data->request_.url().toString());
+
                     if (data->onError_)
                     {
                         postToThread([data] {
                             data->onError_(NetworkResult(
                                 {}, NetworkResult::timedoutStatus));
+                        });
+                    }
+
+                    if (data->finally_)
+                    {
+                        postToThread([data] {
+                            data->finally_();
                         });
                     }
                 });
@@ -157,11 +182,51 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             // TODO(pajlada): A reply was received, kill the timeout timer
             if (reply->error() != QNetworkReply::NetworkError::NoError)
             {
+                if (reply->error() ==
+                    QNetworkReply::NetworkError::OperationCanceledError)
+                {
+                    // Operation cancelled, most likely timed out
+                    qCDebug(chatterinoHTTP)
+                        << QString("%1 [cancelled] %2")
+                               .arg(networkRequestTypes.at(
+                                        int(data->requestType_)),
+                                    data->request_.url().toString());
+                    return;
+                }
+
                 if (data->onError_)
                 {
-                    auto error = reply->error();
-                    postToThread([data, error] {
-                        data->onError_(NetworkResult({}, error));
+                    auto status = reply->attribute(
+                        QNetworkRequest::HttpStatusCodeAttribute);
+                    if (data->requestType_ == NetworkRequestType::Get)
+                    {
+                        qCDebug(chatterinoHTTP)
+                            << QString("%1 %2 %3")
+                                   .arg(networkRequestTypes.at(
+                                            int(data->requestType_)),
+                                        QString::number(status.toInt()),
+                                        data->request_.url().toString());
+                    }
+                    else
+                    {
+                        qCDebug(chatterinoHTTP)
+                            << QString("%1 %2 %3 %4")
+                                   .arg(networkRequestTypes.at(
+                                            int(data->requestType_)),
+                                        QString::number(status.toInt()),
+                                        data->request_.url().toString(),
+                                        QString(data->payload_));
+                    }
+                    // TODO: Should this always be run on the GUI thread?
+                    postToThread([data, code = status.toInt(), reply] {
+                        data->onError_(NetworkResult(reply->readAll(), code));
+                    });
+                }
+
+                if (data->finally_)
+                {
+                    postToThread([data] {
+                        data->finally_();
                     });
                 }
                 return;
@@ -180,16 +245,50 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             if (data->onSuccess_)
             {
                 if (data->executeConcurrently_)
-                    QtConcurrent::run(
-                        [onSuccess = std::move(data->onSuccess_),
-                         result = std::move(result)] { onSuccess(result); });
+                    QtConcurrent::run([onSuccess = std::move(data->onSuccess_),
+                                       result = std::move(result)] {
+                        onSuccess(result);
+                    });
                 else
                     data->onSuccess_(result);
             }
             // log("finished {}", data->request_.url().toString());
 
             reply->deleteLater();
+
+            if (data->requestType_ == NetworkRequestType::Get)
+            {
+                qCDebug(chatterinoHTTP)
+                    << QString("%1 %2 %3")
+                           .arg(networkRequestTypes.at(int(data->requestType_)),
+                                QString::number(status.toInt()),
+                                data->request_.url().toString());
+            }
+            else
+            {
+                qCDebug(chatterinoHTTP)
+                    << QString("%1 %3 %2 %4")
+                           .arg(networkRequestTypes.at(int(data->requestType_)),
+                                data->request_.url().toString(),
+                                QString::number(status.toInt()),
+                                QString(data->payload_));
+            }
+            if (data->finally_)
+            {
+                if (data->executeConcurrently_)
+                    QtConcurrent::run([finally = std::move(data->finally_)] {
+                        finally();
+                    });
+                else
+                    data->finally_();
+            }
         };
+
+        if (data->timer_ != nullptr)
+        {
+            QObject::connect(reply, &QNetworkReply::finished, data->timer_,
+                             &QObject::deleteLater);
+        }
 
         QObject::connect(
             reply, &QNetworkReply::finished, worker,
@@ -233,6 +332,10 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
         QByteArray bytes = cachedFile.readAll();
         NetworkResult result(bytes, 200);
 
+        qCDebug(chatterinoHTTP)
+            << QString("%1 [CACHED] 200 %2")
+                   .arg(networkRequestTypes.at(int(data->requestType_)),
+                        data->request_.url().toString());
         if (data->onSuccess_)
         {
             if (data->executeConcurrently_ || isGuiThread())
@@ -255,6 +358,30 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
                     }
 
                     data->onSuccess_(result);
+                });
+            }
+        }
+
+        if (data->finally_)
+        {
+            if (data->executeConcurrently_ || isGuiThread())
+            {
+                if (data->hasCaller_ && !data->caller_.get())
+                {
+                    return;
+                }
+
+                data->finally_();
+            }
+            else
+            {
+                postToThread([data]() {
+                    if (data->hasCaller_ && !data->caller_.get())
+                    {
+                        return;
+                    }
+
+                    data->finally_();
                 });
             }
         }

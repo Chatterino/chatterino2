@@ -9,8 +9,10 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QApplication>
@@ -39,39 +41,40 @@ SplitContainer::SplitContainer(Notebook *parent)
 {
     this->refreshTabTitle();
 
-    this->managedConnect(Split::modifierStatusChanged, [this](auto modifiers) {
-        this->layout();
+    this->signalHolder_.managedConnect(
+        Split::modifierStatusChanged, [this](auto modifiers) {
+            this->layout();
 
-        if (modifiers == showResizeHandlesModifiers)
-        {
-            for (auto &handle : this->resizeHandles_)
+            if (modifiers == showResizeHandlesModifiers)
             {
-                handle->show();
-                handle->raise();
+                for (auto &handle : this->resizeHandles_)
+                {
+                    handle->show();
+                    handle->raise();
+                }
             }
-        }
-        else
-        {
-            for (auto &handle : this->resizeHandles_)
+            else
             {
-                handle->hide();
+                for (auto &handle : this->resizeHandles_)
+                {
+                    handle->hide();
+                }
             }
-        }
 
-        if (modifiers == showSplitOverlayModifiers)
-        {
-            this->setCursor(Qt::PointingHandCursor);
-        }
-        else
-        {
-            this->unsetCursor();
-        }
-    });
+            if (modifiers == showSplitOverlayModifiers)
+            {
+                this->setCursor(Qt::PointingHandCursor);
+            }
+            else
+            {
+                this->unsetCursor();
+            }
+        });
 
     this->setCursor(Qt::PointingHandCursor);
     this->setAcceptDrops(true);
 
-    this->managedConnect(this->overlay_.dragEnded, [this]() {
+    this->signalHolder_.managedConnect(this->overlay_.dragEnded, [this]() {
         this->isDragging_ = false;
         this->layout();
     });
@@ -121,7 +124,7 @@ Split *SplitContainer::appendNewSplit(bool openChannelNameDialog)
 
     if (openChannelNameDialog)
     {
-        split->showChangeChannelPopup("Open channel name", true, [=](bool ok) {
+        split->showChangeChannelPopup("Open channel", true, [=](bool ok) {
             if (!ok)
             {
                 this->deleteSplit(split);
@@ -159,8 +162,6 @@ void SplitContainer::insertSplit(Split *split, Direction direction,
     getApp()->windows->queueSave();
 
     assertInGuiThread();
-
-    split->setContainer(this);
 
     if (relativeTo == nullptr)
     {
@@ -205,25 +206,80 @@ void SplitContainer::addSplit(Split *split)
 
     split->setParent(this);
     split->show();
-    split->giveFocus(Qt::MouseFocusReason);
+    split->setFocus(Qt::FocusReason::MouseFocusReason);
     this->unsetCursor();
     this->splits_.push_back(split);
 
     this->refreshTab();
 
-    split->getChannelView().tabHighlightRequested.connect(
-        [this](HighlightState state) {
-            if (this->tab_ != nullptr)
+    auto &&conns = this->connectionsPerSplit_[split];
+
+    conns.managedConnect(split->getChannelView().tabHighlightRequested,
+                         [this](HighlightState state) {
+                             if (this->tab_ != nullptr)
+                             {
+                                 this->tab_->setHighlightState(state);
+                             }
+                         });
+
+    conns.managedConnect(split->getChannelView().liveStatusChanged, [this]() {
+        this->refreshTabLiveStatus();
+    });
+
+    conns.managedConnect(split->focused, [this, split] {
+        this->setSelected(split);
+    });
+
+    conns.managedConnect(split->openSplitRequested, [this](auto channel) {
+        this->appendNewSplit(false)->setChannel(channel);
+    });
+
+    conns.managedConnect(
+        split->actionRequested, [this, split](Split::Action action) {
+            switch (action)
             {
-                this->tab_->setHighlightState(state);
+                case Split::Action::RefreshTab:
+                    this->refreshTab();
+                    break;
+
+                case Split::Action::ResetMouseStatus:
+                    this->resetMouseStatus();
+                    break;
+
+                case Split::Action::AppendNewSplit:
+                    this->appendNewSplit(true);
+                    break;
+
+                case Split::Action::Delete: {
+                    this->deleteSplit(split);
+                    auto *tab = this->getTab();
+                    tab->connect(tab, &QWidget::destroyed, [tab]() mutable {
+                        ClosedSplits::invalidateTab(tab);
+                    });
+                    ClosedSplits::push({split->getChannel()->getName(),
+                                        split->getFilters(), tab});
+                }
+                break;
+
+                case Split::Action::SelectSplitLeft:
+                    this->selectNextSplit(SplitContainer::Left);
+                    break;
+                case Split::Action::SelectSplitRight:
+                    this->selectNextSplit(SplitContainer::Right);
+                    break;
+                case Split::Action::SelectSplitAbove:
+                    this->selectNextSplit(SplitContainer::Above);
+                    break;
+                case Split::Action::SelectSplitBelow:
+                    this->selectNextSplit(SplitContainer::Below);
+                    break;
             }
         });
 
-    split->getChannelView().liveStatusChanged.connect([this]() {
-        this->refreshTabLiveStatus();  //
+    conns.managedConnect(split->insertSplitRequested, [this](int dir,
+                                                             Split *parent) {
+        this->insertSplit(new Split(this), static_cast<Direction>(dir), parent);
     });
-
-    split->focused.connect([this, split] { this->setSelected(split); });
 
     this->layout();
 }
@@ -275,15 +331,12 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
     }
     else
     {
-        this->splits_.front()->giveFocus(Qt::MouseFocusReason);
+        this->splits_.front()->setFocus(Qt::FocusReason::MouseFocusReason);
     }
 
     this->refreshTab();
 
-    // fourtf: really bad
-    split->getChannelView().tabHighlightRequested.disconnectAll();
-
-    split->getChannelView().tabHighlightRequested.disconnectAll();
+    this->connectionsPerSplit_.erase(this->connectionsPerSplit_.find(split));
 
     return position;
 }
@@ -318,9 +371,10 @@ void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
         {
             auto &siblings = node->parent_->children_;
 
-            auto it = std::find_if(
-                siblings.begin(), siblings.end(),
-                [node](const auto &other) { return other.get() == node; });
+            auto it = std::find_if(siblings.begin(), siblings.end(),
+                                   [node](const auto &other) {
+                                       return other.get() == node;
+                                   });
             assert(it != siblings.end());
 
             if (direction == Direction::Left || direction == Direction::Above)
@@ -360,7 +414,7 @@ void SplitContainer::focusSplitRecursive(Node *node)
     switch (node->type_)
     {
         case Node::_Split: {
-            node->split_->giveFocus(Qt::OtherFocusReason);
+            node->split_->setFocus(Qt::FocusReason::OtherFocusReason);
         }
         break;
 
@@ -409,6 +463,11 @@ Split *SplitContainer::getTopRightSplit(Node &node)
 
 void SplitContainer::layout()
 {
+    if (this->disableLayouting_)
+    {
+        return;
+    }
+
     // update top right split
     auto topRight = this->getTopRightSplit(this->baseNode_);
     if (this->topRight_)
@@ -668,7 +727,7 @@ void SplitContainer::focusInEvent(QFocusEvent *)
         return;
     }
 
-    if (this->splits_.size() != 0)
+    if (!this->splits_.empty())
     {
         this->splits_.front()->setFocus();
     }
@@ -699,7 +758,37 @@ void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
 {
     assert(this->baseNode_.type_ == Node::EmptyRoot);
 
+    this->disableLayouting_ = true;
     this->applyFromDescriptorRecursively(rootNode, &this->baseNode_);
+    this->disableLayouting_ = false;
+    this->layout();
+}
+
+void SplitContainer::popup()
+{
+    Window &window = getApp()->windows->createWindow(WindowType::Popup);
+    auto popupContainer = window.getNotebook().getOrAddSelectedPage();
+
+    QJsonObject encodedTab;
+    WindowManager::encodeTab(this, true, encodedTab);
+    TabDescriptor tab = TabDescriptor::loadFromJSON(encodedTab);
+
+    // custom title
+    if (!tab.customTitle_.isEmpty())
+    {
+        popupContainer->getTab()->setCustomTitle(tab.customTitle_);
+    }
+
+    // highlighting on new messages
+    popupContainer->getTab()->setHighlightsEnabled(tab.highlightsEnabled_);
+
+    // splits
+    if (tab.rootNode_)
+    {
+        popupContainer->applyFromDescriptor(*tab.rootNode_);
+    }
+
+    window.show();
 }
 
 void SplitContainer::applyFromDescriptorRecursively(
@@ -716,6 +805,7 @@ void SplitContainer::applyFromDescriptorRecursively(
         auto *split = new Split(this);
         split->setChannel(WindowManager::decodeChannel(splitNode));
         split->setModerationMode(splitNode.moderationMode_);
+        split->setFilters(splitNode.filters_);
 
         this->appendSplit(split);
     }
@@ -729,8 +819,6 @@ void SplitContainer::applyFromDescriptorRecursively(
         const auto &containerNode = *n;
 
         bool vertical = containerNode.vertical_;
-
-        Direction direction = vertical ? Direction::Below : Direction::Right;
 
         node->type_ =
             vertical ? Node::VerticalContainer : Node::HorizontalContainer;
@@ -748,6 +836,7 @@ void SplitContainer::applyFromDescriptorRecursively(
                 auto *split = new Split(this);
                 split->setChannel(WindowManager::decodeChannel(splitNode));
                 split->setModerationMode(splitNode.moderationMode_);
+                split->setFilters(splitNode.filters_);
 
                 Node *_node = new Node();
                 _node->parent_ = node;
@@ -764,6 +853,13 @@ void SplitContainer::applyFromDescriptorRecursively(
             {
                 Node *_node = new Node();
                 _node->parent_ = node;
+
+                if (auto *n = std::get_if<ContainerNodeDescriptor>(&item))
+                {
+                    _node->flexH_ = n->flexH_;
+                    _node->flexV_ = n->flexV_;
+                }
+
                 node->children_.emplace_back(_node);
                 this->applyFromDescriptorRecursively(item, _node);
             }
@@ -783,7 +879,7 @@ void SplitContainer::refreshTabTitle()
 
     for (const auto &chatWidget : this->splits_)
     {
-        auto channelName = chatWidget->getChannel()->getName();
+        auto channelName = chatWidget->getChannel()->getLocalizedName();
         if (channelName.isEmpty())
         {
             continue;
@@ -991,8 +1087,10 @@ void SplitContainer::Node::insertNextToThis(Split *_split, Direction _direction)
         this->geometry_ = QRect(0, 0, int(width), int(height));
     }
 
-    auto it = std::find_if(siblings.begin(), siblings.end(),
-                           [this](auto &node) { return this == node.get(); });
+    auto it =
+        std::find_if(siblings.begin(), siblings.end(), [this](auto &node) {
+            return this == node.get();
+        });
 
     assert(it != siblings.end());
     if (_direction == Direction::Right || _direction == Direction::Below)
@@ -1033,8 +1131,9 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
         auto &siblings = this->parent_->children_;
 
         auto it =
-            std::find_if(begin(siblings), end(siblings),
-                         [this](auto &node) { return this == node.get(); });
+            std::find_if(begin(siblings), end(siblings), [this](auto &node) {
+                return this == node.get();
+            });
         assert(it != siblings.end());
 
         Position position;

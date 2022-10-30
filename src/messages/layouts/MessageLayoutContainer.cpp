@@ -43,8 +43,8 @@ void MessageLayoutContainer::begin(int width, float scale, MessageFlags flags)
     auto mediumFontMetrics =
         getApp()->fonts->getFontMetrics(FontStyle::ChatMedium, scale);
     this->textLineHeight_ = mediumFontMetrics.height();
-    this->spaceWidth_ = mediumFontMetrics.width(' ');
-    this->dotdotdotWidth_ = mediumFontMetrics.width("...");
+    this->spaceWidth_ = mediumFontMetrics.horizontalAdvance(' ');
+    this->dotdotdotWidth_ = mediumFontMetrics.horizontalAdvance("...");
     this->canAddMessages_ = true;
     this->isCollapsed_ = false;
 }
@@ -65,7 +65,10 @@ void MessageLayoutContainer::clear()
 
 void MessageLayoutContainer::addElement(MessageLayoutElement *element)
 {
-    if (!this->fitsInLine(element->getRect().width()))
+    bool isZeroWidth =
+        element->getFlags().has(MessageElementFlag::ZeroWidthEmote);
+
+    if (!isZeroWidth && !this->fitsInLine(element->getRect().width()))
     {
         this->breakLine();
     }
@@ -93,6 +96,37 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         return;
     }
 
+    // This lambda contains the logic for when to step one 'space width' back for compact x emotes
+    auto shouldRemoveSpaceBetweenEmotes = [this]() -> bool {
+        if (this->elements_.empty())
+        {
+            // No previous element found
+            return false;
+        }
+
+        const auto &lastElement = this->elements_.back();
+
+        if (!lastElement)
+        {
+            return false;
+        }
+
+        if (!lastElement->hasTrailingSpace())
+        {
+            // Last element did not have a trailing space, so we don't need to do anything.
+            return false;
+        }
+
+        if (lastElement->getLine() != this->line_)
+        {
+            // Last element was not on the same line as us
+            return false;
+        }
+
+        // Returns true if the last element was an emote image
+        return lastElement->getFlags().has(MessageElementFlag::EmoteImages);
+    };
+
     // top margin
     if (this->elements_.size() == 0)
     {
@@ -116,9 +150,10 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     this->lineHeight_ = std::max(this->lineHeight_, newLineHeight);
 
     auto xOffset = 0;
+    bool isZeroWidthEmote = element->getCreator().getFlags().has(
+        MessageElementFlag::ZeroWidthEmote);
 
-    if (element->getCreator().getFlags().has(
-            MessageElementFlag::ZeroWidthEmote))
+    if (isZeroWidthEmote)
     {
         xOffset -= element->getRect().width() + this->spaceWidth_;
     }
@@ -133,17 +168,26 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         yOffset -= (this->margin.top * this->scale_);
     }
 
+    if (getSettings()->removeSpacesBetweenEmotes &&
+        element->getFlags().hasAny({MessageElementFlag::EmoteImages}) &&
+        !isZeroWidthEmote && shouldRemoveSpaceBetweenEmotes())
+    {
+        // Move cursor one 'space width' to the left to combine hug the previous emote
+        this->currentX_ -= this->spaceWidth_;
+    }
+
     // set move element
     element->setPosition(
         QPoint(this->currentX_ + xOffset,
                this->currentY_ - element->getRect().height() + yOffset));
 
+    element->setLine(this->line_);
+
     // add element
     this->elements_.push_back(std::unique_ptr<MessageLayoutElement>(element));
 
     // set current x
-    if (!element->getCreator().getFlags().has(
-            MessageElementFlag::ZeroWidthEmote))
+    if (!isZeroWidthEmote)
     {
         this->currentX_ += element->getRect().width();
     }
@@ -390,7 +434,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                     // ends in same line
                     if (selection.selectionMax.messageIndex == messageIndex &&
                         line.endCharIndex >
-                            /*=*/selection.selectionMax.charIndex)  //
+                            /*=*/selection.selectionMax.charIndex)
                     {
                         returnAfter = true;
                         index = line.startCharIndex;
@@ -617,6 +661,14 @@ void MessageLayoutContainer::addSelectionText(QString &str, int from, int to,
 
     for (auto &element : this->elements_)
     {
+        if (copymode != CopyMode::Everything &&
+            element->getCreator().getFlags().has(
+                MessageElementFlag::RepliedMessage))
+        {
+            // Don't include the message being replied to
+            continue;
+        }
+
         if (copymode == CopyMode::OnlyTextAndEmotes)
         {
             if (element->getCreator().getFlags().hasAny(

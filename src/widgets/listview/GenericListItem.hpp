@@ -1,5 +1,10 @@
 #pragma once
 
+#include <QIcon>
+#include <QPainter>
+#include <QRect>
+#include <QVariant>
+
 namespace chatterino {
 
 class GenericListItem

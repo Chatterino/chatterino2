@@ -1,6 +1,7 @@
 #include "HighlightingPage.hpp"
 
 #include "Application.hpp"
+#include "controllers/highlights/BadgeHighlightModel.hpp"
 #include "controllers/highlights/HighlightBlacklistModel.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
 #include "controllers/highlights/UserHighlightModel.hpp"
@@ -8,6 +9,7 @@
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/StandardItemHelper.hpp"
+#include "widgets/dialogs/BadgePickerDialog.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 
 #include <QFileDialog>
@@ -27,6 +29,22 @@
 
 namespace chatterino {
 
+namespace {
+    // Add additional badges for highlights here
+    QList<DisplayBadge> availableBadges = {
+        {"Broadcaster", "broadcaster"},
+        {"Admin", "admin"},
+        {"Staff", "staff"},
+        {"Moderator", "moderator"},
+        {"Verified", "partner"},
+        {"VIP", "vip"},
+        {"Founder", "founder"},
+        {"Subscriber", "subscriber"},
+        {"Predicted Blue", "predictions/blue-1,predictions/blue-2"},
+        {"Predicted Pink", "predictions/pink-2,predictions/pink-1"},
+    };
+}  // namespace
+
 HighlightingPage::HighlightingPage()
 {
     LayoutCreator<HighlightingPage> layoutCreator(this);
@@ -45,7 +63,9 @@ HighlightingPage::HighlightingPage()
             {
                 highlights.emplace<QLabel>(
                     "Play notification sounds and highlight messages based on "
-                    "certain patterns.");
+                    "certain patterns.\n"
+                    "Message highlights are prioritized over badge highlights, "
+                    "but under user highlights");
 
                 auto view =
                     highlights
@@ -55,7 +75,8 @@ HighlightingPage::HighlightingPage()
                                     &getSettings()->highlightedMessages))
                         .getElement();
                 view->addRegexHelpLink();
-                view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
+                view->setTitles({"Pattern", "Show in\nMentions",
+                                 "Flash\ntaskbar", "Play\nsound",
                                  "Enable\nregex", "Case-\nsensitive",
                                  "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -72,14 +93,15 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getSettings()->highlightedMessages.append(HighlightPhrase{
-                        "my phrase", true, false, false, false, "",
+                        "my phrase", true, true, false, false, false, "",
                         *ColorProvider::instance().color(
                             ColorType::SelfHighlight)});
                 });
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
                                  [this, view](const QModelIndex &clicked) {
-                                     this->tableCellClicked(clicked, view);
+                                     this->tableCellClicked(
+                                         clicked, view, HighlightTab::Messages);
                                  });
             }
 
@@ -88,7 +110,7 @@ HighlightingPage::HighlightingPage()
                 pingUsers.emplace<QLabel>(
                     "Play notification sounds and highlight messages from "
                     "certain users.\n"
-                    "User highlights are prioritized over message "
+                    "User highlights are prioritized over message and badge "
                     "highlights.");
                 EditableModelView *view =
                     pingUsers
@@ -98,11 +120,14 @@ HighlightingPage::HighlightingPage()
                         .getElement();
 
                 view->addRegexHelpLink();
-                view->getTableView()->horizontalHeader()->hideSection(4);
-
+                view->getTableView()->horizontalHeader()->hideSection(
+                    HighlightModel::Column::UseRegex);
+                view->getTableView()->horizontalHeader()->hideSection(
+                    HighlightModel::Column::CaseSensitive);
                 // Case-sensitivity doesn't make sense for user names so it is
                 // set to "false" by default & the column is hidden
-                view->setTitles({"Username", "Flash\ntaskbar", "Play\nsound",
+                view->setTitles({"Username", "Show in\nMentions",
+                                 "Flash\ntaskbar", "Play\nsound",
                                  "Enable\nregex", "Case-\nsensitive",
                                  "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -119,14 +144,69 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getSettings()->highlightedUsers.append(HighlightPhrase{
-                        "highlighted user", true, false, false, false, "",
+                        "highlighted user", true, true, false, false, false, "",
                         *ColorProvider::instance().color(
                             ColorType::SelfHighlight)});
                 });
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
                                  [this, view](const QModelIndex &clicked) {
-                                     this->tableCellClicked(clicked, view);
+                                     this->tableCellClicked(
+                                         clicked, view, HighlightTab::Users);
+                                 });
+            }
+
+            auto badgeHighlights = tabs.appendTab(new QVBoxLayout, "Badges");
+            {
+                badgeHighlights.emplace<QLabel>(
+                    "Play notification sounds and highlight messages based on "
+                    "user badges.\n"
+                    "Badge highlights are prioritzed under user and message "
+                    "highlights.");
+                auto view = badgeHighlights
+                                .emplace<EditableModelView>(
+                                    (new BadgeHighlightModel(nullptr))
+                                        ->initialized(
+                                            &getSettings()->highlightedBadges))
+                                .getElement();
+                view->setTitles({"Name", "Show In\nMentions", "Flash\ntaskbar",
+                                 "Play\nsound", "Custom\nsound", "Color"});
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                    QHeaderView::Fixed);
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                    0, QHeaderView::Stretch);
+
+                // fourtf: make class extrend BaseWidget and add this to
+                // dpiChanged
+                QTimer::singleShot(1, [view] {
+                    view->getTableView()->resizeColumnsToContents();
+                    view->getTableView()->setColumnWidth(0, 200);
+                });
+
+                view->addButtonPressed.connect([this] {
+                    auto d = std::make_shared<BadgePickerDialog>(
+                        availableBadges, this);
+
+                    d->setWindowTitle("Choose badge");
+                    if (d->exec() == QDialog::Accepted)
+                    {
+                        auto s = d->getSelection();
+                        if (!s)
+                        {
+                            return;
+                        }
+                        getSettings()->highlightedBadges.append(
+                            HighlightBadge{s->badgeName(), s->displayName(),
+                                           false, false, false, "",
+                                           *ColorProvider::instance().color(
+                                               ColorType::SelfHighlight)});
+                    }
+                });
+
+                QObject::connect(view->getTableView(), &QTableView::clicked,
+                                 [this, view](const QModelIndex &clicked) {
+                                     this->tableCellClicked(
+                                         clicked, view, HighlightTab::Badges);
                                  });
             }
 
@@ -199,81 +279,106 @@ HighlightingPage::HighlightingPage()
         layout.append(createCheckBox(ALWAYS_PLAY,
                                      getSettings()->highlightAlwaysPlaySound));
         layout.append(createCheckBox(
-            "Flash taskbar only stops highlighting when chatterino is focused",
+            "Flash taskbar only stops highlighting when Chatterino is focused",
             getSettings()->longAlerts));
     }
 
     // ---- misc
     this->disabledUsersChangedTimer_.setSingleShot(true);
-}  // namespace chatterino
+}
 
-void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
-                                        EditableModelView *view)
+void HighlightingPage::openSoundDialog(const QModelIndex &clicked,
+                                       EditableModelView *view, int soundColumn)
 {
-    using Column = HighlightModel::Column;
+    auto fileUrl = QFileDialog::getOpenFileUrl(this, tr("Open Sound"), QUrl(),
+                                               tr("Audio Files (*.mp3 *.wav)"));
+    view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
+    view->getModel()->setData(clicked, fileUrl.fileName(), Qt::DisplayRole);
 
-    if (clicked.column() == Column::SoundPath)
+    // Enable custom sound check box if user set a sound
+    if (!fileUrl.isEmpty())
     {
-        auto fileUrl = QFileDialog::getOpenFileUrl(
-            this, tr("Open Sound"), QUrl(), tr("Audio Files (*.mp3 *.wav)"));
-        view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
-        view->getModel()->setData(clicked, fileUrl.fileName(), Qt::DisplayRole);
-
-        // Enable custom sound check box if user set a sound
-        if (!fileUrl.isEmpty())
-        {
-            QModelIndex checkBox = clicked.siblingAtColumn(Column::PlaySound);
-            view->getModel()->setData(checkBox, Qt::Checked,
-                                      Qt::CheckStateRole);
-        }
+        QModelIndex checkBox = clicked.siblingAtColumn(soundColumn);
+        view->getModel()->setData(checkBox, Qt::Checked, Qt::CheckStateRole);
     }
-    else if (clicked.column() == Column::Color)
-    {
-        // Hacky (?) way to figure out what tab the cell was clicked in
-        const bool fromMessagesTab =
-            (dynamic_cast<HighlightModel *>(view->getModel()) != nullptr);
+}
 
-        if (fromMessagesTab && clicked.row() == HighlightModel::WHISPER_ROW)
-            return;
+void HighlightingPage::openColorDialog(const QModelIndex &clicked,
+                                       EditableModelView *view,
+                                       HighlightTab tab)
+{
+    auto initial =
+        view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
 
-        auto initial =
-            view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
+    auto dialog = new ColorPickerDialog(initial, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
+    dialog->closed.connect([=](auto selected) {
+        if (selected.isValid())
+        {
+            view->getModel()->setData(clicked, selected, Qt::DecorationRole);
 
-        auto dialog = new ColorPickerDialog(initial, this);
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-        dialog->show();
-        dialog->closed.connect([=] {
-            QColor selected = dialog->selectedColor();
-
-            if (selected.isValid())
+            if (tab == HighlightTab::Messages)
             {
-                view->getModel()->setData(clicked, selected,
-                                          Qt::DecorationRole);
-
-                if (fromMessagesTab)
+                /*
+                 * For preset highlights in the "Messages" tab, we need to
+                 * manually update the color map.
+                 */
+                auto instance = ColorProvider::instance();
+                switch (clicked.row())
                 {
-                    /*
-                     * For preset highlights in the "Messages" tab, we need to
-                     * manually update the color map.
-                     */
-                    auto instance = ColorProvider::instance();
-                    switch (clicked.row())
-                    {
-                        case 0:
-                            instance.updateColor(ColorType::SelfHighlight,
-                                                 selected);
-                            break;
-                        case 1:
-                            instance.updateColor(ColorType::Whisper, selected);
-                            break;
-                        case 2:
-                            instance.updateColor(ColorType::Subscription,
-                                                 selected);
-                            break;
-                    }
+                    case 0:
+                        instance.updateColor(ColorType::SelfHighlight,
+                                             selected);
+                        break;
+                    case 1:
+                        instance.updateColor(ColorType::Whisper, selected);
+                        break;
+                    case 2:
+                        instance.updateColor(ColorType::Subscription, selected);
+                        break;
                 }
             }
-        });
+        }
+    });
+}
+
+void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
+                                        EditableModelView *view,
+                                        HighlightTab tab)
+{
+    switch (tab)
+    {
+        case HighlightTab::Messages:
+        case HighlightTab::Users: {
+            using Column = HighlightModel::Column;
+            bool restrictColorRow =
+                (tab == HighlightTab::Messages &&
+                 clicked.row() ==
+                     HighlightModel::HighlightRowIndexes::WhisperRow);
+            if (clicked.column() == Column::SoundPath)
+            {
+                this->openSoundDialog(clicked, view, Column::SoundPath);
+            }
+            else if (clicked.column() == Column::Color && !restrictColorRow)
+            {
+                this->openColorDialog(clicked, view, tab);
+            }
+        }
+        break;
+
+        case HighlightTab::Badges: {
+            using Column = BadgeHighlightModel::Column;
+            if (clicked.column() == Column::SoundPath)
+            {
+                this->openSoundDialog(clicked, view, Column::SoundPath);
+            }
+            else if (clicked.column() == Column::Color)
+            {
+                this->openColorDialog(clicked, view, tab);
+            }
+        }
+        break;
     }
 }
 

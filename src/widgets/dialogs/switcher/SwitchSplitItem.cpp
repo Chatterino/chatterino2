@@ -7,31 +7,23 @@
 
 namespace chatterino {
 
-SwitchSplitItem::SwitchSplitItem(Split *split)
-    : AbstractSwitcherItem(QIcon(":switcher/switch.svg"))
-    , split_(split)
-    , container_(split->getContainer())
-{
-}
-
-SwitchSplitItem::SwitchSplitItem(SplitContainer *container)
+SwitchSplitItem::SwitchSplitItem(SplitContainer *container, Split *split)
     : AbstractSwitcherItem(QIcon(":switcher/switch.svg"))
     , container_(container)
+    , split_(split)
 {
+    assert(this->container_ != nullptr);
 }
 
 void SwitchSplitItem::action()
 {
-    auto &nb = getApp()->windows->getMainWindow().getNotebook();
-    nb.select(this->container_);
-
-    /*
-     * If the item is referring to a specific channel, select the
-     * corresponding split.
-     */
     if (this->split_)
     {
-        this->container_->setSelected(this->split_);
+        getApp()->windows->select(this->split_);
+    }
+    else if (this->container_)
+    {
+        getApp()->windows->select(this->container_);
     }
 }
 

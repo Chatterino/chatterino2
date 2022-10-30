@@ -9,11 +9,11 @@
 #include "util/CombinePath.hpp"
 #include "util/PostToThread.hpp"
 
-#include <QDebug>
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QProcess>
 #include <QRegularExpression>
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {
@@ -59,7 +59,7 @@ Updates::Updates()
     : currentVersion_(CHATTERINO_VERSION)
     , updateGuideLink_("https://chatterino.com")
 {
-    qDebug() << "init UpdateManager";
+    qCDebug(chatterinoUpdate) << "init UpdateManager";
 }
 
 Updates &Updates::instance()
@@ -232,21 +232,27 @@ void Updates::installUpdates()
 
 void Updates::checkForUpdates()
 {
-    if (!Version::instance().isSupportedOS())
+    auto version = Version::instance();
+
+    if (!version.isSupportedOS())
     {
-        qDebug()
+        qCDebug(chatterinoUpdate)
             << "Update checking disabled because OS doesn't appear to be one "
                "of Windows, GNU/Linux or macOS.";
         return;
     }
 
-    // Disable updates if on nightly and windows.
-#ifdef Q_OS_WIN
+    // Disable updates on Flatpak
+    if (version.isFlatpak())
+    {
+        return;
+    }
+
+    // Disable updates if on nightly
     if (Modes::instance().isNightly)
     {
         return;
     }
-#endif
 
     QString url =
         "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/" +
@@ -262,7 +268,7 @@ void Updates::checkForUpdates()
             if (!version_val.isString())
             {
                 this->setStatus_(SearchFailed);
-                qDebug() << "error updating";
+                qCDebug(chatterinoUpdate) << "error updating";
                 return Failure;
             }
 
@@ -272,7 +278,7 @@ void Updates::checkForUpdates()
             if (!updateExe_val.isString())
             {
                 this->setStatus_(SearchFailed);
-                qDebug() << "error updating";
+                qCDebug(chatterinoUpdate) << "error updating";
                 return Failure;
             }
             this->updateExe_ = updateExe_val.toString();
@@ -283,7 +289,7 @@ void Updates::checkForUpdates()
             if (!portable_val.isString())
             {
                 this->setStatus_(SearchFailed);
-                qDebug() << "error updating";
+                qCDebug(chatterinoUpdate) << "error updating";
                 return Failure;
             }
             this->updatePortable_ = portable_val.toString();
@@ -364,7 +370,9 @@ void Updates::setStatus_(Status status)
     if (this->status_ != status)
     {
         this->status_ = status;
-        postToThread([this, status] { this->statusUpdated.invoke(status); });
+        postToThread([this, status] {
+            this->statusUpdated.invoke(status);
+        });
     }
 }
 

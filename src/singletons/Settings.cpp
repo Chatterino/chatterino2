@@ -18,16 +18,22 @@ ConcurrentSettings::ConcurrentSettings()
     // NOTE: these do not get deleted
     : highlightedMessages(*new SignalVector<HighlightPhrase>())
     , highlightedUsers(*new SignalVector<HighlightPhrase>())
+    , highlightedBadges(*new SignalVector<HighlightBadge>())
     , blacklistedUsers(*new SignalVector<HighlightBlacklistUser>())
     , ignoredMessages(*new SignalVector<IgnorePhrase>())
     , mutedChannels(*new SignalVector<QString>())
+    , filterRecords(*new SignalVector<FilterRecordPtr>())
+    , nicknames(*new SignalVector<Nickname>())
     , moderationActions(*new SignalVector<ModerationAction>)
 {
     persist(this->highlightedMessages, "/highlighting/highlights");
     persist(this->blacklistedUsers, "/highlighting/blacklist");
+    persist(this->highlightedBadges, "/highlighting/badges");
     persist(this->highlightedUsers, "/highlighting/users");
     persist(this->ignoredMessages, "/ignore/phrases");
     persist(this->mutedChannels, "/pings/muted");
+    persist(this->filterRecords, "/filtering/filters");
+    persist(this->nicknames, "/nicknames");
     // tagged users?
     persist(this->moderationActions, "/moderation/actions");
 }
@@ -123,7 +129,10 @@ Settings::Settings(const QString &settingsDirectory)
 #ifdef USEWINSDK
     this->autorun = isRegisteredForStartup();
     this->autorun.connect(
-        [](bool autorun) { setRegisteredForStartup(autorun); }, false);
+        [](bool autorun) {
+            setRegisteredForStartup(autorun);
+        },
+        false);
 #endif
 }
 

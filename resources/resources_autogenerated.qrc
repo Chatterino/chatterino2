@@ -1,14 +1,31 @@
 <RCC>
-  <qresource prefix="/">    <file>.gitignore</file>
+  <qresource prefix="/">
+    <file>avatars/_1xelerate.png</file>
+    <file>avatars/alazymeme.png</file>
+    <file>avatars/brian6932.png</file>
+    <file>avatars/explooosion_code.png</file>
     <file>avatars/fourtf.png</file>
+    <file>avatars/hicupalot.png</file>
+    <file>avatars/iprodigy.png</file>
+    <file>avatars/jaxkey.png</file>
+    <file>avatars/kararty.png</file>
+    <file>avatars/karlpolice.png</file>
+    <file>avatars/matthewde.jpg</file>
+    <file>avatars/mm2pl.png</file>
     <file>avatars/pajlada.png</file>
+    <file>avatars/revolter.jpg</file>
+    <file>avatars/slch.png</file>
+    <file>avatars/xheaveny.png</file>
+    <file>avatars/zneix.png</file>
     <file>buttons/addSplit.png</file>
     <file>buttons/addSplitDark.png</file>
     <file>buttons/ban.png</file>
     <file>buttons/banRed.png</file>
+    <file>buttons/cancel.svg</file>
+    <file>buttons/cancelDark.svg</file>
+    <file>buttons/clearSearch.png</file>
     <file>buttons/copyDark.png</file>
     <file>buttons/copyDark.svg</file>
-    <file>buttons/copyDarkTheme.png</file>
     <file>buttons/copyLight.png</file>
     <file>buttons/copyLight.svg</file>
     <file>buttons/emote.svg</file>
@@ -20,6 +37,10 @@
     <file>buttons/modModeDisabled2.png</file>
     <file>buttons/modModeEnabled.png</file>
     <file>buttons/modModeEnabled2.png</file>
+    <file>buttons/replyDark.png</file>
+    <file>buttons/replyDark.svg</file>
+    <file>buttons/replyThreadDark.png</file>
+    <file>buttons/replyThreadDark.svg</file>
     <file>buttons/search.png</file>
     <file>buttons/timeout.png</file>
     <file>buttons/trashCan.png</file>
@@ -37,7 +58,6 @@
     <file>com.chatterino.chatterino.desktop</file>
     <file>contributors.txt</file>
     <file>emoji.json</file>
-    <file>emojidata.txt</file>
     <file>error.png</file>
     <file>examples/moving.gif</file>
     <file>examples/splitting.gif</file>
@@ -46,6 +66,8 @@
     <file>licenses/boost_boost.txt</file>
     <file>licenses/emoji-data-source.txt</file>
     <file>licenses/libcommuni_BSD3.txt</file>
+    <file>licenses/lrucache.txt</file>
+    <file>licenses/magic_enum.txt</file>
     <file>licenses/openssl.txt</file>
     <file>licenses/pajlada_settings.txt</file>
     <file>licenses/pajlada_signals.txt</file>
@@ -70,6 +92,7 @@
     <file>settings/commands.svg</file>
     <file>settings/emote.svg</file>
     <file>settings/externaltools.svg</file>
+    <file>settings/filters.svg</file>
     <file>settings/ignore.svg</file>
     <file>settings/keybinds.svg</file>
     <file>settings/moderation.svg</file>
@@ -84,6 +107,7 @@
     <file>split/up.png</file>
     <file>streamerMode.png</file>
     <file>switcher/plus.svg</file>
+    <file>switcher/popup.svg</file>
     <file>switcher/switch.svg</file>
     <file>tlds.txt</file>
     <file>twitch/admin.png</file>

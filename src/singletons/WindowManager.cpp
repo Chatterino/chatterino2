@@ -11,8 +11,10 @@
 #include <boost/optional.hpp>
 #include <chrono>
 
+#include <QMessageBox>
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/irc/Irc2.hpp"
@@ -26,6 +28,7 @@
 #include "util/Clamp.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
+#include "widgets/FramelessEmbedWindow.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -36,8 +39,6 @@
 namespace chatterino {
 namespace {
 
-    const QString WINDOW_LAYOUT_FILENAME(QStringLiteral("window-layout.json"));
-
     boost::optional<bool> &shouldMoveOutOfBoundsWindow()
     {
         static boost::optional<bool> x;
@@ -46,13 +47,27 @@ namespace {
 
 }  // namespace
 
+const QString WindowManager::WINDOW_LAYOUT_FILENAME(
+    QStringLiteral("window-layout.json"));
+
 using SplitNode = SplitContainer::Node;
 using SplitDirection = SplitContainer::Direction;
 
-void WindowManager::showSettingsDialog(SettingsDialogPreference preference)
+void WindowManager::showSettingsDialog(QWidget *parent,
+                                       SettingsDialogPreference preference)
 {
-    QTimer::singleShot(
-        80, [preference] { SettingsDialog::showDialog(preference); });
+    if (getArgs().dontSaveSettings)
+    {
+        QMessageBox::critical(parent, "Chatterino - Editing Settings Forbidden",
+                              "Settings cannot be edited when running with\n"
+                              "commandline arguments such as '-c'.");
+    }
+    else
+    {
+        QTimer::singleShot(80, [parent, preference] {
+            SettingsDialog::showDialog(parent, preference);
+        });
+    }
 }
 
 void WindowManager::showAccountSelectPopup(QPoint point)
@@ -80,24 +95,28 @@ void WindowManager::showAccountSelectPopup(QPoint point)
 }
 
 WindowManager::WindowManager()
-    : windowLayoutFilePath(
-          combinePath(getPaths()->settingsDirectory, WINDOW_LAYOUT_FILENAME))
+    : windowLayoutFilePath(combinePath(getPaths()->settingsDirectory,
+                                       WindowManager::WINDOW_LAYOUT_FILENAME))
 {
-    qDebug() << "init WindowManager";
+    qCDebug(chatterinoWindowmanager) << "init WindowManager";
 
     auto settings = getSettings();
 
     this->wordFlagsListener_.addSetting(settings->showTimestamps);
     this->wordFlagsListener_.addSetting(settings->showBadgesGlobalAuthority);
+    this->wordFlagsListener_.addSetting(settings->showBadgesPredictions);
     this->wordFlagsListener_.addSetting(settings->showBadgesChannelAuthority);
     this->wordFlagsListener_.addSetting(settings->showBadgesSubscription);
     this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
     this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
+    this->wordFlagsListener_.addSetting(settings->showBadgesFfz);
+    this->wordFlagsListener_.addSetting(settings->showBadgesSevenTV);
     this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
+    this->wordFlagsListener_.addSetting(settings->showReplyButton);
     this->wordFlagsListener_.setCB([this] {
-        this->updateWordTypeMask();  //
+        this->updateWordTypeMask();
     });
 
     this->saveTimer = new QTimer;
@@ -105,15 +124,17 @@ WindowManager::WindowManager()
     this->saveTimer->setSingleShot(true);
 
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
-        getApp()->windows->save();  //
+        getApp()->windows->save();
     });
 
     this->miscUpdateTimer_.start(100);
 
     QObject::connect(&this->miscUpdateTimer_, &QTimer::timeout, [this] {
-        this->miscUpdate.invoke();  //
+        this->miscUpdate.invoke();
     });
 }
+
+WindowManager::~WindowManager() = default;
 
 MessageElementFlags WindowManager::getWordFlags()
 {
@@ -149,6 +170,8 @@ void WindowManager::updateWordTypeMask()
     // badges
     flags.set(settings->showBadgesGlobalAuthority ? MEF::BadgeGlobalAuthority
                                                   : MEF::None);
+    flags.set(settings->showBadgesPredictions ? MEF::BadgePredictions
+                                              : MEF::None);
     flags.set(settings->showBadgesChannelAuthority ? MEF::BadgeChannelAuthority
                                                    : MEF::None);
     flags.set(settings->showBadgesSubscription ? MEF::BadgeSubscription
@@ -156,9 +179,15 @@ void WindowManager::updateWordTypeMask()
     flags.set(settings->showBadgesVanity ? MEF::BadgeVanity : MEF::None);
     flags.set(settings->showBadgesChatterino ? MEF::BadgeChatterino
                                              : MEF::None);
+    flags.set(settings->showBadgesFfz ? MEF::BadgeFfz : MEF::None);
+    flags.set(settings->showBadgesSevenTV ? MEF::BadgeSevenTV : MEF::None);
 
     // username
     flags.set(MEF::Username);
+
+    // replies
+    flags.set(MEF::RepliedMessage);
+    flags.set(settings->showReplyButton ? MEF::ReplyButton : MEF::None);
 
     // misc
     flags.set(MEF::AlwaysShow);
@@ -222,11 +251,31 @@ Window &WindowManager::getSelectedWindow()
     return *this->selectedWindow_;
 }
 
-Window &WindowManager::createWindow(WindowType type, bool show)
+Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
 {
     assertInGuiThread();
 
-    auto *window = new Window(type);
+    auto *const realParent = [this, type, parent]() -> QWidget * {
+        if (parent)
+        {
+            // If a parent is explicitly specified, we use that immediately.
+            return parent;
+        }
+
+        if (type == WindowType::Popup)
+        {
+            // On some window managers, popup windows require a parent to behave correctly. See
+            // https://github.com/Chatterino/chatterino2/pull/1843 for additional context.
+            return &(this->getMainWindow());
+        }
+
+        // If no parent is set and something other than a popup window is being created, we fall
+        // back to the default behavior of no parent.
+        return nullptr;
+    }();
+
+    auto *window = new Window(type, realParent);
+
     this->windows_.push_back(window);
     if (show)
     {
@@ -253,22 +302,29 @@ Window &WindowManager::createWindow(WindowType type, bool show)
     return *window;
 }
 
-int WindowManager::windowCount()
+Window &WindowManager::openInPopup(ChannelPtr channel)
 {
-    return this->windows_.size();
+    auto &popup = this->createWindow(WindowType::Popup, true);
+    auto *split =
+        popup.getNotebook().getOrAddSelectedPage()->appendNewSplit(false);
+    split->setChannel(channel);
+
+    return popup;
 }
 
-Window *WindowManager::windowAt(int index)
+void WindowManager::select(Split *split)
 {
-    assertInGuiThread();
+    this->selectSplit.invoke(split);
+}
 
-    if (index < 0 || (size_t)index >= this->windows_.size())
-    {
-        return nullptr;
-    }
-    qDebug() << "getting window at bad index" << index;
+void WindowManager::select(SplitContainer *container)
+{
+    this->selectSplitContainer.invoke(container);
+}
 
-    return this->windows_.at(index);
+void WindowManager::scrollToMessage(const MessagePtr &message)
+{
+    this->scrollToMessageSignal.invoke(message);
 }
 
 QPoint WindowManager::emotePopupPos()
@@ -285,42 +341,71 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 {
     assertInGuiThread();
 
-    getApp()->themes->repaintVisibleChatWidgets_.connect(
-        [this] { this->repaintVisibleChatWidgets(); });
+    getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
+        this->repaintVisibleChatWidgets();
+    });
 
     assert(!this->initialized_);
 
     {
-        auto windowLayout = this->loadWindowLayoutFromFile();
+        WindowLayout windowLayout;
+
+        if (getArgs().customChannelLayout)
+        {
+            windowLayout = getArgs().customChannelLayout.value();
+        }
+        else
+        {
+            windowLayout = this->loadWindowLayoutFromFile();
+        }
 
         this->emotePopupPos_ = windowLayout.emotePopupPos_;
 
         this->applyWindowLayout(windowLayout);
     }
 
-    // No main window has been created from loading, create an empty one
-    if (mainWindow_ == nullptr)
+    if (getArgs().isFramelessEmbed)
     {
-        mainWindow_ = &this->createWindow(WindowType::Main);
-        mainWindow_->getNotebook().addPage(true);
+        this->framelessEmbedWindow_.reset(new FramelessEmbedWindow);
+        this->framelessEmbedWindow_->show();
     }
 
-    settings.timestampFormat.connect(
-        [this](auto, auto) { this->layoutChannelViews(); });
+    // No main window has been created from loading, create an empty one
+    if (this->mainWindow_ == nullptr)
+    {
+        this->mainWindow_ = &this->createWindow(WindowType::Main);
+        this->mainWindow_->getNotebook().addPage(true);
 
-    settings.emoteScale.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
+        // TODO: don't create main window if it's a frameless embed
+        if (getArgs().isFramelessEmbed)
+        {
+            this->mainWindow_->hide();
+        }
+    }
 
-    settings.timestampFormat.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.alternateMessages.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.separateMessages.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.collpseMessagesMinLines.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.enableRedeemedHighlight.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.timestampFormat.connect([this](auto, auto) {
+        this->layoutChannelViews();
+    });
+
+    settings.emoteScale.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+
+    settings.timestampFormat.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.alternateMessages.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.separateMessages.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.collpseMessagesMinLines.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.enableRedeemedHighlight.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
 
     this->initialized_ = true;
 }
@@ -331,25 +416,25 @@ void WindowManager::save()
     {
         return;
     }
-    qDebug() << "[WindowManager] Saving";
+    qCDebug(chatterinoWindowmanager) << "[WindowManager] Saving";
     assertInGuiThread();
     QJsonDocument document;
 
     // "serialize"
-    QJsonArray window_arr;
+    QJsonArray windowArr;
     for (Window *window : this->windows_)
     {
-        QJsonObject window_obj;
+        QJsonObject windowObj;
 
         // window type
         switch (window->getType())
         {
             case WindowType::Main:
-                window_obj.insert("type", "main");
+                windowObj.insert("type", "main");
                 break;
 
             case WindowType::Popup:
-                window_obj.insert("type", "popup");
+                windowObj.insert("type", "popup");
                 break;
 
             case WindowType::Attached:;
@@ -357,68 +442,48 @@ void WindowManager::save()
 
         if (window->isMaximized())
         {
-            window_obj.insert("state", "maximized");
+            windowObj.insert("state", "maximized");
         }
         else if (window->isMinimized())
         {
-            window_obj.insert("state", "minimized");
+            windowObj.insert("state", "minimized");
         }
 
         // window geometry
         auto rect = window->getBounds();
 
-        window_obj.insert("x", rect.x());
-        window_obj.insert("y", rect.y());
-        window_obj.insert("width", rect.width());
-        window_obj.insert("height", rect.height());
+        windowObj.insert("x", rect.x());
+        windowObj.insert("y", rect.y());
+        windowObj.insert("width", rect.width());
+        windowObj.insert("height", rect.height());
 
-        QJsonObject emote_popup_obj;
-        emote_popup_obj.insert("x", this->emotePopupPos_.x());
-        emote_popup_obj.insert("y", this->emotePopupPos_.y());
-        window_obj.insert("emotePopup", emote_popup_obj);
+        QJsonObject emotePopupObj;
+        emotePopupObj.insert("x", this->emotePopupPos_.x());
+        emotePopupObj.insert("y", this->emotePopupPos_.y());
+        windowObj.insert("emotePopup", emotePopupObj);
 
         // window tabs
-        QJsonArray tabs_arr;
+        QJsonArray tabsArr;
 
-        for (int tab_i = 0; tab_i < window->getNotebook().getPageCount();
-             tab_i++)
+        for (int tabIndex = 0; tabIndex < window->getNotebook().getPageCount();
+             tabIndex++)
         {
-            QJsonObject tab_obj;
+            QJsonObject tabObj;
             SplitContainer *tab = dynamic_cast<SplitContainer *>(
-                window->getNotebook().getPageAt(tab_i));
+                window->getNotebook().getPageAt(tabIndex));
             assert(tab != nullptr);
 
-            // custom tab title
-            if (tab->getTab()->hasCustomTitle())
-            {
-                tab_obj.insert("title", tab->getTab()->getCustomTitle());
-            }
-
-            // selected
-            if (window->getNotebook().getSelectedPage() == tab)
-            {
-                tab_obj.insert("selected", true);
-            }
-
-            // highlighting on new messages
-            tab_obj.insert("highlightsEnabled",
-                           tab->getTab()->hasHighlightsEnabled());
-
-            // splits
-            QJsonObject splits;
-
-            this->encodeNodeRecusively(tab->getBaseNode(), splits);
-
-            tab_obj.insert("splits2", splits);
-            tabs_arr.append(tab_obj);
+            bool isSelected = window->getNotebook().getSelectedPage() == tab;
+            WindowManager::encodeTab(tab, isSelected, tabObj);
+            tabsArr.append(tabObj);
         }
 
-        window_obj.insert("tabs", tabs_arr);
-        window_arr.append(window_obj);
+        windowObj.insert("tabs", tabsArr);
+        windowArr.append(windowObj);
     }
 
     QJsonObject obj;
-    obj.insert("windows", window_arr);
+    obj.insert("windows", windowArr);
     document.setObject(obj);
 
     // save file
@@ -454,18 +519,48 @@ void WindowManager::queueSave()
     this->saveTimer->start(10s);
 }
 
-void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
+void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
+                              QJsonObject &obj)
+{
+    // custom tab title
+    if (tab->getTab()->hasCustomTitle())
+    {
+        obj.insert("title", tab->getTab()->getCustomTitle());
+    }
+
+    // selected
+    if (isSelected)
+    {
+        obj.insert("selected", true);
+    }
+
+    // highlighting on new messages
+    obj.insert("highlightsEnabled", tab->getTab()->hasHighlightsEnabled());
+
+    // splits
+    QJsonObject splits;
+
+    WindowManager::encodeNodeRecursively(tab->getBaseNode(), splits);
+
+    obj.insert("splits2", splits);
+}
+
+void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
 {
     switch (node->getType())
     {
         case SplitNode::_Split: {
             obj.insert("type", "split");
             obj.insert("moderationMode", node->getSplit()->getModerationMode());
+
             QJsonObject split;
-            encodeChannel(node->getSplit()->getIndirectChannel(), split);
+            WindowManager::encodeChannel(node->getSplit()->getIndirectChannel(),
+                                         split);
             obj.insert("data", split);
-            obj.insert("flexh", node->getHorizontalFlex());
-            obj.insert("flexv", node->getVerticalFlex());
+
+            QJsonArray filters;
+            WindowManager::encodeFilters(node->getSplit(), filters);
+            obj.insert("filters", filters);
         }
         break;
         case SplitNode::HorizontalContainer:
@@ -474,17 +569,20 @@ void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
                                    ? "horizontal"
                                    : "vertical");
 
-            QJsonArray items_arr;
+            QJsonArray itemsArr;
             for (const std::unique_ptr<SplitNode> &n : node->getChildren())
             {
                 QJsonObject subObj;
-                this->encodeNodeRecusively(n.get(), subObj);
-                items_arr.append(subObj);
+                WindowManager::encodeNodeRecursively(n.get(), subObj);
+                itemsArr.append(subObj);
             }
-            obj.insert("items", items_arr);
+            obj.insert("items", itemsArr);
         }
         break;
     }
+
+    obj.insert("flexh", node->getHorizontalFlex());
+    obj.insert("flexv", node->getVerticalFlex());
 }
 
 void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
@@ -510,6 +608,10 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             obj.insert("type", "whispers");
         }
         break;
+        case Channel::Type::TwitchLive: {
+            obj.insert("type", "live");
+        }
+        break;
         case Channel::Type::Irc: {
             if (auto ircChannel =
                     dynamic_cast<IrcChannel *>(channel.get().get()))
@@ -526,6 +628,17 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
     }
 }
 
+void WindowManager::encodeFilters(Split *split, QJsonArray &arr)
+{
+    assertInGuiThread();
+
+    auto filters = split->getFilters();
+    for (const auto &f : filters)
+    {
+        arr.append(f.toString(QUuid::WithoutBraces));
+    }
+}
+
 IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 {
     assertInGuiThread();
@@ -534,19 +647,23 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 
     if (descriptor.type_ == "twitch")
     {
-        return app->twitch.server->getOrAddChannel(descriptor.channelName_);
+        return app->twitch->getOrAddChannel(descriptor.channelName_);
     }
     else if (descriptor.type_ == "mentions")
     {
-        return app->twitch.server->mentionsChannel;
+        return app->twitch->mentionsChannel;
     }
     else if (descriptor.type_ == "watching")
     {
-        return app->twitch.server->watchingChannel;
+        return app->twitch->watchingChannel;
     }
     else if (descriptor.type_ == "whispers")
     {
-        return app->twitch.server->whispersChannel;
+        return app->twitch->whispersChannel;
+    }
+    else if (descriptor.type_ == "live")
+    {
+        return app->twitch->liveChannel;
     }
     else if (descriptor.type_ == "irc")
     {
@@ -584,6 +701,11 @@ WindowLayout WindowManager::loadWindowLayoutFromFile() const
 
 void WindowManager::applyWindowLayout(const WindowLayout &layout)
 {
+    if (getArgs().dontLoadMainWindow)
+    {
+        return;
+    }
+
     // Set emote popup position
     this->emotePopupPos_ = layout.emotePopupPos_;
 
@@ -604,11 +726,13 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
         {
             // out of bounds windows
             auto screens = qApp->screens();
-            bool outOfBounds = std::none_of(
-                screens.begin(), screens.end(), [&](QScreen *screen) {
-                    return screen->availableGeometry().intersects(
-                        windowData.geometry_);
-                });
+            bool outOfBounds =
+                !getenv("I3SOCK") &&
+                std::none_of(screens.begin(), screens.end(),
+                             [&](QScreen *screen) {
+                                 return screen->availableGeometry().intersects(
+                                     windowData.geometry_);
+                             });
 
             // ask if move into bounds
             auto &&should = shouldMoveOutOfBoundsWindow();

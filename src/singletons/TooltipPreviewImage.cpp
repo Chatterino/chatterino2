@@ -16,24 +16,24 @@ TooltipPreviewImage::TooltipPreviewImage()
 {
     auto windows = getApp()->windows;
 
-    this->connections_.push_back(windows->gifRepaintRequested.connect([&] {
+    this->connections_.managedConnect(windows->gifRepaintRequested, [&] {
         if (this->image_ && this->image_->animated())
         {
             this->refreshTooltipWidgetPixmap();
         }
-    }));
+    });
 
-    this->connections_.push_back(windows->miscUpdate.connect([&] {
+    this->connections_.managedConnect(windows->miscUpdate, [&] {
         if (this->attemptRefresh)
         {
             this->refreshTooltipWidgetPixmap();
         }
-    }));
+    });
 }
 
 void TooltipPreviewImage::setImage(ImagePtr image)
 {
-    this->image_ = image;
+    this->image_ = std::move(image);
 
     this->refreshTooltipWidgetPixmap();
 }

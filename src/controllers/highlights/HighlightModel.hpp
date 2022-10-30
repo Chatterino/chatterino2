@@ -15,15 +15,25 @@ public:
     // Used here, in HighlightingPage and in UserHighlightModel
     enum Column {
         Pattern = 0,
-        FlashTaskbar = 1,
-        PlaySound = 2,
-        UseRegex = 3,
-        CaseSensitive = 4,
-        SoundPath = 5,
-        Color = 6
+        ShowInMentions = 1,
+        FlashTaskbar = 2,
+        PlaySound = 3,
+        UseRegex = 4,
+        CaseSensitive = 5,
+        SoundPath = 6,
+        Color = 7,
+        COUNT  // keep this as last member of enum
     };
 
-    constexpr static int WHISPER_ROW = 1;
+    enum HighlightRowIndexes {
+        SelfHighlightRow = 0,
+        WhisperRow = 1,
+        SubRow = 2,
+        RedeemedRow = 3,
+        FirstMessageRow = 4,
+        ElevatedMessageRow = 5,
+        ThreadMessageRow = 6,
+    };
 
 protected:
     // turn a vector item into a model row

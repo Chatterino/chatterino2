@@ -57,16 +57,19 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
 
     this->style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
 
-    int a = (this->height() - (20 * this->scale())) / 2;
+    int iconSize = 20 * this->scale();
+    int pad = (this->height() - iconSize) / 2;
     QPixmap pixmap = this->ui_.icon.pixmap(
-        QSize(this->height() - a * 2, this->height() - a * 2));
+        QSize(this->height() - pad * 2, this->height() - pad * 2));
 
-    painter.drawPixmap(a, a, pixmap);
+    painter.drawPixmap(pad, pad, pixmap);
 
-    a = a + a + 20 + a;
+    pad = (3 * pad) + iconSize;
 
-    painter.drawText(QRect(a, 0, width() - a, height()), this->ui_.labelText,
-                     QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+    this->style()->drawItemText(&painter,
+                                QRect(pad, 0, width() - pad, height()),
+                                Qt::AlignLeft | Qt::AlignVCenter,
+                                this->palette(), false, this->ui_.labelText);
 }
 
 void SettingsDialogTab::mousePressEvent(QMouseEvent *event)

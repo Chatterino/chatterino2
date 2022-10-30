@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QPushButton>
+
 namespace chatterino {
 
 class ColorButton : public QPushButton

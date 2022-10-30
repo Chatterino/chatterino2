@@ -11,7 +11,7 @@ static void removeScrollAreaBackground(QScrollArea *scrollArea,
     scrollArea->setFrameStyle(0);
 
     QPalette p;
-    p.setColor(QPalette::Background, QColor(0, 0, 0, 0));
+    p.setColor(QPalette::Window, QColor(0, 0, 0, 0));
     scrollArea->setPalette(p);
     childWidget->setPalette(p);
 }

@@ -5,6 +5,14 @@
 
 namespace chatterino {
 
+#ifndef ATTR_UNUSED
+#    ifdef Q_OS_WIN
+#        define ATTR_UNUSED
+#    else
+#        define ATTR_UNUSED __attribute__((unused))
+#    endif
+#endif
+
 static const char *ANONYMOUS_USERNAME ATTR_UNUSED = "justinfan64537";
 
 inline QByteArray getDefaultClientID()
@@ -29,5 +37,44 @@ static const std::vector<QColor> TWITCH_USERNAME_COLORS = {
     {138, 43, 226},   // BlueViolet
     {0, 255, 127},    // SpringGreen
 };
+
+static const QStringList TWITCH_DEFAULT_COMMANDS{
+    "help",
+    "w",
+    "me",
+    "disconnect",
+    "mods",
+    "vips",
+    "color",
+    "commercial",
+    "mod",
+    "unmod",
+    "vip",
+    "unvip",
+    "ban",
+    "unban",
+    "timeout",
+    "untimeout",
+    "slow",
+    "slowoff",
+    "r9kbeta",
+    "r9kbetaoff",
+    "emoteonly",
+    "emoteonlyoff",
+    "clear",
+    "subscribers",
+    "subscribersoff",
+    "followers",
+    "followersoff",
+    "host",
+    "unhost",
+    "raid",
+    "unraid",
+    "delete",
+    "announce",
+    "requests",
+};
+
+static const QStringList TWITCH_WHISPER_COMMANDS{"/w", ".w"};
 
 }  // namespace chatterino

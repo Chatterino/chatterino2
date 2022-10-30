@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Application.hpp"
-
 #include <QFile>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -20,9 +18,9 @@ public:
     void setFile(QString fileURL, const QString &channelName);
 
 private:
-    QNetworkAccessManager *manager;
-    QNetworkReply *reply;
-    QFile *file;
+    QNetworkAccessManager *manager_;
+    QNetworkReply *reply_;
+    QFile *file_;
 
 private slots:
     void onDownloadProgress(qint64, qint64);
@@ -33,4 +31,5 @@ private slots:
 signals:
     void downloadComplete();
 };
+
 }  // namespace chatterino

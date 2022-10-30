@@ -26,31 +26,36 @@ void LinkResolver::getLinkInfo(
                        QUrl::toPercentEncoding(url, "", "/:"))))
         .caller(caller)
         .timeout(30000)
-        .onSuccess(
-            [successCallback, url](NetworkResult result) mutable -> Outcome {
-                auto root = result.parseJson();
-                auto statusCode = root.value("status").toInt();
-                QString response = QString();
-                QString linkString = url;
-                ImagePtr thumbnail =
-                    Image::fromUrl({root.value("thumbnail").toString()});
-                if (statusCode == 200)
-                {
-                    response = root.value("tooltip").toString();
-                    if (getSettings()->unshortLinks)
-                    {
-                        linkString = root.value("link").toString();
-                    }
-                }
-                else
-                {
-                    response = root.value("message").toString();
-                }
-                successCallback(QUrl::fromPercentEncoding(response.toUtf8()),
-                                Link(Link::Url, linkString), thumbnail);
+        .onSuccess([successCallback,
+                    url](NetworkResult result) mutable -> Outcome {
+            auto root = result.parseJson();
+            auto statusCode = root.value("status").toInt();
+            QString response;
+            QString linkString = url;
+            ImagePtr thumbnail = nullptr;
+            if (statusCode == 200)
+            {
+                response = root.value("tooltip").toString();
 
-                return Success;
-            })
+                if (root.contains("thumbnail"))
+                {
+                    thumbnail =
+                        Image::fromUrl({root.value("thumbnail").toString()});
+                }
+                if (getSettings()->unshortLinks)
+                {
+                    linkString = root.value("link").toString();
+                }
+            }
+            else
+            {
+                response = root.value("message").toString();
+            }
+            successCallback(QUrl::fromPercentEncoding(response.toUtf8()),
+                            Link(Link::Url, linkString), thumbnail);
+
+            return Success;
+        })
         .onError([successCallback, url](auto /*result*/) {
             successCallback("No link info found", Link(Link::Url, url),
                             nullptr);

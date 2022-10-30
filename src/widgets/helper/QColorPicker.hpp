@@ -38,6 +38,7 @@
 ****************************************************************************/
 #pragma once
 
+#include <QFrame>
 #include <QSpinBox>
 
 namespace chatterino {

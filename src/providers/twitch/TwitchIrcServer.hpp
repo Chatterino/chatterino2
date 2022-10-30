@@ -7,7 +7,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
-#include "providers/twitch/TwitchBadges.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 
 #include <chrono>
 #include <memory>
@@ -32,16 +32,27 @@ public:
 
     std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
 
+    void bulkRefreshLiveStatus();
+
+    void reloadBTTVGlobalEmotes();
+    void reloadAllBTTVChannelEmotes();
+    void reloadFFZGlobalEmotes();
+    void reloadAllFFZChannelEmotes();
+    void reloadSevenTVGlobalEmotes();
+    void reloadAllSevenTVChannelEmotes();
+
     Atomic<QString> lastUserThatWhisperedMe;
 
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
+    const ChannelPtr liveChannel;
     IndirectChannel watchingChannel;
 
     PubSub *pubsub;
 
     const BttvEmotes &getBttvEmotes() const;
     const FfzEmotes &getFfzEmotes() const;
+    const SeventvEmotes &getSeventvEmotes() const;
 
 protected:
     virtual void initializeConnection(IrcConnection *connection,
@@ -56,9 +67,6 @@ protected:
     virtual void writeConnectionMessageReceived(
         Communi::IrcMessage *message) override;
 
-    virtual void onReadConnected(IrcConnection *connection) override;
-    virtual void onWriteConnected(IrcConnection *connection) override;
-
     virtual std::shared_ptr<Channel> getCustomChannel(
         const QString &channelname) override;
 
@@ -68,6 +76,10 @@ protected:
 private:
     void onMessageSendRequested(TwitchChannel *channel, const QString &message,
                                 bool &sent);
+    void onReplySendRequested(TwitchChannel *channel, const QString &message,
+                              const QString &replyId, bool &sent);
+
+    bool prepareToSend(TwitchChannel *channel);
 
     std::mutex lastMessageMutex_;
     std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;
@@ -75,9 +87,10 @@ private:
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 
-    TwitchBadges twitchBadges;
     BttvEmotes bttv;
     FfzEmotes ffz;
+    SeventvEmotes seventv_;
+    QTimer bulkLiveStatusTimer_;
 
     pajlada::Signals::SignalHolder signalHolder_;
 };

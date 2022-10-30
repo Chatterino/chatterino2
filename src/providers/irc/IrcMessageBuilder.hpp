@@ -30,12 +30,16 @@ public:
                                const MessageParseArgs &_args, QString content,
                                bool isAction);
 
+    /**
+     * @brief used for global notice messages (i.e. notice messages without a channel as its target)
+     **/
+    explicit IrcMessageBuilder(const Communi::IrcNoticeMessage *_ircMessage,
+                               const MessageParseArgs &_args);
+
     MessagePtr build() override;
 
 private:
     void appendUsername();
-
-    void addWords(const QStringList &words);
 };
 
 }  // namespace chatterino

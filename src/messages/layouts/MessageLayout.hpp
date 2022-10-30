@@ -17,7 +17,7 @@ struct Selection;
 struct MessageLayoutContainer;
 class MessageLayoutElement;
 
-enum class MessageElementFlag;
+enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 enum class MessageLayoutFlag : uint8_t {
@@ -37,8 +37,10 @@ public:
     ~MessageLayout();
 
     const Message *getMessage();
+    const MessagePtr &getMessagePtr() const;
 
     int getHeight() const;
+    int getWidth() const;
 
     MessageLayoutFlags flags;
 
@@ -62,6 +64,8 @@ public:
 
     // Misc
     bool isDisabled() const;
+    bool isReplyable() const;
+    void setRenderReplies(bool render);
 
 private:
     // variables
@@ -69,6 +73,7 @@ private:
     std::shared_ptr<MessageLayoutContainer> container_;
     std::shared_ptr<QPixmap> buffer_{};
     bool bufferValid_ = false;
+    bool renderReplies_ = true;
 
     int height_ = 0;
 

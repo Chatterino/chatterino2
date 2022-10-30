@@ -11,7 +11,10 @@ enum class ColorType {
     SelfHighlight,
     Subscription,
     Whisper,
-    RedeemedHighlight
+    RedeemedHighlight,
+    FirstMessageHighlight,
+    ElevatedMessageHighlight,
+    ThreadMessageHighlight,
 };
 
 class ColorProvider

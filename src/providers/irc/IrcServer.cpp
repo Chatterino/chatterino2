@@ -3,12 +3,17 @@
 #include <cassert>
 #include <cstdlib>
 
+#include "common/QLogging.hpp"
 #include "messages/Message.hpp"
 #include "providers/irc/Irc2.hpp"
 #include "providers/irc/IrcChannel2.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"  // NOTE: Included to access the mentions channel
 #include "singletons/Settings.hpp"
+#include "util/IrcHelpers.hpp"
 #include "util/QObjectRef.hpp"
+
+#include <QMetaEnum>
 
 namespace chatterino {
 
@@ -53,6 +58,11 @@ const QString &IrcServer::nick()
     return this->data_->nick.isEmpty() ? this->data_->user : this->data_->nick;
 }
 
+const QString &IrcServer::userFriendlyIdentifier()
+{
+    return this->data_->host;
+}
+
 void IrcServer::initializeConnectionSignals(IrcConnection *connection,
                                             ConnectionType type)
 {
@@ -86,22 +96,20 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
 
     QObject::connect(connection, &Communi::IrcConnection::noticeMessageReceived,
                      this, [this](Communi::IrcNoticeMessage *message) {
-                         // XD PAJLADA
-                         MessageBuilder builder;
+                         MessageParseArgs args;
+                         args.isReceivedWhisper = true;
 
-                         builder.emplace<TimestampElement>();
-                         builder.emplace<TextElement>(
-                             message->nick(), MessageElementFlag::Username);
-                         builder.emplace<TextElement>(
-                             "-> you:", MessageElementFlag::Username);
-                         builder.emplace<TextElement>(message->content(),
-                                                      MessageElementFlag::Text);
+                         IrcMessageBuilder builder(message, args);
 
-                         auto msg = builder.release();
+                         auto msg = builder.build();
 
                          for (auto &&weak : this->channels)
+                         {
                              if (auto shared = weak.lock())
+                             {
                                  shared->addMessage(msg);
+                             }
+                         }
                      });
 }
 
@@ -182,12 +190,22 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
         if (!builder.isIgnored())
         {
+            auto msg = builder.build();
+
+            channel->addMessage(msg);
             builder.triggerHighlights();
-            channel->addMessage(builder.build());
+            const auto highlighted = msg->flags.has(MessageFlag::Highlighted);
+            const auto showInMentions =
+                msg->flags.has(MessageFlag::ShowInMentions);
+
+            if (highlighted && showInMentions)
+            {
+                getApp()->twitch->mentionsChannel->addMessage(msg);
+            }
         }
         else
         {
-            qDebug() << "message ignored :rage:";
+            qCDebug(chatterinoIrc) << "message ignored :rage:";
         }
     }
 }
@@ -256,7 +274,8 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
             {
                 MessageBuilder builder;
 
-                builder.emplace<TimestampElement>();
+                builder.emplace<TimestampElement>(
+                    calculateMessageTime(message).time());
                 builder.emplace<TextElement>(message->toData(),
                                              MessageElementFlag::Text);
                 builder->flags.set(MessageFlag::Debug);

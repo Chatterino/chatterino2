@@ -1,9 +1,7 @@
 [submodule "lib/libcommuni"]
 	path = lib/libcommuni
 	url = https://github.com/Chatterino/libcommuni
-[submodule "lib/humanize"]
-	path = lib/humanize
-	url = https://github.com/pajlada/humanize.git
+	branch = chatterino-cmake
 [submodule "lib/qBreakpad"]
 	path = lib/qBreakpad
 	url = https://github.com/jiakuan/qBreakpad.git
@@ -27,4 +25,13 @@
 	url = https://github.com/Chatterino/qtkeychain
 [submodule "lib/websocketpp"]
 	path = lib/websocketpp
-	url = https://github.com/ziocleto/websocketpp
+	url = https://github.com/zaphoyd/websocketpp
+[submodule "cmake/sanitizers-cmake"]
+	path = cmake/sanitizers-cmake
+	url = https://github.com/arsenm/sanitizers-cmake
+[submodule "lib/magic_enum"]
+	path = lib/magic_enum
+	url = https://github.com/Neargye/magic_enum
+[submodule "lib/googletest"]
+	path = lib/googletest
+	url = https://github.com/google/googletest.git

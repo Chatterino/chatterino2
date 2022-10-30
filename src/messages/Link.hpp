@@ -20,6 +20,12 @@ public:
         AutoModAllow,
         AutoModDeny,
         OpenAccountsPage,
+        JumpToChannel,
+        Reconnect,
+        CopyToClipboard,
+        ReplyToMessage,
+        ViewThread,
+        JumpToMessage,
     };
 
     Link();

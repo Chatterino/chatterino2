@@ -30,6 +30,7 @@ public:
         DisableCustomScaling = 8,
         FramelessDraggable = 16,
         DontFocus = 32,
+        Dialog = 64,
     };
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
@@ -133,7 +134,6 @@ private:
 #endif
 
     pajlada::Signals::SignalHolder connections_;
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 
     friend class BaseWidget;
 };

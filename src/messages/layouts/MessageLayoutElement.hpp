@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QPen>
 #include <QPoint>
 #include <QRect>
 #include <QString>
@@ -10,6 +11,8 @@
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
+
+#include <pajlada/signals/signalholder.hpp>
 
 class QPainter;
 
@@ -29,6 +32,8 @@ public:
     MessageElement &getCreator() const;
     void setPosition(QPoint point);
     bool hasTrailingSpace() const;
+    int getLine() const;
+    void setLine(int line);
 
     MessageLayoutElement *setTrailingSpace(bool value);
     MessageLayoutElement *setLink(const Link &link_);
@@ -54,6 +59,7 @@ private:
     QRect rect_;
     Link link_;
     MessageElement &creator_;
+    int line_{};
 };
 
 // IMAGE
@@ -88,6 +94,23 @@ private:
     QColor color_;
 };
 
+class ImageWithCircleBackgroundLayoutElement : public ImageLayoutElement
+{
+public:
+    ImageWithCircleBackgroundLayoutElement(MessageElement &creator,
+                                           ImagePtr image,
+                                           const QSize &imageSize, QColor color,
+                                           int padding);
+
+protected:
+    void paint(QPainter &painter) override;
+
+private:
+    const QColor color_;
+    const QSize imageSize_;
+    const int padding_;
+};
+
 // TEXT
 class TextLayoutElement : public MessageLayoutElement
 {
@@ -111,7 +134,7 @@ protected:
     FontStyle style_;
     float scale_;
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
 };
 
 // TEXT ICON
@@ -137,25 +160,24 @@ private:
     QString line2;
 };
 
-struct PajSegment {
-    QString text;
-    QColor color;
-};
-
-// TEXT
-class MultiColorTextLayoutElement : public TextLayoutElement
+class ReplyCurveLayoutElement : public MessageLayoutElement
 {
 public:
-    MultiColorTextLayoutElement(MessageElement &creator_, QString &text,
-                                const QSize &size,
-                                std::vector<PajSegment> segments,
-                                FontStyle style_, float scale_);
+    ReplyCurveLayoutElement(MessageElement &creator, const QSize &size,
+                            float thickness, float lMargin);
 
 protected:
     void paint(QPainter &painter) override;
+    void paintAnimated(QPainter &painter, int yOffset) override;
+    int getMouseOverIndex(const QPoint &abs) const override;
+    int getXFromIndex(int index) override;
+    void addCopyTextToString(QString &str, int from = 0,
+                             int to = INT_MAX) const override;
+    int getSelectionIndexCount() const override;
 
 private:
-    std::vector<PajSegment> segments_;
+    const QPen pen_;
+    const float neededMargin_;
 };
 
 }  // namespace chatterino

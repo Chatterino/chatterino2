@@ -14,6 +14,7 @@
 #include <QMimeDatabase>
 #include <QMutex>
 #include <QSaveFile>
+#include "common/QLogging.hpp"
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds
@@ -104,12 +105,15 @@ QString getJSONValue(QJsonValue responseJson, QString jsonPattern)
 
 QString getLinkFromResponse(NetworkResult response, QString pattern)
 {
-    QRegExp regExp("\\{(.+)\\}");
-    regExp.setMinimal(true);
-    while (regExp.indexIn(pattern) != -1)
+    QRegularExpression regExp("{(.+)}",
+                              QRegularExpression::InvertedGreedinessOption);
+    auto match = regExp.match(pattern);
+
+    while (match.hasMatch())
     {
-        pattern.replace(regExp.cap(0),
-                        getJSONValue(response.parseJson(), regExp.cap(1)));
+        pattern.replace(match.captured(0),
+                        getJSONValue(response.parseJson(), match.captured(1)));
+        match = regExp.match(pattern);
     }
     return pattern;
 }
@@ -127,8 +131,8 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
         getSettings()->imageUploaderFormField.getValue().isEmpty()
             ? getSettings()->imageUploaderFormField.getDefaultValue()
             : getSettings()->imageUploaderFormField);
-    QStringList extraHeaders(
-        getSettings()->imageUploaderHeaders.getValue().split(";"));
+    auto extraHeaders =
+        parseHeaderList(getSettings()->imageUploaderHeaders.getValue());
     QString originalFilePath = imageData.filePath;
 
     QHttpMultiPart *payload = new QHttpMultiPart(QHttpMultiPart::FormDataType);
@@ -160,7 +164,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                     ? ""
                     : getLinkFromResponse(
                           result, getSettings()->imageUploaderDeletionLink);
-            qDebug() << link << deletionLink;
+            qCDebug(chatterinoNuulsuploader) << link << deletionLink;
             textEdit.insertPlainText(link + " ");
             if (uploadQueue.empty())
             {

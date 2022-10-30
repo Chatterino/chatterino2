@@ -2,296 +2,351 @@
 
 #include "messages/LimitedQueueSnapshot.hpp"
 
-#include <QDebug>
+#include <boost/circular_buffer.hpp>
+#include <boost/optional.hpp>
 
-#include <memory>
+#include <cassert>
 #include <mutex>
+#include <shared_mutex>
 #include <vector>
 
 namespace chatterino {
 
-//
-// Warning:
-// - this class is so overengineered it's not even funny anymore
-//
-// Explanation:
-// - messages can be appended until 'limit' is reached
-// - when the limit is reached for every message added one will be removed at
-// the start
-// - messages can only be added to the start when there is space for them,
-//   trying to add messages to the start when it's full will not add them
-// - you are able to get a "Snapshot" which captures the state of this object
-// - adding items to this class does not change the "items" of the snapshot
-//
-
 template <typename T>
 class LimitedQueue
 {
-protected:
-    using Chunk = std::vector<T>;
-    using ChunkVector = std::vector<std::shared_ptr<Chunk>>;
-
 public:
     LimitedQueue(size_t limit = 1000)
         : limit_(limit)
+        , buffer_(limit)
     {
-        this->clear();
-    }
-
-    void clear()
-    {
-        std::lock_guard<std::mutex> lock(this->mutex_);
-
-        this->chunks_ = std::make_shared<ChunkVector>();
-        auto chunk = std::make_shared<Chunk>();
-        chunk->resize(this->chunkSize_);
-        this->chunks_->push_back(chunk);
-        this->firstChunkOffset_ = 0;
-        this->lastChunkEnd_ = 0;
-    }
-
-    // return true if an item was deleted
-    // deleted will be set if the item was deleted
-    bool pushBack(const T &item, T &deleted)
-    {
-        std::lock_guard<std::mutex> lock(this->mutex_);
-
-        auto lastChunk = this->chunks_->back();
-
-        if (lastChunk->size() <= this->lastChunkEnd_)
-        {
-            // Last chunk is full, create a new one and rebuild our chunk vector
-            auto newVector = std::make_shared<ChunkVector>();
-
-            // copy chunks
-            for (auto &chunk : *this->chunks_)
-            {
-                newVector->push_back(chunk);
-            }
-
-            // push back new chunk
-            auto newChunk = std::make_shared<Chunk>();
-            newChunk->resize(this->chunkSize_);
-            newVector->push_back(newChunk);
-
-            // replace current chunk vector
-            this->chunks_ = newVector;
-            this->lastChunkEnd_ = 0;
-            lastChunk = this->chunks_->back();
-        }
-
-        lastChunk->at(this->lastChunkEnd_++) = item;
-
-        return this->deleteFirstItem(deleted);
-    }
-
-    // returns a vector with all the accepted items
-    std::vector<T> pushFront(const std::vector<T> &items)
-    {
-        std::vector<T> acceptedItems;
-
-        if (this->space() > 0)
-        {
-            std::lock_guard<std::mutex> lock(this->mutex_);
-
-            // create new vector to clone chunks into
-            auto newChunks = std::make_shared<ChunkVector>();
-
-            newChunks->resize(this->chunks_->size());
-
-            // copy chunks except for first one
-            for (size_t i = 1; i < this->chunks_->size(); i++)
-            {
-                newChunks->at(i) = this->chunks_->at(i);
-            }
-
-            // create new chunk for the first one
-            size_t offset =
-                std::min(this->space(), static_cast<qsizetype>(items.size()));
-            auto newFirstChunk = std::make_shared<Chunk>();
-            newFirstChunk->resize(this->chunks_->front()->size() + offset);
-
-            for (size_t i = 0; i < offset; i++)
-            {
-                newFirstChunk->at(i) = items[items.size() - offset + i];
-                acceptedItems.push_back(items[items.size() - offset + i]);
-            }
-
-            for (size_t i = 0; i < this->chunks_->at(0)->size(); i++)
-            {
-                newFirstChunk->at(i + offset) = this->chunks_->at(0)->at(i);
-            }
-
-            newChunks->at(0) = newFirstChunk;
-
-            this->chunks_ = newChunks;
-
-            if (this->chunks_->size() == 1)
-            {
-                this->lastChunkEnd_ += offset;
-            }
-        }
-
-        return acceptedItems;
-    }
-
-    // replace an single item, return index if successful, -1 if unsuccessful
-    int replaceItem(const T &item, const T &replacement)
-    {
-        std::lock_guard<std::mutex> lock(this->mutex_);
-
-        int x = 0;
-
-        for (size_t i = 0; i < this->chunks_->size(); i++)
-        {
-            auto &chunk = this->chunks_->at(i);
-
-            size_t start = i == 0 ? this->firstChunkOffset_ : 0;
-            size_t end =
-                i == chunk->size() - 1 ? this->lastChunkEnd_ : chunk->size();
-
-            for (size_t j = start; j < end; j++)
-            {
-                if (chunk->at(j) == item)
-                {
-                    auto newChunk = std::make_shared<Chunk>();
-                    newChunk->resize(chunk->size());
-
-                    for (size_t k = 0; k < chunk->size(); k++)
-                    {
-                        newChunk->at(k) = chunk->at(k);
-                    }
-
-                    newChunk->at(j) = replacement;
-                    this->chunks_->at(i) = newChunk;
-
-                    return x;
-                }
-                x++;
-            }
-        }
-
-        return -1;
-    }
-
-    // replace an item at index, return true if worked
-    bool replaceItem(size_t index, const T &replacement)
-    {
-        std::lock_guard<std::mutex> lock(this->mutex_);
-
-        size_t x = 0;
-
-        for (size_t i = 0; i < this->chunks_->size(); i++)
-        {
-            auto &chunk = this->chunks_->at(i);
-
-            size_t start = i == 0 ? this->firstChunkOffset_ : 0;
-            size_t end =
-                i == chunk->size() - 1 ? this->lastChunkEnd_ : chunk->size();
-
-            for (size_t j = start; j < end; j++)
-            {
-                if (x == index)
-                {
-                    auto newChunk = std::make_shared<Chunk>();
-                    newChunk->resize(chunk->size());
-
-                    for (size_t k = 0; k < chunk->size(); k++)
-                    {
-                        newChunk->at(k) = chunk->at(k);
-                    }
-
-                    newChunk->at(j) = replacement;
-                    this->chunks_->at(i) = newChunk;
-
-                    return true;
-                }
-                x++;
-            }
-        }
-        return false;
-    }
-
-    //    void insertAfter(const std::vector<T> &items, const T &index)
-
-    LimitedQueueSnapshot<T> getSnapshot()
-    {
-        std::lock_guard<std::mutex> lock(this->mutex_);
-
-        return LimitedQueueSnapshot<T>(
-            this->chunks_, this->limit_ - this->space(),
-            this->firstChunkOffset_, this->lastChunkEnd_);
-    }
-
-    bool empty() const
-    {
-        return this->limit_ - this->space() == 0;
     }
 
 private:
-    qsizetype space() const
+    /// Property Accessors
+    /**
+     * @brief Return the limit of the internal buffer
+     */
+    [[nodiscard]] size_t limit() const
     {
-        size_t totalSize = 0;
-        for (auto &chunk : *this->chunks_)
-        {
-            totalSize += chunk->size();
-        }
-
-        totalSize -= this->chunks_->back()->size() - this->lastChunkEnd_;
-        if (this->chunks_->size() != 1)
-        {
-            totalSize -= this->firstChunkOffset_;
-        }
-
-        return this->limit_ - totalSize;
+        return this->limit_;
     }
 
-    bool deleteFirstItem(T &deleted)
+    /**
+     * @brief Return the amount of space left in the buffer
+     *
+     * This does not lock
+     */
+    [[nodiscard]] size_t space() const
     {
-        // determine if the first chunk should be deleted
-        if (space() > 0)
+        return this->limit() - this->buffer_.size();
+    }
+
+public:
+    /**
+     * @brief Return true if the buffer is empty
+     */
+    [[nodiscard]] bool empty() const
+    {
+        std::shared_lock lock(this->mutex_);
+
+        return this->buffer_.empty();
+    }
+
+    /// Value Accessors
+    // Copies of values are returned so that references aren't invalidated
+
+    /**
+     * @brief Get the item at the given index safely
+     *
+     * @param[in] index the index of the item to fetch
+     * @return the item at the index if it's populated, or none if it's not
+     */
+    [[nodiscard]] boost::optional<T> get(size_t index) const
+    {
+        std::shared_lock lock(this->mutex_);
+
+        if (index >= this->buffer_.size())
+        {
+            return boost::none;
+        }
+
+        return this->buffer_[index];
+    }
+
+    /**
+     * @brief Get the first item from the queue
+     *
+     * @return the item at the front of the queue if it's populated, or none the queue is empty
+     */
+    [[nodiscard]] boost::optional<T> first() const
+    {
+        std::shared_lock lock(this->mutex_);
+
+        if (this->buffer_.empty())
+        {
+            return boost::none;
+        }
+
+        return this->buffer_.front();
+    }
+
+    /**
+     * @brief Get the last item from the queue
+     *
+     * @return the item at the back of the queue if it's populated, or none the queue is empty
+     */
+    [[nodiscard]] boost::optional<T> last() const
+    {
+        std::shared_lock lock(this->mutex_);
+
+        if (this->buffer_.empty())
+        {
+            return boost::none;
+        }
+
+        return this->buffer_.back();
+    }
+
+    /// Modifiers
+
+    // Clear the buffer
+    void clear()
+    {
+        std::unique_lock lock(this->mutex_);
+
+        this->buffer_.clear();
+    }
+
+    /**
+     * @brief Push an item to the end of the queue
+     *
+     * @param item the item to push
+     * @param[out] deleted the item that was deleted
+     * @return true if an element was deleted to make room
+     */
+    bool pushBack(const T &item, T &deleted)
+    {
+        std::unique_lock lock(this->mutex_);
+
+        bool full = this->buffer_.full();
+        if (full)
+        {
+            deleted = this->buffer_.front();
+        }
+        this->buffer_.push_back(item);
+        return full;
+    }
+
+    /**
+     * @brief Push an item to the end of the queue
+     *
+     * @param item the item to push
+     * @return true if an element was deleted to make room
+     */
+    bool pushBack(const T &item)
+    {
+        std::unique_lock lock(this->mutex_);
+
+        bool full = this->buffer_.full();
+        this->buffer_.push_back(item);
+        return full;
+    }
+
+    /**
+     * @brief Push items into beginning of queue
+     *
+     * Items are inserted in reverse order.
+     * Items will only be inserted if they fit,
+     * meaning no elements can be deleted from using this function.
+     *
+     * @param items the vector of items to push
+     * @return vector of elements that were pushed
+     */
+    std::vector<T> pushFront(const std::vector<T> &items)
+    {
+        std::unique_lock lock(this->mutex_);
+
+        size_t numToPush = std::min(items.size(), this->space());
+        std::vector<T> pushed;
+        pushed.reserve(numToPush);
+
+        size_t f = items.size() - numToPush;
+        size_t b = items.size() - 1;
+        for (; f < items.size(); ++f, --b)
+        {
+            this->buffer_.push_front(items[b]);
+            pushed.push_back(items[f]);
+        }
+
+        return pushed;
+    }
+
+    /**
+     * @brief Replace the needle with the given item
+     *
+     * @param[in] needle the item to search for
+     * @param[in] replacement the item to replace needle with
+     * @tparam Equality function object to use for comparison
+     * @return the index of the replaced item, or -1 if no replacement took place
+     */
+    template <typename Equals = std::equal_to<T>>
+    int replaceItem(const T &needle, const T &replacement)
+    {
+        std::unique_lock lock(this->mutex_);
+
+        Equals eq;
+        for (int i = 0; i < this->buffer_.size(); ++i)
+        {
+            if (eq(this->buffer_[i], needle))
+            {
+                this->buffer_[i] = replacement;
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * @brief Replace the item at index with the given item
+     *
+     * @param[in] index the index of the item to replace
+     * @param[in] replacement the item to put in place of the item at index
+     * @return true if a replacement took place
+     */
+    bool replaceItem(size_t index, const T &replacement)
+    {
+        std::unique_lock lock(this->mutex_);
+
+        if (index >= this->buffer_.size())
         {
             return false;
         }
 
-        deleted = this->chunks_->front()->at(this->firstChunkOffset_);
-
-        // need to delete the first chunk
-        if (this->firstChunkOffset_ == this->chunks_->front()->size() - 1)
-        {
-            // copy the chunk vector
-            auto newVector = std::make_shared<ChunkVector>();
-
-            // delete first chunk
-            bool first = true;
-            for (auto &chunk : *this->chunks_)
-            {
-                if (!first)
-                {
-                    newVector->push_back(chunk);
-                }
-                first = false;
-            }
-
-            this->chunks_ = newVector;
-            this->firstChunkOffset_ = 0;
-        }
-        else
-        {
-            this->firstChunkOffset_++;
-        }
-
+        this->buffer_[index] = replacement;
         return true;
     }
 
-    std::shared_ptr<ChunkVector> chunks_;
-    std::mutex mutex_;
+    /**
+     * @brief Inserts the given item before another item
+     * 
+     * @param[in] needle the item to use as positional reference
+     * @param[in] item the item to insert before needle
+     * @tparam Equality function object to use for comparison
+     * @return true if an insertion took place
+     */
+    template <typename Equals = std::equal_to<T>>
+    bool insertBefore(const T &needle, const T &item)
+    {
+        std::unique_lock lock(this->mutex_);
 
-    size_t firstChunkOffset_;
-    size_t lastChunkEnd_;
+        Equals eq;
+        for (auto it = this->buffer_.begin(); it != this->buffer_.end(); ++it)
+        {
+            if (eq(*it, needle))
+            {
+                this->buffer_.insert(it, item);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @brief Inserts the given item after another item
+     * 
+     * @param[in] needle the item to use as positional reference
+     * @param[in] item the item to insert after needle
+     * @tparam Equality function object to use for comparison
+     * @return true if an insertion took place
+     */
+    template <typename Equals = std::equal_to<T>>
+    bool insertAfter(const T &needle, const T &item)
+    {
+        std::unique_lock lock(this->mutex_);
+
+        Equals eq;
+        for (auto it = this->buffer_.begin(); it != this->buffer_.end(); ++it)
+        {
+            if (eq(*it, needle))
+            {
+                ++it;  // advance to insert after it
+                this->buffer_.insert(it, item);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    [[nodiscard]] LimitedQueueSnapshot<T> getSnapshot() const
+    {
+        std::shared_lock lock(this->mutex_);
+        return LimitedQueueSnapshot<T>(this->buffer_);
+    }
+
+    // Actions
+
+    /**
+     * @brief Returns the first item matching a predicate
+     * 
+     * The contents of the LimitedQueue are iterated over from front to back 
+     * until the first element that satisfies `pred(item)`. If no item 
+     * satisfies the predicate, or if the queue is empty, then boost::none
+     * is returned.
+     * 
+     * @param[in] pred predicate that will be applied to items
+     * @return the first item found or boost::none
+     */
+    template <typename Predicate>
+    [[nodiscard]] boost::optional<T> find(Predicate pred) const
+    {
+        std::shared_lock lock(this->mutex_);
+
+        for (const auto &item : this->buffer_)
+        {
+            if (pred(item))
+            {
+                return item;
+            }
+        }
+
+        return boost::none;
+    }
+
+    /**
+     * @brief Returns the first item matching a predicate, checking in reverse
+     * 
+     * The contents of the LimitedQueue are iterated over from back to front 
+     * until the first element that satisfies `pred(item)`. If no item 
+     * satisfies the predicate, or if the queue is empty, then boost::none
+     * is returned.
+     * 
+     * @param[in] pred predicate that will be applied to items
+     * @return the first item found or boost::none
+     */
+    template <typename Predicate>
+    [[nodiscard]] boost::optional<T> rfind(Predicate pred) const
+    {
+        std::shared_lock lock(this->mutex_);
+
+        for (auto it = this->buffer_.rbegin(); it != this->buffer_.rend(); ++it)
+        {
+            if (pred(*it))
+            {
+                return *it;
+            }
+        }
+
+        return boost::none;
+    }
+
+private:
+    mutable std::shared_mutex mutex_;
+
     const size_t limit_;
-
-    const size_t chunkSize_ = 100;
+    boost::circular_buffer<T> buffer_;
 };
 
 }  // namespace chatterino

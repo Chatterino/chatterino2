@@ -29,7 +29,7 @@ ModerationAction::ModerationAction(const QString &action)
     : action_(action)
 {
     static QRegularExpression replaceRegex("[!/.]");
-    static QRegularExpression timeoutRegex("^[./]timeout.* (\\d+)");
+    static QRegularExpression timeoutRegex("^[./]timeout.* (\\d+)([mhdw]?)");
 
     auto timeoutMatch = timeoutRegex.match(action);
 
@@ -39,27 +39,63 @@ ModerationAction::ModerationAction(const QString &action)
         // QString line1;
         // QString line2;
 
-        int amount = timeoutMatch.captured(1).toInt();
+        constexpr int minute = 60;
+        constexpr int hour = 60 * minute;
+        constexpr int day = 24 * hour;
+        constexpr int week = 7 * day;
 
-        if (amount < 60)
+        int amount = timeoutMatch.captured(1).toInt();
+        QString unit = timeoutMatch.captured(2);
+
+        if (unit == "m")
+        {
+            amount *= minute;
+        }
+        else if (unit == "h")
+        {
+            amount *= hour;
+        }
+        else if (unit == "d")
+        {
+            amount *= day;
+        }
+        else if (unit == "w")
+        {
+            amount *= week;
+        }
+
+        if (amount < minute)
         {
             this->line1_ = QString::number(amount);
             this->line2_ = "s";
         }
-        else if (amount < 60 * 60)
+        else if (amount < hour)
         {
-            this->line1_ = QString::number(amount / 60);
+            this->line1_ = QString::number(amount / minute);
             this->line2_ = "m";
         }
-        else if (amount < 60 * 60 * 24)
+        else if (amount < day)
         {
-            this->line1_ = QString::number(amount / 60 / 60);
+            this->line1_ = QString::number(amount / hour);
             this->line2_ = "h";
+        }
+        else if (amount < week)
+        {
+            this->line1_ = QString::number(amount / day);
+            this->line2_ = "d";
         }
         else
         {
-            this->line1_ = QString::number(amount / 60 / 60 / 24);
-            this->line2_ = "d";
+            // limit to max timeout duration
+            if (amount > 2 * week)
+            {
+                this->line1_ = ">2";
+            }
+            else
+            {
+                this->line1_ = QString::number(amount / week);
+            }
+            this->line2_ = "w";
         }
 
         // line1 = this->line1_;
@@ -105,9 +141,11 @@ const boost::optional<ImagePtr> &ModerationAction::getImage() const
     if (this->imageToLoad_ != 0)
     {
         if (this->imageToLoad_ == 1)
-            this->image_ = Image::fromPixmap(getResources().buttons.ban);
+            this->image_ =
+                Image::fromResourcePixmap(getResources().buttons.ban);
         else if (this->imageToLoad_ == 2)
-            this->image_ = Image::fromPixmap(getResources().buttons.trashCan);
+            this->image_ =
+                Image::fromResourcePixmap(getResources().buttons.trashCan);
     }
 
     return this->image_;

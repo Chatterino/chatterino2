@@ -22,13 +22,18 @@ class CompletionModel : public QAbstractListModel
             FFZChannelEmote,
             BTTVGlobalEmote,
             BTTVChannelEmote,
+            SeventvGlobalEmote,
+            SeventvChannelEmote,
             TwitchGlobalEmote,
+            TwitchLocalEmote,
             TwitchSubscriberEmote,
             Emoji,
             EmoteEnd,
             // end emotes
 
-            Command,
+            CustomCommand,
+            ChatterinoCommand,
+            TwitchCommand,
         };
 
         TaggedString(const QString &string, Type type);
@@ -52,8 +57,6 @@ public:
     static bool compareStrings(const QString &a, const QString &b);
 
 private:
-    TaggedString createUser(const QString &str);
-
     std::set<TaggedString> items_;
     mutable std::mutex itemsMutex_;
     Channel &channel_;

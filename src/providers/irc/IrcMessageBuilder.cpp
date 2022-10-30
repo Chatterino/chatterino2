@@ -1,6 +1,7 @@
 #include "providers/irc/IrcMessageBuilder.hpp"
 
 #include "Application.hpp"
+#include "common/IrcColors.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
@@ -11,6 +12,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
 #include "widgets/Window.hpp"
 
@@ -21,7 +23,6 @@ IrcMessageBuilder::IrcMessageBuilder(
     const MessageParseArgs &_args)
     : SharedMessageBuilder(_channel, _ircMessage, _args)
 {
-    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 IrcMessageBuilder::IrcMessageBuilder(Channel *_channel,
@@ -31,25 +32,32 @@ IrcMessageBuilder::IrcMessageBuilder(Channel *_channel,
     : SharedMessageBuilder(_channel, _ircMessage, _args, content, isAction)
 {
     assert(false);
-    this->usernameColor_ = getApp()->themes->messages.textColors.system;
+}
+
+IrcMessageBuilder::IrcMessageBuilder(
+    const Communi::IrcNoticeMessage *_ircMessage, const MessageParseArgs &_args)
+    : SharedMessageBuilder(Channel::getEmpty().get(), _ircMessage, _args,
+                           _ircMessage->content(), false)
+{
 }
 
 MessagePtr IrcMessageBuilder::build()
 {
     // PARSE
     this->parse();
+    this->usernameColor_ = getRandomColor(this->ircMessage->nick());
 
     // PUSH ELEMENTS
     this->appendChannelName();
 
-    this->emplace<TimestampElement>();
+    this->message().serverReceivedTime = calculateMessageTime(this->ircMessage);
+    this->emplace<TimestampElement>(this->message().serverReceivedTime.time());
 
     this->appendUsername();
 
-    // words
-    this->addWords(this->originalMessage_.split(' '));
+    // message
+    this->addIrcMessageText(this->originalMessage_);
 
-    this->message().messageText = this->originalMessage_;
     this->message().searchText = this->message().localizedName + " " +
                                  this->userName + ": " + this->originalMessage_;
 
@@ -65,29 +73,39 @@ MessagePtr IrcMessageBuilder::build()
     return this->release();
 }
 
-void IrcMessageBuilder::addWords(const QStringList &words)
-{
-    this->emplace<IrcTextElement>(words.join(' '), MessageElementFlag::Text);
-}
-
 void IrcMessageBuilder::appendUsername()
 {
-    auto app = getApp();
-
     QString username = this->userName;
     this->message().loginName = username;
+    this->message().displayName = username;
 
     // The full string that will be rendered in the chat widget
     QString usernameText = username;
 
-    if (!this->action_)
+    if (this->args.isReceivedWhisper)
     {
-        usernameText += ":";
-    }
+        this->emplace<TextElement>(usernameText, MessageElementFlag::Username,
+                                   this->usernameColor_,
+                                   FontStyle::ChatMediumBold)
+            ->setLink({Link::UserWhisper, this->message().displayName});
 
-    this->emplace<TextElement>(usernameText, MessageElementFlag::Username,
-                               this->usernameColor_, FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, this->message().displayName});
+        // Separator
+        this->emplace<TextElement>("->", MessageElementFlag::Username,
+                                   MessageColor::System, FontStyle::ChatMedium);
+
+        this->emplace<TextElement>("you:", MessageElementFlag::Username);
+    }
+    else
+    {
+        if (!this->action_)
+        {
+            usernameText += ":";
+        }
+        this->emplace<TextElement>(usernameText, MessageElementFlag::Username,
+                                   this->usernameColor_,
+                                   FontStyle::ChatMediumBold)
+            ->setLink({Link::UserInfo, this->message().loginName});
+    }
 }
 
 }  // namespace chatterino

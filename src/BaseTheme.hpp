@@ -61,6 +61,7 @@ public:
             QColor caret;
             QColor link;
             QColor system;
+            QColor chatPlaceholder;
         } textColors;
 
         struct {
@@ -73,6 +74,9 @@ public:
         //        QColor seperator;
         //        QColor seperatorInner;
         QColor selection;
+
+        QColor highlightAnimationStart;
+        QColor highlightAnimationEnd;
     } messages;
 
     /// SCROLLBAR

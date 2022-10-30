@@ -6,8 +6,11 @@
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
 #include "common/SignalVector.hpp"
+#include "controllers/filters/FilterRecord.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
+#include "controllers/nicknames/Nickname.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
@@ -19,9 +22,10 @@ namespace chatterino {
 class HighlightPhrase;
 class HighlightBlacklistUser;
 class IgnorePhrase;
-class TaggedUser;
+class FilterRecord;
+class Nickname;
 
-/// Settings which are availlable for reading on all threads.
+/// Settings which are available for reading on all threads.
 class ConcurrentSettings
 {
 public:
@@ -29,10 +33,12 @@ public:
 
     SignalVector<HighlightPhrase> &highlightedMessages;
     SignalVector<HighlightPhrase> &highlightedUsers;
+    SignalVector<HighlightBadge> &highlightedBadges;
     SignalVector<HighlightBlacklistUser> &blacklistedUsers;
     SignalVector<IgnorePhrase> &ignoredMessages;
     SignalVector<QString> &mutedChannels;
-    //SignalVector<TaggedUser> &taggedUsers;
+    SignalVector<FilterRecordPtr> &filterRecords;
+    SignalVector<Nickname> &nicknames;
     SignalVector<ModerationAction> &moderationActions;
 
     bool isHighlightedUser(const QString &username);
@@ -46,6 +52,25 @@ private:
 };
 
 ConcurrentSettings &getCSettings();
+
+enum UsernameDisplayMode : int {
+    Username = 1,                  // Username
+    LocalizedName = 2,             // Localized name
+    UsernameAndLocalizedName = 3,  // Username (Localized name)
+};
+
+enum HelixTimegateOverride : int {
+    // Use the default timegated behaviour
+    // This means we use the old IRC command up until the migration date and
+    // switch over to the Helix API only after the migration date
+    Timegate = 1,
+
+    // Ignore timegating and always force use the IRC command
+    AlwaysUseIRC = 2,
+
+    // Ignore timegating and always force use the Helix API
+    AlwaysUseHelix = 3,
+};
 
 /// Settings which are availlable for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
@@ -67,9 +92,9 @@ public:
     BoolSetting showLastMessageIndicator = {
         "/appearance/messages/showLastMessageIndicator", false};
     EnumSetting<Qt::BrushStyle> lastMessagePattern = {
-        "/appearance/messages/lastMessagePattern", Qt::VerPattern};
+        "/appearance/messages/lastMessagePattern", Qt::SolidPattern};
     QStringSetting lastMessageColor = {"/appearance/messages/lastMessageColor",
-                                       ""};
+                                       "#7f2026"};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
                                      false};
@@ -79,14 +104,21 @@ public:
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
     BoolSetting hideModerationActions = {
         "/appearance/messages/hideModerationActions", false};
+    BoolSetting hideDeletionActions = {
+        "/appearance/messages/hideDeletionActions", false};
     BoolSetting colorizeNicknames = {"/appearance/messages/colorizeNicknames",
                                      true};
+    EnumSetting<UsernameDisplayMode> usernameDisplayMode = {
+        "/appearance/messages/usernameDisplayMode",
+        UsernameDisplayMode::UsernameAndLocalizedName};
 
-    IntSetting tabDirection = {"/appearance/tabDirection",
-                               NotebookTabDirection::Horizontal};
+    EnumSetting<NotebookTabLocation> tabDirection = {"/appearance/tabDirection",
+                                                     NotebookTabLocation::Top};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
+    BoolSetting showReplyButton = {"/appearance/showReplyButton", false};
+    BoolSetting stripReplyMention = {"/appearance/stripReplyMention", true};
     IntSetting collpseMessagesMinLines = {
         "/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessages = {
@@ -101,6 +133,7 @@ public:
     BoolSetting enableSmoothScrollingNewMessages = {
         "/appearance/smoothScrollingNewMessages", false};
     BoolSetting boldUsernames = {"/appearance/messages/boldUsernames", true};
+    BoolSetting colorUsernames = {"/appearance/messages/colorUsernames", true};
     BoolSetting findAllUsernames = {"/appearance/messages/findAllUsernames",
                                     false};
     // BoolSetting customizable splitheader
@@ -118,12 +151,20 @@ public:
     // Badges
     BoolSetting showBadgesGlobalAuthority = {
         "/appearance/badges/GlobalAuthority", true};
+    BoolSetting showBadgesPredictions = {"/appearance/badges/predictions",
+                                         true};
     BoolSetting showBadgesChannelAuthority = {
         "/appearance/badges/ChannelAuthority", true};
     BoolSetting showBadgesSubscription = {"/appearance/badges/subscription",
                                           true};
     BoolSetting showBadgesVanity = {"/appearance/badges/vanity", true};
     BoolSetting showBadgesChatterino = {"/appearance/badges/chatterino", true};
+    BoolSetting showBadgesFfz = {"/appearance/badges/ffz", true};
+    BoolSetting useCustomFfzModeratorBadges = {
+        "/appearance/badges/useCustomFfzModeratorBadges", true};
+    BoolSetting useCustomFfzVipBadges = {
+        "/appearance/badges/useCustomFfzVipBadges", true};
+    BoolSetting showBadgesSevenTV = {"/appearance/badges/seventv", true};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
@@ -134,6 +175,8 @@ public:
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier",
                                           1.0};
     BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", true};
+    BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
+                                        false};
     // BoolSetting twitchSeperateWriteConnection =
     // {"/behaviour/twitchSeperateWriteConnection", false};
 
@@ -148,6 +191,8 @@ public:
         "/behaviour/autocompletion/userCompletionOnlyWithAt", false};
     BoolSetting emoteCompletionWithColon = {
         "/behaviour/autocompletion/emoteCompletionWithColon", true};
+    BoolSetting showUsernameCompletionMenu = {
+        "/behaviour/autocompletion/showUsernameCompletionMenu", true};
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
     EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {
@@ -165,10 +210,21 @@ public:
     BoolSetting enableEmoteImages = {"/emotes/enableEmoteImages", true};
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
+    BoolSetting showUnlistedSevenTVEmotes = {
+        "/emotes/showUnlistedSevenTVEmotes", false};
 
-    QStringSetting emojiSet = {"/emotes/emojiSet", "EmojiOne 2"};
+    QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
+    BoolSetting removeSpacesBetweenEmotes = {
+        "/emotes/removeSpacesBetweenEmotes", false};
+
+    BoolSetting enableBTTVGlobalEmotes = {"/emotes/bttv/global", true};
+    BoolSetting enableBTTVChannelEmotes = {"/emotes/bttv/channel", true};
+    BoolSetting enableFFZGlobalEmotes = {"/emotes/ffz/global", true};
+    BoolSetting enableFFZChannelEmotes = {"/emotes/ffz/channel", true};
+    BoolSetting enableSevenTVGlobalEmotes = {"/emotes/seventv/global", true};
+    BoolSetting enableSevenTVChannelEmotes = {"/emotes/seventv/channel", true};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
@@ -180,7 +236,7 @@ public:
 
     /// Streamer Mode
     EnumSetting<StreamerModeSetting> enableStreamerMode = {
-        "/streamerMode/enabled", StreamerModeSetting::DetectObs};
+        "/streamerMode/enabled", StreamerModeSetting::DetectStreamingSoftware};
     BoolSetting streamerModeHideUsercardAvatars = {
         "/streamerMode/hideUsercardAvatars", true};
     BoolSetting streamerModeHideLinkThumbnails = {
@@ -188,15 +244,19 @@ public:
     BoolSetting streamerModeHideViewerCountAndDuration = {
         "/streamerMode/hideViewerCountAndDuration", false};
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
+    BoolSetting streamerModeSuppressLiveNotifications = {
+        "/streamerMode/supressLiveNotifications", false};
+    BoolSetting streamerModeSuppressInlineWhispers = {
+        "/streamerMode/suppressInlineWhispers", true};
 
     /// Ignored Phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
                                            "***"};
 
-    /// Ingored Users
-    BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers",
+    /// Blocked Users
+    BoolSetting enableTwitchBlockedUsers = {"/ignore/enableTwitchBlockedUsers",
                                             true};
-    IntSetting showIgnoredUsersMessages = {"/ignore/showIgnoredUsers", 0};
+    IntSetting showBlockedUsersMessages = {"/ignore/showBlockedUsers", 0};
 
     /// Moderation
     QStringSetting timeoutAction = {"/moderation/timeoutAction", "Disable"};
@@ -210,6 +270,8 @@ public:
 
     BoolSetting enableSelfHighlight = {
         "/highlighting/selfHighlight/nameIsHighlightKeyword", true};
+    BoolSetting showSelfHighlightInMentions = {
+        "/highlighting/selfHighlight/showSelfHighlightInMentions", true};
     BoolSetting enableSelfHighlightSound = {
         "/highlighting/selfHighlight/enableSound", true};
     BoolSetting enableSelfHighlightTaskbar = {
@@ -241,6 +303,28 @@ public:
     QStringSetting redeemedHighlightColor = {
         "/highlighting/redeemedHighlightColor", ""};
 
+    BoolSetting enableFirstMessageHighlight = {
+        "/highlighting/firstMessageHighlight/highlighted", true};
+    //    BoolSetting enableFirstMessageHighlightSound = {
+    //        "/highlighting/firstMessageHighlight/enableSound", false};
+    //    BoolSetting enableFirstMessageHighlightTaskbar = {
+    //        "/highlighting/firstMessageHighlight/enableTaskbarFlashing", false};
+    QStringSetting firstMessageHighlightSoundUrl = {
+        "/highlighting/firstMessageHighlightSoundUrl", ""};
+    QStringSetting firstMessageHighlightColor = {
+        "/highlighting/firstMessageHighlightColor", ""};
+
+    BoolSetting enableElevatedMessageHighlight = {
+        "/highlighting/elevatedMessageHighlight/highlighted", true};
+    //    BoolSetting enableElevatedMessageHighlightSound = {
+    //        "/highlighting/elevatedMessageHighlight/enableSound", false};
+    //    BoolSetting enableElevatedMessageHighlightTaskbar = {
+    //        "/highlighting/elevatedMessageHighlight/enableTaskbarFlashing", false};
+    QStringSetting elevatedMessageHighlightSoundUrl = {
+        "/highlighting/elevatedMessageHighlight/soundUrl", ""};
+    QStringSetting elevatedMessageHighlightColor = {
+        "/highlighting/elevatedMessageHighlight/color", ""};
+
     BoolSetting enableSubHighlight = {
         "/highlighting/subHighlight/subsHighlighted", true};
     BoolSetting enableSubHighlightSound = {
@@ -251,9 +335,28 @@ public:
                                            ""};
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
 
+    BoolSetting enableThreadHighlight = {
+        "/highlighting/thread/nameIsHighlightKeyword", true};
+    BoolSetting showThreadHighlightInMentions = {
+        "/highlighting/thread/showSelfHighlightInMentions", true};
+    BoolSetting enableThreadHighlightSound = {
+        "/highlighting/thread/enableSound", true};
+    BoolSetting enableThreadHighlightTaskbar = {
+        "/highlighting/thread/enableTaskbarFlashing", true};
+    QStringSetting threadHighlightSoundUrl = {
+        "/highlighting/threadHighlightSoundUrl", ""};
+    QStringSetting threadHighlightColor = {"/highlighting/threadHighlightColor",
+                                           ""};
+
     QStringSetting highlightColor = {"/highlighting/color", ""};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
+
+    BoolSetting highlightMentions = {"/highlighting/mentions", true};
+
+    /// Filtering
+    BoolSetting excludeUserMessagesFromFilter = {
+        "/filtering/excludeUserMessages", false};
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
@@ -279,6 +382,8 @@ public:
                                            false};
     QStringSetting notificationPathSound = {"/notifications/highlightSoundPath",
                                             "qrc:/sounds/ping3.wav"};
+    BoolSetting notificationOnAnyChannel = {"/notifications/onAnyChannel",
+                                            false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",
@@ -317,8 +422,28 @@ public:
 
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
+
     BoolSetting loadTwitchMessageHistoryOnConnect = {
         "/misc/twitch/loadMessageHistoryOnConnect", true};
+    IntSetting twitchMessageHistoryLimit = {
+        "/misc/twitch/messageHistoryLimit",
+        800,
+    };
+
+    // Temporary time-gate-overrides
+    EnumSetting<HelixTimegateOverride> helixTimegateRaid = {
+        "/misc/twitch/helix-timegate/raid",
+        HelixTimegateOverride::Timegate,
+    };
+    EnumSetting<HelixTimegateOverride> helixTimegateWhisper = {
+        "/misc/twitch/helix-timegate/whisper",
+        HelixTimegateOverride::Timegate,
+    };
+    EnumSetting<HelixTimegateOverride> helixTimegateVIPs = {
+        "/misc/twitch/helix-timegate/vips",
+        HelixTimegateOverride::Timegate,
+    };
+
     IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 1};
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
@@ -327,6 +452,9 @@ public:
     BoolSetting attachExtensionToAnyProcess = {
         "/misc/attachExtensionToAnyProcess", false};
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
+    BoolSetting informOnTabVisibilityToggle = {"/misc/askOnTabVisibilityToggle",
+                                               true};
+    BoolSetting lockNotebookLayout = {"/misc/lockNotebookLayout", false};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",
@@ -342,6 +470,8 @@ public:
     BoolSetting colorSimilarDisabled = {"/similarity/colorSimilarDisabled",
                                         true};
     BoolSetting hideSimilar = {"/similarity/hideSimilar", false};
+    BoolSetting hideSimilarBySameUser = {"/similarity/hideSimilarBySameUser",
+                                         true};
     BoolSetting hideSimilarMyself = {"/similarity/hideSimilarMyself", false};
     BoolSetting shownSimilarTriggerHighlights = {
         "/similarity/shownSimilarTriggerHighlights", false};

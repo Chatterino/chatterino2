@@ -28,8 +28,9 @@ public:
     SignalVector()
         : readOnly_(new std::vector<T>())
     {
-        QObject::connect(&this->itemsChangedTimer_, &QTimer::timeout,
-                         [this] { this->delayedItemsChanged.invoke(); });
+        QObject::connect(&this->itemsChangedTimer_, &QTimer::timeout, [this] {
+            this->delayedItemsChanged.invoke();
+        });
         this->itemsChangedTimer_.setInterval(100);
         this->itemsChangedTimer_.setSingleShot(true);
     }

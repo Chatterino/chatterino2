@@ -15,8 +15,7 @@ public:
     NotificationPage();
 
 private:
-    QComboBox *createToastReactionComboBox(
-        std::vector<pajlada::Signals::ScopedConnection> managedConnections);
+    QComboBox *createToastReactionComboBox();
 };
 
 }  // namespace chatterino

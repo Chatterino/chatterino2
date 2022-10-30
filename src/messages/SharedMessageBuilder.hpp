@@ -2,9 +2,12 @@
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
+#include "messages/MessageColor.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
 #include <QColor>
+#include <QUrl>
 
 namespace chatterino {
 
@@ -30,6 +33,11 @@ public:
     virtual void triggerHighlights();
     virtual MessagePtr build() = 0;
 
+    static std::pair<QString, QString> slashKeyValue(const QString &kvStr);
+
+    // Parses "badges" tag which contains a comma separated list of key-value elements
+    static std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
+
 protected:
     virtual void parse();
 
@@ -45,9 +53,6 @@ protected:
     // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
     virtual void parseHighlights();
 
-    virtual void addTextOrEmoji(EmotePtr emote);
-    virtual void addTextOrEmoji(const QString &value);
-
     void appendChannelName();
 
     Channel *channel;
@@ -58,7 +63,7 @@ protected:
 
     const bool action_{};
 
-    QColor usernameColor_;
+    QColor usernameColor_ = {153, 153, 153};
 
     bool highlightAlert_ = false;
     bool highlightSound_ = false;

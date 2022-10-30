@@ -5,7 +5,9 @@
 
 #include <QHttpMultiPart>
 #include <QNetworkRequest>
+#include <QTimer>
 #include <functional>
+#include <memory>
 
 class QNetworkReply;
 
@@ -42,6 +44,7 @@ struct NetworkData {
     NetworkReplyCreatedCallback onReplyCreated_;
     NetworkErrorCallback onError_;
     NetworkSuccessCallback onSuccess_;
+    NetworkFinallyCallback finally_;
 
     NetworkRequestType requestType_ = NetworkRequestType::Get;
 
@@ -54,7 +57,8 @@ struct NetworkData {
     // to enable the timer, the "setTimeout" function needs to be called before
     // execute is called
     bool hasTimeout_{};
-    QTimer *timer_;
+    int timeoutMS_{};
+    QTimer *timer_ = nullptr;
     QObject *lifetimeManager_;
 
     QString getHash();

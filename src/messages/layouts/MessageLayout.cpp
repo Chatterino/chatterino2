@@ -39,7 +39,7 @@ namespace {
 }  // namespace
 
 MessageLayout::MessageLayout(MessagePtr message)
-    : message_(message)
+    : message_(std::move(message))
     , container_(std::make_shared<MessageLayoutContainer>())
 {
     DebugCount::increase("message layout");
@@ -55,10 +55,20 @@ const Message *MessageLayout::getMessage()
     return this->message_.get();
 }
 
+const MessagePtr &MessageLayout::getMessagePtr() const
+{
+    return this->message_;
+}
+
 // Height
 int MessageLayout::getHeight() const
 {
     return container_->getHeight();
+}
+
+int MessageLayout::getWidth() const
+{
+    return this->container_->getWidth();
 }
 
 // Layout
@@ -115,12 +125,11 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 {
     this->layoutCount_++;
-
     auto messageFlags = this->message_->flags;
 
     if (this->flags.has(MessageLayoutFlag::Expanded) ||
         (flags.has(MessageElementFlag::ModeratorTools) &&
-         !this->message_->flags.has(MessageFlag::Disabled)))  //
+         !this->message_->flags.has(MessageFlag::Disabled)))
     {
         messageFlags.unset(MessageFlag::Collapsed);
     }
@@ -136,13 +145,20 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         }
 
         if (getSettings()->hideModerationActions &&
-            this->message_->flags.has(MessageFlag::Timeout))
+            (this->message_->flags.has(MessageFlag::Timeout) ||
+             this->message_->flags.has(MessageFlag::Untimeout)))
         {
             continue;
         }
 
         if (getSettings()->hideSimilar &&
             this->message_->flags.has(MessageFlag::Similar))
+        {
+            continue;
+        }
+
+        if (!this->renderReplies_ &&
+            element->getFlags().has(MessageElementFlag::RepliedMessage))
         {
             continue;
         }
@@ -272,6 +288,9 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
                                  Selection & /*selection*/)
 {
+    if (buffer->isNull())
+        return;
+
     auto app = getApp();
     auto settings = getSettings();
 
@@ -291,9 +310,24 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
         }
     }();
 
-    if ((this->message_->flags.has(MessageFlag::Highlighted) ||
-         this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
-        !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
+    if (this->message_->flags.has(MessageFlag::ElevatedMessage) &&
+        getSettings()->enableElevatedMessageHighlight.getValue())
+    {
+        backgroundColor = blendColors(backgroundColor,
+                                      *ColorProvider::instance().color(
+                                          ColorType::ElevatedMessageHighlight));
+    }
+
+    else if (this->message_->flags.has(MessageFlag::FirstMessage) &&
+             getSettings()->enableFirstMessageHighlight.getValue())
+    {
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ColorProvider::instance().color(ColorType::FirstMessageHighlight));
+    }
+    else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
+              this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
+             !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
         // Blend highlight color with usual background color
         backgroundColor =
@@ -402,6 +436,28 @@ void MessageLayout::addSelectionText(QString &str, int from, int to,
                                      CopyMode copymode)
 {
     this->container_->addSelectionText(str, from, to, copymode);
+}
+
+bool MessageLayout::isReplyable() const
+{
+    if (this->message_->loginName.isEmpty())
+    {
+        return false;
+    }
+
+    if (this->message_->flags.hasAny(
+            {MessageFlag::System, MessageFlag::Subscription,
+             MessageFlag::Timeout, MessageFlag::Whisper}))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void MessageLayout::setRenderReplies(bool render)
+{
+    this->renderReplies_ = render;
 }
 
 }  // namespace chatterino

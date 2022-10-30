@@ -26,7 +26,7 @@ const std::shared_ptr<QColor> ColorProvider::color(ColorType type) const
 void ColorProvider::updateColor(ColorType type, QColor color)
 {
     auto colorPtr = this->typeColorMap_.at(type);
-    *colorPtr = color;
+    *colorPtr = std::move(color);
 }
 
 QSet<QColor> ColorProvider::recentColors() const
@@ -118,6 +118,48 @@ void ColorProvider::initTypeColorMap()
             {ColorType::RedeemedHighlight,
              std::make_shared<QColor>(
                  HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR)});
+    }
+
+    customColor = getSettings()->firstMessageHighlightColor;
+    if (QColor(customColor).isValid())
+    {
+        this->typeColorMap_.insert({ColorType::FirstMessageHighlight,
+                                    std::make_shared<QColor>(customColor)});
+    }
+    else
+    {
+        this->typeColorMap_.insert(
+            {ColorType::FirstMessageHighlight,
+             std::make_shared<QColor>(
+                 HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR)});
+    }
+
+    customColor = getSettings()->elevatedMessageHighlightColor;
+    if (QColor(customColor).isValid())
+    {
+        this->typeColorMap_.insert({ColorType::ElevatedMessageHighlight,
+                                    std::make_shared<QColor>(customColor)});
+    }
+    else
+    {
+        this->typeColorMap_.insert(
+            {ColorType::ElevatedMessageHighlight,
+             std::make_shared<QColor>(
+                 HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR)});
+    }
+
+    customColor = getSettings()->threadHighlightColor;
+    if (QColor(customColor).isValid())
+    {
+        this->typeColorMap_.insert({ColorType::ThreadMessageHighlight,
+                                    std::make_shared<QColor>(customColor)});
+    }
+    else
+    {
+        this->typeColorMap_.insert(
+            {ColorType::ThreadMessageHighlight,
+             std::make_shared<QColor>(
+                 HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR)});
     }
 }
 

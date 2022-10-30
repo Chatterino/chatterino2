@@ -5,7 +5,6 @@
 #include "boost/algorithm/algorithm.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
-#include "util/Shortcut.hpp"
 #include "util/WindowsHelper.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
@@ -45,9 +44,9 @@
 namespace chatterino {
 
 BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
-    : BaseWidget(parent,
-                 Qt::Window | (_flags.has(TopMost) ? Qt::WindowStaysOnTopHint
-                                                   : Qt::WindowFlags()))
+    : BaseWidget(parent, (_flags.has(Dialog) ? Qt::Dialog : Qt::Window) |
+                             (_flags.has(TopMost) ? Qt::WindowStaysOnTopHint
+                                                  : Qt::WindowFlags()))
     , enableCustomFrame_(_flags.has(EnableCustomFrame))
     , frameless_(_flags.has(Frameless))
     , flags_(_flags)
@@ -83,15 +82,13 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 
     this->updateScale();
 
-    createWindowShortcut(this, "CTRL+0",
-                         [] { getSettings()->uiScale.setValue(1); });
-
     this->resize(300, 150);
 
 #ifdef USEWINSDK
     this->useNextBounds_.setSingleShot(true);
-    QObject::connect(&this->useNextBounds_, &QTimer::timeout, this,
-                     [this]() { this->currentBounds_ = this->nextBounds_; });
+    QObject::connect(&this->useNextBounds_, &QTimer::timeout, this, [this]() {
+        this->currentBounds_ = this->nextBounds_;
+    });
 #endif
 
     this->themeChangedEvent();
@@ -133,8 +130,6 @@ float BaseWindow::qtFontScale() const
 
 void BaseWindow::init()
 {
-    this->setWindowIcon(QIcon(":/images/icon.png"));
-
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame())
     {
@@ -154,9 +149,10 @@ void BaseWindow::init()
 
                 // title
                 Label *title = new Label;
-                QObject::connect(
-                    this, &QWidget::windowTitleChanged,
-                    [title](const QString &text) { title->setText(text); });
+                QObject::connect(this, &QWidget::windowTitleChanged,
+                                 [title](const QString &text) {
+                                     title->setText(text);
+                                 });
 
                 QSizePolicy policy(QSizePolicy::Ignored,
                                    QSizePolicy::Preferred);
@@ -187,7 +183,9 @@ void BaseWindow::init()
                                              : Qt::WindowMaximized);
                                  });
                 QObject::connect(_exitButton, &TitleBarButton::leftClicked,
-                                 this, [this] { this->close(); });
+                                 this, [this] {
+                                     this->close();
+                                 });
 
                 this->ui_.minButton = _minButton;
                 this->ui_.maxButton = _maxButton;
@@ -229,7 +227,7 @@ void BaseWindow::init()
                                    0, 0, 0,
                                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
                 },
-                this->managedConnections_);
+                this->connections_);
         });
     }
 #else
@@ -238,10 +236,14 @@ void BaseWindow::init()
     {
         getSettings()->windowTopMost.connect(
             [this](bool topMost, auto) {
+                auto isVisible = this->isVisible();
                 this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
-                this->show();
+                if (isVisible)
+                {
+                    this->show();
+                }
             },
-            this->managedConnections_);
+            this->connections_);
     }
 #endif
 }
@@ -322,8 +324,8 @@ void BaseWindow::themeChangedEvent()
     else
     {
         QPalette palette;
-        palette.setColor(QPalette::Background, this->theme->window.background);
-        palette.setColor(QPalette::Foreground, this->theme->window.text);
+        palette.setColor(QPalette::Window, this->theme->window.background);
+        palette.setColor(QPalette::WindowText, this->theme->window.text);
         this->setPalette(palette);
     }
 }
@@ -460,8 +462,9 @@ TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButtonStyle &style,
     this->ui_.titlebarBox->insertWidget(1, button);
     button->setButtonStyle(style);
 
-    QObject::connect(button, &TitleBarButton::leftClicked, this,
-                     [onClicked] { onClicked(); });
+    QObject::connect(button, &TitleBarButton::leftClicked, this, [onClicked] {
+        onClicked();
+    });
 
     return button;
 }
@@ -474,8 +477,9 @@ EffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
     this->ui_.buttons.push_back(button);
     this->ui_.titlebarBox->insertWidget(1, button);
 
-    QObject::connect(button, &EffectLabel::leftClicked, this,
-                     [onClicked] { onClicked(); });
+    QObject::connect(button, &EffectLabel::leftClicked, this, [onClicked] {
+        onClicked();
+    });
 
     return button;
 }
@@ -550,8 +554,9 @@ void BaseWindow::resizeEvent(QResizeEvent *)
             ::SetWindowPos((HWND)this->winId(), nullptr, 0, 0,
                            rect.right - rect.left, rect.bottom - rect.top,
                            SWP_NOMOVE | SWP_NOZORDER);
-            QTimer::singleShot(10, this,
-                               [this] { this->isResizeFixing_ = false; });
+            QTimer::singleShot(10, this, [this] {
+                this->isResizeFixing_ = false;
+            });
         });
     }
 #endif
@@ -579,8 +584,9 @@ void BaseWindow::showEvent(QShowEvent *)
     this->moveIntoDesktopRect(this, this->pos());
     if (this->frameless_)
     {
-        QTimer::singleShot(
-            30, this, [this] { this->moveIntoDesktopRect(this, this->pos()); });
+        QTimer::singleShot(30, this, [this] {
+            this->moveIntoDesktopRect(this, this->pos());
+        });
     }
 }
 
@@ -629,11 +635,7 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                              long *result)
 {
 #ifdef USEWINSDK
-#    if (QT_VERSION == QT_VERSION_CHECK(5, 11, 1))
-    MSG *msg = *reinterpret_cast<MSG **>(message);
-#    else
     MSG *msg = reinterpret_cast<MSG *>(message);
-#    endif
 
     bool returnValue = false;
 

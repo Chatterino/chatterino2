@@ -9,7 +9,7 @@ namespace chatterino {
 
 // commandmodel
 HighlightModel::HighlightModel(QObject *parent)
-    : SignalVectorModel<HighlightPhrase>(7, parent)
+    : SignalVectorModel<HighlightPhrase>(Column::COUNT, parent)
 {
 }
 
@@ -25,6 +25,7 @@ HighlightPhrase HighlightModel::getItemFromRow(
 
     return HighlightPhrase{
         row[Column::Pattern]->data(Qt::DisplayRole).toString(),
+        row[Column::ShowInMentions]->data(Qt::CheckStateRole).toBool(),
         row[Column::FlashTaskbar]->data(Qt::CheckStateRole).toBool(),
         row[Column::PlaySound]->data(Qt::CheckStateRole).toBool(),
         row[Column::UseRegex]->data(Qt::CheckStateRole).toBool(),
@@ -38,6 +39,7 @@ void HighlightModel::getRowFromItem(const HighlightPhrase &item,
                                     std::vector<QStandardItem *> &row)
 {
     setStringItem(row[Column::Pattern], item.getPattern());
+    setBoolItem(row[Column::ShowInMentions], item.showInMentions());
     setBoolItem(row[Column::FlashTaskbar], item.hasAlert());
     setBoolItem(row[Column::PlaySound], item.hasSound());
     setBoolItem(row[Column::UseRegex], item.isRegex());
@@ -54,14 +56,17 @@ void HighlightModel::afterInit()
                 getSettings()->enableSelfHighlight.getValue(), true, false);
     usernameRow[Column::Pattern]->setData("Your username (automatic)",
                                           Qt::DisplayRole);
+    setBoolItem(usernameRow[Column::ShowInMentions],
+                getSettings()->showSelfHighlightInMentions.getValue(), true,
+                false);
     setBoolItem(usernameRow[Column::FlashTaskbar],
                 getSettings()->enableSelfHighlightTaskbar.getValue(), true,
                 false);
     setBoolItem(usernameRow[Column::PlaySound],
                 getSettings()->enableSelfHighlightSound.getValue(), true,
                 false);
-    usernameRow[Column::UseRegex]->setFlags(0);
-    usernameRow[Column::CaseSensitive]->setFlags(0);
+    usernameRow[Column::UseRegex]->setFlags({});
+    usernameRow[Column::CaseSensitive]->setFlags({});
 
     QUrl selfSound = QUrl(getSettings()->selfHighlightSoundUrl.getValue());
     setFilePathItem(usernameRow[Column::SoundPath], selfSound, false);
@@ -69,21 +74,22 @@ void HighlightModel::afterInit()
     auto selfColor = ColorProvider::instance().color(ColorType::SelfHighlight);
     setColorItem(usernameRow[Column::Color], *selfColor, false);
 
-    this->insertCustomRow(usernameRow, 0);
+    this->insertCustomRow(usernameRow, HighlightRowIndexes::SelfHighlightRow);
 
     // Highlight settings for whispers
     std::vector<QStandardItem *> whisperRow = this->createRow();
     setBoolItem(whisperRow[Column::Pattern],
                 getSettings()->enableWhisperHighlight.getValue(), true, false);
     whisperRow[Column::Pattern]->setData("Whispers", Qt::DisplayRole);
+    whisperRow[Column::ShowInMentions]->setFlags({});  // We have /whispers
     setBoolItem(whisperRow[Column::FlashTaskbar],
                 getSettings()->enableWhisperHighlightTaskbar.getValue(), true,
                 false);
     setBoolItem(whisperRow[Column::PlaySound],
                 getSettings()->enableWhisperHighlightSound.getValue(), true,
                 false);
-    whisperRow[Column::UseRegex]->setFlags(0);
-    whisperRow[Column::CaseSensitive]->setFlags(0);
+    whisperRow[Column::UseRegex]->setFlags({});
+    whisperRow[Column::CaseSensitive]->setFlags({});
 
     QUrl whisperSound =
         QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
@@ -93,20 +99,21 @@ void HighlightModel::afterInit()
     //    setColorItem(whisperRow[Column::Color], *whisperColor, false);
     whisperRow[Column::Color]->setFlags(Qt::ItemFlag::NoItemFlags);
 
-    this->insertCustomRow(whisperRow, WHISPER_ROW);
+    this->insertCustomRow(whisperRow, HighlightRowIndexes::WhisperRow);
 
     // Highlight settings for subscription messages
     std::vector<QStandardItem *> subRow = this->createRow();
     setBoolItem(subRow[Column::Pattern],
                 getSettings()->enableSubHighlight.getValue(), true, false);
     subRow[Column::Pattern]->setData("Subscriptions", Qt::DisplayRole);
+    subRow[Column::ShowInMentions]->setFlags({});
     setBoolItem(subRow[Column::FlashTaskbar],
                 getSettings()->enableSubHighlightTaskbar.getValue(), true,
                 false);
     setBoolItem(subRow[Column::PlaySound],
                 getSettings()->enableSubHighlightSound.getValue(), true, false);
-    subRow[Column::UseRegex]->setFlags(0);
-    subRow[Column::CaseSensitive]->setFlags(0);
+    subRow[Column::UseRegex]->setFlags({});
+    subRow[Column::CaseSensitive]->setFlags({});
 
     QUrl subSound = QUrl(getSettings()->subHighlightSoundUrl.getValue());
     setFilePathItem(subRow[Column::SoundPath], subSound, false);
@@ -114,7 +121,7 @@ void HighlightModel::afterInit()
     auto subColor = ColorProvider::instance().color(ColorType::Subscription);
     setColorItem(subRow[Column::Color], *subColor, false);
 
-    this->insertCustomRow(subRow, 2);
+    this->insertCustomRow(subRow, HighlightRowIndexes::SubRow);
 
     // Highlight settings for redeemed highlight messages
     std::vector<QStandardItem *> redeemedRow = this->createRow();
@@ -122,16 +129,17 @@ void HighlightModel::afterInit()
                 getSettings()->enableRedeemedHighlight.getValue(), true, false);
     redeemedRow[Column::Pattern]->setData(
         "Highlights redeemed with Channel Points", Qt::DisplayRole);
+    redeemedRow[Column::ShowInMentions]->setFlags({});
     //    setBoolItem(redeemedRow[Column::FlashTaskbar],
     //                getSettings()->enableRedeemedHighlightTaskbar.getValue(), true,
     //                false);
     //    setBoolItem(redeemedRow[Column::PlaySound],
     //                getSettings()->enableRedeemedHighlightSound.getValue(), true,
     //                false);
-    redeemedRow[Column::FlashTaskbar]->setFlags(0);
-    redeemedRow[Column::PlaySound]->setFlags(0);
-    redeemedRow[Column::UseRegex]->setFlags(0);
-    redeemedRow[Column::CaseSensitive]->setFlags(0);
+    redeemedRow[Column::FlashTaskbar]->setFlags({});
+    redeemedRow[Column::PlaySound]->setFlags({});
+    redeemedRow[Column::UseRegex]->setFlags({});
+    redeemedRow[Column::CaseSensitive]->setFlags({});
 
     QUrl RedeemedSound =
         QUrl(getSettings()->redeemedHighlightSoundUrl.getValue());
@@ -141,7 +149,100 @@ void HighlightModel::afterInit()
         ColorProvider::instance().color(ColorType::RedeemedHighlight);
     setColorItem(redeemedRow[Column::Color], *RedeemedColor, false);
 
-    this->insertCustomRow(redeemedRow, 3);
+    this->insertCustomRow(redeemedRow, HighlightRowIndexes::RedeemedRow);
+
+    // Highlight settings for first messages
+    std::vector<QStandardItem *> firstMessageRow = this->createRow();
+    setBoolItem(firstMessageRow[Column::Pattern],
+                getSettings()->enableFirstMessageHighlight.getValue(), true,
+                false);
+    firstMessageRow[Column::Pattern]->setData("First Messages",
+                                              Qt::DisplayRole);
+    firstMessageRow[Column::ShowInMentions]->setFlags({});
+    //    setBoolItem(firstMessageRow[Column::FlashTaskbar],
+    //                getSettings()->enableFirstMessageHighlightTaskbar.getValue(),
+    //                true, false);
+    //    setBoolItem(firstMessageRow[Column::PlaySound],
+    //                getSettings()->enableFirstMessageHighlightSound.getValue(),
+    //                true, false);
+    firstMessageRow[Column::FlashTaskbar]->setFlags({});
+    firstMessageRow[Column::PlaySound]->setFlags({});
+    firstMessageRow[Column::UseRegex]->setFlags({});
+    firstMessageRow[Column::CaseSensitive]->setFlags({});
+
+    QUrl FirstMessageSound =
+        QUrl(getSettings()->firstMessageHighlightSoundUrl.getValue());
+    setFilePathItem(firstMessageRow[Column::SoundPath], FirstMessageSound,
+                    false);
+
+    auto FirstMessageColor =
+        ColorProvider::instance().color(ColorType::FirstMessageHighlight);
+    setColorItem(firstMessageRow[Column::Color], *FirstMessageColor, false);
+
+    this->insertCustomRow(firstMessageRow,
+                          HighlightRowIndexes::FirstMessageRow);
+
+    // Highlight settings for elevated messages
+    std::vector<QStandardItem *> elevatedMessageRow = this->createRow();
+    setBoolItem(elevatedMessageRow[Column::Pattern],
+                getSettings()->enableElevatedMessageHighlight.getValue(), true,
+                false);
+    elevatedMessageRow[Column::Pattern]->setData("Elevated Messages",
+                                                 Qt::DisplayRole);
+    elevatedMessageRow[Column::ShowInMentions]->setFlags({});
+    //    setBoolItem(elevatedMessageRow[Column::FlashTaskbar],
+    //                getSettings()->enableElevatedMessageHighlightTaskbar.getValue(),
+    //                true, false);
+    //    setBoolItem(elevatedMessageRow[Column::PlaySound],
+    //                getSettings()->enableElevatedMessageHighlightSound.getValue(),
+    //                true, false);
+    elevatedMessageRow[Column::FlashTaskbar]->setFlags({});
+    elevatedMessageRow[Column::PlaySound]->setFlags({});
+    elevatedMessageRow[Column::UseRegex]->setFlags({});
+    elevatedMessageRow[Column::CaseSensitive]->setFlags({});
+
+    QUrl elevatedMessageSound =
+        QUrl(getSettings()->elevatedMessageHighlightSoundUrl.getValue());
+    setFilePathItem(elevatedMessageRow[Column::SoundPath], elevatedMessageSound,
+                    false);
+
+    auto elevatedMessageColor =
+        ColorProvider::instance().color(ColorType::ElevatedMessageHighlight);
+    setColorItem(elevatedMessageRow[Column::Color], *elevatedMessageColor,
+                 false);
+
+    this->insertCustomRow(elevatedMessageRow,
+                          HighlightRowIndexes::ElevatedMessageRow);
+
+    // Highlight settings for reply threads
+    std::vector<QStandardItem *> threadMessageRow = this->createRow();
+    setBoolItem(threadMessageRow[Column::Pattern],
+                getSettings()->enableThreadHighlight.getValue(), true, false);
+    threadMessageRow[Column::Pattern]->setData("Participated Reply Threads",
+                                               Qt::DisplayRole);
+    setBoolItem(threadMessageRow[Column::ShowInMentions],
+                getSettings()->showThreadHighlightInMentions.getValue(), true,
+                false);
+    setBoolItem(threadMessageRow[Column::FlashTaskbar],
+                getSettings()->enableThreadHighlightTaskbar.getValue(), true,
+                false);
+    setBoolItem(threadMessageRow[Column::PlaySound],
+                getSettings()->enableThreadHighlightSound.getValue(), true,
+                false);
+    threadMessageRow[Column::UseRegex]->setFlags({});
+    threadMessageRow[Column::CaseSensitive]->setFlags({});
+
+    QUrl threadMessageSound =
+        QUrl(getSettings()->threadHighlightSoundUrl.getValue());
+    setFilePathItem(threadMessageRow[Column::SoundPath], threadMessageSound,
+                    false);
+
+    auto threadMessageColor =
+        ColorProvider::instance().color(ColorType::ThreadMessageHighlight);
+    setColorItem(threadMessageRow[Column::Color], *threadMessageColor, false);
+
+    this->insertCustomRow(threadMessageRow,
+                          HighlightRowIndexes::ThreadMessageRow);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
@@ -153,22 +254,53 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
         case Column::Pattern: {
             if (role == Qt::CheckStateRole)
             {
-                if (rowIndex == 0)
+                if (rowIndex == HighlightRowIndexes::SelfHighlightRow)
                 {
                     getSettings()->enableSelfHighlight.setValue(value.toBool());
                 }
-                else if (rowIndex == WHISPER_ROW)
+                else if (rowIndex == HighlightRowIndexes::WhisperRow)
                 {
                     getSettings()->enableWhisperHighlight.setValue(
                         value.toBool());
                 }
-                else if (rowIndex == 2)
+                else if (rowIndex == HighlightRowIndexes::SubRow)
                 {
                     getSettings()->enableSubHighlight.setValue(value.toBool());
                 }
-                else if (rowIndex == 3)
+                else if (rowIndex == HighlightRowIndexes::RedeemedRow)
                 {
                     getSettings()->enableRedeemedHighlight.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::FirstMessageRow)
+                {
+                    getSettings()->enableFirstMessageHighlight.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::ElevatedMessageRow)
+                {
+                    getSettings()->enableElevatedMessageHighlight.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::ThreadMessageRow)
+                {
+                    getSettings()->enableThreadHighlight.setValue(
+                        value.toBool());
+                }
+            }
+        }
+        break;
+        case Column::ShowInMentions: {
+            if (role == Qt::CheckStateRole)
+            {
+                if (rowIndex == HighlightRowIndexes::SelfHighlightRow)
+                {
+                    getSettings()->showSelfHighlightInMentions.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::ThreadMessageRow)
+                {
+                    getSettings()->showThreadHighlightInMentions.setValue(
                         value.toBool());
                 }
             }
@@ -177,25 +309,41 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
         case Column::FlashTaskbar: {
             if (role == Qt::CheckStateRole)
             {
-                if (rowIndex == 0)
+                if (rowIndex == HighlightRowIndexes::SelfHighlightRow)
                 {
                     getSettings()->enableSelfHighlightTaskbar.setValue(
                         value.toBool());
                 }
-                else if (rowIndex == WHISPER_ROW)
+                else if (rowIndex == HighlightRowIndexes::WhisperRow)
                 {
                     getSettings()->enableWhisperHighlightTaskbar.setValue(
                         value.toBool());
                 }
-                else if (rowIndex == 2)
+                else if (rowIndex == HighlightRowIndexes::SubRow)
                 {
                     getSettings()->enableSubHighlightTaskbar.setValue(
                         value.toBool());
                 }
-                else if (rowIndex == 3)
+                else if (rowIndex == HighlightRowIndexes::RedeemedRow)
                 {
                     // getSettings()->enableRedeemedHighlightTaskbar.setValue(
                     //     value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::FirstMessageRow)
+                {
+                    // getSettings()->enableFirstMessageHighlightTaskbar.setValue(
+                    //     value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::ElevatedMessageRow)
+                {
+                    // getSettings()
+                    //     ->enableElevatedMessageHighlightTaskbar.setvalue(
+                    //         value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::ThreadMessageRow)
+                {
+                    getSettings()->enableThreadHighlightTaskbar.setValue(
+                        value.toBool());
                 }
             }
         }
@@ -203,25 +351,40 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
         case Column::PlaySound: {
             if (role == Qt::CheckStateRole)
             {
-                if (rowIndex == 0)
+                if (rowIndex == HighlightRowIndexes::SelfHighlightRow)
                 {
                     getSettings()->enableSelfHighlightSound.setValue(
                         value.toBool());
                 }
-                else if (rowIndex == WHISPER_ROW)
+                else if (rowIndex == HighlightRowIndexes::WhisperRow)
                 {
                     getSettings()->enableWhisperHighlightSound.setValue(
                         value.toBool());
                 }
-                else if (rowIndex == 2)
+                else if (rowIndex == HighlightRowIndexes::SubRow)
                 {
                     getSettings()->enableSubHighlightSound.setValue(
                         value.toBool());
                 }
-                else if (rowIndex == 3)
+                else if (rowIndex == HighlightRowIndexes::RedeemedRow)
                 {
                     // getSettings()->enableRedeemedHighlightSound.setValue(
                     //     value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::FirstMessageRow)
+                {
+                    // getSettings()->enableFirstMessageHighlightSound.setValue(
+                    //     value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::ElevatedMessageRow)
+                {
+                    // getSettings()->enableElevatedMessageHighlightSound.setValue(
+                    //     value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::ThreadMessageRow)
+                {
+                    getSettings()->enableThreadHighlightSound.setValue(
+                        value.toBool());
                 }
             }
         }
@@ -238,24 +401,39 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
             // Custom sound file
             if (role == Qt::UserRole)
             {
-                if (rowIndex == 0)
+                if (rowIndex == HighlightRowIndexes::SelfHighlightRow)
                 {
                     getSettings()->selfHighlightSoundUrl.setValue(
                         value.toString());
                 }
-                else if (rowIndex == WHISPER_ROW)
+                else if (rowIndex == HighlightRowIndexes::WhisperRow)
                 {
                     getSettings()->whisperHighlightSoundUrl.setValue(
                         value.toString());
                 }
-                else if (rowIndex == 2)
+                else if (rowIndex == HighlightRowIndexes::SubRow)
                 {
                     getSettings()->subHighlightSoundUrl.setValue(
                         value.toString());
                 }
-                else if (rowIndex == 3)
+                else if (rowIndex == HighlightRowIndexes::RedeemedRow)
                 {
                     getSettings()->redeemedHighlightSoundUrl.setValue(
+                        value.toString());
+                }
+                else if (rowIndex == HighlightRowIndexes::FirstMessageRow)
+                {
+                    getSettings()->firstMessageHighlightSoundUrl.setValue(
+                        value.toString());
+                }
+                if (rowIndex == HighlightRowIndexes::ElevatedMessageRow)
+                {
+                    getSettings()->elevatedMessageHighlightSoundUrl.setValue(
+                        value.toString());
+                }
+                else if (rowIndex == HighlightRowIndexes::ThreadMessageRow)
+                {
+                    getSettings()->threadHighlightSoundUrl.setValue(
                         value.toString());
                 }
             }
@@ -266,23 +444,46 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
             if (role == Qt::DecorationRole)
             {
                 auto colorName = value.value<QColor>().name(QColor::HexArgb);
-                if (rowIndex == 0)
+                if (rowIndex == HighlightRowIndexes::SelfHighlightRow)
                 {
                     getSettings()->selfHighlightColor.setValue(colorName);
                 }
-                //                else if (rowIndex == WHISPER_ROW)
+                //                else if (rowIndex == HighlightRowIndexes::WhisperRow)
                 //                {
                 //                    getSettings()->whisperHighlightColor.setValue(colorName);
                 //                }
-                else if (rowIndex == 2)
+                else if (rowIndex == HighlightRowIndexes::SubRow)
                 {
                     getSettings()->subHighlightColor.setValue(colorName);
                 }
-                else if (rowIndex == 3)
+                else if (rowIndex == HighlightRowIndexes::RedeemedRow)
                 {
                     getSettings()->redeemedHighlightColor.setValue(colorName);
                     const_cast<ColorProvider &>(ColorProvider::instance())
                         .updateColor(ColorType::RedeemedHighlight,
+                                     QColor(colorName));
+                }
+                else if (rowIndex == HighlightRowIndexes::FirstMessageRow)
+                {
+                    getSettings()->firstMessageHighlightColor.setValue(
+                        colorName);
+                    const_cast<ColorProvider &>(ColorProvider::instance())
+                        .updateColor(ColorType::FirstMessageHighlight,
+                                     QColor(colorName));
+                }
+                else if (rowIndex == HighlightRowIndexes::ElevatedMessageRow)
+                {
+                    getSettings()->elevatedMessageHighlightColor.setValue(
+                        colorName);
+                    const_cast<ColorProvider &>(ColorProvider::instance())
+                        .updateColor(ColorType::ElevatedMessageHighlight,
+                                     QColor(colorName));
+                }
+                else if (rowIndex == HighlightRowIndexes::ThreadMessageRow)
+                {
+                    getSettings()->threadHighlightColor.setValue(colorName);
+                    const_cast<ColorProvider &>(ColorProvider::instance())
+                        .updateColor(ColorType::ThreadMessageHighlight,
                                      QColor(colorName));
                 }
             }

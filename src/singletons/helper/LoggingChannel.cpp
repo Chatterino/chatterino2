@@ -1,6 +1,7 @@
 #include "LoggingChannel.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 
@@ -12,8 +13,10 @@ namespace chatterino {
 
 QByteArray endline("\n");
 
-LoggingChannel::LoggingChannel(const QString &_channelName)
+LoggingChannel::LoggingChannel(const QString &_channelName,
+                               const QString &_platform)
     : channelName(_channelName)
+    , platform(_platform)
 {
     if (this->channelName.startsWith("/whispers"))
     {
@@ -23,14 +26,19 @@ LoggingChannel::LoggingChannel(const QString &_channelName)
     {
         this->subDirectory = "Mentions";
     }
+    else if (channelName.startsWith("/live"))
+    {
+        this->subDirectory = "Live";
+    }
     else
     {
         this->subDirectory =
             QStringLiteral("Channels") + QDir::separator() + channelName;
     }
 
-    // FOURTF: change this when adding more providers
-    this->subDirectory = "Twitch/" + this->subDirectory;
+    // enforce capitalized platform names
+    this->subDirectory = platform[0].toUpper() + platform.mid(1).toLower() +
+                         QDir::separator() + this->subDirectory;
 
     getSettings()->logPath.connect([this](const QString &logPath, auto) {
         this->baseDirectory =
@@ -63,13 +71,13 @@ void LoggingChannel::openLogFile()
 
     if (!QDir().mkpath(directory))
     {
-        qDebug() << "Unable to create logging path";
+        qCDebug(chatterinoHelper) << "Unable to create logging path";
         return;
     }
 
     // Open file handle to log file of current date
     QString fileName = directory + QDir::separator() + baseFileName;
-    qDebug() << "Logging to" << fileName;
+    qCDebug(chatterinoHelper) << "Logging to" << fileName;
     this->fileHandle.setFileName(fileName);
 
     this->fileHandle.open(QIODevice::Append);
