@@ -2155,22 +2155,6 @@ void Helix::getChatters(
     this->getApiListRecursive(chatterList, "chat/chatters", urlQuery, 1, paginationCursor, successCallback, failureCallback);
 }
 
-// https://dev.twitch.tv/docs/api/reference#get-moderators
-void Helix::getChannelMods(
-    QString broadcasterID,
-    ResultCallback<HelixUserList*> successCallback,
-    FailureCallback<HelixUserListError, QString> failureCallback)  
-{
-    auto chatterList = new HelixUserList();
-    QString paginationCursor("");
-
-    QUrlQuery urlQuery;
-
-    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
-
-    this->getApiListRecursive(chatterList, "moderation/moderators", urlQuery, 1, paginationCursor, successCallback, failureCallback);
-}
-
 // List the VIPs of a channel
 // https://dev.twitch.tv/docs/api/reference#get-vips
 void Helix::getChannelVIPs(

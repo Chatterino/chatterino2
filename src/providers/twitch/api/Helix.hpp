@@ -810,13 +810,6 @@ public:
         QString broadcasterID, QString moderatorID,
         ResultCallback<HelixUserList*> successCallback,
         FailureCallback<HelixUserListError, QString> failureCallback) = 0;
-
-    // Get moderator list
-    // https://dev.twitch.tv/docs/api/reference#get-moderators
-    virtual void getChannelMods(
-        QString broadcasterID,
-        ResultCallback<HelixUserList*> successCallback,
-        FailureCallback<HelixUserListError, QString> failureCallback) = 0;
     
     // https://dev.twitch.tv/docs/api/reference#get-vips
     virtual void getChannelVIPs(
@@ -1083,13 +1076,6 @@ public:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     void getChatters(
         QString broadcasterID, QString moderatorID,
-        ResultCallback<HelixUserList*> successCallback,
-        FailureCallback<HelixUserListError, QString> failureCallback) final;
-
-    // Get moderator list
-    // https://dev.twitch.tv/docs/api/reference#get-moderators
-    void getChannelMods(
-        QString broadcasterID,
         ResultCallback<HelixUserList*> successCallback,
         FailureCallback<HelixUserListError, QString> failureCallback) final;
         

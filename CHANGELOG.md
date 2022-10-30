@@ -68,7 +68,6 @@
 - Minor: Migrated /uniquechat and /r9kbeta to Helix API. (#4057)
 - Minor: Migrated /uniquechatoff and /r9kbetaoff to Helix API. (#4057)
 - Minor: Make menus and placeholders display appropriate custom key combos. (#4045)
-- Minor: Migrated /mods to Helix API. (#3971)
 - Minor: Migrated /chatters to Helix API. (#4019)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fixed `Smooth scrolling on new messages` setting sometimes hiding messages. (#4028)
