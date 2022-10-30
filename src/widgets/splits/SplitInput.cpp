@@ -848,8 +848,7 @@ void SplitInput::editTextChanged()
     // set textLengthLabel value
     QString text = this->ui_.textEdit->toPlainText();
 
-    if (getSettings()->messageOverflow.getValue() == MessageOverflow::Prevent &&
-        text.length() > TWITCH_MESSAGE_LIMIT)
+    if (this->shouldPreventInput(text))
     {
         this->ui_.textEdit->setPlainText(text.left(TWITCH_MESSAGE_LIMIT));
         this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
@@ -1040,6 +1039,16 @@ void SplitInput::clearInput()
     {
         this->replyThread_ = nullptr;
     }
+}
+
+bool SplitInput::shouldPreventInput(const QString &text) const
+{
+    if (getSettings()->messageOverflow.getValue() != MessageOverflow::Prevent)
+    {
+        return false;
+    }
+
+    return text.length() > TWITCH_MESSAGE_LIMIT;
 }
 
 }  // namespace chatterino

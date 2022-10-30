@@ -116,6 +116,10 @@ protected:
     // This does not take hidden into account, so callers must take hidden into account themselves
     int scaledMaxHeight() const;
 
+    // Returns true if the channel this input is connected to is a Twitch channel,
+    // the user's setting is set to Prevent, and the given text goes beyond the Twitch message length limit
+    bool shouldPreventInput(const QString &text) const;
+
     Split *const split_;
     QObjectRef<EmotePopup> emotePopup_;
     QObjectRef<InputCompletionPopup> inputCompletionPopup_;
