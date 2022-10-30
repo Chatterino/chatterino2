@@ -132,6 +132,11 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         return lastElement->getFlags().has(MessageElementFlag::EmoteImages);
     };
 
+    if (element->getText().isRightToLeft())
+    {
+        this->containsRTL = true;
+    }
+
     // check the first non-neutral word to see if we should render RTL or LTR
     if (isAddingMode && this->first == FirstWord::Neutral &&
         element->getFlags().has(MessageElementFlag::Text))
@@ -249,7 +254,7 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     }
 }
 
-void MessageLayoutContainer::reorderRTL()
+void MessageLayoutContainer::reorderRTL(int firstTextIndex)
 {
     if (this->elements_.empty())
     {
@@ -259,17 +264,13 @@ void MessageLayoutContainer::reorderRTL()
     int startIndex = static_cast<int>(this->lineStart_);
     int endIndex = static_cast<int>(this->elements_.size()) - 1;
 
-    // skip none-text elemnts
-    if (this->line_ == 0)
+    if (firstTextIndex >= endIndex)
     {
-        for (int i = 0; i < this->elements_.size(); i++)
-        {
-            if (this->elements_[i]->getFlags().has(MessageElementFlag::Text))
-            {
-                startIndex = i;
-                break;
-            }
-        }
+        return;
+    }
+    else
+    {
+        startIndex = std::max(startIndex, firstTextIndex);
     }
 
     std::vector<int> correctSequence;
@@ -330,7 +331,27 @@ void MessageLayoutContainer::breakLine()
 {
     if (this->containsRTL)
     {
-        this->reorderRTL();
+        if (this->elements_.size() > 0 &&
+            this->elements_[0]->getFlags().has(
+                MessageElementFlag::RepliedMessage) &&
+            this->line_ == 0)
+        {
+            this->reorderRTL(4);
+            this->first = FirstWord::Neutral;
+            this->containsRTL = false;
+        }
+        else
+        {
+            for (int i = 0; i < this->elements_.size(); i++)
+            {
+                if (this->elements_[i]->getFlags().has(
+                        MessageElementFlag::Username))
+                {
+                    this->reorderRTL(i + 1);
+                    break;
+                }
+            }
+        }
     }
 
     int xOffset = 0;

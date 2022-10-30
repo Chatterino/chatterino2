@@ -67,7 +67,7 @@ struct MessageLayoutContainer {
     void breakLine();
     bool atStartOfLine();
     bool fitsInLine(int width_);
-    void reorderRTL();
+    void reorderRTL(int firstTextIndex);
     MessageLayoutElement *getElementAt(QPoint point);
 
     // painting
