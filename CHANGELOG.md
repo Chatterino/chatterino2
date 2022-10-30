@@ -69,6 +69,7 @@
 - Minor: Migrated /uniquechatoff and /r9kbetaoff to Helix API. (#4057)
 - Minor: Added stream titles to windows live toast notifications. (#1297)
 - Minor: Make menus and placeholders display appropriate custom key combos. (#4045)
+- Minor: Add settings tooltips. (#3437)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fixed `Smooth scrolling on new messages` setting sometimes hiding messages. (#4028)
 - Bugfix: Fixed a crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
