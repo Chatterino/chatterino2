@@ -271,7 +271,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return static_cast<StreamerModeSetting>(args.index);
         },
-        false);
+        false,
+        "Specify how Chatterino will handle messages that exceed Twitch "
+        "message limits");
 
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
