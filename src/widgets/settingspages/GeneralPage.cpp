@@ -270,7 +270,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         [](auto args) {
             return static_cast<StreamerModeSetting>(args.index);
-        });
+        },
+        false);
 
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
