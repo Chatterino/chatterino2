@@ -562,19 +562,20 @@ target_link_libraries(${LIBRARY_PROJECT}
         LRUCache
         MagicEnum
         )
-if (BUILD_WITH_QTKEYCHAIN)
-    target_link_libraries(${LIBRARY_PROJECT} PUBLIC qt5keychain)
-    # SOURCE_DIR contains the keychain.h file
-    # BINARY_DIR contains the qkeychain_export.h file
-    target_include_directories(${LIBRARY_PROJECT} PUBLIC
-        ${qtkeychain_SOURCE_DIR}
-        ${qtkeychain_BINARY_DIR})
-else()
+
+if (C2_USE_QTKEYCHAIN AND Qt${MAJOR_QT_VERSION}Keychain_FOUND)
+    target_link_libraries(${LIBRARY_PROJECT}
+        PUBLIC
+        qt${MAJOR_QT_VERSION}keychain)
+else ()
+    if (C2_USE_QTKEYCHAIN)
+        message(WARNING "QtKeychain not found, building without system keychain support")
+    endif ()
     target_compile_definitions(${LIBRARY_PROJECT}
         PUBLIC
         NO_QTKEYCHAIN
         )
-endif()
+endif ()
 
 if (BUILD_APP)
     if (APPLE)
@@ -675,11 +676,6 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
 if (GIT_MODIFIED)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CHATTERINO_GIT_MODIFIED
-        )
-endif ()
-if (USE_SYSTEM_QTKEYCHAIN)
-    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
-        SYSTEM_QTKEYCHAIN
         )
 endif ()
 if (WIN32)

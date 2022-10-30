@@ -108,7 +108,7 @@
 - Dev: Batched checking live status for all channels after startup. (#3757, #3762, #3767)
 - Dev: Moved most command context into the command controller. (#3824)
 - Dev: Error NetworkResults now include the body data. (#3987)
-- Dev: Use QtKeychain upstream repository instead of our own fork. We needed some quirky changes to the repository to support our qmake build, however this is no longer the case. (#3877)
+- Dev: Disable submodule-built version of QtKeychain. (#3877)
 
 ## 2.3.5
 

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 cmake_policy(SET CMP0087 NEW)
 include(FeatureSummary)
-include(FetchContent)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
@@ -15,13 +14,9 @@ option(BUILD_TESTS "Build the tests for Chatterino" OFF)
 option(BUILD_BENCHMARKS "Build the benchmarks for Chatterino" OFF)
 option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
-option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
-option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key chain" ON)
+option(C2_USE_QTKEYCHAIN "Build Chatterino with support for your system key chain" ON)
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
-option(C2_BUILD_SHARED_LIBS "Try to build and use shared libraries where possible" OFF)
-
-set(BUILD_SHARED_LIBS ${C2_BUILD_SHARED_LIBS})
 
 option(USE_CONAN "Use conan" OFF)
 
@@ -86,19 +81,8 @@ else()
 endif()
 
 
-if (BUILD_WITH_QTKEYCHAIN)
-    # Link QtKeychain statically
-    if (USE_SYSTEM_QTKEYCHAIN)
-        find_package(Qt${MAJOR_QT_VERSION}Keychain REQUIRED)
-    else()
-        FetchContent_Declare(
-            QtKeychain
-
-            SOURCE_DIR      ${CMAKE_SOURCE_DIR}/lib/qtkeychain
-            )
-
-        FetchContent_MakeAvailable(QtKeychain)
-    endif()
+if (C2_USE_QTKEYCHAIN)
+    find_package(Qt${MAJOR_QT_VERSION}Keychain)
 endif()
 
 find_package(RapidJSON REQUIRED)
