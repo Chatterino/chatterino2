@@ -4,6 +4,7 @@
 #include <QJsonObject>
 
 namespace {
+
 using namespace chatterino;
 
 const char *typeToString(SeventvEventApiSubscriptionType type)

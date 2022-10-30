@@ -9,6 +9,7 @@
 #include "providers/seventv/SeventvEventApi.hpp"
 
 namespace chatterino {
+
 struct SeventvEventApiMessage {
     QJsonObject data;
 

@@ -6,6 +6,7 @@
 #include "magic_enum.hpp"
 
 namespace chatterino {
+
 // https://github.com/SevenTV/EventAPI/tree/ca4ff15cc42b89560fa661a76c5849047763d334#subscription-types
 enum class SeventvEventApiSubscriptionType {
     UpdateEmoteSet,
@@ -42,6 +43,7 @@ struct SeventvEventApiSubscription {
     friend QDebug &operator<<(QDebug &dbg,
                               const SeventvEventApiSubscription &subscription);
 };
+
 }  // namespace chatterino
 
 template <>
@@ -62,6 +64,7 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
 }
 
 namespace std {
+
 template <>
 struct hash<chatterino::SeventvEventApiSubscription> {
     size_t operator()(const chatterino::SeventvEventApiSubscription &sub) const
@@ -69,4 +72,5 @@ struct hash<chatterino::SeventvEventApiSubscription> {
         return (size_t)qHash(sub.condition, qHash((int)sub.type));
     }
 };
+
 }  // namespace std
