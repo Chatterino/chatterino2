@@ -1048,6 +1048,19 @@ bool SplitInput::shouldPreventInput(const QString &text) const
         return false;
     }
 
+    auto channel = this->split_->getChannel();
+
+    if (channel == nullptr)
+    {
+        return false;
+    }
+
+    if (!channel->isTwitchChannel())
+    {
+        // Don't respect this setting for IRC channels as the limits might be server-specific
+        return false;
+    }
+
     return text.length() > TWITCH_MESSAGE_LIMIT;
 }
 
