@@ -393,7 +393,7 @@ void GeneralPageView::updateNavigationHighlighting()
     }
 }
 
-void GeneralPageView::addToolTip(QWidget &widget, QString text)
+void GeneralPageView::addToolTip(QWidget &widget, QString text) const
 {
     if (text.isEmpty())
     {

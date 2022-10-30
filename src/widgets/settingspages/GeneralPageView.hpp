@@ -203,7 +203,7 @@ protected:
 
 private:
     void updateNavigationHighlighting();
-    void addToolTip(QWidget &widget, QString text);
+    void addToolTip(QWidget &widget, QString text) const;
 
     struct Widget {
         QWidget *element;
