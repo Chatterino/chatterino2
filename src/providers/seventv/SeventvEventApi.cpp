@@ -109,6 +109,17 @@ void SeventvEventApi::onMessage(
             this->handleDispatch(*dispatch);
         }
         break;
+        case SeventvEventApiOpcode::Reconnect: {
+            if (auto client = this->findClient(hdl))
+            {
+                if (auto *stvClient =
+                        dynamic_cast<SeventvEventApiClient *>(client.get()))
+                {
+                    stvClient->close("Reconnecting");
+                }
+            }
+        }
+        break;
         default: {
             qCDebug(chatterinoSeventvEventApi) << "Unhandled op: " << payload;
         }

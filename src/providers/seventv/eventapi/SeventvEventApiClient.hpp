@@ -25,6 +25,8 @@ private:
     std::atomic<std::chrono::time_point<std::chrono::steady_clock>>
         lastHeartbeat_;
     std::atomic<std::chrono::milliseconds> heartbeatInterval_;
+
+    friend class SeventvEventApi;
 };
 
 }  // namespace chatterino
