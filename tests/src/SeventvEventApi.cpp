@@ -11,9 +11,9 @@ const QString EMOTE_SET_A = "60b39e943e203cc169dfc106";
 const QString EMOTE_SET_B = "60bca831e7ecd2f892c9b9ab";
 const QString TARGET_USER_ID = "60b39e943e203cc169dfc106";
 
-TEST(SeventvEventApi, EmoteSets)
+TEST(SeventvEventApi, AllEvents)
 {
-    const QString host("wss://127.0.0.1:9050/liveupdates/seventv/basic");
+    const QString host("wss://127.0.0.1:9050/liveupdates/seventv/all-events");
     auto *eventApi = new SeventvEventApi(host, std::chrono::milliseconds(1000));
     eventApi->start();
 
@@ -85,10 +85,9 @@ TEST(SeventvEventApi, EmoteSets)
     ASSERT_EQ(eventApi->diag.connectionsFailed, 0);
 }
 
-TEST(SeventvEventApi, AutoDisconnect)
+TEST(SeventvEventApi, NoHeartbeat)
 {
-    const QString host(
-        "wss://127.0.0.1:9050/liveupdates/seventv/auto-disconnect");
+    const QString host("wss://127.0.0.1:9050/liveupdates/seventv/no-heartbeat");
     auto *eventApi = new SeventvEventApi(host, std::chrono::milliseconds(1000));
     eventApi->start();
 
