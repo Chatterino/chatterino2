@@ -224,8 +224,6 @@ private:
 
     std::vector<Group> groups_;
     pajlada::Signals::SignalHolder managedConnections_;
-
-    const int MAX_TOOLTIP_LINE_LENGTH = 50;
 };
 
 }  // namespace chatterino
