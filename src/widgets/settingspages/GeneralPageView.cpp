@@ -378,25 +378,27 @@ void GeneralPageView::updateNavigationHighlighting()
 
 void GeneralPageView::addToolTip(QWidget &widget, QString text)
 {
-    if (!text.isEmpty())
+    if (text.isEmpty())
     {
-        if (text.length() > MAX_TOOLTIP_LINE_LENGTH)
-        {
-            // match MAX_TOOLTIP_LINE_LENGTH characters, any remaining
-            // non-space, and then capture the following space for
-            // replacement with newline
-            QString maxLineLengthPattern =
-                QString(".{%1}\\S*\\K(\\s+)").arg(MAX_TOOLTIP_LINE_LENGTH);
-            text.replace(QRegularExpression(maxLineLengthPattern), "\n");
-        }
-
-        widget.setToolTip(text);
-        widget.setStyleSheet("QToolTip {"
-                             "padding: 2px;"
-                             "background-color: #333333;"
-                             "border: 1px solid #545454;"
-                             "}");
+        return;
     }
+
+    if (text.length() > MAX_TOOLTIP_LINE_LENGTH)
+    {
+        // match MAX_TOOLTIP_LINE_LENGTH characters, any remaining
+        // non-space, and then capture the following space for
+        // replacement with newline
+        QString maxLineLengthPattern =
+            QString(".{%1}\\S*\\K(\\s+)").arg(MAX_TOOLTIP_LINE_LENGTH);
+        text.replace(QRegularExpression(maxLineLengthPattern), "\n");
+    }
+
+    widget.setToolTip(text);
+    widget.setStyleSheet("QToolTip {"
+                         "padding: 2px;"
+                         "background-color: #333333;"
+                         "border: 1px solid #545454;"
+                         "}");
 }
 
 }  // namespace chatterino
