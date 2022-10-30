@@ -111,6 +111,10 @@ TwitchChannel::TwitchChannel(const QString &name)
         }
     });
 
+    QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [=] {
+        this->refreshChatters();
+    });
+
     this->chattersListTimer_.start(5 * 60 * 1000);
 
     QObject::connect(&this->threadClearTimer_, &QTimer::timeout, [=] {
@@ -137,6 +141,7 @@ void TwitchChannel::initialize()
 {
     this->fetchDisplayName();
     this->refreshBadges();
+    this->refreshChatters();
 }
 
 bool TwitchChannel::isEmpty() const
@@ -592,9 +597,7 @@ const QString &TwitchChannel::popoutPlayerUrl()
 
 int TwitchChannel::chatterCount()
 {
-    return this->hasModRights()
-        ? this->chatterCount_
-        : this->accessChatters()->getNumChatters();
+    return this->accessChatters()->getNumChatters();
 }
 
 void TwitchChannel::setLive(bool newLiveStatus)
@@ -876,15 +879,13 @@ void TwitchChannel::refreshPubSub()
     getApp()->twitch->pubsub->listenToChannelPointRewards(roomId);
 }
 
-void TwitchChannel::refreshChatters(
-    ResultCallback<std::vector<QString>> successCallback,
-    ResultCallback<QString> failureCallback
-) {
-    
+void TwitchChannel::refreshChatters() {
     // helix endpoint only works for mods
     if (!this->hasModRights()) 
-        return failureCallback(Helix::formatHelixUserListErrorString(QString("chatters"), HelixUserListError::UserNotAuthorized, ""));
-
+    {
+        return;
+    }
+    
     // setting?
     const auto streamStatus = this->accessStreamStatus();
     const auto viewerCount = static_cast<int>(streamStatus->viewerCount);
@@ -901,16 +902,11 @@ void TwitchChannel::refreshChatters(
     getHelix()->getChatters(
         this->roomId(),
         getApp()->accounts->twitch.getCurrent()->getUserId(),
-        [this, successCallback](HelixUserList *chatterList) {
-            this->chatterCount_ = chatterList->total;
+        [this](HelixUserList *chatterList) {
             this->updateOnlineChatters(chatterList->users);
-            successCallback(this->accessChatters()->filterByPrefix(""));
         },
-        [this, failureCallback](auto error, auto message) {
-            auto errorMessage = Helix::formatHelixUserListErrorString(QString("chatters"), error, message);
-            this->addMessage(makeSystemMessage(errorMessage));
-            failureCallback(errorMessage);
-        }
+        // Refresh chatters should only be used when failing silently is an option
+        [this](auto error, auto message) { }
     );
 }
 

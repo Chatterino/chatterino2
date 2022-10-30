@@ -901,19 +901,23 @@ void CommandController::initialize(Settings &, Paths &paths)
                         .arg(localizeNumbers(twitchChannel->chatterCount()))));
             };
 
-            // Fetch from chatter cache when user does not have mod rights
+            // Fail when user is not a moderator
             if (!twitchChannel->hasModRights()) {
-                addChatterCountMessage();
+                channel->addMessage(makeSystemMessage(QString("Error: Only moderators can get number of chatters")));
                 return "";
             }
 
-            // Use helix api when user has mod rights
-            twitchChannel->refreshChatters(
-                [addChatterCountMessage](auto chatters) {
+            // Refresh chatter list via helix api for mods
+            getHelix()->getChatters(
+                twitchChannel->roomId(),
+                getApp()->accounts->twitch.getCurrent()->getUserId(),
+                [twitchChannel, addChatterCountMessage](HelixUserList *chatterList) {
+                    twitchChannel->updateOnlineChatters(chatterList->users);
                     addChatterCountMessage();
                 },
-                [channel](auto error) {
-                    channel->addMessage(makeSystemMessage(error));
+                [channel](auto error, auto message) {
+                    auto errorMessage = Helix::formatHelixUserListErrorString(QString("chatters"), error, message);
+                    channel->addMessage(makeSystemMessage(errorMessage));
                 }
             );
 

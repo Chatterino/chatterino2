@@ -96,10 +96,7 @@ public:
     virtual void reconnect() override;
     void refreshTitle();
     void createClip();
-    void refreshChatters(
-        ResultCallback<std::vector<QString>> successCallback,
-        ResultCallback<QString> failureCallback
-    );
+    void refreshChatters();
 
     // Data
     const QString &subscriptionUrl();
@@ -194,7 +191,6 @@ private:
     const QString subscriptionUrl_;
     const QString channelUrl_;
     const QString popoutPlayerUrl_;
-    int chatterCount_;
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
     std::atomic_flag loadingRecentMessages_ = ATOMIC_FLAG_INIT;
