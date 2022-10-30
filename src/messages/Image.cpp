@@ -278,7 +278,10 @@ Image::~Image()
         return;
     }
 
-    // run destructor of Frames in gui thread
+    // Ensure the destructor for our frames is called in the GUI thread
+    // If the Image destructor is called outside of the GUI thread, move the
+    // ownership of the frames to the GUI thread, otherwise the frames will be
+    // destructed as part as we go out of scope
     if (!isGuiThread())
     {
         postToThread([frames = this->frames_.release()]() {
