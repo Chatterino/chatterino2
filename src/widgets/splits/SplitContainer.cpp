@@ -206,7 +206,7 @@ void SplitContainer::addSplit(Split *split)
 
     split->setParent(this);
     split->show();
-    split->giveFocus(Qt::MouseFocusReason);
+    split->setFocus(Qt::FocusReason::MouseFocusReason);
     this->unsetCursor();
     this->splits_.push_back(split);
 
@@ -331,7 +331,7 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
     }
     else
     {
-        this->splits_.front()->giveFocus(Qt::MouseFocusReason);
+        this->splits_.front()->setFocus(Qt::FocusReason::MouseFocusReason);
     }
 
     this->refreshTab();
@@ -414,7 +414,7 @@ void SplitContainer::focusSplitRecursive(Node *node)
     switch (node->type_)
     {
         case Node::_Split: {
-            node->split_->giveFocus(Qt::OtherFocusReason);
+            node->split_->setFocus(Qt::FocusReason::OtherFocusReason);
         }
         break;
 
@@ -727,7 +727,7 @@ void SplitContainer::focusInEvent(QFocusEvent *)
         return;
     }
 
-    if (this->splits_.size() != 0)
+    if (!this->splits_.empty())
     {
         this->splits_.front()->setFocus();
     }

@@ -12,10 +12,11 @@ namespace {
     {
         // list of command line switches to turn on private browsing in browsers
         static auto switches = std::vector<std::pair<QString, QString>>{
-            {"firefox", "-private-window"},     {"chrome", "-incognito"},
-            {"vivaldi", "-incognito"},          {"opera", "-newprivatetab"},
-            {"opera\\\\launcher", "--private"}, {"iexplore", "-private"},
-            {"msedge", "-inprivate"},
+            {"firefox", "-private-window"},  {"librewolf", "-private-window"},
+            {"waterfox", "-private-window"}, {"icecat", "-private-window"},
+            {"chrome", "-incognito"},        {"vivaldi", "-incognito"},
+            {"opera", "-newprivatetab"},     {"opera\\\\launcher", "--private"},
+            {"iexplore", "-private"},        {"msedge", "-inprivate"},
         };
 
         // transform into regex and replacement string

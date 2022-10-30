@@ -204,8 +204,18 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
             buffer.open(QIODevice::ReadOnly);
             QImageReader reader(&buffer);
 
-            QImage image;
-            if (reader.imageCount() == 0 || !reader.read(&image))
+            if (!reader.canRead() || reader.size().isEmpty())
+            {
+                return Failure;
+            }
+
+            QImage image = reader.read();
+            if (image.isNull())
+            {
+                return Failure;
+            }
+
+            if (reader.imageCount() <= 0)
             {
                 return Failure;
             }

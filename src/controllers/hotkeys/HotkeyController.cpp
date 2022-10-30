@@ -1,6 +1,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "singletons/Settings.hpp"
 
@@ -201,8 +202,15 @@ void HotkeyController::loadHotkeys()
     auto set = std::set<QString>(defaultHotkeysAdded.begin(),
                                  defaultHotkeysAdded.end());
 
+    // set is currently "defaults added in settings"
+    auto numDefaultsFromSettings = set.size();
+
     auto keys = pajlada::Settings::SettingManager::getObjectKeys("/hotkeys");
     this->addDefaults(set);
+
+    // set is currently "all defaults (defaults defined from application + defaults defined in settings)"
+    auto numCombinedDefaults = set.size();
+
     pajlada::Settings::Setting<std::vector<QString>>::set(
         "/hotkeys/addedDefaults", std::vector<QString>(set.begin(), set.end()));
 
@@ -238,6 +246,12 @@ void HotkeyController::loadHotkeys()
         this->hotkeys_.append(std::make_shared<Hotkey>(
             *category, QKeySequence(keySequence), action, arguments,
             QString::fromStdString(key)));
+    }
+
+    if (numDefaultsFromSettings != numCombinedDefaults)
+    {
+        // some default that the user was not aware of has been added to the application, force a save to ensure shared state between hotkey controller and settings
+        this->saveHotkeys();
     }
 }
 
@@ -327,6 +341,9 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             QKeySequence("Ctrl+F"), "showSearch",
                             std::vector<QString>(), "show search");
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
+                            QKeySequence("Ctrl+Shift+F"), "showGlobalSearch",
+                            std::vector<QString>(), "show global search");
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
                             QKeySequence("Ctrl+F5"), "reconnect",
                             std::vector<QString>(), "reconnect");
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
@@ -359,6 +376,9 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
                             QKeySequence("Ctrl+End"), "scrollToBottom",
                             std::vector<QString>(), "scroll to bottom");
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
+                            QKeySequence("Ctrl+Home"), "scrollToTop",
+                            std::vector<QString>(), "scroll to top");
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
                             QKeySequence("F10"), "debug",
                             std::vector<QString>(), "open debug popup");
@@ -526,6 +546,42 @@ void HotkeyController::showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
             .arg(hotkey->name(), warning),
         QMessageBox::Ok);
     msgBox->exec();
+}
+
+QKeySequence HotkeyController::getDisplaySequence(
+    HotkeyCategory category, const QString &action,
+    const std::optional<std::vector<QString>> &arguments) const
+{
+    const auto &found = this->findLike(category, action, arguments);
+    if (found != nullptr)
+    {
+        return found->keySequence();
+    }
+    return {};
+}
+
+std::shared_ptr<Hotkey> HotkeyController::findLike(
+    HotkeyCategory category, const QString &action,
+    const std::optional<std::vector<QString>> &arguments) const
+{
+    for (auto other : this->hotkeys_)
+    {
+        if (other->category() == category && other->action() == action)
+        {
+            if (arguments)
+            {
+                if (other->arguments() == *arguments)
+                {
+                    return other;
+                }
+            }
+            else
+            {
+                return other;
+            }
+        }
+    }
+    return nullptr;
 }
 
 }  // namespace chatterino

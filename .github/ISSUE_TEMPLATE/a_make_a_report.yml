@@ -49,5 +49,5 @@ body:
     attributes:
         label: OS and Chatterino Version
         description: The name of your Operating System and the version shown in Chatterino's about settings page (⚙ -> about tab).
-        placeholder: Chatterino 2.3.4 (commit f64047d, 2021-12-26) on Windows 10 (insiders)
+        placeholder: Chatterino 2.3.5 (commit 81a62764, 2022-04-05) on Windows 10 Version 2009, kernel 10.0.19043
 

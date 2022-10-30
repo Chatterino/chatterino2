@@ -141,14 +141,19 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         }
     }
 
+    // 7TV Global
+    for (auto &emote : *getApp()->twitch->getSeventvEmotes().globalEmotes())
+    {
+        addString(emote.first.string, TaggedString::Type::SeventvGlobalEmote);
+    }
     // Bttv Global
-    for (auto &emote : *getApp()->twitch2->getBttvEmotes().emotes())
+    for (auto &emote : *getApp()->twitch->getBttvEmotes().emotes())
     {
         addString(emote.first.string, TaggedString::Type::BTTVChannelEmote);
     }
 
     // Ffz Global
-    for (auto &emote : *getApp()->twitch2->getFfzEmotes().emotes())
+    for (auto &emote : *getApp()->twitch->getFfzEmotes().emotes())
     {
         addString(emote.first.string, TaggedString::Type::FFZChannelEmote);
     }
@@ -198,6 +203,11 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         }
     }
 
+    // 7TV Channel
+    for (auto &emote : *tc->seventvEmotes())
+    {
+        addString(emote.first.string, TaggedString::Type::SeventvChannelEmote);
+    }
     // Bttv Channel
     for (auto &emote : *tc->bttvEmotes())
     {

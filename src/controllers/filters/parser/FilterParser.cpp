@@ -9,8 +9,7 @@ namespace filterparser {
 
 ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 {
-    auto watchingChannel =
-        chatterino::getApp()->twitch.server->watchingChannel.get();
+    auto watchingChannel = chatterino::getApp()->twitch->watchingChannel.get();
 
     /* Known Identifiers
      *
@@ -30,7 +29,11 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * flags.system_message
      * flags.reward_message
      * flags.first_message
+     * flags.elevated_message
+     * flags.cheer_message
      * flags.whisper
+     * flags.reply
+     * flags.automod
      *
      * message.content
      * message.length
@@ -52,7 +55,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 
     bool subscribed = false;
     int subLength = 0;
-    for (const QString &subBadge : {"subscriber", "founder"})
+    for (const auto &subBadge : {"subscriber", "founder"})
     {
         if (!badges.contains(subBadge))
         {
@@ -82,7 +85,11 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
         {"flags.reward_message",
          m->flags.has(MessageFlag::RedeemedChannelPointReward)},
         {"flags.first_message", m->flags.has(MessageFlag::FirstMessage)},
+        {"flags.elevated_message", m->flags.has(MessageFlag::ElevatedMessage)},
+        {"flags.cheer_message", m->flags.has(MessageFlag::CheerMessage)},
         {"flags.whisper", m->flags.has(MessageFlag::Whisper)},
+        {"flags.reply", m->flags.has(MessageFlag::ReplyMessage)},
+        {"flags.automod", m->flags.has(MessageFlag::AutoMod)},
 
         {"message.content", m->messageText},
         {"message.length", m->messageText.length()},

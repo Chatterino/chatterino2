@@ -3,6 +3,7 @@
 #include <QPaintEvent>
 #include <QScroller>
 #include <QTimer>
+#include <QVariantAnimation>
 #include <QWheelEvent>
 #include <QWidget>
 #include <pajlada/signals/signal.hpp>
@@ -26,7 +27,7 @@ using ChannelPtr = std::shared_ptr<Channel>;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 
-enum class MessageFlag : uint32_t;
+enum class MessageFlag : int64_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 class MessageLayout;
@@ -39,6 +40,7 @@ class Scrollbar;
 class EffectLabel;
 struct Link;
 class MessageLayoutElement;
+class Split;
 
 enum class PauseReason {
     Mouse,
@@ -61,7 +63,15 @@ class ChannelView final : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit ChannelView(BaseWidget *parent = nullptr);
+    enum class Context {
+        None,
+        UserCard,
+        ReplyThread,
+        Search,
+    };
+
+    explicit ChannelView(BaseWidget *parent = nullptr, Split *split = nullptr,
+                         Context context = Context::None);
 
     void queueUpdate();
     Scrollbar &getScrollBar();
@@ -74,12 +84,25 @@ public:
     const boost::optional<MessageElementFlags> &getOverrideFlags() const;
     void updateLastReadMessage();
 
+    /**
+     * Attempts to scroll to a message in this channel.
+     * @return <code>true</code> if the message was found and highlighted.
+     */
+    bool scrollToMessage(const MessagePtr &message);
+    /**
+     * Attempts to scroll to a message id in this channel.
+     * @return <code>true</code> if the message was found and highlighted.
+     */
+    bool scrollToMessageId(const QString &id);
+
     /// Pausing
     bool pausable() const;
     void setPausable(bool value);
     bool paused() const;
     void pause(PauseReason reason, boost::optional<uint> msecs = boost::none);
     void unpause(PauseReason reason);
+
+    MessageElementFlags getFlags() const;
 
     ChannelPtr channel();
     void setChannel(ChannelPtr channel_);
@@ -92,11 +115,28 @@ public:
     void setSourceChannel(ChannelPtr sourceChannel);
     bool hasSourceChannel() const;
 
-    LimitedQueueSnapshot<MessageLayoutPtr> getMessagesSnapshot();
+    LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
     void queueLayout();
 
     void clearMessages();
-    void showUserInfoPopup(const QString &userName);
+
+    Context getContext() const;
+
+    /**
+     * @brief Creates and shows a UserInfoPopup dialog
+     *
+     * @param userName The login name of the user
+     * @param alternativePopoutChannel Optional parameter containing the channel name to use for context
+     **/
+    void showUserInfoPopup(const QString &userName,
+                           QString alternativePopoutChannel = QString());
+
+    /**
+     * @brief This method is meant to be used when filtering out channels.
+     *        It <b>must</b> return true if a message belongs in this channel.
+     *        It <b>might</b> return true if a message doesn't belong in this channel.
+     */
+    bool mayContainMessage(const MessagePtr &message);
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
@@ -141,6 +181,7 @@ private:
     void messageAddedAtStart(std::vector<MessagePtr> &messages);
     void messageRemoveFromStart(MessagePtr &message);
     void messageReplaced(size_t index, MessagePtr &replacement);
+    void messagesUpdated();
 
     void performLayout(bool causedByScollbar = false);
     void layoutVisibleMessages(
@@ -150,23 +191,53 @@ private:
 
     void drawMessages(QPainter &painter);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
-    MessageElementFlags getFlags() const;
     void selectWholeMessage(MessageLayout *layout, int &messageIndex);
     void getWordBounds(MessageLayout *layout,
                        const MessageLayoutElement *element,
                        const QPoint &relativePos, int &wordStart, int &wordEnd);
 
     void handleMouseClick(QMouseEvent *event,
-                          const MessageLayoutElement *hoverLayoutElement,
+                          const MessageLayoutElement *hoveredElement,
                           MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
-                             MessageLayoutPtr layout);
+                             MessageLayoutPtr layout, QMouseEvent *event);
+    void addImageContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                  MessageLayoutPtr layout, QMouseEvent *event,
+                                  QMenu &menu);
+    void addLinkContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                 MessageLayoutPtr layout, QMouseEvent *event,
+                                 QMenu &menu);
+    void addMessageContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                    MessageLayoutPtr layout, QMouseEvent *event,
+                                    QMenu &menu);
+    void addTwitchLinkContextMenuItems(
+        const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
+        QMouseEvent *event, QMenu &menu);
+    void addHiddenContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                   MessageLayoutPtr layout, QMouseEvent *event,
+                                   QMenu &menu);
+    void addCommandExecutionContextMenuItems(
+        const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
+        QMouseEvent *event, QMenu &menu);
+
     int getLayoutWidth() const;
     void updatePauses();
     void unpaused();
 
     void enableScrolling(const QPointF &scrollStart);
     void disableScrolling();
+
+    /**
+     * Scrolls to a message layout that must be from this view.
+     *
+     * @param layout Must be from this channel.
+     * @param messageIdx Must be an index into this channel.
+     */
+    void scrollToMessageLayout(MessageLayout *layout, size_t messageIdx);
+
+    void setInputReply(const MessagePtr &message);
+    void showReplyThreadPopup(const MessagePtr &message);
+    bool canReplyToMessages() const;
 
     QTimer *layoutCooldown_;
     bool layoutQueued_;
@@ -193,9 +264,11 @@ private:
     ChannelPtr channel_ = nullptr;
     ChannelPtr underlyingChannel_ = nullptr;
     ChannelPtr sourceChannel_ = nullptr;
+    Split *split_ = nullptr;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
+    bool showScrollBar_ = false;
 
     FilterSetPtr channelFilters_;
 
@@ -227,6 +300,11 @@ private:
     QPointF currentMousePosition_;
     QTimer scrollTimer_;
 
+    // We're only interested in the pointer, not the contents
+    MessageLayout *highlightedMessage_;
+    QVariantAnimation highlightAnimation_;
+    void setupHighlightAnimationColors();
+
     struct {
         QCursor neutral;
         QCursor up;
@@ -235,6 +313,8 @@ private:
 
     Selection selection_;
     bool selecting_ = false;
+
+    const Context context_;
 
     LimitedQueue<MessageLayoutPtr> messages_;
 

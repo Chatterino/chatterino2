@@ -44,6 +44,10 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               1,
           }},
          {"search", ActionDefinition{"Focus search box"}},
+         {"execModeratorAction",
+          ActionDefinition{
+              "Usercard: execute moderation action",
+              "<ban, unban or number of the timeout button to use>", 1}},
      }},
     {HotkeyCategory::Split,
      {
@@ -85,6 +89,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               1,
           }},
          {"scrollToBottom", ActionDefinition{"Scroll to the bottom"}},
+         {"scrollToTop", ActionDefinition{"Scroll to the top"}},
          {"setChannelNotification",
           ActionDefinition{
               "Set channel live notification",
@@ -99,7 +104,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               0,
               1,
           }},
-         {"showSearch", ActionDefinition{"Search"}},
+         {"showSearch", ActionDefinition{"Search current channel"}},
+         {"showGlobalSearch", ActionDefinition{"Search all channels"}},
          {"startWatching", ActionDefinition{"Start watching"}},
          {"debug", ActionDefinition{"Show debug popup"}},
      }},
@@ -131,6 +137,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           ActionDefinition{"Choose previously sent message"}},
          {"redo", ActionDefinition{"Redo"}},
          {"selectAll", ActionDefinition{"Select all"}},
+         {"selectWord", ActionDefinition{"Select word"}},
          {"sendMessage",
           ActionDefinition{
               "Send message",
@@ -143,7 +150,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
      }},
     {HotkeyCategory::Window,
      {
-#ifdef C_DEBUG
+#ifndef NDEBUG
          {"addCheerMessage", ActionDefinition{"Debug: Add cheer test message"}},
          {"addEmoteMessage", ActionDefinition{"Debug: Add emote test message"}},
          {"addLinkMessage",
@@ -151,6 +158,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"addMiscMessage", ActionDefinition{"Debug: Add misc test message"}},
          {"addRewardMessage",
           ActionDefinition{"Debug: Add reward test message"}},
+         {"addSubMessage", ActionDefinition{"Debug: Add sub test message"}},
 #endif
          {"moveTab",
           ActionDefinition{

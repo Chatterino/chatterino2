@@ -79,8 +79,11 @@ Thumbs.db
 
 # Other editors/IDEs
 .vscode
+.vs
 .idea
 dependencies
+.cache
+.editorconfig
 
 ### CMake ###
 CMakeLists.txt.user
@@ -95,6 +98,8 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
+CMakePresets.json
+CMakeSettings.json
 
 ### CMake Patch ###
 # External projects
@@ -103,3 +108,10 @@ Stamp
 tmp
 Source
 Dependencies_*
+
+# vcpkg
+vcpkg_installed/
+
+# NatVis files
+qt5.natvis
+qt6.natvis
