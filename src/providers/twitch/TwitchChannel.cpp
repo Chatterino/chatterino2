@@ -106,7 +106,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     });
 
     this->destroyed.connect([this]() {
-        if (getApp()->twitch->seventvEventApi)
+        if (getApp()->twitch->seventvEventAPI)
         {
             getApp()->twitch->dropSeventvUser(this->seventvUserId_);
             getApp()->twitch->dropSeventvEmoteSet(this->seventvEmoteSetId_);
@@ -709,9 +709,9 @@ void TwitchChannel::updateSeventvData(const QString &userId,
     this->seventvUserId_ = userId;
     this->seventvEmoteSetId_ = emoteSetId;
     auto fn = [this, oldUserId, oldEmoteSetId]() {
-        if (getApp()->twitch->seventvEventApi)
+        if (getApp()->twitch->seventvEventAPI)
         {
-            getApp()->twitch->seventvEventApi->subscribeUser(
+            getApp()->twitch->seventvEventAPI->subscribeUser(
                 this->seventvUserId_, this->seventvEmoteSetId_);
 
             if (oldUserId)

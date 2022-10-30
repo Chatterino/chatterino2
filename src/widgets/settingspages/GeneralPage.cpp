@@ -388,7 +388,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);
     layout.addCheckbox("Show 7TV channel emotes", s.enableSevenTVChannelEmotes);
     layout.addCheckbox("Enable 7TV live emote updates (requires restart)",
-                       s.enableSevenTVEventApi);
+                       s.enableSevenTVEventAPI);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(

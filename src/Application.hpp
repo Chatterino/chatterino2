@@ -145,7 +145,7 @@ public:
 private:
     void addSingleton(Singleton *singleton);
     void initPubSub();
-    void initSeventvEventApi();
+    void initSeventvEventAPI();
     void initNm(Paths &paths);
 
     template <typename T,

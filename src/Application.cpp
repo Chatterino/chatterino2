@@ -151,9 +151,9 @@ void Application::initialize(Settings &settings, Paths &paths)
     }
     this->initPubSub();
 
-    if (this->twitch->seventvEventApi)
+    if (this->twitch->seventvEventAPI)
     {
-        this->initSeventvEventApi();
+        this->initSeventvEventAPI();
     }
 }
 
@@ -569,9 +569,9 @@ void Application::initPubSub()
     RequestModerationActions();
 }
 
-void Application::initSeventvEventApi()
+void Application::initSeventvEventAPI()
 {
-    this->twitch->seventvEventApi->signals_.emoteAdded.connect(
+    this->twitch->seventvEventAPI->signals_.emoteAdded.connect(
         [&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
@@ -580,7 +580,7 @@ void Application::initSeventvEventApi()
                     });
             });
         });
-    this->twitch->seventvEventApi->signals_.emoteUpdated.connect(
+    this->twitch->seventvEventAPI->signals_.emoteUpdated.connect(
         [&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
@@ -589,7 +589,7 @@ void Application::initSeventvEventApi()
                     });
             });
         });
-    this->twitch->seventvEventApi->signals_.emoteRemoved.connect(
+    this->twitch->seventvEventAPI->signals_.emoteRemoved.connect(
         [&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
@@ -598,7 +598,7 @@ void Application::initSeventvEventApi()
                     });
             });
         });
-    this->twitch->seventvEventApi->signals_.userUpdated.connect(
+    this->twitch->seventvEventAPI->signals_.userUpdated.connect(
         [&](const auto &data) {
             this->twitch->forEachSeventvUser(data.userId,
                                              [data](TwitchChannel &chan) {
@@ -606,7 +606,7 @@ void Application::initSeventvEventApi()
                                              });
         });
 
-    this->twitch->seventvEventApi->start();
+    this->twitch->seventvEventAPI->start();
 }
 
 Application *getApp()

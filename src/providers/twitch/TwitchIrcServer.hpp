@@ -57,7 +57,7 @@ public:
     IndirectChannel watchingChannel;
 
     PubSub *pubsub;
-    std::unique_ptr<SeventvEventApi> seventvEventApi;
+    std::unique_ptr<SeventvEventApi> seventvEventAPI;
 
     const BttvEmotes &getBttvEmotes() const;
     const FfzEmotes &getFfzEmotes() const;

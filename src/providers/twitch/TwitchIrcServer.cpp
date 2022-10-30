@@ -44,9 +44,9 @@ TwitchIrcServer::TwitchIrcServer()
     this->initializeIrc();
 
     this->pubsub = new PubSub(TWITCH_PUBSUB_URL);
-    if (getSettings()->enableSevenTVEventApi)
+    if (getSettings()->enableSevenTVEventAPI)
     {
-        this->seventvEventApi =
+        this->seventvEventAPI =
             std::make_unique<SeventvEventApi>(SEVENTV_EVENTAPI_URL);
     }
 
@@ -577,9 +577,9 @@ void TwitchIrcServer::dropSeventvEmoteSet(const QString &id)
         }
     }
 
-    if (this->seventvEventApi)
+    if (this->seventvEventAPI)
     {
-        this->seventvEventApi->unsubscribeEmoteSet(id);
+        this->seventvEventAPI->unsubscribeEmoteSet(id);
     }
 }
 
@@ -602,9 +602,9 @@ void TwitchIrcServer::dropSeventvUser(const QString &id)
         }
     }
 
-    if (this->seventvEventApi)
+    if (this->seventvEventAPI)
     {
-        this->seventvEventApi->unsubscribeUser(id);
+        this->seventvEventAPI->unsubscribeUser(id);
     }
 }
 
