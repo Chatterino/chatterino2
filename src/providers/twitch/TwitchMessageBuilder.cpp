@@ -238,7 +238,9 @@ MessagePtr TwitchMessageBuilder::build()
             ->setLink({Link::UserInfo, threadRoot->displayName});
 
         this->emplace<SingleLineTextElement>(
-                threadRoot->messageText, MessageElementFlag::RepliedMessage,
+                threadRoot->messageText,
+                MessageElementFlags({MessageElementFlag::RepliedMessage,
+                                     MessageElementFlag::Text}),
                 this->textColor_, FontStyle::ChatMediumSmall)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
     }
@@ -268,8 +270,10 @@ MessagePtr TwitchMessageBuilder::build()
                 ->setLink({Link::UserInfo, name});
 
             this->emplace<SingleLineTextElement>(
-                body, MessageElementFlag::RepliedMessage, this->textColor_,
-                FontStyle::ChatMediumSmall);
+                body,
+                MessageElementFlags({MessageElementFlag::RepliedMessage,
+                                     MessageElementFlag::Text}),
+                this->textColor_, FontStyle::ChatMediumSmall);
         }
     }
 
