@@ -1,11 +1,12 @@
-#include "GeneralPage.hpp"
-
-#include <QFontDialog>
-#include <QLabel>
-#include <QScrollArea>
+#include "widgets/settingspages/GeneralPage.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
@@ -21,6 +22,9 @@
 
 #include <QDesktopServices>
 #include <QFileDialog>
+#include <QFontDialog>
+#include <QLabel>
+#include <QScrollArea>
 
 #define CHROME_EXTENSION_LINK                                           \
     "https://chrome.google.com/webstore/detail/chatterino-native-host/" \
@@ -144,31 +148,48 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToFloat(args.value, 1.f);
         });
-    layout.addDropdown<int>(
-        "Tab layout", {"Horizontal", "Vertical"}, s.tabDirection,
-        [](auto val) {
-            switch (val)
-            {
-                case NotebookTabDirection::Horizontal:
-                    return "Horizontal";
-                case NotebookTabDirection::Vertical:
-                    return "Vertical";
-            }
+    ComboBox *tabDirectionDropdown =
+        layout.addDropdown<std::underlying_type<NotebookTabLocation>::type>(
+            "Tab layout", {"Top", "Left", "Right", "Bottom"}, s.tabDirection,
+            [](auto val) {
+                switch (val)
+                {
+                    case NotebookTabLocation::Top:
+                        return "Top";
+                    case NotebookTabLocation::Left:
+                        return "Left";
+                    case NotebookTabLocation::Right:
+                        return "Right";
+                    case NotebookTabLocation::Bottom:
+                        return "Bottom";
+                }
 
-            return "";
-        },
-        [](auto args) {
-            if (args.value == "Vertical")
-            {
-                return NotebookTabDirection::Vertical;
-            }
-            else
-            {
-                // default to horizontal
-                return NotebookTabDirection::Horizontal;
-            }
-        });
+                return "";
+            },
+            [](auto args) {
+                if (args.value == "Bottom")
+                {
+                    return NotebookTabLocation::Bottom;
+                }
+                else if (args.value == "Left")
+                {
+                    return NotebookTabLocation::Left;
+                }
+                else if (args.value == "Right")
+                {
+                    return NotebookTabLocation::Right;
+                }
+                else
+                {
+                    // default to top
+                    return NotebookTabLocation::Top;
+                }
+            },
+            false);
+    tabDirectionDropdown->setMinimumWidth(
+        tabDirectionDropdown->minimumSizeHint().width());
 
+    layout.addCheckbox("Show message reply button", s.showReplyButton);
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost, false,
                        "Always keep Chatterino as the top window.");
@@ -178,7 +199,17 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 #endif
     if (!BaseWindow::supportsCustomWindowFrame())
     {
-        layout.addCheckbox("Show preferences button (Ctrl+P to show)",
+        auto settingsSeq = getApp()->hotkeys->getDisplaySequence(
+            HotkeyCategory::Window, "openSettings");
+        QString shortcut = " (no key bound to open them otherwise)";
+        // TODO: maybe prevent the user from locking themselves out of the settings?
+        if (!settingsSeq.isEmpty())
+        {
+            shortcut = QStringLiteral(" (%1 to show)")
+                           .arg(settingsSeq.toString(
+                               QKeySequence::SequenceFormat::NativeText));
+        }
+        layout.addCheckbox("Show preferences button" + shortcut,
                            s.hidePreferencesButton, true);
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
@@ -316,6 +347,22 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Remove spaces between emotes",
                        s.removeSpacesBetweenEmotes);
+    layout.addCheckbox("Show unlisted 7TV emotes", s.showUnlistedSevenTVEmotes);
+    s.showUnlistedSevenTVEmotes.connect(
+        []() {
+            getApp()->twitch->forEachChannelAndSpecialChannels(
+                [](const auto &c) {
+                    if (c->isTwitchChannel())
+                    {
+                        auto *channel = dynamic_cast<TwitchChannel *>(c.get());
+                        if (channel != nullptr)
+                        {
+                            channel->refreshSevenTVChannelEmotes(false);
+                        }
+                    }
+                });
+        },
+        false);
     layout.addDropdown<int>(
         "Show info on hover", {"Don't show", "Always show", "Hold shift"},
         s.emotesTooltipPreview,
@@ -334,17 +381,23 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            "Google",
                        },
                        s.emojiSet);
+    layout.addCheckbox("Show BTTV global emotes", s.enableBTTVGlobalEmotes);
+    layout.addCheckbox("Show BTTV channel emotes", s.enableBTTVChannelEmotes);
+    layout.addCheckbox("Show FFZ global emotes", s.enableFFZGlobalEmotes);
+    layout.addCheckbox("Show FFZ channel emotes", s.enableFFZChannelEmotes);
+    layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);
+    layout.addCheckbox("Show 7TV channel emotes", s.enableSevenTVChannelEmotes);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
-        "Chatterino can automatically change behavior if it detects that \"OBS "
-        "Studio\" is running.\nSelect which things you want to change while "
-        "streaming");
+        "Chatterino can automatically change behavior if it detects that any "
+        "streaming software is running.\nSelect which things you want to "
+        "change while streaming");
 
     ComboBox *dankDropdown =
         layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
             "Enable Streamer Mode",
-            {"Disabled", "Enabled", "Automatic (Detect OBS)"},
+            {"Disabled", "Enabled", "Automatic (Detect streaming software)"},
             s.enableStreamerMode,
             [](int value) {
                 return value;
@@ -353,7 +406,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                 return static_cast<StreamerModeSetting>(args.index);
             },
             false);
-    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 10);
+    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 30);
 
     layout.addCheckbox("Hide usercard avatars",
                        s.streamerModeHideUsercardAvatars, false,
@@ -366,6 +419,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
     layout.addCheckbox("Suppress Live Notifications",
                        s.streamerModeSuppressLiveNotifications);
+    layout.addCheckbox("Suppress Inline Whispers",
+                       s.streamerModeSuppressInlineWhispers);
 
     layout.addTitle("Link Previews");
     layout.addDescription(
@@ -544,8 +599,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Title", s.headerStreamTitle);
 
     layout.addSubtitle("R9K");
+    auto toggleLocalr9kSeq = getApp()->hotkeys->getDisplaySequence(
+        HotkeyCategory::Window, "toggleLocalR9K");
+    QString toggleLocalr9kShortcut =
+        "an assigned hotkey (Window -> Toggle local R9K)";
+    if (!toggleLocalr9kSeq.isEmpty())
+    {
+        toggleLocalr9kShortcut = toggleLocalr9kSeq.toString(
+            QKeySequence::SequenceFormat::NativeText);
+    }
     layout.addDescription("Hide similar messages. Toggle hidden "
-                          "messages by pressing Ctrl+H.");
+                          "messages by pressing " +
+                          toggleLocalr9kShortcut + ".");
     layout.addCheckbox("Hide similar messages", s.similarityEnabled);
     //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
     layout.addCheckbox("By the same user", s.hideSimilarBySameUser);
@@ -596,6 +661,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Chatterino", s.showBadgesChatterino);
     layout.addCheckbox("FrankerFaceZ", s.showBadgesFfz, false,
                        "e.g., Bot, FFZ supporter, FFZ developer");
+    layout.addCheckbox("7TV", s.showBadgesSevenTV, false,
+                       "Badges for 7TV admins, developers, and supporters");
     layout.addSeperator();
     layout.addCheckbox("Use custom FrankerFaceZ moderator badges",
                        s.useCustomFfzModeratorBadges);
@@ -634,6 +701,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
     layout.addCheckbox("Automatically close user popup when it loses focus",
                        s.autoCloseUserPopup);
+    layout.addCheckbox(
+        "Automatically close reply thread popup when it loses focus",
+        s.autoCloseThreadPopup);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains,
                        false,
                        "Make all clickable links lowercase to deter "
@@ -715,6 +785,75 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "message) into one cheermote.");
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
+    layout.addCheckbox("Strip leading mention in replies", s.stripReplyMention);
+
+    // Helix timegate settings
+    auto helixTimegateGetValue = [](auto val) {
+        switch (val)
+        {
+            case HelixTimegateOverride::Timegate:
+                return "Timegate";
+            case HelixTimegateOverride::AlwaysUseIRC:
+                return "Always use IRC";
+            case HelixTimegateOverride::AlwaysUseHelix:
+                return "Always use Helix";
+            default:
+                return "Timegate";
+        }
+    };
+
+    auto helixTimegateSetValue = [](auto args) {
+        const auto &v = args.value;
+        if (v == "Timegate")
+        {
+            return HelixTimegateOverride::Timegate;
+        }
+        if (v == "Always use IRC")
+        {
+            return HelixTimegateOverride::AlwaysUseIRC;
+        }
+        if (v == "Always use Helix")
+        {
+            return HelixTimegateOverride::AlwaysUseHelix;
+        }
+
+        qCDebug(chatterinoSettings) << "Unknown Helix timegate override value"
+                                    << v << ", using default value Timegate";
+        return HelixTimegateOverride::Timegate;
+    };
+
+    auto *helixTimegateRaid =
+        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
+            "Helix timegate /raid behaviour",
+            {"Timegate", "Always use IRC", "Always use Helix"},
+            s.helixTimegateRaid,
+            helixTimegateGetValue,  //
+            helixTimegateSetValue,  //
+            false);
+    helixTimegateRaid->setMinimumWidth(
+        helixTimegateRaid->minimumSizeHint().width());
+
+    auto *helixTimegateWhisper =
+        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
+            "Helix timegate /w behaviour",
+            {"Timegate", "Always use IRC", "Always use Helix"},
+            s.helixTimegateWhisper,
+            helixTimegateGetValue,  //
+            helixTimegateSetValue,  //
+            false);
+    helixTimegateWhisper->setMinimumWidth(
+        helixTimegateWhisper->minimumSizeHint().width());
+
+    auto *helixTimegateVIPs =
+        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
+            "Helix timegate /vips behaviour",
+            {"Timegate", "Always use IRC", "Always use Helix"},
+            s.helixTimegateVIPs,
+            helixTimegateGetValue,  //
+            helixTimegateSetValue,  //
+            false);
+    helixTimegateVIPs->setMinimumWidth(
+        helixTimegateVIPs->minimumSizeHint().width());
 
     layout.addStretch();
 
@@ -751,10 +890,8 @@ QString GeneralPage::getFont(const DropdownArgs &args) const
         args.combobox->setEditText("Choosing...");
         QFontDialog dialog(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.));
 
-        dialog.setWindowFlag(Qt::WindowStaysOnTopHint);
-
         auto ok = bool();
-        auto font = dialog.getFont(&ok);
+        auto font = dialog.getFont(&ok, this->window());
 
         if (ok)
             return font.family();

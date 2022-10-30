@@ -6,6 +6,11 @@ on:
     branches:
       - master
   pull_request:
+  workflow_dispatch:
+
+concurrency: 
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -13,22 +18,11 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        qt-version: [5.15.2, 5.12.10]
-        build-system: [qmake, cmake]
+        qt-version: [5.15.2, 5.12.12]
         pch: [true]
-        exclude:
-          - os: windows-latest
-            qt-version: 5.12.10
-            build-system: cmake
-            pch: true
         include:
-          - os: windows-2016
-            qt-version: 5.12.10
-            build-system: cmake
-            pch: true
           - os: ubuntu-latest
             qt-version: 5.15.2
-            build-system: cmake
             pch: false
       fail-fast: false
 
@@ -36,46 +30,41 @@ jobs:
       - name: Set environment variables for windows-latest
         if: matrix.os == 'windows-latest'
         run: |
-            echo "vs_version=2019" >> $GITHUB_ENV
+            echo "vs_version=2022" >> $GITHUB_ENV
         shell: bash
 
-      - name: Set environment variables for windows-2016
-        if: matrix.os == 'windows-2016'
-        run: |
-            echo "vs_version=2017" >> $GITHUB_ENV
-        shell: bash
-
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
         with:
           submodules: true
           fetch-depth: 0  # allows for tags access
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-20210109
-
-      # LINUX
-      - name: Install p7zip (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get update && sudo apt-get -y install p7zip-full
+          path: "${{ github.workspace }}/qt/"
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          aqtversion: '==1.1.1'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          extra: --external 7z
           version: ${{ matrix.qt-version }}
+          dir: "${{ github.workspace }}/qt/"
 
       # WINDOWS
-      - name: Cache conan packages
+      - name: Cache conan packages part 1
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-conan-${{ hashFiles('**/conanfile.txt') }}-20210412
+          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.txt') }}
+          path:  ~/.conan/
+
+      - name: Cache conan packages part 2
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
           path: C:/.conan/
 
       - name: Add Conan to path
@@ -89,28 +78,14 @@ jobs:
         
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.10.0
+        uses: ilammy/msvc-dev-cmd@v1.12.0
 
       - name: Build (Windows)
-        if: startsWith(matrix.os, 'windows') && matrix.build-system == 'qmake'
+        if: startsWith(matrix.os, 'windows')
         run: |
             mkdir build
             cd build
-            conan install ..
-            qmake ..
-            set cl=/MP
-            nmake /S /NOLOGO
-            windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
-            cp release/chatterino.exe Chatterino2/
-            echo nightly > Chatterino2/modes
-            7z a chatterino-windows-x86-64.zip Chatterino2/
-            
-      - name: Build with CMake (Windows)
-        if: startsWith(matrix.os, 'windows') && matrix.build-system == 'cmake'
-        run: |
-            mkdir build
-            cd build
-            conan install ..
+            conan install ..  -b missing
             cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..
             set cl=/MP
             nmake /S /NOLOGO
@@ -121,11 +96,16 @@ jobs:
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
-          name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ matrix.build-system }}.zip
+          name: chatterino-windows-x86-64-${{ matrix.qt-version }}.zip
           path: build/chatterino-windows-x86-64.zip
 
+      - name: Clean Conan pkgs
+        if: startsWith(matrix.os, 'windows')
+        run: conan remove "*" -fsb
+        shell: bash
+        
       # LINUX
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
@@ -152,16 +132,7 @@ jobs:
                 libxcb-xinerama0
 
       - name: Build (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.build-system == 'qmake'
-        run: |
-            mkdir build
-            cd build
-            qmake PREFIX=/usr ..
-            make -j8
-        shell: bash
-
-      - name: Build with CMake (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.build-system == 'cmake'
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
             mkdir build
             cd build
@@ -170,9 +141,27 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release \
               -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
               -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
+              -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
               ..
-            make -j8
+            make -j$(nproc)
         shell: bash
+
+      - name: clang-tidy review
+        if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
+        uses: ZedThree/clang-tidy-review@v0.10.1
+        id: review
+        with:
+          build_dir: build
+          config_file: '.clang-tidy'
+          split_workflow: true
+
+      - uses: actions/upload-artifact@v3
+        if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
+        with:
+          name: clang-tidy-review
+          path: |
+            clang-tidy-review-output.json
+            clang-tidy-review-metadata.json
 
       - name: Package - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
@@ -190,16 +179,16 @@ jobs:
 
       - name: Upload artifact - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ matrix.build-system }}.AppImage
+          name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-${{ matrix.qt-version }}-${{ matrix.build-system }}.deb
+          name: Chatterino-${{ matrix.qt-version }}.deb
           path: build/Chatterino.deb
 
       # MACOS
@@ -210,25 +199,17 @@ jobs:
         shell: bash
 
       - name: Build (MacOS)
-        if: startsWith(matrix.os, 'macos') && matrix.build-system == 'qmake'
-        run: |
-            mkdir build
-            cd build
-            $Qt5_DIR/bin/qmake .. DEFINES+=$dateOfBuild
-            make -j8
-        shell: bash
-
-      - name: Build with CMake (MacOS)
-        if: startsWith(matrix.os, 'macos') && matrix.build-system == 'cmake'
+        if: startsWith(matrix.os, 'macos')
         run: |
             mkdir build
             cd build
             cmake \
                 -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
                 -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
                 -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
                 ..
-            make -j8
+            make -j$(sysctl -n hw.logicalcpu)
         shell: bash
 
       - name: Package (MacOS)
@@ -243,9 +224,9 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
-          name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
+          name: chatterino-osx-${{ matrix.qt-version }}.dmg
           path: build/chatterino-osx.dmg
 
   create-release:
@@ -267,45 +248,25 @@ jobs:
               Nightly Build
           prerelease: true
 
-      - uses: actions/download-artifact@v2.1.0
+      - uses: actions/download-artifact@v3
         with:
-          name: chatterino-windows-x86-64-5.15.2-qmake.zip
+          name: chatterino-windows-x86-64-5.15.2.zip
           path: windows/
 
-      - uses: actions/download-artifact@v2.1.0
+      - uses: actions/download-artifact@v3
         with:
-          name: chatterino-windows-x86-64-5.15.2-cmake.zip
-          path: windows-cmake/
-
-      - uses: actions/download-artifact@v2.1.0
-        with:
-          name: Chatterino-x86_64-5.15.2-qmake.AppImage
+          name: Chatterino-x86_64-5.15.2.AppImage
           path: linux/
 
-      - uses: actions/download-artifact@v2.1.0
+      - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-x86_64-5.15.2-cmake.AppImage
-          path: linux-cmake/
-
-      - uses: actions/download-artifact@v2.1.0
-        with:
-          name: Chatterino-5.15.2-qmake.deb
+          name: Chatterino-5.15.2.deb
           path: ubuntu/
 
-      - uses: actions/download-artifact@v2.1.0
+      - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-5.15.2-cmake.deb
-          path: ubuntu-cmake/
-
-      - uses: actions/download-artifact@v2.1.0
-        with:
-          name: chatterino-osx-5.15.2-qmake.dmg
+          name: chatterino-osx-5.15.2.dmg
           path: macos/
-
-      - uses: actions/download-artifact@v2.1.0
-        with:
-          name: chatterino-osx-5.15.2-cmake.dmg
-          path: macos-cmake/
 
       # TODO: Extract dmg and appimage
 
@@ -324,16 +285,6 @@ jobs:
           asset_name: chatterino-windows-x86-64.zip
           asset_content_type: application/zip
 
-      - name: Upload release asset (Windows) CMake
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows-cmake/chatterino-windows-x86-64.zip
-          asset_name: test-cmake-chatterino-windows-x86-64.zip
-          asset_content_type: application/zip
-
       - name: Upload release asset (Ubuntu)
         uses: actions/upload-release-asset@v1.0.2
         env:
@@ -342,16 +293,6 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./linux/Chatterino-x86_64.AppImage
           asset_name: Chatterino-x86_64.AppImage
-          asset_content_type: application/x-executable
-
-      - name: Upload release asset (Ubuntu) CMake
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux-cmake/Chatterino-x86_64.AppImage
-          asset_name: test-cmake-Chatterino-x86_64.AppImage
           asset_content_type: application/x-executable
 
       - name: Upload release asset (Ubuntu .deb)
@@ -364,16 +305,6 @@ jobs:
           asset_name: Chatterino-x86_64.deb
           asset_content_type: application/vnd.debian.binary-package
 
-      - name: Upload release asset (Ubuntu .deb) CMake
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ubuntu-cmake/Chatterino.deb
-          asset_name: test-cmake-Chatterino-x86_64.deb
-          asset_content_type: application/vnd.debian.binary-package
-
       - name: Upload release asset (MacOS)
         uses: actions/upload-release-asset@v1.0.2
         env:
@@ -384,12 +315,3 @@ jobs:
           asset_name: chatterino-osx.dmg
           asset_content_type: application/x-bzip2
 
-      - name: Upload release asset (MacOS) CMake
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos-cmake/chatterino-osx.dmg
-          asset_name: test-cmake-chatterino-osx.dmg
-          asset_content_type: application/x-bzip2

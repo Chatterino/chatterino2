@@ -34,6 +34,7 @@ struct MessageParseArgs {
     bool isSentWhisper = false;
     bool trimSubscriberUsername = false;
     bool isStaffOrBroadcaster = false;
+    bool isSubscriptionMessage = false;
     QString channelPointRewardId = "";
 };
 
@@ -43,7 +44,8 @@ public:
     MessageBuilder();
     MessageBuilder(SystemMessageTag, const QString &text,
                    const QTime &time = QTime::currentTime());
-    MessageBuilder(TimeoutMessageTag, const QString &systemMessageText,
+    MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
+                   const QString &sourceUser, const QString &systemMessageText,
                    int times, const QTime &time = QTime::currentTime());
     MessageBuilder(TimeoutMessageTag, const QString &username,
                    const QString &durationInSeconds, bool multipleTimes,
@@ -62,8 +64,18 @@ public:
     QString matchLink(const QString &string);
     void addLink(const QString &origLink, const QString &matchedLink);
 
+    /**
+     * Adds the text, applies irc colors, adds links,
+     * and updates the message's messageText.
+     * See https://modern.ircdocs.horse/formatting.html
+     */
+    void addIrcMessageText(const QString &text);
+
     template <typename T, typename... Args>
-    T *emplace(Args &&... args)
+    // clang-format off
+    // clang-format can be enabled once clang-format v11+ has been installed in CI
+    T *emplace(Args &&...args)
+    // clang-format on
     {
         static_assert(std::is_base_of<MessageElement, T>::value,
                       "T must extend MessageElement");
@@ -74,12 +86,29 @@ public:
         return pointer;
     }
 
+protected:
+    virtual void addTextOrEmoji(EmotePtr emote);
+    virtual void addTextOrEmoji(const QString &value);
+
+    MessageColor textColor_ = MessageColor::Text;
+
 private:
     // Helper method that emplaces some text stylized as system text
     // and then appends that text to the QString parameter "toUpdate".
     // Returns the TextElement that was emplaced.
     TextElement *emplaceSystemTextAndUpdate(const QString &text,
                                             QString &toUpdate);
+
+    /**
+     * This will add the text and replace any emojis
+     * with an emoji emote-element.
+     *
+     * @param text Text to add
+     * @param color Color of the text
+     * @param addSpace true if a trailing space should be added after emojis
+     */
+    void addIrcWord(const QString &text, const QColor &color,
+                    bool addSpace = true);
 
     std::shared_ptr<Message> message_;
 };

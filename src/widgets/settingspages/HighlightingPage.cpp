@@ -38,6 +38,8 @@ namespace {
         {"Moderator", "moderator"},
         {"Verified", "partner"},
         {"VIP", "vip"},
+        {"Founder", "founder"},
+        {"Subscriber", "subscriber"},
         {"Predicted Blue", "predictions/blue-1,predictions/blue-2"},
         {"Predicted Pink", "predictions/pink-2,predictions/pink-1"},
     };
@@ -167,8 +169,8 @@ HighlightingPage::HighlightingPage()
                                         ->initialized(
                                             &getSettings()->highlightedBadges))
                                 .getElement();
-                view->setTitles({"Name", "Flash\ntaskbar", "Play\nsound",
-                                 "Custom\nsound", "Color"});
+                view->setTitles({"Name", "Show In\nMentions", "Flash\ntaskbar",
+                                 "Play\nsound", "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -193,10 +195,11 @@ HighlightingPage::HighlightingPage()
                         {
                             return;
                         }
-                        getSettings()->highlightedBadges.append(HighlightBadge{
-                            s->badgeName(), s->displayName(), false, false, "",
-                            *ColorProvider::instance().color(
-                                ColorType::SelfHighlight)});
+                        getSettings()->highlightedBadges.append(
+                            HighlightBadge{s->badgeName(), s->displayName(),
+                                           false, false, false, "",
+                                           *ColorProvider::instance().color(
+                                               ColorType::SelfHighlight)});
                     }
                 });
 
@@ -351,7 +354,8 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
             using Column = HighlightModel::Column;
             bool restrictColorRow =
                 (tab == HighlightTab::Messages &&
-                 clicked.row() == HighlightModel::WHISPER_ROW);
+                 clicked.row() ==
+                     HighlightModel::HighlightRowIndexes::WhisperRow);
             if (clicked.column() == Column::SoundPath)
             {
                 this->openSoundDialog(clicked, view, Column::SoundPath);

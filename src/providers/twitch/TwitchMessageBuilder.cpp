@@ -7,6 +7,8 @@
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
+#include "providers/seventv/SeventvBadges.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -17,6 +19,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
+#include "util/Qt.hpp"
 #include "widgets/Window.hpp"
 
 #include <QApplication>
@@ -48,50 +51,60 @@ namespace chatterino {
 
 namespace {
 
-    QStringList parseTagList(const QVariantMap &tags, const QString &key)
+    QString stylizeUsername(const QString &username, const Message &message)
     {
-        auto iterator = tags.find(key);
-        if (iterator == tags.end())
-            return QStringList{};
+        auto app = getApp();
 
-        return iterator.value().toString().split(
-            ',', QString::SplitBehavior::SkipEmptyParts);
-    }
+        const QString &localizedName = message.localizedName;
+        bool hasLocalizedName = !localizedName.isEmpty();
 
-    std::map<QString, QString> parseBadgeInfos(const QVariantMap &tags)
-    {
-        std::map<QString, QString> badgeInfos;
+        // The full string that will be rendered in the chat widget
+        QString usernameText;
 
-        for (QString badgeInfo : parseTagList(tags, "badge-info"))
+        switch (getSettings()->usernameDisplayMode.getValue())
         {
-            QStringList parts = badgeInfo.split('/');
-            if (parts.size() != 2)
-            {
-                continue;
+            case UsernameDisplayMode::Username: {
+                usernameText = username;
             }
+            break;
 
-            badgeInfos.emplace(parts[0], parts[1]);
+            case UsernameDisplayMode::LocalizedName: {
+                if (hasLocalizedName)
+                {
+                    usernameText = localizedName;
+                }
+                else
+                {
+                    usernameText = username;
+                }
+            }
+            break;
+
+            default:
+            case UsernameDisplayMode::UsernameAndLocalizedName: {
+                if (hasLocalizedName)
+                {
+                    usernameText = username + "(" + localizedName + ")";
+                }
+                else
+                {
+                    usernameText = username;
+                }
+            }
+            break;
         }
 
-        return badgeInfos;
-    }
+        auto nicknames = getCSettings().nicknames.readOnly();
 
-    std::vector<Badge> parseBadges(const QVariantMap &tags)
-    {
-        std::vector<Badge> badges;
-
-        for (QString badge : parseTagList(tags, "badges"))
+        for (const auto &nickname : *nicknames)
         {
-            QStringList parts = badge.split('/');
-            if (parts.size() != 2)
+            if (nickname.match(usernameText))
             {
-                continue;
+                break;
             }
-
-            badges.emplace_back(parts[0], parts[1]);
         }
 
-        return badges;
+        return usernameText;
     }
 
 }  // namespace
@@ -186,9 +199,83 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::FirstMessage);
     }
 
+    if (this->tags.contains("pinned-chat-paid-amount"))
+    {
+        this->message().flags.set(MessageFlag::ElevatedMessage);
+    }
+
+    if (this->tags.contains("bits"))
+    {
+        this->message().flags.set(MessageFlag::CheerMessage);
+    }
+
+    // reply threads
+    if (this->thread_)
+    {
+        // set references
+        this->message().replyThread = this->thread_;
+        this->thread_->addToThread(this->weakOf());
+
+        // enable reply flag
+        this->message().flags.set(MessageFlag::ReplyMessage);
+
+        const auto &threadRoot = this->thread_->root();
+
+        QString usernameText =
+            stylizeUsername(threadRoot->loginName, *threadRoot.get());
+
+        this->emplace<ReplyCurveElement>();
+
+        // construct reply elements
+        this->emplace<TextElement>(
+                "Replying to", MessageElementFlag::RepliedMessage,
+                MessageColor::System, FontStyle::ChatMediumSmall)
+            ->setLink({Link::ViewThread, this->thread_->rootId()});
+
+        this->emplace<TextElement>(
+                "@" + usernameText + ":", MessageElementFlag::RepliedMessage,
+                threadRoot->usernameColor, FontStyle::ChatMediumSmall)
+            ->setLink({Link::UserInfo, threadRoot->displayName});
+
+        this->emplace<SingleLineTextElement>(
+                threadRoot->messageText, MessageElementFlag::RepliedMessage,
+                this->textColor_, FontStyle::ChatMediumSmall)
+            ->setLink({Link::ViewThread, this->thread_->rootId()});
+    }
+    else if (this->tags.find("reply-parent-msg-id") != this->tags.end())
+    {
+        // Message is a reply but we couldn't find the original message.
+        // Render the message using the additional reply tags
+
+        auto replyDisplayName = this->tags.find("reply-parent-display-name");
+        auto replyBody = this->tags.find("reply-parent-msg-body");
+
+        if (replyDisplayName != this->tags.end() &&
+            replyBody != this->tags.end())
+        {
+            auto name = replyDisplayName->toString();
+            auto body = parseTagString(replyBody->toString());
+
+            this->emplace<ReplyCurveElement>();
+
+            this->emplace<TextElement>(
+                "Replying to", MessageElementFlag::RepliedMessage,
+                MessageColor::System, FontStyle::ChatMediumSmall);
+
+            this->emplace<TextElement>(
+                    "@" + name + ":", MessageElementFlag::RepliedMessage,
+                    this->textColor_, FontStyle::ChatMediumSmall)
+                ->setLink({Link::UserInfo, name});
+
+            this->emplace<SingleLineTextElement>(
+                body, MessageElementFlag::RepliedMessage, this->textColor_,
+                FontStyle::ChatMediumSmall);
+        }
+    }
+
     // timestamp
-    this->emplace<TimestampElement>(
-        calculateMessageTimestamp(this->ircMessage));
+    this->message().serverReceivedTime = calculateMessageTime(this->ircMessage);
+    this->emplace<TimestampElement>(this->message().serverReceivedTime.time());
 
     if (this->shouldAddModerationElements())
     {
@@ -199,6 +286,7 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->appendChatterinoBadges();
     this->appendFfzBadges();
+    this->appendSeventvBadges();
 
     this->appendUsername();
 
@@ -263,6 +351,23 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::HighlightedWhisper, true);
         this->message().highlightColor =
             ColorProvider::instance().color(ColorType::Whisper);
+    }
+
+    if (this->thread_)
+    {
+        auto &img = getResources().buttons.replyThreadDark;
+        this->emplace<CircularImageElement>(
+                Image::fromResourcePixmap(img, 0.15), 2, Qt::gray,
+                MessageElementFlag::ReplyButton)
+            ->setLink({Link::ViewThread, this->thread_->rootId()});
+    }
+    else
+    {
+        auto &img = getResources().buttons.replyDark;
+        this->emplace<CircularImageElement>(
+                Image::fromResourcePixmap(img, 0.15), 2, Qt::gray,
+                MessageElementFlag::ReplyButton)
+            ->setLink({Link::ReplyToMessage, this->message().id});
     }
 
     return this->release();
@@ -607,53 +712,7 @@ void TwitchMessageBuilder::appendUsername()
         }
     }
 
-    bool hasLocalizedName = !localizedName.isEmpty();
-
-    // The full string that will be rendered in the chat widget
-    QString usernameText;
-
-    switch (getSettings()->usernameDisplayMode.getValue())
-    {
-        case UsernameDisplayMode::Username: {
-            usernameText = username;
-        }
-        break;
-
-        case UsernameDisplayMode::LocalizedName: {
-            if (hasLocalizedName)
-            {
-                usernameText = localizedName;
-            }
-            else
-            {
-                usernameText = username;
-            }
-        }
-        break;
-
-        default:
-        case UsernameDisplayMode::UsernameAndLocalizedName: {
-            if (hasLocalizedName)
-            {
-                usernameText = username + "(" + localizedName + ")";
-            }
-            else
-            {
-                usernameText = username;
-            }
-        }
-        break;
-    }
-
-    auto nicknames = getCSettings().nicknames.readOnly();
-
-    for (const auto &nickname : *nicknames)
-    {
-        if (nickname.match(usernameText))
-        {
-            break;
-        }
-    }
+    QString usernameText = stylizeUsername(username, this->message());
 
     if (this->args.isSentWhisper)
     {
@@ -947,8 +1006,10 @@ void TwitchMessageBuilder::appendTwitchEmote(
             return;
         }
 
-        auto start = correctPositions[coords.at(0).toUInt()];
-        auto end = correctPositions[coords.at(1).toUInt()];
+        auto start =
+            correctPositions[coords.at(0).toUInt() - this->messageOffset_];
+        auto end =
+            correctPositions[coords.at(1).toUInt() - this->messageOffset_];
 
         if (start >= end || start < 0 || end > this->originalMessage_.length())
         {
@@ -972,8 +1033,9 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
     auto *app = getApp();
 
-    const auto &globalBttvEmotes = app->twitch.server->getBttvEmotes();
-    const auto &globalFfzEmotes = app->twitch.server->getFfzEmotes();
+    const auto &globalBttvEmotes = app->twitch->getBttvEmotes();
+    const auto &globalFfzEmotes = app->twitch->getFfzEmotes();
+    const auto &globalSeventvEmotes = app->twitch->getSeventvEmotes();
 
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
@@ -981,8 +1043,10 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     // Emote order:
     //  - FrankerFaceZ Channel
     //  - BetterTTV Channel
+    //  - 7TV Channel
     //  - FrankerFaceZ Global
     //  - BetterTTV Global
+    //  - 7TV Global
     if (this->twitchChannel && (emote = this->twitchChannel->ffzEmote(name)))
     {
         flags = MessageElementFlag::FfzEmote;
@@ -991,6 +1055,15 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
              (emote = this->twitchChannel->bttvEmote(name)))
     {
         flags = MessageElementFlag::BttvEmote;
+    }
+    else if (this->twitchChannel != nullptr &&
+             (emote = this->twitchChannel->seventvEmote(name)))
+    {
+        flags = MessageElementFlag::SevenTVEmote;
+        if (emote.value()->zeroWidth)
+        {
+            flags.set(MessageElementFlag::ZeroWidthEmote);
+        }
     }
     else if ((emote = globalFfzEmotes.emote(name)))
     {
@@ -1001,6 +1074,14 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
         flags = MessageElementFlag::BttvEmote;
 
         if (zeroWidthEmotes.contains(name.string))
+        {
+            flags.set(MessageElementFlag::ZeroWidthEmote);
+        }
+    }
+    else if ((emote = globalSeventvEmotes.globalEmote(name)))
+    {
+        flags = MessageElementFlag::SevenTVEmote;
+        if (emote.value()->zeroWidth)
         {
             flags.set(MessageElementFlag::ZeroWidthEmote);
         }
@@ -1033,6 +1114,25 @@ boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
     return boost::none;
 }
 
+std::unordered_map<QString, QString> TwitchMessageBuilder::parseBadgeInfoTag(
+    const QVariantMap &tags)
+{
+    std::unordered_map<QString, QString> infoMap;
+
+    auto infoIt = tags.constFind("badge-info");
+    if (infoIt == tags.end())
+        return infoMap;
+
+    auto info = infoIt.value().toString().split(',', Qt::SkipEmptyParts);
+
+    for (const QString &badge : info)
+    {
+        infoMap.emplace(SharedMessageBuilder::slashKeyValue(badge));
+    }
+
+    return infoMap;
+}
+
 void TwitchMessageBuilder::appendTwitchBadges()
 {
     if (this->twitchChannel == nullptr)
@@ -1040,8 +1140,8 @@ void TwitchMessageBuilder::appendTwitchBadges()
         return;
     }
 
-    auto badgeInfos = parseBadgeInfos(this->tags);
-    auto badges = parseBadges(this->tags);
+    auto badgeInfos = TwitchMessageBuilder::parseBadgeInfoTag(this->tags);
+    auto badges = this->parseBadgeTag(this->tags);
 
     for (const auto &badge : badges)
     {
@@ -1091,7 +1191,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
                 // (tier + amount of months with leading zero if less than 100)
                 // e.g. 3054 - tier 3 4,5-year sub. 2108 - tier 2 9-year sub
                 const auto &subTier =
-                    badge.value_.length() > 3 ? badge.value_.front() : '1';
+                    badge.value_.length() > 3 ? badge.value_.at(0) : '1';
                 const auto &subMonths = badgeInfoIt->second;
                 tooltip +=
                     QString(" (%1%2 months)")
@@ -1107,9 +1207,9 @@ void TwitchMessageBuilder::appendTwitchBadges()
             {
                 auto predictionText =
                     badgeInfoIt->second
-                        .replace("\\s", " ")  // standard IRC escapes
-                        .replace("\\:", ";")
-                        .replace("\\\\", "\\")
+                        .replace(R"(\s)", " ")  // standard IRC escapes
+                        .replace(R"(\:)", ";")
+                        .replace(R"(\\)", R"(\)")
                         .replace("⸝", ",");  // twitch's comma escape
                 // Careful, the first character is RIGHT LOW PARAPHRASE BRACKET or U+2E1D, which just looks like a comma
 
@@ -1136,13 +1236,19 @@ void TwitchMessageBuilder::appendChatterinoBadges()
 
 void TwitchMessageBuilder::appendFfzBadges()
 {
-    if (auto badge = getApp()->ffzBadges->getBadge({this->userId_}))
+    for (const auto &badge :
+         getApp()->ffzBadges->getUserBadges({this->userId_}))
     {
-        if (auto color = getApp()->ffzBadges->getBadgeColor({this->userId_}))
-        {
-            this->emplace<FfzBadgeElement>(*badge, MessageElementFlag::BadgeFfz,
-                                           color.get());
-        }
+        this->emplace<FfzBadgeElement>(
+            badge.emote, MessageElementFlag::BadgeFfz, badge.color);
+    }
+}
+
+void TwitchMessageBuilder::appendSeventvBadges()
+{
+    if (auto badge = getApp()->seventvBadges->getBadge({this->userId_}))
+    {
+        this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeSevenTV);
     }
 }
 
@@ -1407,15 +1513,17 @@ void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
                                   MessageColor::System);
     if (originalMessage->messageText.length() > 50)
     {
-        builder->emplace<TextElement>(
-            originalMessage->messageText.left(50) + "…",
-            MessageElementFlag::Text, MessageColor::Text);
+        builder
+            ->emplace<TextElement>(originalMessage->messageText.left(50) + "…",
+                                   MessageElementFlag::Text, MessageColor::Text)
+            ->setLink({Link::JumpToMessage, originalMessage->id});
     }
     else
     {
-        builder->emplace<TextElement>(originalMessage->messageText,
-                                      MessageElementFlag::Text,
-                                      MessageColor::Text);
+        builder
+            ->emplace<TextElement>(originalMessage->messageText,
+                                   MessageElementFlag::Text, MessageColor::Text)
+            ->setLink({Link::JumpToMessage, originalMessage->id});
     }
     builder->message().timeoutUser = "msg:" + originalMessage->id;
 }
@@ -1447,14 +1555,17 @@ void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
                                   MessageColor::System);
     if (action.messageText.length() > 50)
     {
-        builder->emplace<TextElement>(action.messageText.left(50) + "…",
-                                      MessageElementFlag::Text,
-                                      MessageColor::Text);
+        builder
+            ->emplace<TextElement>(action.messageText.left(50) + "…",
+                                   MessageElementFlag::Text, MessageColor::Text)
+            ->setLink({Link::JumpToMessage, action.messageId});
     }
     else
     {
-        builder->emplace<TextElement>(
-            action.messageText, MessageElementFlag::Text, MessageColor::Text);
+        builder
+            ->emplace<TextElement>(action.messageText, MessageElementFlag::Text,
+                                   MessageColor::Text)
+            ->setLink({Link::JumpToMessage, action.messageId});
     }
     builder->message().timeoutUser = "msg:" + action.messageId;
 }
@@ -1508,6 +1619,16 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(QString prefix,
             ->setLink({Link::UserInfo, username})
             ->setTrailingSpace(false);
     }
+}
+
+void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)
+{
+    this->thread_ = std::move(thread);
+}
+
+void TwitchMessageBuilder::setMessageOffset(int offset)
+{
+    this->messageOffset_ = offset;
 }
 
 }  // namespace chatterino

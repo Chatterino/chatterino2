@@ -350,24 +350,24 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
         case TAB_TWITCH: {
             if (this->ui_.twitch.channel->isChecked())
             {
-                return app->twitch.server->getOrAddChannel(
+                return app->twitch->getOrAddChannel(
                     this->ui_.twitch.channelName->text().trimmed());
             }
             else if (this->ui_.twitch.watching->isChecked())
             {
-                return app->twitch.server->watchingChannel;
+                return app->twitch->watchingChannel;
             }
             else if (this->ui_.twitch.mentions->isChecked())
             {
-                return app->twitch.server->mentionsChannel;
+                return app->twitch->mentionsChannel;
             }
             else if (this->ui_.twitch.whispers->isChecked())
             {
-                return app->twitch.server->whispersChannel;
+                return app->twitch->whispersChannel;
             }
             else if (this->ui_.twitch.live->isChecked())
             {
-                return app->twitch.server->liveChannel;
+                return app->twitch->liveChannel;
             }
         }
         break;
@@ -407,8 +407,6 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
 
     if (event->type() == QEvent::FocusIn)
     {
-        widget->grabKeyboard();
-
         auto *radio = dynamic_cast<QRadioButton *>(watched);
         if (radio)
         {
@@ -416,11 +414,6 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
         }
 
         return true;
-    }
-    else if (event->type() == QEvent::FocusOut)
-    {
-        widget->releaseKeyboard();
-        return false;
     }
     else if (event->type() == QEvent::KeyPress)
     {

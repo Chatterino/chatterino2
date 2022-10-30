@@ -18,6 +18,7 @@ public:
     int id();
     const QString &user();
     const QString &nick();
+    const QString &userFriendlyIdentifier();
 
     // AbstractIrcServer interface
 protected:

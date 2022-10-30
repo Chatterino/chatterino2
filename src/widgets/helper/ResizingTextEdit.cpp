@@ -96,8 +96,10 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
     return lastWord;
 }
 
-bool ResizingTextEdit::eventFilter(QObject *, QEvent *event)
+bool ResizingTextEdit::eventFilter(QObject *obj, QEvent *event)
 {
+    (void)obj;  // unused
+
     // makes QShortcuts work in the ResizingTextEdit
     if (event->type() != QEvent::ShortcutOverride)
     {
@@ -244,6 +246,11 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
                      this, &ResizingTextEdit::insertCompletion);
 }
 
+void ResizingTextEdit::resetCompletion()
+{
+    this->completionInProgress_ = false;
+}
+
 void ResizingTextEdit::insertCompletion(const QString &completion)
 {
     if (this->completer_->widget() != this)
@@ -284,11 +291,12 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
         this->imagePasted.invoke(source);
         return;
     }
-    else if (source->hasUrls())
+
+    if (source->hasUrls())
     {
         bool hasUploadable = false;
         auto mimeDb = QMimeDatabase();
-        for (const QUrl url : source->urls())
+        for (const QUrl &url : source->urls())
         {
             QMimeType mime = mimeDb.mimeTypeForUrl(url);
             if (mime.name().startsWith("image"))

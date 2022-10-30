@@ -2,9 +2,10 @@
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
+#include "messages/MessageThread.hpp"
 #include "messages/SharedMessageBuilder.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
-#include "providers/twitch/PubsubActions.hpp"
+#include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
@@ -45,6 +46,9 @@ public:
     void triggerHighlights() override;
     MessagePtr build() override;
 
+    void setThread(std::shared_ptr<MessageThread> thread);
+    void setMessageOffset(int offset);
+
     static void appendChannelPointRewardMessage(
         const ChannelPointReward &reward, MessageBuilder *builder, bool isMod,
         bool isBroadcaster);
@@ -67,6 +71,10 @@ public:
     static void listOfUsersSystemMessage(QString prefix, QStringList users,
                                          Channel *channel,
                                          MessageBuilder *builder);
+
+    // Shares some common logic from SharedMessageBuilder::parseBadgeTag
+    static std::unordered_map<QString, QString> parseBadgeInfoTag(
+        const QVariantMap &tags);
 
 private:
     void parseUsernameColor() override;
@@ -91,6 +99,7 @@ private:
     void appendTwitchBadges();
     void appendChatterinoBadges();
     void appendFfzBadges();
+    void appendSeventvBadges();
     Outcome tryParseCheermote(const QString &string);
 
     bool shouldAddModerationElements() const;
@@ -101,6 +110,19 @@ private:
     int bitsLeft;
     bool bitsStacked = false;
     bool historicalMessage_ = false;
+    std::shared_ptr<MessageThread> thread_;
+
+    /**
+     * Starting offset to be used on index-based operations on `originalMessage_`.
+     *
+     * For example:
+     * originalMessage_ = "there"
+     * messageOffset_ = 4
+     * (the irc message is "hey there")
+     *
+     * then the index 6 would resolve to 6 - 4 = 2 => 'e'
+     */
+    int messageOffset_ = 0;
 
     QString userId_;
     bool senderIsBroadcaster{};

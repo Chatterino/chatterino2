@@ -15,6 +15,7 @@ class Settings;
 class Paths;
 class Window;
 class SplitContainer;
+class ChannelView;
 
 enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
@@ -57,10 +58,22 @@ public:
 
     Window &getMainWindow();
     Window &getSelectedWindow();
-    Window &createWindow(WindowType type, bool show = true);
+    Window &createWindow(WindowType type, bool show = true,
+                         QWidget *parent = nullptr);
+
+    // Use this method if you want to open a "new" channel in a popup. If you want to popup an
+    // existing Split or SplitContainer, consider using Split::popup() or SplitContainer::popup().
+    Window &openInPopup(ChannelPtr channel);
 
     void select(Split *split);
     void select(SplitContainer *container);
+    /**
+     * Scrolls to the message in a split that's not
+     * a mentions view and focuses the split.
+     *
+     * @param message Message to scroll to.
+     */
+    void scrollToMessage(const MessagePtr &message);
 
     QPoint emotePopupPos();
     void setEmotePopupPos(QPoint pos);
@@ -100,6 +113,7 @@ public:
 
     pajlada::Signals::Signal<Split *> selectSplit;
     pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
+    pajlada::Signals::Signal<const MessagePtr &> scrollToMessageSignal;
 
 private:
     static void encodeNodeRecursively(SplitContainer::Node *node,

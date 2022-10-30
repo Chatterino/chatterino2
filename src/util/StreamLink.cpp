@@ -1,10 +1,14 @@
 #include "util/StreamLink.hpp"
 
 #include "Application.hpp"
+#include "providers/irc/IrcMessageBuilder.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/SplitCommand.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QErrorMessage>
 #include <QFileInfo>
@@ -205,6 +209,20 @@ void openStreamlink(const QString &channelURL, const QString &quality,
 
 void openStreamlinkForChannel(const QString &channel)
 {
+    static const QString INFO_TEMPLATE("Opening %1 in Streamlink ...");
+
+    auto *currentPage = dynamic_cast<SplitContainer *>(
+        getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+    if (currentPage != nullptr)
+    {
+        if (auto currentSplit = currentPage->getSelectedSplit();
+            currentSplit != nullptr)
+        {
+            currentSplit->getChannel()->addMessage(
+                makeSystemMessage(INFO_TEMPLATE.arg(channel)));
+        }
+    }
+
     QString channelURL = "twitch.tv/" + channel;
 
     QString preferredQuality = getSettings()->preferredQuality.getValue();

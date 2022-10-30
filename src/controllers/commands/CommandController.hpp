@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <mutex>
+#include <unordered_map>
 
 namespace chatterino {
 
@@ -34,9 +35,10 @@ public:
 
     CommandModel *createModel(QObject *parent);
 
-    QString execCustomCommand(const QStringList &words, const Command &command,
-                              bool dryRun, ChannelPtr channel,
-                              std::map<QString, QString> context = {});
+    QString execCustomCommand(
+        const QStringList &words, const Command &command, bool dryRun,
+        ChannelPtr channel, const Message *message = nullptr,
+        std::unordered_map<QString, QString> context = {});
 
 private:
     void load(Paths &paths);

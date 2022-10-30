@@ -4,7 +4,7 @@ resources_header = \
 
 resources_footer = \
 '''  </qresource>
-</RCC>'''
+</RCC>\n'''
 
 header_header = \
 '''#include <QPixmap>
@@ -22,7 +22,7 @@ public:
 header_footer = \
 '''};
 
-}  // namespace chatterino'''
+}  // namespace chatterino\n'''
 
 source_header = \
 '''#include "ResourcesAutogen.hpp"
@@ -36,4 +36,4 @@ Resources2::Resources2()
 source_footer = \
 '''}
 
-}  // namespace chatterino'''
+}  // namespace chatterino\n'''

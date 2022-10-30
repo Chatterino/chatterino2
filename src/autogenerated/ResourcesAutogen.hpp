@@ -11,8 +11,14 @@ public:
     struct {
         QPixmap _1xelerate;
         QPixmap alazymeme;
+        QPixmap brian6932;
+        QPixmap explooosion_code;
         QPixmap fourtf;
+        QPixmap hicupalot;
+        QPixmap iprodigy;
+        QPixmap jaxkey;
         QPixmap kararty;
+        QPixmap karlpolice;
         QPixmap mm2pl;
         QPixmap pajlada;
         QPixmap slch;
@@ -34,6 +40,8 @@ public:
         QPixmap modModeDisabled2;
         QPixmap modModeEnabled;
         QPixmap modModeEnabled2;
+        QPixmap replyDark;
+        QPixmap replyThreadDark;
         QPixmap search;
         QPixmap timeout;
         QPixmap trashCan;
