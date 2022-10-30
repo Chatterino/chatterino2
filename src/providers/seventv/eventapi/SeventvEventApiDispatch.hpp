@@ -28,7 +28,7 @@ struct SeventvEventApiEmoteAddDispatch {
     SeventvEventApiEmoteAddDispatch(const SeventvEventApiDispatch &dispatch,
                                     QJsonObject emote);
 
-    bool validate();
+    bool validate() const;
 };
 
 struct SeventvEventApiEmoteRemoveDispatch {
@@ -40,7 +40,7 @@ struct SeventvEventApiEmoteRemoveDispatch {
     SeventvEventApiEmoteRemoveDispatch(const SeventvEventApiDispatch &dispatch,
                                        QJsonObject emote);
 
-    bool validate();
+    bool validate() const;
 };
 
 struct SeventvEventApiEmoteUpdateDispatch {
@@ -53,7 +53,7 @@ struct SeventvEventApiEmoteUpdateDispatch {
     SeventvEventApiEmoteUpdateDispatch(const SeventvEventApiDispatch &dispatch,
                                        QJsonObject emote);
 
-    bool validate();
+    bool validate() const;
 };
 
 struct SeventvEventApiUserConnectionUpdateDispatch {
@@ -65,7 +65,7 @@ struct SeventvEventApiUserConnectionUpdateDispatch {
     SeventvEventApiUserConnectionUpdateDispatch(
         const SeventvEventApiDispatch &dispatch, const QJsonObject &update);
 
-    bool validate();
+    bool validate() const;
 };
 
 }  // namespace chatterino

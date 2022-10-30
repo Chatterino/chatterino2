@@ -26,7 +26,7 @@ SeventvEventApiEmoteAddDispatch::SeventvEventApiEmoteAddDispatch(
 {
 }
 
-bool SeventvEventApiEmoteAddDispatch::validate()
+bool SeventvEventApiEmoteAddDispatch::validate() const
 {
     bool validValues =
         !this->emoteSetId.isEmpty() && !this->emoteJson.isEmpty();
@@ -55,7 +55,7 @@ SeventvEventApiEmoteRemoveDispatch::SeventvEventApiEmoteRemoveDispatch(
 {
 }
 
-bool SeventvEventApiEmoteRemoveDispatch::validate()
+bool SeventvEventApiEmoteRemoveDispatch::validate() const
 {
     return !this->emoteSetId.isEmpty() && !this->emoteName.isEmpty() &&
            !this->emoteId.isEmpty();
@@ -73,7 +73,7 @@ SeventvEventApiEmoteUpdateDispatch::SeventvEventApiEmoteUpdateDispatch(
     this->emoteName = value["name"].toString();
 }
 
-bool SeventvEventApiEmoteUpdateDispatch::validate()
+bool SeventvEventApiEmoteUpdateDispatch::validate() const
 {
     return !this->emoteSetId.isEmpty() && !this->emoteId.isEmpty() &&
            !this->oldEmoteName.isEmpty() && !this->emoteName.isEmpty() &&
@@ -90,7 +90,7 @@ SeventvEventApiUserConnectionUpdateDispatch::
 {
 }
 
-bool SeventvEventApiUserConnectionUpdateDispatch::validate()
+bool SeventvEventApiUserConnectionUpdateDispatch::validate() const
 {
     return !this->userId.isEmpty() && !this->oldEmoteSetId.isEmpty() &&
            !this->emoteSetId.isEmpty();
