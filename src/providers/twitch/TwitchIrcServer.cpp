@@ -31,7 +31,7 @@ namespace {
 
 const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
 
-}
+}  // namespace
 
 namespace chatterino {
 

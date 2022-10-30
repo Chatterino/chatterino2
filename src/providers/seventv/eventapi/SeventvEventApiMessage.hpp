@@ -1,12 +1,13 @@
 #pragma once
 
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QString>
+#include "providers/seventv/SeventvEventApi.hpp"
 
 #include <boost/optional.hpp>
 #include <magic_enum.hpp>
-#include "providers/seventv/SeventvEventApi.hpp"
+
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QString>
 
 namespace chatterino {
 

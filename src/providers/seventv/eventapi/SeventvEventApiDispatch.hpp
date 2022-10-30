@@ -16,7 +16,7 @@ struct SeventvEventApiDispatch {
     // it's okay for this to be empty
     QString actorName;
 
-    SeventvEventApiDispatch(QJsonObject _data);
+    SeventvEventApiDispatch(QJsonObject obj);
 };
 
 struct SeventvEventApiEmoteAddDispatch {
@@ -51,7 +51,7 @@ struct SeventvEventApiEmoteUpdateDispatch {
     QString emoteName;
 
     SeventvEventApiEmoteUpdateDispatch(const SeventvEventApiDispatch &dispatch,
-                                       QJsonObject emote);
+                                       QJsonObject changeField);
 
     bool validate() const;
 };

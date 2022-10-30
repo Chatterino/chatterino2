@@ -1,9 +1,10 @@
 #pragma once
 
+#include <magic_enum.hpp>
+
 #include <QByteArray>
 #include <QHash>
 #include <QString>
-#include "magic_enum.hpp"
 
 namespace chatterino {
 
