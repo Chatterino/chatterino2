@@ -1,5 +1,5 @@
-#include "GeneralPageView.hpp"
-#include <QScrollBar>
+#include "widgets/settingspages/GeneralPageView.hpp"
+
 #include "Application.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
@@ -8,7 +8,8 @@
 #include "widgets/helper/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
 
-#include "QRegularExpression"
+#include <QRegularExpression>
+#include <QScrollBar>
 
 namespace chatterino {
 
