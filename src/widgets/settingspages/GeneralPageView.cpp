@@ -1,9 +1,9 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 
 #include "Application.hpp"
-#include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutHelper.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 #include "widgets/helper/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
