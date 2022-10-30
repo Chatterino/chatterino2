@@ -269,7 +269,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return index;
         },
         [](auto args) {
-            return static_cast<StreamerModeSetting>(args.index);
+            return static_cast<MessageOverflow>(args.index);
         },
         false,
         "Specify how Chatterino will handle messages that exceed Twitch "
