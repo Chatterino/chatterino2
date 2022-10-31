@@ -901,6 +901,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                 return "";
             }
 
+            qCDebug(chatterinoTwitch) << "Getting chatter count";
+
             // Refresh chatter list via helix api for mods
             getHelix()->getChatterCount(
                 twitchChannel->roomId(),

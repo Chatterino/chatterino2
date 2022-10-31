@@ -597,7 +597,7 @@ const QString &TwitchChannel::popoutPlayerUrl()
 
 int TwitchChannel::chatterCount()
 {
-    return this->accessChatters()->getNumChatters();
+    return this->chatterCount_;
 }
 
 void TwitchChannel::setLive(bool newLiveStatus)
@@ -902,11 +902,15 @@ void TwitchChannel::refreshChatters() {
     getHelix()->getChatters(
         this->roomId(),
         getApp()->accounts->twitch.getCurrent()->getUserId(),
-        [this](std::unordered_set<QString> chatterList) {
-            this->updateOnlineChatters(chatterList);
+        [this, weak = weakOf<Channel>(this)](std::unordered_set<QString> chatterList, int count) {
+            if (auto shared = weak.lock()) 
+            {
+                this->updateOnlineChatters(chatterList);
+                this->chatterCount_ = count;
+            }
         },
         // Refresh chatters should only be used when failing silently is an option
-        [this](auto error, auto message) { }
+        [](auto error, auto message) { }
     );
 }
 

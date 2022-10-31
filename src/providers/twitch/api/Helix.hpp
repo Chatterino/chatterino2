@@ -798,7 +798,7 @@ public:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     virtual void getChatters(
         QString broadcasterID, QString moderatorID,
-        ResultCallback<std::unordered_set<QString>> successCallback,
+        ResultCallback<std::unordered_set<QString>, int> successCallback,
         FailureCallback<HelixGeneralError, QString> failureCallback) = 0;
 
     // Get chatter count from chat/chatters endpoint
@@ -1073,7 +1073,7 @@ public:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     void getChatters(
         QString broadcasterID, QString moderatorID,
-        ResultCallback<std::unordered_set<QString>> successCallback,
+        ResultCallback<std::unordered_set<QString>, int> successCallback,
         FailureCallback<HelixGeneralError, QString> failureCallback) final;
 
     // Get chatter count from chat/chatters endpoint
@@ -1112,7 +1112,7 @@ private:
     void makeRequestWrapper(
         QString url, QUrlQuery *urlQuery, 
         int page, bool paginate,
-        ResultCallback<QJsonObject*> *resultCallback,
+        ResultCallback<QJsonObject*> resultCallback,
         FailureCallback<HelixGeneralError, QString> failureCallback
     );
 

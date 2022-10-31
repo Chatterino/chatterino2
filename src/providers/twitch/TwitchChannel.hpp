@@ -191,6 +191,7 @@ private:
     const QString subscriptionUrl_;
     const QString channelUrl_;
     const QString popoutPlayerUrl_;
+    int chatterCount_;
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
     std::atomic_flag loadingRecentMessages_ = ATOMIC_FLAG_INIT;
