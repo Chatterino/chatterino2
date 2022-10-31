@@ -208,6 +208,7 @@ MessagePtr TwitchMessageBuilder::build()
             auto user = m.captured(2);
             this->originalMessage_ = m.captured(3);
             this->userName = user + platform;
+            isBridged = true;
         }
     }
 
