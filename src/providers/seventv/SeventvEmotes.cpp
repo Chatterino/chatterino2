@@ -148,7 +148,7 @@ Tooltip createTooltip(const QString &name, const QString &author, bool isGlobal)
 Tooltip createAliasedTooltip(const QString &name, const QString &baseName,
                              const QString &author, bool isGlobal)
 {
-    return Tooltip{QString("%1<br>Alias to %2<br>%3 7TV Emote<br>By: %4")
+    return Tooltip{QString("%1<br>Alias of %2<br>%3 7TV Emote<br>By: %4")
                        .arg(name, baseName, isGlobal ? "Global" : "Channel",
                             author.isEmpty() ? "<deleted>" : author)};
 }
