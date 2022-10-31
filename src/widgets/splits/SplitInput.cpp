@@ -464,6 +464,7 @@ void SplitInput::addShortcuts()
                  this->prevIndex_--;
                  this->ui_.textEdit->setPlainText(
                      this->prevMsg_.at(this->prevIndex_));
+                 this->ui_.textEdit->resetCompletion();
 
                  QTextCursor cursor = this->ui_.textEdit->textCursor();
                  cursor.movePosition(QTextCursor::End);
@@ -487,6 +488,7 @@ void SplitInput::addShortcuts()
                  this->prevIndex_++;
                  this->ui_.textEdit->setPlainText(
                      this->prevMsg_.at(this->prevIndex_));
+                 this->ui_.textEdit->resetCompletion();
              }
              else
              {
@@ -496,6 +498,7 @@ void SplitInput::addShortcuts()
                      // If user has just come from a message history
                      // Then simply get currMsg_.
                      this->ui_.textEdit->setPlainText(this->currMsg_);
+                     this->ui_.textEdit->resetCompletion();
                  }
                  else if (message != this->currMsg_)
                  {
@@ -1000,6 +1003,7 @@ void SplitInput::setReply(std::shared_ptr<MessageThread> reply,
             }
             this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
             this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+            this->ui_.textEdit->resetCompletion();
         }
         this->ui_.replyLabel->setText("Replying to @" +
                                       this->replyThread_->root()->displayName);

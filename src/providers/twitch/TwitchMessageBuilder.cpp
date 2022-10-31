@@ -244,6 +244,11 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::ElevatedMessage);
     }
 
+    if (this->tags.contains("bits"))
+    {
+        this->message().flags.set(MessageFlag::CheerMessage);
+    }
+
     // reply threads
     if (this->thread_)
     {
@@ -273,7 +278,9 @@ MessagePtr TwitchMessageBuilder::build()
             ->setLink({Link::UserInfo, threadRoot->displayName});
 
         this->emplace<SingleLineTextElement>(
-                threadRoot->messageText, MessageElementFlag::RepliedMessage,
+                threadRoot->messageText,
+                MessageElementFlags({MessageElementFlag::RepliedMessage,
+                                     MessageElementFlag::Text}),
                 this->textColor_, FontStyle::ChatMediumSmall)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
     }
@@ -303,8 +310,10 @@ MessagePtr TwitchMessageBuilder::build()
                 ->setLink({Link::UserInfo, name});
 
             this->emplace<SingleLineTextElement>(
-                body, MessageElementFlag::RepliedMessage, this->textColor_,
-                FontStyle::ChatMediumSmall);
+                body,
+                MessageElementFlags({MessageElementFlag::RepliedMessage,
+                                     MessageElementFlag::Text}),
+                this->textColor_, FontStyle::ChatMediumSmall);
         }
     }
 
@@ -323,7 +332,6 @@ MessagePtr TwitchMessageBuilder::build()
     this->appendDankerinoBadges();
     this->appendSeventvBadges();
     this->appendFfzBadges();
-    this->appendSeventvBadges();
 
     this->appendUsername();
 

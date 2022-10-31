@@ -110,7 +110,6 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
     this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
     this->wordFlagsListener_.addSetting(settings->showBadgesDankerino);
-    this->wordFlagsListener_.addSetting(settings->showBadgesSeventv);
     this->wordFlagsListener_.addSetting(settings->showBadgesFfz);
     this->wordFlagsListener_.addSetting(settings->showBadgesSevenTV);
     this->wordFlagsListener_.addSetting(settings->enableEmoteImages);

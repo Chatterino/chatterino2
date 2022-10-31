@@ -1002,12 +1002,6 @@ void UserInfoPopup::loadAvatar(const HelixUser &user)
 
 void UserInfoPopup::fetchSevenTVAvatar(const HelixUser &user)
 {
-    if (!getSettings()->enableLoadingSevenTV)
-    {
-        // ignore seventv request
-        return;
-    }
-
     NetworkRequest(SEVENTV_USER_API.arg(user.login))
         .timeout(20000)
         .header("Content-Type", "application/json")

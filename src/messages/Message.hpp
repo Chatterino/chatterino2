@@ -44,7 +44,8 @@ enum class MessageFlag : int64_t {
     ReplyMessage = (1LL << 24),
     ElevatedMessage = (1LL << 25),
     ParticipatedThread = (1LL << 26),
-    WebchatDetected = (1LL << 27),
+    CheerMessage = (1LL << 27),
+    WebchatDetected = (1LL << 28),
 };
 
 using MessageFlags = FlagsEnum<MessageFlag>;

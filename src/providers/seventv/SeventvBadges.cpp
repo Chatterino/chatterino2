@@ -29,10 +29,6 @@ boost::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id)
 
 void SeventvBadges::loadSeventvBadges()
 {
-    if (!getSettings()->enableLoadingSevenTV)
-    {
-        return;
-    }
     // Cosmetics will work differently in v3, until this is ready
     // we'll use this endpoint.
     static QUrl url("https://7tv.io/v2/cosmetics");

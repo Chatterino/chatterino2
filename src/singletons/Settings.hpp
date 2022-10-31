@@ -167,7 +167,6 @@ public:
     BoolSetting showBadgesVanity = {"/appearance/badges/vanity", true};
     BoolSetting showBadgesChatterino = {"/appearance/badges/chatterino", true};
     BoolSetting showBadgesDankerino = {"/appearance/badges/dankerino", true};
-    BoolSetting showBadgesSeventv = {"/appearance/badges/seventv", true};
     BoolSetting showBadgesFfz = {"/appearance/badges/ffz", true};
     BoolSetting useCustomFfzModeratorBadges = {
         "/appearance/badges/useCustomFfzModeratorBadges", true};
@@ -229,9 +228,6 @@ public:
     BoolSetting removeSpacesBetweenEmotes = {
         "/emotes/removeSpacesBetweenEmotes", false};
 
-    // upstream has this enabled by default now
-    BoolSetting enableLoadingSevenTV = {"/emotes/enableLoadingSevenTV", true};
-
     BoolSetting enableBTTVGlobalEmotes = {"/emotes/bttv/global", true};
     BoolSetting enableBTTVChannelEmotes = {"/emotes/bttv/channel", true};
     BoolSetting enableFFZGlobalEmotes = {"/emotes/ffz/global", true};
@@ -259,6 +255,8 @@ public:
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
     BoolSetting streamerModeSuppressLiveNotifications = {
         "/streamerMode/supressLiveNotifications", false};
+    BoolSetting streamerModeSuppressInlineWhispers = {
+        "/streamerMode/suppressInlineWhispers", true};
 
     /// Ignored Phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
@@ -441,7 +439,7 @@ public:
         800,
     };
     BoolSetting displaySevenTVAnimatedProfile = {
-        "/misc/displaySevenTVAnimatedProfile", true};
+        "/misc/displaySevenTVAnimatedProfile", false};
 
     // Temporary time-gate-overrides
     EnumSetting<HelixTimegateOverride> helixTimegateRaid = {

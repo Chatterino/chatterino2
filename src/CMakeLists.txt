@@ -222,6 +222,10 @@ set(SOURCE_FILES
         providers/irc/IrcServer.cpp
         providers/irc/IrcServer.hpp
 
+        providers/liveupdates/BasicPubSubClient.hpp
+        providers/liveupdates/BasicPubSubManager.hpp
+        providers/liveupdates/BasicPubSubWebsocket.hpp
+
         providers/seventv/SeventvBadges.cpp
         providers/seventv/SeventvBadges.hpp
         providers/seventv/SeventvEmotes.cpp

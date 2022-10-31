@@ -191,9 +191,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Show message reply button", s.showReplyButton);
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
-    layout.addCheckbox("Always on top", s.windowTopMost);
+    layout.addCheckbox("Always on top", s.windowTopMost, false,
+                       "Always keep Chatterino as the top window.");
 #ifdef USEWINSDK
-    layout.addCheckbox("Start with Windows", s.autorun);
+    layout.addCheckbox("Start with Windows", s.autorun, false,
+                       "Start Chatterino when your computer starts.");
 #endif
     if (!BaseWindow::supportsCustomWindowFrame())
     {
@@ -253,17 +255,19 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
-    layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
+    layout.addCheckbox("Show input when it's empty", s.showEmptyInput, false,
+                       "Show the chat box even when there is nothing typed.");
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
-    layout.addCheckbox("Allow sending duplicate messages",
-                       s.allowDuplicateMessages);
+    layout.addCheckbox(
+        "Allow sending duplicate messages", s.allowDuplicateMessages, false,
+        "Allow a single message to be repeatedly sent without any changes.");
 
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
     layout.addCheckbox("Alternate background color", s.alternateMessages);
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
     layout.addDropdown<QString>(
-        "Timestamp format (a = am/pm, zzz = milliseconds)",
+        "Timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
          "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
          "hh:mm:ss.zzz", "hh:mm:ss.zzz a"},
@@ -278,7 +282,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
             return args.index == 0 ? getSettings()->timestampFormat.getValue()
                                    : args.value;
-        });
+        },
+        true, "a = am/pm, zzz = milliseconds");
     layout.addDropdown<int>(
         "Limit message height",
         {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
@@ -367,7 +372,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return args.index;
         },
-        false);
+        false, "Show emote name, provider, and author on hover.");
     layout.addDropdown("Emoji style",
                        {
                            "Twitter",
@@ -404,7 +409,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 30);
 
     layout.addCheckbox("Hide usercard avatars",
-                       s.streamerModeHideUsercardAvatars);
+                       s.streamerModeHideUsercardAvatars, false,
+                       "Prevent potentially explicit avatars from showing.");
     layout.addCheckbox("Hide link thumbnails",
                        s.streamerModeHideLinkThumbnails);
     layout.addCheckbox(
@@ -413,6 +419,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
     layout.addCheckbox("Suppress Live Notifications",
                        s.streamerModeSuppressLiveNotifications);
+    layout.addCheckbox("Suppress Inline Whispers",
+                       s.streamerModeSuppressInlineWhispers);
 
     layout.addTitle("Link Previews");
     layout.addDescription(
@@ -642,18 +650,21 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         });
 
     layout.addSubtitle("Visible badges");
-    layout.addCheckbox("Authority (staff, admin)", s.showBadgesGlobalAuthority);
+    layout.addCheckbox("Authority", s.showBadgesGlobalAuthority, false,
+                       "e.g., staff, admin");
     layout.addCheckbox("Predictions", s.showBadgesPredictions);
-    layout.addCheckbox("Channel (broadcaster, moderator)",
-                       s.showBadgesChannelAuthority);
+    layout.addCheckbox("Channel", s.showBadgesChannelAuthority, false,
+                       "e.g., broadcaster, moderator");
     layout.addCheckbox("Subscriber ", s.showBadgesSubscription);
-    layout.addCheckbox("Vanity (prime, bits, subgifter)", s.showBadgesVanity);
+    layout.addCheckbox("Vanity", s.showBadgesVanity, false,
+                       "e.g., prime, bits, sub gifter");
     layout.addCheckbox("Chatterino", s.showBadgesChatterino);
-    layout.addCheckbox("Dankerino", s.showBadgesDankerino);
-    layout.addCheckbox("SevenTV", s.showBadgesSeventv);
-    layout.addCheckbox("FrankerFaceZ (Bot, FFZ Supporter, FFZ Developer)",
-                       s.showBadgesFfz);
-    layout.addCheckbox("7TV", s.showBadgesSevenTV);
+    // these currently have no real use
+    // layout.addCheckbox("Dankerino", s.showBadgesDankerino);
+    layout.addCheckbox("FrankerFaceZ", s.showBadgesFfz, false,
+                       "e.g., Bot, FFZ supporter, FFZ developer");
+    layout.addCheckbox("7TV", s.showBadgesSevenTV, false,
+                       "Badges for 7TV admins, developers, and supporters");
     layout.addSeperator();
     layout.addCheckbox("Use custom FrankerFaceZ moderator badges",
                        s.useCustomFfzModeratorBadges);
@@ -681,8 +692,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Show 7TV Animated Profile Picture",
                        s.displaySevenTVAnimatedProfile);
-    layout.addCheckbox("Show moderation messages", s.hideModerationActions,
-                       true);
+    layout.addCheckbox(
+        "Show moderation messages", s.hideModerationActions, true,
+        "Show messages for timeouts, bans, and other moderator actions.");
     layout.addCheckbox("Show deletions of single messages",
                        s.hideDeletionActions, true);
     layout.addCheckbox("Colorize users without color set (gray names)",
@@ -696,11 +708,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Automatically close reply thread popup when it loses focus",
         s.autoCloseThreadPopup);
-    layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
+    layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains,
+                       false,
+                       "Make all clickable links lowercase to deter "
+                       "phishing attempts.");
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
     layout.addCheckbox("Color @usernames", s.colorUsernames);
     layout.addCheckbox("Try to find usernames without @ prefix",
-                       s.findAllUsernames);
+                       s.findAllUsernames, false,
+                       "Find mentions of users in chat without the @ prefix.");
     layout.addCheckbox("Show username autocompletion popup menu",
                        s.showUsernameCompletionMenu);
     const QStringList usernameDisplayModes = {"Username", "Localized name",
@@ -736,11 +752,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox(
         "Only search for emote autocompletion at the start of emote names",
-        s.prefixOnlyEmoteCompletion);
+        s.prefixOnlyEmoteCompletion, false,
+        "When disabled, emote tab-completion will complete based on any part "
+        "of the name."
+        "\ne.g., sheffy -> DatSheffy");
     layout.addCheckbox("Only search for username autocompletion with an @",
                        s.userCompletionOnlyWithAt);
 
-    layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers);
+    layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers, false,
+                       "Show whispers as messages in all splits instead "
+                       "of just /whispers.");
     layout.addCheckbox("Highlight received inline whispers",
                        s.highlightInlineWhispers);
     layout.addCheckbox("Load message history on connect",
@@ -762,8 +783,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return args.index;
         },
-        false);
-    layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
+        false, "Combine consecutive timeout messages into a single message.");
+    layout.addCheckbox("Combine multiple bit tips into one", s.stackBits, false,
+                       "Combine consecutive cheermotes (sent in a single "
+                       "message) into one cheermote.");
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
     layout.addCheckbox("Strip leading mention in replies", s.stripReplyMention);
