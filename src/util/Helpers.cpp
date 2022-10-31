@@ -2,9 +2,9 @@
 
 #include "providers/twitch/TwitchCommon.hpp"
 
-#include <QRegularExpression>
 #include <QDirIterator>
 #include <QLocale>
+#include <QRegularExpression>
 #include <QUuid>
 
 namespace chatterino {
