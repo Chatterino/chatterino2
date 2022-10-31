@@ -55,9 +55,4 @@ std::vector<QString> ChatterSet::filterByPrefix(const QString &prefix) const
     return result;
 }
 
-int ChatterSet::getNumChatters() const
-{
-    return this->items.size();
-}
-
 }  // namespace chatterino
