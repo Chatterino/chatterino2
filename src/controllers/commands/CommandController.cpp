@@ -901,8 +901,6 @@ void CommandController::initialize(Settings &, Paths &paths)
                 return "";
             }
 
-            qCDebug(chatterinoTwitch) << "Getting chatter count";
-
             // Refresh chatter list via helix api for mods
             getHelix()->getChatterCount(
                 twitchChannel->roomId(),
@@ -913,7 +911,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                             .arg(localizeNumbers(chatterCount))));
                 },
                 [channel](auto error, auto message) {
-                    auto errorMessage = Helix::formatHelixUserListErrorString(QString("chatters"), error, message);
+                    auto errorMessage = Helix::formatHelixGeneralErrorString(QString("chatters"), error, message);
                     channel->addMessage(makeSystemMessage(errorMessage));
                 }
             );

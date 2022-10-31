@@ -1991,7 +1991,7 @@ void Helix::sendWhisper(
         .execute();
 }
 
-QString Helix::formatHelixUserListErrorString(
+QString Helix::formatHelixGeneralErrorString(
     QString userType,
     HelixGeneralError error,
     QString message

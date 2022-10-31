@@ -1083,7 +1083,7 @@ public:
         ResultCallback<int> successCallback,
         FailureCallback<HelixGeneralError, QString> failureCallback) final;
         
-    static QString formatHelixUserListErrorString(
+    static QString formatHelixGeneralErrorString(
         QString userType, 
         HelixGeneralError error, 
         QString message);
