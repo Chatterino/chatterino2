@@ -330,16 +330,6 @@ struct HelixChatSettings {
     }
 };
 
-class HelixUserList {
-    public:
-        std::unordered_set<QString> users;
-        int total;
-
-        HelixUserList();
-
-        void AddUsersFromResponse(const QJsonObject &response);
-};
-
 struct HelixVip {
     QString userId;
     QString userName;
@@ -530,7 +520,7 @@ enum class HelixWhisperError {  // /w
     Forwarded,
 };  // /w
 
-enum class HelixUserListError { // /chat/chatters and /moderation/moderators
+enum class HelixGeneralError {
     Unknown,
     UserMissingScope,
     UserNotAuthorized,
@@ -808,8 +798,15 @@ public:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     virtual void getChatters(
         QString broadcasterID, QString moderatorID,
-        ResultCallback<HelixUserList*> successCallback,
-        FailureCallback<HelixUserListError, QString> failureCallback) = 0;
+        ResultCallback<std::unordered_set<QString>> successCallback,
+        FailureCallback<HelixGeneralError, QString> failureCallback) = 0;
+
+    // Get chatter count from chat/chatters endpoint
+    // https://dev.twitch.tv/docs/api/reference#get-chatters
+    virtual void getChatterCount(
+        QString broadcasterID, QString moderatorID,
+        ResultCallback<int> successCallback,
+        FailureCallback<HelixGeneralError, QString> failureCallback) = 0;
     
     // https://dev.twitch.tv/docs/api/reference#get-vips
     virtual void getChannelVIPs(
@@ -1076,12 +1073,19 @@ public:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     void getChatters(
         QString broadcasterID, QString moderatorID,
-        ResultCallback<HelixUserList*> successCallback,
-        FailureCallback<HelixUserListError, QString> failureCallback) final;
+        ResultCallback<std::unordered_set<QString>> successCallback,
+        FailureCallback<HelixGeneralError, QString> failureCallback) final;
+
+    // Get chatter count from chat/chatters endpoint
+    // https://dev.twitch.tv/docs/api/reference#get-chatters
+    void getChatterCount(
+        QString broadcasterID, QString moderatorID,
+        ResultCallback<int> successCallback,
+        FailureCallback<HelixGeneralError, QString> failureCallback) final;
         
     static QString formatHelixUserListErrorString(
         QString userType, 
-        HelixUserListError error, 
+        HelixGeneralError error, 
         QString message);
 
     // https://dev.twitch.tv/docs/api/reference#get-vips
@@ -1105,12 +1109,12 @@ protected:
 private:
     NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
 
-    void getApiListRecursive(
-        HelixUserList *list,
-        QString url, QUrlQuery urlQuery,
-        int page, QString paginationCursor,
-        ResultCallback<HelixUserList*> successCallback,
-        FailureCallback<HelixUserListError, QString> failureCallback);
+    void makeRequestWrapper(
+        QString url, QUrlQuery *urlQuery, 
+        int page, bool paginate,
+        ResultCallback<QJsonObject*> *resultCallback,
+        FailureCallback<HelixGeneralError, QString> failureCallback
+    );
 
     QString clientId;
     QString oauthToken;

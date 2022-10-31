@@ -895,12 +895,6 @@ void CommandController::initialize(Settings &, Paths &paths)
                 return "";
             }
 
-            auto addChatterCountMessage = [channel, twitchChannel]() -> void {
-                channel->addMessage(makeSystemMessage(
-                    QString("Chatter count: %1")
-                        .arg(localizeNumbers(twitchChannel->chatterCount()))));
-            };
-
             // Fail when user is not a moderator
             if (!twitchChannel->hasModRights()) {
                 channel->addMessage(makeSystemMessage(QString("Error: Only moderators can get number of chatters")));
@@ -908,12 +902,13 @@ void CommandController::initialize(Settings &, Paths &paths)
             }
 
             // Refresh chatter list via helix api for mods
-            getHelix()->getChatters(
+            getHelix()->getChatterCount(
                 twitchChannel->roomId(),
                 getApp()->accounts->twitch.getCurrent()->getUserId(),
-                [twitchChannel, addChatterCountMessage](HelixUserList *chatterList) {
-                    twitchChannel->updateOnlineChatters(chatterList->users);
-                    addChatterCountMessage();
+                [channel](int chatterCount) {
+                    channel->addMessage(makeSystemMessage(
+                        QString("Chatter count: %1")
+                            .arg(localizeNumbers(chatterCount))));
                 },
                 [channel](auto error, auto message) {
                     auto errorMessage = Helix::formatHelixUserListErrorString(QString("chatters"), error, message);

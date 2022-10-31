@@ -902,8 +902,8 @@ void TwitchChannel::refreshChatters() {
     getHelix()->getChatters(
         this->roomId(),
         getApp()->accounts->twitch.getCurrent()->getUserId(),
-        [this](HelixUserList *chatterList) {
-            this->updateOnlineChatters(chatterList->users);
+        [this](std::unordered_set<QString> chatterList) {
+            this->updateOnlineChatters(chatterList);
         },
         // Refresh chatters should only be used when failing silently is an option
         [this](auto error, auto message) { }

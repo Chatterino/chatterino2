@@ -8,19 +8,6 @@
 
 namespace chatterino {
 
-HelixUserList::HelixUserList() {
-    users = std::unordered_set<QString>();
-}
-
-void HelixUserList::AddUsersFromResponse(const QJsonObject &response) {
-    for (const auto jsonStream : response.value("data").toArray()) 
-    {
-        auto user = jsonStream.toObject().value("user_login").toString();
-        users.insert(user);
-    }
-    users = std::move(users);
-}
-
 static IHelix *instance = nullptr;
 
 void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
@@ -2006,10 +1993,10 @@ void Helix::sendWhisper(
 
 QString Helix::formatHelixUserListErrorString(
     QString userType,
-    HelixUserListError error,
+    HelixGeneralError error,
     QString message
 ) {
-    using Error = HelixUserListError;
+    using Error = HelixGeneralError;
 
     QString errorMessage = QString("Failed to get list of ") + userType + QString(": ");
 
@@ -2042,48 +2029,39 @@ QString Helix::formatHelixUserListErrorString(
 }
 
 // Recursive function with a maximun page of 50
-void Helix::getApiListRecursive(
-    HelixUserList *list,
-    QString url, QUrlQuery urlQuery,
-    int page, QString paginationCursor,
-    ResultCallback<HelixUserList*> successCallback,
-    FailureCallback<HelixUserListError, QString> failureCallback
+void Helix::makeRequestWrapper(
+    QString url, QUrlQuery *urlQuery, 
+    int page, bool paginate,
+    ResultCallback<QJsonObject*> *resultCallback,
+    FailureCallback<HelixGeneralError, QString> failureCallback
 ) {
-    using Error = HelixUserListError;
+    using Error = HelixGeneralError;
 
-    if (!paginationCursor.isEmpty()) {
-        if (urlQuery.hasQueryItem("after")) {
-            urlQuery.removeQueryItem("after");
-        }
-        urlQuery.addQueryItem("after", paginationCursor);
-    }
-
-    this->makeRequest(url, urlQuery)
+    this->makeRequest(url, *urlQuery)
         .type(NetworkRequestType::Get)
         .header("Content-Type", "application/json")
         .onSuccess([=](auto result) -> Outcome {
             if (result.status() != 200)
             {
                 qCWarning(chatterinoTwitch)
-                    << "Success result for getting user list data was "
+                    << "Success result for getting data was "
                     << result.status() << "but we expected it to be 200";
+            } else 
+            {
+                auto json = result.parseJson();
+                (*resultCallback)(&json);
+                if (paginate)
+                {
+                    QString newCursor = json.value("pagination").toObject().value("cursor").toString();
+                    if (!newCursor.isEmpty() && page <= 50)
+                    {
+                        urlQuery->removeQueryItem("after");
+                        urlQuery->addQueryItem("after", newCursor);
+                        this->makeRequestWrapper(url, urlQuery, page+1, true, resultCallback, failureCallback);
+                    }
+                }
             }
 
-            auto response = result.parseJson();
-
-            if (page == 1) {
-                list->total = response.value("total").toInt();
-            }
-
-            QString newCursor = response.value("pagination").toObject().value("cursor").toString();
-            list->AddUsersFromResponse(response);
-
-            // Call function with next page until page 50 is reached or there are no more results
-            if (page <= 50 && !newCursor.isEmpty()) {
-                getApiListRecursive(list, url, urlQuery, page+1, newCursor, successCallback, failureCallback);
-            } else {
-                successCallback(list);
-            }
             return Success;
         })
         .onError([failureCallback](auto result) {
@@ -2102,16 +2080,8 @@ void Helix::getApiListRecursive(
                     {
                         failureCallback(Error::UserMissingScope, message);
                     }
-                    else if (message.compare(
-                                 "The ID in moderator_id must match the user "
-                                 "ID found in the request's OAuth token.",
-                                 Qt::CaseInsensitive) == 0 || message.compare(
-                                 "The ID in broadcaster_id must match the user "
-                                 "ID found in the request's OAuth token.",
-                                 Qt::CaseInsensitive) == 0)
+                    else if (message.contains("OAuth token"))
                     {
-                        // get moderators: Must be broadcaster
-                        // get chatters: Must must have permission to moderate the broadcaster’s chat room.
                         failureCallback(Error::UserNotAuthorized, message);
                     }
                     else
@@ -2128,7 +2098,7 @@ void Helix::getApiListRecursive(
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Unhandled error getting user list:" << result.status()
+                        << "Unhandled error data:" << result.status()
                         << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
@@ -2141,18 +2111,56 @@ void Helix::getApiListRecursive(
 // https://dev.twitch.tv/docs/api/reference#get-chatters
 void Helix::getChatters(
     QString broadcasterID, QString moderatorID,
-    ResultCallback<HelixUserList*> successCallback,
-    FailureCallback<HelixUserListError, QString> failureCallback)  
+    ResultCallback<std::unordered_set<QString>> successCallback,
+    FailureCallback<HelixGeneralError, QString> failureCallback)  
 {
-    auto chatterList = new HelixUserList();
+    std::unordered_set<QString> *chatterList = new std::unordered_set<QString>();
+    int *page = new int;
+    int p = 1;
+    page = &p;
     QString paginationCursor("");
 
-    QUrlQuery urlQuery;
+    QUrlQuery *urlQuery = new QUrlQuery();
+    QString url = QString("chat/chatters");
 
-    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
-    urlQuery.addQueryItem("moderator_id", moderatorID);
+    urlQuery->addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery->addQueryItem("moderator_id", moderatorID);
 
-    this->getApiListRecursive(chatterList, "chat/chatters", urlQuery, 1, paginationCursor, successCallback, failureCallback);
+    ResultCallback<QJsonObject*> handleResponse = [=](QJsonObject *response) {
+        QString newCursor = response->value("pagination").toObject().value("cursor").toString();
+        (*page)++;
+
+        for (const auto jsonStream : response->value("data").toArray()) 
+        {
+            QString user = QString(jsonStream.toObject().value("user_login").toString());
+            chatterList->insert(user);
+        }
+
+        // Call function with next page until page 50 is reached or there are no more results
+        if (*page >= 50 || newCursor.isEmpty()) {
+            successCallback(*chatterList);   
+        }
+    };
+
+    this->makeRequestWrapper(url, urlQuery, 1, true, &handleResponse, failureCallback);
+}
+
+// https://dev.twitch.tv/docs/api/reference#get-chatters
+void Helix::getChatterCount(
+    QString broadcasterID, QString moderatorID,
+    ResultCallback<int> successCallback,
+    FailureCallback<HelixGeneralError, QString> failureCallback)
+{
+    QUrlQuery *urlQuery = new QUrlQuery();
+
+    urlQuery->addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery->addQueryItem("moderator_id", moderatorID);
+
+    ResultCallback<QJsonObject*> handleResponse = [successCallback](QJsonObject *response) {
+        successCallback(response->value("total").toInt());
+    };
+
+    this->makeRequestWrapper("chat/chatters", urlQuery, 0, false, &handleResponse, failureCallback);
 }
 
 // List the VIPs of a channel
