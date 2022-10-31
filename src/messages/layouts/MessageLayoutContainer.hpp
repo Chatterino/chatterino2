@@ -46,9 +46,6 @@ struct Margin {
 struct MessageLayoutContainer {
     MessageLayoutContainer() = default;
 
-    Margin margin = {4, 8, 4, 8};
-    bool centered = false;
-    bool enableCompactEmotes = false;
     FirstWord first = FirstWord::Neutral;
     bool containsRTL = false;
 
@@ -97,6 +94,8 @@ private:
     void _addElement(MessageLayoutElement *element, bool forceAdd = false,
                      int prevIndex = -2);
     bool canCollapse();
+
+    const Margin margin = {4, 8, 4, 8};
 
     // variables
     float scale_ = 1.f;

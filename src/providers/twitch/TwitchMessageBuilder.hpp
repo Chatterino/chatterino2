@@ -99,6 +99,7 @@ private:
     void appendTwitchBadges();
     void appendChatterinoBadges();
     void appendFfzBadges();
+    void appendSeventvBadges();
     Outcome tryParseCheermote(const QString &string);
 
     bool shouldAddModerationElements() const;

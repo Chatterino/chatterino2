@@ -38,7 +38,11 @@ CheckOptions:
     value:           camelBack
   - key:             readability-identifier-naming.MemberCase
     value:           camelBack
+  - key:             readability-identifier-naming.PrivateMemberIgnoredRegexp
+    value:           .*
   - key:             readability-identifier-naming.PrivateMemberSuffix
+    value:           _
+  - key:             readability-identifier-naming.ProtectedMemberSuffix
     value:           _
   - key:             readability-identifier-naming.UnionCase
     value:           CamelCase

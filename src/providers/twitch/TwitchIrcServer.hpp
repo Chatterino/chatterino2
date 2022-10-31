@@ -7,6 +7,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 
 #include <chrono>
 #include <memory>
@@ -37,6 +38,8 @@ public:
     void reloadAllBTTVChannelEmotes();
     void reloadFFZGlobalEmotes();
     void reloadAllFFZChannelEmotes();
+    void reloadSevenTVGlobalEmotes();
+    void reloadAllSevenTVChannelEmotes();
 
     Atomic<QString> lastUserThatWhisperedMe;
 
@@ -49,6 +52,7 @@ public:
 
     const BttvEmotes &getBttvEmotes() const;
     const FfzEmotes &getFfzEmotes() const;
+    const SeventvEmotes &getSeventvEmotes() const;
 
 protected:
     virtual void initializeConnection(IrcConnection *connection,
@@ -85,6 +89,7 @@ private:
 
     BttvEmotes bttv;
     FfzEmotes ffz;
+    SeventvEmotes seventv_;
     QTimer bulkLiveStatusTimer_;
 
     pajlada::Signals::SignalHolder signalHolder_;
