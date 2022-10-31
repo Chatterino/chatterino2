@@ -194,8 +194,26 @@ MessagePtr TwitchMessageBuilder::build()
                 this->channel->isBroadcaster());
         }
     }
+    bool isBridged = false;
+    if (getSettings()->allowBridgeImpersonation &&
+        this->userName == getSettings()->bridgeUser)
+    {
+        // bridged message:
+        // [I] <${user}> ${text}
+        QRegularExpression bridgeMeta(R"(^(\[.\]) <(.+?)> (.*)$)");
+        auto m = bridgeMeta.match(this->originalMessage_);
+        if (m.hasMatch())
+        {
+            auto platform = m.captured(1);
+            auto user = m.captured(2);
+            this->originalMessage_ = m.captured(3);
+            this->userName = user + platform;
+            isBridged = true;
+        }
+    }
+
     if (this->tags.contains("client-nonce") &&
-        getSettings()->nonceFuckeryEnabled)
+        getSettings()->nonceFuckeryEnabled && !isBridged)
     {
         auto isAbnormal =
             isAbnormalNonce(this->tags["client-nonce"].toString());
