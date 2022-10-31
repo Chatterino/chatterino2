@@ -575,7 +575,7 @@ void Application::initSeventvEventAPI()
         [&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
-                    data.emoteSetId, [data](TwitchChannel &chan) {
+                    data.emoteSetID, [data](TwitchChannel &chan) {
                         chan.addSeventvEmote(data);
                     });
             });
@@ -584,7 +584,7 @@ void Application::initSeventvEventAPI()
         [&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
-                    data.emoteSetId, [data](TwitchChannel &chan) {
+                    data.emoteSetID, [data](TwitchChannel &chan) {
                         chan.updateSeventvEmote(data);
                     });
             });
@@ -593,14 +593,14 @@ void Application::initSeventvEventAPI()
         [&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
-                    data.emoteSetId, [data](TwitchChannel &chan) {
+                    data.emoteSetID, [data](TwitchChannel &chan) {
                         chan.removeSeventvEmote(data);
                     });
             });
         });
     this->twitch->seventvEventAPI->signals_.userUpdated.connect(
         [&](const auto &data) {
-            this->twitch->forEachSeventvUser(data.userId,
+            this->twitch->forEachSeventvUser(data.userID,
                                              [data](TwitchChannel &chan) {
                                                  chan.updateSeventvUser(data);
                                              });

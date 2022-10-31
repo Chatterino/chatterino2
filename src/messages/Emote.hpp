@@ -37,7 +37,7 @@ class EmoteMap : public std::unordered_map<EmoteName, EmotePtr>
 {
 public:
     EmoteMap::const_iterator findEmote(const QString &emoteName,
-                                       const QString &emoteId) const;
+                                       const QString &emoteID) const;
 };
 using EmoteIdMap = std::unordered_map<EmoteId, EmotePtr>;
 using WeakEmoteMap = std::unordered_map<EmoteName, std::weak_ptr<const Emote>>;

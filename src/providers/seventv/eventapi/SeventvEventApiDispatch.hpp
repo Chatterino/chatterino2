@@ -20,10 +20,10 @@ struct SeventvEventApiDispatch {
 };
 
 struct SeventvEventApiEmoteAddDispatch {
-    QString emoteSetId;
+    QString emoteSetID;
     QString actorName;
     QJsonObject emoteJson;
-    QString emoteId;
+    QString emoteID;
 
     SeventvEventApiEmoteAddDispatch(const SeventvEventApiDispatch &dispatch,
                                     QJsonObject emote);
@@ -32,10 +32,10 @@ struct SeventvEventApiEmoteAddDispatch {
 };
 
 struct SeventvEventApiEmoteRemoveDispatch {
-    QString emoteSetId;
+    QString emoteSetID;
     QString actorName;
     QString emoteName;
-    QString emoteId;
+    QString emoteID;
 
     SeventvEventApiEmoteRemoveDispatch(const SeventvEventApiDispatch &dispatch,
                                        QJsonObject emote);
@@ -44,9 +44,9 @@ struct SeventvEventApiEmoteRemoveDispatch {
 };
 
 struct SeventvEventApiEmoteUpdateDispatch {
-    QString emoteSetId;
+    QString emoteSetID;
     QString actorName;
-    QString emoteId;
+    QString emoteID;
     QString oldEmoteName;
     QString emoteName;
 
@@ -57,10 +57,10 @@ struct SeventvEventApiEmoteUpdateDispatch {
 };
 
 struct SeventvEventApiUserConnectionUpdateDispatch {
-    QString userId;
+    QString userID;
     QString actorName;
-    QString oldEmoteSetId;
-    QString emoteSetId;
+    QString oldEmoteSetID;
+    QString emoteSetID;
 
     SeventvEventApiUserConnectionUpdateDispatch(
         const SeventvEventApiDispatch &dispatch, const QJsonObject &update);

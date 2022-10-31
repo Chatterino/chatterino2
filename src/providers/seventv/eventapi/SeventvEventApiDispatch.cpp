@@ -19,17 +19,17 @@ SeventvEventApiDispatch::SeventvEventApiDispatch(QJsonObject obj)
 
 SeventvEventApiEmoteAddDispatch::SeventvEventApiEmoteAddDispatch(
     const SeventvEventApiDispatch &dispatch, QJsonObject emote)
-    : emoteSetId(dispatch.id)
+    : emoteSetID(dispatch.id)
     , actorName(dispatch.actorName)
     , emoteJson(std::move(emote))
-    , emoteId(this->emoteJson["id"].toString())
+    , emoteID(this->emoteJson["id"].toString())
 {
 }
 
 bool SeventvEventApiEmoteAddDispatch::validate() const
 {
     bool validValues =
-        !this->emoteSetId.isEmpty() && !this->emoteJson.isEmpty();
+        !this->emoteSetID.isEmpty() && !this->emoteJson.isEmpty();
     if (!validValues)
     {
         return false;
@@ -48,34 +48,34 @@ bool SeventvEventApiEmoteAddDispatch::validate() const
 
 SeventvEventApiEmoteRemoveDispatch::SeventvEventApiEmoteRemoveDispatch(
     const SeventvEventApiDispatch &dispatch, QJsonObject emote)
-    : emoteSetId(dispatch.id)
+    : emoteSetID(dispatch.id)
     , actorName(dispatch.actorName)
     , emoteName(emote["name"].toString())
-    , emoteId(emote["id"].toString())
+    , emoteID(emote["id"].toString())
 {
 }
 
 bool SeventvEventApiEmoteRemoveDispatch::validate() const
 {
-    return !this->emoteSetId.isEmpty() && !this->emoteName.isEmpty() &&
-           !this->emoteId.isEmpty();
+    return !this->emoteSetID.isEmpty() && !this->emoteName.isEmpty() &&
+           !this->emoteID.isEmpty();
 }
 
 SeventvEventApiEmoteUpdateDispatch::SeventvEventApiEmoteUpdateDispatch(
     const SeventvEventApiDispatch &dispatch, QJsonObject changeField)
-    : emoteSetId(dispatch.id)
+    : emoteSetID(dispatch.id)
     , actorName(dispatch.actorName)
 {
     auto oldValue = changeField["old_value"].toObject();
     auto value = changeField["value"].toObject();
-    this->emoteId = value["id"].toString();
+    this->emoteID = value["id"].toString();
     this->oldEmoteName = oldValue["name"].toString();
     this->emoteName = value["name"].toString();
 }
 
 bool SeventvEventApiEmoteUpdateDispatch::validate() const
 {
-    return !this->emoteSetId.isEmpty() && !this->emoteId.isEmpty() &&
+    return !this->emoteSetID.isEmpty() && !this->emoteID.isEmpty() &&
            !this->oldEmoteName.isEmpty() && !this->emoteName.isEmpty() &&
            this->oldEmoteName != this->emoteName;
 }
@@ -83,17 +83,17 @@ bool SeventvEventApiEmoteUpdateDispatch::validate() const
 SeventvEventApiUserConnectionUpdateDispatch::
     SeventvEventApiUserConnectionUpdateDispatch(
         const SeventvEventApiDispatch &dispatch, const QJsonObject &update)
-    : userId(dispatch.id)
+    : userID(dispatch.id)
     , actorName(dispatch.actorName)
-    , oldEmoteSetId(update["old_value"].toObject()["id"].toString())
-    , emoteSetId(update["value"].toObject()["id"].toString())
+    , oldEmoteSetID(update["old_value"].toObject()["id"].toString())
+    , emoteSetID(update["value"].toObject()["id"].toString())
 {
 }
 
 bool SeventvEventApiUserConnectionUpdateDispatch::validate() const
 {
-    return !this->userId.isEmpty() && !this->oldEmoteSetId.isEmpty() &&
-           !this->emoteSetId.isEmpty();
+    return !this->userID.isEmpty() && !this->oldEmoteSetID.isEmpty() &&
+           !this->emoteSetID.isEmpty();
 }
 
 }  // namespace chatterino

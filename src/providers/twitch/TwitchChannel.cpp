@@ -252,8 +252,8 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
             {
                 this->seventvEmotes_.set(std::make_shared<EmoteMap>(
                     std::forward<decltype(emoteMap)>(emoteMap)));
-                this->updateSeventvData(channelInfo.userId,
-                                        channelInfo.emoteSetId);
+                this->updateSeventvData(channelInfo.userID,
+                                        channelInfo.emoteSetID);
             }
         },
         manualRefresh);
@@ -659,9 +659,9 @@ void TwitchChannel::removeSeventvEmote(
 void TwitchChannel::updateSeventvUser(
     const SeventvEventApiUserConnectionUpdateDispatch &dispatch)
 {
-    updateSeventvData(this->seventvUserID_, dispatch.emoteSetId);
+    updateSeventvData(this->seventvUserID_, dispatch.emoteSetID);
     SeventvEmotes::updateEmoteSet(
-        dispatch.emoteSetId,
+        dispatch.emoteSetID,
         [this, weak = weakOf<Channel>(this), dispatch](auto &&emotes,
                                                        const auto &name) {
             postToThread([this, weak, dispatch, emotes, name]() {
@@ -709,7 +709,7 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
 
     this->seventvUserID_ = newUserID;
     this->seventvEmoteSetID_ = newEmoteSetID;
-    auto fn = [this, oldUserID, oldEmoteSetID]() {
+    runInGuiThread([this, oldUserID, oldEmoteSetID]() {
         if (getApp()->twitch->seventvEventAPI)
         {
             getApp()->twitch->seventvEventAPI->subscribeUser(
@@ -724,15 +724,7 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
                 getApp()->twitch->dropSeventvEmoteSet(oldEmoteSetID.get());
             }
         }
-    };
-    if (isGuiThread())
-    {
-        fn();
-    }
-    else
-    {
-        postToThread(fn);
-    }
+    });
 }
 
 void TwitchChannel::addOrReplaceLiveUpdatesAddRemove(const MessagePtr &message,

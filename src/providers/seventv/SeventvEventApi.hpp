@@ -27,7 +27,7 @@ public:
         Signal<SeventvEventApiUserConnectionUpdateDispatch> userUpdated;
     } signals_;  // NOLINT(readability-identifier-naming)
 
-    void subscribeUser(const QString &userId, const QString &emoteSetId);
+    void subscribeUser(const QString &userID, const QString &emoteSetID);
     void unsubscribeUser(const QString &id);
     void unsubscribeEmoteSet(const QString &id);
 

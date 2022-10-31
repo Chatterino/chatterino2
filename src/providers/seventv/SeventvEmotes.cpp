@@ -416,7 +416,7 @@ boost::optional<EmotePtr> SeventvEmotes::updateEmote(
     const SeventvEventApiEmoteUpdateDispatch &dispatch)
 {
     auto oldMap = map.get();
-    auto oldEmote = oldMap->findEmote(dispatch.emoteName, dispatch.emoteId);
+    auto oldEmote = oldMap->findEmote(dispatch.emoteName, dispatch.emoteID);
     if (oldEmote == oldMap->end())
     {
         return boost::none;
@@ -436,7 +436,7 @@ boost::optional<EmotePtr> SeventvEmotes::removeEmote(
     const SeventvEventApiEmoteRemoveDispatch &dispatch)
 {
     EmoteMap updatedMap = *map.get();
-    auto it = updatedMap.findEmote(dispatch.emoteName, dispatch.emoteId);
+    auto it = updatedMap.findEmote(dispatch.emoteName, dispatch.emoteID);
     if (it == updatedMap.end())
     {
         // We already copied the map at this point and are now discarding the copy.

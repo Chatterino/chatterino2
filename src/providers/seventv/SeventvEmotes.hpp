@@ -57,8 +57,8 @@ class EmoteMap;
 class SeventvEmotes final
 {
     struct ChannelInfo {
-        QString userId;
-        QString emoteSetId;
+        QString userID;
+        QString emoteSetID;
     };
 
 public:

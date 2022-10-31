@@ -15,18 +15,18 @@ SeventvEventApi::SeventvEventApi(QString host,
 {
 }
 
-void SeventvEventApi::subscribeUser(const QString &userId,
-                                    const QString &emoteSetId)
+void SeventvEventApi::subscribeUser(const QString &userID,
+                                    const QString &emoteSetID)
 {
-    if (!userId.isEmpty() && this->subscribedUsers_.insert(userId).second)
+    if (!userID.isEmpty() && this->subscribedUsers_.insert(userID).second)
     {
-        this->subscribe({userId, SeventvEventApiSubscriptionType::UpdateUser});
+        this->subscribe({userID, SeventvEventApiSubscriptionType::UpdateUser});
     }
-    if (!emoteSetId.isEmpty() &&
-        this->subscribedEmoteSets_.insert(emoteSetId).second)
+    if (!emoteSetID.isEmpty() &&
+        this->subscribedEmoteSets_.insert(emoteSetID).second)
     {
         this->subscribe(
-            {emoteSetId, SeventvEventApiSubscriptionType::UpdateEmoteSet});
+            {emoteSetID, SeventvEventApiSubscriptionType::UpdateEmoteSet});
     }
 }
 

@@ -47,7 +47,7 @@ EmotePtr cachedOrMakeEmotePtr(
 }
 
 EmoteMap::const_iterator EmoteMap::findEmote(const QString &emoteName,
-                                             const QString &emoteId) const
+                                             const QString &emoteID) const
 {
     auto it = this->end();
     if (!emoteName.isEmpty())
@@ -55,11 +55,11 @@ EmoteMap::const_iterator EmoteMap::findEmote(const QString &emoteName,
         it = this->find(EmoteName{emoteName});
     }
 
-    if (it == this->end() || it->second->id.string != emoteId)
+    if (it == this->end() || it->second->id.string != emoteID)
     {
         it = std::find_if(this->begin(), this->end(),
-                          [emoteId](const auto entry) {
-                              return entry.second->id.string == emoteId;
+                          [emoteID](const auto entry) {
+                              return entry.second->id.string == emoteID;
                           });
     }
     return it;

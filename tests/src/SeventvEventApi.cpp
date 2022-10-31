@@ -44,22 +44,22 @@ TEST(SeventvEventApi, AllEvents)
     ASSERT_EQ(eventApi->diag.connectionsFailed, 0);
 
     auto add = *addDispatch;
-    ASSERT_EQ(add.emoteSetId, EMOTE_SET_A);
+    ASSERT_EQ(add.emoteSetID, EMOTE_SET_A);
     ASSERT_EQ(add.actorName, QString("nerixyz"));
-    ASSERT_EQ(add.emoteId, QString("621d13967cc2d4e1953838ed"));
+    ASSERT_EQ(add.emoteID, QString("621d13967cc2d4e1953838ed"));
 
     auto upd = *updateDispatch;
-    ASSERT_EQ(upd.emoteSetId, EMOTE_SET_A);
+    ASSERT_EQ(upd.emoteSetID, EMOTE_SET_A);
     ASSERT_EQ(upd.actorName, QString("nerixyz"));
-    ASSERT_EQ(upd.emoteId, QString("621d13967cc2d4e1953838ed"));
+    ASSERT_EQ(upd.emoteID, QString("621d13967cc2d4e1953838ed"));
     ASSERT_EQ(upd.oldEmoteName, QString("Chatterinoge"));
     ASSERT_EQ(upd.emoteName, QString("Chatterino"));
 
     auto rem = *removeDispatch;
-    ASSERT_EQ(rem.emoteSetId, EMOTE_SET_A);
+    ASSERT_EQ(rem.emoteSetID, EMOTE_SET_A);
     ASSERT_EQ(rem.actorName, QString("nerixyz"));
     ASSERT_EQ(rem.emoteName, QString("Chatterino"));
-    ASSERT_EQ(rem.emoteId, QString("621d13967cc2d4e1953838ed"));
+    ASSERT_EQ(rem.emoteID, QString("621d13967cc2d4e1953838ed"));
 
     ASSERT_EQ(userDispatch.has_value(), false);
     addDispatch = boost::none;
@@ -74,10 +74,10 @@ TEST(SeventvEventApi, AllEvents)
     ASSERT_EQ(removeDispatch.has_value(), false);
 
     auto user = *userDispatch;
-    ASSERT_EQ(user.userId, TARGET_USER_ID);
+    ASSERT_EQ(user.userID, TARGET_USER_ID);
     ASSERT_EQ(user.actorName, QString("nerixyz"));
-    ASSERT_EQ(user.oldEmoteSetId, EMOTE_SET_A);
-    ASSERT_EQ(user.emoteSetId, EMOTE_SET_B);
+    ASSERT_EQ(user.oldEmoteSetID, EMOTE_SET_A);
+    ASSERT_EQ(user.emoteSetID, EMOTE_SET_B);
 
     eventApi->stop();
     ASSERT_EQ(eventApi->diag.connectionsOpened, 1);
