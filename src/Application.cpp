@@ -75,8 +75,8 @@ Application::Application(Settings &_settings, Paths &_paths)
     , twitch(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , dankerinoBadges(&this->emplace<DankerinoBadges>())
-    , seventvBadges(&this->emplace<SeventvBadges>())
     , ffzBadges(&this->emplace<FfzBadges>())
+    , seventvBadges(&this->emplace<SeventvBadges>())
     , logging(&this->emplace<Logging>())
 {
     this->instance = this;
@@ -202,6 +202,16 @@ int Application::run(QApplication &qtApp)
     getSettings()->enableFFZChannelEmotes.connect(
         [this] {
             this->twitch->reloadAllFFZChannelEmotes();
+        },
+        false);
+    getSettings()->enableSevenTVGlobalEmotes.connect(
+        [this] {
+            this->twitch->reloadSevenTVGlobalEmotes();
+        },
+        false);
+    getSettings()->enableSevenTVChannelEmotes.connect(
+        [this] {
+            this->twitch->reloadAllSevenTVChannelEmotes();
         },
         false);
 

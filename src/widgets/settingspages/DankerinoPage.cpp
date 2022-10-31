@@ -50,8 +50,8 @@ void DankerinoPage::initLayout(GeneralPageView &layout)
     layout.addTitle("Behavior");
     layout.addCheckbox("Lowercase tab-completed usernames",
                        s.lowercaseUsernames);
-    layout.addTitle("Emotes");
-    layout.addCheckbox("Enable loading 7TV emotes", s.enableLoadingSevenTV);
+    //layout.addTitle("Emotes");
+    //layout.addCheckbox("Enable loading 7TV emotes", s.enableLoadingSevenTV);
     layout.addTitle("Miscellaneous");
     layout.addIntInput("High rate limit spam delay in milliseconds (mod/vip)",
                        s.twitchHighRateLimitDelay, 100, 2000, 100);

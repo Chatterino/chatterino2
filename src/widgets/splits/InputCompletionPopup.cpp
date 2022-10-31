@@ -101,24 +101,28 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
 
         if (tc)
         {
-            if (auto seventv = tc->seventvEmotes())
-                addEmotes(emotes, *seventv, text, "Channel 7TV");
-            // TODO extract "Channel BetterTTV" text into a #define.
+            // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
             if (auto bttv = tc->bttvEmotes())
                 addEmotes(emotes, *bttv, text, "Channel BetterTTV");
             if (auto ffz = tc->ffzEmotes())
                 addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
+            if (auto seventv = tc->seventvEmotes())
+            {
+                addEmotes(emotes, *seventv, text, "Channel 7TV");
+            }
         }
 
-        if (auto seventvG = getApp()->twitch->getSeventvEmotes().emotes())
-            addEmotes(emotes, *seventvG, text, "Global 7TV");
         if (auto bttvG = getApp()->twitch->getBttvEmotes().emotes())
             addEmotes(emotes, *bttvG, text, "Global BetterTTV");
         if (auto ffzG = getApp()->twitch->getFfzEmotes().emotes())
             addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
-
-        addEmojis(emotes, getApp()->emotes->emojis.emojis, text);
+        if (auto seventvG = getApp()->twitch->getSeventvEmotes().globalEmotes())
+        {
+            addEmotes(emotes, *seventvG, text, "Global 7TV");
+        }
     }
+
+    addEmojis(emotes, getApp()->emotes->emojis.emojis, text);
 
     // if there is an exact match, put that emote first
     for (size_t i = 1; i < emotes.size(); i++)

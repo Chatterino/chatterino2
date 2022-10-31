@@ -55,6 +55,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 
 void SettingsDialog::addShortcuts()
 {
+    this->setSearchPlaceholderText();
     HotkeyController::HotkeyMap actions{
         {"search",
          [this](std::vector<QString>) -> QString {
@@ -72,6 +73,19 @@ void SettingsDialog::addShortcuts()
     this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
+void SettingsDialog::setSearchPlaceholderText()
+{
+    QString searchHotkey;
+    auto searchSeq = getApp()->hotkeys->getDisplaySequence(
+        HotkeyCategory::PopupWindow, "search");
+    if (!searchSeq.isEmpty())
+    {
+        searchHotkey =
+            "(" + searchSeq.toString(QKeySequence::SequenceFormat::NativeText) +
+            ")";
+    }
+    this->ui_.search->setPlaceholderText("Find in settings... " + searchHotkey);
+}
 
 void SettingsDialog::initUi()
 {
@@ -86,7 +100,7 @@ void SettingsDialog::initUi()
                     .withoutMargin()
                     .emplace<QLineEdit>()
                     .assign(&this->ui_.search);
-    edit->setPlaceholderText("Find in settings... (Ctrl+F by default)");
+    this->setSearchPlaceholderText();
     edit->setClearButtonEnabled(true);
     edit->findChild<QAbstractButton *>()->setIcon(
         QPixmap(":/buttons/clearSearch.png"));

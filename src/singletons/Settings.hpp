@@ -58,6 +58,20 @@ enum UsernameDisplayMode : int {
     LocalizedName = 2,             // Localized name
     UsernameAndLocalizedName = 3,  // Username (Localized name)
 };
+
+enum HelixTimegateOverride : int {
+    // Use the default timegated behaviour
+    // This means we use the old IRC command up until the migration date and
+    // switch over to the Helix API only after the migration date
+    Timegate = 1,
+
+    // Ignore timegating and always force use the IRC command
+    AlwaysUseIRC = 2,
+
+    // Ignore timegating and always force use the Helix API
+    AlwaysUseHelix = 3,
+};
+
 /// Settings which are availlable for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings : public ABSettings, public ConcurrentSettings
@@ -108,6 +122,7 @@ public:
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
     BoolSetting showReplyButton = {"/appearance/showReplyButton", false};
+    BoolSetting stripReplyMention = {"/appearance/stripReplyMention", true};
     IntSetting collpseMessagesMinLines = {
         "/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessages = {
@@ -158,6 +173,7 @@ public:
         "/appearance/badges/useCustomFfzModeratorBadges", true};
     BoolSetting useCustomFfzVipBadges = {
         "/appearance/badges/useCustomFfzVipBadges", true};
+    BoolSetting showBadgesSevenTV = {"/appearance/badges/seventv", true};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
@@ -204,19 +220,24 @@ public:
     BoolSetting enableEmoteImages = {"/emotes/enableEmoteImages", true};
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
-    BoolSetting showUnlistedEmotes = {"/emotes/showUnlistedEmotes", false};
+    BoolSetting showUnlistedSevenTVEmotes = {
+        "/emotes/showUnlistedSevenTVEmotes", false};
 
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
     BoolSetting removeSpacesBetweenEmotes = {
         "/emotes/removeSpacesBetweenEmotes", false};
-    BoolSetting enableLoadingSevenTV = {"/emotes/enableLoadingSevenTV", false};
+
+    // upstream has this enabled by default now
+    BoolSetting enableLoadingSevenTV = {"/emotes/enableLoadingSevenTV", true};
 
     BoolSetting enableBTTVGlobalEmotes = {"/emotes/bttv/global", true};
     BoolSetting enableBTTVChannelEmotes = {"/emotes/bttv/channel", true};
     BoolSetting enableFFZGlobalEmotes = {"/emotes/ffz/global", true};
     BoolSetting enableFFZChannelEmotes = {"/emotes/ffz/channel", true};
+    BoolSetting enableSevenTVGlobalEmotes = {"/emotes/seventv/global", true};
+    BoolSetting enableSevenTVChannelEmotes = {"/emotes/seventv/channel", true};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
@@ -304,6 +325,17 @@ public:
     QStringSetting firstMessageHighlightColor = {
         "/highlighting/firstMessageHighlightColor", ""};
 
+    BoolSetting enableElevatedMessageHighlight = {
+        "/highlighting/elevatedMessageHighlight/highlighted", true};
+    //    BoolSetting enableElevatedMessageHighlightSound = {
+    //        "/highlighting/elevatedMessageHighlight/enableSound", false};
+    //    BoolSetting enableElevatedMessageHighlightTaskbar = {
+    //        "/highlighting/elevatedMessageHighlight/enableTaskbarFlashing", false};
+    QStringSetting elevatedMessageHighlightSoundUrl = {
+        "/highlighting/elevatedMessageHighlight/soundUrl", ""};
+    QStringSetting elevatedMessageHighlightColor = {
+        "/highlighting/elevatedMessageHighlight/color", ""};
+
     BoolSetting enableSubHighlight = {
         "/highlighting/subHighlight/subsHighlighted", true};
     BoolSetting enableSubHighlightSound = {
@@ -313,6 +345,19 @@ public:
     QStringSetting subHighlightSoundUrl = {"/highlighting/subHighlightSoundUrl",
                                            ""};
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
+
+    BoolSetting enableThreadHighlight = {
+        "/highlighting/thread/nameIsHighlightKeyword", true};
+    BoolSetting showThreadHighlightInMentions = {
+        "/highlighting/thread/showSelfHighlightInMentions", true};
+    BoolSetting enableThreadHighlightSound = {
+        "/highlighting/thread/enableSound", true};
+    BoolSetting enableThreadHighlightTaskbar = {
+        "/highlighting/thread/enableTaskbarFlashing", true};
+    QStringSetting threadHighlightSoundUrl = {
+        "/highlighting/threadHighlightSoundUrl", ""};
+    QStringSetting threadHighlightColor = {"/highlighting/threadHighlightColor",
+                                           ""};
 
     QStringSetting highlightColor = {"/highlighting/color", ""};
 
@@ -397,6 +442,20 @@ public:
     };
     BoolSetting displaySevenTVAnimatedProfile = {
         "/misc/displaySevenTVAnimatedProfile", true};
+
+    // Temporary time-gate-overrides
+    EnumSetting<HelixTimegateOverride> helixTimegateRaid = {
+        "/misc/twitch/helix-timegate/raid",
+        HelixTimegateOverride::Timegate,
+    };
+    EnumSetting<HelixTimegateOverride> helixTimegateWhisper = {
+        "/misc/twitch/helix-timegate/whisper",
+        HelixTimegateOverride::Timegate,
+    };
+    EnumSetting<HelixTimegateOverride> helixTimegateVIPs = {
+        "/misc/twitch/helix-timegate/vips",
+        HelixTimegateOverride::Timegate,
+    };
 
     IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 1};
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};

@@ -142,9 +142,9 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     }
 
     // 7TV Global
-    for (auto &emote : *getApp()->twitch->getSeventvEmotes().emotes())
+    for (auto &emote : *getApp()->twitch->getSeventvEmotes().globalEmotes())
     {
-        addString(emote.first.string, TaggedString::Type::SEVENTVGlobalEmote);
+        addString(emote.first.string, TaggedString::Type::SeventvGlobalEmote);
     }
 
     // Bttv Global
@@ -209,7 +209,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     // 7TV Channel
     for (auto &emote : *tc->seventvEmotes())
     {
-        addString(emote.first.string, TaggedString::Type::SEVENTVChannelEmote);
+        addString(emote.first.string, TaggedString::Type::SeventvChannelEmote);
     }
 
     // Bttv Channel

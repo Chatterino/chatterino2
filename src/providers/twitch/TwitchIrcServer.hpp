@@ -34,12 +34,12 @@ public:
 
     void bulkRefreshLiveStatus();
 
-    void reloadSevenTVGlobalEmotes();
-    void reloadAllSevenTVChannelEmotes();
     void reloadBTTVGlobalEmotes();
     void reloadAllBTTVChannelEmotes();
     void reloadFFZGlobalEmotes();
     void reloadAllFFZChannelEmotes();
+    void reloadSevenTVGlobalEmotes();
+    void reloadAllSevenTVChannelEmotes();
 
     Atomic<QString> lastUserThatWhisperedMe;
 
@@ -50,9 +50,9 @@ public:
 
     PubSub *pubsub;
 
-    const SeventvEmotes &getSeventvEmotes() const;
     const BttvEmotes &getBttvEmotes() const;
     const FfzEmotes &getFfzEmotes() const;
+    const SeventvEmotes &getSeventvEmotes() const;
 
 protected:
     virtual void initializeConnection(IrcConnection *connection,
@@ -90,6 +90,7 @@ private:
     SeventvEmotes seventv;
     BttvEmotes bttv;
     FfzEmotes ffz;
+    SeventvEmotes seventv_;
     QTimer bulkLiveStatusTimer_;
 
     pajlada::Signals::SignalHolder signalHolder_;
