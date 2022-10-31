@@ -523,6 +523,10 @@ public:
     BoolSetting dankerinoThreeLetterApiEasterEgg = {
         "/misc/dankerinoThreeLetterApiEasterEgg", false};
 
+    BoolSetting allowBridgeImpersonation = {"/misc/allowBridgeImpersonation",
+                                            false};
+    QStringSetting bridgeUser = {"/misc/bridgeUser", "supabridge"};
+
 private:
     BoolSetting nonceFuckeryMigrated_ = {"/misc/nonceFuckeryMigrated", false};
     void updateModerationActions();

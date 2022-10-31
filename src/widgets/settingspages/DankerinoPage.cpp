@@ -1,6 +1,8 @@
 #include "DankerinoPage.hpp"
 
 #include <QFontDialog>
+#include <QFormLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QScrollArea>
 
@@ -50,6 +52,16 @@ void DankerinoPage::initLayout(GeneralPageView &layout)
     layout.addTitle("Behavior");
     layout.addCheckbox("Lowercase tab-completed usernames",
                        s.lowercaseUsernames);
+    {
+        auto *groupLayout = new QFormLayout();
+        auto *lineEdit = this->createLineEdit(s.bridgeUser);
+        groupLayout->addRow(
+            this->createCheckBox("Allow \"bridge\" users to impersonate others",
+                                 s.allowBridgeImpersonation));
+        lineEdit->setPlaceholderText("supabridge");
+        groupLayout->addRow("Bridge user:", lineEdit);
+        layout.addLayout(groupLayout);
+    }
     //layout.addTitle("Emotes");
     //layout.addCheckbox("Enable loading 7TV emotes", s.enableLoadingSevenTV);
     layout.addTitle("Miscellaneous");
