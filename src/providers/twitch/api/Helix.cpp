@@ -2088,7 +2088,6 @@ void Helix::getChatters(
     int *page = new int;
     int p = 1;
     page = &p;
-    QString paginationCursor("");
 
     QUrlQuery *urlQuery = new QUrlQuery();
     QString url = QString("chat/chatters");
