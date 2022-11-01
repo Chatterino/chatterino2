@@ -49,29 +49,8 @@ namespace {
     const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
     const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
 
-    std::pair<Outcome, std::unordered_set<QString>> parseChatters(
-        const QJsonObject &jsonRoot)
-    {
-        static QStringList categories = {"broadcaster", "vips",   "moderators",
-                                         "staff",       "admins", "global_mods",
-                                         "viewers"};
-
-        auto usernames = std::unordered_set<QString>();
-
-        // parse json
-        QJsonObject jsonCategories = jsonRoot.value("chatters").toObject();
-
-        for (const auto &category : categories)
-        {
-            for (auto jsonCategory : jsonCategories.value(category).toArray())
-            {
-                usernames.insert(jsonCategory.toString());
-            }
-        }
-
-        return {Success, std::move(usernames)};
-    }
-
+    // Maximum number of chatters to fetch when refreshing chatters
+    constexpr auto MAX_CHATTERS_TO_FETCH = 5000;
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name)
@@ -136,9 +115,11 @@ TwitchChannel::TwitchChannel(const QString &name)
     });
 
     // timers
+
     QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [=] {
         this->refreshChatters();
     });
+
     this->chattersListTimer_.start(5 * 60 * 1000);
 
     QObject::connect(&this->threadClearTimer_, &QTimer::timeout, [=] {
@@ -905,6 +886,12 @@ void TwitchChannel::refreshPubSub()
 
 void TwitchChannel::refreshChatters()
 {
+    // helix endpoint only works for mods
+    if (!this->hasModRights())
+    {
+        return;
+    }
+
     // setting?
     const auto streamStatus = this->accessStreamStatus();
     const auto viewerCount = static_cast<int>(streamStatus->viewerCount);
@@ -917,31 +904,19 @@ void TwitchChannel::refreshChatters()
         }
     }
 
-    // get viewer list
-    NetworkRequest("https://tmi.twitch.tv/group/user/" + this->getName() +
-                   "/chatters")
-
-        .onSuccess(
-            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-                // channel still exists?
-                auto shared = weak.lock();
-                if (!shared)
-                {
-                    return Failure;
-                }
-
-                auto data = result.parseJson();
-                this->chatterCount_ = data.value("chatter_count").toInt();
-
-                auto pair = parseChatters(std::move(data));
-                if (pair.first)
-                {
-                    this->updateOnlineChatters(pair.second);
-                }
-
-                return pair.first;
-            })
-        .execute();
+    // Get chatter list via helix api
+    getHelix()->getChatters(
+        this->roomId(), getApp()->accounts->twitch.getCurrent()->getUserId(),
+        MAX_CHATTERS_TO_FETCH,
+        [this, weak = weakOf<Channel>(this)](auto result) {
+            if (auto shared = weak.lock())
+            {
+                this->updateOnlineChatters(result.chatters);
+                this->chatterCount_ = result.total;
+            }
+        },
+        // Refresh chatters should only be used when failing silently is an option
+        [](auto error, auto message) {});
 }
 
 void TwitchChannel::fetchDisplayName()

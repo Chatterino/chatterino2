@@ -1782,6 +1782,83 @@ void Helix::updateChatSettings(
         .execute();
 }
 
+// https://dev.twitch.tv/docs/api/reference#get-chatters
+void Helix::fetchChatters(
+    QString broadcasterID, QString moderatorID, int first, QString after,
+    ResultCallback<HelixChatters> successCallback,
+    FailureCallback<HelixGetChattersError, QString> failureCallback)
+{
+    using Error = HelixGetChattersError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+    urlQuery.addQueryItem("first", QString::number(first));
+
+    if (!after.isEmpty())
+    {
+        urlQuery.addQueryItem("after", after);
+    }
+
+    this->makeRequest("chat/chatters", urlQuery)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for getting chatters was "
+                    << result.status() << "but we expected it to be 200";
+            }
+
+            auto response = result.parseJson();
+            successCallback(HelixChatters(response));
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.contains("OAuth token"))
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 403: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error data:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 // Ban/timeout a user
 // https://dev.twitch.tv/docs/api/reference#ban-user
 void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
@@ -1989,6 +2066,43 @@ void Helix::sendWhisper(
             }
         })
         .execute();
+}
+
+// https://dev.twitch.tv/docs/api/reference#get-chatters
+void Helix::getChatters(
+    QString broadcasterID, QString moderatorID, int maxChattersToFetch,
+    ResultCallback<HelixChatters> successCallback,
+    FailureCallback<HelixGetChattersError, QString> failureCallback)
+{
+    static const auto NUM_CHATTERS_TO_FETCH = 1000;
+
+    auto finalChatters = std::make_shared<HelixChatters>();
+
+    ResultCallback<HelixChatters> fetchSuccess;
+
+    fetchSuccess = [this, broadcasterID, moderatorID, maxChattersToFetch,
+                    finalChatters, &fetchSuccess, successCallback,
+                    failureCallback](auto chatters) {
+        qCDebug(chatterinoTwitch)
+            << "Fetched" << chatters.chatters.size() << "chatters";
+        finalChatters->chatters.merge(chatters.chatters);
+        finalChatters->total = chatters.total;
+
+        if (chatters.cursor.isEmpty() ||
+            finalChatters->chatters.size() >= maxChattersToFetch)
+        {
+            // Done paginating
+            successCallback(*finalChatters);
+            return;
+        }
+
+        this->fetchChatters(broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH,
+                            chatters.cursor, fetchSuccess, failureCallback);
+    };
+
+    // Initiate the recursive calls
+    this->fetchChatters(broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, "",
+                        fetchSuccess, failureCallback);
 }
 
 // List the VIPs of a channel

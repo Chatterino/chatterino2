@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/NetworkRequest.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
+#include "util/QStringHash.hpp"
 
 #include <QJsonArray>
 #include <QString>
@@ -12,6 +13,7 @@
 #include <boost/optional.hpp>
 
 #include <functional>
+#include <unordered_set>
 #include <vector>
 
 namespace chatterino {
@@ -342,6 +344,29 @@ struct HelixVip {
     }
 };
 
+struct HelixChatters {
+    std::unordered_set<QString> chatters;
+    int total;
+    QString cursor;
+
+    HelixChatters() = default;
+
+    explicit HelixChatters(const QJsonObject &jsonObject)
+        : total(jsonObject.value("total").toInt())
+        , cursor(jsonObject.value("pagination")
+                     .toObject()
+                     .value("cursor")
+                     .toString())
+    {
+        const auto &data = jsonObject.value("data").toArray();
+        for (const auto &chatter : data)
+        {
+            auto userLogin = chatter.toObject().value("user_login").toString();
+            this->chatters.insert(userLogin);
+        }
+    }
+};
+
 // TODO(jammehcow): when implementing mod list, just alias HelixVip to HelixMod
 //   as they share the same model.
 //   Alternatively, rename base struct to HelixUser or something and alias both
@@ -518,6 +543,15 @@ enum class HelixWhisperError {  // /w
     // The error message is forwarded directly from the Twitch API
     Forwarded,
 };  // /w
+
+enum class HelixGetChattersError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
 
 enum class HelixListVIPsError {  // /vips
     Unknown,
@@ -784,6 +818,14 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixWhisperError, QString> failureCallback) = 0;
 
+    // Get Chatters from the `broadcasterID` channel
+    // This will follow the returned cursor and return up to `maxChattersToFetch` chatters
+    // https://dev.twitch.tv/docs/api/reference#get-chatters
+    virtual void getChatters(
+        QString broadcasterID, QString moderatorID, int maxChattersToFetch,
+        ResultCallback<HelixChatters> successCallback,
+        FailureCallback<HelixGetChattersError, QString> failureCallback) = 0;
+
     // https://dev.twitch.tv/docs/api/reference#get-vips
     virtual void getChannelVIPs(
         QString broadcasterID,
@@ -1045,6 +1087,14 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixWhisperError, QString> failureCallback) final;
 
+    // Get Chatters from the `broadcasterID` channel
+    // This will follow the returned cursor and return up to `maxChattersToFetch` chatters
+    // https://dev.twitch.tv/docs/api/reference#get-chatters
+    void getChatters(
+        QString broadcasterID, QString moderatorID, int maxChattersToFetch,
+        ResultCallback<HelixChatters> successCallback,
+        FailureCallback<HelixGetChattersError, QString> failureCallback) final;
+
     // https://dev.twitch.tv/docs/api/reference#get-vips
     void getChannelVIPs(
         QString broadcasterID,
@@ -1062,6 +1112,13 @@ protected:
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
         final;
+
+    // Get chatters list - This method is what actually runs the API request
+    // https://dev.twitch.tv/docs/api/reference#get-chatters
+    void fetchChatters(
+        QString broadcasterID, QString moderatorID, int first, QString after,
+        ResultCallback<HelixChatters> successCallback,
+        FailureCallback<HelixGetChattersError, QString> failureCallback);
 
 private:
     NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
