@@ -880,6 +880,42 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand(
         "/chatters", [](const auto & words, auto channel) {
+            auto formatError = [](
+                HelixGetChattersError error,
+                QString message
+            ) {
+                using Error = HelixGetChattersError;
+
+                QString errorMessage = QString("Failed to get chatter count: ");
+
+                switch (error)
+                {
+                    case Error::Forwarded: {
+                        errorMessage += message;
+                    }
+                    break;
+
+                    case Error::UserMissingScope: {
+                        errorMessage += "Missing required scope. "
+                                        "Re-login with your "
+                                        "account and try again.";
+                    }
+                    break;
+
+                    case Error::UserNotAuthorized: {
+                        errorMessage += "You don't have permission to "
+                                        "perform that action.";
+                    }
+                    break;
+
+                    case Error::Unknown: {
+                        errorMessage += "An unknown error has occurred.";
+                    }
+                    break;
+                }
+                return errorMessage;
+            };
+
             if (words.size() != 1)
             {
                 channel->addMessage(makeSystemMessage("Usage: /chatters"));
@@ -910,8 +946,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                         QString("Chatter count: %1")
                             .arg(localizeNumbers(chatterCount))));
                 },
-                [channel](auto error, auto message) {
-                    auto errorMessage = Helix::formatHelixGeneralErrorString(QString("chatters"), error, message);
+                [channel, formatError](auto error, auto message) {
+                    auto errorMessage = formatError(error, message);
                     channel->addMessage(makeSystemMessage(errorMessage));
                 }
             );

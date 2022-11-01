@@ -1991,51 +1991,14 @@ void Helix::sendWhisper(
         .execute();
 }
 
-QString Helix::formatHelixGeneralErrorString(
-    QString userType,
-    HelixGeneralError error,
-    QString message
-) {
-    using Error = HelixGeneralError;
-
-    QString errorMessage = QString("Failed to get list of ") + userType + QString(": ");
-
-    switch (error)
-    {
-        case Error::Forwarded: {
-            errorMessage += message;
-        }
-        break;
-
-        case Error::UserMissingScope: {
-            errorMessage += "Missing required scope. "
-                            "Re-login with your "
-                            "account and try again.";
-        }
-        break;
-
-        case Error::UserNotAuthorized: {
-            errorMessage += "You don't have permission to "
-                            "perform that action.";
-        }
-        break;
-
-        case Error::Unknown: {
-            errorMessage += "An unknown error has occurred.";
-        }
-        break;
-    }
-    return errorMessage;
-}
-
 // Recursive function with a maximun page of 50
 void Helix::makeRequestWrapper(
     QString url, QUrlQuery *urlQuery, 
     int page, bool paginate,
     ResultCallback<QJsonObject*> resultCallback,
-    FailureCallback<HelixGeneralError, QString> failureCallback
+    FailureCallback<HelixGetChattersError, QString> failureCallback
 ) {
-    using Error = HelixGeneralError;
+    using Error = HelixGetChattersError;
 
     this->makeRequest(url, *urlQuery)
         .type(NetworkRequestType::Get)
@@ -2112,7 +2075,7 @@ void Helix::makeRequestWrapper(
 void Helix::getChatters(
     QString broadcasterID, QString moderatorID,
     ResultCallback<std::unordered_set<QString>, int> successCallback,
-    FailureCallback<HelixGeneralError, QString> failureCallback)  
+    FailureCallback<HelixGetChattersError, QString> failureCallback)  
 {
     std::unordered_set<QString> *chatterList = new std::unordered_set<QString>();
     int *page = new int;
@@ -2147,7 +2110,7 @@ void Helix::getChatters(
 void Helix::getChatterCount(
     QString broadcasterID, QString moderatorID,
     ResultCallback<int> successCallback,
-    FailureCallback<HelixGeneralError, QString> failureCallback)
+    FailureCallback<HelixGetChattersError, QString> failureCallback)
 {
     QUrlQuery *urlQuery = new QUrlQuery();
 

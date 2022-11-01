@@ -520,7 +520,7 @@ enum class HelixWhisperError {  // /w
     Forwarded,
 };  // /w
 
-enum class HelixGeneralError {
+enum class HelixGetChattersError {
     Unknown,
     UserMissingScope,
     UserNotAuthorized,
@@ -799,14 +799,14 @@ public:
     virtual void getChatters(
         QString broadcasterID, QString moderatorID,
         ResultCallback<std::unordered_set<QString>, int> successCallback,
-        FailureCallback<HelixGeneralError, QString> failureCallback) = 0;
+        FailureCallback<HelixGetChattersError, QString> failureCallback) = 0;
 
     // Get chatter count from chat/chatters endpoint
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     virtual void getChatterCount(
         QString broadcasterID, QString moderatorID,
         ResultCallback<int> successCallback,
-        FailureCallback<HelixGeneralError, QString> failureCallback) = 0;
+        FailureCallback<HelixGetChattersError, QString> failureCallback) = 0;
     
     // https://dev.twitch.tv/docs/api/reference#get-vips
     virtual void getChannelVIPs(
@@ -1074,19 +1074,14 @@ public:
     void getChatters(
         QString broadcasterID, QString moderatorID,
         ResultCallback<std::unordered_set<QString>, int> successCallback,
-        FailureCallback<HelixGeneralError, QString> failureCallback) final;
+        FailureCallback<HelixGetChattersError, QString> failureCallback) final;
 
     // Get chatter count from chat/chatters endpoint
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     void getChatterCount(
         QString broadcasterID, QString moderatorID,
         ResultCallback<int> successCallback,
-        FailureCallback<HelixGeneralError, QString> failureCallback) final;
-        
-    static QString formatHelixGeneralErrorString(
-        QString userType, 
-        HelixGeneralError error, 
-        QString message);
+        FailureCallback<HelixGetChattersError, QString> failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#get-vips
     void getChannelVIPs(
@@ -1113,7 +1108,7 @@ private:
         QString url, QUrlQuery *urlQuery, 
         int page, bool paginate,
         ResultCallback<QJsonObject*> resultCallback,
-        FailureCallback<HelixGeneralError, QString> failureCallback
+        FailureCallback<HelixGetChattersError, QString> failureCallback
     );
 
     QString clientId;
