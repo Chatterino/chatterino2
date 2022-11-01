@@ -538,7 +538,7 @@ struct HelixStartCommercialResponse {
     // Seconds until the next commercial can be served on this channel
     int retryAfter;
 
-    explicit HelixStartCommercialResponse(QJsonObject jsonObject)
+    explicit HelixStartCommercialResponse(const QJsonObject &jsonObject)
     {
         auto jsonData = jsonObject.value("data").toArray().at(0).toObject();
         this->length = jsonData.value("length").toInt();
