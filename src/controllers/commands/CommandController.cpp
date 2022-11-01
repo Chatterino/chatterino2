@@ -912,12 +912,6 @@ void CommandController::initialize(Settings &, Paths &paths)
             return errorMessage;
         };
 
-        if (words.size() != 1)
-        {
-            channel->addMessage(makeSystemMessage("Usage: /chatters"));
-            return "";
-        }
-
         auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
         if (twitchChannel == nullptr)
