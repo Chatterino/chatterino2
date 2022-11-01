@@ -593,10 +593,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addSubtitle("Chat title");
     layout.addDescription("In live channels show:");
-    layout.addCheckbox("Uptime", s.headerUptime);
-    layout.addCheckbox("Viewer count", s.headerViewerCount);
-    layout.addCheckbox("Category", s.headerGame);
-    layout.addCheckbox("Title", s.headerStreamTitle);
+    layout.addCheckbox("Uptime", s.headerUptime, false,
+                       "Show how long the channel has been live");
+    layout.addCheckbox("Viewer count", s.headerViewerCount, false,
+                       "Show how many users are watching");
+    layout.addCheckbox("Category", s.headerGame, false,
+                       "Show what Category the stream is listed under");
+    layout.addCheckbox("Title", s.headerStreamTitle, false,
+                       "Show the stream title");
 
     layout.addSubtitle("R9K");
     auto toggleLocalr9kSeq = getApp()->hotkeys->getDisplaySequence(
@@ -658,7 +662,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Subscriber ", s.showBadgesSubscription);
     layout.addCheckbox("Vanity", s.showBadgesVanity, false,
                        "e.g., prime, bits, sub gifter");
-    layout.addCheckbox("Chatterino", s.showBadgesChatterino);
+    layout.addCheckbox("Chatterino", s.showBadgesChatterino, false,
+                       "e.g., Chatterino Supporter/Contributor/Developer");
     layout.addCheckbox("FrankerFaceZ", s.showBadgesFfz, false,
                        "e.g., Bot, FFZ supporter, FFZ developer");
     layout.addCheckbox("7TV", s.showBadgesSevenTV, false,
@@ -677,7 +682,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            s.openLinksIncognito);
     }
 
-    layout.addCheckbox("Restart on crash", s.restartOnCrash);
+    layout.addCheckbox(
+        "Restart on crash", s.restartOnCrash, false,
+        "When possible, restart Chatterino if the program crashes");
 
 #if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
     if (!getPaths()->isPortable())
@@ -693,12 +700,23 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Show messages for timeouts, bans, and other moderator actions.");
     layout.addCheckbox("Show deletions of single messages",
                        s.hideDeletionActions, true);
-    layout.addCheckbox("Colorize users without color set (gray names)",
-                       s.colorizeNicknames);
-    layout.addCheckbox("Mention users with a comma (User,)",
-                       s.mentionUsersWithComma);
-    layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
-    layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
+    layout.addCheckbox(
+        "Colorize users without color set (gray names)", s.colorizeNicknames,
+        false,
+        "Grant a random color to users who never set a color for themselves");
+    layout.addCheckbox("Mention users with a comma", s.mentionUsersWithComma,
+                       false,
+                       "When using tab-completon, if the username is at the "
+                       "start of the message, include a comma at the end of "
+                       "the name \n e.g. pajl -> pajlada,");
+    layout.addCheckbox(
+        "Show joined users (< 1000 chatters)", s.showJoins, false,
+        "Show a Twitch system message stating what users have joined the chat, "
+        "only available when the chat has less than 1000 users");
+    layout.addCheckbox(
+        "Show parted users (< 1000 chatters)", s.showParts, false,
+        "Show a Twitch system message stating what users have left the chat, "
+        "only available when chat has less than 1000 users");
     layout.addCheckbox("Automatically close user popup when it loses focus",
                        s.autoCloseUserPopup);
     layout.addCheckbox(
@@ -752,8 +770,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "When disabled, emote tab-completion will complete based on any part "
         "of the name."
         "\ne.g., sheffy -> DatSheffy");
-    layout.addCheckbox("Only search for username autocompletion with an @",
-                       s.userCompletionOnlyWithAt);
+    layout.addCheckbox(
+        "Only search for username autocompletion with an @",
+        s.userCompletionOnlyWithAt, false,
+        "When enabled, username tab-completion will only complete when using @"
+        "\ne.g., pajl -> pajl | @pajl -> @pajlada");
 
     layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers, false,
                        "Show whispers as messages in all splits instead "
@@ -767,7 +788,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.twitchMessageHistoryLimit, 10, 800, 10);
 
     layout.addCheckbox("Enable experimental IRC support (requires restart)",
-                       s.enableExperimentalIrc);
+                       s.enableExperimentalIrc, false,
+                       "When enabled, attempting to join a channel will "
+                       "include an \"IRC (Beta)\" tab allowing the user to "
+                       "connect to an IRC server outside of Twitch ");
     layout.addCheckbox("Show unhandled IRC messages",
                        s.showUnhandledIrcMessages);
     layout.addDropdown<int>(
@@ -785,7 +809,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "message) into one cheermote.");
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
-    layout.addCheckbox("Strip leading mention in replies", s.stripReplyMention);
+    layout.addCheckbox("Strip leading mention in replies", s.stripReplyMention,
+                       true,
+                       "When disabled, messages sent in reply threads will "
+                       "include the @mention for the related thread");
 
     // Helix timegate settings
     auto helixTimegateGetValue = [](auto val) {
