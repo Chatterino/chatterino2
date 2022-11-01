@@ -878,82 +878,79 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand(
-        "/chatters", [](const auto & words, auto channel) {
-            auto formatError = [](
-                HelixGetChattersError error,
-                QString message
-            ) {
-                using Error = HelixGetChattersError;
+    this->registerCommand("/chatters", [](const auto &words, auto channel) {
+        auto formatError = [](HelixGetChattersError error, QString message) {
+            using Error = HelixGetChattersError;
 
-                QString errorMessage = QString("Failed to get chatter count: ");
+            QString errorMessage = QString("Failed to get chatter count: ");
 
-                switch (error)
-                {
-                    case Error::Forwarded: {
-                        errorMessage += message;
-                    }
-                    break;
-
-                    case Error::UserMissingScope: {
-                        errorMessage += "Missing required scope. "
-                                        "Re-login with your "
-                                        "account and try again.";
-                    }
-                    break;
-
-                    case Error::UserNotAuthorized: {
-                        errorMessage += "You don't have permission to "
-                                        "perform that action.";
-                    }
-                    break;
-
-                    case Error::Unknown: {
-                        errorMessage += "An unknown error has occurred.";
-                    }
-                    break;
-                }
-                return errorMessage;
-            };
-
-            if (words.size() != 1)
+            switch (error)
             {
-                channel->addMessage(makeSystemMessage("Usage: /chatters"));
-                return "";
-            }
-
-            auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /chatters command only works in Twitch Channels"));
-                return "";
-            }
-
-            // Fail when user is not a moderator
-            if (!twitchChannel->hasModRights()) {
-                channel->addMessage(makeSystemMessage(QString("Error: Only moderators can get number of chatters")));
-                return "";
-            }
-
-            // Refresh chatter list via helix api for mods
-            getHelix()->getChatterCount(
-                twitchChannel->roomId(),
-                getApp()->accounts->twitch.getCurrent()->getUserId(),
-                [channel](int chatterCount) {
-                    channel->addMessage(makeSystemMessage(
-                        QString("Chatter count: %1")
-                            .arg(localizeNumbers(chatterCount))));
-                },
-                [channel, formatError](auto error, auto message) {
-                    auto errorMessage = formatError(error, message);
-                    channel->addMessage(makeSystemMessage(errorMessage));
+                case Error::Forwarded: {
+                    errorMessage += message;
                 }
-            );
+                break;
 
+                case Error::UserMissingScope: {
+                    errorMessage += "Missing required scope. "
+                                    "Re-login with your "
+                                    "account and try again.";
+                }
+                break;
+
+                case Error::UserNotAuthorized: {
+                    errorMessage += "You don't have permission to "
+                                    "perform that action.";
+                }
+                break;
+
+                case Error::Unknown: {
+                    errorMessage += "An unknown error has occurred.";
+                }
+                break;
+            }
+            return errorMessage;
+        };
+
+        if (words.size() != 1)
+        {
+            channel->addMessage(makeSystemMessage("Usage: /chatters"));
             return "";
-        });
+        }
+
+        auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /chatters command only works in Twitch Channels"));
+            return "";
+        }
+
+        // Fail when user is not a moderator
+        if (!twitchChannel->hasModRights())
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("Error: Only moderators can get number of chatters")));
+            return "";
+        }
+
+        // Refresh chatter list via helix api for mods
+        getHelix()->getChatterCount(
+            twitchChannel->roomId(),
+            getApp()->accounts->twitch.getCurrent()->getUserId(),
+            [channel](int chatterCount) {
+                channel->addMessage(
+                    makeSystemMessage(QString("Chatter count: %1")
+                                          .arg(localizeNumbers(chatterCount))));
+            },
+            [channel, formatError](auto error, auto message) {
+                auto errorMessage = formatError(error, message);
+                channel->addMessage(makeSystemMessage(errorMessage));
+            });
+
+        return "";
+    });
 
     this->registerCommand("/clip", [](const auto & /*words*/, auto channel) {
         if (const auto type = channel->getType();

@@ -9,10 +9,10 @@
 #include <QStringList>
 #include <QUrl>
 #include <QUrlQuery>
-#include <unordered_set>
 #include <boost/optional.hpp>
 
 #include <functional>
+#include <unordered_set>
 #include <vector>
 
 namespace chatterino {
@@ -807,7 +807,7 @@ public:
         QString broadcasterID, QString moderatorID,
         ResultCallback<int> successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback) = 0;
-    
+
     // https://dev.twitch.tv/docs/api/reference#get-vips
     virtual void getChannelVIPs(
         QString broadcasterID,
@@ -1105,11 +1105,9 @@ private:
     NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
 
     void makeRequestWrapper(
-        QString url, QUrlQuery *urlQuery, 
-        int page, bool paginate,
-        ResultCallback<QJsonObject*> resultCallback,
-        FailureCallback<HelixGetChattersError, QString> failureCallback
-    );
+        QString url, QUrlQuery *urlQuery, int page, bool paginate,
+        ResultCallback<QJsonObject *> resultCallback,
+        FailureCallback<HelixGetChattersError, QString> failureCallback);
 
     QString clientId;
     QString oauthToken;

@@ -1993,11 +1993,10 @@ void Helix::sendWhisper(
 
 // Recursive function with a maximun page of 50
 void Helix::makeRequestWrapper(
-    QString url, QUrlQuery *urlQuery, 
-    int page, bool paginate,
-    ResultCallback<QJsonObject*> resultCallback,
-    FailureCallback<HelixGetChattersError, QString> failureCallback
-) {
+    QString url, QUrlQuery *urlQuery, int page, bool paginate,
+    ResultCallback<QJsonObject *> resultCallback,
+    FailureCallback<HelixGetChattersError, QString> failureCallback)
+{
     using Error = HelixGetChattersError;
 
     this->makeRequest(url, *urlQuery)
@@ -2007,20 +2006,26 @@ void Helix::makeRequestWrapper(
             if (result.status() != 200)
             {
                 qCWarning(chatterinoTwitch)
-                    << "Success result for getting data was "
-                    << result.status() << "but we expected it to be 200";
-            } else 
+                    << "Success result for getting data was " << result.status()
+                    << "but we expected it to be 200";
+            }
+            else
             {
                 auto json = result.parseJson();
                 resultCallback(&json);
                 if (paginate)
                 {
-                    QString newCursor = json.value("pagination").toObject().value("cursor").toString();
+                    QString newCursor = json.value("pagination")
+                                            .toObject()
+                                            .value("cursor")
+                                            .toString();
                     if (!newCursor.isEmpty() && page <= 50)
                     {
                         urlQuery->removeQueryItem("after");
                         urlQuery->addQueryItem("after", newCursor);
-                        this->makeRequestWrapper(url, urlQuery, page+1, true, resultCallback, failureCallback);
+                        this->makeRequestWrapper(url, urlQuery, page + 1, true,
+                                                 resultCallback,
+                                                 failureCallback);
                     }
                 }
             }
@@ -2039,7 +2044,8 @@ void Helix::makeRequestWrapper(
                 break;
 
                 case 401: {
-                    if (message.startsWith("Missing scope", Qt::CaseInsensitive))
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
                     {
                         failureCallback(Error::UserMissingScope, message);
                     }
@@ -2075,9 +2081,10 @@ void Helix::makeRequestWrapper(
 void Helix::getChatters(
     QString broadcasterID, QString moderatorID,
     ResultCallback<std::unordered_set<QString>, int> successCallback,
-    FailureCallback<HelixGetChattersError, QString> failureCallback)  
+    FailureCallback<HelixGetChattersError, QString> failureCallback)
 {
-    std::unordered_set<QString> *chatterList = new std::unordered_set<QString>();
+    std::unordered_set<QString> *chatterList =
+        new std::unordered_set<QString>();
     int *page = new int;
     int p = 1;
     page = &p;
@@ -2089,21 +2096,29 @@ void Helix::getChatters(
     urlQuery->addQueryItem("broadcaster_id", broadcasterID);
     urlQuery->addQueryItem("moderator_id", moderatorID);
 
-    this->makeRequestWrapper(url, urlQuery, 1, true, [=](QJsonObject *response) {
-        QString newCursor = response->value("pagination").toObject().value("cursor").toString();
-        (*page)++;
+    this->makeRequestWrapper(
+        url, urlQuery, 1, true,
+        [=](QJsonObject *response) {
+            QString newCursor = response->value("pagination")
+                                    .toObject()
+                                    .value("cursor")
+                                    .toString();
+            (*page)++;
 
-        for (const auto jsonStream : response->value("data").toArray()) 
-        {
-            QString user = QString(jsonStream.toObject().value("user_login").toString());
-            chatterList->insert(user);
-        }
+            for (const auto jsonStream : response->value("data").toArray())
+            {
+                QString user = QString(
+                    jsonStream.toObject().value("user_login").toString());
+                chatterList->insert(user);
+            }
 
-        // Call function with next page until page 50 is reached or there are no more results
-        if (*page >= 50 || newCursor.isEmpty()) {
-            successCallback(*chatterList, response->value("total").toInt());
-        }
-    }, failureCallback);
+            // Call function with next page until page 50 is reached or there are no more results
+            if (*page >= 50 || newCursor.isEmpty())
+            {
+                successCallback(*chatterList, response->value("total").toInt());
+            }
+        },
+        failureCallback);
 }
 
 // https://dev.twitch.tv/docs/api/reference#get-chatters
@@ -2117,9 +2132,12 @@ void Helix::getChatterCount(
     urlQuery->addQueryItem("broadcaster_id", broadcasterID);
     urlQuery->addQueryItem("moderator_id", moderatorID);
 
-    this->makeRequestWrapper("chat/chatters", urlQuery, 0, false, [successCallback](QJsonObject *response) {
-        successCallback(response->value("total").toInt());
-    }, failureCallback);
+    this->makeRequestWrapper(
+        "chat/chatters", urlQuery, 0, false,
+        [successCallback](QJsonObject *response) {
+            successCallback(response->value("total").toInt());
+        },
+        failureCallback);
 }
 
 // List the VIPs of a channel

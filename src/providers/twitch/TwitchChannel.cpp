@@ -879,13 +879,14 @@ void TwitchChannel::refreshPubSub()
     getApp()->twitch->pubsub->listenToChannelPointRewards(roomId);
 }
 
-void TwitchChannel::refreshChatters() {
+void TwitchChannel::refreshChatters()
+{
     // helix endpoint only works for mods
-    if (!this->hasModRights()) 
+    if (!this->hasModRights())
     {
         return;
     }
-    
+
     // setting?
     const auto streamStatus = this->accessStreamStatus();
     const auto viewerCount = static_cast<int>(streamStatus->viewerCount);
@@ -900,18 +901,17 @@ void TwitchChannel::refreshChatters() {
 
     // Get chatter list via helix api
     getHelix()->getChatters(
-        this->roomId(),
-        getApp()->accounts->twitch.getCurrent()->getUserId(),
-        [this, weak = weakOf<Channel>(this)](std::unordered_set<QString> chatterList, int count) {
-            if (auto shared = weak.lock()) 
+        this->roomId(), getApp()->accounts->twitch.getCurrent()->getUserId(),
+        [this, weak = weakOf<Channel>(this)](
+            std::unordered_set<QString> chatterList, int count) {
+            if (auto shared = weak.lock())
             {
                 this->updateOnlineChatters(chatterList);
                 this->chatterCount_ = count;
             }
         },
         // Refresh chatters should only be used when failing silently is an option
-        [](auto error, auto message) { }
-    );
+        [](auto error, auto message) {});
 }
 
 void TwitchChannel::fetchDisplayName()
