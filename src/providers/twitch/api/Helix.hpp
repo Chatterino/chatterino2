@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/NetworkRequest.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
+#include "util/QStringHash.hpp"
 
 #include <QJsonArray>
 #include <QString>
