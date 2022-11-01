@@ -899,8 +899,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                 break;
 
                 case Error::UserNotAuthorized: {
-                    errorMessage += "You don't have permission to "
-                                    "perform that action.";
+                    errorMessage += "You must have moderator permissions to "
+                                    "use this command.";
                 }
                 break;
 
@@ -918,14 +918,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         {
             channel->addMessage(makeSystemMessage(
                 "The /chatters command only works in Twitch Channels"));
-            return "";
-        }
-
-        // Fail when user is not a moderator
-        if (!twitchChannel->hasModRights())
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("Error: Only moderators can get number of chatters")));
             return "";
         }
 
