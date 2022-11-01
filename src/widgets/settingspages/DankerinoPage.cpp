@@ -83,10 +83,10 @@ void DankerinoPage::initLayout(GeneralPageView &layout)
         layout.addCheckbox("Abnormal nonce detection",
                            s.abnormalNonceDetection);
 
-        layout.addCheckbox(
-            "Webchat detection highlights. Highlights messages sent from "
-            "webchat in orange or the specified color below.",
-            s.normalNonceDetection);
+        layout.addCheckbox("Webchat detection highlights. ",
+                           s.normalNonceDetection, false,
+                           "Highlights messages sent from webchat in orange or "
+                           "the specified color below.");
 
         layout.addColorButton("Webchat detected color",
                               QColor(getSettings()->webchatColor.getValue()),
