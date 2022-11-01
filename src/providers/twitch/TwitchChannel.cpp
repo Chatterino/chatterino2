@@ -111,6 +111,8 @@ TwitchChannel::TwitchChannel(const QString &name)
         }
     });
 
+    // timers
+
     QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [=] {
         this->refreshChatters();
     });
@@ -140,8 +142,8 @@ TwitchChannel::TwitchChannel(const QString &name)
 void TwitchChannel::initialize()
 {
     this->fetchDisplayName();
-    this->refreshBadges();
     this->refreshChatters();
+    this->refreshBadges();
 }
 
 bool TwitchChannel::isEmpty() const
