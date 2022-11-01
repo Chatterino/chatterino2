@@ -902,8 +902,7 @@ void TwitchChannel::refreshChatters()
     // Get chatter list via helix api
     getHelix()->getChatters(
         this->roomId(), getApp()->accounts->twitch.getCurrent()->getUserId(),
-        [this, weak = weakOf<Channel>(this)](
-            std::unordered_set<QString> chatterList, int count) {
+        [this, weak = weakOf<Channel>(this)](auto chatterList, int count) {
             if (auto shared = weak.lock())
             {
                 this->updateOnlineChatters(chatterList);
