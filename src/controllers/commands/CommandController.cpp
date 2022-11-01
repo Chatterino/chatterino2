@@ -922,13 +922,13 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         // Refresh chatter list via helix api for mods
-        getHelix()->getChatterCount(
+        getHelix()->getChatters(
             twitchChannel->roomId(),
-            getApp()->accounts->twitch.getCurrent()->getUserId(),
-            [channel](int chatterCount) {
+            getApp()->accounts->twitch.getCurrent()->getUserId(), 1,
+            [channel](auto result) {
                 channel->addMessage(
                     makeSystemMessage(QString("Chatter count: %1")
-                                          .arg(localizeNumbers(chatterCount))));
+                                          .arg(localizeNumbers(result.total))));
             },
             [channel, formatError](auto error, auto message) {
                 auto errorMessage = formatError(error, message);

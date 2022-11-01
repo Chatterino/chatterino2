@@ -1782,6 +1782,83 @@ void Helix::updateChatSettings(
         .execute();
 }
 
+// https://dev.twitch.tv/docs/api/reference#get-chatters
+void Helix::fetchChatters(
+    QString broadcasterID, QString moderatorID, int first, QString after,
+    ResultCallback<HelixChatters> successCallback,
+    FailureCallback<HelixGetChattersError, QString> failureCallback)
+{
+    using Error = HelixGetChattersError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+    urlQuery.addQueryItem("first", QString::number(first));
+
+    if (!after.isEmpty())
+    {
+        urlQuery.addQueryItem("after", after);
+    }
+
+    this->makeRequest("chat/chatters", urlQuery)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for getting chatters was "
+                    << result.status() << "but we expected it to be 200";
+            }
+
+            auto response = result.parseJson();
+            successCallback(HelixChatters(response));
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.contains("OAuth token"))
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 403: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error data:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 // Ban/timeout a user
 // https://dev.twitch.tv/docs/api/reference#ban-user
 void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
@@ -1991,152 +2068,41 @@ void Helix::sendWhisper(
         .execute();
 }
 
-// Recursive function with a maximun page of 50
-void Helix::makeRequestWrapper(
-    QString url, QUrlQuery *urlQuery, int page, bool paginate,
-    ResultCallback<QJsonObject *> resultCallback,
-    FailureCallback<HelixGetChattersError, QString> failureCallback)
-{
-    using Error = HelixGetChattersError;
-
-    this->makeRequest(url, *urlQuery)
-        .type(NetworkRequestType::Get)
-        .header("Content-Type", "application/json")
-        .onSuccess([=](auto result) -> Outcome {
-            if (result.status() != 200)
-            {
-                qCWarning(chatterinoTwitch)
-                    << "Success result for getting data was " << result.status()
-                    << "but we expected it to be 200";
-            }
-            else
-            {
-                auto json = result.parseJson();
-                resultCallback(&json);
-                if (paginate)
-                {
-                    QString newCursor = json.value("pagination")
-                                            .toObject()
-                                            .value("cursor")
-                                            .toString();
-                    if (!newCursor.isEmpty() && page <= 50)
-                    {
-                        urlQuery->removeQueryItem("after");
-                        urlQuery->addQueryItem("after", newCursor);
-                        this->makeRequestWrapper(url, urlQuery, page + 1, true,
-                                                 resultCallback,
-                                                 failureCallback);
-                    }
-                }
-            }
-
-            return Success;
-        })
-        .onError([failureCallback](auto result) {
-            auto obj = result.parseJson();
-            auto message = obj.value("message").toString();
-
-            switch (result.status())
-            {
-                case 400: {
-                    failureCallback(Error::Forwarded, message);
-                }
-                break;
-
-                case 401: {
-                    if (message.startsWith("Missing scope",
-                                           Qt::CaseInsensitive))
-                    {
-                        failureCallback(Error::UserMissingScope, message);
-                    }
-                    else if (message.contains("OAuth token"))
-                    {
-                        failureCallback(Error::UserNotAuthorized, message);
-                    }
-                    else
-                    {
-                        failureCallback(Error::Forwarded, message);
-                    }
-                }
-                break;
-
-                case 403: {
-                    failureCallback(Error::UserNotAuthorized, message);
-                }
-                break;
-
-                default: {
-                    qCDebug(chatterinoTwitch)
-                        << "Unhandled error data:" << result.status()
-                        << result.getData() << obj;
-                    failureCallback(Error::Unknown, message);
-                }
-                break;
-            }
-        })
-        .execute();
-}
-
 // https://dev.twitch.tv/docs/api/reference#get-chatters
 void Helix::getChatters(
-    QString broadcasterID, QString moderatorID,
-    ResultCallback<std::unordered_set<QString>, int> successCallback,
+    QString broadcasterID, QString moderatorID, int maxChattersToFetch,
+    ResultCallback<HelixChatters> successCallback,
     FailureCallback<HelixGetChattersError, QString> failureCallback)
 {
-    std::unordered_set<QString> *chatterList =
-        new std::unordered_set<QString>();
-    int *page = new int;
-    int p = 1;
-    page = &p;
+    static const auto NUM_CHATTERS_TO_FETCH = 1000;
 
-    QUrlQuery *urlQuery = new QUrlQuery();
-    QString url = QString("chat/chatters");
+    auto finalChatters = std::make_shared<HelixChatters>();
 
-    urlQuery->addQueryItem("broadcaster_id", broadcasterID);
-    urlQuery->addQueryItem("moderator_id", moderatorID);
+    ResultCallback<HelixChatters> fetchSuccess;
 
-    this->makeRequestWrapper(
-        url, urlQuery, 1, true,
-        [=](QJsonObject *response) {
-            QString newCursor = response->value("pagination")
-                                    .toObject()
-                                    .value("cursor")
-                                    .toString();
-            (*page)++;
+    fetchSuccess = [this, broadcasterID, moderatorID, maxChattersToFetch,
+                    finalChatters, &fetchSuccess, successCallback,
+                    failureCallback](auto chatters) {
+        qCDebug(chatterinoTwitch)
+            << "Fetched" << chatters.chatters.size() << "chatters";
+        finalChatters->chatters.merge(chatters.chatters);
+        finalChatters->total = chatters.total;
 
-            for (const auto jsonStream : response->value("data").toArray())
-            {
-                QString user = QString(
-                    jsonStream.toObject().value("user_login").toString());
-                chatterList->insert(user);
-            }
+        if (chatters.cursor.isEmpty() ||
+            finalChatters->chatters.size() >= maxChattersToFetch)
+        {
+            // Done paginating
+            successCallback(*finalChatters);
+            return;
+        }
 
-            // Call function with next page until page 50 is reached or there are no more results
-            if (*page >= 50 || newCursor.isEmpty())
-            {
-                successCallback(*chatterList, response->value("total").toInt());
-            }
-        },
-        failureCallback);
-}
+        this->fetchChatters(broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH,
+                            chatters.cursor, fetchSuccess, failureCallback);
+    };
 
-// https://dev.twitch.tv/docs/api/reference#get-chatters
-void Helix::getChatterCount(
-    QString broadcasterID, QString moderatorID,
-    ResultCallback<int> successCallback,
-    FailureCallback<HelixGetChattersError, QString> failureCallback)
-{
-    QUrlQuery *urlQuery = new QUrlQuery();
-
-    urlQuery->addQueryItem("broadcaster_id", broadcasterID);
-    urlQuery->addQueryItem("moderator_id", moderatorID);
-
-    this->makeRequestWrapper(
-        "chat/chatters", urlQuery, 0, false,
-        [successCallback](QJsonObject *response) {
-            successCallback(response->value("total").toInt());
-        },
-        failureCallback);
+    // Initiate the recursive calls
+    this->fetchChatters(broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, "",
+                        fetchSuccess, failureCallback);
 }
 
 // List the VIPs of a channel

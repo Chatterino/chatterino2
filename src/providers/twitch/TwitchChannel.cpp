@@ -48,6 +48,9 @@ namespace {
         "Failed to create a clip - an unknown error occurred.");
     const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
     const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
+
+    // Maximum number of chatters to fetch when refreshing chatters
+    constexpr auto MAX_CHATTERS_TO_FETCH = 5000;
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name)
@@ -904,11 +907,12 @@ void TwitchChannel::refreshChatters()
     // Get chatter list via helix api
     getHelix()->getChatters(
         this->roomId(), getApp()->accounts->twitch.getCurrent()->getUserId(),
-        [this, weak = weakOf<Channel>(this)](auto chatterList, int count) {
+        MAX_CHATTERS_TO_FETCH,
+        [this, weak = weakOf<Channel>(this)](auto result) {
             if (auto shared = weak.lock())
             {
-                this->updateOnlineChatters(chatterList);
-                this->chatterCount_ = count;
+                this->updateOnlineChatters(result.chatters);
+                this->chatterCount_ = result.total;
             }
         },
         // Refresh chatters should only be used when failing silently is an option
