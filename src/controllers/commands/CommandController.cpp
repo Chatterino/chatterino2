@@ -3132,6 +3132,150 @@ void CommandController::initialize(Settings &, Paths &paths)
         "/r9kbeta", [uniqueChatLambda](const QStringList &words, auto channel) {
             return uniqueChatLambda(words, channel, true);
         });
+
+    this->registerCommand(
+        "/commercial", [](const QStringList &words, auto channel) -> QString {
+            const auto *usageStr = "Usage: \"/commercial <length>\" - Starts a "
+                                   "commercial with the "
+                                   "specified duration for the current "
+                                   "channel. Valid length options "
+                                   "are 30, 60, 90, 120, 150, and 180 seconds.";
+
+            switch (getSettings()->helixTimegateCommercial.getValue())
+            {
+                case HelixTimegateOverride::Timegate: {
+                    if (areIRCCommandsStillAvailable())
+                    {
+                        return useIRCCommand(words);
+                    }
+
+                    // fall through to Helix logic
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseIRC: {
+                    return useIRCCommand(words);
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseHelix: {
+                    // do nothing and fall through to Helix logic
+                }
+                break;
+            }
+
+            if (words.size() < 2)
+            {
+                channel->addMessage(makeSystemMessage(usageStr));
+                return "";
+            }
+
+            auto user = getApp()->accounts->twitch.getCurrent();
+
+            // Avoid Helix calls without Client ID and/or OAuth Token
+            if (user->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to use the /commercial command"));
+                return "";
+            }
+
+            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc == nullptr)
+            {
+                return "";
+            }
+
+            auto broadcasterID = tc->roomId();
+            auto length = words.at(1).toInt();
+
+            // Valid lengths can be found in the length body parameter description
+            // https://dev.twitch.tv/docs/api/reference#start-commercial
+            const QList<int> validLengths = {30, 60, 90, 120, 150, 180};
+            if (!validLengths.contains(length))
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Invalid commercial duration length specified. Valid "
+                    "options "
+                    "are 30, 60, 90, 120, 150, and 180 seconds"));
+                return "";
+            }
+
+            using Error = HelixStartCommercialError;
+
+            getHelix()->startCommercial(
+                broadcasterID, length,
+                [channel](auto response) {
+                    channel->addMessage(makeSystemMessage(
+                        QString("Starting commercial break. Keep in mind you "
+                                "are still "
+                                "live and not all viewers will receive a "
+                                "commercial. "
+                                "You may run another commercial in %1 seconds.")
+                            .arg(response.retryAfter)));
+                },
+                [channel](auto error, auto message) {
+                    MessageBuilder messageBuilder(
+                        systemMessage, "Failed to start commercial - ");
+
+                    switch (error)
+                    {
+                        case Error::UserMissingScope: {
+                            messageBuilder.emplace<TextElement>(
+                                "Missing required scope. "
+                                "Re-login with your "
+                                "account and try again.",
+                                MessageElementFlag::Text, MessageColor::System);
+                        }
+                        break;
+
+                        case Error::TokenMustMatchBroadcaster: {
+                            messageBuilder.emplace<TextElement>(
+                                "Only the broadcaster of the channel can run "
+                                "commercials",
+                                MessageElementFlag::Text, MessageColor::System);
+                        }
+                        break;
+
+                        case Error::BroadcasterNotStreaming: {
+                            messageBuilder.emplace<TextElement>(
+                                "You must be streaming live to run "
+                                "commercials.",
+                                MessageElementFlag::Text, MessageColor::System);
+                        }
+                        break;
+
+                        case Error::Ratelimited: {
+                            messageBuilder.emplace<TextElement>(
+                                "You must wait until your cooldown period "
+                                "expires before you can run another "
+                                "commercial.",
+                                MessageElementFlag::Text, MessageColor::System);
+                        }
+                        break;
+
+                        case Error::Forwarded: {
+                            messageBuilder.emplace<TextElement>(
+                                message, MessageElementFlag::Text,
+                                MessageColor::System);
+                        }
+                        break;
+
+                        case Error::Unknown:
+                        default: {
+                            messageBuilder.emplace<TextElement>(
+                                QString("An unknown error has occurred (%1).")
+                                    .arg(message),
+                                MessageElementFlag::Text, MessageColor::System);
+                        }
+                        break;
+                    }
+
+                    channel->addMessage(messageBuilder.release());
+                });
+
+            return "";
+        });
 }
 
 void CommandController::save()
