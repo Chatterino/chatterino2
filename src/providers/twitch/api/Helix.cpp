@@ -2078,31 +2078,32 @@ void Helix::getChatters(
 
     auto finalChatters = std::make_shared<HelixChatters>();
 
-    ResultCallback<HelixChatters> fetchSuccess;
+    auto fetchSuccess = [this, broadcasterID, moderatorID, maxChattersToFetch,
+                         finalChatters, successCallback,
+                         failureCallback](auto fs) {
+        return [=](auto chatters) {
+            qCDebug(chatterinoTwitch)
+                << "Fetched" << chatters.chatters.size() << "chatters";
+            finalChatters->chatters.merge(chatters.chatters);
+            finalChatters->total = chatters.total;
 
-    fetchSuccess = [this, broadcasterID, moderatorID, maxChattersToFetch,
-                    finalChatters, &fetchSuccess, successCallback,
-                    failureCallback](auto chatters) {
-        qCDebug(chatterinoTwitch)
-            << "Fetched" << chatters.chatters.size() << "chatters";
-        finalChatters->chatters.merge(chatters.chatters);
-        finalChatters->total = chatters.total;
+            if (chatters.cursor.isEmpty() ||
+                finalChatters->chatters.size() >= maxChattersToFetch)
+            {
+                // Done paginating
+                successCallback(*finalChatters);
+                return;
+            }
 
-        if (chatters.cursor.isEmpty() ||
-            finalChatters->chatters.size() >= maxChattersToFetch)
-        {
-            // Done paginating
-            successCallback(*finalChatters);
-            return;
-        }
-
-        this->fetchChatters(broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH,
-                            chatters.cursor, fetchSuccess, failureCallback);
+            this->fetchChatters(broadcasterID, moderatorID,
+                                NUM_CHATTERS_TO_FETCH, chatters.cursor, fs,
+                                failureCallback);
+        };
     };
 
     // Initiate the recursive calls
     this->fetchChatters(broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, "",
-                        fetchSuccess, failureCallback);
+                        fetchSuccess(fetchSuccess), failureCallback);
 }
 
 // List the VIPs of a channel
