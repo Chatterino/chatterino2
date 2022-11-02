@@ -684,10 +684,10 @@ ReplyCurveElement::ReplyCurveElement()
 void ReplyCurveElement::addToContainer(MessageLayoutContainer &container,
                                        MessageElementFlags flags)
 {
-    static const int width = 18;
-    static const float thickness = 1.5;
-    static const int radius = 6;
-    static const int margin = 2;
+    static const int width = 18;         // Overall width
+    static const float thickness = 1.5;  // Pen width
+    static const int radius = 6;         // Radius of the top left corner
+    static const int margin = 2;         // Top/Left/Bottom margin
 
     if (flags.hasAny(this->getFlags()))
     {
