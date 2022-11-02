@@ -164,7 +164,7 @@ class ReplyCurveLayoutElement : public MessageLayoutElement
 {
 public:
     ReplyCurveLayoutElement(MessageElement &creator, int width, float thickness,
-                            float radius, float lMargin);
+                            float radius, float neededMargin);
 
 protected:
     void paint(QPainter &painter) override;
