@@ -134,30 +134,33 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         messageFlags.unset(MessageFlag::Collapsed);
     }
 
+    bool hideModerated = getSettings()->hideModerated;
+    bool hideModerationActions = getSettings()->hideModerationActions;
+    bool hideSimilar = getSettings()->hideSimilar;
+    bool hideReplies = !flags.has(MessageElementFlag::RepliedMessage);
+
     this->container_->begin(width, this->scale_, messageFlags);
 
     for (const auto &element : this->message_->elements)
     {
-        if (getSettings()->hideModerated &&
-            this->message_->flags.has(MessageFlag::Disabled))
+        if (hideModerated && this->message_->flags.has(MessageFlag::Disabled))
         {
             continue;
         }
 
-        if (getSettings()->hideModerationActions &&
+        if (hideModerationActions &&
             (this->message_->flags.has(MessageFlag::Timeout) ||
              this->message_->flags.has(MessageFlag::Untimeout)))
         {
             continue;
         }
 
-        if (getSettings()->hideSimilar &&
-            this->message_->flags.has(MessageFlag::Similar))
+        if (hideSimilar && this->message_->flags.has(MessageFlag::Similar))
         {
             continue;
         }
 
-        if (!this->renderReplies_ &&
+        if (hideReplies &&
             element->getFlags().has(MessageElementFlag::RepliedMessage))
         {
             continue;
@@ -453,11 +456,6 @@ bool MessageLayout::isReplyable() const
     }
 
     return true;
-}
-
-void MessageLayout::setRenderReplies(bool render)
-{
-    this->renderReplies_ = render;
 }
 
 }  // namespace chatterino
