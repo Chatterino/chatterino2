@@ -100,7 +100,6 @@ public:
                                      false};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
-    BoolSetting compactEmotes = {"/appearance/messages/compactEmotes", true};
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
     BoolSetting hideModerationActions = {
         "/appearance/messages/hideModerationActions", false};
