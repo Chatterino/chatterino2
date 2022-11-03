@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722, #3989, #4041, #4047, #4055, #4067)
+- Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722, #3989, #4041, #4047, #4055, #4067, #4077)
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
 - Major: Added support for emotes and badges from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062)
 - Minor: Added highlights for `Elevated Messages`. (#4016)
@@ -70,6 +70,7 @@
 - Minor: Migrated /commercial to Helix API. (#4094)
 - Minor: Added stream titles to windows live toast notifications. (#1297)
 - Minor: Make menus and placeholders display appropriate custom key combos. (#4045)
+- Minor: Migrated /chatters to Helix API. (#4088, #4097)
 - Minor: Add settings tooltips. (#3437)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fixed `Smooth scrolling on new messages` setting sometimes hiding messages. (#4028)

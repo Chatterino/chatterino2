@@ -163,8 +163,8 @@ private:
 class ReplyCurveLayoutElement : public MessageLayoutElement
 {
 public:
-    ReplyCurveLayoutElement(MessageElement &creator, const QSize &size,
-                            float thickness, float lMargin);
+    ReplyCurveLayoutElement(MessageElement &creator, int width, float thickness,
+                            float radius, float neededMargin);
 
 protected:
     void paint(QPainter &painter) override;
@@ -177,6 +177,7 @@ protected:
 
 private:
     const QPen pen_;
+    const float radius_;
     const float neededMargin_;
 };
 
