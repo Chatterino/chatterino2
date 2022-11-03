@@ -938,85 +938,109 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand("/mods", [](const auto & /*words*/, auto channel) {
-        auto formatError = [](HelixGetModeratorsError error, QString message) {
-            using Error = HelixGetModeratorsError;
+    auto formatModsError = [](HelixGetModeratorsError error, QString message) {
+        using Error = HelixGetModeratorsError;
 
-            QString errorMessage = QString("Failed to get moderators: ");
+        QString errorMessage = QString("Failed to get moderators: ");
 
-            switch (error)
+        switch (error)
+        {
+            case Error::Forwarded: {
+                errorMessage += message;
+            }
+            break;
+
+            case Error::UserMissingScope: {
+                errorMessage += "Missing required scope. "
+                                "Re-login with your "
+                                "account and try again.";
+            }
+            break;
+
+            case Error::UserNotAuthorized: {
+                errorMessage +=
+                    "Due to Twitch restrictions, this command can only be "
+                    "used by moderators. To see the list of mods you must "
+                    "use the Twitch website.";
+            }
+            break;
+
+            case Error::Unknown: {
+                errorMessage += "An unknown error has occurred.";
+            }
+            break;
+        }
+        return errorMessage;
+    };
+
+    this->registerCommand(
+        "/mods",
+        [formatModsError](const QStringList &words, auto channel) -> QString {
+            switch (getSettings()->helixTimegateModerators.getValue())
             {
-                case Error::Forwarded: {
-                    errorMessage += message;
+                case HelixTimegateOverride::Timegate: {
+                    if (areIRCCommandsStillAvailable())
+                    {
+                        return useIRCCommand(words);
+                    }
                 }
                 break;
 
-                case Error::UserMissingScope: {
-                    errorMessage += "Missing required scope. "
-                                    "Re-login with your "
-                                    "account and try again.";
+                case HelixTimegateOverride::AlwaysUseIRC: {
+                    return useIRCCommand(words);
                 }
                 break;
-
-                case Error::UserNotAuthorized: {
-                    errorMessage += "Due to Twitch restrictions, this command can only be "
-                        "used by moderators. To see the list of mods you must "
-                        "use the Twitch website.";
-                }
-                break;
-
-                case Error::Unknown: {
-                    errorMessage += "An unknown error has occurred.";
+                case HelixTimegateOverride::AlwaysUseHelix: {
+                    // Fall through to helix logic
                 }
                 break;
             }
-            return errorMessage;
-        };
 
-        auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /mods command only works in Twitch Channels"));
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /mods command only works in Twitch Channels"));
+                return "";
+            }
+
+            getHelix()->getModerators(
+                twitchChannel->roomId(),
+                [channel](auto result) {
+                    auto message =
+                        QString("The moderators of this channel are ");
+                    auto listSize = result.size();
+                    int i = 0;
+                    for (auto it = result.begin(); it != result.end(); it++)
+                    {
+                        auto mod = *it;
+                        message = message + mod.userName;
+
+                        if (listSize > 2 && i < listSize - 2)
+                        {
+                            message = message + QString(", ");
+                        }
+                        else if (listSize > 2 && i == listSize - 1)
+                        {
+                            message = message + QString(", and ");
+                        }
+                        else if (listSize == 2 && i == 1)
+                        {
+                            message = message + QString(" and ");
+                        }
+
+                        i++;
+                    }
+
+                    channel->addMessage(makeSystemMessage(message));
+                },
+                [channel, formatModsError](auto error, auto message) {
+                    auto errorMessage = formatModsError(error, message);
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
             return "";
-        }
-
-        getHelix()->getModerators(
-            twitchChannel->roomId(),
-            [channel](auto result) {
-                auto message = QString("The moderators of this channel are ");
-                auto listSize = result.size();
-                int i = 0;
-                for (auto it = result.begin(); it != result.end(); it++)
-                {
-                    auto mod = *it;
-                    message = message + mod.userName;
-
-                    if (listSize > 2 && i < listSize - 2)
-                    {
-                        message = message + QString(", ");
-                    }
-                    else if (listSize > 2 && i == listSize - 1)
-                    {
-                        message = message + QString(", and ");
-                    }
-                    else if (listSize == 2 && i == 1)
-                    {
-                        message = message + QString(" and ");
-                    }
-
-                    i++;
-                }
-
-                channel->addMessage(makeSystemMessage(message));
-            },
-            [channel, formatError](auto error, auto message) {
-                auto errorMessage = formatError(error, message);
-                channel->addMessage(makeSystemMessage(errorMessage));
-            });
-        return "";
-    });
+        });
 
     this->registerCommand("/clip", [](const auto & /*words*/, auto channel) {
         if (const auto type = channel->getType();
