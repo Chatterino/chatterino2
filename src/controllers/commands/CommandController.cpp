@@ -959,8 +959,9 @@ void CommandController::initialize(Settings &, Paths &paths)
                 break;
 
                 case Error::UserNotAuthorized: {
-                    errorMessage += "You must have moderator permissions to "
-                                    "use this command.";
+                    errorMessage += "Due to Twitch restrictions, this command can only be "
+                        "used by moderators. To see the list of mods you must "
+                        "use the Twitch website.";
                 }
                 break;
 
