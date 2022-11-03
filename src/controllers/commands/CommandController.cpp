@@ -938,6 +938,84 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
+    this->registerCommand("/mods", [](const auto & /*words*/, auto channel) {
+        auto formatError = [](HelixGetModeratorsError error, QString message) {
+            using Error = HelixGetModeratorsError;
+
+            QString errorMessage = QString("Failed to get moderators: ");
+
+            switch (error)
+            {
+                case Error::Forwarded: {
+                    errorMessage += message;
+                }
+                break;
+
+                case Error::UserMissingScope: {
+                    errorMessage += "Missing required scope. "
+                                    "Re-login with your "
+                                    "account and try again.";
+                }
+                break;
+
+                case Error::UserNotAuthorized: {
+                    errorMessage += "You must have moderator permissions to "
+                                    "use this command.";
+                }
+                break;
+
+                case Error::Unknown: {
+                    errorMessage += "An unknown error has occurred.";
+                }
+                break;
+            }
+            return errorMessage;
+        };
+
+
+        auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /mods command only works in Twitch Channels"));
+            return "";
+        }
+
+        getHelix()->getModerators(
+            twitchChannel->roomId(),
+            [channel](auto result) {
+                auto message = QString("The moderators of this channel are ");
+                auto listSize = result.size();
+                int i = 0;
+                for (auto it = result.begin(); it != result.end();it++)
+                {
+                    auto mod = *it;
+                    message = message + mod.userName;
+
+                    if (listSize > 2 && i < listSize - 2)
+                    {
+                        message = message +  QString(", ");
+                    } else if (listSize > 2 && i == listSize - 1)
+                    {
+                        message = message + QString(", and ");
+                    } else if (listSize == 2 && i == 1) {
+                        message = message + QString(" and ");
+                    }
+
+                    i++;
+                }
+
+                channel->addMessage(makeSystemMessage(message));
+            },
+            [channel, formatError](auto error, auto message) {
+                auto errorMessage = formatError(error, message);
+                channel->addMessage(makeSystemMessage(errorMessage));
+            }
+        );
+        return "";
+    });
+
     this->registerCommand("/clip", [](const auto & /*words*/, auto channel) {
         if (const auto type = channel->getType();
             type != Channel::Type::Twitch &&
