@@ -2189,17 +2189,17 @@ void Helix::getModerators(
 {
     auto finalModerators = std::make_shared<std::vector<HelixModerator>>();
 
-    auto fetchSuccess = [this, broadcasterID,
-                         finalModerators, successCallback,
+    auto fetchSuccess = [this, broadcasterID, finalModerators, successCallback,
                          failureCallback](auto fs) {
         return [=](auto moderators) {
             qCDebug(chatterinoTwitch)
                 << "Fetched " << moderators.moderators.size() << " moderators";
-            
-            std::for_each(moderators.moderators.begin(), moderators.moderators.end(), [finalModerators](auto mod)
-            {
-                finalModerators->push_back(mod);
-            });
+
+            std::for_each(moderators.moderators.begin(),
+                          moderators.moderators.end(),
+                          [finalModerators](auto mod) {
+                              finalModerators->push_back(mod);
+                          });
 
             if (moderators.cursor.isEmpty())
             {
@@ -2209,12 +2209,13 @@ void Helix::getModerators(
             }
 
             this->fetchModerators(broadcasterID, moderators.cursor, fs,
-                                failureCallback);
+                                  failureCallback);
         };
     };
 
     // Initiate the recursive calls
-    this->fetchModerators(broadcasterID, "", fetchSuccess(fetchSuccess), failureCallback);
+    this->fetchModerators(broadcasterID, "", fetchSuccess(fetchSuccess),
+                          failureCallback);
 }
 
 // List the VIPs of a channel

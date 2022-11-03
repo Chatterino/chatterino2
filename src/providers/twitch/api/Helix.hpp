@@ -1138,7 +1138,8 @@ public:
     void getModerators(
         QString broadcasterID,
         ResultCallback<std::vector<HelixModerator>> successCallback,
-        FailureCallback<HelixGetModeratorsError, QString> failureCallback) final;
+        FailureCallback<HelixGetModeratorsError, QString> failureCallback)
+        final;
 
     // https://dev.twitch.tv/docs/api/reference#get-vips
     void getChannelVIPs(

@@ -972,7 +972,6 @@ void CommandController::initialize(Settings &, Paths &paths)
             return errorMessage;
         };
 
-
         auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
         if (twitchChannel == nullptr)
@@ -988,18 +987,21 @@ void CommandController::initialize(Settings &, Paths &paths)
                 auto message = QString("The moderators of this channel are ");
                 auto listSize = result.size();
                 int i = 0;
-                for (auto it = result.begin(); it != result.end();it++)
+                for (auto it = result.begin(); it != result.end(); it++)
                 {
                     auto mod = *it;
                     message = message + mod.userName;
 
                     if (listSize > 2 && i < listSize - 2)
                     {
-                        message = message +  QString(", ");
-                    } else if (listSize > 2 && i == listSize - 1)
+                        message = message + QString(", ");
+                    }
+                    else if (listSize > 2 && i == listSize - 1)
                     {
                         message = message + QString(", and ");
-                    } else if (listSize == 2 && i == 1) {
+                    }
+                    else if (listSize == 2 && i == 1)
+                    {
                         message = message + QString(" and ");
                     }
 
@@ -1011,8 +1013,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             [channel, formatError](auto error, auto message) {
                 auto errorMessage = formatError(error, message);
                 channel->addMessage(makeSystemMessage(errorMessage));
-            }
-        );
+            });
         return "";
     });
 
