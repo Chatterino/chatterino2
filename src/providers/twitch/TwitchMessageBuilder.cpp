@@ -128,11 +128,11 @@ namespace {
 
         auto id = EmoteId{parameters.at(0)};
 
-        auto occurences = parameters.at(1).split(',');
+        auto occurrences = parameters.at(1).split(',');
 
-        for (const QString &occurence : occurences)
+        for (const QString &occurrence : occurrences)
         {
-            auto coords = occurence.split('-');
+            auto coords = occurrence.split('-');
 
             if (coords.length() < 2)
             {
