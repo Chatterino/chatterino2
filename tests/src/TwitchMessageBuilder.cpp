@@ -377,6 +377,7 @@ TEST_F(TestTwitchMessageBuilder, ParseTwitchEmotes)
             Communi::IrcPrivateMessage::fromData(test.input, nullptr));
         QString originalMessage = privmsg->content();
 
+        // TODO: Add tests with replies
         auto actualTwitchEmotes = TwitchMessageBuilder::parseTwitchEmotes(
             privmsg->tags(), originalMessage, 0);
 
