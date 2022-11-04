@@ -1009,16 +1009,17 @@ void CommandController::initialize(Settings &, Paths &paths)
                 twitchChannel->roomId(),
                 [channel, twitchChannel](auto result) {
                     QStringList list;
-                    for (auto it = result.begin(); it != result.end();it++)
+                    for (auto it = result.begin(); it != result.end(); it++)
                     {
                         list << it->userName;
                     }
-                    
+
                     list.sort(Qt::CaseInsensitive);
 
                     MessageBuilder builder;
                     TwitchMessageBuilder::listOfUsersSystemMessage(
-                        "The moderators of this channel are ", list, twitchChannel, &builder);
+                        "The moderators of this channel are ", list,
+                        twitchChannel, &builder);
                     channel->addMessage(builder.release());
                 },
                 [channel, formatModsError](auto error, auto message) {
