@@ -1007,33 +1007,19 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             getHelix()->getModerators(
                 twitchChannel->roomId(),
-                [channel](auto result) {
-                    auto message =
-                        QString("The moderators of this channel are ");
-                    auto listSize = result.size();
-                    int i = 0;
-                    for (auto it = result.begin(); it != result.end(); it++)
+                [channel, twitchChannel](auto result) {
+                    QStringList list;
+                    for (auto it = result.begin(); it != result.end();it++)
                     {
-                        auto mod = *it;
-                        message = message + mod.userName;
-
-                        if (listSize > 2 && i < listSize - 2)
-                        {
-                            message = message + QString(", ");
-                        }
-                        else if (listSize > 2 && i == listSize - 1)
-                        {
-                            message = message + QString(", and ");
-                        }
-                        else if (listSize == 2 && i == 1)
-                        {
-                            message = message + QString(" and ");
-                        }
-
-                        i++;
+                        list << it->userName;
                     }
+                    
+                    list.sort(Qt::CaseInsensitive);
 
-                    channel->addMessage(makeSystemMessage(message));
+                    MessageBuilder builder;
+                    TwitchMessageBuilder::listOfUsersSystemMessage(
+                        "The moderators of this channel are ", list, twitchChannel, &builder);
+                    channel->addMessage(builder.release());
                 },
                 [channel, formatModsError](auto error, auto message) {
                     auto errorMessage = formatModsError(error, message);
