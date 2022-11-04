@@ -378,7 +378,7 @@ TEST_F(TestTwitchMessageBuilder, ParseTwitchEmotes)
         QString originalMessage = privmsg->content();
 
         auto actualTwitchEmotes = TwitchMessageBuilder::parseTwitchEmotes(
-            privmsg->tags(), originalMessage);
+            privmsg->tags(), originalMessage, 0);
 
         EXPECT_EQ(actualTwitchEmotes, test.expectedTwitchEmotes)
             << "Input for twitch emotes " << test.input.toStdString()
