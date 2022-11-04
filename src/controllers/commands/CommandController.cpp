@@ -1018,7 +1018,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
                     MessageBuilder builder;
                     TwitchMessageBuilder::listOfUsersSystemMessage(
-                        "The moderators of this channel are ", list,
+                        "The moderators of this channel are", list,
                         twitchChannel, &builder);
                     channel->addMessage(builder.release());
                 },
