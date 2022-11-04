@@ -163,16 +163,18 @@ namespace {
             }
 
             auto name = EmoteName{originalMessage.mid(start, end - start + 1)};
-            TwitchEmoteOccurrence emoteOccurence{
-                start, end,
+            TwitchEmoteOccurrence emoteOccurrence{
+                start,
+                end,
                 app->getEmotes()->getTwitchEmotes()->getOrCreateEmote(id, name),
-                name};
-            if (emoteOccurence.ptr == nullptr)
+                name,
+            };
+            if (emoteOccurrence.ptr == nullptr)
             {
                 qCDebug(chatterinoTwitch)
-                    << "nullptr" << emoteOccurence.name.string;
+                    << "nullptr" << emoteOccurrence.name.string;
             }
-            vec.push_back(std::move(emoteOccurence));
+            vec.push_back(std::move(emoteOccurrence));
         }
     }
 
