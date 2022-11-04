@@ -107,11 +107,11 @@ namespace {
         return usernameText;
     }
 
-    void appendTwitchEmoteOccurences(const QString &emote,
-                                     std::vector<TwitchEmoteOccurrence> &vec,
-                                     const std::vector<int> &correctPositions,
-                                     const QString &originalMessage,
-                                     int messageOffset)
+    void appendTwitchEmoteOccurrences(const QString &emote,
+                                      std::vector<TwitchEmoteOccurrence> &vec,
+                                      const std::vector<int> &correctPositions,
+                                      const QString &originalMessage,
+                                      int messageOffset)
     {
         auto *app = getIApp();
         if (!emote.contains(':'))
