@@ -878,60 +878,109 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand("/chatters", [](const auto &words, auto channel) {
-        auto formatError = [](HelixGetChattersError error, QString message) {
-            using Error = HelixGetChattersError;
+    auto formatChattersError = [](HelixGetChattersError error,
+                                  QString message) {
+        using Error = HelixGetChattersError;
 
-            QString errorMessage = QString("Failed to get chatter count: ");
+        QString errorMessage = QString("Failed to get chatter count: ");
 
-            switch (error)
-            {
-                case Error::Forwarded: {
-                    errorMessage += message;
-                }
-                break;
-
-                case Error::UserMissingScope: {
-                    errorMessage += "Missing required scope. "
-                                    "Re-login with your "
-                                    "account and try again.";
-                }
-                break;
-
-                case Error::UserNotAuthorized: {
-                    errorMessage += "You must have moderator permissions to "
-                                    "use this command.";
-                }
-                break;
-
-                case Error::Unknown: {
-                    errorMessage += "An unknown error has occurred.";
-                }
-                break;
+        switch (error)
+        {
+            case Error::Forwarded: {
+                errorMessage += message;
             }
-            return errorMessage;
-        };
+            break;
 
-        auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            case Error::UserMissingScope: {
+                errorMessage += "Missing required scope. "
+                                "Re-login with your "
+                                "account and try again.";
+            }
+            break;
+
+            case Error::UserNotAuthorized: {
+                errorMessage += "You must have moderator permissions to "
+                                "use this command.";
+            }
+            break;
+
+            case Error::Unknown: {
+                errorMessage += "An unknown error has occurred.";
+            }
+            break;
+        }
+        return errorMessage;
+    };
+
+    this->registerCommand(
+        "/chatters", [formatChattersError](const auto &words, auto channel) {
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /chatters command only works in Twitch Channels"));
+                return "";
+            }
+
+            // Refresh chatter list via helix api for mods
+            getHelix()->getChatters(
+                twitchChannel->roomId(),
+                getApp()->accounts->twitch.getCurrent()->getUserId(), 1,
+                [channel](auto result) {
+                    channel->addMessage(makeSystemMessage(
+                        QString("Chatter count: %1")
+                            .arg(localizeNumbers(result.total))));
+                },
+                [channel, formatChattersError](auto error, auto message) {
+                    auto errorMessage = formatChattersError(error, message);
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
+
+            return "";
+        });
+
+    this->registerCommand("/test-chatters", [formatChattersError](
+                                                const auto & /*words*/,
+                                                auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
         if (twitchChannel == nullptr)
         {
             channel->addMessage(makeSystemMessage(
-                "The /chatters command only works in Twitch Channels"));
+                "The /test-chatters command only works in Twitch Channels"));
             return "";
         }
 
-        // Refresh chatter list via helix api for mods
         getHelix()->getChatters(
             twitchChannel->roomId(),
-            getApp()->accounts->twitch.getCurrent()->getUserId(), 1,
-            [channel](auto result) {
-                channel->addMessage(
-                    makeSystemMessage(QString("Chatter count: %1")
-                                          .arg(localizeNumbers(result.total))));
+            getApp()->accounts->twitch.getCurrent()->getUserId(), 5000,
+            [channel, twitchChannel](auto result) {
+                QStringList entries;
+                for (const auto &username : result.chatters)
+                {
+                    entries << username;
+                }
+
+                QString prefix = "Chatters ";
+
+                if (result.total > 5000)
+                {
+                    prefix += QString("(5000/%1):").arg(result.total);
+                }
+                else
+                {
+                    prefix += QString("(%1):").arg(result.total);
+                }
+
+                MessageBuilder builder;
+                TwitchMessageBuilder::listOfUsersSystemMessage(
+                    prefix, entries, twitchChannel, &builder);
+
+                channel->addMessage(builder.release());
             },
-            [channel, formatError](auto error, auto message) {
-                auto errorMessage = formatError(error, message);
+            [channel, formatChattersError](auto error, auto message) {
+                auto errorMessage = formatChattersError(error, message);
                 channel->addMessage(makeSystemMessage(errorMessage));
             });
 

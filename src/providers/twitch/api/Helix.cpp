@@ -12,6 +12,8 @@ using namespace chatterino;
 
 static constexpr auto NUM_MODERATORS_TO_FETCH_PER_REQUEST = 100;
 
+static constexpr auto NUM_CHATTERS_TO_FETCH = 1000;
+
 }  // namespace
 
 namespace chatterino {
@@ -1790,6 +1792,37 @@ void Helix::updateChatSettings(
         .execute();
 }
 
+void Helix::onFetchChattersSuccess(
+    std::shared_ptr<HelixChatters> finalChatters, QString broadcasterID,
+    QString moderatorID, int maxChattersToFetch,
+    ResultCallback<HelixChatters> successCallback,
+    FailureCallback<HelixGetChattersError, QString> failureCallback,
+    HelixChatters chatters)
+{
+    qCDebug(chatterinoTwitch)
+        << "Fetched" << chatters.chatters.size() << "chatters";
+
+    finalChatters->chatters.merge(chatters.chatters);
+    finalChatters->total = chatters.total;
+
+    if (chatters.cursor.isEmpty() ||
+        finalChatters->chatters.size() >= maxChattersToFetch)
+    {
+        // Done paginating
+        successCallback(*finalChatters);
+        return;
+    }
+
+    this->fetchChatters(
+        broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, chatters.cursor,
+        [=](auto chatters) {
+            this->onFetchChattersSuccess(
+                finalChatters, broadcasterID, moderatorID, maxChattersToFetch,
+                successCallback, failureCallback, chatters);
+        },
+        failureCallback);
+}
+
 // https://dev.twitch.tv/docs/api/reference#get-chatters
 void Helix::fetchChatters(
     QString broadcasterID, QString moderatorID, int first, QString after,
@@ -2191,36 +2224,17 @@ void Helix::getChatters(
     ResultCallback<HelixChatters> successCallback,
     FailureCallback<HelixGetChattersError, QString> failureCallback)
 {
-    static const auto NUM_CHATTERS_TO_FETCH = 1000;
-
     auto finalChatters = std::make_shared<HelixChatters>();
 
-    auto fetchSuccess = [this, broadcasterID, moderatorID, maxChattersToFetch,
-                         finalChatters, successCallback,
-                         failureCallback](auto fs) {
-        return [=](auto chatters) {
-            qCDebug(chatterinoTwitch)
-                << "Fetched" << chatters.chatters.size() << "chatters";
-            finalChatters->chatters.merge(chatters.chatters);
-            finalChatters->total = chatters.total;
-
-            if (chatters.cursor.isEmpty() ||
-                finalChatters->chatters.size() >= maxChattersToFetch)
-            {
-                // Done paginating
-                successCallback(*finalChatters);
-                return;
-            }
-
-            this->fetchChatters(broadcasterID, moderatorID,
-                                NUM_CHATTERS_TO_FETCH, chatters.cursor, fs,
-                                failureCallback);
-        };
-    };
-
     // Initiate the recursive calls
-    this->fetchChatters(broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, "",
-                        fetchSuccess(fetchSuccess), failureCallback);
+    this->fetchChatters(
+        broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, "",
+        [=](auto chatters) {
+            this->onFetchChattersSuccess(
+                finalChatters, broadcasterID, moderatorID, maxChattersToFetch,
+                successCallback, failureCallback, chatters);
+        },
+        failureCallback);
 }
 
 // https://dev.twitch.tv/docs/api/reference#get-moderators

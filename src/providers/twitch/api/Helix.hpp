@@ -1206,6 +1206,14 @@ protected:
         FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
         final;
 
+    // Recursive boy
+    void onFetchChattersSuccess(
+        std::shared_ptr<HelixChatters> finalChatters, QString broadcasterID,
+        QString moderatorID, int maxChattersToFetch,
+        ResultCallback<HelixChatters> successCallback,
+        FailureCallback<HelixGetChattersError, QString> failureCallback,
+        HelixChatters chatters);
+
     // Get chatters list - This method is what actually runs the API request
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     void fetchChatters(
