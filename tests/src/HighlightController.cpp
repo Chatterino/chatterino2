@@ -16,6 +16,8 @@
 using namespace chatterino;
 using ::testing::Exactly;
 
+namespace {
+
 class MockApplication : IApplication
 {
 public:
@@ -27,7 +29,7 @@ public:
     {
         return nullptr;
     }
-    Emotes *getEmotes() override
+    IEmotes *getEmotes() override
     {
         return nullptr;
     }
@@ -76,6 +78,8 @@ public:
     HighlightController highlights;
     // TODO: Figure this out
 };
+
+}  // namespace
 
 class MockHelix : public IHelix
 {
