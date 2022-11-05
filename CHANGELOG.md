@@ -72,6 +72,7 @@
 - Minor: Make menus and placeholders display appropriate custom key combos. (#4045)
 - Minor: Migrated /chatters to Helix API. (#4088, #4097, #4114)
 - Minor: Migrated /mods to Helix API. (#4103)
+- Minor: Migrated viewer list to Helix API (#4117)
 - Minor: Add settings tooltips. (#3437)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fixed `Smooth scrolling on new messages` setting sometimes hiding messages. (#4028)
