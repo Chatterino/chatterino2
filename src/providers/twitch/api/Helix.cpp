@@ -2335,6 +2335,98 @@ void Helix::getChannelVIPs(
         .execute();
 }
 
+void Helix::startCommercial(
+    QString broadcasterID, int length,
+    ResultCallback<HelixStartCommercialResponse> successCallback,
+    FailureCallback<HelixStartCommercialError, QString> failureCallback)
+{
+    using Error = HelixStartCommercialError;
+
+    QJsonObject payload;
+
+    payload.insert("broadcaster_id", QJsonValue(broadcasterID));
+    payload.insert("length", QJsonValue(length));
+
+    this->makeRequest("channels/commercial", QUrlQuery())
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto obj = result.parseJson();
+            if (obj.isEmpty())
+            {
+                failureCallback(
+                    Error::Unknown,
+                    "Twitch didn't send any information about this error.");
+                return Failure;
+            }
+
+            successCallback(HelixStartCommercialResponse(obj));
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.contains(
+                                 "To start a commercial, the broadcaster must "
+                                 "be streaming live.",
+                                 Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::BroadcasterNotStreaming,
+                                        message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 401: {
+                    if (message.contains(
+                            "The ID in broadcaster_id must match the user ID "
+                            "found in the request's OAuth token.",
+                            Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::TokenMustMatchBroadcaster,
+                                        message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 429: {
+                    // The cooldown period is implied to be included
+                    // in the error's "retry_after" response field but isn't.
+                    // If this becomes available we should append that to the error message.
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error starting commercial:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

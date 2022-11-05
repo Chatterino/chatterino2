@@ -16,6 +16,8 @@
 using namespace chatterino;
 using ::testing::Exactly;
 
+namespace {
+
 class MockApplication : IApplication
 {
 public:
@@ -27,7 +29,7 @@ public:
     {
         return nullptr;
     }
-    Emotes *getEmotes() override
+    IEmotes *getEmotes() override
     {
         return nullptr;
     }
@@ -76,6 +78,8 @@ public:
     HighlightController highlights;
     // TODO: Figure this out
 };
+
+}  // namespace
 
 class MockHelix : public IHelix
 {
@@ -377,6 +381,15 @@ public:
          ResultCallback<std::vector<HelixVip>> successCallback,
          (FailureCallback<HelixListVIPsError, QString> failureCallback)),
         (override));  // /vips
+
+    // /commercial
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, startCommercial,
+        (QString broadcasterID, int length,
+         ResultCallback<HelixStartCommercialResponse> successCallback,
+         (FailureCallback<HelixStartCommercialError, QString> failureCallback)),
+        (override));  // /commercial
 
     // /mods
     // The extra parenthesis around the failure callback is because its type contains a comma

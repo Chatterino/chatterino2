@@ -20,11 +20,17 @@ using EmotePtr = std::shared_ptr<const Emote>;
 class Channel;
 class TwitchChannel;
 
-struct TwitchEmoteOccurence {
+struct TwitchEmoteOccurrence {
     int start;
     int end;
     EmotePtr ptr;
     EmoteName name;
+
+    bool operator==(const TwitchEmoteOccurrence &other) const
+    {
+        return std::tie(this->start, this->end, this->ptr, this->name) ==
+               std::tie(other.start, other.end, other.ptr, other.name);
+    }
 };
 
 class TwitchMessageBuilder : public SharedMessageBuilder
@@ -79,6 +85,10 @@ public:
     static std::unordered_map<QString, QString> parseBadgeInfoTag(
         const QVariantMap &tags);
 
+    static std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(
+        const QVariantMap &tags, const QString &originalMessage,
+        int messageOffset);
+
 private:
     void parseUsernameColor() override;
     void parseUsername() override;
@@ -86,16 +96,13 @@ private:
     void parseRoomID();
     void appendUsername();
 
-    void runIgnoreReplaces(std::vector<TwitchEmoteOccurence> &twitchEmotes);
+    void runIgnoreReplaces(std::vector<TwitchEmoteOccurrence> &twitchEmotes);
 
     boost::optional<EmotePtr> getTwitchBadge(const Badge &badge);
-    void appendTwitchEmote(const QString &emote,
-                           std::vector<TwitchEmoteOccurence> &vec,
-                           std::vector<int> &correctPositions);
     Outcome tryAppendEmote(const EmoteName &name) override;
 
     void addWords(const QStringList &words,
-                  const std::vector<TwitchEmoteOccurence> &twitchEmotes);
+                  const std::vector<TwitchEmoteOccurrence> &twitchEmotes);
     void addTextOrEmoji(EmotePtr emote) override;
     void addTextOrEmoji(const QString &value) override;
 

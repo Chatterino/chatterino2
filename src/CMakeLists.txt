@@ -542,6 +542,21 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 
 add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
+if (CHATTERINO_GENERATE_COVERAGE)
+    include(CodeCoverage)
+    append_coverage_compiler_flags_to_target(${LIBRARY_PROJECT})
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC gcov)
+    message(STATUS "project source dir: ${PROJECT_SOURCE_DIR}/src")
+    setup_target_for_coverage_lcov(
+        NAME coverage
+        EXECUTABLE ./bin/chatterino-test
+        BASE_DIRECTORY ${PROJECT_SOURCE_DIR}/src
+        EXCLUDE "/usr/include/*"
+        EXCLUDE "build-*/*"
+        EXCLUDE "lib/*"
+        )
+endif ()
+
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         Qt${MAJOR_QT_VERSION}::Core

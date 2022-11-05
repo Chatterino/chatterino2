@@ -598,6 +598,34 @@ enum class HelixListVIPsError {  // /vips
     Forwarded,
 };  // /vips
 
+struct HelixStartCommercialResponse {
+    // Length of the triggered commercial
+    int length;
+    // Provides contextual information on why the request failed
+    QString message;
+    // Seconds until the next commercial can be served on this channel
+    int retryAfter;
+
+    explicit HelixStartCommercialResponse(const QJsonObject &jsonObject)
+    {
+        auto jsonData = jsonObject.value("data").toArray().at(0).toObject();
+        this->length = jsonData.value("length").toInt();
+        this->message = jsonData.value("message").toString();
+        this->retryAfter = jsonData.value("retry_after").toInt();
+    }
+};
+
+enum class HelixStartCommercialError {
+    Unknown,
+    TokenMustMatchBroadcaster,
+    UserMissingScope,
+    BroadcasterNotStreaming,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 class IHelix
 {
 public:
@@ -873,6 +901,13 @@ public:
         QString broadcasterID,
         ResultCallback<std::vector<HelixVip>> successCallback,
         FailureCallback<HelixListVIPsError, QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#start-commercial
+    virtual void startCommercial(
+        QString broadcasterID, int length,
+        ResultCallback<HelixStartCommercialResponse> successCallback,
+        FailureCallback<HelixStartCommercialError, QString>
+            failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 
@@ -1151,6 +1186,13 @@ public:
         QString broadcasterID,
         ResultCallback<std::vector<HelixVip>> successCallback,
         FailureCallback<HelixListVIPsError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#start-commercial
+    void startCommercial(
+        QString broadcasterID, int length,
+        ResultCallback<HelixStartCommercialResponse> successCallback,
+        FailureCallback<HelixStartCommercialError, QString> failureCallback)
+        final;
 
     void update(QString clientId, QString oauthToken) final;
 
