@@ -44,7 +44,8 @@ TwitchIrcServer::TwitchIrcServer()
     this->initializeIrc();
 
     this->pubsub = new PubSub(TWITCH_PUBSUB_URL);
-    if (getSettings()->enableSevenTVEventAPI)
+    if (getSettings()->enableSevenTVEventAPI &&
+        getSettings()->enableSevenTVChannelEmotes)
     {
         this->seventvEventAPI =
             std::make_unique<SeventvEventApi>(SEVENTV_EVENTAPI_URL);
