@@ -443,7 +443,7 @@ public:
         HelixTimegateOverride::Timegate,
     };
     EnumSetting<HelixTimegateOverride> helixTimegateModerators = {
-        "/misc/twitch/helix-timegate/moderaters",
+        "/misc/twitch/helix-timegate/moderators",
         HelixTimegateOverride::Timegate,
     };
 
