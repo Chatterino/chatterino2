@@ -2,6 +2,8 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -60,12 +62,15 @@ NotebookTab::NotebookTab(Notebook *notebook)
         this->showRenameDialog();
     });
 
+    // XXX: this doesn't update after changing hotkeys
+
     this->menu_.addAction(
         "Close Tab",
         [=]() {
             this->notebook_->removePage(this->page);
         },
-        QKeySequence("Ctrl+Shift+W"));
+        getApp()->hotkeys->getDisplaySequence(HotkeyCategory::Window,
+                                              "removeTab"));
 
     this->menu_.addAction(
         "Popup Tab",
@@ -75,7 +80,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
                 container->popup();
             }
         },
-        QKeySequence("Ctrl+Shift+N"));
+        getApp()->hotkeys->getDisplaySequence(HotkeyCategory::Window, "popup",
+                                              {{"window"}}));
 
     highlightNewMessagesAction_ =
         new QAction("Mark Tab as Unread on New Messages", &this->menu_);

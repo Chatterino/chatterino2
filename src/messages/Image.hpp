@@ -3,11 +3,14 @@
 #include <QPixmap>
 #include <QString>
 #include <QThread>
+#include <QTimer>
 #include <QVector>
 #include <atomic>
 #include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
+#include <chrono>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <pajlada/signals/signal.hpp>
@@ -26,9 +29,11 @@ namespace detail {
     {
     public:
         Frames();
-        Frames(const QVector<Frame<QPixmap>> &frames);
+        Frames(QVector<Frame<QPixmap>> &&frames);
         ~Frames();
 
+        void clear();
+        bool empty() const;
         bool animated() const;
         void advance();
         boost::optional<QPixmap> current() const;
@@ -56,7 +61,7 @@ public:
     ~Image();
 
     static ImagePtr fromUrl(const Url &url, qreal scale = 1);
-    static ImagePtr fromPixmap(const QPixmap &pixmap, qreal scale = 1);
+    static ImagePtr fromResourcePixmap(const QPixmap &pixmap, qreal scale = 1);
     static ImagePtr getEmpty();
 
     const Url &url() const;
@@ -80,13 +85,46 @@ private:
 
     void setPixmap(const QPixmap &pixmap);
     void actuallyLoad();
+    void expireFrames();
 
     const Url url_{};
     const qreal scale_{1};
     std::atomic_bool empty_{false};
 
-    // gui thread only
+    mutable std::chrono::time_point<std::chrono::steady_clock> lastUsed_;
+
     bool shouldLoad_{false};
+
+    // gui thread only
     std::unique_ptr<detail::Frames> frames_{};
+
+    friend class ImageExpirationPool;
 };
+
+class ImageExpirationPool
+{
+private:
+    friend class Image;
+
+    ImageExpirationPool();
+    static ImageExpirationPool &instance();
+
+    void addImagePtr(ImagePtr imgPtr);
+    void removeImagePtr(Image *rawPtr);
+
+    /**
+     * @brief Frees frame data for all images that ImagePool deems to have expired.
+     * 
+     * Expiration is based on last accessed time of the Image, stored in Image::lastUsed_.
+     * Must be ran in the GUI thread.
+     */
+    void freeOld();
+
+private:
+    // Timer to periodically run freeOld()
+    QTimer freeTimer_;
+    std::map<Image *, std::weak_ptr<Image>> allImages_;
+    std::mutex mutex_;
+};
+
 }  // namespace chatterino

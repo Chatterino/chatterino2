@@ -133,6 +133,34 @@ void ColorProvider::initTypeColorMap()
              std::make_shared<QColor>(
                  HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR)});
     }
+
+    customColor = getSettings()->elevatedMessageHighlightColor;
+    if (QColor(customColor).isValid())
+    {
+        this->typeColorMap_.insert({ColorType::ElevatedMessageHighlight,
+                                    std::make_shared<QColor>(customColor)});
+    }
+    else
+    {
+        this->typeColorMap_.insert(
+            {ColorType::ElevatedMessageHighlight,
+             std::make_shared<QColor>(
+                 HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR)});
+    }
+
+    customColor = getSettings()->threadHighlightColor;
+    if (QColor(customColor).isValid())
+    {
+        this->typeColorMap_.insert({ColorType::ThreadMessageHighlight,
+                                    std::make_shared<QColor>(customColor)});
+    }
+    else
+    {
+        this->typeColorMap_.insert(
+            {ColorType::ThreadMessageHighlight,
+             std::make_shared<QColor>(
+                 HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR)});
+    }
 }
 
 void ColorProvider::initDefaultColors()

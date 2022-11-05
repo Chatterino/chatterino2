@@ -1,13 +1,16 @@
 #include "ChannelView.hpp"
 
 #include <QClipboard>
+#include <QColor>
 #include <QDate>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QEasingCurve>
 #include <QGraphicsBlurEffect>
 #include <QMessageBox>
 #include <QPainter>
 #include <QScreen>
+#include <QVariantAnimation>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -117,13 +120,28 @@ namespace {
         {
             addPageLink("FFZ");
         }
+        else if (creatorFlags.has(MessageElementFlag::SevenTVEmote))
+        {
+            addPageLink("7TV");
+        }
+    }
+
+    // Current function: https://www.desmos.com/calculator/vdyamchjwh
+    qreal highlightEasingFunction(qreal progress)
+    {
+        if (progress <= 0.1)
+        {
+            return 1.0 - pow(10.0 * progress, 3.0);
+        }
+        return 1.0 + pow((20.0 / 9.0) * (0.5 * progress - 0.5), 3.0);
     }
 }  // namespace
 
 ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
     : BaseWidget(parent)
-    , scrollBar_(new Scrollbar(this))
     , split_(split)
+    , scrollBar_(new Scrollbar(this))
+    , highlightAnimation_(this)
     , context_(context)
 {
     this->setMouseTracking(true);
@@ -164,6 +182,12 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
     // of any place where you can, or where it would make sense,
     // to tab to a ChannelVieChannelView
     this->setFocusPolicy(Qt::FocusPolicy::ClickFocus);
+
+    this->setupHighlightAnimationColors();
+    this->highlightAnimation_.setDuration(1500);
+    auto curve = QEasingCurve();
+    curve.setCustomType(highlightEasingFunction);
+    this->highlightAnimation_.setEasingCurve(curve);
 }
 
 void ChannelView::initializeLayout()
@@ -339,7 +363,16 @@ void ChannelView::themeChangedEvent()
 {
     BaseWidget::themeChangedEvent();
 
+    this->setupHighlightAnimationColors();
     this->queueLayout();
+}
+
+void ChannelView::setupHighlightAnimationColors()
+{
+    this->highlightAnimation_.setStartValue(
+        this->theme->messages.highlightAnimationStart);
+    this->highlightAnimation_.setEndValue(
+        this->theme->messages.highlightAnimationEnd);
 }
 
 void ChannelView::scaleChangedEvent(float scale)
@@ -392,7 +425,8 @@ void ChannelView::performLayout(bool causedByScrollbar)
     auto &messages = this->getMessagesSnapshot();
 
     this->showingLatestMessages_ =
-        this->scrollBar_->isAtBottom() || !this->scrollBar_->isVisible();
+        this->scrollBar_->isAtBottom() ||
+        (!this->scrollBar_->isVisible() && !causedByScrollbar);
 
     /// Layout visible messages
     this->layoutVisibleMessages(messages);
@@ -475,6 +509,7 @@ void ChannelView::updateScrollbar(
     {
         this->scrollBar_->setDesiredValue(0);
     }
+    this->showScrollBar_ = showScrollbar;
 
     this->scrollBar_->setMaximum(messages.size());
 
@@ -657,6 +692,17 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                 this->channel_->replaceMessage(index, replacement);
         });
 
+    this->channelConnections_.managedConnect(
+        underlyingChannel->filledInMessages, [this](const auto &messages) {
+            std::vector<MessagePtr> filtered;
+            filtered.reserve(messages.size());
+            std::copy_if(messages.begin(), messages.end(),
+                         std::back_inserter(filtered), [this](MessagePtr msg) {
+                             return this->shouldIncludeMessage(msg);
+                         });
+            this->channel_->fillInMissingMessages(filtered);
+        });
+
     //
     // Standard channel connections
     //
@@ -688,11 +734,17 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
             this->messageReplaced(index, replacement);
         });
 
+    // on messages filled in
+    this->channelConnections_.managedConnect(this->channel_->filledInMessages,
+                                             [this](const auto &) {
+                                                 this->messagesUpdated();
+                                             });
+
     auto snapshot = underlyingChannel->getMessageSnapshot();
 
     for (const auto &msg : snapshot)
     {
-        auto messageLayout = new MessageLayout(msg);
+        auto messageLayout = std::make_shared<MessageLayout>(msg);
 
         if (this->lastMessageHasAlternateBackground_)
         {
@@ -706,7 +758,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
             messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
         }
 
-        this->messages_.pushBack(MessageLayoutPtr(messageLayout));
+        this->messages_.pushBack(messageLayout);
         if (this->showScrollbarHighlights())
         {
             this->scrollBar_->addHighlight(msg->getScrollBarHighlight());
@@ -787,7 +839,7 @@ void ChannelView::messageAppended(MessagePtr &message,
         messageFlags = overridingFlags.get_ptr();
     }
 
-    auto messageRef = new MessageLayout(message);
+    auto messageRef = std::make_shared<MessageLayout>(message);
 
     if (this->lastMessageHasAlternateBackground_)
     {
@@ -812,7 +864,7 @@ void ChannelView::messageAppended(MessagePtr &message,
         loop.exec();
     }
 
-    if (this->messages_.pushBack(MessageLayoutPtr(messageRef)))
+    if (this->messages_.pushBack(messageRef))
     {
         if (this->paused())
         {
@@ -863,7 +915,7 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     for (size_t i = 0; i < messages.size(); i++)
     {
         auto message = messages.at(i);
-        auto layout = new MessageLayout(message);
+        auto layout = std::make_shared<MessageLayout>(message);
 
         // alternate color
         if (!this->lastMessageHasAlternateBackgroundReverse_)
@@ -871,7 +923,7 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
         this->lastMessageHasAlternateBackgroundReverse_ =
             !this->lastMessageHasAlternateBackgroundReverse_;
 
-        messageRefs.at(i) = MessageLayoutPtr(layout);
+        messageRefs.at(i) = std::move(layout);
     }
 
     /// Add the messages at the start
@@ -926,7 +978,7 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
 
     auto message = *oMessage;
 
-    MessageLayoutPtr newItem(new MessageLayout(replacement));
+    auto newItem = std::make_shared<MessageLayout>(replacement);
 
     if (message->flags.has(MessageLayoutFlag::AlternateBackground))
     {
@@ -937,6 +989,41 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
                                        replacement->getScrollBarHighlight());
 
     this->messages_.replaceItem(message, newItem);
+    this->queueLayout();
+}
+
+void ChannelView::messagesUpdated()
+{
+    auto snapshot = this->channel_->getMessageSnapshot();
+
+    this->messages_.clear();
+    this->scrollBar_->clearHighlights();
+    this->lastMessageHasAlternateBackground_ = false;
+    this->lastMessageHasAlternateBackgroundReverse_ = true;
+
+    for (const auto &msg : snapshot)
+    {
+        auto messageLayout = std::make_shared<MessageLayout>(msg);
+
+        if (this->lastMessageHasAlternateBackground_)
+        {
+            messageLayout->flags.set(MessageLayoutFlag::AlternateBackground);
+        }
+        this->lastMessageHasAlternateBackground_ =
+            !this->lastMessageHasAlternateBackground_;
+
+        if (this->channel_->shouldIgnoreHighlights())
+        {
+            messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
+        }
+
+        this->messages_.pushBack(messageLayout);
+        if (this->showScrollbarHighlights())
+        {
+            this->scrollBar_->addHighlight(msg->getScrollBarHighlight());
+        }
+    }
+
     this->queueLayout();
 }
 
@@ -1036,6 +1123,86 @@ MessageElementFlags ChannelView::getFlags() const
     return flags;
 }
 
+bool ChannelView::scrollToMessage(const MessagePtr &message)
+{
+    if (!this->mayContainMessage(message))
+    {
+        return false;
+    }
+
+    auto &messagesSnapshot = this->getMessagesSnapshot();
+    if (messagesSnapshot.size() == 0)
+    {
+        return false;
+    }
+
+    // TODO: Figure out if we can somehow binary-search here.
+    //       Currently, a message only sometimes stores a QDateTime,
+    //       but always a QTime (inaccurate on midnight).
+    //
+    // We're searching from the bottom since it's more likely for a user
+    // wanting to go to a message that recently scrolled out of view.
+    size_t messageIdx = messagesSnapshot.size() - 1;
+    for (; messageIdx < SIZE_MAX; messageIdx--)
+    {
+        if (messagesSnapshot[messageIdx]->getMessagePtr() == message)
+        {
+            break;
+        }
+    }
+
+    if (messageIdx == SIZE_MAX)
+    {
+        return false;
+    }
+
+    this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
+    getApp()->windows->select(this->split_);
+    return true;
+}
+
+bool ChannelView::scrollToMessageId(const QString &messageId)
+{
+    auto &messagesSnapshot = this->getMessagesSnapshot();
+    if (messagesSnapshot.size() == 0)
+    {
+        return false;
+    }
+
+    // We're searching from the bottom since it's more likely for a user
+    // wanting to go to a message that recently scrolled out of view.
+    size_t messageIdx = messagesSnapshot.size() - 1;
+    for (; messageIdx < SIZE_MAX; messageIdx--)
+    {
+        if (messagesSnapshot[messageIdx]->getMessagePtr()->id == messageId)
+        {
+            break;
+        }
+    }
+
+    if (messageIdx == SIZE_MAX)
+    {
+        return false;
+    }
+
+    this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
+    getApp()->windows->select(this->split_);
+    return true;
+}
+
+void ChannelView::scrollToMessageLayout(MessageLayout *layout,
+                                        size_t messageIdx)
+{
+    this->highlightedMessage_ = layout;
+    this->highlightAnimation_.setCurrentTime(0);
+    this->highlightAnimation_.start(QAbstractAnimation::KeepWhenStopped);
+
+    if (this->showScrollBar_)
+    {
+        this->getScrollBar().setDesiredValue(messageIdx);
+    }
+}
+
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
 {
     //    BenchmarkGuard benchmark("paint");
@@ -1091,6 +1258,17 @@ void ChannelView::drawMessages(QPainter &painter)
 
         layout->paint(painter, DRAW_WIDTH, y, i, this->selection_,
                       isLastMessage, windowFocused, isMentions);
+
+        if (this->highlightedMessage_ == layout)
+        {
+            painter.fillRect(
+                0, y, layout->getWidth(), layout->getHeight(),
+                this->highlightAnimation_.currentValue().value<QColor>());
+            if (this->highlightAnimation_.state() == QVariantAnimation::Stopped)
+            {
+                this->highlightedMessage_ = nullptr;
+            }
+        }
 
         y += layout->getHeight();
 
@@ -1515,7 +1693,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     !element->getThumbnail()->url().string.isEmpty();
                 auto thumb =
                     shouldHideThumbnail
-                        ? Image::fromPixmap(getResources().streamerMode)
+                        ? Image::fromResourcePixmap(getResources().streamerMode)
                         : element->getThumbnail();
                 tooltipPreviewImage.setImage(std::move(thumb));
 
@@ -2018,6 +2196,46 @@ void ChannelView::addMessageContextMenuItems(
             });
         }
     }
+
+    bool isSearch = this->context_ == Context::Search;
+    bool isReplyOrUserCard = (this->context_ == Context::ReplyThread ||
+                              this->context_ == Context::UserCard) &&
+                             this->split_;
+    bool isMentions =
+        this->channel()->getType() == Channel::Type::TwitchMentions;
+    if (isSearch || isMentions || isReplyOrUserCard)
+    {
+        const auto &messagePtr = layout->getMessagePtr();
+        menu.addAction("Go to message", [this, &messagePtr, isSearch,
+                                         isMentions, isReplyOrUserCard] {
+            if (isSearch)
+            {
+                if (const auto &search =
+                        dynamic_cast<SearchPopup *>(this->parentWidget()))
+                {
+                    search->goToMessage(messagePtr);
+                }
+            }
+            else if (isMentions)
+            {
+                getApp()->windows->scrollToMessage(messagePtr);
+            }
+            else if (isReplyOrUserCard)
+            {
+                // If the thread is in the mentions channel,
+                // we need to find the original split.
+                if (this->split_->getChannel()->getType() ==
+                    Channel::Type::TwitchMentions)
+                {
+                    getApp()->windows->scrollToMessage(messagePtr);
+                }
+                else
+                {
+                    this->split_->getChannelView().scrollToMessage(messagePtr);
+                }
+            }
+        });
+    }
 }
 
 void ChannelView::addTwitchLinkContextMenuItems(
@@ -2269,6 +2487,30 @@ void ChannelView::showUserInfoPopup(const QString &userName,
     userPopup->show();
 }
 
+bool ChannelView::mayContainMessage(const MessagePtr &message)
+{
+    switch (this->channel()->getType())
+    {
+        case Channel::Type::Direct:
+        case Channel::Type::Twitch:
+        case Channel::Type::TwitchWatching:
+        case Channel::Type::Irc:
+            return this->channel()->getName() == message->channelName;
+        case Channel::Type::TwitchWhispers:
+            return message->flags.has(MessageFlag::Whisper);
+        case Channel::Type::TwitchMentions:
+            return message->flags.has(MessageFlag::Highlighted);
+        case Channel::Type::TwitchLive:
+            return message->flags.has(MessageFlag::System);
+        case Channel::Type::TwitchEnd:  // TODO: not used?
+        case Channel::Type::None:       // Unspecific
+        case Channel::Type::Misc:       // Unspecific
+            return true;
+        default:
+            return true;  // unreachable
+    }
+}
+
 void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                                   MessageLayout *layout)
 {
@@ -2388,6 +2630,21 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         break;
         case Link::ViewThread: {
             this->showReplyThreadPopup(layout->getMessagePtr());
+        }
+        break;
+        case Link::JumpToMessage: {
+            if (this->context_ == Context::Search)
+            {
+                if (auto search =
+                        dynamic_cast<SearchPopup *>(this->parentWidget()))
+                {
+                    search->goToMessageId(link.value);
+                }
+            }
+            else
+            {
+                this->scrollToMessageId(link.value);
+            }
         }
         break;
 

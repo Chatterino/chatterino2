@@ -14,6 +14,7 @@ struct Emote {
     ImageSet images;
     Tooltip tooltip;
     Url homePage;
+    bool zeroWidth;
 
     // FOURTF: no solution yet, to be refactored later
     const QString &getCopyString() const
@@ -33,6 +34,9 @@ class EmoteMap : public std::unordered_map<EmoteName, EmotePtr>
 using EmoteIdMap = std::unordered_map<EmoteId, EmotePtr>;
 using WeakEmoteMap = std::unordered_map<EmoteName, std::weak_ptr<const Emote>>;
 using WeakEmoteIdMap = std::unordered_map<EmoteId, std::weak_ptr<const Emote>>;
+
+static const std::shared_ptr<const EmoteMap> EMPTY_EMOTE_MAP = std::make_shared<
+    const EmoteMap>();  // NOLINT(cert-err58-cpp) -- assume this doesn't throw an exception
 
 EmotePtr cachedOrMakeEmotePtr(Emote &&emote, const EmoteMap &cache);
 EmotePtr cachedOrMakeEmotePtr(
