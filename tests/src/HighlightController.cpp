@@ -382,7 +382,7 @@ public:
     // The extra parenthesis around the failure callback is because its type contains a comma
     MOCK_METHOD(
         void, getModerators,
-        (QString broadcasterID,
+        (QString broadcasterID, int maxModeratorsToFetch,
          ResultCallback<std::vector<HelixModerator>> successCallback,
          (FailureCallback<HelixGetModeratorsError, QString> failureCallback)),
         (override));  // /mods

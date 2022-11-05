@@ -1006,7 +1006,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             }
 
             getHelix()->getModerators(
-                twitchChannel->roomId(),
+                twitchChannel->roomId(), 500,
                 [channel, twitchChannel](auto result) {
                     QStringList list;
                     for (auto it = result.begin(); it != result.end(); it++)

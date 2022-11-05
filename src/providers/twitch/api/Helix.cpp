@@ -1861,7 +1861,7 @@ void Helix::fetchChatters(
 
 void Helix::onFetchModeratorsSuccess(
     std::shared_ptr<std::vector<HelixModerator>> finalModerators,
-    QString broadcasterID,
+    QString broadcasterID, int maxModeratorsToFetch,
     ResultCallback<std::vector<HelixModerator>> successCallback,
     FailureCallback<HelixGetModeratorsError, QString> failureCallback,
     HelixModerators moderators)
@@ -1874,7 +1874,8 @@ void Helix::onFetchModeratorsSuccess(
                       finalModerators->push_back(mod);
                   });
 
-    if (moderators.cursor.isEmpty())
+    if (moderators.cursor.isEmpty() ||
+        finalModerators->size() >= maxModeratorsToFetch)
     {
         // Done paginating
         successCallback(*finalModerators);
@@ -1884,9 +1885,9 @@ void Helix::onFetchModeratorsSuccess(
     this->fetchModerators(
         broadcasterID, moderators.cursor,
         [=](auto moderators) {
-            this->onFetchModeratorsSuccess(finalModerators, broadcasterID,
-                                           successCallback, failureCallback,
-                                           moderators);
+            this->onFetchModeratorsSuccess(
+                finalModerators, broadcasterID, maxModeratorsToFetch,
+                successCallback, failureCallback, moderators);
         },
         failureCallback);
 }
@@ -2215,7 +2216,7 @@ void Helix::getChatters(
 
 // https://dev.twitch.tv/docs/api/reference#get-moderators
 void Helix::getModerators(
-    QString broadcasterID,
+    QString broadcasterID, int maxModeratorsToFetch,
     ResultCallback<std::vector<HelixModerator>> successCallback,
     FailureCallback<HelixGetModeratorsError, QString> failureCallback)
 {
@@ -2225,9 +2226,9 @@ void Helix::getModerators(
     this->fetchModerators(
         broadcasterID, "",
         [=](auto moderators) {
-            this->onFetchModeratorsSuccess(finalModerators, broadcasterID,
-                                           successCallback, failureCallback,
-                                           moderators);
+            this->onFetchModeratorsSuccess(
+                finalModerators, broadcasterID, maxModeratorsToFetch,
+                successCallback, failureCallback, moderators);
         },
         failureCallback);
 }

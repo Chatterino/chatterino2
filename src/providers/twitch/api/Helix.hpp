@@ -859,7 +859,7 @@ public:
     // This will follow the returned cursor
     // https://dev.twitch.tv/docs/api/reference#get-moderators
     virtual void getModerators(
-        QString broadcasterID,
+        QString broadcasterID, int maxModeratorsToFetch,
         ResultCallback<std::vector<HelixModerator>> successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback) = 0;
 
@@ -1136,7 +1136,7 @@ public:
     // This will follow the returned cursor
     // https://dev.twitch.tv/docs/api/reference#get-moderators
     void getModerators(
-        QString broadcasterID,
+        QString broadcasterID, int maxModeratorsToFetch,
         ResultCallback<std::vector<HelixModerator>> successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback)
         final;
@@ -1169,7 +1169,7 @@ protected:
     // Recursive boy
     void onFetchModeratorsSuccess(
         std::shared_ptr<std::vector<HelixModerator>> finalModerators,
-        QString broadcasterID,
+        QString broadcasterID, int maxModeratorsToFetch,
         ResultCallback<std::vector<HelixModerator>> successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback,
         HelixModerators moderators);
