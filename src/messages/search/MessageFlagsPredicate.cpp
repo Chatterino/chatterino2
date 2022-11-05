@@ -44,8 +44,8 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
         }
         else if (flag == "redemption")
         {
-            this->flags_.set(MessageFlag::RedeemedChannelPointReward),
-                this->flags_.set(MessageFlag::RedeemedHighlight);
+            this->flags_.set(MessageFlag::RedeemedChannelPointReward);
+            this->flags_.set(MessageFlag::RedeemedHighlight);
         }
     }
 }
