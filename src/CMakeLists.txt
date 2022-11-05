@@ -59,10 +59,12 @@ set(SOURCE_FILES
         controllers/accounts/AccountModel.cpp
         controllers/accounts/AccountModel.hpp
 
-        controllers/commands/Command.cpp
-        controllers/commands/Command.hpp
+        controllers/commands/builtin/twitch/ChatSettings.cpp
+        controllers/commands/builtin/twitch/ChatSettings.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
+        controllers/commands/Command.cpp
+        controllers/commands/Command.hpp
         controllers/commands/CommandModel.cpp
         controllers/commands/CommandModel.hpp
 
