@@ -32,6 +32,7 @@
 #include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 
 #include <QApplication>
 #include <QDesktopServices>
@@ -838,10 +839,49 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel = channelTemp;
         }
 
+        // try to link to current split if possible
+        Split *currentSplit = nullptr;
+        auto *currentPage = dynamic_cast<SplitContainer *>(
+            getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+        if (currentPage != nullptr)
+        {
+            currentSplit = currentPage->getSelectedSplit();
+        }
+
+        auto differentChannel =
+            currentSplit != nullptr && currentSplit->getChannel() != channel;
+        if (differentChannel || currentSplit == nullptr)
+        {
+            // not possible to use current split, try searching for one
+            const auto &notebook =
+                getApp()->windows->getMainWindow().getNotebook();
+            auto count = notebook.getPageCount();
+            for (int i = 0; i < count; i++)
+            {
+                auto *page = notebook.getPageAt(i);
+                auto *container = dynamic_cast<SplitContainer *>(page);
+                assert(container != nullptr);
+                for (auto *split : container->getSplits())
+                {
+                    if (split->getChannel() == channel)
+                    {
+                        currentSplit = split;
+                        break;
+                    }
+                }
+            }
+
+            // This would have crashed either way.
+            assert(currentSplit != nullptr &&
+                   "something went HORRIBLY wrong with the /usercard "
+                   "command. It couldn't find a split for a channel which "
+                   "should be open.");
+        }
+
         auto *userPopup = new UserInfoPopup(
             getSettings()->autoCloseUserPopup,
             static_cast<QWidget *>(&(getApp()->windows->getMainWindow())),
-            nullptr);
+            currentSplit);
         userPopup->setData(userName, channel);
         userPopup->move(QCursor::pos());
         userPopup->show();
