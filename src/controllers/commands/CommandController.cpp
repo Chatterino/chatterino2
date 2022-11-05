@@ -1008,17 +1008,11 @@ void CommandController::initialize(Settings &, Paths &paths)
             getHelix()->getModerators(
                 twitchChannel->roomId(), 500,
                 [channel, twitchChannel](auto result) {
-                    QStringList list;
-                    for (auto it = result.begin(); it != result.end(); it++)
-                    {
-                        list << it->userName;
-                    }
-
-                    list.sort(Qt::CaseInsensitive);
+                    // TODO: sort results?
 
                     MessageBuilder builder;
                     TwitchMessageBuilder::listOfUsersSystemMessage(
-                        "The moderators of this channel are", list,
+                        "The moderators of this channel are", result,
                         twitchChannel, &builder);
                     channel->addMessage(builder.release());
                 },

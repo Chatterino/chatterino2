@@ -1625,6 +1625,62 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(QString prefix,
     }
 }
 
+void TwitchMessageBuilder::listOfUsersSystemMessage(
+    QString prefix, const std::vector<HelixModerator> &users, Channel *channel,
+    MessageBuilder *builder)
+{
+    QString text = prefix;
+
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->emplace<TextElement>(prefix, MessageElementFlag::Text,
+                                  MessageColor::System);
+    bool isFirst = true;
+    auto *tc = dynamic_cast<TwitchChannel *>(channel);
+    for (const auto &user : users)
+    {
+        if (!isFirst)
+        {
+            // this is used to add the ", " after each but the last entry
+            builder->emplace<TextElement>(",", MessageElementFlag::Text,
+                                          MessageColor::System);
+            text += QString(", %1").arg(user.userName);
+        }
+        else
+        {
+            text += user.userName;
+        }
+        isFirst = false;
+
+        MessageColor color = MessageColor::System;
+
+        if (tc && getSettings()->colorUsernames)
+        {
+            if (auto userColor = tc->getUserColor(user.userLogin);
+                userColor.isValid())
+            {
+                color = MessageColor(userColor);
+            }
+        }
+
+        builder
+            ->emplace<TextElement>(user.userName,
+                                   MessageElementFlag::BoldUsername, color,
+                                   FontStyle::ChatMediumBold)
+            ->setLink({Link::UserInfo, user.userLogin})
+            ->setTrailingSpace(false);
+        builder
+            ->emplace<TextElement>(user.userName,
+                                   MessageElementFlag::NonBoldUsername, color)
+            ->setLink({Link::UserInfo, user.userLogin})
+            ->setTrailingSpace(false);
+    }
+
+    builder->message().messageText = text;
+    builder->message().searchText = text;
+}
+
 void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)
 {
     this->thread_ = std::move(thread);

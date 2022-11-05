@@ -332,8 +332,13 @@ struct HelixChatSettings {
 };
 
 struct HelixVip {
+    // Twitch ID of the user
     QString userId;
+
+    // Display name of the user
     QString userName;
+
+    // Login name of the user
     QString userLogin;
 
     explicit HelixVip(const QJsonObject &jsonObject)
