@@ -1166,6 +1166,14 @@ protected:
         ResultCallback<HelixChatters> successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback);
 
+    // Recursive boy
+    void onFetchModeratorsSuccess(
+        std::shared_ptr<std::vector<HelixModerator>> finalModerators,
+        QString broadcasterID,
+        ResultCallback<std::vector<HelixModerator>> successCallback,
+        FailureCallback<HelixGetModeratorsError, QString> failureCallback,
+        HelixModerators moderators);
+
     // Get moderator list - This method is what actually runs the API request
     // https://dev.twitch.tv/docs/api/reference#get-moderators
     void fetchModerators(

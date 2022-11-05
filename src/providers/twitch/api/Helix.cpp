@@ -1859,6 +1859,38 @@ void Helix::fetchChatters(
         .execute();
 }
 
+void Helix::onFetchModeratorsSuccess(
+    std::shared_ptr<std::vector<HelixModerator>> finalModerators,
+    QString broadcasterID,
+    ResultCallback<std::vector<HelixModerator>> successCallback,
+    FailureCallback<HelixGetModeratorsError, QString> failureCallback,
+    HelixModerators moderators)
+{
+    qCDebug(chatterinoTwitch)
+        << "Fetched " << moderators.moderators.size() << " moderators";
+
+    std::for_each(moderators.moderators.begin(), moderators.moderators.end(),
+                  [finalModerators](auto mod) {
+                      finalModerators->push_back(mod);
+                  });
+
+    if (moderators.cursor.isEmpty())
+    {
+        // Done paginating
+        successCallback(*finalModerators);
+        return;
+    }
+
+    this->fetchModerators(
+        broadcasterID, moderators.cursor,
+        [=](auto moderators) {
+            this->onFetchModeratorsSuccess(finalModerators, broadcasterID,
+                                           successCallback, failureCallback,
+                                           moderators);
+        },
+        failureCallback);
+}
+
 // https://dev.twitch.tv/docs/api/reference#get-moderators
 void Helix::fetchModerators(
     QString broadcasterID, QString after,
@@ -2189,33 +2221,15 @@ void Helix::getModerators(
 {
     auto finalModerators = std::make_shared<std::vector<HelixModerator>>();
 
-    auto fetchSuccess = [this, broadcasterID, finalModerators, successCallback,
-                         failureCallback](auto fs) {
-        return [=](auto moderators) {
-            qCDebug(chatterinoTwitch)
-                << "Fetched " << moderators.moderators.size() << " moderators";
-
-            std::for_each(moderators.moderators.begin(),
-                          moderators.moderators.end(),
-                          [finalModerators](auto mod) {
-                              finalModerators->push_back(mod);
-                          });
-
-            if (moderators.cursor.isEmpty())
-            {
-                // Done paginating
-                successCallback(*finalModerators);
-                return;
-            }
-
-            this->fetchModerators(broadcasterID, moderators.cursor, fs,
-                                  failureCallback);
-        };
-    };
-
     // Initiate the recursive calls
-    this->fetchModerators(broadcasterID, "", fetchSuccess(fetchSuccess),
-                          failureCallback);
+    this->fetchModerators(
+        broadcasterID, "",
+        [=](auto moderators) {
+            this->onFetchModeratorsSuccess(finalModerators, broadcasterID,
+                                           successCallback, failureCallback,
+                                           moderators);
+        },
+        failureCallback);
 }
 
 // List the VIPs of a channel
