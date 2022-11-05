@@ -2570,6 +2570,11 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/followers", &commands::followers);
     this->registerCommand("/followersoff", &commands::followersOff);
 
+    this->registerCommand("/uniquechat", &commands::uniqueChat);
+    this->registerCommand("/r9kbeta", &commands::uniqueChat);
+    this->registerCommand("/uniquechatoff", &commands::uniqueChatOff);
+    this->registerCommand("/r9kbetaoff", &commands::uniqueChatOff);
+
     auto formatBanTimeoutError =
         [](const char *operation, HelixBanUserError error,
            const QString &message, const QString &userDisplayName) -> QString {
@@ -2945,11 +2950,6 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             return "";
         });
-
-    this->registerCommand("/uniquechat", &commands::uniqueChat);
-    this->registerCommand("/r9kbeta", &commands::uniqueChat);
-    this->registerCommand("/uniquechatoff", &commands::uniqueChatOff);
-    this->registerCommand("/r9kbetaoff", &commands::uniqueChatOff);
 
     this->registerCommand(
         "/commercial",
