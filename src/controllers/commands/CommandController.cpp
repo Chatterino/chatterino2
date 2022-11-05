@@ -44,14 +44,6 @@ namespace {
 
 using namespace chatterino;
 
-bool areIRCCommandsStillAvailable()
-{
-    // 11th of February 2023, 06:00am UTC
-    const QDateTime migrationTime(QDate(2023, 2, 11), QTime(6, 0), Qt::UTC);
-    auto now = QDateTime::currentDateTimeUtc();
-    return now < migrationTime;
-}
-
 QString useIRCCommand(const QStringList &words)
 {
     // Reform the original command
@@ -191,7 +183,7 @@ bool useIrcForWhisperCommand()
     switch (getSettings()->helixTimegateWhisper.getValue())
     {
         case HelixTimegateOverride::Timegate: {
-            if (areIRCCommandsStillAvailable())
+            if (CommandController::areIRCCommandsStillAvailable())
             {
                 return true;
             }
@@ -542,6 +534,14 @@ const std::unordered_map<QString, VariableReplacer> COMMAND_VARS{
 }  // namespace
 
 namespace chatterino {
+
+bool CommandController::CommandController::areIRCCommandsStillAvailable()
+{
+    // 11th of February 2023, 06:00am UTC
+    const QDateTime migrationTime(QDate(2023, 2, 11), QTime(6, 0), Qt::UTC);
+    auto now = QDateTime::currentDateTimeUtc();
+    return now < migrationTime;
+}
 
 void CommandController::initialize(Settings &, Paths &paths)
 {
@@ -1068,7 +1068,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             switch (getSettings()->helixTimegateModerators.getValue())
             {
                 case HelixTimegateOverride::Timegate: {
-                    if (areIRCCommandsStillAvailable())
+                    if (CommandController::areIRCCommandsStillAvailable())
                     {
                         return useIRCCommand(words);
                     }
@@ -2333,7 +2333,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             switch (getSettings()->helixTimegateRaid.getValue())
             {
                 case HelixTimegateOverride::Timegate: {
-                    if (areIRCCommandsStillAvailable())
+                    if (CommandController::areIRCCommandsStillAvailable())
                     {
                         return useIRCCommand(words);
                     }
@@ -2456,7 +2456,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             switch (getSettings()->helixTimegateRaid.getValue())
             {
                 case HelixTimegateOverride::Timegate: {
-                    if (areIRCCommandsStillAvailable())
+                    if (CommandController::areIRCCommandsStillAvailable())
                     {
                         return useIRCCommand(words);
                     }
@@ -3263,7 +3263,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             switch (getSettings()->helixTimegateVIPs.getValue())
             {
                 case HelixTimegateOverride::Timegate: {
-                    if (areIRCCommandsStillAvailable())
+                    if (CommandController::areIRCCommandsStillAvailable())
                     {
                         return useIRCCommand(words);
                     }
@@ -3411,7 +3411,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             switch (getSettings()->helixTimegateCommercial.getValue())
             {
                 case HelixTimegateOverride::Timegate: {
-                    if (areIRCCommandsStillAvailable())
+                    if (CommandController::areIRCCommandsStillAvailable())
                     {
                         return useIRCCommand(words);
                     }

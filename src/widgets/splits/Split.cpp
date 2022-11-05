@@ -956,6 +956,32 @@ void Split::openWithCustomScheme()
 
 void Split::showViewerList()
 {
+    switch (getSettings()->helixTimegateViewerList.getValue())
+    {
+        case HelixTimegateOverride::Timegate: {
+            if (CommandController::areIRCCommandsStillAvailable())
+            {
+                this->showViewerListTmi();
+            } else 
+            {
+                this->showViewerListHelix();
+            }
+        }
+        break;
+
+        case HelixTimegateOverride::AlwaysUseIRC: {
+            this->showViewerListTmi();
+        }
+        break;
+        case HelixTimegateOverride::AlwaysUseHelix: {
+            this->showViewerListHelix();
+        }
+        break;
+    }
+}
+
+void Split::showViewerListTmi()
+{
     auto viewerDock =
         new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
     viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
@@ -1053,6 +1079,334 @@ void Split::showViewerList()
             return Success;
         })
         .execute();
+
+    QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {
+        viewerDock->setMinimumWidth(300);
+    });
+
+    auto listDoubleClick = [this](const QModelIndex &index) {
+        const auto itemText = index.data().toString();
+
+        // if the list item contains a parentheses it means that
+        // it's a category label so don't show a usercard
+        if (!itemText.contains("(") && !itemText.isEmpty())
+        {
+            this->view_->showUserInfoPopup(itemText);
+        }
+    };
+
+    QObject::connect(chattersList, &QListWidget::doubleClicked, this,
+                     listDoubleClick);
+
+    QObject::connect(resultList, &QListWidget::doubleClicked, this,
+                     listDoubleClick);
+
+    HotkeyController::HotkeyMap actions{
+        {"delete",
+         [viewerDock](std::vector<QString>) -> QString {
+             viewerDock->close();
+             return "";
+         }},
+        {"accept", nullptr},
+        {"reject", nullptr},
+        {"scrollPage", nullptr},
+        {"openTab", nullptr},
+        {"search",
+         [searchBar](std::vector<QString>) -> QString {
+             searchBar->setFocus();
+             searchBar->selectAll();
+             return "";
+         }},
+    };
+
+    getApp()->hotkeys->shortcutsForCategory(HotkeyCategory::PopupWindow,
+                                            actions, viewerDock);
+
+    dockVbox->addWidget(searchBar);
+    dockVbox->addWidget(loadingLabel);
+    dockVbox->addWidget(chattersList);
+    dockVbox->addWidget(resultList);
+    resultList->hide();
+
+    multiWidget->setStyleSheet(this->theme->splits.input.styleSheet);
+    multiWidget->setLayout(dockVbox);
+    viewerDock->setWidget(multiWidget);
+    viewerDock->setFloating(true);
+    viewerDock->show();
+    viewerDock->activateWindow();
+}
+
+QString formatVIPListError(HelixListVIPsError error, const QString &message) {
+    using Error = HelixListVIPsError;
+
+    QString errorMessage = QString("Failed to list VIPs - ");
+
+    switch (error)
+    {
+        case Error::Forwarded: {
+            errorMessage += message;
+        }
+        break;
+
+        case Error::Ratelimited: {
+            errorMessage += "You are being ratelimited by Twitch. Try "
+                            "again in a few seconds.";
+        }
+        break;
+
+        case Error::UserMissingScope: {
+            // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+            errorMessage += "Missing required scope. "
+                            "Re-login with your "
+                            "account and try again.";
+        }
+        break;
+
+        case Error::UserNotAuthorized: {
+            // TODO(pajlada): Phrase MISSING_PERMISSION
+            errorMessage += "You don't have permission to "
+                            "perform that action.";
+        }
+        break;
+
+        case Error::UserNotBroadcaster: {
+            errorMessage +=
+                "Due to Twitch restrictions, "
+                "this command can only be used by the broadcaster. "
+                "To see the list of VIPs you must use the Twitch website.";
+        }
+        break;
+
+        case Error::Unknown: {
+            errorMessage += "An unknown error has occurred.";
+        }
+        break;
+    }
+    return errorMessage;
+};
+
+QString formatModsError(HelixGetModeratorsError error, QString message) {
+    using Error = HelixGetModeratorsError;
+
+    QString errorMessage = QString("Failed to get moderators: ");
+
+    switch (error)
+    {
+        case Error::Forwarded: {
+            errorMessage += message;
+        }
+        break;
+
+        case Error::UserMissingScope: {
+            errorMessage += "Missing required scope. "
+                            "Re-login with your "
+                            "account and try again.";
+        }
+        break;
+
+        case Error::UserNotAuthorized: {
+            errorMessage +=
+                "Due to Twitch restrictions, "
+                "this command can only be used by the broadcaster. "
+                "To see the list of mods you must use the Twitch website.";
+        }
+        break;
+
+        case Error::Unknown: {
+            errorMessage += "An unknown error has occurred.";
+        }
+        break;
+    }
+    return errorMessage;
+};
+
+QString formatChattersError(HelixGetChattersError error, QString message) {
+    using Error = HelixGetChattersError;
+
+    QString errorMessage = QString("Failed to get chatters: ");
+
+    switch (error)
+    {
+        case Error::Forwarded: {
+            errorMessage += message;
+        }
+        break;
+
+        case Error::UserMissingScope: {
+            errorMessage += "Missing required scope. "
+                            "Re-login with your "
+                            "account and try again.";
+        }
+        break;
+
+        case Error::UserNotAuthorized: {
+            errorMessage +=
+                "Due to Twitch restrictions, "
+                "this command can only be used by moderators. "
+                "To see the list of chatters you must use the Twitch website.";
+        }
+        break;
+
+        case Error::Unknown: {
+            errorMessage += "An unknown error has occurred.";
+        }
+        break;
+    }
+    return errorMessage;
+};
+
+void Split::showViewerListHelix()
+{
+    auto viewerDock =
+        new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
+    viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    viewerDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
+                            QDockWidget::DockWidgetClosable |
+                            QDockWidget::DockWidgetFloatable);
+    viewerDock->resize(
+        0.5 * this->width(),
+        this->height() - this->header_->height() - this->input_->height());
+    viewerDock->move(0, this->header_->height());
+
+    auto multiWidget = new QWidget(viewerDock);
+    auto dockVbox = new QVBoxLayout(viewerDock);
+    auto searchBar = new QLineEdit(viewerDock);
+
+    auto chattersList = new QListWidget();
+    auto resultList = new QListWidget();
+
+    auto channel = getChannel().get();
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel);
+
+    auto loadingLabel = new QLabel("Loading...");
+    searchBar->setPlaceholderText("Search User...");
+
+    auto formatListItemText = [](QString text) {
+        auto item = new QListWidgetItem();
+        item->setText(text);
+        item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
+        return item;
+    };
+
+    auto addLabel = [this, formatListItemText, chattersList](QString label) {
+        auto formattedLabel = formatListItemText(label);
+        formattedLabel->setForeground(this->theme->accent);
+        chattersList->addItem(formattedLabel);
+    };
+
+    auto addUserList = [=](std::vector<QString> users, QString label) {
+        if (users.empty())
+            return;
+
+        addLabel(QString("%1 (%2)").arg(label, localizeNumbers(users.size())));
+
+        auto iter = users.begin();
+        while (iter != users.end()) 
+        {
+            auto user = *iter;
+            chattersList->addItem(formatListItemText(user));
+            iter++;
+        }
+        chattersList->addItem(new QListWidgetItem());
+    };
+
+    auto performListSearch = [=]() {
+        auto query = searchBar->text();
+        if (query.isEmpty())
+        {
+            resultList->hide();
+            chattersList->show();
+            return;
+        }
+
+        auto results = chattersList->findItems(query, Qt::MatchContains);
+        chattersList->hide();
+        resultList->clear();
+        for (auto &item : results)
+        {
+            if (!item->text().contains("("))
+            {
+                resultList->addItem(formatListItemText(item->text()));
+            }
+        }
+        resultList->show();
+    };
+
+    auto loadChatters = [=]() {
+        getHelix()->getChatters(
+            twitchChannel->roomId(),
+            getApp()->accounts->twitch.getCurrent()->getUserId(), 50000,
+            [=](auto chatters) {
+                std::vector<QString> chatterVector;
+                for (const auto &chatter : chatters.chatters)
+                {
+                    chatterVector.push_back(chatter);
+                }
+                addUserList(chatterVector, QString("Viewers"));
+                loadingLabel->hide();
+                performListSearch();
+            },
+            [chattersList, formatListItemText](auto error, auto message) {
+                auto errorMessage = formatChattersError(error, message);
+                chattersList->addItem(formatListItemText(errorMessage)); 
+            }
+        );
+    };
+
+    QObject::connect(searchBar, &QLineEdit::textEdited, this,
+                     performListSearch);
+    
+    // Add broadcaster
+    addLabel("Broadcaster");
+
+    chattersList->addItem(channel->getName());
+    chattersList->addItem(new QListWidgetItem());
+
+
+    // Only broadcaster can get vips, mods can get viewers
+    if (channel->isBroadcaster()) {
+        auto helixApi = getHelix();
+
+        // Add moderators
+        helixApi->getModerators(
+            twitchChannel->roomId(), 1000,
+            [=](auto modList) {
+                std::vector<QString> modVector;
+                for (auto mod : modList)
+                {
+                    modVector.push_back(mod.userName);
+                }
+                addUserList(modVector, QString("Moderators"));
+                
+                // Add vips
+                helixApi->getChannelVIPs(
+                    twitchChannel->roomId(),
+                    [=](auto vips) {
+                        std::vector<QString> vipVector;
+                        for (auto vip : vips)
+                        {
+                            vipVector.emplace_back(vip.userName);
+                        }
+                        addUserList(vipVector, QString("VIPs"));
+
+                        // Add chatters
+                        loadChatters();
+                    },
+                    [chattersList, formatListItemText](auto error, auto message) {
+                        auto errorMessage = formatVIPListError(error, message); 
+                        chattersList->addItem(formatListItemText(errorMessage)); 
+                    }
+                );
+            },
+            [this, chattersList, formatListItemText](auto error, auto message) {
+                auto errorMessage = formatModsError(error, message);
+                chattersList->addItem(formatListItemText(errorMessage));
+            }
+        );
+    } else if (channel->hasModRights())
+    {
+        loadChatters();
+    }
 
     QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {
         viewerDock->setMinimumWidth(300);

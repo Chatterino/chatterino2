@@ -447,6 +447,11 @@ public:
         HelixTimegateOverride::Timegate,
     };
 
+    EnumSetting<HelixTimegateOverride> helixTimegateViewerList = {
+        "/misc/twitch/helix-timegate/viwerlist",
+        HelixTimegateOverride::Timegate,
+    };
+
     EnumSetting<HelixTimegateOverride> helixTimegateCommercial = {
         "/misc/twitch/helix-timegate/commercial",
         HelixTimegateOverride::Timegate,
