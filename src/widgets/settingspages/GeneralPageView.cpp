@@ -1,12 +1,32 @@
-#include "GeneralPageView.hpp"
-#include <QScrollBar>
+#include "widgets/settingspages/GeneralPageView.hpp"
+
 #include "Application.hpp"
-#include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutHelper.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 #include "widgets/helper/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
+
+#include <QRegularExpression>
+#include <QScrollBar>
+
+namespace {
+
+constexpr int MAX_TOOLTIP_LINE_LENGTH = 50;
+const auto MAX_TOOLTIP_LINE_LENGTH_PATTERN =
+    QStringLiteral(R"(.{%1}\S*\K(\s+))").arg(MAX_TOOLTIP_LINE_LENGTH);
+const QRegularExpression MAX_TOOLTIP_LINE_LENGTH_REGEX(
+    MAX_TOOLTIP_LINE_LENGTH_PATTERN);
+
+const auto TOOLTIP_STYLE_SHEET = QStringLiteral(R"(QToolTip {
+padding: 2px;
+background-color: #333333;
+border: 1px solid #545454;
+}
+)");
+
+}  // namespace
 
 namespace chatterino {
 
@@ -86,9 +106,11 @@ SubtitleLabel *GeneralPageView::addSubtitle(const QString &title)
 }
 
 QCheckBox *GeneralPageView::addCheckbox(const QString &text,
-                                        BoolSetting &setting, bool inverse)
+                                        BoolSetting &setting, bool inverse,
+                                        QString toolTipText)
 {
     auto check = new QCheckBox(text);
+    this->addToolTip(*check, toolTipText);
 
     // update when setting changes
     setting.connect(
@@ -112,7 +134,8 @@ QCheckBox *GeneralPageView::addCheckbox(const QString &text,
 }
 
 ComboBox *GeneralPageView::addDropdown(const QString &text,
-                                       const QStringList &list)
+                                       const QStringList &list,
+                                       QString toolTipText)
 {
     auto layout = new QHBoxLayout;
     auto combo = new ComboBox;
@@ -124,6 +147,7 @@ ComboBox *GeneralPageView::addDropdown(const QString &text,
     layout->addStretch(1);
     layout->addWidget(combo);
 
+    this->addToolTip(*label, toolTipText);
     this->addLayout(layout);
 
     // groups
@@ -135,9 +159,10 @@ ComboBox *GeneralPageView::addDropdown(const QString &text,
 
 ComboBox *GeneralPageView::addDropdown(
     const QString &text, const QStringList &items,
-    pajlada::Settings::Setting<QString> &setting, bool editable)
+    pajlada::Settings::Setting<QString> &setting, bool editable,
+    QString toolTipText)
 {
-    auto combo = this->addDropdown(text, items);
+    auto combo = this->addDropdown(text, items, toolTipText);
 
     if (editable)
         combo->setEditable(true);
@@ -160,15 +185,19 @@ ComboBox *GeneralPageView::addDropdown(
 
 ColorButton *GeneralPageView::addColorButton(
     const QString &text, const QColor &color,
-    pajlada::Settings::Setting<QString> &setting)
+    pajlada::Settings::Setting<QString> &setting, QString toolTipText)
 {
     auto colorButton = new ColorButton(color);
     auto layout = new QHBoxLayout();
     auto label = new QLabel(text + ":");
+
     layout->addWidget(label);
     layout->addStretch(1);
     layout->addWidget(colorButton);
+
+    this->addToolTip(*label, toolTipText);
     this->addLayout(layout);
+
     QObject::connect(
         colorButton, &ColorButton::clicked, [this, &setting, colorButton]() {
             auto dialog = new ColorPickerDialog(QColor(setting), this);
@@ -190,11 +219,13 @@ ColorButton *GeneralPageView::addColorButton(
 }
 
 QSpinBox *GeneralPageView::addIntInput(const QString &text, IntSetting &setting,
-                                       int min, int max, int step)
+                                       int min, int max, int step,
+                                       QString toolTipText)
 {
     auto layout = new QHBoxLayout;
 
     auto label = new QLabel(text + ":");
+    this->addToolTip(*label, toolTipText);
 
     auto input = new QSpinBox;
     input->setMinimum(min);
@@ -360,6 +391,25 @@ void GeneralPageView::updateNavigationHighlighting()
             group.navigationLink->setStyleSheet("");
         }
     }
+}
+
+void GeneralPageView::addToolTip(QWidget &widget, QString text) const
+{
+    if (text.isEmpty())
+    {
+        return;
+    }
+
+    if (text.length() > MAX_TOOLTIP_LINE_LENGTH)
+    {
+        // match MAX_TOOLTIP_LINE_LENGTH characters, any remaining
+        // non-space, and then capture the following space for
+        // replacement with newline
+        text.replace(MAX_TOOLTIP_LINE_LENGTH_REGEX, "\n");
+    }
+
+    widget.setToolTip(text);
+    widget.setStyleSheet(TOOLTIP_STYLE_SHEET);
 }
 
 }  // namespace chatterino

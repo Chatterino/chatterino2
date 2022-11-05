@@ -8,6 +8,7 @@
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
+#include <optional>
 #include <set>
 
 class QShortcut;
@@ -33,6 +34,17 @@ public:
 
     void save() override;
     std::shared_ptr<Hotkey> getHotkeyByName(QString name);
+    /**
+     * @brief returns a QKeySequence that perfoms the actions requested.
+     * Accepted if and only if the category matches, the action matches and arguments match.
+     * When arguments is present, contents of arguments must match the checked hotkey, otherwise arguments are ignored.
+     * For example:
+     * - std::nullopt (or {}) will match any hotkey satisfying category, action values,
+     * - {{"foo", "bar"}} will only match a hotkey that has these arguments and these arguments only
+     */
+    QKeySequence getDisplaySequence(
+        HotkeyCategory category, const QString &action,
+        const std::optional<std::vector<QString>> &arguments = {}) const;
 
     /**
      * @brief removes the hotkey with the oldName and inserts newHotkey at the end
@@ -114,6 +126,17 @@ private:
      **/
     static void showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
                                 QString warning);
+    /**
+     * @brief finds a Hotkey matching category, action and arguments.
+     * Accepted if and only if the category matches, the action matches and arguments match.
+     * When arguments is present, contents of arguments must match the checked hotkey, otherwise arguments are ignored.
+     * For example:
+     * - std::nullopt (or {}) will match any hotkey satisfying category, action values,
+     * - {{"foo", "bar"}} will only match a hotkey that has these arguments and these arguments only
+     */
+    std::shared_ptr<Hotkey> findLike(
+        HotkeyCategory category, const QString &action,
+        const std::optional<std::vector<QString>> &arguments = {}) const;
 
     friend class KeyboardSettingsPage;
 

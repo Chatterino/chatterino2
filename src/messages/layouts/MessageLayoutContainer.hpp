@@ -14,7 +14,7 @@ class QPainter;
 
 namespace chatterino {
 
-enum class MessageFlag : uint32_t;
+enum class MessageFlag : int64_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 struct Margin {
@@ -44,10 +44,6 @@ struct Margin {
 
 struct MessageLayoutContainer {
     MessageLayoutContainer() = default;
-
-    Margin margin = {4, 8, 4, 8};
-    bool centered = false;
-    bool enableCompactEmotes = false;
 
     int getHeight() const;
     int getWidth() const;
@@ -92,6 +88,8 @@ private:
     // helpers
     void _addElement(MessageLayoutElement *element, bool forceAdd = false);
     bool canCollapse();
+
+    const Margin margin = {4, 8, 4, 8};
 
     // variables
     float scale_ = 1.f;

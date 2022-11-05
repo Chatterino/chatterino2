@@ -110,6 +110,7 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
     this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
     this->wordFlagsListener_.addSetting(settings->showBadgesFfz);
+    this->wordFlagsListener_.addSetting(settings->showBadgesSevenTV);
     this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
@@ -179,6 +180,7 @@ void WindowManager::updateWordTypeMask()
     flags.set(settings->showBadgesChatterino ? MEF::BadgeChatterino
                                              : MEF::None);
     flags.set(settings->showBadgesFfz ? MEF::BadgeFfz : MEF::None);
+    flags.set(settings->showBadgesSevenTV ? MEF::BadgeSevenTV : MEF::None);
 
     // username
     flags.set(MEF::Username);
@@ -318,6 +320,11 @@ void WindowManager::select(Split *split)
 void WindowManager::select(SplitContainer *container)
 {
     this->selectSplitContainer.invoke(container);
+}
+
+void WindowManager::scrollToMessage(const MessagePtr &message)
+{
+    this->scrollToMessageSignal.invoke(message);
 }
 
 QPoint WindowManager::emotePopupPos()

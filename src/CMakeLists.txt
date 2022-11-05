@@ -156,6 +156,8 @@ set(SOURCE_FILES
         messages/layouts/MessageLayoutElement.hpp
         messages/search/AuthorPredicate.cpp
         messages/search/AuthorPredicate.hpp
+        messages/search/BadgePredicate.cpp
+        messages/search/BadgePredicate.hpp
         messages/search/ChannelPredicate.cpp
         messages/search/ChannelPredicate.hpp
         messages/search/LinkPredicate.cpp
@@ -166,6 +168,8 @@ set(SOURCE_FILES
         messages/search/RegexPredicate.hpp
         messages/search/SubstringPredicate.cpp
         messages/search/SubstringPredicate.hpp
+        messages/search/SubtierPredicate.cpp
+        messages/search/SubtierPredicate.hpp
 
         providers/IvrApi.cpp
         providers/IvrApi.hpp
@@ -209,6 +213,15 @@ set(SOURCE_FILES
         providers/irc/IrcMessageBuilder.hpp
         providers/irc/IrcServer.cpp
         providers/irc/IrcServer.hpp
+
+        providers/liveupdates/BasicPubSubClient.hpp
+        providers/liveupdates/BasicPubSubManager.hpp
+        providers/liveupdates/BasicPubSubWebsocket.hpp
+
+        providers/seventv/SeventvBadges.cpp
+        providers/seventv/SeventvBadges.hpp
+        providers/seventv/SeventvEmotes.cpp
+        providers/seventv/SeventvEmotes.hpp
 
         providers/twitch/ChannelPointReward.cpp
         providers/twitch/ChannelPointReward.hpp
@@ -529,6 +542,21 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 
 add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
+if (CHATTERINO_GENERATE_COVERAGE)
+    include(CodeCoverage)
+    append_coverage_compiler_flags_to_target(${LIBRARY_PROJECT})
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC gcov)
+    message(STATUS "project source dir: ${PROJECT_SOURCE_DIR}/src")
+    setup_target_for_coverage_lcov(
+        NAME coverage
+        EXECUTABLE ./bin/chatterino-test
+        BASE_DIRECTORY ${PROJECT_SOURCE_DIR}/src
+        EXCLUDE "/usr/include/*"
+        EXCLUDE "build-*/*"
+        EXCLUDE "lib/*"
+        )
+endif ()
+
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         Qt${MAJOR_QT_VERSION}::Core
@@ -774,6 +802,7 @@ else ()
         -Wno-strict-aliasing
 
         -Werror=return-type
+        -Werror=reorder
     )
 
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")

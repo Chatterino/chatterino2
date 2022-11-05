@@ -19,6 +19,14 @@ public:
     SearchPopup(QWidget *parent, Split *split = nullptr);
 
     virtual void addChannel(ChannelView &channel);
+    void goToMessage(const MessagePtr &message);
+    /**
+     * This method should only be used for searches that
+     * don't include a mentions channel,
+     * since it will only search in the opened channels (not globally).
+     * @param messageId
+     */
+    void goToMessageId(const QString &messageId);
 
 protected:
     virtual void updateWindowTitle();

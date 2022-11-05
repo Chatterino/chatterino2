@@ -67,6 +67,11 @@ int MessageLayout::getHeight() const
     return container_->getHeight();
 }
 
+int MessageLayout::getWidth() const
+{
+    return this->container_->getWidth();
+}
+
 // Layout
 // return true if redraw is required
 bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
@@ -130,12 +135,16 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         messageFlags.unset(MessageFlag::Collapsed);
     }
 
+    bool hideModerated = getSettings()->hideModerated;
+    bool hideModerationActions = getSettings()->hideModerationActions;
+    bool hideSimilar = getSettings()->hideSimilar;
+    bool hideReplies = !flags.has(MessageElementFlag::RepliedMessage);
+
     this->container_->begin(width, this->scale_, messageFlags);
 
     for (const auto &element : this->message_->elements)
     {
-        if (getSettings()->hideModerated &&
-            this->message_->flags.has(MessageFlag::Disabled))
+        if (hideModerated && this->message_->flags.has(MessageFlag::Disabled))
         {
             continue;
         }
@@ -145,7 +154,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         {
             // This condition has been set up to execute isInStreamerMode() as the last thing
             // as it could end up being expensive.
-            if (getSettings()->hideModerationActions ||
+            if (hideModerationActions ||
                 (getSettings()->streamerModeSuppressModActions &&
                  isInStreamerMode()))
             {
@@ -153,13 +162,12 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
             }
         }
 
-        if (getSettings()->hideSimilar &&
-            this->message_->flags.has(MessageFlag::Similar))
+        if (hideSimilar && this->message_->flags.has(MessageFlag::Similar))
         {
             continue;
         }
 
-        if (!this->renderReplies_ &&
+        if (hideReplies &&
             element->getFlags().has(MessageElementFlag::RepliedMessage))
         {
             continue;
@@ -312,8 +320,16 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
         }
     }();
 
-    if (this->message_->flags.has(MessageFlag::FirstMessage) &&
-        getSettings()->enableFirstMessageHighlight.getValue())
+    if (this->message_->flags.has(MessageFlag::ElevatedMessage) &&
+        getSettings()->enableElevatedMessageHighlight.getValue())
+    {
+        backgroundColor = blendColors(backgroundColor,
+                                      *ColorProvider::instance().color(
+                                          ColorType::ElevatedMessageHighlight));
+    }
+
+    else if (this->message_->flags.has(MessageFlag::FirstMessage) &&
+             getSettings()->enableFirstMessageHighlight.getValue())
     {
         backgroundColor = blendColors(
             backgroundColor,
@@ -447,11 +463,6 @@ bool MessageLayout::isReplyable() const
     }
 
     return true;
-}
-
-void MessageLayout::setRenderReplies(bool render)
-{
-    this->renderReplies_ = render;
 }
 
 }  // namespace chatterino
