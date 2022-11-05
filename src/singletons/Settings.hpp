@@ -442,6 +442,10 @@ public:
         "/misc/twitch/helix-timegate/vips",
         HelixTimegateOverride::Timegate,
     };
+    EnumSetting<HelixTimegateOverride> helixTimegateModerators = {
+        "/misc/twitch/helix-timegate/moderators",
+        HelixTimegateOverride::Timegate,
+    };
 
     EnumSetting<HelixTimegateOverride> helixTimegateCommercial = {
         "/misc/twitch/helix-timegate/commercial",

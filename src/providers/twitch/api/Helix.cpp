@@ -6,6 +6,14 @@
 #include <QJsonDocument>
 #include <magic_enum.hpp>
 
+namespace {
+
+using namespace chatterino;
+
+static constexpr auto NUM_MODERATORS_TO_FETCH_PER_REQUEST = 100;
+
+}  // namespace
+
 namespace chatterino {
 
 static IHelix *instance = nullptr;
@@ -1859,6 +1867,115 @@ void Helix::fetchChatters(
         .execute();
 }
 
+void Helix::onFetchModeratorsSuccess(
+    std::shared_ptr<std::vector<HelixModerator>> finalModerators,
+    QString broadcasterID, int maxModeratorsToFetch,
+    ResultCallback<std::vector<HelixModerator>> successCallback,
+    FailureCallback<HelixGetModeratorsError, QString> failureCallback,
+    HelixModerators moderators)
+{
+    qCDebug(chatterinoTwitch)
+        << "Fetched " << moderators.moderators.size() << " moderators";
+
+    std::for_each(moderators.moderators.begin(), moderators.moderators.end(),
+                  [finalModerators](auto mod) {
+                      finalModerators->push_back(mod);
+                  });
+
+    if (moderators.cursor.isEmpty() ||
+        finalModerators->size() >= maxModeratorsToFetch)
+    {
+        // Done paginating
+        successCallback(*finalModerators);
+        return;
+    }
+
+    this->fetchModerators(
+        broadcasterID, NUM_MODERATORS_TO_FETCH_PER_REQUEST, moderators.cursor,
+        [=](auto moderators) {
+            this->onFetchModeratorsSuccess(
+                finalModerators, broadcasterID, maxModeratorsToFetch,
+                successCallback, failureCallback, moderators);
+        },
+        failureCallback);
+}
+
+// https://dev.twitch.tv/docs/api/reference#get-moderators
+void Helix::fetchModerators(
+    QString broadcasterID, int first, QString after,
+    ResultCallback<HelixModerators> successCallback,
+    FailureCallback<HelixGetModeratorsError, QString> failureCallback)
+{
+    using Error = HelixGetModeratorsError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("first", QString::number(first));
+
+    if (!after.isEmpty())
+    {
+        urlQuery.addQueryItem("after", after);
+    }
+
+    this->makeRequest("moderation/moderators", urlQuery)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for getting moderators was "
+                    << result.status() << "but we expected it to be 200";
+            }
+
+            auto response = result.parseJson();
+            successCallback(HelixModerators(response));
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.contains("OAuth token"))
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 403: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error data:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 // Ban/timeout a user
 // https://dev.twitch.tv/docs/api/reference#ban-user
 void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
@@ -2104,6 +2221,25 @@ void Helix::getChatters(
     // Initiate the recursive calls
     this->fetchChatters(broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, "",
                         fetchSuccess(fetchSuccess), failureCallback);
+}
+
+// https://dev.twitch.tv/docs/api/reference#get-moderators
+void Helix::getModerators(
+    QString broadcasterID, int maxModeratorsToFetch,
+    ResultCallback<std::vector<HelixModerator>> successCallback,
+    FailureCallback<HelixGetModeratorsError, QString> failureCallback)
+{
+    auto finalModerators = std::make_shared<std::vector<HelixModerator>>();
+
+    // Initiate the recursive calls
+    this->fetchModerators(
+        broadcasterID, NUM_MODERATORS_TO_FETCH_PER_REQUEST, "",
+        [=](auto moderators) {
+            this->onFetchModeratorsSuccess(
+                finalModerators, broadcasterID, maxModeratorsToFetch,
+                successCallback, failureCallback, moderators);
+        },
+        failureCallback);
 }
 
 // List the VIPs of a channel

@@ -938,6 +938,91 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
+    auto formatModsError = [](HelixGetModeratorsError error, QString message) {
+        using Error = HelixGetModeratorsError;
+
+        QString errorMessage = QString("Failed to get moderators: ");
+
+        switch (error)
+        {
+            case Error::Forwarded: {
+                errorMessage += message;
+            }
+            break;
+
+            case Error::UserMissingScope: {
+                errorMessage += "Missing required scope. "
+                                "Re-login with your "
+                                "account and try again.";
+            }
+            break;
+
+            case Error::UserNotAuthorized: {
+                errorMessage +=
+                    "Due to Twitch restrictions, "
+                    "this command can only be used by the broadcaster. "
+                    "To see the list of mods you must use the Twitch website.";
+            }
+            break;
+
+            case Error::Unknown: {
+                errorMessage += "An unknown error has occurred.";
+            }
+            break;
+        }
+        return errorMessage;
+    };
+
+    this->registerCommand(
+        "/mods",
+        [formatModsError](const QStringList &words, auto channel) -> QString {
+            switch (getSettings()->helixTimegateModerators.getValue())
+            {
+                case HelixTimegateOverride::Timegate: {
+                    if (areIRCCommandsStillAvailable())
+                    {
+                        return useIRCCommand(words);
+                    }
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseIRC: {
+                    return useIRCCommand(words);
+                }
+                break;
+                case HelixTimegateOverride::AlwaysUseHelix: {
+                    // Fall through to helix logic
+                }
+                break;
+            }
+
+            auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /mods command only works in Twitch Channels"));
+                return "";
+            }
+
+            getHelix()->getModerators(
+                twitchChannel->roomId(), 500,
+                [channel, twitchChannel](auto result) {
+                    // TODO: sort results?
+
+                    MessageBuilder builder;
+                    TwitchMessageBuilder::listOfUsersSystemMessage(
+                        "The moderators of this channel are", result,
+                        twitchChannel, &builder);
+                    channel->addMessage(builder.release());
+                },
+                [channel, formatModsError](auto error, auto message) {
+                    auto errorMessage = formatModsError(error, message);
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
+            return "";
+        });
+
     this->registerCommand("/clip", [](const auto & /*words*/, auto channel) {
         if (const auto type = channel->getType();
             type != Channel::Type::Twitch &&

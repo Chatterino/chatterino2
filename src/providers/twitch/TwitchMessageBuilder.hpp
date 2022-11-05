@@ -7,6 +7,7 @@
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
+#include "providers/twitch/api/Helix.hpp"
 
 #include <IrcMessage>
 #include <QString>
@@ -77,6 +78,9 @@ public:
     static void listOfUsersSystemMessage(QString prefix, QStringList users,
                                          Channel *channel,
                                          MessageBuilder *builder);
+    static void listOfUsersSystemMessage(
+        QString prefix, const std::vector<HelixModerator> &users,
+        Channel *channel, MessageBuilder *builder);
 
     // Shares some common logic from SharedMessageBuilder::parseBadgeTag
     static std::unordered_map<QString, QString> parseBadgeInfoTag(

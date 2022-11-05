@@ -866,6 +866,17 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     helixTimegateCommercial->setMinimumWidth(
         helixTimegateCommercial->minimumSizeHint().width());
 
+    auto *helixTimegateModerators =
+        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
+            "Helix timegate /mods behaviour",
+            {"Timegate", "Always use IRC", "Always use Helix"},
+            s.helixTimegateModerators,
+            helixTimegateGetValue,  //
+            helixTimegateSetValue,  //
+            false);
+    helixTimegateModerators->setMinimumWidth(
+        helixTimegateModerators->minimumSizeHint().width());
+
     layout.addStretch();
 
     // invisible element for width
