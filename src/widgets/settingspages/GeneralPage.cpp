@@ -877,7 +877,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     helixTimegateModerators->setMinimumWidth(
         helixTimegateModerators->minimumSizeHint().width());
 
-
     auto *helixTimegateViewerList =
         layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
             "Helix timegate viwer list behaviour",

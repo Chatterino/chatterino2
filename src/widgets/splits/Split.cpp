@@ -962,7 +962,8 @@ void Split::showViewerList()
             if (CommandController::areIRCCommandsStillAvailable())
             {
                 this->showViewerListTmi();
-            } else 
+            }
+            else
             {
                 this->showViewerListHelix();
             }
@@ -1136,7 +1137,8 @@ void Split::showViewerListTmi()
     viewerDock->activateWindow();
 }
 
-QString formatVIPListError(HelixListVIPsError error, const QString &message) {
+QString formatVIPListError(HelixListVIPsError error, const QString &message)
+{
     using Error = HelixListVIPsError;
 
     QString errorMessage = QString("Failed to list VIPs - ");
@@ -1185,7 +1187,8 @@ QString formatVIPListError(HelixListVIPsError error, const QString &message) {
     return errorMessage;
 };
 
-QString formatModsError(HelixGetModeratorsError error, QString message) {
+QString formatModsError(HelixGetModeratorsError error, QString message)
+{
     using Error = HelixGetModeratorsError;
 
     QString errorMessage = QString("Failed to get moderators: ");
@@ -1220,7 +1223,8 @@ QString formatModsError(HelixGetModeratorsError error, QString message) {
     return errorMessage;
 };
 
-QString formatChattersError(HelixGetChattersError error, QString message) {
+QString formatChattersError(HelixGetChattersError error, QString message)
+{
     using Error = HelixGetChattersError;
 
     QString errorMessage = QString("Failed to get chatters: ");
@@ -1301,7 +1305,7 @@ void Split::showViewerListHelix()
         addLabel(QString("%1 (%2)").arg(label, localizeNumbers(users.size())));
 
         auto iter = users.begin();
-        while (iter != users.end()) 
+        while (iter != users.end())
         {
             auto user = *iter;
             chattersList->addItem(formatListItemText(user));
@@ -1348,23 +1352,22 @@ void Split::showViewerListHelix()
             },
             [chattersList, formatListItemText](auto error, auto message) {
                 auto errorMessage = formatChattersError(error, message);
-                chattersList->addItem(formatListItemText(errorMessage)); 
-            }
-        );
+                chattersList->addItem(formatListItemText(errorMessage));
+            });
     };
 
     QObject::connect(searchBar, &QLineEdit::textEdited, this,
                      performListSearch);
-    
+
     // Add broadcaster
     addLabel("Broadcaster");
 
     chattersList->addItem(channel->getName());
     chattersList->addItem(new QListWidgetItem());
 
-
     // Only broadcaster can get vips, mods can get viewers
-    if (channel->isBroadcaster()) {
+    if (channel->isBroadcaster())
+    {
         auto helixApi = getHelix();
 
         // Add moderators
@@ -1377,7 +1380,7 @@ void Split::showViewerListHelix()
                     modVector.push_back(mod.userName);
                 }
                 addUserList(modVector, QString("Moderators"));
-                
+
                 // Add vips
                 helixApi->getChannelVIPs(
                     twitchChannel->roomId(),
@@ -1392,18 +1395,18 @@ void Split::showViewerListHelix()
                         // Add chatters
                         loadChatters();
                     },
-                    [chattersList, formatListItemText](auto error, auto message) {
-                        auto errorMessage = formatVIPListError(error, message); 
-                        chattersList->addItem(formatListItemText(errorMessage)); 
-                    }
-                );
+                    [chattersList, formatListItemText](auto error,
+                                                       auto message) {
+                        auto errorMessage = formatVIPListError(error, message);
+                        chattersList->addItem(formatListItemText(errorMessage));
+                    });
             },
             [this, chattersList, formatListItemText](auto error, auto message) {
                 auto errorMessage = formatModsError(error, message);
                 chattersList->addItem(formatListItemText(errorMessage));
-            }
-        );
-    } else if (channel->hasModRights())
+            });
+    }
+    else if (channel->hasModRights())
     {
         loadChatters();
     }
