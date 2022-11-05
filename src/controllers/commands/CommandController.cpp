@@ -853,11 +853,12 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (differentChannel || currentSplit == nullptr)
         {
             // not possible to use current split, try searching for one
-            auto *notebook = &getApp()->windows->getMainWindow().getNotebook();
-            auto count = notebook->getPageCount();
+            const auto &notebook =
+                getApp()->windows->getMainWindow().getNotebook();
+            auto count = notebook.getPageCount();
             for (int i = 0; i < count; i++)
             {
-                auto *page = notebook->getPageAt(i);
+                auto *page = notebook.getPageAt(i);
                 auto *container = dynamic_cast<SplitContainer *>(page);
                 assert(container != nullptr);
                 for (auto *split : container->getSplits())
