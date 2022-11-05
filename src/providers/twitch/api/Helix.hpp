@@ -1132,7 +1132,7 @@ public:
         ResultCallback<HelixChatters> successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback) final;
 
-    // Get Chatters from the `broadcasterID` channel
+    // Get moderators from the `broadcasterID` channel
     // This will follow the returned cursor
     // https://dev.twitch.tv/docs/api/reference#get-moderators
     void getModerators(
