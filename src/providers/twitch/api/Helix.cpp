@@ -6,6 +6,14 @@
 #include <QJsonDocument>
 #include <magic_enum.hpp>
 
+namespace {
+
+using namespace chatterino;
+
+static constexpr auto NUM_MODERATORS_TO_FETCH_PER_REQUEST = 100;
+
+}  // namespace
+
 namespace chatterino {
 
 static IHelix *instance = nullptr;
@@ -1883,7 +1891,7 @@ void Helix::onFetchModeratorsSuccess(
     }
 
     this->fetchModerators(
-        broadcasterID, moderators.cursor,
+        broadcasterID, NUM_MODERATORS_TO_FETCH_PER_REQUEST, moderators.cursor,
         [=](auto moderators) {
             this->onFetchModeratorsSuccess(
                 finalModerators, broadcasterID, maxModeratorsToFetch,
@@ -1894,7 +1902,7 @@ void Helix::onFetchModeratorsSuccess(
 
 // https://dev.twitch.tv/docs/api/reference#get-moderators
 void Helix::fetchModerators(
-    QString broadcasterID, QString after,
+    QString broadcasterID, int first, QString after,
     ResultCallback<HelixModerators> successCallback,
     FailureCallback<HelixGetModeratorsError, QString> failureCallback)
 {
@@ -1903,6 +1911,7 @@ void Helix::fetchModerators(
     QUrlQuery urlQuery;
 
     urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("first", QString::number(first));
 
     if (!after.isEmpty())
     {
@@ -2224,7 +2233,7 @@ void Helix::getModerators(
 
     // Initiate the recursive calls
     this->fetchModerators(
-        broadcasterID, "",
+        broadcasterID, NUM_MODERATORS_TO_FETCH_PER_REQUEST, "",
         [=](auto moderators) {
             this->onFetchModeratorsSuccess(
                 finalModerators, broadcasterID, maxModeratorsToFetch,

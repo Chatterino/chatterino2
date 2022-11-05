@@ -1177,7 +1177,7 @@ protected:
     // Get moderator list - This method is what actually runs the API request
     // https://dev.twitch.tv/docs/api/reference#get-moderators
     void fetchModerators(
-        QString broadcasterID, QString after,
+        QString broadcasterID, int first, QString after,
         ResultCallback<HelixModerators> successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback);
 
