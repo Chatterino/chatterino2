@@ -382,6 +382,15 @@ public:
          (FailureCallback<HelixListVIPsError, QString> failureCallback)),
         (override));  // /vips
 
+    // /commercial
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, startCommercial,
+        (QString broadcasterID, int length,
+         ResultCallback<HelixStartCommercialResponse> successCallback,
+         (FailureCallback<HelixStartCommercialError, QString> failureCallback)),
+        (override));  // /commercial
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 
