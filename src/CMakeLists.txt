@@ -61,6 +61,7 @@ set(SOURCE_FILES
 
         controllers/commands/builtin/twitch/ChatSettings.cpp
         controllers/commands/builtin/twitch/ChatSettings.hpp
+        controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
         controllers/commands/Command.cpp

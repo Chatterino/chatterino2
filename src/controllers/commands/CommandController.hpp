@@ -4,6 +4,7 @@
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "controllers/commands/Command.hpp"
+#include "controllers/commands/CommandContext.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
 #include <QMap>
@@ -46,10 +47,16 @@ private:
     using CommandFunction =
         std::function<QString(QStringList /*words*/, ChannelPtr /*channel*/)>;
 
-    void registerCommand(QString commandName, CommandFunction commandFunction);
+    using CommandFunctionWithContext = std::function<QString(CommandContext)>;
+
+    using CommandFunctionAlternatives =
+        std::variant<CommandFunction, CommandFunctionWithContext>;
+
+    void registerCommand(QString commandName,
+                         CommandFunctionAlternatives commandFunction);
 
     // Chatterino commands
-    QMap<QString, CommandFunction> commands_;
+    std::unordered_map<QString, CommandFunctionAlternatives> commands_;
 
     // User-created commands
     QMap<QString, Command> userCommands_;

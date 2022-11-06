@@ -1,25 +1,24 @@
 #pragma once
 
-#include "common/Channel.hpp"
+#include "controllers/commands/CommandContext.hpp"
 
 #include <QString>
-#include <QStringList>
 
 namespace chatterino::commands {
 
-QString emoteOnly(const QStringList &words, ChannelPtr channel);
-QString emoteOnlyOff(const QStringList &words, ChannelPtr channel);
+QString emoteOnly(const CommandContext &ctx);
+QString emoteOnlyOff(const CommandContext &ctx);
 
-QString subscribers(const QStringList &words, ChannelPtr channel);
-QString subscribersOff(const QStringList &words, ChannelPtr channel);
+QString subscribers(const CommandContext &ctx);
+QString subscribersOff(const CommandContext &ctx);
 
-QString slow(const QStringList &words, ChannelPtr channel);
-QString slowOff(const QStringList &words, ChannelPtr channel);
+QString slow(const CommandContext &ctx);
+QString slowOff(const CommandContext &ctx);
 
-QString followers(const QStringList &words, ChannelPtr channel);
-QString followersOff(const QStringList &words, ChannelPtr channel);
+QString followers(const CommandContext &ctx);
+QString followersOff(const CommandContext &ctx);
 
-QString uniqueChat(const QStringList &words, ChannelPtr channel);
-QString uniqueChatOff(const QStringList &words, ChannelPtr channel);
+QString uniqueChat(const CommandContext &ctx);
+QString uniqueChatOff(const CommandContext &ctx);
 
 }  // namespace chatterino::commands

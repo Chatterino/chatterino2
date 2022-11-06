@@ -3097,7 +3097,22 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         const auto it = this->commands_.find(commandName);
         if (it != this->commands_.end())
         {
-            return it.value()(words, channel);
+            if (auto *command = std::get_if<CommandFunction>(&it->second))
+            {
+                return (*command)(words, channel);
+            }
+            if (auto *command =
+                    std::get_if<CommandFunctionWithContext>(&it->second))
+            {
+                CommandContext ctx{
+                    words,
+                    channel,
+                    dynamic_cast<TwitchChannel *>(channel.get()),
+                };
+                return (*command)(ctx);
+            }
+
+            return "";
         }
     }
 
@@ -3123,10 +3138,10 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     return text;
 }
 
-void CommandController::registerCommand(QString commandName,
-                                        CommandFunction commandFunction)
+void CommandController::registerCommand(
+    QString commandName, CommandFunctionAlternatives commandFunction)
 {
-    assert(!this->commands_.contains(commandName));
+    assert(this->commands_.count(commandName) == 0);
 
     this->commands_[commandName] = commandFunction;
 
