@@ -42,6 +42,10 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
         {
             this->flags_.set(MessageFlag::CheerMessage);
         }
+        else if (flag == "reply")
+        {
+            this->flags_.set(MessageFlag::ReplyMessage);
+        }
     }
 }
 
