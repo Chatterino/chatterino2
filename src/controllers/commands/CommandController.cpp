@@ -7,6 +7,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandModel.hpp"
+#include "controllers/commands/builtin/twitch/ChatSettings.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
@@ -2557,409 +2558,22 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });  // unraid
 
-    const auto formatChatSettingsError = [](const HelixUpdateChatSettingsError
-                                                error,
-                                            const QString &message,
-                                            int durationUnitMultiplier = 1) {
-        static const QRegularExpression invalidRange("(\\d+) through (\\d+)");
+    this->registerCommand("/emoteonly", &commands::emoteOnly);
+    this->registerCommand("/emoteonlyoff", &commands::emoteOnlyOff);
 
-        QString errorMessage = QString("Failed to update - ");
-        using Error = HelixUpdateChatSettingsError;
-        switch (error)
-        {
-            case Error::UserMissingScope: {
-                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
-                errorMessage += "Missing required scope. "
-                                "Re-login with your "
-                                "account and try again.";
-            }
-            break;
+    this->registerCommand("/subscribers", &commands::subscribers);
+    this->registerCommand("/subscribersoff", &commands::subscribersOff);
 
-            case Error::UserNotAuthorized:
-            case Error::Forbidden: {
-                // TODO(pajlada): Phrase MISSING_PERMISSION
-                errorMessage += "You don't have permission to "
-                                "perform that action.";
-            }
-            break;
+    this->registerCommand("/slow", &commands::slow);
+    this->registerCommand("/slowoff", &commands::slowOff);
 
-            case Error::Ratelimited: {
-                errorMessage += "You are being ratelimited by Twitch. Try "
-                                "again in a few seconds.";
-            }
-            break;
+    this->registerCommand("/followers", &commands::followers);
+    this->registerCommand("/followersoff", &commands::followersOff);
 
-            case Error::OutOfRange: {
-                QRegularExpressionMatch matched = invalidRange.match(message);
-                if (matched.hasMatch())
-                {
-                    auto from = matched.captured(1).toInt();
-                    auto to = matched.captured(2).toInt();
-                    errorMessage +=
-                        QString("The duration is out of the valid range: "
-                                "%1 through %2.")
-                            .arg(from == 0 ? "0s"
-                                           : formatTime(from *
-                                                        durationUnitMultiplier),
-                                 to == 0
-                                     ? "0s"
-                                     : formatTime(to * durationUnitMultiplier));
-                }
-                else
-                {
-                    errorMessage += message;
-                }
-            }
-            break;
-
-            case Error::Forwarded: {
-                errorMessage = message;
-            }
-            break;
-
-            case Error::Unknown:
-            default: {
-                errorMessage += "An unknown error has occurred.";
-            }
-            break;
-        }
-        return errorMessage;
-    };
-
-    this->registerCommand("/emoteonly", [formatChatSettingsError](
-                                            const QStringList & /* words */,
-                                            auto channel) {
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(makeSystemMessage(
-                "You must be logged in to update chat settings!"));
-            return "";
-        }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /emoteonly command only works in Twitch channels"));
-            return "";
-        }
-
-        if (twitchChannel->accessRoomModes()->emoteOnly)
-        {
-            channel->addMessage(
-                makeSystemMessage("This room is already in emote-only mode."));
-            return "";
-        }
-
-        getHelix()->updateEmoteMode(
-            twitchChannel->roomId(), currentUser->getUserId(), true,
-            [](auto) {
-                //we'll get a message from irc
-            },
-            [channel, formatChatSettingsError](auto error, auto message) {
-                channel->addMessage(
-                    makeSystemMessage(formatChatSettingsError(error, message)));
-            });
-        return "";
-    });
-
-    this->registerCommand(
-        "/emoteonlyoff", [formatChatSettingsError](
-                             const QStringList & /* words */, auto channel) {
-            auto currentUser = getApp()->accounts->twitch.getCurrent();
-            if (currentUser->isAnon())
-            {
-                channel->addMessage(makeSystemMessage(
-                    "You must be logged in to update chat settings!"));
-                return "";
-            }
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /emoteonlyoff command only works in Twitch channels"));
-                return "";
-            }
-
-            if (!twitchChannel->accessRoomModes()->emoteOnly)
-            {
-                channel->addMessage(
-                    makeSystemMessage("This room is not in emote-only mode."));
-                return "";
-            }
-
-            getHelix()->updateEmoteMode(
-                twitchChannel->roomId(), currentUser->getUserId(), false,
-                [](auto) {
-                    // we'll get a message from irc
-                },
-                [channel, formatChatSettingsError](auto error, auto message) {
-                    channel->addMessage(makeSystemMessage(
-                        formatChatSettingsError(error, message)));
-                });
-            return "";
-        });
-
-    this->registerCommand(
-        "/subscribers", [formatChatSettingsError](
-                            const QStringList & /* words */, auto channel) {
-            auto currentUser = getApp()->accounts->twitch.getCurrent();
-            if (currentUser->isAnon())
-            {
-                channel->addMessage(makeSystemMessage(
-                    "You must be logged in to update chat settings!"));
-                return "";
-            }
-
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /subscribers command only works in Twitch channels"));
-                return "";
-            }
-
-            if (twitchChannel->accessRoomModes()->submode)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "This room is already in subscribers-only mode."));
-                return "";
-            }
-
-            getHelix()->updateSubscriberMode(
-                twitchChannel->roomId(), currentUser->getUserId(), true,
-                [](auto) {
-                    //we'll get a message from irc
-                },
-                [channel, formatChatSettingsError](auto error, auto message) {
-                    channel->addMessage(makeSystemMessage(
-                        formatChatSettingsError(error, message)));
-                });
-            return "";
-        });
-
-    this->registerCommand("/subscribersoff", [formatChatSettingsError](
-                                                 const QStringList
-                                                     & /* words */,
-                                                 auto channel) {
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(makeSystemMessage(
-                "You must be logged in to update chat settings!"));
-            return "";
-        }
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /subscribersoff command only works in Twitch channels"));
-            return "";
-        }
-
-        if (!twitchChannel->accessRoomModes()->submode)
-        {
-            channel->addMessage(makeSystemMessage(
-                "This room is not in subscribers-only mode."));
-            return "";
-        }
-
-        getHelix()->updateSubscriberMode(
-            twitchChannel->roomId(), currentUser->getUserId(), false,
-            [](auto) {
-                // we'll get a message from irc
-            },
-            [channel, formatChatSettingsError](auto error, auto message) {
-                channel->addMessage(
-                    makeSystemMessage(formatChatSettingsError(error, message)));
-            });
-        return "";
-    });
-
-    this->registerCommand("/slow", [formatChatSettingsError](
-                                       const QStringList &words, auto channel) {
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(makeSystemMessage(
-                "You must be logged in to update chat settings!"));
-            return "";
-        }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /slow command only works in Twitch channels"));
-            return "";
-        }
-
-        int duration = 30;
-        if (words.length() >= 2)
-        {
-            bool ok = false;
-            duration = words.at(1).toInt(&ok);
-            if (!ok || duration <= 0)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Usage: \"/slow [duration]\" - Enables slow mode (limit "
-                    "how often users may send messages). Duration (optional, "
-                    "default=30) must be a positive number of seconds. Use "
-                    "\"slowoff\" to disable. "));
-                return "";
-            }
-        }
-
-        if (twitchChannel->accessRoomModes()->slowMode == duration)
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("This room is already in %1-second slow mode.")
-                    .arg(duration)));
-            return "";
-        }
-
-        getHelix()->updateSlowMode(
-            twitchChannel->roomId(), currentUser->getUserId(), duration,
-            [](auto) {
-                //we'll get a message from irc
-            },
-            [channel, formatChatSettingsError](auto error, auto message) {
-                channel->addMessage(
-                    makeSystemMessage(formatChatSettingsError(error, message)));
-            });
-        return "";
-    });
-
-    this->registerCommand(
-        "/slowoff", [formatChatSettingsError](const QStringList & /* words */,
-                                              auto channel) {
-            auto currentUser = getApp()->accounts->twitch.getCurrent();
-            if (currentUser->isAnon())
-            {
-                channel->addMessage(makeSystemMessage(
-                    "You must be logged in to update chat settings!"));
-                return "";
-            }
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /slowoff command only works in Twitch channels"));
-                return "";
-            }
-
-            if (twitchChannel->accessRoomModes()->slowMode <= 0)
-            {
-                channel->addMessage(
-                    makeSystemMessage("This room is not in slow mode."));
-                return "";
-            }
-
-            getHelix()->updateSlowMode(
-                twitchChannel->roomId(), currentUser->getUserId(), boost::none,
-                [](auto) {
-                    // we'll get a message from irc
-                },
-                [channel, formatChatSettingsError](auto error, auto message) {
-                    channel->addMessage(makeSystemMessage(
-                        formatChatSettingsError(error, message)));
-                });
-            return "";
-        });
-
-    this->registerCommand("/followers", [formatChatSettingsError](
-                                            const QStringList &words,
-                                            auto channel) {
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(makeSystemMessage(
-                "You must be logged in to update chat settings!"));
-            return "";
-        }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /followers command only works in Twitch channels"));
-            return "";
-        }
-
-        int duration = 0;
-        if (words.length() >= 2)
-        {
-            auto parsed = parseDurationToSeconds(words.mid(1).join(' '), 60);
-            duration = (int)(parsed / 60);
-            // -1 / 60 == 0 => use parsed
-            if (parsed < 0)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Usage: \"/followers [duration]\" - Enables followers-only"
-                    " mode (only users who have followed for 'duration' may "
-                    "chat). Examples: \"30m\", \"1 week\", \"5 days 12 "
-                    "hours\". Must be less than 3 months. "));
-                return "";
-            }
-        }
-
-        if (twitchChannel->accessRoomModes()->followerOnly == duration)
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("This room is already in %1 followers-only mode.")
-                    .arg(formatTime(duration * 60))));
-            return "";
-        }
-
-        getHelix()->updateFollowerMode(
-            twitchChannel->roomId(), currentUser->getUserId(), duration,
-            [](auto) {
-                //we'll get a message from irc
-            },
-            [channel, formatChatSettingsError](auto error, auto message) {
-                channel->addMessage(makeSystemMessage(
-                    formatChatSettingsError(error, message, 60)));
-            });
-        return "";
-    });
-
-    this->registerCommand("/followersoff", [formatChatSettingsError](
-                                               const QStringList & /* words */,
-                                               auto channel) {
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(makeSystemMessage(
-                "You must be logged in to update chat settings!"));
-            return "";
-        }
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /followersoff command only works in Twitch channels"));
-            return "";
-        }
-
-        if (twitchChannel->accessRoomModes()->followerOnly < 0)
-        {
-            channel->addMessage(
-                makeSystemMessage("This room is not in followers-only mode. "));
-            return "";
-        }
-
-        getHelix()->updateFollowerMode(
-            twitchChannel->roomId(), currentUser->getUserId(), boost::none,
-            [](auto) {
-                // we'll get a message from irc
-            },
-            [channel, formatChatSettingsError](auto error, auto message) {
-                channel->addMessage(
-                    makeSystemMessage(formatChatSettingsError(error, message)));
-            });
-        return "";
-    });
+    this->registerCommand("/uniquechat", &commands::uniqueChat);
+    this->registerCommand("/r9kbeta", &commands::uniqueChat);
+    this->registerCommand("/uniquechatoff", &commands::uniqueChatOff);
+    this->registerCommand("/r9kbetaoff", &commands::uniqueChatOff);
 
     auto formatBanTimeoutError =
         [](const char *operation, HelixBanUserError error,
@@ -3337,67 +2951,6 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
-    auto uniqueChatLambda = [formatChatSettingsError](auto words, auto channel,
-                                                      bool target) {
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(makeSystemMessage(
-                "You must be logged in to update chat settings!"));
-            return "";
-        }
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("The /%1 command only works in Twitch channels")
-                    .arg(target ? "uniquechat" : "uniquechatoff")));
-            return "";
-        }
-
-        if (twitchChannel->accessRoomModes()->r9k == target)
-        {
-            channel->addMessage(makeSystemMessage(
-                target ? "This room is already in unique-chat mode."
-                       : "This room is not in unique-chat mode."));
-            return "";
-        }
-
-        getHelix()->updateUniqueChatMode(
-            twitchChannel->roomId(), currentUser->getUserId(), target,
-            [](auto) {
-                // we'll get a message from irc
-            },
-            [channel, formatChatSettingsError](auto error, auto message) {
-                channel->addMessage(
-                    makeSystemMessage(formatChatSettingsError(error, message)));
-            });
-        return "";
-    };
-
-    this->registerCommand(
-        "/uniquechatoff",
-        [uniqueChatLambda](const QStringList &words, auto channel) {
-            return uniqueChatLambda(words, channel, false);
-        });
-
-    this->registerCommand(
-        "/r9kbetaoff",
-        [uniqueChatLambda](const QStringList &words, auto channel) {
-            return uniqueChatLambda(words, channel, false);
-        });
-
-    this->registerCommand(
-        "/uniquechat",
-        [uniqueChatLambda](const QStringList &words, auto channel) {
-            return uniqueChatLambda(words, channel, true);
-        });
-
-    this->registerCommand(
-        "/r9kbeta", [uniqueChatLambda](const QStringList &words, auto channel) {
-            return uniqueChatLambda(words, channel, true);
-        });
-
     this->registerCommand(
         "/commercial",
         [formatStartCommercialError](const QStringList &words,
@@ -3544,7 +3097,22 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         const auto it = this->commands_.find(commandName);
         if (it != this->commands_.end())
         {
-            return it.value()(words, channel);
+            if (auto *command = std::get_if<CommandFunction>(&it->second))
+            {
+                return (*command)(words, channel);
+            }
+            if (auto *command =
+                    std::get_if<CommandFunctionWithContext>(&it->second))
+            {
+                CommandContext ctx{
+                    words,
+                    channel,
+                    dynamic_cast<TwitchChannel *>(channel.get()),
+                };
+                return (*command)(ctx);
+            }
+
+            return "";
         }
     }
 
@@ -3570,12 +3138,12 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     return text;
 }
 
-void CommandController::registerCommand(QString commandName,
-                                        CommandFunction commandFunction)
+void CommandController::registerCommand(const QString &commandName,
+                                        CommandFunctionVariants commandFunction)
 {
-    assert(!this->commands_.contains(commandName));
+    assert(this->commands_.count(commandName) == 0);
 
-    this->commands_[commandName] = commandFunction;
+    this->commands_[commandName] = std::move(commandFunction);
 
     this->defaultChatterinoCommandAutoCompletions_.append(commandName);
 }
