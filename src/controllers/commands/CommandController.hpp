@@ -50,14 +50,14 @@ private:
 
     using CommandFunctionWithContext = std::function<QString(CommandContext)>;
 
-    using CommandFunctionAlternatives =
+    using CommandFunctionVariants =
         std::variant<CommandFunction, CommandFunctionWithContext>;
 
-    void registerCommand(QString commandName,
-                         CommandFunctionAlternatives commandFunction);
+    void registerCommand(const QString &commandName,
+                         CommandFunctionVariants commandFunction);
 
     // Chatterino commands
-    std::unordered_map<QString, CommandFunctionAlternatives> commands_;
+    std::unordered_map<QString, CommandFunctionVariants> commands_;
 
     // User-created commands
     QMap<QString, Command> userCommands_;

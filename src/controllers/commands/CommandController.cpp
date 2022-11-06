@@ -3138,12 +3138,12 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     return text;
 }
 
-void CommandController::registerCommand(
-    QString commandName, CommandFunctionAlternatives commandFunction)
+void CommandController::registerCommand(const QString &commandName,
+                                        CommandFunctionVariants commandFunction)
 {
     assert(this->commands_.count(commandName) == 0);
 
-    this->commands_[commandName] = commandFunction;
+    this->commands_[commandName] = std::move(commandFunction);
 
     this->defaultChatterinoCommandAutoCompletions_.append(commandName);
 }
