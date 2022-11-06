@@ -242,6 +242,8 @@ public:
         "/streamerMode/hideLinkThumbnails", true};
     BoolSetting streamerModeHideViewerCountAndDuration = {
         "/streamerMode/hideViewerCountAndDuration", false};
+    BoolSetting streamerModeHideModActions = {"/streamerMode/hideModActions",
+                                              true};
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
     BoolSetting streamerModeSuppressLiveNotifications = {
         "/streamerMode/supressLiveNotifications", false};

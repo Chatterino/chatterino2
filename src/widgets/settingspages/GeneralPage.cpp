@@ -416,6 +416,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Hide viewer count and stream length while hovering over split header",
         s.streamerModeHideViewerCountAndDuration);
+    layout.addCheckbox("Hide moderation actions", s.streamerModeHideModActions);
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
     layout.addCheckbox("Suppress Live Notifications",
                        s.streamerModeSuppressLiveNotifications);
