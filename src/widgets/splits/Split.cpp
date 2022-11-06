@@ -1385,10 +1385,12 @@ void Split::showViewerListHelix()
                      performListSearch);
 
     // Add broadcaster
-    addLabel("Broadcaster");
-
-    chattersList->addItem(channel->getName());
-    chattersList->addItem(new QListWidgetItem());
+    if (channel->isBroadcaster() || channel->hasModRights())
+    {
+        addLabel("Broadcaster");
+        chattersList->addItem(channel->getName());
+        chattersList->addItem(new QListWidgetItem());
+    }
 
     // Only broadcaster can get vips, mods can get viewers
     if (channel->isBroadcaster())
@@ -1432,11 +1434,19 @@ void Split::showViewerListHelix()
     else if (channel->hasModRights())
     {
         std::vector<QString> modList;
+        modList.push_back("Moderators cannot check who is a moderator");
         std::vector<QString> vipList;
+        vipList.push_back("Moderators cannot check who is a vip");
         loadChatters(modList, vipList);
     }
     else
     {
+        chattersList->addItem(
+            formatListItemText("Due to Twitch restrictions, this feature is "
+                               "only available for moderators."));
+        chattersList->addItem(
+            formatListItemText("If you would like to see the Viewer list, you "
+                               "must use the Twitch website."));
         loadingLabel->hide();
     }
 
