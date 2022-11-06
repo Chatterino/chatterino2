@@ -216,6 +216,11 @@ int Application::run(QApplication &qtApp)
     return qtApp.exec();
 }
 
+IEmotes *Application::getEmotes()
+{
+    return this->emotes;
+}
+
 void Application::save()
 {
     for (auto &singleton : this->singletons_)

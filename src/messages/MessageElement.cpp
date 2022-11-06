@@ -679,21 +679,23 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
 
 ReplyCurveElement::ReplyCurveElement()
     : MessageElement(MessageElementFlag::RepliedMessage)
-    // these values nicely align with a single badge
-    , neededMargin_(3)
-    , size_(18, 14)
 {
 }
 
 void ReplyCurveElement::addToContainer(MessageLayoutContainer &container,
                                        MessageElementFlags flags)
 {
+    static const int width = 18;         // Overall width
+    static const float thickness = 1.5;  // Pen width
+    static const int radius = 6;         // Radius of the top left corner
+    static const int margin = 2;         // Top/Left/Bottom margin
+
     if (flags.hasAny(this->getFlags()))
     {
-        QSize boxSize = this->size_ * container.getScale();
-        container.addElement(new ReplyCurveLayoutElement(
-            *this, boxSize, 1.5 * container.getScale(),
-            this->neededMargin_ * container.getScale()));
+        float scale = container.getScale();
+        container.addElement(
+            new ReplyCurveLayoutElement(*this, width * scale, thickness * scale,
+                                        radius * scale, margin * scale));
     }
 }
 

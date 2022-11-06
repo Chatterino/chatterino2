@@ -157,21 +157,20 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         this->currentY_ = int(this->margin.top * this->scale_);
     }
 
-    int newLineHeight = element->getRect().height();
+    int elementLineHeight = element->getRect().height();
 
     // compact emote offset
     bool isCompactEmote =
-        getSettings()->compactEmotes &&
         !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
         element->getCreator().getFlags().has(MessageElementFlag::EmoteImages);
 
     if (isCompactEmote)
     {
-        newLineHeight -= COMPACT_EMOTES_OFFSET * this->scale_;
+        elementLineHeight -= COMPACT_EMOTES_OFFSET * this->scale_;
     }
 
     // update line height
-    this->lineHeight_ = std::max(this->lineHeight_, newLineHeight);
+    this->lineHeight_ = std::max(this->lineHeight_, elementLineHeight);
 
     auto xOffset = 0;
     bool isZeroWidthEmote = element->getCreator().getFlags().has(
@@ -372,7 +371,6 @@ void MessageLayoutContainer::breakLine()
         MessageLayoutElement *element = this->elements_.at(i).get();
 
         bool isCompactEmote =
-            getSettings()->compactEmotes &&
             !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
             element->getCreator().getFlags().has(
                 MessageElementFlag::EmoteImages);
@@ -381,15 +379,6 @@ void MessageLayoutContainer::breakLine()
         if (isCompactEmote)
         {
             yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale_;
-        }
-
-        //        if (element->getCreator().getFlags() &
-        //        MessageElementFlag::Badges)
-        //        {
-        if (element->getRect().height() < this->textLineHeight_)
-        {
-            // yExtra -= (this->textLineHeight_ - element->getRect().height()) /
-            // 2;
         }
 
         element->setPosition(

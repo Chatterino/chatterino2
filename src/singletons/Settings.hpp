@@ -100,7 +100,6 @@ public:
                                      false};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
-    BoolSetting compactEmotes = {"/appearance/messages/compactEmotes", true};
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
     BoolSetting hideModerationActions = {
         "/appearance/messages/hideModerationActions", false};
@@ -441,6 +440,15 @@ public:
     };
     EnumSetting<HelixTimegateOverride> helixTimegateVIPs = {
         "/misc/twitch/helix-timegate/vips",
+        HelixTimegateOverride::Timegate,
+    };
+    EnumSetting<HelixTimegateOverride> helixTimegateModerators = {
+        "/misc/twitch/helix-timegate/moderators",
+        HelixTimegateOverride::Timegate,
+    };
+
+    EnumSetting<HelixTimegateOverride> helixTimegateCommercial = {
+        "/misc/twitch/helix-timegate/commercial",
         HelixTimegateOverride::Timegate,
     };
 

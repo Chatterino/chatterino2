@@ -301,7 +301,7 @@ private:
     QTimer scrollTimer_;
 
     // We're only interested in the pointer, not the contents
-    MessageLayout *highlightedMessage_;
+    MessageLayout *highlightedMessage_ = nullptr;
     QVariantAnimation highlightAnimation_;
     void setupHighlightAnimationColors();
 
