@@ -1989,16 +1989,17 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
         }
         break;
         case Qt::RightButton: {
-            auto split = dynamic_cast<Split *>(this->parentWidget());
-            auto insertText = [=](QString text) {
-                if (split)
-                {
-                    split->insertTextToInput(text);
-                }
-            };
-
-            if (hoveredElement != nullptr)
+            // insert user mention to input, only in default context
+            if ((this->context_ == Context::None) &&
+                (hoveredElement != nullptr))
             {
+                auto split = dynamic_cast<Split *>(this->parentWidget());
+                auto insertText = [=](QString text) {
+                    if (split)
+                    {
+                        split->insertTextToInput(text);
+                    }
+                };
                 const auto &link = hoveredElement->getLink();
 
                 if (link.type == Link::UserInfo)
