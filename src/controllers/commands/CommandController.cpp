@@ -32,6 +32,7 @@
 #include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 
 #include <QApplication>
 #include <QDesktopServices>
@@ -838,10 +839,49 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel = channelTemp;
         }
 
+        // try to link to current split if possible
+        Split *currentSplit = nullptr;
+        auto *currentPage = dynamic_cast<SplitContainer *>(
+            getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+        if (currentPage != nullptr)
+        {
+            currentSplit = currentPage->getSelectedSplit();
+        }
+
+        auto differentChannel =
+            currentSplit != nullptr && currentSplit->getChannel() != channel;
+        if (differentChannel || currentSplit == nullptr)
+        {
+            // not possible to use current split, try searching for one
+            const auto &notebook =
+                getApp()->windows->getMainWindow().getNotebook();
+            auto count = notebook.getPageCount();
+            for (int i = 0; i < count; i++)
+            {
+                auto *page = notebook.getPageAt(i);
+                auto *container = dynamic_cast<SplitContainer *>(page);
+                assert(container != nullptr);
+                for (auto *split : container->getSplits())
+                {
+                    if (split->getChannel() == channel)
+                    {
+                        currentSplit = split;
+                        break;
+                    }
+                }
+            }
+
+            // This would have crashed either way.
+            assert(currentSplit != nullptr &&
+                   "something went HORRIBLY wrong with the /usercard "
+                   "command. It couldn't find a split for a channel which "
+                   "should be open.");
+        }
+
         auto *userPopup = new UserInfoPopup(
             getSettings()->autoCloseUserPopup,
             static_cast<QWidget *>(&(getApp()->windows->getMainWindow())),
-            nullptr);
+            currentSplit);
         userPopup->setData(userName, channel);
         userPopup->move(QCursor::pos());
         userPopup->show();
@@ -878,65 +918,199 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand("/chatters", [](const auto &words, auto channel) {
-        auto formatError = [](HelixGetChattersError error, QString message) {
-            using Error = HelixGetChattersError;
+    auto formatChattersError = [](HelixGetChattersError error,
+                                  QString message) {
+        using Error = HelixGetChattersError;
 
-            QString errorMessage = QString("Failed to get chatter count: ");
+        QString errorMessage = QString("Failed to get chatter count: ");
 
-            switch (error)
-            {
-                case Error::Forwarded: {
-                    errorMessage += message;
-                }
-                break;
-
-                case Error::UserMissingScope: {
-                    errorMessage += "Missing required scope. "
-                                    "Re-login with your "
-                                    "account and try again.";
-                }
-                break;
-
-                case Error::UserNotAuthorized: {
-                    errorMessage += "You must have moderator permissions to "
-                                    "use this command.";
-                }
-                break;
-
-                case Error::Unknown: {
-                    errorMessage += "An unknown error has occurred.";
-                }
-                break;
+        switch (error)
+        {
+            case Error::Forwarded: {
+                errorMessage += message;
             }
-            return errorMessage;
-        };
+            break;
 
-        auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            case Error::UserMissingScope: {
+                errorMessage += "Missing required scope. "
+                                "Re-login with your "
+                                "account and try again.";
+            }
+            break;
+
+            case Error::UserNotAuthorized: {
+                errorMessage += "You must have moderator permissions to "
+                                "use this command.";
+            }
+            break;
+
+            case Error::Unknown: {
+                errorMessage += "An unknown error has occurred.";
+            }
+            break;
+        }
+        return errorMessage;
+    };
+
+    this->registerCommand(
+        "/chatters", [formatChattersError](const auto &words, auto channel) {
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /chatters command only works in Twitch Channels"));
+                return "";
+            }
+
+            // Refresh chatter list via helix api for mods
+            getHelix()->getChatters(
+                twitchChannel->roomId(),
+                getApp()->accounts->twitch.getCurrent()->getUserId(), 1,
+                [channel](auto result) {
+                    channel->addMessage(makeSystemMessage(
+                        QString("Chatter count: %1")
+                            .arg(localizeNumbers(result.total))));
+                },
+                [channel, formatChattersError](auto error, auto message) {
+                    auto errorMessage = formatChattersError(error, message);
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
+
+            return "";
+        });
+
+    this->registerCommand("/test-chatters", [formatChattersError](
+                                                const auto & /*words*/,
+                                                auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
         if (twitchChannel == nullptr)
         {
             channel->addMessage(makeSystemMessage(
-                "The /chatters command only works in Twitch Channels"));
+                "The /test-chatters command only works in Twitch Channels"));
             return "";
         }
 
-        // Refresh chatter list via helix api for mods
         getHelix()->getChatters(
             twitchChannel->roomId(),
-            getApp()->accounts->twitch.getCurrent()->getUserId(), 1,
-            [channel](auto result) {
-                channel->addMessage(
-                    makeSystemMessage(QString("Chatter count: %1")
-                                          .arg(localizeNumbers(result.total))));
+            getApp()->accounts->twitch.getCurrent()->getUserId(), 5000,
+            [channel, twitchChannel](auto result) {
+                QStringList entries;
+                for (const auto &username : result.chatters)
+                {
+                    entries << username;
+                }
+
+                QString prefix = "Chatters ";
+
+                if (result.total > 5000)
+                {
+                    prefix += QString("(5000/%1):").arg(result.total);
+                }
+                else
+                {
+                    prefix += QString("(%1):").arg(result.total);
+                }
+
+                MessageBuilder builder;
+                TwitchMessageBuilder::listOfUsersSystemMessage(
+                    prefix, entries, twitchChannel, &builder);
+
+                channel->addMessage(builder.release());
             },
-            [channel, formatError](auto error, auto message) {
-                auto errorMessage = formatError(error, message);
+            [channel, formatChattersError](auto error, auto message) {
+                auto errorMessage = formatChattersError(error, message);
                 channel->addMessage(makeSystemMessage(errorMessage));
             });
 
         return "";
     });
+
+    auto formatModsError = [](HelixGetModeratorsError error, QString message) {
+        using Error = HelixGetModeratorsError;
+
+        QString errorMessage = QString("Failed to get moderators: ");
+
+        switch (error)
+        {
+            case Error::Forwarded: {
+                errorMessage += message;
+            }
+            break;
+
+            case Error::UserMissingScope: {
+                errorMessage += "Missing required scope. "
+                                "Re-login with your "
+                                "account and try again.";
+            }
+            break;
+
+            case Error::UserNotAuthorized: {
+                errorMessage +=
+                    "Due to Twitch restrictions, "
+                    "this command can only be used by the broadcaster. "
+                    "To see the list of mods you must use the Twitch website.";
+            }
+            break;
+
+            case Error::Unknown: {
+                errorMessage += "An unknown error has occurred.";
+            }
+            break;
+        }
+        return errorMessage;
+    };
+
+    this->registerCommand(
+        "/mods",
+        [formatModsError](const QStringList &words, auto channel) -> QString {
+            switch (getSettings()->helixTimegateModerators.getValue())
+            {
+                case HelixTimegateOverride::Timegate: {
+                    if (areIRCCommandsStillAvailable())
+                    {
+                        return useIRCCommand(words);
+                    }
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseIRC: {
+                    return useIRCCommand(words);
+                }
+                break;
+                case HelixTimegateOverride::AlwaysUseHelix: {
+                    // Fall through to helix logic
+                }
+                break;
+            }
+
+            auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /mods command only works in Twitch Channels"));
+                return "";
+            }
+
+            getHelix()->getModerators(
+                twitchChannel->roomId(), 500,
+                [channel, twitchChannel](auto result) {
+                    // TODO: sort results?
+
+                    MessageBuilder builder;
+                    TwitchMessageBuilder::listOfUsersSystemMessage(
+                        "The moderators of this channel are", result,
+                        twitchChannel, &builder);
+                    channel->addMessage(builder.release());
+                },
+                [channel, formatModsError](auto error, auto message) {
+                    auto errorMessage = formatModsError(error, message);
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
+            return "";
+        });
 
     this->registerCommand("/clip", [](const auto & /*words*/, auto channel) {
         if (const auto type = channel->getType();
@@ -3033,6 +3207,55 @@ void CommandController::initialize(Settings &, Paths &paths)
         return errorMessage;
     };
 
+    auto formatStartCommercialError = [](HelixStartCommercialError error,
+                                         const QString &message) -> QString {
+        using Error = HelixStartCommercialError;
+
+        QString errorMessage = "Failed to start commercial - ";
+
+        switch (error)
+        {
+            case Error::UserMissingScope: {
+                errorMessage += "Missing required scope. Re-login with your "
+                                "account and try again.";
+            }
+            break;
+
+            case Error::TokenMustMatchBroadcaster: {
+                errorMessage += "Only the broadcaster of the channel can run "
+                                "commercials.";
+            }
+            break;
+
+            case Error::BroadcasterNotStreaming: {
+                errorMessage += "You must be streaming live to run "
+                                "commercials.";
+            }
+            break;
+
+            case Error::Ratelimited: {
+                errorMessage += "You must wait until your cooldown period "
+                                "expires before you can run another "
+                                "commercial.";
+            }
+            break;
+
+            case Error::Forwarded: {
+                errorMessage += message;
+            }
+            break;
+
+            case Error::Unknown:
+            default: {
+                errorMessage +=
+                    QString("An unknown error has occurred (%1).").arg(message);
+            }
+            break;
+        }
+
+        return errorMessage;
+    };
+
     this->registerCommand(
         "/vips",
         [formatVIPListError](const QStringList &words,
@@ -3173,6 +3396,99 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand(
         "/r9kbeta", [uniqueChatLambda](const QStringList &words, auto channel) {
             return uniqueChatLambda(words, channel, true);
+        });
+
+    this->registerCommand(
+        "/commercial",
+        [formatStartCommercialError](const QStringList &words,
+                                     auto channel) -> QString {
+            const auto *usageStr = "Usage: \"/commercial <length>\" - Starts a "
+                                   "commercial with the "
+                                   "specified duration for the current "
+                                   "channel. Valid length options "
+                                   "are 30, 60, 90, 120, 150, and 180 seconds.";
+
+            switch (getSettings()->helixTimegateCommercial.getValue())
+            {
+                case HelixTimegateOverride::Timegate: {
+                    if (areIRCCommandsStillAvailable())
+                    {
+                        return useIRCCommand(words);
+                    }
+
+                    // fall through to Helix logic
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseIRC: {
+                    return useIRCCommand(words);
+                }
+                break;
+
+                case HelixTimegateOverride::AlwaysUseHelix: {
+                    // do nothing and fall through to Helix logic
+                }
+                break;
+            }
+
+            if (words.size() < 2)
+            {
+                channel->addMessage(makeSystemMessage(usageStr));
+                return "";
+            }
+
+            auto user = getApp()->accounts->twitch.getCurrent();
+
+            // Avoid Helix calls without Client ID and/or OAuth Token
+            if (user->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to use the /commercial command"));
+                return "";
+            }
+
+            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc == nullptr)
+            {
+                return "";
+            }
+
+            auto broadcasterID = tc->roomId();
+            auto length = words.at(1).toInt();
+
+            // We would prefer not to early out here and rather handle the API error
+            // like the rest of them, but the API doesn't give us a proper length error.
+            // Valid lengths can be found in the length body parameter description
+            // https://dev.twitch.tv/docs/api/reference#start-commercial
+            const QList<int> validLengths = {30, 60, 90, 120, 150, 180};
+            if (!validLengths.contains(length))
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Invalid commercial duration length specified. Valid "
+                    "options "
+                    "are 30, 60, 90, 120, 150, and 180 seconds"));
+                return "";
+            }
+
+            getHelix()->startCommercial(
+                broadcasterID, length,
+                [channel](auto response) {
+                    channel->addMessage(makeSystemMessage(
+                        QString("Starting commercial break. Keep in mind you "
+                                "are still "
+                                "live and not all viewers will receive a "
+                                "commercial. "
+                                "You may run another commercial in %1 seconds.")
+                            .arg(response.retryAfter)));
+                },
+                [channel, formatStartCommercialError](auto error,
+                                                      auto message) {
+                    auto errorMessage =
+                        formatStartCommercialError(error, message);
+                    channel->addMessage(makeSystemMessage(errorMessage));
+                });
+
+            return "";
         });
 }
 

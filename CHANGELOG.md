@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722, #3989, #4041, #4047, #4055, #4067, #4077)
+- Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722, #3989, #4041, #4047, #4055, #4067, #4077, #3905)
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
 - Major: Added support for emotes and badges from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062)
 - Minor: Added highlights for `Elevated Messages`. (#4016)
@@ -68,9 +68,11 @@
 - Minor: Migrated /vips to Helix API. Chat command will continue to be used until February 11th 2023. (#4053)
 - Minor: Migrated /uniquechat and /r9kbeta to Helix API. (#4057)
 - Minor: Migrated /uniquechatoff and /r9kbetaoff to Helix API. (#4057)
+- Minor: Migrated /commercial to Helix API. (#4094)
 - Minor: Added stream titles to windows live toast notifications. (#1297)
 - Minor: Make menus and placeholders display appropriate custom key combos. (#4045)
-- Minor: Migrated /chatters to Helix API. (#4088, #4097)
+- Minor: Migrated /chatters to Helix API. (#4088, #4097, #4114)
+- Minor: Migrated /mods to Helix API. (#4103)
 - Minor: Add settings tooltips. (#3437)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fixed `Smooth scrolling on new messages` setting sometimes hiding messages. (#4028)
@@ -103,7 +105,6 @@
 - Bugfix: Fixed channel-based popups from rewriting messages to file log (#4060)
 - Bugfix: Fixed invalid/dangling completion when cycling through previous messages or replying (#4072)
 - Bugfix: Fixed incorrect .desktop icon path. (#4078)
-- Bugfix: Fixed Twitch channel-specific filters not being applied correctly. (#4107)
 - Dev: Removed official support for QMake. (#3839, #3883)
 - Dev: Rewrote LimitedQueue (#3798)
 - Dev: Overhauled highlight system by moving all checks into a Controller allowing for easier tests. (#3399, #3801, #3835)
