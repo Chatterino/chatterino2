@@ -205,16 +205,15 @@ private:
 
     QString prepareMessage(const QString &message) const;
 
-    /**
-     * Either adds the `message` or updates an existing message
-     * that was of the same kind (add/remove) as `message`
-     * by merging the added/removed emotes.
-     *
-     * @param message The message to add or take replacements from.
-     * @param platform The emote platform (BTTV, FFZ, 7TV)
-     */
-    void addOrReplaceLiveUpdatesAddRemove(const MessagePtr &message,
-                                          const QString &platform);
+    void addOrReplaceLiveUpdatesAddRemove(bool isEmoteAdd,
+                                          const QString &platform,
+                                          const QString &actor,
+                                          const QString &emoteName);
+
+    bool tryReplaceLastLiveUpdateAddOrRemove(MessageFlag op,
+                                             const QString &platform,
+                                             const QString &actor,
+                                             const QString &emoteName);
 
     // Data
     const QString subscriptionUrl_;
@@ -264,6 +263,16 @@ private:
      * empty if this channel isn't connected with 7TV
      */
     QString seventvEmoteSetID_;
+    /**
+     * The index of the twitch connection in
+     * 7TV's user representation.
+     */
+    size_t seventvUserTwitchConnectionIndex_;
+
+    QString lastLiveUpdateEmotePlatform_;
+    QString lastLiveUpdateEmoteActor_;
+    std::weak_ptr<const Message> lastLiveUpdateMessage_;
+    std::vector<QString> lastLiveUpdateEmoteNames_;
 
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;

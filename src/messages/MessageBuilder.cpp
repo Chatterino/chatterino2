@@ -543,7 +543,6 @@ MessageBuilder::MessageBuilder(LiveUpdatesAddEmoteMessageTag /*unused*/,
     this->message().loginName = actor;
     this->message().messageText = finalText;
     this->message().searchText = finalText;
-    this->message().liveUpdateEmoteNames = emoteNames;
 
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::LiveUpdatesAdd);
@@ -581,7 +580,6 @@ MessageBuilder::MessageBuilder(LiveUpdatesRemoveEmoteMessageTag /*unused*/,
     this->message().loginName = actor;
     this->message().messageText = finalText;
     this->message().searchText = finalText;
-    this->message().liveUpdateEmoteNames = emoteNames;
 
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::LiveUpdatesRemove);
