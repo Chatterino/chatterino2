@@ -1336,8 +1336,7 @@ void Split::showViewerListHelix()
         resultList->show();
     };
 
-    auto vectorContains = [](std::vector<QString> vector, QString s) -> bool
-    {
+    auto vectorContains = [](std::vector<QString> vector, QString s) -> bool {
         for (auto i : vector)
         {
             if (i == s)
@@ -1357,9 +1356,9 @@ void Split::showViewerListHelix()
                 std::vector<QString> chatterVector;
                 for (const auto &chatter : chatters.chatters)
                 {
-                    if (!vectorContains(modList, chatter) 
-                        && !vectorContains(vipList, chatter)
-                        && chatter != broadcasterName)
+                    if (!vectorContains(modList, chatter) &&
+                        !vectorContains(vipList, chatter) &&
+                        chatter != broadcasterName)
                     {
                         chatterVector.push_back(chatter);
                     }
@@ -1435,7 +1434,8 @@ void Split::showViewerListHelix()
         std::vector<QString> modList;
         std::vector<QString> vipList;
         loadChatters(modList, vipList);
-    } else 
+    }
+    else
     {
         loadingLabel->hide();
     }
