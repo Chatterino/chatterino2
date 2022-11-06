@@ -205,11 +205,36 @@ private:
 
     QString prepareMessage(const QString &message) const;
 
+    /**
+     * Either adds a message mentioning the updated emotes
+     * or replaces an existing message. For criteria on existing messages,
+     * see `tryReplaceLastLiveUpdateAddOrRemove`.
+     *
+     * @param isEmoteAdd true if the emote was added, false if it was removed.
+     * @param platform The platform the emote was updated on ("7TV", "BTTV", "FFZ")
+     * @param actor The actor performing the update (possibly empty)
+     * @param emoteName The emote's name
+     */
     void addOrReplaceLiveUpdatesAddRemove(bool isEmoteAdd,
                                           const QString &platform,
                                           const QString &actor,
                                           const QString &emoteName);
 
+    /**
+     * Tries to replace the last emote update message.
+     *
+     * A last message is valid if:
+     *  * The actors match
+     *  * The operations match
+     *  * The platform matches
+     *  * The last message isn't older than 5s
+     *
+     * @param op The emote operation (LiveUpdatesAdd or LiveUpdatesRemove)
+     * @param platform The emote platform  ("7TV", "BTTV", "FFZ")
+     * @param actor The actor performing the action (possibly empty)
+     * @param emoteName The updated emote's name
+     * @return true, if the last message was replaced
+     */
     bool tryReplaceLastLiveUpdateAddOrRemove(MessageFlag op,
                                              const QString &platform,
                                              const QString &actor,
@@ -269,9 +294,13 @@ private:
      */
     size_t seventvUserTwitchConnectionIndex_;
 
+    /** The platform of the last live emote update ("7TV", "BTTV", "FFZ"). */
     QString lastLiveUpdateEmotePlatform_;
+    /** The actor name of the last live emote update. */
     QString lastLiveUpdateEmoteActor_;
+    /** A weak reference to the last live emote update message. */
     std::weak_ptr<const Message> lastLiveUpdateMessage_;
+    /** A list of the emotes listed in the lat live emote update message. */
     std::vector<QString> lastLiveUpdateEmoteNames_;
 
     pajlada::Signals::SignalHolder signalHolder_;
