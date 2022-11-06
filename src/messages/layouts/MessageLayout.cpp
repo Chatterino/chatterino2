@@ -155,7 +155,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
             // This condition has been set up to execute isInStreamerMode() as the last thing
             // as it could end up being expensive.
             if (hideModerationActions ||
-                (getSettings()->streamerModeSuppressModActions &&
+                (getSettings()->streamerModeHideModActions &&
                  isInStreamerMode()))
             {
                 continue;

@@ -421,8 +421,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.streamerModeSuppressLiveNotifications);
     layout.addCheckbox("Suppress Inline Whispers",
                        s.streamerModeSuppressInlineWhispers);
-    layout.addCheckbox("Hide moderation actions",
-                       s.streamerModeSuppressModActions);
+    layout.addCheckbox("Hide moderation actions", s.streamerModeHideModActions);
 
     layout.addTitle("Link Previews");
     layout.addDescription(
