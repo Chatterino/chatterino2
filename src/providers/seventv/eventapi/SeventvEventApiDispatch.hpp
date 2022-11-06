@@ -61,9 +61,11 @@ struct SeventvEventAPIUserConnectionUpdateDispatch {
     QString actorName;
     QString oldEmoteSetID;
     QString emoteSetID;
+    size_t connectionIndex;
 
     SeventvEventAPIUserConnectionUpdateDispatch(
-        const SeventvEventAPIDispatch &dispatch, const QJsonObject &update);
+        const SeventvEventAPIDispatch &dispatch, const QJsonObject &update,
+        size_t connectionIndex);
 
     bool validate() const;
 };

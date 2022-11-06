@@ -71,7 +71,6 @@ void SeventvEventAPI::onMessage(
             << "Unable to parse incoming event-api message: " << payload;
         return;
     }
-    qCDebug(chatterinoSeventvEventAPI) << payload;
     auto message = *pMessage;
     switch (message.op)
     {
@@ -220,8 +219,8 @@ void SeventvEventAPI::handleDispatch(const SeventvEventAPIDispatch &dispatch)
                         continue;
                     }
 
-                    SeventvEventAPIUserConnectionUpdateDispatch update(dispatch,
-                                                                       value);
+                    SeventvEventAPIUserConnectionUpdateDispatch update(
+                        dispatch, value, (size_t)updated["index"].toInt());
 
                     if (update.validate())
                     {

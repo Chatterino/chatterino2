@@ -60,6 +60,7 @@ public:
     struct ChannelInfo {
         QString userID;
         QString emoteSetID;
+        size_t twitchConnectionIndex;
     };
 
     SeventvEmotes();

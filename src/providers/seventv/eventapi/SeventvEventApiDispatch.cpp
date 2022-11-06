@@ -82,11 +82,13 @@ bool SeventvEventAPIEmoteUpdateDispatch::validate() const
 
 SeventvEventAPIUserConnectionUpdateDispatch::
     SeventvEventAPIUserConnectionUpdateDispatch(
-        const SeventvEventAPIDispatch &dispatch, const QJsonObject &update)
+        const SeventvEventAPIDispatch &dispatch, const QJsonObject &update,
+        size_t connectionIndex)
     : userID(dispatch.id)
     , actorName(dispatch.actorName)
     , oldEmoteSetID(update["old_value"].toObject()["id"].toString())
     , emoteSetID(update["value"].toObject()["id"].toString())
+    , connectionIndex(connectionIndex)
 {
 }
 

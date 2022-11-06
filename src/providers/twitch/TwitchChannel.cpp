@@ -251,6 +251,8 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
                     std::forward<decltype(emoteMap)>(emoteMap)));
                 this->updateSeventvData(channelInfo.userID,
                                         channelInfo.emoteSetID);
+                this->seventvUserTwitchConnectionIndex_ =
+                    channelInfo.twitchConnectionIndex;
             }
         },
         manualRefresh);
@@ -649,6 +651,12 @@ void TwitchChannel::removeSeventvEmote(
 void TwitchChannel::updateSeventvUser(
     const SeventvEventAPIUserConnectionUpdateDispatch &dispatch)
 {
+    if (dispatch.connectionIndex != this->seventvUserTwitchConnectionIndex_)
+    {
+        // A different connection was updated
+        return;
+    }
+
     updateSeventvData(this->seventvUserID_, dispatch.emoteSetID);
     SeventvEmotes::getEmoteSet(
         dispatch.emoteSetID,

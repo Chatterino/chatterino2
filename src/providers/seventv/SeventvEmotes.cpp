@@ -319,8 +319,20 @@ void SeventvEmotes::loadChannelEmotes(
             if (hasEmotes)
             {
                 auto user = json["user"].toObject();
+
+                size_t connectionIdx = 0;
+                for (const auto &conn : user["connections"].toArray())
+                {
+                    if (conn.toObject()["platform"].toString() == "TWITCH")
+                    {
+                        break;
+                    }
+                    connectionIdx++;
+                }
+
                 callback(std::move(emoteMap),
-                         {user["id"].toString(), emoteSet["id"].toString()});
+                         {user["id"].toString(), emoteSet["id"].toString(),
+                          connectionIdx});
             }
 
             auto shared = channel.lock();
