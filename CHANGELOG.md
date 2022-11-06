@@ -20,6 +20,7 @@
 - Minor: Added `is:first-msg` search option. (#3700)
 - Minor: Added `is:elevated-msg` search option. (#4018)
 - Minor: Added `is:cheer-msg` search option. (#4069)
+- Minor: Added `is:redemption` search option. (#4118)
 - Minor: Added `is:reply` search option. (#4119)
 - Minor: Added `subtier:` search option (e.g. `subtier:3` to find Tier 3 subs). (#4013)
 - Minor: Added `badge:` search option (e.g. `badge:mod` to users with the moderator badge). (#4013)
