@@ -165,7 +165,9 @@ void SeventvEventAPI::handleDispatch(const SeventvEventAPIDispatch &dispatch)
                     continue;
                 }
 
-                SeventvEventAPIEmoteUpdateDispatch update(dispatch, updated);
+                SeventvEventAPIEmoteUpdateDispatch update(
+                    dispatch, updated["old_value"].toObject(),
+                    updated["value"].toObject());
 
                 if (update.validate())
                 {

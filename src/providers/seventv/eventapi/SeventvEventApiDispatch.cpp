@@ -5,16 +5,13 @@
 namespace chatterino {
 
 SeventvEventAPIDispatch::SeventvEventAPIDispatch(QJsonObject obj)
-    : body(obj["body"].toObject())
+    : type(magic_enum::enum_cast<SeventvEventAPISubscriptionType>(
+               obj["type"].toString().toStdString())
+               .value_or(SeventvEventAPISubscriptionType::INVALID))
+    , body(obj["body"].toObject())
     , id(this->body["id"].toString())
     , actorName(this->body["actor"].toObject()["display_name"].toString())
 {
-    auto subType = magic_enum::enum_cast<SeventvEventAPISubscriptionType>(
-        obj["type"].toString().toStdString());
-    if (subType.has_value())
-    {
-        this->type = subType.value();
-    }
 }
 
 SeventvEventAPIEmoteAddDispatch::SeventvEventAPIEmoteAddDispatch(
@@ -62,15 +59,14 @@ bool SeventvEventAPIEmoteRemoveDispatch::validate() const
 }
 
 SeventvEventAPIEmoteUpdateDispatch::SeventvEventAPIEmoteUpdateDispatch(
-    const SeventvEventAPIDispatch &dispatch, QJsonObject changeField)
+    const SeventvEventAPIDispatch &dispatch, QJsonObject oldValue,
+    QJsonObject value)
     : emoteSetID(dispatch.id)
     , actorName(dispatch.actorName)
+    , emoteID(value["id"].toString())
+    , oldEmoteName(oldValue["name"].toString())
+    , emoteName(value["name"].toString())
 {
-    auto oldValue = changeField["old_value"].toObject();
-    auto value = changeField["value"].toObject();
-    this->emoteID = value["id"].toString();
-    this->oldEmoteName = oldValue["name"].toString();
-    this->emoteName = value["name"].toString();
 }
 
 bool SeventvEventAPIEmoteUpdateDispatch::validate() const
