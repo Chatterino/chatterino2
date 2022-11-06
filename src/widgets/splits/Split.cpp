@@ -1336,15 +1336,41 @@ void Split::showViewerListHelix()
         resultList->show();
     };
 
-    auto loadChatters = [=]() {
+    auto vectorContains = [](std::vector<QString> vector, QString s) -> bool
+    {
+        for (auto i : vector)
+        {
+            if (i == s)
+            {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    auto loadChatters = [=](auto modList, auto vipList) {
         getHelix()->getChatters(
             twitchChannel->roomId(),
             getApp()->accounts->twitch.getCurrent()->getUserId(), 50000,
             [=](auto chatters) {
+                auto broadcasterName = channel->getName();
                 std::vector<QString> chatterVector;
                 for (const auto &chatter : chatters.chatters)
                 {
-                    chatterVector.push_back(chatter);
+                    if (!vectorContains(modList, chatter) 
+                        && !vectorContains(vipList, chatter)
+                        && chatter != broadcasterName)
+                    {
+                        chatterVector.push_back(chatter);
+                    }
+                }
+                if (!modList.empty())
+                {
+                    addUserList(modList, QString("Moderators"));
+                }
+                if (!vipList.empty())
+                {
+                    addUserList(vipList, QString("VIPs"));
                 }
                 addUserList(chatterVector, QString("Viewers"));
                 loadingLabel->hide();
@@ -1379,7 +1405,6 @@ void Split::showViewerListHelix()
                 {
                     modVector.push_back(mod.userName);
                 }
-                addUserList(modVector, QString("Moderators"));
 
                 // Add vips
                 helixApi->getChannelVIPs(
@@ -1390,10 +1415,9 @@ void Split::showViewerListHelix()
                         {
                             vipVector.emplace_back(vip.userName);
                         }
-                        addUserList(vipVector, QString("VIPs"));
 
                         // Add chatters
-                        loadChatters();
+                        loadChatters(modVector, vipVector);
                     },
                     [chattersList, formatListItemText](auto error,
                                                        auto message) {
@@ -1408,7 +1432,12 @@ void Split::showViewerListHelix()
     }
     else if (channel->hasModRights())
     {
-        loadChatters();
+        std::vector<QString> modList;
+        std::vector<QString> vipList;
+        loadChatters(modList, vipList);
+    } else 
+    {
+        loadingLabel->hide();
     }
 
     QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {
