@@ -23,8 +23,8 @@ namespace chatterino {
 
 namespace {
 
-    void logInWithCredentials(const QString &userID, const QString &username,
-                              const QString &clientID,
+    bool logInWithCredentials(QWidget *parent, const QString &userID,
+                              const QString &username, const QString &clientID,
                               const QString &oauthToken)
     {
         QStringList errors;
@@ -48,20 +48,12 @@ namespace {
 
         if (errors.length() > 0)
         {
-            QMessageBox messageBox;
-// Set error window on top
-#ifdef USEWINSDK
-            ::SetWindowPos(HWND(messageBox.winId()), HWND_TOPMOST, 0, 0, 0, 0,
-                           SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-
-#endif
-            messageBox.setWindowTitle(
-                "Chatterino - invalid account credentials");
+            QMessageBox messageBox(parent);
+            messageBox.setWindowTitle("Invalid account credentials");
             messageBox.setIcon(QMessageBox::Critical);
             messageBox.setText(errors.join("<br>"));
-            messageBox.setStandardButtons(QMessageBox::Ok);
             messageBox.exec();
-            return;
+            return false;
         }
 
         std::string basePath = "/accounts/uid" + userID.toStdString();
@@ -75,6 +67,7 @@ namespace {
 
         getApp()->accounts->twitch.reloadUsers();
         getApp()->accounts->twitch.currentUsername = username;
+        return true;
     }
 
 }  // namespace
@@ -84,7 +77,7 @@ BasicLoginWidget::BasicLoginWidget()
     const QString logInLink = "https://chatterino.com/client_login";
     this->setLayout(&this->ui_.layout);
 
-    this->ui_.loginButton.setText("Log in (Opens in browser)");
+    this->ui_.loginButton.setText("Login using browser");
     this->ui_.pasteCodeButton.setText("Paste login info");
     this->ui_.unableToOpenBrowserHelper.setWindowTitle(
         "Chatterino - unable to open in browser");
@@ -97,10 +90,11 @@ BasicLoginWidget::BasicLoginWidget()
             .arg(logInLink));
     this->ui_.unableToOpenBrowserHelper.setOpenExternalLinks(true);
 
-    this->ui_.horizontalLayout.addWidget(&this->ui_.loginButton);
-    this->ui_.horizontalLayout.addWidget(&this->ui_.pasteCodeButton);
+    this->ui_.formLayout.addRow("Step 1", &this->ui_.loginButton);
+    this->ui_.formLayout.addRow("Step 2", &this->ui_.pasteCodeButton);
+    this->ui_.formLayout.setFormAlignment(Qt::AlignVCenter);
 
-    this->ui_.layout.addLayout(&this->ui_.horizontalLayout);
+    this->ui_.layout.addLayout(&this->ui_.formLayout);
     this->ui_.layout.addWidget(&this->ui_.unableToOpenBrowserHelper);
 
     connect(&this->ui_.loginButton, &QPushButton::clicked, [this, logInLink]() {
@@ -115,6 +109,9 @@ BasicLoginWidget::BasicLoginWidget()
     connect(&this->ui_.pasteCodeButton, &QPushButton::clicked, [this]() {
         QStringList parameters = getClipboardText().split(";");
         QString oauthToken, clientID, username, userID;
+
+        // Removing clipboard content to prevent accidental paste of credentials into somewhere
+        crossPlatformCopy("");
 
         for (const auto &param : parameters)
         {
@@ -148,11 +145,10 @@ BasicLoginWidget::BasicLoginWidget()
             }
         }
 
-        logInWithCredentials(userID, username, clientID, oauthToken);
-
-        // Removing clipboard content to prevent accidental paste of credentials into somewhere
-        crossPlatformCopy("");
-        this->window()->close();
+        if (logInWithCredentials(this, userID, username, clientID, oauthToken))
+        {
+            this->window()->close();
+        }
     });
 }
 
@@ -212,15 +208,15 @@ AdvancedLoginWidget::AdvancedLoginWidget()
                 this->ui_.oauthTokenInput.clear();
             });
 
-    connect(&this->ui_.buttonUpperRow.addUserButton, &QPushButton::clicked,
-            [=]() {
-                QString userID = this->ui_.userIDInput.text();
-                QString username = this->ui_.usernameInput.text();
-                QString clientID = this->ui_.clientIDInput.text();
-                QString oauthToken = this->ui_.oauthTokenInput.text();
+    connect(
+        &this->ui_.buttonUpperRow.addUserButton, &QPushButton::clicked, [=]() {
+            QString userID = this->ui_.userIDInput.text();
+            QString username = this->ui_.usernameInput.text();
+            QString clientID = this->ui_.clientIDInput.text();
+            QString oauthToken = this->ui_.oauthTokenInput.text();
 
-                logInWithCredentials(userID, username, clientID, oauthToken);
-            });
+            logInWithCredentials(this, userID, username, clientID, oauthToken);
+        });
 }
 
 void AdvancedLoginWidget::refreshButtons()
@@ -238,15 +234,15 @@ void AdvancedLoginWidget::refreshButtons()
     }
 }
 
-LoginWidget::LoginWidget(QWidget *parent)
+LoginDialog::LoginDialog(QWidget *parent)
     : QDialog(parent)
 {
-#ifdef USEWINSDK
-    ::SetWindowPos(HWND(this->winId()), HWND_TOPMOST, 0, 0, 0, 0,
-                   SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-#endif
+    this->setMinimumWidth(300);
+    this->setWindowFlags(
+        (this->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
+        Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
-    this->setWindowTitle("Chatterino - add new account");
+    this->setWindowTitle("Add new account");
 
     this->setLayout(&this->ui_.mainLayout);
     this->ui_.mainLayout.addWidget(&this->ui_.tabWidget);
