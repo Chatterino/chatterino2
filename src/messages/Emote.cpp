@@ -46,13 +46,13 @@ EmotePtr cachedOrMakeEmotePtr(
     }
 }
 
-EmoteMap::const_iterator EmoteMap::findEmote(const QString &emoteName,
+EmoteMap::const_iterator EmoteMap::findEmote(const QString &emoteNameHint,
                                              const QString &emoteID) const
 {
     auto it = this->end();
-    if (!emoteName.isEmpty())
+    if (!emoteNameHint.isEmpty())
     {
-        it = this->find(EmoteName{emoteName});
+        it = this->find(EmoteName{emoteNameHint});
     }
 
     if (it == this->end() || it->second->id.string != emoteID)
@@ -63,12 +63,6 @@ EmoteMap::const_iterator EmoteMap::findEmote(const QString &emoteName,
                           });
     }
     return it;
-}
-
-void updateEmoteMapPtr(Atomic<std::shared_ptr<const EmoteMap>> &map,
-                       EmoteMap &&updatedMap)
-{
-    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
 }
 
 }  // namespace chatterino

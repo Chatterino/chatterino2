@@ -37,7 +37,7 @@ Q_LOGGING_CATEGORY(chatterinoRecentMessages, "chatterino.recentmessages",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoSettings, "chatterino.settings", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoSeventv, "chatterino.seventv", logThreshold);
-Q_LOGGING_CATEGORY(chatterinoSeventvEventApi, "chatterino.seventv.eventapi",
+Q_LOGGING_CATEGORY(chatterinoSeventvEventAPI, "chatterino.seventv.eventapi",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoStreamerMode, "chatterino.streamermode",
                    logThreshold);

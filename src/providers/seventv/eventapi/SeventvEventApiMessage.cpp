@@ -1,10 +1,10 @@
-#include "providers/seventv/eventapi/SeventvEventApiMessage.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPIMessage.hpp"
 
 namespace chatterino {
 
-SeventvEventApiMessage::SeventvEventApiMessage(QJsonObject _json)
+SeventvEventAPIMessage::SeventvEventAPIMessage(QJsonObject _json)
     : data(_json["d"].toObject())
-    , op(SeventvEventApiOpcode(_json["op"].toInt()))
+    , op(SeventvEventAPIOpcode(_json["op"].toInt()))
 {
 }
 

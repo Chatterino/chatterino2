@@ -9,7 +9,7 @@
 namespace chatterino {
 
 // https://github.com/SevenTV/EventAPI/tree/ca4ff15cc42b89560fa661a76c5849047763d334#subscription-types
-enum class SeventvEventApiSubscriptionType {
+enum class SeventvEventAPISubscriptionType {
     UpdateEmoteSet,
     UpdateUser,
 
@@ -17,7 +17,7 @@ enum class SeventvEventApiSubscriptionType {
 };
 
 // https://github.com/SevenTV/EventAPI/tree/ca4ff15cc42b89560fa661a76c5849047763d334#opcodes
-enum class SeventvEventApiOpcode {
+enum class SeventvEventAPIOpcode {
     Dispatch = 0,
     Hello = 1,
     Heartbeat = 2,
@@ -32,31 +32,31 @@ enum class SeventvEventApiOpcode {
     Signal = 37,
 };
 
-struct SeventvEventApiSubscription {
-    bool operator==(const SeventvEventApiSubscription &rhs) const;
-    bool operator!=(const SeventvEventApiSubscription &rhs) const;
+struct SeventvEventAPISubscription {
+    bool operator==(const SeventvEventAPISubscription &rhs) const;
+    bool operator!=(const SeventvEventAPISubscription &rhs) const;
     QString condition;
-    SeventvEventApiSubscriptionType type;
+    SeventvEventAPISubscriptionType type;
 
     QByteArray encodeSubscribe() const;
     QByteArray encodeUnsubscribe() const;
 
     friend QDebug &operator<<(QDebug &dbg,
-                              const SeventvEventApiSubscription &subscription);
+                              const SeventvEventAPISubscription &subscription);
 };
 
 }  // namespace chatterino
 
 template <>
 constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
-    chatterino::SeventvEventApiSubscriptionType>(
-    chatterino::SeventvEventApiSubscriptionType value) noexcept
+    chatterino::SeventvEventAPISubscriptionType>(
+    chatterino::SeventvEventAPISubscriptionType value) noexcept
 {
     switch (value)
     {
-        case chatterino::SeventvEventApiSubscriptionType::UpdateEmoteSet:
+        case chatterino::SeventvEventAPISubscriptionType::UpdateEmoteSet:
             return "emote_set.update";
-        case chatterino::SeventvEventApiSubscriptionType::UpdateUser:
+        case chatterino::SeventvEventAPISubscriptionType::UpdateUser:
             return "user.update";
 
         default:
@@ -67,8 +67,8 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
 namespace std {
 
 template <>
-struct hash<chatterino::SeventvEventApiSubscription> {
-    size_t operator()(const chatterino::SeventvEventApiSubscription &sub) const
+struct hash<chatterino::SeventvEventAPISubscription> {
+    size_t operator()(const chatterino::SeventvEventAPISubscription &sub) const
     {
         return (size_t)qHash(sub.condition, qHash((int)sub.type));
     }

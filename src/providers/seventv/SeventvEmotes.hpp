@@ -3,7 +3,7 @@
 #include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
-#include "providers/seventv/eventapi/SeventvEventApiDispatch.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
 #include <memory>
@@ -56,12 +56,12 @@ class EmoteMap;
 
 class SeventvEmotes final
 {
+public:
     struct ChannelInfo {
         QString userID;
         QString emoteSetID;
     };
 
-public:
     SeventvEmotes();
 
     std::shared_ptr<const EmoteMap> globalEmotes() const;
@@ -72,17 +72,41 @@ public:
         std::function<void(EmoteMap &&, ChannelInfo)> callback,
         bool manualRefresh);
 
+    /**
+     * Adds an emote to the `map` if it's valid.
+     * This will _copy_ the emote map and
+     * update the `Atomic`.
+     *
+     * @return The added emote if an emote was added.
+     */
     static boost::optional<EmotePtr> addEmote(
         Atomic<std::shared_ptr<const EmoteMap>> &map,
-        const SeventvEventApiEmoteAddDispatch &dispatch);
+        const SeventvEventAPIEmoteAddDispatch &dispatch);
+
+    /**
+     * Updates an emote in this `map`.
+     * This will _copy_ the emote map and
+     * update the `Atomic`.
+     *
+     * @return The updated emote if any emote was updated.
+     */
     static boost::optional<EmotePtr> updateEmote(
         Atomic<std::shared_ptr<const EmoteMap>> &map,
-        const SeventvEventApiEmoteUpdateDispatch &dispatch);
+        const SeventvEventAPIEmoteUpdateDispatch &dispatch);
+
+    /**
+     * Removes an emote from this `map`.
+     * This will _copy_ the emote map and
+     * update the `Atomic`.
+     *
+     * @return The removed emote if any emote was removed.
+     */
     static boost::optional<EmotePtr> removeEmote(
         Atomic<std::shared_ptr<const EmoteMap>> &map,
-        const SeventvEventApiEmoteRemoveDispatch &dispatch);
+        const SeventvEventAPIEmoteRemoveDispatch &dispatch);
 
-    static void updateEmoteSet(
+    /** Fetches an emote-set by its id */
+    static void getEmoteSet(
         const QString &emoteSetId,
         std::function<void(EmoteMap &&, QString)> successCallback,
         std::function<void(QString)> errorCallback);

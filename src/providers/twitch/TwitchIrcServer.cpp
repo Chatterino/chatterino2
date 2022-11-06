@@ -10,7 +10,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/seventv/SeventvEventApi.hpp"
+#include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -48,7 +48,7 @@ TwitchIrcServer::TwitchIrcServer()
         getSettings()->enableSevenTVChannelEmotes)
     {
         this->seventvEventAPI =
-            std::make_unique<SeventvEventApi>(SEVENTV_EVENTAPI_URL);
+            std::make_unique<SeventvEventAPI>(SEVENTV_EVENTAPI_URL);
     }
 
     // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) {
@@ -555,14 +555,22 @@ void TwitchIrcServer::forEachSeventvUser(
     });
 }
 
-void TwitchIrcServer::dropSeventvEmoteSet(const QString &id)
+void TwitchIrcServer::dropSeventvChannel(const QString &userID,
+                                         const QString &emoteSetID)
 {
+    if (!this->seventvEventAPI)
+    {
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
-    // Although as of writing this not possible,
-    // one emote set could be used by many channels.
-    // Thus unsubscribing from ana emote set requires
-    // checking that no channel has this set added.
+    // ignore empty values
+    bool skipUser = userID.isEmpty();
+    bool skipSet = emoteSetID.isEmpty();
+
+    bool foundUser = skipUser;
+    bool foundSet = skipSet;
     for (std::weak_ptr<Channel> &weak : this->channels)
     {
         ChannelPtr chan = weak.lock();
@@ -571,41 +579,29 @@ void TwitchIrcServer::dropSeventvEmoteSet(const QString &id)
             continue;
         }
 
-        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
-            channel->seventvEmoteSetID() == id)
+        auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
+        if (!foundSet && channel->seventvEmoteSetID() == emoteSetID)
         {
-            return;
+            foundSet = true;
+        }
+        if (!foundUser && channel->seventvUserID() == userID)
+        {
+            foundUser = true;
+        }
+
+        if (foundSet && foundUser)
+        {
+            break;
         }
     }
 
-    if (this->seventvEventAPI)
+    if (!foundUser)
     {
-        this->seventvEventAPI->unsubscribeEmoteSet(id);
+        this->seventvEventAPI->unsubscribeUser(userID);
     }
-}
-
-void TwitchIrcServer::dropSeventvUser(const QString &id)
-{
-    std::lock_guard<std::mutex> lock(this->channelMutex);
-
-    for (std::weak_ptr<Channel> &weak : this->channels)
+    if (!foundSet)
     {
-        ChannelPtr chan = weak.lock();
-        if (!chan)
-        {
-            continue;
-        }
-
-        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
-            channel->seventvUserID() == id)
-        {
-            return;
-        }
-    }
-
-    if (this->seventvEventAPI)
-    {
-        this->seventvEventAPI->unsubscribeUser(id);
+        this->seventvEventAPI->unsubscribeEmoteSet(emoteSetID);
     }
 }
 

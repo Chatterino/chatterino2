@@ -2,46 +2,57 @@
 
 #include "providers/liveupdates/BasicPubSubClient.hpp"
 #include "providers/liveupdates/BasicPubSubManager.hpp"
-#include "providers/seventv/eventapi/SeventvEventApiDispatch.hpp"
-#include "providers/seventv/eventapi/SeventvEventApiSubscription.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
 #include "util/QStringHash.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 
-class SeventvEventApi : public BasicPubSubManager<SeventvEventApiSubscription>
+class SeventvEventAPI : public BasicPubSubManager<SeventvEventAPISubscription>
 {
     template <typename T>
     using Signal =
         pajlada::Signals::Signal<T>;  // type-id is vector<T, Alloc<T>>
 
 public:
-    SeventvEventApi(QString host, std::chrono::milliseconds heartbeatInterval =
-                                      std::chrono::milliseconds(25000));
+    SeventvEventAPI(QString host,
+                    std::chrono::milliseconds defaultHeartbeatInterval =
+                        std::chrono::milliseconds(25000));
 
     struct {
-        Signal<SeventvEventApiEmoteAddDispatch> emoteAdded;
-        Signal<SeventvEventApiEmoteUpdateDispatch> emoteUpdated;
-        Signal<SeventvEventApiEmoteRemoveDispatch> emoteRemoved;
-        Signal<SeventvEventApiUserConnectionUpdateDispatch> userUpdated;
+        Signal<SeventvEventAPIEmoteAddDispatch> emoteAdded;
+        Signal<SeventvEventAPIEmoteUpdateDispatch> emoteUpdated;
+        Signal<SeventvEventAPIEmoteRemoveDispatch> emoteRemoved;
+        Signal<SeventvEventAPIUserConnectionUpdateDispatch> userUpdated;
     } signals_;  // NOLINT(readability-identifier-naming)
 
+    /**
+     * Subscribes to a user and emote-set
+     * if not already subscribed.
+     *
+     * @param userID 7TV user-id, may be empty.
+     * @param emoteSetID 7TV emote-set-id, may be empty.
+     */
     void subscribeUser(const QString &userID, const QString &emoteSetID);
+
+    /** Unsubscribes from a user by its 7TV user id */
     void unsubscribeUser(const QString &id);
+    /** Unsubscribes from an emote-set by its id */
     void unsubscribeEmoteSet(const QString &id);
 
 protected:
-    std::shared_ptr<BasicPubSubClient<SeventvEventApiSubscription>>
+    std::shared_ptr<BasicPubSubClient<SeventvEventAPISubscription>>
         createClient(liveupdates::WebsocketClient &client,
                      websocketpp::connection_hdl hdl) override;
     void onMessage(
         websocketpp::connection_hdl hdl,
-        BasicPubSubManager<SeventvEventApiSubscription>::WebsocketMessagePtr
+        BasicPubSubManager<SeventvEventAPISubscription>::WebsocketMessagePtr
             msg) override;
 
 private:
-    void handleDispatch(const SeventvEventApiDispatch &dispatch);
+    void handleDispatch(const SeventvEventAPIDispatch &dispatch);
 
     std::unordered_set<QString> subscribedEmoteSets_;
     std::unordered_set<QString> subscribedUsers_;

@@ -1,15 +1,15 @@
 #pragma once
 
 #include "providers/liveupdates/BasicPubSubClient.hpp"
-#include "providers/seventv/eventapi/SeventvEventApiSubscription.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
 
 namespace chatterino {
 
-class SeventvEventApiClient
-    : public BasicPubSubClient<SeventvEventApiSubscription>
+class SeventvEventAPIClient
+    : public BasicPubSubClient<SeventvEventAPISubscription>
 {
 public:
-    SeventvEventApiClient(liveupdates::WebsocketClient &websocketClient,
+    SeventvEventAPIClient(liveupdates::WebsocketClient &websocketClient,
                           liveupdates::WebsocketHandle handle,
                           std::chrono::milliseconds heartbeatInterval);
 
@@ -26,7 +26,7 @@ private:
         lastHeartbeat_;
     std::atomic<std::chrono::milliseconds> heartbeatInterval_;
 
-    friend class SeventvEventApi;
+    friend class SeventvEventAPI;
 };
 
 }  // namespace chatterino

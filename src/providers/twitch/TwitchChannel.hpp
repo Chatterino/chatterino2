@@ -9,7 +9,7 @@
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
 #include "messages/MessageThread.hpp"
-#include "providers/seventv/eventapi/SeventvEventApiDispatch.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -123,11 +123,15 @@ public:
     const QString &seventvUserID() const;
     const QString &seventvEmoteSetID() const;
 
-    void addSeventvEmote(const SeventvEventApiEmoteAddDispatch &dispatch);
-    void updateSeventvEmote(const SeventvEventApiEmoteUpdateDispatch &dispatch);
-    void removeSeventvEmote(const SeventvEventApiEmoteRemoveDispatch &dispatch);
+    /** Adds a 7TV channel emote to this channel. */
+    void addSeventvEmote(const SeventvEventAPIEmoteAddDispatch &dispatch);
+    /** Updates a 7TV channel emote's name in this channel */
+    void updateSeventvEmote(const SeventvEventAPIEmoteUpdateDispatch &dispatch);
+    /** Removes a 7TV channel emote from this channel */
+    void removeSeventvEmote(const SeventvEventAPIEmoteRemoveDispatch &dispatch);
+    /** Updates the current 7TV user. Currently, only the emote-set is updated. */
     void updateSeventvUser(
-        const SeventvEventApiUserConnectionUpdateDispatch &dispatch);
+        const SeventvEventAPIUserConnectionUpdateDispatch &dispatch);
 
     // Update the channel's 7TV information (the channel's 7TV user ID and emote set ID)
     void updateSeventvData(const QString &newUserID,
@@ -201,6 +205,14 @@ private:
 
     QString prepareMessage(const QString &message) const;
 
+    /**
+     * Either adds the `message` or updates an existing message
+     * that was of the same kind (add/remove) as `message`
+     * by merging the added/removed emotes.
+     *
+     * @param message The message to add or take replacements from.
+     * @param platform The emote platform (BTTV, FFZ, 7TV)
+     */
     void addOrReplaceLiveUpdatesAddRemove(const MessagePtr &message,
                                           const QString &platform);
 
@@ -242,7 +254,15 @@ private:
     QElapsedTimer clipCreationTimer_;
     bool isClipCreationInProgress{false};
 
+    /**
+     * This channels 7TV user-id,
+     * empty if this channel isn't connected with 7TV.
+     */
     QString seventvUserID_;
+    /**
+     * This channels current 7TV emote-set-id,
+     * empty if this channel isn't connected with 7TV
+     */
     QString seventvEmoteSetID_;
 
     pajlada::Signals::SignalHolder signalHolder_;

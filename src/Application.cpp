@@ -20,7 +20,7 @@
 #include "providers/irc/Irc2.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
-#include "providers/seventv/SeventvEventApi.hpp"
+#include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -151,10 +151,7 @@ void Application::initialize(Settings &settings, Paths &paths)
     }
     this->initPubSub();
 
-    if (this->twitch->seventvEventAPI)
-    {
-        this->initSeventvEventAPI();
-    }
+    this->initSeventvEventAPI();
 }
 
 int Application::run(QApplication &qtApp)
@@ -571,6 +568,13 @@ void Application::initPubSub()
 
 void Application::initSeventvEventAPI()
 {
+    if (!this->twitch->seventvEventAPI)
+    {
+        qCDebug(chatterinoSeventvEventAPI)
+            << "Skipping initialization as the EventApi is disabled";
+        return;
+    }
+
     this->twitch->seventvEventAPI->signals_.emoteAdded.connect(
         [&](const auto &data) {
             postToThread([this, data] {

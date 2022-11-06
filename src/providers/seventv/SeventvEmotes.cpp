@@ -221,7 +221,7 @@ EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal)
 }
 
 EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
-                            const SeventvEventApiEmoteUpdateDispatch &dispatch)
+                            const SeventvEventAPIEmoteUpdateDispatch &dispatch)
 {
     bool toNonAliased = oldEmote->baseName.has_value() &&
                         dispatch.emoteName == oldEmote->baseName->string;
@@ -386,7 +386,7 @@ void SeventvEmotes::loadChannelEmotes(
 
 boost::optional<EmotePtr> SeventvEmotes::addEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &map,
-    const SeventvEventApiEmoteAddDispatch &dispatch)
+    const SeventvEventAPIEmoteAddDispatch &dispatch)
 {
     // Check for visibility first, so we don't copy the map.
     auto emoteData = dispatch.emoteJson["data"].toObject();
@@ -395,25 +395,26 @@ boost::optional<EmotePtr> SeventvEmotes::addEmote(
         return boost::none;
     }
 
+    // This copies the map.
     EmoteMap updatedMap = *map.get();
     auto result = createEmote(dispatch.emoteJson, emoteData, false);
     if (!result.hasImages)
     {
-        // this shouldn't happen but if it does it will crash
+        // Incoming emote didn't contain any images, abort
         qCDebug(chatterinoSeventv)
             << "Emote without images:" << dispatch.emoteJson;
         return boost::none;
     }
     auto emote = std::make_shared<const Emote>(std::move(result.emote));
     updatedMap[result.name] = emote;
-    updateEmoteMapPtr(map, std::move(updatedMap));
+    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
 
     return emote;
 }
 
 boost::optional<EmotePtr> SeventvEmotes::updateEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &map,
-    const SeventvEventApiEmoteUpdateDispatch &dispatch)
+    const SeventvEventAPIEmoteUpdateDispatch &dispatch)
 {
     auto oldMap = map.get();
     auto oldEmote = oldMap->findEmote(dispatch.emoteName, dispatch.emoteID);
@@ -421,20 +422,23 @@ boost::optional<EmotePtr> SeventvEmotes::updateEmote(
     {
         return boost::none;
     }
+
+    // This copies the map.
     EmoteMap updatedMap = *map.get();
     updatedMap.erase(oldEmote->second->name);
 
     auto emote = createUpdatedEmote(oldEmote->second, dispatch);
     updatedMap[emote->name] = emote;
-    updateEmoteMapPtr(map, std::move(updatedMap));
+    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
 
     return emote;
 }
 
 boost::optional<EmotePtr> SeventvEmotes::removeEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &map,
-    const SeventvEventApiEmoteRemoveDispatch &dispatch)
+    const SeventvEventAPIEmoteRemoveDispatch &dispatch)
 {
+    // This copies the map.
     EmoteMap updatedMap = *map.get();
     auto it = updatedMap.findEmote(dispatch.emoteName, dispatch.emoteID);
     if (it == updatedMap.end())
@@ -445,11 +449,12 @@ boost::optional<EmotePtr> SeventvEmotes::removeEmote(
     }
     auto emote = it->second;
     updatedMap.erase(it);
-    updateEmoteMapPtr(map, std::move(updatedMap));
+    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
+
     return emote;
 }
 
-void SeventvEmotes::updateEmoteSet(
+void SeventvEmotes::getEmoteSet(
     const QString &emoteSetId,
     std::function<void(EmoteMap &&, QString)> successCallback,
     std::function<void(QString)> errorCallback)

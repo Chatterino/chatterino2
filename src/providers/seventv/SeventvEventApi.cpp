@@ -1,65 +1,65 @@
-#include "providers/seventv/SeventvEventApi.hpp"
+#include "providers/seventv/SeventvEventAPI.hpp"
 
-#include "providers/seventv/eventapi/SeventvEventApiClient.hpp"
-#include "providers/seventv/eventapi/SeventvEventApiMessage.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPIClient.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPIMessage.hpp"
 
 #include <QJsonArray>
 #include <utility>
 
 namespace chatterino {
 
-SeventvEventApi::SeventvEventApi(QString host,
-                                 std::chrono::milliseconds heartbeatInterval)
+SeventvEventAPI::SeventvEventAPI(
+    QString host, std::chrono::milliseconds defaultHeartbeatInterval)
     : BasicPubSubManager(std::move(host))
-    , heartbeatInterval_(heartbeatInterval)
+    , heartbeatInterval_(defaultHeartbeatInterval)
 {
 }
 
-void SeventvEventApi::subscribeUser(const QString &userID,
+void SeventvEventAPI::subscribeUser(const QString &userID,
                                     const QString &emoteSetID)
 {
     if (!userID.isEmpty() && this->subscribedUsers_.insert(userID).second)
     {
-        this->subscribe({userID, SeventvEventApiSubscriptionType::UpdateUser});
+        this->subscribe({userID, SeventvEventAPISubscriptionType::UpdateUser});
     }
     if (!emoteSetID.isEmpty() &&
         this->subscribedEmoteSets_.insert(emoteSetID).second)
     {
         this->subscribe(
-            {emoteSetID, SeventvEventApiSubscriptionType::UpdateEmoteSet});
+            {emoteSetID, SeventvEventAPISubscriptionType::UpdateEmoteSet});
     }
 }
 
-void SeventvEventApi::unsubscribeEmoteSet(const QString &id)
+void SeventvEventAPI::unsubscribeEmoteSet(const QString &id)
 {
     if (this->subscribedEmoteSets_.erase(id) > 0)
     {
         this->unsubscribe(
-            {id, SeventvEventApiSubscriptionType::UpdateEmoteSet});
+            {id, SeventvEventAPISubscriptionType::UpdateEmoteSet});
     }
 }
 
-void SeventvEventApi::unsubscribeUser(const QString &id)
+void SeventvEventAPI::unsubscribeUser(const QString &id)
 {
     if (this->subscribedUsers_.erase(id) > 0)
     {
-        this->unsubscribe({id, SeventvEventApiSubscriptionType::UpdateUser});
+        this->unsubscribe({id, SeventvEventAPISubscriptionType::UpdateUser});
     }
 }
 
-std::shared_ptr<BasicPubSubClient<SeventvEventApiSubscription>>
-    SeventvEventApi::createClient(liveupdates::WebsocketClient &client,
+std::shared_ptr<BasicPubSubClient<SeventvEventAPISubscription>>
+    SeventvEventAPI::createClient(liveupdates::WebsocketClient &client,
                                   websocketpp::connection_hdl hdl)
 {
-    auto shared = std::make_shared<SeventvEventApiClient>(
+    auto shared = std::make_shared<SeventvEventAPIClient>(
         client, hdl, this->heartbeatInterval_);
     return std::static_pointer_cast<
-        BasicPubSubClient<SeventvEventApiSubscription>>(std::move(shared));
+        BasicPubSubClient<SeventvEventAPISubscription>>(std::move(shared));
 }
 
-void SeventvEventApi::onMessage(
+void SeventvEventAPI::onMessage(
     websocketpp::connection_hdl hdl,
-    BasicPubSubManager<SeventvEventApiSubscription>::WebsocketMessagePtr msg)
+    BasicPubSubManager<SeventvEventAPISubscription>::WebsocketMessagePtr msg)
 {
     const auto &payload = QString::fromStdString(msg->get_payload());
 
@@ -67,19 +67,19 @@ void SeventvEventApi::onMessage(
 
     if (!pMessage)
     {
-        qCDebug(chatterinoSeventvEventApi)
+        qCDebug(chatterinoSeventvEventAPI)
             << "Unable to parse incoming event-api message: " << payload;
         return;
     }
-    qCDebug(chatterinoSeventvEventApi) << payload;
+    qCDebug(chatterinoSeventvEventAPI) << payload;
     auto message = *pMessage;
     switch (message.op)
     {
-        case SeventvEventApiOpcode::Hello: {
+        case SeventvEventAPIOpcode::Hello: {
             if (auto client = this->findClient(hdl))
             {
                 if (auto *stvClient =
-                        dynamic_cast<SeventvEventApiClient *>(client.get()))
+                        dynamic_cast<SeventvEventAPIClient *>(client.get()))
                 {
                     stvClient->setHeartbeatInterval(
                         message.data["heartbeat_interval"].toInt());
@@ -87,33 +87,33 @@ void SeventvEventApi::onMessage(
             }
         }
         break;
-        case SeventvEventApiOpcode::Heartbeat: {
+        case SeventvEventAPIOpcode::Heartbeat: {
             if (auto client = this->findClient(hdl))
             {
                 if (auto *stvClient =
-                        dynamic_cast<SeventvEventApiClient *>(client.get()))
+                        dynamic_cast<SeventvEventAPIClient *>(client.get()))
                 {
                     stvClient->handleHeartbeat();
                 }
             }
         }
         break;
-        case SeventvEventApiOpcode::Dispatch: {
-            auto dispatch = message.toInner<SeventvEventApiDispatch>();
+        case SeventvEventAPIOpcode::Dispatch: {
+            auto dispatch = message.toInner<SeventvEventAPIDispatch>();
             if (!dispatch)
             {
-                qCDebug(chatterinoSeventvEventApi)
+                qCDebug(chatterinoSeventvEventAPI)
                     << "Malformed dispatch" << payload;
                 return;
             }
             this->handleDispatch(*dispatch);
         }
         break;
-        case SeventvEventApiOpcode::Reconnect: {
+        case SeventvEventAPIOpcode::Reconnect: {
             if (auto client = this->findClient(hdl))
             {
                 if (auto *stvClient =
-                        dynamic_cast<SeventvEventApiClient *>(client.get()))
+                        dynamic_cast<SeventvEventAPIClient *>(client.get()))
                 {
                     stvClient->close("Reconnecting");
                 }
@@ -121,17 +121,17 @@ void SeventvEventApi::onMessage(
         }
         break;
         default: {
-            qCDebug(chatterinoSeventvEventApi) << "Unhandled op: " << payload;
+            qCDebug(chatterinoSeventvEventAPI) << "Unhandled op: " << payload;
         }
         break;
     }
 }
 
-void SeventvEventApi::handleDispatch(const SeventvEventApiDispatch &dispatch)
+void SeventvEventAPI::handleDispatch(const SeventvEventAPIDispatch &dispatch)
 {
     switch (dispatch.type)
     {
-        case SeventvEventApiSubscriptionType::UpdateEmoteSet: {
+        case SeventvEventAPISubscriptionType::UpdateEmoteSet: {
             // dispatchBody: {
             //   pushed:  Array<{ key, value            }>,
             //   pulled:  Array<{ key,        old_value }>,
@@ -145,7 +145,7 @@ void SeventvEventApi::handleDispatch(const SeventvEventApiDispatch &dispatch)
                     continue;
                 }
 
-                SeventvEventApiEmoteAddDispatch added(
+                SeventvEventAPIEmoteAddDispatch added(
                     dispatch, pushed["value"].toObject());
 
                 if (added.validate())
@@ -154,7 +154,7 @@ void SeventvEventApi::handleDispatch(const SeventvEventApiDispatch &dispatch)
                 }
                 else
                 {
-                    qCDebug(chatterinoSeventvEventApi)
+                    qCDebug(chatterinoSeventvEventAPI)
                         << "Invalid dispatch" << dispatch.body;
                 }
             }
@@ -166,7 +166,7 @@ void SeventvEventApi::handleDispatch(const SeventvEventApiDispatch &dispatch)
                     continue;
                 }
 
-                SeventvEventApiEmoteUpdateDispatch update(dispatch, updated);
+                SeventvEventAPIEmoteUpdateDispatch update(dispatch, updated);
 
                 if (update.validate())
                 {
@@ -174,7 +174,7 @@ void SeventvEventApi::handleDispatch(const SeventvEventApiDispatch &dispatch)
                 }
                 else
                 {
-                    qCDebug(chatterinoSeventvEventApi)
+                    qCDebug(chatterinoSeventvEventAPI)
                         << "Invalid dispatch" << dispatch.body;
                 }
             }
@@ -186,7 +186,7 @@ void SeventvEventApi::handleDispatch(const SeventvEventApiDispatch &dispatch)
                     continue;
                 }
 
-                SeventvEventApiEmoteRemoveDispatch removed(
+                SeventvEventAPIEmoteRemoveDispatch removed(
                     dispatch, pulled["old_value"].toObject());
 
                 if (removed.validate())
@@ -195,13 +195,13 @@ void SeventvEventApi::handleDispatch(const SeventvEventApiDispatch &dispatch)
                 }
                 else
                 {
-                    qCDebug(chatterinoSeventvEventApi)
+                    qCDebug(chatterinoSeventvEventAPI)
                         << "Invalid dispatch" << dispatch.body;
                 }
             }
         }
         break;
-        case SeventvEventApiSubscriptionType::UpdateUser: {
+        case SeventvEventAPISubscriptionType::UpdateUser: {
             // dispatchBody: {
             //   updated: Array<{ key, value: Array<{key, value}> }>
             // }
@@ -220,7 +220,7 @@ void SeventvEventApi::handleDispatch(const SeventvEventApiDispatch &dispatch)
                         continue;
                     }
 
-                    SeventvEventApiUserConnectionUpdateDispatch update(dispatch,
+                    SeventvEventAPIUserConnectionUpdateDispatch update(dispatch,
                                                                        value);
 
                     if (update.validate())
@@ -229,7 +229,7 @@ void SeventvEventApi::handleDispatch(const SeventvEventApiDispatch &dispatch)
                     }
                     else
                     {
-                        qCDebug(chatterinoSeventvEventApi)
+                        qCDebug(chatterinoSeventvEventAPI)
                             << "Invalid dispatch" << dispatch.body;
                     }
                 }
@@ -237,7 +237,7 @@ void SeventvEventApi::handleDispatch(const SeventvEventApiDispatch &dispatch)
         }
         break;
         default: {
-            qCDebug(chatterinoSeventvEventApi)
+            qCDebug(chatterinoSeventvEventAPI)
                 << "Unknown subscription type:" << (int)dispatch.type
                 << "body:" << dispatch.body;
         }
