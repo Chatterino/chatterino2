@@ -9,20 +9,20 @@ namespace chatterino {
 
 // https://github.com/SevenTV/EventAPI/tree/ca4ff15cc42b89560fa661a76c5849047763d334#message-payload
 struct SeventvEventAPIDispatch {
-    const SeventvEventAPISubscriptionType type;
-    const QJsonObject body;
-    const QString id;
+    SeventvEventAPISubscriptionType type;
+    QJsonObject body;
+    QString id;
     // it's okay for this to be empty
-    const QString actorName;
+    QString actorName;
 
     SeventvEventAPIDispatch(QJsonObject obj);
 };
 
 struct SeventvEventAPIEmoteAddDispatch {
-    const QString emoteSetID;
-    const QString actorName;
-    const QJsonObject emoteJson;
-    const QString emoteID;
+    QString emoteSetID;
+    QString actorName;
+    QJsonObject emoteJson;
+    QString emoteID;
 
     SeventvEventAPIEmoteAddDispatch(const SeventvEventAPIDispatch &dispatch,
                                     QJsonObject emote);
@@ -31,10 +31,10 @@ struct SeventvEventAPIEmoteAddDispatch {
 };
 
 struct SeventvEventAPIEmoteRemoveDispatch {
-    const QString emoteSetID;
-    const QString actorName;
-    const QString emoteName;
-    const QString emoteID;
+    QString emoteSetID;
+    QString actorName;
+    QString emoteName;
+    QString emoteID;
 
     SeventvEventAPIEmoteRemoveDispatch(const SeventvEventAPIDispatch &dispatch,
                                        QJsonObject emote);
@@ -43,11 +43,11 @@ struct SeventvEventAPIEmoteRemoveDispatch {
 };
 
 struct SeventvEventAPIEmoteUpdateDispatch {
-    const QString emoteSetID;
-    const QString actorName;
-    const QString emoteID;
-    const QString oldEmoteName;
-    const QString emoteName;
+    QString emoteSetID;
+    QString actorName;
+    QString emoteID;
+    QString oldEmoteName;
+    QString emoteName;
 
     SeventvEventAPIEmoteUpdateDispatch(const SeventvEventAPIDispatch &dispatch,
                                        QJsonObject oldValue, QJsonObject value);
@@ -56,11 +56,11 @@ struct SeventvEventAPIEmoteUpdateDispatch {
 };
 
 struct SeventvEventAPIUserConnectionUpdateDispatch {
-    const QString userID;
-    const QString actorName;
-    const QString oldEmoteSetID;
-    const QString emoteSetID;
-    const size_t connectionIndex;
+    QString userID;
+    QString actorName;
+    QString oldEmoteSetID;
+    QString emoteSetID;
+    size_t connectionIndex;
 
     SeventvEventAPIUserConnectionUpdateDispatch(
         const SeventvEventAPIDispatch &dispatch, const QJsonObject &update,
