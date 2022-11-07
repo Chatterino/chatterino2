@@ -1443,10 +1443,10 @@ void Split::showViewerListHelix()
     {
         chattersList->addItem(
             formatListItemText("Due to Twitch restrictions, this feature is "
-                               "only available for moderators."));
+                               "only \navailable for moderators."));
         chattersList->addItem(
             formatListItemText("If you would like to see the Viewer list, you "
-                               "must use the Twitch website."));
+                               "must \nuse the Twitch website."));
         loadingLabel->hide();
     }
 
