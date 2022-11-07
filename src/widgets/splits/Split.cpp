@@ -1304,7 +1304,7 @@ void Split::showViewerListHelix()
 
         addLabel(QString("%1 (%2)").arg(label, localizeNumbers(users.size())));
 
-        for (int i = 0; i < users.size();i++)
+        for (int i = 0; i < users.size(); i++)
         {
             chattersList->addItem(formatListItemText(users.at(i)));
         }
@@ -1356,7 +1356,7 @@ void Split::showViewerListHelix()
                     }
                 }
                 chatterList.sort();
-                
+
                 if (containsBroadcaster)
                 {
                     addLabel("Broadcaster");
