@@ -78,6 +78,7 @@
 - Minor: Add settings tooltips. (#3437)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fixed `Smooth scrolling on new messages` setting sometimes hiding messages. (#4028)
+- Bugfix: Fixed context menu not opening when username is right clicked from usercard/search/reply window. (#4122)
 - Bugfix: Fixed a crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
 - Bugfix: Fixed a crash that can occur when changing channels. (#3799)
 - Bugfix: Fixed viewers list search not working when used before loading finishes. (#3774)
