@@ -1436,7 +1436,7 @@ void Split::showViewerListHelix()
         std::vector<QString> modList;
         modList.push_back("Moderators cannot check who is a moderator");
         std::vector<QString> vipList;
-        vipList.push_back("Moderators cannot check who is a vip");
+        vipList.push_back("Moderators cannot check who is a VIP");
         loadChatters(modList, vipList);
     }
     else
