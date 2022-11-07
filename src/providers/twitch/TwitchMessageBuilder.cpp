@@ -69,7 +69,8 @@ namespace chatterino {
 
 namespace {
 
-    QString stylizeUsername(const QString &username, const Message &message)
+    QString stylizeUsername(const QString &username, const Message &message,
+                            QColor *usernameColor = nullptr)
     {
         auto app = getApp();
 
@@ -116,8 +117,20 @@ namespace {
 
         for (const auto &nickname : *nicknames)
         {
+            QString temp = usernameText;
             if (nickname.match(usernameText))
             {
+                const static QString SET_COLOR_COMMAND = "::hack-set-color ";
+                if (usernameText.startsWith(SET_COLOR_COMMAND))
+                {
+                    auto color =
+                        QColor(usernameText.mid(SET_COLOR_COMMAND.length()));
+                    if (usernameColor != nullptr && color.isValid())
+                    {
+                        *usernameColor = color;
+                        usernameText = temp;
+                    }
+                }
                 break;
             }
         }
@@ -279,8 +292,10 @@ MessagePtr TwitchMessageBuilder::build()
 
         const auto &threadRoot = this->thread_->root();
 
-        QString usernameText =
-            stylizeUsername(threadRoot->loginName, *threadRoot.get());
+        QColor usernameColor = threadRoot->usernameColor;
+
+        QString usernameText = stylizeUsername(
+            threadRoot->loginName, *threadRoot.get(), &usernameColor);
 
         this->emplace<ReplyCurveElement>();
 
@@ -290,9 +305,9 @@ MessagePtr TwitchMessageBuilder::build()
                 MessageColor::System, FontStyle::ChatMediumSmall)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
 
-        this->emplace<TextElement>(
-                "@" + usernameText + ":", MessageElementFlag::RepliedMessage,
-                threadRoot->usernameColor, FontStyle::ChatMediumSmall)
+        this->emplace<TextElement>("@" + usernameText + ":",
+                                   MessageElementFlag::RepliedMessage,
+                                   usernameColor, FontStyle::ChatMediumSmall)
             ->setLink({Link::UserInfo, threadRoot->displayName});
 
         this->emplace<SingleLineTextElement>(
@@ -775,7 +790,8 @@ void TwitchMessageBuilder::appendUsername()
         }
     }
 
-    QString usernameText = stylizeUsername(username, this->message());
+    QString usernameText =
+        stylizeUsername(username, this->message(), &this->usernameColor_);
 
     if (this->args.isSentWhisper)
     {

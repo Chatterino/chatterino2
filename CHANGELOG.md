@@ -5,6 +5,7 @@
 
 ### Dankerino
 
+- Minor: Added support for setting chat colors locally (Mm2PL/Dankerino#135)
 - Minor: Added support for SupaBridge (Mm2PL/Dankerino#134)
 - Minor: Added a link to the upstream commit (Mm2PL/Dankerino#127)
 - Minor: Added RaccAttack URL to Twitch Emote context menu (Mm2PL/Dankerino#122)
