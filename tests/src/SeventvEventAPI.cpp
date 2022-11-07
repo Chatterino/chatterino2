@@ -78,6 +78,7 @@ TEST(SeventvEventAPI, AllEvents)
     ASSERT_EQ(user.actorName, QString("nerixyz"));
     ASSERT_EQ(user.oldEmoteSetID, EMOTE_SET_A);
     ASSERT_EQ(user.emoteSetID, EMOTE_SET_B);
+    ASSERT_EQ(user.connectionIndex, 0);
 
     eventAPI->stop();
     ASSERT_EQ(eventAPI->diag.connectionsOpened, 1);
