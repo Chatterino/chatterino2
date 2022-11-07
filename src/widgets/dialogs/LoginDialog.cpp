@@ -90,11 +90,10 @@ BasicLoginWidget::BasicLoginWidget()
             .arg(logInLink));
     this->ui_.unableToOpenBrowserHelper.setOpenExternalLinks(true);
 
-    this->ui_.formLayout.addRow("Step 1", &this->ui_.loginButton);
-    this->ui_.formLayout.addRow("Step 2", &this->ui_.pasteCodeButton);
-    this->ui_.formLayout.setFormAlignment(Qt::AlignVCenter);
+    this->ui_.horizontalLayout.addWidget(&this->ui_.loginButton);
+    this->ui_.horizontalLayout.addWidget(&this->ui_.pasteCodeButton);
 
-    this->ui_.layout.addLayout(&this->ui_.formLayout);
+    this->ui_.layout.addLayout(&this->ui_.horizontalLayout);
     this->ui_.layout.addWidget(&this->ui_.unableToOpenBrowserHelper);
 
     connect(&this->ui_.loginButton, &QPushButton::clicked, [this, logInLink]() {

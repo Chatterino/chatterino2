@@ -26,7 +26,7 @@ public:
 
     struct {
         QVBoxLayout layout;
-        QFormLayout formLayout;
+        QHBoxLayout horizontalLayout;
         QPushButton loginButton;
         QPushButton pasteCodeButton;
         QLabel unableToOpenBrowserHelper;
