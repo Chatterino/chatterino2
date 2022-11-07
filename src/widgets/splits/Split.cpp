@@ -1298,18 +1298,15 @@ void Split::showViewerListHelix()
         chattersList->addItem(formattedLabel);
     };
 
-    auto addUserList = [=](std::vector<QString> users, QString label) {
-        if (users.empty())
+    auto addUserList = [=](QStringList users, QString label) {
+        if (users.isEmpty())
             return;
 
         addLabel(QString("%1 (%2)").arg(label, localizeNumbers(users.size())));
 
-        auto iter = users.begin();
-        while (iter != users.end())
+        for (int i = 0; i < users.size();i++)
         {
-            auto user = *iter;
-            chattersList->addItem(formatListItemText(user));
-            iter++;
+            chattersList->addItem(formatListItemText(users.at(i)));
         }
         chattersList->addItem(new QListWidgetItem());
     };
@@ -1336,42 +1333,39 @@ void Split::showViewerListHelix()
         resultList->show();
     };
 
-    auto vectorContains = [](std::vector<QString> vector, QString s) -> bool {
-        for (auto i : vector)
-        {
-            if (i == s)
-            {
-                return true;
-            }
-        }
-        return false;
-    };
-
     auto loadChatters = [=](auto modList, auto vipList) {
         getHelix()->getChatters(
             twitchChannel->roomId(),
             getApp()->accounts->twitch.getCurrent()->getUserId(), 50000,
             [=](auto chatters) {
-                auto broadcasterName = channel->getName();
-                std::vector<QString> chatterVector;
+                auto broadcaster = channel->getName().toLower();
+                QStringList chatterList;
+                bool containsBroadcaster = false;
                 for (const auto &chatter : chatters.chatters)
                 {
-                    if (!vectorContains(modList, chatter) &&
-                        !vectorContains(vipList, chatter) &&
-                        chatter != broadcasterName)
+                    auto lowerCaseChatter = chatter.toLower();
+                    if (lowerCaseChatter == broadcaster)
                     {
-                        chatterVector.push_back(chatter);
+                        containsBroadcaster = true;
+                    }
+                    if (!modList.contains(lowerCaseChatter) &&
+                        !vipList.contains(lowerCaseChatter) &&
+                        lowerCaseChatter != broadcaster)
+                    {
+                        chatterList.append(lowerCaseChatter);
                     }
                 }
-                if (!modList.empty())
+                chatterList.sort();
+                
+                if (containsBroadcaster)
                 {
-                    addUserList(modList, QString("Moderators"));
+                    addLabel("Broadcaster");
+                    chattersList->addItem(broadcaster);
+                    chattersList->addItem(new QListWidgetItem());
                 }
-                if (!vipList.empty())
-                {
-                    addUserList(vipList, QString("VIPs"));
-                }
-                addUserList(chatterVector, QString("Viewers"));
+                addUserList(modList, QString("Moderators"));
+                addUserList(vipList, QString("VIPs"));
+                addUserList(chatterList, QString("Chatters"));
                 loadingLabel->hide();
                 performListSearch();
             },
@@ -1384,15 +1378,7 @@ void Split::showViewerListHelix()
     QObject::connect(searchBar, &QLineEdit::textEdited, this,
                      performListSearch);
 
-    // Add broadcaster
-    if (channel->isBroadcaster() || channel->hasModRights())
-    {
-        addLabel("Broadcaster");
-        chattersList->addItem(channel->getName());
-        chattersList->addItem(new QListWidgetItem());
-    }
-
-    // Only broadcaster can get vips, mods can get viewers
+    // Only broadcaster can get vips, mods can get chatters
     if (channel->isBroadcaster())
     {
         auto helixApi = getHelix();
@@ -1400,25 +1386,27 @@ void Split::showViewerListHelix()
         // Add moderators
         helixApi->getModerators(
             twitchChannel->roomId(), 1000,
-            [=](auto modList) {
-                std::vector<QString> modVector;
-                for (auto mod : modList)
+            [=](auto mods) {
+                QStringList modList;
+                for (auto mod : mods)
                 {
-                    modVector.push_back(mod.userName);
+                    modList.append(mod.userName.toLower());
                 }
+                modList.sort();
 
                 // Add vips
                 helixApi->getChannelVIPs(
                     twitchChannel->roomId(),
                     [=](auto vips) {
-                        std::vector<QString> vipVector;
+                        QStringList vipList;
                         for (auto vip : vips)
                         {
-                            vipVector.emplace_back(vip.userName);
+                            vipList.append(vip.userName.toLower());
                         }
+                        vipList.sort();
 
                         // Add chatters
-                        loadChatters(modVector, vipVector);
+                        loadChatters(modList, vipList);
                     },
                     [chattersList, formatListItemText](auto error,
                                                        auto message) {
@@ -1433,10 +1421,10 @@ void Split::showViewerListHelix()
     }
     else if (channel->hasModRights())
     {
-        std::vector<QString> modList;
-        modList.push_back("Moderators cannot check who is a moderator");
-        std::vector<QString> vipList;
-        vipList.push_back("Moderators cannot check who is a VIP");
+        QStringList modList;
+        modList.append("Moderators cannot check who is a moderator");
+        QStringList vipList;
+        vipList.append("Moderators cannot check who is a VIP");
         loadChatters(modList, vipList);
     }
     else
