@@ -8,8 +8,8 @@ fi
 
 chatterino_version=$(git describe 2>/dev/null | cut -c 2-) || true
 if [ -z "$chatterino_version" ]; then
-    echo "Falling back to setting the version to 'dev'"
-    chatterino_version="dev"
+    chatterino_version="0.0.0-dev"
+    echo "Falling back to setting the version to '$chatterino_version'"
 else
     echo "Found Chatterino version $chatterino_version via git"
 fi
