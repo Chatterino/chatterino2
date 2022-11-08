@@ -257,5 +257,6 @@ jobs:
           artifactErrorsFailBuild: true
           artifacts: "release-artifacts/*"
           generateReleaseNotes: true
+          prerelease: true
           name: Nightly Release
           tag: nightly-build
