@@ -889,11 +889,13 @@ void ChannelView::messageAppended(MessagePtr &message,
              this->channel_->getType() != Channel::Type::TwitchMentions))
 
         {
-            this->tabHighlightRequested.invoke(HighlightState::Highlighted);
+            this->tabHighlightRequested.invoke(HighlightState::Highlighted,
+                                               message->highlightColor);
         }
         else
         {
-            this->tabHighlightRequested.invoke(HighlightState::NewMessage);
+            this->tabHighlightRequested.invoke(HighlightState::NewMessage,
+                                               nullptr);
         }
     }
 
