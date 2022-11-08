@@ -77,7 +77,7 @@ BasicLoginWidget::BasicLoginWidget()
     const QString logInLink = "https://chatterino.com/client_login";
     this->setLayout(&this->ui_.layout);
 
-    this->ui_.loginButton.setText("Login using browser");
+    this->ui_.loginButton.setText("Log in (Opens in browser)");
     this->ui_.pasteCodeButton.setText("Paste login info");
     this->ui_.unableToOpenBrowserHelper.setWindowTitle(
         "Chatterino - unable to open in browser");
