@@ -6,8 +6,13 @@ if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     exit 1
 fi
 
-chatterino_version=$(git describe | cut -c 2-)
-echo "Found Chatterino version $chatterino_version via git"
+chatterino_version=$(git describe 2>/dev/null | cut -c 2-) || true
+if [ -z "$chatterino_version" ]; then
+    echo "Falling back to setting the version to 'dev'"
+    chatterino_version="dev"
+else
+    echo "Found Chatterino version $chatterino_version via git"
+fi
 
 rm -vrf "./package" || true  # delete any old packaging dir
 
