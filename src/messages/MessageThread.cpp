@@ -58,4 +58,14 @@ size_t MessageThread::liveCount(
     return count;
 }
 
+bool MessageThread::participated() const
+{
+    return this->participated_;
+}
+
+void MessageThread::markParticipated()
+{
+    this->participated_ = true;
+}
+
 }  // namespace chatterino

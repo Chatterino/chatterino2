@@ -105,9 +105,13 @@ namespace {
         for (size_t i = 0; i < snapshot.size(); i++)
         {
             MessagePtr message = snapshot[i];
+
+            auto overrideFlags = boost::optional<MessageFlags>(message->flags);
+            overrideFlags->set(MessageFlag::DoNotLog);
+
             if (checkMessageUserName(userName, message))
             {
-                channelPtr->addMessage(message);
+                channelPtr->addMessage(message, overrideFlags);
             }
         }
 
@@ -131,6 +135,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
     : DraggablePopup(closeAutomatically, parent)
     , split_(split)
 {
+    assert(split != nullptr &&
+           "split being nullptr causes lots of bugs down the road");
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
 

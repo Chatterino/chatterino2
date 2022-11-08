@@ -34,6 +34,23 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
         {
             this->flags_.set(MessageFlag::FirstMessage);
         }
+        else if (flag == "elevated-msg")
+        {
+            this->flags_.set(MessageFlag::ElevatedMessage);
+        }
+        else if (flag == "cheer-msg")
+        {
+            this->flags_.set(MessageFlag::CheerMessage);
+        }
+        else if (flag == "redemption")
+        {
+            this->flags_.set(MessageFlag::RedeemedChannelPointReward);
+            this->flags_.set(MessageFlag::RedeemedHighlight);
+        }
+        else if (flag == "reply")
+        {
+            this->flags_.set(MessageFlag::ReplyMessage);
+        }
     }
 }
 

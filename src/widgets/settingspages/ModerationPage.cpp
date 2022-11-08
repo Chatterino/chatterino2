@@ -239,7 +239,7 @@ void ModerationPage::addModerationButtonSettings(
 
     // build one line for each customizable button
     auto i = 0;
-    for (const auto tButton : getSettings()->timeoutButtons.getValue())
+    for (const auto &tButton : getSettings()->timeoutButtons.getValue())
     {
         const auto buttonNumber = QString::number(i);
         auto timeout = timeoutLayout.emplace<QHBoxLayout>().withoutMargin();

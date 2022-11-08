@@ -7,4 +7,4 @@ namespace chatterino {
 
 using QuickSwitcherModel = GenericListModel;
 
-}
+}  // namespace chatterino

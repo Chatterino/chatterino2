@@ -12,6 +12,7 @@ public:
         QPixmap _1xelerate;
         QPixmap alazymeme;
         QPixmap brian6932;
+        QPixmap explooosion_code;
         QPixmap fourtf;
         QPixmap hicupalot;
         QPixmap iprodigy;
