@@ -164,26 +164,12 @@ jobs:
             sh ./../.CI/CreateAppImage.sh
         shell: bash
 
-      - name: Package - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-            cd build
-            sh ./../.CI/CreateUbuntuDeb.sh
-        shell: bash
-
       - name: Upload artifact - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
-
-      - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v3
-        with:
-          name: Chatterino-${{ matrix.qt-version }}.deb
-          path: build/Chatterino.deb
 
       # MACOS
       - name: Install dependencies (MacOS)
@@ -237,11 +223,6 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: Chatterino-x86_64-5.15.2.AppImage
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: Chatterino-5.15.2.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
