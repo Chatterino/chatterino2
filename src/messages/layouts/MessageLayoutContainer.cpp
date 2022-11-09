@@ -620,17 +620,17 @@ int MessageLayoutContainer::getLastCharacterIndex() const
 
 int MessageLayoutContainer::getFirstMessageCharacterIndex() const
 {
-    static FlagsEnum<MessageElementFlag> flags;
-    flags.set(MessageElementFlag::Username);
-    flags.set(MessageElementFlag::Timestamp);
-    flags.set(MessageElementFlag::Badges);
+    static FlagsEnum<MessageElementFlag> skippedFlags;
+    skippedFlags.set(MessageElementFlag::RepliedMessage);
+    skippedFlags.set(MessageElementFlag::Timestamp);
+    skippedFlags.set(MessageElementFlag::Badges);
+    skippedFlags.set(MessageElementFlag::Username);
 
     // Get the index of the first character of the real message
-    // (no badges/timestamps/username)
     int index = 0;
     for (auto &element : this->elements_)
     {
-        if (element->getFlags().hasAny(flags))
+        if (element->getFlags().hasAny(skippedFlags))
         {
             index += element->getSelectionIndexCount();
         }
