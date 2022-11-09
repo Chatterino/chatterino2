@@ -39,7 +39,7 @@ echo ""
 # move directory up
 ls -la "$packaging_dir$(pwd)"
 ls -la "$packaging_dir$(pwd)/appdir"
-mv "$packaging_dir$(pwd)/appdir/*" "$packaging_dir/"
+mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/"
 rm -vrf "$packaging_dir/home" || true
 
 echo "Building package..."
