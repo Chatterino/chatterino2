@@ -99,15 +99,17 @@ public:
     SubtitleLabel *addSubtitle(const QString &text);
     /// @param inverse Inverses true to false and vice versa
     QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
-                           bool inverse = false);
-    ComboBox *addDropdown(const QString &text, const QStringList &items);
+                           bool inverse = false, QString toolTipText = {});
+    ComboBox *addDropdown(const QString &text, const QStringList &items,
+                          QString toolTipText = {});
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           pajlada::Settings::Setting<QString> &setting,
-                          bool editable = false);
+                          bool editable = false, QString toolTipText = {});
     ColorButton *addColorButton(const QString &text, const QColor &color,
-                                pajlada::Settings::Setting<QString> &setting);
+                                pajlada::Settings::Setting<QString> &setting,
+                                QString toolTipText = {});
     QSpinBox *addIntInput(const QString &text, IntSetting &setting, int min,
-                          int max, int step);
+                          int max, int step, QString toolTipText = {});
     void addNavigationSpacing();
 
     template <typename OnClick>
@@ -135,7 +137,8 @@ public:
         const QString &text, const QStringList &items,
         pajlada::Settings::Setting<T> &setting,
         std::function<boost::variant<int, QString>(T)> getValue,
-        std::function<T(DropdownArgs)> setValue, bool editable = true)
+        std::function<T(DropdownArgs)> setValue, bool editable = true,
+        QString toolTipText = {})
     {
         auto items2 = items;
         auto selected = getValue(setting.getValue());
@@ -147,7 +150,7 @@ public:
                 items2.insert(0, boost::get<QString>(selected));
         }
 
-        auto combo = this->addDropdown(text, items2);
+        auto combo = this->addDropdown(text, items2, toolTipText);
         if (editable)
             combo->setEditable(true);
 
@@ -200,6 +203,7 @@ protected:
 
 private:
     void updateNavigationHighlighting();
+    void addToolTip(QWidget &widget, QString text) const;
 
     struct Widget {
         QWidget *element;

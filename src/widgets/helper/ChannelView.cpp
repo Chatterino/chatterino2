@@ -120,6 +120,10 @@ namespace {
         {
             addPageLink("FFZ");
         }
+        else if (creatorFlags.has(MessageElementFlag::SevenTVEmote))
+        {
+            addPageLink("7TV");
+        }
     }
 
     // Current function: https://www.desmos.com/calculator/vdyamchjwh

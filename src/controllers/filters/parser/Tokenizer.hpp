@@ -24,6 +24,8 @@ static const QMap<QString, QString> validIdentifiersMap = {
     {"flags.system_message", "system message?"},
     {"flags.reward_message", "channel point reward message?"},
     {"flags.first_message", "first message?"},
+    {"flags.elevated_message", "elevated message?"},
+    {"flags.cheer_message", "cheer message?"},
     {"flags.whisper", "whisper message?"},
     {"flags.reply", "reply message?"},
     {"flags.automod", "automod message?"},

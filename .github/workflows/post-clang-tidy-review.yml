@@ -35,5 +35,5 @@ jobs:
       - name: 'Unzip artifact'
         run: unzip clang-tidy-review.zip
 
-      - uses: pajlada/clang-tidy-review/post@feat/split-up-review-and-post-workflows
+      - uses: ZedThree/clang-tidy-review/post@v0.10.1
         id: review

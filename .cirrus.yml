@@ -3,7 +3,7 @@ freebsd_instance:
 
 task:
   install_script:
-  - pkg install -y boost-libs git qt5-buildtools qt5-concurrent qt5-core qt5-multimedia qt5-svg qtkeychain qt5-qmake cmake qt5-linguist
+  - pkg install -y boost-libs git qt5-buildtools qt5-concurrent qt5-core qt5-multimedia qt5-svg qtkeychain-qt5 qt5-qmake cmake qt5-linguist
   script: |
     git submodule init
     git submodule update

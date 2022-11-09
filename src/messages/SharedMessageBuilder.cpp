@@ -149,7 +149,8 @@ void SharedMessageBuilder::parseHighlights()
 
     auto badges = SharedMessageBuilder::parseBadgeTag(this->tags);
     auto [highlighted, highlightResult] = getIApp()->getHighlights()->check(
-        this->args, badges, this->ircMessage->nick(), this->originalMessage_);
+        this->args, badges, this->ircMessage->nick(), this->originalMessage_,
+        this->message().flags);
 
     if (!highlighted)
     {
@@ -178,41 +179,6 @@ void SharedMessageBuilder::parseHighlights()
     if (highlightResult.showInMentions)
     {
         this->message().flags.set(MessageFlag::ShowInMentions);
-    }
-}
-
-void SharedMessageBuilder::addTextOrEmoji(EmotePtr emote)
-{
-    this->emplace<EmoteElement>(emote, MessageElementFlag::EmojiAll);
-}
-
-void SharedMessageBuilder::addTextOrEmoji(const QString &string_)
-{
-    auto string = QString(string_);
-
-    // Actually just text
-    auto linkString = this->matchLink(string);
-    auto link = Link();
-    auto &&textColor = this->textColor_;
-
-    if (linkString.isEmpty())
-    {
-        if (string.startsWith('@'))
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                       textColor, FontStyle::ChatMediumBold);
-            this->emplace<TextElement>(
-                string, MessageElementFlag::NonBoldUsername, textColor);
-        }
-        else
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::Text,
-                                       textColor);
-        }
-    }
-    else
-    {
-        this->addLink(string, linkString);
     }
 }
 

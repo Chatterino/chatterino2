@@ -1,7 +1,8 @@
 #pragma once
 
-#include <QCoreApplication>
+#include "debug/AssertInGuiThread.hpp"
 
+#include <QCoreApplication>
 #include <QRunnable>
 #include <QThreadPool>
 
@@ -28,6 +29,19 @@ public:
 private:
     std::function<void()> action_;
 };
+
+template <typename F>
+static void runInGuiThread(F &&fun)
+{
+    if (isGuiThread())
+    {
+        fun();
+    }
+    else
+    {
+        postToThread(fun);
+    }
+}
 
 // Taken from
 // https://stackoverflow.com/questions/21646467/how-to-execute-a-functor-or-a-lambda-in-a-given-thread-in-qt-gcd-style
