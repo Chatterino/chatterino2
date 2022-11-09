@@ -40,8 +40,6 @@ public:
         ChannelPtr channel, const Message *message = nullptr,
         std::unordered_map<QString, QString> context = {});
 
-    static bool areIRCCommandsStillAvailable();
-
 private:
     void load(Paths &paths);
 

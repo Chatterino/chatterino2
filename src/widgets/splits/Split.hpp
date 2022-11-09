@@ -176,10 +176,6 @@ public slots:
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
     void reconnect();
-
-private slots:
-    void showViewerListTmi();
-    void showViewerListHelix();
 };
 
 }  // namespace chatterino
