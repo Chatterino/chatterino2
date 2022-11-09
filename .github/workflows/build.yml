@@ -256,7 +256,7 @@ jobs:
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: "release-artifacts/*"
-          generateReleaseNotes: true
+          body: ${{ github.event.commits[0].message }}
           prerelease: true
           name: Nightly Release
           tag: nightly-build
