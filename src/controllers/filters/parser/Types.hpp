@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QRegularExpression>
+#include <set>
 
 #include <memory>
 
@@ -65,8 +66,98 @@ enum TokenType {
     NONE = 200
 };
 
-bool convertVariantTypes(QVariant &a, QVariant &b, int type);
+QString metaTypeToString(QMetaType::Type type);
 QString tokenTypeToInfoString(TokenType type);
+
+class PossibleType
+{
+public:
+    PossibleType(QMetaType::Type t)
+    {
+        this->types_.insert(t);
+    }
+
+    PossibleType(std::initializer_list<QMetaType::Type> t)
+        : types_(t)
+    {
+        assert(!this->types_.empty());
+    }
+
+    QString string() const
+    {
+        if (this->types_.size() == 1)
+        {
+            return metaTypeToString(*this->types_.begin());
+        }
+        else
+        {
+            QStringList names;
+            names.reserve(this->types_.size());
+            for (QMetaType::Type t : this->types_)
+            {
+                names.push_back(metaTypeToString(t));
+            }
+            return "(" + names.join(" | ") + ")";
+        }
+    }
+
+    bool operator==(QMetaType::Type t) const
+    {
+        return this->types_.count(t) != 0;
+    }
+
+    bool operator==(const PossibleType &p) const
+    {
+        // Check if there are any common types between the two sets
+        auto i = this->types_.cbegin();
+        auto j = p.types_.cbegin();
+        while (i != this->types_.cend() && j != p.types_.cend())
+        {
+            if (*i == *j)
+                return true;
+            else if (*i < *j)
+                ++i;
+            else
+                ++j;
+        }
+        return false;
+    }
+
+    bool operator!=(QMetaType::Type t) const
+    {
+        return this->types_.count(t) == 0;
+    }
+
+    bool operator!=(const PossibleType &p) const
+    {
+        return !this->operator==(p);
+    }
+
+private:
+    std::set<QMetaType::Type> types_;
+};
+
+class Expression;
+class TypeValidator
+{
+public:
+    TypeValidator();
+
+    bool must(bool condition, const QString &message);
+    bool must(bool condition, TokenType op, const PossibleType &left,
+              const PossibleType &right);
+    bool must(bool condition, TokenType op, const PossibleType &left,
+              const PossibleType &right, const Expression *wholeExp);
+
+    void fail(const QString &message);
+
+    bool valid() const;
+    const QString &failureMessage();
+
+private:
+    bool valid_ = true;
+    QString failureMessage_ = "";
+};
 
 class Expression
 {
@@ -76,6 +167,16 @@ public:
     virtual QVariant execute(const ContextMap &) const
     {
         return false;
+    }
+
+    virtual PossibleType returnType() const
+    {
+        return QMetaType::Bool;
+    }
+
+    virtual bool validateTypes(TypeValidator &validator) const
+    {
+        return true;
     }
 
     virtual QString debug() const
@@ -98,6 +199,8 @@ public:
     TokenType type();
 
     QVariant execute(const ContextMap &context) const override;
+    PossibleType returnType() const override;
+    bool validateTypes(TypeValidator &validator) const override;
     QString debug() const override;
     QString filterString() const override;
 
@@ -112,6 +215,8 @@ public:
     RegexExpression(QString regex, bool caseInsensitive);
 
     QVariant execute(const ContextMap &context) const override;
+    PossibleType returnType() const override;
+    bool validateTypes(TypeValidator &validator) const override;
     QString debug() const override;
     QString filterString() const override;
 
@@ -129,6 +234,8 @@ public:
     ListExpression(ExpressionList list);
 
     QVariant execute(const ContextMap &context) const override;
+    PossibleType returnType() const override;
+    bool validateTypes(TypeValidator &validator) const override;
     QString debug() const override;
     QString filterString() const override;
 
@@ -142,6 +249,8 @@ public:
     BinaryOperation(TokenType op, ExpressionPtr left, ExpressionPtr right);
 
     QVariant execute(const ContextMap &context) const override;
+    PossibleType returnType() const override;
+    bool validateTypes(TypeValidator &validator) const override;
     QString debug() const override;
     QString filterString() const override;
 
@@ -157,6 +266,8 @@ public:
     UnaryOperation(TokenType op, ExpressionPtr right);
 
     QVariant execute(const ContextMap &context) const override;
+    PossibleType returnType() const override;
+    bool validateTypes(TypeValidator &validator) const override;
     QString debug() const override;
     QString filterString() const override;
 

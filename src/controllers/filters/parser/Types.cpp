@@ -1,15 +1,52 @@
 #include "controllers/filters/parser/Types.hpp"
+#include "controllers/filters/parser/Tokenizer.hpp"
 
 namespace filterparser {
 
-bool convertVariantTypes(QVariant &a, QVariant &b, int type)
-{
-    return a.convert(type) && b.convert(type);
-}
+namespace {
+    inline bool variantIs(const QVariant &a, QMetaType::Type type)
+    {
+        return static_cast<QMetaType::Type>(a.type()) == type;
+    }
 
-bool variantTypesMatch(QVariant &a, QVariant &b, QVariant::Type type)
+    inline bool variantIsNot(const QVariant &a, QMetaType::Type type)
+    {
+        return static_cast<QMetaType::Type>(a.type()) != type;
+    }
+
+    inline bool convertVariantTypes(QVariant &a, QVariant &b, int type)
+    {
+        return a.convert(type) && b.convert(type);
+    }
+
+    inline bool variantTypesMatch(QVariant &a, QVariant &b,
+                                  QMetaType::Type type)
+    {
+        return variantIs(a, type) && variantIs(b, type);
+    }
+}  // namespace
+
+QString metaTypeToString(QMetaType::Type type)
 {
-    return a.type() == type && b.type() == type;
+    using T = QMetaType;
+    switch (type)
+    {
+        case T::QString:
+            return "string";
+        case T::Bool:
+            return "boolean";
+        case T::Int:
+            return "integer";
+        case T::QVariantList:
+        case T::QStringList:
+            return "list";
+        case T::QRegExp:
+            return "regular expression";
+        case T::QColor:
+            return "color";
+        default:
+            return QString::fromUtf8(QMetaType::typeName(type));
+    }
 }
 
 QString tokenTypeToInfoString(TokenType type)
@@ -84,6 +121,60 @@ QString tokenTypeToInfoString(TokenType type)
     }
 }
 
+TypeValidator::TypeValidator()
+{
+}
+
+bool TypeValidator::must(bool condition, const QString &message)
+{
+    if (!condition)
+    {
+        this->fail(message);
+    }
+    return condition;
+}
+
+bool TypeValidator::must(bool condition, TokenType op, const PossibleType &left,
+                         const PossibleType &right)
+{
+    if (!condition)
+    {
+        this->fail(
+            QStringLiteral("Can't compute %1 for %2 and %3")
+                .arg(tokenTypeToInfoString(op), left.string(), right.string()));
+    }
+    return condition;
+}
+
+bool TypeValidator::must(bool condition, TokenType op, const PossibleType &left,
+                         const PossibleType &right, const Expression *wholeExp)
+{
+    if (!condition)
+    {
+        this->fail(
+            QStringLiteral("Can't compute %1 for %2 and %3\n\nExpression: %4")
+                .arg(tokenTypeToInfoString(op), left.string(), right.string(),
+                     wholeExp->filterString()));
+    }
+    return condition;
+}
+
+void TypeValidator::fail(const QString &message)
+{
+    this->valid_ = false;
+    this->failureMessage_ = message;
+}
+
+bool TypeValidator::valid() const
+{
+    return this->valid_;
+}
+
+const QString &TypeValidator::failureMessage()
+{
+    return this->failureMessage_;
+}
+
 // ValueExpression
 
 ValueExpression::ValueExpression(QVariant value, TokenType type)
@@ -97,6 +188,26 @@ QVariant ValueExpression::execute(const ContextMap &context) const
         return context.value(this->value_.toString());
     }
     return this->value_;
+}
+
+PossibleType ValueExpression::returnType() const
+{
+    if (this->type_ == TokenType::IDENTIFIER)
+    {
+        auto it = validIdentifiersMap.find(this->value_.toString());
+        if (it != validIdentifiersMap.end())
+        {
+            return it.value().type;
+        }
+
+        return Expression::returnType();  // Invalid fallback
+    }
+    return static_cast<QMetaType::Type>(this->value_.type());
+}
+
+bool ValueExpression::validateTypes(TypeValidator &validator) const
+{
+    return true;  // Nothing to do
 }
 
 TokenType ValueExpression::type()
@@ -139,6 +250,16 @@ QVariant RegexExpression::execute(const ContextMap &) const
     return this->regex_;
 }
 
+PossibleType RegexExpression::returnType() const
+{
+    return QMetaType::QRegularExpression;
+}
+
+bool RegexExpression::validateTypes(TypeValidator &validator) const
+{
+    return true;  // Nothing to do
+}
+
 QString RegexExpression::debug() const
 {
     return this->regexString_;
@@ -164,7 +285,7 @@ QVariant ListExpression::execute(const ContextMap &context) const
     for (const auto &exp : this->list_)
     {
         auto res = exp->execute(context);
-        if (allStrings && res.type() != QVariant::Type::String)
+        if (allStrings && variantIsNot(res.type(), QMetaType::QString))
         {
             allStrings = false;
         }
@@ -186,6 +307,25 @@ QVariant ListExpression::execute(const ContextMap &context) const
     {
         return results;
     }
+}
+
+PossibleType ListExpression::returnType() const
+{
+    for (const auto &exp : this->list_)
+    {
+        if (exp->returnType() != QMetaType::QString)
+        {
+            return QMetaType::QVariantList;
+        }
+    }
+
+    // Every item evaluates to a string
+    return QMetaType::QStringList;
+}
+
+bool ListExpression::validateTypes(TypeValidator &validator) const
+{
+    return true;  // Nothing to do
 }
 
 QString ListExpression::debug() const
@@ -225,7 +365,8 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
     switch (this->op_)
     {
         case PLUS:
-            if (left.type() == QVariant::Type::String &&
+            if (static_cast<QMetaType::Type>(left.type()) ==
+                    QMetaType::QString &&
                 right.canConvert(QMetaType::QString))
             {
                 return left.toString().append(right.toString());
@@ -260,14 +401,14 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                 return left.toBool() && right.toBool();
             return false;
         case EQ:
-            if (variantTypesMatch(left, right, QVariant::Type::String))
+            if (variantTypesMatch(left, right, QMetaType::QString))
             {
                 return left.toString().compare(right.toString(),
                                                Qt::CaseInsensitive) == 0;
             }
             return left == right;
         case NEQ:
-            if (variantTypesMatch(left, right, QVariant::Type::String))
+            if (variantTypesMatch(left, right, QMetaType::QString))
             {
                 return left.toString().compare(right.toString(),
                                                Qt::CaseInsensitive) != 0;
@@ -290,20 +431,20 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                 return left.toInt() >= right.toInt();
             return false;
         case CONTAINS:
-            if (left.type() == QVariant::Type::StringList &&
+            if (variantIs(left, QMetaType::QStringList) &&
                 right.canConvert(QMetaType::QString))
             {
                 return left.toStringList().contains(right.toString(),
                                                     Qt::CaseInsensitive);
             }
 
-            if (left.type() == QVariant::Type::Map &&
+            if (variantIs(left.type(), QMetaType::QVariantMap) &&
                 right.canConvert(QMetaType::QString))
             {
                 return left.toMap().contains(right.toString());
             }
 
-            if (left.type() == QVariant::Type::List)
+            if (variantIs(left.type(), QMetaType::QVariantList))
             {
                 return left.toList().contains(right);
             }
@@ -317,7 +458,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
 
             return false;
         case STARTS_WITH:
-            if (left.type() == QVariant::Type::StringList &&
+            if (variantIs(left.type(), QMetaType::QStringList) &&
                 right.canConvert(QMetaType::QString))
             {
                 auto list = left.toStringList();
@@ -326,7 +467,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                                             Qt::CaseInsensitive);
             }
 
-            if (left.type() == QVariant::Type::List)
+            if (variantIs(left.type(), QMetaType::QVariantList))
             {
                 return left.toList().startsWith(right);
             }
@@ -341,7 +482,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
             return false;
 
         case ENDS_WITH:
-            if (left.type() == QVariant::Type::StringList &&
+            if (variantIs(left.type(), QMetaType::QStringList) &&
                 right.canConvert(QMetaType::QString))
             {
                 auto list = left.toStringList();
@@ -350,7 +491,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                                            Qt::CaseInsensitive);
             }
 
-            if (left.type() == QVariant::Type::List)
+            if (variantIs(left.type(), QMetaType::QVariantList))
             {
                 return left.toList().endsWith(right);
             }
@@ -371,14 +512,14 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
 
             auto matching = left.toString();
 
-            switch (right.type())
+            switch (static_cast<QMetaType::Type>(right.type()))
             {
-                case QVariant::Type::RegularExpression: {
+                case QMetaType::QRegularExpression: {
                     return right.toRegularExpression()
                         .match(matching)
                         .hasMatch();
                 }
-                case QVariant::Type::List: {
+                case QMetaType::QVariantList: {
                     auto list = right.toList();
 
                     // list must be two items
@@ -386,9 +527,9 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                         return false;
 
                     // list must be a regular expression and an int
-                    if (list.at(0).type() !=
-                            QVariant::Type::RegularExpression ||
-                        list.at(1).type() != QVariant::Type::Int)
+                    if (variantIsNot(list.at(0),
+                                     QMetaType::QRegularExpression) ||
+                        variantIsNot(list.at(1), QMetaType::Int))
                         return false;
 
                     auto match =
@@ -403,6 +544,132 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                 default:
                     return false;
             }
+        }
+        default:
+            return false;
+    }
+}
+
+PossibleType BinaryOperation::returnType() const
+{
+    auto left = this->left_->returnType();
+    auto right = this->right_->returnType();
+    switch (this->op_)
+    {
+        case PLUS:
+            if (left == QMetaType::QString)
+            {
+                return QMetaType::QString;  // String concatenation
+            }
+            return QMetaType::Int;
+        case MINUS:
+        case MULTIPLY:
+        case DIVIDE:
+        case MOD:
+            return QMetaType::Int;
+        case OR:
+        case AND:
+        case EQ:
+        case NEQ:
+        case LT:
+        case GT:
+        case LTE:
+        case GTE:
+        case CONTAINS:
+        case STARTS_WITH:
+        case ENDS_WITH:
+            return QMetaType::Bool;
+        case MATCH: {
+            if (left != QMetaType::QString)
+            {
+                return QMetaType::Bool;
+            }
+
+            if (right == QMetaType::QRegularExpression)
+            {
+                return QMetaType::Bool;
+            }
+            else if (right == QMetaType::QVariantList)
+            {
+                return {QMetaType::QString, QMetaType::Bool};
+            }
+
+            return QMetaType::Bool;
+        }
+        default:
+            return QMetaType::Bool;
+    }
+}
+
+bool BinaryOperation::validateTypes(TypeValidator &validator) const
+{
+    if (!this->left_->validateTypes(validator) ||
+        !this->right_->validateTypes(validator))
+    {
+        return false;
+    }
+
+    auto left = this->left_->returnType();
+    auto right = this->right_->returnType();
+    switch (this->op_)
+    {
+        case PLUS:
+            if (left == QMetaType::QString)
+            {
+                return true;
+            }
+            return validator.must(
+                left == QMetaType::Int && right == QMetaType::Int, this->op_,
+                left, right, this);
+        case MINUS:
+        case MULTIPLY:
+        case DIVIDE:
+        case MOD:
+        case LT:
+        case GT:
+            return validator.must(
+                left == QMetaType::Int && right == QMetaType::Int, this->op_,
+                left, right, this);
+        case OR:
+        case AND:
+            return validator.must(
+                left == QMetaType::Bool && right == QMetaType::Bool, this->op_,
+                left, right, this);
+        case EQ:
+        case NEQ:
+            // todo:
+            // validator.must(left == right || left == QMetaType::QString,
+            //                this->op_, left, right, this);
+            return true;
+        case LTE:
+        case GTE:
+            return validator.must(
+                left == QMetaType::Int && right == QMetaType::Int, this->op_,
+                left, right, this);
+        case CONTAINS:
+        case STARTS_WITH:
+        case ENDS_WITH:
+            return validator.must(left == QMetaType::QVariantList ||
+                                      left == QMetaType::QStringList ||
+                                      left == QMetaType::QString,
+                                  this->op_, left, right, this);
+        case MATCH: {
+            if (left != QMetaType::QString)
+            {
+                validator.fail(
+                    QStringLiteral(
+                        "Can't match on type %1, only string\n\nExpression: %s")
+                        .arg(left.string(), this->filterString()));
+                return false;
+            }
+
+            if (right == QMetaType::QRegularExpression ||
+                right == QMetaType::QVariantList)
+            {
+                return true;
+            }
+
+            return validator.must(false, this->op_, left, right, this);
         }
         default:
             return false;
@@ -483,6 +750,35 @@ QVariant UnaryOperation::execute(const ContextMap &context) const
             if (right.canConvert<bool>())
                 return !right.toBool();
             return false;
+        default:
+            return false;
+    }
+}
+
+PossibleType UnaryOperation::returnType() const
+{
+    auto right = this->right_->returnType();
+    switch (this->op_)
+    {
+        case NOT:
+            return QMetaType::Bool;
+        default:
+            return QMetaType::Bool;
+    }
+}
+
+bool UnaryOperation::validateTypes(TypeValidator &validator) const
+{
+    if (!this->right_->validateTypes(validator))
+    {
+        return false;
+    }
+
+    auto right = this->right_->returnType();
+    switch (this->op_)
+    {
+        case NOT:
+            return right == QMetaType::Bool;
         default:
             return false;
     }

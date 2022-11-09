@@ -117,6 +117,15 @@ FilterParser::FilterParser(const QString &text)
     , tokenizer_(Tokenizer(text))
     , builtExpression_(this->parseExpression(true))
 {
+    if (this->valid_)
+    {
+        TypeValidator validator;
+        bool typesValid = this->builtExpression_->validateTypes(validator);
+        if (!typesValid)
+        {
+            this->errorLog("Invalid types\n" + validator.failureMessage());
+        }
+    }
 }
 
 bool FilterParser::execute(const ContextMap &context) const

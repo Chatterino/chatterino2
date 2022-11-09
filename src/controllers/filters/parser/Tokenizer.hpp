@@ -8,29 +8,35 @@
 
 namespace filterparser {
 
-static const QMap<QString, QString> validIdentifiersMap = {
-    {"author.badges", "author badges"},
-    {"author.color", "author color"},
-    {"author.name", "author name"},
-    {"author.no_color", "author has no color?"},
-    {"author.subbed", "author subscribed?"},
-    {"author.sub_length", "author sub length"},
-    {"channel.name", "channel name"},
-    {"channel.watching", "/watching channel?"},
-    {"channel.live", "Channel live?"},
-    {"flags.highlighted", "highlighted?"},
-    {"flags.points_redeemed", "redeemed points?"},
-    {"flags.sub_message", "sub/resub message?"},
-    {"flags.system_message", "system message?"},
-    {"flags.reward_message", "channel point reward message?"},
-    {"flags.first_message", "first message?"},
-    {"flags.elevated_message", "elevated message?"},
-    {"flags.cheer_message", "cheer message?"},
-    {"flags.whisper", "whisper message?"},
-    {"flags.reply", "reply message?"},
-    {"flags.automod", "automod message?"},
-    {"message.content", "message text"},
-    {"message.length", "message length"}};
+struct IdentifierDescription {
+    QString humanDescription;
+    QMetaType::Type type;
+};
+
+static const QMap<QString, IdentifierDescription> validIdentifiersMap = {
+    {"author.badges", {"author badges", QMetaType::QStringList}},
+    {"author.color", {"author color", QMetaType::QColor}},
+    {"author.name", {"author name", QMetaType::QString}},
+    {"author.no_color", {"author has no color?", QMetaType::Bool}},
+    {"author.subbed", {"author subscribed?", QMetaType::Bool}},
+    {"author.sub_length", {"author sub length", QMetaType::Int}},
+    {"channel.name", {"channel name", QMetaType::QString}},
+    {"channel.watching", {"/watching channel?", QMetaType::Bool}},
+    {"channel.live", {"channel live?", QMetaType::Bool}},
+    {"flags.highlighted", {"highlighted?", QMetaType::Bool}},
+    {"flags.points_redeemed", {"redeemed points?", QMetaType::Bool}},
+    {"flags.sub_message", {"sub/resub message?", QMetaType::Bool}},
+    {"flags.system_message", {"system message?", QMetaType::Bool}},
+    {"flags.reward_message",
+     {"channel point reward message?", QMetaType::Bool}},
+    {"flags.first_message", {"first message?", QMetaType::Bool}},
+    {"flags.elevated_message", {"elevated message?", QMetaType::Bool}},
+    {"flags.cheer_message", {"cheer message?", QMetaType::Bool}},
+    {"flags.whisper", {"whisper message?", QMetaType::Bool}},
+    {"flags.reply", {"reply message?", QMetaType::Bool}},
+    {"flags.automod", {"automod message?", QMetaType::Bool}},
+    {"message.content", {"message text", QMetaType::QString}},
+    {"message.length", {"message length", QMetaType::Int}}};
 
 // clang-format off
 static const QRegularExpression tokenRegex(
