@@ -42,4 +42,3 @@ rm -vrf "$packaging_dir/home" || true
 
 echo "Building package..."
 dpkg-deb --build "$packaging_dir" "Chatterino-x86_64.deb"
-dpkg -c Chatterino-x86_64.deb
