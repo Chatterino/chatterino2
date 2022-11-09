@@ -2,12 +2,15 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookButton.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/Split.hpp"
@@ -47,6 +50,11 @@ Notebook::Notebook(QWidget *parent)
                      [this](bool value) {
                          this->setLockNotebookLayout(value);
                      });
+    this->showTabsAction_ = new QAction("Toggle visibility of tabs");
+    QObject::connect(this->showTabsAction_, &QAction::triggered, [this]() {
+        this->setShowTabs(!this->getShowTabs());
+    });
+    this->updateTabVisibilityMenuAction();
 
     this->addNotebookActionsToMenu(&this->menu_);
 
@@ -65,6 +73,7 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
     tab->page = page;
 
     tab->setCustomTitle(title);
+    tab->setTabLocation(this->tabLocation_);
 
     Item item;
     item.page = page;
@@ -373,12 +382,32 @@ void Notebook::setShowTabs(bool value)
     // show a popup upon hiding tabs
     if (!value && getSettings()->informOnTabVisibilityToggle.getValue())
     {
+        auto unhideSeq = getApp()->hotkeys->getDisplaySequence(
+            HotkeyCategory::Window, "setTabVisibility", {{}});
+        if (unhideSeq.isEmpty())
+        {
+            unhideSeq = getApp()->hotkeys->getDisplaySequence(
+                HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
+        }
+        if (unhideSeq.isEmpty())
+        {
+            unhideSeq = getApp()->hotkeys->getDisplaySequence(
+                HotkeyCategory::Window, "setTabVisibility", {{"on"}});
+        }
+        QString hotkeyInfo = "(currently unbound)";
+        if (!unhideSeq.isEmpty())
+        {
+            hotkeyInfo =
+                "(" +
+                unhideSeq.toString(QKeySequence::SequenceFormat::NativeText) +
+                ")";
+        }
         QMessageBox msgBox(this->window());
         msgBox.window()->setWindowTitle("Chatterino - hidden tabs");
         msgBox.setText("You've just hidden your tabs.");
         msgBox.setInformativeText(
-            "You can toggle tabs by using the keyboard shortcut (Ctrl+U by "
-            "default) or right-clicking the tab area and selecting \"Toggle "
+            "You can toggle tabs by using the keyboard shortcut " + hotkeyInfo +
+            " or right-clicking the tab area and selecting \"Toggle "
             "visibility of tabs\".");
         msgBox.addButton(QMessageBox::Ok);
         auto *dsaButton =
@@ -393,6 +422,34 @@ void Notebook::setShowTabs(bool value)
             getSettings()->informOnTabVisibilityToggle.setValue(false);
         }
     }
+    updateTabVisibilityMenuAction();
+}
+
+void Notebook::updateTabVisibilityMenuAction()
+{
+    auto toggleSeq = getApp()->hotkeys->getDisplaySequence(
+        HotkeyCategory::Window, "setTabVisibility", {{}});
+    if (toggleSeq.isEmpty())
+    {
+        toggleSeq = getApp()->hotkeys->getDisplaySequence(
+            HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
+    }
+
+    if (toggleSeq.isEmpty())
+    {
+        // show contextual shortcuts
+        if (this->getShowTabs())
+        {
+            toggleSeq = getApp()->hotkeys->getDisplaySequence(
+                HotkeyCategory::Window, "setTabVisibility", {{"off"}});
+        }
+        else if (!this->getShowTabs())
+        {
+            toggleSeq = getApp()->hotkeys->getDisplaySequence(
+                HotkeyCategory::Window, "setTabVisibility", {{"on"}});
+        }
+    }
+    this->showTabsAction_->setShortcut(toggleSeq);
 }
 
 bool Notebook::getShowAddButton() const
@@ -437,6 +494,7 @@ void Notebook::performLayout(bool animated)
     const auto minimumTabAreaSpace = int(tabHeight * 0.5);
     const auto addButtonWidth = this->showAddButton_ ? tabHeight : 0;
     const auto lineThickness = int(2 * scale);
+    const auto tabSpacer = std::max<int>(1, int(scale * 1));
 
     const auto buttonWidth = tabHeight;
     const auto buttonHeight = tabHeight - 1;
@@ -488,7 +546,7 @@ void Notebook::performLayout(bool animated)
                 /// Layout tab
                 item.tab->growWidth(0);
                 item.tab->moveAnimated(QPoint(x, y), animated);
-                x += item.tab->width() + std::max<int>(1, int(scale * 1));
+                x += item.tab->width() + tabSpacer;
             }
 
             /// Update which tabs are in the last row
@@ -549,10 +607,12 @@ void Notebook::performLayout(bool animated)
         }
 
         if (this->visibleButtonCount() > 0)
-            y = tabHeight;
+            y = tabHeight + lineThickness;  // account for divider line
 
         int totalButtonWidths = x;
-        int top = y;
+        const int top = y + tabSpacer;  // add margin
+
+        y = top;
         x = left;
 
         // zneix: if we were to remove buttons when tabs are hidden
@@ -598,7 +658,8 @@ void Notebook::performLayout(bool animated)
                     /// Layout tab
                     item.tab->growWidth(largestWidth);
                     item.tab->moveAnimated(QPoint(x, y), animated);
-                    y += tabHeight;
+                    item.tab->setInLastRow(isLastColumn);
+                    y += tabHeight + tabSpacer;
                 }
 
                 if (isLastColumn && this->showAddButton_)
@@ -648,10 +709,12 @@ void Notebook::performLayout(bool animated)
         }
 
         if (this->visibleButtonCount() > 0)
-            y = tabHeight;
+            y = tabHeight + lineThickness;  // account for divider line
 
         int consumedButtonWidths = right - x;
-        int top = y;
+        const int top = y + tabSpacer;  // add margin
+
+        y = top;
         x = right;
 
         // zneix: if we were to remove buttons when tabs are hidden
@@ -702,7 +765,8 @@ void Notebook::performLayout(bool animated)
                     /// Layout tab
                     item.tab->growWidth(largestWidth);
                     item.tab->moveAnimated(QPoint(x, y), animated);
-                    y += tabHeight;
+                    item.tab->setInLastRow(isLastColumn);
+                    y += tabHeight + tabSpacer;
                 }
 
                 if (isLastColumn && this->showAddButton_)
@@ -761,7 +825,7 @@ void Notebook::performLayout(bool animated)
         if (this->showTabs_)
         {
             // reset vertical position regardless
-            y = bottom - tabHeight;
+            y = bottom - tabHeight - tabSpacer;
 
             // layout tabs
             /// Notebook tabs need to know if they are in the last row.
@@ -787,7 +851,7 @@ void Notebook::performLayout(bool animated)
                 /// Layout tab
                 item.tab->growWidth(0);
                 item.tab->moveAnimated(QPoint(x, y), animated);
-                x += item.tab->width() + std::max<int>(1, int(scale * 1));
+                x += item.tab->width() + tabSpacer;
             }
 
             /// Update which tabs are in the last row
@@ -810,7 +874,7 @@ void Notebook::performLayout(bool animated)
 
         int consumedBottomSpace =
             std::max({bottom - y, consumedButtonHeights, minimumTabAreaSpace});
-        int tabsStart = bottom - consumedBottomSpace;
+        int tabsStart = bottom - consumedBottomSpace - lineThickness;
 
         if (this->lineOffset_ != tabsStart)
         {
@@ -861,6 +925,13 @@ void Notebook::setTabLocation(NotebookTabLocation location)
     if (location != this->tabLocation_)
     {
         this->tabLocation_ = location;
+
+        // Update all tabs
+        for (const auto &item : this->items_)
+        {
+            item.tab->setTabLocation(location);
+        }
+
         this->performLayout();
     }
 }
@@ -918,12 +989,7 @@ void Notebook::setLockNotebookLayout(bool value)
 
 void Notebook::addNotebookActionsToMenu(QMenu *menu)
 {
-    menu->addAction(
-        "Toggle visibility of tabs",
-        [this]() {
-            this->setShowTabs(!this->getShowTabs());
-        },
-        QKeySequence("Ctrl+U"));
+    menu->addAction(this->showTabsAction_);
 
     menu->addAction(this->lockNotebookLayoutAction_);
 }
@@ -1006,6 +1072,29 @@ SplitNotebook::SplitNotebook(Window *parent)
                                        [this](SplitContainer *sc) {
                                            this->select(sc);
                                        });
+
+    this->signalHolder_.managedConnect(
+        getApp()->windows->scrollToMessageSignal,
+        [this](const MessagePtr &message) {
+            for (auto &&item : this->items())
+            {
+                if (auto sc = dynamic_cast<SplitContainer *>(item.page))
+                {
+                    for (auto *split : sc->getSplits())
+                    {
+                        if (split->getChannel()->getType() !=
+                            Channel::Type::TwitchMentions)
+                        {
+                            if (split->getChannelView().scrollToMessage(
+                                    message))
+                            {
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        });
 }
 
 void SplitNotebook::showEvent(QShowEvent *)

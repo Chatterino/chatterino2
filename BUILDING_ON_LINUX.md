@@ -8,11 +8,11 @@ Note on Qt version compatibility: If you are installing Qt from a package manage
 
 _Most likely works the same for other Debian-like distros_
 
-Install all of the dependencies using `sudo apt install qttools5-dev qtmultimedia5-dev libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev libboost-filesystem-dev cmake g++`
+Install all of the dependencies using `sudo apt install qttools5-dev qtmultimedia5-dev qt5-image-formats-plugins libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev libboost-filesystem-dev cmake g++`
 
 ### Arch Linux
 
-Install all of the dependencies using `sudo pacman -S --needed qt5-base qt5-multimedia qt5-svg qt5-tools gst-plugins-ugly gst-plugins-good boost rapidjson pkgconf openssl cmake`
+Install all of the dependencies using `sudo pacman -S --needed qt5-base qt5-multimedia qt5-imageformats qt5-svg qt5-tools gst-plugins-ugly gst-plugins-good boost rapidjson pkgconf openssl cmake`
 
 Alternatively you can use the [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) package to build and install Chatterino for you.
 
