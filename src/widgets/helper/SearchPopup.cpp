@@ -248,13 +248,13 @@ void SearchPopup::initLayout()
     // VBOX
     {
         auto *layout1 = new QVBoxLayout(this);
-        layout1->setMargin(0);
+        layout1->setContentsMargins(0, 0, 0, 0);
         layout1->setSpacing(0);
 
         // HBOX
         {
             auto *layout2 = new QHBoxLayout(this);
-            layout2->setMargin(8);
+            layout2->setContentsMargins(8, 8, 8, 8);
             layout2->setSpacing(8);
 
             // SEARCH INPUT

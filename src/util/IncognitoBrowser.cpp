@@ -90,7 +90,8 @@ bool openLinkIncognito(const QString &link)
 #ifdef Q_OS_WIN
     auto command = getCommand(link);
 
-    return QProcess::startDetached(command);
+    // TODO: split command into program path and incognito argument
+    return QProcess::startDetached(command, {});
 #else
     return false;
 #endif
