@@ -330,25 +330,13 @@ void MessageLayoutContainer::breakLine()
 {
     if (this->containsRTL)
     {
-        if (this->elements_.size() > 0 &&
-            this->elements_[0]->getFlags().has(
-                MessageElementFlag::RepliedMessage) &&
-            this->line_ == 0)
+        for (int i = 0; i < this->elements_.size(); i++)
         {
-            this->reorderRTL(4);
-            this->first = FirstWord::Neutral;
-            this->containsRTL = false;
-        }
-        else
-        {
-            for (int i = 0; i < this->elements_.size(); i++)
+            if (this->elements_[i]->getFlags().has(
+                    MessageElementFlag::Username))
             {
-                if (this->elements_[i]->getFlags().has(
-                        MessageElementFlag::Username))
-                {
-                    this->reorderRTL(i + 1);
-                    break;
-                }
+                this->reorderRTL(i + 1);
+                break;
             }
         }
     }
