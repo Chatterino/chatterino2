@@ -2,24 +2,25 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
   "name": "chatterino",
   "version": "2.0.0",
+  "builtin-baseline": "5ba2b95aea2a39aa89444949c7a047af38c401c1",
   "dependencies": [
     "benchmark",
     "boost-asio",
-    "boost-signals2",
+    "boost-circular-buffer",
     "boost-foreach",
     "boost-interprocess",
     "boost-random",
+    "boost-signals2",
     "boost-variant",
-    "boost-circular-buffer",
     "gtest",
     "openssl",
     "qt5-multimedia",
     "qt5-tools"
   ],
-  "builtin-baseline": "8da5d2b4503b3100b6b7bb26ffeeefd0e8a25799",
   "overrides": [
     {
-      "name": "openssl", "version-string": "1.1.1n"
+      "name": "openssl",
+      "version-string": "1.1.1n"
     }
   ]
 }

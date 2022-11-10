@@ -6,8 +6,13 @@ if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     exit 1
 fi
 
-chatterino_version=$(git describe | cut -c 2-)
-echo "Found Chatterino version $chatterino_version via git"
+chatterino_version=$(git describe 2>/dev/null | cut -c 2-) || true
+if [ -z "$chatterino_version" ]; then
+    chatterino_version="0.0.0-dev"
+    echo "Falling back to setting the version to '$chatterino_version'"
+else
+    echo "Found Chatterino version $chatterino_version via git"
+fi
 
 rm -vrf "./package" || true  # delete any old packaging dir
 
@@ -32,4 +37,4 @@ DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install
 echo ""
 
 echo "Building package..."
-dpkg-deb --build "$packaging_dir" "Chatterino.deb"
+dpkg-deb --build "$packaging_dir" "Chatterino-x86_64.deb"

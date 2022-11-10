@@ -92,7 +92,7 @@ AboutPage::AboutPage()
                        ":/licenses/libcommuni_BSD3.txt");
             addLicense(form.getElement(), "OpenSSL", "https://www.openssl.org/",
                        ":/licenses/openssl.txt");
-            addLicense(form.getElement(), "RapidJson", "http://rapidjson.org/",
+            addLicense(form.getElement(), "RapidJson", "https://rapidjson.org/",
                        ":/licenses/rapidjson.txt");
             addLicense(form.getElement(), "Pajlada/Settings",
                        "https://github.com/pajlada/settings",

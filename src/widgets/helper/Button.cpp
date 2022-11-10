@@ -6,7 +6,7 @@
 #include <QPainter>
 #include <QPalette>
 
-#include "BaseTheme.hpp"
+#include "singletons/Theme.hpp"
 #include "util/FunctionEventFilter.hpp"
 
 namespace chatterino {

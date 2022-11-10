@@ -416,6 +416,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Hide viewer count and stream length while hovering over split header",
         s.streamerModeHideViewerCountAndDuration);
+    layout.addCheckbox("Hide moderation actions", s.streamerModeHideModActions);
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
     layout.addCheckbox("Suppress Live Notifications",
                        s.streamerModeSuppressLiveNotifications);
@@ -858,6 +859,28 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             false);
     helixTimegateVIPs->setMinimumWidth(
         helixTimegateVIPs->minimumSizeHint().width());
+
+    auto *helixTimegateCommercial =
+        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
+            "Helix timegate /commercial behaviour",
+            {"Timegate", "Always use IRC", "Always use Helix"},
+            s.helixTimegateCommercial,
+            helixTimegateGetValue,  //
+            helixTimegateSetValue,  //
+            false);
+    helixTimegateCommercial->setMinimumWidth(
+        helixTimegateCommercial->minimumSizeHint().width());
+
+    auto *helixTimegateModerators =
+        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
+            "Helix timegate /mods behaviour",
+            {"Timegate", "Always use IRC", "Always use Helix"},
+            s.helixTimegateModerators,
+            helixTimegateGetValue,  //
+            helixTimegateSetValue,  //
+            false);
+    helixTimegateModerators->setMinimumWidth(
+        helixTimegateModerators->minimumSizeHint().width());
 
     layout.addStretch();
 
