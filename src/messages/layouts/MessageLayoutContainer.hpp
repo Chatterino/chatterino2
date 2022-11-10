@@ -64,6 +64,10 @@ struct MessageLayoutContainer {
     void breakLine();
     bool atStartOfLine();
     bool fitsInLine(int width_);
+    // this method is called when a message has an RTL word
+    // we need to reorder the words to be shown properly
+    // however we don't we to reorder non-text elements like badges, timestamps, username
+    // firstTextIndex is the index of the first text element that we need to start the reordering from
     void reorderRTL(int firstTextIndex);
     MessageLayoutElement *getElementAt(QPoint point);
 

@@ -287,7 +287,7 @@ void TextLayoutElement::paint(QPainter &painter)
 {
     auto app = getApp();
     QString text = this->getText();
-    if (text.isRightToLeft())
+    if (text.isRightToLeft() || this->reversedNeutral)
     {
         text.prepend(u8"\u061c");
         text.append(u8"\u061c");

@@ -267,31 +267,40 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
     {
         return;
     }
-    else
-    {
-        startIndex = std::max(startIndex, firstTextIndex);
-    }
+    startIndex = std::max(startIndex, firstTextIndex);
 
     std::vector<int> correctSequence;
     std::stack<int> swappedSequence;
-    bool wasPrevPushed = false;
+    bool wasPrevReversed = false;
 
     // we reverse a sequence of words if it's opposite to the text direction
-    // the long condition below covers the possible three cases:
+    // the second condition below covers the possible three cases:
     // 1 - if we are in RTL mode (first non-neutral word is RTL)
     // we render RTL, reversing LTR sequences,
     // 2 - if we are in LTR mode (first non-neautral word is LTR or all wrods are neutral)
     // we render LTR, reversing RTL sequences
-    // 3 - neutral words follow previous words, we reverse a neutral word when the previous word was reveresed
+    // 3 - neutral words follow previous words, we reverse a neutral word when the previous word was reversed
+
+    // the first condition checks if a neutral word is treated as a RTL word
+    // this is used later to add an invisible Arabic letter to fix orentation
+    // this can happen in two cases:
+    // 1 - in RTL mode, the previous word should be RTL (i.e. not reversed)
+    // 2 - in LTR mode, the previous word should be RTL (i.e. reversed)
     for (int i = startIndex; i <= endIndex; i++)
     {
+        if (isNeutral(this->elements_[i]->getText()) &&
+            ((this->first == FirstWord::RTL && !wasPrevReversed) ||
+             (this->first == FirstWord::LTR && wasPrevReversed)))
+        {
+            this->elements_[i]->reversedNeutral = true;
+        }
         if (((this->elements_[i]->getText().isRightToLeft() !=
               (this->first == FirstWord::RTL)) &&
              !isNeutral(this->elements_[i]->getText())) ||
-            (isNeutral(this->elements_[i]->getText()) && wasPrevPushed))
+            (isNeutral(this->elements_[i]->getText()) && wasPrevReversed))
         {
             swappedSequence.push(i);
-            wasPrevPushed = true;
+            wasPrevReversed = true;
         }
         else
         {
@@ -301,7 +310,7 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
                 swappedSequence.pop();
             }
             correctSequence.push_back(i);
-            wasPrevPushed = false;
+            wasPrevReversed = false;
         }
     }
     while (!swappedSequence.empty())
@@ -319,7 +328,10 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
     {
         this->currentX_ = this->elements_[startIndex]->getRect().left();
     }
-    for (int i = 0; i < correctSequence.size(); i++)
+    // manually do the first call with -1 as previous index
+    this->_addElement(this->elements_[correctSequence[0]].get(), false, -1);
+
+    for (int i = 1; i < correctSequence.size(); i++)
     {
         this->_addElement(this->elements_[correctSequence[i]].get(), false,
                           correctSequence[i - 1]);
