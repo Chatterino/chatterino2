@@ -1,5 +1,6 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 set(SOURCE_FILES
         Application.cpp

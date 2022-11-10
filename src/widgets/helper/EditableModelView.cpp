@@ -29,7 +29,7 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
 
     // create layout
     QVBoxLayout *vbox = new QVBoxLayout(this);
-    vbox->setMargin(0);
+    vbox->setContentsMargins(0, 0, 0, 0);
 
     // create button layout
     QHBoxLayout *buttons = new QHBoxLayout(this);
