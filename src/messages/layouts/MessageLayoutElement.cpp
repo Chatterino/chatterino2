@@ -12,6 +12,12 @@
 #include <QPainter>
 #include <QPainterPath>
 
+namespace {
+
+const QChar RTL_MARK(0x200F);
+
+}  // namespace
+
 namespace chatterino {
 
 const QRect &MessageLayoutElement::getRect() const
@@ -289,8 +295,8 @@ void TextLayoutElement::paint(QPainter &painter)
     QString text = this->getText();
     if (text.isRightToLeft() || this->reversedNeutral)
     {
-        text.prepend(u8"\u200F");
-        text.append(u8"\u200F");
+        text.prepend(RTL_MARK);
+        text.append(RTL_MARK);
     }
 
     painter.setPen(this->color_);
