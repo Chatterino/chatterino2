@@ -144,7 +144,7 @@ void BaseWindow::init()
             {
                 QHBoxLayout *buttonLayout = this->ui_.titlebarBox =
                     new QHBoxLayout();
-                buttonLayout->setMargin(0);
+                buttonLayout->setContentsMargins(0, 0, 0, 0);
                 layout->addLayout(buttonLayout);
 
                 // title
@@ -343,14 +343,15 @@ bool BaseWindow::event(QEvent *event)
 
 void BaseWindow::wheelEvent(QWheelEvent *event)
 {
-    if (event->orientation() != Qt::Vertical)
+    // ignore horizontal mouse wheels
+    if (event->angleDelta().x() != 0)
     {
         return;
     }
 
     if (event->modifiers() & Qt::ControlModifier)
     {
-        if (event->delta() > 0)
+        if (event->angleDelta().y() > 0)
         {
             getSettings()->setClampedUiScale(
                 getSettings()->getClampedUiScale() + 0.1);
