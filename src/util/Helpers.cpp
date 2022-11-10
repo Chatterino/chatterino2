@@ -126,7 +126,7 @@ bool startsWithOrContains(const QString &str1, const QString &str2,
 
 bool isNeutral(const QString &s)
 {
-    const QRegularExpression re("\\p{L}");
+    static const QRegularExpression re("\\p{L}");
     const QRegularExpressionMatch match = re.match(s);
     return !match.hasMatch();
 }
