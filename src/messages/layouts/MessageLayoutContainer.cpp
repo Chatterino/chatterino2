@@ -139,7 +139,8 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
 
     // check the first non-neutral word to see if we should render RTL or LTR
     if (isAddingMode && this->first == FirstWord::Neutral &&
-        element->getFlags().has(MessageElementFlag::Text))
+        element->getFlags().has(MessageElementFlag::Text) &&
+        !element->getFlags().has(MessageElementFlag::RepliedMessage))
     {
         if (element->getText().isRightToLeft())
         {
