@@ -6,8 +6,6 @@ set(SOURCE_FILES
         Application.hpp
         BaseSettings.cpp
         BaseSettings.hpp
-        BaseTheme.cpp
-        BaseTheme.hpp
         BrowserExtension.cpp
         BrowserExtension.hpp
         RunGui.cpp
@@ -677,7 +675,6 @@ endif ()
 target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO
     UNICODE
-    AB_CUSTOM_THEME
     AB_CUSTOM_SETTINGS
     IRC_STATIC
     IRC_NAMESPACE=Communi

@@ -1,6 +1,5 @@
 #include "TooltipWidget.hpp"
 
-#include "BaseTheme.hpp"
 #include "singletons/Fonts.hpp"
 
 #include <QDebug>
