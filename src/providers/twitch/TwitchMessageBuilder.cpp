@@ -130,6 +130,7 @@ namespace {
                         *usernameColor = color;
                         usernameText = temp;
                     }
+                    continue;  // actual nicknames go after this shit hack
                 }
                 break;
             }
