@@ -289,8 +289,8 @@ void TextLayoutElement::paint(QPainter &painter)
     QString text = this->getText();
     if (text.isRightToLeft() || this->reversedNeutral)
     {
-        text.prepend(u8"\u061c");
-        text.append(u8"\u061c");
+        text.prepend(u8"\u200F");
+        text.append(u8"\u200F");
     }
 
     painter.setPen(this->color_);
