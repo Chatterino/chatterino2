@@ -6,8 +6,6 @@ set(SOURCE_FILES
         Application.hpp
         BaseSettings.cpp
         BaseSettings.hpp
-        BaseTheme.cpp
-        BaseTheme.hpp
         BrowserExtension.cpp
         BrowserExtension.hpp
         RunGui.cpp

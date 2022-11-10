@@ -1,8 +1,8 @@
 #include "BaseWindow.hpp"
 
 #include "BaseSettings.hpp"
-#include "BaseTheme.hpp"
 #include "boost/algorithm/algorithm.hpp"
+#include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
