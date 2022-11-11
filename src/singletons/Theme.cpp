@@ -105,7 +105,14 @@ void Theme::actuallyUpdate(double hue, double multiplier)
 #ifdef Q_OS_LINUX
         this->window.background = lightWin ? "#fff" : QColor(61, 60, 56);
 #else
-        this->window.background = lightWin ? "#fff" : "#111";
+        if (this->themeName.getValue() == "Black")
+        {
+            this->window.background = lightWin ? "#fff" : "#040404";
+        }
+        else
+        {
+            this->window.background = lightWin ? "#fff" : "#111";
+        }
 #endif
 
         QColor fg = this->window.text = lightWin ? "#000" : "#eee";
@@ -147,23 +154,44 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         }
         else
         {
-            this->tabs.regular = {
-                QColor("#aaa"),
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                {QColor("#444"), QColor("#444"), QColor("#444")}};
-            this->tabs.newMessage = {
-                fg,
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                {QColor("#888"), QColor("#888"), QColor("#888")}};
-            this->tabs.highlighted = {
-                fg,
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                {highlighted, highlighted, highlighted}};
-
-            this->tabs.selected = {
-                QColor("#fff"),
-                {QColor("#555555"), QColor("#555555"), QColor("#555555")},
-                {this->accent, this->accent, this->accent}};
+            if (this->themeName.getValue() == "Black")
+            {
+                this->tabs.regular = {
+                    QColor("#aaa"),
+                    {QColor("#0b0b0b"), QColor("#0b0b0b"), QColor("#0b0b0b")},
+                    {QColor("#444"), QColor("#444"), QColor("#444")}};
+                this->tabs.newMessage = {
+                    fg,
+                    {QColor("#0b0b0b"), QColor("#0b0b0b"), QColor("#0b0b0b")},
+                    {QColor("#888"), QColor("#888"), QColor("#888")}};
+                this->tabs.highlighted = {
+                    fg,
+                    {QColor("#0b0b0b"), QColor("#0b0b0b"), QColor("#0b0b0b")},
+                    {highlighted, highlighted, highlighted}};
+                this->tabs.selected = {
+                    QColor("#fff"),
+                    {QColor("#333333"), QColor("#333333"), QColor("#333333")},
+                    {this->accent, this->accent, this->accent}};
+            }
+            else
+            {
+                this->tabs.regular = {
+                    QColor("#aaa"),
+                    {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                    {QColor("#444"), QColor("#444"), QColor("#444")}};
+                this->tabs.newMessage = {
+                    fg,
+                    {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                    {QColor("#888"), QColor("#888"), QColor("#888")}};
+                this->tabs.highlighted = {
+                    fg,
+                    {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                    {highlighted, highlighted, highlighted}};
+                this->tabs.selected = {
+                    QColor("#fff"),
+                    {QColor("#555555"), QColor("#555555"), QColor("#555555")},
+                    {this->accent, this->accent, this->accent}};
+            }
         }
 
         // scrollbar
@@ -246,17 +274,33 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
     }
 
-    this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
-    this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);
+        if (this->themeName.getValue() == "Black")
+        {
+            this->splits.header.background = getColor(0, sat, flat ? 1 : 0.98);
+            this->splits.header.border = getColor(0, sat, flat ? 1 : 0.93);
+            this->splits.header.focusedBackground =
+                getColor(0, sat, isLight ? 1 : 0.9);
+            this->splits.header.focusedBorder = getColor(0, sat, isLight ? 1 : 0.89);
+
+            this->splits.input.background = getColor(0, sat, flat ? 1 : 0.97);
+            this->splits.input.border = getColor(0, sat, flat ? 1.05 : 1.02);
+        }
+        else
+        {
+            this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
+            this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);
+            this->splits.header.focusedBackground =
+                getColor(0, sat, isLight ? 0.95 : 0.79);
+            this->splits.header.focusedBorder = getColor(0, sat, isLight ? 0.90 : 0.78);
+
+            this->splits.input.background = getColor(0, sat, flat ? 0.95 : 0.95);
+            this->splits.input.border = getColor(0, sat, flat ? 1 : 1);
+        }
+
     this->splits.header.text = this->messages.textColors.regular;
-    this->splits.header.focusedBackground =
-        getColor(0, sat, isLight ? 0.95 : 0.79);
-    this->splits.header.focusedBorder = getColor(0, sat, isLight ? 0.90 : 0.78);
     this->splits.header.focusedText = QColor::fromHsvF(
         0.58388, isLight ? 1.0 : 0.482, isLight ? 0.6375 : 1.0);
 
-    this->splits.input.background = getColor(0, sat, flat ? 0.95 : 0.95);
-    this->splits.input.border = getColor(0, sat, flat ? 1 : 1);
     this->splits.input.text = this->messages.textColors.regular;
     this->splits.input.styleSheet =
         "background:" + this->splits.input.background.name() + ";" +
