@@ -278,12 +278,13 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
     // the second condition below covers the possible three cases:
     // 1 - if we are in RTL mode (first non-neutral word is RTL)
     // we render RTL, reversing LTR sequences,
-    // 2 - if we are in LTR mode (first non-neautral word is LTR or all wrods are neutral)
+    // 2 - if we are in LTR mode (first non-neautral word is LTR or all words are neutral)
     // we render LTR, reversing RTL sequences
     // 3 - neutral words follow previous words, we reverse a neutral word when the previous word was reversed
 
     // the first condition checks if a neutral word is treated as a RTL word
-    // this is used later to add an invisible Arabic letter to fix orentation
+    // this is used later to add U+202B (RTL embedding) character signal to
+    // fix punctuation marks and mixing embedding LTR in an RTL word
     // this can happen in two cases:
     // 1 - in RTL mode, the previous word should be RTL (i.e. not reversed)
     // 2 - in LTR mode, the previous word should be RTL (i.e. reversed)

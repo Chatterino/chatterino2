@@ -14,8 +14,7 @@
 
 namespace {
 
-const QChar RTL_MARK(0x200F);
-
+const QChar RTL_EMBED(0x202B);
 }  // namespace
 
 namespace chatterino {
@@ -295,8 +294,7 @@ void TextLayoutElement::paint(QPainter &painter)
     QString text = this->getText();
     if (text.isRightToLeft() || this->reversedNeutral)
     {
-        text.prepend(RTL_MARK);
-        text.append(RTL_MARK);
+        text.prepend(RTL_EMBED);
     }
 
     painter.setPen(this->color_);
