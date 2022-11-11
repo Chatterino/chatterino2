@@ -454,8 +454,14 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         {
             // Need to wait for pubsub reward notification
             auto clone = _message->clone();
+            qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
+                                         "callback since reward is not known:"
+                                      << rewardId;
             channel->channelPointRewardAdded.connect(
                 [=, &server](ChannelPointReward reward) {
+                    qCDebug(chatterinoTwitch)
+                        << "TwitchChannel reward added callback:" << reward.id
+                        << "-" << rewardId;
                     if (reward.id == rewardId)
                     {
                         this->addMessage(clone, target, content_, server, isSub,
