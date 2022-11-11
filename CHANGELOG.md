@@ -71,7 +71,7 @@
 - Minor: Migrated /vips to Helix API. Chat command will continue to be used until February 11th 2023. (#4053)
 - Minor: Migrated /uniquechat and /r9kbeta to Helix API. (#4057)
 - Minor: Migrated /uniquechatoff and /r9kbetaoff to Helix API. (#4057)
-- Minor: Migrated /commercial to Helix API. (#4094)
+- Minor: Migrated /commercial to Helix API. (#4094, #4141)
 - Minor: Added stream titles to windows live toast notifications. (#1297)
 - Minor: Make menus and placeholders display appropriate custom key combos. (#4045)
 - Minor: Migrated /chatters to Helix API. (#4088, #4097, #4114)
