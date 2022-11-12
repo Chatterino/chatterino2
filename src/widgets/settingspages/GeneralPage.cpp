@@ -767,6 +767,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addIntInput("Max number of history messages to load on connect",
                        s.twitchMessageHistoryLimit, 10, 800, 10);
 
+    layout.addIntInput("Split message scrollback limit (requires restart)",
+                       s.scrollbackSplitLimit, 100, 100000, 100);
+    layout.addIntInput("Usercard scrollback limit (requires restart)",
+                       s.scrollbackUsercardLimit, 100, 100000, 100);
+
     layout.addCheckbox("Enable experimental IRC support (requires restart)",
                        s.enableExperimentalIrc);
     layout.addCheckbox("Show unhandled IRC messages",

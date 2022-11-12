@@ -430,6 +430,14 @@ public:
         "/misc/twitch/messageHistoryLimit",
         800,
     };
+    IntSetting scrollbackSplitLimit = {
+        "/misc/scrollback/splitLimit",
+        1000,
+    };
+    IntSetting scrollbackUsercardLimit = {
+        "/misc/scrollback/usercardLimit",
+        1000,
+    };
 
     // Temporary time-gate-overrides
     EnumSetting<HelixTimegateOverride> helixTimegateRaid = {
