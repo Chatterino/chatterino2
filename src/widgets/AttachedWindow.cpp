@@ -48,7 +48,7 @@ AttachedWindow::AttachedWindow(void *_target, int _yOffset)
     , yOffset_(_yOffset)
 {
     QLayout *layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(layout);
 
     auto *split = new Split(this);

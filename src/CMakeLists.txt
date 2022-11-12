@@ -1,13 +1,12 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 set(SOURCE_FILES
         Application.cpp
         Application.hpp
         BaseSettings.cpp
         BaseSettings.hpp
-        BaseTheme.cpp
-        BaseTheme.hpp
         BrowserExtension.cpp
         BrowserExtension.hpp
         RunGui.cpp
@@ -677,7 +676,6 @@ endif ()
 target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO
     UNICODE
-    AB_CUSTOM_THEME
     AB_CUSTOM_SETTINGS
     IRC_STATIC
     IRC_NAMESPACE=Communi
