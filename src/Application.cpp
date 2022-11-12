@@ -571,7 +571,7 @@ void Application::initSeventvEventAPI()
     if (!this->twitch->seventvEventAPI)
     {
         qCDebug(chatterinoSeventvEventAPI)
-            << "Skipping initialization as the EventApi is disabled";
+            << "Skipping initialization as the EventAPI is disabled";
         return;
     }
 

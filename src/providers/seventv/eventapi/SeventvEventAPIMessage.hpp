@@ -28,7 +28,7 @@ boost::optional<InnerClass> SeventvEventAPIMessage::toInner()
     return InnerClass{this->data};
 }
 
-static boost::optional<SeventvEventAPIMessage> parseSeventvEventApiBaseMessage(
+static boost::optional<SeventvEventAPIMessage> parseSeventvEventAPIBaseMessage(
     const QString &blob)
 {
     QJsonDocument jsonDoc(QJsonDocument::fromJson(blob.toUtf8()));

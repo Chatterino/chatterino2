@@ -63,7 +63,7 @@ void SeventvEventAPI::onMessage(
 {
     const auto &payload = QString::fromStdString(msg->get_payload());
 
-    auto pMessage = parseSeventvEventApiBaseMessage(payload);
+    auto pMessage = parseSeventvEventAPIBaseMessage(payload);
 
     if (!pMessage)
     {
