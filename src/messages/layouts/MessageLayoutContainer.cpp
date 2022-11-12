@@ -278,7 +278,7 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
     // the second condition below covers the possible three cases:
     // 1 - if we are in RTL mode (first non-neutral word is RTL)
     // we render RTL, reversing LTR sequences,
-    // 2 - if we are in LTR mode (first non-neautral word is LTR or all words are neutral)
+    // 2 - if we are in LTR mode (first non-neutral word is LTR or all words are neutral)
     // we render LTR, reversing RTL sequences
     // 3 - neutral words follow previous words, we reverse a neutral word when the previous word was reversed
 
