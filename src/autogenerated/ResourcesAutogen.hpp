@@ -41,6 +41,9 @@ public:
         QPixmap modModeDisabled2;
         QPixmap modModeEnabled;
         QPixmap modModeEnabled2;
+        QPixmap pinDisabledDark;
+        QPixmap pinDisabledLight;
+        QPixmap pinEnabled;
         QPixmap replyDark;
         QPixmap replyThreadDark;
         QPixmap search;
