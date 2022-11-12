@@ -6,7 +6,7 @@
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
 - Major: Added support for emotes and badges from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062)
 - Major: Added support for Right-to-Left Languages (#3958, #4139)
-- Minor: Added ability to pin individual Usercards to stay open even if it loses focus. Only available if "Automatically close usercard when it loses focus" is enabled. (#3884)
+- Minor: Added ability to pin Usercards to stay open even if it loses focus. Only available if "Automatically close usercard when it loses focus" is enabled. (#3884)
 - Minor: Allow hiding moderation actions in streamer mode. (#3926)
 - Minor: Added highlights for `Elevated Messages`. (#4016)
 - Minor: Removed total views from the usercard, as Twitch no longer updates the number. (#3792)
