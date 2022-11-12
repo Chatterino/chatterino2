@@ -38,6 +38,12 @@
     <file>buttons/modModeDisabled2.png</file>
     <file>buttons/modModeEnabled.png</file>
     <file>buttons/modModeEnabled2.png</file>
+    <file>buttons/pinDisabledDark.png</file>
+    <file>buttons/pinDisabledDark.svg</file>
+    <file>buttons/pinDisabledLight.png</file>
+    <file>buttons/pinDisabledLight.svg</file>
+    <file>buttons/pinEnabled.png</file>
+    <file>buttons/pinEnabled.svg</file>
     <file>buttons/replyDark.png</file>
     <file>buttons/replyDark.svg</file>
     <file>buttons/replyThreadDark.png</file>

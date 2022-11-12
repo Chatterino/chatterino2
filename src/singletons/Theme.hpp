@@ -129,6 +129,7 @@ public:
 
     struct {
         QPixmap copy;
+        QPixmap pin;
     } buttons;
 
     void normalizeColor(QColor &color);

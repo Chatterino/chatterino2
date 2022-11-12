@@ -2,12 +2,13 @@
 
 ## Unversioned
 
-- Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722, #3989, #4041, #4047, #4055, #4067, #4077, #3905)
+- Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722, #3989, #4041, #4047, #4055, #4067, #4077, #3905, #4131)
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
 - Major: Added support for emotes and badges from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062)
 - Major: Added support for Right-to-Left Languages (#3958, #4139)
 - Minor: Added setting to keep more message history in splits. (#3811)
 - Minor: Added setting to keep more message history in usercards. (#3811)
+- Minor: Added ability to pin Usercards to stay open even if it loses focus. Only available if "Automatically close usercard when it loses focus" is enabled. (#3884)
 - Minor: Allow hiding moderation actions in streamer mode. (#3926)
 - Minor: Added highlights for `Elevated Messages`. (#4016)
 - Minor: Removed total views from the usercard, as Twitch no longer updates the number. (#3792)
@@ -80,6 +81,7 @@
 - Minor: Migrated /mods to Helix API. (#4103)
 - Minor: Add settings tooltips. (#3437)
 - Minor: Improved look of tabs when using a layout other than top. (#3925)
+- Bugfix: Fixed `Add new account` dialog causing main chatterino window to be non movable. (#4121)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
 - Bugfix: Fixed `Smooth scrolling on new messages` setting sometimes hiding messages. (#4028)
 - Bugfix: Fixed a crash that can occur when closing and quickly reopening a split, then running a command. (#3852)
