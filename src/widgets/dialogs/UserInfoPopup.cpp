@@ -897,13 +897,17 @@ void UserInfoPopup::updateFocusLoss()
     {
         this->setActionOnFocusLoss(BaseWindow::Delete);
         if (this->ui_.pinButton != nullptr)
+        {
             this->ui_.pinButton->setPixmap(getApp()->themes->buttons.pin);
+        }
     }
     else
     {
         this->setActionOnFocusLoss(BaseWindow::Nothing);
         if (this->ui_.pinButton != nullptr)
+        {
             this->ui_.pinButton->setPixmap(getResources().buttons.pinEnabled);
+        }
     }
 }
 
