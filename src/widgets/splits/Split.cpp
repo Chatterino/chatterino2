@@ -96,7 +96,7 @@ Split::Split(QWidget *parent)
     this->setFocusProxy(this->input_->ui_.textEdit);
 
     this->vbox_->setSpacing(0);
-    this->vbox_->setMargin(1);
+    this->vbox_->setContentsMargins(1, 1, 1, 1);
 
     this->vbox_->addWidget(this->header_);
     this->vbox_->addWidget(this->view_, 1);
