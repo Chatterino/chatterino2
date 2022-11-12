@@ -17,6 +17,7 @@ class AccountController;
 class NotificationController;
 class HighlightController;
 class HotkeyController;
+class UserDataController;
 
 class Theme;
 class WindowManager;
@@ -53,6 +54,7 @@ public:
     virtual TwitchIrcServer *getTwitch() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
+    virtual UserDataController *getUserData() = 0;
 };
 
 class Application : public IApplication
@@ -89,6 +91,7 @@ public:
     ChatterinoBadges *const chatterinoBadges{};
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
+    UserDataController *const userData{};
 
     /*[[deprecated]]*/ Logging *const logging{};
 
@@ -140,6 +143,10 @@ public:
     FfzBadges *getFfzBadges() override
     {
         return this->ffzBadges;
+    }
+    UserDataController *getUserData() override
+    {
+        return this->userData;
     }
 
 private:

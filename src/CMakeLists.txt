@@ -125,6 +125,10 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
+        controllers/userdata/UserDataController.cpp
+        controllers/userdata/UserDataController.hpp
+        controllers/userdata/UserData.hpp
+
         debug/Benchmark.cpp
         debug/Benchmark.hpp
 
@@ -363,6 +367,8 @@ set(SOURCE_FILES
         util/TypeName.hpp
         util/WindowsHelper.cpp
         util/WindowsHelper.hpp
+
+        util/serialize/Container.hpp
 
         widgets/AccountSwitchPopup.cpp
         widgets/AccountSwitchPopup.hpp
