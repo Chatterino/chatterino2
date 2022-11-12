@@ -12,6 +12,11 @@
 #include <QPainter>
 #include <QPainterPath>
 
+namespace {
+
+const QChar RTL_EMBED(0x202B);
+}  // namespace
+
 namespace chatterino {
 
 const QRect &MessageLayoutElement::getRect() const
@@ -286,14 +291,19 @@ int TextLayoutElement::getSelectionIndexCount() const
 void TextLayoutElement::paint(QPainter &painter)
 {
     auto app = getApp();
+    QString text = this->getText();
+    if (text.isRightToLeft() || this->reversedNeutral)
+    {
+        text.prepend(RTL_EMBED);
+    }
 
     painter.setPen(this->color_);
 
     painter.setFont(app->fonts->getFont(this->style_, this->scale_));
 
     painter.drawText(
-        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
-        this->getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
+        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000), text,
+        QTextOption(Qt::AlignLeft | Qt::AlignTop));
 }
 
 void TextLayoutElement::paintAnimated(QPainter &, int)
@@ -442,11 +452,12 @@ int TextIconLayoutElement::getXFromIndex(int index)
 }
 
 ReplyCurveLayoutElement::ReplyCurveLayoutElement(MessageElement &creator,
-                                                 const QSize &size,
-                                                 float thickness,
+                                                 int width, float thickness,
+                                                 float radius,
                                                  float neededMargin)
-    : MessageLayoutElement(creator, size)
+    : MessageLayoutElement(creator, QSize(width, 0))
     , pen_(QColor("#888"), thickness, Qt::SolidLine, Qt::RoundCap)
+    , radius_(radius)
     , neededMargin_(neededMargin)
 {
 }
@@ -454,23 +465,36 @@ ReplyCurveLayoutElement::ReplyCurveLayoutElement(MessageElement &creator,
 void ReplyCurveLayoutElement::paint(QPainter &painter)
 {
     QRectF paintRect(this->getRect());
-    QPainterPath bezierPath;
+    QPainterPath path;
 
-    qreal top = paintRect.top() + paintRect.height() * 0.25;  // 25% from top
-    qreal left = paintRect.left() + this->neededMargin_;
-    qreal bottom = paintRect.bottom() - this->neededMargin_;
-    QPointF startPoint(left, bottom);
-    QPointF controlPoint(left, top);
-    QPointF endPoint(paintRect.right(), top);
+    QRectF curveRect = paintRect.marginsRemoved(QMarginsF(
+        this->neededMargin_, this->neededMargin_, 0, this->neededMargin_));
 
-    // Create curve path
-    bezierPath.moveTo(startPoint);
-    bezierPath.quadTo(controlPoint, endPoint);
+    // Make sure that our curveRect can always fit the radius curve
+    if (curveRect.height() < this->radius_)
+    {
+        curveRect.setTop(curveRect.top() -
+                         (this->radius_ - curveRect.height()));
+    }
+
+    QPointF bStartPoint(curveRect.left(), curveRect.top() + this->radius_);
+    QPointF bEndPoint(curveRect.left() + this->radius_, curveRect.top());
+    QPointF bControlPoint(curveRect.topLeft());
+
+    // Draw line from bottom left to curve
+    path.moveTo(curveRect.bottomLeft());
+    path.lineTo(bStartPoint);
+
+    // Draw curve path
+    path.quadTo(bControlPoint, bEndPoint);
+
+    // Draw line from curve to top right
+    path.lineTo(curveRect.topRight());
 
     // Render curve
     painter.setPen(this->pen_);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.drawPath(bezierPath);
+    painter.drawPath(path);
 }
 
 void ReplyCurveLayoutElement::paintAnimated(QPainter &painter, int yOffset)

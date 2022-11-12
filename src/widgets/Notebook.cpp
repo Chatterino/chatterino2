@@ -73,6 +73,7 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
     tab->page = page;
 
     tab->setCustomTitle(title);
+    tab->setTabLocation(this->tabLocation_);
 
     Item item;
     item.page = page;
@@ -493,6 +494,7 @@ void Notebook::performLayout(bool animated)
     const auto minimumTabAreaSpace = int(tabHeight * 0.5);
     const auto addButtonWidth = this->showAddButton_ ? tabHeight : 0;
     const auto lineThickness = int(2 * scale);
+    const auto tabSpacer = std::max<int>(1, int(scale * 1));
 
     const auto buttonWidth = tabHeight;
     const auto buttonHeight = tabHeight - 1;
@@ -544,7 +546,7 @@ void Notebook::performLayout(bool animated)
                 /// Layout tab
                 item.tab->growWidth(0);
                 item.tab->moveAnimated(QPoint(x, y), animated);
-                x += item.tab->width() + std::max<int>(1, int(scale * 1));
+                x += item.tab->width() + tabSpacer;
             }
 
             /// Update which tabs are in the last row
@@ -605,10 +607,12 @@ void Notebook::performLayout(bool animated)
         }
 
         if (this->visibleButtonCount() > 0)
-            y = tabHeight;
+            y = tabHeight + lineThickness;  // account for divider line
 
         int totalButtonWidths = x;
-        int top = y;
+        const int top = y + tabSpacer;  // add margin
+
+        y = top;
         x = left;
 
         // zneix: if we were to remove buttons when tabs are hidden
@@ -654,7 +658,8 @@ void Notebook::performLayout(bool animated)
                     /// Layout tab
                     item.tab->growWidth(largestWidth);
                     item.tab->moveAnimated(QPoint(x, y), animated);
-                    y += tabHeight;
+                    item.tab->setInLastRow(isLastColumn);
+                    y += tabHeight + tabSpacer;
                 }
 
                 if (isLastColumn && this->showAddButton_)
@@ -704,10 +709,12 @@ void Notebook::performLayout(bool animated)
         }
 
         if (this->visibleButtonCount() > 0)
-            y = tabHeight;
+            y = tabHeight + lineThickness;  // account for divider line
 
         int consumedButtonWidths = right - x;
-        int top = y;
+        const int top = y + tabSpacer;  // add margin
+
+        y = top;
         x = right;
 
         // zneix: if we were to remove buttons when tabs are hidden
@@ -758,7 +765,8 @@ void Notebook::performLayout(bool animated)
                     /// Layout tab
                     item.tab->growWidth(largestWidth);
                     item.tab->moveAnimated(QPoint(x, y), animated);
-                    y += tabHeight;
+                    item.tab->setInLastRow(isLastColumn);
+                    y += tabHeight + tabSpacer;
                 }
 
                 if (isLastColumn && this->showAddButton_)
@@ -817,7 +825,7 @@ void Notebook::performLayout(bool animated)
         if (this->showTabs_)
         {
             // reset vertical position regardless
-            y = bottom - tabHeight;
+            y = bottom - tabHeight - tabSpacer;
 
             // layout tabs
             /// Notebook tabs need to know if they are in the last row.
@@ -843,7 +851,7 @@ void Notebook::performLayout(bool animated)
                 /// Layout tab
                 item.tab->growWidth(0);
                 item.tab->moveAnimated(QPoint(x, y), animated);
-                x += item.tab->width() + std::max<int>(1, int(scale * 1));
+                x += item.tab->width() + tabSpacer;
             }
 
             /// Update which tabs are in the last row
@@ -866,7 +874,7 @@ void Notebook::performLayout(bool animated)
 
         int consumedBottomSpace =
             std::max({bottom - y, consumedButtonHeights, minimumTabAreaSpace});
-        int tabsStart = bottom - consumedBottomSpace;
+        int tabsStart = bottom - consumedBottomSpace - lineThickness;
 
         if (this->lineOffset_ != tabsStart)
         {
@@ -917,6 +925,13 @@ void Notebook::setTabLocation(NotebookTabLocation location)
     if (location != this->tabLocation_)
     {
         this->tabLocation_ = location;
+
+        // Update all tabs
+        for (const auto &item : this->items_)
+        {
+            item.tab->setTabLocation(location);
+        }
+
         this->performLayout();
     }
 }

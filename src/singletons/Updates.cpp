@@ -179,10 +179,10 @@ void Updates::installUpdates()
             })
             .onSuccess([this](auto result) -> Outcome {
                 QByteArray object = result.getData();
-                auto filename =
+                auto filePath =
                     combinePath(getPaths()->miscDirectory, "Update.exe");
 
-                QFile file(filename);
+                QFile file(filePath);
                 file.open(QIODevice::Truncate | QIODevice::WriteOnly);
 
                 if (file.write(object) == -1)
@@ -203,7 +203,7 @@ void Updates::installUpdates()
                 file.flush();
                 file.close();
 
-                if (QProcess::startDetached(filename))
+                if (QProcess::startDetached(filePath, {}))
                 {
                     QApplication::exit(0);
                 }

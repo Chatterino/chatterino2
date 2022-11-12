@@ -429,10 +429,6 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
-
-private:
-    int neededMargin_;
-    QSize size_;
 };
 
 }  // namespace chatterino

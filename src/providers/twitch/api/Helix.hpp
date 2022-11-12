@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/NetworkRequest.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
+#include "util/QStringHash.hpp"
 
 #include <QJsonArray>
 #include <QString>
@@ -12,6 +13,7 @@
 #include <boost/optional.hpp>
 
 #include <functional>
+#include <unordered_set>
 #include <vector>
 
 namespace chatterino {
@@ -330,8 +332,13 @@ struct HelixChatSettings {
 };
 
 struct HelixVip {
+    // Twitch ID of the user
     QString userId;
+
+    // Display name of the user
     QString userName;
+
+    // Login name of the user
     QString userLogin;
 
     explicit HelixVip(const QJsonObject &jsonObject)
@@ -342,9 +349,52 @@ struct HelixVip {
     }
 };
 
-// TODO(jammehcow): when implementing mod list, just alias HelixVip to HelixMod
-//   as they share the same model.
-//   Alternatively, rename base struct to HelixUser or something and alias both
+struct HelixChatters {
+    std::unordered_set<QString> chatters;
+    int total;
+    QString cursor;
+
+    HelixChatters() = default;
+
+    explicit HelixChatters(const QJsonObject &jsonObject)
+        : total(jsonObject.value("total").toInt())
+        , cursor(jsonObject.value("pagination")
+                     .toObject()
+                     .value("cursor")
+                     .toString())
+    {
+        const auto &data = jsonObject.value("data").toArray();
+        for (const auto &chatter : data)
+        {
+            auto userLogin = chatter.toObject().value("user_login").toString();
+            this->chatters.insert(userLogin);
+        }
+    }
+};
+
+using HelixModerator = HelixVip;
+
+struct HelixModerators {
+    std::vector<HelixModerator> moderators;
+    QString cursor;
+
+    HelixModerators() = default;
+
+    explicit HelixModerators(const QJsonObject &jsonObject)
+        : cursor(jsonObject.value("pagination")
+                     .toObject()
+                     .value("cursor")
+                     .toString())
+    {
+        const auto &data = jsonObject.value("data").toArray();
+        for (const auto &mod : data)
+        {
+            HelixModerator moderator(mod.toObject());
+
+            this->moderators.push_back(moderator);
+        }
+    }
+};
 
 enum class HelixAnnouncementColor {
     Blue,
@@ -519,6 +569,24 @@ enum class HelixWhisperError {  // /w
     Forwarded,
 };  // /w
 
+enum class HelixGetChattersError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+enum class HelixGetModeratorsError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 enum class HelixListVIPsError {  // /vips
     Unknown,
     UserMissingScope,
@@ -529,6 +597,35 @@ enum class HelixListVIPsError {  // /vips
     // The error message is forwarded directly from the Twitch API
     Forwarded,
 };  // /vips
+
+struct HelixStartCommercialResponse {
+    // Length of the triggered commercial
+    int length;
+    // Provides contextual information on why the request failed
+    QString message;
+    // Seconds until the next commercial can be served on this channel
+    int retryAfter;
+
+    explicit HelixStartCommercialResponse(const QJsonObject &jsonObject)
+    {
+        auto jsonData = jsonObject.value("data").toArray().at(0).toObject();
+        this->length = jsonData.value("length").toInt();
+        this->message = jsonData.value("message").toString();
+        this->retryAfter = jsonData.value("retry_after").toInt();
+    }
+};
+
+enum class HelixStartCommercialError {
+    Unknown,
+    TokenMustMatchBroadcaster,
+    UserMissingScope,
+    BroadcasterNotStreaming,
+    MissingLengthParameter,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
 
 class IHelix
 {
@@ -784,11 +881,34 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixWhisperError, QString> failureCallback) = 0;
 
+    // Get Chatters from the `broadcasterID` channel
+    // This will follow the returned cursor and return up to `maxChattersToFetch` chatters
+    // https://dev.twitch.tv/docs/api/reference#get-chatters
+    virtual void getChatters(
+        QString broadcasterID, QString moderatorID, int maxChattersToFetch,
+        ResultCallback<HelixChatters> successCallback,
+        FailureCallback<HelixGetChattersError, QString> failureCallback) = 0;
+
+    // Get moderators from the `broadcasterID` channel
+    // This will follow the returned cursor
+    // https://dev.twitch.tv/docs/api/reference#get-moderators
+    virtual void getModerators(
+        QString broadcasterID, int maxModeratorsToFetch,
+        ResultCallback<std::vector<HelixModerator>> successCallback,
+        FailureCallback<HelixGetModeratorsError, QString> failureCallback) = 0;
+
     // https://dev.twitch.tv/docs/api/reference#get-vips
     virtual void getChannelVIPs(
         QString broadcasterID,
         ResultCallback<std::vector<HelixVip>> successCallback,
         FailureCallback<HelixListVIPsError, QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#start-commercial
+    virtual void startCommercial(
+        QString broadcasterID, int length,
+        ResultCallback<HelixStartCommercialResponse> successCallback,
+        FailureCallback<HelixStartCommercialError, QString>
+            failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 
@@ -1045,11 +1165,35 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixWhisperError, QString> failureCallback) final;
 
+    // Get Chatters from the `broadcasterID` channel
+    // This will follow the returned cursor and return up to `maxChattersToFetch` chatters
+    // https://dev.twitch.tv/docs/api/reference#get-chatters
+    void getChatters(
+        QString broadcasterID, QString moderatorID, int maxChattersToFetch,
+        ResultCallback<HelixChatters> successCallback,
+        FailureCallback<HelixGetChattersError, QString> failureCallback) final;
+
+    // Get moderators from the `broadcasterID` channel
+    // This will follow the returned cursor
+    // https://dev.twitch.tv/docs/api/reference#get-moderators
+    void getModerators(
+        QString broadcasterID, int maxModeratorsToFetch,
+        ResultCallback<std::vector<HelixModerator>> successCallback,
+        FailureCallback<HelixGetModeratorsError, QString> failureCallback)
+        final;
+
     // https://dev.twitch.tv/docs/api/reference#get-vips
     void getChannelVIPs(
         QString broadcasterID,
         ResultCallback<std::vector<HelixVip>> successCallback,
         FailureCallback<HelixListVIPsError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#start-commercial
+    void startCommercial(
+        QString broadcasterID, int length,
+        ResultCallback<HelixStartCommercialResponse> successCallback,
+        FailureCallback<HelixStartCommercialError, QString> failureCallback)
+        final;
 
     void update(QString clientId, QString oauthToken) final;
 
@@ -1062,6 +1206,36 @@ protected:
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
         final;
+
+    // Recursive boy
+    void onFetchChattersSuccess(
+        std::shared_ptr<HelixChatters> finalChatters, QString broadcasterID,
+        QString moderatorID, int maxChattersToFetch,
+        ResultCallback<HelixChatters> successCallback,
+        FailureCallback<HelixGetChattersError, QString> failureCallback,
+        HelixChatters chatters);
+
+    // Get chatters list - This method is what actually runs the API request
+    // https://dev.twitch.tv/docs/api/reference#get-chatters
+    void fetchChatters(
+        QString broadcasterID, QString moderatorID, int first, QString after,
+        ResultCallback<HelixChatters> successCallback,
+        FailureCallback<HelixGetChattersError, QString> failureCallback);
+
+    // Recursive boy
+    void onFetchModeratorsSuccess(
+        std::shared_ptr<std::vector<HelixModerator>> finalModerators,
+        QString broadcasterID, int maxModeratorsToFetch,
+        ResultCallback<std::vector<HelixModerator>> successCallback,
+        FailureCallback<HelixGetModeratorsError, QString> failureCallback,
+        HelixModerators moderators);
+
+    // Get moderator list - This method is what actually runs the API request
+    // https://dev.twitch.tv/docs/api/reference#get-moderators
+    void fetchModerators(
+        QString broadcasterID, int first, QString after,
+        ResultCallback<HelixModerators> successCallback,
+        FailureCallback<HelixGetModeratorsError, QString> failureCallback);
 
 private:
     NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
