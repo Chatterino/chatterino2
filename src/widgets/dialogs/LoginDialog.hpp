@@ -61,10 +61,10 @@ public:
     } ui_;
 };
 
-class LoginWidget : public QDialog
+class LoginDialog : public QDialog
 {
 public:
-    LoginWidget(QWidget *parent);
+    LoginDialog(QWidget *parent);
 
 private:
     struct {
