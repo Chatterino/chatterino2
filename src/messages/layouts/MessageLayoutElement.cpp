@@ -12,6 +12,11 @@
 #include <QPainter>
 #include <QPainterPath>
 
+namespace {
+
+const QChar RTL_EMBED(0x202B);
+}  // namespace
+
 namespace chatterino {
 
 const QRect &MessageLayoutElement::getRect() const
@@ -286,14 +291,19 @@ int TextLayoutElement::getSelectionIndexCount() const
 void TextLayoutElement::paint(QPainter &painter)
 {
     auto app = getApp();
+    QString text = this->getText();
+    if (text.isRightToLeft() || this->reversedNeutral)
+    {
+        text.prepend(RTL_EMBED);
+    }
 
     painter.setPen(this->color_);
 
     painter.setFont(app->fonts->getFont(this->style_, this->scale_));
 
     painter.drawText(
-        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
-        this->getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
+        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000), text,
+        QTextOption(Qt::AlignLeft | Qt::AlignTop));
 }
 
 void TextLayoutElement::paintAnimated(QPainter &, int)

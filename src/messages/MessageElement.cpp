@@ -473,6 +473,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
         // once we encounter an emote or reach the end of the message text. */
         QString currentText;
 
+        container.first = FirstWord::Neutral;
         for (Word &word : this->words_)
         {
             auto parsedWords = app->emotes->emojis.parse(word.text);
