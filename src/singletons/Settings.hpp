@@ -430,12 +430,12 @@ public:
         "/misc/twitch/messageHistoryLimit",
         800,
     };
-    IntSetting scrollbackOnScreenLimit = {
-        "/misc/scrollbackOnScreenLimit",
+    IntSetting scrollbackSplitLimit = {
+        "/misc/scrollback/splitLimit",
         1000,
     };
-    IntSetting scrollbackUsercardLogLimit = {
-        "/misc/scrollbackUsercardLogLimit",
+    IntSetting scrollbackUsercardLimit = {
+        "/misc/scrollback/usercardLimit",
         1000,
     };
 
