@@ -153,7 +153,7 @@ void Window::addLayout()
     this->getLayoutContainer()->setLayout(layout);
 
     // set margin
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     this->notebook_->setAllowUserTabManagement(true);
     this->notebook_->setShowAddButton(true);

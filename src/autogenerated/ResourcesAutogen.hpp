@@ -20,6 +20,7 @@ public:
         QPixmap kararty;
         QPixmap karlpolice;
         QPixmap mm2pl;
+        QPixmap mohad12211;
         QPixmap pajlada;
         QPixmap slch;
         QPixmap xheaveny;
@@ -40,6 +41,9 @@ public:
         QPixmap modModeDisabled2;
         QPixmap modModeEnabled;
         QPixmap modModeEnabled2;
+        QPixmap pinDisabledDark;
+        QPixmap pinDisabledLight;
+        QPixmap pinEnabled;
         QPixmap replyDark;
         QPixmap replyThreadDark;
         QPixmap search;
