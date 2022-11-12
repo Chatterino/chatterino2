@@ -768,9 +768,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.twitchMessageHistoryLimit, 10, 800, 10);
 
     layout.addIntInput("Split message scrollback limit (requires restart)",
-                       s.scrollbackSplitLimit, 1000, 100000, 1000);
+                       s.scrollbackSplitLimit, 100, 100000, 100);
     layout.addIntInput("Usercard scrollback limit (requires restart)",
-                       s.scrollbackUsercardLimit, 1000, 100000, 1000);
+                       s.scrollbackUsercardLimit, 100, 100000, 100);
 
     layout.addCheckbox("Enable experimental IRC support (requires restart)",
                        s.enableExperimentalIrc);
