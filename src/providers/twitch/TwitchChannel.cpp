@@ -267,6 +267,10 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
     }
     if (result)
     {
+        qCDebug(chatterinoTwitch)
+            << "[TwitchChannel" << this->getName()
+            << "] Channel point reward added:" << reward.id << ","
+            << reward.title << "," << reward.isUserInputRequired;
         this->channelPointRewardAdded.invoke(reward);
     }
 }
