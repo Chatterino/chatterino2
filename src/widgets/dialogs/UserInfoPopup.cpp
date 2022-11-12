@@ -494,7 +494,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
         this->ui_.noMessagesLabel->setVisible(false);
 
         this->ui_.latestMessages =
-            new ChannelView(this, this->split_, ChannelView::Context::UserCard);
+            new ChannelView(this, this->split_, ChannelView::Context::UserCard,
+                            getSettings()->scrollbackUsercardLogLimit);
         this->ui_.latestMessages->setMinimumSize(400, 275);
         this->ui_.latestMessages->setSizePolicy(QSizePolicy::Expanding,
                                                 QSizePolicy::Expanding);

@@ -137,13 +137,14 @@ namespace {
     }
 }  // namespace
 
-ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context)
+ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
+                         size_t messagesLimit)
     : BaseWidget(parent)
     , split_(split)
     , scrollBar_(new Scrollbar(this))
     , highlightAnimation_(this)
     , context_(context)
-    , messages_(getSettings()->scrollbackOnScreenLimit)
+    , messages_(messagesLimit)
 {
     this->setMouseTracking(true);
 

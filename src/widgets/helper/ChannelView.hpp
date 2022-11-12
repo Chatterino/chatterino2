@@ -71,7 +71,8 @@ public:
     };
 
     explicit ChannelView(BaseWidget *parent = nullptr, Split *split = nullptr,
-                         Context context = Context::None);
+                         Context context = Context::None,
+                         size_t messagesLimit = 1000);
 
     void queueUpdate();
     Scrollbar &getScrollBar();
