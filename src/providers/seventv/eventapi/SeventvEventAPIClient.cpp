@@ -28,8 +28,7 @@ void SeventvEventAPIClient::setHeartbeatInterval(int intervalMs)
 {
     qCDebug(chatterinoSeventvEventAPI)
         << "Setting expected heartbeat interval to" << intervalMs << "ms";
-    this->heartbeatInterval_.store(std::chrono::milliseconds(intervalMs),
-                                   std::memory_order_release);
+    this->heartbeatInterval_ = std::chrono::milliseconds(intervalMs);
 }
 
 void SeventvEventAPIClient::handleHeartbeat()
@@ -45,7 +44,7 @@ void SeventvEventAPIClient::checkHeartbeat()
     // https://github.com/SevenTV/EventAPI/tree/ca4ff15cc42b89560fa661a76c5849047763d334#heartbeat
     assert(this->isStarted());
     if ((std::chrono::steady_clock::now() - this->lastHeartbeat_.load()) >
-        3 * this->heartbeatInterval_.load(std::memory_order_acquire))
+        3 * this->heartbeatInterval_)
     {
         qCDebug(chatterinoSeventvEventAPI)
             << "Didn't receive a heartbeat in time, disconnecting!";
@@ -57,8 +56,7 @@ void SeventvEventAPIClient::checkHeartbeat()
     auto self = std::dynamic_pointer_cast<SeventvEventAPIClient>(
         this->shared_from_this());
 
-    runAfter(this->websocketClient_.get_io_service(),
-             this->heartbeatInterval_.load(std::memory_order_acquire),
+    runAfter(this->websocketClient_.get_io_service(), this->heartbeatInterval_,
              [self](auto) {
                  if (!self->isStarted())
                  {

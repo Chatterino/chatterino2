@@ -24,7 +24,8 @@ private:
 
     std::atomic<std::chrono::time_point<std::chrono::steady_clock>>
         lastHeartbeat_;
-    std::atomic<std::chrono::milliseconds> heartbeatInterval_;
+    // This will be set once on the welcome message.
+    std::chrono::milliseconds heartbeatInterval_;
 
     friend class SeventvEventAPI;
 };
