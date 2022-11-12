@@ -2847,6 +2847,13 @@ void CommandController::initialize(Settings &, Paths &paths)
             }
             break;
 
+            case Error::MissingLengthParameter: {
+                errorMessage +=
+                    "Command must include a desired commercial break "
+                    "length that is greater than zero.";
+            }
+            break;
+
             case Error::Ratelimited: {
                 errorMessage += "You must wait until your cooldown period "
                                 "expires before you can run another "
@@ -3009,29 +3016,16 @@ void CommandController::initialize(Settings &, Paths &paths)
             auto broadcasterID = tc->roomId();
             auto length = words.at(1).toInt();
 
-            // We would prefer not to early out here and rather handle the API error
-            // like the rest of them, but the API doesn't give us a proper length error.
-            // Valid lengths can be found in the length body parameter description
-            // https://dev.twitch.tv/docs/api/reference#start-commercial
-            const QList<int> validLengths = {30, 60, 90, 120, 150, 180};
-            if (!validLengths.contains(length))
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Invalid commercial duration length specified. Valid "
-                    "options "
-                    "are 30, 60, 90, 120, 150, and 180 seconds"));
-                return "";
-            }
-
             getHelix()->startCommercial(
                 broadcasterID, length,
                 [channel](auto response) {
                     channel->addMessage(makeSystemMessage(
-                        QString("Starting commercial break. Keep in mind you "
-                                "are still "
+                        QString("Starting %1 second long commercial break. "
+                                "Keep in mind you are still "
                                 "live and not all viewers will receive a "
                                 "commercial. "
-                                "You may run another commercial in %1 seconds.")
+                                "You may run another commercial in %2 seconds.")
+                            .arg(response.length)
                             .arg(response.retryAfter)));
                 },
                 [channel, formatStartCommercialError](auto error,

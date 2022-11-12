@@ -20,6 +20,7 @@ public:
         QPixmap kararty;
         QPixmap karlpolice;
         QPixmap mm2pl;
+        QPixmap mohad12211;
         QPixmap pajlada;
         QPixmap slch;
         QPixmap xheaveny;

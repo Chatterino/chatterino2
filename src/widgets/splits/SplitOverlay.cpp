@@ -22,7 +22,7 @@ SplitOverlay::SplitOverlay(Split *parent)
 {
     QGridLayout *layout = new QGridLayout(this);
     this->layout_ = layout;
-    layout->setMargin(1);
+    layout->setContentsMargins(1, 1, 1, 1);
     layout->setSpacing(1);
 
     layout->setRowStretch(1, 1);

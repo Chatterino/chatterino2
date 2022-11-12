@@ -29,7 +29,7 @@ StreamView::StreamView(ChannelPtr channel, const QUrl &url)
     chat->setChannel(std::move(channel));
 
     this->layout()->setSpacing(0);
-    this->layout()->setMargin(0);
+    this->layout()->setContentsMargins(0, 0, 0, 0);
 }
 
 }  // namespace chatterino
