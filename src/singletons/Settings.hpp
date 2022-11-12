@@ -436,7 +436,7 @@ public:
     };
     IntSetting scrollbackUsercardLogLimit = {
         "/misc/scrollbackUsercardLogLimit",
-        8000,
+        1000,
     };
 
     // Temporary time-gate-overrides
