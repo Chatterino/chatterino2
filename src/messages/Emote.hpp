@@ -19,6 +19,10 @@ struct Emote {
     bool zeroWidth;
     EmoteId id;
     EmoteAuthor author;
+    /**
+     * If this emote is aliased, this contains
+     * the original (base) name of the emote.
+     */
     boost::optional<EmoteName> baseName;
 
     // FOURTF: no solution yet, to be refactored later
