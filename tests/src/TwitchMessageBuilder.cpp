@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
+#include "controllers/userdata/UserDataController.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
@@ -73,8 +74,13 @@ public:
     {
         return nullptr;
     }
+    UserDataController *getUserData() override
+    {
+        return &this->userData;
+    }
 
     Emotes emotes;
+    UserDataController userData;
 };
 
 }  // namespace
