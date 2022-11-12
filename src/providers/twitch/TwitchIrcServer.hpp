@@ -53,7 +53,7 @@ public:
      * If not, it unsubscribes from the respective messages.
      *
      * It's currently not possible to share emote sets among users,
-     * but is commonly requested feature.
+     * but it's a commonly requested feature.
      */
     void dropSeventvChannel(const QString &userID, const QString &emoteSetID);
 
