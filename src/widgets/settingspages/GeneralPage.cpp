@@ -700,7 +700,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.mentionUsersWithComma);
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
-    layout.addCheckbox("Automatically close user popup when it loses focus",
+    layout.addCheckbox("Automatically close usercard when it loses focus",
                        s.autoCloseUserPopup);
     layout.addCheckbox(
         "Automatically close reply thread popup when it loses focus",
