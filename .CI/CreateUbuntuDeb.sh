@@ -28,18 +28,17 @@ Priority: optional
 Architecture: amd64
 Maintainer: Mm2PL <mm2pl@kotmisia.pl>
 Description: Testing out chatterino as a Ubuntu package
-Depends: libc6, libqt5concurrent5, libqt5core5a, libqt5dbus5, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5svg5, libqt5widgets5, libssl1.1, libboost-all-dev
+Depends: libqt5core5a, libqt5multimedia5, libqt5widgets5, libqt5gui5, libqt5network5, libqt5dbus5, libboost-filesystem1.71.0, libglib2.0-0, libssl1.1, libstdc++6, libgcc1, libc-bin, libxcb1, qt5-image-formats-plugins
 EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 
 echo "Running make install in package dir"
-# DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
-make install DESTDIR="$packaging_dir"; find "$packaging_dir/"
+DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
 echo ""
 
 # move directory up
-# mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/"
-# rm -vrf "$packaging_dir/home" || true
+mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/"
+rm -vrf "$packaging_dir/home" || true
 
 echo "Building package..."
 dpkg-deb --build "$packaging_dir" "Chatterino-x86_64.deb"
