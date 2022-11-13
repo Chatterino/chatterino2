@@ -79,6 +79,7 @@
 - Minor: Make menus and placeholders display appropriate custom key combos. (#4045)
 - Minor: Migrated /chatters to Helix API. (#4088, #4097, #4114)
 - Minor: Migrated /mods to Helix API. (#4103)
+- Minor: Improved text selection to match Windows native behaviour. (#4127)
 - Minor: Add settings tooltips. (#3437)
 - Minor: Improved look of tabs when using a layout other than top. (#3925)
 - Bugfix: Fixed `Add new account` dialog causing main chatterino window to be non movable. (#4121)
