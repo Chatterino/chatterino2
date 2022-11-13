@@ -90,7 +90,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
 
     layout->setSpacing(0);
     // provide draggable margin if frameless
-    layout->setMargin(closeAutomatically ? 15 : 1);
+    auto marginPx = closeAutomatically ? 15 : 1;
+    layout->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
     layout->addWidget(this->ui_.threadView, 1);
     layout->addWidget(this->ui_.replyInput);
 }

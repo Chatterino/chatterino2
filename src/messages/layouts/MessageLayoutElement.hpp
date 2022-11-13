@@ -28,6 +28,8 @@ public:
     MessageLayoutElement(MessageElement &creator_, const QSize &size);
     virtual ~MessageLayoutElement();
 
+    bool reversedNeutral = false;
+
     const QRect &getRect() const;
     MessageElement &getCreator() const;
     void setPosition(QPoint point);
