@@ -12,6 +12,7 @@
 #include <boost/optional.hpp>
 #include <pajlada/settings.hpp>
 
+#include <shared_mutex>
 #include <unordered_map>
 
 namespace chatterino {
@@ -42,8 +43,11 @@ protected:
 private:
     void update(std::unordered_map<QString, UserData> &&newUsers);
 
+    std::unordered_map<QString, UserData> getUsers() const;
+
     // Stores a real-time list of users & their customizations
     std::unordered_map<QString, UserData> users;
+    mutable std::shared_mutex usersMutex;
 
     std::shared_ptr<pajlada::Settings::SettingManager> sm;
     pajlada::Settings::Setting<std::unordered_map<QString, UserData>> setting;

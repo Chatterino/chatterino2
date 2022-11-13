@@ -45,6 +45,7 @@ void UserDataController::save()
 boost::optional<UserData> UserDataController::getUser(
     const QString &userID) const
 {
+    std::shared_lock lock(this->usersMutex);
     auto it = this->users.find(userID);
 
     if (it == this->users.end())
@@ -55,10 +56,16 @@ boost::optional<UserData> UserDataController::getUser(
     return it->second;
 }
 
+std::unordered_map<QString, UserData> UserDataController::getUsers() const
+{
+    std::shared_lock lock(this->usersMutex);
+    return this->users;
+}
+
 void UserDataController::setUserColor(const QString &userID,
                                       const QString &colorString)
 {
-    auto c = this->users;
+    auto c = this->getUsers();
     auto it = c.find(userID);
     boost::optional<QColor> finalColor =
         boost::make_optional(!colorString.isEmpty(), QColor(colorString));
@@ -85,6 +92,7 @@ void UserDataController::setUserColor(const QString &userID,
 void UserDataController::update(
     std::unordered_map<QString, UserData> &&newUsers)
 {
+    std::unique_lock lock(this->usersMutex);
     this->users = std::move(newUsers);
     this->setting.setValue(this->users);
 }
