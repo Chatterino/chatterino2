@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "mocks/UserData.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
 
@@ -73,8 +74,13 @@ public:
     {
         return nullptr;
     }
+    IUserDataController *getUserData() override
+    {
+        return &this->userData;
+    }
 
     Emotes emotes;
+    mock::UserDataController userData;
 };
 
 }  // namespace

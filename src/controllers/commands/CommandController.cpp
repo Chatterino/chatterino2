@@ -8,6 +8,7 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandModel.hpp"
 #include "controllers/commands/builtin/twitch/ChatSettings.hpp"
+#include "controllers/userdata/UserDataController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
@@ -3037,6 +3038,22 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             return "";
         });
+
+    this->registerCommand("/unstable-set-user-color", [](const auto &ctx) {
+        auto userID = ctx.words.at(1);
+        if (ctx.words.size() < 2)
+        {
+            ctx.channel->addMessage(
+                makeSystemMessage(QString("Usage: %1 <TwitchUserID> [color]")
+                                      .arg(ctx.words.at(0))));
+        }
+
+        auto color = ctx.words.value(2);
+
+        getIApp()->getUserData()->setUserColor(userID, color);
+
+        return "";
+    });
 }
 
 void CommandController::save()

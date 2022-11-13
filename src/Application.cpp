@@ -11,6 +11,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/userdata/UserDataController.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
@@ -76,6 +77,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
+    , userData(&this->emplace<UserDataController>())
     , logging(&this->emplace<Logging>())
 {
     this->instance = this;
@@ -222,6 +224,11 @@ int Application::run(QApplication &qtApp)
 IEmotes *Application::getEmotes()
 {
     return this->emotes;
+}
+
+IUserDataController *Application::getUserData()
+{
+    return this->userData;
 }
 
 void Application::save()

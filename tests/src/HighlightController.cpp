@@ -1,7 +1,9 @@
 #include "controllers/highlights/HighlightController.hpp"
+
 #include "Application.hpp"
 #include "BaseSettings.hpp"
-#include "messages/MessageBuilder.hpp"       // for MessageParseArgs
+#include "messages/MessageBuilder.hpp"  // for MessageParseArgs
+#include "mocks/UserData.hpp"
 #include "providers/twitch/TwitchBadge.hpp"  // for Badge
 #include "providers/twitch/api/Helix.hpp"
 
@@ -73,9 +75,14 @@ public:
     {
         return nullptr;
     }
+    IUserDataController *getUserData() override
+    {
+        return &this->userData;
+    }
 
     AccountController accounts;
     HighlightController highlights;
+    mock::UserDataController userData;
     // TODO: Figure this out
 };
 
