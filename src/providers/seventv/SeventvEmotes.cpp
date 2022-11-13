@@ -32,9 +32,9 @@ using namespace chatterino;
 const QString CHANNEL_HAS_NO_EMOTES("This channel has no 7TV channel emotes.");
 const QString EMOTE_LINK_FORMAT("https://7tv.app/emotes/%1");
 
-// TODO(nerix): add links to documentation (7tv.io)
 const QString API_URL_USER("https://7tv.io/v3/users/twitch/%1");
 const QString API_URL_GLOBAL_EMOTE_SET("https://7tv.io/v3/emote-sets/global");
+const QString API_URL_EMOTE_SET("https://7tv.io/v3/emote-sets/%1");
 
 struct CreateEmoteResult {
     Emote emote;
@@ -160,17 +160,20 @@ CreateEmoteResult createEmote(const QJsonObject &activeEmote,
     auto emoteName = EmoteName{activeEmote["name"].toString()};
     auto author =
         EmoteAuthor{emoteData["owner"].toObject()["display_name"].toString()};
-    auto baseEmoteName = emoteData["name"].toString();
+    auto baseEmoteName = EmoteName{emoteData["name"].toString()};
     bool zeroWidth = isZeroWidthActive(activeEmote);
-    bool aliasedName = emoteName.string != baseEmoteName;
+    bool aliasedName = emoteName != baseEmoteName;
     auto tooltip =
-        aliasedName ? createAliasedTooltip(emoteName.string, baseEmoteName,
-                                           author.string, isGlobal)
-                    : createTooltip(emoteName.string, author.string, isGlobal);
+        aliasedName
+            ? createAliasedTooltip(emoteName.string, baseEmoteName.string,
+                                   author.string, isGlobal)
+            : createTooltip(emoteName.string, author.string, isGlobal);
     auto imageSet = makeImageSet(emoteData);
 
-    auto emote = Emote({emoteName, imageSet, tooltip,
-                        Url{EMOTE_LINK_FORMAT.arg(emoteId.string)}, zeroWidth});
+    auto emote =
+        Emote({emoteName, imageSet, tooltip,
+               Url{EMOTE_LINK_FORMAT.arg(emoteId.string)}, zeroWidth, emoteId,
+               author, boost::make_optional(aliasedName, baseEmoteName)});
 
     return {emote, emoteId, emoteName, !emote.images.getImage1()->isEmpty()};
 }
@@ -215,6 +218,24 @@ EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal)
     }
 
     return emotes;
+}
+
+EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
+                            const SeventvEventAPIEmoteUpdateDispatch &dispatch)
+{
+    bool toNonAliased = oldEmote->baseName.has_value() &&
+                        dispatch.emoteName == oldEmote->baseName->string;
+
+    auto baseName = oldEmote->baseName.get_value_or(oldEmote->name);
+    auto emote = std::make_shared<const Emote>(Emote(
+        {EmoteName{dispatch.emoteName}, oldEmote->images,
+         toNonAliased
+             ? createTooltip(dispatch.emoteName, oldEmote->author.string, false)
+             : createAliasedTooltip(dispatch.emoteName, baseName.string,
+                                    oldEmote->author.string, false),
+         oldEmote->homePage, oldEmote->zeroWidth, oldEmote->id,
+         oldEmote->author, boost::make_optional(!toNonAliased, baseName)}));
+    return emote;
 }
 
 }  // namespace
@@ -273,10 +294,9 @@ void SeventvEmotes::loadGlobalEmotes()
         .execute();
 }
 
-void SeventvEmotes::loadChannelEmotes(const std::weak_ptr<Channel> &channel,
-                                      const QString &channelId,
-                                      std::function<void(EmoteMap &&)> callback,
-                                      bool manualRefresh)
+void SeventvEmotes::loadChannelEmotes(
+    const std::weak_ptr<Channel> &channel, const QString &channelId,
+    std::function<void(EmoteMap &&, ChannelInfo)> callback, bool manualRefresh)
 {
     qCDebug(chatterinoSeventv)
         << "Reloading 7TV Channel Emotes" << channelId << manualRefresh;
@@ -298,7 +318,21 @@ void SeventvEmotes::loadChannelEmotes(const std::weak_ptr<Channel> &channel,
 
             if (hasEmotes)
             {
-                callback(std::move(emoteMap));
+                auto user = json["user"].toObject();
+
+                size_t connectionIdx = 0;
+                for (const auto &conn : user["connections"].toArray())
+                {
+                    if (conn.toObject()["platform"].toString() == "TWITCH")
+                    {
+                        break;
+                    }
+                    connectionIdx++;
+                }
+
+                callback(std::move(emoteMap),
+                         {user["id"].toString(), emoteSet["id"].toString(),
+                          connectionIdx});
             }
 
             auto shared = channel.lock();
@@ -359,6 +393,112 @@ void SeventvEmotes::loadChannelEmotes(const std::weak_ptr<Channel> &channel,
                                           "emotes. (unknown error)"));
                 }
             })
+        .execute();
+}
+
+boost::optional<EmotePtr> SeventvEmotes::addEmote(
+    Atomic<std::shared_ptr<const EmoteMap>> &map,
+    const SeventvEventAPIEmoteAddDispatch &dispatch)
+{
+    // Check for visibility first, so we don't copy the map.
+    auto emoteData = dispatch.emoteJson["data"].toObject();
+    if (emoteData.empty() || !checkEmoteVisibility(emoteData))
+    {
+        return boost::none;
+    }
+
+    // This copies the map.
+    EmoteMap updatedMap = *map.get();
+    auto result = createEmote(dispatch.emoteJson, emoteData, false);
+    if (!result.hasImages)
+    {
+        // Incoming emote didn't contain any images, abort
+        qCDebug(chatterinoSeventv)
+            << "Emote without images:" << dispatch.emoteJson;
+        return boost::none;
+    }
+    auto emote = std::make_shared<const Emote>(std::move(result.emote));
+    updatedMap[result.name] = emote;
+    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
+
+    return emote;
+}
+
+boost::optional<EmotePtr> SeventvEmotes::updateEmote(
+    Atomic<std::shared_ptr<const EmoteMap>> &map,
+    const SeventvEventAPIEmoteUpdateDispatch &dispatch)
+{
+    auto oldMap = map.get();
+    auto oldEmote = oldMap->findEmote(dispatch.emoteName, dispatch.emoteID);
+    if (oldEmote == oldMap->end())
+    {
+        return boost::none;
+    }
+
+    // This copies the map.
+    EmoteMap updatedMap = *map.get();
+    updatedMap.erase(oldEmote->second->name);
+
+    auto emote = createUpdatedEmote(oldEmote->second, dispatch);
+    updatedMap[emote->name] = emote;
+    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
+
+    return emote;
+}
+
+boost::optional<EmotePtr> SeventvEmotes::removeEmote(
+    Atomic<std::shared_ptr<const EmoteMap>> &map,
+    const SeventvEventAPIEmoteRemoveDispatch &dispatch)
+{
+    // This copies the map.
+    EmoteMap updatedMap = *map.get();
+    auto it = updatedMap.findEmote(dispatch.emoteName, dispatch.emoteID);
+    if (it == updatedMap.end())
+    {
+        // We already copied the map at this point and are now discarding the copy.
+        // This is fine, because this case should be really rare.
+        return boost::none;
+    }
+    auto emote = it->second;
+    updatedMap.erase(it);
+    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
+
+    return emote;
+}
+
+void SeventvEmotes::getEmoteSet(
+    const QString &emoteSetId,
+    std::function<void(EmoteMap &&, QString)> successCallback,
+    std::function<void(QString)> errorCallback)
+{
+    qCDebug(chatterinoSeventv) << "Loading 7TV Emote Set" << emoteSetId;
+
+    NetworkRequest(API_URL_EMOTE_SET.arg(emoteSetId), NetworkRequestType::Get)
+        .timeout(20000)
+        .onSuccess([callback = std::move(successCallback),
+                    emoteSetId](const NetworkResult &result) -> Outcome {
+            auto json = result.parseJson();
+            auto parsedEmotes = json["emotes"].toArray();
+
+            auto emoteMap = parseEmotes(parsedEmotes, false);
+
+            qCDebug(chatterinoSeventv) << "Loaded" << emoteMap.size()
+                                       << "7TV Emotes from" << emoteSetId;
+
+            callback(std::move(emoteMap), json["name"].toString());
+            return Success;
+        })
+        .onError([emoteSetId, callback = std::move(errorCallback)](
+                     const NetworkResult &result) {
+            if (result.status() == NetworkResult::timedoutStatus)
+            {
+                callback("timed out");
+            }
+            else
+            {
+                callback(QString("status: %1").arg(result.status()));
+            }
+        })
         .execute();
 }
 

@@ -21,6 +21,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/FormatTime.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/LimitedQueue.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/BasicPubSub.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/SeventvEventAPI.cpp
     # Add your new file above this line!
     )
 
