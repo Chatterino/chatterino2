@@ -17,6 +17,7 @@ class AccountController;
 class NotificationController;
 class HighlightController;
 class HotkeyController;
+class IUserDataController;
 class UserDataController;
 
 class Theme;
@@ -54,7 +55,7 @@ public:
     virtual TwitchIrcServer *getTwitch() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
-    virtual UserDataController *getUserData() = 0;
+    virtual IUserDataController *getUserData() = 0;
 };
 
 class Application : public IApplication
@@ -144,10 +145,7 @@ public:
     {
         return this->ffzBadges;
     }
-    UserDataController *getUserData() override
-    {
-        return this->userData;
-    }
+    IUserDataController *getUserData() override;
 
 private:
     void addSingleton(Singleton *singleton);

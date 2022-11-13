@@ -226,6 +226,11 @@ IEmotes *Application::getEmotes()
     return this->emotes;
 }
 
+IUserDataController *Application::getUserData()
+{
+    return this->userData;
+}
+
 void Application::save()
 {
     for (auto &singleton : this->singletons_)

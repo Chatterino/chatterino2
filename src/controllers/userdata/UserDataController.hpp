@@ -23,6 +23,9 @@ public:
     virtual ~IUserDataController() = default;
 
     virtual boost::optional<UserData> getUser(const QString &userID) const = 0;
+
+    virtual void setUserColor(const QString &userID,
+                              const QString &colorString) = 0;
 };
 
 class UserDataController : public IUserDataController, public Singleton
@@ -35,7 +38,8 @@ public:
     boost::optional<UserData> getUser(const QString &userID) const override;
 
     // Update or insert extra data for the user's color override
-    void setUserColor(const QString &userID, const QString &colorString);
+    void setUserColor(const QString &userID,
+                      const QString &colorString) override;
 
 protected:
     void save() override;
