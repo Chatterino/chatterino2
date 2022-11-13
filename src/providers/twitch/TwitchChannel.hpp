@@ -9,6 +9,7 @@
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
 #include "messages/MessageThread.hpp"
+#include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
 #include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
@@ -123,6 +124,11 @@ public:
     const QString &seventvUserID() const;
     const QString &seventvEmoteSetID() const;
 
+    /** Adds a BTTV channel emote to this channel. */
+    void addBttvEmote(const BttvLiveUpdateEmoteAddMessage &message);
+    /** Removes a BTTV channel emote from this channel. */
+    void removeBttvEmote(const BttvLiveUpdateEmoteRemoveMessage &message);
+
     /** Adds a 7TV channel emote to this channel. */
     void addSeventvEmote(const SeventvEventAPIEmoteAddDispatch &dispatch);
     /** Updates a 7TV channel emote's name in this channel */
@@ -190,6 +196,8 @@ private:
     void fetchDisplayName();
     void cleanUpReplyThreads();
     void showLoginMessage();
+    /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
+    void joinBttvChannel() const;
 
     void setLive(bool newLiveStatus);
     void setMod(bool value);

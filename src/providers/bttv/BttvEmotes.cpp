@@ -21,6 +21,12 @@ namespace {
 
     QString emoteLinkFormat("https://betterttv.com/emotes/%1");
 
+    struct CreateEmoteResult {
+        EmoteId id;
+        EmoteName name;
+        Emote emote;
+    };
+
     Url getEmoteLink(QString urlTemplate, const EmoteId &id,
                      const QString &emoteScale)
     {
@@ -70,6 +76,37 @@ namespace {
 
         return {Success, std::move(emotes)};
     }
+
+    CreateEmoteResult createChannelEmote(const QString &channelDisplayName,
+                                         const QJsonObject &jsonEmote)
+    {
+        auto id = EmoteId{jsonEmote.value("id").toString()};
+        auto name = EmoteName{jsonEmote.value("code").toString()};
+        auto author = EmoteAuthor{
+            jsonEmote.value("user").toObject().value("displayName").toString()};
+
+        auto emote = Emote({
+            name,
+            ImageSet{
+                Image::fromUrl(getEmoteLinkV3(id, "1x"), 1),
+                Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
+                Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25),
+            },
+            Tooltip{
+                QString("%1<br>%2 BetterTTV Emote<br>By: %3")
+                    .arg(name.string)
+                    // when author is empty, it is a channel emote created by the broadcaster
+                    .arg(author.string.isEmpty() ? "Channel" : "Shared")
+                    .arg(author.string.isEmpty() ? channelDisplayName
+                                                 : author.string)},
+            Url{emoteLinkFormat.arg(id.string)},
+            false,
+            id,
+        });
+
+        return {id, name, emote};
+    }
+
     std::pair<Outcome, EmoteMap> parseChannelEmotes(
         const QJsonObject &jsonRoot, const QString &channelDisplayName)
     {
@@ -80,33 +117,11 @@ namespace {
             auto jsonEmotes = jsonRoot.value(key).toArray();
             for (auto jsonEmote_ : jsonEmotes)
             {
-                auto jsonEmote = jsonEmote_.toObject();
+                auto emote = createChannelEmote(channelDisplayName,
+                                                jsonEmote_.toObject());
 
-                auto id = EmoteId{jsonEmote.value("id").toString()};
-                auto name = EmoteName{jsonEmote.value("code").toString()};
-                auto author = EmoteAuthor{jsonEmote.value("user")
-                                              .toObject()
-                                              .value("displayName")
-                                              .toString()};
-
-                auto emote = Emote({
-                    name,
-                    ImageSet{
-                        Image::fromUrl(getEmoteLinkV3(id, "1x"), 1),
-                        Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
-                        Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25),
-                    },
-                    Tooltip{
-                        QString("%1<br>%2 BetterTTV Emote<br>By: %3")
-                            .arg(name.string)
-                            // when author is empty, it is a channel emote created by the broadcaster
-                            .arg(author.string.isEmpty() ? "Channel" : "Shared")
-                            .arg(author.string.isEmpty() ? channelDisplayName
-                                                         : author.string)},
-                    Url{emoteLinkFormat.arg(id.string)},
-                });
-
-                emotes[name] = cachedOrMake(std::move(emote), id);
+                emotes[emote.name] =
+                    cachedOrMake(std::move(emote.emote), emote.id);
             }
         };
 
@@ -226,6 +241,41 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             }
         })
         .execute();
+}
+
+EmotePtr BttvEmotes::addEmote(const QString &channelDisplayName,
+                              Atomic<std::shared_ptr<const EmoteMap>> &map,
+                              const BttvLiveUpdateEmoteAddMessage &message)
+{
+    // This copies the map.
+    EmoteMap updatedMap = *map.get();
+    auto result = createChannelEmote(channelDisplayName, message.jsonEmote);
+
+    auto emote = std::make_shared<const Emote>(std::move(result.emote));
+    updatedMap[result.name] = emote;
+    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
+
+    return emote;
+}
+
+boost::optional<EmotePtr> BttvEmotes::removeEmote(
+    Atomic<std::shared_ptr<const EmoteMap>> &map,
+    const BttvLiveUpdateEmoteRemoveMessage &message)
+{
+    // This copies the map.
+    EmoteMap updatedMap = *map.get();
+    auto it = updatedMap.findEmote(QString(), message.emoteID);
+    if (it == updatedMap.end())
+    {
+        // We already copied the map at this point and are now discarding the copy.
+        // This is fine, because this case should be really rare.
+        return boost::none;
+    }
+    auto emote = it->second;
+    updatedMap.erase(it);
+    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
+
+    return emote;
 }
 
 /*

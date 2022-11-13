@@ -3,6 +3,7 @@
 #include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
 #include <memory>
@@ -31,6 +32,28 @@ public:
                             const QString &channelDisplayName,
                             std::function<void(EmoteMap &&)> callback,
                             bool manualRefresh);
+
+    /**
+     * Adds an emote to the `map`.
+     * This will _copy_ the emote map and
+     * update the `Atomic`.
+     *
+     * @return The added emote.
+     */
+    static EmotePtr addEmote(const QString &channelDisplayName,
+                             Atomic<std::shared_ptr<const EmoteMap>> &map,
+                             const BttvLiveUpdateEmoteAddMessage &message);
+
+    /**
+     * Removes an emote from this `map`.
+     * This will _copy_ the emote map and
+     * update the `Atomic`.
+     *
+     * @return The removed emote if any emote was removed.
+     */
+    static boost::optional<EmotePtr> removeEmote(
+        Atomic<std::shared_ptr<const EmoteMap>> &map,
+        const BttvLiveUpdateEmoteRemoveMessage &message);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;

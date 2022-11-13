@@ -7,6 +7,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubSubManager.hpp"
@@ -29,6 +30,7 @@ using namespace std::chrono_literals;
 
 namespace {
 
+const QString BTTV_LIVE_UPDATES_URL = "wss://sockets.betterttv.net/ws";
 const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
 
 }  // namespace
@@ -44,6 +46,14 @@ TwitchIrcServer::TwitchIrcServer()
     this->initializeIrc();
 
     this->pubsub = new PubSub(TWITCH_PUBSUB_URL);
+
+    if (getSettings()->enableBTTVLiveUpdates &&
+        getSettings()->enableBTTVChannelEmotes)
+    {
+        this->bttvLiveUpdates =
+            std::make_unique<BttvLiveUpdates>(BTTV_LIVE_UPDATES_URL);
+    }
+
     if (getSettings()->enableSevenTVEventAPI &&
         getSettings()->enableSevenTVChannelEmotes)
     {

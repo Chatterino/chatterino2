@@ -13,6 +13,7 @@
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
+#include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
@@ -153,6 +154,7 @@ void Application::initialize(Settings &settings, Paths &paths)
     }
     this->initPubSub();
 
+    this->initBttvLiveUpdates();
     this->initSeventvEventAPI();
 }
 
@@ -571,6 +573,40 @@ void Application::initPubSub()
     this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);
 
     RequestModerationActions();
+}
+
+void Application::initBttvLiveUpdates()
+{
+    if (!this->twitch->bttvLiveUpdates)
+    {
+        qCDebug(chatterinoBttv)
+            << "Skipping initialization of Live Updates as it's disabled";
+        return;
+    }
+
+    this->twitch->bttvLiveUpdates->signals_.emoteAdded.connect(
+        [&](const auto &data) {
+            auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
+
+            postToThread([chan, data] {
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->addBttvEmote(data);
+                }
+            });
+        });
+    this->twitch->bttvLiveUpdates->signals_.emoteRemoved.connect(
+        [&](const auto &data) {
+            auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
+
+            postToThread([chan, data] {
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->removeBttvEmote(data);
+                }
+            });
+        });
+    this->twitch->bttvLiveUpdates->start();
 }
 
 void Application::initSeventvEventAPI()

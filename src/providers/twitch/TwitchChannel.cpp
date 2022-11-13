@@ -9,6 +9,7 @@
 #include "messages/Emote.hpp"
 #include "messages/Message.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
+#include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
 #include "providers/RecentMessagesApi.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
@@ -92,6 +93,7 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->refreshFFZChannelEmotes(false);
         this->refreshBTTVChannelEmotes(false);
         this->refreshSevenTVChannelEmotes(false);
+        this->joinBttvChannel();
     });
 
     this->connected.connect([this]() {
@@ -110,6 +112,11 @@ TwitchChannel::TwitchChannel(const QString &name)
     this->destroyed.connect([this]() {
         getApp()->twitch->dropSeventvChannel(this->seventvUserID_,
                                              this->seventvEmoteSetID_);
+
+        if (getApp()->twitch->bttvLiveUpdates)
+        {
+            getApp()->twitch->bttvLiveUpdates->partChannel(this->roomId());
+        }
     });
 
     this->messageRemovedFromStart.connect([this](MessagePtr &msg) {
@@ -609,6 +616,36 @@ const QString &TwitchChannel::seventvUserID() const
 const QString &TwitchChannel::seventvEmoteSetID() const
 {
     return this->seventvEmoteSetID_;
+}
+
+void TwitchChannel::joinBttvChannel() const
+{
+    if (getApp()->twitch->bttvLiveUpdates)
+    {
+        getApp()->twitch->bttvLiveUpdates->joinChannel(this->roomId());
+    }
+}
+
+void TwitchChannel::addBttvEmote(const BttvLiveUpdateEmoteAddMessage &message)
+{
+    auto emote = BttvEmotes::addEmote(this->getDisplayName(), this->bttvEmotes_,
+                                      message);
+
+    this->addOrReplaceLiveUpdatesAddRemove(true, "BTTV", QString() /*actor*/,
+                                           emote->name.string);
+}
+
+void TwitchChannel::removeBttvEmote(
+    const BttvLiveUpdateEmoteRemoveMessage &message)
+{
+    auto removed = BttvEmotes::removeEmote(this->bttvEmotes_, message);
+    if (!removed)
+    {
+        return;
+    }
+
+    this->addOrReplaceLiveUpdatesAddRemove(false, "BTTV", QString() /*actor*/,
+                                           removed.get()->name.string);
 }
 
 void TwitchChannel::addSeventvEmote(
