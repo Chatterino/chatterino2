@@ -46,4 +46,23 @@ EmotePtr cachedOrMakeEmotePtr(
     }
 }
 
+EmoteMap::const_iterator EmoteMap::findEmote(const QString &emoteNameHint,
+                                             const QString &emoteID) const
+{
+    auto it = this->end();
+    if (!emoteNameHint.isEmpty())
+    {
+        it = this->find(EmoteName{emoteNameHint});
+    }
+
+    if (it == this->end() || it->second->id.string != emoteID)
+    {
+        it = std::find_if(this->begin(), this->end(),
+                          [emoteID](const auto entry) {
+                              return entry.second->id.string == emoteID;
+                          });
+    }
+    return it;
+}
+
 }  // namespace chatterino

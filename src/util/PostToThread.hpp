@@ -30,19 +30,6 @@ private:
     std::function<void()> action_;
 };
 
-template <typename F>
-static void runInGuiThread(F &&fun)
-{
-    if (isGuiThread())
-    {
-        fun();
-    }
-    else
-    {
-        postToThread(fun);
-    }
-}
-
 // Taken from
 // https://stackoverflow.com/questions/21646467/how-to-execute-a-functor-or-a-lambda-in-a-given-thread-in-qt-gcd-style
 // Qt 5/4 - preferred, has least allocations
@@ -68,6 +55,19 @@ static void postToThread(F &&fun, QObject *obj = qApp)
         }
     };
     QCoreApplication::postEvent(obj, new Event(std::forward<F>(fun)));
+}
+
+template <typename F>
+static void runInGuiThread(F &&fun)
+{
+    if (isGuiThread())
+    {
+        fun();
+    }
+    else
+    {
+        postToThread(fun);
+    }
 }
 
 }  // namespace chatterino
