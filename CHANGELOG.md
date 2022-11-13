@@ -81,6 +81,7 @@
 - Minor: Migrated /mods to Helix API. (#4103)
 - Minor: Improved text selection to match Windows native behaviour. (#4127)
 - Minor: Add settings tooltips. (#3437)
+- Minor: Add setting to limit message input length. (#3418)
 - Minor: Improved look of tabs when using a layout other than top. (#3925)
 - Bugfix: Fixed `Add new account` dialog causing main chatterino window to be non movable. (#4121)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)

@@ -29,7 +29,6 @@
 #include <QPainter>
 
 namespace chatterino {
-const int TWITCH_MESSAGE_LIMIT = 500;
 
 SplitInput::SplitInput(Split *_chatWidget, bool enableInlineReplying)
     : SplitInput(_chatWidget, _chatWidget, enableInlineReplying)
@@ -848,6 +847,13 @@ void SplitInput::editTextChanged()
     // set textLengthLabel value
     QString text = this->ui_.textEdit->toPlainText();
 
+    if (this->shouldPreventInput(text))
+    {
+        this->ui_.textEdit->setPlainText(text.left(TWITCH_MESSAGE_LIMIT));
+        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+        return;
+    }
+
     if (text.startsWith("/r ", Qt::CaseInsensitive) &&
         this->split_->getChannel()->isTwitchChannel())
     {
@@ -865,6 +871,28 @@ void SplitInput::editTextChanged()
         text = text.trimmed();
         text =
             app->commands->execCommand(text, this->split_->getChannel(), true);
+    }
+
+    if (getSettings()->messageOverflow.getValue() == MessageOverflow::Highlight)
+    {
+        if (text.length() > TWITCH_MESSAGE_LIMIT &&
+            text.length() > this->lastOverflowLength)
+        {
+            QTextCharFormat format;
+            format.setForeground(Qt::red);
+
+            QTextCursor cursor = this->ui_.textEdit->textCursor();
+            cursor.setPosition(lastOverflowLength, QTextCursor::MoveAnchor);
+            cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+
+            this->lastOverflowLength = text.length();
+
+            cursor.setCharFormat(format);
+        }
+        else if (this->lastOverflowLength != TWITCH_MESSAGE_LIMIT)
+        {
+            this->lastOverflowLength = TWITCH_MESSAGE_LIMIT;
+        }
     }
 
     QString labelText;
@@ -1010,6 +1038,29 @@ void SplitInput::clearInput()
     {
         this->replyThread_ = nullptr;
     }
+}
+
+bool SplitInput::shouldPreventInput(const QString &text) const
+{
+    if (getSettings()->messageOverflow.getValue() != MessageOverflow::Prevent)
+    {
+        return false;
+    }
+
+    auto channel = this->split_->getChannel();
+
+    if (channel == nullptr)
+    {
+        return false;
+    }
+
+    if (!channel->isTwitchChannel())
+    {
+        // Don't respect this setting for IRC channels as the limits might be server-specific
+        return false;
+    }
+
+    return text.length() > TWITCH_MESSAGE_LIMIT;
 }
 
 }  // namespace chatterino

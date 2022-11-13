@@ -19,6 +19,7 @@
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -261,6 +262,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Allow sending duplicate messages", s.allowDuplicateMessages, false,
         "Allow a single message to be repeatedly sent without any changes.");
+    layout.addDropdown<std::underlying_type<MessageOverflow>::type>(
+        "Message overflow", {"Highlight", "Prevent", "Allow"},
+        s.messageOverflow,
+        [](auto index) {
+            return index;
+        },
+        [](auto args) {
+            return static_cast<MessageOverflow>(args.index);
+        },
+        false,
+        "Specify how Chatterino will handle messages that exceed Twitch "
+        "message limits");
 
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
