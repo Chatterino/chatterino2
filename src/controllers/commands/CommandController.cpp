@@ -3039,9 +3039,16 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
-    this->registerCommand("/customize-user", [](const auto &ctx) {
+    this->registerCommand("/unstable-set-user-color", [](const auto &ctx) {
         auto userID = ctx.words.at(1);
-        auto color = ctx.words.at(2);
+        if (ctx.words.size() < 2)
+        {
+            ctx.channel->addMessage(
+                makeSystemMessage(QString("Usage: %1 <TwitchUserID> [color]")
+                                      .arg(ctx.words.at(0))));
+        }
+
+        auto color = ctx.words.value(2);
 
         getIApp()->getUserData()->setUserColor(userID, color);
 
