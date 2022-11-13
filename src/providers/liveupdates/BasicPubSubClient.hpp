@@ -121,27 +121,6 @@ protected:
         return true;
     }
 
-    bool isStarted() const
-    {
-        return this->started_.load(std::memory_order_acquire);
-    }
-
-    liveupdates::WebsocketClient &websocketClient_;
-
-private:
-    void start()
-    {
-        assert(!this->isStarted());
-        this->started_.store(true, std::memory_order_release);
-        this->onConnectionEstablished();
-    }
-
-    void stop()
-    {
-        assert(this->isStarted());
-        this->started_.store(false, std::memory_order_release);
-    }
-
     void close(const std::string &reason,
                websocketpp::close::status::value code =
                    websocketpp::close::status::normal)
@@ -163,6 +142,27 @@ private:
                 << "Error closing:" << ec.message().c_str();
             return;
         }
+    }
+
+    bool isStarted() const
+    {
+        return this->started_.load(std::memory_order_acquire);
+    }
+
+    liveupdates::WebsocketClient &websocketClient_;
+
+private:
+    void start()
+    {
+        assert(!this->isStarted());
+        this->started_.store(true, std::memory_order_release);
+        this->onConnectionEstablished();
+    }
+
+    void stop()
+    {
+        assert(this->isStarted());
+        this->started_.store(false, std::memory_order_release);
     }
 
     liveupdates::WebsocketHandle handle_;
