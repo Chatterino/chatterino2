@@ -227,6 +227,7 @@ public:
     BoolSetting enableFFZChannelEmotes = {"/emotes/ffz/channel", true};
     BoolSetting enableSevenTVGlobalEmotes = {"/emotes/seventv/global", true};
     BoolSetting enableSevenTVChannelEmotes = {"/emotes/seventv/channel", true};
+    BoolSetting enableSevenTVEventAPI = {"/emotes/seventv/eventapi", true};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
@@ -432,6 +433,14 @@ public:
     IntSetting twitchMessageHistoryLimit = {
         "/misc/twitch/messageHistoryLimit",
         800,
+    };
+    IntSetting scrollbackSplitLimit = {
+        "/misc/scrollback/splitLimit",
+        1000,
+    };
+    IntSetting scrollbackUsercardLimit = {
+        "/misc/scrollback/usercardLimit",
+        1000,
     };
 
     // Temporary time-gate-overrides
