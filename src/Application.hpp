@@ -17,6 +17,8 @@ class AccountController;
 class NotificationController;
 class HighlightController;
 class HotkeyController;
+class IUserDataController;
+class UserDataController;
 
 class Theme;
 class WindowManager;
@@ -54,6 +56,7 @@ public:
     virtual TwitchIrcServer *getTwitch() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
+    virtual IUserDataController *getUserData() = 0;
 };
 
 class Application : public IApplication
@@ -91,6 +94,7 @@ public:
     DankerinoBadges *const dankerinoBadges{};
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
+    UserDataController *const userData{};
 
     /*[[deprecated]]*/ Logging *const logging{};
 
@@ -143,10 +147,12 @@ public:
     {
         return this->ffzBadges;
     }
+    IUserDataController *getUserData() override;
 
 private:
     void addSingleton(Singleton *singleton);
     void initPubSub();
+    void initSeventvEventAPI();
     void initNm(Paths &paths);
 
     template <typename T,

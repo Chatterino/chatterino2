@@ -12,6 +12,7 @@
     <file>avatars/karlpolice.png</file>
     <file>avatars/matthewde.jpg</file>
     <file>avatars/mm2pl.png</file>
+    <file>avatars/mohad12211.png</file>
     <file>avatars/pajlada.png</file>
     <file>avatars/revolter.jpg</file>
     <file>avatars/slch.png</file>
@@ -37,6 +38,12 @@
     <file>buttons/modModeDisabled2.png</file>
     <file>buttons/modModeEnabled.png</file>
     <file>buttons/modModeEnabled2.png</file>
+    <file>buttons/pinDisabledDark.png</file>
+    <file>buttons/pinDisabledDark.svg</file>
+    <file>buttons/pinDisabledLight.png</file>
+    <file>buttons/pinDisabledLight.svg</file>
+    <file>buttons/pinEnabled.png</file>
+    <file>buttons/pinEnabled.svg</file>
     <file>buttons/replyDark.png</file>
     <file>buttons/replyDark.svg</file>
     <file>buttons/replyThreadDark.png</file>

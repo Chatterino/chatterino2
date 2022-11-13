@@ -11,6 +11,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/userdata/UserDataController.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
@@ -21,6 +22,7 @@
 #include "providers/irc/Irc2.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -77,6 +79,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , dankerinoBadges(&this->emplace<DankerinoBadges>())
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
+    , userData(&this->emplace<UserDataController>())
     , logging(&this->emplace<Logging>())
 {
     this->instance = this;
@@ -151,6 +154,8 @@ void Application::initialize(Settings &settings, Paths &paths)
         this->initNm(paths);
     }
     this->initPubSub();
+
+    this->initSeventvEventAPI();
 }
 
 int Application::run(QApplication &qtApp)
@@ -221,6 +226,11 @@ int Application::run(QApplication &qtApp)
 IEmotes *Application::getEmotes()
 {
     return this->emotes;
+}
+
+IUserDataController *Application::getUserData()
+{
+    return this->userData;
 }
 
 void Application::save()
@@ -563,6 +573,53 @@ void Application::initPubSub()
     this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);
 
     RequestModerationActions();
+}
+
+void Application::initSeventvEventAPI()
+{
+    if (!this->twitch->seventvEventAPI)
+    {
+        qCDebug(chatterinoSeventvEventAPI)
+            << "Skipping initialization as the EventAPI is disabled";
+        return;
+    }
+
+    this->twitch->seventvEventAPI->signals_.emoteAdded.connect(
+        [&](const auto &data) {
+            postToThread([this, data] {
+                this->twitch->forEachSeventvEmoteSet(
+                    data.emoteSetID, [data](TwitchChannel &chan) {
+                        chan.addSeventvEmote(data);
+                    });
+            });
+        });
+    this->twitch->seventvEventAPI->signals_.emoteUpdated.connect(
+        [&](const auto &data) {
+            postToThread([this, data] {
+                this->twitch->forEachSeventvEmoteSet(
+                    data.emoteSetID, [data](TwitchChannel &chan) {
+                        chan.updateSeventvEmote(data);
+                    });
+            });
+        });
+    this->twitch->seventvEventAPI->signals_.emoteRemoved.connect(
+        [&](const auto &data) {
+            postToThread([this, data] {
+                this->twitch->forEachSeventvEmoteSet(
+                    data.emoteSetID, [data](TwitchChannel &chan) {
+                        chan.removeSeventvEmote(data);
+                    });
+            });
+        });
+    this->twitch->seventvEventAPI->signals_.userUpdated.connect(
+        [&](const auto &data) {
+            this->twitch->forEachSeventvUser(data.userID,
+                                             [data](TwitchChannel &chan) {
+                                                 chan.updateSeventvUser(data);
+                                             });
+        });
+
+    this->twitch->seventvEventAPI->start();
 }
 
 Application *getApp()

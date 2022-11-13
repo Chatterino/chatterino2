@@ -57,6 +57,11 @@ namespace _helpers_internal {
 bool startsWithOrContains(const QString &str1, const QString &str2,
                           Qt::CaseSensitivity caseSensitivity, bool startsWith);
 
+/**
+ * @brief isNeutral checks if the string doesn't contain any character in the unicode "letter" category
+ * i.e. if the string contains only neutral characters.
+ **/
+bool isNeutral(const QString &s);
 QString generateUuid();
 
 QString formatRichLink(const QString &url, bool file = false);

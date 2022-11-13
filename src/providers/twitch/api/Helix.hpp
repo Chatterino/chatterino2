@@ -641,6 +641,7 @@ enum class HelixStartCommercialError {
     TokenMustMatchBroadcaster,
     UserMissingScope,
     BroadcasterNotStreaming,
+    MissingLengthParameter,
     Ratelimited,
 
     // The error message is forwarded directly from the Twitch API

@@ -168,11 +168,11 @@ EmotePopup::EmotePopup(QWidget *parent)
     QRegularExpression searchRegex("\\S*");
     searchRegex.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
     QHBoxLayout *layout2 = new QHBoxLayout(this);
-    layout2->setMargin(8);
+    layout2->setContentsMargins(8, 8, 8, 8);
     layout2->setSpacing(8);
 
     this->search_ = new QLineEdit();
@@ -215,7 +215,7 @@ EmotePopup::EmotePopup(QWidget *parent)
 
     this->notebook_ = new Notebook(this);
     layout->addWidget(this->notebook_);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     this->subEmotesView_ = makeView("Subs");
     this->channelEmotesView_ = makeView("Channel");

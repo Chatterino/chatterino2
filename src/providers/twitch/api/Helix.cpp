@@ -2511,6 +2511,11 @@ void Helix::startCommercial(
                         failureCallback(Error::BroadcasterNotStreaming,
                                         message);
                     }
+                    else if (message.startsWith("Missing required parameter",
+                                                Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::MissingLengthParameter, message);
+                    }
                     else
                     {
                         failureCallback(Error::Forwarded, message);

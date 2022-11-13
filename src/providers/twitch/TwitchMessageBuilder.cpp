@@ -4,6 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
+#include "controllers/userdata/UserDataController.hpp"
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/dankerino/DankerinoBadges.hpp"
@@ -766,6 +767,18 @@ void TwitchMessageBuilder::parseRoomID()
 
 void TwitchMessageBuilder::parseUsernameColor()
 {
+    const auto *userData = getIApp()->getUserData();
+    assert(userData != nullptr);
+
+    if (const auto &user = userData->getUser(this->userId_))
+    {
+        if (user->color)
+        {
+            this->usernameColor_ = user->color.value();
+            return;
+        }
+    }
+
     const auto iterator = this->tags.find("color");
     if (iterator != this->tags.end())
     {

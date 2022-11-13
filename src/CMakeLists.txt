@@ -1,5 +1,6 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 set(SOURCE_FILES
         Application.cpp
@@ -124,6 +125,10 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
+        controllers/userdata/UserDataController.cpp
+        controllers/userdata/UserDataController.hpp
+        controllers/userdata/UserData.hpp
+
         debug/Benchmark.cpp
         debug/Benchmark.hpp
 
@@ -231,6 +236,17 @@ set(SOURCE_FILES
         providers/seventv/SeventvBadges.hpp
         providers/seventv/SeventvEmotes.cpp
         providers/seventv/SeventvEmotes.hpp
+        providers/seventv/SeventvEventAPI.cpp
+        providers/seventv/SeventvEventAPI.hpp
+
+        providers/seventv/eventapi/SeventvEventAPIClient.cpp
+        providers/seventv/eventapi/SeventvEventAPIClient.hpp
+        providers/seventv/eventapi/SeventvEventAPIDispatch.cpp
+        providers/seventv/eventapi/SeventvEventAPIDispatch.hpp
+        providers/seventv/eventapi/SeventvEventAPIMessage.cpp
+        providers/seventv/eventapi/SeventvEventAPIMessage.hpp
+        providers/seventv/eventapi/SeventvEventAPISubscription.cpp
+        providers/seventv/eventapi/SeventvEventAPISubscription.hpp
 
         providers/twitch/ChannelPointReward.cpp
         providers/twitch/ChannelPointReward.hpp
@@ -359,6 +375,8 @@ set(SOURCE_FILES
         util/TypeName.hpp
         util/WindowsHelper.cpp
         util/WindowsHelper.hpp
+
+        util/serialize/Container.hpp
 
         widgets/AccountSwitchPopup.cpp
         widgets/AccountSwitchPopup.hpp
