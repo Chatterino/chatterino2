@@ -479,12 +479,14 @@ void Image::actuallyLoad()
             {
                 qCDebug(chatterinoImage)
                     << "Error: image cant be read " << shared->url().string;
+                shared->empty_ = true;
                 return Failure;
             }
 
             const auto size = reader.size();
             if (size.isEmpty())
             {
+                shared->empty_ = true;
                 return Failure;
             }
 
@@ -494,6 +496,7 @@ void Image::actuallyLoad()
                 qCDebug(chatterinoImage)
                     << "Error: image has less than 1 frame "
                     << shared->url().string << ": " << reader.errorString();
+                shared->empty_ = true;
                 return Failure;
             }
 
@@ -503,7 +506,7 @@ void Image::actuallyLoad()
                 double(Image::maxBytesRam))
             {
                 qCDebug(chatterinoImage) << "image too large in RAM";
-
+                shared->empty_ = true;
                 return Failure;
             }
 
