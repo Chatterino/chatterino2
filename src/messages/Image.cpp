@@ -506,6 +506,7 @@ void Image::actuallyLoad()
                 double(Image::maxBytesRam))
             {
                 qCDebug(chatterinoImage) << "image too large in RAM";
+
                 shared->empty_ = true;
                 return Failure;
             }
