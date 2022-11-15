@@ -561,6 +561,12 @@ QString ChannelView::getSelectedText()
     const auto indexStart = selection.selectionMin.messageIndex;
     const auto indexEnd = selection.selectionMax.messageIndex;
 
+    if (indexEnd > numMessages || indexStart > numMessages)
+    {
+        // One of our messages is out of bounds
+        return result;
+    }
+
     for (auto msg = indexStart; msg <= indexEnd; msg++)
     {
         MessageLayoutPtr layout = messagesSnapshot[msg];
