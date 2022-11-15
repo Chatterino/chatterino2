@@ -8,7 +8,7 @@ namespace filterparser {
 class ListExpression : public Expression
 {
 public:
-    ListExpression(ExpressionList list);
+    ListExpression(ExpressionList &&list);
 
     QVariant execute(const ContextMap &context) const override;
     PossibleType returnType() const override;
