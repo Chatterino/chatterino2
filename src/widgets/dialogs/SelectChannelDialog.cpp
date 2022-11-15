@@ -206,8 +206,16 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
             outerBox->addRow("Server:", view);
         }
+        {
+            auto *inner = new QHBoxLayout(this);
+            this->ui_.irc.channel = new QLineEdit;
+            auto *label = new QLabel;
+            label->setText("#");
+            inner->addWidget(label);
+            inner->addWidget(this->ui_.irc.channel);
 
-        outerBox->addRow("Channel:", this->ui_.irc.channel = new QLineEdit);
+            outerBox->addRow("Channel:", inner);
+        }
 
         auto tab = notebook->addPage(obj.getElement());
         tab->setCustomTitle("Irc (Beta)");
