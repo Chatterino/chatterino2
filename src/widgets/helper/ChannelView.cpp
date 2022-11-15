@@ -558,7 +558,7 @@ QString ChannelView::getSelectedText()
     const auto indexStart = selection.selectionMin.messageIndex;
     const auto indexEnd = selection.selectionMax.messageIndex;
 
-    if (indexEnd > numMessages || indexStart > numMessages)
+    if (indexEnd >= numMessages || indexStart >= numMessages)
     {
         // One of our messages is out of bounds
         return result;
