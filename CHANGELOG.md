@@ -112,6 +112,7 @@
 - Bugfix: Display sent IRC messages like received ones (#4027)
 - Bugfix: Fixed non-global FrankerFaceZ emotes from being loaded as global emotes. (#3921)
 - Bugfix: Fixed trailing spaces from preventing Nicknames from working correctly. (#3946)
+- Bugfix: Fixed crashes that can occur while selecting/copying messages and they are removed. (#4153)
 - Bugfix: Fixed trailing spaces from preventing User Highlights from working correctly. (#4051)
 - Bugfix: Fixed channel-based popups from rewriting messages to file log (#4060)
 - Bugfix: Fixed invalid/dangling completion when cycling through previous messages or replying (#4072)
