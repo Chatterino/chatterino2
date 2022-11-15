@@ -71,6 +71,46 @@ struct Selection {
         return this->selectionMin.messageIndex ==
                this->selectionMax.messageIndex;
     }
+
+    // Shift all message selection indices `offset` back
+    void shiftMessageIndex(uint32_t offset)
+    {
+        if (offset > this->selectionMin.messageIndex)
+        {
+            this->selectionMin.messageIndex = 0;
+        }
+        else
+        {
+            this->selectionMin.messageIndex -= offset;
+        }
+
+        if (offset > this->selectionMax.messageIndex)
+        {
+            this->selectionMax.messageIndex = 0;
+        }
+        else
+        {
+            this->selectionMax.messageIndex -= offset;
+        }
+
+        if (offset > this->start.messageIndex)
+        {
+            this->start.messageIndex = 0;
+        }
+        else
+        {
+            this->start.messageIndex -= offset;
+        }
+
+        if (offset > this->end.messageIndex)
+        {
+            this->end.messageIndex = 0;
+        }
+        else
+        {
+            this->end.messageIndex -= offset;
+        }
+    }
 };
 
 struct DoubleClickSelection {

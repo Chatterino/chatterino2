@@ -353,10 +353,7 @@ void ChannelView::updatePauses()
 void ChannelView::unpaused()
 {
     /// Move selection
-    this->selection_.selectionMin.messageIndex -= this->pauseSelectionOffset_;
-    this->selection_.selectionMax.messageIndex -= this->pauseSelectionOffset_;
-    this->selection_.start.messageIndex -= this->pauseSelectionOffset_;
-    this->selection_.end.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.shiftMessageIndex(this->pauseSelectionOffset_);
 
     this->pauseSelectionOffset_ = 0;
 }
@@ -970,10 +967,7 @@ void ChannelView::messageRemoveFromStart(MessagePtr &message)
     }
     else
     {
-        this->selection_.selectionMin.messageIndex--;
-        this->selection_.selectionMax.messageIndex--;
-        this->selection_.start.messageIndex--;
-        this->selection_.end.messageIndex--;
+        this->selection_.shiftMessageIndex(1);
     }
 
     this->queueLayout();

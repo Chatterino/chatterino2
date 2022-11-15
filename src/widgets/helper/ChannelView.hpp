@@ -255,7 +255,8 @@ private:
         pauses_;
     boost::optional<SteadyClock::time_point> pauseEnd_;
     int pauseScrollOffset_ = 0;
-    int pauseSelectionOffset_ = 0;
+    // Keeps track how many message indices we need to offset the selection when we resume scrolling
+    uint32_t pauseSelectionOffset_ = 0;
 
     boost::optional<MessageElementFlags> overrideFlags_;
     MessageLayoutPtr lastReadMessage_;
