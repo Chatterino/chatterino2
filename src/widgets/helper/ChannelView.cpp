@@ -550,23 +550,26 @@ QString ChannelView::getSelectedText()
     LimitedQueueSnapshot<MessageLayoutPtr> &messagesSnapshot =
         this->getMessagesSnapshot();
 
-    Selection _selection = this->selection_;
+    Selection selection = this->selection_;
 
-    if (_selection.isEmpty())
+    if (selection.isEmpty())
     {
         return result;
     }
 
-    for (int msg = _selection.selectionMin.messageIndex;
-         msg <= _selection.selectionMax.messageIndex; msg++)
+    const auto numMessages = messagesSnapshot.size();
+    const auto indexStart = selection.selectionMin.messageIndex;
+    const auto indexEnd = selection.selectionMax.messageIndex;
+
+    for (auto msg = indexStart; msg <= indexEnd; msg++)
     {
         MessageLayoutPtr layout = messagesSnapshot[msg];
-        int from = msg == _selection.selectionMin.messageIndex
-                       ? _selection.selectionMin.charIndex
-                       : 0;
-        int to = msg == _selection.selectionMax.messageIndex
-                     ? _selection.selectionMax.charIndex
-                     : layout->getLastCharacterIndex() + 1;
+        auto from = msg == selection.selectionMin.messageIndex
+                        ? selection.selectionMin.charIndex
+                        : 0;
+        auto to = msg == selection.selectionMax.messageIndex
+                      ? selection.selectionMax.charIndex
+                      : layout->getLastCharacterIndex() + 1;
 
         layout->addSelectionText(result, from, to);
     }
