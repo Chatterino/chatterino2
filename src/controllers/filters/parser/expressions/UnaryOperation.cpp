@@ -45,7 +45,8 @@ bool UnaryOperation::validateTypes(TypeValidator &validator) const
     switch (this->op_)
     {
         case NOT:
-            return right == QMetaType::Bool;
+            return validator.must(right == QMetaType::Bool, this->op_, right,
+                                  this);
         default:
             return false;
     }

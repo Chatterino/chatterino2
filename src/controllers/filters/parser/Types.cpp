@@ -199,6 +199,18 @@ bool TypeValidator::must(bool condition, TokenType op, const PossibleType &left,
     return condition;
 }
 
+bool TypeValidator::must(bool condition, TokenType op,
+                         const PossibleType &right, const Expression *wholeExp)
+{
+    if (!condition)
+    {
+        this->fail(QStringLiteral("Can't compute %1 for %2\n\nExpression: %4")
+                       .arg(tokenTypeToInfoString(op), right.string(),
+                            wholeExp->filterString()));
+    }
+    return condition;
+}
+
 void TypeValidator::fail(const QString &message)
 {
     this->valid_ = false;

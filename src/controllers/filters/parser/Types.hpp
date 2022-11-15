@@ -92,10 +92,14 @@ public:
     TypeValidator();
 
     bool must(bool condition, const QString &message);
+
     bool must(bool condition, TokenType op, const PossibleType &left,
               const PossibleType &right);
     bool must(bool condition, TokenType op, const PossibleType &left,
               const PossibleType &right, const Expression *wholeExp);
+
+    bool must(bool condition, TokenType op, const PossibleType &right,
+              const Expression *wholeExp);
 
     void fail(const QString &message);
 
