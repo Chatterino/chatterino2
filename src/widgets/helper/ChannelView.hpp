@@ -184,7 +184,7 @@ private:
     void messageReplaced(size_t index, MessagePtr &replacement);
     void messagesUpdated();
 
-    void performLayout(bool causedByScollbar = false);
+    void performLayout(bool causedByScrollbar = false);
     void layoutVisibleMessages(
         LimitedQueueSnapshot<MessageLayoutPtr> &messages);
     void updateScrollbar(LimitedQueueSnapshot<MessageLayoutPtr> &messages,

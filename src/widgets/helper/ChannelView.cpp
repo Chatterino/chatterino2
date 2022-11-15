@@ -453,7 +453,7 @@ void ChannelView::layoutVisibleMessages(
 
         for (auto i = start; i < messages.size() && y <= this->height(); i++)
         {
-            auto message = messages[i];
+            const auto &message = messages[i];
 
             redrawRequired |=
                 message->layout(layoutWidth, this->scale(), flags);
