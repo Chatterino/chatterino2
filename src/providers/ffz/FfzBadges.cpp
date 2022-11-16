@@ -92,7 +92,7 @@ void FfzBadges::load()
                     auto userIDString = QString::number(user.toInt());
 
                     auto [userBadges, created] = this->userBadges.emplace(
-                        std::make_pair<QString, std::unordered_set<int>>(
+                        std::make_pair<QString, std::set<int>>(
                             std::move(userIDString), {badgeID}));
                     if (!created)
                     {
