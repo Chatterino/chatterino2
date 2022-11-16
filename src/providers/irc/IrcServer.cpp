@@ -219,8 +219,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
         case Communi::IrcMessage::Join: {
             auto x = static_cast<Communi::IrcJoinMessage *>(message);
 
-            if (auto it =
-                    this->channels.find(this->cleanChannelName(x->channel()));
+            if (auto it = this->channels.find(x->channel());
                 it != this->channels.end())
             {
                 if (auto shared = it->lock())
@@ -243,8 +242,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
         case Communi::IrcMessage::Part: {
             auto x = static_cast<Communi::IrcPartMessage *>(message);
 
-            if (auto it =
-                    this->channels.find(this->cleanChannelName(x->channel()));
+            if (auto it = this->channels.find(x->channel());
                 it != this->channels.end())
             {
                 if (auto shared = it->lock())
