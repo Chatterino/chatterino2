@@ -353,10 +353,7 @@ void ChannelView::updatePauses()
 void ChannelView::unpaused()
 {
     /// Move selection
-    this->selection_.selectionMin.messageIndex -= this->pauseSelectionOffset_;
-    this->selection_.selectionMax.messageIndex -= this->pauseSelectionOffset_;
-    this->selection_.start.messageIndex -= this->pauseSelectionOffset_;
-    this->selection_.end.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.shiftMessageIndex(this->pauseSelectionOffset_);
 
     this->pauseSelectionOffset_ = 0;
 }
@@ -456,7 +453,7 @@ void ChannelView::layoutVisibleMessages(
 
         for (auto i = start; i < messages.size() && y <= this->height(); i++)
         {
-            auto message = messages[i];
+            const auto &message = messages[i];
 
             redrawRequired |=
                 message->layout(layoutWidth, this->scale(), flags);
@@ -550,23 +547,32 @@ QString ChannelView::getSelectedText()
     LimitedQueueSnapshot<MessageLayoutPtr> &messagesSnapshot =
         this->getMessagesSnapshot();
 
-    Selection _selection = this->selection_;
+    Selection selection = this->selection_;
 
-    if (_selection.isEmpty())
+    if (selection.isEmpty())
     {
         return result;
     }
 
-    for (int msg = _selection.selectionMin.messageIndex;
-         msg <= _selection.selectionMax.messageIndex; msg++)
+    const auto numMessages = messagesSnapshot.size();
+    const auto indexStart = selection.selectionMin.messageIndex;
+    const auto indexEnd = selection.selectionMax.messageIndex;
+
+    if (indexEnd >= numMessages || indexStart >= numMessages)
+    {
+        // One of our messages is out of bounds
+        return result;
+    }
+
+    for (auto msg = indexStart; msg <= indexEnd; msg++)
     {
         MessageLayoutPtr layout = messagesSnapshot[msg];
-        int from = msg == _selection.selectionMin.messageIndex
-                       ? _selection.selectionMin.charIndex
-                       : 0;
-        int to = msg == _selection.selectionMax.messageIndex
-                     ? _selection.selectionMax.charIndex
-                     : layout->getLastCharacterIndex() + 1;
+        auto from = msg == selection.selectionMin.messageIndex
+                        ? selection.selectionMin.charIndex
+                        : 0;
+        auto to = msg == selection.selectionMax.messageIndex
+                      ? selection.selectionMax.charIndex
+                      : layout->getLastCharacterIndex() + 1;
 
         layout->addSelectionText(result, from, to);
     }
@@ -961,10 +967,7 @@ void ChannelView::messageRemoveFromStart(MessagePtr &message)
     }
     else
     {
-        this->selection_.selectionMin.messageIndex--;
-        this->selection_.selectionMax.messageIndex--;
-        this->selection_.start.messageIndex--;
-        this->selection_.end.messageIndex--;
+        this->selection_.shiftMessageIndex(1);
     }
 
     this->queueLayout();

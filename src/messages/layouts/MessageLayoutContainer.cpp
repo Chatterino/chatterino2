@@ -798,10 +798,10 @@ int MessageLayoutContainer::getFirstMessageCharacterIndex() const
     return index;
 }
 
-void MessageLayoutContainer::addSelectionText(QString &str, int from, int to,
-                                              CopyMode copymode)
+void MessageLayoutContainer::addSelectionText(QString &str, uint32_t from,
+                                              uint32_t to, CopyMode copymode)
 {
-    int index = 0;
+    uint32_t index = 0;
     bool first = true;
 
     for (auto &element : this->elements_)
@@ -819,7 +819,9 @@ void MessageLayoutContainer::addSelectionText(QString &str, int from, int to,
             if (element->getCreator().getFlags().hasAny(
                     {MessageElementFlag::Timestamp,
                      MessageElementFlag::Username, MessageElementFlag::Badges}))
+            {
                 continue;
+            }
         }
 
         auto indexCount = element->getSelectionIndexCount();
