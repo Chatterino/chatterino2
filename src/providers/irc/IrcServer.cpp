@@ -115,8 +115,7 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
                      &Communi::IrcConnection::capabilityMessageReceived, this,
                      [this](Communi::IrcCapabilityMessage *message) {
                          const QStringList caps = message->capabilities();
-                         if (caps.contains("echo-message") ||
-                             caps.contains("znc.in/self-message"))
+                         if (caps.contains("echo-message"))
                          {
                              this->hasEcho_ = true;
                          }
