@@ -99,6 +99,7 @@
 - Bugfix: Fixed existing emote popups not being raised from behind other windows when refocusing them on macOS (#3713)
 - Bugfix: Fixed automod queue pubsub topic persisting after user change. (#3718)
 - Bugfix: Fixed viewer list not closing after pressing escape key. (#3734)
+- Bugfix: Fixed users being assigned duplicate FrankerFaceZ badges. (#4155)
 - Bugfix: Fixed links with no thumbnail having previous link's thumbnail. (#3720)
 - Bugfix: Fixed message only showing a maximum of one global FrankerFaceZ badge even if the user has multiple. (#3818)
 - Bugfix: Added an icon in the CMake macOS bundle. (#3832)
