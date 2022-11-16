@@ -180,6 +180,26 @@ void IrcServer::onReadConnected(IrcConnection *connection)
 
 void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
+    // Note: This doesn't use isPrivate() to be compatible with replayed direct messages
+    if (!message->target().startsWith("#"))
+    {
+        MessageParseArgs args;
+        args.isReceivedWhisper = true;
+
+        IrcMessageBuilder builder(message, args);
+
+        auto msg = builder.build();
+
+        for (auto &&weak : this->channels)
+        {
+            if (auto shared = weak.lock())
+            {
+                shared->addMessage(msg);
+            }
+        }
+        return;
+    }
+
     auto target = message->target();
     target = target.startsWith('#') ? target.mid(1) : target;
 

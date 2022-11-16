@@ -6,6 +6,7 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageColor.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
@@ -38,6 +39,15 @@ IrcMessageBuilder::IrcMessageBuilder(
     const Communi::IrcNoticeMessage *_ircMessage, const MessageParseArgs &_args)
     : SharedMessageBuilder(Channel::getEmpty().get(), _ircMessage, _args,
                            _ircMessage->content(), false)
+{
+}
+
+IrcMessageBuilder::IrcMessageBuilder(
+    const Communi::IrcPrivateMessage *_ircMessage,
+    const MessageParseArgs &_args)
+    : SharedMessageBuilder(Channel::getEmpty().get(), _ircMessage, _args,
+                           _ircMessage->content(), false)
+    , whisperTarget_(_ircMessage->target())
 {
 }
 
@@ -93,7 +103,17 @@ void IrcMessageBuilder::appendUsername()
         this->emplace<TextElement>("->", MessageElementFlag::Username,
                                    MessageColor::System, FontStyle::ChatMedium);
 
-        this->emplace<TextElement>("you:", MessageElementFlag::Username);
+        if (this->whisperTarget_.isEmpty())
+        {
+            this->emplace<TextElement>("you:", MessageElementFlag::Username);
+        }
+        else
+        {
+            this->emplace<TextElement>(this->whisperTarget_ + ":",
+                                       MessageElementFlag::Username,
+                                       getRandomColor(this->whisperTarget_),
+                                       FontStyle::ChatMediumBold);
+        }
     }
     else
     {
