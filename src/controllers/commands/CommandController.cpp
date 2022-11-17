@@ -1561,6 +1561,12 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
 
     this->registerCommand("/color", [](const QStringList &words, auto channel) {
+        if (!channel->isTwitchChannel())
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /color command only works in Twitch channels"));
+            return "";
+        }
         auto user = getApp()->accounts->twitch.getCurrent();
 
         // Avoid Helix calls without Client ID and/or OAuth Token
