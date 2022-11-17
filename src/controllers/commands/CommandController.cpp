@@ -1091,6 +1091,15 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand(
         "/mods",
         [formatModsError](const QStringList &words, auto channel) -> QString {
+            auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /mods command only works in Twitch Channels"));
+                return "";
+            }
+
             switch (getSettings()->helixTimegateModerators.getValue())
             {
                 case HelixTimegateOverride::Timegate: {
@@ -1109,15 +1118,6 @@ void CommandController::initialize(Settings &, Paths &paths)
                     // Fall through to helix logic
                 }
                 break;
-            }
-
-            auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /mods command only works in Twitch Channels"));
-                return "";
             }
 
             getHelix()->getModerators(
