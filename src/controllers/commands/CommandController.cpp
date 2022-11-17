@@ -2919,6 +2919,14 @@ void CommandController::initialize(Settings &, Paths &paths)
         "/vips",
         [formatVIPListError](const QStringList &words,
                              auto channel) -> QString {
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /vips command only works in Twitch channels"));
+                return "";
+            }
+
             switch (getSettings()->helixTimegateVIPs.getValue())
             {
                 case HelixTimegateOverride::Timegate: {
@@ -2941,15 +2949,6 @@ void CommandController::initialize(Settings &, Paths &paths)
                 }
                 break;
             }
-
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /vips command only works in Twitch channels"));
-                return "";
-            }
-
             auto currentUser = getApp()->accounts->twitch.getCurrent();
             if (currentUser->isAnon())
             {
