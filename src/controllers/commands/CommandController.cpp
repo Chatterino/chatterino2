@@ -3146,7 +3146,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         }
     }
 
-    // works only in a valid Twitch channel
     if (!dryRun)
     {
         // check if command exists
