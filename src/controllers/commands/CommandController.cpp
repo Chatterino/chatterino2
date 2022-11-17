@@ -2494,6 +2494,13 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand(  // /unraid
         "/unraid", [](const QStringList &words, auto channel) -> QString {
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /unraid command only works in Twitch channels"));
+                return "";
+            }
             switch (getSettings()->helixTimegateRaid.getValue())
             {
                 case HelixTimegateOverride::Timegate: {
@@ -2530,14 +2537,6 @@ void CommandController::initialize(Settings &, Paths &paths)
             {
                 channel->addMessage(makeSystemMessage(
                     "You must be logged in to cancel the raid!"));
-                return "";
-            }
-
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /unraid command only works in Twitch channels"));
                 return "";
             }
 
