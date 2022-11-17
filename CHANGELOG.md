@@ -6,6 +6,7 @@
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
 - Major: Added support for emotes, badges, and live emote updates from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062, #4090)
 - Major: Added support for Right-to-Left Languages (#3958, #4139)
+- Minor: Make builtin commands work in IRC channels (#4160)
 - Minor: Added setting to keep more message history in splits. (#3811)
 - Minor: Added setting to keep more message history in usercards. (#3811)
 - Minor: Added ability to pin Usercards to stay open even if it loses focus. Only available if "Automatically close usercard when it loses focus" is enabled. (#3884)
