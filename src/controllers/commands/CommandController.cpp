@@ -2046,6 +2046,13 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
 
     this->registerCommand("/vip", [](const QStringList &words, auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /vip command only works in Twitch channels"));
+            return "";
+        }
         if (words.size() < 2)
         {
             channel->addMessage(makeSystemMessage(
@@ -2059,14 +2066,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         {
             channel->addMessage(
                 makeSystemMessage("You must be logged in to VIP someone!"));
-            return "";
-        }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /vip command only works in Twitch channels"));
             return "";
         }
 
@@ -2139,6 +2138,13 @@ void CommandController::initialize(Settings &, Paths &paths)
     });
 
     this->registerCommand("/unvip", [](const QStringList &words, auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /unvip command only works in Twitch channels"));
+            return "";
+        }
         if (words.size() < 2)
         {
             channel->addMessage(makeSystemMessage(
@@ -2152,14 +2158,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         {
             channel->addMessage(
                 makeSystemMessage("You must be logged in to UnVIP someone!"));
-            return "";
-        }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /unvip command only works in Twitch channels"));
             return "";
         }
 
