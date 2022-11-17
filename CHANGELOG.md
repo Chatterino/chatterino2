@@ -82,7 +82,7 @@
 - Minor: Improved text selection to match Windows native behaviour. (#4127)
 - Minor: Add settings tooltips. (#3437)
 - Minor: Add setting to limit message input length. (#3418)
-- Minor: Make builtin commands work in IRC channels (#4160)
+- Minor: Make builtin commands work in IRC channels. (#4160)
 - Minor: Improved look of tabs when using a layout other than top. (#3925, #4152)
 - Bugfix: Fixed channels with two leading `#`s not being usable on IRC (#4154)
 - Bugfix: Fixed `Add new account` dialog causing main chatterino window to be non movable. (#4121)
