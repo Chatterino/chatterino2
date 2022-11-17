@@ -2673,6 +2673,13 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/timeout", [formatBanTimeoutError](
                                           const QStringList &words,
                                           auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The /timeout command only works in Twitch channels")));
+            return "";
+        }
         const auto *usageStr =
             "Usage: \"/timeout <username> [duration][time unit] [reason]\" - "
             "Temporarily prevent a user from chatting. Duration (optional, "
@@ -2692,14 +2699,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         {
             channel->addMessage(
                 makeSystemMessage("You must be logged in to timeout someone!"));
-            return "";
-        }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("The /timeout command only works in Twitch channels")));
             return "";
         }
 
