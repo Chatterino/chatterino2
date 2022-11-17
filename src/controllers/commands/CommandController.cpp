@@ -2999,6 +2999,14 @@ void CommandController::initialize(Settings &, Paths &paths)
         "/commercial",
         [formatStartCommercialError](const QStringList &words,
                                      auto channel) -> QString {
+            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /commercial command only works in Twitch channels"));
+                return "";
+            }
+
             const auto *usageStr = "Usage: \"/commercial <length>\" - Starts a "
                                    "commercial with the "
                                    "specified duration for the current "
@@ -3041,12 +3049,6 @@ void CommandController::initialize(Settings &, Paths &paths)
             {
                 channel->addMessage(makeSystemMessage(
                     "You must be logged in to use the /commercial command"));
-                return "";
-            }
-
-            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-            if (tc == nullptr)
-            {
                 return "";
             }
 
