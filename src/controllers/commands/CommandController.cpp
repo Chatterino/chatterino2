@@ -2745,6 +2745,14 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/ban", [formatBanTimeoutError](
                                       const QStringList &words, auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The /ban command only works in Twitch channels")));
+            return "";
+        }
+
         const auto *usageStr =
             "Usage: \"/ban <username> [reason]\" - Permanently prevent a user "
             "from chatting. Reason is optional and will be shown to the target "
@@ -2760,14 +2768,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         {
             channel->addMessage(
                 makeSystemMessage("You must be logged in to ban someone!"));
-            return "";
-        }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("The /ban command only works in Twitch channels")));
             return "";
         }
 
