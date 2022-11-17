@@ -2243,6 +2243,14 @@ void CommandController::initialize(Settings &, Paths &paths)
     // These changes are from the helix-command-migration/unban-untimeout branch
     auto unbanLambda = [](auto words, auto channel) {
         auto commandName = words.at(0).toLower();
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The %1 command only works in Twitch channels")
+                    .arg(commandName)));
+            return "";
+        }
         if (words.size() < 2)
         {
             channel->addMessage(makeSystemMessage(
@@ -2256,15 +2264,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         {
             channel->addMessage(
                 makeSystemMessage("You must be logged in to unban someone!"));
-            return "";
-        }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("The %1 command only works in Twitch channels")
-                    .arg(commandName)));
             return "";
         }
 
