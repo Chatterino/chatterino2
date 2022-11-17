@@ -1469,10 +1469,19 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand("/raw", [](const QStringList &words, ChannelPtr) {
-        getApp()->twitch->sendRawMessage(words.mid(1).join(" "));
-        return "";
-    });
+    this->registerCommand(
+        "/raw", [](const QStringList &words, ChannelPtr channel) -> QString {
+            if (channel->isTwitchChannel())
+            {
+                getApp()->twitch->sendRawMessage(words.mid(1).join(" "));
+            }
+            else
+            {
+                // other code down the road handles this for IRC
+                return words.join(" ");
+            }
+            return "";
+        });
 
     this->registerCommand(
         "/reply", [](const QStringList &words, ChannelPtr channel) {
