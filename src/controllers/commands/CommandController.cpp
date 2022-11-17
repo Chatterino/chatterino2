@@ -1143,6 +1143,8 @@ void CommandController::initialize(Settings &, Paths &paths)
             type != Channel::Type::Twitch &&
             type != Channel::Type::TwitchWatching)
         {
+            channel->addMessage(makeSystemMessage(
+                "The /clip command only works in Twitch Channels"));
             return "";
         }
 
