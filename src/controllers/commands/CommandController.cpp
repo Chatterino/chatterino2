@@ -731,6 +731,11 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
 
     this->registerCommand("/follow", [](const auto &words, auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            return "";
+        }
         channel->addMessage(makeSystemMessage(
             "Twitch has removed the ability to follow users through "
             "third-party applications. For more information, see "
@@ -739,6 +744,11 @@ void CommandController::initialize(Settings &, Paths &paths)
     });
 
     this->registerCommand("/unfollow", [](const auto &words, auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            return "";
+        }
         channel->addMessage(makeSystemMessage(
             "Twitch has removed the ability to unfollow users through "
             "third-party applications. For more information, see "
