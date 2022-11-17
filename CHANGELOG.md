@@ -129,6 +129,7 @@
 - Dev: Batched checking live status for all channels after startup. (#3757, #3762, #3767)
 - Dev: Moved most command context into the command controller. (#3824)
 - Dev: Error NetworkResults now include the body data. (#3987)
+- Dev: Automatically generate resources files with cmake. (#4159)
 
 ## 2.3.5
 
