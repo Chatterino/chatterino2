@@ -607,6 +607,13 @@ void CommandController::initialize(Settings &, Paths &paths)
     /// Deprecated commands
 
     auto blockLambda = [](const auto &words, auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /block command only works in Twitch channels"));
+            return "";
+        }
         if (words.size() < 2)
         {
             channel->addMessage(makeSystemMessage("Usage: /block <user>"));
@@ -653,6 +660,13 @@ void CommandController::initialize(Settings &, Paths &paths)
     };
 
     auto unblockLambda = [](const auto &words, auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /unblock command only works in Twitch channels"));
+            return "";
+        }
         if (words.size() < 2)
         {
             channel->addMessage(makeSystemMessage("Usage: /unblock <user>"));
