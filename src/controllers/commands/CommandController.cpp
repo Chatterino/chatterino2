@@ -1528,6 +1528,12 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand(
         "/fakemsg",
         [](const QStringList &words, ChannelPtr channel) -> QString {
+            if (!channel->isTwitchChannel())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /fakemsg command only works in Twitch channels."));
+                return "";
+            }
             if (words.size() < 2)
             {
                 channel->addMessage(makeSystemMessage(
