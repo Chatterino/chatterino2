@@ -39,7 +39,7 @@ private:
     // pointer so we don't have to circle include Irc2.hpp
     IrcServerData *data_;
 
-    bool hasEcho_;
+    bool hasEcho_{false};
 };
 
 }  // namespace chatterino
