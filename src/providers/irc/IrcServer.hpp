@@ -23,9 +23,8 @@ public:
     bool hasEcho() const;
     /**
      * @brief sends a private/direct message to target
-     * Returns a built message if there needs to be one generated client-side, a nullptr otherwise
      */
-    MessagePtr sendDirectly(QString target, QString message);
+    void sendDirectly(QString target, QString message);
 
     // AbstractIrcServer interface
 protected:

@@ -336,12 +336,7 @@ QString runWhisperCommand(const QStringList &words, const ChannelPtr &channel)
         return "";
     }
     auto *server = ircChannel->server();
-    auto msg = server->sendDirectly(target, message);
-    if (msg != nullptr)
-    {
-        ircChannel->addMessage(msg);
-    }
-
+    server->sendDirectly(target, message);
     return "";
 }
 

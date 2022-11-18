@@ -321,12 +321,12 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
     }
 }
 
-MessagePtr IrcServer::sendDirectly(QString target, QString message)
+void IrcServer::sendDirectly(QString target, QString message)
 {
     this->sendRawMessage(QString("PRIVMSG %1 :%2").arg(target, message));
     if (this->hasEcho())
     {
-        return nullptr;
+        return;
     }
 
     MessageParseArgs args;
@@ -342,7 +342,15 @@ MessagePtr IrcServer::sendDirectly(QString target, QString message)
     b.emplace<TextElement>(target + ":", MessageElementFlag::Text,
                            MessageColor::Text, FontStyle::ChatMediumBold);
     b.emplace<TextElement>(message, MessageElementFlag::Text);
-    return b.release();
+
+    auto msg = b.release();
+    for (auto &&weak : this->channels)
+    {
+        if (auto shared = weak.lock())
+        {
+            shared->addMessage(msg);
+        }
+    }
 }
 
 bool IrcServer::hasEcho() const
