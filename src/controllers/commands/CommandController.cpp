@@ -12,6 +12,8 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/irc/IrcChannel2.hpp"
+#include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -234,101 +236,111 @@ QString runWhisperCommand(const QStringList &words, const ChannelPtr &channel)
     auto target = words.at(1);
     stripChannelName(target);
     auto message = words.mid(2).join(' ');
-
-    if (useIrcForWhisperCommand())
+    if (channel->isTwitchChannel())
     {
-        if (channel->isTwitchChannel())
+        // this covers all twitch channels and twitch-like channels
+        if (useIrcForWhisperCommand())
         {
             appendWhisperMessageWordsLocally(words);
             sendWhisperMessage(words.join(' '));
+            return "";
         }
-        else
-        {
-            channel->addMessage(makeSystemMessage(
-                "You can only send whispers from Twitch channels."));
-        }
+        getHelix()->getUserByName(
+            target,
+            [channel, currentUser, target, message,
+             words](const auto &targetUser) {
+                getHelix()->sendWhisper(
+                    currentUser->getUserId(), targetUser.id, message,
+                    [words] {
+                        appendWhisperMessageWordsLocally(words);
+                    },
+                    [channel, target, targetUser](auto error, auto message) {
+                        using Error = HelixWhisperError;
+
+                        QString errorMessage = "Failed to send whisper - ";
+
+                        switch (error)
+                        {
+                            case Error::NoVerifiedPhone: {
+                                errorMessage +=
+                                    "Due to Twitch restrictions, you are now "
+                                    "required to have a verified phone number "
+                                    "to send whispers. You can add a phone "
+                                    "number in Twitch settings. "
+                                    "https://www.twitch.tv/settings/security";
+                            };
+                            break;
+
+                            case Error::RecipientBlockedUser: {
+                                errorMessage +=
+                                    "The recipient doesn't allow whispers "
+                                    "from strangers or you directly.";
+                            };
+                            break;
+
+                            case Error::WhisperSelf: {
+                                errorMessage += "You cannot whisper yourself.";
+                            };
+                            break;
+
+                            case Error::Forwarded: {
+                                errorMessage += message;
+                            }
+                            break;
+
+                            case Error::Ratelimited: {
+                                errorMessage +=
+                                    "You may only whisper a maximum of 40 "
+                                    "unique recipients per day. Within the "
+                                    "per day limit, you may whisper a "
+                                    "maximum of 3 whispers per second and "
+                                    "a maximum of 100 whispers per minute.";
+                            }
+                            break;
+
+                            case Error::UserMissingScope: {
+                                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+                                errorMessage += "Missing required scope. "
+                                                "Re-login with your "
+                                                "account and try again.";
+                            }
+                            break;
+
+                            case Error::UserNotAuthorized: {
+                                // TODO(pajlada): Phrase MISSING_PERMISSION
+                                errorMessage += "You don't have permission to "
+                                                "perform that action.";
+                            }
+                            break;
+
+                            case Error::Unknown: {
+                                errorMessage +=
+                                    "An unknown error has occurred.";
+                            }
+                            break;
+                        }
+                        channel->addMessage(makeSystemMessage(errorMessage));
+                    });
+            },
+            [channel] {
+                channel->addMessage(
+                    makeSystemMessage("No user matching that username."));
+            });
         return "";
     }
-
-    getHelix()->getUserByName(
-        target,
-        [channel, currentUser, target, message, words](const auto &targetUser) {
-            getHelix()->sendWhisper(
-                currentUser->getUserId(), targetUser.id, message,
-                [words] {
-                    appendWhisperMessageWordsLocally(words);
-                },
-                [channel, target, targetUser](auto error, auto message) {
-                    using Error = HelixWhisperError;
-
-                    QString errorMessage = "Failed to send whisper - ";
-
-                    switch (error)
-                    {
-                        case Error::NoVerifiedPhone: {
-                            errorMessage +=
-                                "Due to Twitch restrictions, you are now "
-                                "required to have a verified phone number "
-                                "to send whispers. You can add a phone "
-                                "number in Twitch settings. "
-                                "https://www.twitch.tv/settings/security";
-                        };
-                        break;
-
-                        case Error::RecipientBlockedUser: {
-                            errorMessage +=
-                                "The recipient doesn't allow whispers "
-                                "from strangers or you directly.";
-                        };
-                        break;
-
-                        case Error::WhisperSelf: {
-                            errorMessage += "You cannot whisper yourself.";
-                        };
-                        break;
-
-                        case Error::Forwarded: {
-                            errorMessage += message;
-                        }
-                        break;
-
-                        case Error::Ratelimited: {
-                            errorMessage +=
-                                "You may only whisper a maximum of 40 "
-                                "unique recipients per day. Within the "
-                                "per day limit, you may whisper a "
-                                "maximum of 3 whispers per second and "
-                                "a maximum of 100 whispers per minute.";
-                        }
-                        break;
-
-                        case Error::UserMissingScope: {
-                            // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
-                            errorMessage += "Missing required scope. "
-                                            "Re-login with your "
-                                            "account and try again.";
-                        }
-                        break;
-
-                        case Error::UserNotAuthorized: {
-                            // TODO(pajlada): Phrase MISSING_PERMISSION
-                            errorMessage += "You don't have permission to "
-                                            "perform that action.";
-                        }
-                        break;
-
-                        case Error::Unknown: {
-                            errorMessage += "An unknown error has occurred.";
-                        }
-                        break;
-                    }
-                    channel->addMessage(makeSystemMessage(errorMessage));
-                });
-        },
-        [channel] {
-            channel->addMessage(
-                makeSystemMessage("No user matching that username."));
-        });
+    // we must be on IRC
+    auto *ircChannel = dynamic_cast<IrcChannel *>(channel.get());
+    if (ircChannel == nullptr)
+    {
+        // give up
+        return "";
+    }
+    auto *server = ircChannel->server();
+    auto msg = server->sendDirectly(target, message);
+    if (msg != nullptr)
+    {
+        ircChannel->addMessage(msg);
+    }
 
     return "";
 }
