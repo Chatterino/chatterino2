@@ -21,6 +21,10 @@ public:
     const QString &userFriendlyIdentifier();
 
     bool hasEcho() const;
+    /**
+     * @brief sends a whisper to the target user (PRIVMSG where a user is the target)
+     */
+    void sendWhisper(const QString &target, const QString &message);
 
     // AbstractIrcServer interface
 protected:
