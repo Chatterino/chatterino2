@@ -22,7 +22,7 @@ public:
 
     bool hasEcho() const;
     /**
-     * @brief sends a private/direct message to target
+     * @brief sends a private message directly to target
      */
     void sendWhisper(QString target, QString message);
 

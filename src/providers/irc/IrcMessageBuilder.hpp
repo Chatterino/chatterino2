@@ -37,7 +37,7 @@ public:
                                const MessageParseArgs &_args);
 
     /**
-     * @brief used for global private/direct messages (i.e. PRIVMSG messages with our nick as the target)
+     * @brief used for whisper messages (i.e. PRIVMSG messages with our nick as the target)
      **/
     explicit IrcMessageBuilder(const Communi::IrcPrivateMessage *_ircMessage,
                                const MessageParseArgs &_args);
