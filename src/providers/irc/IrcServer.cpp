@@ -192,13 +192,15 @@ void IrcServer::onReadConnected(IrcConnection *connection)
 
 void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
-    // Note: This doesn't use isOwn() to be compatible with replayed direct messages
+    // Note: This doesn't use isPrivate() because it only applies to messages targeting our user,
+    // Servers or bouncers may send messages which have our user as the source
+    // (like with echo-message CAP), we need to take care of this.
     if (!message->target().startsWith("#"))
     {
         MessageParseArgs args;
         if (message->isOwn())
         {
-            // message bounced off the server because of echo-message CAP
+            // The server sent us a whisper which has our user as the source
             args.isSentWhisper = true;
         }
         else
