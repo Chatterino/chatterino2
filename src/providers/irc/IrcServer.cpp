@@ -192,7 +192,7 @@ void IrcServer::onReadConnected(IrcConnection *connection)
 
 void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
-    // Note: This doesn't use isPrivate() to be compatible with replayed direct messages
+    // Note: This doesn't use isOwn() to be compatible with replayed direct messages
     if (!message->target().startsWith("#"))
     {
         MessageParseArgs args;
