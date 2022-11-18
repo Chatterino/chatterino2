@@ -38,7 +38,10 @@ void IrcChannel::sendMessage(const QString &message)
         if (this->server() != nullptr)
         {
             this->server()->sendMessage(this->getName(), message);
-
+            if (this->server()->hasEcho())
+            {
+                return;
+            }
             MessageBuilder builder;
 
             builder

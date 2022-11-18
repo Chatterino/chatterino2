@@ -20,6 +20,8 @@ public:
     const QString &nick();
     const QString &userFriendlyIdentifier();
 
+    bool hasEcho() const;
+
     // AbstractIrcServer interface
 protected:
     void initializeConnectionSignals(IrcConnection *connection,
@@ -36,6 +38,8 @@ protected:
 private:
     // pointer so we don't have to circle include Irc2.hpp
     IrcServerData *data_;
+
+    bool hasEcho_{false};
 };
 
 }  // namespace chatterino
