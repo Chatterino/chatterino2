@@ -196,7 +196,15 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
     if (!message->target().startsWith("#"))
     {
         MessageParseArgs args;
-        args.isReceivedWhisper = true;
+        if (message->isOwn())
+        {
+            // message bounced off the server because of echo-message CAP
+            args.isSentWhisper = true;
+        }
+        else
+        {
+            args.isReceivedWhisper = true;
+        }
 
         IrcMessageBuilder builder(message, args);
 

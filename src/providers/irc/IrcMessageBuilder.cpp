@@ -115,6 +115,21 @@ void IrcMessageBuilder::appendUsername()
                                        FontStyle::ChatMediumBold);
         }
     }
+    else if (this->args.isSentWhisper)
+    {
+        this->emplace<TextElement>(usernameText, MessageElementFlag::Username,
+                                   this->usernameColor_,
+                                   FontStyle::ChatMediumBold);
+
+        // Separator
+        this->emplace<TextElement>("->", MessageElementFlag::Username,
+                                   MessageColor::System, FontStyle::ChatMedium);
+
+        this->emplace<TextElement>(
+                this->whisperTarget_ + ":", MessageElementFlag::Username,
+                getRandomColor(this->whisperTarget_), FontStyle::ChatMediumBold)
+            ->setLink({Link::UserWhisper, this->whisperTarget_});
+    }
     else
     {
         if (!this->action_)
