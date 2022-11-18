@@ -5,6 +5,8 @@
 
 #include "common/QLogging.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageColor.hpp"
+#include "messages/MessageElement.hpp"
 #include "providers/irc/Irc2.hpp"
 #include "providers/irc/IrcChannel2.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
@@ -317,6 +319,30 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 }
             };
     }
+}
+
+MessagePtr IrcServer::sendDirectly(QString target, QString message)
+{
+    this->sendRawMessage(QString("PRIVMSG %1 :%2").arg(target, message));
+    if (this->hasEcho())
+    {
+        return nullptr;
+    }
+
+    MessageParseArgs args;
+    args.isSentWhisper = true;
+
+    MessageBuilder b;
+
+    b.emplace<TimestampElement>();
+    b.emplace<TextElement>(this->nick(), MessageElementFlag::Text,
+                           MessageColor::Text, FontStyle::ChatMediumBold);
+    b.emplace<TextElement>("->", MessageElementFlag::Text,
+                           MessageColor::System);
+    b.emplace<TextElement>(target + ":", MessageElementFlag::Text,
+                           MessageColor::Text, FontStyle::ChatMediumBold);
+    b.emplace<TextElement>(message, MessageElementFlag::Text);
+    return b.release();
 }
 
 bool IrcServer::hasEcho() const
