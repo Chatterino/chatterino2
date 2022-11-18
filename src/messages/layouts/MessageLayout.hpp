@@ -59,7 +59,8 @@ public:
     int getLastCharacterIndex() const;
     int getFirstMessageCharacterIndex() const;
     int getSelectionIndex(QPoint position);
-    void addSelectionText(QString &str, int from = 0, int to = INT_MAX,
+    void addSelectionText(QString &str, uint32_t from = 0,
+                          uint32_t to = UINT32_MAX,
                           CopyMode copymode = CopyMode::Everything);
 
     // Misc

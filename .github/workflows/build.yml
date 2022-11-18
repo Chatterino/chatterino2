@@ -250,7 +250,7 @@ jobs:
           path: release-artifacts/
 
       - name: Create release
-        uses: ncipollo/release-action@v1.11.1
+        uses: ncipollo/release-action@v1.11.2
         with:
           removeArtifacts: true
           allowUpdates: true

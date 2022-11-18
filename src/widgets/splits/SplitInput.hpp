@@ -22,6 +22,19 @@ class EffectLabel;
 class MessageThread;
 class ResizingTextEdit;
 
+// MessageOverflow is used for controlling how to guide the user into not
+// sending a message that will be discarded by Twitch
+enum MessageOverflow {
+    // Allow overflowing characters to be inserted into the input box, but highlight them in red
+    Highlight,
+
+    // Prevent more characters from being inserted into the input box
+    Prevent,
+
+    // Do nothing
+    Allow,
+};
+
 class SplitInput : public BaseWidget
 {
     Q_OBJECT
@@ -35,6 +48,8 @@ public:
     bool isEditFirstWord() const;
     QString getInputText() const;
     void insertText(const QString &text);
+
+    static const int TWITCH_MESSAGE_LIMIT = 500;
 
     void setReply(std::shared_ptr<MessageThread> reply,
                   bool showInlineReplying = true);
@@ -101,6 +116,10 @@ protected:
     // This does not take hidden into account, so callers must take hidden into account themselves
     int scaledMaxHeight() const;
 
+    // Returns true if the channel this input is connected to is a Twitch channel,
+    // the user's setting is set to Prevent, and the given text goes beyond the Twitch message length limit
+    bool shouldPreventInput(const QString &text) const;
+
     Split *const split_;
     QObjectRef<EmotePopup> emotePopup_;
     QObjectRef<InputCompletionPopup> inputCompletionPopup_;
@@ -126,6 +145,8 @@ protected:
     QStringList prevMsg_;
     QString currMsg_;
     int prevIndex_ = 0;
+
+    int lastOverflowLength = TWITCH_MESSAGE_LIMIT;
 
     // Hidden denotes whether this split input should be hidden or not
     // This is used instead of the regular QWidget::hide/show because

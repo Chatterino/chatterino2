@@ -14,6 +14,7 @@
 #include "singletons/Toasts.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 using TimeoutButton = std::pair<QString, int>;
 
@@ -98,6 +99,8 @@ public:
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
                                      false};
+    EnumSetting<MessageOverflow> messageOverflow = {
+        "/appearance/messages/messageOverflow", MessageOverflow::Highlight};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
