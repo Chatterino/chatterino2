@@ -134,6 +134,17 @@ Open up your terminal with the Visual Studio environment variables, then enter t
 3. `cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..`
 4. `nmake`
 
+## Building on MSVC with AddressSanitizer
+
+Make sure you installed `C++ AddressSanitizer` in your VisualStudio installation like described in the [Microsoft Docs](https://learn.microsoft.com/en-us/cpp/sanitizers/asan#install-the-addresssanitizer).
+
+To build Chatterino with AddressSanitizer on MSVC, you need to add `-DCMAKE_CXX_FLAGS=/fsanitize=address` to your CMake options.
+
+When you start Chatterino, and it's complaining about `clang_rt.asan_dbg_dynamic-x86_64.dll` missing,
+copy the file found in `<VisualStudio-installation-path>\VC\Tools\MSVC\<version>\bin\Hostx64\x64\clang_rt.asan_dbg_dynamic-x86_64.dll` to the `Chatterino` folder inside your `build` folder.
+
+To learn more about AddressSanitizer and MSVC, visit the [Microsoft Docs](https://learn.microsoft.com/en-us/cpp/sanitizers/asan).
+
 ## Building/Running in CLion
 
 _Note:_ We're using `build` instead of the CLion default `cmake-build-debug` folder.

@@ -81,7 +81,8 @@ struct MessageLayoutContainer {
     int getSelectionIndex(QPoint point);
     int getLastCharacterIndex() const;
     int getFirstMessageCharacterIndex() const;
-    void addSelectionText(QString &str, int from, int to, CopyMode copymode);
+    void addSelectionText(QString &str, uint32_t from, uint32_t to,
+                          CopyMode copymode);
 
     bool isCollapsed();
 

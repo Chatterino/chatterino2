@@ -395,10 +395,8 @@ std::shared_ptr<Channel> AbstractIrcServer::getCustomChannel(
 
 QString AbstractIrcServer::cleanChannelName(const QString &dirtyChannelName)
 {
-    if (dirtyChannelName.startsWith('#'))
-        return dirtyChannelName.mid(1);
-    else
-        return dirtyChannelName;
+    // This function is a Noop only for IRC, for Twitch it removes a leading '#' and lowercases the name
+    return dirtyChannelName;
 }
 
 void AbstractIrcServer::addFakeMessage(const QString &data)

@@ -449,7 +449,7 @@ int MessageLayout::getSelectionIndex(QPoint position)
     return this->container_->getSelectionIndex(position);
 }
 
-void MessageLayout::addSelectionText(QString &str, int from, int to,
+void MessageLayout::addSelectionText(QString &str, uint32_t from, uint32_t to,
                                      CopyMode copymode)
 {
     this->container_->addSelectionText(str, from, to, copymode);
