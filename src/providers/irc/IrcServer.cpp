@@ -331,7 +331,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
     }
 }
 
-void IrcServer::sendDirectly(QString target, QString message)
+void IrcServer::sendWhisper(QString target, QString message)
 {
     this->sendRawMessage(QString("PRIVMSG %1 :%2").arg(target, message));
     if (this->hasEcho())

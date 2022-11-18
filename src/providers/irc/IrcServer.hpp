@@ -24,7 +24,7 @@ public:
     /**
      * @brief sends a private/direct message to target
      */
-    void sendDirectly(QString target, QString message);
+    void sendWhisper(QString target, QString message);
 
     // AbstractIrcServer interface
 protected:
