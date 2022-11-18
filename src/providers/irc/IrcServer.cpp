@@ -111,6 +111,15 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
                              }
                          }
                      });
+    QObject::connect(connection,
+                     &Communi::IrcConnection::capabilityMessageReceived, this,
+                     [this](Communi::IrcCapabilityMessage *message) {
+                         const QStringList caps = message->capabilities();
+                         if (caps.contains("echo-message"))
+                         {
+                             this->hasEcho_ = true;
+                         }
+                     });
 }
 
 void IrcServer::initializeConnection(IrcConnection *connection,
@@ -127,6 +136,7 @@ void IrcServer::initializeConnection(IrcConnection *connection,
                                                         : this->data_->nick);
     connection->setRealName(this->data_->real.isEmpty() ? this->data_->user
                                                         : this->data_->nick);
+    connection->network()->setRequestedCapabilities({"echo-message"});
 
     if (getSettings()->enableExperimentalIrc)
     {
@@ -307,6 +317,11 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 }
             };
     }
+}
+
+bool IrcServer::hasEcho() const
+{
+    return this->hasEcho_;
 }
 
 }  // namespace chatterino
