@@ -2064,6 +2064,13 @@ void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
                     {
                         failureCallback(Error::TargetBanned, message);
                     }
+                    else if (message.startsWith(
+                                 "The user specified in the user_id field may "
+                                 "not be banned",
+                                 Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::CannotBanUser, message);
+                    }
                     else
                     {
                         failureCallback(Error::Forwarded, message);
