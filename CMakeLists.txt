@@ -150,6 +150,9 @@ if (BUILD_TESTS OR BUILD_BENCHMARKS)
     add_definitions(-DCHATTERINO_TEST)
 endif ()
 
+# Generate resource files
+include(cmake/resources/generate_resources.cmake)
+
 add_subdirectory(src)
 
 if (BUILD_TESTS)
