@@ -68,8 +68,8 @@
 - Minor: Migrated /followersoff to Helix API. (#4040)
 - Minor: Migrated /raid command to Helix API. Chat command will continue to be used until February 11th 2023. (#4029)
 - Minor: Migrated /unraid command to Helix API. Chat command will continue to be used until February 11th 2023. (#4030)
-- Minor: Migrated /ban to Helix API. (#4049)
-- Minor: Migrated /timeout to Helix API. (#4049)
+- Minor: Migrated /ban to Helix API. (#4049, #4164)
+- Minor: Migrated /timeout to Helix API. (#4049, #4164)
 - Minor: Migrated /w to Helix API. Chat command will continue to be used until February 11th 2023. (#4052)
 - Minor: Migrated /vips to Helix API. Chat command will continue to be used until February 11th 2023. (#4053)
 - Minor: Migrated /uniquechat and /r9kbeta to Helix API. (#4057)
@@ -132,6 +132,7 @@
 - Dev: Batched checking live status for all channels after startup. (#3757, #3762, #3767)
 - Dev: Moved most command context into the command controller. (#3824)
 - Dev: Error NetworkResults now include the body data. (#3987)
+- Dev: Automatically generate resources files with cmake. (#4159)
 
 ## 2.3.5
 
