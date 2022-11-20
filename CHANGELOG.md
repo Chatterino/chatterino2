@@ -123,6 +123,7 @@
 - Bugfix: Fixed invalid/dangling completion when cycling through previous messages or replying (#4072)
 - Bugfix: Fixed incorrect .desktop icon path. (#4078)
 - Bugfix: Mark bad or invalid images as empty. (#4151)
+- Bugfix: Fixed `/watching` channel jumping around. (#4169)
 - Dev: Got rid of BaseTheme (#4132)
 - Dev: Removed official support for QMake. (#3839, #3883)
 - Dev: Rewrote LimitedQueue (#3798)
