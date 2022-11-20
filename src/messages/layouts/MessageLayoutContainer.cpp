@@ -83,7 +83,7 @@ void MessageLayoutContainer::addElementNoLineBreak(
     this->_addElement(element);
 }
 
-bool MessageLayoutContainer::canAddElements()
+bool MessageLayoutContainer::canAddElements() const
 {
     return this->canAddMessages_;
 }
@@ -331,9 +331,12 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
         this->currentX_ = this->elements_[startIndex]->getRect().left();
     }
     // manually do the first call with -1 as previous index
-    this->_addElement(this->elements_[correctSequence[0]].get(), false, -1);
+    if (this->canAddElements())
+    {
+        this->_addElement(this->elements_[correctSequence[0]].get(), false, -1);
+    }
 
-    for (int i = 1; i < correctSequence.size(); i++)
+    for (int i = 1; i < correctSequence.size() && this->canAddElements(); i++)
     {
         this->_addElement(this->elements_[correctSequence[i]].get(), false,
                           correctSequence[i - 1]);
