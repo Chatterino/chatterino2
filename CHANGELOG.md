@@ -5,7 +5,7 @@
 - Major: Added support for Twitch's Chat Replies. [Wiki Page](https://wiki.chatterino.com/Features/#message-replies) (#3722, #3989, #4041, #4047, #4055, #4067, #4077, #3905, #4131)
 - Major: Added multi-channel searching to search dialog via keyboard shortcut. (Ctrl+Shift+F by default) (#3694, #3875)
 - Major: Added support for emotes, badges, and live emote updates from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062, #4090)
-- Major: Added support for Right-to-Left Languages (#3958, #4139)
+- Major: Added support for Right-to-Left Languages (#3958, #4139, #4168)
 - Minor: Added setting to keep more message history in splits. (#3811)
 - Minor: Added setting to keep more message history in usercards. (#3811)
 - Minor: Added ability to pin Usercards to stay open even if it loses focus. Only available if "Automatically close usercard when it loses focus" is enabled. (#3884)
@@ -124,6 +124,7 @@
 - Bugfix: Fixed invalid/dangling completion when cycling through previous messages or replying (#4072)
 - Bugfix: Fixed incorrect .desktop icon path. (#4078)
 - Bugfix: Mark bad or invalid images as empty. (#4151)
+- Bugfix: Fixed `/watching` channel jumping around. (#4169)
 - Dev: Got rid of BaseTheme (#4132)
 - Dev: Removed official support for QMake. (#3839, #3883)
 - Dev: Rewrote LimitedQueue (#3798)
@@ -133,7 +134,7 @@
 - Dev: Batched checking live status for all channels after startup. (#3757, #3762, #3767)
 - Dev: Moved most command context into the command controller. (#3824)
 - Dev: Error NetworkResults now include the body data. (#3987)
-- Dev: Automatically generate resources files with cmake. (#4159)
+- Dev: Automatically generate resources files with cmake. (#4159, #4167)
 
 ## 2.3.5
 
