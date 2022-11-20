@@ -12,12 +12,12 @@
 #    include <Windows.h>
 #endif
 
+#include <pajlada/settings/setting.hpp>
 #include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QUrl>
-#include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
 

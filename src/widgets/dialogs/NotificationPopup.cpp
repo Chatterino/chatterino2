@@ -7,7 +7,6 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QScreen>
-
 #include <QVBoxLayout>
 
 namespace chatterino {

@@ -3,9 +3,9 @@
 #include "common/Singleton.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
+#include <pajlada/settings/setting.hpp>
 #include <QBrush>
 #include <QColor>
-#include <pajlada/settings/setting.hpp>
 #include <singletons/Settings.hpp>
 
 namespace chatterino {

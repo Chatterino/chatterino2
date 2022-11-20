@@ -1,11 +1,11 @@
 #pragma once
 
-#include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 
+#include <pajlada/serialize.hpp>
 #include <QRegularExpression>
 #include <QString>
-#include <pajlada/serialize.hpp>
 
 #include <memory>
 

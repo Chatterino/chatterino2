@@ -1,8 +1,5 @@
 #pragma once
 
-#include <pajlada/settings/setting.hpp>
-#include <pajlada/settings/settinglistener.hpp>
-
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
 #include "common/SignalVector.hpp"
@@ -15,6 +12,9 @@
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/SplitInput.hpp"
+
+#include <pajlada/settings/setting.hpp>
+#include <pajlada/settings/settinglistener.hpp>
 
 using TimeoutButton = std::pair<QString, int>;
 

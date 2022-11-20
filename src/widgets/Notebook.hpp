@@ -3,11 +3,11 @@
 #include "pajlada/signals/signal.hpp"
 #include "widgets/BaseWidget.hpp"
 
+#include <pajlada/signals/signalholder.hpp>
 #include <QList>
 #include <QMenu>
 #include <QMessageBox>
 #include <QWidget>
-#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 

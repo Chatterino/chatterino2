@@ -2,6 +2,7 @@
 
 #include <QEvent>
 #include <QObject>
+
 #include <functional>
 
 namespace chatterino {

@@ -3,8 +3,9 @@
 #include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
 
-#include <QPixmap>
 #include <boost/noncopyable.hpp>
+#include <QPixmap>
+
 #include <cinttypes>
 #include <memory>
 

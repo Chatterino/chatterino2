@@ -1,14 +1,15 @@
 #pragma once
 
-#include <QPoint>
-#include <QRect>
-#include <memory>
-#include <vector>
-
 #include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
-#include "messages/Selection.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
+#include "messages/Selection.hpp"
+
+#include <QPoint>
+#include <QRect>
+
+#include <memory>
+#include <vector>
 
 class QPainter;
 

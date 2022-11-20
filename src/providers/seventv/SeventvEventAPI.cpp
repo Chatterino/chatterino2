@@ -4,6 +4,7 @@
 #include "providers/seventv/eventapi/SeventvEventAPIMessage.hpp"
 
 #include <QJsonArray>
+
 #include <utility>
 
 namespace chatterino {

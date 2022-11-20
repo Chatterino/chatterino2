@@ -6,15 +6,16 @@
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 
 #include <QApplication>
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QFont>
 #include <QIcon>
+
 #include <functional>
 
 #ifdef CHATTERINO
@@ -23,11 +24,11 @@
 #endif
 
 #ifdef USEWINSDK
+#    include <dwmapi.h>
+#    include <gdiplus.h>
 #    include <ObjIdl.h>
 #    include <VersionHelpers.h>
 #    include <Windows.h>
-#    include <dwmapi.h>
-#    include <gdiplus.h>
 #    include <windowsx.h>
 
 //#include <ShellScalingApi.h>

@@ -6,6 +6,8 @@
 #include "singletons/Paths.hpp"
 #include "util/PostToThread.hpp"
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/interprocess/ipc/message_queue.hpp>
 #include <QCoreApplication>
 #include <QFile>
 #include <QJsonArray>
@@ -13,17 +15,14 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/interprocess/ipc/message_queue.hpp>
-
 namespace ipc = boost::interprocess;
 
 #ifdef Q_OS_WIN
-#    include <QSettings>
-
-#    include <Windows.h>
 #    include "singletons/WindowManager.hpp"
 #    include "widgets/AttachedWindow.hpp"
+
+#    include <QSettings>
+#    include <Windows.h>
 #endif
 
 #include <iostream>

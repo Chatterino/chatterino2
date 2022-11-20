@@ -3,6 +3,7 @@
 #include "common/NetworkManager.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/Paths.hpp"
 #include "util/DebugCount.hpp"
@@ -12,7 +13,6 @@
 #include <QFile>
 #include <QNetworkReply>
 #include <QtConcurrent>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 

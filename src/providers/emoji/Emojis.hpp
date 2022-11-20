@@ -2,9 +2,10 @@
 
 #include "util/ConcurrentMap.hpp"
 
+#include <boost/variant.hpp>
 #include <QMap>
 #include <QRegularExpression>
-#include <boost/variant.hpp>
+
 #include <map>
 #include <set>
 #include <vector>

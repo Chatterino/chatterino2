@@ -9,9 +9,9 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "util/ExponentialBackoff.hpp"
 
+#include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
 #include <QString>
-#include <pajlada/signals/signal.hpp>
 #include <websocketpp/client.hpp>
 
 #include <atomic>
