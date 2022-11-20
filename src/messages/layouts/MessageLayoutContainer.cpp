@@ -264,7 +264,7 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
     int startIndex = static_cast<int>(this->lineStart_);
     int endIndex = static_cast<int>(this->elements_.size()) - 1;
 
-    if (firstTextIndex >= endIndex)
+    if (firstTextIndex >= endIndex || startIndex >= this->elements_.size())
     {
         return;
     }
@@ -449,7 +449,17 @@ void MessageLayoutContainer::end()
             QSize(this->dotdotdotWidth_, this->textLineHeight_),
             QColor("#00D80A"), FontStyle::ChatMediumBold, this->scale_);
 
-        // getApp()->themes->messages.textColors.system
+        if (this->first == FirstWord::RTL)
+        {
+            // Shift all elements in the next line to the left
+            for (int i = this->lines_.back().startIndex;
+                 i < this->elements_.size(); i++)
+            {
+                QPoint prevPos = this->elements_[i]->getRect().topLeft();
+                this->elements_[i]->setPosition(
+                    QPoint(prevPos.x() + this->dotdotdotWidth_, prevPos.y()));
+            }
+        }
         this->_addElement(element, true);
         this->isCollapsed_ = true;
     }
