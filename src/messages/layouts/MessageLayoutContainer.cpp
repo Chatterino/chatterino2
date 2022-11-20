@@ -48,6 +48,7 @@ void MessageLayoutContainer::begin(int width, float scale, MessageFlags flags)
     this->dotdotdotWidth_ = mediumFontMetrics.horizontalAdvance("...");
     this->canAddMessages_ = true;
     this->isCollapsed_ = false;
+    this->wasPrevReversed_ = false;
 }
 
 void MessageLayoutContainer::clear()
@@ -272,7 +273,6 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
 
     std::vector<int> correctSequence;
     std::stack<int> swappedSequence;
-    bool wasPrevReversed = false;
 
     // we reverse a sequence of words if it's opposite to the text direction
     // the second condition below covers the possible three cases:
@@ -291,18 +291,18 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
     for (int i = startIndex; i <= endIndex; i++)
     {
         if (isNeutral(this->elements_[i]->getText()) &&
-            ((this->first == FirstWord::RTL && !wasPrevReversed) ||
-             (this->first == FirstWord::LTR && wasPrevReversed)))
+            ((this->first == FirstWord::RTL && !this->wasPrevReversed_) ||
+             (this->first == FirstWord::LTR && this->wasPrevReversed_)))
         {
             this->elements_[i]->reversedNeutral = true;
         }
         if (((this->elements_[i]->getText().isRightToLeft() !=
               (this->first == FirstWord::RTL)) &&
              !isNeutral(this->elements_[i]->getText())) ||
-            (isNeutral(this->elements_[i]->getText()) && wasPrevReversed))
+            (isNeutral(this->elements_[i]->getText()) && this->wasPrevReversed_))
         {
             swappedSequence.push(i);
-            wasPrevReversed = true;
+            this->wasPrevReversed_ = true;
         }
         else
         {
@@ -312,7 +312,7 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
                 swappedSequence.pop();
             }
             correctSequence.push_back(i);
-            wasPrevReversed = false;
+            this->wasPrevReversed_ = false;
         }
     }
     while (!swappedSequence.empty())
