@@ -299,7 +299,8 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
         if (((this->elements_[i]->getText().isRightToLeft() !=
               (this->first == FirstWord::RTL)) &&
              !isNeutral(this->elements_[i]->getText())) ||
-            (isNeutral(this->elements_[i]->getText()) && this->wasPrevReversed_))
+            (isNeutral(this->elements_[i]->getText()) &&
+             this->wasPrevReversed_))
         {
             swappedSequence.push(i);
             this->wasPrevReversed_ = true;
