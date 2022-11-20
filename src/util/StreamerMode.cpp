@@ -12,11 +12,13 @@
 #include "widgets/Window.hpp"
 
 #ifdef USEWINSDK
-#    include <VersionHelpers.h>
+// clang-format off
 #    include <Windows.h>
 
+#    include <VersionHelpers.h>
 #    include <WtsApi32.h>
 #    pragma comment(lib, "Wtsapi32.lib")
+// clang-format on
 #endif
 
 #include <QProcess>

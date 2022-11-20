@@ -24,11 +24,12 @@
 #endif
 
 #ifdef USEWINSDK
-#    include <dwmapi.h>
-#    include <gdiplus.h>
+// clang-format off
 #    include <ObjIdl.h>
 #    include <VersionHelpers.h>
 #    include <Windows.h>
+#    include <dwmapi.h>
+#    include <gdiplus.h>
 #    include <windowsx.h>
 
 //#include <ShellScalingApi.h>
@@ -38,6 +39,7 @@
 #    include <QVBoxLayout>
 
 #    define WM_DPICHANGED 0x02E0
+// clang-format on
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"

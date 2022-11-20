@@ -2,8 +2,10 @@
 
 #ifdef USEWINSDK
 
-#    include <boost/optional.hpp>
+// clang-format off
 #    include <Windows.h>
+#    include <boost/optional.hpp>
+// clang-format on
 
 namespace chatterino {
 
