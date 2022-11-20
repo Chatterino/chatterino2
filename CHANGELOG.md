@@ -86,6 +86,7 @@
 - Minor: Add support for `echo-message` capabilities for IRC. (#4157)
 - Minor: Add proper support for IRC private messages. (#4158)
 - Minor: Improved look of tabs when using a layout other than top. (#3925, #4152)
+- Minor: Added support for Nicknames on IRC. (#4170)
 - Bugfix: Fixed channels with two leading `#`s not being usable on IRC (#4154)
 - Bugfix: Fixed `Add new account` dialog causing main chatterino window to be non movable. (#4121)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
