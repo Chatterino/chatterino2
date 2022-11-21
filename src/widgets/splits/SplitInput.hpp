@@ -87,6 +87,8 @@ protected:
     void paintEvent(QPaintEvent * /*event*/) override;
     void resizeEvent(QResizeEvent * /*event*/) override;
 
+    void mousePressEvent(QMouseEvent *event) override;
+
     virtual void giveFocus(Qt::FocusReason reason);
 
     QString handleSendMessage(std::vector<QString> &arguments);
