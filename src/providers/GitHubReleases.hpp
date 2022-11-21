@@ -73,7 +73,7 @@ private:
 
 public:
     /**
-     * @brief Gets the most latest release that was not a prerelease
+     * @brief Get the most recent release that was not a prerelease
      *
      * @param releaseCallback Callback on got matching release
      * @param failureCallback Callback on failure
@@ -81,7 +81,7 @@ public:
     static void getLatestNotPrerelease(ReleaseCallback releaseCallback,
                                        FailureCallback failureCallback);
     /**
-     * @brief Gets the most latest release that was a prerelease
+     * @brief Get the most recent release that was a prerelease
      *
      * @param releaseCallback Callback on got matching prerelease
      * @param failureCallback Callback on failure
@@ -89,7 +89,7 @@ public:
     static void getLatestPrerelease(ReleaseCallback releaseCallback,
                                     FailureCallback failureCallback);
     /**
-     * @brief Gets the latest release
+     * @brief Get the latest release
      *
      * @param releaseCallback Callback on got release
      * @param failureCallback Callback on failure
@@ -97,7 +97,7 @@ public:
     static void getLatestRelease(ReleaseCallback releaseCallback,
                                  FailureCallback failureCallback);
     /**
-     * @brief Gets a release by its Git tag
+     * @brief Get a release by its Git tag
      *
      * @param tag Git tag to query
      * @param releaseCallback Callback on got release
