@@ -62,6 +62,12 @@ SearchPopup::SearchPopup(QWidget *parent, Split *split)
     , split_(split)
 {
     this->initLayout();
+    if (this->split_ && this->split_->getChannelView().hasSelection())
+    {
+        this->searchInput_->setText(
+            this->split_->getChannelView().getSelectedText().trimmed());
+        this->searchInput_->selectAll();
+    }
     this->resize(400, 600);
     this->addShortcuts();
 }
