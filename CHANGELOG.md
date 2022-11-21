@@ -2,7 +2,9 @@
 
 ## Unversioned
 
-## 2.4.0
+- Bugfix: Fixed being unable to see the usercard of VIPs who have Asian language display names. (#4174)
+
+## 2.4.0-beta
 
 - Major: Added support for emotes, badges, and live emote updates from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062, #4090)
 - Major: Added support for Right-to-Left Languages (#3958, #4139, #4168)
