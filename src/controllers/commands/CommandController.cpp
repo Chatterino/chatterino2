@@ -3000,6 +3000,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                     auto messagePrefix =
                         QString("The VIPs of this channel are");
 
+                    // TODO: sort results?
                     MessageBuilder builder;
                     TwitchMessageBuilder::listOfUsersSystemMessage(
                         messagePrefix, vipList, twitchChannel, &builder);
