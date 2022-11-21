@@ -3003,7 +3003,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
                     for (const auto &vip : vipList)
                     {
-                        entries.append(vip.userName);
+                        entries.append(vip.userLogin);
                     }
 
                     entries.sort(Qt::CaseInsensitive);
