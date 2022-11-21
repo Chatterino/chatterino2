@@ -22,11 +22,13 @@ Checks: '-*,
     -performance-noexcept-move-constructor,
     -misc-non-private-member-variables-in-classes,
     -cppcoreguidelines-non-private-member-variables-in-classes,
+    -cppcoreguidelines-special-member-functions,
     -modernize-use-nodiscard,
     -modernize-use-trailing-return-type,
     -readability-identifier-length,
     -readability-function-cognitive-complexity,
     -bugprone-easily-swappable-parameters,
+    -cert-err58-cpp,
     '
 CheckOptions:
   - key:             readability-identifier-naming.ClassCase
@@ -37,7 +39,11 @@ CheckOptions:
     value:           camelBack
   - key:             readability-identifier-naming.MemberCase
     value:           camelBack
+  - key:             readability-identifier-naming.PrivateMemberIgnoredRegexp
+    value:           .*
   - key:             readability-identifier-naming.PrivateMemberSuffix
+    value:           _
+  - key:             readability-identifier-naming.ProtectedMemberSuffix
     value:           _
   - key:             readability-identifier-naming.UnionCase
     value:           CamelCase

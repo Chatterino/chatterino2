@@ -90,7 +90,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
 
     layout->setSpacing(0);
     // provide draggable margin if frameless
-    layout->setMargin(closeAutomatically ? 15 : 1);
+    auto marginPx = closeAutomatically ? 15 : 1;
+    layout->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
     layout->addWidget(this->ui_.threadView, 1);
     layout->addWidget(this->ui_.replyInput);
 }
@@ -130,12 +131,19 @@ void ReplyThreadPopup::addMessagesFromThread()
     this->ui_.threadView->setChannel(virtualChannel);
     this->ui_.threadView->setSourceChannel(sourceChannel);
 
-    virtualChannel->addMessage(this->thread_->root());
+    auto overrideFlags =
+        boost::optional<MessageFlags>(this->thread_->root()->flags);
+    overrideFlags->set(MessageFlag::DoNotLog);
+
+    virtualChannel->addMessage(this->thread_->root(), overrideFlags);
     for (const auto &msgRef : this->thread_->replies())
     {
         if (auto msg = msgRef.lock())
         {
-            virtualChannel->addMessage(msg);
+            auto overrideFlags = boost::optional<MessageFlags>(msg->flags);
+            overrideFlags->set(MessageFlag::DoNotLog);
+
+            virtualChannel->addMessage(msg, overrideFlags);
         }
     }
 
@@ -145,8 +153,12 @@ void ReplyThreadPopup::addMessagesFromThread()
                 [this, virtualChannel](MessagePtr &message, auto) {
                     if (message->replyThread == this->thread_)
                     {
+                        auto overrideFlags =
+                            boost::optional<MessageFlags>(message->flags);
+                        overrideFlags->set(MessageFlag::DoNotLog);
+
                         // same reply thread, add message
-                        virtualChannel->addMessage(message);
+                        virtualChannel->addMessage(message, overrideFlags);
                     }
                 }));
 }

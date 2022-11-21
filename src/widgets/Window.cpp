@@ -153,7 +153,7 @@ void Window::addLayout()
     this->getLayoutContainer()->setLayout(layout);
 
     // set margin
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     this->notebook_->setAllowUserTabManagement(true);
     this->notebook_->setShowAddButton(true);
@@ -244,6 +244,14 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
 
     actions.emplace("addEmoteMessage", [=](std::vector<QString>) -> QString {
         const auto &messages = getSampleEmoteTestMessages();
+        static int index = 0;
+        const auto &msg = messages[index++ % messages.size()];
+        getApp()->twitch->addFakeMessage(msg);
+        return "";
+    });
+
+    actions.emplace("addSubMessage", [=](std::vector<QString>) -> QString {
+        const auto &messages = getSampleSubMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
         getApp()->twitch->addFakeMessage(msg);

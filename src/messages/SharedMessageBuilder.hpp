@@ -38,6 +38,9 @@ public:
     // Parses "badges" tag which contains a comma separated list of key-value elements
     static std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
 
+    static QString stylizeUsername(const QString &username,
+                                   const Message &message);
+
 protected:
     virtual void parse();
 
@@ -53,9 +56,6 @@ protected:
     // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
     virtual void parseHighlights();
 
-    virtual void addTextOrEmoji(EmotePtr emote);
-    virtual void addTextOrEmoji(const QString &value);
-
     void appendChannelName();
 
     Channel *channel;
@@ -67,7 +67,6 @@ protected:
     const bool action_{};
 
     QColor usernameColor_ = {153, 153, 153};
-    MessageColor textColor_ = MessageColor::Text;
 
     bool highlightAlert_ = false;
     bool highlightSound_ = false;

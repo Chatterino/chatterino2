@@ -7,7 +7,7 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
-project(chatterino VERSION 2.3.5)
+project(chatterino VERSION 2.4.0)
 
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
@@ -18,6 +18,7 @@ option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
 option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key chain" ON)
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
+option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
 
 option(USE_CONAN "Use conan" OFF)
 
@@ -104,12 +105,16 @@ find_package(RapidJSON REQUIRED)
 find_package(Websocketpp REQUIRED)
 
 if (BUILD_TESTS)
+    # For MSVC: Prevent overriding the parent project's compiler/linker settings
+    # See https://github.com/google/googletest/blob/main/googletest/README.md#visual-studio-dynamic-vs-static-runtimes
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
     add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib/googletest" "lib/googletest")
 
     mark_as_advanced(
-        BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
-        gmock_build_tests gtest_build_samples gtest_build_tests
-        gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
+            BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
+            gmock_build_tests gtest_build_samples gtest_build_tests
+            gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
     )
 
     set_target_properties(gtest PROPERTIES FOLDER lib)
@@ -144,6 +149,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if (BUILD_TESTS OR BUILD_BENCHMARKS)
     add_definitions(-DCHATTERINO_TEST)
 endif ()
+
+# Generate resource files
+include(cmake/resources/generate_resources.cmake)
 
 add_subdirectory(src)
 

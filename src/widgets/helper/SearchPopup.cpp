@@ -7,11 +7,14 @@
 #include "common/Channel.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/search/AuthorPredicate.hpp"
+#include "messages/search/BadgePredicate.hpp"
 #include "messages/search/ChannelPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
 #include "messages/search/MessageFlagsPredicate.hpp"
 #include "messages/search/RegexPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
+#include "messages/search/SubtierPredicate.hpp"
+#include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {
@@ -43,7 +46,12 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
 
         // If all predicates match, add the message to the channel
         if (accept)
-            channel->addMessage(message);
+        {
+            auto overrideFlags = boost::optional<MessageFlags>(message->flags);
+            overrideFlags->set(MessageFlag::DoNotLog);
+
+            channel->addMessage(message, overrideFlags);
+        }
     }
 
     return channel;
@@ -104,6 +112,34 @@ void SearchPopup::addChannel(ChannelView &channel)
     this->searchChannels_.append(std::ref(channel));
 
     this->updateWindowTitle();
+}
+
+void SearchPopup::goToMessage(const MessagePtr &message)
+{
+    for (const auto &view : this->searchChannels_)
+    {
+        if (view.get().channel()->getType() == Channel::Type::TwitchMentions)
+        {
+            getApp()->windows->scrollToMessage(message);
+            return;
+        }
+
+        if (view.get().scrollToMessage(message))
+        {
+            return;
+        }
+    }
+}
+
+void SearchPopup::goToMessageId(const QString &messageId)
+{
+    for (const auto &view : this->searchChannels_)
+    {
+        if (view.get().scrollToMessageId(messageId))
+        {
+            return;
+        }
+    }
 }
 
 void SearchPopup::updateWindowTitle()
@@ -212,13 +248,13 @@ void SearchPopup::initLayout()
     // VBOX
     {
         auto *layout1 = new QVBoxLayout(this);
-        layout1->setMargin(0);
+        layout1->setContentsMargins(0, 0, 0, 0);
         layout1->setSpacing(0);
 
         // HBOX
         {
             auto *layout2 = new QHBoxLayout(this);
-            layout2->setMargin(8);
+            layout2->setContentsMargins(8, 8, 8, 8);
             layout2->setSpacing(8);
 
             // SEARCH INPUT
@@ -268,6 +304,8 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     std::vector<std::unique_ptr<MessagePredicate>> predicates;
     QStringList authors;
     QStringList channels;
+    QStringList badges;
+    QStringList subtiers;
 
     while (it.hasNext())
     {
@@ -282,6 +320,14 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
         if (name == "from")
         {
             authors.append(value);
+        }
+        else if (name == "badge")
+        {
+            badges.append(value);
+        }
+        else if (name == "subtier")
+        {
+            subtiers.append(value);
         }
         else if (name == "has" && value == "link")
         {
@@ -308,10 +354,24 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     }
 
     if (!authors.empty())
+    {
         predicates.push_back(std::make_unique<AuthorPredicate>(authors));
+    }
 
     if (!channels.empty())
+    {
         predicates.push_back(std::make_unique<ChannelPredicate>(channels));
+    }
+
+    if (!badges.empty())
+    {
+        predicates.push_back(std::make_unique<BadgePredicate>(badges));
+    }
+
+    if (!subtiers.empty())
+    {
+        predicates.push_back(std::make_unique<SubtierPredicate>(subtiers));
+    }
 
     return predicates;
 }

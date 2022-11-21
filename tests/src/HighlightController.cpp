@@ -1,7 +1,9 @@
 #include "controllers/highlights/HighlightController.hpp"
+
 #include "Application.hpp"
 #include "BaseSettings.hpp"
-#include "messages/MessageBuilder.hpp"       // for MessageParseArgs
+#include "messages/MessageBuilder.hpp"  // for MessageParseArgs
+#include "mocks/UserData.hpp"
 #include "providers/twitch/TwitchBadge.hpp"  // for Badge
 #include "providers/twitch/api/Helix.hpp"
 
@@ -11,9 +13,12 @@
 #include <QDir>
 #include <QFile>
 #include <QString>
+#include <boost/optional/optional_io.hpp>
 
 using namespace chatterino;
 using ::testing::Exactly;
+
+namespace {
 
 class MockApplication : IApplication
 {
@@ -26,7 +31,7 @@ public:
     {
         return nullptr;
     }
-    Emotes *getEmotes() override
+    IEmotes *getEmotes() override
     {
         return nullptr;
     }
@@ -70,11 +75,18 @@ public:
     {
         return nullptr;
     }
+    IUserDataController *getUserData() override
+    {
+        return &this->userData;
+    }
 
     AccountController accounts;
     HighlightController highlights;
+    mock::UserDataController userData;
     // TODO: Figure this out
 };
+
+}  // namespace
 
 class MockHelix : public IHelix
 {
@@ -209,7 +221,202 @@ public:
                  HelixFailureCallback failureCallback),
                 (override));
 
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, updateUserChatColor,
+                (QString userID, QString color,
+                 ResultCallback<> successCallback,
+                 (FailureCallback<HelixUpdateUserChatColorError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, deleteChatMessages,
+                (QString broadcasterID, QString moderatorID, QString messageID,
+                 ResultCallback<> successCallback,
+                 (FailureCallback<HelixDeleteChatMessagesError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, addChannelModerator,
+                (QString broadcasterID, QString userID,
+                 ResultCallback<> successCallback,
+                 (FailureCallback<HelixAddChannelModeratorError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, removeChannelModerator,
+                (QString broadcasterID, QString userID,
+                 ResultCallback<> successCallback,
+                 (FailureCallback<HelixRemoveChannelModeratorError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, sendChatAnnouncement,
+                (QString broadcasterID, QString moderatorID, QString message,
+                 HelixAnnouncementColor color, ResultCallback<> successCallback,
+                 (FailureCallback<HelixSendChatAnnouncementError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, addChannelVIP,
+        (QString broadcasterID, QString userID,
+         ResultCallback<> successCallback,
+         (FailureCallback<HelixAddChannelVIPError, QString> failureCallback)),
+        (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, removeChannelVIP,
+                (QString broadcasterID, QString userID,
+                 ResultCallback<> successCallback,
+                 (FailureCallback<HelixRemoveChannelVIPError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, unbanUser,
+        (QString broadcasterID, QString moderatorID, QString userID,
+         ResultCallback<> successCallback,
+         (FailureCallback<HelixUnbanUserError, QString> failureCallback)),
+        (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(  // /raid
+        void, startRaid,
+        (QString fromBroadcasterID, QString toBroadcasterId,
+         ResultCallback<> successCallback,
+         (FailureCallback<HelixStartRaidError, QString> failureCallback)),
+        (override));  // /raid
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(  // /unraid
+        void, cancelRaid,
+        (QString broadcasterID, ResultCallback<> successCallback,
+         (FailureCallback<HelixCancelRaidError, QString> failureCallback)),
+        (override));  // /unraid
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, updateEmoteMode,
+                (QString broadcasterID, QString moderatorID, bool emoteMode,
+                 ResultCallback<HelixChatSettings> successCallback,
+                 (FailureCallback<HelixUpdateChatSettingsError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, updateFollowerMode,
+                (QString broadcasterID, QString moderatorID,
+                 boost::optional<int> followerModeDuration,
+                 ResultCallback<HelixChatSettings> successCallback,
+                 (FailureCallback<HelixUpdateChatSettingsError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, updateNonModeratorChatDelay,
+                (QString broadcasterID, QString moderatorID,
+                 boost::optional<int> nonModeratorChatDelayDuration,
+                 ResultCallback<HelixChatSettings> successCallback,
+                 (FailureCallback<HelixUpdateChatSettingsError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, updateSlowMode,
+                (QString broadcasterID, QString moderatorID,
+                 boost::optional<int> slowModeWaitTime,
+                 ResultCallback<HelixChatSettings> successCallback,
+                 (FailureCallback<HelixUpdateChatSettingsError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, updateSubscriberMode,
+                (QString broadcasterID, QString moderatorID,
+                 bool subscriberMode,
+                 ResultCallback<HelixChatSettings> successCallback,
+                 (FailureCallback<HelixUpdateChatSettingsError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, updateUniqueChatMode,
+                (QString broadcasterID, QString moderatorID,
+                 bool uniqueChatMode,
+                 ResultCallback<HelixChatSettings> successCallback,
+                 (FailureCallback<HelixUpdateChatSettingsError, QString>
+                      failureCallback)),
+                (override));
+    // update chat settings
+
+    // /timeout, /ban
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, banUser,
+                (QString broadcasterID, QString moderatorID, QString userID,
+                 boost::optional<int> duration, QString reason,
+                 ResultCallback<> successCallback,
+                 (FailureCallback<HelixBanUserError, QString> failureCallback)),
+                (override));  // /timeout, /ban
+
+    // /w
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, sendWhisper,
+                (QString fromUserID, QString toUserID, QString message,
+                 ResultCallback<> successCallback,
+                 (FailureCallback<HelixWhisperError, QString> failureCallback)),
+                (override));  // /w
+
+    // getChatters
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, getChatters,
+        (QString broadcasterID, QString moderatorID, int maxChattersToFetch,
+         ResultCallback<HelixChatters> successCallback,
+         (FailureCallback<HelixGetChattersError, QString> failureCallback)),
+        (override));  // getChatters
+
+    // /vips
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, getChannelVIPs,
+        (QString broadcasterID,
+         ResultCallback<std::vector<HelixVip>> successCallback,
+         (FailureCallback<HelixListVIPsError, QString> failureCallback)),
+        (override));  // /vips
+
+    // /commercial
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, startCommercial,
+        (QString broadcasterID, int length,
+         ResultCallback<HelixStartCommercialResponse> successCallback,
+         (FailureCallback<HelixStartCommercialError, QString> failureCallback)),
+        (override));  // /commercial
+
+    // /mods
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, getModerators,
+        (QString broadcasterID, int maxModeratorsToFetch,
+         ResultCallback<std::vector<HelixModerator>> successCallback,
+         (FailureCallback<HelixGetModeratorsError, QString> failureCallback)),
+        (override));  // /mods
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
+                (override));
+
+protected:
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, updateChatSettings,
+                (QString broadcasterID, QString moderatorID, QJsonObject json,
+                 ResultCallback<HelixChatSettings> successCallback,
+                 (FailureCallback<HelixUpdateChatSettingsError, QString>
+                      failureCallback)),
                 (override));
 };
 
@@ -303,6 +510,15 @@ static QString DEFAULT_SETTINGS = R"!(
                 "sound": false,
                 "soundUrl": "",
                 "color": "#7fe8b7eb"
+            },
+            {
+                "name": "vip",
+                "displayName": "VIP",
+                "showInMentions": true,
+                "alert": false,
+                "sound": false,
+                "soundUrl": "",
+                "color": "#7fe8b7ec"
             }
         ],
         "subHighlightColor": "#64ffd641"
@@ -316,6 +532,7 @@ struct TestCase {
         std::vector<Badge> badges;
         QString senderName;
         QString originalMessage;
+        MessageFlags flags;
     } input;
 
     struct {
@@ -467,6 +684,32 @@ TEST_F(HighlightControllerTest, A)
             },
         },
         {
+            // Badge highlight with showInMentions only
+            {
+                // input
+                MessageParseArgs{},  // no special args
+                {
+                    {
+                        "vip",
+                        "0",
+                    },
+                },
+                "badge",                  // sender name
+                "show in mentions only",  // original message
+            },
+            {
+                // expected
+                true,  // state
+                {
+                    false,                                  // alert
+                    false,                                  // playsound
+                    boost::none,                            // custom sound url
+                    std::make_shared<QColor>("#7fe8b7ec"),  // color
+                    true,                                   // showInMentions
+                },
+            },
+        },
+        {
             // User mention with showInMentions
             {
                 // input
@@ -532,12 +775,15 @@ TEST_F(HighlightControllerTest, A)
 
     for (const auto &[input, expected] : tests)
     {
-        auto [isMatch, matchResult] = this->controller->check(
-            input.args, input.badges, input.senderName, input.originalMessage);
+        auto [isMatch, matchResult] =
+            this->controller->check(input.args, input.badges, input.senderName,
+                                    input.originalMessage, input.flags);
 
         EXPECT_EQ(isMatch, expected.state)
             << qUtf8Printable(input.senderName) << ": "
             << qUtf8Printable(input.originalMessage);
-        EXPECT_EQ(matchResult, expected.result);
+        EXPECT_EQ(matchResult, expected.result)
+            << qUtf8Printable(input.senderName) << ": "
+            << qUtf8Printable(input.originalMessage);
     }
 }

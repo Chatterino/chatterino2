@@ -12,6 +12,11 @@
 #include <QPainter>
 #include <QPainterPath>
 
+namespace {
+
+const QChar RTL_EMBED(0x202B);
+}  // namespace
+
 namespace chatterino {
 
 const QRect &MessageLayoutElement::getRect() const
@@ -103,8 +108,8 @@ ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
     this->trailingSpace = creator.hasTrailingSpace();
 }
 
-void ImageLayoutElement::addCopyTextToString(QString &str, int from,
-                                             int to) const
+void ImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                             uint32_t to) const
 {
     const auto *emoteElement =
         dynamic_cast<EmoteElement *>(&this->getCreator());
@@ -267,8 +272,8 @@ void TextLayoutElement::listenToLinkChanges()
         });
 }
 
-void TextLayoutElement::addCopyTextToString(QString &str, int from,
-                                            int to) const
+void TextLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                            uint32_t to) const
 {
     str += this->getText().mid(from, to - from);
 
@@ -286,14 +291,19 @@ int TextLayoutElement::getSelectionIndexCount() const
 void TextLayoutElement::paint(QPainter &painter)
 {
     auto app = getApp();
+    QString text = this->getText();
+    if (text.isRightToLeft() || this->reversedNeutral)
+    {
+        text.prepend(RTL_EMBED);
+    }
 
     painter.setPen(this->color_);
 
     painter.setFont(app->fonts->getFont(this->style_, this->scale_));
 
     painter.drawText(
-        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
-        this->getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
+        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000), text,
+        QTextOption(Qt::AlignLeft | Qt::AlignTop));
 }
 
 void TextLayoutElement::paintAnimated(QPainter &, int)
@@ -317,7 +327,8 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
         auto &&text = this->getText();
         auto width = metrics.horizontalAdvance(this->getText()[i]);
 
-        if (x + width > abs.x())
+        // accept mouse to be at only 50%+ of character width to increase index
+        if (x + (width * 0.5) > abs.x())
         {
             if (text.size() > i + 1 && QChar::isLowSurrogate(text[i].unicode()))
             {
@@ -376,8 +387,8 @@ TextIconLayoutElement::TextIconLayoutElement(MessageElement &creator,
 {
 }
 
-void TextIconLayoutElement::addCopyTextToString(QString &str, int from,
-                                                int to) const
+void TextIconLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                                uint32_t to) const
 {
 }
 
@@ -442,11 +453,12 @@ int TextIconLayoutElement::getXFromIndex(int index)
 }
 
 ReplyCurveLayoutElement::ReplyCurveLayoutElement(MessageElement &creator,
-                                                 const QSize &size,
-                                                 float thickness,
+                                                 int width, float thickness,
+                                                 float radius,
                                                  float neededMargin)
-    : MessageLayoutElement(creator, size)
+    : MessageLayoutElement(creator, QSize(width, 0))
     , pen_(QColor("#888"), thickness, Qt::SolidLine, Qt::RoundCap)
+    , radius_(radius)
     , neededMargin_(neededMargin)
 {
 }
@@ -454,23 +466,36 @@ ReplyCurveLayoutElement::ReplyCurveLayoutElement(MessageElement &creator,
 void ReplyCurveLayoutElement::paint(QPainter &painter)
 {
     QRectF paintRect(this->getRect());
-    QPainterPath bezierPath;
+    QPainterPath path;
 
-    qreal top = paintRect.top() + paintRect.height() * 0.25;  // 25% from top
-    qreal left = paintRect.left() + this->neededMargin_;
-    qreal bottom = paintRect.bottom() - this->neededMargin_;
-    QPointF startPoint(left, bottom);
-    QPointF controlPoint(left, top);
-    QPointF endPoint(paintRect.right(), top);
+    QRectF curveRect = paintRect.marginsRemoved(QMarginsF(
+        this->neededMargin_, this->neededMargin_, 0, this->neededMargin_));
 
-    // Create curve path
-    bezierPath.moveTo(startPoint);
-    bezierPath.quadTo(controlPoint, endPoint);
+    // Make sure that our curveRect can always fit the radius curve
+    if (curveRect.height() < this->radius_)
+    {
+        curveRect.setTop(curveRect.top() -
+                         (this->radius_ - curveRect.height()));
+    }
+
+    QPointF bStartPoint(curveRect.left(), curveRect.top() + this->radius_);
+    QPointF bEndPoint(curveRect.left() + this->radius_, curveRect.top());
+    QPointF bControlPoint(curveRect.topLeft());
+
+    // Draw line from bottom left to curve
+    path.moveTo(curveRect.bottomLeft());
+    path.lineTo(bStartPoint);
+
+    // Draw curve path
+    path.quadTo(bControlPoint, bEndPoint);
+
+    // Draw line from curve to top right
+    path.lineTo(curveRect.topRight());
 
     // Render curve
     painter.setPen(this->pen_);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.drawPath(bezierPath);
+    painter.drawPath(path);
 }
 
 void ReplyCurveLayoutElement::paintAnimated(QPainter &painter, int yOffset)
@@ -488,14 +513,12 @@ int ReplyCurveLayoutElement::getXFromIndex(int index)
     {
         return this->getRect().left();
     }
-    else
-    {
-        return this->getRect().right();
-    }
+
+    return this->getRect().right();
 }
 
-void ReplyCurveLayoutElement::addCopyTextToString(QString &str, int from,
-                                                  int to) const
+void ReplyCurveLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                                  uint32_t to) const
 {
 }
 

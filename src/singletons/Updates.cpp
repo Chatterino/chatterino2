@@ -180,23 +180,23 @@ void Updates::installUpdates()
         })
         .onSuccess([this, portable](auto result) -> Outcome {
             QByteArray object = result.getData();
-            QString filename;
+            QString filePath;
 #ifdef Q_OS_WIN
             if (portable)
             {
-                filename = combinePath(getPaths()->miscDirectory, "update.zip");
+                filePath = combinePath(getPaths()->miscDirectory, "update.zip");
             }
             else
             {
-                filename = combinePath(getPaths()->miscDirectory, "Update.exe");
+                filePath = combinePath(getPaths()->miscDirectory, "Update.exe");
             }
 #elif defined Q_OS_MAC
-            filename = combinePath(getPaths()->miscDirectory, "Chatterino.dmg");
+            filePath = combinePath(getPaths()->miscDirectory, "Chatterino.dmg");
 #else
             return Failure;  // shouldn't happen, but guard against it anyways
 #endif
 
-            QFile file(filename);
+            QFile file(filePath);
             file.open(QIODevice::Truncate | QIODevice::WriteOnly);
 
             auto onInstallError = [this]() {
@@ -211,7 +211,7 @@ void Updates::installUpdates()
             };
 
             // Write data to disk
-            qCDebug(chatterinoUpdate) << "Writing update file to" << filename;
+            qCDebug(chatterinoUpdate) << "Writing update file to" << filePath;
             if (file.write(object) == -1)
             {
                 qCWarning(chatterinoUpdate)
@@ -228,11 +228,11 @@ void Updates::installUpdates()
             if (portable)
             {
                 qCDebug(chatterinoUpdate)
-                    << "Starting portable updater" << filename;
+                    << "Starting portable updater" << filePath;
                 QProcess::startDetached(
                     combinePath(QCoreApplication::applicationDirPath(),
                                 "updater.1/ChatterinoUpdater.exe"),
-                    {filename, "restart"});
+                    {filePath, "restart"});
 
                 QApplication::exit(0);
                 return Success;
@@ -241,8 +241,8 @@ void Updates::installUpdates()
             {
                 // Attempt to launch installer
                 qCDebug(chatterinoUpdate)
-                    << "Starting updater executable" << filename;
-                if (QProcess::startDetached(filename))
+                    << "Starting updater executable" << filePath;
+                if (QProcess::startDetached(filePath, {}))
                 {
                     QApplication::exit(0);
                     return Success;
@@ -261,7 +261,7 @@ void Updates::installUpdates()
                     // Open explorer with the executable highlighted
                     QString showExecutableCommand =
                         "C:\\Windows\\explorer.exe /select," +
-                        QDir::toNativeSeparators(filename);
+                        QDir::toNativeSeparators(filePath);
                     bool openedExplorer =
                         QProcess::startDetached(showExecutableCommand);
 
@@ -269,7 +269,7 @@ void Updates::installUpdates()
                     {
                         showPopupMessage(
                             QMessageBox::Warning, "Chatterino Update",
-                            "Well, this is embarassing. Chatterino was also "
+                            "Well, this is embarrassing. Chatterino was also "
                             "unable to open the explorer window. A link will "
                             "open allowing you to manually download the "
                             "update.",
@@ -289,7 +289,7 @@ void Updates::installUpdates()
                 "Applications folder.",
                 true);
 
-            QUrl fileUrl = QUrl("file://" + filename, QUrl::TolerantMode);
+            QUrl fileUrl = QUrl("file://" + filePath, QUrl::TolerantMode);
             QDesktopServices::openUrl(fileUrl);
             return Success;
 #else

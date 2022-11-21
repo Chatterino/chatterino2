@@ -36,14 +36,23 @@ public:
     explicit IrcMessageBuilder(const Communi::IrcNoticeMessage *_ircMessage,
                                const MessageParseArgs &_args);
 
+    /**
+     * @brief used for whisper messages (i.e. PRIVMSG messages with our nick as the target)
+     **/
+    explicit IrcMessageBuilder(const Communi::IrcPrivateMessage *_ircMessage,
+                               const MessageParseArgs &_args);
+
     MessagePtr build() override;
 
 private:
     void appendUsername();
 
-    void addWords(const QStringList &words);
-    void addText(const QString &text, const QColor &color,
-                 bool addSpace = true);
+    /**
+     * @brief holds the name of the target for the private/direct IRC message
+     *
+     * This might not be our nick
+     */
+    QString whisperTarget_;
 };
 
 }  // namespace chatterino

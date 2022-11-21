@@ -29,7 +29,6 @@
 #include <QPainter>
 
 namespace chatterino {
-const int TWITCH_MESSAGE_LIMIT = 500;
 
 SplitInput::SplitInput(Split *_chatWidget, bool enableInlineReplying)
     : SplitInput(_chatWidget, _chatWidget, enableInlineReplying)
@@ -209,9 +208,8 @@ void SplitInput::themeChangedEvent()
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     this->ui_.textEdit->setPalette(placeholderPalette);
 #endif
-
-    this->ui_.vbox->setMargin(
-        int((this->theme->isLightTheme() ? 4 : 2) * this->scale()));
+    auto marginPx = (this->theme->isLightTheme() ? 4 : 2) * this->scale();
+    this->ui_.vbox->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
 
     this->ui_.emoteButton->getLabel().setStyleSheet("color: #000");
 
@@ -464,6 +462,7 @@ void SplitInput::addShortcuts()
                  this->prevIndex_--;
                  this->ui_.textEdit->setPlainText(
                      this->prevMsg_.at(this->prevIndex_));
+                 this->ui_.textEdit->resetCompletion();
 
                  QTextCursor cursor = this->ui_.textEdit->textCursor();
                  cursor.movePosition(QTextCursor::End);
@@ -487,6 +486,7 @@ void SplitInput::addShortcuts()
                  this->prevIndex_++;
                  this->ui_.textEdit->setPlainText(
                      this->prevMsg_.at(this->prevIndex_));
+                 this->ui_.textEdit->resetCompletion();
              }
              else
              {
@@ -496,6 +496,7 @@ void SplitInput::addShortcuts()
                      // If user has just come from a message history
                      // Then simply get currMsg_.
                      this->ui_.textEdit->setPlainText(this->currMsg_);
+                     this->ui_.textEdit->resetCompletion();
                  }
                  else if (message != this->currMsg_)
                  {
@@ -647,6 +648,16 @@ void SplitInput::installKeyPressedEvent()
     });
 }
 
+void SplitInput::mousePressEvent(QMouseEvent *event)
+{
+    if (this->hidden)
+    {
+        BaseWidget::mousePressEvent(event);
+    }
+    // else, don't call QWidget::mousePressEvent,
+    // which will call event->ignore()
+}
+
 void SplitInput::onTextChanged()
 {
     this->updateCompletionPopup();
@@ -661,8 +672,7 @@ void SplitInput::updateCompletionPopup()
 {
     auto channel = this->split_->getChannel().get();
     auto tc = dynamic_cast<TwitchChannel *>(channel);
-    bool showEmoteCompletion =
-        channel->isTwitchChannel() && getSettings()->emoteCompletionWithColon;
+    bool showEmoteCompletion = getSettings()->emoteCompletionWithColon;
     bool showUsernameCompletion =
         tc && getSettings()->showUsernameCompletionMenu;
     if (!showEmoteCompletion && !showUsernameCompletion)
@@ -847,6 +857,13 @@ void SplitInput::editTextChanged()
     // set textLengthLabel value
     QString text = this->ui_.textEdit->toPlainText();
 
+    if (this->shouldPreventInput(text))
+    {
+        this->ui_.textEdit->setPlainText(text.left(TWITCH_MESSAGE_LIMIT));
+        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+        return;
+    }
+
     if (text.startsWith("/r ", Qt::CaseInsensitive) &&
         this->split_->getChannel()->isTwitchChannel())
     {
@@ -864,6 +881,28 @@ void SplitInput::editTextChanged()
         text = text.trimmed();
         text =
             app->commands->execCommand(text, this->split_->getChannel(), true);
+    }
+
+    if (getSettings()->messageOverflow.getValue() == MessageOverflow::Highlight)
+    {
+        if (text.length() > TWITCH_MESSAGE_LIMIT &&
+            text.length() > this->lastOverflowLength)
+        {
+            QTextCharFormat format;
+            format.setForeground(Qt::red);
+
+            QTextCursor cursor = this->ui_.textEdit->textCursor();
+            cursor.setPosition(lastOverflowLength, QTextCursor::MoveAnchor);
+            cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+
+            this->lastOverflowLength = text.length();
+
+            cursor.setCharFormat(format);
+        }
+        else if (this->lastOverflowLength != TWITCH_MESSAGE_LIMIT)
+        {
+            this->lastOverflowLength = TWITCH_MESSAGE_LIMIT;
+        }
     }
 
     QString labelText;
@@ -978,9 +1017,18 @@ void SplitInput::setReply(std::shared_ptr<MessageThread> reply,
     if (this->enableInlineReplying_)
     {
         // Only enable reply label if inline replying
-        this->ui_.textEdit->setPlainText(
-            "@" + this->replyThread_->root()->displayName + " ");
-        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+        auto replyPrefix = "@" + this->replyThread_->root()->displayName;
+        auto plainText = this->ui_.textEdit->toPlainText().trimmed();
+        if (!plainText.startsWith(replyPrefix))
+        {
+            if (!plainText.isEmpty())
+            {
+                replyPrefix.append(' ');
+            }
+            this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
+            this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+            this->ui_.textEdit->resetCompletion();
+        }
         this->ui_.replyLabel->setText("Replying to @" +
                                       this->replyThread_->root()->displayName);
     }
@@ -1000,6 +1048,29 @@ void SplitInput::clearInput()
     {
         this->replyThread_ = nullptr;
     }
+}
+
+bool SplitInput::shouldPreventInput(const QString &text) const
+{
+    if (getSettings()->messageOverflow.getValue() != MessageOverflow::Prevent)
+    {
+        return false;
+    }
+
+    auto channel = this->split_->getChannel();
+
+    if (channel == nullptr)
+    {
+        return false;
+    }
+
+    if (!channel->isTwitchChannel())
+    {
+        // Don't respect this setting for IRC channels as the limits might be server-specific
+        return false;
+    }
+
+    return text.length() > TWITCH_MESSAGE_LIMIT;
 }
 
 }  // namespace chatterino

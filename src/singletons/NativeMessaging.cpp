@@ -19,7 +19,7 @@
 namespace ipc = boost::interprocess;
 
 #ifdef Q_OS_WIN
-#    include <QProcess>
+#    include <QSettings>
 
 #    include <Windows.h>
 #    include "singletons/WindowManager.hpp"
@@ -98,9 +98,8 @@ void registerNmManifest(Paths &paths, const QString &manifestFilename,
     file.flush();
 
 #ifdef Q_OS_WIN
-    // clang-format off
-        QProcess::execute("REG ADD \"" + registryKeyName + "\" /ve /t REG_SZ /d \"" + manifestPath + "\" /f");
-// clang-format on
+    QSettings registry(registryKeyName, QSettings::NativeFormat);
+    registry.setValue("Default", manifestPath);
 #endif
 }
 
@@ -240,8 +239,11 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
             postToThread([=] {
                 if (!name.isEmpty())
                 {
-                    app->twitch->watchingChannel.reset(
-                        app->twitch->getOrAddChannel(name));
+                    auto channel = app->twitch->getOrAddChannel(name);
+                    if (app->twitch->watchingChannel.get() != channel)
+                    {
+                        app->twitch->watchingChannel.reset(channel);
+                    }
                 }
 
                 if (attach || attachFullscreen)
