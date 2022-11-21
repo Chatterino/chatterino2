@@ -23,6 +23,7 @@ const auto TOOLTIP_STYLE_SHEET = QStringLiteral(R"(QToolTip {
 padding: 2px;
 background-color: #333333;
 border: 1px solid #545454;
+color: #4FC3F7;
 }
 )");
 
