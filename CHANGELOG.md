@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Bugfix: Show correct context menu in split input (#4177)
+- Bugfix: Fixed the wrong right-click menu showing in the chat input box. (#4177)
 
 ## 2.4.0
 
