@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Search window input will automaticly use currently selected text if present. (#4178)
 - Bugfix: Fixed being unable to see the usercard of VIPs who have Asian language display names. (#4174)
 
 ## 2.4.0-beta
