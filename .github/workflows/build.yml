@@ -4,7 +4,7 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - chore/user-logins-for-/vips
   pull_request:
   workflow_dispatch:
 
@@ -226,7 +226,7 @@ jobs:
   create-release:
     needs: build
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/chore/user-logins-for-/vips')
 
     steps:
       - uses: actions/download-artifact@v3
@@ -256,7 +256,7 @@ jobs:
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: "release-artifacts/*"
-          body: ${{ github.event.head_commit.message }}
+          body: "Use `userLogin` for /vips response"
           prerelease: true
           name: Nightly Release
-          tag: nightly-build
+          tag: nightly-build-vips
