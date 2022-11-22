@@ -4,7 +4,7 @@
 
 - Bugfix: Fixed being unable to see the usercard of VIPs who have Asian language display names. (#4174)
 - Bugfix: Fixed the wrong right-click menu showing in the chat input box. (#4177)
-- Bugfix: Do not parent popup windows on Windows OS. (#4181)
+- Bugfix: Fixed popup windows not appearing/minimizing correctly on the Windows taskbar. (#4181)
 
 ## 2.4.0-beta
 
