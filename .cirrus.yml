@@ -9,5 +9,5 @@ task:
     git submodule update
     mkdir build
     cd build
-    cmake CMAKE_C_COMPILER="cc" -DCMAKE_CXX_COMPILER="c++" -DCMAKE_C_FLAGS="-O2 -pipe  -fstack-protector-strong -fno-strict-aliasing "  -DCMAKE_CXX_FLAGS="-O2 -pipe -fstack-protector-strong -fno-strict-aliasing  "  -DLINK_OPTIONS="-fstack-protector-strong" -DCMAKE_INSTALL_PREFIX="/usr/local" -DCMAKE_BUILD_TYPE="release" ..
+    cmake CMAKE_C_COMPILER="cc" -DCMAKE_CXX_COMPILER="c++" -DCMAKE_C_FLAGS="-O2 -pipe  -fstack-protector-strong -fno-strict-aliasing "  -DCMAKE_CXX_FLAGS="-O2 -pipe -fstack-protector-strong -fno-strict-aliasing  "  -DLINK_OPTIONS="-fstack-protector-strong" -DCMAKE_INSTALL_PREFIX="/usr/local" -DCMAKE_BUILD_TYPE="release" -DUSE_SYSTEM_QTKEYCHAIN=ON ..
     make -j $(getconf _NPROCESSORS_ONLN)
