@@ -128,6 +128,17 @@ namespace {
         return timeout.second * durations[timeout.first];
     }
 
+    QString hashSevenTVUrl(const QString &url)
+    {
+        QByteArray bytes;
+
+        bytes.append(url.toUtf8());
+        QByteArray hashBytes(
+            QCryptographicHash::hash(bytes, QCryptographicHash::Sha256));
+
+        return hashBytes.toHex();
+    }
+
 }  // namespace
 
 UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
@@ -925,57 +936,57 @@ void UserInfoPopup::loadAvatar(const HelixUser &user)
 
 void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
 {
-    NetworkRequest(SEVENTV_USER_API.arg(user.login))
+    NetworkRequest(SEVENTV_USER_API.arg(user.id))
         .timeout(20000)
-        .header("Content-Type", "application/json")
         .onSuccess([this, hack = std::weak_ptr<bool>(this->lifetimeHack_)](
-                       NetworkResult result) -> Outcome {
+                       const NetworkResult &result) -> Outcome {
             if (!hack.lock())
             {
                 return Success;
             }
 
             auto root = result.parseJson();
-            auto id = root.value(QStringLiteral("id")).toString();
-            auto profile_picture_id =
-                root.value(QStringLiteral("profile_picture_id")).toString();
+            auto url = root["user"].toObject()["avatar_url"].toString();
 
-            if (profile_picture_id.length() == 0)
+            if (url.isEmpty())
             {
                 return Success;
             }
+            url.prepend("https:");
 
-            auto URI = SEVENTV_CDR_PP.arg(id, profile_picture_id);
-            auto filename = getPaths()->cacheDirectory() + "/" + "7tv-pp-" +
-                            id + "-" + profile_picture_id;
+            // We're implementing custom caching here,
+            // because we need the cached file path.
+            auto hash = hashSevenTVUrl(url);
+            auto filename = getPaths()->cacheDirectory() + "/" + hash;
 
             QFile cacheFile(filename);
             if (cacheFile.exists())
             {
-                this->avatarUrl_ = URI;
+                this->avatarUrl_ = url;
                 this->setSevenTVAvatar(filename);
+                return Success;
             }
-            else
-            {
-                QNetworkRequest req(URI);
-                static auto manager = new QNetworkAccessManager();
-                auto *reply = manager->get(req);
 
-                QObject::connect(reply, &QNetworkReply::finished, this, [=] {
-                    if (reply->error() == QNetworkReply::NoError)
-                    {
-                        this->avatarUrl_ = URI;
-                        this->saveCacheAvatar(reply->readAll(), filename);
-                        this->setSevenTVAvatar(filename);
-                    }
-                    else
-                    {
-                        qCWarning(chatterinoSeventv)
-                            << "Error fetching Profile Picture, "
-                            << reply->error();
-                    }
-                });
-            }
+            QNetworkRequest req(url);
+
+            // We're using this manager instead of the one provided
+            // in NetworkManager, because we're on a different thread.
+            static auto *manager = new QNetworkAccessManager();
+            auto *reply = manager->get(req);
+
+            QObject::connect(reply, &QNetworkReply::finished, this, [=] {
+                if (reply->error() == QNetworkReply::NoError)
+                {
+                    this->avatarUrl_ = url;
+                    this->saveCacheAvatar(reply->readAll(), filename);
+                    this->setSevenTVAvatar(filename);
+                }
+                else
+                {
+                    qCWarning(chatterinoSeventv)
+                        << "Error fetching Profile Picture:" << reply->error();
+                }
+            });
 
             return Success;
         })
@@ -987,9 +998,11 @@ void UserInfoPopup::setSevenTVAvatar(const QString &filename)
     auto hack = std::weak_ptr<bool>(this->lifetimeHack_);
 
     if (this->avatarDestroyed || !hack.lock())
+    {
         return;
+    }
 
-    auto movie = new QMovie(filename, {});
+    auto *movie = new QMovie(filename, {});
     if (!movie->isValid())
     {
         qCWarning(chatterinoSeventv)
