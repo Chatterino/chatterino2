@@ -239,8 +239,11 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
             postToThread([=] {
                 if (!name.isEmpty())
                 {
-                    app->twitch->watchingChannel.reset(
-                        app->twitch->getOrAddChannel(name));
+                    auto channel = app->twitch->getOrAddChannel(name);
+                    if (app->twitch->watchingChannel.get() != channel)
+                    {
+                        app->twitch->watchingChannel.reset(channel);
+                    }
                 }
 
                 if (attach || attachFullscreen)

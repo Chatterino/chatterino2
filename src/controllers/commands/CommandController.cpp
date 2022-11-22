@@ -2999,18 +2999,11 @@ void CommandController::initialize(Settings &, Paths &paths)
 
                     auto messagePrefix =
                         QString("The VIPs of this channel are");
-                    auto entries = QStringList();
 
-                    for (const auto &vip : vipList)
-                    {
-                        entries.append(vip.userName);
-                    }
-
-                    entries.sort(Qt::CaseInsensitive);
-
+                    // TODO: sort results?
                     MessageBuilder builder;
                     TwitchMessageBuilder::listOfUsersSystemMessage(
-                        messagePrefix, entries, twitchChannel, &builder);
+                        messagePrefix, vipList, twitchChannel, &builder);
 
                     channel->addMessage(builder.release());
                 },

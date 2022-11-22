@@ -783,6 +783,9 @@ endif ()
 
 # Configure compiler warnings
 if (MSVC)
+    # Someone adds /W3 before we add /W4.
+    # This makes sure, only /W4 is specified.
+    string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     # 4714 - function marked as __forceinline not inlined
     # 4996 - occurs when the compiler encounters a function or variable that is marked as deprecated.
     #        These functions may have a different preferred name, may be insecure or have
