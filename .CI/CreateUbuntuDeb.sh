@@ -28,7 +28,7 @@ Priority: optional
 Architecture: amd64
 Maintainer: Mm2PL <mm2pl@kotmisia.pl>
 Description: Testing out chatterino as a Ubuntu package
-Depends: qttools5-dev, qtmultimedia5-dev, qt5-image-formats-plugins, libqt5svg5-dev, libboost-dev, libssl-dev, libboost-system-dev, libboost-filesystem-dev, cmake, g++
+Depends: qttools5-dev, qtmultimedia5-dev, qt5-image-formats-plugins, libqt5svg5-dev, libboost-dev, libssl-dev, libboost-system-dev, libboost-filesystem-dev, libqt5core5a
 EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 
