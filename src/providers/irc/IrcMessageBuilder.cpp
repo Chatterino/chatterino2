@@ -90,7 +90,8 @@ void IrcMessageBuilder::appendUsername()
     this->message().displayName = username;
 
     // The full string that will be rendered in the chat widget
-    QString usernameText = username;
+    QString usernameText =
+        SharedMessageBuilder::stylizeUsername(username, this->message());
 
     if (this->args.isReceivedWhisper)
     {

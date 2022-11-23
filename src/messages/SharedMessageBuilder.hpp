@@ -38,6 +38,10 @@ public:
     // Parses "badges" tag which contains a comma separated list of key-value elements
     static std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
 
+    static QString stylizeUsername(const QString &username,
+                                   const Message &message,
+                                   QColor *usernameColor = nullptr);
+
 protected:
     virtual void parse();
 

@@ -2658,8 +2658,19 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             case Error::TargetBanned: {
                 // Equivalent IRC error
-                errorMessage = QString("%1 is already banned in this channel.")
-                                   .arg(userDisplayName);
+                errorMessage += QString("%1 is already banned in this channel.")
+                                    .arg(userDisplayName);
+            }
+            break;
+
+            case Error::CannotBanUser: {
+                // We can't provide the identical error as in IRC,
+                // because we don't have enough information about the user.
+                // The messages from IRC are formatted like this:
+                // "You cannot {op} moderator {mod} unless you are the owner of this channel."
+                // "You cannot {op} the broadcaster."
+                errorMessage += QString("You cannot %1 %2.")
+                                    .arg(operation, userDisplayName);
             }
             break;
 
@@ -2988,18 +2999,11 @@ void CommandController::initialize(Settings &, Paths &paths)
 
                     auto messagePrefix =
                         QString("The VIPs of this channel are");
-                    auto entries = QStringList();
 
-                    for (const auto &vip : vipList)
-                    {
-                        entries.append(vip.userName);
-                    }
-
-                    entries.sort(Qt::CaseInsensitive);
-
+                    // TODO: sort results?
                     MessageBuilder builder;
                     TwitchMessageBuilder::listOfUsersSystemMessage(
-                        messagePrefix, entries, twitchChannel, &builder);
+                        messagePrefix, vipList, twitchChannel, &builder);
 
                     channel->addMessage(builder.release());
                 },

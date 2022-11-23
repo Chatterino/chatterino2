@@ -70,76 +70,6 @@ namespace chatterino {
 
 namespace {
 
-    QString stylizeUsername(const QString &username, const Message &message,
-                            QColor *usernameColor = nullptr)
-    {
-        auto app = getApp();
-
-        const QString &localizedName = message.localizedName;
-        bool hasLocalizedName = !localizedName.isEmpty();
-
-        // The full string that will be rendered in the chat widget
-        QString usernameText;
-
-        switch (getSettings()->usernameDisplayMode.getValue())
-        {
-            case UsernameDisplayMode::Username: {
-                usernameText = username;
-            }
-            break;
-
-            case UsernameDisplayMode::LocalizedName: {
-                if (hasLocalizedName)
-                {
-                    usernameText = localizedName;
-                }
-                else
-                {
-                    usernameText = username;
-                }
-            }
-            break;
-
-            default:
-            case UsernameDisplayMode::UsernameAndLocalizedName: {
-                if (hasLocalizedName)
-                {
-                    usernameText = username + "(" + localizedName + ")";
-                }
-                else
-                {
-                    usernameText = username;
-                }
-            }
-            break;
-        }
-
-        auto nicknames = getCSettings().nicknames.readOnly();
-
-        for (const auto &nickname : *nicknames)
-        {
-            QString temp = usernameText;
-            if (nickname.match(usernameText))
-            {
-                const static QString SET_COLOR_COMMAND = "::hack-set-color ";
-                if (usernameText.startsWith(SET_COLOR_COMMAND))
-                {
-                    auto color =
-                        QColor(usernameText.mid(SET_COLOR_COMMAND.length()));
-                    if (usernameColor != nullptr && color.isValid())
-                    {
-                        *usernameColor = color;
-                        usernameText = temp;
-                    }
-                    continue;  // actual nicknames go after this shit hack
-                }
-                break;
-            }
-        }
-
-        return usernameText;
-    }
-
     void appendTwitchEmoteOccurrences(const QString &emote,
                                       std::vector<TwitchEmoteOccurrence> &vec,
                                       const std::vector<int> &correctPositions,
@@ -367,7 +297,7 @@ MessagePtr TwitchMessageBuilder::build()
 
         QColor usernameColor = threadRoot->usernameColor;
 
-        QString usernameText = stylizeUsername(
+        QString usernameText = SharedMessageBuilder::stylizeUsername(
             threadRoot->loginName, *threadRoot.get(), &usernameColor);
 
         this->emplace<ReplyCurveElement>();
@@ -858,8 +788,8 @@ void TwitchMessageBuilder::appendUsername()
         }
     }
 
-    QString usernameText =
-        stylizeUsername(username, this->message(), &this->usernameColor_);
+    QString usernameText = SharedMessageBuilder::stylizeUsername(
+        username, this->message(), &this->usernameColor_);
 
     if (this->args.isSentWhisper)
     {

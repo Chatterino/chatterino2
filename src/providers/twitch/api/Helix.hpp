@@ -572,6 +572,7 @@ enum class HelixBanUserError {  // /timeout, /ban
     Ratelimited,
     ConflictingOperation,
     TargetBanned,
+    CannotBanUser,
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
