@@ -793,8 +793,9 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
         {
             this->shown_ = true;
 
-            const MARGINS shadow = {8, 8, 8, 8};
-            DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
+            // disable OS window border
+            const MARGINS margins = {-1};
+            DwmExtendFrameIntoClientArea(HWND(this->winId()), &margins);
         }
         if (!this->initalBounds_.isNull())
         {
@@ -819,17 +820,15 @@ bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame())
     {
-        // int cx = GetSystemMetrics(SM_CXSIZEFRAME);
-        // int cy = GetSystemMetrics(SM_CYSIZEFRAME);
-
         if (msg->wParam == TRUE)
         {
-            NCCALCSIZE_PARAMS *ncp =
-                (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
-            ncp->lppos->flags |= SWP_NOREDRAW;
-            RECT *clientRect = &ncp->rgrc[0];
-
-            clientRect->top -= 1;
+            // remove 1 extra pixel on top of custom frame
+            auto *ncp = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
+            if (ncp)
+            {
+                ncp->lppos->flags |= SWP_NOREDRAW;
+                ncp->rgrc[0].top -= 1;
+            }
         }
 
         *result = 0;
