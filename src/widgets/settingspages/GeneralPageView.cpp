@@ -18,14 +18,6 @@ const auto MAX_TOOLTIP_LINE_LENGTH_PATTERN =
     QStringLiteral(R"(.{%1}\S*\K(\s+))").arg(MAX_TOOLTIP_LINE_LENGTH);
 const QRegularExpression MAX_TOOLTIP_LINE_LENGTH_REGEX(
     MAX_TOOLTIP_LINE_LENGTH_PATTERN);
-
-const auto TOOLTIP_STYLE_SHEET = QStringLiteral(R"(QToolTip {
-padding: 2px;
-background-color: #333333;
-border: 1px solid #545454;
-}
-)");
-
 }  // namespace
 
 namespace chatterino {
@@ -409,7 +401,6 @@ void GeneralPageView::addToolTip(QWidget &widget, QString text) const
     }
 
     widget.setToolTip(text);
-    widget.setStyleSheet(TOOLTIP_STYLE_SHEET);
 }
 
 }  // namespace chatterino
