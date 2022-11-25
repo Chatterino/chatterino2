@@ -128,6 +128,7 @@ private:
     int dotdotdotWidth_ = 0;
     bool canAddMessages_ = true;
     bool isCollapsed_ = false;
+    bool wasPrevReversed_ = false;
 
     std::vector<std::unique_ptr<MessageLayoutElement>> elements_;
     std::vector<Line> lines_;
