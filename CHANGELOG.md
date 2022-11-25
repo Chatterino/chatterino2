@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Bugfix: Fixed crash happening when QuickSwitcher is used with a popout window. (#4187)
 - Bugfix: Fixed low contrast of text in settings tooltips. (#4188)
 - Bugfix: Fixed being unable to see the usercard of VIPs who have Asian language display names. (#4174)
 - Bugfix: Fixed the wrong right-click menu showing in the chat input box. (#4177)
