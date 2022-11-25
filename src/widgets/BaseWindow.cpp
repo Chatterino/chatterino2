@@ -823,7 +823,7 @@ bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
         if (msg->wParam == TRUE)
         {
             // remove 1 extra pixel on top of custom frame
-            auto *ncp = (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
+            auto *ncp = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
             if (ncp)
             {
                 ncp->lppos->flags |= SWP_NOREDRAW;
