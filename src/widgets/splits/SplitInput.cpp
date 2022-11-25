@@ -648,6 +648,16 @@ void SplitInput::installKeyPressedEvent()
     });
 }
 
+void SplitInput::mousePressEvent(QMouseEvent *event)
+{
+    if (this->hidden)
+    {
+        BaseWidget::mousePressEvent(event);
+    }
+    // else, don't call QWidget::mousePressEvent,
+    // which will call event->ignore()
+}
+
 void SplitInput::onTextChanged()
 {
     this->updateCompletionPopup();

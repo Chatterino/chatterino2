@@ -2,7 +2,13 @@
 
 ## Unversioned
 
-## 2.4.0
+- Bugfix: Fixed crash happening when QuickSwitcher is used with a popout window. (#4187)
+- Bugfix: Fixed low contrast of text in settings tooltips. (#4188)
+- Bugfix: Fixed being unable to see the usercard of VIPs who have Asian language display names. (#4174)
+- Bugfix: Fixed the wrong right-click menu showing in the chat input box. (#4177)
+- Bugfix: Fixed popup windows not appearing/minimizing correctly on the Windows taskbar. (#4181)
+
+## 2.4.0-beta
 
 - Major: Added support for emotes, badges, and live emote updates from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062, #4090)
 - Major: Added support for Right-to-Left Languages (#3958, #4139, #4168, #4173)
