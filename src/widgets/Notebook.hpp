@@ -90,7 +90,7 @@ private:
     void resizeAddButton();
 
     bool containsPage(QWidget *page);
-    Item &findItem(QWidget *page);
+    Item *findItem(QWidget *page);
 
     static bool containsChild(const QObject *obj, const QObject *child);
     NotebookTab *getTabFromPage(QWidget *page);
