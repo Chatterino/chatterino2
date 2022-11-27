@@ -78,7 +78,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
                 this->updateScale();
             });
         },
-        this->connections_);
+        this->connections_, false);
 
     this->updateScale();
 
