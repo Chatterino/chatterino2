@@ -244,15 +244,24 @@ HighlightingPage::HighlightingPage()
         {
             auto label = customSound.append(this->createLabel<QString>(
                 [](const auto &value) {
-                    return QString("Default sound: %1")
-                        .arg(value.isEmpty()
-                                 ? "Chatterino Ping"
-                                 : QUrl::fromLocalFile(value).fileName());
+                    if (value.isEmpty())
+                    {
+                        return QString("Default sound: Chatterino Ping");
+                    }
+
+                    auto url = QUrl::fromLocalFile(value);
+                    return QString("Default sound: <a href=\"%1\"><span "
+                                   "style=\"color: white\">%2</span></a>")
+                        .arg(url.toString(QUrl::FullyEncoded), url.fileName());
                 },
                 getSettings()->pathHighlightSound));
             label->setToolTip(
                 "This sound will play for all highlight phrases that have "
                 "sound enabled and don't have a custom sound set.");
+            label->setTextFormat(Qt::RichText);
+            label->setTextInteractionFlags(Qt::TextBrowserInteraction |
+                                           Qt::LinksAccessibleByKeyboard);
+            label->setOpenExternalLinks(true);
             customSound->setStretchFactor(label.getElement(), 1);
 
             auto clearSound = customSound.emplace<QPushButton>("Clear");
