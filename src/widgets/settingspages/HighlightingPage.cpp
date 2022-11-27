@@ -17,14 +17,9 @@
 #include <QListWidget>
 #include <QPushButton>
 #include <QStandardItemModel>
-#include <QTableView>
 #include <QTabWidget>
-#include <QTextEdit>
+#include <QTableView>
 
-#define ENABLE_HIGHLIGHTS "Enable Highlighting"
-#define HIGHLIGHT_MSG "Highlight messages containing your name"
-#define PLAY_SOUND "Play sound when your name is mentioned"
-#define FLASH_TASKBAR "Flash taskbar when your name is mentioned"
 #define ALWAYS_PLAY "Play highlight sound even when Chatterino is focused"
 
 namespace chatterino {
