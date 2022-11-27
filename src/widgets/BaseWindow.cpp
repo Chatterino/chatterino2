@@ -81,7 +81,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
                 this->updateScale();
             });
         },
-        this->connections_);
+        this->connections_, false);
 
     this->updateScale();
 
@@ -786,8 +786,12 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 #ifdef USEWINSDK
     if (auto dpi = getWindowDpi(msg->hwnd))
     {
-        this->nativeScale_ = dpi.get() / 96.f;
-        this->updateScale();
+        float currentScale = (float)dpi.get() / 96.F;
+        if (currentScale != this->nativeScale_)
+        {
+            this->nativeScale_ = currentScale;
+            this->updateScale();
+        }
     }
 
     if (!this->shown_ && this->isVisible())
