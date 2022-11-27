@@ -2,6 +2,7 @@
 
 #include "common/NetworkPrivate.hpp"
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
@@ -12,7 +13,6 @@
 #include <QDebug>
 #include <QFile>
 #include <QtConcurrent>
-#include "common/QLogging.hpp"
 
 #include <cassert>
 

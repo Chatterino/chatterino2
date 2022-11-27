@@ -1,10 +1,11 @@
 #pragma once
 
+#include "common/FlagsEnum.hpp"
 #include "widgets/BaseWidget.hpp"
 
-#include <functional>
 #include <pajlada/signals/signalholder.hpp>
-#include "common/FlagsEnum.hpp"
+
+#include <functional>
 
 class QHBoxLayout;
 struct tagMSG;

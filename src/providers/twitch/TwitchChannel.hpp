@@ -10,17 +10,17 @@
 #include "common/UniqueAccess.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
-#include "providers/twitch/api/Helix.hpp"
 #include "util/QStringHash.hpp"
 
-#include <QColor>
-#include <QElapsedTimer>
-#include <QRegularExpression>
 #include <boost/optional.hpp>
 #include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <QColor>
+#include <QElapsedTimer>
+#include <QRegularExpression>
 
 #include <atomic>
 #include <mutex>

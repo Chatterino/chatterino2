@@ -2,6 +2,7 @@
 
 #include <QCoreApplication>
 #include <QThread>
+
 #include <cassert>
 
 namespace chatterino {

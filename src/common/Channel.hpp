@@ -4,11 +4,11 @@
 #include "common/FlagsEnum.hpp"
 #include "messages/LimitedQueue.hpp"
 
+#include <boost/optional.hpp>
+#include <pajlada/signals/signal.hpp>
 #include <QDate>
 #include <QString>
 #include <QTimer>
-#include <boost/optional.hpp>
-#include <pajlada/signals/signal.hpp>
 
 #include <memory>
 

@@ -1,15 +1,16 @@
 #pragma once
 
-#include <atomic>
-#include <chrono>
-#include <pajlada/signals/signal.hpp>
-#include <unordered_set>
-
 #include "common/QLogging.hpp"
 #include "providers/liveupdates/BasicPubSubWebsocket.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
+
+#include <pajlada/signals/signal.hpp>
+
+#include <atomic>
+#include <chrono>
+#include <unordered_set>
 
 namespace chatterino {
 

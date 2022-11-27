@@ -5,6 +5,7 @@
 #include <QIcon>
 #include <QPaintEvent>
 #include <QWidget>
+
 #include <functional>
 
 namespace chatterino {

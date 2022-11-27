@@ -5,6 +5,7 @@
 #include "messages/ImageSet.hpp"
 
 #include <boost/optional.hpp>
+
 #include <functional>
 #include <memory>
 #include <unordered_map>

@@ -28,11 +28,13 @@
 #ifndef CHATTERINOWEBSOCKETPPLOGGER_HPP
 #define CHATTERINOWEBSOCKETPPLOGGER_HPP
 
-#include <string>
+#include "common/QLogging.hpp"
+
 #include <websocketpp/common/cpp11.hpp>
 #include <websocketpp/logger/basic.hpp>
 #include <websocketpp/logger/levels.hpp>
-#include "common/QLogging.hpp"
+
+#include <string>
 
 namespace websocketpp {
 namespace log {

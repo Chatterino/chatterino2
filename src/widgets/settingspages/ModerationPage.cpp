@@ -17,9 +17,9 @@
 #include <QListView>
 #include <QPushButton>
 #include <QTableView>
+#include <QtConcurrent/QtConcurrent>
 #include <QTextEdit>
 #include <QVBoxLayout>
-#include <QtConcurrent/QtConcurrent>
 
 namespace chatterino {
 

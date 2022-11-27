@@ -1,7 +1,5 @@
 #include "Application.hpp"
 
-#include <atomic>
-
 #include "common/Args.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
@@ -40,10 +38,12 @@
 #include "util/PostToThread.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
 
 #include <QDesktopServices>
+
+#include <atomic>
 
 namespace chatterino {
 

@@ -6,13 +6,14 @@
 #include "messages/MessageColor.hpp"
 #include "singletons/Fonts.hpp"
 
+#include <boost/noncopyable.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QRect>
 #include <QString>
 #include <QTime>
-#include <boost/noncopyable.hpp>
+
 #include <cstdint>
 #include <memory>
-#include <pajlada/signals/signalholder.hpp>
 #include <vector>
 
 namespace chatterino {

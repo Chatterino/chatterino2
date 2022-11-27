@@ -1,7 +1,8 @@
 #include "common/ChatterSet.hpp"
 
-#include <tuple>
 #include "debug/Benchmark.hpp"
+
+#include <tuple>
 
 namespace chatterino {
 

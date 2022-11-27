@@ -2,6 +2,7 @@
 
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/QLogging.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -14,7 +15,6 @@
 #include <QMimeDatabase>
 #include <QMutex>
 #include <QSaveFile>
-#include "common/QLogging.hpp"
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds

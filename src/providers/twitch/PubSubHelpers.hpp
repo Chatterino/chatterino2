@@ -1,11 +1,13 @@
 #pragma once
 
-#include <QJsonObject>
-#include <boost/asio.hpp>
-#include <boost/asio/steady_timer.hpp>
-#include <memory>
 #include "common/QLogging.hpp"
 #include "util/RapidjsonHelpers.hpp"
+
+#include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
+#include <QJsonObject>
+
+#include <memory>
 
 namespace chatterino {
 

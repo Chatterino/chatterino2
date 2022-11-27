@@ -1,8 +1,9 @@
 #pragma once
 
-#include <QApplication>
-#include <boost/optional.hpp>
 #include "common/WindowDescriptors.hpp"
+
+#include <boost/optional.hpp>
+#include <QApplication>
 
 namespace chatterino {
 

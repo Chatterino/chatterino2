@@ -1,9 +1,9 @@
 #pragma once
 
+#include <pajlada/signals/signal.hpp>
 #include <QCompleter>
 #include <QKeyEvent>
 #include <QTextEdit>
-#include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 

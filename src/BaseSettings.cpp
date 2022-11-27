@@ -1,8 +1,8 @@
 #include "BaseSettings.hpp"
 
-#include <QDebug>
-
 #include "util/Clamp.hpp"
+
+#include <QDebug>
 
 namespace chatterino {
 

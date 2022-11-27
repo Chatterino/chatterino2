@@ -5,11 +5,9 @@
 #include "widgets/BaseWindow.hpp"
 
 #include <pajlada/signals/signal.hpp>
-
 #include <QLabel>
-#include <QRadioButton>
-
 #include <QLineEdit>
+#include <QRadioButton>
 
 namespace chatterino {
 
