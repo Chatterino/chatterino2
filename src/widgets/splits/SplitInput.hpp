@@ -45,7 +45,9 @@ public:
     SplitInput(QWidget *parent, Split *_chatWidget,
                bool enableInlineReplying = true);
 
-    void clearSelection();
+    bool hasSelection() const;
+    void clearSelection() const;
+
     bool isEditFirstWord() const;
     QString getInputText() const;
     void insertText(const QString &text);
