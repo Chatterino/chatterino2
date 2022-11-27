@@ -7,11 +7,11 @@
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
 
-#include "ircconnection.h"
-
 #include <gtest/gtest.h>
+#include <IrcConnection>
 #include <QDebug>
 #include <QString>
+
 #include <unordered_map>
 #include <vector>
 

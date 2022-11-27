@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QString>
 #include <pajlada/signals/signal.hpp>
+#include <QString>
 
 namespace chatterino {
 

@@ -1,4 +1,5 @@
 #include "controllers/filters/parser/Tokenizer.hpp"
+
 #include "common/QLogging.hpp"
 
 namespace filterparser {

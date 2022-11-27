@@ -1,5 +1,10 @@
 #include "TwitchBadges.hpp"
 
+#include "common/NetworkRequest.hpp"
+#include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
+#include "messages/Emote.hpp"
+
 #include <QBuffer>
 #include <QIcon>
 #include <QImageReader>
@@ -8,11 +13,6 @@
 #include <QJsonValue>
 #include <QThread>
 #include <QUrlQuery>
-
-#include "common/NetworkRequest.hpp"
-#include "common/Outcome.hpp"
-#include "common/QLogging.hpp"
-#include "messages/Emote.hpp"
 
 namespace chatterino {
 

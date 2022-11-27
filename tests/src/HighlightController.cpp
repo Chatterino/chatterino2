@@ -4,16 +4,16 @@
 #include "BaseSettings.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
 #include "mocks/UserData.hpp"
-#include "providers/twitch/TwitchBadge.hpp"  // for Badge
 #include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/TwitchBadge.hpp"  // for Badge
 
+#include <boost/optional/optional_io.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QString>
-#include <boost/optional/optional_io.hpp>
 
 using namespace chatterino;
 using ::testing::Exactly;

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QObject>
-
 #include "common/SignalVectorModel.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
+
+#include <QObject>
 
 namespace chatterino {
 

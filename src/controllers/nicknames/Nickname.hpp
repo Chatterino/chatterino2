@@ -1,11 +1,11 @@
 #pragma once
 
 #include "controllers/accounts/AccountController.hpp"
-#include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 
-#include <QString>
 #include <pajlada/serialize.hpp>
+#include <QString>
 
 #include <memory>
 

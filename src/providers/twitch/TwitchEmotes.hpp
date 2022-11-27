@@ -1,14 +1,14 @@
 #pragma once
 
-#include <QColor>
-#include <QRegularExpression>
-#include <QString>
-#include <unordered_map>
-
 #include "common/Aliases.hpp"
 #include "common/UniqueAccess.hpp"
 
+#include <QColor>
+#include <QRegularExpression>
+#include <QString>
+
 #include <memory>
+#include <unordered_map>
 
 // NB: "default" can be replaced with "static" to always get a non-animated
 // variant

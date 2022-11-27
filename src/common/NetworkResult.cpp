@@ -1,9 +1,10 @@
 #include "common/NetworkResult.hpp"
 
+#include "common/QLogging.hpp"
+
+#include <QJsonDocument>
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
-#include <QJsonDocument>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 

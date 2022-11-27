@@ -3,11 +3,11 @@
 #include "common/ChatterinoSetting.hpp"
 #include "common/Singleton.hpp"
 
+#include <boost/noncopyable.hpp>
+#include <pajlada/signals/signal.hpp>
 #include <QFont>
 #include <QFontDatabase>
 #include <QFontMetrics>
-#include <boost/noncopyable.hpp>
-#include <pajlada/signals/signal.hpp>
 
 #include <array>
 #include <unordered_map>

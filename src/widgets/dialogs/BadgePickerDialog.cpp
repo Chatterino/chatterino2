@@ -1,10 +1,10 @@
 #include "BadgePickerDialog.hpp"
-#include <QSizePolicy>
-#include "singletons/Resources.hpp"
 
 #include "providers/twitch/TwitchBadges.hpp"
+#include "singletons/Resources.hpp"
 
 #include <QDialogButtonBox>
+#include <QSizePolicy>
 #include <QVBoxLayout>
 
 namespace chatterino {

@@ -4,6 +4,7 @@
 #include "widgets/helper/NotebookTab.hpp"
 
 #include <QUuid>
+
 #include <deque>
 #include <mutex>
 #include <utility>

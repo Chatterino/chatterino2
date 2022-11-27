@@ -1,8 +1,8 @@
 #include "TitlebarButton.hpp"
 
-#include <QPainterPath>
-
 #include "singletons/Theme.hpp"
+
+#include <QPainterPath>
 
 namespace chatterino {
 

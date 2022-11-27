@@ -11,6 +11,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
+
 #include <memory>
 
 namespace chatterino {

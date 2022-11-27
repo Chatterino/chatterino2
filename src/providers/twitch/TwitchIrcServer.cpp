@@ -1,8 +1,5 @@
 #include "TwitchIrcServer.hpp"
 
-#include <IrcCommand>
-#include <cassert>
-
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
@@ -20,7 +17,10 @@
 #include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 
+#include <IrcCommand>
 #include <QMetaEnum>
+
+#include <cassert>
 
 // using namespace Communi;
 using namespace std::chrono_literals;

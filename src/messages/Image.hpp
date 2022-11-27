@@ -1,22 +1,23 @@
 #pragma once
 
+#include "common/Aliases.hpp"
+#include "common/Common.hpp"
+
+#include <boost/noncopyable.hpp>
+#include <boost/optional.hpp>
+#include <boost/variant.hpp>
+#include <pajlada/signals/signal.hpp>
 #include <QPixmap>
 #include <QString>
 #include <QThread>
 #include <QTimer>
 #include <QVector>
+
 #include <atomic>
-#include <boost/noncopyable.hpp>
-#include <boost/optional.hpp>
-#include <boost/variant.hpp>
 #include <chrono>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <pajlada/signals/signal.hpp>
-
-#include "common/Aliases.hpp"
-#include "common/Common.hpp"
 
 namespace chatterino {
 namespace detail {

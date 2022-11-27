@@ -1,16 +1,15 @@
 #pragma once
 
-#include <QCheckBox>
-#include <QComboBox>
-#include <QLineEdit>
-#include <QSpinBox>
-#include <pajlada/signals/signal.hpp>
-
 #include "singletons/Settings.hpp"
 
+#include <pajlada/signals/signal.hpp>
+#include <QCheckBox>
+#include <QComboBox>
 #include <QLabel>
+#include <QLineEdit>
 #include <QPainter>
 #include <QPushButton>
+#include <QSpinBox>
 
 #define SETTINGS_PAGE_WIDGET_BOILERPLATE(type, parent) \
     class type : public parent                         \

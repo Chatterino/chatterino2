@@ -1,8 +1,8 @@
-#include <utility>
-
 #include "providers/seventv/eventapi/SeventvEventAPIClient.hpp"
 
 #include "providers/twitch/PubSubHelpers.hpp"
+
+#include <utility>
 
 namespace chatterino {
 

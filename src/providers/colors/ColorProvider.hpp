@@ -1,9 +1,9 @@
 #pragma once
 
+#include <QColor>
+
 #include <memory>
 #include <unordered_map>
-
-#include <QColor>
 
 namespace chatterino {
 

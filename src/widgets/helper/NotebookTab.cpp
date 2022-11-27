@@ -10,19 +10,19 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Clamp.hpp"
 #include "util/Helpers.hpp"
-#include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
+#include <boost/bind/bind.hpp>
 #include <QApplication>
 #include <QDebug>
 #include <QDialogButtonBox>
 #include <QLabel>
-#include <QLineEdit>
 #include <QLinearGradient>
+#include <QLineEdit>
 #include <QMimeData>
 #include <QPainter>
-#include <boost/bind/bind.hpp>
 
 namespace chatterino {
 namespace {
