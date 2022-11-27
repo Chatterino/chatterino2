@@ -116,7 +116,7 @@ Split::Split(QWidget *parent)
     this->updateInputPlaceholder();
 
     this->view_->selectionChanged.connect([this]() {
-        if (view_->hasSelection())
+        if (this->input_->hasSelection())
         {
             this->input_->clearSelection();
         }

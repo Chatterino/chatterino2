@@ -796,14 +796,16 @@ void SplitInput::insertCompletionText(const QString &input_)
     }
 }
 
-void SplitInput::clearSelection()
+bool SplitInput::hasSelection() const
 {
-    QTextCursor c = this->ui_.textEdit->textCursor();
+    return this->ui_.textEdit->textCursor().hasSelection();
+}
 
-    c.setPosition(c.position());
-    c.setPosition(c.position(), QTextCursor::KeepAnchor);
-
-    this->ui_.textEdit->setTextCursor(c);
+void SplitInput::clearSelection() const
+{
+    auto cursor = this->ui_.textEdit->textCursor();
+    cursor.clearSelection();
+    this->ui_.textEdit->setTextCursor(cursor);
 }
 
 bool SplitInput::isEditFirstWord() const
