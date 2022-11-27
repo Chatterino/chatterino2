@@ -9,6 +9,7 @@
 - Bugfix: Fixed the wrong right-click menu showing in the chat input box. (#4177)
 - Bugfix: Fixed popup windows not appearing/minimizing correctly on the Windows taskbar. (#4181)
 - Bugfix: Fixed white border appearing around maximized window on Windows. (#4190)
+- Bugfix: Improved time to open settings (#4193)
 
 ## 2.4.0-beta
 
