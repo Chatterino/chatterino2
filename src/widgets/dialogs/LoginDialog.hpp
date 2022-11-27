@@ -14,8 +14,8 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTabWidget>
-#include <QVBoxLayout>
 #include <QtCore/QVariant>
+#include <QVBoxLayout>
 
 namespace chatterino {
 

@@ -3,8 +3,8 @@
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 
-#include <QJsonDocument>
 #include <magic_enum.hpp>
+#include <QJsonDocument>
 
 namespace {
 

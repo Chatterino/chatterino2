@@ -2,8 +2,8 @@
 
 #include "util/RapidJsonSerializeQString.hpp"
 
-#include <rapidjson/document.h>
 #include <pajlada/serialize.hpp>
+#include <rapidjson/document.h>
 
 #include <cassert>
 #include <string>

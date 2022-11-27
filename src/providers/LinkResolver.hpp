@@ -1,10 +1,11 @@
 #pragma once
 
-#include <QString>
-#include <functional>
-
 #include "messages/Image.hpp"
 #include "messages/Link.hpp"
+
+#include <QString>
+
+#include <functional>
 
 namespace chatterino {
 

@@ -1,8 +1,9 @@
 #pragma once
 
-#include <memory>
 #include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
+
+#include <memory>
 
 namespace chatterino {
 

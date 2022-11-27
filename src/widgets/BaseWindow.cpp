@@ -6,15 +6,16 @@
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 
 #include <QApplication>
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QFont>
 #include <QIcon>
+
 #include <functional>
 
 #ifdef CHATTERINO
@@ -23,6 +24,7 @@
 #endif
 
 #ifdef USEWINSDK
+// clang-format off
 #    include <ObjIdl.h>
 #    include <VersionHelpers.h>
 #    include <Windows.h>
@@ -37,6 +39,7 @@
 #    include <QVBoxLayout>
 
 #    define WM_DPICHANGED 0x02E0
+// clang-format on
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"
@@ -78,7 +81,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
                 this->updateScale();
             });
         },
-        this->connections_);
+        this->connections_, false);
 
     this->updateScale();
 
@@ -783,8 +786,12 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 #ifdef USEWINSDK
     if (auto dpi = getWindowDpi(msg->hwnd))
     {
-        this->nativeScale_ = dpi.get() / 96.f;
-        this->updateScale();
+        float currentScale = (float)dpi.get() / 96.F;
+        if (currentScale != this->nativeScale_)
+        {
+            this->nativeScale_ = currentScale;
+            this->updateScale();
+        }
     }
 
     if (!this->shown_ && this->isVisible())

@@ -1,4 +1,5 @@
 #include "QualityPopup.hpp"
+
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/WindowManager.hpp"

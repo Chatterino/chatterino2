@@ -1,10 +1,11 @@
 #include "Updates.hpp"
 
-#include "Settings.hpp"
 #include "common/Modes.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
+#include "Settings.hpp"
 #include "singletons/Paths.hpp"
 #include "util/CombinePath.hpp"
 #include "util/PostToThread.hpp"
@@ -13,7 +14,6 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QRegularExpression>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QDialog>
 #include <pajlada/signals/signalholder.hpp>
+#include <QDialog>
 
 namespace chatterino {
 

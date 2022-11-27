@@ -6,10 +6,9 @@
 #include "widgets/helper/QColorPicker.hpp"
 
 #include <pajlada/signals/signal.hpp>
+#include <QLabel>
 
 #include <array>
-
-#include <QLabel>
 
 namespace chatterino {
 

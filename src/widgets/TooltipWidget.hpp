@@ -2,9 +2,9 @@
 
 #include "widgets/BaseWindow.hpp"
 
+#include <pajlada/signals/signal.hpp>
 #include <QLabel>
 #include <QWidget>
-#include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <QString>
 #include "common/Outcome.hpp"
+
+#include <QString>
 
 namespace chatterino {
 

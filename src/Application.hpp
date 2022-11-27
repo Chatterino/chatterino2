@@ -1,11 +1,12 @@
 #pragma once
 
-#include <QApplication>
-#include <memory>
-
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "singletons/NativeMessaging.hpp"
+
+#include <QApplication>
+
+#include <memory>
 
 namespace chatterino {
 

@@ -1,13 +1,15 @@
 #pragma once
 
+#include "common/Aliases.hpp"
+#include "util/QStringHash.hpp"
+
 #include <boost/optional.hpp>
 #include <common/Singleton.hpp>
+
 #include <memory>
 #include <shared_mutex>
 #include <unordered_map>
 #include <vector>
-#include "common/Aliases.hpp"
-#include "util/QStringHash.hpp"
 
 namespace chatterino {
 

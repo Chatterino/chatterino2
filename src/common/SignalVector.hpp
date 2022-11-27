@@ -1,12 +1,13 @@
 #pragma once
 
-#include <QStandardItemModel>
-#include <QTimer>
+#include "debug/AssertInGuiThread.hpp"
+
 #include <boost/noncopyable.hpp>
 #include <pajlada/signals/signal.hpp>
-#include <vector>
+#include <QStandardItemModel>
+#include <QTimer>
 
-#include "debug/AssertInGuiThread.hpp"
+#include <vector>
 
 namespace chatterino {
 

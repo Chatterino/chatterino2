@@ -1,16 +1,17 @@
 #include "providers/emoji/Emojis.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "singletons/Settings.hpp"
 
+#include <boost/variant.hpp>
+#include <QFile>
 #include <rapidjson/error/en.h>
 #include <rapidjson/error/error.h>
 #include <rapidjson/rapidjson.h>
-#include <QFile>
-#include <boost/variant.hpp>
+
 #include <memory>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {

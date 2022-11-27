@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QString>
-#include <QThread>
 #include <boost/optional.hpp>
 #include <common/Atomic.hpp>
+#include <QString>
+#include <QThread>
 
 namespace chatterino {
 

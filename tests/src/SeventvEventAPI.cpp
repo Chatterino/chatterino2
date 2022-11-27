@@ -1,8 +1,8 @@
 #include "providers/seventv/SeventvEventAPI.hpp"
 
+#include <boost/optional.hpp>
 #include <gtest/gtest.h>
 #include <QString>
-#include <boost/optional.hpp>
 
 using namespace chatterino;
 using namespace std::chrono_literals;

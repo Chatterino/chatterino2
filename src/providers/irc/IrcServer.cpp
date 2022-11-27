@@ -1,8 +1,5 @@
 #include "IrcServer.hpp"
 
-#include <cassert>
-#include <cstdlib>
-
 #include "common/QLogging.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageColor.hpp"
@@ -16,6 +13,9 @@
 #include "util/QObjectRef.hpp"
 
 #include <QMetaEnum>
+
+#include <cassert>
+#include <cstdlib>
 
 namespace chatterino {
 

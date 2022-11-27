@@ -12,6 +12,7 @@
 #include <QHeaderView>
 #include <QTableView>
 #include <QVBoxLayout>
+
 #include <algorithm>
 
 namespace chatterino {

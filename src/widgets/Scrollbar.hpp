@@ -4,10 +4,10 @@
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
+#include <pajlada/signals/signal.hpp>
 #include <QMutex>
 #include <QPropertyAnimation>
 #include <QWidget>
-#include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 
