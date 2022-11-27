@@ -37,14 +37,14 @@ IncludeCategories:
   - Regex:  '<[[:alnum:].]+/[a-zA-Z0-9\._\/-]+>'
     Priority: 3
 # Qt includes
-  - Regex:  '^<Q[a-zA-Z\._\/-]+>$'
+  - Regex:  '^<Q[a-zA-Z0-9\._\/-]+>$'
     Priority: 3
     CaseSensitive: true
 # LibCommuni includes
   - Regex:  '^<Irc[a-zA-Z]+>$'
     Priority: 3
 # Misc libraries
-  - Regex:  '^<[a-zA-Z_]+\.h(pp)?>$'
+  - Regex:  '^<[a-zA-Z_0-9]+\.h(pp)?>$'
     Priority: 3
 # Standard library includes
   - Regex:  '^<[a-zA-Z_]+>$'
