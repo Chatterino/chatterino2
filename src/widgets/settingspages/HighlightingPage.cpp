@@ -308,13 +308,6 @@ void HighlightingPage::openSoundDialog(const QModelIndex &clicked,
                                                tr("Audio Files (*.mp3 *.wav)"));
     view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
     view->getModel()->setData(clicked, fileUrl.fileName(), Qt::DisplayRole);
-
-    // Enable custom sound check box if user set a sound
-    if (!fileUrl.isEmpty())
-    {
-        QModelIndex checkBox = clicked.siblingAtColumn(soundColumn);
-        view->getModel()->setData(checkBox, Qt::Checked, Qt::CheckStateRole);
-    }
 }
 
 void HighlightingPage::openColorDialog(const QModelIndex &clicked,
