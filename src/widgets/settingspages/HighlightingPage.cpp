@@ -260,9 +260,8 @@ HighlightingPage::HighlightingPage()
                 "sound enabled and don't have a custom sound set.");
             customSound->setStretchFactor(label.getElement(), 1);
 
+            auto clearSound = customSound.emplace<QPushButton>("Clear");
             auto selectFile = customSound.emplace<QPushButton>("Change...");
-            auto clearSound = customSound.emplace<QPushButton>(
-                QIcon(":/buttons/cancel.svg"), "Clear");
 
             QObject::connect(selectFile.getElement(), &QPushButton::clicked,
                              this, [=]() mutable {
@@ -276,6 +275,19 @@ HighlightingPage::HighlightingPage()
                              this, [=]() mutable {
                                  getSettings()->pathHighlightSound = QString();
                              });
+
+            getSettings()->pathHighlightSound.connect(
+                [clearSound = clearSound.getElement()](const auto &value) {
+                    if (value.isEmpty())
+                    {
+                        clearSound->hide();
+                    }
+                    else
+                    {
+                        clearSound->show();
+                    }
+                },
+                this->managedConnections_);
         }
 
         layout.append(createCheckBox(ALWAYS_PLAY,
