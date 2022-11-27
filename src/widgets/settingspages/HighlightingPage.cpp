@@ -367,7 +367,8 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                 (tab == HighlightTab::Messages &&
                  clicked.row() ==
                      HighlightModel::HighlightRowIndexes::WhisperRow);
-            if (clicked.column() == Column::SoundPath)
+            if (clicked.column() == Column::SoundPath &&
+                clicked.flags().testFlag(Qt::ItemIsEnabled))
             {
                 this->openSoundDialog(clicked, view, Column::SoundPath);
             }
