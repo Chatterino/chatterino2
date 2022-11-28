@@ -563,9 +563,9 @@ void BaseWindow::resizeEvent(QResizeEvent *)
             });
         });
     }
-#endif
 
     this->calcButtonsSizes();
+#endif
 }
 
 void BaseWindow::moveEvent(QMoveEvent *event)
@@ -726,6 +726,11 @@ void BaseWindow::calcButtonsSizes()
         return;
     }
 
+    if (this->frameless_)
+    {
+        return;
+    }
+
     if ((this->width() / this->scale()) < 300)
     {
         if (this->ui_.minButton)
@@ -784,6 +789,12 @@ bool BaseWindow::handleDPICHANGED(MSG *msg)
 bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 {
 #ifdef USEWINSDK
+    // ignore window hide event
+    if (!msg->wParam)
+    {
+        return true;
+    }
+
     if (auto dpi = getWindowDpi(msg->hwnd))
     {
         float currentScale = (float)dpi.get() / 96.F;
@@ -794,16 +805,17 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
         }
     }
 
-    if (!this->shown_ && this->isVisible())
+    if (!this->shown_)
     {
+        this->shown_ = true;
+
         if (this->hasCustomWindowFrame())
         {
-            this->shown_ = true;
-
             // disable OS window border
             const MARGINS margins = {-1};
             DwmExtendFrameIntoClientArea(HWND(this->winId()), &margins);
         }
+
         if (!this->initalBounds_.isNull())
         {
             ::SetWindowPos(msg->hwnd, nullptr, this->initalBounds_.x(),
@@ -812,9 +824,9 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
                            SWP_NOZORDER | SWP_NOACTIVATE);
             this->currentBounds_ = this->initalBounds_;
         }
-    }
 
-    this->calcButtonsSizes();
+        this->calcButtonsSizes();
+    }
 
     return true;
 #else
