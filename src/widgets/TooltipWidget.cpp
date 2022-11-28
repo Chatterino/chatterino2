@@ -116,14 +116,4 @@ void TooltipWidget::leaveEvent(QEvent *)
     // clear parents event
 }
 
-void TooltipWidget::moveEvent(QMoveEvent *)
-{
-    // clear parents event
-}
-
-void TooltipWidget::resizeEvent(QResizeEvent *)
-{
-    // clear parents event
-}
-
 }  // namespace chatterino
