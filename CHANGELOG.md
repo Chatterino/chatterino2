@@ -2,18 +2,7 @@
 
 ## Unversioned
 
-- Bugfix: Fixed crash happening when QuickSwitcher is used with a popout window. (#4187)
-- Bugfix: Fixed low contrast of text in settings tooltips. (#4188)
-- Bugfix: Fixed being unable to see the usercard of VIPs who have Asian language display names. (#4174)
-- Bugfix: Fixed messages where Right-to-Left order is mixed in multiple lines. (#4173)
-- Bugfix: Fixed the wrong right-click menu showing in the chat input box. (#4177)
-- Bugfix: Fixed popup windows not appearing/minimizing correctly on the Windows taskbar. (#4181)
-- Bugfix: Fixed white border appearing around maximized window on Windows. (#4190)
-- Bugfix: Fixed window scaling being applied too many times on startup, causing windows like Settings to be slow. (#4193)
-- Bugfix: Fixed input text cursor flickering when selecting text in a split. (#4197)
-- Bugfix: Fixed shipped resources having incorrect ICC profile (#4199)
-
-## 2.4.0-beta
+## 2.4.0
 
 - Major: Added support for emotes, badges, and live emote updates from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062, #4090)
 - Major: Added support for Right-to-Left Languages (#3958, #4139, #4168)
@@ -100,6 +89,16 @@
 - Minor: Add proper support for IRC private messages. (#4158)
 - Minor: Improved look of tabs when using a layout other than top. (#3925, #4152)
 - Minor: Added support for Nicknames on IRC. (#4170)
+- Bugfix: Fixed crash happening when QuickSwitcher is used with a popout window. (#4187)
+- Bugfix: Fixed low contrast of text in settings tooltips. (#4188)
+- Bugfix: Fixed being unable to see the usercard of VIPs who have Asian language display names. (#4174)
+- Bugfix: Fixed messages where Right-to-Left order is mixed in multiple lines. (#4173)
+- Bugfix: Fixed the wrong right-click menu showing in the chat input box. (#4177)
+- Bugfix: Fixed popup windows not appearing/minimizing correctly on the Windows taskbar. (#4181)
+- Bugfix: Fixed white border appearing around maximized window on Windows. (#4190)
+- Bugfix: Fixed window scaling being applied too many times on startup, causing windows like Settings to be slow. (#4193)
+- Bugfix: Fixed input text cursor flickering when selecting text in a split. (#4197)
+- Bugfix: Fixed shipped resources having incorrect ICC profile (#4199)
 - Bugfix: Fixed channels with two leading `#`s not being usable on IRC (#4154)
 - Bugfix: Fixed `Add new account` dialog causing main chatterino window to be non movable. (#4121)
 - Bugfix: Connection to Twitch PubSub now recovers more reliably. (#3643, #3716)
