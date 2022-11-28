@@ -11,6 +11,7 @@
 - Bugfix: Fixed white border appearing around maximized window on Windows. (#4190)
 - Bugfix: Fixed window scaling being applied too many times on startup, causing windows like Settings to be slow. (#4193)
 - Bugfix: Fixed input text cursor flickering when selecting text in a split. (#4197)
+- Bugfix: Fixed shipped resources having incorrect ICC profile (#4199)
 
 ## 2.4.0-beta
 
