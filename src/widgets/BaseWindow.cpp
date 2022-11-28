@@ -540,7 +540,11 @@ void BaseWindow::resizeEvent(QResizeEvent *)
 {
     // Queue up save because: Window resized
 #ifdef CHATTERINO
-    getApp()->windows->queueSave();
+    if (!flags_.has(DisableLayoutSave))
+    {
+        getApp()->windows->queueSave();
+    }
+    
 #endif
 
     //this->moveIntoDesktopRect(this);
@@ -572,7 +576,10 @@ void BaseWindow::moveEvent(QMoveEvent *event)
 {
     // Queue up save because: Window position changed
 #ifdef CHATTERINO
-    getApp()->windows->queueSave();
+    if (!flags_.has(DisableLayoutSave))
+    {
+        getApp()->windows->queueSave();
+    }    
 #endif
 
     BaseWidget::moveEvent(event);
