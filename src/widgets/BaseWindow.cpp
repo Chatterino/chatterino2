@@ -544,7 +544,7 @@ void BaseWindow::resizeEvent(QResizeEvent *)
     {
         getApp()->windows->queueSave();
     }
-    
+
 #endif
 
     //this->moveIntoDesktopRect(this);
@@ -579,7 +579,7 @@ void BaseWindow::moveEvent(QMoveEvent *event)
     if (!flags_.has(DisableLayoutSave))
     {
         getApp()->windows->queueSave();
-    }    
+    }
 #endif
 
     BaseWidget::moveEvent(event);
