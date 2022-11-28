@@ -30,6 +30,8 @@ public:
 protected:
     void changeEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
+    void moveEvent(QMoveEvent *) override;
+    void resizeEvent(QResizeEvent *) override;
     void themeChangedEvent() override;
     void scaleChangedEvent(float) override;
     void paintEvent(QPaintEvent *) override;
