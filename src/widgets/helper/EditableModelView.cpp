@@ -1,16 +1,16 @@
 #include "EditableModelView.hpp"
+
 #include "widgets/helper/RegExpItemDelegate.hpp"
 
 #include <QAbstractItemView>
 #include <QAbstractTableModel>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QLabel>
 #include <QModelIndex>
 #include <QPushButton>
 #include <QTableView>
 #include <QVBoxLayout>
-
-#include <QLabel>
 
 namespace chatterino {
 

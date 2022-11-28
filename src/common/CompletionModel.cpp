@@ -15,6 +15,7 @@
 #include "util/QStringHash.hpp"
 
 #include <QtAlgorithms>
+
 #include <utility>
 
 namespace chatterino {

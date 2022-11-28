@@ -7,8 +7,8 @@
 #include "controllers/commands/CommandContext.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
-#include <QMap>
 #include <pajlada/settings.hpp>
+#include <QMap>
 
 #include <memory>
 #include <mutex>

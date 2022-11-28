@@ -1,10 +1,11 @@
 #pragma once
 
-#include <IrcMessage>
 #include "common/Channel.hpp"
 #include "messages/Message.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+
+#include <IrcMessage>
 
 #include <vector>
 

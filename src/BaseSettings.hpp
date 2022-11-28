@@ -3,9 +3,9 @@
 
 #include "common/ChatterinoSetting.hpp"
 
-#include <rapidjson/document.h>
-#include <QString>
 #include <pajlada/settings/settingdata.hpp>
+#include <QString>
+#include <rapidjson/document.h>
 
 #include <memory>
 

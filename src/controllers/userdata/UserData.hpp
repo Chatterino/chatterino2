@@ -1,12 +1,12 @@
 #pragma once
 
-#include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 
-#include <QColor>
-#include <QString>
 #include <boost/optional.hpp>
 #include <pajlada/serialize.hpp>
+#include <QColor>
+#include <QString>
 
 namespace chatterino {
 

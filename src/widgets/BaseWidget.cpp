@@ -11,6 +11,7 @@
 #include <QIcon>
 #include <QLayout>
 #include <QtGlobal>
+
 #include <algorithm>
 
 namespace chatterino {

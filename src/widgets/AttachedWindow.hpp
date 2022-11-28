@@ -4,6 +4,7 @@
 
 #include <QTimer>
 #include <QWidget>
+
 #include <memory>
 
 namespace chatterino {

@@ -5,8 +5,9 @@
 #include "util/QStringHash.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
-#include <QTime>
 #include <boost/noncopyable.hpp>
+#include <QTime>
+
 #include <cinttypes>
 #include <memory>
 #include <vector>

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QObject>
-
 #include "common/SignalVectorModel.hpp"
 #include "controllers/commands/Command.hpp"
+
+#include <QObject>
 
 namespace chatterino {
 

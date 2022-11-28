@@ -1,6 +1,7 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
@@ -24,13 +25,12 @@
 #include "util/Qt.hpp"
 #include "widgets/Window.hpp"
 
+#include <boost/variant.hpp>
 #include <QApplication>
 #include <QColor>
 #include <QDebug>
 #include <QMediaPlayer>
 #include <QStringRef>
-#include <boost/variant.hpp>
-#include "common/QLogging.hpp"
 
 namespace {
 

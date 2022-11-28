@@ -10,9 +10,9 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -22,13 +22,13 @@
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "util/StreamerMode.hpp"
-#include "widgets/Label.hpp"
-#include "widgets/Scrollbar.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/Label.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>

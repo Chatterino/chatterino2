@@ -1,13 +1,13 @@
 #include "Button.hpp"
 
+#include "singletons/Theme.hpp"
+#include "util/FunctionEventFilter.hpp"
+
 #include <QApplication>
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QPainter>
 #include <QPalette>
-
-#include "singletons/Theme.hpp"
-#include "util/FunctionEventFilter.hpp"
 
 namespace chatterino {
 namespace {

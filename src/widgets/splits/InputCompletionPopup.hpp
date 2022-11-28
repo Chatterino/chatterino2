@@ -1,9 +1,10 @@
 #pragma once
 
-#include <functional>
 #include "common/Channel.hpp"
 #include "widgets/BasePopup.hpp"
 #include "widgets/listview/GenericListModel.hpp"
+
+#include <functional>
 
 namespace chatterino {
 

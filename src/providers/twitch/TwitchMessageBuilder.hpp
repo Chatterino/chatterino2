@@ -4,10 +4,10 @@
 #include "common/Outcome.hpp"
 #include "messages/MessageThread.hpp"
 #include "messages/SharedMessageBuilder.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
-#include "providers/twitch/api/Helix.hpp"
 
 #include <IrcMessage>
 #include <QString>

@@ -1,6 +1,7 @@
 #include "messages/LimitedQueue.hpp"
 
 #include <gtest/gtest.h>
+
 #include <vector>
 
 using namespace chatterino;

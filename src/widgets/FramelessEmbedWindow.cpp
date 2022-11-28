@@ -1,10 +1,11 @@
 #include "FramelessEmbedWindow.hpp"
 
-#include <QHBoxLayout>
 #include "Application.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "QJsonDocument"
 #include "QMessageBox"
-#include "providers/twitch/TwitchIrcServer.hpp"
+
+#include <QHBoxLayout>
 //#include "widgets/helper/ChannelView.hpp"
 #include "common/Args.hpp"
 #include "widgets/splits/Split.hpp"

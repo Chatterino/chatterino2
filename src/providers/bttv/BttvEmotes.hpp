@@ -1,10 +1,11 @@
 #pragma once
 
-#include <memory>
 #include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+
+#include <memory>
 
 namespace chatterino {
 

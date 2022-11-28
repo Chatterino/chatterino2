@@ -5,12 +5,12 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/optional.hpp>
 #include <QJsonArray>
 #include <QString>
 #include <QStringList>
 #include <QUrl>
 #include <QUrlQuery>
-#include <boost/optional.hpp>
 
 #include <functional>
 #include <unordered_set>

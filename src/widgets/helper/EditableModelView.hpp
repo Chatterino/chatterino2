@@ -1,8 +1,7 @@
 #pragma once
 
-#include <QWidget>
-
 #include <pajlada/signals/signal.hpp>
+#include <QWidget>
 
 class QAbstractTableModel;
 class QTableView;

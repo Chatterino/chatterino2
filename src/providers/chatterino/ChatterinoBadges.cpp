@@ -1,13 +1,14 @@
 #include "ChatterinoBadges.hpp"
 
+#include "common/NetworkRequest.hpp"
+#include "common/Outcome.hpp"
+#include "messages/Emote.hpp"
+
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QThread>
 #include <QUrl>
-#include "common/NetworkRequest.hpp"
-#include "common/Outcome.hpp"
-#include "messages/Emote.hpp"
 
 namespace chatterino {
 void ChatterinoBadges::initialize(Settings &settings, Paths &paths)

@@ -4,12 +4,11 @@
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/helper/EditableModelView.hpp"
-
-#include <QTableView>
+#include "widgets/Window.hpp"
 
 #include <QHeaderView>
+#include <QTableView>
 
 namespace chatterino {
 

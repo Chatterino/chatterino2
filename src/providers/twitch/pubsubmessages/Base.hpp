@@ -1,12 +1,10 @@
 #pragma once
 
+#include <boost/optional.hpp>
+#include <magic_enum.hpp>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QString>
-
-#include <magic_enum.hpp>
-
-#include <boost/optional.hpp>
 
 namespace chatterino {
 
