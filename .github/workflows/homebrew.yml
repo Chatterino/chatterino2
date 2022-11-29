@@ -1,19 +1,18 @@
 name: 'Publish Homebrew Cask on Release'
 on:
   push:
-    # tags:
+    tags:
       # Should match semver for mainline releases (not including -beta)
-      # - 'v2.[0-9]+.[0-9]+'
+      - 'v2.[0-9]+.[0-9]+'
       # TODO: handle beta and nightly releases
       # Need to make those casks manually first
       # - v2.[0-9]+.[0-9]+-beta(?:[0-9]+)
 
 env:
   # This gets updated later on in the run by a bash script to strip the prefix
-  C2_CASK_NAME: 'chatterino'
-  C2_TAGGED_VERSION: '2.4.0'
+  C2_CASK_NAME: chatterino
+  C2_TAGGED_VERSION: ${{ github.ref_name }}
   HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
-  # C2_TAGGED_VERSION: '${{ github.ref_name }}'
 
 jobs:
   update_stable_homebrew_cask:
