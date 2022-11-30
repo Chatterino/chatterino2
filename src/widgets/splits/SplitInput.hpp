@@ -151,8 +151,6 @@ protected:
     QString currMsg_;
     int prevIndex_ = 0;
 
-    int lastOverflowLength = TWITCH_MESSAGE_LIMIT;
-
     // Hidden denotes whether this split input should be hidden or not
     // This is used instead of the regular QWidget::hide/show because
     // focus events don't work as expected, so instead we use this bool and
