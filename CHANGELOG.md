@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed incorrect red coloring of message input. (#4204)
+
 ## 2.4.0
 
 - Major: Added support for emotes, badges, and live emote updates from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062, #4090)
