@@ -60,8 +60,10 @@ bool MessageFlagsPredicate::appliesTo(const Message &message)
     // Exclude timeout messages from system flag when timeout flag isn't present
     if (this->flags_.has(MessageFlag::System) &&
         !this->flags_.has(MessageFlag::Timeout))
-        return message.flags.hasAny(flags_) &&
-               !message.flags.has(MessageFlag::Timeout);
+    {
+        return this->isNegated ^ (message.flags.hasAny(flags_) &&
+                                  !message.flags.has(MessageFlag::Timeout));
+    }
 
     return this->isNegated ^ message.flags.hasAny(flags_);
 }
