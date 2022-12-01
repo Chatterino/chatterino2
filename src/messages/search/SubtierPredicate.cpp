@@ -4,7 +4,8 @@
 
 namespace chatterino {
 
-SubtierPredicate::SubtierPredicate(const QStringList &subtiers)
+SubtierPredicate::SubtierPredicate(const QStringList &subtiers, bool negate)
+    : MessagePredicate(negate)
 {
     // Check if any comma-seperated values were passed and transform those
     for (const auto &entry : subtiers)
@@ -25,7 +26,7 @@ bool SubtierPredicate::appliesTo(const Message &message)
             const auto &subTier =
                 badge.value_.length() > 3 ? badge.value_.at(0) : '1';
 
-            return subtiers_.contains(subTier);
+            return this->isNegated ^ subtiers_.contains(subTier);
         }
     }
 

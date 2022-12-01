@@ -28,7 +28,7 @@ public:
      *
      * @param flags a string comma seperated list of names for the flags a message should have
      */
-    MessageFlagsPredicate(const QString &flags);
+    MessageFlagsPredicate(const QString &flags, bool negate);
 
     /**
      * @brief Checks whether the message has any of the flags passed

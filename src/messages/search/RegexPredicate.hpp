@@ -21,7 +21,7 @@ public:
      *
      * @param regex the regex to match the message against
      */
-    RegexPredicate(const QString &regex);
+    RegexPredicate(const QString &regex, bool negate);
 
     /**
      * @brief Checks whether the message matches the regex passed in the

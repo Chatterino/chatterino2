@@ -12,7 +12,7 @@ namespace chatterino {
 class LinkPredicate : public MessagePredicate
 {
 public:
-    LinkPredicate();
+    LinkPredicate(bool negate);
 
     /**
      * @brief Checks whether the message contains a link.

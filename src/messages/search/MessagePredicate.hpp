@@ -16,6 +16,12 @@ namespace chatterino {
  */
 class MessagePredicate
 {
+protected:
+    MessagePredicate(bool negate = false)
+        : isNegated(negate)
+    {
+    }
+
 public:
     virtual ~MessagePredicate() = default;
 
@@ -29,5 +35,8 @@ public:
      * @return true if this predicate applies, false otherwise
      */
     virtual bool appliesTo(const Message &message) = 0;
+
+protected:
+    bool isNegated = false;
 };
 }  // namespace chatterino

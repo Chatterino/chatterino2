@@ -18,7 +18,7 @@ public:
      *
      * @param badges a list of badges that a message should contain 
      */
-    BadgePredicate(const QStringList &badges);
+    BadgePredicate(const QStringList &badges, bool negate);
 
     /**
      * @brief Checks whether the message contains any of the badges passed

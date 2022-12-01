@@ -4,7 +4,8 @@
 
 namespace chatterino {
 
-BadgePredicate::BadgePredicate(const QStringList &badges)
+BadgePredicate::BadgePredicate(const QStringList &badges, bool negate)
+    : MessagePredicate(negate)
 {
     // Check if any comma-seperated values were passed and transform those
     for (const auto &entry : badges)
@@ -36,7 +37,7 @@ bool BadgePredicate::appliesTo(const Message &message)
 {
     for (const Badge &badge : message.badges)
     {
-        if (badges_.contains(badge.key_, Qt::CaseInsensitive))
+        if (this->isNegated ^ badges_.contains(badge.key_, Qt::CaseInsensitive))
         {
             return true;
         }
