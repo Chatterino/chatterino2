@@ -10,14 +10,14 @@ RegexPredicate::RegexPredicate(const QString &regex, bool negate)
 
 bool RegexPredicate::appliesTo(const Message &message)
 {
-    if (this->isNegated ^ !regex_.isValid())
+    if (!regex_.isValid())
     {
         return false;
     }
 
     QRegularExpressionMatch match = regex_.match(message.messageText);
 
-    return match.hasMatch();
+    return this->isNegated ^ match.hasMatch();
 }
 
 }  // namespace chatterino

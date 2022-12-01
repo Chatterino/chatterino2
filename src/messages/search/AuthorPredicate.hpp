@@ -18,7 +18,7 @@ public:
      *
      * @param authors a list of user names that a message should be sent from
      */
-    AuthorPredicate(const QStringList &authors, bool negate);
+    AuthorPredicate(const QString &authors, bool negate);
 
     /**
      * @brief Checks whether the message is authored by any of the users passed

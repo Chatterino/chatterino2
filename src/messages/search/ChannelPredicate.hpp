@@ -18,7 +18,7 @@ public:
      *
      * @param channels a list of channel names that a message should be sent in
      */
-    ChannelPredicate(const QStringList &channels, bool negate);
+    ChannelPredicate(const QString &channels, bool negate);
 
     /**
      * @brief Checks whether the message was sent in any of the channels passed

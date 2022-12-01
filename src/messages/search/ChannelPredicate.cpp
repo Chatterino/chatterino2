@@ -4,17 +4,14 @@
 
 namespace chatterino {
 
-ChannelPredicate::ChannelPredicate(const QStringList &channels, bool negate)
+ChannelPredicate::ChannelPredicate(const QString &channels, bool negate)
     : MessagePredicate(negate)
     , channels_()
 {
     // Check if any comma-seperated values were passed and transform those
-    for (const auto &entry : channels)
+    for (const auto &channel : channels.split(',', Qt::SkipEmptyParts))
     {
-        for (const auto &channel : entry.split(',', Qt::SkipEmptyParts))
-        {
-            this->channels_ << channel;
-        }
+        this->channels_ << channel;
     }
 }
 

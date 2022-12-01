@@ -18,7 +18,7 @@ public:
      *
      * @param subtiers a list of subtiers that a message should contain 
      */
-    SubtierPredicate(const QStringList &subtiers, bool negate);
+    SubtierPredicate(const QString &subtiers, bool negate);
 
     /**
      * @brief Checks whether the message contains any of the subtiers passed
