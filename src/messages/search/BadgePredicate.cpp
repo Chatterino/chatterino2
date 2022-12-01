@@ -34,13 +34,13 @@ bool BadgePredicate::appliesTo(const Message &message)
 {
     for (const Badge &badge : message.badges)
     {
-        if (this->isNegated ^ badges_.contains(badge.key_, Qt::CaseInsensitive))
+        if (badges_.contains(badge.key_, Qt::CaseInsensitive))
         {
-            return true;
+            return this->isNegated ^ true;
         }
     }
 
-    return false;
+    return this->isNegated ^ false;
 }
 
 }  // namespace chatterino

@@ -27,7 +27,7 @@ bool SubtierPredicate::appliesTo(const Message &message)
         }
     }
 
-    return false;
+    return this->isNegated ^ false;
 }
 
 }  // namespace chatterino
