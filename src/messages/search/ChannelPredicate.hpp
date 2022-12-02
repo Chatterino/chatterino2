@@ -28,7 +28,7 @@ public:
      * @return true if the message was sent in one of the specified channels,
      *         false otherwise
      */
-    bool appliesTo(const Message &message);
+    bool appliesTo(const Message &message) override;
 
 private:
     /// Holds the channel names that will be searched for

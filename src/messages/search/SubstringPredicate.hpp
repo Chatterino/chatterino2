@@ -31,7 +31,7 @@ public:
      * @param message the message to check
      * @return true if the message contains the substring, false otherwise
      */
-    bool appliesTo(const Message &message);
+    bool appliesTo(const Message &message) override;
 
 private:
     /// Holds the substring to search for in a message's `messageText`

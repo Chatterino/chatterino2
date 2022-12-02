@@ -38,7 +38,7 @@ public:
      * @return true if the message has at least one of the specified flags,
      *         false otherwise
      */
-    bool appliesTo(const Message &message);
+    bool appliesTo(const Message &message) override;
 
 private:
     /// Holds the flags that will be searched for
