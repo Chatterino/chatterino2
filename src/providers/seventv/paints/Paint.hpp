@@ -1,9 +1,11 @@
 #pragma once
 
+#include "providers/seventv/paints/PaintDropShadow.hpp"
+
 #include <QBrush>
 #include <QFont>
+
 #include <vector>
-#include "providers/seventv/paints/PaintDropShadow.hpp"
 
 namespace chatterino {
 

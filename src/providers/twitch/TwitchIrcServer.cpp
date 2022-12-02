@@ -1,8 +1,5 @@
 #include "TwitchIrcServer.hpp"
 
-#include <IrcCommand>
-#include <cassert>
-
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
@@ -10,6 +7,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -19,7 +17,10 @@
 #include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 
+#include <IrcCommand>
 #include <QMetaEnum>
+
+#include <cassert>
 
 // using namespace Communi;
 using namespace std::chrono_literals;
@@ -38,11 +39,11 @@ TwitchIrcServer::TwitchIrcServer()
     this->initializeIrc();
 
     this->pubsub = new PubSub(TWITCH_PUBSUB_URL);
-
-    if (getSettings()->enableSevenTVEventApi)
+    if (getSettings()->enableSevenTVEventAPI &&
+        getSettings()->enableSevenTVChannelEmotes)
     {
-        this->eventApi =
-            std::make_unique<SeventvEventApi>(SEVENTV_EVENTAPI_URL);
+        this->seventvEventAPI =
+            std::make_unique<SeventvEventAPI>(SEVENTV_EVENTAPI_URL);
     }
 
     // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) {
@@ -531,7 +532,7 @@ void TwitchIrcServer::forEachSeventvEmoteSet(
 {
     this->forEachChannel([emoteSetId, func](const auto &chan) {
         if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
-            channel->seventvEmoteSetId() == emoteSetId)
+            channel->seventvEmoteSetID() == emoteSetId)
         {
             func(*channel);
         }
@@ -542,17 +543,29 @@ void TwitchIrcServer::forEachSeventvUser(
 {
     this->forEachChannel([userId, func](const auto &chan) {
         if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
-            channel->seventvUserId() == userId)
+            channel->seventvUserID() == userId)
         {
             func(*channel);
         }
     });
 }
 
-void TwitchIrcServer::dropSeventvEmoteSet(const QString &id)
+void TwitchIrcServer::dropSeventvChannel(const QString &userID,
+                                         const QString &emoteSetID)
 {
+    if (!this->seventvEventAPI)
+    {
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
+    // ignore empty values
+    bool skipUser = userID.isEmpty();
+    bool skipSet = emoteSetID.isEmpty();
+
+    bool foundUser = skipUser;
+    bool foundSet = skipSet;
     for (std::weak_ptr<Channel> &weak : this->channels)
     {
         ChannelPtr chan = weak.lock();
@@ -561,41 +574,30 @@ void TwitchIrcServer::dropSeventvEmoteSet(const QString &id)
             continue;
         }
 
-        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
-            channel->seventvEmoteSetId() == id)
+        auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
+        if (!foundSet && channel->seventvEmoteSetID() == emoteSetID)
         {
-            return;
+            foundSet = true;
+        }
+        if (!foundUser && channel->seventvUserID() == userID)
+        {
+            foundUser = true;
+        }
+
+        if (foundSet && foundUser)
+        {
+            break;
         }
     }
 
-    if (this->eventApi)
+    if (!foundUser)
     {
-        this->eventApi->unsubscribeEmoteSet(id);
+        this->seventvEventAPI->unsubscribeUser(userID);
+    }
+    if (!foundSet)
+    {
+        this->seventvEventAPI->unsubscribeEmoteSet(emoteSetID);
     }
 }
 
-void TwitchIrcServer::dropSeventvUser(const QString &id)
-{
-    std::lock_guard<std::mutex> lock(this->channelMutex);
-
-    for (std::weak_ptr<Channel> &weak : this->channels)
-    {
-        ChannelPtr chan = weak.lock();
-        if (!chan)
-        {
-            continue;
-        }
-
-        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
-            channel->seventvUserId() == id)
-        {
-            return;
-        }
-    }
-
-    if (this->eventApi)
-    {
-        this->eventApi->unsubscribeUser(id);
-    }
-}
 }  // namespace chatterino

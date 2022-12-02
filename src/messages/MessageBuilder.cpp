@@ -23,6 +23,45 @@ QRegularExpression IRC_COLOR_PARSE_REGEX(
     "(\u0003(\\d{1,2})?(,(\\d{1,2}))?|\u000f)",
     QRegularExpression::UseUnicodePropertiesOption);
 
+QString formatUpdatedEmoteList(const QString &platform,
+                               const std::vector<QString> &emoteNames,
+                               bool isAdd, bool isFirstWord)
+{
+    QString text = "";
+    if (isAdd)
+    {
+        text += isFirstWord ? "Added" : "added";
+    }
+    else
+    {
+        text += isFirstWord ? "Removed" : "removed";
+    }
+
+    if (emoteNames.size() == 1)
+    {
+        text += QString(" %1 emote ").arg(platform);
+    }
+    else
+    {
+        text += QString(" %1 %2 emotes ").arg(emoteNames.size()).arg(platform);
+    }
+
+    auto i = 0;
+    for (const auto &emoteName : emoteNames)
+    {
+        i++;
+        if (i > 1)
+        {
+            text += i == emoteNames.size() ? " and " : ", ";
+        }
+        text += emoteName;
+    }
+
+    text += ".";
+
+    return text;
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -186,139 +225,6 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
 MessageBuilder::MessageBuilder()
     : message_(std::make_shared<Message>())
 {
-}
-
-MessageBuilder::MessageBuilder(SevenTvEventApiAddEmoteMessageTag,
-                               const QString &actor,
-                               std::vector<QString> emoteNames)
-    : MessageBuilder()
-{
-    auto text = emoteNames.size() == 1
-                    ? QString("added 7TV emote ")
-                    : QString("added %1 7TV emotes ").arg(emoteNames.size());
-
-    auto i = 0;
-    for (const auto &emoteName : emoteNames)
-    {
-        if (i++)
-        {
-            text += i == emoteNames.size() ? " and " : ", ";
-        }
-        text += emoteName;
-    }
-
-    text += ".";
-
-    this->emplace<TimestampElement>();
-    this->emplace<TextElement>(actor, MessageElementFlag::Username,
-                               MessageColor::System)
-        ->setLink({Link::UserInfo, actor});
-    this->emplace<TextElement>(text, MessageElementFlag::Text,
-                               MessageColor::System);
-
-    auto finalText = QString("%1 %2").arg(actor, text);
-
-    this->message().loginName = actor;
-    this->message().messageText = finalText;
-    this->message().searchText = finalText;
-    this->message().seventvEventTargetEmotes = emoteNames;
-
-    this->message().flags.set(MessageFlag::System);
-    this->message().flags.set(MessageFlag::SevenTvEventApiAddEmoteMessage);
-    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
-}
-
-MessageBuilder::MessageBuilder(SevenTvEventApiRemoveEmoteMessageTag,
-                               const QString &actor,
-                               std::vector<QString> emoteNames)
-    : MessageBuilder()
-{
-    auto text = emoteNames.size() == 1
-                    ? QString("removed 7TV emote ")
-                    : QString("removed %1 7TV emotes ").arg(emoteNames.size());
-
-    auto i = 0;
-    for (const auto &emoteName : emoteNames)
-    {
-        if (i++)
-        {
-            text += i == emoteNames.size() ? " and " : ", ";
-        }
-        text += emoteName;
-    }
-
-    text += ".";
-
-    this->emplace<TimestampElement>();
-    this->emplace<TextElement>(actor, MessageElementFlag::Username,
-                               MessageColor::System)
-        ->setLink({Link::UserInfo, actor});
-    this->emplace<TextElement>(text, MessageElementFlag::Text,
-                               MessageColor::System);
-
-    auto finalText = QString("%1 %2").arg(actor, text);
-
-    this->message().loginName = actor;
-    this->message().messageText = finalText;
-    this->message().searchText = finalText;
-    this->message().seventvEventTargetEmotes = emoteNames;
-
-    this->message().flags.set(MessageFlag::System);
-    this->message().flags.set(MessageFlag::SevenTvEventApiRemoveEmoteMessage);
-    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
-}
-
-MessageBuilder::MessageBuilder(SevenTvEventApiUpdateEmoteMessageTag,
-                               const QString &actor, const QString &emoteName,
-                               const QString &oldEmoteName)
-    : MessageBuilder()
-{
-    auto text =
-        QString("renamed 7TV emote %1 to %2.").arg(oldEmoteName, emoteName);
-
-    this->emplace<TimestampElement>();
-    this->emplace<TextElement>(actor, MessageElementFlag::Username,
-                               MessageColor::System)
-        ->setLink({Link::UserInfo, actor});
-    this->emplace<TextElement>(text, MessageElementFlag::Text,
-                               MessageColor::System);
-
-    auto finalText = QString("%1 %2").arg(actor, text);
-
-    this->message().loginName = actor;
-    this->message().messageText = finalText;
-    this->message().searchText = finalText;
-    this->message().seventvEventTargetEmotes = {emoteName, oldEmoteName};
-
-    this->message().flags.set(MessageFlag::System);
-    this->message().flags.set(MessageFlag::SevenTvEventApiUpdateEmoteMessage);
-    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
-}
-
-MessageBuilder::MessageBuilder(SevenTvEventApiUpdateEmoteSetMessageTag,
-                               const QString &actor,
-                               const QString &emoteSetName)
-    : MessageBuilder()
-{
-    auto text = QString("switched the active 7TV Emote Set to \"%1\".")
-                    .arg(emoteSetName);
-
-    this->emplace<TimestampElement>();
-    this->emplace<TextElement>(actor, MessageElementFlag::Username,
-                               MessageColor::System)
-        ->setLink({Link::UserInfo, actor});
-    this->emplace<TextElement>(text, MessageElementFlag::Text,
-                               MessageColor::System);
-
-    auto finalText = QString("%1 %2").arg(actor, text);
-
-    this->message().loginName = actor;
-    this->message().messageText = finalText;
-    this->message().searchText = finalText;
-
-    this->message().flags.set(MessageFlag::System);
-    this->message().flags.set(MessageFlag::SevenTvEventApiUpdateEmoteMessage);
-    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
 }
 
 MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
@@ -604,6 +510,133 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
 
     this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
+}
+
+MessageBuilder::MessageBuilder(LiveUpdatesAddEmoteMessageTag /*unused*/,
+                               const QString &platform, const QString &actor,
+                               const std::vector<QString> &emoteNames)
+    : MessageBuilder()
+{
+    auto text =
+        formatUpdatedEmoteList(platform, emoteNames, true, actor.isEmpty());
+
+    this->emplace<TimestampElement>();
+    if (!actor.isEmpty())
+    {
+        this->emplace<TextElement>(actor, MessageElementFlag::Username,
+                                   MessageColor::System)
+            ->setLink({Link::UserInfo, actor});
+    }
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
+                               MessageColor::System);
+
+    QString finalText;
+    if (actor.isEmpty())
+    {
+        finalText = text;
+    }
+    else
+    {
+        finalText = QString("%1 %2").arg(actor, text);
+    }
+
+    this->message().loginName = actor;
+    this->message().messageText = finalText;
+    this->message().searchText = finalText;
+
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::LiveUpdatesAdd);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+}
+
+MessageBuilder::MessageBuilder(LiveUpdatesRemoveEmoteMessageTag /*unused*/,
+                               const QString &platform, const QString &actor,
+                               const std::vector<QString> &emoteNames)
+    : MessageBuilder()
+{
+    auto text =
+        formatUpdatedEmoteList(platform, emoteNames, false, actor.isEmpty());
+
+    this->emplace<TimestampElement>();
+    if (!actor.isEmpty())
+    {
+        this->emplace<TextElement>(actor, MessageElementFlag::Username,
+                                   MessageColor::System)
+            ->setLink({Link::UserInfo, actor});
+    }
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
+                               MessageColor::System);
+
+    QString finalText;
+    if (actor.isEmpty())
+    {
+        finalText = text;
+    }
+    else
+    {
+        finalText = QString("%1 %2").arg(actor, text);
+    }
+
+    this->message().loginName = actor;
+    this->message().messageText = finalText;
+    this->message().searchText = finalText;
+
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::LiveUpdatesRemove);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+}
+
+MessageBuilder::MessageBuilder(LiveUpdatesUpdateEmoteMessageTag /*unused*/,
+                               const QString &platform, const QString &actor,
+                               const QString &emoteName,
+                               const QString &oldEmoteName)
+    : MessageBuilder()
+{
+    auto text = QString("renamed %1 emote %2 to %3.")
+                    .arg(platform, oldEmoteName, emoteName);
+
+    this->emplace<TimestampElement>();
+    this->emplace<TextElement>(actor, MessageElementFlag::Username,
+                               MessageColor::System)
+        ->setLink({Link::UserInfo, actor});
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
+                               MessageColor::System);
+
+    auto finalText = QString("%1 %2").arg(actor, text);
+
+    this->message().loginName = actor;
+    this->message().messageText = finalText;
+    this->message().searchText = finalText;
+
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::LiveUpdatesUpdate);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+}
+
+MessageBuilder::MessageBuilder(LiveUpdatesUpdateEmoteSetMessageTag /*unused*/,
+                               const QString &platform, const QString &actor,
+                               const QString &emoteSetName)
+    : MessageBuilder()
+{
+    auto text = QString("switched the active %1 Emote Set to \"%2\".")
+                    .arg(platform, emoteSetName);
+
+    this->emplace<TimestampElement>();
+    this->emplace<TextElement>(actor, MessageElementFlag::Username,
+                               MessageColor::System)
+        ->setLink({Link::UserInfo, actor});
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
+                               MessageColor::System);
+
+    auto finalText = QString("%1 %2").arg(actor, text);
+
+    this->message().loginName = actor;
+    this->message().messageText = finalText;
+    this->message().searchText = finalText;
+
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::LiveUpdatesUpdate);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
 }
 
 Message *MessageBuilder::operator->()

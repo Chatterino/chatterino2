@@ -14,23 +14,24 @@
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
-#include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
-#include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #ifndef NDEBUG
-#    include <rapidjson/document.h>
 #    include "providers/twitch/PubSubManager.hpp"
 #    include "providers/twitch/PubSubMessages.hpp"
 #    include "util/SampleData.hpp"
+
+#    include <rapidjson/document.h>
 #endif
 
 #include <QApplication>
@@ -153,7 +154,7 @@ void Window::addLayout()
     this->getLayoutContainer()->setLayout(layout);
 
     // set margin
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     this->notebook_->setAllowUserTabManagement(true);
     this->notebook_->setShowAddButton(true);

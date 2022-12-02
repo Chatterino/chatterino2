@@ -5,8 +5,9 @@
 #include "util/QStringHash.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
-#include <QTime>
 #include <boost/noncopyable.hpp>
+#include <QTime>
+
 #include <cinttypes>
 #include <memory>
 #include <vector>
@@ -45,13 +46,9 @@ enum class MessageFlag : int64_t {
     ElevatedMessage = (1LL << 25),
     ParticipatedThread = (1LL << 26),
     CheerMessage = (1LL << 27),
-
-    // SevenTV Flags
-    // For some reason C++ compiler is unable to infer that these are all 64bit values so when you do 1 << 60 it thinks the 1 and the 60 are 32bit values and it overflows.
-    // So we have to explicitly cast them to 64bit values. (1ULL << 60)
-    SevenTvEventApiAddEmoteMessage = (1ULL << 60),
-    SevenTvEventApiRemoveEmoteMessage = (1ULL << 61),
-    SevenTvEventApiUpdateEmoteMessage = (1ULL << 62),
+    LiveUpdatesAdd = (1LL << 28),
+    LiveUpdatesRemove = (1LL << 29),
+    LiveUpdatesUpdate = (1LL << 30),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

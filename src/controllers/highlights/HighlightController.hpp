@@ -7,9 +7,9 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 
+#include <boost/optional.hpp>
 #include <QColor>
 #include <QUrl>
-#include <boost/optional.hpp>
 
 #include <functional>
 #include <memory>

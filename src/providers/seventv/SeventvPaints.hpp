@@ -4,10 +4,10 @@
 #include "providers/seventv/paints/Paint.hpp"
 #include "providers/seventv/paints/PaintDropShadow.hpp"
 
-#include <optional>
-
 #include <QJsonArray>
 #include <QString>
+
+#include <optional>
 
 namespace chatterino {
 

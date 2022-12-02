@@ -3,7 +3,7 @@
 #include "messages/MessageElement.hpp"
 
 #include <QRegularExpression>
-#include <boost/optional.hpp>
+
 #include <ctime>
 #include <utility>
 
@@ -20,20 +20,20 @@ struct SystemMessageTag {
 };
 struct TimeoutMessageTag {
 };
-struct SevenTvEventApiUpdateEmoteMessageTag {
+struct LiveUpdatesUpdateEmoteMessageTag {
 };
-struct SevenTvEventApiRemoveEmoteMessageTag {
+struct LiveUpdatesRemoveEmoteMessageTag {
 };
-struct SevenTvEventApiAddEmoteMessageTag {
+struct LiveUpdatesAddEmoteMessageTag {
 };
-struct SevenTvEventApiUpdateEmoteSetMessageTag {
+struct LiveUpdatesUpdateEmoteSetMessageTag {
 };
 const SystemMessageTag systemMessage{};
 const TimeoutMessageTag timeoutMessage{};
-const SevenTvEventApiUpdateEmoteMessageTag seventvUpdateEmoteMessage{};
-const SevenTvEventApiRemoveEmoteMessageTag seventvRemoveEmoteMessage{};
-const SevenTvEventApiAddEmoteMessageTag seventvAddEmoteMessage{};
-const SevenTvEventApiUpdateEmoteSetMessageTag seventvUpdateEmoteSetMessage{};
+const LiveUpdatesUpdateEmoteMessageTag liveUpdatesUpdateEmoteMessage{};
+const LiveUpdatesRemoveEmoteMessageTag liveUpdatesRemoveEmoteMessage{};
+const LiveUpdatesAddEmoteMessageTag liveUpdatesAddEmoteMessage{};
+const LiveUpdatesUpdateEmoteSetMessageTag liveUpdatesUpdateEmoteSetMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
 MessagePtr makeSystemMessage(const QString &text, const QTime &time);
@@ -63,17 +63,21 @@ public:
     MessageBuilder(TimeoutMessageTag, const QString &username,
                    const QString &durationInSeconds, bool multipleTimes,
                    const QTime &time = QTime::currentTime());
-    MessageBuilder(SevenTvEventApiAddEmoteMessageTag, const QString &actor,
-                   std::vector<QString> emoteNames);
-    MessageBuilder(SevenTvEventApiRemoveEmoteMessageTag, const QString &actor,
-                   std::vector<QString> emoteNames);
-    MessageBuilder(SevenTvEventApiUpdateEmoteMessageTag, const QString &actor,
-                   const QString &emoteName, const QString &oldEmoteName);
-    MessageBuilder(SevenTvEventApiUpdateEmoteSetMessageTag,
-                   const QString &actor, const QString &emoteSetName);
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);
     MessageBuilder(const AutomodUserAction &action);
+
+    MessageBuilder(LiveUpdatesAddEmoteMessageTag, const QString &platform,
+                   const QString &actor,
+                   const std::vector<QString> &emoteNames);
+    MessageBuilder(LiveUpdatesRemoveEmoteMessageTag, const QString &platform,
+                   const QString &actor,
+                   const std::vector<QString> &emoteNames);
+    MessageBuilder(LiveUpdatesUpdateEmoteMessageTag, const QString &platform,
+                   const QString &actor, const QString &emoteName,
+                   const QString &oldEmoteName);
+    MessageBuilder(LiveUpdatesUpdateEmoteSetMessageTag, const QString &platform,
+                   const QString &actor, const QString &emoteSetName);
 
     virtual ~MessageBuilder() = default;
 

@@ -13,6 +13,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QThread>
+
 #include <utility>
 
 /**
@@ -32,7 +33,6 @@ using namespace chatterino;
 const QString CHANNEL_HAS_NO_EMOTES("This channel has no 7TV channel emotes.");
 const QString EMOTE_LINK_FORMAT("https://7tv.app/emotes/%1");
 
-// TODO(nerix): add links to documentation (7tv.io)
 const QString API_URL_USER("https://7tv.io/v3/users/twitch/%1");
 const QString API_URL_GLOBAL_EMOTE_SET("https://7tv.io/v3/emote-sets/global");
 const QString API_URL_EMOTE_SET("https://7tv.io/v3/emote-sets/%1");
@@ -148,7 +148,7 @@ Tooltip createTooltip(const QString &name, const QString &author, bool isGlobal)
 Tooltip createAliasedTooltip(const QString &name, const QString &baseName,
                              const QString &author, bool isGlobal)
 {
-    return Tooltip{QString("%1<br>Alias to %2<br>%3 7TV Emote<br>By: %4")
+    return Tooltip{QString("%1<br>Alias of %2<br>%3 7TV Emote<br>By: %4")
                        .arg(name, baseName, isGlobal ? "Global" : "Channel",
                             author.isEmpty() ? "<deleted>" : author)};
 }
@@ -160,17 +160,20 @@ CreateEmoteResult createEmote(const QJsonObject &activeEmote,
     auto emoteName = EmoteName{activeEmote["name"].toString()};
     auto author =
         EmoteAuthor{emoteData["owner"].toObject()["display_name"].toString()};
-    auto baseEmoteName = emoteData["name"].toString();
+    auto baseEmoteName = EmoteName{emoteData["name"].toString()};
     bool zeroWidth = isZeroWidthActive(activeEmote);
-    bool aliasedName = emoteName.string != baseEmoteName;
+    bool aliasedName = emoteName != baseEmoteName;
     auto tooltip =
-        aliasedName ? createAliasedTooltip(emoteName.string, baseEmoteName,
-                                           author.string, isGlobal)
-                    : createTooltip(emoteName.string, author.string, isGlobal);
+        aliasedName
+            ? createAliasedTooltip(emoteName.string, baseEmoteName.string,
+                                   author.string, isGlobal)
+            : createTooltip(emoteName.string, author.string, isGlobal);
     auto imageSet = makeImageSet(emoteData);
 
-    auto emote = Emote({emoteName, imageSet, tooltip,
-                        Url{EMOTE_LINK_FORMAT.arg(emoteId.string)}, zeroWidth});
+    auto emote =
+        Emote({emoteName, imageSet, tooltip,
+               Url{EMOTE_LINK_FORMAT.arg(emoteId.string)}, zeroWidth, emoteId,
+               author, boost::make_optional(aliasedName, baseEmoteName)});
 
     return {emote, emoteId, emoteName, !emote.images.getImage1()->isEmpty()};
 }
@@ -217,14 +220,8 @@ EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal)
     return emotes;
 }
 
-void updateEmoteMapPtr(Atomic<std::shared_ptr<const EmoteMap>> &map,
-                       EmoteMap &&updatedMap)
-{
-    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
-}
-
 EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
-                            const SeventvEventApiEmoteUpdateDispatch &dispatch)
+                            const SeventvEventAPIEmoteUpdateDispatch &dispatch)
 {
     bool toNonAliased = oldEmote->baseName.has_value() &&
                         dispatch.emoteName == oldEmote->baseName->string;
@@ -236,8 +233,8 @@ EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
              ? createTooltip(dispatch.emoteName, oldEmote->author.string, false)
              : createAliasedTooltip(dispatch.emoteName, baseName.string,
                                     oldEmote->author.string, false),
-         oldEmote->homePage, oldEmote->zeroWidth, oldEmote->author,
-         boost::make_optional(!toNonAliased, baseName)}));
+         oldEmote->homePage, oldEmote->zeroWidth, oldEmote->id,
+         oldEmote->author, boost::make_optional(!toNonAliased, baseName)}));
     return emote;
 }
 
@@ -322,8 +319,20 @@ void SeventvEmotes::loadChannelEmotes(
             if (hasEmotes)
             {
                 auto user = json["user"].toObject();
+
+                size_t connectionIdx = 0;
+                for (const auto &conn : user["connections"].toArray())
+                {
+                    if (conn.toObject()["platform"].toString() == "TWITCH")
+                    {
+                        break;
+                    }
+                    connectionIdx++;
+                }
+
                 callback(std::move(emoteMap),
-                         {user["id"].toString(), emoteSet["id"].toString()});
+                         {user["id"].toString(), emoteSet["id"].toString(),
+                          connectionIdx});
             }
 
             auto shared = channel.lock();
@@ -389,7 +398,7 @@ void SeventvEmotes::loadChannelEmotes(
 
 boost::optional<EmotePtr> SeventvEmotes::addEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &map,
-    const SeventvEventApiEmoteAddDispatch &dispatch)
+    const SeventvEventAPIEmoteAddDispatch &dispatch)
 {
     // Check for visibility first, so we don't copy the map.
     auto emoteData = dispatch.emoteJson["data"].toObject();
@@ -398,60 +407,66 @@ boost::optional<EmotePtr> SeventvEmotes::addEmote(
         return boost::none;
     }
 
+    // This copies the map.
     EmoteMap updatedMap = *map.get();
     auto result = createEmote(dispatch.emoteJson, emoteData, false);
     if (!result.hasImages)
     {
-        // this shouldn't happen but if it does it will crash
+        // Incoming emote didn't contain any images, abort
         qCDebug(chatterinoSeventv)
             << "Emote without images:" << dispatch.emoteJson;
         return boost::none;
     }
     auto emote = std::make_shared<const Emote>(std::move(result.emote));
     updatedMap[result.name] = emote;
-    updateEmoteMapPtr(map, std::move(updatedMap));
+    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
 
     return emote;
 }
 
 boost::optional<EmotePtr> SeventvEmotes::updateEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &map,
-    const SeventvEventApiEmoteUpdateDispatch &dispatch)
+    const SeventvEventAPIEmoteUpdateDispatch &dispatch)
 {
     auto oldMap = map.get();
-    auto oldEmote = oldMap->find({dispatch.oldEmoteName});
+    auto oldEmote = oldMap->findEmote(dispatch.emoteName, dispatch.emoteID);
     if (oldEmote == oldMap->end())
     {
         return boost::none;
     }
+
+    // This copies the map.
     EmoteMap updatedMap = *map.get();
     updatedMap.erase(oldEmote->second->name);
 
     auto emote = createUpdatedEmote(oldEmote->second, dispatch);
     updatedMap[emote->name] = emote;
-    updateEmoteMapPtr(map, std::move(updatedMap));
+    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
 
     return emote;
 }
 
-bool SeventvEmotes::removeEmote(
+boost::optional<EmotePtr> SeventvEmotes::removeEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &map,
-    const SeventvEventApiEmoteRemoveDispatch &dispatch)
+    const SeventvEventAPIEmoteRemoveDispatch &dispatch)
 {
+    // This copies the map.
     EmoteMap updatedMap = *map.get();
-    auto it = updatedMap.find(EmoteName{dispatch.emoteName});
+    auto it = updatedMap.findEmote(dispatch.emoteName, dispatch.emoteID);
     if (it == updatedMap.end())
     {
         // We already copied the map at this point and are now discarding the copy.
         // This is fine, because this case should be really rare.
-        return false;
+        return boost::none;
     }
+    auto emote = it->second;
     updatedMap.erase(it);
-    updateEmoteMapPtr(map, std::move(updatedMap));
-    return true;
+    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
+
+    return emote;
 }
 
-void SeventvEmotes::updateEmoteSet(
+void SeventvEmotes::getEmoteSet(
     const QString &emoteSetId,
     std::function<void(EmoteMap &&, QString)> successCallback,
     std::function<void(QString)> errorCallback)

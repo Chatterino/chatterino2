@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Paint.hpp"
 #include "messages/Image.hpp"
+#include "Paint.hpp"
 
 namespace chatterino {
 

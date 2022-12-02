@@ -4,8 +4,8 @@
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/PubSubWebsocket.hpp"
 
-#include <QString>
 #include <pajlada/signals/signal.hpp>
+#include <QString>
 
 #include <atomic>
 #include <vector>

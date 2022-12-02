@@ -18,13 +18,13 @@
 #include "util/LayoutCreator.hpp"
 #include "util/LayoutHelper.hpp"
 #include "util/StreamerMode.hpp"
-#include "widgets/Label.hpp"
-#include "widgets/TooltipWidget.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 #include "widgets/helper/EffectLabel.hpp"
+#include "widgets/Label.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+#include "widgets/TooltipWidget.hpp"
 
 #include <QDesktopWidget>
 #include <QDrag>
@@ -33,6 +33,7 @@
 #include <QMenu>
 #include <QMimeData>
 #include <QPainter>
+
 #include <cmath>
 
 #ifdef USEWEBENGINE
@@ -330,7 +331,7 @@ void SplitHeader::initializeLayout()
         },
         this->managedConnections_);
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     this->setLayout(layout);
 

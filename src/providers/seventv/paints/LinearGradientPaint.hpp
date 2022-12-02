@@ -1,7 +1,9 @@
 #pragma once
 
-#include <utility>
 #include "Paint.hpp"
+
+#include <optional>
+#include <utility>
 
 namespace chatterino {
 

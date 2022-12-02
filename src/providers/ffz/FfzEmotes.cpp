@@ -1,7 +1,5 @@
 #include "providers/ffz/FfzEmotes.hpp"
 
-#include <QJsonArray>
-
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
@@ -10,6 +8,8 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
+
+#include <QJsonArray>
 
 namespace chatterino {
 namespace {

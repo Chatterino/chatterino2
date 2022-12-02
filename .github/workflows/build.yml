@@ -8,7 +8,7 @@ on:
   pull_request:
   workflow_dispatch:
 
-concurrency: 
+concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
@@ -38,17 +38,11 @@ jobs:
           submodules: true
           fetch-depth: 0  # allows for tags access
 
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v3
-        with:
-          path: "${{ github.workspace }}/qt/"
-          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
-
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3.0.0
         with:
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
           version: ${{ matrix.qt-version }}
           dir: "${{ github.workspace }}/qt/"
 
@@ -70,12 +64,12 @@ jobs:
       - name: Add Conan to path
         if: startsWith(matrix.os, 'windows')
         run: echo "C:\Program Files\Conan\conan\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-        
+
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
             choco install conan -y
-        
+
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
         uses: ilammy/msvc-dev-cmd@v1.12.0
@@ -105,7 +99,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: conan remove "*" -fsb
         shell: bash
-        
+
       # LINUX
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
@@ -115,6 +109,7 @@ jobs:
                 cmake \
                 virtualenv \
                 rapidjson-dev \
+                libfuse2 \
                 libssl-dev \
                 libboost-dev \
                 libxcb-randr0-dev \
@@ -148,7 +143,7 @@ jobs:
 
       - name: clang-tidy review
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        uses: ZedThree/clang-tidy-review@v0.10.0
+        uses: ZedThree/clang-tidy-review@v0.10.1
         id: review
         with:
           build_dir: build
@@ -189,7 +184,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-${{ matrix.qt-version }}.deb
-          path: build/Chatterino.deb
+          path: build/Chatterino-x86_64.deb
 
       # MACOS
       - name: Install dependencies (MacOS)
@@ -235,83 +230,34 @@ jobs:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/chatterino7')
 
     steps:
-      - name: Create release
-        id: create_release
-        uses: pajlada/create-release@v2.0.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: nightly-build
-          backup_tag_name: backup-nightly-build
-          release_name: Nightly Release
-          body: |
-              Nightly Build
-          prerelease: true
-
       - uses: actions/download-artifact@v3
         with:
           name: chatterino-windows-x86-64-5.15.2.zip
-          path: windows/
+          path: release-artifacts/
 
       - uses: actions/download-artifact@v3
         with:
           name: Chatterino-x86_64-5.15.2.AppImage
-          path: linux/
+          path: release-artifacts/
 
       - uses: actions/download-artifact@v3
         with:
           name: Chatterino-5.15.2.deb
-          path: ubuntu/
+          path: release-artifacts/
 
       - uses: actions/download-artifact@v3
         with:
           name: chatterino-osx-5.15.2.dmg
-          path: macos/
+          path: release-artifacts/
 
-      # TODO: Extract dmg and appimage
-
-      # - name: Read upload URL into output
-      #   id: upload_url
-      #   run: |
-      #     echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
-
-      - name: Upload release asset (Windows)
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create release
+        uses: ncipollo/release-action@v1.11.2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows/chatterino-windows-x86-64.zip
-          asset_name: chatterino-windows-x86-64.zip
-          asset_content_type: application/zip
-
-      - name: Upload release asset (Ubuntu)
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux/Chatterino-x86_64.AppImage
-          asset_name: Chatterino-x86_64.AppImage
-          asset_content_type: application/x-executable
-
-      - name: Upload release asset (Ubuntu .deb)
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ubuntu/Chatterino.deb
-          asset_name: Chatterino-x86_64.deb
-          asset_content_type: application/vnd.debian.binary-package
-
-      - name: Upload release asset (MacOS)
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos/chatterino-osx.dmg
-          asset_name: chatterino-osx.dmg
-          asset_content_type: application/x-bzip2
-
+          removeArtifacts: true
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifacts: "release-artifacts/*"
+          body: ${{ github.event.head_commit.message }}
+          prerelease: true
+          name: Nightly Release
+          tag: nightly-build

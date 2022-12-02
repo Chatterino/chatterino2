@@ -1,4 +1,5 @@
 #include "RadialGradientPaint.hpp"
+
 #include <algorithm>
 
 namespace chatterino {

@@ -6,9 +6,9 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#include <functional>
-
 #include <QLineEdit>
+
+#include <functional>
 
 namespace chatterino {
 

@@ -1,15 +1,17 @@
 #include "FfzBadges.hpp"
 
+#include "common/NetworkRequest.hpp"
+#include "common/Outcome.hpp"
+#include "messages/Emote.hpp"
+
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QThread>
 #include <QUrl>
+
 #include <map>
 #include <shared_mutex>
-#include "common/NetworkRequest.hpp"
-#include "common/Outcome.hpp"
-#include "messages/Emote.hpp"
 
 namespace chatterino {
 
@@ -92,12 +94,12 @@ void FfzBadges::load()
                     auto userIDString = QString::number(user.toInt());
 
                     auto [userBadges, created] = this->userBadges.emplace(
-                        std::make_pair<QString, std::vector<int>>(
+                        std::make_pair<QString, std::set<int>>(
                             std::move(userIDString), {badgeID}));
                     if (!created)
                     {
                         // User already had a badge assigned
-                        userBadges->second.push_back(badgeID);
+                        userBadges->second.emplace(badgeID);
                     }
                 }
             }

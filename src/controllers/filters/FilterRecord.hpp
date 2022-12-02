@@ -1,15 +1,14 @@
 #pragma once
 
-#include "util/RapidJsonSerializeQString.hpp"
-#include "util/RapidjsonHelpers.hpp"
-
 #include "controllers/filters/parser/FilterParser.hpp"
 #include "controllers/filters/parser/Types.hpp"
+#include "util/RapidjsonHelpers.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 
+#include <pajlada/serialize.hpp>
 #include <QRegularExpression>
 #include <QString>
 #include <QUuid>
-#include <pajlada/serialize.hpp>
 
 #include <memory>
 

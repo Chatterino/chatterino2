@@ -1,7 +1,6 @@
-#include "messages/MessageBuilder.hpp"
-
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "messages/MessageColor.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 
@@ -37,6 +36,9 @@ public:
 
     // Parses "badges" tag which contains a comma separated list of key-value elements
     static std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
+
+    static QString stylizeUsername(const QString &username,
+                                   const Message &message);
 
 protected:
     virtual void parse();

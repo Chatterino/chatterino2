@@ -15,6 +15,7 @@
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
+#include "util/StreamerMode.hpp"
 
 #include <IrcMessage>
 
@@ -453,8 +454,14 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         {
             // Need to wait for pubsub reward notification
             auto clone = _message->clone();
+            qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
+                                         "callback since reward is not known:"
+                                      << rewardId;
             channel->channelPointRewardAdded.connect(
                 [=, &server](ChannelPointReward reward) {
+                    qCDebug(chatterinoTwitch)
+                        << "TwitchChannel reward added callback:" << reward.id
+                        << "-" << rewardId;
                     if (reward.id == rewardId)
                     {
                         this->addMessage(clone, target, content_, server, isSub,
@@ -800,7 +807,9 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     overrideFlags->set(MessageFlag::DoNotTriggerNotification);
     overrideFlags->set(MessageFlag::DoNotLog);
 
-    if (getSettings()->inlineWhispers)
+    if (getSettings()->inlineWhispers &&
+        !(getSettings()->streamerModeSuppressInlineWhispers &&
+          isInStreamerMode()))
     {
         getApp()->twitch->forEachChannel(
             [&_message, overrideFlags](ChannelPtr channel) {
@@ -1000,10 +1009,9 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
         getSettings()->helixTimegateWhisper.getValue() ==
             HelixTimegateOverride::Timegate)
     {
-        content =
-            content +
-            " Consider setting the \"Helix timegate /w "
-            "behaviour\" to \"Always use Helix\" in your Chatterino settings.";
+        content = content +
+                  " Consider setting \"Helix timegate /w behaviour\" "
+                  "to \"Always use Helix\" in your Chatterino settings.";
     }
     builtMessages.emplace_back(
         makeSystemMessage(content, calculateMessageTime(message).time()));

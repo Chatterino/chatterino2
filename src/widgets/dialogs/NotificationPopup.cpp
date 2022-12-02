@@ -7,7 +7,6 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QScreen>
-
 #include <QVBoxLayout>
 
 namespace chatterino {
@@ -32,8 +31,7 @@ void NotificationPopup::updatePosition()
 {
     Location location = BottomRight;
 
-    QDesktopWidget *desktop = QApplication::desktop();
-    const QRect rect = desktop->availableGeometry();
+    const QRect rect = QGuiApplication::primaryScreen()->availableGeometry();
 
     switch (location)
     {

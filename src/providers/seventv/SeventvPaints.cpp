@@ -10,6 +10,7 @@
 
 #include <QUrl>
 #include <QUrlQuery>
+
 #include <vector>
 
 namespace chatterino {

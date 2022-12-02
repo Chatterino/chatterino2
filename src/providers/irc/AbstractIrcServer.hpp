@@ -1,14 +1,15 @@
 #pragma once
 
-#include <IrcMessage>
-#include <functional>
-#include <mutex>
-#include <pajlada/signals/signal.hpp>
-#include <pajlada/signals/signalholder.hpp>
-
 #include "common/Common.hpp"
 #include "providers/irc/IrcConnection2.hpp"
 #include "util/RatelimitBucket.hpp"
+
+#include <IrcMessage>
+#include <pajlada/signals/signal.hpp>
+#include <pajlada/signals/signalholder.hpp>
+
+#include <functional>
+#include <mutex>
 
 namespace chatterino {
 

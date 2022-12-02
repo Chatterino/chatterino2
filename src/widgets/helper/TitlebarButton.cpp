@@ -1,6 +1,6 @@
 #include "TitlebarButton.hpp"
 
-#include "BaseTheme.hpp"
+#include "singletons/Theme.hpp"
 
 #include <QPainterPath>
 

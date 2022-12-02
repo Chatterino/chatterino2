@@ -12,7 +12,7 @@ Install all of the dependencies using `sudo apt install qttools5-dev qtmultimedi
 
 ### Arch Linux
 
-Install all of the dependencies using `sudo pacman -S --needed qt5-base qt5-multimedia qt5-svg qt5-tools gst-plugins-ugly gst-plugins-good boost rapidjson pkgconf openssl cmake`
+Install all of the dependencies using `sudo pacman -S --needed qt5-base qt5-multimedia qt5-imageformats qt5-svg qt5-tools gst-plugins-ugly gst-plugins-good boost rapidjson pkgconf openssl cmake`
 
 Alternatively you can use the [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) package to build and install Chatterino for you.
 

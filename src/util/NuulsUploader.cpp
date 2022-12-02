@@ -2,6 +2,7 @@
 
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/QLogging.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -14,7 +15,6 @@
 #include <QMimeDatabase>
 #include <QMutex>
 #include <QSaveFile>
-#include "common/QLogging.hpp"
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds
@@ -204,9 +204,32 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
             return Success;
         })
         .onError([channel](NetworkResult result) -> bool {
-            channel->addMessage(makeSystemMessage(
+            auto errorMessage =
                 QString("An error happened while uploading your image: %1")
-                    .arg(result.status())));
+                    .arg(result.status());
+
+            // Try to read more information from the result body
+            auto obj = result.parseJson();
+            if (!obj.isEmpty())
+            {
+                auto apiCode = obj.value("code");
+                if (!apiCode.isUndefined())
+                {
+                    auto codeString = apiCode.toVariant().toString();
+                    codeString.truncate(20);
+                    errorMessage += QString(" - code: %1").arg(codeString);
+                }
+
+                auto apiError = obj.value("error").toString();
+                if (!apiError.isEmpty())
+                {
+                    apiError.truncate(300);
+                    errorMessage +=
+                        QString(" - error: %1").arg(apiError.trimmed());
+                }
+            }
+
+            channel->addMessage(makeSystemMessage(errorMessage));
             uploadMutex.unlock();
             return true;
         })

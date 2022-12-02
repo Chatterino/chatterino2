@@ -9,7 +9,8 @@
 
 namespace chatterino {
 
-struct eventapiconfig : public websocketpp::config::asio_tls_client {
+struct BasicPubSubConfig : public websocketpp::config::asio_tls_client {
+    // NOLINTBEGIN(modernize-use-using)
     typedef websocketpp::log::chatterinowebsocketpplogger<
         concurrency_type, websocketpp::log::elevel>
         elog_type;
@@ -17,18 +18,19 @@ struct eventapiconfig : public websocketpp::config::asio_tls_client {
         concurrency_type, websocketpp::log::alevel>
         alog_type;
 
-    struct permessage_deflate_config {
+    struct PerMessageDeflateConfig {
     };
 
     typedef websocketpp::extensions::permessage_deflate::disabled<
-        permessage_deflate_config>
+        PerMessageDeflateConfig>
         permessage_deflate_type;
+    // NOLINTEND(modernize-use-using)
 };
 
-namespace eventapi {
-    using WebsocketClient = websocketpp::client<chatterino::eventapiconfig>;
+namespace liveupdates {
+    using WebsocketClient = websocketpp::client<chatterino::BasicPubSubConfig>;
     using WebsocketHandle = websocketpp::connection_hdl;
     using WebsocketErrorCode = websocketpp::lib::error_code;
-}  // namespace eventapi
+}  // namespace liveupdates
 
 }  // namespace chatterino

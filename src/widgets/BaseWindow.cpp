@@ -1,20 +1,21 @@
 #include "BaseWindow.hpp"
 
 #include "BaseSettings.hpp"
-#include "BaseTheme.hpp"
 #include "boost/algorithm/algorithm.hpp"
+#include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 
 #include <QApplication>
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QFont>
 #include <QIcon>
+
 #include <functional>
 
 #ifdef CHATTERINO
@@ -23,6 +24,7 @@
 #endif
 
 #ifdef USEWINSDK
+// clang-format off
 #    include <ObjIdl.h>
 #    include <VersionHelpers.h>
 #    include <Windows.h>
@@ -37,6 +39,7 @@
 #    include <QVBoxLayout>
 
 #    define WM_DPICHANGED 0x02E0
+// clang-format on
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"
@@ -78,7 +81,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
                 this->updateScale();
             });
         },
-        this->connections_);
+        this->connections_, false);
 
     this->updateScale();
 
@@ -144,7 +147,7 @@ void BaseWindow::init()
             {
                 QHBoxLayout *buttonLayout = this->ui_.titlebarBox =
                     new QHBoxLayout();
-                buttonLayout->setMargin(0);
+                buttonLayout->setContentsMargins(0, 0, 0, 0);
                 layout->addLayout(buttonLayout);
 
                 // title
@@ -343,14 +346,15 @@ bool BaseWindow::event(QEvent *event)
 
 void BaseWindow::wheelEvent(QWheelEvent *event)
 {
-    if (event->orientation() != Qt::Vertical)
+    // ignore horizontal mouse wheels
+    if (event->angleDelta().x() != 0)
     {
         return;
     }
 
     if (event->modifiers() & Qt::ControlModifier)
     {
-        if (event->delta() > 0)
+        if (event->angleDelta().y() > 0)
         {
             getSettings()->setClampedUiScale(
                 getSettings()->getClampedUiScale() + 0.1);
@@ -782,8 +786,12 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 #ifdef USEWINSDK
     if (auto dpi = getWindowDpi(msg->hwnd))
     {
-        this->nativeScale_ = dpi.get() / 96.f;
-        this->updateScale();
+        float currentScale = (float)dpi.get() / 96.F;
+        if (currentScale != this->nativeScale_)
+        {
+            this->nativeScale_ = currentScale;
+            this->updateScale();
+        }
     }
 
     if (!this->shown_ && this->isVisible())
@@ -792,8 +800,9 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
         {
             this->shown_ = true;
 
-            const MARGINS shadow = {8, 8, 8, 8};
-            DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
+            // disable OS window border
+            const MARGINS margins = {-1};
+            DwmExtendFrameIntoClientArea(HWND(this->winId()), &margins);
         }
         if (!this->initalBounds_.isNull())
         {
@@ -818,17 +827,15 @@ bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame())
     {
-        // int cx = GetSystemMetrics(SM_CXSIZEFRAME);
-        // int cy = GetSystemMetrics(SM_CYSIZEFRAME);
-
         if (msg->wParam == TRUE)
         {
-            NCCALCSIZE_PARAMS *ncp =
-                (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
-            ncp->lppos->flags |= SWP_NOREDRAW;
-            RECT *clientRect = &ncp->rgrc[0];
-
-            clientRect->top -= 1;
+            // remove 1 extra pixel on top of custom frame
+            auto *ncp = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
+            if (ncp)
+            {
+                ncp->lppos->flags |= SWP_NOREDRAW;
+                ncp->rgrc[0].top -= 1;
+            }
         }
 
         *result = 0;

@@ -9,10 +9,10 @@
 #include "providers/twitch/TwitchUser.hpp"
 #include "util/QStringHash.hpp"
 
-#include <rapidjson/document.h>
 #include <QColor>
 #include <QElapsedTimer>
 #include <QString>
+#include <rapidjson/document.h>
 
 #include <functional>
 #include <mutex>

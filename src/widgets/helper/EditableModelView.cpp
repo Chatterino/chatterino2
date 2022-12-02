@@ -1,16 +1,16 @@
 #include "EditableModelView.hpp"
+
 #include "widgets/helper/RegExpItemDelegate.hpp"
 
 #include <QAbstractItemView>
 #include <QAbstractTableModel>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QLabel>
 #include <QModelIndex>
 #include <QPushButton>
 #include <QTableView>
 #include <QVBoxLayout>
-
-#include <QLabel>
 
 namespace chatterino {
 
@@ -29,7 +29,7 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
 
     // create layout
     QVBoxLayout *vbox = new QVBoxLayout(this);
-    vbox->setMargin(0);
+    vbox->setContentsMargins(0, 0, 0, 0);
 
     // create button layout
     QHBoxLayout *buttons = new QHBoxLayout(this);
