@@ -1,8 +1,9 @@
 #pragma once
 
-#include <functional>
 #include "messages/Emote.hpp"
 #include "widgets/listview/GenericListItem.hpp"
+
+#include <functional>
 
 namespace chatterino {
 

@@ -1,11 +1,10 @@
 #include "common/NetworkRequest.hpp"
+
 #include "common/NetworkManager.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
-#include "providers/twitch/api/Helix.hpp"
-
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
+#include "providers/twitch/api/Helix.hpp"
 
 #include <gtest/gtest.h>
 

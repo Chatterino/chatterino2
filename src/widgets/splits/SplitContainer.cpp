@@ -8,13 +8,14 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
 
+#include <boost/foreach.hpp>
 #include <QApplication>
 #include <QDebug>
 #include <QHBoxLayout>
@@ -25,8 +26,8 @@
 #include <QPainter>
 #include <QVBoxLayout>
 #include <QWidget>
+
 #include <algorithm>
-#include <boost/foreach.hpp>
 
 namespace chatterino {
 

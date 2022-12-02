@@ -2,12 +2,11 @@
 
 #include "common/SignalVector.hpp"
 
+#include <boost/optional.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QAbstractTableModel>
 #include <QMimeData>
 #include <QStandardItem>
-#include <boost/optional.hpp>
-
-#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 

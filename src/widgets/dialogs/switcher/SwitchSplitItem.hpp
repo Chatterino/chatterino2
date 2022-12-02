@@ -1,12 +1,11 @@
 #pragma once
 
-#include "widgets/dialogs/switcher/AbstractSwitcherItem.hpp"
-
 #include "singletons/WindowManager.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
+#include "widgets/dialogs/switcher/AbstractSwitcherItem.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
 
 namespace chatterino {
 

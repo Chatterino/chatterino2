@@ -1,8 +1,8 @@
 #pragma once
 
-#include <memory>
-
 #include <QColor>
+
+#include <memory>
 
 namespace chatterino {
 

@@ -1,22 +1,5 @@
 #include "ChannelView.hpp"
 
-#include <QClipboard>
-#include <QColor>
-#include <QDate>
-#include <QDebug>
-#include <QDesktopServices>
-#include <QEasingCurve>
-#include <QGraphicsBlurEffect>
-#include <QMessageBox>
-#include <QPainter>
-#include <QScreen>
-#include <QVariantAnimation>
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <functional>
-#include <memory>
-
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
@@ -24,12 +7,12 @@
 #include "controllers/commands/CommandController.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
+#include "messages/layouts/MessageLayout.hpp"
+#include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
-#include "messages/layouts/MessageLayout.hpp"
-#include "messages/layouts/MessageLayoutElement.hpp"
 #include "providers/LinkResolver.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -44,16 +27,34 @@
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamerMode.hpp"
 #include "util/Twitch.hpp"
-#include "widgets/Scrollbar.hpp"
-#include "widgets/TooltipWidget.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/SearchPopup.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitInput.hpp"
+#include "widgets/TooltipWidget.hpp"
+#include "widgets/Window.hpp"
+
+#include <QClipboard>
+#include <QColor>
+#include <QDate>
+#include <QDebug>
+#include <QDesktopServices>
+#include <QEasingCurve>
+#include <QGraphicsBlurEffect>
+#include <QMessageBox>
+#include <QPainter>
+#include <QScreen>
+#include <QVariantAnimation>
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <functional>
+#include <memory>
 
 #define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3

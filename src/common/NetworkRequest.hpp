@@ -4,6 +4,7 @@
 #include "common/NetworkResult.hpp"
 
 #include <QHttpMultiPart>
+
 #include <memory>
 
 namespace chatterino {

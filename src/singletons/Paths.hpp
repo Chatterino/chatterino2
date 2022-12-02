@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QString>
 #include <boost/optional.hpp>
+#include <QString>
 
 namespace chatterino {
 

@@ -1,15 +1,17 @@
 #include "FfzBadges.hpp"
 
+#include "common/NetworkRequest.hpp"
+#include "common/Outcome.hpp"
+#include "messages/Emote.hpp"
+
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QThread>
 #include <QUrl>
+
 #include <map>
 #include <shared_mutex>
-#include "common/NetworkRequest.hpp"
-#include "common/Outcome.hpp"
-#include "messages/Emote.hpp"
 
 namespace chatterino {
 

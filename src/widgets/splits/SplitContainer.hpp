@@ -3,6 +3,8 @@
 #include "common/WindowDescriptors.hpp"
 #include "widgets/BaseWidget.hpp"
 
+#include <pajlada/signals/signal.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QDragEnterEvent>
 #include <QHBoxLayout>
 #include <QRect>
@@ -12,8 +14,6 @@
 
 #include <algorithm>
 #include <functional>
-#include <pajlada/signals/signal.hpp>
-#include <pajlada/signals/signalholder.hpp>
 #include <unordered_map>
 #include <vector>
 

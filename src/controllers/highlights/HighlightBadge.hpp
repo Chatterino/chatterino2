@@ -1,12 +1,12 @@
 #pragma once
 
 #include "providers/twitch/TwitchBadge.hpp"
-#include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 
+#include <pajlada/serialize.hpp>
 #include <QString>
 #include <QUrl>
-#include <pajlada/serialize.hpp>
 
 namespace chatterino {
 class HighlightBadge

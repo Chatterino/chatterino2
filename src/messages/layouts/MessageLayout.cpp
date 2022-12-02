@@ -2,9 +2,9 @@
 
 #include "Application.hpp"
 #include "debug/Benchmark.hpp"
+#include "messages/layouts/MessageLayoutContainer.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
-#include "messages/layouts/MessageLayoutContainer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -15,8 +15,8 @@
 #include <QApplication>
 #include <QDebug>
 #include <QPainter>
-#include <QThread>
 #include <QtGlobal>
+#include <QThread>
 
 #define MARGIN_LEFT (int)(8 * this->scale)
 #define MARGIN_RIGHT (int)(8 * this->scale)

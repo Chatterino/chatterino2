@@ -6,7 +6,6 @@
 #include "widgets/Notebook.hpp"
 
 #include <pajlada/signals/signal.hpp>
-
 #include <QLineEdit>
 
 namespace chatterino {

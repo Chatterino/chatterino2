@@ -5,12 +5,12 @@
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 
+#include <boost/noncopyable.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QPen>
 #include <QPoint>
 #include <QRect>
 #include <QString>
-#include <boost/noncopyable.hpp>
-#include <pajlada/signals/signalholder.hpp>
 
 #include <climits>
 #include <cstdint>

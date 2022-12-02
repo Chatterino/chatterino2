@@ -3,14 +3,14 @@
 #include "common/Singleton.hpp"
 #include "controllers/userdata/UserData.hpp"
 #include "util/QStringHash.hpp"
-#include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 #include "util/serialize/Container.hpp"
 
-#include <QColor>
-#include <QString>
 #include <boost/optional.hpp>
 #include <pajlada/settings.hpp>
+#include <QColor>
+#include <QString>
 
 #include <shared_mutex>
 #include <unordered_map>

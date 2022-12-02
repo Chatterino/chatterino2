@@ -7,17 +7,17 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/Message.hpp"
-#include "providers/RecentMessagesApi.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
+#include "providers/RecentMessagesApi.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
-#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
@@ -26,13 +26,13 @@
 #include "util/QStringHash.hpp"
 #include "widgets/Window.hpp"
 
-#include <rapidjson/document.h>
 #include <IrcConnection>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QThread>
 #include <QTimer>
+#include <rapidjson/document.h>
 
 namespace chatterino {
 namespace {

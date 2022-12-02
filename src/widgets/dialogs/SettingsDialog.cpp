@@ -32,6 +32,10 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 {
     this->setObjectName("SettingsDialog");
     this->setWindowTitle("Chatterino Settings");
+    // Disable the ? button in the titlebar until we decide to use it
+    this->setWindowFlags(this->windowFlags() &
+                         ~Qt::WindowContextHelpButtonHint);
+
     this->resize(915, 600);
     this->themeChangedEvent();
     this->scaleChangedEvent(this->scale());
@@ -41,9 +45,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     this->overrideBackgroundColor_ = QColor("#111111");
     this->scaleChangedEvent(this->scale());  // execute twice to width of item
 
-    // Disable the ? button in the titlebar until we decide to use it
-    this->setWindowFlags(this->windowFlags() &
-                         ~Qt::WindowContextHelpButtonHint);
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
                                        [this]() {

@@ -1,27 +1,28 @@
 #include "messages/Image.hpp"
 
-#include <QBuffer>
-#include <QImageReader>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
-#include <QTimer>
-#include <boost/functional/hash.hpp>
-#include <functional>
-#include <queue>
-#include <thread>
-
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
+
+#include <boost/functional/hash.hpp>
+#include <QBuffer>
+#include <QImageReader>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QTimer>
+
+#include <functional>
+#include <queue>
+#include <thread>
 #ifndef CHATTERINO_TEST
 #    include "singletons/Emotes.hpp"
 #endif
-#include "singletons/WindowManager.hpp"
 #include "singletons/helper/GifTimer.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 
