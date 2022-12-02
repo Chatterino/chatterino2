@@ -258,7 +258,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.enableSmoothScrollingNewMessages);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput, false,
                        "Show the chat box even when there is nothing typed.");
-    layout.addCheckbox("Show message length while typing", s.showMessageLength);
+    layout.addCheckbox(
+        "Show message length while typing", s.showMessageLength, false,
+        "Show how many characters are currently in your input box.\n"
+        "Useful for making sure you don't go past the 500 character Twitch "
+        "limit, or a lower limit enforced by a moderation bot");
     layout.addCheckbox(
         "Allow sending duplicate messages", s.allowDuplicateMessages, false,
         "Allow a single message to be repeatedly sent without any changes.");
