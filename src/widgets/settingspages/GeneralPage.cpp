@@ -430,17 +430,23 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Hide usercard avatars",
                        s.streamerModeHideUsercardAvatars, false,
                        "Prevent potentially explicit avatars from showing.");
-    layout.addCheckbox("Hide link thumbnails",
-                       s.streamerModeHideLinkThumbnails);
+    layout.addCheckbox("Hide link thumbnails", s.streamerModeHideLinkThumbnails,
+                       false,
+                       "Prevent potentially explicit links from showing.");
     layout.addCheckbox(
         "Hide viewer count and stream length while hovering over split header",
         s.streamerModeHideViewerCountAndDuration);
-    layout.addCheckbox("Hide moderation actions", s.streamerModeHideModActions);
-    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
-    layout.addCheckbox("Suppress Live Notifications",
-                       s.streamerModeSuppressLiveNotifications);
+    layout.addCheckbox(
+        "Hide moderation actions", s.streamerModeHideModActions, false,
+        "Hide which moderators executed a mod action on a user.");
+    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions, false,
+                       "Mute your ping sound from playing.");
+    layout.addCheckbox(
+        "Suppress Live Notifications", s.streamerModeSuppressLiveNotifications,
+        false, "Hide Live notification popups from appearing. (Windows Only)");
     layout.addCheckbox("Suppress Inline Whispers",
-                       s.streamerModeSuppressInlineWhispers);
+                       s.streamerModeSuppressInlineWhispers, false,
+                       "Hide whispers sent to you from appearing in chat.");
 
     layout.addTitle("Link Previews");
     layout.addDescription(
