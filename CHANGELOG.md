@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Bugfix: Fixed incorrect red coloring of message input. (#4204)
+- Bugfix: Fixed message input showing as red after removing a message that was more than 500 characters. (#4204)
 
 ## 2.4.0
 
