@@ -734,7 +734,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        false,
                        "When using tab-completon, if the username is at the "
                        "start of the message, include a comma at the end of "
-                       "the name \n e.g. pajl -> pajlada,");
+                       "the name.\ne.g. pajl -> pajlada,");
     layout.addCheckbox(
         "Show joined users (< 1000 chatters)", s.showJoins, false,
         "Show a Twitch system message stating what users have joined the chat, "
