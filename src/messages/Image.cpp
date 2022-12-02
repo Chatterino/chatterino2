@@ -1,27 +1,28 @@
 #include "messages/Image.hpp"
 
-#include <QBuffer>
-#include <QImageReader>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
-#include <QTimer>
-#include <boost/functional/hash.hpp>
-#include <functional>
-#include <queue>
-#include <thread>
-
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
+
+#include <boost/functional/hash.hpp>
+#include <QBuffer>
+#include <QImageReader>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QTimer>
+
+#include <functional>
+#include <queue>
+#include <thread>
 #ifndef CHATTERINO_TEST
 #    include "singletons/Emotes.hpp"
 #endif
-#include "singletons/WindowManager.hpp"
 #include "singletons/helper/GifTimer.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 
@@ -479,12 +480,14 @@ void Image::actuallyLoad()
             {
                 qCDebug(chatterinoImage)
                     << "Error: image cant be read " << shared->url().string;
+                shared->empty_ = true;
                 return Failure;
             }
 
             const auto size = reader.size();
             if (size.isEmpty())
             {
+                shared->empty_ = true;
                 return Failure;
             }
 
@@ -494,6 +497,7 @@ void Image::actuallyLoad()
                 qCDebug(chatterinoImage)
                     << "Error: image has less than 1 frame "
                     << shared->url().string << ": " << reader.errorString();
+                shared->empty_ = true;
                 return Failure;
             }
 
@@ -504,6 +508,7 @@ void Image::actuallyLoad()
             {
                 qCDebug(chatterinoImage) << "image too large in RAM";
 
+                shared->empty_ = true;
                 return Failure;
             }
 

@@ -1,22 +1,99 @@
 #pragma once
 
-#include "BaseTheme.hpp"
 #include "common/Singleton.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
+#include <pajlada/settings/setting.hpp>
 #include <QBrush>
 #include <QColor>
-#include <pajlada/settings/setting.hpp>
 #include <singletons/Settings.hpp>
 
 namespace chatterino {
 
 class WindowManager;
 
-class Theme final : public Singleton, public BaseTheme
+class Theme final : public Singleton
 {
 public:
     Theme();
+
+    bool isLightTheme() const;
+
+    struct TabColors {
+        QColor text;
+        struct {
+            QBrush regular;
+            QBrush hover;
+            QBrush unfocused;
+        } backgrounds;
+        struct {
+            QColor regular;
+            QColor hover;
+            QColor unfocused;
+        } line;
+    };
+
+    QColor accent{"#00aeef"};
+
+    /// WINDOW
+    struct {
+        QColor background;
+        QColor text;
+        QColor borderUnfocused;
+        QColor borderFocused;
+    } window;
+
+    /// TABS
+    struct {
+        TabColors regular;
+        TabColors newMessage;
+        TabColors highlighted;
+        TabColors selected;
+        QColor border;
+        QColor dividerLine;
+    } tabs;
+
+    /// MESSAGES
+    struct {
+        struct {
+            QColor regular;
+            QColor caret;
+            QColor link;
+            QColor system;
+            QColor chatPlaceholder;
+        } textColors;
+
+        struct {
+            QColor regular;
+            QColor alternate;
+            // QColor whisper;
+        } backgrounds;
+
+        QColor disabled;
+        //        QColor seperator;
+        //        QColor seperatorInner;
+        QColor selection;
+
+        QColor highlightAnimationStart;
+        QColor highlightAnimationEnd;
+    } messages;
+
+    /// SCROLLBAR
+    struct {
+        QColor background;
+        QColor thumb;
+        QColor thumbSelected;
+        struct {
+            QColor highlight;
+            QColor subscription;
+        } highlights;
+    } scrollbars;
+
+    /// TOOLTIP
+    struct {
+        QColor text;
+        QColor background;
+    } tooltip;
 
     /// SPLITS
     struct {
@@ -52,16 +129,26 @@ public:
 
     struct {
         QPixmap copy;
+        QPixmap pin;
     } buttons;
 
     void normalizeColor(QColor &color);
+    void update();
+    QColor blendColors(const QColor &color1, const QColor &color2, qreal ratio);
+
+    pajlada::Signals::NoArgSignal updated;
+
+    QStringSetting themeName{"/appearance/theme/name", "Dark"};
+    DoubleSetting themeHue{"/appearance/theme/hue", 0.0};
 
 private:
-    void actuallyUpdate(double hue, double multiplier) override;
+    bool isLight_ = false;
+    void actuallyUpdate(double hue, double multiplier);
 
     pajlada::Signals::NoArgSignal repaintVisibleChatWidgets_;
 
     friend class WindowManager;
 };
 
+Theme *getTheme();
 }  // namespace chatterino

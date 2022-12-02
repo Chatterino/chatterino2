@@ -1,15 +1,16 @@
 #pragma once
 
 #include "common/QLogging.hpp"
+#include "common/Version.hpp"
 #include "providers/liveupdates/BasicPubSubClient.hpp"
 #include "providers/liveupdates/BasicPubSubWebsocket.hpp"
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "util/DebugCount.hpp"
 #include "util/ExponentialBackoff.hpp"
 
+#include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
 #include <QString>
-#include <pajlada/signals/signal.hpp>
 #include <websocketpp/client.hpp>
 
 #include <algorithm>
@@ -85,6 +86,8 @@ public:
         this->websocketClient_.set_fail_handler([this](auto hdl) {
             this->onConnectionFail(hdl);
         });
+        this->websocketClient_.set_user_agent("Chatterino/" CHATTERINO_VERSION
+                                              " (" CHATTERINO_GIT_HASH ")");
     }
 
     virtual ~BasicPubSubManager() = default;

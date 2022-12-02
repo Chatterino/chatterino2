@@ -2,10 +2,10 @@
 
 #include "messages/Message.hpp"
 
+#include <boost/noncopyable.hpp>
 #include <QDateTime>
 #include <QFile>
 #include <QString>
-#include <boost/noncopyable.hpp>
 
 #include <memory>
 

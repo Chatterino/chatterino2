@@ -2,23 +2,17 @@
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
-#include "providers/twitch/api/Helix.hpp"
-
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
-
-#include <gtest/gtest.h>
-
-#include <QJsonArray>
-#include <QtConcurrent>
-
-#include <chrono>
-#include <thread>
-#include "common/NetworkManager.hpp"
+#include "providers/twitch/api/Helix.hpp"
 
 #include <gtest/gtest.h>
 #include <QApplication>
+#include <QJsonArray>
+#include <QtConcurrent>
 #include <QTimer>
+
+#include <chrono>
+#include <thread>
 
 using namespace chatterino;
 

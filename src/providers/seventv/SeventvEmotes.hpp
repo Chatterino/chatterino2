@@ -3,6 +3,7 @@
 #include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
 #include <memory>
@@ -56,15 +57,60 @@ class EmoteMap;
 class SeventvEmotes final
 {
 public:
+    struct ChannelInfo {
+        QString userID;
+        QString emoteSetID;
+        size_t twitchConnectionIndex;
+    };
+
     SeventvEmotes();
 
     std::shared_ptr<const EmoteMap> globalEmotes() const;
     boost::optional<EmotePtr> globalEmote(const EmoteName &name) const;
     void loadGlobalEmotes();
-    static void loadChannelEmotes(const std::weak_ptr<Channel> &channel,
-                                  const QString &channelId,
-                                  std::function<void(EmoteMap &&)> callback,
-                                  bool manualRefresh);
+    static void loadChannelEmotes(
+        const std::weak_ptr<Channel> &channel, const QString &channelId,
+        std::function<void(EmoteMap &&, ChannelInfo)> callback,
+        bool manualRefresh);
+
+    /**
+     * Adds an emote to the `map` if it's valid.
+     * This will _copy_ the emote map and
+     * update the `Atomic`.
+     *
+     * @return The added emote if an emote was added.
+     */
+    static boost::optional<EmotePtr> addEmote(
+        Atomic<std::shared_ptr<const EmoteMap>> &map,
+        const SeventvEventAPIEmoteAddDispatch &dispatch);
+
+    /**
+     * Updates an emote in this `map`.
+     * This will _copy_ the emote map and
+     * update the `Atomic`.
+     *
+     * @return The updated emote if any emote was updated.
+     */
+    static boost::optional<EmotePtr> updateEmote(
+        Atomic<std::shared_ptr<const EmoteMap>> &map,
+        const SeventvEventAPIEmoteUpdateDispatch &dispatch);
+
+    /**
+     * Removes an emote from this `map`.
+     * This will _copy_ the emote map and
+     * update the `Atomic`.
+     *
+     * @return The removed emote if any emote was removed.
+     */
+    static boost::optional<EmotePtr> removeEmote(
+        Atomic<std::shared_ptr<const EmoteMap>> &map,
+        const SeventvEventAPIEmoteRemoveDispatch &dispatch);
+
+    /** Fetches an emote-set by its id */
+    static void getEmoteSet(
+        const QString &emoteSetId,
+        std::function<void(EmoteMap &&, QString)> successCallback,
+        std::function<void(QString)> errorCallback);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;

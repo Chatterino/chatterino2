@@ -17,8 +17,8 @@
 #include <QListWidget>
 #include <QPushButton>
 #include <QStandardItemModel>
-#include <QTabWidget>
 #include <QTableView>
+#include <QTabWidget>
 #include <QTextEdit>
 
 #define ENABLE_HIGHLIGHTS "Enable Highlighting"

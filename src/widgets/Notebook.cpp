@@ -8,14 +8,15 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookButton.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+#include "widgets/Window.hpp"
 
+#include <boost/foreach.hpp>
 #include <QDebug>
 #include <QFile>
 #include <QFormLayout>
@@ -24,7 +25,6 @@
 #include <QStandardPaths>
 #include <QUuid>
 #include <QWidget>
-#include <boost/foreach.hpp>
 
 namespace chatterino {
 
@@ -73,6 +73,7 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
     tab->page = page;
 
     tab->setCustomTitle(title);
+    tab->setTabLocation(this->tabLocation_);
 
     Item item;
     item.page = page;
@@ -155,54 +156,58 @@ int Notebook::indexOf(QWidget *page) const
 
 void Notebook::select(QWidget *page, bool focusPage)
 {
+    if (!page)
+    {
+        return;
+    }
+
     if (page == this->selectedPage_)
     {
         return;
     }
 
-    if (page != nullptr)
+    auto *item = this->findItem(page);
+    if (!item)
     {
-        page->setHidden(false);
+        return;
+    }
 
-        assert(this->containsPage(page));
-        Item &item = this->findItem(page);
+    page->show();
 
-        item.tab->setSelected(true);
-        item.tab->raise();
+    item->tab->setSelected(true);
+    item->tab->raise();
 
-        if (focusPage)
+    if (focusPage)
+    {
+        if (item->selectedWidget == nullptr)
         {
-            if (item.selectedWidget == nullptr)
+            item->page->setFocus();
+        }
+        else
+        {
+            if (containsChild(page, item->selectedWidget))
             {
-                item.page->setFocus();
+                item->selectedWidget->setFocus(Qt::MouseFocusReason);
             }
             else
             {
-                if (containsChild(page, item.selectedWidget))
-                {
-                    item.selectedWidget->setFocus(Qt::MouseFocusReason);
-                }
-                else
-                {
-                    qCDebug(chatterinoWidget) << "Notebook: selected child of "
-                                                 "page doesn't exist anymore";
-                }
+                qCDebug(chatterinoWidget) << "Notebook: selected child of "
+                                             "page doesn't exist anymore";
             }
         }
     }
 
     if (this->selectedPage_ != nullptr)
     {
-        this->selectedPage_->setHidden(true);
+        this->selectedPage_->hide();
 
-        Item &item = this->findItem(selectedPage_);
-        item.tab->setSelected(false);
-
-        //        for (auto split : this->selectedPage->getSplits()) {
-        //            split->updateLastReadMessage();
-        //        }
-
-        item.selectedWidget = this->selectedPage_->focusWidget();
+        auto *item = this->findItem(selectedPage_);
+        if (!item)
+        {
+            return;
+        }
+        item->tab->setSelected(false);
+        item->selectedWidget = this->selectedPage_->focusWidget();
     }
 
     this->selectedPage_ = page;
@@ -218,14 +223,17 @@ bool Notebook::containsPage(QWidget *page)
                        });
 }
 
-Notebook::Item &Notebook::findItem(QWidget *page)
+Notebook::Item *Notebook::findItem(QWidget *page)
 {
     auto it = std::find_if(this->items_.begin(), this->items_.end(),
                            [page](const auto &item) {
                                return page == item.page;
                            });
-    assert(it != this->items_.end());
-    return *it;
+    if (it != this->items_.end())
+    {
+        return &(*it);
+    }
+    return nullptr;
 }
 
 bool Notebook::containsChild(const QObject *obj, const QObject *child)
@@ -493,6 +501,7 @@ void Notebook::performLayout(bool animated)
     const auto minimumTabAreaSpace = int(tabHeight * 0.5);
     const auto addButtonWidth = this->showAddButton_ ? tabHeight : 0;
     const auto lineThickness = int(2 * scale);
+    const auto tabSpacer = std::max<int>(1, int(scale * 1));
 
     const auto buttonWidth = tabHeight;
     const auto buttonHeight = tabHeight - 1;
@@ -544,7 +553,7 @@ void Notebook::performLayout(bool animated)
                 /// Layout tab
                 item.tab->growWidth(0);
                 item.tab->moveAnimated(QPoint(x, y), animated);
-                x += item.tab->width() + std::max<int>(1, int(scale * 1));
+                x += item.tab->width() + tabSpacer;
             }
 
             /// Update which tabs are in the last row
@@ -605,15 +614,17 @@ void Notebook::performLayout(bool animated)
         }
 
         if (this->visibleButtonCount() > 0)
-            y = tabHeight;
+            y = tabHeight + lineThickness;  // account for divider line
 
         int totalButtonWidths = x;
-        int top = y;
+        const int top = y + tabSpacer;  // add margin
+
+        y = top;
         x = left;
 
         // zneix: if we were to remove buttons when tabs are hidden
         // stuff below to "set page bounds" part should be in conditional statement
-        int tabsPerColumn = (this->height() - top) / tabHeight;
+        int tabsPerColumn = (this->height() - top) / (tabHeight + tabSpacer);
         if (tabsPerColumn == 0)  // window hasn't properly rendered yet
         {
             return;
@@ -654,7 +665,8 @@ void Notebook::performLayout(bool animated)
                     /// Layout tab
                     item.tab->growWidth(largestWidth);
                     item.tab->moveAnimated(QPoint(x, y), animated);
-                    y += tabHeight;
+                    item.tab->setInLastRow(isLastColumn);
+                    y += tabHeight + tabSpacer;
                 }
 
                 if (isLastColumn && this->showAddButton_)
@@ -704,15 +716,17 @@ void Notebook::performLayout(bool animated)
         }
 
         if (this->visibleButtonCount() > 0)
-            y = tabHeight;
+            y = tabHeight + lineThickness;  // account for divider line
 
         int consumedButtonWidths = right - x;
-        int top = y;
+        const int top = y + tabSpacer;  // add margin
+
+        y = top;
         x = right;
 
         // zneix: if we were to remove buttons when tabs are hidden
         // stuff below to "set page bounds" part should be in conditional statement
-        int tabsPerColumn = (this->height() - top) / tabHeight;
+        int tabsPerColumn = (this->height() - top) / (tabHeight + tabSpacer);
         if (tabsPerColumn == 0)  // window hasn't properly rendered yet
         {
             return;
@@ -758,7 +772,8 @@ void Notebook::performLayout(bool animated)
                     /// Layout tab
                     item.tab->growWidth(largestWidth);
                     item.tab->moveAnimated(QPoint(x, y), animated);
-                    y += tabHeight;
+                    item.tab->setInLastRow(isLastColumn);
+                    y += tabHeight + tabSpacer;
                 }
 
                 if (isLastColumn && this->showAddButton_)
@@ -817,7 +832,7 @@ void Notebook::performLayout(bool animated)
         if (this->showTabs_)
         {
             // reset vertical position regardless
-            y = bottom - tabHeight;
+            y = bottom - tabHeight - tabSpacer;
 
             // layout tabs
             /// Notebook tabs need to know if they are in the last row.
@@ -843,7 +858,7 @@ void Notebook::performLayout(bool animated)
                 /// Layout tab
                 item.tab->growWidth(0);
                 item.tab->moveAnimated(QPoint(x, y), animated);
-                x += item.tab->width() + std::max<int>(1, int(scale * 1));
+                x += item.tab->width() + tabSpacer;
             }
 
             /// Update which tabs are in the last row
@@ -866,7 +881,7 @@ void Notebook::performLayout(bool animated)
 
         int consumedBottomSpace =
             std::max({bottom - y, consumedButtonHeights, minimumTabAreaSpace});
-        int tabsStart = bottom - consumedBottomSpace;
+        int tabsStart = bottom - consumedBottomSpace - lineThickness;
 
         if (this->lineOffset_ != tabsStart)
         {
@@ -917,6 +932,13 @@ void Notebook::setTabLocation(NotebookTabLocation location)
     if (location != this->tabLocation_)
     {
         this->tabLocation_ = location;
+
+        // Update all tabs
+        for (const auto &item : this->items_)
+        {
+            item.tab->setTabLocation(location);
+        }
+
         this->performLayout();
     }
 }

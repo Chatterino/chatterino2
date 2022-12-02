@@ -1,20 +1,22 @@
 #pragma once
 
-#include <QPoint>
-#include <QRect>
-#include <memory>
-#include <vector>
-
 #include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
-#include "messages/Selection.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
+#include "messages/Selection.hpp"
+
+#include <QPoint>
+#include <QRect>
+
+#include <memory>
+#include <vector>
 
 class QPainter;
 
 namespace chatterino {
 
 enum class MessageFlag : int64_t;
+enum class FirstWord { Neutral, RTL, LTR };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 struct Margin {
@@ -45,6 +47,9 @@ struct Margin {
 struct MessageLayoutContainer {
     MessageLayoutContainer() = default;
 
+    FirstWord first = FirstWord::Neutral;
+    bool containsRTL = false;
+
     int getHeight() const;
     int getWidth() const;
     float getScale() const;
@@ -54,12 +59,17 @@ struct MessageLayoutContainer {
     void end();
 
     void clear();
-    bool canAddElements();
+    bool canAddElements() const;
     void addElement(MessageLayoutElement *element);
     void addElementNoLineBreak(MessageLayoutElement *element);
     void breakLine();
     bool atStartOfLine();
     bool fitsInLine(int width_);
+    // this method is called when a message has an RTL word
+    // we need to reorder the words to be shown properly
+    // however we don't we to reorder non-text elements like badges, timestamps, username
+    // firstTextIndex is the index of the first text element that we need to start the reordering from
+    void reorderRTL(int firstTextIndex);
     MessageLayoutElement *getElementAt(QPoint point);
 
     // painting
@@ -72,7 +82,8 @@ struct MessageLayoutContainer {
     int getSelectionIndex(QPoint point);
     int getLastCharacterIndex() const;
     int getFirstMessageCharacterIndex() const;
-    void addSelectionText(QString &str, int from, int to, CopyMode copymode);
+    void addSelectionText(QString &str, uint32_t from, uint32_t to,
+                          CopyMode copymode);
 
     bool isCollapsed();
 
@@ -86,7 +97,18 @@ private:
     };
 
     // helpers
-    void _addElement(MessageLayoutElement *element, bool forceAdd = false);
+    /*
+    _addElement is called at two stages. first stage is the normal one where we want to add message layout elements to the container.
+    If we detect an RTL word in the message, reorderRTL will be called, which is the second stage, where we call _addElement
+    again for each layout element, but in the correct order this time, without adding the elemnt to the this->element_ vector.
+    Due to compact emote logic, we need the previous element to check if we should change the spacing or not.
+    in stage one, this is simply elements_.back(), but in stage 2 that's not the case due to the reordering, and we need to pass the 
+    index of the reordered previous element. 
+    In stage one we don't need that and we pass -2 to indicate stage one (i.e. adding mode)
+    In stage two, we pass -1 for the first element, and the index of the oredered privous element for the rest.
+    */
+    void _addElement(MessageLayoutElement *element, bool forceAdd = false,
+                     int prevIndex = -2);
     bool canCollapse();
 
     const Margin margin = {4, 8, 4, 8};
@@ -107,6 +129,7 @@ private:
     int dotdotdotWidth_ = 0;
     bool canAddMessages_ = true;
     bool isCollapsed_ = false;
+    bool wasPrevReversed_ = false;
 
     std::vector<std::unique_ptr<MessageLayoutElement>> elements_;
     std::vector<Line> lines_;

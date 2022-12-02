@@ -3,26 +3,24 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/irc/Irc2.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Notebook.hpp"
 #include "widgets/dialogs/IrcConnectionEditor.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
-#include <QVBoxLayout>
-
-#include <QTableView>
-#include "providers/irc/Irc2.hpp"
-#include "widgets/helper/EditableModelView.hpp"
-
-#include <QHeaderView>
 #include <QPushButton>
+#include <QTableView>
+#include <QVBoxLayout>
 
 #define TAB_TWITCH 0
 #define TAB_IRC 1
@@ -207,7 +205,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
             outerBox->addRow("Server:", view);
         }
 
-        outerBox->addRow("Channel:", this->ui_.irc.channel = new QLineEdit);
+        outerBox->addRow("Channel: #", this->ui_.irc.channel = new QLineEdit);
 
         auto tab = notebook->addPage(obj.getElement());
         tab->setCustomTitle("Irc (Beta)");

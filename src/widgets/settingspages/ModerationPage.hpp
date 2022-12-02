@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QTimer>
-
 #include "widgets/settingspages/SettingsPage.hpp"
+
+#include <QTimer>
 
 class QTabWidget;
 class QPushButton;

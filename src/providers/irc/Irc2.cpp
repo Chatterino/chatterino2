@@ -1,6 +1,5 @@
 #include "Irc2.hpp"
 
-#include <pajlada/serialize.hpp>
 #include "common/Credentials.hpp"
 #include "common/SignalVectorModel.hpp"
 #include "singletons/Paths.hpp"
@@ -8,6 +7,7 @@
 #include "util/RapidjsonHelpers.hpp"
 #include "util/StandardItemHelper.hpp"
 
+#include <pajlada/serialize.hpp>
 #include <QSaveFile>
 #include <QtConcurrent>
 

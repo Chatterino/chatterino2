@@ -27,7 +27,28 @@ IndentCaseLabels: true
 IndentWidth: 4
 IndentWrappedFunctionNames: true
 IndentPPDirectives: AfterHash
-IncludeBlocks: Preserve
+SortIncludes: CaseInsensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+# Project includes
+  - Regex:  '^"[a-zA-Z\._-]+(/[a-zA-Z0-9\._-]+)*"$'
+    Priority: 1
+# Third party library includes
+  - Regex:  '<[[:alnum:].]+/[a-zA-Z0-9\._\/-]+>'
+    Priority: 3
+# Qt includes
+  - Regex:  '^<Q[a-zA-Z0-9\._\/-]+>$'
+    Priority: 3
+    CaseSensitive: true
+# LibCommuni includes
+  - Regex:  '^<Irc[a-zA-Z]+>$'
+    Priority: 3
+# Misc libraries
+  - Regex:  '^<[a-zA-Z_0-9]+\.h(pp)?>$'
+    Priority: 3
+# Standard library includes
+  - Regex:  '^<[a-zA-Z_]+>$'
+    Priority: 4
 NamespaceIndentation: Inner
 PointerBindsToType: false
 SpacesBeforeTrailingComments: 2

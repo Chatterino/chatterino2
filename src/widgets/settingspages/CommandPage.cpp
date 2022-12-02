@@ -1,18 +1,18 @@
 #include "CommandPage.hpp"
 
-#include <QHeaderView>
-#include <QLabel>
-#include <QPushButton>
-#include <QStandardItemModel>
-#include <QTableView>
-#include <QTextEdit>
-
 #include "Application.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/commands/CommandModel.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/StandardItemHelper.hpp"
 #include "widgets/helper/EditableModelView.hpp"
+
+#include <QHeaderView>
+#include <QLabel>
+#include <QPushButton>
+#include <QStandardItemModel>
+#include <QTableView>
+#include <QTextEdit>
 //#include "widgets/helper/ComboBoxItemDelegate.hpp"
 #include "util/CombinePath.hpp"
 #include "util/Qt.hpp"

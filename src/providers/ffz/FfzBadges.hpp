@@ -1,19 +1,19 @@
 #pragma once
 
-#include <boost/optional.hpp>
-#include <common/Singleton.hpp>
-
 #include "common/Aliases.hpp"
 #include "common/UniqueAccess.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/optional.hpp>
+#include <common/Singleton.hpp>
+#include <QColor>
+
 #include <map>
 #include <memory>
+#include <set>
 #include <shared_mutex>
 #include <unordered_map>
 #include <vector>
-
-#include <QColor>
 
 namespace chatterino {
 
@@ -41,7 +41,7 @@ private:
     std::shared_mutex mutex_;
 
     // userBadges points a user ID to the list of badges they have
-    std::unordered_map<QString, std::vector<int>> userBadges;
+    std::unordered_map<QString, std::set<int>> userBadges;
 
     // badges points a badge ID to the information about the badge
     std::unordered_map<int, Badge> badges;

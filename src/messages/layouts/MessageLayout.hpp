@@ -3,8 +3,9 @@
 #include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
 
-#include <QPixmap>
 #include <boost/noncopyable.hpp>
+#include <QPixmap>
+
 #include <cinttypes>
 #include <memory>
 
@@ -59,13 +60,13 @@ public:
     int getLastCharacterIndex() const;
     int getFirstMessageCharacterIndex() const;
     int getSelectionIndex(QPoint position);
-    void addSelectionText(QString &str, int from = 0, int to = INT_MAX,
+    void addSelectionText(QString &str, uint32_t from = 0,
+                          uint32_t to = UINT32_MAX,
                           CopyMode copymode = CopyMode::Everything);
 
     // Misc
     bool isDisabled() const;
     bool isReplyable() const;
-    void setRenderReplies(bool render);
 
 private:
     // variables
@@ -73,7 +74,6 @@ private:
     std::shared_ptr<MessageLayoutContainer> container_;
     std::shared_ptr<QPixmap> buffer_{};
     bool bufferValid_ = false;
-    bool renderReplies_ = true;
 
     int height_ = 0;
 

@@ -1,23 +1,26 @@
 #include "AttachedWindow.hpp"
 
 #include "Application.hpp"
-#include "ForwardDecl.hpp"
 #include "common/QLogging.hpp"
+#include "ForwardDecl.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QTimer>
 #include <QVBoxLayout>
+
 #include <memory>
 
 #ifdef USEWINSDK
+// clang-format off
 #    include "util/WindowsHelper.hpp"
 
 #    include "Windows.h"
 // don't even think about reordering these
 #    include "Psapi.h"
 #    pragma comment(lib, "Dwmapi.lib")
+// clang-format on
 #endif
 
 namespace chatterino {
@@ -48,7 +51,7 @@ AttachedWindow::AttachedWindow(void *_target, int _yOffset)
     , yOffset_(_yOffset)
 {
     QLayout *layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(layout);
 
     auto *split = new Split(this);

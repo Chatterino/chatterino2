@@ -1,10 +1,11 @@
 #include "Updates.hpp"
 
-#include "Settings.hpp"
 #include "common/Modes.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
+#include "Settings.hpp"
 #include "singletons/Paths.hpp"
 #include "util/CombinePath.hpp"
 #include "util/PostToThread.hpp"
@@ -13,7 +14,6 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QRegularExpression>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {
@@ -179,10 +179,10 @@ void Updates::installUpdates()
             })
             .onSuccess([this](auto result) -> Outcome {
                 QByteArray object = result.getData();
-                auto filename =
+                auto filePath =
                     combinePath(getPaths()->miscDirectory, "Update.exe");
 
-                QFile file(filename);
+                QFile file(filePath);
                 file.open(QIODevice::Truncate | QIODevice::WriteOnly);
 
                 if (file.write(object) == -1)
@@ -203,7 +203,7 @@ void Updates::installUpdates()
                 file.flush();
                 file.close();
 
-                if (QProcess::startDetached(filename))
+                if (QProcess::startDetached(filePath, {}))
                 {
                     QApplication::exit(0);
                 }

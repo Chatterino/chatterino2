@@ -1,8 +1,8 @@
 #pragma once
 
-#include <rapidjson/document.h>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <rapidjson/document.h>
 
 namespace chatterino {
 

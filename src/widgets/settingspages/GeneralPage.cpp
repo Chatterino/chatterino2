@@ -19,6 +19,7 @@
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -261,6 +262,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Allow sending duplicate messages", s.allowDuplicateMessages, false,
         "Allow a single message to be repeatedly sent without any changes.");
+    layout.addDropdown<std::underlying_type<MessageOverflow>::type>(
+        "Message overflow", {"Highlight", "Prevent", "Allow"},
+        s.messageOverflow,
+        [](auto index) {
+            return index;
+        },
+        [](auto args) {
+            return static_cast<MessageOverflow>(args.index);
+        },
+        false,
+        "Specify how Chatterino will handle messages that exceed Twitch "
+        "message limits");
 
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
@@ -387,6 +400,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show FFZ channel emotes", s.enableFFZChannelEmotes);
     layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);
     layout.addCheckbox("Show 7TV channel emotes", s.enableSevenTVChannelEmotes);
+    layout.addCheckbox("Enable 7TV live emote updates (requires restart)",
+                       s.enableSevenTVEventAPI);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
@@ -416,6 +431,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Hide viewer count and stream length while hovering over split header",
         s.streamerModeHideViewerCountAndDuration);
+    layout.addCheckbox("Hide moderation actions", s.streamerModeHideModActions);
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
     layout.addCheckbox("Suppress Live Notifications",
                        s.streamerModeSuppressLiveNotifications);
@@ -787,6 +803,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addIntInput("Max number of history messages to load on connect",
                        s.twitchMessageHistoryLimit, 10, 800, 10);
 
+    layout.addIntInput("Split message scrollback limit (requires restart)",
+                       s.scrollbackSplitLimit, 100, 100000, 100);
+    layout.addIntInput("Usercard scrollback limit (requires restart)",
+                       s.scrollbackUsercardLimit, 100, 100000, 100);
+
     layout.addCheckbox("Enable experimental IRC support (requires restart)",
                        s.enableExperimentalIrc, false,
                        "When enabled, attempting to join a channel will "
@@ -881,6 +902,28 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             false);
     helixTimegateVIPs->setMinimumWidth(
         helixTimegateVIPs->minimumSizeHint().width());
+
+    auto *helixTimegateCommercial =
+        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
+            "Helix timegate /commercial behaviour",
+            {"Timegate", "Always use IRC", "Always use Helix"},
+            s.helixTimegateCommercial,
+            helixTimegateGetValue,  //
+            helixTimegateSetValue,  //
+            false);
+    helixTimegateCommercial->setMinimumWidth(
+        helixTimegateCommercial->minimumSizeHint().width());
+
+    auto *helixTimegateModerators =
+        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
+            "Helix timegate /mods behaviour",
+            {"Timegate", "Always use IRC", "Always use Helix"},
+            s.helixTimegateModerators,
+            helixTimegateGetValue,  //
+            helixTimegateSetValue,  //
+            false);
+    helixTimegateModerators->setMinimumWidth(
+        helixTimegateModerators->minimumSizeHint().width());
 
     layout.addStretch();
 

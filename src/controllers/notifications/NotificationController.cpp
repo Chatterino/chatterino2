@@ -5,9 +5,9 @@
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
-#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
@@ -21,6 +21,7 @@
 #include <QDir>
 #include <QMediaPlayer>
 #include <QUrl>
+
 #include <unordered_set>
 
 namespace chatterino {

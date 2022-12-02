@@ -1,8 +1,8 @@
 #pragma once
 
+#include <boost/noncopyable.hpp>
 #include <QElapsedTimer>
 #include <QString>
-#include <boost/noncopyable.hpp>
 
 namespace chatterino {
 

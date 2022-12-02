@@ -1,15 +1,16 @@
 #pragma once
 
-#include <atomic>
-#include <chrono>
-#include <pajlada/signals/signal.hpp>
-#include <unordered_set>
-
 #include "common/QLogging.hpp"
 #include "providers/liveupdates/BasicPubSubWebsocket.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
+
+#include <pajlada/signals/signal.hpp>
+
+#include <atomic>
+#include <chrono>
+#include <unordered_set>
 
 namespace chatterino {
 
@@ -121,27 +122,6 @@ protected:
         return true;
     }
 
-    bool isStarted() const
-    {
-        return this->started_.load(std::memory_order_acquire);
-    }
-
-    liveupdates::WebsocketClient &websocketClient_;
-
-private:
-    void start()
-    {
-        assert(!this->isStarted());
-        this->started_.store(true, std::memory_order_release);
-        this->onConnectionEstablished();
-    }
-
-    void stop()
-    {
-        assert(this->isStarted());
-        this->started_.store(false, std::memory_order_release);
-    }
-
     void close(const std::string &reason,
                websocketpp::close::status::value code =
                    websocketpp::close::status::normal)
@@ -163,6 +143,27 @@ private:
                 << "Error closing:" << ec.message().c_str();
             return;
         }
+    }
+
+    bool isStarted() const
+    {
+        return this->started_.load(std::memory_order_acquire);
+    }
+
+    liveupdates::WebsocketClient &websocketClient_;
+
+private:
+    void start()
+    {
+        assert(!this->isStarted());
+        this->started_.store(true, std::memory_order_release);
+        this->onConnectionEstablished();
+    }
+
+    void stop()
+    {
+        assert(this->isStarted());
+        this->started_.store(false, std::memory_order_release);
     }
 
     liveupdates::WebsocketHandle handle_;

@@ -1,6 +1,5 @@
-#include "providers/twitch/PubSubManager.hpp"
-
 #include "providers/twitch/PubSubActions.hpp"
+#include "providers/twitch/PubSubManager.hpp"
 
 #include <gtest/gtest.h>
 

@@ -32,6 +32,10 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 {
     this->setObjectName("SettingsDialog");
     this->setWindowTitle("Chatterino Settings");
+    // Disable the ? button in the titlebar until we decide to use it
+    this->setWindowFlags(this->windowFlags() &
+                         ~Qt::WindowContextHelpButtonHint);
+
     this->resize(915, 600);
     this->themeChangedEvent();
     this->scaleChangedEvent(this->scale());
@@ -41,9 +45,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     this->overrideBackgroundColor_ = QColor("#111111");
     this->scaleChangedEvent(this->scale());  // execute twice to width of item
 
-    // Disable the ? button in the titlebar until we decide to use it
-    this->setWindowFlags(this->windowFlags() &
-                         ~Qt::WindowContextHelpButtonHint);
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
                                        [this]() {
@@ -123,7 +124,7 @@ void SettingsDialog::initUi()
         .assign(&this->ui_.pageStack)
         .withoutMargin();
 
-    this->ui_.pageStack->setMargin(0);
+    this->ui_.pageStack->setContentsMargins(0, 0, 0, 0);
 
     outerBox->addSpacing(12);
 
@@ -193,9 +194,7 @@ void SettingsDialog::filterElements(const QString &text)
 
 void SettingsDialog::addTabs()
 {
-    this->ui_.tabContainer->setMargin(0);
     this->ui_.tabContainer->setSpacing(0);
-
     this->ui_.tabContainer->setContentsMargins(0, 20, 0, 20);
 
     // Constructors are wrapped in std::function to remove some strain from first time loading.

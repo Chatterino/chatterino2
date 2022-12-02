@@ -1,15 +1,5 @@
 #pragma once
 
-#include <QPaintEvent>
-#include <QScroller>
-#include <QTimer>
-#include <QVariantAnimation>
-#include <QWheelEvent>
-#include <QWidget>
-#include <pajlada/signals/signal.hpp>
-#include <unordered_map>
-#include <unordered_set>
-
 #include "common/FlagsEnum.hpp"
 #include "controllers/filters/FilterSet.hpp"
 #include "messages/Image.hpp"
@@ -17,6 +7,17 @@
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Selection.hpp"
 #include "widgets/BaseWidget.hpp"
+
+#include <pajlada/signals/signal.hpp>
+#include <QPaintEvent>
+#include <QScroller>
+#include <QTimer>
+#include <QVariantAnimation>
+#include <QWheelEvent>
+#include <QWidget>
+
+#include <unordered_map>
+#include <unordered_set>
 
 namespace chatterino {
 enum class HighlightState;
@@ -71,7 +72,8 @@ public:
     };
 
     explicit ChannelView(BaseWidget *parent = nullptr, Split *split = nullptr,
-                         Context context = Context::None);
+                         Context context = Context::None,
+                         size_t messagesLimit = 1000);
 
     void queueUpdate();
     Scrollbar &getScrollBar();
@@ -183,7 +185,7 @@ private:
     void messageReplaced(size_t index, MessagePtr &replacement);
     void messagesUpdated();
 
-    void performLayout(bool causedByScollbar = false);
+    void performLayout(bool causedByScrollbar = false);
     void layoutVisibleMessages(
         LimitedQueueSnapshot<MessageLayoutPtr> &messages);
     void updateScrollbar(LimitedQueueSnapshot<MessageLayoutPtr> &messages,
@@ -254,7 +256,8 @@ private:
         pauses_;
     boost::optional<SteadyClock::time_point> pauseEnd_;
     int pauseScrollOffset_ = 0;
-    int pauseSelectionOffset_ = 0;
+    // Keeps track how many message indices we need to offset the selection when we resume scrolling
+    uint32_t pauseSelectionOffset_ = 0;
 
     boost::optional<MessageElementFlags> overrideFlags_;
     MessageLayoutPtr lastReadMessage_;
@@ -301,7 +304,7 @@ private:
     QTimer scrollTimer_;
 
     // We're only interested in the pointer, not the contents
-    MessageLayout *highlightedMessage_;
+    MessageLayout *highlightedMessage_ = nullptr;
     QVariantAnimation highlightAnimation_;
     void setupHighlightAnimationColors();
 

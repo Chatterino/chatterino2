@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QString>
 #include <pajlada/settings.hpp>
+#include <QString>
 
 namespace chatterino {
 

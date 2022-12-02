@@ -1,20 +1,24 @@
 #include "controllers/highlights/HighlightController.hpp"
+
 #include "Application.hpp"
 #include "BaseSettings.hpp"
-#include "messages/MessageBuilder.hpp"       // for MessageParseArgs
-#include "providers/twitch/TwitchBadge.hpp"  // for Badge
+#include "messages/MessageBuilder.hpp"  // for MessageParseArgs
+#include "mocks/UserData.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/TwitchBadge.hpp"  // for Badge
 
+#include <boost/optional/optional_io.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QString>
-#include <boost/optional/optional_io.hpp>
 
 using namespace chatterino;
 using ::testing::Exactly;
+
+namespace {
 
 class MockApplication : IApplication
 {
@@ -27,7 +31,7 @@ public:
     {
         return nullptr;
     }
-    Emotes *getEmotes() override
+    IEmotes *getEmotes() override
     {
         return nullptr;
     }
@@ -71,11 +75,18 @@ public:
     {
         return nullptr;
     }
+    IUserDataController *getUserData() override
+    {
+        return &this->userData;
+    }
 
     AccountController accounts;
     HighlightController highlights;
+    mock::UserDataController userData;
     // TODO: Figure this out
 };
+
+}  // namespace
 
 class MockHelix : public IHelix
 {
@@ -360,6 +371,15 @@ public:
                  (FailureCallback<HelixWhisperError, QString> failureCallback)),
                 (override));  // /w
 
+    // getChatters
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, getChatters,
+        (QString broadcasterID, QString moderatorID, int maxChattersToFetch,
+         ResultCallback<HelixChatters> successCallback,
+         (FailureCallback<HelixGetChattersError, QString> failureCallback)),
+        (override));  // getChatters
+
     // /vips
     // The extra parenthesis around the failure callback is because its type contains a comma
     MOCK_METHOD(
@@ -368,6 +388,24 @@ public:
          ResultCallback<std::vector<HelixVip>> successCallback,
          (FailureCallback<HelixListVIPsError, QString> failureCallback)),
         (override));  // /vips
+
+    // /commercial
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, startCommercial,
+        (QString broadcasterID, int length,
+         ResultCallback<HelixStartCommercialResponse> successCallback,
+         (FailureCallback<HelixStartCommercialError, QString> failureCallback)),
+        (override));  // /commercial
+
+    // /mods
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, getModerators,
+        (QString broadcasterID, int maxModeratorsToFetch,
+         ResultCallback<std::vector<HelixModerator>> successCallback,
+         (FailureCallback<HelixGetModeratorsError, QString> failureCallback)),
+        (override));  // /mods
 
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));

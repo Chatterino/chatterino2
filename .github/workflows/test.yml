@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.4
+  TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.5
 
 concurrency: 
   group: test-${{ github.ref }}
@@ -33,11 +33,11 @@ jobs:
           path: "${{ github.workspace }}/qt/"
           key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
 
-      # LINUX
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3.0.0
         with:
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
           version: ${{ matrix.qt-version }}
           dir: "${{ github.workspace }}/qt/"
 

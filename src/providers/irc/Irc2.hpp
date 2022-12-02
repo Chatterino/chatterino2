@@ -1,10 +1,10 @@
 #pragma once
 
-#include <rapidjson/rapidjson.h>
-#include <common/SignalVector.hpp>
-
+#include "common/SignalVector.hpp"
 #include "providers/irc/IrcChannel2.hpp"
 #include "providers/irc/IrcServer.hpp"
+
+#include <rapidjson/rapidjson.h>
 
 class QAbstractTableModel;
 

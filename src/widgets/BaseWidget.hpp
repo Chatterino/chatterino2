@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QShortcut>
-#include <QWidget>
 #include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <QShortcut>
+#include <QWidget>
 
 namespace chatterino {
 
