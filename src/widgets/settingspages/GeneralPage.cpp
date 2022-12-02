@@ -681,17 +681,17 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addSubtitle("Visible badges");
     layout.addCheckbox("Authority", s.showBadgesGlobalAuthority, false,
-                       "e.g., staff, admin");
+                       "e.g. staff, admin");
     layout.addCheckbox("Predictions", s.showBadgesPredictions);
     layout.addCheckbox("Channel", s.showBadgesChannelAuthority, false,
-                       "e.g., broadcaster, moderator");
+                       "e.g. broadcaster, moderator");
     layout.addCheckbox("Subscriber ", s.showBadgesSubscription);
     layout.addCheckbox("Vanity", s.showBadgesVanity, false,
-                       "e.g., prime, bits, sub gifter");
+                       "e.g. prime, bits, sub gifter");
     layout.addCheckbox("Chatterino", s.showBadgesChatterino, false,
-                       "e.g., Chatterino Supporter/Contributor/Developer");
+                       "e.g. Chatterino Supporter/Contributor/Developer");
     layout.addCheckbox("FrankerFaceZ", s.showBadgesFfz, false,
-                       "e.g., Bot, FFZ supporter, FFZ developer");
+                       "e.g. Bot, FFZ supporter, FFZ developer");
     layout.addCheckbox("7TV", s.showBadgesSevenTV, false,
                        "Badges for 7TV admins, developers, and supporters");
     layout.addSeperator();
@@ -798,12 +798,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.prefixOnlyEmoteCompletion, false,
         "When disabled, emote tab-completion will complete based on any part "
         "of the name."
-        "\ne.g., sheffy -> DatSheffy");
+        "\ne.g. sheffy -> DatSheffy");
     layout.addCheckbox(
         "Only search for username autocompletion with an @",
         s.userCompletionOnlyWithAt, false,
         "When enabled, username tab-completion will only complete when using @"
-        "\ne.g., pajl -> pajl | @pajl -> @pajlada");
+        "\ne.g. pajl -> pajl | @pajl -> @pajlada");
 
     layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers, false,
                        "Show whispers as messages in all splits instead "
