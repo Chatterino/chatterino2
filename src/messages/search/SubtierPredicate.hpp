@@ -17,6 +17,7 @@ public:
      * @brief Create an SubtierPredicate with a list of subtiers to search for.
      *
      * @param subtiers a list of subtiers that a message should contain 
+     * @param negate when set, excludes messages containing selected subtiers from results
      */
     SubtierPredicate(const QString &subtiers, bool negate);
 

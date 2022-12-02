@@ -17,6 +17,7 @@ public:
      * @brief Create a ChannelPredicate with a list of channels to search for.
      *
      * @param channels a list of channel names that a message should be sent in
+     * @param negate when set, excludes list of channel names from results
      */
     ChannelPredicate(const QString &channels, bool negate);
 

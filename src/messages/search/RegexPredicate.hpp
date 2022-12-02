@@ -20,6 +20,7 @@ public:
      * The message is being matched case-insensitively.
      *
      * @param regex the regex to match the message against
+     * @param negate when set, excludes messages matching the regex from results
      */
     RegexPredicate(const QString &regex, bool negate);
 

@@ -27,6 +27,7 @@ public:
      * "system" is used for the "System" flag.
      *
      * @param flags a string comma seperated list of names for the flags a message should have
+     * @param negate when set, excludes messages containg selected flags from results
      */
     MessageFlagsPredicate(const QString &flags, bool negate);
 
