@@ -22,6 +22,7 @@ class InputCompletionPopup;
 class EffectLabel;
 class MessageThread;
 class ResizingTextEdit;
+class ChannelView;
 
 // MessageOverflow is used for controlling how to guide the user into not
 // sending a message that will be discarded by Twitch
@@ -42,7 +43,7 @@ class SplitInput : public BaseWidget
 
 public:
     SplitInput(Split *_chatWidget, bool enableInlineReplying = true);
-    SplitInput(QWidget *parent, Split *_chatWidget,
+    SplitInput(QWidget *parent, Split *_chatWidget, ChannelView *_channelView,
                bool enableInlineReplying = true);
 
     bool hasSelection() const;
@@ -126,6 +127,7 @@ protected:
     bool shouldPreventInput(const QString &text) const;
 
     Split *const split_;
+    ChannelView *const channelView_;
     QObjectRef<EmotePopup> emotePopup_;
     QObjectRef<InputCompletionPopup> inputCompletionPopup_;
 

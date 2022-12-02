@@ -166,9 +166,13 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
         this->updatePauses();
     });
 
+    // This shortcut is not used in splits, it's used in views that
+    // don't have a SplitInput like the SearchPopup or EmotePopup.
+    // See SplitInput::installKeyPressedEvent for the copy event
+    // from views with a SplitInput.
     auto shortcut = new QShortcut(QKeySequence::StandardKey::Copy, this);
     QObject::connect(shortcut, &QShortcut::activated, [this] {
-        crossPlatformCopy(this->getSelectedText());
+        this->copySelectedText();
     });
 
     this->clickTimer_ = new QTimer(this);
@@ -590,6 +594,11 @@ void ChannelView::clearSelection()
 {
     this->selection_ = Selection();
     queueLayout();
+}
+
+void ChannelView::copySelectedText()
+{
+    crossPlatformCopy(this->getSelectedText());
 }
 
 void ChannelView::setEnableScrollingToBottom(bool value)

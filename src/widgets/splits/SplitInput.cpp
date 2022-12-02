@@ -31,14 +31,16 @@
 namespace chatterino {
 
 SplitInput::SplitInput(Split *_chatWidget, bool enableInlineReplying)
-    : SplitInput(_chatWidget, _chatWidget, enableInlineReplying)
+    : SplitInput(_chatWidget, _chatWidget, _chatWidget->view_,
+                 enableInlineReplying)
 {
 }
 
 SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
-                       bool enableInlineReplying)
+                       ChannelView *_channelView, bool enableInlineReplying)
     : BaseWidget(parent)
     , split_(_chatWidget)
+    , channelView_(_channelView)
     , enableInlineReplying_(enableInlineReplying)
 {
     this->installEventFilter(this);
@@ -560,7 +562,7 @@ void SplitInput::addShortcuts()
 
              if (copyFromSplit)
              {
-                 this->split_->copyToClipboard();
+                 this->channelView_->copySelectedText();
              }
              else
              {
@@ -639,9 +641,9 @@ void SplitInput::installKeyPressedEvent()
         if ((event->key() == Qt::Key_C || event->key() == Qt::Key_Insert) &&
             event->modifiers() == Qt::ControlModifier)
         {
-            if (this->split_->view_->hasSelection())
+            if (this->channelView_->hasSelection())
             {
-                this->split_->copyToClipboard();
+                this->channelView_->copySelectedText();
                 event->accept();
             }
         }
