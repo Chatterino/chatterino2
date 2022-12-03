@@ -30,7 +30,7 @@ protected:
      * @return true if the message was authored by one of the specified users,
      *         false otherwise
      */
-    bool appliesTo(const Message &message) override;
+    bool appliesToImpl(const Message &message) override;
 
 private:
     /// Holds the user names that will be searched for

@@ -30,7 +30,7 @@ protected:
      * @return true if the message contains a subtier listed in the specified subtiers,
      *         false otherwise
      */
-    bool appliesTo(const Message &message) override;
+    bool appliesToImpl(const Message &message) override;
 
 private:
     /// Holds the subtiers that will be searched for

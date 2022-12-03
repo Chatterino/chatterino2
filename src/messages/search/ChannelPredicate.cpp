@@ -15,7 +15,7 @@ ChannelPredicate::ChannelPredicate(const QString &channels, bool negate)
     }
 }
 
-bool ChannelPredicate::appliesTo(const Message &message)
+bool ChannelPredicate::appliesToImpl(const Message &message)
 {
     return channels_.contains(message.channelName, Qt::CaseInsensitive);
 }

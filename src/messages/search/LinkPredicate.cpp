@@ -10,7 +10,7 @@ LinkPredicate::LinkPredicate(bool negate)
 {
 }
 
-bool LinkPredicate::appliesTo(const Message &message)
+bool LinkPredicate::appliesToImpl(const Message &message)
 {
     for (const auto &word : message.messageText.split(' ', Qt::SkipEmptyParts))
     {

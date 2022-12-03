@@ -26,7 +26,7 @@ protected:
      * @param message the message to check
      * @return true if the message contains a link, false otherwise
      */
-    bool appliesTo(const Message &message) override;
+    bool appliesToImpl(const Message &message) override;
 };
 
 }  // namespace chatterino

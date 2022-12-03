@@ -8,7 +8,7 @@ RegexPredicate::RegexPredicate(const QString &regex, bool negate)
 {
 }
 
-bool RegexPredicate::appliesTo(const Message &message)
+bool RegexPredicate::appliesToImpl(const Message &message)
 {
     if (!regex_.isValid())
     {

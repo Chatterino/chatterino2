@@ -30,7 +30,7 @@ BadgePredicate::BadgePredicate(const QString &badges, bool negate)
     }
 }
 
-bool BadgePredicate::appliesTo(const Message &message)
+bool BadgePredicate::appliesToImpl(const Message &message)
 {
     for (const Badge &badge : message.badges)
     {

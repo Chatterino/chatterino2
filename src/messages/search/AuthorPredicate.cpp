@@ -15,7 +15,7 @@ AuthorPredicate::AuthorPredicate(const QString &authors, bool negate)
     }
 }
 
-bool AuthorPredicate::appliesTo(const Message &message)
+bool AuthorPredicate::appliesToImpl(const Message &message)
 {
     return authors_.contains(message.displayName, Qt::CaseInsensitive) ||
            authors_.contains(message.loginName, Qt::CaseInsensitive);

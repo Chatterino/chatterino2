@@ -34,7 +34,7 @@ protected:
      * @param message the message to check
      * @return true if the message matches the regex, false otherwise
      */
-    bool appliesTo(const Message &message) override;
+    bool appliesToImpl(const Message &message) override;
 
 private:
     /// Holds the regular expression to match the message against

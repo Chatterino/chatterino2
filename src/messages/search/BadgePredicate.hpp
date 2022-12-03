@@ -30,7 +30,7 @@ protected:
      * @return true if the message contains a badge listed in the specified badges,
      *         false otherwise
      */
-    bool appliesTo(const Message &message) override;
+    bool appliesToImpl(const Message &message) override;
 
 private:
     /// Holds the badges that will be searched for

@@ -14,7 +14,7 @@ SubtierPredicate::SubtierPredicate(const QString &subtiers, bool negate)
     }
 }
 
-bool SubtierPredicate::appliesTo(const Message &message)
+bool SubtierPredicate::appliesToImpl(const Message &message)
 {
     for (const Badge &badge : message.badges)
     {

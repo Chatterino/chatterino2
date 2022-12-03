@@ -55,7 +55,7 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags, bool negate)
     }
 }
 
-bool MessageFlagsPredicate::appliesTo(const Message &message)
+bool MessageFlagsPredicate::appliesToImpl(const Message &message)
 {
     // Exclude timeout messages from system flag when timeout flag isn't present
     if (this->flags_.has(MessageFlag::System) &&
