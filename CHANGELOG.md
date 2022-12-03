@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Bugfix: Fixed unnecessary saving of windows layout. (#4201)
 - Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
 
 ## 2.4.0
