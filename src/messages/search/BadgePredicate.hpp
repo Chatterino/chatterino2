@@ -16,7 +16,7 @@ public:
     /**
      * @brief Create an BadgePredicate with a list of badges to search for.
      *
-     * @param badges a list of badges that a message should contain 
+     * @param badges one or more comma-separated badges that a message should contain
      * @param negate when set, excludes list of badges from results
      */
     BadgePredicate(const QString &badges, bool negate);

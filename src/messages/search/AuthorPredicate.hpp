@@ -16,7 +16,7 @@ public:
     /**
      * @brief Create an AuthorPredicate with a list of users to search for.
      *
-     * @param authors a list of user names that a message should be sent from
+     * @param authors one or more comma-separated user names that a message should be sent from
      * @param negate when set, excludes list of user names from results
      */
     AuthorPredicate(const QString &authors, bool negate);
