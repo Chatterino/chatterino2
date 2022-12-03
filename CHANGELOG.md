@@ -2,6 +2,9 @@
 
 ## Unversioned
 
+- Bugfix: Fixed unnecessary saving of windows layout. (#4201)
+- Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
+
 ## 2.4.0
 
 - Major: Added support for emotes, badges, and live emote updates from [7TV](https://7tv.app). [Wiki Page](https://wiki.chatterino.com/Third_party_services/#7tv) (#4002, #4062, #4090)

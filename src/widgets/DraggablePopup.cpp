@@ -23,8 +23,11 @@ namespace {
 }  // namespace
 
 DraggablePopup::DraggablePopup(bool closeAutomatically, QWidget *parent)
-    : BaseWindow(closeAutomatically ? popupFlagsCloseAutomatically : popupFlags,
-                 parent)
+    : BaseWindow(
+          closeAutomatically
+              ? popupFlagsCloseAutomatically | BaseWindow::DisableLayoutSave
+              : popupFlags | BaseWindow::DisableLayoutSave,
+          parent)
     , lifetimeHack_(std::make_shared<bool>(false))
     , dragTimer_(this)
 
