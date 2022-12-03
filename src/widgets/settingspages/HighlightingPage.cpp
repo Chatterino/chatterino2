@@ -16,8 +16,8 @@
 #include <QHeaderView>
 #include <QPushButton>
 #include <QStandardItemModel>
-#include <QTabWidget>
 #include <QTableView>
+#include <QTabWidget>
 
 #define ALWAYS_PLAY "Play highlight sound even when Chatterino is focused"
 
