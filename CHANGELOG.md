@@ -3,6 +3,13 @@
 ## Unversioned
 
 - Minor: Added ability to negate search predicates. (#4207)
+- Minor: Search window input will automatically use currently selected text if present. (#4178)
+- Minor: Cleared up highlight sound settings (#4194)
+- Bugfix: Fixed highlight sounds not reloading on change properly. (#4194)
+- Bugfix: Fixed CTRL + C not working in reply thread popups. (#4209)
+- Bugfix: Fixed message input showing as red after removing a message that was more than 500 characters. (#4204)
+- Bugfix: Fixed unnecessary saving of windows layout. (#4201)
+- Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
 
 ## 2.4.0
 

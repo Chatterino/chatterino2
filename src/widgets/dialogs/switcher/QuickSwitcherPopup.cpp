@@ -32,8 +32,8 @@ namespace {
 const QSize QuickSwitcherPopup::MINIMUM_SIZE(500, 300);
 
 QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
-    : BasePopup(FlagsEnum<BaseWindow::Flags>{BaseWindow::Flags::Frameless,
-                                             BaseWindow::Flags::TopMost},
+    : BasePopup({BaseWindow::Flags::Frameless, BaseWindow::Flags::TopMost,
+                 BaseWindow::DisableLayoutSave},
                 parent)
     , switcherModel_(this)
 {
