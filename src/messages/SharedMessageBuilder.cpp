@@ -19,14 +19,16 @@ namespace chatterino {
 
 namespace {
 
+    /**
+     * Gets the default sound url if the user set one,
+     * or the chatterino default ping sound if no url is set.
+     */
     QUrl getFallbackHighlightSound()
     {
         QString path = getSettings()->pathHighlightSound;
         bool fileExists = !path.isEmpty() && QFileInfo::exists(path) &&
                           QFileInfo(path).isFile();
 
-        // Use fallback sound when no custom sound is set
-        // or if the file doesn't exist.
         if (fileExists)
         {
             return QUrl::fromLocalFile(path);
