@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ForwardDecl.hpp"
 #include "controllers/filters/FilterSet.hpp"
+#include "ForwardDecl.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/search/MessagePredicate.hpp"
 #include "widgets/BasePopup.hpp"

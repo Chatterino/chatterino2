@@ -2,11 +2,11 @@
 
 #include "common/UniqueAccess.hpp"
 
-#include <mutex>
-#include <typeinfo>
-
 #include <QMap>
 #include <QString>
+
+#include <mutex>
+#include <typeinfo>
 
 namespace chatterino {
 

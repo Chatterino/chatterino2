@@ -6,9 +6,9 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/MessageThread.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitInput.hpp"
 
@@ -81,7 +81,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     });
 
     // Create SplitInput with inline replying disabled
-    this->ui_.replyInput = new SplitInput(this, this->split_, false);
+    this->ui_.replyInput =
+        new SplitInput(this, this->split_, this->ui_.threadView, false);
 
     this->bSignals_.emplace_back(
         getApp()->accounts->twitch.currentUserChanged.connect([this] {

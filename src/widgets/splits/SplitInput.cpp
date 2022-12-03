@@ -6,39 +6,43 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Link.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Clamp.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Scrollbar.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/splits/InputCompletionPopup.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/splits/SplitInput.hpp"
 
-#include <functional>
-
 #include <QCompleter>
 #include <QPainter>
+#include <QSignalBlocker>
+
+#include <functional>
 
 namespace chatterino {
 
 SplitInput::SplitInput(Split *_chatWidget, bool enableInlineReplying)
-    : SplitInput(_chatWidget, _chatWidget, enableInlineReplying)
+    : SplitInput(_chatWidget, _chatWidget, _chatWidget->view_,
+                 enableInlineReplying)
 {
 }
 
 SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
-                       bool enableInlineReplying)
+                       ChannelView *_channelView, bool enableInlineReplying)
     : BaseWidget(parent)
     , split_(_chatWidget)
+    , channelView_(_channelView)
     , enableInlineReplying_(enableInlineReplying)
 {
     this->installEventFilter(this);
@@ -560,7 +564,7 @@ void SplitInput::addShortcuts()
 
              if (copyFromSplit)
              {
-                 this->split_->copyToClipboard();
+                 this->channelView_->copySelectedText();
              }
              else
              {
@@ -639,13 +643,23 @@ void SplitInput::installKeyPressedEvent()
         if ((event->key() == Qt::Key_C || event->key() == Qt::Key_Insert) &&
             event->modifiers() == Qt::ControlModifier)
         {
-            if (this->split_->view_->hasSelection())
+            if (this->channelView_->hasSelection())
             {
-                this->split_->copyToClipboard();
+                this->channelView_->copySelectedText();
                 event->accept();
             }
         }
     });
+}
+
+void SplitInput::mousePressEvent(QMouseEvent *event)
+{
+    if (this->hidden)
+    {
+        BaseWidget::mousePressEvent(event);
+    }
+    // else, don't call QWidget::mousePressEvent,
+    // which will call event->ignore()
 }
 
 void SplitInput::onTextChanged()
@@ -786,14 +800,16 @@ void SplitInput::insertCompletionText(const QString &input_)
     }
 }
 
-void SplitInput::clearSelection()
+bool SplitInput::hasSelection() const
 {
-    QTextCursor c = this->ui_.textEdit->textCursor();
+    return this->ui_.textEdit->textCursor().hasSelection();
+}
 
-    c.setPosition(c.position());
-    c.setPosition(c.position(), QTextCursor::KeepAnchor);
-
-    this->ui_.textEdit->setTextCursor(c);
+void SplitInput::clearSelection() const
+{
+    auto cursor = this->ui_.textEdit->textCursor();
+    cursor.clearSelection();
+    this->ui_.textEdit->setTextCursor(cursor);
 }
 
 bool SplitInput::isEditFirstWord() const
@@ -873,25 +889,29 @@ void SplitInput::editTextChanged()
             app->commands->execCommand(text, this->split_->getChannel(), true);
     }
 
-    if (getSettings()->messageOverflow.getValue() == MessageOverflow::Highlight)
+    if (text.length() > 0 &&
+        getSettings()->messageOverflow.getValue() == MessageOverflow::Highlight)
     {
-        if (text.length() > TWITCH_MESSAGE_LIMIT &&
-            text.length() > this->lastOverflowLength)
-        {
-            QTextCharFormat format;
-            format.setForeground(Qt::red);
+        QTextCursor cursor = this->ui_.textEdit->textCursor();
+        QTextCharFormat format;
+        QList<QTextEdit::ExtraSelection> selections;
 
-            QTextCursor cursor = this->ui_.textEdit->textCursor();
-            cursor.setPosition(lastOverflowLength, QTextCursor::MoveAnchor);
+        cursor.setPosition(qMin(text.length(), TWITCH_MESSAGE_LIMIT),
+                           QTextCursor::MoveAnchor);
+        cursor.movePosition(QTextCursor::Start, QTextCursor::KeepAnchor);
+        selections.append({cursor, format});
+
+        if (text.length() > TWITCH_MESSAGE_LIMIT)
+        {
+            cursor.setPosition(TWITCH_MESSAGE_LIMIT, QTextCursor::MoveAnchor);
             cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
-
-            this->lastOverflowLength = text.length();
-
-            cursor.setCharFormat(format);
+            format.setForeground(Qt::red);
+            selections.append({cursor, format});
         }
-        else if (this->lastOverflowLength != TWITCH_MESSAGE_LIMIT)
+        // block reemit of QTextEdit::textChanged()
         {
-            this->lastOverflowLength = TWITCH_MESSAGE_LIMIT;
+            const QSignalBlocker b(this->ui_.textEdit);
+            this->ui_.textEdit->setExtraSelections(selections);
         }
     }
 

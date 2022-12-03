@@ -6,15 +6,16 @@
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 
 #include <QApplication>
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QFont>
 #include <QIcon>
+
 #include <functional>
 
 #ifdef CHATTERINO
@@ -23,6 +24,7 @@
 #endif
 
 #ifdef USEWINSDK
+// clang-format off
 #    include <ObjIdl.h>
 #    include <VersionHelpers.h>
 #    include <Windows.h>
@@ -37,6 +39,7 @@
 #    include <QVBoxLayout>
 
 #    define WM_DPICHANGED 0x02E0
+// clang-format on
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"
@@ -78,7 +81,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
                 this->updateScale();
             });
         },
-        this->connections_);
+        this->connections_, false);
 
     this->updateScale();
 
@@ -537,7 +540,11 @@ void BaseWindow::resizeEvent(QResizeEvent *)
 {
     // Queue up save because: Window resized
 #ifdef CHATTERINO
-    getApp()->windows->queueSave();
+    if (!flags_.has(DisableLayoutSave))
+    {
+        getApp()->windows->queueSave();
+    }
+
 #endif
 
     //this->moveIntoDesktopRect(this);
@@ -560,16 +567,19 @@ void BaseWindow::resizeEvent(QResizeEvent *)
             });
         });
     }
-#endif
 
     this->calcButtonsSizes();
+#endif
 }
 
 void BaseWindow::moveEvent(QMoveEvent *event)
 {
     // Queue up save because: Window position changed
 #ifdef CHATTERINO
-    getApp()->windows->queueSave();
+    if (!flags_.has(DisableLayoutSave))
+    {
+        getApp()->windows->queueSave();
+    }
 #endif
 
     BaseWidget::moveEvent(event);
@@ -723,6 +733,11 @@ void BaseWindow::calcButtonsSizes()
         return;
     }
 
+    if (this->frameless_)
+    {
+        return;
+    }
+
     if ((this->width() / this->scale()) < 300)
     {
         if (this->ui_.minButton)
@@ -781,21 +796,33 @@ bool BaseWindow::handleDPICHANGED(MSG *msg)
 bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 {
 #ifdef USEWINSDK
-    if (auto dpi = getWindowDpi(msg->hwnd))
+    // ignore window hide event
+    if (!msg->wParam)
     {
-        this->nativeScale_ = dpi.get() / 96.f;
-        this->updateScale();
+        return true;
     }
 
-    if (!this->shown_ && this->isVisible())
+    if (auto dpi = getWindowDpi(msg->hwnd))
     {
+        float currentScale = (float)dpi.get() / 96.F;
+        if (currentScale != this->nativeScale_)
+        {
+            this->nativeScale_ = currentScale;
+            this->updateScale();
+        }
+    }
+
+    if (!this->shown_)
+    {
+        this->shown_ = true;
+
         if (this->hasCustomWindowFrame())
         {
-            this->shown_ = true;
-
-            const MARGINS shadow = {8, 8, 8, 8};
-            DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
+            // disable OS window border
+            const MARGINS margins = {-1};
+            DwmExtendFrameIntoClientArea(HWND(this->winId()), &margins);
         }
+
         if (!this->initalBounds_.isNull())
         {
             ::SetWindowPos(msg->hwnd, nullptr, this->initalBounds_.x(),
@@ -804,9 +831,9 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
                            SWP_NOZORDER | SWP_NOACTIVATE);
             this->currentBounds_ = this->initalBounds_;
         }
-    }
 
-    this->calcButtonsSizes();
+        this->calcButtonsSizes();
+    }
 
     return true;
 #else
@@ -819,17 +846,15 @@ bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame())
     {
-        // int cx = GetSystemMetrics(SM_CXSIZEFRAME);
-        // int cy = GetSystemMetrics(SM_CYSIZEFRAME);
-
         if (msg->wParam == TRUE)
         {
-            NCCALCSIZE_PARAMS *ncp =
-                (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
-            ncp->lppos->flags |= SWP_NOREDRAW;
-            RECT *clientRect = &ncp->rgrc[0];
-
-            clientRect->top -= 1;
+            // remove 1 extra pixel on top of custom frame
+            auto *ncp = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
+            if (ncp)
+            {
+                ncp->lppos->flags |= SWP_NOREDRAW;
+                ncp->rgrc[0].top -= 1;
+            }
         }
 
         *result = 0;

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QLayout>
 #include <boost/variant.hpp>
+#include <QLayout>
 
 class QWidget;
 class QScrollArea;

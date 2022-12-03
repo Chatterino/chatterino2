@@ -1,6 +1,6 @@
 #include "util/Clipboard.hpp"
-#include <QApplication>
 
+#include <QApplication>
 #include <QClipboard>
 
 namespace chatterino {

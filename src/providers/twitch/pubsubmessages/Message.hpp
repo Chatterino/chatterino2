@@ -2,11 +2,10 @@
 
 #include "common/QLogging.hpp"
 
+#include <boost/optional.hpp>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QString>
-
-#include <boost/optional.hpp>
 
 namespace chatterino {
 

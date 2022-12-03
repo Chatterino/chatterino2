@@ -1,4 +1,5 @@
 #include "ChannelPointReward.hpp"
+
 #include "common/QLogging.hpp"
 
 namespace chatterino {

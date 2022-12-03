@@ -7,13 +7,12 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QScreen>
-
 #include <QVBoxLayout>
 
 namespace chatterino {
 
 NotificationPopup::NotificationPopup()
-    : BaseWindow(BaseWindow::Frameless)
+    : BaseWindow({BaseWindow::Frameless, BaseWindow::DisableLayoutSave})
     , channel_(std::make_shared<Channel>("notifications", Channel::Type::None))
 
 {

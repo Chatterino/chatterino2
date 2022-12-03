@@ -3,9 +3,9 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
-#include <rapidjson/document.h>
-#include <QString>
 #include <pajlada/serialize.hpp>
+#include <QString>
+#include <rapidjson/document.h>
 
 #include <cassert>
 

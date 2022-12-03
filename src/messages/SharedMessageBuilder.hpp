@@ -1,7 +1,6 @@
-#include "messages/MessageBuilder.hpp"
-
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "messages/MessageColor.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 

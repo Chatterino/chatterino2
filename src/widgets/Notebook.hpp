@@ -3,11 +3,11 @@
 #include "pajlada/signals/signal.hpp"
 #include "widgets/BaseWidget.hpp"
 
+#include <pajlada/signals/signalholder.hpp>
 #include <QList>
 #include <QMenu>
 #include <QMessageBox>
 #include <QWidget>
-#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 
@@ -90,7 +90,7 @@ private:
     void resizeAddButton();
 
     bool containsPage(QWidget *page);
-    Item &findItem(QWidget *page);
+    Item *findItem(QWidget *page);
 
     static bool containsChild(const QObject *obj, const QObject *child);
     NotebookTab *getTabFromPage(QWidget *page);

@@ -1,16 +1,16 @@
 #pragma once
 
 #include "widgets/BaseWindow.hpp"
+#include "widgets/helper/SettingsDialogTab.hpp"
 
+#include <pajlada/settings/setting.hpp>
+#include <QFrame>
 #include <QPushButton>
 #include <QStackedLayout>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <functional>
-#include <pajlada/settings/setting.hpp>
-#include "widgets/helper/SettingsDialogTab.hpp"
 
-#include <QFrame>
+#include <functional>
 
 class QLineEdit;
 

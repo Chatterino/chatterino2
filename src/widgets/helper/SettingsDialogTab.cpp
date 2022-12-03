@@ -1,4 +1,5 @@
 #include "widgets/helper/SettingsDialogTab.hpp"
+
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 

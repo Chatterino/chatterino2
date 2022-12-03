@@ -1,7 +1,7 @@
 #pragma once
 
-#include "QRegularExpression"
 #include "messages/search/MessagePredicate.hpp"
+#include "QRegularExpression"
 
 namespace chatterino {
 

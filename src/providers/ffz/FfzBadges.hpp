@@ -4,9 +4,9 @@
 #include "common/UniqueAccess.hpp"
 #include "util/QStringHash.hpp"
 
-#include <QColor>
 #include <boost/optional.hpp>
 #include <common/Singleton.hpp>
+#include <QColor>
 
 #include <map>
 #include <memory>

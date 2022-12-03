@@ -1,13 +1,5 @@
 #include "RunGui.hpp"
 
-#include <QApplication>
-#include <QFile>
-#include <QPalette>
-#include <QStyleFactory>
-#include <Qt>
-#include <QtConcurrent>
-#include <csignal>
-
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
@@ -19,6 +11,15 @@
 #include "singletons/Updates.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
+
+#include <QApplication>
+#include <QFile>
+#include <QPalette>
+#include <QStyleFactory>
+#include <Qt>
+#include <QtConcurrent>
+
+#include <csignal>
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"

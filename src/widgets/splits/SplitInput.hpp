@@ -11,6 +11,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
+
 #include <memory>
 
 namespace chatterino {
@@ -21,6 +22,7 @@ class InputCompletionPopup;
 class EffectLabel;
 class MessageThread;
 class ResizingTextEdit;
+class ChannelView;
 
 // MessageOverflow is used for controlling how to guide the user into not
 // sending a message that will be discarded by Twitch
@@ -41,15 +43,15 @@ class SplitInput : public BaseWidget
 
 public:
     SplitInput(Split *_chatWidget, bool enableInlineReplying = true);
-    SplitInput(QWidget *parent, Split *_chatWidget,
+    SplitInput(QWidget *parent, Split *_chatWidget, ChannelView *_channelView,
                bool enableInlineReplying = true);
 
-    void clearSelection();
+    bool hasSelection() const;
+    void clearSelection() const;
+
     bool isEditFirstWord() const;
     QString getInputText() const;
     void insertText(const QString &text);
-
-    static const int TWITCH_MESSAGE_LIMIT = 500;
 
     void setReply(std::shared_ptr<MessageThread> reply,
                   bool showInlineReplying = true);
@@ -87,6 +89,8 @@ protected:
     void paintEvent(QPaintEvent * /*event*/) override;
     void resizeEvent(QResizeEvent * /*event*/) override;
 
+    void mousePressEvent(QMouseEvent *event) override;
+
     virtual void giveFocus(Qt::FocusReason reason);
 
     QString handleSendMessage(std::vector<QString> &arguments);
@@ -121,6 +125,7 @@ protected:
     bool shouldPreventInput(const QString &text) const;
 
     Split *const split_;
+    ChannelView *const channelView_;
     QObjectRef<EmotePopup> emotePopup_;
     QObjectRef<InputCompletionPopup> inputCompletionPopup_;
 
@@ -145,8 +150,6 @@ protected:
     QStringList prevMsg_;
     QString currMsg_;
     int prevIndex_ = 0;
-
-    int lastOverflowLength = TWITCH_MESSAGE_LIMIT;
 
     // Hidden denotes whether this split input should be hidden or not
     // This is used instead of the regular QWidget::hide/show because

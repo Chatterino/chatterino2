@@ -1,7 +1,6 @@
 #pragma once
 
 #include <magic_enum.hpp>
-
 #include <QByteArray>
 #include <QHash>
 #include <QString>

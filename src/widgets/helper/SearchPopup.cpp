@@ -1,9 +1,5 @@
 #include "SearchPopup.hpp"
 
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QPushButton>
-
 #include "common/Channel.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/search/AuthorPredicate.hpp"
@@ -16,6 +12,10 @@
 #include "messages/search/SubtierPredicate.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
+
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QPushButton>
 
 namespace chatterino {
 
@@ -58,7 +58,7 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
 }
 
 SearchPopup::SearchPopup(QWidget *parent, Split *split)
-    : BasePopup({}, parent)
+    : BasePopup({BaseWindow::DisableLayoutSave}, parent)
     , split_(split)
 {
     this->initLayout();

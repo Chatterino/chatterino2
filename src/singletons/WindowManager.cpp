@@ -1,17 +1,5 @@
 #include "singletons/WindowManager.hpp"
 
-#include <QDebug>
-#include <QDesktopWidget>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QMessageBox>
-#include <QSaveFile>
-#include <QScreen>
-#include <boost/optional.hpp>
-#include <chrono>
-
-#include <QMessageBox>
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/QLogging.hpp"
@@ -28,13 +16,25 @@
 #include "util/Clamp.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
-#include "widgets/FramelessEmbedWindow.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/FramelessEmbedWindow.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+#include "widgets/Window.hpp"
+
+#include <boost/optional.hpp>
+#include <QDebug>
+#include <QDesktopWidget>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QMessageBox>
+#include <QSaveFile>
+#include <QScreen>
+
+#include <chrono>
 
 namespace chatterino {
 namespace {
@@ -262,12 +262,18 @@ Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
             return parent;
         }
 
+        // FIXME: On Windows, parenting popup windows causes unwanted behavior (see
+        //        https://github.com/Chatterino/chatterino2/issues/4179 for discussion). Ideally, we
+        //        would use a different solution rather than relying on OS-specific code but this is
+        //        the low-effort fix for now.
+#ifndef Q_OS_WIN
         if (type == WindowType::Popup)
         {
             // On some window managers, popup windows require a parent to behave correctly. See
             // https://github.com/Chatterino/chatterino2/pull/1843 for additional context.
             return &(this->getMainWindow());
         }
+#endif
 
         // If no parent is set and something other than a popup window is being created, we fall
         // back to the default behavior of no parent.

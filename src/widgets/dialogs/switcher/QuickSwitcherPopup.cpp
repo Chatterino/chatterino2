@@ -4,13 +4,13 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/dialogs/switcher/NewPopupItem.hpp"
 #include "widgets/dialogs/switcher/NewTabItem.hpp"
 #include "widgets/dialogs/switcher/SwitchSplitItem.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/listview/GenericListView.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/Window.hpp"
 
 namespace chatterino {
 
@@ -32,8 +32,8 @@ namespace {
 const QSize QuickSwitcherPopup::MINIMUM_SIZE(500, 300);
 
 QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
-    : BasePopup(FlagsEnum<BaseWindow::Flags>{BaseWindow::Flags::Frameless,
-                                             BaseWindow::Flags::TopMost},
+    : BasePopup({BaseWindow::Flags::Frameless, BaseWindow::Flags::TopMost,
+                 BaseWindow::DisableLayoutSave},
                 parent)
     , switcherModel_(this)
 {

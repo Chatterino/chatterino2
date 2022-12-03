@@ -1,10 +1,11 @@
 #pragma once
 
+#include "common/FlagsEnum.hpp"
 #include "widgets/BaseWidget.hpp"
 
-#include <functional>
 #include <pajlada/signals/signalholder.hpp>
-#include "common/FlagsEnum.hpp"
+
+#include <functional>
 
 class QHBoxLayout;
 struct tagMSG;
@@ -31,6 +32,7 @@ public:
         FramelessDraggable = 16,
         DontFocus = 32,
         Dialog = 64,
+        DisableLayoutSave = 128,
     };
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };

@@ -1,6 +1,6 @@
-#include <utility>
-
 #include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
+
+#include <utility>
 
 namespace chatterino {
 

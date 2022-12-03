@@ -1,13 +1,13 @@
 #pragma once
 
-#include <memory>
 #include "common/Channel.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
 #include "common/WindowDescriptors.hpp"
-
 #include "pajlada/settings/settinglistener.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+
+#include <memory>
 
 namespace chatterino {
 

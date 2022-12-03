@@ -1,16 +1,16 @@
 #include "widgets/helper/NotebookButton.hpp"
+
 #include "singletons/Theme.hpp"
-#include "widgets/Notebook.hpp"
 #include "widgets/helper/Button.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
+#include <QMimeData>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
 #include <QRadialGradient>
-
-#include <QMimeData>
 
 #define nuuls nullptr
 

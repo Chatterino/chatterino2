@@ -1,15 +1,5 @@
 #pragma once
 
-#include <QPaintEvent>
-#include <QScroller>
-#include <QTimer>
-#include <QVariantAnimation>
-#include <QWheelEvent>
-#include <QWidget>
-#include <pajlada/signals/signal.hpp>
-#include <unordered_map>
-#include <unordered_set>
-
 #include "common/FlagsEnum.hpp"
 #include "controllers/filters/FilterSet.hpp"
 #include "messages/Image.hpp"
@@ -17,6 +7,17 @@
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Selection.hpp"
 #include "widgets/BaseWidget.hpp"
+
+#include <pajlada/signals/signal.hpp>
+#include <QPaintEvent>
+#include <QScroller>
+#include <QTimer>
+#include <QVariantAnimation>
+#include <QWheelEvent>
+#include <QWidget>
+
+#include <unordered_map>
+#include <unordered_set>
 
 namespace chatterino {
 enum class HighlightState;
@@ -76,9 +77,17 @@ public:
 
     void queueUpdate();
     Scrollbar &getScrollBar();
+
     QString getSelectedText();
     bool hasSelection();
     void clearSelection();
+    /**
+     * Copies the currently selected text to the users clipboard.
+     *
+     * @see ::getSelectedText()
+     */
+    void copySelectedText();
+
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
     void setOverrideFlags(boost::optional<MessageElementFlags> value);

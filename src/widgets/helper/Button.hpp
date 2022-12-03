@@ -1,9 +1,8 @@
 #pragma once
 
-#include <boost/optional.hpp>
-
 #include "widgets/BaseWidget.hpp"
 
+#include <boost/optional.hpp>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPainter>
