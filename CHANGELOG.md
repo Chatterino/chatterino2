@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Cleared up highlight sound settings (#4194)
+- Bugfix: Fixed highlight sounds not reloading on change properly. (#4194)
 - Bugfix: Fixed CTRL + C not working in reply thread popups. (#4209)
 - Bugfix: Fixed message input showing as red after removing a message that was more than 500 characters. (#4204)
 - Bugfix: Fixed unnecessary saving of windows layout. (#4201)

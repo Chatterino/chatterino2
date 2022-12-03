@@ -17,9 +17,9 @@ public:
         Pattern = 0,
         ShowInMentions = 1,
         FlashTaskbar = 2,
-        PlaySound = 3,
-        UseRegex = 4,
-        CaseSensitive = 5,
+        UseRegex = 3,
+        CaseSensitive = 4,
+        PlaySound = 5,
         SoundPath = 6,
         Color = 7,
         COUNT  // keep this as last member of enum
