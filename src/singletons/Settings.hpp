@@ -271,7 +271,6 @@ public:
 
     /// Highlighting
     //    BoolSetting enableHighlights = {"/highlighting/enabled", true};
-    //    BoolSetting customHighlightSound = {"/highlighting/useCustomSound", false};
 
     BoolSetting enableSelfHighlight = {
         "/highlighting/selfHighlight/nameIsHighlightKeyword", true};
