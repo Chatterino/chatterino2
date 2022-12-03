@@ -28,7 +28,7 @@ public:
      * @param message the message to check for this predicate
      * @return true if this predicate applies, false otherwise
      **/
-    bool apply(const Message &message)
+    bool appliesTo(const Message &message)
     {
         auto result = this->appliesToImpl(message);
         if (this->isNegated_)

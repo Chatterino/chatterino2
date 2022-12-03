@@ -37,7 +37,7 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
         for (const auto &pred : predicates)
         {
             // Discard the message as soon as one predicate fails
-            if (!pred->apply(*message))
+            if (!pred->appliesTo(*message))
             {
                 accept = false;
                 break;
