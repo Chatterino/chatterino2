@@ -83,7 +83,7 @@ HighlightingPage::HighlightingPage()
                 // dpiChanged
                 QTimer::singleShot(1, [view] {
                     view->getTableView()->resizeColumnsToContents();
-                    view->getTableView()->setColumnWidth(0, 200);
+                    view->getTableView()->setColumnWidth(0, 400);
                 });
 
                 view->addButtonPressed.connect([] {
