@@ -15,6 +15,8 @@ namespace chatterino {
 
 static const char *ANONYMOUS_USERNAME ATTR_UNUSED = "justinfan64537";
 
+static constexpr int TWITCH_MESSAGE_LIMIT = 500;
+
 inline QByteArray getDefaultClientID()
 {
     return QByteArray("7ue61iz46fz11y3cugd0l3tawb4taal");

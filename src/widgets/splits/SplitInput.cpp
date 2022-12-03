@@ -6,6 +6,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Link.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -25,6 +26,7 @@
 
 #include <QCompleter>
 #include <QPainter>
+#include <QSignalBlocker>
 
 #include <functional>
 
@@ -887,25 +889,29 @@ void SplitInput::editTextChanged()
             app->commands->execCommand(text, this->split_->getChannel(), true);
     }
 
-    if (getSettings()->messageOverflow.getValue() == MessageOverflow::Highlight)
+    if (text.length() > 0 &&
+        getSettings()->messageOverflow.getValue() == MessageOverflow::Highlight)
     {
-        if (text.length() > TWITCH_MESSAGE_LIMIT &&
-            text.length() > this->lastOverflowLength)
-        {
-            QTextCharFormat format;
-            format.setForeground(Qt::red);
+        QTextCursor cursor = this->ui_.textEdit->textCursor();
+        QTextCharFormat format;
+        QList<QTextEdit::ExtraSelection> selections;
 
-            QTextCursor cursor = this->ui_.textEdit->textCursor();
-            cursor.setPosition(lastOverflowLength, QTextCursor::MoveAnchor);
+        cursor.setPosition(qMin(text.length(), TWITCH_MESSAGE_LIMIT),
+                           QTextCursor::MoveAnchor);
+        cursor.movePosition(QTextCursor::Start, QTextCursor::KeepAnchor);
+        selections.append({cursor, format});
+
+        if (text.length() > TWITCH_MESSAGE_LIMIT)
+        {
+            cursor.setPosition(TWITCH_MESSAGE_LIMIT, QTextCursor::MoveAnchor);
             cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
-
-            this->lastOverflowLength = text.length();
-
-            cursor.setCharFormat(format);
+            format.setForeground(Qt::red);
+            selections.append({cursor, format});
         }
-        else if (this->lastOverflowLength != TWITCH_MESSAGE_LIMIT)
+        // block reemit of QTextEdit::textChanged()
         {
-            this->lastOverflowLength = TWITCH_MESSAGE_LIMIT;
+            const QSignalBlocker b(this->ui_.textEdit);
+            this->ui_.textEdit->setExtraSelections(selections);
         }
     }
 
