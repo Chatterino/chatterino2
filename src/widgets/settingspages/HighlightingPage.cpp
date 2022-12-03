@@ -14,7 +14,6 @@
 
 #include <QFileDialog>
 #include <QHeaderView>
-#include <QListWidget>
 #include <QPushButton>
 #include <QStandardItemModel>
 #include <QTabWidget>
