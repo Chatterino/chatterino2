@@ -52,8 +52,6 @@ public:
     QString getInputText() const;
     void insertText(const QString &text);
 
-    static const int TWITCH_MESSAGE_LIMIT = 500;
-
     void setReply(std::shared_ptr<MessageThread> reply,
                   bool showInlineReplying = true);
     void setPlaceholderText(const QString &text);
@@ -150,8 +148,6 @@ protected:
     QStringList prevMsg_;
     QString currMsg_;
     int prevIndex_ = 0;
-
-    int lastOverflowLength = TWITCH_MESSAGE_LIMIT;
 
     // Hidden denotes whether this split input should be hidden or not
     // This is used instead of the regular QWidget::hide/show because
