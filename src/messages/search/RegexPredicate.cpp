@@ -17,7 +17,7 @@ bool RegexPredicate::appliesTo(const Message &message)
 
     QRegularExpressionMatch match = regex_.match(message.messageText);
 
-    return this->isNegated ^ match.hasMatch();
+    return match.hasMatch();
 }
 
 }  // namespace chatterino

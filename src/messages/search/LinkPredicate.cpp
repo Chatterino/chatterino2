@@ -15,10 +15,10 @@ bool LinkPredicate::appliesTo(const Message &message)
     for (const auto &word : message.messageText.split(' ', Qt::SkipEmptyParts))
     {
         if (LinkParser(word).hasMatch())
-            return this->isNegated ^ true;
+            return true;
     }
 
-    return this->isNegated ^ false;
+    return false;
 }
 
 }  // namespace chatterino

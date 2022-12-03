@@ -19,6 +19,22 @@ class MessagePredicate
 public:
     virtual ~MessagePredicate() = default;
 
+    bool apply(const Message &message)
+    {
+        auto result = this->appliesTo(message);
+        if (this->isNegated_)
+        {
+            return !result;
+        }
+        return result;
+    }
+
+protected:
+    explicit MessagePredicate(bool negate)
+        : isNegated_(negate)
+    {
+    }
+
     /**
      * @brief Checks whether this predicate applies to the passed message.
      *
@@ -30,12 +46,7 @@ public:
      */
     virtual bool appliesTo(const Message &message) = 0;
 
-protected:
-    explicit MessagePredicate(bool negate = false)
-        : isNegated(negate)
-    {
-    }
-
-    const bool isNegated = false;
+private:
+    const bool isNegated_ = false;
 };
 }  // namespace chatterino

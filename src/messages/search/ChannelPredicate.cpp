@@ -17,8 +17,7 @@ ChannelPredicate::ChannelPredicate(const QString &channels, bool negate)
 
 bool ChannelPredicate::appliesTo(const Message &message)
 {
-    return this->isNegated ^
-           channels_.contains(message.channelName, Qt::CaseInsensitive);
+    return channels_.contains(message.channelName, Qt::CaseInsensitive);
 }
 
 }  // namespace chatterino

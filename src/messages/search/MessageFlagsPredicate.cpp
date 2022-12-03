@@ -61,11 +61,10 @@ bool MessageFlagsPredicate::appliesTo(const Message &message)
     if (this->flags_.has(MessageFlag::System) &&
         !this->flags_.has(MessageFlag::Timeout))
     {
-        return this->isNegated ^ (message.flags.hasAny(flags_) &&
-                                  !message.flags.has(MessageFlag::Timeout));
+        return message.flags.hasAny(flags_) &&
+               !message.flags.has(MessageFlag::Timeout);
     }
-
-    return this->isNegated ^ message.flags.hasAny(flags_);
+    return message.flags.hasAny(flags_);
 }
 
 }  // namespace chatterino

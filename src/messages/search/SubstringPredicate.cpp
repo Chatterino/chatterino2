@@ -3,7 +3,8 @@
 namespace chatterino {
 
 SubstringPredicate::SubstringPredicate(const QString &search)
-    : search_(search)
+    : MessagePredicate(false)
+    , search_(search)
 {
 }
 

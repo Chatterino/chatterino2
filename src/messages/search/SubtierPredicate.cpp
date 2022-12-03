@@ -23,11 +23,11 @@ bool SubtierPredicate::appliesTo(const Message &message)
             const auto &subTier =
                 badge.value_.length() > 3 ? badge.value_.at(0) : '1';
 
-            return this->isNegated ^ subtiers_.contains(subTier);
+            return subtiers_.contains(subTier);
         }
     }
 
-    return this->isNegated ^ false;
+    return false;
 }
 
 }  // namespace chatterino

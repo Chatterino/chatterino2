@@ -17,9 +17,8 @@ AuthorPredicate::AuthorPredicate(const QString &authors, bool negate)
 
 bool AuthorPredicate::appliesTo(const Message &message)
 {
-    return this->isNegated ^
-           (authors_.contains(message.displayName, Qt::CaseInsensitive) ||
-            authors_.contains(message.loginName, Qt::CaseInsensitive));
+    return authors_.contains(message.displayName, Qt::CaseInsensitive) ||
+           authors_.contains(message.loginName, Qt::CaseInsensitive);
 }
 
 }  // namespace chatterino
