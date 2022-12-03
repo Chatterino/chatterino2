@@ -7,6 +7,7 @@
 #include "controllers/highlights/UserHighlightModel.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/StandardItemHelper.hpp"
 #include "widgets/dialogs/BadgePickerDialog.hpp"
@@ -251,7 +252,8 @@ HighlightingPage::HighlightingPage()
                     auto url = QUrl::fromLocalFile(value);
                     return QString("Default sound: <a href=\"%1\"><span "
                                    "style=\"color: white\">%2</span></a>")
-                        .arg(url.toString(QUrl::FullyEncoded), url.fileName());
+                        .arg(url.toString(QUrl::FullyEncoded),
+                             shortenString(url.fileName(), 50));
                 },
                 getSettings()->pathHighlightSound));
             label->setToolTip(
