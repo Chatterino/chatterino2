@@ -21,6 +21,7 @@ public:
      */
     ChannelPredicate(const QString &channels, bool negate);
 
+protected:
     /**
      * @brief Checks whether the message was sent in any of the channels passed
      *        in the constructor.

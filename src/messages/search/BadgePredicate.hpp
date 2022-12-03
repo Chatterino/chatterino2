@@ -21,6 +21,7 @@ public:
      */
     BadgePredicate(const QString &badges, bool negate);
 
+protected:
     /**
      * @brief Checks whether the message contains any of the badges passed
      *        in the constructor.

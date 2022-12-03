@@ -31,6 +31,7 @@ public:
      */
     MessageFlagsPredicate(const QString &flags, bool negate);
 
+protected:
     /**
      * @brief Checks whether the message has any of the flags passed
      *        in the constructor.

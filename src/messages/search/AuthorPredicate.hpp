@@ -21,6 +21,7 @@ public:
      */
     AuthorPredicate(const QString &authors, bool negate);
 
+protected:
     /**
      * @brief Checks whether the message is authored by any of the users passed
      *        in the constructor.

@@ -22,6 +22,7 @@ public:
      */
     SubstringPredicate(const QString &search);
 
+protected:
     /**
      * @brief Checks whether the message contains the substring passed in the
      *        constructor.

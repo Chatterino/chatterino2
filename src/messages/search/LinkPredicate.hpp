@@ -19,6 +19,7 @@ public:
     */
     LinkPredicate(bool negate);
 
+protected:
     /**
      * @brief Checks whether the message contains a link.
      *

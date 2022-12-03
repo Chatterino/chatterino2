@@ -24,6 +24,7 @@ public:
      */
     RegexPredicate(const QString &regex, bool negate);
 
+protected:
     /**
      * @brief Checks whether the message matches the regex passed in the
      *        constructor

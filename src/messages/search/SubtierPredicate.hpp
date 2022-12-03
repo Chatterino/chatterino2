@@ -21,6 +21,7 @@ public:
      */
     SubtierPredicate(const QString &subtiers, bool negate);
 
+protected:
     /**
      * @brief Checks whether the message contains any of the subtiers passed
      *        in the constructor.
