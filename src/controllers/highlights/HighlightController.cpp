@@ -50,8 +50,7 @@ void rebuildSubscriptionHighlights(Settings &settings,
     {
         auto highlightSound = settings.enableSubHighlightSound.getValue();
         auto highlightAlert = settings.enableSubHighlightTaskbar.getValue();
-        auto highlightSoundUrlValue =
-            settings.whisperHighlightSoundUrl.getValue();
+        auto highlightSoundUrlValue = settings.subHighlightSoundUrl.getValue();
         boost::optional<QUrl> highlightSoundUrl;
         if (!highlightSoundUrlValue.isEmpty())
         {
