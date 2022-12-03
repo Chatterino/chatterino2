@@ -77,9 +77,17 @@ public:
 
     void queueUpdate();
     Scrollbar &getScrollBar();
+
     QString getSelectedText();
     bool hasSelection();
     void clearSelection();
+    /**
+     * Copies the currently selected text to the users clipboard.
+     *
+     * @see ::getSelectedText()
+     */
+    void copySelectedText();
+
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
     void setOverrideFlags(boost::optional<MessageElementFlags> value);

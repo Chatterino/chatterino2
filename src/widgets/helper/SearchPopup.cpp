@@ -58,7 +58,7 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
 }
 
 SearchPopup::SearchPopup(QWidget *parent, Split *split)
-    : BasePopup({}, parent)
+    : BasePopup({BaseWindow::DisableLayoutSave}, parent)
     , split_(split)
 {
     this->initLayout();
