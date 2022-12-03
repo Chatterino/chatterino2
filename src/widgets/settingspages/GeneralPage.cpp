@@ -432,7 +432,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "Prevent potentially explicit avatars from showing.");
     layout.addCheckbox("Hide link thumbnails", s.streamerModeHideLinkThumbnails,
                        false,
-                       "Prevent potentially explicit links from showing.");
+                       "Prevent potentially explicit thumbnails from showing "
+                       "when hovering links.");
     layout.addCheckbox(
         "Hide viewer count and stream length while hovering over split header",
         s.streamerModeHideViewerCountAndDuration);
