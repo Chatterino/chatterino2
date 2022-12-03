@@ -19,6 +19,15 @@ class MessagePredicate
 public:
     virtual ~MessagePredicate() = default;
 
+    /**
+     * @brief Checks whether this predicate applies to the passed message
+     *
+     * Calls the derived classes `appliedTo` implementation, and respects the `isNegated_` flag
+     * it's set.
+     *
+     * @param message the message to check for this predicate
+     * @return true if this predicate applies, false otherwise
+     **/
     bool apply(const Message &message)
     {
         auto result = this->appliesTo(message);
