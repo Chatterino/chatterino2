@@ -229,8 +229,12 @@ void SharedMessageBuilder::triggerHighlights()
     {
         if (auto player = getPlayer())
         {
-            // load media if not loaded or fully buffered
-            if (player->mediaStatus() != 3 || player->mediaStatus() != 6)
+            // load media if not loading, loaded, stalled, buffering, or fully buffered
+            if (!(player->mediaStatus() == QMediaPlayer::LoadingMedia ||
+                  player->mediaStatus() == QMediaPlayer::LoadedMedia ||
+                  player->mediaStatus() == QMediaPlayer::StalledMedia ||
+                  player->mediaStatus() == QMediaPlayer::BufferingMedia ||
+                  player->mediaStatus() == QMediaPlayer::BufferedMedia))
             {
                 player->setMedia(this->highlightSoundUrl_);
             }
