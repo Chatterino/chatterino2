@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Search window input will automatically use currently selected text if present. (#4178)
 - Minor: Cleared up highlight sound settings (#4194)
 - Bugfix: Fixed highlight sounds not reloading on change properly. (#4194)
 - Bugfix: Fixed CTRL + C not working in reply thread popups. (#4209)
