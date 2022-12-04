@@ -229,7 +229,7 @@ void SharedMessageBuilder::triggerHighlights()
     {
         if (auto player = getPlayer())
         {
-            // load media if not loading, loaded, stalled, buffering, or fully buffered
+            // set media if not loading, loaded, stalled, buffering, or fully buffered
             if (!(player->mediaStatus() == QMediaPlayer::LoadingMedia ||
                   player->mediaStatus() == QMediaPlayer::LoadedMedia ||
                   player->mediaStatus() == QMediaPlayer::StalledMedia ||
