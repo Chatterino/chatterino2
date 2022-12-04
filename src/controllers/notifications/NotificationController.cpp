@@ -103,8 +103,12 @@ void NotificationController::playSound()
                   getSettings()->notificationPathSound.getValue())
             : QUrl("qrc:/sounds/ping2.wav");
 
-    // load media if not loaded or fully buffered
-    if (player->mediaStatus() != 3 || player->mediaStatus() != 6)
+    // load media if not loaded, buffered, loading, buffering, or stalled
+    if (!(player->mediaStatus() == QMediaPlayer::LoadedMedia ||
+          player->mediaStatus() == QMediaPlayer::BufferedMedia ||
+          player->mediaStatus() == QMediaPlayer::LoadingMedia ||
+          player->mediaStatus() == QMediaPlayer::BufferingMedia ||
+          player->mediaStatus() == QMediaPlayer::StalledMedia))
     {
         player->setMedia(highlightSoundUrl);
     }
