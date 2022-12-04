@@ -302,7 +302,7 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     // It also ignores whitespaces in values when being surrounded by quotation
     // marks, to enable inputs like this => regex:"kappa 123"
     static QRegularExpression predicateRegex(
-        R"lit((?:(?<name>\w+):(?<negation>[!\-])?(?<value>".+?"|[^\s]+))|[^\s]+?(?=$|\s))lit");
+        R"lit((?<negation>[!\-])?(?:(?<name>\w+):(?<value>".+?"|[^\s]+))|[^\s]+?(?=$|\s))lit");
     static QRegularExpression trimQuotationMarksRegex(R"(^"|"$)");
 
     QRegularExpressionMatchIterator it = predicateRegex.globalMatch(input);
