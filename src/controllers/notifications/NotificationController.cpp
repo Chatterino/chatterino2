@@ -96,7 +96,6 @@ void NotificationController::removeChannelNotification(
 void NotificationController::playSound()
 {
     static auto player = new QMediaPlayer;
-    static QUrl currentPlayerUrl;
 
     QUrl highlightSoundUrl =
         getSettings()->notificationCustomSound
@@ -104,12 +103,11 @@ void NotificationController::playSound()
                   getSettings()->notificationPathSound.getValue())
             : QUrl("qrc:/sounds/ping2.wav");
 
-    if (currentPlayerUrl != highlightSoundUrl)
+    if (player->mediaStatus() != 3 || player->mediaStatus() != 6)
     {
         player->setMedia(highlightSoundUrl);
-
-        currentPlayerUrl = highlightSoundUrl;
     }
+
     player->play();
 }
 
