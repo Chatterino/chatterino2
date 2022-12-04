@@ -229,7 +229,7 @@ void SharedMessageBuilder::triggerHighlights()
     {
         if (auto player = getPlayer())
         {
-            // reload the media if not loaded or buffered
+            // load media if not loaded or fully buffered
             if (player->mediaStatus() != 3 || player->mediaStatus() != 6)
             {
                 player->setMedia(this->highlightSoundUrl_);
