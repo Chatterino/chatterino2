@@ -27,9 +27,11 @@ public:
      * "system" is used for the "System" flag.
      *
      * @param flags a string comma seperated list of names for the flags a message should have
+     * @param negate when set, excludes messages containg selected flags from results
      */
-    MessageFlagsPredicate(const QString &flags);
+    MessageFlagsPredicate(const QString &flags, bool negate);
 
+protected:
     /**
      * @brief Checks whether the message has any of the flags passed
      *        in the constructor.
@@ -38,7 +40,7 @@ public:
      * @return true if the message has at least one of the specified flags,
      *         false otherwise
      */
-    bool appliesTo(const Message &message);
+    bool appliesToImpl(const Message &message) override;
 
 private:
     /// Holds the flags that will be searched for

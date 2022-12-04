@@ -5,11 +5,12 @@
 
 namespace chatterino {
 
-LinkPredicate::LinkPredicate()
+LinkPredicate::LinkPredicate(bool negate)
+    : MessagePredicate(negate)
 {
 }
 
-bool LinkPredicate::appliesTo(const Message &message)
+bool LinkPredicate::appliesToImpl(const Message &message)
 {
     for (const auto &word : message.messageText.split(' ', Qt::SkipEmptyParts))
     {
