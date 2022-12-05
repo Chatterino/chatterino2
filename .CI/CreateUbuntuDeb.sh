@@ -28,7 +28,7 @@ Priority: optional
 Architecture: amd64
 Maintainer: Mm2PL <mm2pl@kotmisia.pl>
 Description: Testing out chatterino as a Ubuntu package
-Depends: rapidjson-dev, libfuse2, libssl-dev, libboost-dev, libxcb-randr0-dev, libboost-system-dev, libboost-filesystem-dev, libxkbcommon-x11-0, libgstreamer-plugins-base1.0-0, libgl1-mesa-dev, libxcb-icccm4, libxcb-image0, libxcb-keysyms1, libxcb-render-util0, libxcb-xinerama0
+Depends: rapidjson-dev, libfuse2, libssl-dev, libboost-dev, libxcb-randr0-dev, libboost-system-dev, libboost-filesystem-dev, libxkbcommon-x11-0, libgstreamer-plugins-base1.0-0, libgl1-mesa-dev, libxcb-icccm4, libxcb-image0, libxcb-keysyms1, libxcb-render-util0, libxcb-xinerama0, qttools5-dev, qt5multimedia5-dev, qt5image-formats-plugins, libqt5svg5-dev, libqt5core5a
 EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 
