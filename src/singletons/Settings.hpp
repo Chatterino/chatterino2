@@ -271,7 +271,6 @@ public:
 
     /// Highlighting
     //    BoolSetting enableHighlights = {"/highlighting/enabled", true};
-    BoolSetting customHighlightSound = {"/highlighting/useCustomSound", false};
 
     BoolSetting enableSelfHighlight = {
         "/highlighting/selfHighlight/nameIsHighlightKeyword", true};
@@ -303,8 +302,8 @@ public:
     //        "/highlighting/redeemedHighlight/enableSound", false};
     //    BoolSetting enableRedeemedHighlightTaskbar = {
     //        "/highlighting/redeemedHighlight/enableTaskbarFlashing", false};
-    QStringSetting redeemedHighlightSoundUrl = {
-        "/highlighting/redeemedHighlightSoundUrl", ""};
+    //    QStringSetting redeemedHighlightSoundUrl = {
+    //        "/highlighting/redeemedHighlightSoundUrl", ""};
     QStringSetting redeemedHighlightColor = {
         "/highlighting/redeemedHighlightColor", ""};
 
@@ -314,8 +313,8 @@ public:
     //        "/highlighting/firstMessageHighlight/enableSound", false};
     //    BoolSetting enableFirstMessageHighlightTaskbar = {
     //        "/highlighting/firstMessageHighlight/enableTaskbarFlashing", false};
-    QStringSetting firstMessageHighlightSoundUrl = {
-        "/highlighting/firstMessageHighlightSoundUrl", ""};
+    //    QStringSetting firstMessageHighlightSoundUrl = {
+    //        "/highlighting/firstMessageHighlightSoundUrl", ""};
     QStringSetting firstMessageHighlightColor = {
         "/highlighting/firstMessageHighlightColor", ""};
 
@@ -325,8 +324,8 @@ public:
     //        "/highlighting/elevatedMessageHighlight/enableSound", false};
     //    BoolSetting enableElevatedMessageHighlightTaskbar = {
     //        "/highlighting/elevatedMessageHighlight/enableTaskbarFlashing", false};
-    QStringSetting elevatedMessageHighlightSoundUrl = {
-        "/highlighting/elevatedMessageHighlight/soundUrl", ""};
+    //    QStringSetting elevatedMessageHighlightSoundUrl = {
+    //        "/highlighting/elevatedMessageHighlight/soundUrl", ""};
     QStringSetting elevatedMessageHighlightColor = {
         "/highlighting/elevatedMessageHighlight/color", ""};
 

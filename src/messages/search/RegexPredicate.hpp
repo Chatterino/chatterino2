@@ -20,9 +20,11 @@ public:
      * The message is being matched case-insensitively.
      *
      * @param regex the regex to match the message against
+     * @param negate when set, excludes messages matching the regex from results
      */
-    RegexPredicate(const QString &regex);
+    RegexPredicate(const QString &regex, bool negate);
 
+protected:
     /**
      * @brief Checks whether the message matches the regex passed in the
      *        constructor
@@ -32,7 +34,7 @@ public:
      * @param message the message to check
      * @return true if the message matches the regex, false otherwise
      */
-    bool appliesTo(const Message &message);
+    bool appliesToImpl(const Message &message) override;
 
 private:
     /// Holds the regular expression to match the message against

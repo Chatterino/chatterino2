@@ -11,7 +11,9 @@
 namespace chatterino {
 
 AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
-    : BaseWindow({BaseWindow::TopMost, BaseWindow::Frameless}, parent)
+    : BaseWindow({BaseWindow::TopMost, BaseWindow::Frameless,
+                  BaseWindow::DisableLayoutSave},
+                 parent)
 {
 #ifdef Q_OS_LINUX
     this->setWindowFlag(Qt::Popup);

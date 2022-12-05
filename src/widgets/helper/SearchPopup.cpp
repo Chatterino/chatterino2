@@ -58,10 +58,16 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
 }
 
 SearchPopup::SearchPopup(QWidget *parent, Split *split)
-    : BasePopup({}, parent)
+    : BasePopup({BaseWindow::DisableLayoutSave}, parent)
     , split_(split)
 {
     this->initLayout();
+    if (this->split_ && this->split_->getChannelView().hasSelection())
+    {
+        this->searchInput_->setText(
+            this->split_->getChannelView().getSelectedText().trimmed());
+        this->searchInput_->selectAll();
+    }
     this->resize(400, 600);
     this->addShortcuts();
 }
@@ -296,81 +302,63 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     // It also ignores whitespaces in values when being surrounded by quotation
     // marks, to enable inputs like this => regex:"kappa 123"
     static QRegularExpression predicateRegex(
-        R"lit((?:(?<name>\w+):(?<value>".+?"|[^\s]+))|[^\s]+?(?=$|\s))lit");
+        R"lit((?<negation>[!\-])?(?:(?<name>\w+):(?<value>".+?"|[^\s]+))|[^\s]+?(?=$|\s))lit");
     static QRegularExpression trimQuotationMarksRegex(R"(^"|"$)");
 
     QRegularExpressionMatchIterator it = predicateRegex.globalMatch(input);
 
     std::vector<std::unique_ptr<MessagePredicate>> predicates;
-    QStringList authors;
-    QStringList channels;
-    QStringList badges;
-    QStringList subtiers;
 
     while (it.hasNext())
     {
         QRegularExpressionMatch match = it.next();
 
         QString name = match.captured("name");
-
+        bool isNegated = !match.captured("negation").isEmpty();
         QString value = match.captured("value");
         value.remove(trimQuotationMarksRegex);
 
         // match predicates
+
         if (name == "from")
         {
-            authors.append(value);
+            predicates.push_back(
+                std::make_unique<AuthorPredicate>(value, isNegated));
         }
         else if (name == "badge")
         {
-            badges.append(value);
+            predicates.push_back(
+                std::make_unique<BadgePredicate>(value, isNegated));
         }
         else if (name == "subtier")
         {
-            subtiers.append(value);
+            predicates.push_back(
+                std::make_unique<SubtierPredicate>(value, isNegated));
         }
         else if (name == "has" && value == "link")
         {
-            predicates.push_back(std::make_unique<LinkPredicate>());
+            predicates.push_back(std::make_unique<LinkPredicate>(isNegated));
         }
         else if (name == "in")
         {
-            channels.append(value);
+            predicates.push_back(
+                std::make_unique<ChannelPredicate>(value, isNegated));
         }
         else if (name == "is")
         {
             predicates.push_back(
-                std::make_unique<MessageFlagsPredicate>(value));
+                std::make_unique<MessageFlagsPredicate>(value, isNegated));
         }
         else if (name == "regex")
         {
-            predicates.push_back(std::make_unique<RegexPredicate>(value));
+            predicates.push_back(
+                std::make_unique<RegexPredicate>(value, isNegated));
         }
         else
         {
             predicates.push_back(
                 std::make_unique<SubstringPredicate>(match.captured()));
         }
-    }
-
-    if (!authors.empty())
-    {
-        predicates.push_back(std::make_unique<AuthorPredicate>(authors));
-    }
-
-    if (!channels.empty())
-    {
-        predicates.push_back(std::make_unique<ChannelPredicate>(channels));
-    }
-
-    if (!badges.empty())
-    {
-        predicates.push_back(std::make_unique<BadgePredicate>(badges));
-    }
-
-    if (!subtiers.empty())
-    {
-        predicates.push_back(std::make_unique<SubtierPredicate>(subtiers));
     }
 
     return predicates;

@@ -1121,11 +1121,6 @@ void Split::openSubPage()
     }
 }
 
-void Split::copyToClipboard()
-{
-    crossPlatformCopy(this->view_->getSelectedText());
-}
-
 void Split::startWatching()
 {
 #ifdef USEWEBENGINE
