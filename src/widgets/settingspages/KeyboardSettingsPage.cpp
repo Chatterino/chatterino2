@@ -40,13 +40,6 @@ KeyboardSettingsPage::KeyboardSettingsPage()
             auto newHotkey = dialog.data();
             int vectorIndex = getApp()->hotkeys->hotkeys_.append(newHotkey);
             getApp()->hotkeys->save();
-
-            // Select and scroll to newly added hotkey
-            auto modelRow = model->getModelIndexFromVectorIndex(vectorIndex);
-            auto modelIndex = model->index(modelRow, 0);
-            view->selectRow(modelRow);
-            view->getTableView()->scrollTo(modelIndex,
-                                           QAbstractItemView::PositionAtCenter);
         }
     });
 
@@ -89,11 +82,6 @@ void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
         auto vectorIndex =
             getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
         getApp()->hotkeys->save();
-
-        // Select the replaced hotkey
-        auto modelRow = model->getModelIndexFromVectorIndex(vectorIndex);
-        auto modelIndex = model->index(modelRow, 0);
-        view->selectRow(modelRow);
     }
 }
 
