@@ -36,11 +36,13 @@ echo "Running make install in package dir"
 DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
 echo ""
 
+echo "$packaging_dir$(pwd)/appdir/usr"
+echo "$packaging_dir/"
 # move directory up
 mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/"
 rm -vrf "$packaging_dir/home" || true
 
 echo "Building package..."
 dpkg-deb --build "$packaging_dir" "Chatterino-x86_64.deb"
-dpkg -I chatterino-x86_64.deb
-dpkg -c chatterino-x86_64.deb
+dpkg -I Chatterino-x86_64.deb
+dpkg -c Chatterino-x86_64.deb
