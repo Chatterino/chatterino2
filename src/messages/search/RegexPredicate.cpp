@@ -2,12 +2,13 @@
 
 namespace chatterino {
 
-RegexPredicate::RegexPredicate(const QString &regex)
-    : regex_(regex, QRegularExpression::CaseInsensitiveOption)
+RegexPredicate::RegexPredicate(const QString &regex, bool negate)
+    : MessagePredicate(negate)
+    , regex_(regex, QRegularExpression::CaseInsensitiveOption)
 {
 }
 
-bool RegexPredicate::appliesTo(const Message &message)
+bool RegexPredicate::appliesToImpl(const Message &message)
 {
     if (!regex_.isValid())
     {
