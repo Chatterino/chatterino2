@@ -157,6 +157,9 @@ protected:
     // set the height of the split input to 0 if we're supposed to be hidden instead
     bool hidden{false};
 
+signals:
+    void selectionChanged();
+
 private slots:
     void editTextChanged();
 

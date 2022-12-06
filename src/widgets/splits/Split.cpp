@@ -115,12 +115,23 @@ Split::Split(QWidget *parent)
     });
     this->updateInputPlaceholder();
 
-    this->view_->selectionChanged.connect([this]() {
-        if (this->input_->hasSelection())
-        {
-            this->input_->clearSelection();
-        }
-    });
+    // clear SplitInput selection when selecting in ChannelView
+    QObject::connect(this->view_, &ChannelView::selectionChanged, this,
+                     [this]() {
+                         if (this->input_->hasSelection())
+                         {
+                             this->input_->clearSelection();
+                         }
+                     });
+
+    // clear ChannelView selection when selecting in SplitInput
+    QObject::connect(this->input_, &SplitInput::selectionChanged, this,
+                     [this]() {
+                         if (this->view_->hasSelection())
+                         {
+                             this->view_->clearSelection();
+                         }
+                     });
 
     this->view_->openChannelIn.connect([this](
                                            QString twitchChannel,
