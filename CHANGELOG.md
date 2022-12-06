@@ -6,6 +6,7 @@
 - Minor: Search window input will automatically use currently selected text if present. (#4178)
 - Minor: Cleared up highlight sound settings (#4194)
 - Minor: Tables in settings window will now scroll to newly added rows. (#4216)
+- Minor: Added link to streamlink docs for easier user setup. (#4217)
 - Bugfix: Fixed highlight sounds not reloading on change properly. (#4194)
 - Bugfix: Fixed CTRL + C not working in reply thread popups. (#4209)
 - Bugfix: Fixed message input showing as red after removing a message that was more than 500 characters. (#4204)
