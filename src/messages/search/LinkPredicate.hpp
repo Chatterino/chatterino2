@@ -12,15 +12,21 @@ namespace chatterino {
 class LinkPredicate : public MessagePredicate
 {
 public:
-    LinkPredicate();
+    /**
+     * @brief Create an LinkPredicate
+     * 
+     * @param negate when set, excludes messages containing links from results
+    */
+    LinkPredicate(bool negate);
 
+protected:
     /**
      * @brief Checks whether the message contains a link.
      *
      * @param message the message to check
      * @return true if the message contains a link, false otherwise
      */
-    bool appliesTo(const Message &message);
+    bool appliesToImpl(const Message &message) override;
 };
 
 }  // namespace chatterino
