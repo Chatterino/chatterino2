@@ -191,7 +191,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         tabDirectionDropdown->minimumSizeHint().width());
 
     layout.addCheckbox(
-        "Hide message reply context", s.hideReplyContext, false,
+        "Show message reply context", s.hideReplyContext, true,
         "This setting will only affect how messages are rendered. You can "
         "reply to a message regardless of this setting.");
     layout.addCheckbox("Show message reply button", s.showReplyButton);
