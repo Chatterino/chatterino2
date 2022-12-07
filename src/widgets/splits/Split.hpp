@@ -169,7 +169,6 @@ public slots:
     void openInStreamlink();
     void openStreamSettingsEditor();
     void openWithCustomScheme();
-    void copyToClipboard();
     void startWatching();
     void setFiltersDialog();
     void showSearch(bool singleChannel);

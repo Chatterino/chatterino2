@@ -27,9 +27,9 @@
 namespace chatterino {
 
 SettingsDialog::SettingsDialog(QWidget *parent)
-    : BaseWindow(
-          {BaseWindow::Flags::DisableCustomScaling, BaseWindow::Flags::Dialog},
-          parent)
+    : BaseWindow({BaseWindow::Flags::DisableCustomScaling,
+                  BaseWindow::Flags::Dialog, BaseWindow::DisableLayoutSave},
+                 parent)
 {
     this->setObjectName("SettingsDialog");
     this->setWindowTitle("Chatterino Settings");

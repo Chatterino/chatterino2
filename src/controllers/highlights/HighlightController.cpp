@@ -50,8 +50,7 @@ void rebuildSubscriptionHighlights(Settings &settings,
     {
         auto highlightSound = settings.enableSubHighlightSound.getValue();
         auto highlightAlert = settings.enableSubHighlightTaskbar.getValue();
-        auto highlightSoundUrlValue =
-            settings.whisperHighlightSoundUrl.getValue();
+        auto highlightSoundUrlValue = settings.subHighlightSoundUrl.getValue();
         boost::optional<QUrl> highlightSoundUrl;
         if (!highlightSoundUrlValue.isEmpty())
         {
@@ -284,15 +283,22 @@ namespace chatterino {
 
 void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
 {
+    this->rebuildListener_.addSetting(settings.enableSelfHighlight);
+    this->rebuildListener_.addSetting(settings.enableSelfHighlightSound);
+    this->rebuildListener_.addSetting(settings.enableSelfHighlightTaskbar);
+    this->rebuildListener_.addSetting(settings.selfHighlightSoundUrl);
+    this->rebuildListener_.addSetting(settings.showSelfHighlightInMentions);
+
     this->rebuildListener_.addSetting(settings.enableWhisperHighlight);
     this->rebuildListener_.addSetting(settings.enableWhisperHighlightSound);
     this->rebuildListener_.addSetting(settings.enableWhisperHighlightTaskbar);
     this->rebuildListener_.addSetting(settings.whisperHighlightSoundUrl);
-    this->rebuildListener_.addSetting(settings.whisperHighlightColor);
-    this->rebuildListener_.addSetting(settings.enableSelfHighlight);
+
     this->rebuildListener_.addSetting(settings.enableSubHighlight);
     this->rebuildListener_.addSetting(settings.enableSubHighlightSound);
     this->rebuildListener_.addSetting(settings.enableSubHighlightTaskbar);
+    this->rebuildListener_.addSetting(settings.subHighlightSoundUrl);
+
     this->rebuildListener_.addSetting(settings.enableThreadHighlight);
     this->rebuildListener_.addSetting(settings.enableThreadHighlightSound);
     this->rebuildListener_.addSetting(settings.enableThreadHighlightTaskbar);

@@ -45,7 +45,7 @@ namespace {
 
 InputCompletionPopup::InputCompletionPopup(QWidget *parent)
     : BasePopup({BasePopup::EnableCustomFrame, BasePopup::Frameless,
-                 BasePopup::DontFocus},
+                 BasePopup::DontFocus, BaseWindow::DisableLayoutSave},
                 parent)
     , model_(this)
 {

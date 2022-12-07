@@ -258,7 +258,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.enableSmoothScrollingNewMessages);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput, false,
                        "Show the chat box even when there is nothing typed.");
-    layout.addCheckbox("Show message length while typing", s.showMessageLength);
+    layout.addCheckbox(
+        "Show message length while typing", s.showMessageLength, false,
+        "Show how many characters are currently in your input box.\n"
+        "Useful for making sure you don't go past the 500 character Twitch "
+        "limit, or a lower limit enforced by a moderation bot");
     layout.addCheckbox(
         "Allow sending duplicate messages", s.allowDuplicateMessages, false,
         "Allow a single message to be repeatedly sent without any changes.");
@@ -426,17 +430,23 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Hide usercard avatars",
                        s.streamerModeHideUsercardAvatars, false,
                        "Prevent potentially explicit avatars from showing.");
-    layout.addCheckbox("Hide link thumbnails",
-                       s.streamerModeHideLinkThumbnails);
+    layout.addCheckbox("Hide link thumbnails", s.streamerModeHideLinkThumbnails,
+                       false,
+                       "Prevent potentially explicit thumbnails from showing "
+                       "when hovering links.");
     layout.addCheckbox(
         "Hide viewer count and stream length while hovering over split header",
         s.streamerModeHideViewerCountAndDuration);
-    layout.addCheckbox("Hide moderation actions", s.streamerModeHideModActions);
-    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
-    layout.addCheckbox("Suppress Live Notifications",
-                       s.streamerModeSuppressLiveNotifications);
+    layout.addCheckbox("Hide moderation actions", s.streamerModeHideModActions,
+                       false, "Hide bans & timeouts from appearing in chat.");
+    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions, false,
+                       "Mute your ping sound from playing.");
+    layout.addCheckbox(
+        "Suppress Live Notifications", s.streamerModeSuppressLiveNotifications,
+        false, "Hide Live notification popups from appearing. (Windows Only)");
     layout.addCheckbox("Suppress Inline Whispers",
-                       s.streamerModeSuppressInlineWhispers);
+                       s.streamerModeSuppressInlineWhispers, false,
+                       "Hide whispers sent to you from appearing in chat.");
 
     layout.addTitle("Link Previews");
     layout.addDescription(
@@ -609,10 +619,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addSubtitle("Chat title");
     layout.addDescription("In live channels show:");
-    layout.addCheckbox("Uptime", s.headerUptime);
-    layout.addCheckbox("Viewer count", s.headerViewerCount);
-    layout.addCheckbox("Category", s.headerGame);
-    layout.addCheckbox("Title", s.headerStreamTitle);
+    layout.addCheckbox("Uptime", s.headerUptime, false,
+                       "Show how long the channel has been live");
+    layout.addCheckbox("Viewer count", s.headerViewerCount, false,
+                       "Show how many users are watching");
+    layout.addCheckbox("Category", s.headerGame, false,
+                       "Show what Category the stream is listed under");
+    layout.addCheckbox("Title", s.headerStreamTitle, false,
+                       "Show the stream title");
 
     layout.addSubtitle("R9K");
     auto toggleLocalr9kSeq = getApp()->hotkeys->getDisplaySequence(
@@ -667,18 +681,19 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addSubtitle("Visible badges");
     layout.addCheckbox("Authority", s.showBadgesGlobalAuthority, false,
-                       "e.g., staff, admin");
+                       "e.g. staff, admin");
     layout.addCheckbox("Predictions", s.showBadgesPredictions);
     layout.addCheckbox("Channel", s.showBadgesChannelAuthority, false,
-                       "e.g., broadcaster, moderator");
+                       "e.g. broadcaster, moderator");
     layout.addCheckbox("Subscriber ", s.showBadgesSubscription);
     layout.addCheckbox("Vanity", s.showBadgesVanity, false,
-                       "e.g., prime, bits, sub gifter");
-    layout.addCheckbox("Chatterino", s.showBadgesChatterino);
+                       "e.g. prime, bits, sub gifter");
     // these currently have no real use
     // layout.addCheckbox("Dankerino", s.showBadgesDankerino);
+    layout.addCheckbox("Chatterino", s.showBadgesChatterino, false,
+                       "e.g. Chatterino Supporter/Contributor/Developer");
     layout.addCheckbox("FrankerFaceZ", s.showBadgesFfz, false,
-                       "e.g., Bot, FFZ supporter, FFZ developer");
+                       "e.g. Bot, FFZ supporter, FFZ developer");
     layout.addCheckbox("7TV", s.showBadgesSevenTV, false,
                        "Badges for 7TV admins, developers, and supporters");
     layout.addSeperator();
@@ -695,7 +710,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            s.openLinksIncognito);
     }
 
-    layout.addCheckbox("Restart on crash", s.restartOnCrash);
+    layout.addCheckbox(
+        "Restart on crash", s.restartOnCrash, false,
+        "When possible, restart Chatterino if the program crashes");
 
 #if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
     if (!getPaths()->isPortable())
@@ -713,13 +730,24 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Show messages for timeouts, bans, and other moderator actions.");
     layout.addCheckbox("Show deletions of single messages",
                        s.hideDeletionActions, true);
-    layout.addCheckbox("Colorize users without color set (gray names)",
-                       s.colorizeNicknames);
-    layout.addCheckbox("Mention users with a comma (User,)",
-                       s.mentionUsersWithComma);
-    layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
-    layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
-    layout.addCheckbox("Automatically close usercard when it loses focus",
+    layout.addCheckbox(
+        "Colorize users without color set (gray names)", s.colorizeNicknames,
+        false,
+        "Grant a random color to users who never set a color for themselves");
+    layout.addCheckbox("Mention users with a comma", s.mentionUsersWithComma,
+                       false,
+                       "When using tab-completon, if the username is at the "
+                       "start of the message, include a comma at the end of "
+                       "the name.\ne.g. pajl -> pajlada,");
+    layout.addCheckbox(
+        "Show joined users (< 1000 chatters)", s.showJoins, false,
+        "Show a Twitch system message stating what users have joined the chat, "
+        "only available when the chat has less than 1000 users");
+    layout.addCheckbox(
+        "Show parted users (< 1000 chatters)", s.showParts, false,
+        "Show a Twitch system message stating what users have left the chat, "
+        "only available when chat has less than 1000 users");
+    layout.addCheckbox("Automatically close user popup when it loses focus",
                        s.autoCloseUserPopup);
     layout.addCheckbox(
         "Automatically close reply thread popup when it loses focus",
@@ -728,8 +756,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        false,
                        "Make all clickable links lowercase to deter "
                        "phishing attempts.");
-    layout.addCheckbox("Bold @usernames", s.boldUsernames);
-    layout.addCheckbox("Color @usernames", s.colorUsernames);
+    layout.addCheckbox("Bold @usernames", s.boldUsernames, false,
+                       "Bold @mentions to make them more noticable.");
+    layout.addCheckbox("Color @usernames", s.colorUsernames, false,
+                       "If Chatterino has seen a user, highlight @mention's of "
+                       "them with their Twitch color.");
     layout.addCheckbox("Try to find usernames without @ prefix",
                        s.findAllUsernames, false,
                        "Find mentions of users in chat without the @ prefix.");
@@ -771,9 +802,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.prefixOnlyEmoteCompletion, false,
         "When disabled, emote tab-completion will complete based on any part "
         "of the name."
-        "\ne.g., sheffy -> DatSheffy");
-    layout.addCheckbox("Only search for username autocompletion with an @",
-                       s.userCompletionOnlyWithAt);
+        "\ne.g. sheffy -> DatSheffy");
+    layout.addCheckbox(
+        "Only search for username autocompletion with an @",
+        s.userCompletionOnlyWithAt, false,
+        "When enabled, username tab-completion will only complete when using @"
+        "\ne.g. pajl -> pajl | @pajl -> @pajlada");
 
     layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers, false,
                        "Show whispers as messages in all splits instead "
@@ -792,7 +826,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.scrollbackUsercardLimit, 100, 100000, 100);
 
     layout.addCheckbox("Enable experimental IRC support (requires restart)",
-                       s.enableExperimentalIrc);
+                       s.enableExperimentalIrc, false,
+                       "When enabled, attempting to join a channel will "
+                       "include an \"IRC (Beta)\" tab allowing the user to "
+                       "connect to an IRC server outside of Twitch ");
     layout.addCheckbox("Show unhandled IRC messages",
                        s.showUnhandledIrcMessages);
     layout.addDropdown<int>(
@@ -810,7 +847,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "message) into one cheermote.");
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
-    layout.addCheckbox("Strip leading mention in replies", s.stripReplyMention);
+    layout.addCheckbox("Strip leading mention in replies", s.stripReplyMention,
+                       true,
+                       "When disabled, messages sent in reply threads will "
+                       "include the @mention for the related thread");
 
     // Helix timegate settings
     auto helixTimegateGetValue = [](auto val) {
