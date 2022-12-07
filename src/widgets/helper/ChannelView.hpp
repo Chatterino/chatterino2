@@ -149,6 +149,7 @@ public:
     bool mayContainMessage(const MessagePtr &message);
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
+    pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::Signal<const Link &> linkClicked;
@@ -337,9 +338,6 @@ private:
 
     static constexpr int leftPadding = 8;
     static constexpr int scrollbarPadding = 8;
-
-signals:
-    void selectionChanged();
 
 private slots:
     void wordFlagsChanged()

@@ -1081,7 +1081,7 @@ void ChannelView::setSelection(const SelectionItem &start,
 
     this->selection_ = Selection(start, end);
 
-    emit this->selectionChanged();
+    this->selectionChanged.invoke();
 }
 
 MessageElementFlags ChannelView::getFlags() const

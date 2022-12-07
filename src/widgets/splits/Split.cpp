@@ -116,13 +116,12 @@ Split::Split(QWidget *parent)
     this->updateInputPlaceholder();
 
     // clear SplitInput selection when selecting in ChannelView
-    QObject::connect(this->view_, &ChannelView::selectionChanged, this,
-                     [this]() {
-                         if (this->input_->hasSelection())
-                         {
-                             this->input_->clearSelection();
-                         }
-                     });
+    this->view_->selectionChanged.connect([this]() {
+        if (this->input_->hasSelection())
+        {
+            this->input_->clearSelection();
+        }
+    });
 
     // clear ChannelView selection when selecting in SplitInput
     QObject::connect(this->input_, &SplitInput::selectionChanged, this,

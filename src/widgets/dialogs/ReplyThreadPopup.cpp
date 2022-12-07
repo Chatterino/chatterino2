@@ -90,13 +90,12 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
         }));
 
     // clear SplitInput selection when selecting in ChannelView
-    QObject::connect(this->ui_.threadView, &ChannelView::selectionChanged, this,
-                     [this]() {
-                         if (this->ui_.replyInput->hasSelection())
-                         {
-                             this->ui_.replyInput->clearSelection();
-                         }
-                     });
+    this->ui_.threadView->selectionChanged.connect([this]() {
+        if (this->ui_.replyInput->hasSelection())
+        {
+            this->ui_.replyInput->clearSelection();
+        }
+    });
 
     // clear ChannelView selection when selecting in SplitInput
     QObject::connect(this->ui_.replyInput, &SplitInput::selectionChanged, this,
