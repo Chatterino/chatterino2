@@ -1128,10 +1128,10 @@ MessageElementFlags ChannelView::getFlags() const
         flags.set(MessageElementFlag::ChannelName);
 
     if (this->context_ == Context::ReplyThread ||
-        !getSettings()->showReplyContext)
+        getSettings()->hideReplyContext)
     {
         // Don't show inline replies within the ReplyThreadPopup
-        // or if they're disabled
+        // or if they're hidden
         flags.unset(MessageElementFlag::RepliedMessage);
     }
 

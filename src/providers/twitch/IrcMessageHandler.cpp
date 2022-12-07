@@ -70,8 +70,13 @@ MessagePtr generateBannedMessage(bool confirmedBan)
 
 int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
 {
-    if (!getSettings()->stripReplyMention || !getSettings()->showReplyContext)
+    if (!getSettings()->stripReplyMention)
     {
+        return 0;
+    }
+    if (getSettings()->hideReplyContext)
+    {
+        // Never strip reply mentions if reply contexts are hidden
         return 0;
     }
 
