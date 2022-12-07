@@ -190,6 +190,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     tabDirectionDropdown->setMinimumWidth(
         tabDirectionDropdown->minimumSizeHint().width());
 
+    layout.addCheckbox(
+        "Show message reply context", s.hideReplyContext, true,
+        "This setting will only affect how messages are shown. You can reply "
+        "to a message regardless of this setting.");
     layout.addCheckbox("Show message reply button", s.showReplyButton);
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost, false,
@@ -843,10 +847,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "message) into one cheermote.");
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
-    layout.addCheckbox("Strip leading mention in replies", s.stripReplyMention,
-                       true,
-                       "When disabled, messages sent in reply threads will "
-                       "include the @mention for the related thread");
+    layout.addCheckbox(
+        "Strip leading mention in replies", s.stripReplyMention, true,
+        "When disabled, messages sent in reply threads will include the "
+        "@mention for the related thread. If the reply context is hidden, "
+        "these mentions will never be stripped.");
 
     // Helix timegate settings
     auto helixTimegateGetValue = [](auto val) {

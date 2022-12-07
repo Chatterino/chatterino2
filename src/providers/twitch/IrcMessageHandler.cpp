@@ -74,6 +74,11 @@ int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
     {
         return 0;
     }
+    if (getSettings()->hideReplyContext)
+    {
+        // Never strip reply mentions if reply contexts are hidden
+        return 0;
+    }
 
     if (const auto it = tags.find("reply-parent-display-name");
         it != tags.end())
