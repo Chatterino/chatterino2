@@ -187,8 +187,8 @@ private:
 
     void performLayout(bool causedByScrollbar = false);
     void layoutVisibleMessages(
-        LimitedQueueSnapshot<MessageLayoutPtr> &messages);
-    void updateScrollbar(LimitedQueueSnapshot<MessageLayoutPtr> &messages,
+        const LimitedQueueSnapshot<MessageLayoutPtr> &messages);
+    void updateScrollbar(const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
                          bool causedByScrollbar);
 
     void drawMessages(QPainter &painter);
