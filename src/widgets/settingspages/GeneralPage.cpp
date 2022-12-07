@@ -192,8 +192,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox(
         "Show message reply context", s.hideReplyContext, true,
-        "This setting will only affect how messages are rendered. You can "
-        "reply to a message regardless of this setting.");
+        "This setting will only affect how messages are shown. You can reply "
+        "to a message regardless of this setting.");
     layout.addCheckbox("Show message reply button", s.showReplyButton);
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost, false,
@@ -849,9 +849,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.highlightMentions);
     layout.addCheckbox(
         "Strip leading mention in replies", s.stripReplyMention, true,
-        "When disabled, messages sent in reply threads will "
-        "include the @mention for the related thread. If the rendering of the"
-        "reply context is turned off, these mentions will never be stripped.");
+        "When disabled, messages sent in reply threads will include the "
+        "@mention for the related thread. If the rendering of the reply "
+        "context is turned off, these mentions will never be stripped.");
 
     // Helix timegate settings
     auto helixTimegateGetValue = [](auto val) {
