@@ -850,8 +850,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Strip leading mention in replies", s.stripReplyMention, true,
         "When disabled, messages sent in reply threads will include the "
-        "@mention for the related thread. If the rendering of the reply "
-        "context is turned off, these mentions will never be stripped.");
+        "@mention for the related thread. If the reply context is hidden, "
+        "these mentions will never be stripped.");
 
     // Helix timegate settings
     auto helixTimegateGetValue = [](auto val) {
