@@ -70,7 +70,7 @@ MessagePtr generateBannedMessage(bool confirmedBan)
 
 int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
 {
-    if (!getSettings()->stripReplyMention)
+    if (!getSettings()->stripReplyMention || !getSettings()->showReplyContext)
     {
         return 0;
     }

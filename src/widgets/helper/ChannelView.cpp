@@ -1124,9 +1124,11 @@ MessageElementFlags ChannelView::getFlags() const
     if (this->sourceChannel_ == app->twitch->mentionsChannel)
         flags.set(MessageElementFlag::ChannelName);
 
-    if (this->context_ == Context::ReplyThread)
+    if (this->context_ == Context::ReplyThread ||
+        !getSettings()->showReplyContext)
     {
         // Don't show inline replies within the ReplyThreadPopup
+        // or if they're disabled
         flags.unset(MessageElementFlag::RepliedMessage);
     }
 
