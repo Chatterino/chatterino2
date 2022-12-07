@@ -119,6 +119,7 @@ public:
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
+    BoolSetting showReplyContext = {"/appearance/showReplyContext", true};
     BoolSetting showReplyButton = {"/appearance/showReplyButton", false};
     BoolSetting stripReplyMention = {"/appearance/stripReplyMention", true};
     IntSetting collpseMessagesMinLines = {

@@ -235,32 +235,37 @@ MessagePtr TwitchMessageBuilder::build()
         // enable reply flag
         this->message().flags.set(MessageFlag::ReplyMessage);
 
-        const auto &threadRoot = this->thread_->root();
+        if (getSettings()->showReplyContext)
+        {
+            const auto &threadRoot = this->thread_->root();
 
-        QString usernameText = SharedMessageBuilder::stylizeUsername(
-            threadRoot->loginName, *threadRoot.get());
+            QString usernameText = SharedMessageBuilder::stylizeUsername(
+                threadRoot->loginName, *threadRoot.get());
 
-        this->emplace<ReplyCurveElement>();
+            this->emplace<ReplyCurveElement>();
 
-        // construct reply elements
-        this->emplace<TextElement>(
-                "Replying to", MessageElementFlag::RepliedMessage,
-                MessageColor::System, FontStyle::ChatMediumSmall)
-            ->setLink({Link::ViewThread, this->thread_->rootId()});
+            // construct reply elements
+            this->emplace<TextElement>(
+                    "Replying to", MessageElementFlag::RepliedMessage,
+                    MessageColor::System, FontStyle::ChatMediumSmall)
+                ->setLink({Link::ViewThread, this->thread_->rootId()});
 
-        this->emplace<TextElement>(
-                "@" + usernameText + ":", MessageElementFlag::RepliedMessage,
-                threadRoot->usernameColor, FontStyle::ChatMediumSmall)
-            ->setLink({Link::UserInfo, threadRoot->displayName});
+            this->emplace<TextElement>("@" + usernameText + ":",
+                                       MessageElementFlag::RepliedMessage,
+                                       threadRoot->usernameColor,
+                                       FontStyle::ChatMediumSmall)
+                ->setLink({Link::UserInfo, threadRoot->displayName});
 
-        this->emplace<SingleLineTextElement>(
-                threadRoot->messageText,
-                MessageElementFlags({MessageElementFlag::RepliedMessage,
-                                     MessageElementFlag::Text}),
-                this->textColor_, FontStyle::ChatMediumSmall)
-            ->setLink({Link::ViewThread, this->thread_->rootId()});
+            this->emplace<SingleLineTextElement>(
+                    threadRoot->messageText,
+                    MessageElementFlags({MessageElementFlag::RepliedMessage,
+                                         MessageElementFlag::Text}),
+                    this->textColor_, FontStyle::ChatMediumSmall)
+                ->setLink({Link::ViewThread, this->thread_->rootId()});
+        }
     }
-    else if (this->tags.find("reply-parent-msg-id") != this->tags.end())
+    else if (this->tags.find("reply-parent-msg-id") != this->tags.end() &&
+             getSettings()->showReplyContext)
     {
         // Message is a reply but we couldn't find the original message.
         // Render the message using the additional reply tags
