@@ -98,13 +98,12 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     });
 
     // clear ChannelView selection when selecting in SplitInput
-    QObject::connect(this->ui_.replyInput, &SplitInput::selectionChanged, this,
-                     [this]() {
-                         if (this->ui_.threadView->hasSelection())
-                         {
-                             this->ui_.threadView->clearSelection();
-                         }
-                     });
+    this->ui_.replyInput->selectionChanged.connect([this]() {
+        if (this->ui_.threadView->hasSelection())
+        {
+            this->ui_.threadView->clearSelection();
+        }
+    });
 
     layout->setSpacing(0);
     // provide draggable margin if frameless

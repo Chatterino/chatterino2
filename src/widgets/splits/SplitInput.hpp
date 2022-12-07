@@ -81,6 +81,7 @@ public:
     bool isHidden() const;
 
     pajlada::Signals::Signal<const QString &> textChanged;
+    pajlada::Signals::NoArgSignal selectionChanged;
 
 protected:
     void scaleChangedEvent(float scale_) override;
@@ -156,9 +157,6 @@ protected:
     // focus events don't work as expected, so instead we use this bool and
     // set the height of the split input to 0 if we're supposed to be hidden instead
     bool hidden{false};
-
-signals:
-    void selectionChanged();
 
 private slots:
     void editTextChanged();

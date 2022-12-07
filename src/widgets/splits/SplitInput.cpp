@@ -136,8 +136,6 @@ void SplitInput::initLayout()
                      this, &SplitInput::onCursorPositionChanged);
     QObject::connect(this->ui_.textEdit, &QTextEdit::textChanged, this,
                      &SplitInput::onTextChanged);
-    QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable, this,
-                     &SplitInput::selectionChanged);
 
     this->managedConnections_.managedConnect(app->fonts->fontChanged, [=]() {
         this->ui_.textEdit->setFont(
@@ -155,6 +153,15 @@ void SplitInput::initLayout()
     QObject::connect(this->ui_.cancelReplyButton, &EffectLabel::leftClicked,
                      [=] {
                          this->clearInput();
+                     });
+
+    // Forward selection change signal
+    QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
+                     [this](bool available) {
+                         if (available)
+                         {
+                             this->selectionChanged.invoke();
+                         }
                      });
 
     // textEditLength visibility
