@@ -140,10 +140,7 @@ void HighlightModel::afterInit()
     redeemedRow[Column::PlaySound]->setFlags({});
     redeemedRow[Column::UseRegex]->setFlags({});
     redeemedRow[Column::CaseSensitive]->setFlags({});
-
-    QUrl RedeemedSound =
-        QUrl(getSettings()->redeemedHighlightSoundUrl.getValue());
-    setFilePathItem(redeemedRow[Column::SoundPath], RedeemedSound, false);
+    redeemedRow[Column::SoundPath]->setFlags(Qt::NoItemFlags);
 
     auto RedeemedColor =
         ColorProvider::instance().color(ColorType::RedeemedHighlight);
@@ -169,11 +166,7 @@ void HighlightModel::afterInit()
     firstMessageRow[Column::PlaySound]->setFlags({});
     firstMessageRow[Column::UseRegex]->setFlags({});
     firstMessageRow[Column::CaseSensitive]->setFlags({});
-
-    QUrl FirstMessageSound =
-        QUrl(getSettings()->firstMessageHighlightSoundUrl.getValue());
-    setFilePathItem(firstMessageRow[Column::SoundPath], FirstMessageSound,
-                    false);
+    firstMessageRow[Column::SoundPath]->setFlags(Qt::NoItemFlags);
 
     auto FirstMessageColor =
         ColorProvider::instance().color(ColorType::FirstMessageHighlight);
@@ -200,11 +193,7 @@ void HighlightModel::afterInit()
     elevatedMessageRow[Column::PlaySound]->setFlags({});
     elevatedMessageRow[Column::UseRegex]->setFlags({});
     elevatedMessageRow[Column::CaseSensitive]->setFlags({});
-
-    QUrl elevatedMessageSound =
-        QUrl(getSettings()->elevatedMessageHighlightSoundUrl.getValue());
-    setFilePathItem(elevatedMessageRow[Column::SoundPath], elevatedMessageSound,
-                    false);
+    elevatedMessageRow[Column::SoundPath]->setFlags(Qt::NoItemFlags);
 
     auto elevatedMessageColor =
         ColorProvider::instance().color(ColorType::ElevatedMessageHighlight);
@@ -414,21 +403,6 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == HighlightRowIndexes::SubRow)
                 {
                     getSettings()->subHighlightSoundUrl.setValue(
-                        value.toString());
-                }
-                else if (rowIndex == HighlightRowIndexes::RedeemedRow)
-                {
-                    getSettings()->redeemedHighlightSoundUrl.setValue(
-                        value.toString());
-                }
-                else if (rowIndex == HighlightRowIndexes::FirstMessageRow)
-                {
-                    getSettings()->firstMessageHighlightSoundUrl.setValue(
-                        value.toString());
-                }
-                if (rowIndex == HighlightRowIndexes::ElevatedMessageRow)
-                {
-                    getSettings()->elevatedMessageHighlightSoundUrl.setValue(
                         value.toString());
                 }
                 else if (rowIndex == HighlightRowIndexes::ThreadMessageRow)

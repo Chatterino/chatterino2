@@ -31,9 +31,6 @@ private:
     QHBoxLayout *buttons_{};
 
     void moveRow(int dir);
-
-public:
-    void selectRow(int row);
 };
 
 }  // namespace chatterino

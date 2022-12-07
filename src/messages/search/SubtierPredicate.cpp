@@ -4,19 +4,17 @@
 
 namespace chatterino {
 
-SubtierPredicate::SubtierPredicate(const QStringList &subtiers)
+SubtierPredicate::SubtierPredicate(const QString &subtiers, bool negate)
+    : MessagePredicate(negate)
 {
     // Check if any comma-seperated values were passed and transform those
-    for (const auto &entry : subtiers)
+    for (const auto &subtier : subtiers.split(',', Qt::SkipEmptyParts))
     {
-        for (const auto &subtier : entry.split(',', Qt::SkipEmptyParts))
-        {
-            this->subtiers_ << subtier;
-        }
+        this->subtiers_ << subtier;
     }
 }
 
-bool SubtierPredicate::appliesTo(const Message &message)
+bool SubtierPredicate::appliesToImpl(const Message &message)
 {
     for (const Badge &badge : message.badges)
     {
