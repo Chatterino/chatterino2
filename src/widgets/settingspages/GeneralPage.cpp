@@ -848,7 +848,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
     layout.addCheckbox(
-        "Strip leading mention in replies", s.stripReplyMention, true,
+        "Strip leading mention in replies", s.stripReplyMention, false,
         "When disabled, messages sent in reply threads will include the "
         "@mention for the related thread. If the reply context is hidden, "
         "these mentions will never be stripped.");
