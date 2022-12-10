@@ -81,6 +81,7 @@ public:
     bool isHidden() const;
 
     pajlada::Signals::Signal<const QString &> textChanged;
+    pajlada::Signals::NoArgSignal selectionChanged;
 
 protected:
     void scaleChangedEvent(float scale_) override;

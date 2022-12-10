@@ -82,7 +82,13 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     QObject::connect(this->model_, &QAbstractTableModel::rowsMoved, this,
                      [this](const QModelIndex &parent, int start, int end,
                             const QModelIndex &destination, int row) {
-                         this->selectRow(row);
+                         this->tableView_->selectRow(row);
+                     });
+
+    // select freshly added row
+    QObject::connect(this->model_, &QAbstractTableModel::rowsInserted, this,
+                     [this](const QModelIndex &parent, int first, int last) {
+                         this->tableView_->selectRow(last);
                      });
 
     // add tableview
@@ -149,15 +155,7 @@ void EditableModelView::moveRow(int dir)
 
     model_->moveRows(model_->index(row, 0), row, selected.size(),
                      model_->index(row + dir, 0), row + dir);
-    this->selectRow(row + dir);
-}
-
-void EditableModelView::selectRow(int row)
-{
-    this->getTableView()->selectionModel()->clear();
-    this->getTableView()->selectionModel()->select(
-        this->model_->index(row, 0),
-        QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+    this->tableView_->selectRow(row + dir);
 }
 
 }  // namespace chatterino

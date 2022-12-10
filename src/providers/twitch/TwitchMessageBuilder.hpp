@@ -95,6 +95,9 @@ private:
     void parseUsername() override;
     void parseMessageID();
     void parseRoomID();
+    // Parse & build thread information into the message
+    // Will read information from thread_ or from IRC tags
+    void parseThread();
     void appendUsername();
 
     void runIgnoreReplaces(std::vector<TwitchEmoteOccurrence> &twitchEmotes);
