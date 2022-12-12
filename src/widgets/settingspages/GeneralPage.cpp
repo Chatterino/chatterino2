@@ -292,7 +292,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
-    layout.addCheckbox("Alternate background color", s.alternateMessages);
+    layout.addCheckbox("Alternate background color", s.alternateMessages, false,
+                       "Slightly change the background behind every other "
+                       "message to help better tell them apart.");
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
     layout.addDropdown<QString>(
         "Timestamp format",
