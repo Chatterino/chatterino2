@@ -291,7 +291,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "message limits");
 
     layout.addTitle("Messages");
-    layout.addCheckbox("Separate with lines", s.separateMessages);
+    layout.addCheckbox(
+        "Separate with lines", s.separateMessages, false,
+        "Adds a line inbetween each message to help better tell them apart.");
     layout.addCheckbox("Alternate background color", s.alternateMessages, false,
                        "Slightly change the background behind every other "
                        "message to help better tell them apart.");
