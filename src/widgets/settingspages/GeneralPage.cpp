@@ -818,8 +818,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers, false,
                        "Show whispers as messages in all splits instead "
                        "of just /whispers.");
-    layout.addCheckbox("Highlight received inline whispers",
-                       s.highlightInlineWhispers);
+    layout.addCheckbox(
+        "Highlight received inline whispers", s.highlightInlineWhispers, false,
+        "Highlight the whispers shown in all splits.\nIf \"Show Twitch "
+        "whispers inline\" is disabled, this setting will do nothing.");
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
     // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history
