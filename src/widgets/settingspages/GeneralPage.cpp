@@ -371,6 +371,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "When enabled, adjacent emotes will no longer have an "
                        "added space seperating them.");
     layout.addCheckbox("Show unlisted 7TV emotes", s.showUnlistedSevenTVEmotes);
+    // TODO: Add a tooltip explaining what an unlisted 7TV emote is
+    // but wait until https://github.com/Chatterino/wiki/pull/255 is resolved,
+    // as an official description from 7TV devs is best
     s.showUnlistedSevenTVEmotes.connect(
         []() {
             getApp()->twitch->forEachChannelAndSpecialChannels(
