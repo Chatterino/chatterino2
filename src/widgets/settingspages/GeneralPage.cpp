@@ -194,7 +194,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Show message reply context", s.hideReplyContext, true,
         "This setting will only affect how messages are shown. You can reply "
         "to a message regardless of this setting.");
-    layout.addCheckbox("Show message reply button", s.showReplyButton);
+    layout.addCheckbox("Show message reply button", s.showReplyButton, false,
+                       "Show a reply button next to every chat message");
     layout.addCheckbox(
         "Show tab close button", s.showTabCloseButton, false,
         "When disabled, the ✕ to close a tab will be hidden\n.Tabs can still "
