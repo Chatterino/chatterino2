@@ -198,7 +198,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "Show a reply button next to every chat message");
     layout.addCheckbox(
         "Show tab close button", s.showTabCloseButton, false,
-        "When disabled, the ✕ to close a tab will be hidden\n.Tabs can still "
+        "When disabled, the 🗙 to close a tab will be hidden\n.Tabs can still "
         "be closed by right-clicking or CTRL+SHIFT+W");
     layout.addCheckbox("Always on top", s.windowTopMost, false,
                        "Always keep Chatterino as the top window.");
