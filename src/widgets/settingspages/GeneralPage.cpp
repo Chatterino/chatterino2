@@ -810,7 +810,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "double-clicking.\nUseful making sure you don't "
                        "accidentally click on suspicious links.");
     layout.addCheckbox(
-        "Unshorten links", s.unshortLinks, true,
+        "Unshorten links", s.unshortLinks, false,
         "When enabled, \"right-click + copy link\" will copy the unshortened "
         "version of the link.\ne.g. https://bit.ly/mrfors -> "
         "https://forsen.tv/");
@@ -866,7 +866,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "Combine consecutive cheermotes (sent in a single "
                        "message) into one cheermote.");
     layout.addCheckbox(
-        "Messages in /mentions highlights tab", s.highlightMentions, true,
+        "Messages in /mentions highlights tab", s.highlightMentions, false,
         // update this tooltip if https://github.com/Chatterino/chatterino2/pull/1557 is ever merged
         "When disabled, the /mentions tab will not highlight in "
         "red when you are mentioned.");
