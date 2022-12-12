@@ -198,7 +198,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "Show a reply button next to every chat message");
     layout.addCheckbox(
         "Show tab close button", s.showTabCloseButton, false,
-        "When disabled, the x to close a tab will be hidden\n.Tabs can still "
+        "When disabled, the x to close a tab will be hidden.\nTabs can still "
         "be closed by right-clicking or CTRL+SHIFT+W");
     layout.addCheckbox("Always on top", s.windowTopMost, false,
                        "Always keep Chatterino as the top window.");
@@ -572,7 +572,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Attach to any browser (may cause issues)",
         s.attachExtensionToAnyProcess, false,
         "Attempt to force the Chatterino Browser Extension to work in certain "
-        "browsers that do not work automatically.\n.e.g. Librewolf");
+        "browsers that do not work automatically.\ne.g. Librewolf");
 #endif
 
     layout.addTitle("AppData & Cache");
