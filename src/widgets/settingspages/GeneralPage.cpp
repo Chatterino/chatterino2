@@ -795,7 +795,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         });
     layout.addCheckbox("Double click to open links and other elements in chat",
                        s.linksDoubleClickOnly);
-    layout.addCheckbox("Unshorten links", s.unshortLinks);
+    layout.addCheckbox(
+        "Unshorten links", s.unshortLinks, true,
+        "When enabled, \"right-click + copy link\" will copy the unshortened "
+        "version of the link.\ne.g. shortened_url -> unshortened_url");
 
     layout.addCheckbox(
         "Only search for emote autocompletion at the start of emote names",
