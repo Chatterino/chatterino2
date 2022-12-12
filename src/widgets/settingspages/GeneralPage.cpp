@@ -223,7 +223,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
     layout.addCheckbox("Show which channels are live in tabs", s.showTabLive,
-                       true,
+                       false,
                        "Shows a red dot in the top right corner of a tab to "
                        "indicate they are live.");
 
