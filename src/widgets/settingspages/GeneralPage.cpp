@@ -806,7 +806,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Unshorten links", s.unshortLinks, true,
         "When enabled, \"right-click + copy link\" will copy the unshortened "
-        "version of the link.\ne.g. shortened_url -> unshortened_url");
+        "version of the link.\ne.g. https://bit.ly/mrfors -> "
+        "https://forsen.tv/");
 
     layout.addCheckbox(
         "Only search for emote autocompletion at the start of emote names",
