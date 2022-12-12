@@ -784,7 +784,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             [](auto args) {
                 return args.index + 1;
             },
-            false);
+            false,
+            "Customizes how you see Asian Language names.\ne.g. "
+            "testaccount_420(테스트계정420) -> tesaccount_420\n"
+            "testaccount_420(테스트계정420) -> 테스트계정420");
     nameDropdown->setMinimumWidth(nameDropdown->minimumSizeHint().width());
 
     layout.addDropdown<float>(
