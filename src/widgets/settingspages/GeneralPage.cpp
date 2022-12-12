@@ -561,8 +561,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addDescription("Chatterino only attaches to known browsers to avoid "
                           "attaching to other windows by accident.");
-    layout.addCheckbox("Attach to any browser (may cause issues)",
-                       s.attachExtensionToAnyProcess);
+    layout.addCheckbox(
+        "Attach to any browser (may cause issues)",
+        s.attachExtensionToAnyProcess, false,
+        "Attempt to force the Chatterino Browser Extension to work in certain "
+        "browsers that do not work automatically.\n.e.g. Librewolf");
 #endif
 
     layout.addTitle("AppData & Cache");
