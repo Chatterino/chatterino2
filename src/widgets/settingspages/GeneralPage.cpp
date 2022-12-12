@@ -297,7 +297,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Alternate background color", s.alternateMessages, false,
                        "Slightly change the background behind every other "
                        "message to help better tell them apart.");
-    layout.addCheckbox("Show deleted messages", s.hideModerated, true);
+    layout.addCheckbox("Show deleted messages", s.hideModerated, true,
+                       "When disabled, messages deleted by moderators will "
+                       "be hidden.");
     layout.addDropdown<QString>(
         "Timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
