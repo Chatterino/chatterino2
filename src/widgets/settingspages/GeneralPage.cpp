@@ -195,7 +195,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "This setting will only affect how messages are shown. You can reply "
         "to a message regardless of this setting.");
     layout.addCheckbox("Show message reply button", s.showReplyButton);
-    layout.addCheckbox("Show tab close button", s.showTabCloseButton);
+    layout.addCheckbox(
+        "Show tab close button", s.showTabCloseButton, false,
+        "When disabled, the ✕ to close a tab will be hidden\n.Tabs can still "
+        "be closed by right-clicking or CTRL+SHIFT+W");
     layout.addCheckbox("Always on top", s.windowTopMost, false,
                        "Always keep Chatterino as the top window.");
 #ifdef USEWINSDK
