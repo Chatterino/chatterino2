@@ -752,7 +752,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Show moderation messages", s.hideModerationActions, true,
         "Show messages for timeouts, bans, and other moderator actions.");
     layout.addCheckbox("Show deletions of single messages",
-                       s.hideDeletionActions, true);
+                       s.hideDeletionActions, true,
+                       "Show when a single message is deleted.\ne.g. A message "
+                       "from TreuKS was deleted: abc");
     layout.addCheckbox(
         "Colorize users without color set (gray names)", s.colorizeNicknames,
         false,
