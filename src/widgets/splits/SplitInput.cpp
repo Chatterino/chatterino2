@@ -155,12 +155,12 @@ void SplitInput::initLayout()
                          this->clearInput();
                      });
 
-    // clear channelview selection when selecting in the input
+    // Forward selection change signal
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
                      [this](bool available) {
                          if (available)
                          {
-                             this->split_->view_->clearSelection();
+                             this->selectionChanged.invoke();
                          }
                      });
 

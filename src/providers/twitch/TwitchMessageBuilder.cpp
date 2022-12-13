@@ -284,74 +284,7 @@ MessagePtr TwitchMessageBuilder::build()
     }
 
     // reply threads
-    if (this->thread_)
-    {
-        // set references
-        this->message().replyThread = this->thread_;
-        this->thread_->addToThread(this->weakOf());
-
-        // enable reply flag
-        this->message().flags.set(MessageFlag::ReplyMessage);
-
-        const auto &threadRoot = this->thread_->root();
-
-        QColor usernameColor = threadRoot->usernameColor;
-
-        QString usernameText = SharedMessageBuilder::stylizeUsername(
-            threadRoot->loginName, *threadRoot.get(), &usernameColor);
-
-        this->emplace<ReplyCurveElement>();
-
-        // construct reply elements
-        this->emplace<TextElement>(
-                "Replying to", MessageElementFlag::RepliedMessage,
-                MessageColor::System, FontStyle::ChatMediumSmall)
-            ->setLink({Link::ViewThread, this->thread_->rootId()});
-
-        this->emplace<TextElement>("@" + usernameText + ":",
-                                   MessageElementFlag::RepliedMessage,
-                                   usernameColor, FontStyle::ChatMediumSmall)
-            ->setLink({Link::UserInfo, threadRoot->displayName});
-
-        this->emplace<SingleLineTextElement>(
-                threadRoot->messageText,
-                MessageElementFlags({MessageElementFlag::RepliedMessage,
-                                     MessageElementFlag::Text}),
-                this->textColor_, FontStyle::ChatMediumSmall)
-            ->setLink({Link::ViewThread, this->thread_->rootId()});
-    }
-    else if (this->tags.find("reply-parent-msg-id") != this->tags.end())
-    {
-        // Message is a reply but we couldn't find the original message.
-        // Render the message using the additional reply tags
-
-        auto replyDisplayName = this->tags.find("reply-parent-display-name");
-        auto replyBody = this->tags.find("reply-parent-msg-body");
-
-        if (replyDisplayName != this->tags.end() &&
-            replyBody != this->tags.end())
-        {
-            auto name = replyDisplayName->toString();
-            auto body = parseTagString(replyBody->toString());
-
-            this->emplace<ReplyCurveElement>();
-
-            this->emplace<TextElement>(
-                "Replying to", MessageElementFlag::RepliedMessage,
-                MessageColor::System, FontStyle::ChatMediumSmall);
-
-            this->emplace<TextElement>(
-                    "@" + name + ":", MessageElementFlag::RepliedMessage,
-                    this->textColor_, FontStyle::ChatMediumSmall)
-                ->setLink({Link::UserInfo, name});
-
-            this->emplace<SingleLineTextElement>(
-                body,
-                MessageElementFlags({MessageElementFlag::RepliedMessage,
-                                     MessageElementFlag::Text}),
-                this->textColor_, FontStyle::ChatMediumSmall);
-        }
-    }
+    this->parseThread();
 
     // timestamp
     this->message().serverReceivedTime = calculateMessageTime(this->ircMessage);
@@ -691,6 +624,76 @@ void TwitchMessageBuilder::parseRoomID()
         if (this->twitchChannel->roomId().isEmpty())
         {
             this->twitchChannel->setRoomId(this->roomID_);
+        }
+    }
+}
+
+void TwitchMessageBuilder::parseThread()
+{
+    if (this->thread_)
+    {
+        // set references
+        this->message().replyThread = this->thread_;
+        this->thread_->addToThread(this->weakOf());
+
+        // enable reply flag
+        this->message().flags.set(MessageFlag::ReplyMessage);
+
+        const auto &threadRoot = this->thread_->root();
+
+        QString usernameText = SharedMessageBuilder::stylizeUsername(
+            threadRoot->loginName, *threadRoot.get());
+
+        this->emplace<ReplyCurveElement>();
+
+        // construct reply elements
+        this->emplace<TextElement>(
+                "Replying to", MessageElementFlag::RepliedMessage,
+                MessageColor::System, FontStyle::ChatMediumSmall)
+            ->setLink({Link::ViewThread, this->thread_->rootId()});
+
+        this->emplace<TextElement>(
+                "@" + usernameText + ":", MessageElementFlag::RepliedMessage,
+                threadRoot->usernameColor, FontStyle::ChatMediumSmall)
+            ->setLink({Link::UserInfo, threadRoot->displayName});
+
+        this->emplace<SingleLineTextElement>(
+                threadRoot->messageText,
+                MessageElementFlags({MessageElementFlag::RepliedMessage,
+                                     MessageElementFlag::Text}),
+                this->textColor_, FontStyle::ChatMediumSmall)
+            ->setLink({Link::ViewThread, this->thread_->rootId()});
+    }
+    else if (this->tags.find("reply-parent-msg-id") != this->tags.end())
+    {
+        // Message is a reply but we couldn't find the original message.
+        // Render the message using the additional reply tags
+
+        auto replyDisplayName = this->tags.find("reply-parent-display-name");
+        auto replyBody = this->tags.find("reply-parent-msg-body");
+
+        if (replyDisplayName != this->tags.end() &&
+            replyBody != this->tags.end())
+        {
+            auto name = replyDisplayName->toString();
+            auto body = parseTagString(replyBody->toString());
+
+            this->emplace<ReplyCurveElement>();
+
+            this->emplace<TextElement>(
+                "Replying to", MessageElementFlag::RepliedMessage,
+                MessageColor::System, FontStyle::ChatMediumSmall);
+
+            this->emplace<TextElement>(
+                    "@" + name + ":", MessageElementFlag::RepliedMessage,
+                    this->textColor_, FontStyle::ChatMediumSmall)
+                ->setLink({Link::UserInfo, name});
+
+            this->emplace<SingleLineTextElement>(
+                body,
+                MessageElementFlags({MessageElementFlag::RepliedMessage,
+                                     MessageElementFlag::Text}),
+                this->textColor_, FontStyle::ChatMediumSmall);
         }
     }
 }

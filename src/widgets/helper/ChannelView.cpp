@@ -431,7 +431,7 @@ void ChannelView::performLayout(bool causedByScrollbar)
     // BenchmarkGuard benchmark("layout");
 
     /// Get messages and check if there are at least 1
-    auto &messages = this->getMessagesSnapshot();
+    const auto &messages = this->getMessagesSnapshot();
 
     this->showingLatestMessages_ =
         this->scrollBar_->isAtBottom() ||
@@ -449,7 +449,7 @@ void ChannelView::performLayout(bool causedByScrollbar)
 }
 
 void ChannelView::layoutVisibleMessages(
-    LimitedQueueSnapshot<MessageLayoutPtr> &messages)
+    const LimitedQueueSnapshot<MessageLayoutPtr> &messages)
 {
     const auto start = size_t(this->scrollBar_->getCurrentValue());
     const auto layoutWidth = this->getLayoutWidth();
@@ -473,11 +473,14 @@ void ChannelView::layoutVisibleMessages(
     }
 
     if (redrawRequired)
+    {
         this->queueUpdate();
+    }
 }
 
 void ChannelView::updateScrollbar(
-    LimitedQueueSnapshot<MessageLayoutPtr> &messages, bool causedByScrollbar)
+    const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
+    bool causedByScrollbar)
 {
     if (messages.size() == 0)
     {
@@ -1129,9 +1132,11 @@ MessageElementFlags ChannelView::getFlags() const
     if (this->sourceChannel_ == app->twitch->mentionsChannel)
         flags.set(MessageElementFlag::ChannelName);
 
-    if (this->context_ == Context::ReplyThread)
+    if (this->context_ == Context::ReplyThread ||
+        getSettings()->hideReplyContext)
     {
         // Don't show inline replies within the ReplyThreadPopup
+        // or if they're hidden
         flags.unset(MessageElementFlag::RepliedMessage);
     }
 
