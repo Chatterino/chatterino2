@@ -332,7 +332,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Draw a line below the most recent message before "
                        "switching applications.",
                        s.showLastMessageIndicator, false,
-                       "Adds a red underline below the most recent message "
+                       "Adds an underline below the most recent message "
                        "sent before you tabbed out of Chatterino.");
     layout.addDropdown<std::underlying_type<Qt::BrushStyle>::type>(
         "Line style", {"Dotted", "Solid"}, s.lastMessagePattern,
