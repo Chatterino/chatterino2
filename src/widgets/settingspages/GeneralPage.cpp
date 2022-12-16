@@ -196,10 +196,20 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "to a message regardless of this setting.");
     layout.addCheckbox("Show message reply button", s.showReplyButton, false,
                        "Show a reply button next to every chat message");
+
+    auto removeTabSeq = getApp()->hotkeys->getDisplaySequence(
+        HotkeyCategory::Window, "removeTab");
+    QString removeTabShortcut = "an assigned hotkey (Window -> remove tab)";
+    if (!removeTabSeq.isEmpty())
+    {
+        removeTabShortcut =
+            removeTabSeq.toString(QKeySequence::SequenceFormat::NativeText);
+    }
     layout.addCheckbox(
-        "Show tab close button", s.showTabCloseButton, false,
+        ("Show tab close button"), s.showTabCloseButton, false,
         "When disabled, the x to close a tab will be hidden.\nTabs can still "
-        "be closed by right-clicking or CTRL+SHIFT+W");
+        "be closed by right-clicking or " +
+            removeTabShortcut + ".");
     layout.addCheckbox("Always on top", s.windowTopMost, false,
                        "Always keep Chatterino as the top window.");
 #ifdef USEWINSDK
