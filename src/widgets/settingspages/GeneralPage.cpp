@@ -208,7 +208,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Show tab close button", s.showTabCloseButton, false,
         "When disabled, the x to close a tab will be hidden.\nTabs can still "
-        "be closed by right-clicking or " +
+        "be closed by right-clicking or pressing " +
             removeTabShortcut + ".");
     layout.addCheckbox("Always on top", s.windowTopMost, false,
                        "Always keep Chatterino as the top window.");
