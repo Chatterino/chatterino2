@@ -232,10 +232,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            s.hidePreferencesButton, true);
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
-    layout.addCheckbox("Show which channels are live in tabs", s.showTabLive,
-                       false,
+    layout.addCheckbox("Mark tabs with live channels", s.showTabLive, false,
                        "Shows a red dot in the top right corner of a tab to "
-                       "indicate they are live.");
+                       "indicate one of the channels in the tab is live.");
 
     layout.addTitle("Chat");
 
