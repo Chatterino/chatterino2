@@ -36,8 +36,6 @@ public:
         std::vector<TwitchEmote> emotes;
     };
 
-    std::map<QString, EmoteSet> staticEmoteSets;
-
     struct TwitchAccountEmoteData {
         std::vector<std::shared_ptr<EmoteSet>> emoteSets;
 
@@ -94,8 +92,6 @@ public:
     void autoModDeny(const QString msgID, ChannelPtr channel);
 
 private:
-    void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);
-
     QString oauthClient_;
     QString oauthToken_;
     QString userName_;
