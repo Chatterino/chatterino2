@@ -2,10 +2,8 @@
 
 #include "Application.hpp"
 #include "common/ChatterSet.hpp"
-#include "common/Common.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
-#include "debug/Benchmark.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -64,7 +62,7 @@ QVariant CompletionModel::data(const QModelIndex &index, int) const
 
     auto it = this->items_.begin();
     std::advance(it, index.row());
-    return QVariant(it->string);
+    return {it->string};
 }
 
 int CompletionModel::rowCount(const QModelIndex &) const
@@ -85,7 +83,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     }
 
     // Twitch channel
-    auto tc = dynamic_cast<TwitchChannel *>(&this->channel_);
+    auto *tc = dynamic_cast<TwitchChannel *>(&this->channel_);
 
     auto addString = [=](const QString &str, TaggedString::Type type) {
         // Special case for handling default Twitch commands
@@ -132,7 +130,8 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 
         // Twitch Emotes available locally
         auto localEmoteData = account->accessLocalEmotes();
-        if (tc && localEmoteData->find(tc->roomId()) != localEmoteData->end())
+        if (tc != nullptr &&
+            localEmoteData->find(tc->roomId()) != localEmoteData->end())
         {
             for (const auto &emote : localEmoteData->at(tc->roomId()))
             {
@@ -143,18 +142,19 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     }
 
     // 7TV Global
-    for (auto &emote : *getApp()->twitch->getSeventvEmotes().globalEmotes())
+    for (const auto &emote :
+         *getApp()->twitch->getSeventvEmotes().globalEmotes())
     {
         addString(emote.first.string, TaggedString::Type::SeventvGlobalEmote);
     }
     // Bttv Global
-    for (auto &emote : *getApp()->twitch->getBttvEmotes().emotes())
+    for (const auto &emote : *getApp()->twitch->getBttvEmotes().emotes())
     {
         addString(emote.first.string, TaggedString::Type::BTTVChannelEmote);
     }
 
     // Ffz Global
-    for (auto &emote : *getApp()->twitch->getFfzEmotes().emotes())
+    for (const auto &emote : *getApp()->twitch->getFfzEmotes().emotes())
     {
         addString(emote.first.string, TaggedString::Type::FFZChannelEmote);
     }
@@ -163,7 +163,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     if (prefix.startsWith(":"))
     {
         const auto &emojiShortCodes = getApp()->emotes->emojis.shortCodes;
-        for (auto &m : emojiShortCodes)
+        for (const auto &m : emojiShortCodes)
         {
             addString(QString(":%1:").arg(m), TaggedString::Type::Emoji);
         }
@@ -171,7 +171,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 
     //
     // Stuff below is available only in regular Twitch channels
-    if (!tc)
+    if (tc == nullptr)
     {
         return;
     }
@@ -205,36 +205,37 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     }
 
     // 7TV Channel
-    for (auto &emote : *tc->seventvEmotes())
+    for (const auto &emote : *tc->seventvEmotes())
     {
         addString(emote.first.string, TaggedString::Type::SeventvChannelEmote);
     }
     // Bttv Channel
-    for (auto &emote : *tc->bttvEmotes())
+    for (const auto &emote : *tc->bttvEmotes())
     {
         addString(emote.first.string, TaggedString::Type::BTTVGlobalEmote);
     }
 
     // Ffz Channel
-    for (auto &emote : *tc->ffzEmotes())
+    for (const auto &emote : *tc->ffzEmotes())
     {
         addString(emote.first.string, TaggedString::Type::BTTVGlobalEmote);
     }
 
     // Custom Chatterino commands
-    for (auto &command : getApp()->commands->items)
+    for (const auto &command : getApp()->commands->items)
     {
         addString(command.name, TaggedString::CustomCommand);
     }
 
     // Default Chatterino commands
-    for (auto &command : getApp()->commands->getDefaultChatterinoCommandList())
+    for (const auto &command :
+         getApp()->commands->getDefaultChatterinoCommandList())
     {
         addString(command, TaggedString::ChatterinoCommand);
     }
 
     // Default Twitch commands
-    for (auto &command : TWITCH_DEFAULT_COMMANDS)
+    for (const auto &command : TWITCH_DEFAULT_COMMANDS)
     {
         addString(command, TaggedString::TwitchCommand);
     }
@@ -246,7 +247,9 @@ bool CompletionModel::compareStrings(const QString &a, const QString &b)
     // (fixes order of LuL and LUL)
     int k = QString::compare(a, b, Qt::CaseInsensitive);
     if (k == 0)
+    {
         return a > b;
+    }
 
     return k < 0;
 }
