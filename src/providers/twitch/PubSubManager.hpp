@@ -7,6 +7,7 @@
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/PubSubWebsocket.hpp"
 #include "util/ExponentialBackoff.hpp"
+#include "util/QStringHash.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
