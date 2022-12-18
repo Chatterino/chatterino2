@@ -5,6 +5,7 @@
 #include "util/RapidJsonSerializeQString.hpp"
 
 #include <pajlada/serialize.hpp>
+#include <QRegularExpression>
 #include <QString>
 
 #include <memory>

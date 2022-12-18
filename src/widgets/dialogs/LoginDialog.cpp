@@ -5,6 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 

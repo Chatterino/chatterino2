@@ -11,6 +11,7 @@
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/twitch/EmoteValue.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"

@@ -1,6 +1,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 
 #include "common/QLogging.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 
 namespace {
 

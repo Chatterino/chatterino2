@@ -4,6 +4,7 @@
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -474,6 +475,18 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         bind(&PubSub::onConnectionClose, this, ::_1));
     this->websocketClient.set_fail_handler(
         bind(&PubSub::onConnectionFail, this, ::_1));
+}
+
+void PubSub::setAccount(std::shared_ptr<TwitchAccount> account)
+{
+    this->token_ = account->getOAuthToken();
+    this->userID_ = account->getUserId();
+}
+
+void PubSub::setAccountData(QString token, QString userID)
+{
+    this->token_ = token;
+    this->userID_ = userID;
 }
 
 void PubSub::addClient()
