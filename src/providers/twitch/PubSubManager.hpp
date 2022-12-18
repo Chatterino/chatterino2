@@ -6,7 +6,6 @@
 #include "providers/twitch/PubSubClientOptions.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/PubSubWebsocket.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
 #include "util/ExponentialBackoff.hpp"
 
 #include <pajlada/signals/signal.hpp>
@@ -23,6 +22,8 @@
 #include <vector>
 
 namespace chatterino {
+
+class TwitchAccount;
 
 class PubSub
 {
@@ -57,17 +58,9 @@ public:
     PubSub(const QString &host,
            std::chrono::seconds pingInterval = std::chrono::seconds(15));
 
-    void setAccount(std::shared_ptr<TwitchAccount> account)
-    {
-        this->token_ = account->getOAuthToken();
-        this->userID_ = account->getUserId();
-    }
+    void setAccount(std::shared_ptr<TwitchAccount> account);
 
-    void setAccountData(QString token, QString userID)
-    {
-        this->token_ = token;
-        this->userID_ = userID;
-    }
+    void setAccountData(QString token, QString userID);
 
     ~PubSub() = delete;
 

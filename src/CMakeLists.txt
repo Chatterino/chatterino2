@@ -107,6 +107,8 @@ set(SOURCE_FILES
         controllers/ignores/IgnoreController.hpp
         controllers/ignores/IgnoreModel.cpp
         controllers/ignores/IgnoreModel.hpp
+        controllers/ignores/IgnorePhrase.cpp
+        controllers/ignores/IgnorePhrase.hpp
 
         controllers/moderationactions/ModerationAction.cpp
         controllers/moderationactions/ModerationAction.hpp
