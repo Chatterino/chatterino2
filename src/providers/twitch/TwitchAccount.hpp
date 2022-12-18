@@ -20,12 +20,6 @@
 
 namespace chatterino {
 
-enum FollowResult {
-    FollowResult_Following,
-    FollowResult_NotFollowing,
-    FollowResult_Failed,
-};
-
 struct TwitchEmoteSetResolverResponse {
     const QString channelName;
     const QString channelId;
