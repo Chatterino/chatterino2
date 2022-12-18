@@ -22,8 +22,8 @@ namespace chatterino {
 // TaggedString
 //
 
-CompletionModel::TaggedString::TaggedString(const QString &_string, Type _type)
-    : string(_string)
+CompletionModel::TaggedString::TaggedString(QString _string, Type _type)
+    : string(std::move(_string))
     , type(_type)
 {
 }
@@ -51,30 +51,37 @@ CompletionModel::CompletionModel(Channel &channel)
 {
 }
 
-int CompletionModel::columnCount(const QModelIndex &) const
+int CompletionModel::columnCount(const QModelIndex &parent) const
 {
+    (void)parent;  // unused
+
     return 1;
 }
 
-QVariant CompletionModel::data(const QModelIndex &index, int) const
+QVariant CompletionModel::data(const QModelIndex &index, int role) const
 {
-    std::lock_guard<std::mutex> lock(this->itemsMutex_);
+    (void)role;  // unused
+
+    std::shared_lock lock(this->itemsMutex_);
 
     auto it = this->items_.begin();
     std::advance(it, index.row());
     return {it->string};
 }
 
-int CompletionModel::rowCount(const QModelIndex &) const
+int CompletionModel::rowCount(const QModelIndex &parent) const
 {
-    std::lock_guard<std::mutex> lock(this->itemsMutex_);
+    (void)parent;  // unused
+
+    std::shared_lock lock(this->itemsMutex_);
 
     return this->items_.size();
 }
 
 void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 {
-    std::lock_guard<std::mutex> guard(this->itemsMutex_);
+    std::unique_lock lock(this->itemsMutex_);
+
     this->items_.clear();
 
     if (prefix.length() < 2 || !this->channel_.isTwitchChannel())
