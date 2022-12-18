@@ -29,7 +29,7 @@ Priority: optional
 Architecture: amd64
 Maintainer: Mm2PL <mm2pl@kotmisia.pl>
 Description: Testing out chatterino as a Ubuntu package
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: \${misc:Depends}, \${shlibs:Depends}
 EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 
