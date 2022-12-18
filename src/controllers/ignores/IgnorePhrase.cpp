@@ -1,5 +1,7 @@
 #include "controllers/ignores/IgnorePhrase.hpp"
 
+#include "Application.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 
 namespace chatterino {

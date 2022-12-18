@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Application.hpp"
-#include "controllers/accounts/AccountController.hpp"
+#include "messages/Emote.hpp"
 #include "singletons/Settings.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
@@ -10,7 +9,7 @@
 #include <QRegularExpression>
 #include <QString>
 
-#include <memory>
+#include <unordered_map>
 
 namespace chatterino {
 
