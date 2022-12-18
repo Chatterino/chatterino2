@@ -5,6 +5,7 @@ Checks: '-*,
     -misc-unused-parameters,
     readability-identifier-naming,
     -llvm-header-guard,
+    -llvm-include-order,
     modernize-*,
     readability-*,
     performance-*,
@@ -51,3 +52,5 @@ CheckOptions:
     value:           UPPER_CASE
   - key:             readability-identifier-naming.VariableCase
     value:           camelBack
+  - key:             readability-implicit-bool-conversion.AllowPointerConditions
+    value:           true

@@ -9,6 +9,7 @@
 #include "messages/MessageElement.hpp"
 #include "providers/LinkResolver.hpp"
 #include "providers/twitch/PubSubActions.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"

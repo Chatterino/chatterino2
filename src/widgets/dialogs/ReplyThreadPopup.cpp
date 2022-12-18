@@ -5,6 +5,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/MessageThread.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
@@ -88,6 +89,22 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
         getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->updateInputUI();
         }));
+
+    // clear SplitInput selection when selecting in ChannelView
+    this->ui_.threadView->selectionChanged.connect([this]() {
+        if (this->ui_.replyInput->hasSelection())
+        {
+            this->ui_.replyInput->clearSelection();
+        }
+    });
+
+    // clear ChannelView selection when selecting in SplitInput
+    this->ui_.replyInput->selectionChanged.connect([this]() {
+        if (this->ui_.threadView->hasSelection())
+        {
+            this->ui_.threadView->clearSelection();
+        }
+    });
 
     layout->setSpacing(0);
     // provide draggable margin if frameless

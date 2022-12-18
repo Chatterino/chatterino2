@@ -17,11 +17,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-20.04, macos-latest]
         qt-version: [5.15.2]
         pch: [true]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             qt-version: 5.15.2
             pch: false
       fail-fast: false
@@ -251,7 +251,7 @@ jobs:
           path: release-artifacts/
 
       - name: Create release
-        uses: ncipollo/release-action@v1.11.2
+        uses: ncipollo/release-action@v1.12.0
         with:
           removeArtifacts: true
           allowUpdates: true
