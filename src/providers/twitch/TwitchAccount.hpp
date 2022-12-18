@@ -20,8 +20,6 @@
 
 namespace chatterino {
 
-std::vector<QStringList> getEmoteSetBatches(QStringList emoteSetKeys);
-
 class TwitchAccount : public Account
 {
 public:
