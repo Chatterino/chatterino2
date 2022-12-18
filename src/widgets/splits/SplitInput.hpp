@@ -81,6 +81,7 @@ public:
     bool isHidden() const;
 
     pajlada::Signals::Signal<const QString &> textChanged;
+    pajlada::Signals::NoArgSignal selectionChanged;
 
 protected:
     void scaleChangedEvent(float scale_) override;
@@ -111,7 +112,7 @@ protected:
     void updateCompletionPopup();
     void showCompletionPopup(const QString &text, bool emoteCompletion);
     void hideCompletionPopup();
-    void insertCompletionText(const QString &text);
+    void insertCompletionText(const QString &input_) const;
     void openEmotePopup();
 
     void updateCancelReplyButton();

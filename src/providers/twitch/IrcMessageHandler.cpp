@@ -5,6 +5,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Message.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
@@ -72,6 +73,11 @@ int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
 {
     if (!getSettings()->stripReplyMention)
     {
+        return 0;
+    }
+    if (getSettings()->hideReplyContext)
+    {
+        // Never strip reply mentions if reply contexts are hidden
         return 0;
     }
 

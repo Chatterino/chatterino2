@@ -2,7 +2,6 @@
 
 #include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
 #include "util/SharedPtrElementLess.hpp"
 
 #include <boost/signals2.hpp>

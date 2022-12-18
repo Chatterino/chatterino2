@@ -85,6 +85,6 @@ jobs:
             docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
             docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
             docker run -p 9051:80 --detach kennethreitz/httpbin
-            ./bin/chatterino-test --platform minimal
+            ./bin/chatterino-test --platform minimal || ./bin/chatterino-test --platform minimal || ./bin/chatterino-test --platform minimal
         working-directory: build-test
         shell: bash

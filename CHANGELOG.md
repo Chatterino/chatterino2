@@ -7,10 +7,12 @@
 - Minor: Cleared up highlight sound settings (#4194)
 - Minor: Tables in settings window will now scroll to newly added rows. (#4216)
 - Minor: Added link to streamlink docs for easier user setup. (#4217)
+- Minor: Added setting to turn off rendering of reply context. (#4224)
 - Bugfix: Fixed highlight sounds not reloading on change properly. (#4194)
 - Bugfix: Fixed CTRL + C not working in reply thread popups. (#4209)
 - Bugfix: Fixed message input showing as red after removing a message that was more than 500 characters. (#4204)
 - Bugfix: Fixed unnecessary saving of windows layout. (#4201)
+- Bugfix: Fixed Reply window missing selection clear behaviour between chat and input box. (#4218)
 - Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
 
 ## 2.4.0
