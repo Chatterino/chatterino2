@@ -20,31 +20,6 @@
 
 namespace chatterino {
 
-struct TwitchEmoteSetResolverResponse {
-    const QString channelName;
-    const QString channelId;
-    const QString type;
-    const int tier;
-    const bool isCustom;
-    // Example response:
-    //    {
-    //      "channel_name": "zneix",
-    //      "channel_id": "99631238",
-    //      "type": "",
-    //      "tier": 1,
-    //      "custom": false
-    //    }
-
-    TwitchEmoteSetResolverResponse(QJsonObject jsonObject)
-        : channelName(jsonObject.value("channel_name").toString())
-        , channelId(jsonObject.value("channel_id").toString())
-        , type(jsonObject.value("type").toString())
-        , tier(jsonObject.value("tier").toInt())
-        , isCustom(jsonObject.value("custom").toBool())
-    {
-    }
-};
-
 std::vector<QStringList> getEmoteSetBatches(QStringList emoteSetKeys);
 
 class TwitchAccount : public Account
