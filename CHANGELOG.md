@@ -13,7 +13,7 @@
 - Bugfix: Fixed message input showing as red after removing a message that was more than 500 characters. (#4204)
 - Bugfix: Fixed unnecessary saving of windows layout. (#4201)
 - Bugfix: Fixed Reply window missing selection clear behaviour between chat and input box. (#4218)
-- Bugfix: Fixed crash occuring at tabs direction change. (#4248)
+- Bugfix: Fixed crash that could occur when changing Tab layout and utilizing multiple windows. (#4248)
 - Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
 
 ## 2.4.0
