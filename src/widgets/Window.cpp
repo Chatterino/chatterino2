@@ -80,9 +80,11 @@ Window::Window(WindowType type, QWidget *parent)
                                        });
     if (type == WindowType::Main || type == WindowType::Popup)
     {
-        getSettings()->tabDirection.connect([this](int val) {
-            this->notebook_->setTabLocation(NotebookTabLocation(val));
-        });
+        getSettings()->tabDirection.connect(
+            [this](int val) {
+                this->notebook_->setTabLocation(NotebookTabLocation(val));
+            },
+            this->signalHolder_);
     }
 }
 
