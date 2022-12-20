@@ -19,6 +19,7 @@ option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key 
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
 option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
+option(BUILD_SHARED_LIBS "" OFF)
 
 option(USE_CONAN "Use conan" OFF)
 
@@ -84,7 +85,6 @@ endif()
 
 if (BUILD_WITH_QTKEYCHAIN)
     # Link QtKeychain statically
-    option(QTKEYCHAIN_STATIC "" ON)
     if (USE_SYSTEM_QTKEYCHAIN)
         find_package(Qt${MAJOR_QT_VERSION}Keychain REQUIRED)
     else()
