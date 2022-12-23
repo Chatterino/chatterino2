@@ -803,16 +803,16 @@ if (MSVC)
     #        We don't use size_t in a lot of cases, since
     #        Qt doesn't use it - it uses int (or qsizetype in Qt6).
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
-            /W4
-            # 5038 - warnings about initialization order
-            /w15038
-            # 4855 - implicit capture of 'this' via '[=]' is deprecated
-            /w14855
-            # Disable the following warnings (see reasoning above)
-            /wd4505
-            /wd4100
-            /wd4267
-            )
+        /W4
+        # 5038 - warnings about initialization order
+        /w15038
+        # 4855 - implicit capture of 'this' via '[=]' is deprecated
+        /w14855
+        # Disable the following warnings (see reasoning above)
+        /wd4505
+        /wd4100
+        /wd4267
+    )
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
 else ()
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
