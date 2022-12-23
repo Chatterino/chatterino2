@@ -15,6 +15,7 @@
 - Bugfix: Fixed Reply window missing selection clear behaviour between chat and input box. (#4218)
 - Bugfix: Fixed crash that could occur when changing Tab layout and utilizing multiple windows. (#4248)
 - Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
+- Dev: Migrated to C++ 20 (#4252)
 
 ## 2.4.0
 
