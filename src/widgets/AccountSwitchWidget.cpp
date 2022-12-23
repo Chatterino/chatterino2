@@ -20,7 +20,7 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
         this->addItem(userName);
     }
 
-    app->accounts->twitch.userListUpdated.connect([=]() {
+    app->accounts->twitch.userListUpdated.connect([=, this]() {
         this->blockSignals(true);
 
         this->clear();
@@ -39,7 +39,7 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
 
     this->refreshSelection();
 
-    QObject::connect(this, &QListWidget::clicked, [=] {
+    QObject::connect(this, &QListWidget::clicked, [=, this] {
         if (!this->selectedItems().isEmpty())
         {
             QString newUsername = this->currentItem()->text();

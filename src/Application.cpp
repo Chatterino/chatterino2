@@ -551,7 +551,7 @@ void Application::initPubSub()
 
     this->twitch->pubsub->start();
 
-    auto RequestModerationActions = [=]() {
+    auto RequestModerationActions = [this]() {
         this->twitch->pubsub->setAccount(
             getApp()->accounts->twitch.getCurrent());
         // TODO(pajlada): Unlisten to all authed topics instead of only
@@ -561,7 +561,7 @@ void Application::initPubSub()
     };
 
     this->accounts->twitch.currentUserChanged.connect(
-        [=] {
+        [this] {
             this->twitch->pubsub->unlistenAllModerationActions();
             this->twitch->pubsub->unlistenAutomod();
             this->twitch->pubsub->unlistenWhispers();

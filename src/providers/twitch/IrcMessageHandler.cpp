@@ -464,7 +464,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                                          "callback since reward is not known:"
                                       << rewardId;
             channel->channelPointRewardAdded.connect(
-                [=, &server](ChannelPointReward reward) {
+                [=, this, &server](ChannelPointReward reward) {
                     qCDebug(chatterinoTwitch)
                         << "TwitchChannel reward added callback:" << reward.id
                         << "-" << rewardId;

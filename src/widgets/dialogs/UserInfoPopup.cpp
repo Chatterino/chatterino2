@@ -919,7 +919,7 @@ void UserInfoPopup::loadAvatar(const QUrl &url)
     static auto manager = new QNetworkAccessManager();
     auto *reply = manager->get(req);
 
-    QObject::connect(reply, &QNetworkReply::finished, this, [=] {
+    QObject::connect(reply, &QNetworkReply::finished, this, [=, this] {
         if (reply->error() == QNetworkReply::NoError)
         {
             const auto data = reply->readAll();

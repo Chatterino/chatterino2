@@ -167,7 +167,7 @@ public:
     {
         std::unique_lock lock(this->mutex_);
 
-        size_t numToPush = (std::min)(items.size(), this->space());
+        size_t numToPush = std::min(items.size(), this->space());
         std::vector<T> pushed;
         pushed.reserve(numToPush);
 
