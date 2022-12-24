@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 
     QCoreApplication::setApplicationName("chatterino");
     QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
-    QCoreApplication::setOrganizationDomain("https://www.chatterino.com");
+    QCoreApplication::setOrganizationDomain("chatterino.com");
 
     Paths *paths{};
 

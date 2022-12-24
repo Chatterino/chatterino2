@@ -364,6 +364,7 @@ set(SOURCE_FILES
         util/StreamLink.hpp
         util/StreamerMode.cpp
         util/StreamerMode.hpp
+        util/ThreadGuard.hpp
         util/Twitch.cpp
         util/Twitch.hpp
         util/TypeName.hpp
