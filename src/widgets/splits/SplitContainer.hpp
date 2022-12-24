@@ -189,7 +189,7 @@ public:
     Position deleteSplit(Split *split);
 
     void selectNextSplit(Direction direction);
-    void setSelected(Split *selected_);
+    void setSelected(Split *split);
 
     int getSplitCount();
     const std::vector<Split *> getSplits() const;
