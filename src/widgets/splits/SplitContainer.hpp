@@ -211,7 +211,6 @@ public:
     void selectNextSplit(Direction direction);
     void setSelected(Split *split);
 
-    int getSplitCount();
     std::vector<Split *> getSplits() const;
 
     void refreshTab();
