@@ -20,7 +20,7 @@ option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
 option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
-option(CHATTERINO_LTO "Enable LTO for all targets" ON)
+option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
 
 option(USE_CONAN "Use conan" OFF)
 
