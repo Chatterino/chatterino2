@@ -20,8 +20,17 @@ option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
 option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
+option(CHATTERINO_LTO "Enable LTO for all targets" ON)
 
 option(USE_CONAN "Use conan" OFF)
+
+if(CHATTERINO_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
+    message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO})")
+else()
+    message(STATUS "LTO: Disabled")
+endif()
 
 if (BUILD_WITH_QT6)
     set(MAJOR_QT_VERSION "6")
