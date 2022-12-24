@@ -192,7 +192,7 @@ public:
     void setSelected(Split *split);
 
     int getSplitCount();
-    const std::vector<Split *> getSplits() const;
+    std::vector<Split *> getSplits() const;
 
     void refreshTab();
 

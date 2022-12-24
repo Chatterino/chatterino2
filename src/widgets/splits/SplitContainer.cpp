@@ -755,7 +755,7 @@ int SplitContainer::getSplitCount()
     return this->splits_.size();
 }
 
-const std::vector<Split *> SplitContainer::getSplits() const
+std::vector<Split *> SplitContainer::getSplits() const
 {
     return this->splits_;
 }
