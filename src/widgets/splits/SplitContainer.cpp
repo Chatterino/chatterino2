@@ -450,11 +450,15 @@ Split *SplitContainer::getTopRightSplit(Node &node)
             return node.getSplit();
         case Node::Type::VerticalContainer:
             if (!node.getChildren().empty())
+            {
                 return getTopRightSplit(*node.getChildren().front());
+            }
             break;
         case Node::Type::HorizontalContainer:
             if (!node.getChildren().empty())
+            {
                 return getTopRightSplit(*node.getChildren().back());
+            }
             break;
         default:;
     }
@@ -471,10 +475,14 @@ void SplitContainer::layout()
     // update top right split
     auto *topRight = this->getTopRightSplit(this->baseNode_);
     if (this->topRight_)
+    {
         this->topRight_->setIsTopRightSplit(false);
+    }
     this->topRight_ = topRight;
     if (topRight)
+    {
         this->topRight_->setIsTopRightSplit(true);
+    }
 
     // layout
     this->baseNode_.geometry_ = this->rect().adjusted(-1, -1, 0, 0);
@@ -689,10 +697,14 @@ void SplitContainer::paintEvent(QPaintEvent *)
 void SplitContainer::dragEnterEvent(QDragEnterEvent *event)
 {
     if (!event->mimeData()->hasFormat("chatterino/split"))
+    {
         return;
+    }
 
     if (!SplitContainer::isDraggingSplit)
+    {
         return;
+    }
 
     this->isDragging_ = true;
     this->layout();
@@ -1217,9 +1229,13 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
     for (std::unique_ptr<Node> &node : this->children_)
     {
         if (node->flexH_ <= 0)
+        {
             node->flexH_ = 0;
+        }
         if (node->flexV_ <= 0)
+        {
             node->flexV_ = 0;
+        }
     }
 
     switch (this->type_)
