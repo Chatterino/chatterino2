@@ -107,6 +107,39 @@ namespace {
         return {id, name, emote};
     }
 
+    bool updateChannelEmote(Emote &emote, const QString &channelDisplayName,
+                            const QJsonObject &jsonEmote)
+    {
+        bool anyModifications = false;
+
+        if (jsonEmote.contains("code"))
+        {
+            emote.name = EmoteName{jsonEmote.value("code").toString()};
+            anyModifications = true;
+        }
+        if (jsonEmote.contains("user"))
+        {
+            emote.author = EmoteAuthor{jsonEmote.value("user")
+                                           .toObject()
+                                           .value("displayName")
+                                           .toString()};
+            anyModifications = true;
+        }
+
+        if (anyModifications)
+        {
+            emote.tooltip = Tooltip{
+                QString("%1<br>%2 BetterTTV Emote<br>By: %3")
+                    .arg(emote.name.string)
+                    // when author is empty, it is a channel emote created by the broadcaster
+                    .arg(emote.author.string.isEmpty() ? "Channel" : "Shared")
+                    .arg(emote.author.string.isEmpty() ? channelDisplayName
+                                                       : emote.author.string)};
+        }
+
+        return anyModifications;
+    }
+
     std::pair<Outcome, EmoteMap> parseChannelEmotes(
         const QJsonObject &jsonRoot, const QString &channelDisplayName)
     {
@@ -243,9 +276,10 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
         .execute();
 }
 
-EmotePtr BttvEmotes::addEmote(const QString &channelDisplayName,
-                              Atomic<std::shared_ptr<const EmoteMap>> &map,
-                              const BttvLiveUpdateEmoteAddMessage &message)
+EmotePtr BttvEmotes::addEmote(
+    const QString &channelDisplayName,
+    Atomic<std::shared_ptr<const EmoteMap>> &map,
+    const BttvLiveUpdateEmoteUpdateAddMessage &message)
 {
     // This copies the map.
     EmoteMap updatedMap = *map.get();
@@ -256,6 +290,42 @@ EmotePtr BttvEmotes::addEmote(const QString &channelDisplayName,
     map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
 
     return emote;
+}
+
+boost::optional<std::pair<EmotePtr, EmotePtr>> BttvEmotes::updateEmote(
+    const QString &channelDisplayName,
+    Atomic<std::shared_ptr<const EmoteMap>> &map,
+    const BttvLiveUpdateEmoteUpdateAddMessage &message)
+{
+    // This copies the map.
+    EmoteMap updatedMap = *map.get();
+
+    // Step 1: remove the existing emote
+    auto it = updatedMap.findEmote(QString(), message.emoteID);
+    if (it == updatedMap.end())
+    {
+        // We already copied the map at this point and are now discarding the copy.
+        // This is fine, because this case should be really rare.
+        return boost::none;
+    }
+    auto oldEmotePtr = it->second;
+    // copy the existing emote, to not change the original one
+    auto emote = *oldEmotePtr;
+    updatedMap.erase(it);
+
+    // Step 2: update the emote
+    if (!updateChannelEmote(emote, channelDisplayName, message.jsonEmote))
+    {
+        // The emote wasn't actually updated
+        return boost::none;
+    }
+
+    auto name = emote.name;
+    auto emotePtr = std::make_shared<const Emote>(std::move(emote));
+    updatedMap[name] = emotePtr;
+    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
+
+    return std::make_pair(oldEmotePtr, emotePtr);
 }
 
 boost::optional<EmotePtr> BttvEmotes::removeEmote(

@@ -7,6 +7,8 @@
 
 #include <pajlada/signals/signal.hpp>
 
+#include <unordered_set>
+
 namespace chatterino {
 
 class BttvLiveUpdates : public BasicPubSubManager<BttvLiveUpdateSubscription>
@@ -19,19 +21,25 @@ public:
     BttvLiveUpdates(QString host);
 
     struct {
-        Signal<BttvLiveUpdateEmoteAddMessage> emoteAdded;
+        Signal<BttvLiveUpdateEmoteUpdateAddMessage> emoteAdded;
+        Signal<BttvLiveUpdateEmoteUpdateAddMessage> emoteUpdated;
         Signal<BttvLiveUpdateEmoteRemoveMessage> emoteRemoved;
     } signals_;  // NOLINT(readability-identifier-naming)
 
     /**
-     * Joins a twitch channel by its id (without any prefix like 'twitch:')
+     * Joins a Twitch channel by its id (without any prefix like 'twitch:')
      * if it's not already joined.
+     *
+     * @param channelID the Twitch channel-id of the broadcaster.
+     * @param userName the Twitch username of the current user.
      */
-    void joinChannel(const QString &id);
+    void joinChannel(const QString &channelID, const QString &userName);
 
     /**
      * Parts a twitch channel by its id (without any prefix like 'twitch:')
      * if it's joined.
+     *
+     * @param id the Twitch channel-id of the broadcaster.
      */
     void partChannel(const QString &id);
 
@@ -42,6 +50,7 @@ protected:
         override;
 
 private:
+    // Contains all joined Twitch channel-ids
     std::unordered_set<QString> joinedChannels_;
 };
 

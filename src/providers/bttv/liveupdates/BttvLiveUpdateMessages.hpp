@@ -4,8 +4,8 @@
 
 namespace chatterino {
 
-struct BttvLiveUpdateEmoteAddMessage {
-    BttvLiveUpdateEmoteAddMessage(const QJsonObject &json);
+struct BttvLiveUpdateEmoteUpdateAddMessage {
+    BttvLiveUpdateEmoteUpdateAddMessage(const QJsonObject &json);
 
     QString channelID;
 

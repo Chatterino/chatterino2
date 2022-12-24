@@ -622,17 +622,47 @@ void TwitchChannel::joinBttvChannel() const
 {
     if (getApp()->twitch->bttvLiveUpdates)
     {
-        getApp()->twitch->bttvLiveUpdates->joinChannel(this->roomId());
+        const auto currentAccount = getApp()->accounts->twitch.getCurrent();
+        QString userName;
+        if (currentAccount && !currentAccount->isAnon())
+        {
+            userName = currentAccount->getUserName();
+        }
+        getApp()->twitch->bttvLiveUpdates->joinChannel(this->roomId(),
+                                                       userName);
     }
 }
 
-void TwitchChannel::addBttvEmote(const BttvLiveUpdateEmoteAddMessage &message)
+void TwitchChannel::addBttvEmote(
+    const BttvLiveUpdateEmoteUpdateAddMessage &message)
 {
     auto emote = BttvEmotes::addEmote(this->getDisplayName(), this->bttvEmotes_,
                                       message);
 
     this->addOrReplaceLiveUpdatesAddRemove(true, "BTTV", QString() /*actor*/,
                                            emote->name.string);
+}
+
+void TwitchChannel::updateBttvEmote(
+    const BttvLiveUpdateEmoteUpdateAddMessage &message)
+{
+    auto updated = BttvEmotes::updateEmote(this->getDisplayName(),
+                                           this->bttvEmotes_, message);
+    if (!updated)
+    {
+        return;
+    }
+
+    const auto [oldEmote, newEmote] = *updated;
+    if (oldEmote->name == newEmote->name)
+    {
+        return;  // only the creator changed
+    }
+
+    auto builder = MessageBuilder(liveUpdatesUpdateEmoteMessage, "BTTV",
+                                  QString() /* actor */, newEmote->name.string,
+                                  oldEmote->name.string);
+    this->addMessage(builder.release());
 }
 
 void TwitchChannel::removeBttvEmote(

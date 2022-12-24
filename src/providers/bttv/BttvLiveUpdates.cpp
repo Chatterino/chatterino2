@@ -1,6 +1,7 @@
 #include "providers/bttv/BttvLiveUpdates.hpp"
 
 #include <QJsonDocument>
+
 #include <utility>
 
 namespace chatterino {
@@ -10,11 +11,15 @@ BttvLiveUpdates::BttvLiveUpdates(QString host)
 {
 }
 
-void BttvLiveUpdates::joinChannel(const QString &id)
+void BttvLiveUpdates::joinChannel(const QString &channelID,
+                                  const QString &userName)
 {
-    if (this->joinedChannels_.insert(id).second)
+    if (this->joinedChannels_.insert(channelID).second)
     {
-        this->subscribe({id, BttvLiveUpdateSubscriptionType::Channel});
+        this->subscribe({channelID, QString() /*userName*/,
+                         BttvLiveUpdateSubscriptionType::Channel});
+        this->subscribe(
+            {channelID, userName, BttvLiveUpdateSubscriptionType::BroadcastMe});
     }
 }
 
@@ -22,7 +27,8 @@ void BttvLiveUpdates::partChannel(const QString &id)
 {
     if (this->joinedChannels_.erase(id) > 0)
     {
-        this->unsubscribe({id, BttvLiveUpdateSubscriptionType::Channel});
+        this->unsubscribe({id, QString() /*userName*/,
+                           BttvLiveUpdateSubscriptionType::Channel});
     }
 }
 
@@ -45,7 +51,7 @@ void BttvLiveUpdates::onMessage(
 
     if (eventType == "emote_create")
     {
-        auto message = BttvLiveUpdateEmoteAddMessage(eventData);
+        auto message = BttvLiveUpdateEmoteUpdateAddMessage(eventData);
 
         if (!message.validate())
         {
@@ -54,6 +60,18 @@ void BttvLiveUpdates::onMessage(
         }
 
         this->signals_.emoteAdded.invoke(message);
+    }
+    else if (eventType == "emote_update")
+    {
+        auto message = BttvLiveUpdateEmoteUpdateAddMessage(eventData);
+
+        if (!message.validate())
+        {
+            qCDebug(chatterinoBttv) << "Invalid update message" << json;
+            return;
+        }
+
+        this->signals_.emoteUpdated.invoke(message);
     }
     else if (eventType == "emote_delete")
     {

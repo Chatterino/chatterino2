@@ -595,6 +595,17 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
+    this->twitch->bttvLiveUpdates->signals_.emoteUpdated.connect(
+        [&](const auto &data) {
+            auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
+
+            postToThread([chan, data] {
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->updateBttvEmote(data);
+                }
+            });
+        });
     this->twitch->bttvLiveUpdates->signals_.emoteRemoved.connect(
         [&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);

@@ -125,7 +125,9 @@ public:
     const QString &seventvEmoteSetID() const;
 
     /** Adds a BTTV channel emote to this channel. */
-    void addBttvEmote(const BttvLiveUpdateEmoteAddMessage &message);
+    void addBttvEmote(const BttvLiveUpdateEmoteUpdateAddMessage &message);
+    /** Updates a BTTV channel emote in this channel. */
+    void updateBttvEmote(const BttvLiveUpdateEmoteUpdateAddMessage &message);
     /** Removes a BTTV channel emote from this channel. */
     void removeBttvEmote(const BttvLiveUpdateEmoteRemoveMessage &message);
 

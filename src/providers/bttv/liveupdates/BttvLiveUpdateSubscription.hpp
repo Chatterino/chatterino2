@@ -8,12 +8,14 @@ namespace chatterino {
 
 enum class BttvLiveUpdateSubscriptionType {
     Channel,
+    BroadcastMe,
 
     INVALID,
 };
 
 struct BttvLiveUpdateSubscription {
     QString twitchID;
+    QString userName;
     BttvLiveUpdateSubscriptionType type;
 
     QByteArray encodeSubscribe() const;

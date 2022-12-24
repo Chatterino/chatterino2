@@ -17,7 +17,7 @@ bool tryParseChannelId(QString &channelId)
 
 namespace chatterino {
 
-BttvLiveUpdateEmoteAddMessage::BttvLiveUpdateEmoteAddMessage(
+BttvLiveUpdateEmoteUpdateAddMessage::BttvLiveUpdateEmoteUpdateAddMessage(
     const QJsonObject &json)
     : channelID(json["channel"].toString())
     , jsonEmote(json["emote"].toObject())
@@ -27,7 +27,7 @@ BttvLiveUpdateEmoteAddMessage::BttvLiveUpdateEmoteAddMessage(
 {
 }
 
-bool BttvLiveUpdateEmoteAddMessage::validate() const
+bool BttvLiveUpdateEmoteUpdateAddMessage::validate() const
 {
     // We don't need to check for jsonEmote["code"]/["id"],
     // because these are this->emoteID and this->emoteName.

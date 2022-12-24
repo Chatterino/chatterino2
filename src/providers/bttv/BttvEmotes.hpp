@@ -7,6 +7,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 
 #include <memory>
+#include <utility>
 
 namespace chatterino {
 
@@ -40,9 +41,22 @@ public:
      *
      * @return The added emote.
      */
-    static EmotePtr addEmote(const QString &channelDisplayName,
-                             Atomic<std::shared_ptr<const EmoteMap>> &map,
-                             const BttvLiveUpdateEmoteAddMessage &message);
+    static EmotePtr addEmote(
+        const QString &channelDisplayName,
+        Atomic<std::shared_ptr<const EmoteMap>> &map,
+        const BttvLiveUpdateEmoteUpdateAddMessage &message);
+
+    /**
+     * Updates an emote in this `map`.
+     * This will _copy_ the emote map and
+     * update the `Atomic`.
+     *
+     * @return pair<old emote, new emote> if any emote was updated.
+     */
+    static boost::optional<std::pair<EmotePtr, EmotePtr>> updateEmote(
+        const QString &channelDisplayName,
+        Atomic<std::shared_ptr<const EmoteMap>> &map,
+        const BttvLiveUpdateEmoteUpdateAddMessage &message);
 
     /**
      * Removes an emote from this `map`.
