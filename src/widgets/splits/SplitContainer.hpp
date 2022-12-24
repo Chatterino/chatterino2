@@ -227,7 +227,7 @@ protected:
 
 private:
     void applyFromDescriptorRecursively(const NodeDescriptor &rootNode,
-                                        Node *node);
+                                        Node *baseNode);
 
     void layout();
     void selectSplitRecursive(Node *node, Direction direction);

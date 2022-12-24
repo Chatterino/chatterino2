@@ -803,7 +803,7 @@ void SplitContainer::popup()
 }
 
 void SplitContainer::applyFromDescriptorRecursively(
-    const NodeDescriptor &rootNode, Node *node)
+    const NodeDescriptor &rootNode, Node *baseNode)
 {
     if (std::holds_alternative<SplitNodeDescriptor>(rootNode))
     {
@@ -831,8 +831,8 @@ void SplitContainer::applyFromDescriptorRecursively(
 
         bool vertical = containerNode.vertical_;
 
-        node->type_ = vertical ? Node::Type::VerticalContainer
-                               : Node::Type::HorizontalContainer;
+        baseNode->type_ = vertical ? Node::Type::VerticalContainer
+                                   : Node::Type::HorizontalContainer;
 
         for (const auto &item : containerNode.items_)
         {
@@ -850,20 +850,20 @@ void SplitContainer::applyFromDescriptorRecursively(
                 split->setFilters(splitNode.filters_);
 
                 auto *_node = new Node();
-                _node->parent_ = node;
+                _node->parent_ = baseNode;
                 _node->split_ = split;
                 _node->type_ = Node::Type::Split;
 
                 _node->flexH_ = splitNode.flexH_;
                 _node->flexV_ = splitNode.flexV_;
-                node->children_.emplace_back(_node);
+                baseNode->children_.emplace_back(_node);
 
                 this->addSplit(split);
             }
             else
             {
                 auto *_node = new Node();
-                _node->parent_ = node;
+                _node->parent_ = baseNode;
 
                 if (const auto *n = std::get_if<ContainerNodeDescriptor>(&item))
                 {
@@ -871,7 +871,7 @@ void SplitContainer::applyFromDescriptorRecursively(
                     _node->flexV_ = n->flexV_;
                 }
 
-                node->children_.emplace_back(_node);
+                baseNode->children_.emplace_back(_node);
                 this->applyFromDescriptorRecursively(item, _node);
             }
         }
