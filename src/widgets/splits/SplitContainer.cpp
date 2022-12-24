@@ -252,7 +252,7 @@ void SplitContainer::addSplit(Split *split)
                 case Split::Action::Delete: {
                     this->deleteSplit(split);
                     auto *tab = this->getTab();
-                    tab->connect(tab, &QWidget::destroyed, [tab]() mutable {
+                    QObject::connect(tab, &QWidget::destroyed, [tab]() mutable {
                         ClosedSplits::invalidateTab(tab);
                     });
                     ClosedSplits::push({split->getChannel()->getName(),
