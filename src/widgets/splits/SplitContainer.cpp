@@ -854,7 +854,7 @@ void SplitContainer::applyFromDescriptorRecursively(
                 auto *_node = new Node();
                 _node->parent_ = node;
 
-                if (auto *n = std::get_if<ContainerNodeDescriptor>(&item))
+                if (const auto *n = std::get_if<ContainerNodeDescriptor>(&item))
                 {
                     _node->flexH_ = n->flexH_;
                     _node->flexV_ = n->flexV_;
