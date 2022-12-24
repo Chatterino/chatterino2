@@ -238,19 +238,7 @@ private:
     void refreshTabTitle();
     void refreshTabLiveStatus();
 
-    struct DropRegion {
-        QRect rect;
-        std::pair<int, int> position;
-
-        DropRegion(QRect rect, std::pair<int, int> position)
-        {
-            this->rect = rect;
-            this->position = position;
-        }
-    };
-
     std::vector<DropRect> dropRects_;
-    std::vector<DropRegion> dropRegions_;
     DropOverlay overlay_;
     std::vector<std::unique_ptr<ResizeHandle>> resizeHandles_;
     QPoint mouseOverPoint_;
