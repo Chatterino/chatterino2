@@ -12,6 +12,9 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' }}
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -20,15 +23,21 @@ jobs:
         os: [windows-latest, ubuntu-20.04, macos-latest]
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
-        lto: [(github.ref == 'refs/heads/master')]
+        force-lto: [false]
         include:
           - os: ubuntu-20.04
             qt-version: 5.15.2
             pch: false
-            lto: true
+            force-lto: true
       fail-fast: false
 
     steps:
+      - name: Force LTO
+        if: matrix.force-lto == true
+        run: |
+            echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
+        shell: bash
+
       - name: Set environment variables for windows-latest
         if: matrix.os == 'windows-latest'
         run: |
@@ -86,7 +95,7 @@ jobs:
                 -G"NMake Makefiles" `
                 -DCMAKE_BUILD_TYPE=Release `
                 -DUSE_CONAN=ON `
-                -DCHATTERINO_LTO=${{ matrix.lto }} `
+                -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
                 ..
             set cl=/MP
             nmake /S /NOLOGO
@@ -144,7 +153,7 @@ jobs:
               -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
               -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
               -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
-              -DCHATTERINO_LTO=${{ matrix.lto }} \
+              -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               ..
             make -j"$(nproc)"
         shell: bash
@@ -211,7 +220,7 @@ jobs:
                 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
                 -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
                 -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
-                -DCHATTERINO_LTO=${{ matrix.lto }} \
+                -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
                 ..
             make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
