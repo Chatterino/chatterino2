@@ -1415,7 +1415,7 @@ void SplitContainer::DropOverlay::setRects(
 
 // pajlada::Signals::NoArgSignal dragEnded;
 
-void SplitContainer::DropOverlay::paintEvent(QPaintEvent *)
+void SplitContainer::DropOverlay::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
@@ -1455,7 +1455,7 @@ void SplitContainer::DropOverlay::dragMoveEvent(QDragMoveEvent *event)
     this->update();
 }
 
-void SplitContainer::DropOverlay::dragLeaveEvent(QDragLeaveEvent *)
+void SplitContainer::DropOverlay::dragLeaveEvent(QDragLeaveEvent * /*event*/)
 {
     this->mouseOverPoint_ = QPoint(-10000, -10000);
     this->close();
@@ -1503,7 +1503,7 @@ SplitContainer::ResizeHandle::ResizeHandle(SplitContainer *_parent)
     this->hide();
 }
 
-void SplitContainer::ResizeHandle::paintEvent(QPaintEvent *)
+void SplitContainer::ResizeHandle::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
     painter.setPen(QPen(getApp()->themes->splits.resizeHandle, 2));
@@ -1533,7 +1533,7 @@ void SplitContainer::ResizeHandle::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void SplitContainer::ResizeHandle::mouseReleaseEvent(QMouseEvent *)
+void SplitContainer::ResizeHandle::mouseReleaseEvent(QMouseEvent * /*event*/)
 {
     this->isMouseDown_ = false;
 }
