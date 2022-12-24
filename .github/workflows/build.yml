@@ -32,7 +32,7 @@ jobs:
       - name: Set environment variables for windows-latest
         if: matrix.os == 'windows-latest'
         run: |
-            echo "vs_version=2022" >> $GITHUB_ENV
+            echo "vs_version=2022" >> "$GITHUB_ENV"
         shell: bash
 
       - uses: actions/checkout@v3
@@ -146,7 +146,7 @@ jobs:
               -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
               -DCHATTERINO_LTO=${{ matrix.lto }} \
               ..
-            make -j$(nproc)
+            make -j"$(nproc)"
         shell: bash
 
       - name: clang-tidy review
@@ -213,7 +213,7 @@ jobs:
                 -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
                 -DCHATTERINO_LTO=${{ matrix.lto }} \
                 ..
-            make -j$(sysctl -n hw.logicalcpu)
+            make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
 
       - name: Package (MacOS)
