@@ -142,8 +142,7 @@ void SplitContainer::appendSplit(Split *split)
 
 void SplitContainer::insertSplit(Split *split, const Position &position)
 {
-    this->insertSplit(split, position.direction_,
-                      reinterpret_cast<Node *>(position.relativeNode_));
+    this->insertSplit(split, position.direction_, position.relativeNode_);
 }
 
 void SplitContainer::insertSplit(Split *split, Direction direction,
