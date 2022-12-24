@@ -194,7 +194,7 @@ void NotebookButton::dropEvent(QDropEvent *event)
             page->setTab(tab);
 
             SplitContainer::draggingSplit->setParent(page);
-            page->appendSplit(SplitContainer::draggingSplit);
+            page->insertSplit(SplitContainer::draggingSplit);
         }
     }
 }

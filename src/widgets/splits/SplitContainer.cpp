@@ -120,7 +120,7 @@ Split *SplitContainer::appendNewSplit(bool openChannelNameDialog)
     assertInGuiThread();
 
     auto *split = new Split(this);
-    this->appendSplit(split);
+    this->insertSplit(split);
 
     if (openChannelNameDialog)
     {
@@ -135,32 +135,40 @@ Split *SplitContainer::appendNewSplit(bool openChannelNameDialog)
     return split;
 }
 
-void SplitContainer::appendSplit(Split *split)
-{
-    this->insertSplit(split, Direction::Right);
-}
-
-void SplitContainer::insertSplit(Split *split, const Position &position)
-{
-    this->insertSplit(split, position.direction_, position.relativeNode_);
-}
-
-void SplitContainer::insertSplit(Split *split, Direction direction,
-                                 Split *relativeTo)
-{
-    Node *node = this->baseNode_.findNodeContainingSplit(relativeTo);
-    assert(node != nullptr);
-
-    this->insertSplit(split, direction, node);
-}
-
-void SplitContainer::insertSplit(Split *split, Direction direction,
-                                 Node *relativeTo)
+void SplitContainer::insertSplit(Split *split, InsertOptions &&options)
 {
     // Queue up save because: Split added
     getApp()->windows->queueSave();
 
     assertInGuiThread();
+
+    if (options.position)
+    {
+        // options.position must not be set together with any other options
+        assert(!options.relativeSplit);
+        assert(!options.relativeNode);
+        assert(!options.direction.has_value());
+
+        options.relativeNode = options.position->relativeNode_;
+        options.direction = options.position->direction_;
+    }
+
+    if (options.relativeSplit)
+    {
+        // options.relativeNode must not be set together with relativeSplit
+        assert(!options.relativeNode);
+
+        Node *node =
+            this->baseNode_.findNodeContainingSplit(options.relativeSplit);
+        assert(node != nullptr);
+
+        InsertOptions opts{};
+
+        options.relativeNode = node;
+    }
+
+    auto *relativeTo = options.relativeNode;
+    const auto direction = options.direction.value_or(Direction::Right);
 
     if (relativeTo == nullptr)
     {
@@ -275,10 +283,14 @@ void SplitContainer::addSplit(Split *split)
             }
         });
 
-    conns.managedConnect(split->insertSplitRequested, [this](int dir,
-                                                             Split *parent) {
-        this->insertSplit(new Split(this), static_cast<Direction>(dir), parent);
-    });
+    conns.managedConnect(
+        split->insertSplitRequested, [this](int dir, Split *parent) {
+            this->insertSplit(new Split(this),
+                              {
+                                  .relativeSplit = parent,
+                                  .direction = static_cast<Direction>(dir),
+                              });
+        });
 
     this->layout();
 }
@@ -595,7 +607,7 @@ void SplitContainer::mouseReleaseEvent(QMouseEvent *event)
                              });
             if (it != this->dropRects_.end())
             {
-                this->insertSplit(new Split(this), it->position);
+                this->insertSplit(new Split(this), {.position = it->position});
             }
         }
     }
@@ -807,21 +819,28 @@ void SplitContainer::applyFromDescriptorRecursively(
 {
     if (std::holds_alternative<SplitNodeDescriptor>(rootNode))
     {
+        // This is a leaf, no further recursion happens from here
+
         const auto *n = std::get_if<SplitNodeDescriptor>(&rootNode);
         if (!n)
         {
             return;
         }
         const auto &splitNode = *n;
+
         auto *split = new Split(this);
         split->setChannel(WindowManager::decodeChannel(splitNode));
         split->setModerationMode(splitNode.moderationMode_);
         split->setFilters(splitNode.filters_);
 
-        this->appendSplit(split);
+        this->insertSplit(split);
+
+        return;
     }
-    else if (std::holds_alternative<ContainerNodeDescriptor>(rootNode))
+
+    if (std::holds_alternative<ContainerNodeDescriptor>(rootNode))
     {
+        // This is a branch, it will contain one or more splits/containers
         const auto *n = std::get_if<ContainerNodeDescriptor>(&rootNode);
         if (!n)
         {
@@ -849,30 +868,30 @@ void SplitContainer::applyFromDescriptorRecursively(
                 split->setModerationMode(splitNode.moderationMode_);
                 split->setFilters(splitNode.filters_);
 
-                auto *_node = new Node();
-                _node->parent_ = baseNode;
-                _node->split_ = split;
-                _node->type_ = Node::Type::Split;
+                auto *node = new Node();
+                node->parent_ = baseNode;
+                node->split_ = split;
+                node->type_ = Node::Type::Split;
 
-                _node->flexH_ = splitNode.flexH_;
-                _node->flexV_ = splitNode.flexV_;
-                baseNode->children_.emplace_back(_node);
+                node->flexH_ = splitNode.flexH_;
+                node->flexV_ = splitNode.flexV_;
+                baseNode->children_.emplace_back(node);
 
                 this->addSplit(split);
             }
             else
             {
-                auto *_node = new Node();
-                _node->parent_ = baseNode;
+                auto *node = new Node();
+                node->parent_ = baseNode;
 
                 if (const auto *n = std::get_if<ContainerNodeDescriptor>(&item))
                 {
-                    _node->flexH_ = n->flexH_;
-                    _node->flexV_ = n->flexV_;
+                    node->flexH_ = n->flexH_;
+                    node->flexV_ = n->flexV_;
                 }
 
-                baseNode->children_.emplace_back(_node);
-                this->applyFromDescriptorRecursively(item, _node);
+                baseNode->children_.emplace_back(node);
+                this->applyFromDescriptorRecursively(item, node);
             }
         }
     }
@@ -1476,7 +1495,8 @@ void SplitContainer::DropOverlay::dropEvent(QDropEvent *event)
 
     if (position != nullptr)
     {
-        this->parent_->insertSplit(SplitContainer::draggingSplit, *position);
+        this->parent_->insertSplit(SplitContainer::draggingSplit,
+                                   {.position = *position});
         event->acceptProposedAction();
     }
 

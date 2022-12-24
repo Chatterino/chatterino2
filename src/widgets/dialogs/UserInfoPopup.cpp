@@ -313,7 +313,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                                 SplitContainer *container = nb.addPage(true);
                                 Split *split = new Split(container);
                                 split->setChannel(channel);
-                                container->appendSplit(split);
+                                container->insertSplit(split);
                             });
                         menu->popup(QCursor::pos());
                         menu->raise();

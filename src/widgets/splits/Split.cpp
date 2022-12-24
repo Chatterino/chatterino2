@@ -628,7 +628,7 @@ void Split::joinChannelInNewTab(ChannelPtr channel)
 
     Split *split = new Split(container);
     split->setChannel(channel);
-    container->appendSplit(split);
+    container->insertSplit(split);
 }
 
 void Split::openChannelInBrowserPlayer(ChannelPtr channel)
@@ -899,7 +899,7 @@ void Split::popup()
     split->setModerationMode(this->getModerationMode());
     split->setFilters(this->getFilters());
 
-    window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+    window.getNotebook().getOrAddSelectedPage()->insertSplit(split);
     window.show();
 }
 
@@ -1270,7 +1270,7 @@ void Split::drag()
 
         if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
         {
-            container->insertSplit(this, originalLocation);
+            container->insertSplit(this, {.position = originalLocation});
         }
 
         SplitContainer::isDraggingSplit = false;

@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -38,6 +39,7 @@ public:
     struct Node;
 
     // fourtf: !!! preserve the order of left, up, right and down
+    // It's important to preserve since we cast from an int to this enum, so 0 = left, 1 = above etc
     enum Direction { Left, Above, Right, Below };
 
     struct Position final {
@@ -49,8 +51,8 @@ public:
         {
         }
 
-        Node *relativeNode_;
-        Direction direction_;
+        Node *relativeNode_{nullptr};
+        Direction direction_{Direction::Right};
 
         friend struct Node;
         friend class SplitContainer;
@@ -182,11 +184,30 @@ public:
     SplitContainer(Notebook *parent);
 
     Split *appendNewSplit(bool openChannelNameDialog);
-    void appendSplit(Split *split);
-    void insertSplit(Split *split, const Position &position);
-    void insertSplit(Split *split, Direction direction, Split *relativeTo);
-    void insertSplit(Split *split, Direction direction,
-                     Node *relativeTo = nullptr);
+
+    struct InsertOptions {
+        /// Position must be set alone, as if it's set it will override direction & relativeNode with its underlying values
+        std::optional<Position> position{};
+
+        /// Will be used to figure out the relative node, so relative node or position must not be set if using this
+        Split *relativeSplit{nullptr};
+
+        Node *relativeNode{nullptr};
+        std::optional<Direction> direction{};
+    };
+
+    // Insert split into the base node of this container
+    // Default values for each field must be specified due to these bugs:
+    //  - https://bugs.llvm.org/show_bug.cgi?id=36684
+    //  - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=96645
+    void insertSplit(Split *split, InsertOptions &&options = InsertOptions{
+                                       .position = std::nullopt,
+                                       .relativeSplit = nullptr,
+                                       .relativeNode = nullptr,
+                                       .direction = std::nullopt,
+                                   });
+
+    // Returns a pointer to the selected split
     Split *getSelectedSplit() const;
     Position releaseSplit(Split *split);
     Position deleteSplit(Split *split);
