@@ -204,8 +204,8 @@ private:
 
         this->clients_.emplace(hdl, client);
 
-        auto pendingSubsToTake = (std::min)(this->pendingSubscriptions_.size(),
-                                            client->maxSubscriptions);
+        auto pendingSubsToTake = std::min(this->pendingSubscriptions_.size(),
+                                          client->maxSubscriptions);
 
         qCDebug(chatterinoLiveupdates)
             << "LiveUpdate connection opened, subscribing to"

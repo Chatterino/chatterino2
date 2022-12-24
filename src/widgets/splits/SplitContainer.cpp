@@ -125,7 +125,7 @@ Split *SplitContainer::appendNewSplit(bool openChannelNameDialog)
 
     if (openChannelNameDialog)
     {
-        split->showChangeChannelPopup("Open channel", true, [=](bool ok) {
+        split->showChangeChannelPopup("Open channel", true, [=, this](bool ok) {
             if (!ok)
             {
                 this->deleteSplit(split);
@@ -1242,7 +1242,7 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
                 0.0001, this->getChildrensTotalFlex(isVertical));
             qreal totalSize = std::accumulate(
                 this->children_.begin(), this->children_.end(), qreal(0),
-                [=](int val, std::unique_ptr<Node> &node) {
+                [=, this](int val, std::unique_ptr<Node> &node) {
                     return val + std::max<qreal>(
                                      this->getSize(isVertical) /
                                          std::max<qreal>(0.0001, totalFlex) *

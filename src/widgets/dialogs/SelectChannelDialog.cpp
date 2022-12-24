@@ -223,13 +223,14 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         layout.emplace<QHBoxLayout>().emplace<QDialogButtonBox>(this);
     {
         auto *button_ok = buttons->addButton(QDialogButtonBox::Ok);
-        QObject::connect(button_ok, &QPushButton::clicked, [=](bool) {
+        QObject::connect(button_ok, &QPushButton::clicked, [this](bool) {
             this->ok();
         });
         auto *button_cancel = buttons->addButton(QDialogButtonBox::Cancel);
-        QObject::connect(button_cancel, &QAbstractButton::clicked, [=](bool) {
-            this->close();
-        });
+        QObject::connect(button_cancel, &QAbstractButton::clicked,
+                         [this](bool) {
+                             this->close();
+                         });
     }
 
     this->setMinimumSize(300, 310);

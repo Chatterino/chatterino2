@@ -16,6 +16,7 @@
 - Bugfix: Fixed crash that could occur when changing Tab layout and utilizing multiple windows. (#4248)
 - Dev: Remove protocol from QApplication's Organization Domain (so changed from `https://www.chatterino.com` to `chatterino.com`). (#4256)
 - Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
+- Dev: Migrated to C++ 20 (#4252)
 
 ## 2.4.0
 

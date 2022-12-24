@@ -39,7 +39,7 @@ GeneralPageView::GeneralPageView(QWidget *parent)
         {scrollArea, new QSpacerItem(16, 1), navigation}));
 
     QObject::connect(scrollArea->verticalScrollBar(), &QScrollBar::valueChanged,
-                     this, [=] {
+                     this, [this] {
                          this->updateNavigationHighlighting();
                      });
 }
@@ -74,7 +74,7 @@ TitleLabel *GeneralPageView::addTitle(const QString &title)
     navLabel->setCursor(Qt::PointingHandCursor);
     this->navigationLayout_->addWidget(navLabel);
 
-    QObject::connect(navLabel, &NavigationLabel::leftMouseUp, label, [=] {
+    QObject::connect(navLabel, &NavigationLabel::leftMouseUp, label, [=, this] {
         this->contentScrollArea_->verticalScrollBar()->setValue(label->y());
     });
 

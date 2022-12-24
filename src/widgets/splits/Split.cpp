@@ -157,7 +157,7 @@ Split::Split(QWidget *parent)
         }
     });
 
-    this->input_->textChanged.connect([=](const QString &newText) {
+    this->input_->textChanged.connect([this](const QString &newText) {
         if (getSettings()->showEmptyInput)
         {
             // We always show the input regardless of the text, so we can early out here
@@ -754,7 +754,7 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setWindowTitle(dialogTitle);
     dialog->show();
-    dialog->closed.connect([=] {
+    dialog->closed.connect([=, this] {
         if (dialog->hasSeletedChannel())
         {
             this->setChannel(dialog->getSelectedChannel());
@@ -1030,7 +1030,7 @@ void Split::showViewerList()
     NetworkRequest::twitchRequest("https://tmi.twitch.tv/group/user/" +
                                   this->getChannel()->getName() + "/chatters")
         .caller(this)
-        .onSuccess([=](auto result) -> Outcome {
+        .onSuccess([=, this](auto result) -> Outcome {
             auto obj = result.parseJson();
             QJsonObject chattersObj = obj.value("chatters").toObject();
 

@@ -89,7 +89,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     this->menu_.addAction(
         "Close Tab",
-        [=]() {
+        [this]() {
             this->notebook_->removePage(this->page);
         },
         getApp()->hotkeys->getDisplaySequence(HotkeyCategory::Window,
@@ -97,7 +97,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     this->menu_.addAction(
         "Popup Tab",
-        [=]() {
+        [this]() {
             if (auto container = dynamic_cast<SplitContainer *>(this->page))
             {
                 container->popup();

@@ -641,13 +641,13 @@ void Window::addMenuBar()
 
     QAction *nextTab = windowMenu->addAction(QString("Select next tab"));
     nextTab->setShortcuts({QKeySequence("Meta+Tab")});
-    connect(nextTab, &QAction::triggered, this, [=] {
+    connect(nextTab, &QAction::triggered, this, [this] {
         this->notebook_->selectNextTab();
     });
 
     QAction *prevTab = windowMenu->addAction(QString("Select previous tab"));
     prevTab->setShortcuts({QKeySequence("Meta+Shift+Tab")});
-    connect(prevTab, &QAction::triggered, this, [=] {
+    connect(prevTab, &QAction::triggered, this, [this] {
         this->notebook_->selectPreviousTab();
     });
 }
