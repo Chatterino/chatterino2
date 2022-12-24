@@ -90,11 +90,11 @@ public:
             HorizontalContainer,
         };
 
-        Type getType();
-        Split *getSplit();
-        Node *getParent();
-        qreal getHorizontalFlex();
-        qreal getVerticalFlex();
+        Type getType() const;
+        Split *getSplit() const;
+        Node *getParent() const;
+        qreal getHorizontalFlex() const;
+        qreal getVerticalFlex() const;
         const std::vector<std::unique_ptr<Node>> &getChildren();
 
     private:

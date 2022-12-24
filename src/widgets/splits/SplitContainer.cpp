@@ -938,26 +938,26 @@ void SplitContainer::refreshTabLiveStatus()
 // Node
 //
 
-SplitContainer::Node::Type SplitContainer::Node::getType()
+SplitContainer::Node::Type SplitContainer::Node::getType() const
 {
     return this->type_;
 }
-Split *SplitContainer::Node::getSplit()
+Split *SplitContainer::Node::getSplit() const
 {
     return this->split_;
 }
 
-SplitContainer::Node *SplitContainer::Node::getParent()
+SplitContainer::Node *SplitContainer::Node::getParent() const
 {
     return this->parent_;
 }
 
-qreal SplitContainer::Node::getHorizontalFlex()
+qreal SplitContainer::Node::getHorizontalFlex() const
 {
     return this->flexH_;
 }
 
-qreal SplitContainer::Node::getVerticalFlex()
+qreal SplitContainer::Node::getVerticalFlex() const
 {
     return this->flexV_;
 }
