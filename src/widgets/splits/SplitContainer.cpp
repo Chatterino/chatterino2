@@ -486,13 +486,14 @@ void SplitContainer::layout()
     // layout
     this->baseNode_.geometry_ = this->rect().adjusted(-1, -1, 0, 0);
 
-    std::vector<DropRect> _dropRects;
-    std::vector<ResizeRect> _resizeRects;
-    this->baseNode_.layout(
-        Split::modifierStatus == showAddSplitRegions || this->isDragging_,
-        this->scale(), _dropRects, _resizeRects);
+    std::vector<DropRect> dropRects;
+    std::vector<ResizeRect> resizeRects;
 
-    this->dropRects_ = _dropRects;
+    const bool addSpacing =
+        Split::modifierStatus == showAddSplitRegions || this->isDragging_;
+    this->baseNode_.layout(addSpacing, this->scale(), dropRects, resizeRects);
+
+    this->dropRects_ = dropRects;
 
     for (Split *split : this->splits_)
     {
@@ -501,20 +502,20 @@ void SplitContainer::layout()
         Node *node = this->baseNode_.findNodeContainingSplit(split);
 
         // left
-        _dropRects.push_back(
+        dropRects.push_back(
             DropRect(QRect(g.left(), g.top(), g.width() / 3, g.height()),
                      Position(node, Direction::Left)));
         // right
-        _dropRects.push_back(DropRect(QRect(g.right() - g.width() / 3, g.top(),
-                                            g.width() / 3, g.height()),
-                                      Position(node, Direction::Right)));
+        dropRects.push_back(DropRect(QRect(g.right() - g.width() / 3, g.top(),
+                                           g.width() / 3, g.height()),
+                                     Position(node, Direction::Right)));
 
         // top
-        _dropRects.push_back(
+        dropRects.push_back(
             DropRect(QRect(g.left(), g.top(), g.width(), g.height() / 2),
                      Position(node, Direction::Above)));
         // bottom
-        _dropRects.push_back(
+        dropRects.push_back(
             DropRect(QRect(g.left(), g.bottom() - g.height() / 2, g.width(),
                            g.height() / 2),
                      Position(node, Direction::Below)));
@@ -523,30 +524,30 @@ void SplitContainer::layout()
     if (this->splits_.empty())
     {
         QRect g = this->rect();
-        _dropRects.push_back(
+        dropRects.push_back(
             DropRect(QRect(g.left(), g.top(), g.width() - 1, g.height() - 1),
                      Position(nullptr, Direction::Below)));
     }
 
-    this->overlay_.setRects(std::move(_dropRects));
+    this->overlay_.setRects(std::move(dropRects));
 
     // handle resizeHandles
-    if (this->resizeHandles_.size() < _resizeRects.size())
+    if (this->resizeHandles_.size() < resizeRects.size())
     {
-        while (this->resizeHandles_.size() < _resizeRects.size())
+        while (this->resizeHandles_.size() < resizeRects.size())
         {
             this->resizeHandles_.push_back(
                 std::make_unique<ResizeHandle>(this));
         }
     }
-    else if (this->resizeHandles_.size() > _resizeRects.size())
+    else if (this->resizeHandles_.size() > resizeRects.size())
     {
-        this->resizeHandles_.resize(_resizeRects.size());
+        this->resizeHandles_.resize(resizeRects.size());
     }
 
     {
         size_t i = 0;
-        for (ResizeRect &resizeRect : _resizeRects)
+        for (ResizeRect &resizeRect : resizeRects)
         {
             ResizeHandle *handle = this->resizeHandles_[i].get();
             handle->setGeometry(resizeRect.rect);
