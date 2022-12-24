@@ -20,10 +20,12 @@ jobs:
         os: [windows-latest, ubuntu-20.04, macos-latest]
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
+        lto: [github.ref == 'refs/heads/master']
         include:
           - os: ubuntu-20.04
             qt-version: 5.15.2
             pch: false
+            lto: true
       fail-fast: false
 
     steps:
@@ -80,7 +82,12 @@ jobs:
             mkdir build
             cd build
             conan install ..  -b missing
-            cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..
+            cmake `
+                -G"NMake Makefiles" `
+                -DCMAKE_BUILD_TYPE=Release `
+                -DUSE_CONAN=ON `
+                -DCHATTERINO_LTO=${{ matrix.lto }} `
+                ..
             set cl=/MP
             nmake /S /NOLOGO
             windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
@@ -137,6 +144,7 @@ jobs:
               -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
               -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
               -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
+              -DCHATTERINO_LTO=${{ matrix.lto }} \
               ..
             make -j$(nproc)
         shell: bash
@@ -203,6 +211,7 @@ jobs:
                 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
                 -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
                 -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
+                -DCHATTERINO_LTO=${{ matrix.lto }} \
                 ..
             make -j$(sysctl -n hw.logicalcpu)
         shell: bash
