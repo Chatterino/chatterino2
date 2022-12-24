@@ -1161,18 +1161,18 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
                 siblings.begin() == it ? Direction::Left : Direction::Right;
         }
 
-        auto *_parent = this->parent_;
+        auto *parent = this->parent_;
         siblings.erase(it);
         std::unique_ptr<Node> &sibling = siblings.front();
-        _parent->type_ = sibling->type_;
-        _parent->split_ = sibling->split_;
+        parent->type_ = sibling->type_;
+        parent->split_ = sibling->split_;
         std::vector<std::unique_ptr<Node>> nodes =
             std::move(sibling->children_);
         for (auto &node : nodes)
         {
-            node->parent_ = _parent;
+            node->parent_ = parent;
         }
-        _parent->children_ = std::move(nodes);
+        parent->children_ = std::move(nodes);
     }
     else
     {
