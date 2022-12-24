@@ -119,7 +119,7 @@ Split *SplitContainer::appendNewSplit(bool openChannelNameDialog)
 {
     assertInGuiThread();
 
-    Split *split = new Split(this);
+    auto *split = new Split(this);
     this->appendSplit(split);
 
     if (openChannelNameDialog)
@@ -469,7 +469,7 @@ void SplitContainer::layout()
     }
 
     // update top right split
-    auto topRight = this->getTopRightSplit(this->baseNode_);
+    auto *topRight = this->getTopRightSplit(this->baseNode_);
     if (this->topRight_)
         this->topRight_->setIsTopRightSplit(false);
     this->topRight_ = topRight;
@@ -610,7 +610,7 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
         QString text = "Click to add a split";
 
-        Notebook *notebook = dynamic_cast<Notebook *>(this->parentWidget());
+        auto *notebook = dynamic_cast<Notebook *>(this->parentWidget());
 
         if (notebook != nullptr)
         {
@@ -767,7 +767,7 @@ void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
 void SplitContainer::popup()
 {
     Window &window = getApp()->windows->createWindow(WindowType::Popup);
-    auto popupContainer = window.getNotebook().getOrAddSelectedPage();
+    auto *popupContainer = window.getNotebook().getOrAddSelectedPage();
 
     QJsonObject encodedTab;
     WindowManager::encodeTab(this, true, encodedTab);
@@ -796,7 +796,7 @@ void SplitContainer::applyFromDescriptorRecursively(
 {
     if (std::holds_alternative<SplitNodeDescriptor>(rootNode))
     {
-        auto *n = std::get_if<SplitNodeDescriptor>(&rootNode);
+        const auto *n = std::get_if<SplitNodeDescriptor>(&rootNode);
         if (!n)
         {
             return;
@@ -811,7 +811,7 @@ void SplitContainer::applyFromDescriptorRecursively(
     }
     else if (std::holds_alternative<ContainerNodeDescriptor>(rootNode))
     {
-        auto *n = std::get_if<ContainerNodeDescriptor>(&rootNode);
+        const auto *n = std::get_if<ContainerNodeDescriptor>(&rootNode);
         if (!n)
         {
             return;
@@ -827,7 +827,7 @@ void SplitContainer::applyFromDescriptorRecursively(
         {
             if (std::holds_alternative<SplitNodeDescriptor>(item))
             {
-                auto *n = std::get_if<SplitNodeDescriptor>(&item);
+                const auto *n = std::get_if<SplitNodeDescriptor>(&item);
                 if (!n)
                 {
                     return;
@@ -838,7 +838,7 @@ void SplitContainer::applyFromDescriptorRecursively(
                 split->setModerationMode(splitNode.moderationMode_);
                 split->setFilters(splitNode.filters_);
 
-                Node *_node = new Node();
+                auto *_node = new Node();
                 _node->parent_ = node;
                 _node->split_ = split;
                 _node->type_ = Node::_Split;
@@ -851,7 +851,7 @@ void SplitContainer::applyFromDescriptorRecursively(
             }
             else
             {
-                Node *_node = new Node();
+                auto *_node = new Node();
                 _node->parent_ = node;
 
                 if (auto *n = std::get_if<ContainerNodeDescriptor>(&item))
@@ -1152,7 +1152,7 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
                     siblings.begin() == it ? Direction::Left : Direction::Right;
             }
 
-            Node *_parent = this->parent_;
+            auto *_parent = this->parent_;
             siblings.erase(it);
             std::unique_ptr<Node> &sibling = siblings.front();
             _parent->type_ = sibling->type_;
@@ -1235,7 +1235,7 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
             bool isVertical = this->type_ == Node::VerticalContainer;
 
             // vars
-            qreal minSize = qreal(48 * _scale);
+            qreal minSize(48 * _scale);
 
             qreal totalFlex = std::max<qreal>(
                 0.0001, this->getChildrensTotalFlex(isVertical));
@@ -1530,7 +1530,7 @@ void SplitContainer::ResizeHandle::mouseMoveEvent(QMouseEvent *event)
     assert(node != nullptr);
     assert(node->parent_ != nullptr);
 
-    auto &siblings = node->parent_->getChildren();
+    const auto &siblings = node->parent_->getChildren();
     auto it = std::find_if(siblings.begin(), siblings.end(),
                            [this](const std::unique_ptr<Node> &n) {
                                return n.get() == this->node;
@@ -1590,7 +1590,7 @@ void SplitContainer::ResizeHandle::mouseDoubleClickEvent(QMouseEvent *event)
 
 void SplitContainer::ResizeHandle::resetFlex()
 {
-    for (auto &sibling : this->node->getParent()->getChildren())
+    for (const auto &sibling : this->node->getParent()->getChildren())
     {
         sibling->flexH_ = 1;
         sibling->flexV_ = 1;
