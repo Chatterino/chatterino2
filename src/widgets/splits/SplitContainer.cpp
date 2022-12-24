@@ -90,9 +90,9 @@ NotebookTab *SplitContainer::getTab() const
     return this->tab_;
 }
 
-void SplitContainer::setTab(NotebookTab *_tab)
+void SplitContainer::setTab(NotebookTab *tab)
 {
-    this->tab_ = _tab;
+    this->tab_ = tab;
 
     this->tab_->page = this;
 

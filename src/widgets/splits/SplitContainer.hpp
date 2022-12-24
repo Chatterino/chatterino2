@@ -194,7 +194,7 @@ public:
     NotebookTab *getTab() const;
     Node *getBaseNode();
 
-    void setTab(NotebookTab *tab_);
+    void setTab(NotebookTab *tab);
     void hideResizeHandles();
     void resetMouseStatus();
 
