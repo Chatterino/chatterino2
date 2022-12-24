@@ -1224,14 +1224,7 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
 {
     for (std::unique_ptr<Node> &node : this->children_)
     {
-        if (node->flexH_ <= 0)
-        {
-            node->flexH_ = 0;
-        }
-        if (node->flexV_ <= 0)
-        {
-            node->flexV_ = 0;
-        }
+        node->clamp();
     }
 
     switch (this->type_)
@@ -1378,6 +1371,19 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
             }
         }
         break;
+    }
+}
+
+void SplitContainer::Node::clamp()
+{
+    if (this->flexH_ < 0)
+    {
+        this->flexH_ = 0;
+    }
+
+    if (this->flexV_ < 0)
+    {
+        this->flexV_ = 0;
     }
 }
 

@@ -115,6 +115,9 @@ public:
                     std::vector<DropRect> &dropRects_,
                     std::vector<ResizeRect> &resizeRects);
 
+        // Clamps the flex values ensuring they're never below 0
+        void clamp();
+
         static Type toContainerType(Direction _dir);
 
         Type type_;
