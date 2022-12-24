@@ -324,7 +324,7 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
     split->setParent(nullptr);
     Position position = node->releaseSplit();
     this->layout();
-    if (splits_.size() == 0)
+    if (splits_.empty())
     {
         this->setSelected(nullptr);
         this->setCursor(Qt::PointingHandCursor);
@@ -571,7 +571,7 @@ void SplitContainer::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
-        if (this->splits_.size() == 0)
+        if (this->splits_.empty())
         {
             // "Add Chat" was clicked
             this->appendNewSplit(true);
@@ -598,7 +598,7 @@ void SplitContainer::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    if (this->splits_.size() == 0)
+    if (this->splits_.empty())
     {
         painter.fillRect(rect(), this->theme->splits.background);
 
@@ -1106,7 +1106,7 @@ void SplitContainer::Node::insertNextToThis(Split *_split, Direction _direction)
 void SplitContainer::Node::setSplit(Split *_split)
 {
     assert(this->split_ == nullptr);
-    assert(this->children_.size() == 0);
+    assert(this->children_.empty());
 
     this->split_ = _split;
     this->type_ = Type::Split;
