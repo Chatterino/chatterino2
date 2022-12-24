@@ -628,6 +628,7 @@ const boost::optional<MessageElementFlags> &ChannelView::getOverrideFlags()
 
 LimitedQueueSnapshot<MessageLayoutPtr> &ChannelView::getMessagesSnapshot()
 {
+    this->snapshotGuard_.guard();
     if (!this->paused() /*|| this->scrollBar_->isVisible()*/)
     {
         this->snapshot_ = this->messages_.getSnapshot();
