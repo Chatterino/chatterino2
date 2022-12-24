@@ -601,7 +601,7 @@ void SplitContainer::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void SplitContainer::paintEvent(QPaintEvent *)
+void SplitContainer::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
@@ -724,13 +724,13 @@ void SplitContainer::mouseMoveEvent(QMouseEvent *event)
     this->update();
 }
 
-void SplitContainer::leaveEvent(QEvent *)
+void SplitContainer::leaveEvent(QEvent * /*event*/)
 {
     this->mouseOverPoint_ = QPoint(-10000, -10000);
     this->update();
 }
 
-void SplitContainer::focusInEvent(QFocusEvent *)
+void SplitContainer::focusInEvent(QFocusEvent * /*event*/)
 {
     if (this->baseNode_.findNodeContainingSplit(this->selected_) != nullptr)
     {
