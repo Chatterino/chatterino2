@@ -20,7 +20,7 @@ jobs:
         os: [windows-latest, ubuntu-20.04, macos-latest]
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
-        lto: [github.ref == 'refs/heads/master']
+        lto: [(github.ref == 'refs/heads/master')]
         include:
           - os: ubuntu-20.04
             qt-version: 5.15.2
