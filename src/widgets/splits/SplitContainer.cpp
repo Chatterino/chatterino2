@@ -165,11 +165,11 @@ void SplitContainer::insertSplit(Split *split, Direction direction,
 
     if (relativeTo == nullptr)
     {
-        if (this->baseNode_.type_ == Node::EmptyRoot)
+        if (this->baseNode_.type_ == Node::Type::EmptyRoot)
         {
             this->baseNode_.setSplit(split);
         }
-        else if (this->baseNode_.type_ == Node::_Split)
+        else if (this->baseNode_.type_ == Node::Type::Split)
         {
             this->baseNode_.nestSplitIntoCollection(split, direction);
         }
@@ -413,13 +413,13 @@ void SplitContainer::focusSplitRecursive(Node *node)
 {
     switch (node->type_)
     {
-        case Node::_Split: {
+        case Node::Type::Split: {
             node->split_->setFocus(Qt::FocusReason::OtherFocusReason);
         }
         break;
 
-        case Node::HorizontalContainer:
-        case Node::VerticalContainer: {
+        case Node::Type::HorizontalContainer:
+        case Node::Type::VerticalContainer: {
             auto &children = node->children_;
 
             auto it = std::find_if(
@@ -446,13 +446,13 @@ Split *SplitContainer::getTopRightSplit(Node &node)
 {
     switch (node.getType())
     {
-        case Node::_Split:
+        case Node::Type::Split:
             return node.getSplit();
-        case Node::VerticalContainer:
+        case Node::Type::VerticalContainer:
             if (!node.getChildren().empty())
                 return getTopRightSplit(*node.getChildren().front());
             break;
-        case Node::HorizontalContainer:
+        case Node::Type::HorizontalContainer:
             if (!node.getChildren().empty())
                 return getTopRightSplit(*node.getChildren().back());
             break;
@@ -756,7 +756,7 @@ SplitContainer::Node *SplitContainer::getBaseNode()
 
 void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
 {
-    assert(this->baseNode_.type_ == Node::EmptyRoot);
+    assert(this->baseNode_.type_ == Node::Type::EmptyRoot);
 
     this->disableLayouting_ = true;
     this->applyFromDescriptorRecursively(rootNode, &this->baseNode_);
@@ -820,8 +820,8 @@ void SplitContainer::applyFromDescriptorRecursively(
 
         bool vertical = containerNode.vertical_;
 
-        node->type_ =
-            vertical ? Node::VerticalContainer : Node::HorizontalContainer;
+        node->type_ = vertical ? Node::Type::VerticalContainer
+                               : Node::Type::HorizontalContainer;
 
         for (const auto &item : containerNode.items_)
         {
@@ -841,7 +841,7 @@ void SplitContainer::applyFromDescriptorRecursively(
                 auto *_node = new Node();
                 _node->parent_ = node;
                 _node->split_ = split;
-                _node->type_ = Node::_Split;
+                _node->type_ = Node::Type::Split;
 
                 _node->flexH_ = splitNode.flexH_;
                 _node->flexV_ = splitNode.flexV_;
@@ -965,7 +965,7 @@ SplitContainer::Node::Node()
 }
 
 SplitContainer::Node::Node(Split *_split, Node *_parent)
-    : type_(Type::_Split)
+    : type_(Type::Split)
     , split_(_split)
     , parent_(_parent)
 {
@@ -987,7 +987,7 @@ bool SplitContainer::Node::isOrContainsNode(SplitContainer::Node *_node)
 SplitContainer::Node *SplitContainer::Node::findNodeContainingSplit(
     Split *_split)
 {
-    if (this->type_ == Type::_Split && this->split_ == _split)
+    if (this->type_ == Type::Split && this->split_ == _split)
     {
         return this;
     }
@@ -1011,19 +1011,19 @@ void SplitContainer::Node::insertSplitRelative(Split *_split,
     {
         switch (this->type_)
         {
-            case Node::EmptyRoot: {
+            case Node::Type::EmptyRoot: {
                 this->setSplit(_split);
             }
             break;
-            case Node::_Split: {
+            case Node::Type::Split: {
                 this->nestSplitIntoCollection(_split, _direction);
             }
             break;
-            case Node::HorizontalContainer: {
+            case Node::Type::HorizontalContainer: {
                 this->nestSplitIntoCollection(_split, _direction);
             }
             break;
-            case Node::VerticalContainer: {
+            case Node::Type::VerticalContainer: {
                 this->nestSplitIntoCollection(_split, _direction);
             }
             break;
@@ -1109,12 +1109,12 @@ void SplitContainer::Node::setSplit(Split *_split)
     assert(this->children_.size() == 0);
 
     this->split_ = _split;
-    this->type_ = Type::_Split;
+    this->type_ = Type::Split;
 }
 
 SplitContainer::Position SplitContainer::Node::releaseSplit()
 {
-    assert(this->type_ == Type::_Split);
+    assert(this->type_ == Type::Split);
 
     if (parent_ == nullptr)
     {
@@ -1224,15 +1224,15 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
 
     switch (this->type_)
     {
-        case Node::_Split: {
+        case Node::Type::Split: {
             QRect rect = this->geometry_.toRect();
             this->split_->setGeometry(
                 rect.marginsRemoved(QMargins(1, 1, 0, 0)));
         }
         break;
-        case Node::VerticalContainer:
-        case Node::HorizontalContainer: {
-            bool isVertical = this->type_ == Node::VerticalContainer;
+        case Node::Type::VerticalContainer:
+        case Node::Type::HorizontalContainer: {
+            bool isVertical = this->type_ == Node::Type::VerticalContainer;
 
             // vars
             qreal minSize(48 * _scale);

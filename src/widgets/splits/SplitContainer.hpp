@@ -83,7 +83,12 @@ private:
 
 public:
     struct Node final {
-        enum Type { EmptyRoot, _Split, VerticalContainer, HorizontalContainer };
+        enum class Type {
+            EmptyRoot,
+            Split,
+            VerticalContainer,
+            HorizontalContainer,
+        };
 
         Type getType();
         Split *getSplit();
