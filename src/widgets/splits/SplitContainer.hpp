@@ -6,14 +6,10 @@
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QDragEnterEvent>
-#include <QHBoxLayout>
 #include <QRect>
-#include <QVBoxLayout>
-#include <QVector>
 #include <QWidget>
 
 #include <algorithm>
-#include <functional>
 #include <optional>
 #include <unordered_map>
 #include <vector>

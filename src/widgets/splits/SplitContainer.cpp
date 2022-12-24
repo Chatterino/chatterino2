@@ -6,7 +6,6 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/LayoutCreator.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/Notebook.hpp"
@@ -16,15 +15,10 @@
 
 #include <boost/foreach.hpp>
 #include <QApplication>
-#include <QDebug>
-#include <QHBoxLayout>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QMimeData>
-#include <QObject>
 #include <QPainter>
-#include <QVBoxLayout>
-#include <QWidget>
 
 #include <algorithm>
 
