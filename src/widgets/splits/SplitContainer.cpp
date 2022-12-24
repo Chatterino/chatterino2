@@ -1137,69 +1137,66 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
         pos.direction_ = Direction::Right;
         return pos;
     }
-    else
+
+    auto &siblings = this->parent_->children_;
+
+    auto it = std::find_if(begin(siblings), end(siblings), [this](auto &node) {
+        return this == node.get();
+    });
+    assert(it != siblings.end());
+
+    Position position;
+    if (siblings.size() == 2)
     {
-        auto &siblings = this->parent_->children_;
-
-        auto it =
-            std::find_if(begin(siblings), end(siblings), [this](auto &node) {
-                return this == node.get();
-            });
-        assert(it != siblings.end());
-
-        Position position;
-        if (siblings.size() == 2)
+        // delete this and move split to parent
+        position.relativeNode_ = this->parent_;
+        if (this->parent_->type_ == Type::VerticalContainer)
         {
-            // delete this and move split to parent
-            position.relativeNode_ = this->parent_;
-            if (this->parent_->type_ == Type::VerticalContainer)
-            {
-                position.direction_ = siblings.begin() == it ? Direction::Above
-                                                             : Direction::Below;
-            }
-            else
-            {
-                position.direction_ =
-                    siblings.begin() == it ? Direction::Left : Direction::Right;
-            }
-
-            auto *_parent = this->parent_;
-            siblings.erase(it);
-            std::unique_ptr<Node> &sibling = siblings.front();
-            _parent->type_ = sibling->type_;
-            _parent->split_ = sibling->split_;
-            std::vector<std::unique_ptr<Node>> nodes =
-                std::move(sibling->children_);
-            for (auto &node : nodes)
-            {
-                node->parent_ = _parent;
-            }
-            _parent->children_ = std::move(nodes);
+            position.direction_ =
+                siblings.begin() == it ? Direction::Above : Direction::Below;
         }
         else
         {
-            if (this == siblings.back().get())
-            {
-                position.direction_ =
-                    this->parent_->type_ == Type::VerticalContainer
-                        ? Direction::Below
-                        : Direction::Right;
-                siblings.erase(it);
-                position.relativeNode_ = siblings.back().get();
-            }
-            else
-            {
-                position.relativeNode_ = (it + 1)->get();
-                position.direction_ =
-                    this->parent_->type_ == Type::VerticalContainer
-                        ? Direction::Above
-                        : Direction::Left;
-                siblings.erase(it);
-            }
+            position.direction_ =
+                siblings.begin() == it ? Direction::Left : Direction::Right;
         }
 
-        return position;
+        auto *_parent = this->parent_;
+        siblings.erase(it);
+        std::unique_ptr<Node> &sibling = siblings.front();
+        _parent->type_ = sibling->type_;
+        _parent->split_ = sibling->split_;
+        std::vector<std::unique_ptr<Node>> nodes =
+            std::move(sibling->children_);
+        for (auto &node : nodes)
+        {
+            node->parent_ = _parent;
+        }
+        _parent->children_ = std::move(nodes);
     }
+    else
+    {
+        if (this == siblings.back().get())
+        {
+            position.direction_ =
+                this->parent_->type_ == Type::VerticalContainer
+                    ? Direction::Below
+                    : Direction::Right;
+            siblings.erase(it);
+            position.relativeNode_ = siblings.back().get();
+        }
+        else
+        {
+            position.relativeNode_ = (it + 1)->get();
+            position.direction_ =
+                this->parent_->type_ == Type::VerticalContainer
+                    ? Direction::Above
+                    : Direction::Left;
+            siblings.erase(it);
+        }
+    }
+
+    return position;
 }
 
 qreal SplitContainer::Node::getFlex(bool isVertical)
