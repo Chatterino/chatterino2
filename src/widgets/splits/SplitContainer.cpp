@@ -502,31 +502,30 @@ void SplitContainer::layout()
         Node *node = this->baseNode_.findNodeContainingSplit(split);
 
         // left
-        dropRects.push_back(
-            DropRect(QRect(g.left(), g.top(), g.width() / 3, g.height()),
-                     Position(node, Direction::Left)));
+        dropRects.emplace_back(
+            QRect(g.left(), g.top(), g.width() / 3, g.height()),
+            Position(node, Direction::Left));
         // right
-        dropRects.push_back(DropRect(QRect(g.right() - g.width() / 3, g.top(),
-                                           g.width() / 3, g.height()),
-                                     Position(node, Direction::Right)));
+        dropRects.emplace_back(QRect(g.right() - g.width() / 3, g.top(),
+                                     g.width() / 3, g.height()),
+                               Position(node, Direction::Right));
 
         // top
-        dropRects.push_back(
-            DropRect(QRect(g.left(), g.top(), g.width(), g.height() / 2),
-                     Position(node, Direction::Above)));
+        dropRects.emplace_back(
+            QRect(g.left(), g.top(), g.width(), g.height() / 2),
+            Position(node, Direction::Above));
         // bottom
-        dropRects.push_back(
-            DropRect(QRect(g.left(), g.bottom() - g.height() / 2, g.width(),
-                           g.height() / 2),
-                     Position(node, Direction::Below)));
+        dropRects.emplace_back(QRect(g.left(), g.bottom() - g.height() / 2,
+                                     g.width(), g.height() / 2),
+                               Position(node, Direction::Below));
     }
 
     if (this->splits_.empty())
     {
         QRect g = this->rect();
-        dropRects.push_back(
-            DropRect(QRect(g.left(), g.top(), g.width() - 1, g.height() - 1),
-                     Position(nullptr, Direction::Below)));
+        dropRects.emplace_back(
+            QRect(g.left(), g.top(), g.width() - 1, g.height() - 1),
+            Position(nullptr, Direction::Below));
     }
 
     this->overlay_.setRects(std::move(dropRects));
