@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
@@ -10,6 +11,7 @@
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
+#include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/Window.hpp"
 
@@ -23,9 +25,6 @@
 #include <algorithm>
 
 namespace chatterino {
-
-bool SplitContainer::isDraggingSplit = false;
-Split *SplitContainer::draggingSplit = nullptr;
 
 SplitContainer::SplitContainer(Notebook *parent)
     : BaseWidget(parent)
@@ -706,7 +705,7 @@ void SplitContainer::dragEnterEvent(QDragEnterEvent *event)
         return;
     }
 
-    if (!SplitContainer::isDraggingSplit)
+    if (!isDraggingSplit())
     {
         return;
     }
@@ -1487,12 +1486,22 @@ void SplitContainer::DropOverlay::dropEvent(QDropEvent *event)
         }
     }
 
-    if (position != nullptr)
+    if (!position)
     {
-        this->parent_->insertSplit(SplitContainer::draggingSplit,
-                                   {.position = *position});
-        event->acceptProposedAction();
+        qCDebug(chatterinoWidget) << "No valid drop rectangle under cursor";
+        return;
     }
+
+    auto *draggedSplit = dynamic_cast<Split *>(event->source());
+    if (!draggedSplit)
+    {
+        qCDebug(chatterinoWidget)
+            << "Dropped something that wasn't a split onto a split container";
+        return;
+    }
+
+    this->parent_->insertSplit(draggedSplit, {.position = *position});
+    event->acceptProposedAction();
 
     this->mouseOverPoint_ = QPoint(-10000, -10000);
     this->close();

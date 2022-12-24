@@ -34,6 +34,7 @@
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
+#include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/splits/SplitHeader.hpp"
 #include "widgets/splits/SplitInput.hpp"
@@ -1256,25 +1257,31 @@ static Iter select_randomly(Iter start, Iter end)
 
 void Split::drag()
 {
-    if (auto container = dynamic_cast<SplitContainer *>(this->parentWidget()))
+    auto *container = dynamic_cast<SplitContainer *>(this->parentWidget());
+    if (!container)
     {
-        SplitContainer::isDraggingSplit = true;
-        SplitContainer::draggingSplit = this;
-
-        auto originalLocation = container->releaseSplit(this);
-        auto drag = new QDrag(this);
-        auto mimeData = new QMimeData;
-
-        mimeData->setData("chatterino/split", "xD");
-        drag->setMimeData(mimeData);
-
-        if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
-        {
-            container->insertSplit(this, {.position = originalLocation});
-        }
-
-        SplitContainer::isDraggingSplit = false;
+        qCWarning(chatterinoWidget)
+            << "Attempted to initiate split drag without a container parent";
+        return;
     }
+
+    setDraggingSplit(true);
+
+    auto originalLocation = container->releaseSplit(this);
+    auto drag = new QDrag(this);
+    auto mimeData = new QMimeData;
+
+    mimeData->setData("chatterino/split", "xD");
+    drag->setMimeData(mimeData);
+
+    // drag->exec is a blocking action
+    if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
+    {
+        // The split wasn't dropped in a valid spot, return it to its original position
+        container->insertSplit(this, {.position = originalLocation});
+    }
+
+    setDraggingSplit(false);
 }
 
 void Split::setInputReply(const std::shared_ptr<MessageThread> &reply)

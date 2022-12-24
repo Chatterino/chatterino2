@@ -223,9 +223,6 @@ public:
     void hideResizeHandles();
     void resetMouseStatus();
 
-    static bool isDraggingSplit;
-    static Split *draggingSplit;
-
     void applyFromDescriptor(const NodeDescriptor &rootNode);
 
     void popup();
@@ -276,6 +273,7 @@ private:
 
     pajlada::Signals::SignalHolder signalHolder_;
 
+    // Specifies whether the user is currently dragging something over this container
     bool isDragging_ = false;
 };
 
