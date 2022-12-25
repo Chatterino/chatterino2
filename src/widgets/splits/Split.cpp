@@ -1265,7 +1265,7 @@ void Split::drag()
         return;
     }
 
-    setDraggingSplit(true);
+    startDraggingSplit();
 
     auto originalLocation = container->releaseSplit(this);
     auto drag = new QDrag(this);
@@ -1281,7 +1281,7 @@ void Split::drag()
         container->insertSplit(this, {.position = originalLocation});
     }
 
-    setDraggingSplit(false);
+    stopDraggingSplit();
 }
 
 void Split::setInputReply(const std::shared_ptr<MessageThread> &reply)
