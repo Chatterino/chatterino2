@@ -155,8 +155,6 @@ void SplitContainer::insertSplit(Split *split, InsertOptions &&options)
             this->baseNode_.findNodeContainingSplit(options.relativeSplit);
         assert(node != nullptr);
 
-        InsertOptions opts{};
-
         options.relativeNode = node;
     }
 
