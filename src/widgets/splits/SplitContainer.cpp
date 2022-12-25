@@ -1383,15 +1383,8 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
 
 void SplitContainer::Node::clamp()
 {
-    if (this->flexH_ < 0)
-    {
-        this->flexH_ = 0;
-    }
-
-    if (this->flexV_ < 0)
-    {
-        this->flexV_ = 0;
-    }
+    this->flexH_ = std::max(0.0, this->flexH_);
+    this->flexV_ = std::max(0.0, this->flexV_);
 }
 
 SplitContainer::Node::Type SplitContainer::Node::toContainerType(Direction _dir)
