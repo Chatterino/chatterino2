@@ -48,7 +48,7 @@ CheckOptions:
     value:           _
   - key:             readability-identifier-naming.UnionCase
     value:           CamelCase
-  - key:             readability-identifier-naming.GlobalVariableCase
+  - key:             readability-identifier-naming.GlobalConstantCase
     value:           UPPER_CASE
   - key:             readability-identifier-naming.VariableCase
     value:           camelBack

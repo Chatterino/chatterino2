@@ -12,6 +12,7 @@
 #include "util/Helpers.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <boost/bind/bind.hpp>
@@ -695,10 +696,15 @@ void NotebookTab::leaveEvent(QEvent *event)
 void NotebookTab::dragEnterEvent(QDragEnterEvent *event)
 {
     if (!event->mimeData()->hasFormat("chatterino/split"))
+    {
         return;
+    }
 
-    if (!SplitContainer::isDraggingSplit)
+    if (!isDraggingSplit())
+    {
+        // Ensure dragging a split from a different Chatterino instance doesn't switch tabs around
         return;
+    }
 
     if (this->notebook_->getAllowUserTabManagement())
     {

@@ -525,6 +525,8 @@ set(SOURCE_FILES
 
         widgets/splits/ClosedSplits.cpp
         widgets/splits/ClosedSplits.hpp
+        widgets/splits/DraggedSplit.cpp
+        widgets/splits/DraggedSplit.hpp
         widgets/splits/InputCompletionItem.cpp
         widgets/splits/InputCompletionItem.hpp
         widgets/splits/InputCompletionPopup.cpp
