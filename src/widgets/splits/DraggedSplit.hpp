@@ -1,7 +1,5 @@
 #pragma once
 
-#include "widgets/splits/Split.hpp"
-
 namespace chatterino {
 
 // Returns true if the user is currently dragging a split in this Chatterino instance
