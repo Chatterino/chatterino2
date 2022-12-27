@@ -13,6 +13,13 @@
 #    include <WtsApi32.h>
 // clang-format on
 #    pragma comment(lib, "Wtsapi32.lib")
+#else
+#    include "Application.hpp"
+#    include "messages/MessageBuilder.hpp"
+#    include "providers/twitch/TwitchIrcServer.hpp"
+#    include "widgets/Notebook.hpp"
+#    include "widgets/splits/Split.hpp"
+#    include "widgets/Window.hpp"
 #endif
 
 namespace chatterino {
