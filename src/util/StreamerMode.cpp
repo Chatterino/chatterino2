@@ -1,4 +1,4 @@
-#include "StreamerMode.hpp"
+#include "util/StreamerMode.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
@@ -11,17 +11,17 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/Window.hpp"
 
+#include <QProcess>
+
 #ifdef USEWINSDK
 // clang-format off
+// These imports cannot be ordered alphabetically.
 #    include <Windows.h>
-
 #    include <VersionHelpers.h>
 #    include <WtsApi32.h>
-#    pragma comment(lib, "Wtsapi32.lib")
 // clang-format on
+#    pragma comment(lib, "Wtsapi32.lib")
 #endif
-
-#include <QProcess>
 
 namespace chatterino {
 
