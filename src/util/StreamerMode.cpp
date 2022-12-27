@@ -1,9 +1,17 @@
 #include "util/StreamerMode.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
+
+#include <QProcess>
 
 #ifdef USEWINSDK
 // clang-format off
@@ -13,15 +21,6 @@
 #    include <WtsApi32.h>
 // clang-format on
 #    pragma comment(lib, "Wtsapi32.lib")
-#else
-#    include "Application.hpp"
-#    include "messages/MessageBuilder.hpp"
-#    include "providers/twitch/TwitchIrcServer.hpp"
-#    include "widgets/Notebook.hpp"
-#    include "widgets/splits/Split.hpp"
-#    include "widgets/Window.hpp"
-
-#    include <QProcess>
 #endif
 
 namespace chatterino {
