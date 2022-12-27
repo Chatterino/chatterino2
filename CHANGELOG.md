@@ -15,6 +15,7 @@
 - Bugfix: Fixed Reply window missing selection clear behaviour between chat and input box. (#4218)
 - Bugfix: Fixed crash that could occur when changing Tab layout and utilizing multiple windows. (#4248)
 - Bugfix: Fixed text sometimes not pasting properly when image uploader was disabled. (#4246)
+- Bugfix: Fixed text cursor(caret) not showing in open channel dialog. (#4196)
 - Dev: Remove protocol from QApplication's Organization Domain (so changed from `https://www.chatterino.com` to `chatterino.com`). (#4256)
 - Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
 - Dev: Migrated to C++ 20 (#4252, #4257)

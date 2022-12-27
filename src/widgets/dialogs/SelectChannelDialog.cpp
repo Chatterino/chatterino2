@@ -410,9 +410,12 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
         if (radio)
         {
             radio->setChecked(true);
+            return true;
         }
-
-        return true;
+        else
+        {
+            return false;
+        }
     }
     else if (event->type() == QEvent::KeyPress)
     {
