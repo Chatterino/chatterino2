@@ -206,12 +206,13 @@ void ChannelView::initializeLayout()
     this->goToBottom_->getLabel().setText("More messages below");
     this->goToBottom_->setVisible(false);
 
-    QObject::connect(this->goToBottom_, &EffectLabel::leftClicked, this, [=] {
-        QTimer::singleShot(180, [=] {
-            this->scrollBar_->scrollToBottom(
-                getSettings()->enableSmoothScrollingNewMessages.getValue());
+    QObject::connect(
+        this->goToBottom_, &EffectLabel::leftClicked, this, [this] {
+            QTimer::singleShot(180, [this] {
+                this->scrollBar_->scrollToBottom(
+                    getSettings()->enableSmoothScrollingNewMessages.getValue());
+            });
         });
-    });
 }
 
 void ChannelView::initializeScrollbar()
@@ -628,6 +629,7 @@ const boost::optional<MessageElementFlags> &ChannelView::getOverrideFlags()
 
 LimitedQueueSnapshot<MessageLayoutPtr> &ChannelView::getMessagesSnapshot()
 {
+    this->snapshotGuard_.guard();
     if (!this->paused() /*|| this->scrollBar_->isVisible()*/)
     {
         this->snapshot_ = this->messages_.getSnapshot();

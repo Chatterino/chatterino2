@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.12)
 cmake_policy(SET CMP0087 NEW)
 include(FeatureSummary)
 
@@ -20,8 +20,17 @@ option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
 option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
+option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
 
 option(USE_CONAN "Use conan" OFF)
+
+if(CHATTERINO_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
+    message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO})")
+else()
+    message(STATUS "LTO: Disabled")
+endif()
 
 if (BUILD_WITH_QT6)
     set(MAJOR_QT_VERSION "6")
@@ -143,7 +152,7 @@ else()
     add_subdirectory("${CMAKE_SOURCE_DIR}/lib/settings" EXCLUDE_FROM_ALL)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (BUILD_TESTS OR BUILD_BENCHMARKS)

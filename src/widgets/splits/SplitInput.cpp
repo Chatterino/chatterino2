@@ -137,21 +137,22 @@ void SplitInput::initLayout()
     QObject::connect(this->ui_.textEdit, &QTextEdit::textChanged, this,
                      &SplitInput::onTextChanged);
 
-    this->managedConnections_.managedConnect(app->fonts->fontChanged, [=]() {
-        this->ui_.textEdit->setFont(
-            app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
-        this->ui_.replyLabel->setFont(
-            app->fonts->getFont(FontStyle::ChatMediumBold, this->scale()));
-    });
+    this->managedConnections_.managedConnect(
+        app->fonts->fontChanged, [=, this]() {
+            this->ui_.textEdit->setFont(
+                app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+            this->ui_.replyLabel->setFont(
+                app->fonts->getFont(FontStyle::ChatMediumBold, this->scale()));
+        });
 
     // open emote popup
-    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [=] {
+    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [this] {
         this->openEmotePopup();
     });
 
     // clear input and remove reply thread
     QObject::connect(this->ui_.cancelReplyButton, &EffectLabel::leftClicked,
-                     [=] {
+                     [this] {
                          this->clearInput();
                      });
 

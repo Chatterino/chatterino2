@@ -6,6 +6,7 @@
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Selection.hpp"
+#include "util/ThreadGuard.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <pajlada/signals/signal.hpp>
@@ -270,6 +271,7 @@ private:
     boost::optional<MessageElementFlags> overrideFlags_;
     MessageLayoutPtr lastReadMessage_;
 
+    ThreadGuard snapshotGuard_;
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
     ChannelPtr channel_ = nullptr;

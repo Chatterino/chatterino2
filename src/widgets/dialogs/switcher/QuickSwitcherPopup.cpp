@@ -1,6 +1,7 @@
 #include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
@@ -10,6 +11,8 @@
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/listview/GenericListView.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
 namespace chatterino {
