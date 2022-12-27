@@ -1,4 +1,4 @@
-#include "AttachedWindow.hpp"
+#include "widgets/AttachedWindow.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"

@@ -1,4 +1,4 @@
-#include "StreamerMode.hpp"
+#include "util/StreamerMode.hpp"
 
 #include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"

@@ -1,4 +1,4 @@
-#include "BaseWindow.hpp"
+#include "widgets/BaseWindow.hpp"
 
 #include "BaseSettings.hpp"
 #include "singletons/Theme.hpp"
