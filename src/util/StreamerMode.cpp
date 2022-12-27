@@ -20,6 +20,8 @@
 #    include "widgets/Notebook.hpp"
 #    include "widgets/splits/Split.hpp"
 #    include "widgets/Window.hpp"
+
+#    include <QProcess>
 #endif
 
 namespace chatterino {
