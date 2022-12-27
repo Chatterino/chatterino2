@@ -1,27 +1,19 @@
 #include "StreamerMode.hpp"
 
-#include "Application.hpp"
 #include "common/QLogging.hpp"
-#include "messages/MessageBuilder.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/NotebookTab.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/splits/Split.hpp"
-#include "widgets/Window.hpp"
 
 #ifdef USEWINSDK
 // clang-format off
+// These imports cannot be ordered alphabetically.
 #    include <Windows.h>
-
 #    include <VersionHelpers.h>
 #    include <WtsApi32.h>
-#    pragma comment(lib, "Wtsapi32.lib")
 // clang-format on
+#    pragma comment(lib, "Wtsapi32.lib")
 #endif
-
-#include <QProcess>
 
 namespace chatterino {
 

@@ -1,7 +1,6 @@
 #include "BaseWindow.hpp"
 
 #include "BaseSettings.hpp"
-#include "boost/algorithm/algorithm.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
@@ -11,7 +10,6 @@
 #include "widgets/TooltipWidget.hpp"
 
 #include <QApplication>
-#include <QDebug>
 #include <QDesktopWidget>
 #include <QFont>
 #include <QIcon>
@@ -24,22 +22,16 @@
 #endif
 
 #ifdef USEWINSDK
-// clang-format off
-#    include <ObjIdl.h>
+#    include <dwmapi.h>
 #    include <VersionHelpers.h>
 #    include <Windows.h>
-#    include <dwmapi.h>
-#    include <gdiplus.h>
 #    include <windowsx.h>
 
-//#include <ShellScalingApi.h>
 #    pragma comment(lib, "Dwmapi.lib")
 
 #    include <QHBoxLayout>
-#    include <QVBoxLayout>
 
 #    define WM_DPICHANGED 0x02E0
-// clang-format on
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"

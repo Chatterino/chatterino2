@@ -6,7 +6,6 @@
 #include "QMessageBox"
 
 #include <QHBoxLayout>
-//#include "widgets/helper/ChannelView.hpp"
 #include "common/Args.hpp"
 #include "widgets/splits/Split.hpp"
 
