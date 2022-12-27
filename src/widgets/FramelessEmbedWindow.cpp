@@ -1,13 +1,13 @@
 #include "FramelessEmbedWindow.hpp"
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "QJsonDocument"
-#include "QMessageBox"
+#include "widgets/splits/Split.hpp"
 
 #include <QHBoxLayout>
-#include "common/Args.hpp"
-#include "widgets/splits/Split.hpp"
+#include <QJsonDocument>
+#include <QMessageBox>
 
 #ifdef USEWINSDK
 #    include "Windows.h"
