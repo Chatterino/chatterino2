@@ -10,7 +10,7 @@ chatterino_version=$(git describe 2>/dev/null | cut -c 2-) || true
 if [ -z "$chatterino_version" ]; then
     chatterino_version="0.0.0-dev"
     echo "Falling back to setting the version to '$chatterino_version'"
-elif [ "$chatterino_version" = "nightly-build" ]; then
+elif [ "$chatterino_version" = "ightly-build" ]; then
     chatterino_version=$(git describe --abbrev=0 --tags `git rev-list --tags --skip=1 --max-count=1` 2>/dev/null | cut -c 2-) || true
     echo "Found Chatterino nightly build via git. Falling back to the second to last tag"
     if [ -z "$chatterino_version" ]; then
