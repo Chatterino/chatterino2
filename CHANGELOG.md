@@ -21,6 +21,7 @@
 - Dev: Migrated to C++ 20 (#4252, #4257)
 - Dev: Enable LTO for main branch builds. (#4258, #4260)
 - Dev: Removed unused include directives. (#4266)
+- Dev: Removed unused operators in `Image` (#4267)
 
 ## 2.4.0
 
