@@ -159,6 +159,7 @@ bool TooltipWidget::refreshPixmap()
         this->displayImage_->setPixmap(*pixmap);
     }
     this->displayImage_->show();
+
     return true;
 }
 
