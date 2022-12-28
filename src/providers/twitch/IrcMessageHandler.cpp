@@ -5,6 +5,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Message.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
@@ -463,7 +464,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                                          "callback since reward is not known:"
                                       << rewardId;
             channel->channelPointRewardAdded.connect(
-                [=, &server](ChannelPointReward reward) {
+                [=, this, &server](ChannelPointReward reward) {
                     qCDebug(chatterinoTwitch)
                         << "TwitchChannel reward added callback:" << reward.id
                         << "-" << rewardId;

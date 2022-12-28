@@ -5,6 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 
@@ -176,16 +177,16 @@ AdvancedLoginWidget::AdvancedLoginWidget()
 
     this->ui_.oauthTokenInput.setEchoMode(QLineEdit::Password);
 
-    connect(&this->ui_.userIDInput, &QLineEdit::textChanged, [=]() {
+    connect(&this->ui_.userIDInput, &QLineEdit::textChanged, [this]() {
         this->refreshButtons();
     });
-    connect(&this->ui_.usernameInput, &QLineEdit::textChanged, [=]() {
+    connect(&this->ui_.usernameInput, &QLineEdit::textChanged, [this]() {
         this->refreshButtons();
     });
-    connect(&this->ui_.clientIDInput, &QLineEdit::textChanged, [=]() {
+    connect(&this->ui_.clientIDInput, &QLineEdit::textChanged, [this]() {
         this->refreshButtons();
     });
-    connect(&this->ui_.oauthTokenInput, &QLineEdit::textChanged, [=]() {
+    connect(&this->ui_.oauthTokenInput, &QLineEdit::textChanged, [this]() {
         this->refreshButtons();
     });
 
@@ -200,22 +201,23 @@ AdvancedLoginWidget::AdvancedLoginWidget()
         &this->ui_.buttonUpperRow.clearFieldsButton);
 
     connect(&this->ui_.buttonUpperRow.clearFieldsButton, &QPushButton::clicked,
-            [=]() {
+            [this]() {
                 this->ui_.userIDInput.clear();
                 this->ui_.usernameInput.clear();
                 this->ui_.clientIDInput.clear();
                 this->ui_.oauthTokenInput.clear();
             });
 
-    connect(
-        &this->ui_.buttonUpperRow.addUserButton, &QPushButton::clicked, [=]() {
-            QString userID = this->ui_.userIDInput.text();
-            QString username = this->ui_.usernameInput.text();
-            QString clientID = this->ui_.clientIDInput.text();
-            QString oauthToken = this->ui_.oauthTokenInput.text();
+    connect(&this->ui_.buttonUpperRow.addUserButton, &QPushButton::clicked,
+            [this]() {
+                QString userID = this->ui_.userIDInput.text();
+                QString username = this->ui_.usernameInput.text();
+                QString clientID = this->ui_.clientIDInput.text();
+                QString oauthToken = this->ui_.oauthTokenInput.text();
 
-            logInWithCredentials(this, userID, username, clientID, oauthToken);
-        });
+                logInWithCredentials(this, userID, username, clientID,
+                                     oauthToken);
+            });
 }
 
 void AdvancedLoginWidget::refreshButtons()

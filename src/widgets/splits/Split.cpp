@@ -11,6 +11,7 @@
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/twitch/EmoteValue.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -33,6 +34,7 @@
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
+#include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/splits/SplitHeader.hpp"
 #include "widgets/splits/SplitInput.hpp"
@@ -156,7 +158,7 @@ Split::Split(QWidget *parent)
         }
     });
 
-    this->input_->textChanged.connect([=](const QString &newText) {
+    this->input_->textChanged.connect([this](const QString &newText) {
         if (getSettings()->showEmptyInput)
         {
             // We always show the input regardless of the text, so we can early out here
@@ -627,7 +629,7 @@ void Split::joinChannelInNewTab(ChannelPtr channel)
 
     Split *split = new Split(container);
     split->setChannel(channel);
-    container->appendSplit(split);
+    container->insertSplit(split);
 }
 
 void Split::openChannelInBrowserPlayer(ChannelPtr channel)
@@ -753,7 +755,7 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setWindowTitle(dialogTitle);
     dialog->show();
-    dialog->closed.connect([=] {
+    dialog->closed.connect([=, this] {
         if (dialog->hasSeletedChannel())
         {
             this->setChannel(dialog->getSelectedChannel());
@@ -898,7 +900,7 @@ void Split::popup()
     split->setModerationMode(this->getModerationMode());
     split->setFilters(this->getFilters());
 
-    window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+    window.getNotebook().getOrAddSelectedPage()->insertSplit(split);
     window.show();
 }
 
@@ -1029,7 +1031,7 @@ void Split::showViewerList()
     NetworkRequest::twitchRequest("https://tmi.twitch.tv/group/user/" +
                                   this->getChannel()->getName() + "/chatters")
         .caller(this)
-        .onSuccess([=](auto result) -> Outcome {
+        .onSuccess([=, this](auto result) -> Outcome {
             auto obj = result.parseJson();
             QJsonObject chattersObj = obj.value("chatters").toObject();
 
@@ -1255,25 +1257,31 @@ static Iter select_randomly(Iter start, Iter end)
 
 void Split::drag()
 {
-    if (auto container = dynamic_cast<SplitContainer *>(this->parentWidget()))
+    auto *container = dynamic_cast<SplitContainer *>(this->parentWidget());
+    if (!container)
     {
-        SplitContainer::isDraggingSplit = true;
-        SplitContainer::draggingSplit = this;
-
-        auto originalLocation = container->releaseSplit(this);
-        auto drag = new QDrag(this);
-        auto mimeData = new QMimeData;
-
-        mimeData->setData("chatterino/split", "xD");
-        drag->setMimeData(mimeData);
-
-        if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
-        {
-            container->insertSplit(this, originalLocation);
-        }
-
-        SplitContainer::isDraggingSplit = false;
+        qCWarning(chatterinoWidget)
+            << "Attempted to initiate split drag without a container parent";
+        return;
     }
+
+    startDraggingSplit();
+
+    auto originalLocation = container->releaseSplit(this);
+    auto drag = new QDrag(this);
+    auto mimeData = new QMimeData;
+
+    mimeData->setData("chatterino/split", "xD");
+    drag->setMimeData(mimeData);
+
+    // drag->exec is a blocking action
+    if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
+    {
+        // The split wasn't dropped in a valid spot, return it to its original position
+        container->insertSplit(this, {.position = originalLocation});
+    }
+
+    stopDraggingSplit();
 }
 
 void Split::setInputReply(const std::shared_ptr<MessageThread> &reply)

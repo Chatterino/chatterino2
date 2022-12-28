@@ -273,7 +273,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     if (isLastReadMessage)
     {
         QColor color;
-        if (getSettings()->lastMessageColor != "")
+        if (getSettings()->lastMessageColor != QStringLiteral(""))
         {
             color = QColor(getSettings()->lastMessageColor.getValue());
         }

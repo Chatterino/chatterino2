@@ -71,7 +71,7 @@ void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
     this->reloadSevenTVGlobalEmotes();
 
     /* Refresh all twitch channel's live status in bulk every 30 seconds after starting chatterino */
-    QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [=] {
+    QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [this] {
         this->bulkRefreshLiveStatus();
     });
     this->bulkLiveStatusTimer_.start(30 * 1000);

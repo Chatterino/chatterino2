@@ -544,23 +544,6 @@ void Image::expireFrames()
     this->shouldLoad_ = true;  // Mark as needing load again
 }
 
-bool Image::operator==(const Image &other) const
-{
-    if (this->isEmpty() && other.isEmpty())
-        return true;
-    if (!this->url_.string.isEmpty() && this->url_ == other.url_)
-        return true;
-    if (this->frames_->first() == other.frames_->first())
-        return true;
-
-    return false;
-}
-
-bool Image::operator!=(const Image &other) const
-{
-    return !this->operator==(other);
-}
-
 ImageExpirationPool::ImageExpirationPool()
 {
     QObject::connect(&this->freeTimer_, &QTimer::timeout, [this] {

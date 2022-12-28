@@ -215,7 +215,7 @@ void Emojis::sortEmojis()
 void Emojis::loadEmojiSet()
 {
 #ifndef CHATTERINO_TEST
-    getSettings()->emojiSet.connect([=](const auto &emojiSet) {
+    getSettings()->emojiSet.connect([this](const auto &emojiSet) {
 #else
     const QString emojiSet = "twitter";
 #endif

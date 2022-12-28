@@ -107,6 +107,8 @@ set(SOURCE_FILES
         controllers/ignores/IgnoreController.hpp
         controllers/ignores/IgnoreModel.cpp
         controllers/ignores/IgnoreModel.hpp
+        controllers/ignores/IgnorePhrase.cpp
+        controllers/ignores/IgnorePhrase.hpp
 
         controllers/moderationactions/ModerationAction.cpp
         controllers/moderationactions/ModerationAction.hpp
@@ -362,6 +364,7 @@ set(SOURCE_FILES
         util/StreamLink.hpp
         util/StreamerMode.cpp
         util/StreamerMode.hpp
+        util/ThreadGuard.hpp
         util/Twitch.cpp
         util/Twitch.hpp
         util/TypeName.hpp
@@ -522,6 +525,8 @@ set(SOURCE_FILES
 
         widgets/splits/ClosedSplits.cpp
         widgets/splits/ClosedSplits.hpp
+        widgets/splits/DraggedSplit.cpp
+        widgets/splits/DraggedSplit.hpp
         widgets/splits/InputCompletionItem.cpp
         widgets/splits/InputCompletionItem.hpp
         widgets/splits/InputCompletionPopup.cpp
@@ -662,6 +667,12 @@ if (BUILD_APP)
                 DESTINATION share/icons/hicolor/256x256/apps
                 )
     endif ()
+
+    if(CHATTERINO_ENABLE_LTO)
+        message(STATUS "Enabling LTO for ${EXECUTABLE_PROJECT}")
+        set_property(TARGET ${EXECUTABLE_PROJECT}
+            PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif()
 endif ()
 
 if (USE_PRECOMPILED_HEADERS)
@@ -786,28 +797,32 @@ if (MSVC)
     # Someone adds /W3 before we add /W4.
     # This makes sure, only /W4 is specified.
     string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    # 4714 - function marked as __forceinline not inlined
-    # 4996 - occurs when the compiler encounters a function or variable that is marked as deprecated.
-    #        These functions may have a different preferred name, may be insecure or have
-    #        a more secure variant, or may be obsolete.
-    # 4505 - unreferenced local version has been removed
-    # 4127 - conditional expression is constant
-    # 4503 - decorated name length exceeded, name was truncated
-    # 4100 - unreferences formal parameter
-    # 4305 - possible truncation of data
-    # 4267 - possible loss of data in return
+    # 4505 - "unreferenced local version has been removed"
+    #        Although this might give hints on dead code,
+    #        there are some cases where it's distracting.
+    #
+    # 4100 - "unreferenced formal parameter"
+    #        There are a lot of functions and methods where
+    #        an argument was given a name but never used.
+    #        There's a clang-tidy rule that will catch this
+    #        for new/updated functions/methods.
+    #
+    # 4267 - "possible loss of data in return"
+    #        These are implicit conversions from size_t to int/qsizetype.
+    #        We don't use size_t in a lot of cases, since
+    #        Qt doesn't use it - it uses int (or qsizetype in Qt6).
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
         /W4
-        # Disable the following warnings
-        /wd4714
-        /wd4996
+        # 5038 - warnings about initialization order
+        /w15038
+        # 4855 - implicit capture of 'this' via '[=]' is deprecated
+        /w14855
+        # Disable the following warnings (see reasoning above)
         /wd4505
-        /wd4127
-        /wd4503
         /wd4100
-        /wd4305
         /wd4267
     )
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
 else ()
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
         -Wall
@@ -836,3 +851,9 @@ else ()
         )
     endif()
 endif ()
+
+if(CHATTERINO_ENABLE_LTO)
+    message(STATUS "Enabling LTO for ${LIBRARY_PROJECT}")
+    set_property(TARGET ${LIBRARY_PROJECT}
+                 PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()

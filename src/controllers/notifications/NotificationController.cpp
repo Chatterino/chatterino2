@@ -42,7 +42,7 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
 
     this->fetchFakeChannels();
 
-    QObject::connect(this->liveStatusTimer_, &QTimer::timeout, [=] {
+    QObject::connect(this->liveStatusTimer_, &QTimer::timeout, [this] {
         this->fetchFakeChannels();
     });
     this->liveStatusTimer_->start(60 * 1000);

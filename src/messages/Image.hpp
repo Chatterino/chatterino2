@@ -76,8 +76,8 @@ public:
     int height() const;
     bool animated() const;
 
-    bool operator==(const Image &image) const;
-    bool operator!=(const Image &image) const;
+    bool operator==(const Image &image) = delete;
+    bool operator!=(const Image &image) = delete;
 
 private:
     Image();

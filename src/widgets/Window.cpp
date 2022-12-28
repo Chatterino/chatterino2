@@ -7,6 +7,7 @@
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -79,9 +80,11 @@ Window::Window(WindowType type, QWidget *parent)
                                        });
     if (type == WindowType::Main || type == WindowType::Popup)
     {
-        getSettings()->tabDirection.connect([this](int val) {
-            this->notebook_->setTabLocation(NotebookTabLocation(val));
-        });
+        getSettings()->tabDirection.connect(
+            [this](int val) {
+                this->notebook_->setTabLocation(NotebookTabLocation(val));
+            },
+            this->signalHolder_);
     }
 }
 
@@ -421,7 +424,7 @@ void Window::addShortcuts()
              split->setChannel(
                  getApp()->twitch->getOrAddChannel(si.channelName));
              split->setFilters(si.filters);
-             splitContainer->appendSplit(split);
+             splitContainer->insertSplit(split);
              splitContainer->setSelected(split);
              this->notebook_->select(splitContainer);
              return "";
@@ -638,13 +641,13 @@ void Window::addMenuBar()
 
     QAction *nextTab = windowMenu->addAction(QString("Select next tab"));
     nextTab->setShortcuts({QKeySequence("Meta+Tab")});
-    connect(nextTab, &QAction::triggered, this, [=] {
+    connect(nextTab, &QAction::triggered, this, [this] {
         this->notebook_->selectNextTab();
     });
 
     QAction *prevTab = windowMenu->addAction(QString("Select previous tab"));
     prevTab->setShortcuts({QKeySequence("Meta+Shift+Tab")});
-    connect(prevTab, &QAction::triggered, this, [=] {
+    connect(prevTab, &QAction::triggered, this, [this] {
         this->notebook_->selectPreviousTab();
     });
 }

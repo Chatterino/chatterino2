@@ -32,7 +32,7 @@ public:
         return this->value_ == other.value_;
     }
 
-    bool operator!=(const FlagsEnum &other)
+    bool operator!=(const FlagsEnum<T> &other)
     {
         return this->value_ != other.value_;
     }

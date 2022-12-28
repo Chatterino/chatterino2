@@ -1815,7 +1815,7 @@ void Helix::onFetchChattersSuccess(
 
     this->fetchChatters(
         broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, chatters.cursor,
-        [=](auto chatters) {
+        [=, this](auto chatters) {
             this->onFetchChattersSuccess(
                 finalChatters, broadcasterID, moderatorID, maxChattersToFetch,
                 successCallback, failureCallback, chatters);
@@ -1925,7 +1925,7 @@ void Helix::onFetchModeratorsSuccess(
 
     this->fetchModerators(
         broadcasterID, NUM_MODERATORS_TO_FETCH_PER_REQUEST, moderators.cursor,
-        [=](auto moderators) {
+        [=, this](auto moderators) {
             this->onFetchModeratorsSuccess(
                 finalModerators, broadcasterID, maxModeratorsToFetch,
                 successCallback, failureCallback, moderators);
@@ -2236,7 +2236,7 @@ void Helix::getChatters(
     // Initiate the recursive calls
     this->fetchChatters(
         broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, "",
-        [=](auto chatters) {
+        [=, this](auto chatters) {
             this->onFetchChattersSuccess(
                 finalChatters, broadcasterID, moderatorID, maxChattersToFetch,
                 successCallback, failureCallback, chatters);
@@ -2255,7 +2255,7 @@ void Helix::getModerators(
     // Initiate the recursive calls
     this->fetchModerators(
         broadcasterID, NUM_MODERATORS_TO_FETCH_PER_REQUEST, "",
-        [=](auto moderators) {
+        [=, this](auto moderators) {
             this->onFetchModeratorsSuccess(
                 finalModerators, broadcasterID, maxModeratorsToFetch,
                 successCallback, failureCallback, moderators);

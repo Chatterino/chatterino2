@@ -6,6 +6,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "messages/Emote.hpp"
 #include "messages/Message.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
@@ -15,6 +16,7 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubSubManager.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -36,7 +38,11 @@
 
 namespace chatterino {
 namespace {
-    constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
+#if QT_VERSION < QT_VERSION_CHECK(6, 1, 0)
+    const QString MAGIC_MESSAGE_SUFFIX = QString((const char *)u8" \U000E0000");
+#else
+    const QString MAGIC_MESSAGE_SUFFIX = QString::fromUtf8(u8" \U000E0000");
+#endif
     constexpr int TITLE_REFRESH_PERIOD = 10000;
     constexpr int CLIP_CREATION_COOLDOWN = 5000;
     const QString CLIPS_LINK("https://clips.twitch.tv/%1");
@@ -70,7 +76,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([=] {
+        getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
             this->refreshPubSub();
         }));
@@ -122,13 +128,13 @@ TwitchChannel::TwitchChannel(const QString &name)
 
     // timers
 
-    QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [=] {
+    QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [this] {
         this->refreshChatters();
     });
 
     this->chattersListTimer_.start(5 * 60 * 1000);
 
-    QObject::connect(&this->threadClearTimer_, &QTimer::timeout, [=] {
+    QObject::connect(&this->threadClearTimer_, &QTimer::timeout, [this] {
         // We periodically check for any dangling reply threads that missed
         // being cleaned up on messageRemovedFromStart. This could occur if
         // some other part of the program, like a user card, held a reference
