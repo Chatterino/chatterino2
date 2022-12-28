@@ -13,7 +13,6 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
-#include "singletons/TooltipPreviewImage.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
@@ -928,9 +927,8 @@ void SplitHeader::enterEvent(QEvent *event)
             dynamic_cast<TwitchChannel *>(channel)->refreshTitle();
         }
 
-        TooltipPreviewImage::instance().setImage(nullptr);
-
         auto tooltip = TooltipWidget::instance();
+        tooltip->clearImage();
         tooltip->setText(this->tooltipText_);
         tooltip->setWordWrap(true);
         tooltip->adjustSize();
@@ -939,7 +937,6 @@ void SplitHeader::enterEvent(QEvent *event)
 
         tooltip->moveTo(this, pos, false);
         tooltip->show();
-        tooltip->raise();
     }
 
     BaseWidget::enterEvent(event);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "messages/Image.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <pajlada/signals/signal.hpp>
@@ -16,18 +17,17 @@ public:
     static TooltipWidget *instance();
 
     TooltipWidget(BaseWidget *parent = nullptr);
-    ~TooltipWidget() override;
+    ~TooltipWidget() override = default;
 
     void setText(QString text);
     void setWordWrap(bool wrap);
     void clearImage();
-    void setImage(QPixmap image);
-
-#ifdef USEWINSDK
-    void raise();
-#endif
+    void setImage(ImagePtr image);
+    void setImageScale(int w, int h);
 
 protected:
+    void showEvent(QShowEvent *) override;
+    void hideEvent(QHideEvent *) override;
     void changeEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
     void themeChangedEvent() override;
@@ -37,9 +37,18 @@ protected:
 private:
     void updateFont();
 
+    // used by WindowManager::gifRepaintRequested signal to progress frames when tooltip image is animated
+    bool refreshPixmap();
+
+    // set to true when tooltip image did not finish loading yet (pixmapOrLoad returned false)
+    bool attemptRefresh{false};
+
+    ImagePtr image_ = nullptr;
+    int customImgWidth = 0;
+    int customImgHeight = 0;
     QLabel *displayImage_;
     QLabel *displayText_;
-    pajlada::Signals::Connection fontChangedConnection_;
+    pajlada::Signals::SignalHolder connections_;
 };
 
 }  // namespace chatterino
