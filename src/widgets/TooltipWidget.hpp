@@ -3,7 +3,7 @@
 #include "messages/Image.hpp"
 #include "widgets/BaseWindow.hpp"
 
-#include <pajlada/signals/signal.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QLabel>
 #include <QWidget>
 
