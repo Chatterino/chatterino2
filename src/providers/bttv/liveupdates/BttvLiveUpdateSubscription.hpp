@@ -3,6 +3,7 @@
 #include <boost/functional/hash.hpp>
 #include <QByteArray>
 #include <QHash>
+#include <QJsonObject>
 #include <QString>
 
 #include <variant>

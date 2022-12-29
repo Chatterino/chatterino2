@@ -1,7 +1,6 @@
 #include "providers/bttv/liveupdates/BttvLiveUpdateSubscription.hpp"
 
 #include <QJsonDocument>
-#include <QJsonObject>
 
 namespace chatterino {
 
