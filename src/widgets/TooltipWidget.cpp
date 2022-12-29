@@ -102,8 +102,8 @@ void TooltipWidget::setWordWrap(bool wrap)
 void TooltipWidget::clearImage()
 {
     this->displayImage_->hide();
-    this->setImageScale(0, 0);
     this->image_ = nullptr;
+    this->setImageScale(0, 0);
 }
 
 void TooltipWidget::setImage(ImagePtr image)
@@ -112,16 +112,21 @@ void TooltipWidget::setImage(ImagePtr image)
     {
         return;
     }
-    // hide image until loaded
-    this->displayImage_->hide();
+    // hide image until loaded and reset scale
+    this->clearImage();
     this->image_ = std::move(image);
     this->refreshPixmap();
 }
 
 void TooltipWidget::setImageScale(int w, int h)
 {
+    if (this->customImgWidth == w && this->customImgHeight == h)
+    {
+        return;
+    }
     this->customImgWidth = w;
     this->customImgHeight = h;
+    this->refreshPixmap();
 }
 
 void TooltipWidget::hideEvent(QHideEvent *)
@@ -131,7 +136,6 @@ void TooltipWidget::hideEvent(QHideEvent *)
 
 void TooltipWidget::showEvent(QShowEvent *)
 {
-    this->refreshPixmap();
     this->adjustSize();
 }
 
