@@ -1172,7 +1172,7 @@ SplitContainer *SplitNotebook::getOrAddSelectedPage()
 
     if (selectedPage)
     {
-        return (SplitContainer *)(selectedPage);
+        return dynamic_cast<SplitContainer *>(selectedPage);
     }
 
     return this->addPage();
