@@ -16,10 +16,9 @@ void BttvLiveUpdates::joinChannel(const QString &channelID,
 {
     if (this->joinedChannels_.insert(channelID).second)
     {
-        this->subscribe({channelID, QString() /*userName*/,
-                         BttvLiveUpdateSubscriptionType::Channel});
-        this->subscribe(
-            {channelID, userName, BttvLiveUpdateSubscriptionType::BroadcastMe});
+        this->subscribe({BttvLiveUpdateSubscriptionChannel{channelID}});
+        this->subscribe({BttvLiveUpdateBroadcastMe{.twitchID = channelID,
+                                                   .userName = userName}});
     }
 }
 
@@ -27,8 +26,7 @@ void BttvLiveUpdates::partChannel(const QString &id)
 {
     if (this->joinedChannels_.erase(id) > 0)
     {
-        this->unsubscribe({id, QString() /*userName*/,
-                           BttvLiveUpdateSubscriptionType::Channel});
+        this->unsubscribe({BttvLiveUpdateSubscriptionChannel{id}});
     }
 }
 

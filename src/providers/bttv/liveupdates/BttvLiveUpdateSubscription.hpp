@@ -1,28 +1,52 @@
 #pragma once
 
+#include <boost/functional/hash.hpp>
 #include <QByteArray>
 #include <QHash>
 #include <QString>
 
+#include <variant>
+
 namespace chatterino {
 
-enum class BttvLiveUpdateSubscriptionType {
-    Channel,
-    BroadcastMe,
+struct BttvLiveUpdateSubscriptionChannel {
+    QString twitchID;
 
-    INVALID,
+    QJsonObject encode(bool isSubscribe) const;
+    bool operator==(const BttvLiveUpdateSubscriptionChannel &rhs) const;
+    bool operator!=(const BttvLiveUpdateSubscriptionChannel &rhs) const;
+    friend QDebug &operator<<(QDebug &dbg,
+                              const BttvLiveUpdateSubscriptionChannel &data);
 };
 
-struct BttvLiveUpdateSubscription {
+struct BttvLiveUpdateBroadcastMe {
     QString twitchID;
     QString userName;
-    BttvLiveUpdateSubscriptionType type;
+
+    QJsonObject encode(bool isSubscribe) const;
+    bool operator==(const BttvLiveUpdateBroadcastMe &rhs) const;
+    bool operator!=(const BttvLiveUpdateBroadcastMe &rhs) const;
+    friend QDebug &operator<<(QDebug &dbg,
+                              const BttvLiveUpdateBroadcastMe &data);
+};
+
+using BttvLiveUpdateSubscriptionData =
+    std::variant<BttvLiveUpdateSubscriptionChannel, BttvLiveUpdateBroadcastMe>;
+
+struct BttvLiveUpdateSubscription {
+    BttvLiveUpdateSubscriptionData data;
 
     QByteArray encodeSubscribe() const;
     QByteArray encodeUnsubscribe() const;
 
-    bool operator==(const BttvLiveUpdateSubscription &rhs) const;
-    bool operator!=(const BttvLiveUpdateSubscription &rhs) const;
+    bool operator==(const BttvLiveUpdateSubscription &rhs) const
+    {
+        return this->data == rhs.data;
+    }
+    bool operator!=(const BttvLiveUpdateSubscription &rhs) const
+    {
+        return !(*this == rhs);
+    }
 
     friend QDebug &operator<<(QDebug &dbg,
                               const BttvLiveUpdateSubscription &subscription);
@@ -33,10 +57,31 @@ struct BttvLiveUpdateSubscription {
 namespace std {
 
 template <>
+struct hash<chatterino::BttvLiveUpdateSubscriptionChannel> {
+    size_t operator()(
+        const chatterino::BttvLiveUpdateSubscriptionChannel &data) const
+    {
+        return qHash(data.twitchID);
+    }
+};
+
+template <>
+struct hash<chatterino::BttvLiveUpdateBroadcastMe> {
+    size_t operator()(const chatterino::BttvLiveUpdateBroadcastMe &data) const
+    {
+        size_t seed = 0;
+        boost::hash_combine(seed, qHash(data.twitchID));
+        boost::hash_combine(seed, qHash(data.userName));
+        return seed;
+    }
+};
+
+template <>
 struct hash<chatterino::BttvLiveUpdateSubscription> {
     size_t operator()(const chatterino::BttvLiveUpdateSubscription &sub) const
     {
-        return (size_t)qHash(sub.twitchID, qHash((int)sub.type));
+        return std::hash<chatterino::BttvLiveUpdateSubscriptionData>{}(
+            sub.data);
     }
 };
 
