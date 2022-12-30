@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/WindowDescriptors.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <pajlada/signals/signal.hpp>
@@ -12,6 +11,7 @@
 #include <algorithm>
 #include <optional>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 class QJsonObject;
@@ -21,6 +21,10 @@ namespace chatterino {
 class Split;
 class NotebookTab;
 class Notebook;
+struct ContainerNodeDescriptor;
+struct SplitNodeDescriptor;
+using NodeDescriptor =
+    std::variant<ContainerNodeDescriptor, SplitNodeDescriptor>;
 
 //
 // Note: This class is a spaghetti container. There is a lot of spaghetti code

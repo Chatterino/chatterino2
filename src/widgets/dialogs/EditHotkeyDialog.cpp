@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/ActionNames.hpp"
+#include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/hotkeys/HotkeyHelpers.hpp"
 #include "ui_EditHotkeyDialog.h"

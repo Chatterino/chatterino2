@@ -1,6 +1,8 @@
 #include "FiltersPage.hpp"
 
+#include "Application.hpp"
 #include "controllers/filters/FilterModel.hpp"
+#include "controllers/filters/FilterRecord.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"

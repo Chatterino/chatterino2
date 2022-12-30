@@ -1,6 +1,9 @@
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
+#include "common/NetworkCommon.hpp"
+#include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/Hotkey.hpp"
@@ -15,7 +18,6 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
-#include "util/LayoutCreator.hpp"
 #include "util/LayoutHelper.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"

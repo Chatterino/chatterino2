@@ -1,7 +1,6 @@
 #pragma once
 
-#include "messages/Emote.hpp"
-#include "singletons/Settings.hpp"
+#include "common/Aliases.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
@@ -12,6 +11,9 @@
 #include <unordered_map>
 
 namespace chatterino {
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
 
 class IgnorePhrase
 {
@@ -42,6 +44,8 @@ public:
     const std::unordered_map<EmoteName, EmotePtr> &getEmotes() const;
 
     bool containsEmote() const;
+
+    static IgnorePhrase createEmpty();
 
 private:
     QString pattern_;
@@ -82,10 +86,7 @@ struct Deserialize<chatterino::IgnorePhrase> {
         if (!value.IsObject())
         {
             PAJLADA_REPORT_ERROR(error)
-            return chatterino::IgnorePhrase(
-                QString(), false, false,
-                ::chatterino::getSettings()->ignoredPhraseReplace.getValue(),
-                true);
+            return chatterino::IgnorePhrase::createEmpty();
         }
 
         QString _pattern;

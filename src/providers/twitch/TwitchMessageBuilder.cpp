@@ -7,10 +7,16 @@
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageThread.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
+#include "providers/colors/ColorProvider.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
+#include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
@@ -27,7 +33,6 @@
 #include "widgets/Window.hpp"
 
 #include <boost/variant.hpp>
-#include <QApplication>
 #include <QColor>
 #include <QDebug>
 #include <QMediaPlayer>

@@ -1,9 +1,6 @@
 #pragma once
 
-#include "util/LayoutCreator.hpp"
 #include "widgets/BasePopup.hpp"
-#include "widgets/helper/ColorButton.hpp"
-#include "widgets/helper/QColorPicker.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QLabel>
@@ -11,6 +8,14 @@
 #include <array>
 
 namespace chatterino {
+
+class ColorButton;
+class QColorLuminancePicker;
+class QColorPicker;
+class QColSpinBox;
+
+template <class T>
+class LayoutCreator;
 
 /**
  * @brief A custom color picker dialog.

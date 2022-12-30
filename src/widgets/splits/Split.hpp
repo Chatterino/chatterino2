@@ -3,10 +3,10 @@
 #include "common/Aliases.hpp"
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
-#include "pajlada/signals/signalholder.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <boost/signals2.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QFont>
 #include <QShortcut>
 #include <QVBoxLayout>

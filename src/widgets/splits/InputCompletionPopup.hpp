@@ -1,12 +1,14 @@
 #pragma once
 
-#include "common/Channel.hpp"
 #include "widgets/BasePopup.hpp"
 #include "widgets/listview/GenericListModel.hpp"
 
 #include <functional>
 
 namespace chatterino {
+
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
 
 class GenericListView;
 

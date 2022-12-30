@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Channel.hpp"
 #include "common/ChatterSet.hpp"
 #include "common/UniqueAccess.hpp"
 #include "lrucache/lrucache.hpp"
@@ -9,6 +8,8 @@
 #include <QRgb>
 
 namespace chatterino {
+
+class Channel;
 
 class ChannelChatters
 {

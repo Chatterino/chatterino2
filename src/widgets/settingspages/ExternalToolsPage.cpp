@@ -1,6 +1,6 @@
 #include "ExternalToolsPage.hpp"
 
-#include "Application.hpp"
+#include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"

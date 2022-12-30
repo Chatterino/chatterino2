@@ -1,8 +1,5 @@
 #pragma once
 
-#include "common/Channel.hpp"
-#include "widgets/helper/NotebookTab.hpp"
-
 #include <QUuid>
 
 #include <deque>
@@ -10,6 +7,8 @@
 #include <utility>
 
 namespace chatterino {
+
+class NotebookTab;
 
 class ClosedSplits
 {

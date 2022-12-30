@@ -2,7 +2,6 @@
 
 #include "messages/LimitedQueue.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QMutex>
@@ -12,6 +11,7 @@
 namespace chatterino {
 
 class ChannelView;
+class ScrollbarHighlight;
 
 class Scrollbar : public BaseWidget
 {

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "common/NetworkRequest.hpp"
-#include "messages/Link.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 
 #include <boost/noncopyable.hpp>
+#include <QJsonArray>
 
 #include <functional>
 

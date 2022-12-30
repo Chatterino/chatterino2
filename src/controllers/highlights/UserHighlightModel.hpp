@@ -1,13 +1,13 @@
 #pragma once
 
 #include "common/SignalVectorModel.hpp"
-#include "controllers/highlights/HighlightPhrase.hpp"
 
 #include <QObject>
 
 namespace chatterino {
 
 class HighlightController;
+class HighlightPhrase;
 
 class UserHighlightModel : public SignalVectorModel<HighlightPhrase>
 {

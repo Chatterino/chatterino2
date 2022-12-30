@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
+#include "singletons/Settings.hpp"
 
 namespace chatterino {
 
@@ -110,6 +111,13 @@ bool IgnorePhrase::containsEmote() const
         this->emotesChecked_ = true;
     }
     return !this->emotes_.empty();
+}
+
+IgnorePhrase IgnorePhrase::createEmpty()
+{
+    return IgnorePhrase(
+        QString(), false, false,
+        ::chatterino::getSettings()->ignoredPhraseReplace.getValue(), true);
 }
 
 }  // namespace chatterino

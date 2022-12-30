@@ -1,13 +1,12 @@
 #include "widgets/Scrollbar.hpp"
 
-#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
+#include "widgets/helper/ScrollbarHighlight.hpp"
 
-#include <QDebug>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QTimer>

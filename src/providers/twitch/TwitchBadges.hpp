@@ -1,8 +1,6 @@
 #pragma once
 
 #include "common/UniqueAccess.hpp"
-#include "messages/Image.hpp"
-#include "util/DisplayBadge.hpp"
 #include "util/QStringHash.hpp"
 
 #include <boost/optional.hpp>
@@ -22,6 +20,8 @@ using EmotePtr = std::shared_ptr<const Emote>;
 
 class Settings;
 class Paths;
+class Image;
+class DisplayBadge;
 
 class TwitchBadges
 {

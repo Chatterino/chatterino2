@@ -1,8 +1,6 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
-#include "controllers/filters/FilterSet.hpp"
-#include "messages/Image.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Selection.hpp"
@@ -43,6 +41,8 @@ class EffectLabel;
 struct Link;
 class MessageLayoutElement;
 class Split;
+class FilterSet;
+using FilterSetPtr = std::shared_ptr<FilterSet>;
 
 enum class PauseReason {
     Mouse,

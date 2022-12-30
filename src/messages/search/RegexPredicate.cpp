@@ -1,5 +1,7 @@
 #include "RegexPredicate.hpp"
 
+#include "messages/Message.hpp"
+
 namespace chatterino {
 
 RegexPredicate::RegexPredicate(const QString &regex, bool negate)

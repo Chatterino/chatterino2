@@ -1,11 +1,12 @@
 #pragma once
 
 #include "common/SignalVectorModel.hpp"
-#include "controllers/nicknames/Nickname.hpp"
 
 #include <QObject>
 
 namespace chatterino {
+
+class Nickname;
 
 class NicknamesModel : public SignalVectorModel<Nickname>
 {

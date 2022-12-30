@@ -1,13 +1,13 @@
 #pragma once
 
 #include "common/SignalVectorModel.hpp"
-#include "controllers/commands/Command.hpp"
 
 #include <QObject>
 
 namespace chatterino {
 
 class CommandController;
+struct Command;
 
 class CommandModel : public SignalVectorModel<Command>
 {

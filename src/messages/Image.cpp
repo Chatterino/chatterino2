@@ -3,6 +3,8 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
+#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
@@ -345,6 +347,11 @@ ImagePtr Image::getEmpty()
 {
     static auto empty = ImagePtr(new Image);
     return empty;
+}
+
+ImagePtr getEmptyImagePtr()
+{
+    return Image::getEmpty();
 }
 
 Image::Image()

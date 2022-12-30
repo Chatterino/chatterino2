@@ -2,10 +2,10 @@
 
 #include "Application.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/FunctionEventFilter.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 
 #include <QDebug>
-#include <QPainter>
-#include <util/FunctionEventFilter.hpp>
 
 namespace chatterino {
 

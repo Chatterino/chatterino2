@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Application.hpp"
 #include "common/Singleton.hpp"
 
 #include <pajlada/settings/setting.hpp>

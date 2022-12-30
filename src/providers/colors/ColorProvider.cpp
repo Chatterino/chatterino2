@@ -1,5 +1,7 @@
 #include "providers/colors/ColorProvider.hpp"
 
+#include "controllers/highlights/HighlightPhrase.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 
 namespace chatterino {

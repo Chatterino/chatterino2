@@ -1,11 +1,11 @@
 #pragma once
 
-#include "widgets/helper/EditableModelView.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
 namespace chatterino {
 
 class HotkeyModel;
+class EditableModelView;
 
 class KeyboardSettingsPage : public SettingsPage
 {

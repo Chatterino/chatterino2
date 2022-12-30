@@ -1,14 +1,15 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "messages/MessageColor.hpp"
-#include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
 #include <QColor>
 #include <QUrl>
 
 namespace chatterino {
+
+class Badge;
+class Channel;
 
 class SharedMessageBuilder : public MessageBuilder
 {

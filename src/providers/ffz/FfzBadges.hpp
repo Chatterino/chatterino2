@@ -1,16 +1,13 @@
 #pragma once
 
 #include "common/Aliases.hpp"
-#include "common/UniqueAccess.hpp"
+#include "common/Singleton.hpp"
 #include "util/QStringHash.hpp"
 
 #include <boost/optional.hpp>
-#include <common/Singleton.hpp>
 #include <QColor>
 
-#include <map>
 #include <memory>
-#include <set>
 #include <shared_mutex>
 #include <unordered_map>
 #include <vector>

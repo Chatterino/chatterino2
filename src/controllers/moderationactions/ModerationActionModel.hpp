@@ -1,11 +1,12 @@
 #pragma once
 
 #include "common/SignalVectorModel.hpp"
-#include "controllers/moderationactions/ModerationAction.hpp"
 
 #include <QObject>
 
 namespace chatterino {
+
+class ModerationAction;
 
 class ModerationActionModel : public SignalVectorModel<ModerationAction>
 {

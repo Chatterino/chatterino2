@@ -1,7 +1,6 @@
 #pragma once
 
 #include "widgets/listview/GenericItemDelegate.hpp"
-#include "widgets/listview/GenericListItem.hpp"
 
 #include <QListView>
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "providers/twitch/TwitchBadge.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
@@ -9,6 +8,9 @@
 #include <QUrl>
 
 namespace chatterino {
+
+class Badge;
+
 class HighlightBadge
 {
 public:
