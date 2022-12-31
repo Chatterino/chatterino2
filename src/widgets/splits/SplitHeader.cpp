@@ -40,153 +40,161 @@
 #    include "widgets/StreamView.hpp"
 #endif
 
-namespace chatterino {
 namespace {
-    auto formatRoomMode(TwitchChannel &channel) -> QString
+
+using namespace chatterino;
+
+auto formatRoomMode(TwitchChannel &channel) -> QString
+{
+    QString text;
+
     {
-        QString text;
+        auto modes = channel.accessRoomModes();
 
+        if (modes->r9k)
+            text += "r9k, ";
+        if (modes->slowMode)
+            text += QString("slow(%1), ").arg(localizeNumbers(modes->slowMode));
+        if (modes->emoteOnly)
+            text += "emote, ";
+        if (modes->submode)
+            text += "sub, ";
+        if (modes->followerOnly != -1)
         {
-            auto modes = channel.accessRoomModes();
-
-            if (modes->r9k)
-                text += "r9k, ";
-            if (modes->slowMode)
-                text +=
-                    QString("slow(%1), ").arg(localizeNumbers(modes->slowMode));
-            if (modes->emoteOnly)
-                text += "emote, ";
-            if (modes->submode)
-                text += "sub, ";
-            if (modes->followerOnly != -1)
+            if (modes->followerOnly != 0)
             {
-                if (modes->followerOnly != 0)
-                {
-                    text += QString("follow(%1m), ")
-                                .arg(localizeNumbers(modes->followerOnly));
-                }
-                else
-                {
-                    text += QString("follow, ");
-                }
+                text += QString("follow(%1m), ")
+                            .arg(localizeNumbers(modes->followerOnly));
+            }
+            else
+            {
+                text += QString("follow, ");
             }
         }
+    }
 
-        if (text.length() > 2)
+    if (text.length() > 2)
+    {
+        text = text.mid(0, text.size() - 2);
+    }
+
+    if (!text.isEmpty())
+    {
+        static QRegularExpression commaReplacement("^(.+?, .+?,) (.+)$");
+
+        auto match = commaReplacement.match(text);
+        if (match.hasMatch())
+            text = match.captured(1) + '\n' + match.captured(2);
+    }
+
+    if (text.isEmpty() && channel.hasModRights())
+        return "none";
+
+    return text;
+}
+
+auto formatTooltip(const TwitchChannel::StreamStatus &s, QString thumbnail)
+{
+    auto title = [&s]() -> QString {
+        if (s.title.isEmpty())
         {
-            text = text.mid(0, text.size() - 2);
+            return QStringLiteral("");
         }
 
-        if (!text.isEmpty())
-        {
-            static QRegularExpression commaReplacement("^(.+?, .+?,) (.+)$");
+        return s.title.toHtmlEscaped() + "<br><br>";
+    }();
 
-            auto match = commaReplacement.match(text);
-            if (match.hasMatch())
-                text = match.captured(1) + '\n' + match.captured(2);
+    auto tooltip = [&thumbnail]() -> QString {
+        if (getSettings()->thumbnailSizeStream.getValue() == 0)
+        {
+            return QStringLiteral("");
         }
 
-        if (text.isEmpty() && channel.hasModRights())
-            return "none";
-
-        return text;
-    }
-    auto formatTooltip(const TwitchChannel::StreamStatus &s, QString thumbnail)
-    {
-        auto title = [&s]() -> QString {
-            if (s.title.isEmpty())
-            {
-                return QStringLiteral("");
-            }
-
-            return s.title.toHtmlEscaped() + "<br><br>";
-        }();
-
-        auto tooltip = [&thumbnail]() -> QString {
-            if (getSettings()->thumbnailSizeStream.getValue() == 0)
-            {
-                return QStringLiteral("");
-            }
-
-            if (thumbnail.isEmpty())
-            {
-                return QStringLiteral("Couldn't fetch thumbnail<br>");
-            }
-
-            return "<img src=\"data:image/jpg;base64, " + thumbnail + "\"><br>";
-        }();
-
-        auto game = [&s]() -> QString {
-            if (s.game.isEmpty())
-            {
-                return QStringLiteral("");
-            }
-
-            return s.game.toHtmlEscaped() + "<br>";
-        }();
-
-        auto extraStreamData = [&s]() -> QString {
-            if (isInStreamerMode() &&
-                getSettings()->streamerModeHideViewerCountAndDuration)
-            {
-                return QStringLiteral(
-                    "<span style=\"color: #808892;\">&lt;Streamer "
-                    "Mode&gt;</span>");
-            }
-
-            return QString("%1 for %2 with %3 viewers")
-                .arg(s.rerun ? "Vod-casting" : "Live")
-                .arg(s.uptime)
-                .arg(localizeNumbers(s.viewerCount));
-        }();
-
-        return QString("<p style=\"text-align: center;\">" +  //
-                       title +                                //
-                       tooltip +                              //
-                       game +                                 //
-                       extraStreamData +                      //
-                       "</p>"                                 //
-        );
-    }
-    auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
-    {
-        return QString("<p style=\"text-align: center;\">Offline<br>%1</p>")
-            .arg(s.title.toHtmlEscaped());
-    }
-    auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
-    {
-        auto title = QString();
-
-        // live
-        if (s.rerun)
-            title += " (rerun)";
-        else if (s.streamType.isEmpty())
-            title += " (" + s.streamType + ")";
-        else
-            title += " (live)";
-
-        // description
-        if (settings.headerUptime)
-            title += " - " + s.uptime;
-        if (settings.headerViewerCount)
-            title += " - " + localizeNumbers(s.viewerCount);
-        if (settings.headerGame && !s.game.isEmpty())
-            title += " - " + s.game;
-        if (settings.headerStreamTitle && !s.title.isEmpty())
+        if (thumbnail.isEmpty())
         {
-            title += " - " + s.title.simplified();
+            return QStringLiteral("Couldn't fetch thumbnail<br>");
         }
 
-        return title;
-    }
-    auto distance(QPoint a, QPoint b)
-    {
-        auto x = std::abs(a.x() - b.x());
-        auto y = std::abs(a.y() - b.y());
+        return "<img src=\"data:image/jpg;base64, " + thumbnail + "\"><br>";
+    }();
 
-        return std::sqrt(x * x + y * y);
+    auto game = [&s]() -> QString {
+        if (s.game.isEmpty())
+        {
+            return QStringLiteral("");
+        }
+
+        return s.game.toHtmlEscaped() + "<br>";
+    }();
+
+    auto extraStreamData = [&s]() -> QString {
+        if (isInStreamerMode() &&
+            getSettings()->streamerModeHideViewerCountAndDuration)
+        {
+            return QStringLiteral(
+                "<span style=\"color: #808892;\">&lt;Streamer "
+                "Mode&gt;</span>");
+        }
+
+        return QString("%1 for %2 with %3 viewers")
+            .arg(s.rerun ? "Vod-casting" : "Live")
+            .arg(s.uptime)
+            .arg(localizeNumbers(s.viewerCount));
+    }();
+
+    return QString("<p style=\"text-align: center;\">" +  //
+                   title +                                //
+                   tooltip +                              //
+                   game +                                 //
+                   extraStreamData +                      //
+                   "</p>"                                 //
+    );
+}
+
+auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
+{
+    return QString("<p style=\"text-align: center;\">Offline<br>%1</p>")
+        .arg(s.title.toHtmlEscaped());
+}
+
+auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
+{
+    auto title = QString();
+
+    // live
+    if (s.rerun)
+        title += " (rerun)";
+    else if (s.streamType.isEmpty())
+        title += " (" + s.streamType + ")";
+    else
+        title += " (live)";
+
+    // description
+    if (settings.headerUptime)
+        title += " - " + s.uptime;
+    if (settings.headerViewerCount)
+        title += " - " + localizeNumbers(s.viewerCount);
+    if (settings.headerGame && !s.game.isEmpty())
+        title += " - " + s.game;
+    if (settings.headerStreamTitle && !s.title.isEmpty())
+    {
+        title += " - " + s.title.simplified();
     }
+
+    return title;
+}
+
+auto distance(QPoint a, QPoint b)
+{
+    auto x = std::abs(a.x() - b.x());
+    auto y = std::abs(a.y() - b.y());
+
+    return std::sqrt(x * x + y * y);
+}
+
 }  // namespace
+
+namespace chatterino {
 
 SplitHeader::SplitHeader(Split *_split)
     : BaseWidget(_split)
