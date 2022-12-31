@@ -169,8 +169,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
 {
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(20000)
-        .onSuccess([callback = std::move(callback), channel,
-                    &channelDisplayName,
+        .onSuccess([callback = std::move(callback), channel, channelDisplayName,
                     manualRefresh](auto result) -> Outcome {
             auto pair =
                 parseChannelEmotes(result.parseJson(), channelDisplayName);
