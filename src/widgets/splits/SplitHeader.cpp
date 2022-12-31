@@ -804,6 +804,7 @@ void SplitHeader::updateChannelText()
                  this->lastThumbnail_.elapsed() > THUMBNAIL_MAX_AGE_MS))
             {
                 NetworkRequest(url, NetworkRequestType::Get)
+                    .caller(this)
                     .onSuccess([this](auto result) -> Outcome {
                         // NOTE: We do not follow the redirects, so we need to make sure we only treat code 200 as a valid image
                         if (result.status() == 200)
