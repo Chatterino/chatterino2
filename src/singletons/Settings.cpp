@@ -1,12 +1,12 @@
 #include "singletons/Settings.hpp"
 
-#include "Application.hpp"
+#include "controllers/filters/FilterRecord.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
-#include "singletons/Paths.hpp"
-#include "singletons/Resources.hpp"
-#include "singletons/WindowManager.hpp"
+#include "controllers/moderationactions/ModerationAction.hpp"
+#include "controllers/nicknames/Nickname.hpp"
 #include "util/PersistSignalVector.hpp"
 #include "util/WindowsHelper.hpp"
 

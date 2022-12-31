@@ -1,17 +1,11 @@
 #pragma once
 
-#include "Application.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/ChannelChatters.hpp"
-#include "common/ChatterSet.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
-#include "messages/MessageThread.hpp"
-#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
-#include "providers/twitch/api/Helix.hpp"
-#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 
@@ -54,6 +48,14 @@ class TwitchBadges;
 class FfzEmotes;
 class BttvEmotes;
 class SeventvEmotes;
+struct SeventvEventAPIEmoteAddDispatch;
+struct SeventvEventAPIEmoteUpdateDispatch;
+struct SeventvEventAPIEmoteRemoveDispatch;
+struct SeventvEventAPIUserConnectionUpdateDispatch;
+struct ChannelPointReward;
+class MessageThread;
+struct CheerEmoteSet;
+struct HelixStream;
 
 class TwitchIrcServer;
 

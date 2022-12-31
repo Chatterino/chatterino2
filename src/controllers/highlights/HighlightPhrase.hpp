@@ -1,6 +1,5 @@
 #pragma once
 
-#include "providers/colors/ColorProvider.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 

@@ -15,6 +15,7 @@ namespace chatterino {
 
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
+class RatelimitBucket;
 
 class AbstractIrcServer : public QObject
 {

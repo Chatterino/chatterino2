@@ -2,10 +2,7 @@
 
 #include "widgets/settingspages/SettingsPage.hpp"
 
-class QPushButton;
-class QListWidget;
-
-class QVBoxLayout;
+class QComboBox;
 
 namespace chatterino {
 

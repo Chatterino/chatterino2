@@ -1,6 +1,7 @@
-#include "IgnoreModel.hpp"
+#include "controllers/ignores/IgnoreModel.hpp"
 
 #include "Application.hpp"
+#include "controllers/ignores/IgnorePhrase.hpp"
 #include "singletons/Settings.hpp"
 #include "util/StandardItemHelper.hpp"
 

@@ -1,8 +1,10 @@
 #include "messages/MessageElement.hpp"
 
 #include "Application.hpp"
+#include "controllers/moderationactions/ModerationAction.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "providers/emoji/Emojis.hpp"

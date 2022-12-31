@@ -2,6 +2,9 @@
 
 #include "messages/search/MessagePredicate.hpp"
 
+#include <QString>
+#include <QStringList>
+
 namespace chatterino {
 
 /**

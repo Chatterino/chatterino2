@@ -1,3 +1,5 @@
+#pragma once
+
 #include "widgets/listview/GenericListItem.hpp"
 
 #include <QAbstractListModel>

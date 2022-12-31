@@ -2,14 +2,17 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/EditHotkeyDialog.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 
 #include <QFormLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QMessageBox>
 #include <QTableView>
 
 namespace chatterino {

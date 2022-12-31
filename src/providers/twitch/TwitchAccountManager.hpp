@@ -2,7 +2,7 @@
 
 #include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
-#include "util/SharedPtrElementLess.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 
 #include <boost/signals2.hpp>
 

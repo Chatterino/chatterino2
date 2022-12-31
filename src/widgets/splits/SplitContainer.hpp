@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <optional>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 class QJsonObject;

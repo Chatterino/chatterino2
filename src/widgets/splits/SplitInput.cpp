@@ -5,6 +5,8 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Link.hpp"
+#include "messages/Message.hpp"
+#include "messages/MessageThread.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -22,7 +24,6 @@
 #include "widgets/splits/InputCompletionPopup.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
-#include "widgets/splits/SplitInput.hpp"
 
 #include <QCompleter>
 #include <QPainter>

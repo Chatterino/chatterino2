@@ -1,7 +1,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 
-#include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"

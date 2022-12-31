@@ -1,17 +1,17 @@
 #pragma once
 
-#include "controllers/filters/FilterSet.hpp"
 #include "ForwardDecl.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
-#include "messages/search/MessagePredicate.hpp"
 #include "widgets/BasePopup.hpp"
-#include "widgets/splits/Split.hpp"
 
 #include <memory>
 
 class QLineEdit;
 
 namespace chatterino {
+
+class Split;
+class MessagePredicate;
 
 class SearchPopup : public BasePopup
 {

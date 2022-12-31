@@ -1,13 +1,10 @@
 #pragma once
 
 #include "common/SignalVectorModel.hpp"
-#include "controllers/notifications/NotificationController.hpp"
 
 #include <QObject>
 
 namespace chatterino {
-
-class MutedChannelController;
 
 class MutedChannelModel : public SignalVectorModel<QString>
 {

@@ -1,11 +1,14 @@
 #pragma once
 
-#include "common/Channel.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-
 #include <QStringList>
 
+#include <memory>
+
 namespace chatterino {
+
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
+class TwitchChannel;
 
 struct CommandContext {
     QStringList words;

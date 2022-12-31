@@ -4,6 +4,7 @@
 #include "widgets/BaseWidget.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
+#include <QTimer>
 
 #include <functional>
 
