@@ -35,14 +35,14 @@ public:
     void updateRoomModes();
 
 protected:
-    void scaleChangedEvent(float) override;
+    void scaleChangedEvent(float scale) override;
     void themeChangedEvent() override;
 
-    void paintEvent(QPaintEvent *) override;
+    void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
-    void enterEvent(QEvent *) override;
+    void enterEvent(QEvent *event) override;
     void leaveEvent(QEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 

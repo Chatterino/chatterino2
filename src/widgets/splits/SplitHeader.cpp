@@ -880,7 +880,7 @@ void SplitHeader::updateModerationModeIcon()
     }
 }
 
-void SplitHeader::paintEvent(QPaintEvent *)
+void SplitHeader::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
@@ -932,7 +932,7 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
     this->doubleClicked_ = false;
 }
 
-void SplitHeader::mouseReleaseEvent(QMouseEvent *event)
+void SplitHeader::mouseReleaseEvent(QMouseEvent * /*event*/)
 {
     this->dragging_ = false;
 }
