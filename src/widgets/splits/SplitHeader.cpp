@@ -512,10 +512,10 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         action->setText("Enable /mention tab highlights");
         action->setCheckable(true);
 
-        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
+        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action]() {
             action->setChecked(getSettings()->highlightMentions);
         });
-        action->connect(action, &QAction::triggered, this, [this]() {
+        action->connect(action, &QAction::triggered, this, []() {
             getSettings()->highlightMentions =
                 !getSettings()->highlightMentions;
         });
