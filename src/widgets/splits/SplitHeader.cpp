@@ -44,6 +44,9 @@ namespace {
 
 using namespace chatterino;
 
+// 5 minutes
+constexpr const uint64_t THUMBNAIL_MAX_AGE_MS = 5ULL * 60 * 1000;
+
 auto formatRoomMode(TwitchChannel &channel) -> QString
 {
     QString text;
@@ -817,7 +820,7 @@ void SplitHeader::updateChannelText()
             }
             if (!url.isEmpty() &&
                 (!this->lastThumbnail_.isValid() ||
-                 this->lastThumbnail_.elapsed() > 5 * 60 * 1000))
+                 this->lastThumbnail_.elapsed() > THUMBNAIL_MAX_AGE_MS))
             {
                 NetworkRequest(url, NetworkRequestType::Get)
                     .onSuccess([this](auto result) -> Outcome {
