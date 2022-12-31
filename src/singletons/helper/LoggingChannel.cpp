@@ -7,7 +7,6 @@
 
 #include <QDir>
 
-
 namespace chatterino {
 
 QByteArray endline("\n");
