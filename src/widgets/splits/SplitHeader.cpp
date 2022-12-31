@@ -52,13 +52,21 @@ auto formatRoomMode(TwitchChannel &channel) -> QString
         auto modes = channel.accessRoomModes();
 
         if (modes->r9k)
+        {
             text += "r9k, ";
+        }
         if (modes->slowMode)
+        {
             text += QString("slow(%1), ").arg(localizeNumbers(modes->slowMode));
+        }
         if (modes->emoteOnly)
+        {
             text += "emote, ";
+        }
         if (modes->submode)
+        {
             text += "sub, ";
+        }
         if (modes->followerOnly != -1)
         {
             if (modes->followerOnly != 0)
@@ -84,11 +92,15 @@ auto formatRoomMode(TwitchChannel &channel) -> QString
 
         auto match = commaReplacement.match(text);
         if (match.hasMatch())
+        {
             text = match.captured(1) + '\n' + match.captured(2);
+        }
     }
 
     if (text.isEmpty() && channel.hasModRights())
+    {
         return "none";
+    }
 
     return text;
 }
@@ -163,19 +175,31 @@ auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
 
     // live
     if (s.rerun)
+    {
         title += " (rerun)";
+    }
     else if (s.streamType.isEmpty())
+    {
         title += " (" + s.streamType + ")";
+    }
     else
+    {
         title += " (live)";
+    }
 
     // description
     if (settings.headerUptime)
+    {
         title += " - " + s.uptime;
+    }
     if (settings.headerViewerCount)
+    {
         title += " - " + localizeNumbers(s.viewerCount);
+    }
     if (settings.headerGame && !s.game.isEmpty())
+    {
         title += " - " + s.game;
+    }
     if (settings.headerStreamTitle && !s.title.isEmpty())
     {
         title += " - " + s.title.simplified();
@@ -321,12 +345,16 @@ void SplitHeader::initializeLayout()
             if (getSettings()->moderationActions.empty())
             {
                 if (this->split_->getModerationMode())
+                {
                     this->split_->setModerationMode(true);
+                }
             }
             else
             {
                 if (this->split_->getModerationMode())
+                {
                     this->split_->setModerationMode(true);
+                }
             }
         });
 
@@ -758,7 +786,9 @@ void SplitHeader::updateChannelText()
     auto title = channel->getLocalizedName();
 
     if (indirectChannel.getType() == Channel::Type::TwitchWatching)
+    {
         title = "watching: " + (title.isEmpty() ? "none" : title);
+    }
 
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
