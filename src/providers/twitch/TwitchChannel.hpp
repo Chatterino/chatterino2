@@ -77,7 +77,21 @@ public:
         bool submode = false;
         bool r9k = false;
         bool emoteOnly = false;
+
+        /**
+         * @brief Number of minutes required for users to be followed before typing in chat
+         *
+         * Special cases:
+         * -1 = follower mode off
+         *  0 = follower mode on, no time requirement
+         **/
         int followerOnly = -1;
+
+        /**
+         * @brief Number of seconds required to wait before typing emotes
+         *
+         * 0 = slow mode off
+         **/
         int slowMode = 0;
     };
 

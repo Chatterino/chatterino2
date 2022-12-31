@@ -197,6 +197,12 @@ Split::Split(QWidget *parent)
     this->setSizePolicy(QSizePolicy::MinimumExpanding,
                         QSizePolicy::MinimumExpanding);
 
+    // update moderation button when items changed
+    this->signalHolder_.managedConnect(
+        getSettings()->moderationActions.delayedItemsChanged, [this] {
+            this->refreshModerationMode();
+        });
+
     this->signalHolder_.managedConnect(
         modifierStatusChanged, [this](Qt::KeyboardModifiers status) {
             if ((status ==
@@ -631,6 +637,12 @@ void Split::joinChannelInNewTab(ChannelPtr channel)
     container->insertSplit(split);
 }
 
+void Split::refreshModerationMode()
+{
+    this->header_->updateModerationModeIcon();
+    this->view_->queueLayout();
+}
+
 void Split::openChannelInBrowserPlayer(ChannelPtr channel)
 {
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
@@ -722,8 +734,7 @@ void Split::setChannel(IndirectChannel newChannel)
 void Split::setModerationMode(bool value)
 {
     this->moderationMode_ = value;
-    this->header_->updateModerationModeIcon();
-    this->view_->queueLayout();
+    this->refreshModerationMode();
 }
 
 bool Split::getModerationMode() const
