@@ -1,6 +1,8 @@
 #include <QMimeData>
 #include <QString>
 
+#include <memory>
+
 namespace chatterino {
 
 class ResizingTextEdit;

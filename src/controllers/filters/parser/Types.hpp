@@ -2,6 +2,8 @@
 
 #include <QRegularExpression>
 
+#include <memory>
+
 namespace chatterino {
 
 struct Message;

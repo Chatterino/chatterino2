@@ -6,6 +6,7 @@
 #include <QTime>
 
 #include <ctime>
+#include <memory>
 #include <utility>
 
 namespace chatterino {

@@ -8,6 +8,7 @@
 #include <QRegularExpression>
 #include <QString>
 
+#include <memory>
 #include <unordered_map>
 
 namespace chatterino {
