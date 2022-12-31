@@ -196,9 +196,9 @@ auto distance(QPoint a, QPoint b)
 
 namespace chatterino {
 
-SplitHeader::SplitHeader(Split *_split)
-    : BaseWidget(_split)
-    , split_(_split)
+SplitHeader::SplitHeader(Split *split)
+    : BaseWidget(split)
+    , split_(split)
 {
     this->initializeLayout();
 

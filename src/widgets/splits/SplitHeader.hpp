@@ -25,7 +25,7 @@ class SplitHeader final : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit SplitHeader(Split *_chatWidget);
+    explicit SplitHeader(Split *split);
 
     void setAddButtonVisible(bool value);
     void setViewersButtonVisible(bool value);
