@@ -12,6 +12,7 @@
 #include <QFormLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QMessageBox>
 #include <QTableView>
 
 namespace chatterino {

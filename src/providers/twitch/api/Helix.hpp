@@ -7,6 +7,7 @@
 
 #include <boost/optional.hpp>
 #include <QJsonArray>
+#include <QJsonObject>
 #include <QString>
 #include <QStringList>
 #include <QUrl>

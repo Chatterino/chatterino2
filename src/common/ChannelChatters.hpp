@@ -5,6 +5,8 @@
 #include "lrucache/lrucache.hpp"
 #include "util/QStringHash.hpp"
 
+#include <QColor>
+#include <QObject>
 #include <QRgb>
 
 namespace chatterino {

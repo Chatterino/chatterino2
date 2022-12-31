@@ -8,6 +8,7 @@
 #include "widgets/BaseWidget.hpp"
 
 #include <pajlada/signals/signal.hpp>
+#include <QMenu>
 #include <QPaintEvent>
 #include <QScroller>
 #include <QTimer>

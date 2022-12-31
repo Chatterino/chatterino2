@@ -2,6 +2,8 @@
 
 #include "common/Aliases.hpp"
 
+#include <memory>
+
 namespace chatterino {
 
 class Image;

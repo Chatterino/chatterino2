@@ -4,6 +4,7 @@
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
 
+#include <boost/optional.hpp>
 #include <IrcMessage>
 #include <QString>
 #include <QVariant>

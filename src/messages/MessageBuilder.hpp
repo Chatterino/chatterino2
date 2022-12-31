@@ -3,6 +3,7 @@
 #include "messages/MessageColor.hpp"
 
 #include <QRegularExpression>
+#include <QTime>
 
 #include <ctime>
 #include <utility>

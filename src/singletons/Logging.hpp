@@ -2,6 +2,9 @@
 
 #include "common/Singleton.hpp"
 
+#include <QString>
+
+#include <map>
 #include <memory>
 
 namespace chatterino {

@@ -5,6 +5,7 @@
 
 #include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
+#include <QIcon>
 #include <QMap>
 #include <QString>
 

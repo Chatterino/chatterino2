@@ -10,6 +10,8 @@
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
+#include <QJsonArray>
+
 #include <algorithm>
 #include <exception>
 #include <iostream>

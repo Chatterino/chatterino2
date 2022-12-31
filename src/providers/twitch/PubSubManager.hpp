@@ -5,6 +5,7 @@
 #include "util/ExponentialBackoff.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
 #include <QString>

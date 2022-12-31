@@ -8,6 +8,7 @@
 
 #include <QDialogButtonBox>
 #include <QLineEdit>
+#include <QSet>
 
 namespace chatterino {
 

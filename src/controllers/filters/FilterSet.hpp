@@ -1,8 +1,11 @@
 #pragma once
 
+#include <pajlada/signals.hpp>
 #include <QList>
 #include <QMap>
 #include <QUuid>
+
+#include <memory>
 
 namespace chatterino {
 

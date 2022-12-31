@@ -4,8 +4,11 @@
 #include "util/RapidJsonSerializeQString.hpp"
 
 #include <pajlada/serialize.hpp>
+#include <QColor>
 #include <QString>
 #include <QUrl>
+
+#include <memory>
 
 namespace chatterino {
 

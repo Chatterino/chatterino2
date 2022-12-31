@@ -1,8 +1,10 @@
 #pragma once
 
+#include <QObject>
 #include <QString>
 
 #include <functional>
+#include <memory>
 
 namespace chatterino {
 

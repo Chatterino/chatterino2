@@ -5,6 +5,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <QJsonArray>
+#include <QJsonObject>
 
 #include <functional>
 
