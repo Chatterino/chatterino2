@@ -115,9 +115,8 @@ bool IgnorePhrase::containsEmote() const
 
 IgnorePhrase IgnorePhrase::createEmpty()
 {
-    return IgnorePhrase(
-        QString(), false, false,
-        ::chatterino::getSettings()->ignoredPhraseReplace.getValue(), true);
+    return IgnorePhrase(QString(), false, false,
+                        getSettings()->ignoredPhraseReplace.getValue(), true);
 }
 
 }  // namespace chatterino

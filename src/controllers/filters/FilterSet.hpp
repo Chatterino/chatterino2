@@ -1,5 +1,9 @@
 #pragma once
 
+#include <QList>
+#include <QMap>
+#include <QUuid>
+
 namespace chatterino {
 
 class FilterRecord;

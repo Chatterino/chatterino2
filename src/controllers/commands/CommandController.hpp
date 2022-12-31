@@ -2,6 +2,7 @@
 
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
+#include "util/QStringHash.hpp"
 
 #include <pajlada/settings.hpp>
 #include <QMap>

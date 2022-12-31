@@ -10,7 +10,6 @@ class Paths;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 class LoggingChannel;
-class LoggingChannel;
 
 class Logging : public Singleton
 {

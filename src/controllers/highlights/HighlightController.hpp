@@ -5,6 +5,7 @@
 #include "common/UniqueAccess.hpp"
 
 #include <boost/optional.hpp>
+#include <pajlada/settings/settinglistener.hpp>
 #include <QColor>
 #include <QUrl>
 
