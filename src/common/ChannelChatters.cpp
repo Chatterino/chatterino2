@@ -5,6 +5,8 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 
+#include <QColor>
+
 namespace chatterino {
 
 ChannelChatters::ChannelChatters(Channel &channel)
