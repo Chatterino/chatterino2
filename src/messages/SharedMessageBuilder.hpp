@@ -1,3 +1,5 @@
+#pragma once
+
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/MessageBuilder.hpp"
