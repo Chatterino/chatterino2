@@ -518,7 +518,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action]() {
             action->setChecked(getSettings()->highlightMentions);
         });
-        action->connect(action, &QAction::triggered, this, []() {
+        QObject::connect(action, &QAction::triggered, this, []() {
             getSettings()->highlightMentions =
                 !getSettings()->highlightMentions;
         });
@@ -552,7 +552,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
             action->setChecked(getApp()->notifications->isChannelNotified(
                 this->split_->getChannel()->getName(), Platform::Twitch));
         });
-        action->connect(action, &QAction::triggered, this, [this]() {
+        QObject::connect(action, &QAction::triggered, this, [this]() {
             getApp()->notifications->updateChannelNotification(
                 this->split_->getChannel()->getName(), Platform::Twitch);
         });
@@ -570,7 +570,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
             action->setChecked(getSettings()->isMutedChannel(
                 this->split_->getChannel()->getName()));
         });
-        action->connect(action, &QAction::triggered, this, [this]() {
+        QObject::connect(action, &QAction::triggered, this, [this]() {
             getSettings()->toggleMutedChannel(
                 this->split_->getChannel()->getName());
         });
