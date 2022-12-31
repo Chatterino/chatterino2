@@ -50,7 +50,7 @@ echo "$packaging_dir$(pwd)/appdir/usr"
 echo "$packaging_dir/"
 # move directory up
 mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/"
-cp -R "Qt" "$packaging_dir/Qt"
+cp -R "../Qt" "$packaging_dir/Qt"
 readelf -a
 rm -vrf "$packaging_dir/home" || true
 
