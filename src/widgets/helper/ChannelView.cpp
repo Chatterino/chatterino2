@@ -20,7 +20,6 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
-#include "singletons/TooltipPreviewImage.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
@@ -206,12 +205,13 @@ void ChannelView::initializeLayout()
     this->goToBottom_->getLabel().setText("More messages below");
     this->goToBottom_->setVisible(false);
 
-    QObject::connect(this->goToBottom_, &EffectLabel::leftClicked, this, [=] {
-        QTimer::singleShot(180, [=] {
-            this->scrollBar_->scrollToBottom(
-                getSettings()->enableSmoothScrollingNewMessages.getValue());
+    QObject::connect(
+        this->goToBottom_, &EffectLabel::leftClicked, this, [this] {
+            QTimer::singleShot(180, [this] {
+                this->scrollBar_->scrollToBottom(
+                    getSettings()->enableSmoothScrollingNewMessages.getValue());
+            });
         });
-    });
 }
 
 void ChannelView::initializeScrollbar()
@@ -628,6 +628,7 @@ const boost::optional<MessageElementFlags> &ChannelView::getOverrideFlags()
 
 LimitedQueueSnapshot<MessageLayoutPtr> &ChannelView::getMessagesSnapshot()
 {
+    this->snapshotGuard_.guard();
     if (!this->paused() /*|| this->scrollBar_->isVisible()*/)
     {
         this->snapshot_ = this->messages_.getSnapshot();
@@ -1657,8 +1658,6 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
-        auto &tooltipPreviewImage = TooltipPreviewImage::instance();
-        tooltipPreviewImage.setImageScale(0, 0);
         auto badgeElement = dynamic_cast<const BadgeElement *>(element);
 
         if ((badgeElement || emoteElement) &&
@@ -1669,18 +1668,18 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             {
                 if (emoteElement)
                 {
-                    tooltipPreviewImage.setImage(
+                    tooltipWidget->setImage(
                         emoteElement->getEmote()->images.getImage(3.0));
                 }
                 else if (badgeElement)
                 {
-                    tooltipPreviewImage.setImage(
+                    tooltipWidget->setImage(
                         badgeElement->getEmote()->images.getImage(3.0));
                 }
             }
             else
             {
-                tooltipPreviewImage.setImage(nullptr);
+                tooltipWidget->clearImage();
             }
         }
         else
@@ -1703,7 +1702,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             auto thumbnailSize = getSettings()->thumbnailSize;
             if (!thumbnailSize)
             {
-                tooltipPreviewImage.setImage(nullptr);
+                tooltipWidget->clearImage();
             }
             else
             {
@@ -1716,13 +1715,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     shouldHideThumbnail
                         ? Image::fromResourcePixmap(getResources().streamerMode)
                         : element->getThumbnail();
-                tooltipPreviewImage.setImage(std::move(thumb));
+                tooltipWidget->setImage(std::move(thumb));
 
                 if (element->getThumbnailType() ==
                     MessageElement::ThumbnailType::Link_Thumbnail)
                 {
-                    tooltipPreviewImage.setImageScale(thumbnailSize,
-                                                      thumbnailSize);
+                    tooltipWidget->setImageScale(thumbnailSize, thumbnailSize);
                 }
             }
         }
@@ -1730,10 +1728,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->setText(element->getTooltip());
-        tooltipWidget->adjustSize();
-        tooltipWidget->setWindowFlag(Qt::WindowStaysOnTopHint, true);
         tooltipWidget->show();
-        tooltipWidget->raise();
     }
 
     // check if word has a link

@@ -213,7 +213,7 @@ void ModerationPage::addModerationButtonSettings(
     texts->setContentsMargins(0, 0, 0, 15);
     texts->setSizeConstraint(QLayout::SetMaximumSize);
 
-    const auto valueChanged = [=] {
+    const auto valueChanged = [=, this] {
         const auto index = QObject::sender()->objectName().toInt();
 
         const auto line = this->durationInputs_[index];
