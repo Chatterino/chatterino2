@@ -5,7 +5,6 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
-#include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QMouseEvent>
 #include <QPainter>
