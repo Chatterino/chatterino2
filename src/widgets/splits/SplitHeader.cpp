@@ -55,7 +55,7 @@ auto formatRoomMode(TwitchChannel &channel) -> QString
         {
             text += "r9k, ";
         }
-        if (modes->slowMode)
+        if (modes->slowMode > 0)
         {
             text += QString("slow(%1), ").arg(localizeNumbers(modes->slowMode));
         }
@@ -623,7 +623,7 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
             auto roomModes = twitchChannel->accessRoomModes();
 
             setR9k->setChecked(roomModes->r9k);
-            setSlow->setChecked(roomModes->slowMode);
+            setSlow->setChecked(roomModes->slowMode > 0);
             setEmote->setChecked(roomModes->emoteOnly);
             setSub->setChecked(roomModes->submode);
             setFollowers->setChecked(roomModes->followerOnly != -1);
