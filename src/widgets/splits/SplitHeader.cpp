@@ -849,7 +849,7 @@ void SplitHeader::updateChannelText()
         }
     }
 
-    if (!title.isEmpty() && this->split_->getFilters().size() != 0)
+    if (!title.isEmpty() && !this->split_->getFilters().empty())
     {
         title += " - filtered";
     }
