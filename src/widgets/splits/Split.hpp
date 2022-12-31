@@ -130,6 +130,14 @@ private:
      */
     void joinChannelInNewTab(ChannelPtr channel);
 
+    /**
+     * @brief Refresh moderation mode layouts/buttons
+     *
+     * Should be called after after the moderation mode is changed or
+     * moderation actions have been changed
+     **/
+    void refreshModerationMode();
+
     IndirectChannel channel_;
 
     bool moderationMode_{};

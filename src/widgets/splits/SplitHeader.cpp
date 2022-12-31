@@ -342,25 +342,6 @@ void SplitHeader::initializeLayout()
         }),
     });
 
-    // update moderation button when items changed
-    this->managedConnections_.managedConnect(
-        getSettings()->moderationActions.delayedItemsChanged, [this] {
-            if (getSettings()->moderationActions.empty())
-            {
-                if (this->split_->getModerationMode())
-                {
-                    this->split_->setModerationMode(true);
-                }
-            }
-            else
-            {
-                if (this->split_->getModerationMode())
-                {
-                    this->split_->setModerationMode(true);
-                }
-            }
-        });
-
     getSettings()->customURIScheme.connect(
         [this] {
             if (auto *const drop = this->dropdownButton_)
