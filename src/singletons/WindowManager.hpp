@@ -5,6 +5,8 @@
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <pajlada/settings/settinglistener.hpp>
+#include <QPoint>
+#include <QTimer>
 
 #include <memory>
 

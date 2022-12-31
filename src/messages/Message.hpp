@@ -4,6 +4,7 @@
 #include "util/QStringHash.hpp"
 
 #include <boost/noncopyable.hpp>
+#include <QColor>
 #include <QTime>
 
 #include <cinttypes>
