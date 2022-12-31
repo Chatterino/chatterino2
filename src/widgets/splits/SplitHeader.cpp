@@ -233,7 +233,7 @@ SplitHeader::SplitHeader(Split *split)
 
 void SplitHeader::initializeLayout()
 {
-    auto layout = makeLayout<QHBoxLayout>({
+    auto *layout = makeLayout<QHBoxLayout>({
         // space
         makeWidget<BaseWidget>([](auto w) {
             w->setScaleIndependantSize(8, 4);
@@ -332,7 +332,7 @@ void SplitHeader::initializeLayout()
 
     getSettings()->customURIScheme.connect(
         [this] {
-            if (const auto drop = this->dropdownButton_)
+            if (auto *const drop = this->dropdownButton_)
             {
                 drop->setMenu(this->createMainMenu());
             }
@@ -452,7 +452,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     {
         // "How to..." sub menu
-        auto subMenu = new QMenu("How to...", this);
+        auto *subMenu = new QMenu("How to...", this);
         subMenu->addAction("move split", this->split_, &Split::explainMoving);
         subMenu->addAction("add/split", this->split_, &Split::explainSplitting);
         menu->addMenu(subMenu);
@@ -461,7 +461,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     menu->addSeparator();
 
     // sub menu
-    auto moreMenu = new QMenu("More", this);
+    auto *moreMenu = new QMenu("More", this);
 
     auto modModeSeq = h->getDisplaySequence(HotkeyCategory::Split,
                                             "setModerationMode", {{"toggle"}});
@@ -480,7 +480,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     if (this->split_->getChannel()->getType() == Channel::Type::TwitchMentions)
     {
-        auto action = new QAction(this);
+        auto *action = new QAction(this);
         action->setText("Enable /mention tab highlights");
         action->setCheckable(true);
 
@@ -503,7 +503,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
         moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
 
-        auto action = new QAction(this);
+        auto *action = new QAction(this);
         action->setText("Notify when live");
         action->setCheckable(true);
 
@@ -531,7 +531,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     if (twitchChannel)
     {
-        auto action = new QAction(this);
+        auto *action = new QAction(this);
         action->setText("Mute highlight sound");
         action->setCheckable(true);
 
@@ -563,11 +563,11 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
 {
     auto menu = std::make_unique<QMenu>();
 
-    auto setSub = new QAction("Subscriber only", this);
-    auto setEmote = new QAction("Emote only", this);
-    auto setSlow = new QAction("Slow", this);
-    auto setR9k = new QAction("R9K", this);
-    auto setFollowers = new QAction("Followers only", this);
+    auto *setSub = new QAction("Subscriber only", this);
+    auto *setEmote = new QAction("Emote only", this);
+    auto *setSlow = new QAction("Slow", this);
+    auto *setR9k = new QAction("R9K", this);
+    auto *setFollowers = new QAction("Followers only", this);
 
     setFollowers->setCheckable(true);
     setSub->setCheckable(true);
@@ -584,7 +584,7 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
     this->managedConnections_.managedConnect(
         this->modeUpdateRequested_,
         [this, setSub, setEmote, setSlow, setR9k, setFollowers]() {
-            auto twitchChannel =
+            auto *twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
             if (twitchChannel == nullptr)
             {
@@ -683,7 +683,7 @@ void SplitHeader::updateRoomModes()
 void SplitHeader::initializeModeSignals(EffectLabel &label)
 {
     this->modeUpdateRequested_.connect([this, &label] {
-        if (auto twitchChannel =
+        if (auto *twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
         {
             label.setEnable(twitchChannel->hasModRights());
@@ -718,7 +718,7 @@ void SplitHeader::handleChannelChanged()
     this->channelConnections_.clear();
 
     auto channel = this->split_->getChannel();
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         this->channelConnections_.managedConnect(
             twitchChannel->liveStatusChanged, [this]() {
@@ -760,7 +760,7 @@ void SplitHeader::updateChannelText()
     if (indirectChannel.getType() == Channel::Type::TwitchWatching)
         title = "watching: " + (title.isEmpty() ? "none" : title);
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         const auto streamStatus = twitchChannel->accessStreamStatus();
 
@@ -834,7 +834,7 @@ void SplitHeader::updateModerationModeIcon()
                        : getResources().buttons.modModeDisabled);
 
     auto channel = this->split_->getChannel();
-    auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
     if (twitchChannel != nullptr &&
         (twitchChannel->hasModRights() || moderationMode))
@@ -929,13 +929,13 @@ void SplitHeader::enterEvent(QEvent *event)
 {
     if (!this->tooltipText_.isEmpty())
     {
-        auto channel = this->split_->getChannel().get();
+        auto *channel = this->split_->getChannel().get();
         if (channel->getType() == Channel::Type::Twitch)
         {
             dynamic_cast<TwitchChannel *>(channel)->refreshTitle();
         }
 
-        auto tooltip = TooltipWidget::instance();
+        auto *tooltip = TooltipWidget::instance();
         tooltip->clearImage();
         tooltip->setText(this->tooltipText_);
         tooltip->setWordWrap(true);
@@ -1002,7 +1002,7 @@ void SplitHeader::reloadChannelEmotes()
 
     auto channel = this->split_->getChannel();
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         twitchChannel->refreshFFZChannelEmotes(true);
         twitchChannel->refreshBTTVChannelEmotes(true);
