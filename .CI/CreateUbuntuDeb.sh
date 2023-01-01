@@ -50,14 +50,9 @@ echo "$packaging_dir$(pwd)/appdir/usr"
 echo "$packaging_dir/"
 # move directory up
 mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/"
-echo "ls -lah"
-ls -lah
-echo "ls -lah $(pwd) (pwd)"
-ls -lah "$(pwd)"
-echo "ls -lah $(pwd)/.. (pwd/..)"
-ls -lah "$(pwd)/.."
+
 cp -R "../qt" "$packaging_dir/qt"
-readelf -a
+readelf -a bin/chatterino
 rm -vrf "$packaging_dir/home" || true
 
 echo "Building package..."
