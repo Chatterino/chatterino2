@@ -38,7 +38,7 @@ Priority: optional
 Architecture: amd64
 Maintainer: Mm2PL <mm2pl@kotmisia.pl>
 Description: Testing out chatterino as a Ubuntu package
-Depends: readelf, patchelf
+Depends:
 EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 
@@ -52,7 +52,6 @@ echo "$packaging_dir/"
 mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/"
 
 cp -R "../qt" "$packaging_dir/qt"
-readelf -a bin/chatterino
 rm -vrf "$packaging_dir/home" || true
 
 echo "Building package..."
