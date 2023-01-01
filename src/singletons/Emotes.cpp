@@ -1,8 +1,5 @@
 #include "singletons/Emotes.hpp"
 
-#include "Application.hpp"
-#include "controllers/accounts/AccountController.hpp"
-
 namespace chatterino {
 
 Emotes::Emotes()

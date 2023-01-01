@@ -1,5 +1,9 @@
 #include "providers/seventv/SeventvEventAPI.hpp"
 
+#include "providers/seventv/eventapi/SeventvEventAPIClient.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPIMessage.hpp"
+
 #include <boost/optional.hpp>
 #include <gtest/gtest.h>
 #include <QString>

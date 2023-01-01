@@ -1,6 +1,7 @@
-#include "NicknamesModel.hpp"
+#include "controllers/nicknames/NicknamesModel.hpp"
 
 #include "Application.hpp"
+#include "controllers/nicknames/Nickname.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "singletons/Settings.hpp"
 #include "util/StandardItemHelper.hpp"

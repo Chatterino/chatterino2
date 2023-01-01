@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/Aliases.hpp"
-#include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 
 #include <QJsonObject>

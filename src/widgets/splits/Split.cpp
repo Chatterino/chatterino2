@@ -2,15 +2,14 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/MessageThread.hpp"
-#include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -197,6 +196,12 @@ Split::Split(QWidget *parent)
 
     this->setSizePolicy(QSizePolicy::MinimumExpanding,
                         QSizePolicy::MinimumExpanding);
+
+    // update moderation button when items changed
+    this->signalHolder_.managedConnect(
+        getSettings()->moderationActions.delayedItemsChanged, [this] {
+            this->refreshModerationMode();
+        });
 
     this->signalHolder_.managedConnect(
         modifierStatusChanged, [this](Qt::KeyboardModifiers status) {
@@ -632,6 +637,12 @@ void Split::joinChannelInNewTab(ChannelPtr channel)
     container->insertSplit(split);
 }
 
+void Split::refreshModerationMode()
+{
+    this->header_->updateModerationModeIcon();
+    this->view_->queueLayout();
+}
+
 void Split::openChannelInBrowserPlayer(ChannelPtr channel)
 {
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
@@ -723,8 +734,7 @@ void Split::setChannel(IndirectChannel newChannel)
 void Split::setModerationMode(bool value)
 {
     this->moderationMode_ = value;
-    this->header_->updateModerationModeIcon();
-    this->view_->queueLayout();
+    this->refreshModerationMode();
 }
 
 bool Split::getModerationMode() const

@@ -2,16 +2,20 @@
 
 #include "Application.hpp"
 #include "controllers/highlights/BadgeHighlightModel.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistModel.hpp"
+#include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/UserHighlightModel.hpp"
+#include "providers/colors/ColorProvider.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/StandardItemHelper.hpp"
 #include "widgets/dialogs/BadgePickerDialog.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 
 #include <QFileDialog>
 #include <QHeaderView>

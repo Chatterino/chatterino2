@@ -1,7 +1,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 
-#include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
@@ -169,8 +169,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
 {
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(20000)
-        .onSuccess([callback = std::move(callback), channel,
-                    &channelDisplayName,
+        .onSuccess([callback = std::move(callback), channel, channelDisplayName,
                     manualRefresh](auto result) -> Outcome {
             auto pair =
                 parseChannelEmotes(result.parseJson(), channelDisplayName);

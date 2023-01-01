@@ -2,10 +2,13 @@
 
 #include "Application.hpp"
 #include "BaseSettings.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
 #include "mocks/UserData.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchBadge.hpp"  // for Badge
+#include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 
 #include <boost/optional/optional_io.hpp>
 #include <gmock/gmock.h>

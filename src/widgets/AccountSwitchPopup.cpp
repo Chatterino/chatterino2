@@ -1,12 +1,11 @@
 #include "widgets/AccountSwitchPopup.hpp"
 
+#include "widgets/AccountSwitchWidget.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 
-#include <QHBoxLayout>
 #include <QLayout>
 #include <QPainter>
 #include <QPushButton>
-#include <QVBoxLayout>
 
 namespace chatterino {
 

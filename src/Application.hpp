@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "singletons/NativeMessaging.hpp"
 
@@ -25,7 +24,6 @@ class Theme;
 class WindowManager;
 class Logging;
 class Paths;
-class AccountManager;
 class Emotes;
 class IEmotes;
 class Settings;

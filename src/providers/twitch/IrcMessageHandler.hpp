@@ -1,9 +1,6 @@
 #pragma once
 
-#include "common/Channel.hpp"
-#include "messages/Message.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "messages/LimitedQueueSnapshot.hpp"
 
 #include <IrcMessage>
 
@@ -13,6 +10,11 @@ namespace chatterino {
 
 class TwitchIrcServer;
 class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
+class TwitchChannel;
+class TwitchMessageBuilder;
 
 class IrcMessageHandler
 {

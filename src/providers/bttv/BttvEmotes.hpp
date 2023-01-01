@@ -1,9 +1,9 @@
 #pragma once
 
-#include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
+
+#include <boost/optional.hpp>
 
 #include <memory>
 
@@ -12,6 +12,7 @@ namespace chatterino {
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteMap;
+class Channel;
 
 class BttvEmotes final
 {

@@ -1,6 +1,7 @@
-#include "TooltipWidget.hpp"
+#include "widgets/TooltipWidget.hpp"
 
 #include "Application.hpp"
+#include "messages/Image.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/WindowManager.hpp"
 

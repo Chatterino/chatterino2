@@ -1,8 +1,6 @@
 #pragma once
 
-#include "providers/twitch/TwitchChannel.hpp"
 #include "widgets/BasePopup.hpp"
-#include "widgets/Notebook.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QLineEdit>
@@ -13,6 +11,8 @@ struct Link;
 class ChannelView;
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
+class Notebook;
+class TwitchChannel;
 
 class EmotePopup : public BasePopup
 {

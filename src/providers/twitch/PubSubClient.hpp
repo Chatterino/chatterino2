@@ -1,7 +1,6 @@
 #pragma once
 
 #include "providers/twitch/PubSubClientOptions.hpp"
-#include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/PubSubWebsocket.hpp"
 
 #include <pajlada/signals/signal.hpp>
@@ -11,6 +10,9 @@
 #include <vector>
 
 namespace chatterino {
+
+struct PubSubMessage;
+struct PubSubListenMessage;
 
 struct TopicData {
     QString topic;

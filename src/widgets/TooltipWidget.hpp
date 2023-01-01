@@ -1,6 +1,5 @@
 #pragma once
 
-#include "messages/Image.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
@@ -8,6 +7,9 @@
 #include <QWidget>
 
 namespace chatterino {
+
+class Image;
+using ImagePtr = std::shared_ptr<Image>;
 
 class TooltipWidget : public BaseWindow
 {
