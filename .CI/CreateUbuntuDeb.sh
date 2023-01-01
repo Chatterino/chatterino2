@@ -56,7 +56,7 @@ echo "ls -lah $(pwd) (pwd)"
 ls -lah "$(pwd)"
 echo "ls -lah $(pwd)/.. (pwd/..)"
 ls -lah "$(pwd)/.."
-cp -R "../Qt" "$packaging_dir/Qt"
+cp -R "../qt" "$packaging_dir/qt"
 readelf -a
 rm -vrf "$packaging_dir/home" || true
 
