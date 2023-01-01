@@ -57,7 +57,7 @@ echo "$packaging_dir/"
 mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/"
 
 mkdir -p "$packaging_dir/lib/qt"
-cp -R "../qt" "$packaging_dir/lib/qt"
+cp -R "../qt" "$packaging_dir/lib"
 rm -vrf "$packaging_dir/home" || true
 
 echo "Building package..."
