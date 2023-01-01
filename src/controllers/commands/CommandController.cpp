@@ -44,6 +44,7 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
+#include <magic_enum.hpp>
 #include <QApplication>
 #include <QDesktopServices>
 #include <QFile>
@@ -770,6 +771,99 @@ void CommandController::initialize(Settings &, Paths &paths)
     });
 
     /// Supported commands
+
+    this->registerCommand("/debug-account", [](const auto & /*words*/,
+                                               auto channel) {
+        const auto &acc = getIApp()->getAccounts()->twitch.getCurrent();
+
+        // Account information
+        channel->addMessage(
+            makeSystemMessage(QString("User login: %1. ID: %2")
+                                  .arg(acc->getUserName(), acc->getUserId())));
+
+        const auto emoteData = *acc->accessEmotes();
+
+        for (const auto &emoteSet : emoteData.emoteSets)
+        {
+            channel->addMessage(
+                makeSystemMessage(QString("Emote set: %1").arg(emoteSet->key)));
+            channel->addMessage(makeSystemMessage(
+                QString("Channel name: %1").arg(emoteSet->channelName)));
+            channel->addMessage(
+                makeSystemMessage(QString("Text: %1").arg(emoteSet->text)));
+            channel->addMessage(
+                makeSystemMessage(QString("Local: %1").arg(emoteSet->local)));
+
+            for (const auto &emote : emoteSet->emotes)
+            {
+                channel->addMessage(makeSystemMessage(
+                    QString("Emote: %1 (%2)")
+                        .arg(emote.name.string, emote.id.string)));
+            }
+        }
+
+        return "";
+    });
+
+    this->registerCommand(
+        "/debug-twitch-channel", [](const auto & /*words*/, auto channel) {
+            const auto *twitchChannel =
+                dynamic_cast<TwitchChannel *>(channel.get());
+            if (!twitchChannel)
+            {
+                channel->addMessage(
+                    makeSystemMessage("this is not a twitch channel"));
+                return "";
+            }
+
+            const auto &twitchEmotes = getApp()->emotes->twitch;
+
+            for (const auto &emoteSetID : twitchChannel->twitchEmoteSets)
+            {
+                channel->addMessage(makeSystemMessage(
+                    QString("Emote set ID available in this channel: %1")
+                        .arg(emoteSetID)));
+                auto emoteSetIt = twitchEmotes.twitchEmoteSets.find(emoteSetID);
+                if (emoteSetIt != twitchEmotes.twitchEmoteSets.end())
+                {
+                    const auto &emoteSet = *emoteSetIt;
+                    channel->addMessage(makeSystemMessage(
+                        QString("Emote set login: %1")
+                            .arg(emoteSet.second->ivrEmoteSet.login)));
+                }
+            }
+
+            return "";
+        });
+
+    this->registerCommand("/debug-emotes-twitch", [](const auto & /*words*/,
+                                                     auto channel) {
+        const auto &twitchEmotes = getApp()->emotes->twitch;
+
+        for (const auto &[emoteSetID, emoteSet] : twitchEmotes.twitchEmoteSets)
+        {
+            if (emoteSet->emoteSetType)
+            {
+                channel->addMessage(makeSystemMessage(
+                    QString("Emote set ID: %1 (%2)")
+                        .arg(emoteSetID,
+                             QString::fromUtf8(
+                                 magic_enum::enum_name(*emoteSet->emoteSetType)
+                                     .data()))));
+            }
+            else
+            {
+                channel->addMessage(makeSystemMessage(
+                    QString("Emote set ID: %1 (unknown type '%2')")
+                        .arg(emoteSetID, emoteSet->emoteSetTypeString)));
+            }
+            channel->addMessage(
+                makeSystemMessage(QString("Emote set login: %1")
+                                      .arg(emoteSet->ivrEmoteSet.login)));
+        }
+
+        return "";
+    });
 
     this->registerCommand(
         "/debug-args", [](const auto & /*words*/, auto channel) {

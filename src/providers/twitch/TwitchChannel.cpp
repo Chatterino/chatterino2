@@ -621,6 +621,11 @@ std::shared_ptr<const EmoteMap> TwitchChannel::seventvEmotes() const
     return this->seventvEmotes_.get();
 }
 
+void TwitchChannel::setTwitchEmoteSets(QStringList &&emoteSets)
+{
+    this->twitchEmoteSets = emoteSets;
+}
+
 const QString &TwitchChannel::seventvUserID() const
 {
     return this->seventvUserID_;

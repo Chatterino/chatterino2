@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/NetworkRequest.hpp"
-#include "providers/twitch/TwitchEmotes.hpp"
 
 #include <boost/noncopyable.hpp>
 #include <QJsonArray>
@@ -10,6 +9,9 @@
 #include <functional>
 
 namespace chatterino {
+
+#define TWITCH_EMOTE_TEMPLATE \
+    "https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/{scale}"
 
 using IvrFailureCallback = std::function<void()>;
 template <typename... T>
@@ -34,13 +36,14 @@ struct IvrSubage {
 };
 
 struct IvrEmoteSet {
-    const QString setId;
-    const QString displayName;
-    const QString login;
-    const QString channelId;
-    const QString tier;
-    const QJsonArray emotes;
+    QString setId;
+    QString displayName;
+    QString login;
+    QString channelId;
+    QString tier;
+    QJsonArray emotes;
 
+    IvrEmoteSet() = default;
     IvrEmoteSet(const QJsonObject &root)
         : setId(root.value("setID").toString())
         , displayName(root.value("channelName").toString())

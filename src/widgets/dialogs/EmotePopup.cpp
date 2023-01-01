@@ -390,9 +390,43 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     auto channelChannel = std::make_shared<Channel>("", Channel::Type::None);
 
     // twitch
+
+    for (const auto &emoteSetID : this->twitchChannel_->twitchEmoteSets)
+    {
+        const auto &twitchEmoteSets = getApp()->emotes->twitch.twitchEmoteSets;
+        auto emoteSetIt = twitchEmoteSets.find(emoteSetID);
+        if (emoteSetIt != twitchEmoteSets.end())
+        {
+            const auto &emoteSet = *emoteSetIt->second;
+            switch (
+                emoteSet.emoteSetType.value_or(TwitchEmoteType::Subscriptions))
+            {
+                case TwitchEmoteType::Globals:
+                case TwitchEmoteType::Smilies: {
+                    // GLOBAL TWITCH
+                    addEmotes(*globalChannel, emoteSet.emotes,
+                              QString("Twitch - %1")
+                                  .arg(emoteSet.ivrEmoteSet.displayName),
+                              MessageElementFlag::TwitchEmote);
+                }
+                break;
+
+                default: {
+                    addEmotes(*subChannel, emoteSet.emotes,
+                              QString("Twitch - %1")
+                                  .arg(emoteSet.ivrEmoteSet.displayName),
+                              MessageElementFlag::TwitchEmote);
+                }
+                break;
+            }
+        }
+    }
+
+    /*
     addTwitchEmoteSets(
         getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets,
         *globalChannel, *subChannel, this->channel_->getName());
+        */
 
     // global
     if (Settings::instance().enableBTTVGlobalEmotes)
@@ -477,8 +511,10 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
         searchText, getApp()->twitch->getSeventvEmotes().globalEmotes());
 
     // twitch
+    /*
     addTwitchEmoteSets(twitchGlobalEmotes, *searchChannel, *searchChannel,
                        this->channel_->getName());
+                       */
 
     // global
     if (!bttvGlobalEmotes.empty())

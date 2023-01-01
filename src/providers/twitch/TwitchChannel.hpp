@@ -15,6 +15,7 @@
 #include <QColor>
 #include <QElapsedTimer>
 #include <QRegularExpression>
+#include <QStringList>
 
 #include <atomic>
 #include <mutex>
@@ -133,6 +134,10 @@ public:
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
     std::shared_ptr<const EmoteMap> seventvEmotes() const;
+
+    void setTwitchEmoteSets(QStringList &&emoteSets);
+
+    QStringList twitchEmoteSets;
 
     virtual void refreshBTTVChannelEmotes(bool manualRefresh);
     virtual void refreshFFZChannelEmotes(bool manualRefresh);

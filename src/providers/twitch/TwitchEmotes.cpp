@@ -3,7 +3,10 @@
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
+#include "providers/IvrApi.hpp"
 #include "util/QStringHash.hpp"
+
+#include <optional>
 
 namespace chatterino {
 
@@ -56,6 +59,117 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
     }
 
     return shared;
+}
+
+template <typename C>
+auto splitListIntoBatches2(const C &container, int batchSize = 100)
+{
+    std::vector<C> batches;
+    int batchCount =
+        std::ceil(static_cast<double>(container.size()) / batchSize);
+    batches.reserve(batchCount);
+
+    auto it = container.cbegin();
+
+    for (int j = 0; j < batchCount; j++)
+    {
+        C batch;
+
+        for (int i = 0; i < batchSize && it != container.end(); i++)
+        {
+            batch.insert(it.key(), it.value());
+            it++;
+        }
+        if (batch.empty())
+        {
+            break;
+        }
+        batches.emplace_back(std::move(batch));
+    }
+
+    return batches;
+}
+
+void TwitchEmotes::loadSets(QStringList emoteSets)
+{
+    QMap<QString, std::shared_ptr<TwitchEmoteSet>> newEmoteSets;
+    QStringList exitingEmoteSetIDs;
+
+    {
+        // unique_lock twitchEmoteSets
+        for (const auto &emoteSetID : emoteSets)
+        {
+            if (!this->twitchEmoteSets.contains(emoteSetID))
+            {
+                auto emoteSet = std::make_shared<TwitchEmoteSet>();
+                newEmoteSets.insert(emoteSetID, emoteSet);
+                this->twitchEmoteSets.emplace(emoteSetID, emoteSet);
+            }
+        }
+    }
+
+    auto batches = splitListIntoBatches2(newEmoteSets);
+    for (auto &&batch : batches)
+    {
+        const auto emoteSetIDs = batch.keys().join(',');
+        getIvr()->getBulkEmoteSets(
+            emoteSetIDs,
+            [this, batch = std::move(batch)](QJsonArray emoteSetArray) {
+                for (auto emoteSetResponse : emoteSetArray)
+                {
+                    IvrEmoteSet ivrEmoteSet(emoteSetResponse.toObject());
+                    qDebug() << ivrEmoteSet.setId << ivrEmoteSet.displayName
+                             << ivrEmoteSet.login << ivrEmoteSet.channelId
+                             << ivrEmoteSet.tier << ivrEmoteSet.emotes;
+                    auto emoteSet = batch[ivrEmoteSet.setId];
+                    assert(emoteSet != nullptr);
+                    emoteSet->ivrEmoteSet = ivrEmoteSet;
+
+                    for (const auto &emoteObj : ivrEmoteSet.emotes)
+                    {
+                        IvrEmote ivrEmote(emoteObj.toObject());
+                        if (emoteSet->emoteSetTypeString.isEmpty())
+                        {
+                            emoteSet->emoteSetTypeString = ivrEmote.emoteType;
+                        }
+                        if (!emoteSet->emoteSetType)
+                        {
+                            emoteSet->emoteSetType =
+                                magic_enum::enum_cast<TwitchEmoteType>(
+                                    ivrEmote.emoteType.toStdString());
+                            if (emoteSet->emoteSetType)
+                            {
+                                qDebug() << "XXX: Set the emote set type to"
+                                         << QString::fromUtf8(
+                                                magic_enum::enum_name(
+                                                    *emoteSet->emoteSetType)
+                                                    .data());
+                            }
+                            else
+                            {
+                                qDebug()
+                                    << "XXX: Failed to set emote set type: "
+                                    << ivrEmote.emoteType;
+                            }
+                        }
+
+                        auto id = EmoteId{ivrEmote.id};
+                        auto code = EmoteName{
+                            TwitchEmotes::cleanUpEmoteCode(ivrEmote.code)};
+
+                        // emoteSet->emotes.push_back(TwitchEmote{id, code});
+
+                        auto emote = this->getOrCreateEmote(id, code);
+
+                        // Follower emotes can be only used in their origin channel
+                        emoteSet->emotes.emplace(code, emote);
+                    }
+                }
+            },
+            [] {
+                // fetching emotes failed, ivr API might be down
+            });
+    }
 }
 
 Url TwitchEmotes::getEmoteLink(const EmoteId &id, const QString &emoteScale)

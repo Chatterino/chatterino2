@@ -14,9 +14,11 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
@@ -721,9 +723,10 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 {
     auto currentUser = getApp()->accounts->twitch.getCurrent();
 
+    QStringList emoteSets = message->tag("emote-sets").toString().split(",");
+
     // set received emote-sets, used in TwitchAccount::loadUserstateEmotes
-    bool emoteSetsChanged = currentUser->setUserstateEmoteSets(
-        message->tag("emote-sets").toString().split(","));
+    bool emoteSetsChanged = currentUser->setUserstateEmoteSets(emoteSets);
 
     if (emoteSetsChanged)
     {
@@ -742,11 +745,27 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         return;
     }
 
+    auto *tc = dynamic_cast<TwitchChannel *>(c.get());
+    if (!tc)
+    {
+        return;
+    }
+
+    for (const auto &emoteSetID : emoteSets)
+    {
+        qDebug() << "XXX: Emote set:" << emoteSetID;
+    }
+
+    getApp()->emotes->twitch.loadSets(emoteSets);
+
+    tc->setTwitchEmoteSets(std::move(emoteSets));
+
+    // TODO: Clean up below code
+
     // Checking if currentUser is a VIP or staff member
     QVariant _badges = message->tag("badges");
     if (_badges.isValid())
     {
-        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(c.get());
         if (tc != nullptr)
         {
             auto parsedBadges = parseBadges(_badges.toString());
