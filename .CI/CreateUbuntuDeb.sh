@@ -54,6 +54,7 @@ echo "$packaging_dir/"
 # move directory up
 mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/"
 
+mkdir -p "$packaging_dir/lib/qt"
 cp -R "../qt" "$packaging_dir/lib/qt"
 rm -vrf "$packaging_dir/home" || true
 
