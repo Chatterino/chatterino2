@@ -41,6 +41,9 @@ Description: Testing out chatterino as a Ubuntu package
 Depends:
 EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
+cat >> "$packaging_dir/DEBIAN/postinst" << EOF
+export LD_LIBRARY_PATH=/lib/qt/Qt/5.15.2/gcc_64/lib:"$LD_LIBRARY_PATH"
+EOF
 
 echo "Running make install in package dir"
 DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
@@ -51,7 +54,7 @@ echo "$packaging_dir/"
 # move directory up
 mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/"
 
-cp -R "../qt" "$packaging_dir/qt"
+cp -R "../qt" "$packaging_dir/lib/qt"
 rm -vrf "$packaging_dir/home" || true
 
 echo "Building package..."
