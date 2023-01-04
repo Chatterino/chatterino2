@@ -1,7 +1,11 @@
-#include "BadgeHighlightModel.hpp"
+#include "controllers/highlights/BadgeHighlightModel.hpp"
 
 #include "Application.hpp"
+#include "common/SignalVectorModel.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/Emote.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/Settings.hpp"
 #include "util/StandardItemHelper.hpp"
 

@@ -70,6 +70,10 @@ set(SOURCE_FILES
 
         controllers/filters/FilterModel.cpp
         controllers/filters/FilterModel.hpp
+        controllers/filters/FilterRecord.cpp
+        controllers/filters/FilterRecord.hpp
+        controllers/filters/FilterSet.cpp
+        controllers/filters/FilterSet.hpp
         controllers/filters/parser/FilterParser.cpp
         controllers/filters/parser/FilterParser.hpp
         controllers/filters/parser/Tokenizer.cpp
@@ -188,8 +192,6 @@ set(SOURCE_FILES
 
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp
-        providers/bttv/LoadBttvChannelEmote.cpp
-        providers/bttv/LoadBttvChannelEmote.hpp
 
         providers/chatterino/ChatterinoBadges.cpp
         providers/chatterino/ChatterinoBadges.hpp
@@ -316,8 +318,6 @@ set(SOURCE_FILES
         singletons/Theme.hpp
         singletons/Toasts.cpp
         singletons/Toasts.hpp
-        singletons/TooltipPreviewImage.cpp
-        singletons/TooltipPreviewImage.hpp
         singletons/Updates.cpp
         singletons/Updates.hpp
         singletons/WindowManager.cpp
@@ -332,6 +332,7 @@ set(SOURCE_FILES
         util/AttachToConsole.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
+        util/ConcurrentMap.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
         util/DisplayBadge.cpp
@@ -358,6 +359,7 @@ set(SOURCE_FILES
         util/RatelimitBucket.hpp
         util/SampleData.cpp
         util/SampleData.hpp
+        util/SharedPtrElementLess.hpp
         util/SplitCommand.cpp
         util/SplitCommand.hpp
         util/StreamLink.cpp

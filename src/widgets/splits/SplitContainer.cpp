@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
+#include "common/WindowDescriptors.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
@@ -15,7 +16,6 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/Window.hpp"
 
-#include <boost/foreach.hpp>
 #include <QApplication>
 #include <QJsonArray>
 #include <QJsonObject>

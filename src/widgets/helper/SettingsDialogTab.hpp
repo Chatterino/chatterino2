@@ -13,7 +13,7 @@ namespace chatterino {
 class SettingsPage;
 class SettingsDialog;
 
-enum SettingsTabId {
+enum class SettingsTabId {
     None,
     Accounts,
     Moderation,

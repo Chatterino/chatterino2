@@ -1,6 +1,7 @@
 #include "FfzBadges.hpp"
 
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "messages/Emote.hpp"
 

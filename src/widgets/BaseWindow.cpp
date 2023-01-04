@@ -1,7 +1,9 @@
 #include "widgets/BaseWindow.hpp"
 
-#include "BaseSettings.hpp"
+#include "Application.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
@@ -15,11 +17,6 @@
 #include <QIcon>
 
 #include <functional>
-
-#ifdef CHATTERINO
-#    include "Application.hpp"
-#    include "singletons/WindowManager.hpp"
-#endif
 
 #ifdef USEWINSDK
 #    include <dwmapi.h>

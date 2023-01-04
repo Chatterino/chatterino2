@@ -10,6 +10,12 @@
 
 namespace chatterino {
 
+template <typename T>
+class SignalVector;
+
+template <typename T>
+struct SignalVectorItemEvent;
+
 template <typename TVectorItem>
 class SignalVectorModel : public QAbstractTableModel,
                           pajlada::Signals::SignalHolder

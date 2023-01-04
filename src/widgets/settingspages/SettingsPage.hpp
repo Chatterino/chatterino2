@@ -1,7 +1,6 @@
 #pragma once
 
-#include "singletons/Settings.hpp"
-
+#include <pajlada/settings.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QCheckBox>
 #include <QComboBox>

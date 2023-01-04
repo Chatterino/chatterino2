@@ -3,6 +3,7 @@
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "messages/MessageElement.hpp"
 #include "providers/irc/IrcCommands.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/irc/IrcServer.hpp"

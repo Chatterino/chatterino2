@@ -3,12 +3,16 @@
 #include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
-#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
+#include "common/FlagsEnum.hpp"
 
 #include <memory>
 
 namespace chatterino {
+
+class Channel;
+struct SeventvEventAPIEmoteAddDispatch;
+struct SeventvEventAPIEmoteUpdateDispatch;
+struct SeventvEventAPIEmoteRemoveDispatch;
 
 // https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/emote-set.model.go#L29-L36
 enum class SeventvActiveEmoteFlag : int64_t {

@@ -1,12 +1,12 @@
 #pragma once
 
 #include "common/SignalVectorModel.hpp"
-#include "controllers/highlights/HighlightBlacklistUser.hpp"
 
 #include <QObject>
 
 namespace chatterino {
 
+class HighlightBlacklistUser;
 class HighlightController;
 
 class HighlightBlacklistModel : public SignalVectorModel<HighlightBlacklistUser>

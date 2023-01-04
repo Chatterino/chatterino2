@@ -1,6 +1,5 @@
 #pragma once
 
-#include "widgets/helper/EditableModelView.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
 #include <QAbstractTableModel>
@@ -10,6 +9,8 @@ class QPushButton;
 class QListWidget;
 
 namespace chatterino {
+
+class EditableModelView;
 
 class HighlightingPage : public SettingsPage
 {

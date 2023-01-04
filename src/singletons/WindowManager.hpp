@@ -1,11 +1,12 @@
 #pragma once
 
-#include "common/Channel.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
-#include "common/WindowDescriptors.hpp"
-#include "pajlada/settings/settinglistener.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+
+#include <pajlada/settings/settinglistener.hpp>
+#include <QPoint>
+#include <QTimer>
 
 #include <memory>
 
@@ -14,8 +15,15 @@ namespace chatterino {
 class Settings;
 class Paths;
 class Window;
-class SplitContainer;
 class ChannelView;
+class IndirectChannel;
+class Split;
+struct SplitDescriptor;
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
+class WindowLayout;
 
 enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;

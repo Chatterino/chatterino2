@@ -1,9 +1,10 @@
 #include "providers/emoji/Emojis.hpp"
 
-#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 #include "singletons/Settings.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
 #include <boost/variant.hpp>
 #include <QFile>
@@ -11,6 +12,7 @@
 #include <rapidjson/error/error.h>
 #include <rapidjson/rapidjson.h>
 
+#include <array>
 #include <memory>
 
 namespace chatterino {

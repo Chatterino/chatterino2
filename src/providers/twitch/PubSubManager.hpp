@@ -1,14 +1,11 @@
 #pragma once
 
-#include "providers/twitch/ChatterinoWebSocketppLogger.hpp"
-#include "providers/twitch/PubSubActions.hpp"
-#include "providers/twitch/PubSubClient.hpp"
 #include "providers/twitch/PubSubClientOptions.hpp"
-#include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/PubSubWebsocket.hpp"
 #include "util/ExponentialBackoff.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
 #include <QString>
@@ -25,6 +22,23 @@
 namespace chatterino {
 
 class TwitchAccount;
+class PubSubClient;
+
+struct ClearChatAction;
+struct DeleteAction;
+struct ModeChangedAction;
+struct ModerationStateAction;
+struct BanAction;
+struct UnbanAction;
+struct PubSubAutoModQueueMessage;
+struct AutomodAction;
+struct AutomodUserAction;
+struct AutomodInfoAction;
+struct PubSubWhisperMessage;
+
+struct PubSubListenMessage;
+struct PubSubMessage;
+struct PubSubMessageMessage;
 
 class PubSub
 {

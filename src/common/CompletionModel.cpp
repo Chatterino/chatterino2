@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/ChatterSet.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "messages/Emote.hpp"
 #include "providers/twitch/TwitchAccount.hpp"

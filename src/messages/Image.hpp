@@ -102,6 +102,9 @@ private:
     friend class ImageExpirationPool;
 };
 
+// forward-declarable function that calls Image::getEmpty() under the hood.
+ImagePtr getEmptyImagePtr();
+
 class ImageExpirationPool
 {
 private:

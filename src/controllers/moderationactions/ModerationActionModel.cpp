@@ -1,5 +1,6 @@
-#include "ModerationActionModel.hpp"
+#include "controllers/moderationactions/ModerationActionModel.hpp"
 
+#include "controllers/moderationactions/ModerationAction.hpp"
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {

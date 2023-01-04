@@ -1,6 +1,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "singletons/Settings.hpp"

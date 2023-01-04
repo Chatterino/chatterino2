@@ -1,14 +1,18 @@
 #pragma once
 
 #include "common/Singleton.hpp"
-#include "messages/Message.hpp"
-#include "singletons/helper/LoggingChannel.hpp"
 
+#include <QString>
+
+#include <map>
 #include <memory>
 
 namespace chatterino {
 
 class Paths;
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
+class LoggingChannel;
 
 class Logging : public Singleton
 {

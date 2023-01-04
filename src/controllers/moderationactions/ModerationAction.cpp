@@ -1,6 +1,7 @@
-#include "ModerationAction.hpp"
+#include "controllers/moderationactions/ModerationAction.hpp"
 
 #include "Application.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "messages/Image.hpp"
 #include "singletons/Resources.hpp"
 

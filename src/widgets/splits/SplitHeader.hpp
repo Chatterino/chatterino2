@@ -25,7 +25,7 @@ class SplitHeader final : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit SplitHeader(Split *_chatWidget);
+    explicit SplitHeader(Split *split);
 
     void setAddButtonVisible(bool value);
     void setViewersButtonVisible(bool value);
@@ -35,16 +35,16 @@ public:
     void updateRoomModes();
 
 protected:
-    virtual void scaleChangedEvent(float) override;
-    virtual void themeChangedEvent() override;
+    void scaleChangedEvent(float scale) override;
+    void themeChangedEvent() override;
 
-    virtual void paintEvent(QPaintEvent *) override;
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void mouseReleaseEvent(QMouseEvent *event) override;
-    virtual void mouseMoveEvent(QMouseEvent *event) override;
-    virtual void enterEvent(QEvent *) override;
-    virtual void leaveEvent(QEvent *event) override;
-    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void enterEvent(QEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
     void initializeLayout();
