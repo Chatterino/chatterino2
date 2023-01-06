@@ -5,7 +5,6 @@
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QScreen>
 #include <QVBoxLayout>
 

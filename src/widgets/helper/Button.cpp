@@ -5,8 +5,8 @@
 
 #include <QApplication>
 #include <QDebug>
-#include <QDesktopWidget>
 #include <QPainter>
+#include <QScreen>
 
 namespace chatterino {
 namespace {
@@ -345,10 +345,15 @@ void Button::showMenu()
         return;
 
     auto point = [this] {
-        auto bounds = QApplication::desktop()->availableGeometry(this);
-
         auto point = this->mapToGlobal(
             QPoint(this->width() - this->menu_->width(), this->height()));
+
+        auto *screen = QApplication::screenAt(point);
+        if (screen == nullptr)
+        {
+            screen = QApplication::primaryScreen();
+        }
+        auto bounds = screen->availableGeometry();
 
         if (point.y() + this->menu_->height() > bounds.bottom())
         {
