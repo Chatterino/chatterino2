@@ -4,6 +4,8 @@
 
 #include <QObject>
 
+#include <vector>
+
 namespace chatterino {
 
 class Nickname;
