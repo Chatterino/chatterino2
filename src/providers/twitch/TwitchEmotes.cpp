@@ -2,6 +2,7 @@
 
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
+#include "util/QStringHash.hpp"
 
 namespace chatterino {
 
