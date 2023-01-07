@@ -20,6 +20,7 @@
 - Bugfix: Fixed tooltip images not appearing if mouse hovered only first pixel. (#4268)
 - Bugfix: Fixed crash that could occur when closing down a split at the wrong time. (#4277)
 - Bugfix: Fixed crash that could occur when closing down the last of a channel when reloading emotes. (#4278)
+- Bugfix: Fixed scrollbar highlight colors when changing message history limit. (#4288)
 - Dev: Remove protocol from QApplication's Organization Domain (so changed from `https://www.chatterino.com` to `chatterino.com`). (#4256)
 - Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
 - Dev: Migrated to C++ 20 (#4252, #4257)
