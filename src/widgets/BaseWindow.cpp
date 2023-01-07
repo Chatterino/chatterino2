@@ -12,9 +12,9 @@
 #include "widgets/TooltipWidget.hpp"
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QFont>
 #include <QIcon>
+#include <QScreen>
 
 #include <functional>
 
@@ -244,7 +244,7 @@ void BaseWindow::setStayInScreenRect(bool value)
 {
     this->stayInScreenRect_ = value;
 
-    this->moveIntoDesktopRect(this, this->pos());
+    this->moveIntoDesktopRect(this->pos());
 }
 
 bool BaseWindow::getStayInScreenRect() const
@@ -522,21 +522,16 @@ void BaseWindow::moveTo(QWidget *parent, QPoint point, bool offset)
         point.ry() += 16;
     }
 
-    this->moveIntoDesktopRect(parent, point);
+    this->moveIntoDesktopRect(point);
 }
 
 void BaseWindow::resizeEvent(QResizeEvent *)
 {
     // Queue up save because: Window resized
-#ifdef CHATTERINO
     if (!flags_.has(DisableLayoutSave))
     {
         getApp()->windows->queueSave();
     }
-
-#endif
-
-    //this->moveIntoDesktopRect(this);
 
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame() && !this->isResizeFixing_)
@@ -581,50 +576,55 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
-    this->moveIntoDesktopRect(this, this->pos());
+    this->moveIntoDesktopRect(this->pos());
     if (this->frameless_)
     {
         QTimer::singleShot(30, this, [this] {
-            this->moveIntoDesktopRect(this, this->pos());
+            this->moveIntoDesktopRect(this->pos());
         });
     }
 }
 
-void BaseWindow::moveIntoDesktopRect(QWidget *parent, QPoint point)
+void BaseWindow::moveIntoDesktopRect(QPoint point)
 {
     if (!this->stayInScreenRect_)
+    {
         return;
+    }
 
     // move the widget into the screen geometry if it's not already in there
-    QDesktopWidget *desktop = QApplication::desktop();
-    QPoint globalCursorPos = QCursor::pos();
-
-    QRect s = desktop->availableGeometry(parent);
+    auto *screen = QApplication::screenAt(point);
+    if (screen == nullptr)
+    {
+        screen = QApplication::primaryScreen();
+    }
+    const QRect bounds = screen->availableGeometry();
 
     bool stickRight = false;
     bool stickBottom = false;
 
-    if (point.x() < s.left())
+    if (point.x() < bounds.left())
     {
-        point.setX(s.left());
+        point.setX(bounds.left());
     }
-    if (point.y() < s.top())
+    if (point.y() < bounds.top())
     {
-        point.setY(s.top());
+        point.setY(bounds.top());
     }
-    if (point.x() + this->width() > s.right())
+    if (point.x() + this->width() > bounds.right())
     {
         stickRight = true;
-        point.setX(s.right() - this->width());
+        point.setX(bounds.right() - this->width());
     }
-    if (point.y() + this->height() > s.bottom())
+    if (point.y() + this->height() > bounds.bottom())
     {
         stickBottom = true;
-        point.setY(s.bottom() - this->height());
+        point.setY(bounds.bottom() - this->height());
     }
 
     if (stickRight && stickBottom)
     {
+        const QPoint globalCursorPos = QCursor::pos();
         point.setY(globalCursorPos.y() - this->height() - 16);
     }
 

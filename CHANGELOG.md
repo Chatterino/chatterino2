@@ -28,6 +28,7 @@
 - Dev: Removed unused include directives. (#4266, #4275)
 - Dev: Removed TooltipPreviewImage. (#4268)
 - Dev: Removed unused operators in `Image` (#4267)
+- Dev: Removed usage of deprecated `QDesktopWidget` (#4287)
 
 ## 2.4.0
 
