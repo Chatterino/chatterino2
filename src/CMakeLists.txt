@@ -848,6 +848,8 @@ else ()
             -Wno-unused-private-field
             -Werror=inconsistent-missing-override
             -Werror=final-dtor-non-final-class
+            -Werror=ambiguous-reversed-operator
+
         )
     else ()
         target_compile_options(${LIBRARY_PROJECT} PUBLIC
