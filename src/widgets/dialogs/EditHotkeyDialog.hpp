@@ -14,7 +14,7 @@ namespace chatterino {
 
 class Hotkey;
 
-class EditHotkeyDialog : public QDialog
+class EditHotkeyDialog final : public QDialog
 {
     Q_OBJECT
 
