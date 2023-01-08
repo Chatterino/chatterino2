@@ -846,6 +846,7 @@ else ()
         target_compile_options(${LIBRARY_PROJECT} PUBLIC
             -Wno-unused-local-typedef
             -Wno-unused-private-field
+            -Werror=inconsistent-missing-override
         )
     else ()
         target_compile_options(${LIBRARY_PROJECT} PUBLIC
