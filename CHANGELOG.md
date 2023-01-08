@@ -25,7 +25,7 @@
 - Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
 - Dev: Migrated to C++ 20 (#4252, #4257)
 - Dev: Enable LTO for main branch builds. (#4258, #4260)
-- Dev: Removed unused include directives. (#4266, #4275)
+- Dev: Removed unused include directives. (#4266, #4275, #4294)
 - Dev: Removed TooltipPreviewImage. (#4268)
 - Dev: Removed unused operators in `Image` (#4267)
 - Dev: Removed usage of deprecated `QDesktopWidget` (#4287)
