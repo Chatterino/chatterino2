@@ -6,6 +6,7 @@
 #include "providers/IvrApi.hpp"
 #include "util/QStringHash.hpp"
 
+#include <cmath>
 #include <optional>
 
 namespace chatterino {

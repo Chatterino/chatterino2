@@ -4,6 +4,7 @@
 #include "common/UniqueAccess.hpp"
 #include "messages/Emote.hpp"
 #include "providers/IvrApi.hpp"
+#include "util/QStringHash.hpp"
 
 #include <magic_enum.hpp>
 #include <QColor>
