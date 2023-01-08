@@ -31,6 +31,7 @@
 - Dev: Removed usage of deprecated `QDesktopWidget` (#4287)
 - Dev: Bump Cirrus CI FreeBSD image from 12.1 to 13.1. (#4295)
 - Dev: Fixed `inconsistent-missing-override` warnings. (#4296)
+- Dev: Fixed `final-dtor-non-final-class` warnings. (#4296)
 
 ## 2.4.0
 

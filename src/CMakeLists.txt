@@ -847,6 +847,7 @@ else ()
             -Wno-unused-local-typedef
             -Wno-unused-private-field
             -Werror=inconsistent-missing-override
+            -Werror=final-dtor-non-final-class
         )
     else ()
         target_compile_options(${LIBRARY_PROJECT} PUBLIC
