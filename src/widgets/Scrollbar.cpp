@@ -16,9 +16,10 @@
 
 namespace chatterino {
 
-Scrollbar::Scrollbar(ChannelView *parent)
+Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
     : BaseWidget(parent)
     , currentValueAnimation_(this, "currentValue_")
+    , highlights_(messagesLimit)
 {
     resize(int(16 * this->scale()), 100);
     this->currentValueAnimation_.setDuration(150);

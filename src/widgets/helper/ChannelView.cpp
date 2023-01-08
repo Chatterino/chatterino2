@@ -147,7 +147,7 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
                          size_t messagesLimit)
     : BaseWidget(parent)
     , split_(split)
-    , scrollBar_(new Scrollbar(this))
+    , scrollBar_(new Scrollbar(messagesLimit, this))
     , highlightAnimation_(this)
     , context_(context)
     , messages_(messagesLimit)
