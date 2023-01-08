@@ -26,7 +26,13 @@
 #include <QRegularExpression>
 #include <QTabWidget>
 
+#include <algorithm>
+#include <functional>
+#include <iomanip>
+#include <ranges>
+#include <tuple>
 #include <utility>
+#include <vector>
 
 namespace {
 
@@ -94,23 +100,30 @@ auto makeEmojiMessage(EmojiMap &emojiMap)
     return builder.release();
 }
 
-void addTwitchEmoteSets(
-    std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> sets,
-    Channel &globalChannel, Channel &subChannel, QString currentChannelName)
+void addTwitchEmoteSets(QStringList emoteSetIDs, Channel &globalChannel,
+                        Channel &subChannel, QString currentChannelName)
 {
+    const auto &twitchEmoteSets = getApp()->emotes->twitch.twitchEmoteSets;
+
     QMap<QString, QPair<bool, std::vector<MessagePtr>>> mapOfSets;
 
-    for (const auto &set : sets)
+    for (const auto &emoteSetID : emoteSetIDs)
     {
-        // Some emotes (e.g. follower ones) are only available in their origin channel
-        if (set->local && currentChannelName != set->channelName)
+        auto emoteSetIt = twitchEmoteSets.find(emoteSetID);
+
+        if (emoteSetIt == twitchEmoteSets.end())
         {
+            // The emote set was not loaded. Warn? Notify? List? Update on loaded?
             continue;
         }
 
+        const auto &emoteSet = *emoteSetIt->second;
+
         // TITLE
-        auto channelName = set->channelName;
-        auto text = set->text.isEmpty() ? "Twitch" : set->text;
+        auto channelName = emoteSet.ivrEmoteSet.login;
+        auto text = emoteSet.ivrEmoteSet.displayName.isEmpty()
+                        ? "Twitch"
+                        : emoteSet.ivrEmoteSet.displayName;
 
         // EMOTES
         MessageBuilder builder;
@@ -122,18 +135,35 @@ void addTwitchEmoteSets(
         {
             std::vector<MessagePtr> b;
             b.push_back(makeTitleMessage(text));
-            mapOfSets[channelName] = qMakePair(set->key == "0", b);
+            mapOfSets[channelName] =
+                qMakePair(emoteSet.ivrEmoteSet.setId == "0", b);
         }
 
-        for (const auto &emote : set->emotes)
+        // std::views::keys(emoteSet.emotes); // :()
+        std::vector<EmoteName> keys;
+        keys.reserve(emoteSet.emotes.size());
+
+        for (const auto &emote : emoteSet.emotes)
         {
+            keys.push_back(emote.first);
+        }
+
+        std::sort(keys.begin(), keys.end(), [](EmoteName a, EmoteName b) {
+            return a.string < b.string;
+        });
+
+        for (const auto &emoteName : keys)
+        {
+            const auto &emoteIt = emoteSet.emotes.find(emoteName);
+            assert(emoteIt != emoteSet.emotes.end());
+            const auto &emotePtr = emoteIt->second;
+
             builder
                 .emplace<EmoteElement>(
-                    getApp()->emotes->twitch.getOrCreateEmote(emote.id,
-                                                              emote.name),
+                    emotePtr,
                     MessageElementFlags{MessageElementFlag::AlwaysShow,
                                         MessageElementFlag::TwitchEmote})
-                ->setLink(Link(Link::InsertText, emote.name.string));
+                ->setLink(Link(Link::InsertText, emoteName.string));
         }
 
         mapOfSets[channelName].second.push_back(builder.release());
@@ -390,43 +420,8 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     auto channelChannel = std::make_shared<Channel>("", Channel::Type::None);
 
     // twitch
-
-    for (const auto &emoteSetID : this->twitchChannel_->twitchEmoteSets)
-    {
-        const auto &twitchEmoteSets = getApp()->emotes->twitch.twitchEmoteSets;
-        auto emoteSetIt = twitchEmoteSets.find(emoteSetID);
-        if (emoteSetIt != twitchEmoteSets.end())
-        {
-            const auto &emoteSet = *emoteSetIt->second;
-            switch (
-                emoteSet.emoteSetType.value_or(TwitchEmoteType::Subscriptions))
-            {
-                case TwitchEmoteType::Globals:
-                case TwitchEmoteType::Smilies: {
-                    // GLOBAL TWITCH
-                    addEmotes(*globalChannel, emoteSet.emotes,
-                              QString("Twitch - %1")
-                                  .arg(emoteSet.ivrEmoteSet.displayName),
-                              MessageElementFlag::TwitchEmote);
-                }
-                break;
-
-                default: {
-                    addEmotes(*subChannel, emoteSet.emotes,
-                              QString("Twitch - %1")
-                                  .arg(emoteSet.ivrEmoteSet.displayName),
-                              MessageElementFlag::TwitchEmote);
-                }
-                break;
-            }
-        }
-    }
-
-    /*
-    addTwitchEmoteSets(
-        getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets,
-        *globalChannel, *subChannel, this->channel_->getName());
-        */
+    addTwitchEmoteSets(this->twitchChannel_->twitchEmoteSets, *globalChannel,
+                       *subChannel, this->channel_->getName());
 
     // global
     if (Settings::instance().enableBTTVGlobalEmotes)
@@ -510,12 +505,6 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     auto seventvGlobalEmotes = filterEmoteMap(
         searchText, getApp()->twitch->getSeventvEmotes().globalEmotes());
 
-    // twitch
-    /*
-    addTwitchEmoteSets(twitchGlobalEmotes, *searchChannel, *searchChannel,
-                       this->channel_->getName());
-                       */
-
     // global
     if (!bttvGlobalEmotes.empty())
     {
@@ -537,6 +526,10 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     {
         return;
     }
+
+    // TODO: This is not working
+    addTwitchEmoteSets(this->twitchChannel_->twitchEmoteSets, *searchChannel,
+                       *searchChannel, this->channel_->getName());
 
     auto bttvChannelEmotes =
         filterEmoteMap(searchText, this->twitchChannel_->bttvEmotes());
