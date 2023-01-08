@@ -2,10 +2,13 @@
 
 #include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
+#include "util/QStringHash.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
 #include <boost/signals2.hpp>
+#include <QString>
 
+#include <memory>
 #include <mutex>
 #include <vector>
 
