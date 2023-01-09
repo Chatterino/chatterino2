@@ -98,6 +98,7 @@ void NotificationController::removeChannelNotification(
 void NotificationController::playSound()
 {
     static auto player = new QMediaPlayer;
+    static QUrl currentPlayerUrl;
 
     QUrl highlightSoundUrl =
         getSettings()->notificationCustomSound
@@ -105,11 +106,14 @@ void NotificationController::playSound()
                   getSettings()->notificationPathSound.getValue())
             : QUrl("qrc:/sounds/ping2.wav");
 
-    // Set media if no media, or if media is buffered
+    // Set media if no media, if media is buffered, or if the ping sound url has changed
     if (player->mediaStatus() == QMediaPlayer::NoMedia ||
-        player->mediaStatus() == QMediaPlayer::BufferedMedia)
+        player->mediaStatus() == QMediaPlayer::BufferedMedia ||
+        currentPlayerUrl != highlightSoundUrl)
     {
         player->setMedia(highlightSoundUrl);
+        
+        currentPlayerUrl = highlightSoundUrl;
     }
 
     player->play();
