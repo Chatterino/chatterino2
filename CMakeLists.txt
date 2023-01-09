@@ -64,6 +64,8 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Concurrent
     )
 
+message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
+
 if (WIN32)
     find_package(WinToast REQUIRED)
 endif ()

@@ -5,6 +5,7 @@
 #include <QStringRef>
 
 #include <cmath>
+#include <vector>
 
 namespace chatterino {
 
