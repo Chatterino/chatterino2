@@ -234,10 +234,9 @@ void SharedMessageBuilder::triggerHighlights()
     {
         if (auto player = getPlayer())
         {
-            // Set media if no media, if media is buffered, or if the highlight sound url has changed
-            if (player->mediaStatus() == QMediaPlayer::NoMedia ||
-                player->mediaStatus() == QMediaPlayer::BufferedMedia ||
-                currentPlayerUrl != this->highlightSoundUrl_)
+            // Set media if the highlight sound url has changed, or if media is buffered
+            if (currentPlayerUrl != this->highlightSoundUrl_ ||
+                player->mediaStatus() == QMediaPlayer::BufferedMedia)
             {
                 player->setMedia(this->highlightSoundUrl_);
 
