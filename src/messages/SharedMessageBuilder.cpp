@@ -213,6 +213,8 @@ inline QMediaPlayer *getPlayer()
 
 void SharedMessageBuilder::triggerHighlights()
 {
+    static QUrl currentPlayerUrl;
+
     if (isInStreamerMode() && getSettings()->streamerModeMuteMentions)
     {
         // We are in streamer mode with muting mention sounds enabled. Do nothing.
@@ -232,11 +234,14 @@ void SharedMessageBuilder::triggerHighlights()
     {
         if (auto player = getPlayer())
         {
-            // Set media if no media, or if media is buffered
+            // Set media if no media, if media is buffered, or if the ping sound url has changed
             if (player->mediaStatus() == QMediaPlayer::NoMedia ||
-                player->mediaStatus() == QMediaPlayer::BufferedMedia)
+                player->mediaStatus() == QMediaPlayer::BufferedMedia ||
+                currentPlayerUrl != this->highlightSoundUrl_)
             {
                 player->setMedia(this->highlightSoundUrl_);
+
+                currentPlayerUrl = this->highlightSoundUrl_;
             }
 
             player->play();
