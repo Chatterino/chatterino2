@@ -3,6 +3,7 @@
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
 #include "common/SignalVector.hpp"
+#include "controllers/logging/ChannelLog.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/StreamerMode.hpp"
@@ -40,7 +41,7 @@ public:
     SignalVector<FilterRecordPtr> &filterRecords;
     SignalVector<Nickname> &nicknames;
     SignalVector<ModerationAction> &moderationActions;
-    SignalVector<QString> &loggedChannels;
+    SignalVector<ChannelLog> &loggedChannels;
 
     bool isHighlightedUser(const QString &username);
     bool isBlacklistedUser(const QString &username);

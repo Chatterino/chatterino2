@@ -161,7 +161,7 @@ ModerationPage::ModerationPage()
                         ->initialized(&getSettings()->loggedChannels))
                 .getElement();
 
-        view->setTitles({"Twitch channels"});
+        view->setTitles({"Twitch channels", "Enable Logs"});
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
             QHeaderView::Fixed);
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -169,7 +169,7 @@ ModerationPage::ModerationPage()
 
         view->addButtonPressed.connect([] {
             getSettings()->loggedChannels.append(
-                ("channel"));
+                ChannelLog("channel", false));
         });
 
     }  // logs end
