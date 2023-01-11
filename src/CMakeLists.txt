@@ -649,17 +649,32 @@ if (BUILD_APP)
         )
 
     if (MSVC)
-        if (NOT VCPKG_INSTALLED_DIR)
+        if (NOT WINDEPLOYQT_PATH)
             get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
             get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
-            set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
-
-            install(TARGETS ${EXECUTABLE_PROJECT}
-                    RUNTIME DESTINATION .
-                    )
-
-            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
+            string(APPEND WINDEPLOYQT_PATH ${QT_BIN_DIR} /windeployqt.exe)
+        else()
+            file(TO_CMAKE_PATH "${WINDEPLOYQT_PATH}" WINDEPLOYQT_PATH)
         endif()
+
+        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(WINDEPLOYQT_MODE --debug)
+        else()
+            set(WINDEPLOYQT_MODE --release)
+        endif()
+
+        set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
+        string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
+
+        install(TARGETS ${EXECUTABLE_PROJECT} 
+            RUNTIME_DEPENDENCIES 
+                PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
+                POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
+                DIRECTORIES ${QT_BIN_DIR}
+            RUNTIME DESTINATION .)
+
+        install(CODE "message(\"Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
+        install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
