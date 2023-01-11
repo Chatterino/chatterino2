@@ -40,6 +40,7 @@ public:
     SignalVector<FilterRecordPtr> &filterRecords;
     SignalVector<Nickname> &nicknames;
     SignalVector<ModerationAction> &moderationActions;
+    SignalVector<QString> &loggedChannels;
 
     bool isHighlightedUser(const QString &username);
     bool isBlacklistedUser(const QString &username);
@@ -364,6 +365,7 @@ public:
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
+    BoolSetting enableCustomLogging = {"/logging/customLogging", false};
 
     QStringSetting logPath = {"/logging/path", ""};
 

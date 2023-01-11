@@ -1,6 +1,7 @@
 #include "ModerationPage.hpp"
 
 #include "Application.hpp"
+#include "controllers/logging/ChannelLoggingModel.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/moderationactions/ModerationActionModel.hpp"
 #include "singletons/Logging.hpp"
@@ -69,8 +70,21 @@ ModerationPage::ModerationPage()
 
     auto logs = tabs.appendTab(new QVBoxLayout, "Logs");
     {
-        logs.append(this->createCheckBox("Enable logging",
-                                         getSettings()->enableLogging));
+        QCheckBox *enableLogging = this->createCheckBox(
+            "Enable logging", getSettings()->enableLogging);
+        logs.append(enableLogging);
+        QCheckBox *customLogging = this->createCheckBox("Enable logging for specific channels",
+                                         getSettings()->enableCustomLogging);
+
+        customLogging->setEnabled(getSettings()->enableLogging);
+        logs.append(customLogging);
+
+        // Select event
+        QObject::connect(enableLogging, &QCheckBox::stateChanged,
+                         this, [enableLogging, customLogging]() mutable {
+                                 customLogging->setEnabled(enableLogging->isChecked());
+                         });
+
         auto logsPathLabel = logs.emplace<QLabel>();
 
         // Logs (copied from LoggingMananger)
@@ -139,6 +153,24 @@ ModerationPage::ModerationPage()
                                  return fetchLogDirectorySize();
                              }));
                          });
+
+        EditableModelView *view =
+            logs
+                .emplace<EditableModelView>(
+                    (new ChannelLoggingModel(nullptr))
+                        ->initialized(&getSettings()->loggedChannels))
+                .getElement();
+
+        view->setTitles({"Twitch channels"});
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(
+            QHeaderView::Fixed);
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(
+            0, QHeaderView::Stretch);
+
+        view->addButtonPressed.connect([] {
+            getSettings()->loggedChannels.append(
+                ("channel"));
+        });
 
     }  // logs end
 

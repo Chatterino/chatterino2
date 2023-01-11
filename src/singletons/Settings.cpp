@@ -25,6 +25,7 @@ ConcurrentSettings::ConcurrentSettings()
     , filterRecords(*new SignalVector<FilterRecordPtr>())
     , nicknames(*new SignalVector<Nickname>())
     , moderationActions(*new SignalVector<ModerationAction>)
+    , loggedChannels(*new SignalVector<QString>)
 {
     persist(this->highlightedMessages, "/highlighting/highlights");
     persist(this->blacklistedUsers, "/highlighting/blacklist");
