@@ -648,7 +648,7 @@ if (BUILD_APP)
         RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
         )
 
-    if (MSVC)
+    if (WIN32)
         if (NOT WINDEPLOYQT_PATH)
             get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
             get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
