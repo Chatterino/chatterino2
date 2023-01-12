@@ -667,10 +667,12 @@ if (BUILD_APP)
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
         if (X_VCPKG_APPLOCAL_DEPS_INSTALL)
-            # Requires CMake 3.14
             install(TARGETS ${EXECUTABLE_PROJECT} RUNTIME DESTINATION .)
+            install(CODE "message(\"-- Flattening plugins/\")")
+            # vcpkg will add the plugin folders (like "iconengines" or "mediaformats") inside a `plugins` folder.
+            # We need to flatten this folder, thus we're running `mv plugins/* . && rm plugins` in powershell.
+            install(CODE "execute_process(COMMAND powershell \"& { Move-Item -Path \\\"${CMAKE_INSTALL_PREFIX}/plugins/*\\\" -Destination \\\"${CMAKE_INSTALL_PREFIX}\\\"; Remove-Item \\\"${CMAKE_INSTALL_PREFIX}/plugins\\\" }\" COMMAND_ERROR_IS_FATAL ANY)")
         else()
-            # Requires CMake 3.21
             install(TARGETS ${EXECUTABLE_PROJECT} 
                 RUNTIME_DEPENDENCIES 
                     PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
