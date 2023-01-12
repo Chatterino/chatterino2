@@ -666,15 +666,18 @@ if (BUILD_APP)
         set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
-        install(TARGETS ${EXECUTABLE_PROJECT} 
-            RUNTIME_DEPENDENCIES 
-                PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
-                POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
-                DIRECTORIES ${QT_BIN_DIR}
-            RUNTIME DESTINATION .)
-
-        install(CODE "message(\"Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
-        install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")
+        if (X_VCPKG_APPLOCAL_DEPS_INSTALL)
+            install(TARGETS ${EXECUTABLE_PROJECT} RUNTIME DESTINATION .)
+        else()
+            install(TARGETS ${EXECUTABLE_PROJECT} 
+                RUNTIME_DEPENDENCIES 
+                    PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
+                    POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
+                    DIRECTORIES ${QT_BIN_DIR}
+                RUNTIME DESTINATION .)
+            install(CODE "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
+            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")        
+        endif()
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
