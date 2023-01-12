@@ -667,8 +667,10 @@ if (BUILD_APP)
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
         if (X_VCPKG_APPLOCAL_DEPS_INSTALL)
+            # Requires CMake 3.14
             install(TARGETS ${EXECUTABLE_PROJECT} RUNTIME DESTINATION .)
         else()
+            # Requires CMake 3.21
             install(TARGETS ${EXECUTABLE_PROJECT} 
                 RUNTIME_DEPENDENCIES 
                     PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
