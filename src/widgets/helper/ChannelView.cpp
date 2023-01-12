@@ -1466,7 +1466,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         this->pause(PauseReason::Mouse);
     }
 
-    auto tooltipWidget = TooltipWidget::instance();
+    auto *tooltipWidget = TooltipWidget::instance();
     std::shared_ptr<MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
@@ -1730,6 +1730,10 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
         }
 
+        auto *tooltipParent = static_cast<QWidget *>(
+            &(getApp()->windows->getMainWindow().getNotebook()));
+        // update parent so wayland knows we're not messing around
+        tooltipWidget->setParent(tooltipParent);
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->setText(element->getTooltip());

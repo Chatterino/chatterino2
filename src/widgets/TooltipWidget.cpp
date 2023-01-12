@@ -4,6 +4,7 @@
 #include "messages/Image.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/WindowManager.hpp"
+#include "widgets/Window.hpp"
 
 #include <QPainter>
 #include <QVBoxLayout>
@@ -12,11 +13,13 @@ namespace chatterino {
 
 TooltipWidget *TooltipWidget::instance()
 {
-    static TooltipWidget *tooltipWidget = new TooltipWidget();
+    auto *windows = getApp()->getWindows();
+    auto *parent = static_cast<QWidget *>(&windows->getMainWindow());
+    static TooltipWidget *tooltipWidget = new TooltipWidget(parent);
     return tooltipWidget;
 }
 
-TooltipWidget::TooltipWidget(BaseWidget *parent)
+TooltipWidget::TooltipWidget(QWidget *parent)
     : BaseWindow({BaseWindow::TopMost, BaseWindow::DontFocus,
                   BaseWindow::DisableLayoutSave},
                  parent)
