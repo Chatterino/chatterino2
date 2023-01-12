@@ -39,6 +39,7 @@
 - Dev: Fixed `final-dtor-non-final-class` warnings. (#4296)
 - Dev: Fixed `ambiguous-reversed-operator` warnings. (#4296)
 - Dev: Format YAML and JSON files with prettier. (#4304)
+- Dev: Addded CMake Install Support on Windows. (#4300)
 
 ## 2.4.0
 
