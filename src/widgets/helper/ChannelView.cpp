@@ -54,6 +54,7 @@
 #include <QPainter>
 #include <QScreen>
 #include <QVariantAnimation>
+#include <QWindow>
 
 #include <algorithm>
 #include <chrono>
@@ -1733,7 +1734,29 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         auto *tooltipParent = static_cast<QWidget *>(
             &(getApp()->windows->getMainWindow().getNotebook()));
         // update parent so wayland knows we're not messing around
-        tooltipWidget->setParent(tooltipParent);
+        // tooltipWidget->setParent(tooltipParent);
+        // auto *asd =
+        //     static_cast<QWidget *>(&getApp()->getWindows()->getMainWindow());
+        if (this->window())
+        {
+            qDebug() << "XXX: window xd";
+            // tooltipWidget->winId();
+            // tooltipWidget->windowHandle()->setTransientParent(
+            //     this->window()->windowHandle());
+            if (this->window()->hasFocus())
+            {
+                tooltipWidget->setParent(nullptr);
+            }
+            else
+            {
+                tooltipWidget->setParent(this->window());
+            }
+            tooltipWidget->setWindowFlag(Qt::WindowStaysOnTopHint);
+        }
+        else
+        {
+            qDebug() << "XXX: no window";
+        }
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->setText(element->getTooltip());

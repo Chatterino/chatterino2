@@ -8,6 +8,7 @@
 
 #include <QPainter>
 #include <QVBoxLayout>
+#include <QWindow>
 
 namespace chatterino {
 
@@ -15,7 +16,10 @@ TooltipWidget *TooltipWidget::instance()
 {
     auto *windows = getApp()->getWindows();
     auto *parent = static_cast<QWidget *>(&windows->getMainWindow());
-    static TooltipWidget *tooltipWidget = new TooltipWidget(parent);
+    auto *asd = parent->window();
+    static TooltipWidget *tooltipWidget = new TooltipWidget(nullptr);
+
+    tooltipWidget->winId();
     return tooltipWidget;
 }
 
