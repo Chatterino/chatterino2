@@ -1,25 +1,22 @@
 #include "ModerationPage.hpp"
 
 #include "Application.hpp"
+#include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/moderationactions/ModerationActionModel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QFileDialog>
-#include <QFormLayout>
-#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
-#include <QListView>
 #include <QPushButton>
 #include <QTableView>
 #include <QtConcurrent/QtConcurrent>
-#include <QTextEdit>
-#include <QVBoxLayout>
 
 namespace chatterino {
 

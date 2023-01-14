@@ -9,6 +9,7 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 

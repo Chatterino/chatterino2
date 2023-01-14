@@ -3,7 +3,6 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
-#include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
 #include <QString>
@@ -15,7 +14,6 @@ struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
 class Channel;
-class TwitchChannel;
 
 class IrcMessageBuilder : public SharedMessageBuilder
 {

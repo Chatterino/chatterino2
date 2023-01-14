@@ -1,13 +1,11 @@
 #include "LoggingChannel.hpp"
 
-#include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "messages/Message.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QDir>
-
-#include <ctime>
 
 namespace chatterino {
 

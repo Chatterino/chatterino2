@@ -1,13 +1,13 @@
 #pragma once
 
-#include "common/Atomic.hpp"
-#include "messages/Image.hpp"
+#include "common/Aliases.hpp"
 #include "messages/ImageSet.hpp"
 
 #include <boost/optional.hpp>
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 
 namespace chatterino {
@@ -55,9 +55,6 @@ public:
     EmoteMap::const_iterator findEmote(const QString &emoteNameHint,
                                        const QString &emoteID) const;
 };
-using EmoteIdMap = std::unordered_map<EmoteId, EmotePtr>;
-using WeakEmoteMap = std::unordered_map<EmoteName, std::weak_ptr<const Emote>>;
-using WeakEmoteIdMap = std::unordered_map<EmoteId, std::weak_ptr<const Emote>>;
 
 static const std::shared_ptr<const EmoteMap> EMPTY_EMOTE_MAP = std::make_shared<
     const EmoteMap>();  // NOLINT(cert-err58-cpp) -- assume this doesn't throw an exception

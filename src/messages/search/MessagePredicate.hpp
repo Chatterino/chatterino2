@@ -1,10 +1,10 @@
 #pragma once
 
-#include "messages/Message.hpp"
-
 #include <memory>
 
 namespace chatterino {
+
+struct Message;
 
 /**
  * @brief Abstract base class for message predicates.

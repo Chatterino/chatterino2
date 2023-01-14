@@ -2,8 +2,6 @@
 
 #include "common/FlagsEnum.hpp"
 #include "messages/Link.hpp"
-#include "messages/MessageColor.hpp"
-#include "messages/MessageElement.hpp"
 
 #include <boost/noncopyable.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -22,6 +20,7 @@ class MessageElement;
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
 enum class FontStyle : uint8_t;
+enum class MessageElementFlag : int64_t;
 
 class MessageLayoutElement : boost::noncopyable
 {

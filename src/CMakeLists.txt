@@ -70,6 +70,10 @@ set(SOURCE_FILES
 
         controllers/filters/FilterModel.cpp
         controllers/filters/FilterModel.hpp
+        controllers/filters/FilterRecord.cpp
+        controllers/filters/FilterRecord.hpp
+        controllers/filters/FilterSet.cpp
+        controllers/filters/FilterSet.hpp
         controllers/filters/parser/FilterParser.cpp
         controllers/filters/parser/FilterParser.hpp
         controllers/filters/parser/Tokenizer.cpp
@@ -190,8 +194,6 @@ set(SOURCE_FILES
         providers/bttv/BttvEmotes.hpp
         providers/bttv/BttvLiveUpdates.cpp
         providers/bttv/BttvLiveUpdates.hpp
-        providers/bttv/LoadBttvChannelEmote.cpp
-        providers/bttv/LoadBttvChannelEmote.hpp
 
         providers/bttv/liveupdates/BttvLiveUpdateMessages.cpp
         providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp
@@ -323,8 +325,6 @@ set(SOURCE_FILES
         singletons/Theme.hpp
         singletons/Toasts.cpp
         singletons/Toasts.hpp
-        singletons/TooltipPreviewImage.cpp
-        singletons/TooltipPreviewImage.hpp
         singletons/Updates.cpp
         singletons/Updates.hpp
         singletons/WindowManager.cpp
@@ -339,6 +339,7 @@ set(SOURCE_FILES
         util/AttachToConsole.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
+        util/ConcurrentMap.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
         util/DisplayBadge.cpp
@@ -365,6 +366,7 @@ set(SOURCE_FILES
         util/RatelimitBucket.hpp
         util/SampleData.cpp
         util/SampleData.hpp
+        util/SharedPtrElementLess.hpp
         util/SplitCommand.cpp
         util/SplitCommand.hpp
         util/StreamLink.cpp
@@ -642,15 +644,17 @@ if (BUILD_APP)
         )
 
     if (MSVC)
-        get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
-        get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
-        set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
+        if (NOT VCPKG_INSTALLED_DIR)
+            get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
+            get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
+            set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
 
-        install(TARGETS ${EXECUTABLE_PROJECT}
-                RUNTIME DESTINATION .
-                )
+            install(TARGETS ${EXECUTABLE_PROJECT}
+                    RUNTIME DESTINATION .
+                    )
 
-        install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
+            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
+        endif()
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
@@ -851,6 +855,10 @@ else ()
         target_compile_options(${LIBRARY_PROJECT} PUBLIC
             -Wno-unused-local-typedef
             -Wno-unused-private-field
+            -Werror=inconsistent-missing-override
+            -Werror=final-dtor-non-final-class
+            -Werror=ambiguous-reversed-operator
+
         )
     else ()
         target_compile_options(${LIBRARY_PROJECT} PUBLIC

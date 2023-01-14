@@ -26,7 +26,6 @@
 
 #include <boost/optional.hpp>
 #include <QDebug>
-#include <QDesktopWidget>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>

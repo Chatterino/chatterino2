@@ -156,49 +156,50 @@ int Notebook::indexOf(QWidget *page) const
 
 void Notebook::select(QWidget *page, bool focusPage)
 {
-    if (!page)
-    {
-        return;
-    }
-
     if (page == this->selectedPage_)
     {
+        // Nothing has changed
         return;
     }
 
-    auto *item = this->findItem(page);
-    if (!item)
+    if (page)
     {
-        return;
-    }
-
-    page->show();
-
-    item->tab->setSelected(true);
-    item->tab->raise();
-
-    if (focusPage)
-    {
-        if (item->selectedWidget == nullptr)
+        // A new page has been selected, mark it as selected & focus one of its splits
+        auto *item = this->findItem(page);
+        if (!item)
         {
-            item->page->setFocus();
+            return;
         }
-        else
+
+        page->show();
+
+        item->tab->setSelected(true);
+        item->tab->raise();
+
+        if (focusPage)
         {
-            if (containsChild(page, item->selectedWidget))
+            if (item->selectedWidget == nullptr)
             {
-                item->selectedWidget->setFocus(Qt::MouseFocusReason);
+                item->page->setFocus();
             }
             else
             {
-                qCDebug(chatterinoWidget) << "Notebook: selected child of "
-                                             "page doesn't exist anymore";
+                if (containsChild(page, item->selectedWidget))
+                {
+                    item->selectedWidget->setFocus(Qt::MouseFocusReason);
+                }
+                else
+                {
+                    qCDebug(chatterinoWidget) << "Notebook: selected child of "
+                                                 "page doesn't exist anymore";
+                }
             }
         }
     }
 
-    if (this->selectedPage_ != nullptr)
+    if (this->selectedPage_)
     {
+        // Hide the previously selected page
         this->selectedPage_->hide();
 
         auto *item = this->findItem(selectedPage_);
@@ -1169,22 +1170,29 @@ SplitContainer *SplitNotebook::getOrAddSelectedPage()
 {
     auto *selectedPage = this->getSelectedPage();
 
-    return selectedPage != nullptr ? (SplitContainer *)selectedPage
-                                   : this->addPage();
+    if (selectedPage)
+    {
+        return dynamic_cast<SplitContainer *>(selectedPage);
+    }
+
+    return this->addPage();
 }
 
 void SplitNotebook::select(QWidget *page, bool focusPage)
 {
-    if (auto selectedPage = this->getSelectedPage())
+    // If there's a previously selected page, go through its splits and
+    // update their "last read message" indicator
+    if (auto *selectedPage = this->getSelectedPage())
     {
-        if (auto splitContainer = dynamic_cast<SplitContainer *>(selectedPage))
+        if (auto *splitContainer = dynamic_cast<SplitContainer *>(selectedPage))
         {
-            for (auto split : splitContainer->getSplits())
+            for (auto *split : splitContainer->getSplits())
             {
                 split->updateLastReadMessage();
             }
         }
     }
+
     this->Notebook::select(page, focusPage);
 }
 

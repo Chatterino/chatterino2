@@ -1,7 +1,13 @@
 #include "providers/twitch/PubSubActions.hpp"
+#include "providers/twitch/PubSubClient.hpp"
 #include "providers/twitch/PubSubManager.hpp"
+#include "providers/twitch/pubsubmessages/AutoMod.hpp"
+#include "providers/twitch/pubsubmessages/Whisper.hpp"
 
 #include <gtest/gtest.h>
+#include <QString>
+
+#include <chrono>
 
 using namespace chatterino;
 using namespace std::chrono_literals;

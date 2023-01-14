@@ -1,5 +1,7 @@
 #include "providers/twitch/api/Helix.hpp"
 
+#include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 
@@ -19,6 +21,19 @@ static constexpr auto NUM_CHATTERS_TO_FETCH = 1000;
 namespace chatterino {
 
 static IHelix *instance = nullptr;
+
+HelixChatters::HelixChatters(const QJsonObject &jsonObject)
+    : total(jsonObject.value("total").toInt())
+    , cursor(
+          jsonObject.value("pagination").toObject().value("cursor").toString())
+{
+    const auto &data = jsonObject.value("data").toArray();
+    for (const auto &chatter : data)
+    {
+        auto userLogin = chatter.toObject().value("user_login").toString();
+        this->chatters.insert(userLogin);
+    }
+}
 
 void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
                        ResultCallback<std::vector<HelixUser>> successCallback,

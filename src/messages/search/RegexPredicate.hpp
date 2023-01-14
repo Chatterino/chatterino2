@@ -3,6 +3,8 @@
 #include "messages/search/MessagePredicate.hpp"
 #include "QRegularExpression"
 
+#include <QString>
+
 namespace chatterino {
 
 /**

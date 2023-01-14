@@ -1,7 +1,6 @@
 #pragma once
 
 #include "widgets/BaseWindow.hpp"
-#include "widgets/helper/SettingsDialogTab.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <QFrame>
@@ -19,6 +18,7 @@ namespace chatterino {
 class SettingsPage;
 class SettingsDialogTab;
 class ModerationPage;
+enum class SettingsTabId;
 
 class PageHeader : public QFrame
 {

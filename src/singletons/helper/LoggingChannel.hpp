@@ -1,7 +1,5 @@
 #pragma once
 
-#include "messages/Message.hpp"
-
 #include <boost/noncopyable.hpp>
 #include <QDateTime>
 #include <QFile>
@@ -12,6 +10,8 @@
 namespace chatterino {
 
 class Logging;
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
 
 class LoggingChannel : boost::noncopyable
 {

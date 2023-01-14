@@ -1,15 +1,12 @@
 #include "singletons/Fonts.hpp"
 
-#include "BaseSettings.hpp"
+#include "Application.hpp"
 #include "debug/AssertInGuiThread.hpp"
+#include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 
 #include <QDebug>
 #include <QtGlobal>
-
-#ifdef CHATTERINO
-#    include "Application.hpp"
-#    include "singletons/WindowManager.hpp"
-#endif
 
 #ifdef Q_OS_WIN32
 #    define DEFAULT_FONT_FAMILY "Segoe UI"

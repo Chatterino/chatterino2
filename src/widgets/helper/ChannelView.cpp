@@ -4,15 +4,19 @@
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/filters/FilterSet.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "messages/MessageThread.hpp"
 #include "providers/LinkResolver.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -20,7 +24,6 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
-#include "singletons/TooltipPreviewImage.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
@@ -32,6 +35,7 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
+#include "widgets/helper/ScrollbarHighlight.hpp"
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
@@ -143,7 +147,7 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
                          size_t messagesLimit)
     : BaseWidget(parent)
     , split_(split)
-    , scrollBar_(new Scrollbar(this))
+    , scrollBar_(new Scrollbar(messagesLimit, this))
     , highlightAnimation_(this)
     , context_(context)
     , messages_(messagesLimit)
@@ -1659,8 +1663,6 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
-        auto &tooltipPreviewImage = TooltipPreviewImage::instance();
-        tooltipPreviewImage.setImageScale(0, 0);
         auto badgeElement = dynamic_cast<const BadgeElement *>(element);
 
         if ((badgeElement || emoteElement) &&
@@ -1671,18 +1673,18 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             {
                 if (emoteElement)
                 {
-                    tooltipPreviewImage.setImage(
+                    tooltipWidget->setImage(
                         emoteElement->getEmote()->images.getImage(3.0));
                 }
                 else if (badgeElement)
                 {
-                    tooltipPreviewImage.setImage(
+                    tooltipWidget->setImage(
                         badgeElement->getEmote()->images.getImage(3.0));
                 }
             }
             else
             {
-                tooltipPreviewImage.setImage(nullptr);
+                tooltipWidget->clearImage();
             }
         }
         else
@@ -1705,7 +1707,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             auto thumbnailSize = getSettings()->thumbnailSize;
             if (!thumbnailSize)
             {
-                tooltipPreviewImage.setImage(nullptr);
+                tooltipWidget->clearImage();
             }
             else
             {
@@ -1718,13 +1720,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     shouldHideThumbnail
                         ? Image::fromResourcePixmap(getResources().streamerMode)
                         : element->getThumbnail();
-                tooltipPreviewImage.setImage(std::move(thumb));
+                tooltipWidget->setImage(std::move(thumb));
 
                 if (element->getThumbnailType() ==
                     MessageElement::ThumbnailType::Link_Thumbnail)
                 {
-                    tooltipPreviewImage.setImageScale(thumbnailSize,
-                                                      thumbnailSize);
+                    tooltipWidget->setImageScale(thumbnailSize, thumbnailSize);
                 }
             }
         }
@@ -1732,10 +1733,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->setText(element->getTooltip());
-        tooltipWidget->adjustSize();
-        tooltipWidget->setWindowFlag(Qt::WindowStaysOnTopHint, true);
         tooltipWidget->show();
-        tooltipWidget->raise();
     }
 
     // check if word has a link

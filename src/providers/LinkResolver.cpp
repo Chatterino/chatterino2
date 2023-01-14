@@ -1,8 +1,9 @@
 #include "providers/LinkResolver.hpp"
 
-#include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
+#include "common/Outcome.hpp"
 #include "messages/Image.hpp"
 #include "messages/Link.hpp"
 #include "singletons/Settings.hpp"

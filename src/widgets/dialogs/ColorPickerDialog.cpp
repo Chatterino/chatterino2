@@ -2,9 +2,13 @@
 
 #include "providers/colors/ColorProvider.hpp"
 #include "singletons/Theme.hpp"
+#include "util/LayoutCreator.hpp"
+#include "widgets/helper/ColorButton.hpp"
+#include "widgets/helper/QColorPicker.hpp"
 
 #include <QDialogButtonBox>
 #include <QLineEdit>
+#include <QSet>
 
 namespace chatterino {
 

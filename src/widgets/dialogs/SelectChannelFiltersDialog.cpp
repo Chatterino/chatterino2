@@ -1,5 +1,6 @@
 #include "SelectChannelFiltersDialog.hpp"
 
+#include "controllers/filters/FilterRecord.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QCheckBox>

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "widgets/DraggablePopup.hpp"
-#include "widgets/helper/ChannelView.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -15,6 +14,8 @@ namespace chatterino {
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 class Label;
+class ChannelView;
+class Split;
 
 class UserInfoPopup final : public DraggablePopup
 {

@@ -1,19 +1,20 @@
 #pragma once
 
-#include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
-#include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
+
+#include <boost/optional.hpp>
 
 #include <memory>
-#include <utility>
 
 namespace chatterino {
 
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteMap;
+class Channel;
+class BttvLiveUpdateEmoteUpdateAddMessage;
+class BttvLiveUpdateEmoteRemoveMessage;
 
 class BttvEmotes final
 {

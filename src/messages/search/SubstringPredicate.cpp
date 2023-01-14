@@ -1,5 +1,7 @@
 #include "messages/search/SubstringPredicate.hpp"
 
+#include "messages/Message.hpp"
+
 namespace chatterino {
 
 SubstringPredicate::SubstringPredicate(const QString &search)

@@ -1,5 +1,7 @@
 #include "messages/search/BadgePredicate.hpp"
 
+#include "messages/Message.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
 #include "util/Qt.hpp"
 
 namespace chatterino {

@@ -1,5 +1,7 @@
 #include "WindowsHelper.hpp"
 
+#include <QCoreApplication>
+#include <QFileInfo>
 #include <QSettings>
 
 #ifdef USEWINSDK
