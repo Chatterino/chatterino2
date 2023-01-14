@@ -26,6 +26,20 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
         return;
     }
 
+    if (getSettings()->enableCustomLogging)
+    {
+        SignalVector<ChannelLog> &channelLogs = getSettings()->loggedChannels;
+        for (const ChannelLog &channelLog : channelLogs.raw())
+        {
+            if (channelLog.channel == channelName &&
+                !channelLog.loggingEnabled)
+            {
+                return;
+            }
+        }
+
+    }
+
     auto platIt = this->loggingChannels_.find(platformName);
     if (platIt == this->loggingChannels_.end())
     {
