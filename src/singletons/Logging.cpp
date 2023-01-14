@@ -28,13 +28,19 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
 
     if (getSettings()->onlyLogListedChannels)
     {
+        bool foundChannel = false;
         SignalVector<ChannelLog> &channelLogs = getSettings()->loggedChannels;
         for (const ChannelLog &channelLog : channelLogs.raw())
         {
-            if (channelLog.channel == channelName && !channelLog.loggingEnabled)
+            if (channelLog.channel == channelName)
             {
-                return;
+                foundChannel = true;
+                break;
             }
+        }
+        if (!foundChannel)
+        {
+            return;
         }
     }
 

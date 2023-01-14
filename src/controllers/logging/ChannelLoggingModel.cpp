@@ -6,7 +6,7 @@ namespace chatterino {
 
 // commandmodel
 ChannelLoggingModel ::ChannelLoggingModel(QObject *parent)
-    : SignalVectorModel<ChannelLog>(2, parent)
+    : SignalVectorModel<ChannelLog>(1, parent)
 {
 }
 
@@ -15,8 +15,7 @@ ChannelLog ChannelLoggingModel::getItemFromRow(
     std::vector<QStandardItem *> &row, const ChannelLog &channelLog)
 {
     return ChannelLog(
-        row[Column::Channel]->data(Qt::DisplayRole).toString(),
-        row[Column::LoggingEnabled]->data(Qt::CheckStateRole).toBool());
+        row[Column::Channel]->data(Qt::DisplayRole).toString());
 }
 
 // turns a row in the model into a vector item
@@ -24,7 +23,6 @@ void ChannelLoggingModel::getRowFromItem(const ChannelLog &item,
                                          std::vector<QStandardItem *> &row)
 {
     setStringItem(row[0], item.channel);
-    setBoolItem(row[1], item.loggingEnabled);
 }
 
 }  // namespace chatterino

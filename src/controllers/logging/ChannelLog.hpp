@@ -11,9 +11,8 @@ class ChannelLog
 {
 public:
     QString channel;
-    bool loggingEnabled;
 
-    ChannelLog(const QString &channel, bool loggingEnabled);
+    ChannelLog(const QString &channel);
 
     bool operator==(const ChannelLog &other) const;
 
@@ -34,7 +33,6 @@ struct Serialize<chatterino::ChannelLog> {
         rapidjson::Value ret(rapidjson::kObjectType);
 
         chatterino::rj::set(ret, "channel", value.channel, a);
-        chatterino::rj::set(ret, "loggingEnabled", value.loggingEnabled, a);
 
         return ret;
     }
@@ -55,12 +53,6 @@ struct Deserialize<chatterino::ChannelLog> {
         }
 
         if (!chatterino::rj::getSafe(value, "channel", channelLog.channel))
-        {
-            PAJLADA_REPORT_ERROR(error);
-            return channelLog;
-        }
-        if (!chatterino::rj::getSafe(value, "loggingEnabled",
-                                     channelLog.loggingEnabled))
         {
             PAJLADA_REPORT_ERROR(error);
             return channelLog;

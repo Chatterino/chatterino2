@@ -3,9 +3,8 @@
 namespace chatterino {
 
 // ChannelLog
-ChannelLog::ChannelLog(const QString &channel, bool loggingEnabled)
+ChannelLog::ChannelLog(const QString &channel)
     : channel(channel)
-    , loggingEnabled(loggingEnabled)
 {
 }
 
@@ -16,7 +15,7 @@ QString ChannelLog::toString() const
 
 ChannelLog ChannelLog::createEmpty()
 {
-    return ChannelLog("", false);
+    return ChannelLog("");
 }
 
 }  // namespace chatterino
