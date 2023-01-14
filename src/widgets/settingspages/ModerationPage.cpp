@@ -73,17 +73,19 @@ ModerationPage::ModerationPage()
         QCheckBox *enableLogging = this->createCheckBox(
             "Enable logging", getSettings()->enableLogging);
         logs.append(enableLogging);
-        QCheckBox *customLogging = this->createCheckBox("Enable logging for specific channels",
-                                         getSettings()->enableCustomLogging);
+        QCheckBox *customLogging =
+            this->createCheckBox("Enable logging for specific channels",
+                                 getSettings()->enableCustomLogging);
 
         customLogging->setEnabled(getSettings()->enableLogging);
         logs.append(customLogging);
 
         // Select event
-        QObject::connect(enableLogging, &QCheckBox::stateChanged,
-                         this, [enableLogging, customLogging]() mutable {
-                                 customLogging->setEnabled(enableLogging->isChecked());
-                         });
+        QObject::connect(
+            enableLogging, &QCheckBox::stateChanged, this,
+            [enableLogging, customLogging]() mutable {
+                customLogging->setEnabled(enableLogging->isChecked());
+            });
 
         auto logsPathLabel = logs.emplace<QLabel>();
 
@@ -155,8 +157,7 @@ ModerationPage::ModerationPage()
                          });
 
         EditableModelView *view =
-            logs
-                .emplace<EditableModelView>(
+            logs.emplace<EditableModelView>(
                     (new ChannelLoggingModel(nullptr))
                         ->initialized(&getSettings()->loggedChannels))
                 .getElement();
@@ -168,8 +169,7 @@ ModerationPage::ModerationPage()
             0, QHeaderView::Stretch);
 
         view->addButtonPressed.connect([] {
-            getSettings()->loggedChannels.append(
-                ChannelLog("channel", false));
+            getSettings()->loggedChannels.append(ChannelLog("channel", false));
         });
 
     }  // logs end

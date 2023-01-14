@@ -12,16 +12,12 @@ class ChannelLoggingModel : public SignalVectorModel<ChannelLog>
 public:
     explicit ChannelLoggingModel(QObject *parent);
 
-    enum Column {
-        Channel = 0,
-        LoggingEnabled = 1
-    };
+    enum Column { Channel = 0, LoggingEnabled = 1 };
 
 protected:
     // turn a vector item into a model row
-    virtual ChannelLog getItemFromRow(
-        std::vector<QStandardItem *> &row,
-        const ChannelLog &channelLog) override;
+    virtual ChannelLog getItemFromRow(std::vector<QStandardItem *> &row,
+                                      const ChannelLog &channelLog) override;
 
     // turns a row in the model into a vector item
     virtual void getRowFromItem(const ChannelLog &item,

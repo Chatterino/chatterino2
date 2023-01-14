@@ -7,7 +7,8 @@
 
 namespace chatterino {
 
-class ChannelLog {
+class ChannelLog
+{
 public:
     QString channel;
     bool loggingEnabled;
@@ -42,9 +43,10 @@ struct Serialize<chatterino::ChannelLog> {
 template <>
 struct Deserialize<chatterino::ChannelLog> {
     static chatterino::ChannelLog get(const rapidjson::Value &value,
-                                   bool *error = nullptr)
+                                      bool *error = nullptr)
     {
-        chatterino::ChannelLog ChannelLog = chatterino::ChannelLog::createEmpty();
+        chatterino::ChannelLog ChannelLog =
+            chatterino::ChannelLog::createEmpty();
 
         if (!value.IsObject())
         {
@@ -57,7 +59,8 @@ struct Deserialize<chatterino::ChannelLog> {
             PAJLADA_REPORT_ERROR(error);
             return ChannelLog;
         }
-        if (!chatterino::rj::getSafe(value, "loggingEnabled", ChannelLog.loggingEnabled))
+        if (!chatterino::rj::getSafe(value, "loggingEnabled",
+                                     ChannelLog.loggingEnabled))
         {
             PAJLADA_REPORT_ERROR(error);
             return ChannelLog;

@@ -31,13 +31,11 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
         SignalVector<ChannelLog> &channelLogs = getSettings()->loggedChannels;
         for (const ChannelLog &channelLog : channelLogs.raw())
         {
-            if (channelLog.channel == channelName &&
-                !channelLog.loggingEnabled)
+            if (channelLog.channel == channelName && !channelLog.loggingEnabled)
             {
                 return;
             }
         }
-
     }
 
     auto platIt = this->loggingChannels_.find(platformName);
