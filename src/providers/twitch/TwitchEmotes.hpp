@@ -112,6 +112,8 @@ public:
     EmotePtr getOrCreateEmote(const EmoteId &id,
                               const EmoteName &name) override;
 
+    // TODO: Ensure emote sets can be reloaded if they're stale
+    // How do we find out they're stale? Just 30 minutes old or something?
     void loadSets(QStringList emoteSets);
 
     std::unordered_map<QString, std::shared_ptr<TwitchEmoteSet>>

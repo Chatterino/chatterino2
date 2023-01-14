@@ -95,6 +95,8 @@ bool IgnorePhrase::containsEmote() const
 {
     if (!this->emotesChecked_)
     {
+        // TODO: Implement
+        /*
         const auto &accvec = getApp()->accounts->twitch.accounts;
         for (const auto &acc : accvec)
         {
@@ -108,6 +110,7 @@ bool IgnorePhrase::containsEmote() const
                 }
             }
         }
+        */
         this->emotesChecked_ = true;
     }
     return !this->emotes_.empty();

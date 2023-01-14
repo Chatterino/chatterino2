@@ -96,9 +96,18 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
                 {
                     if (emote.first.string.contains(text, Qt::CaseInsensitive))
                     {
-                        emotes.push_back({emote.second,
-                                          emote.second->name.string,
-                                          "Twitch Emote"});
+                        if (emoteSet.ivrEmoteSet.setId == "0")
+                        {
+                            emotes.push_back({emote.second,
+                                              emote.second->name.string,
+                                              "Twitch Global Emote"});
+                        }
+                        else
+                        {
+                            emotes.push_back({emote.second,
+                                              emote.second->name.string,
+                                              "Twitch Emote"});
+                        }
                     }
                 }
             }

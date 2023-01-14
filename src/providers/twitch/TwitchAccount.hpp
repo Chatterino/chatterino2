@@ -78,17 +78,6 @@ public:
     SharedAccessGuard<const std::set<QString>> accessBlockedUserIds() const;
     SharedAccessGuard<const std::set<TwitchUser>> accessBlocks() const;
 
-    void loadEmotes(std::weak_ptr<Channel> weakChannel = {});
-    // loadUserstateEmotes loads emote sets that are part of the USERSTATE emote-sets key
-    // this function makes sure not to load emote sets that have already been loaded
-    void loadUserstateEmotes(std::weak_ptr<Channel> weakChannel = {});
-    // setUserStateEmoteSets sets the emote sets that were parsed from the USERSTATE emote-sets key
-    // Returns true if the newly inserted emote sets differ from the ones previously saved
-    [[nodiscard]] bool setUserstateEmoteSets(QStringList newEmoteSets);
-    SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
-    SharedAccessGuard<const std::unordered_map<QString, EmoteMap>>
-        accessLocalEmotes() const;
-
     // Automod actions
     void autoModAllow(const QString msgID, ChannelPtr channel);
     void autoModDeny(const QString msgID, ChannelPtr channel);
@@ -102,13 +91,8 @@ private:
     Atomic<QColor> color_;
 
     mutable std::mutex ignoresMutex_;
-    QStringList userstateEmoteSets_;
     UniqueAccess<std::set<TwitchUser>> ignores_;
     UniqueAccess<std::set<QString>> ignoresUserIds_;
-
-    //    std::map<UserId, TwitchAccountEmoteData> emotes;
-    UniqueAccess<TwitchAccountEmoteData> emotes_;
-    UniqueAccess<std::unordered_map<QString, EmoteMap>> localEmotes_;
 };
 
 }  // namespace chatterino

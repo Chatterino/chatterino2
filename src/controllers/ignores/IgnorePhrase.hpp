@@ -44,6 +44,9 @@ public:
 
     const std::unordered_map<EmoteName, EmotePtr> &getEmotes() const;
 
+    /**
+     * @brief containsEmote returns true if the ignored phrase replacement string contains a Twitch emotes
+     */
     bool containsEmote() const;
 
     static IgnorePhrase createEmpty();

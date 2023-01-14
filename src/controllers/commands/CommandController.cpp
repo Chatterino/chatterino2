@@ -109,15 +109,16 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     b.emplace<TextElement>(words[1] + ":", MessageElementFlag::Text,
                            MessageColor::Text, FontStyle::ChatMediumBold);
 
-    const auto &acc = app->accounts->twitch.getCurrent();
-    const auto &accemotes = *acc->accessEmotes();
     const auto &bttvemotes = app->twitch->getBttvEmotes();
     const auto &ffzemotes = app->twitch->getFfzEmotes();
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {
-        {  // Twitch emote
+        {
+            // Twitch emote
+            // TODO: Re-implement
+            /*
             auto it = accemotes.emotes.find({words[i]});
             if (it != accemotes.emotes.end())
             {
@@ -125,6 +126,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                                         MessageElementFlag::TwitchEmote);
                 continue;
             }
+            */
         }  // Twitch emote
 
         {  // bttv/ffz emote
@@ -772,15 +774,16 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     /// Supported commands
 
-    this->registerCommand("/debug-account", [](const auto & /*words*/,
-                                               auto channel) {
-        const auto &acc = getIApp()->getAccounts()->twitch.getCurrent();
+    this->registerCommand(
+        "/debug-account", [](const auto & /*words*/, auto channel) {
+            const auto &acc = getIApp()->getAccounts()->twitch.getCurrent();
 
-        // Account information
-        channel->addMessage(
-            makeSystemMessage(QString("User login: %1. ID: %2")
-                                  .arg(acc->getUserName(), acc->getUserId())));
+            // Account information
+            channel->addMessage(makeSystemMessage(
+                QString("User login: %1. ID: %2")
+                    .arg(acc->getUserName(), acc->getUserId())));
 
+            /*
         const auto emoteData = *acc->accessEmotes();
 
         for (const auto &emoteSet : emoteData.emoteSets)
@@ -801,9 +804,10 @@ void CommandController::initialize(Settings &, Paths &paths)
                         .arg(emote.name.string, emote.id.string)));
             }
         }
+        */
 
-        return "";
-    });
+            return "";
+        });
 
     this->registerCommand(
         "/debug-twitch-channel", [](const auto & /*words*/, auto channel) {
