@@ -116,7 +116,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
         connection->setPassword(oauthToken);
     }
 
-    // https://dev.twitch.tv/docs/irc/guide/#connecting-to-twitch-irc
+    // https://dev.twitch.tv/docs/irc#connecting-to-the-twitch-irc-server
     // SSL disabled: irc://irc.chat.twitch.tv:6667 (or port 80)
     // SSL enabled: irc://irc.chat.twitch.tv:6697 (or port 443)
     connection->setHost(Env::get().twitchServerHost);

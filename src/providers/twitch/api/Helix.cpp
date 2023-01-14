@@ -22,6 +22,19 @@ namespace chatterino {
 
 static IHelix *instance = nullptr;
 
+HelixChatters::HelixChatters(const QJsonObject &jsonObject)
+    : total(jsonObject.value("total").toInt())
+    , cursor(
+          jsonObject.value("pagination").toObject().value("cursor").toString())
+{
+    const auto &data = jsonObject.value("data").toArray();
+    for (const auto &chatter : data)
+    {
+        auto userLogin = chatter.toObject().value("user_login").toString();
+        this->chatters.insert(userLogin);
+    }
+}
+
 void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
                        ResultCallback<std::vector<HelixUser>> successCallback,
                        HelixFailureCallback failureCallback)

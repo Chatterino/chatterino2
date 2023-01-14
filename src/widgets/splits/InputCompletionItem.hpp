@@ -3,6 +3,7 @@
 #include "widgets/listview/GenericListItem.hpp"
 
 #include <functional>
+#include <memory>
 
 namespace chatterino {
 

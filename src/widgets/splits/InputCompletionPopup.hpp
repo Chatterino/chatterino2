@@ -4,6 +4,7 @@
 #include "widgets/listview/GenericListModel.hpp"
 
 #include <functional>
+#include <memory>
 
 namespace chatterino {
 

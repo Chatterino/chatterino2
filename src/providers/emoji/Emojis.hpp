@@ -5,6 +5,7 @@
 #include <boost/variant.hpp>
 #include <QMap>
 #include <QRegularExpression>
+#include <QVector>
 
 #include <map>
 #include <set>

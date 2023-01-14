@@ -53,8 +53,8 @@ public:
     pajlada::Signals::Signal<QColor> closed;
 
 protected:
-    void closeEvent(QCloseEvent *);
-    void themeChangedEvent();
+    void closeEvent(QCloseEvent *) override;
+    void themeChangedEvent() override;
 
 private:
     struct {

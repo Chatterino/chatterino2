@@ -28,7 +28,6 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/TooltipWidget.hpp"
 
-#include <QDesktopWidget>
 #include <QDrag>
 #include <QHBoxLayout>
 #include <QInputDialog>

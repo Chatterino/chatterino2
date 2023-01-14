@@ -637,15 +637,17 @@ if (BUILD_APP)
         )
 
     if (MSVC)
-        get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
-        get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
-        set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
+        if (NOT VCPKG_INSTALLED_DIR)
+            get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
+            get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
+            set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
 
-        install(TARGETS ${EXECUTABLE_PROJECT}
-                RUNTIME DESTINATION .
-                )
+            install(TARGETS ${EXECUTABLE_PROJECT}
+                    RUNTIME DESTINATION .
+                    )
 
-        install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
+            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
+        endif()
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
@@ -846,6 +848,10 @@ else ()
         target_compile_options(${LIBRARY_PROJECT} PUBLIC
             -Wno-unused-local-typedef
             -Wno-unused-private-field
+            -Werror=inconsistent-missing-override
+            -Werror=final-dtor-non-final-class
+            -Werror=ambiguous-reversed-operator
+
         )
     else ()
         target_compile_options(${LIBRARY_PROJECT} PUBLIC
