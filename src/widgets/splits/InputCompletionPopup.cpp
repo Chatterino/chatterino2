@@ -79,27 +79,30 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
     // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
     if (channel->isTwitchChannel())
     {
-        if (auto user = getApp()->accounts->twitch.getCurrent())
-        {
-            // Twitch Emotes available globally
-            auto emoteData = user->accessEmotes();
-            addEmotes(emotes, emoteData->emotes, text, "Twitch Emote");
-
-            // Twitch Emotes available locally
-            auto localEmoteData = user->accessLocalEmotes();
-            if (tc &&
-                localEmoteData->find(tc->roomId()) != localEmoteData->end())
-            {
-                if (const auto *localEmotes = &localEmoteData->at(tc->roomId()))
-                {
-                    addEmotes(emotes, *localEmotes, text,
-                              "Local Twitch Emotes");
-                }
-            }
-        }
-
         if (tc)
         {
+            // TODO: Add support for /whispers too
+            const auto &twitchEmoteSets =
+                getApp()->emotes->twitch.twitchEmoteSets;
+            for (const auto &emoteSetID : tc->twitchEmoteSets)
+            {
+                const auto emoteSetIt = twitchEmoteSets.find(emoteSetID);
+                if (emoteSetIt == twitchEmoteSets.end())
+                {
+                    continue;
+                }
+                const auto &emoteSet = *emoteSetIt->second;
+                for (const auto &emote : emoteSet.emotes)
+                {
+                    if (emote.first.string.contains(text, Qt::CaseInsensitive))
+                    {
+                        emotes.push_back({emote.second,
+                                          emote.second->name.string,
+                                          "Twitch Emote"});
+                    }
+                }
+            }
+
             // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
             if (auto bttv = tc->bttvEmotes())
             {
