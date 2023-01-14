@@ -73,18 +73,18 @@ ModerationPage::ModerationPage()
         QCheckBox *enableLogging = this->createCheckBox(
             "Enable logging", getSettings()->enableLogging);
         logs.append(enableLogging);
-        QCheckBox *customLogging =
-            this->createCheckBox("Enable logging for specific channels",
-                                 getSettings()->enableCustomLogging);
+        QCheckBox *onlyLogListedChannels =
+            this->createCheckBox("Only log channels listed below",
+                                 getSettings()->onlyLogListedChannels);
 
-        customLogging->setEnabled(getSettings()->enableLogging);
-        logs.append(customLogging);
+        onlyLogListedChannels->setEnabled(getSettings()->enableLogging);
+        logs.append(onlyLogListedChannels);
 
         // Select event
         QObject::connect(
             enableLogging, &QCheckBox::stateChanged, this,
-            [enableLogging, customLogging]() mutable {
-                customLogging->setEnabled(enableLogging->isChecked());
+            [enableLogging, onlyLogListedChannels]() mutable {
+                onlyLogListedChannels->setEnabled(enableLogging->isChecked());
             });
 
         auto logsPathLabel = logs.emplace<QLabel>();

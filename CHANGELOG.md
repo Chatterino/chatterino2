@@ -33,7 +33,7 @@
 - Dev: Fixed `inconsistent-missing-override` warnings. (#4296)
 - Dev: Fixed `final-dtor-non-final-class` warnings. (#4296)
 - Dev: Fixed `ambiguous-reversed-operator` warnings. (#4296)
-- Dev: Add settings to select which channels to log. (#4302)
+- Minor: Add settings to select which channels to log. (#4302)
 
 ## 2.4.0
 

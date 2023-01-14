@@ -1,12 +1,12 @@
-#include "ChannelLog.hpp"
+#include "controllers/logging/ChannelLog.hpp"
 
 namespace chatterino {
 
 // ChannelLog
 ChannelLog::ChannelLog(const QString &channel, bool loggingEnabled)
+    : channel(channel)
+    , loggingEnabled(loggingEnabled)
 {
-    this->channel = channel;
-    this->loggingEnabled = loggingEnabled;
 }
 
 QString ChannelLog::toString() const

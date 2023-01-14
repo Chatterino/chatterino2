@@ -45,28 +45,28 @@ struct Deserialize<chatterino::ChannelLog> {
     static chatterino::ChannelLog get(const rapidjson::Value &value,
                                       bool *error = nullptr)
     {
-        chatterino::ChannelLog ChannelLog =
+        chatterino::ChannelLog channelLog =
             chatterino::ChannelLog::createEmpty();
 
         if (!value.IsObject())
         {
             PAJLADA_REPORT_ERROR(error);
-            return ChannelLog;
+            return channelLog;
         }
 
-        if (!chatterino::rj::getSafe(value, "channel", ChannelLog.channel))
+        if (!chatterino::rj::getSafe(value, "channel", channelLog.channel))
         {
             PAJLADA_REPORT_ERROR(error);
-            return ChannelLog;
+            return channelLog;
         }
         if (!chatterino::rj::getSafe(value, "loggingEnabled",
-                                     ChannelLog.loggingEnabled))
+                                     channelLog.loggingEnabled))
         {
             PAJLADA_REPORT_ERROR(error);
-            return ChannelLog;
+            return channelLog;
         }
 
-        return ChannelLog;
+        return channelLog;
     }
 };
 

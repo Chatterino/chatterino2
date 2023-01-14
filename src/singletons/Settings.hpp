@@ -366,7 +366,7 @@ public:
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
-    BoolSetting enableCustomLogging = {"/logging/customLogging", false};
+    BoolSetting onlyLogListedChannels = {"/logging/onlyLogListedChannels", false};
 
     QStringSetting logPath = {"/logging/path", ""};
 
