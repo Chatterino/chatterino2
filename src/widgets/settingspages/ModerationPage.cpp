@@ -73,19 +73,6 @@ ModerationPage::ModerationPage()
         QCheckBox *enableLogging = this->createCheckBox(
             "Enable logging", getSettings()->enableLogging);
         logs.append(enableLogging);
-        QCheckBox *onlyLogListedChannels =
-            this->createCheckBox("Only log channels listed below",
-                                 getSettings()->onlyLogListedChannels);
-
-        onlyLogListedChannels->setEnabled(getSettings()->enableLogging);
-        logs.append(onlyLogListedChannels);
-
-        // Select event
-        QObject::connect(
-            enableLogging, &QCheckBox::stateChanged, this,
-            [enableLogging, onlyLogListedChannels]() mutable {
-                onlyLogListedChannels->setEnabled(enableLogging->isChecked());
-            });
 
         auto logsPathLabel = logs.emplace<QLabel>();
 
@@ -121,7 +108,6 @@ ModerationPage::ModerationPage()
             });
 
         buttons->addStretch();
-        logs->addStretch(1);
 
         // Show how big (size-wise) the logs are
         auto logsPathSizeLabel = logs.emplace<QLabel>();
@@ -155,6 +141,20 @@ ModerationPage::ModerationPage()
                                  return fetchLogDirectorySize();
                              }));
                          });
+
+        QCheckBox *onlyLogListedChannels =
+            this->createCheckBox("Only log channels listed below",
+                                 getSettings()->onlyLogListedChannels);
+
+        onlyLogListedChannels->setEnabled(getSettings()->enableLogging);
+        logs.append(onlyLogListedChannels);
+
+        // Select event
+        QObject::connect(
+            enableLogging, &QCheckBox::stateChanged, this,
+            [enableLogging, onlyLogListedChannels]() mutable {
+                onlyLogListedChannels->setEnabled(enableLogging->isChecked());
+            });
 
         EditableModelView *view =
             logs.emplace<EditableModelView>(
