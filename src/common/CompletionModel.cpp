@@ -130,27 +130,6 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         }
     };
 
-    if (auto account = getApp()->accounts->twitch.getCurrent())
-    {
-        // Twitch Emotes available globally
-        for (const auto &emote : account->accessEmotes()->emotes)
-        {
-            addString(emote.first.string, TaggedString::TwitchGlobalEmote);
-        }
-
-        // Twitch Emotes available locally
-        auto localEmoteData = account->accessLocalEmotes();
-        if (tc != nullptr &&
-            localEmoteData->find(tc->roomId()) != localEmoteData->end())
-        {
-            for (const auto &emote : localEmoteData->at(tc->roomId()))
-            {
-                addString(emote.first.string,
-                          TaggedString::Type::TwitchLocalEmote);
-            }
-        }
-    }
-
     // 7TV Global
     for (const auto &emote :
          *getApp()->twitch->getSeventvEmotes().globalEmotes())
@@ -184,6 +163,22 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     if (tc == nullptr)
     {
         return;
+    }
+
+    // Twitch emotes
+    const auto &twitchEmoteSets = getApp()->emotes->twitch.twitchEmoteSets;
+    for (const auto &emoteSetID : tc->twitchEmoteSets)
+    {
+        const auto emoteSetIt = twitchEmoteSets.find(emoteSetID);
+        if (emoteSetIt == twitchEmoteSets.end())
+        {
+            continue;
+        }
+        const auto &emoteSet = *emoteSetIt->second;
+        for (const auto &emote : emoteSet.emotes)
+        {
+            addString(emote.first.string, TaggedString::TwitchGlobalEmote);
+        }
     }
 
     // Usernames
