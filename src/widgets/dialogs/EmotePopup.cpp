@@ -101,10 +101,12 @@ auto makeEmojiMessage(EmojiMap &emojiMap)
 }
 
 void addTwitchEmoteSets(QStringList emoteSetIDs, Channel &globalChannel,
-                        Channel &subChannel, QString currentChannelName)
+                        Channel &subChannel, QString currentChannelName,
+                        const QString &searchText = "")
 {
     const auto &twitchEmoteSets = getApp()->emotes->twitch.twitchEmoteSets;
 
+    // TODO: Split this up into a 'subscriber' map & 'global' map
     QMap<QString, QPair<bool, std::vector<MessagePtr>>> mapOfSets;
 
     for (const auto &emoteSetID : emoteSetIDs)
@@ -113,7 +115,9 @@ void addTwitchEmoteSets(QStringList emoteSetIDs, Channel &globalChannel,
 
         if (emoteSetIt == twitchEmoteSets.end())
         {
-            // The emote set was not loaded. Warn? Notify? List? Update on loaded?
+            qCDebug(chatterinoWidget)
+                << "Emote set" << emoteSetID
+                << "not loaded, unable to add it to emote popup";
             continue;
         }
 
@@ -130,27 +134,29 @@ void addTwitchEmoteSets(QStringList emoteSetIDs, Channel &globalChannel,
         builder->flags.set(MessageFlag::Centered);
         builder->flags.set(MessageFlag::DisableCompactEmotes);
 
-        // If value of map is empty, create init pair and add title.
-        if (mapOfSets.find(channelName) == mapOfSets.end())
-        {
-            std::vector<MessagePtr> b;
-            b.push_back(makeTitleMessage(text));
-            mapOfSets[channelName] =
-                qMakePair(emoteSet.ivrEmoteSet.setId == "0", b);
-        }
-
         // std::views::keys(emoteSet.emotes); // :()
         std::vector<EmoteName> keys;
         keys.reserve(emoteSet.emotes.size());
 
         for (const auto &emote : emoteSet.emotes)
         {
+            if (!searchText.isEmpty() &&
+                !emote.first.string.contains(searchText, Qt::CaseInsensitive))
+            {
+                continue;
+            }
             keys.push_back(emote.first);
         }
 
-        std::sort(keys.begin(), keys.end(), [](EmoteName a, EmoteName b) {
-            return a.string < b.string;
-        });
+        if (keys.empty())
+        {
+            continue;
+        }
+
+        std::sort(keys.begin(), keys.end(),
+                  [](const EmoteName &a, const EmoteName &b) {
+                      return a.string < b.string;
+                  });
 
         for (const auto &emoteName : keys)
         {
@@ -164,6 +170,15 @@ void addTwitchEmoteSets(QStringList emoteSetIDs, Channel &globalChannel,
                     MessageElementFlags{MessageElementFlag::AlwaysShow,
                                         MessageElementFlag::TwitchEmote})
                 ->setLink(Link(Link::InsertText, emoteName.string));
+        }
+
+        // If value of map is empty, create init pair and add title.
+        if (mapOfSets.find(channelName) == mapOfSets.end())
+        {
+            std::vector<MessagePtr> b;
+            b.push_back(makeTitleMessage(text));
+            mapOfSets[channelName] =
+                qMakePair(emoteSet.ivrEmoteSet.setId == "0", b);
         }
 
         mapOfSets[channelName].second.push_back(builder.release());
@@ -477,27 +492,6 @@ void EmotePopup::loadChannel(ChannelPtr channel)
 void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
                                     const QString &searchText)
 {
-    auto twitchEmoteSets =
-        getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets;
-    std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> twitchGlobalEmotes{};
-
-    for (const auto &set : twitchEmoteSets)
-    {
-        auto setCopy = std::make_shared<TwitchAccount::EmoteSet>(*set);
-        auto setIt =
-            std::remove_if(setCopy->emotes.begin(), setCopy->emotes.end(),
-                           [searchText](auto &emote) {
-                               return !emote.name.string.contains(
-                                   searchText, Qt::CaseInsensitive);
-                           });
-        setCopy->emotes.resize(std::distance(setCopy->emotes.begin(), setIt));
-
-        if (!setCopy->emotes.empty())
-        {
-            twitchGlobalEmotes.push_back(setCopy);
-        }
-    }
-
     auto bttvGlobalEmotes =
         filterEmoteMap(searchText, getApp()->twitch->getBttvEmotes().emotes());
     auto ffzGlobalEmotes =
@@ -527,9 +521,8 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
         return;
     }
 
-    // TODO: This is not working
     addTwitchEmoteSets(this->twitchChannel_->twitchEmoteSets, *searchChannel,
-                       *searchChannel, this->channel_->getName());
+                       *searchChannel, this->channel_->getName(), searchText);
 
     auto bttvChannelEmotes =
         filterEmoteMap(searchText, this->twitchChannel_->bttvEmotes());
