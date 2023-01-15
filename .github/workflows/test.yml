@@ -8,7 +8,7 @@ on:
 env:
   TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.5
 
-concurrency: 
+concurrency:
   group: test-${{ github.ref }}
   cancel-in-progress: true
 
@@ -30,7 +30,7 @@ jobs:
         id: cache-qt
         uses: actions/cache@v3
         with:
-          path: "${{ github.workspace }}/qt/"
+          path: '${{ github.workspace }}/qt/'
           key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
 
       - name: Install Qt
@@ -39,52 +39,52 @@ jobs:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
           version: ${{ matrix.qt-version }}
-          dir: "${{ github.workspace }}/qt/"
+          dir: '${{ github.workspace }}/qt/'
 
       # LINUX
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            sudo apt-get update
-            sudo apt-get -y install \
-                cmake \
-                rapidjson-dev \
-                libssl-dev \
-                libboost-dev \
-                libboost-system-dev \
-                libboost-filesystem-dev \
-                libpulse-dev \
-                libxkbcommon-x11-0 \
-                libgstreamer-plugins-base1.0-0 \
-                build-essential \
-                libgl1-mesa-dev \
-                libxcb-icccm4 \
-                libxcb-image0 \
-                libxcb-keysyms1 \
-                libxcb-render-util0 \
-                libxcb-xinerama0
+          sudo apt-get update
+          sudo apt-get -y install \
+              cmake \
+              rapidjson-dev \
+              libssl-dev \
+              libboost-dev \
+              libboost-system-dev \
+              libboost-filesystem-dev \
+              libpulse-dev \
+              libxkbcommon-x11-0 \
+              libgstreamer-plugins-base1.0-0 \
+              build-essential \
+              libgl1-mesa-dev \
+              libxcb-icccm4 \
+              libxcb-image0 \
+              libxcb-keysyms1 \
+              libxcb-render-util0 \
+              libxcb-xinerama0
 
       - name: Create build directory (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            mkdir build-test
+          mkdir build-test
         shell: bash
 
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            cmake -DBUILD_TESTS=On -DBUILD_APP=OFF ..
-            cmake --build . --config Release
+          cmake -DBUILD_TESTS=On -DBUILD_APP=OFF ..
+          cmake --build . --config Release
         working-directory: build-test
         shell: bash
 
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            docker pull kennethreitz/httpbin
-            docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
-            docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
-            docker run -p 9051:80 --detach kennethreitz/httpbin
-            ./bin/chatterino-test --platform minimal || ./bin/chatterino-test --platform minimal || ./bin/chatterino-test --platform minimal
+          docker pull kennethreitz/httpbin
+          docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
+          docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
+          docker run -p 9051:80 --detach kennethreitz/httpbin
+          ./bin/chatterino-test --platform minimal || ./bin/chatterino-test --platform minimal || ./bin/chatterino-test --platform minimal
         working-directory: build-test
         shell: bash

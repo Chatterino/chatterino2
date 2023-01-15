@@ -3,7 +3,7 @@ name: Post clang-tidy review comments
 
 on:
   workflow_run:
-    workflows: ["Build"]
+    workflows: ['Build']
     types:
       - completed
 

@@ -7,7 +7,7 @@ on:
       - master
   pull_request:
 
-concurrency: 
+concurrency:
   group: lint-${{ github.ref }}
   cancel-in-progress: true
 
@@ -22,4 +22,4 @@ jobs:
         uses: actionsx/prettier@v2
         with:
           # prettier CLI arguments.
-          args: --check '**/*.md'
+          args: --check '**/*.{md,yml,yaml}' '.prettierrc' 'vcpkg.json'

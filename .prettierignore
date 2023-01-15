@@ -3,4 +3,4 @@ lib/*/
 conan-pkgs/*/
 cmake/sanitizers-cmake/
 
-.github/
+.clang-tidy
