@@ -14,7 +14,7 @@ QString ChannelLog::toString() const
 
 ChannelLog ChannelLog::createEmpty()
 {
-    return ChannelLog("");
+    return {""};
 }
 
 }  // namespace chatterino
