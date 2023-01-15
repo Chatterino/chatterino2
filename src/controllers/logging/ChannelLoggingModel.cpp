@@ -6,7 +6,7 @@ namespace chatterino {
 
 // commandmodel
 ChannelLoggingModel ::ChannelLoggingModel(QObject *parent)
-    : SignalVectorModel<ChannelLog>(1, parent)
+    : SignalVectorModel<ChannelLog>(Column::COUNT, parent)
 {
 }
 

@@ -12,7 +12,10 @@ class ChannelLoggingModel : public SignalVectorModel<ChannelLog>
 public:
     explicit ChannelLoggingModel(QObject *parent);
 
-    enum Column { Channel = 0 };
+    enum Column {
+        Channel,
+        COUNT,
+    };
 
 protected:
     // turn a vector item into a model row
