@@ -22,4 +22,4 @@ jobs:
         uses: actionsx/prettier@v2
         with:
           # prettier CLI arguments.
-          args: --check '**/*.{md,yml,yaml}' '.prettierrc' 'vcpkg.json'
+          args: --check .
