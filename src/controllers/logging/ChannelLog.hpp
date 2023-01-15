@@ -16,9 +16,9 @@ public:
 
     bool operator==(const ChannelLog &other) const;
 
-    QString toString() const;
+    [[nodiscard]] QString toString() const;
 
-    static ChannelLog createEmpty();
+    [[nodiscard]] static ChannelLog createEmpty();
 };
 
 }  // namespace chatterino
