@@ -119,6 +119,11 @@ set(SOURCE_FILES
         controllers/moderationactions/ModerationActionModel.cpp
         controllers/moderationactions/ModerationActionModel.hpp
 
+        controllers/logging/ChannelLog.cpp
+        controllers/logging/ChannelLog.hpp
+        controllers/logging/ChannelLoggingModel.cpp
+        controllers/logging/ChannelLoggingModel.hpp
+
         controllers/nicknames/NicknamesModel.cpp
         controllers/nicknames/NicknamesModel.hpp
         controllers/nicknames/Nickname.hpp

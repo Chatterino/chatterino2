@@ -445,15 +445,15 @@ void HighlightController::rebuildChecks(Settings &settings)
     checks->clear();
 
     // CURRENT ORDER:
-    // Subscription -> Whisper -> User -> Message -> Reply Threads -> Badge
+    // Subscription -> Whisper -> Message -> User -> Reply Threads -> Badge
 
     rebuildSubscriptionHighlights(settings, *checks);
 
     rebuildWhisperHighlights(settings, *checks);
 
-    rebuildUserHighlights(settings, *checks);
-
     rebuildMessageHighlights(settings, *checks);
+
+    rebuildUserHighlights(settings, *checks);
 
     rebuildReplyThreadHighlight(settings, *checks);
 
