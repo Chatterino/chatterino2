@@ -30,7 +30,7 @@ jobs:
         id: cache-qt
         uses: actions/cache@v3
         with:
-          path: '${{ github.workspace }}/qt/'
+          path: "${{ github.workspace }}/qt/"
           key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
 
       - name: Install Qt
@@ -39,7 +39,7 @@ jobs:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
           version: ${{ matrix.qt-version }}
-          dir: '${{ github.workspace }}/qt/'
+          dir: "${{ github.workspace }}/qt/"
 
       # LINUX
       - name: Install dependencies (Ubuntu)

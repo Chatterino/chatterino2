@@ -55,7 +55,7 @@ jobs:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
           version: ${{ matrix.qt-version }}
-          dir: '${{ github.workspace }}/qt/'
+          dir: "${{ github.workspace }}/qt/"
 
       # WINDOWS
       - name: Cache conan packages part 1
@@ -164,7 +164,7 @@ jobs:
         id: review
         with:
           build_dir: build
-          config_file: '.clang-tidy'
+          config_file: ".clang-tidy"
           split_workflow: true
 
       - uses: actions/upload-artifact@v3
@@ -274,7 +274,7 @@ jobs:
           removeArtifacts: true
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: 'release-artifacts/*'
+          artifacts: "release-artifacts/*"
           body: ${{ github.event.head_commit.message }}
           prerelease: true
           name: Nightly Release
