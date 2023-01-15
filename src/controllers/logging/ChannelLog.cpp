@@ -2,9 +2,8 @@
 
 namespace chatterino {
 
-// ChannelLog
-ChannelLog::ChannelLog(const QString &channel)
-    : channel(channel)
+ChannelLog::ChannelLog(QString channel_)
+    : channel(std::move(channel_))
 {
 }
 

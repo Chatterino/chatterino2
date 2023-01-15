@@ -12,7 +12,7 @@ class ChannelLog
 public:
     QString channel;
 
-    ChannelLog(const QString &channel);
+    ChannelLog(QString channel_);
 
     bool operator==(const ChannelLog &other) const;
 
