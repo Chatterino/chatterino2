@@ -7,7 +7,7 @@ on:
       - master
   pull_request:
 
-concurrency: 
+concurrency:
   group: lint-${{ github.ref }}
   cancel-in-progress: true
 
@@ -18,8 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Lint Markdown files
+      - name: Check formatting with Prettier
         uses: actionsx/prettier@v2
         with:
           # prettier CLI arguments.
-          args: --check '**/*.md'
+          args: --check .
