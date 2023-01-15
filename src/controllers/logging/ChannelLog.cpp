@@ -2,14 +2,19 @@
 
 namespace chatterino {
 
-ChannelLog::ChannelLog(QString channel_)
-    : channel(std::move(channel_))
+ChannelLog::ChannelLog(QString channelName)
+    : channelName_(std::move(channelName))
 {
+}
+
+QString ChannelLog::channelName() const
+{
+    return this->channelName_;
 }
 
 QString ChannelLog::toString() const
 {
-    return this->channel;
+    return this->channelName_;
 }
 
 ChannelLog ChannelLog::createEmpty()

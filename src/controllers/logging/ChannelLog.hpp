@@ -9,12 +9,14 @@ namespace chatterino {
 
 class ChannelLog
 {
-public:
-    QString channel;
+    QString channelName_;
 
-    ChannelLog(QString channel_);
+public:
+    ChannelLog(QString channelName);
 
     bool operator==(const ChannelLog &other) const;
+
+    [[nodiscard]] QString channelName() const;
 
     [[nodiscard]] QString toString() const;
 
@@ -32,7 +34,7 @@ struct Serialize<chatterino::ChannelLog> {
     {
         rapidjson::Value ret(rapidjson::kObjectType);
 
-        chatterino::rj::set(ret, "channel", value.channel, a);
+        chatterino::rj::set(ret, "channelName", value.channelName(), a);
 
         return ret;
     }
@@ -43,22 +45,21 @@ struct Deserialize<chatterino::ChannelLog> {
     static chatterino::ChannelLog get(const rapidjson::Value &value,
                                       bool *error = nullptr)
     {
-        chatterino::ChannelLog channelLog =
-            chatterino::ChannelLog::createEmpty();
-
         if (!value.IsObject())
         {
             PAJLADA_REPORT_ERROR(error);
-            return channelLog;
+            return chatterino::ChannelLog::createEmpty();
         }
 
-        if (!chatterino::rj::getSafe(value, "channel", channelLog.channel))
+        QString channelName;
+
+        if (!chatterino::rj::getSafe(value, "channelName", channelName))
         {
             PAJLADA_REPORT_ERROR(error);
-            return channelLog;
+            return chatterino::ChannelLog::createEmpty();
         }
 
-        return channelLog;
+        return {channelName};
     }
 };
 

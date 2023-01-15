@@ -21,7 +21,7 @@ void Logging::initialize(Settings &settings, Paths & /*paths*/)
 
         for (const auto &loggedChannel : *settings.loggedChannels.readOnly())
         {
-            this->onlyLogListedChannels.insert(loggedChannel.channel);
+            this->onlyLogListedChannels.insert(loggedChannel.channelName());
         }
     });
 }
