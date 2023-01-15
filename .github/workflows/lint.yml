@@ -23,3 +23,11 @@ jobs:
         with:
           # prettier CLI arguments.
           args: --check .
+      - name: Install cmakelang
+        run: |
+          apt-get install python3 python3-pip -y
+          pip install cmakelang[YAML]
+      - name: Check format and lint CMake files
+        run: |
+          cmake-format --check CMakeLists.txt benchmarks/CMakeLists.txt src/CMakeLists.txt tests/CMakeLists.txt
+          cmake-lint CMakeLists.txt benchmarks/CMakeLists.txt src/CMakeLists.txt tests/CMakeLists.txt
