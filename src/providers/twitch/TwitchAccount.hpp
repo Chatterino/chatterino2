@@ -93,6 +93,8 @@ private:
     mutable std::mutex ignoresMutex_;
     UniqueAccess<std::set<TwitchUser>> ignores_;
     UniqueAccess<std::set<QString>> ignoresUserIds_;
+
+    QStringList globallyAccessibleEmoteSetIDs;
 };
 
 }  // namespace chatterino
