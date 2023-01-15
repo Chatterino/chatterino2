@@ -13,8 +13,8 @@ struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteMap;
 class Channel;
-class BttvLiveUpdateEmoteUpdateAddMessage;
-class BttvLiveUpdateEmoteRemoveMessage;
+struct BttvLiveUpdateEmoteUpdateAddMessage;
+struct BttvLiveUpdateEmoteRemoveMessage;
 
 class BttvEmotes final
 {

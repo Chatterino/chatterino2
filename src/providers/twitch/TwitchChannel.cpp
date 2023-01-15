@@ -15,6 +15,8 @@
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
+#include "providers/bttv/BttvLiveUpdates.hpp"
+#include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
 #include "providers/RecentMessagesApi.hpp"
 #include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"

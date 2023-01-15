@@ -7,6 +7,7 @@
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 
