@@ -9,7 +9,6 @@ namespace chatterino {
 
 class ChannelLoggingModel : public SignalVectorModel<ChannelLog>
 {
-public:
     explicit ChannelLoggingModel(QObject *parent);
 
     enum Column {
@@ -25,6 +24,8 @@ protected:
     // turns a row in the model into a vector item
     void getRowFromItem(const ChannelLog &item,
                         std::vector<QStandardItem *> &row) override;
+
+    friend class ModerationPage;
 };
 
 }  // namespace chatterino
