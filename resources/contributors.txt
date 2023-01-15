@@ -54,6 +54,7 @@ iProdigy | https://github.com/iProdigy | :/avatars/iprodigy.png | Contributor
 Jaxkey | https://github.com/Jaxkey | :/avatars/jaxkey.png | Contributor
 Explooosion | https://github.com/Explooosion-code | :/avatars/explooosion_code.png | Contributor
 mohad12211 | https://github.com/mohad12211 | :/avatars/mohad12211.png | Contributor
+Felanbird | https://github.com/Felanbird | | Contributor
 
 # If you are a contributor add yourself above this line
 
