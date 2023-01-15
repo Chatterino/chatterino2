@@ -8,6 +8,10 @@ This is a set of guidelines for contributing to Chatterino. The goal is to teach
 
 Code is automatically formatted using `clang-format`. It takes the burden off of the programmer and ensures that all contributors use the same style (even if mess something up accidentally). We recommend that you set up automatic formatting on file save in your editor.
 
+`CMakeLists.txt` files are formatted and linted using [`cmake-format`](https://cmake-format.readthedocs.io/en/latest/cmake-format.html) and [`cmake-lint`](https://cmake-format.readthedocs.io/en/latest/cmake-lint.html).
+
+Markdown files are formatted using [`prettier`](https://prettier.io/).
+
 # Comments
 
 Comments should only be used to:
