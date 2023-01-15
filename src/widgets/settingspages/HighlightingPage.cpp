@@ -63,8 +63,8 @@ HighlightingPage::HighlightingPage()
                 highlights.emplace<QLabel>(
                     "Play notification sounds and highlight messages based on "
                     "certain patterns.\n"
-                    "Message highlights are prioritized over badge highlights, "
-                    "but under user highlights");
+                    "Message highlights are prioritized over badge highlights "
+                    "and user highlights.");
 
                 auto view =
                     highlights
@@ -109,8 +109,8 @@ HighlightingPage::HighlightingPage()
                 pingUsers.emplace<QLabel>(
                     "Play notification sounds and highlight messages from "
                     "certain users.\n"
-                    "User highlights are prioritized over message and badge "
-                    "highlights.");
+                    "User highlights are prioritized badge highlights, but "
+                    "under message highlights.");
                 EditableModelView *view =
                     pingUsers
                         .emplace<EditableModelView>(
