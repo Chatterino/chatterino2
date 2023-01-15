@@ -84,7 +84,7 @@ format:
   enable_sort: true
   # If true, the parsers may infer whether or not an argument
   # list is sortable (without annotation).
-  autosort: false
+  autosort: true
   # By default, if cmake-format cannot successfully fit
   # everything into the desired linewidth it will apply the
   # last, most agressive attempt that it made. If this flag is

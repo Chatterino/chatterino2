@@ -1,28 +1,29 @@
 project(chatterino-test)
 
 set(TEST_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/ChannelChatters.cpp
+    # cmake-format: sort
     ${CMAKE_CURRENT_LIST_DIR}/src/AccessGuard.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/NetworkCommon.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/NetworkRequest.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/BasicPubSub.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/ChannelChatters.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChatterSet.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightPhrase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ExponentialBackoff.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/Helpers.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/RatelimitBucket.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/Hotkeys.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/UtilTwitch.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/IrcHelpers.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchPubSubClient.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchMessageBuilder.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightController.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/FormatTime.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Helpers.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightController.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightPhrase.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Hotkeys.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/IrcHelpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/LimitedQueue.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/BasicPubSub.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/NetworkCommon.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/NetworkRequest.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/RatelimitBucket.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/SeventvEventAPI.cpp
     # Add your new file above this line!
+    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchMessageBuilder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchPubSubClient.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/UtilTwitch.cpp
 )
 
 add_executable(${PROJECT_NAME} ${TEST_SOURCES})

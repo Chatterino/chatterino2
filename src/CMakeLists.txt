@@ -3,14 +3,14 @@ set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 set(SOURCE_FILES
+    # cmake-format: sort
+    ${CMAKE_SOURCE_DIR}/resources/resources.qrc
     Application.cpp
     Application.hpp
     BaseSettings.cpp
     BaseSettings.hpp
     BrowserExtension.cpp
     BrowserExtension.hpp
-    RunGui.cpp
-    RunGui.hpp
     common/Args.cpp
     common/Args.hpp
     common/Channel.cpp
@@ -57,11 +57,11 @@ set(SOURCE_FILES
     controllers/accounts/AccountModel.hpp
     controllers/commands/builtin/twitch/ChatSettings.cpp
     controllers/commands/builtin/twitch/ChatSettings.hpp
+    controllers/commands/Command.cpp
+    controllers/commands/Command.hpp
     controllers/commands/CommandContext.hpp
     controllers/commands/CommandController.cpp
     controllers/commands/CommandController.hpp
-    controllers/commands/Command.cpp
-    controllers/commands/Command.hpp
     controllers/commands/CommandModel.cpp
     controllers/commands/CommandModel.hpp
     controllers/filters/FilterModel.cpp
@@ -106,26 +106,26 @@ set(SOURCE_FILES
     controllers/ignores/IgnoreModel.hpp
     controllers/ignores/IgnorePhrase.cpp
     controllers/ignores/IgnorePhrase.hpp
-    controllers/moderationactions/ModerationAction.cpp
-    controllers/moderationactions/ModerationAction.hpp
-    controllers/moderationactions/ModerationActionModel.cpp
-    controllers/moderationactions/ModerationActionModel.hpp
     controllers/logging/ChannelLog.cpp
     controllers/logging/ChannelLog.hpp
     controllers/logging/ChannelLoggingModel.cpp
     controllers/logging/ChannelLoggingModel.hpp
+    controllers/moderationactions/ModerationAction.cpp
+    controllers/moderationactions/ModerationAction.hpp
+    controllers/moderationactions/ModerationActionModel.cpp
+    controllers/moderationactions/ModerationActionModel.hpp
+    controllers/nicknames/Nickname.hpp
     controllers/nicknames/NicknamesModel.cpp
     controllers/nicknames/NicknamesModel.hpp
-    controllers/nicknames/Nickname.hpp
     controllers/notifications/NotificationController.cpp
     controllers/notifications/NotificationController.hpp
     controllers/notifications/NotificationModel.cpp
     controllers/notifications/NotificationModel.hpp
     controllers/pings/MutedChannelModel.cpp
     controllers/pings/MutedChannelModel.hpp
+    controllers/userdata/UserData.hpp
     controllers/userdata/UserDataController.cpp
     controllers/userdata/UserDataController.hpp
-    controllers/userdata/UserData.hpp
     debug/Benchmark.cpp
     debug/Benchmark.hpp
     messages/Emote.cpp
@@ -134,6 +134,12 @@ set(SOURCE_FILES
     messages/Image.hpp
     messages/ImageSet.cpp
     messages/ImageSet.hpp
+    messages/layouts/MessageLayout.cpp
+    messages/layouts/MessageLayout.hpp
+    messages/layouts/MessageLayoutContainer.cpp
+    messages/layouts/MessageLayoutContainer.hpp
+    messages/layouts/MessageLayoutElement.cpp
+    messages/layouts/MessageLayoutElement.hpp
     messages/Link.cpp
     messages/Link.hpp
     messages/Message.cpp
@@ -146,14 +152,6 @@ set(SOURCE_FILES
     messages/MessageElement.hpp
     messages/MessageThread.cpp
     messages/MessageThread.hpp
-    messages/SharedMessageBuilder.cpp
-    messages/SharedMessageBuilder.hpp
-    messages/layouts/MessageLayout.cpp
-    messages/layouts/MessageLayout.hpp
-    messages/layouts/MessageLayoutContainer.cpp
-    messages/layouts/MessageLayoutContainer.hpp
-    messages/layouts/MessageLayoutElement.cpp
-    messages/layouts/MessageLayoutElement.hpp
     messages/search/AuthorPredicate.cpp
     messages/search/AuthorPredicate.hpp
     messages/search/BadgePredicate.cpp
@@ -170,12 +168,8 @@ set(SOURCE_FILES
     messages/search/SubstringPredicate.hpp
     messages/search/SubtierPredicate.cpp
     messages/search/SubtierPredicate.hpp
-    providers/IvrApi.cpp
-    providers/IvrApi.hpp
-    providers/LinkResolver.cpp
-    providers/LinkResolver.hpp
-    providers/RecentMessagesApi.cpp
-    providers/RecentMessagesApi.hpp
+    messages/SharedMessageBuilder.cpp
+    messages/SharedMessageBuilder.hpp
     providers/bttv/BttvEmotes.cpp
     providers/bttv/BttvEmotes.hpp
     providers/chatterino/ChatterinoBadges.cpp
@@ -204,15 +198,15 @@ set(SOURCE_FILES
     providers/irc/IrcMessageBuilder.hpp
     providers/irc/IrcServer.cpp
     providers/irc/IrcServer.hpp
+    providers/IvrApi.cpp
+    providers/IvrApi.hpp
+    providers/LinkResolver.cpp
+    providers/LinkResolver.hpp
     providers/liveupdates/BasicPubSubClient.hpp
     providers/liveupdates/BasicPubSubManager.hpp
     providers/liveupdates/BasicPubSubWebsocket.hpp
-    providers/seventv/SeventvBadges.cpp
-    providers/seventv/SeventvBadges.hpp
-    providers/seventv/SeventvEmotes.cpp
-    providers/seventv/SeventvEmotes.hpp
-    providers/seventv/SeventvEventAPI.cpp
-    providers/seventv/SeventvEventAPI.hpp
+    providers/RecentMessagesApi.cpp
+    providers/RecentMessagesApi.hpp
     providers/seventv/eventapi/SeventvEventAPIClient.cpp
     providers/seventv/eventapi/SeventvEventAPIClient.hpp
     providers/seventv/eventapi/SeventvEventAPIDispatch.cpp
@@ -221,6 +215,14 @@ set(SOURCE_FILES
     providers/seventv/eventapi/SeventvEventAPIMessage.hpp
     providers/seventv/eventapi/SeventvEventAPISubscription.cpp
     providers/seventv/eventapi/SeventvEventAPISubscription.hpp
+    providers/seventv/SeventvBadges.cpp
+    providers/seventv/SeventvBadges.hpp
+    providers/seventv/SeventvEmotes.cpp
+    providers/seventv/SeventvEmotes.hpp
+    providers/seventv/SeventvEventAPI.cpp
+    providers/seventv/SeventvEventAPI.hpp
+    providers/twitch/api/Helix.cpp
+    providers/twitch/api/Helix.hpp
     providers/twitch/ChannelPointReward.cpp
     providers/twitch/ChannelPointReward.hpp
     providers/twitch/IrcMessageHandler.cpp
@@ -234,6 +236,21 @@ set(SOURCE_FILES
     providers/twitch/PubSubManager.cpp
     providers/twitch/PubSubManager.hpp
     providers/twitch/PubSubMessages.hpp
+    providers/twitch/pubsubmessages/AutoMod.cpp
+    providers/twitch/pubsubmessages/AutoMod.hpp
+    providers/twitch/pubsubmessages/Base.cpp
+    providers/twitch/pubsubmessages/Base.hpp
+    providers/twitch/pubsubmessages/ChannelPoints.cpp
+    providers/twitch/pubsubmessages/ChannelPoints.hpp
+    providers/twitch/pubsubmessages/ChatModeratorAction.cpp
+    providers/twitch/pubsubmessages/ChatModeratorAction.hpp
+    providers/twitch/pubsubmessages/Listen.cpp
+    providers/twitch/pubsubmessages/Listen.hpp
+    providers/twitch/pubsubmessages/Message.hpp
+    providers/twitch/pubsubmessages/Unlisten.cpp
+    providers/twitch/pubsubmessages/Unlisten.hpp
+    providers/twitch/pubsubmessages/Whisper.cpp
+    providers/twitch/pubsubmessages/Whisper.hpp
     providers/twitch/PubSubWebsocket.hpp
     providers/twitch/TwitchAccount.cpp
     providers/twitch/TwitchAccount.hpp
@@ -255,29 +272,18 @@ set(SOURCE_FILES
     providers/twitch/TwitchMessageBuilder.hpp
     providers/twitch/TwitchUser.cpp
     providers/twitch/TwitchUser.hpp
-    providers/twitch/pubsubmessages/AutoMod.cpp
-    providers/twitch/pubsubmessages/AutoMod.hpp
-    providers/twitch/pubsubmessages/Base.cpp
-    providers/twitch/pubsubmessages/Base.hpp
-    providers/twitch/pubsubmessages/ChannelPoints.cpp
-    providers/twitch/pubsubmessages/ChannelPoints.hpp
-    providers/twitch/pubsubmessages/ChatModeratorAction.cpp
-    providers/twitch/pubsubmessages/ChatModeratorAction.hpp
-    providers/twitch/pubsubmessages/Listen.cpp
-    providers/twitch/pubsubmessages/Listen.hpp
-    providers/twitch/pubsubmessages/Message.hpp
-    providers/twitch/pubsubmessages/Unlisten.cpp
-    providers/twitch/pubsubmessages/Unlisten.hpp
-    providers/twitch/pubsubmessages/Whisper.cpp
-    providers/twitch/pubsubmessages/Whisper.hpp
-    providers/twitch/api/Helix.cpp
-    providers/twitch/api/Helix.hpp
+    RunGui.cpp
+    RunGui.hpp
     singletons/Badges.cpp
     singletons/Badges.hpp
     singletons/Emotes.cpp
     singletons/Emotes.hpp
     singletons/Fonts.cpp
     singletons/Fonts.hpp
+    singletons/helper/GifTimer.cpp
+    singletons/helper/GifTimer.hpp
+    singletons/helper/LoggingChannel.cpp
+    singletons/helper/LoggingChannel.hpp
     singletons/Logging.cpp
     singletons/Logging.hpp
     singletons/NativeMessaging.cpp
@@ -296,10 +302,6 @@ set(SOURCE_FILES
     singletons/Updates.hpp
     singletons/WindowManager.cpp
     singletons/WindowManager.hpp
-    singletons/helper/GifTimer.cpp
-    singletons/helper/GifTimer.hpp
-    singletons/helper/LoggingChannel.cpp
-    singletons/helper/LoggingChannel.hpp
     util/AttachToConsole.cpp
     util/AttachToConsole.hpp
     util/Clipboard.cpp
@@ -331,20 +333,20 @@ set(SOURCE_FILES
     util/RatelimitBucket.hpp
     util/SampleData.cpp
     util/SampleData.hpp
+    util/serialize/Container.hpp
     util/SharedPtrElementLess.hpp
     util/SplitCommand.cpp
     util/SplitCommand.hpp
-    util/StreamLink.cpp
-    util/StreamLink.hpp
     util/StreamerMode.cpp
     util/StreamerMode.hpp
+    util/StreamLink.cpp
+    util/StreamLink.hpp
     util/ThreadGuard.hpp
     util/Twitch.cpp
     util/Twitch.hpp
     util/TypeName.hpp
     util/WindowsHelper.cpp
     util/WindowsHelper.hpp
-    util/serialize/Container.hpp
     widgets/AccountSwitchPopup.cpp
     widgets/AccountSwitchPopup.hpp
     widgets/AccountSwitchWidget.cpp
@@ -357,22 +359,6 @@ set(SOURCE_FILES
     widgets/BaseWidget.hpp
     widgets/BaseWindow.cpp
     widgets/BaseWindow.hpp
-    widgets/DraggablePopup.cpp
-    widgets/DraggablePopup.hpp
-    widgets/FramelessEmbedWindow.cpp
-    widgets/FramelessEmbedWindow.hpp
-    widgets/Label.cpp
-    widgets/Label.hpp
-    widgets/Notebook.cpp
-    widgets/Notebook.hpp
-    widgets/Scrollbar.cpp
-    widgets/Scrollbar.hpp
-    widgets/StreamView.cpp
-    widgets/StreamView.hpp
-    widgets/TooltipWidget.cpp
-    widgets/TooltipWidget.hpp
-    widgets/Window.cpp
-    widgets/Window.hpp
     widgets/dialogs/BadgePickerDialog.cpp
     widgets/dialogs/BadgePickerDialog.hpp
     widgets/dialogs/ChannelFilterEditorDialog.cpp
@@ -402,12 +388,6 @@ set(SOURCE_FILES
     widgets/dialogs/SelectChannelFiltersDialog.hpp
     widgets/dialogs/SettingsDialog.cpp
     widgets/dialogs/SettingsDialog.hpp
-    widgets/dialogs/UpdateDialog.cpp
-    widgets/dialogs/UpdateDialog.hpp
-    widgets/dialogs/UserInfoPopup.cpp
-    widgets/dialogs/UserInfoPopup.hpp
-    widgets/dialogs/WelcomeDialog.cpp
-    widgets/dialogs/WelcomeDialog.hpp
     widgets/dialogs/switcher/NewPopupItem.cpp
     widgets/dialogs/switcher/NewPopupItem.hpp
     widgets/dialogs/switcher/NewTabItem.cpp
@@ -418,6 +398,16 @@ set(SOURCE_FILES
     widgets/dialogs/switcher/QuickSwitcherPopup.hpp
     widgets/dialogs/switcher/SwitchSplitItem.cpp
     widgets/dialogs/switcher/SwitchSplitItem.hpp
+    widgets/dialogs/UpdateDialog.cpp
+    widgets/dialogs/UpdateDialog.hpp
+    widgets/dialogs/UserInfoPopup.cpp
+    widgets/dialogs/UserInfoPopup.hpp
+    widgets/dialogs/WelcomeDialog.cpp
+    widgets/dialogs/WelcomeDialog.hpp
+    widgets/DraggablePopup.cpp
+    widgets/DraggablePopup.hpp
+    widgets/FramelessEmbedWindow.cpp
+    widgets/FramelessEmbedWindow.hpp
     widgets/helper/Button.cpp
     widgets/helper/Button.hpp
     widgets/helper/ChannelView.cpp
@@ -440,8 +430,6 @@ set(SOURCE_FILES
     widgets/helper/QColorPicker.hpp
     widgets/helper/RegExpItemDelegate.cpp
     widgets/helper/RegExpItemDelegate.hpp
-    widgets/helper/TrimRegExpValidator.cpp
-    widgets/helper/TrimRegExpValidator.hpp
     widgets/helper/ResizingTextEdit.cpp
     widgets/helper/ResizingTextEdit.hpp
     widgets/helper/ScrollbarHighlight.cpp
@@ -454,6 +442,10 @@ set(SOURCE_FILES
     widgets/helper/SignalLabel.hpp
     widgets/helper/TitlebarButton.cpp
     widgets/helper/TitlebarButton.hpp
+    widgets/helper/TrimRegExpValidator.cpp
+    widgets/helper/TrimRegExpValidator.hpp
+    widgets/Label.cpp
+    widgets/Label.hpp
     widgets/listview/GenericItemDelegate.cpp
     widgets/listview/GenericItemDelegate.hpp
     widgets/listview/GenericListItem.cpp
@@ -462,6 +454,10 @@ set(SOURCE_FILES
     widgets/listview/GenericListModel.hpp
     widgets/listview/GenericListView.cpp
     widgets/listview/GenericListView.hpp
+    widgets/Notebook.cpp
+    widgets/Notebook.hpp
+    widgets/Scrollbar.cpp
+    widgets/Scrollbar.hpp
     widgets/settingspages/AboutPage.cpp
     widgets/settingspages/AboutPage.hpp
     widgets/settingspages/AccountsPage.cpp
@@ -508,7 +504,12 @@ set(SOURCE_FILES
     widgets/splits/SplitInput.hpp
     widgets/splits/SplitOverlay.cpp
     widgets/splits/SplitOverlay.hpp
-    ${CMAKE_SOURCE_DIR}/resources/resources.qrc
+    widgets/StreamView.cpp
+    widgets/StreamView.hpp
+    widgets/TooltipWidget.cpp
+    widgets/TooltipWidget.hpp
+    widgets/Window.cpp
+    widgets/Window.hpp
 )
 
 if(WIN32)
