@@ -6,6 +6,7 @@
 #include "providers/IvrApi.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/signals2.hpp>
 #include <magic_enum.hpp>
 #include <QColor>
 #include <QRegularExpression>
@@ -21,8 +22,6 @@
     "https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/{scale}"
 
 namespace chatterino {
-struct Emote;
-using EmotePtr = std::shared_ptr<const Emote>;
 
 struct CheerEmote {
     QColor color;
@@ -38,13 +37,19 @@ struct CheerEmoteSet {
     std::vector<CheerEmote> cheerEmotes;
 };
 
+struct TwitchEmoteData {
+    std::optional<Emote::Type> type{};
+    std::optional<QString> author{};
+};
+
 class ITwitchEmotes
 {
 public:
     virtual ~ITwitchEmotes() = default;
 
-    virtual EmotePtr getOrCreateEmote(const EmoteId &id,
-                                      const EmoteName &name) = 0;
+    virtual EmotePtr getOrCreateEmote(
+        const EmoteId &id, const EmoteName &name,
+        TwitchEmoteData &&extraEmoteData = {}) = 0;
 };
 
 struct TwitchEmote {
@@ -109,13 +114,16 @@ public:
     static QString cleanUpEmoteCode(const QString &dirtyEmoteCode);
     TwitchEmotes() = default;
 
-    EmotePtr getOrCreateEmote(const EmoteId &id,
-                              const EmoteName &name) override;
+    EmotePtr getOrCreateEmote(const EmoteId &id, const EmoteName &name,
+                              TwitchEmoteData &&extraEmoteData = {}) override;
 
     // TODO: Ensure emote sets can be reloaded if they're stale
     // How do we find out they're stale? Just 30 minutes old or something?
     void loadSets(QStringList emoteSets);
 
+    boost::signals2::signal<void()> setsChanged;
+
+    // TODO: make into an Atomic<std::shared_ptr<...
     std::unordered_map<QString, std::shared_ptr<TwitchEmoteSet>>
         twitchEmoteSets;
 

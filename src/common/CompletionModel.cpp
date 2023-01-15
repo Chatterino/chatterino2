@@ -166,19 +166,9 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     }
 
     // Twitch emotes
-    const auto &twitchEmoteSets = getApp()->emotes->twitch.twitchEmoteSets;
-    for (const auto &emoteSetID : tc->twitchEmoteSets)
+    for (const auto &emote : *tc->twitchEmotes())
     {
-        const auto emoteSetIt = twitchEmoteSets.find(emoteSetID);
-        if (emoteSetIt == twitchEmoteSets.end())
-        {
-            continue;
-        }
-        const auto &emoteSet = *emoteSetIt->second;
-        for (const auto &emote : emoteSet.emotes)
-        {
-            addString(emote.first.string, TaggedString::TwitchGlobalEmote);
-        }
+        addString(emote.first.string, TaggedString::Type::TwitchGlobalEmote);
     }
 
     // Usernames

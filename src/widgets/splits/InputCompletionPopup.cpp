@@ -81,34 +81,13 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
     {
         if (tc)
         {
-            // TODO: Add support for /whispers too
-            const auto &twitchEmoteSets =
-                getApp()->emotes->twitch.twitchEmoteSets;
-            for (const auto &emoteSetID : tc->twitchEmoteSets)
+            for (const auto &emote : *tc->twitchEmotes())
             {
-                const auto emoteSetIt = twitchEmoteSets.find(emoteSetID);
-                if (emoteSetIt == twitchEmoteSets.end())
+                if (emote.first.string.contains(text, Qt::CaseInsensitive))
                 {
-                    continue;
-                }
-                const auto &emoteSet = *emoteSetIt->second;
-                for (const auto &emote : emoteSet.emotes)
-                {
-                    if (emote.first.string.contains(text, Qt::CaseInsensitive))
-                    {
-                        if (emoteSet.ivrEmoteSet.setId == "0")
-                        {
-                            emotes.push_back({emote.second,
-                                              emote.second->name.string,
-                                              "Twitch Global Emote"});
-                        }
-                        else
-                        {
-                            emotes.push_back({emote.second,
-                                              emote.second->name.string,
-                                              "Twitch Emote"});
-                        }
-                    }
+                    // TODO: Add back the Twitch Global Emote tag
+                    emotes.push_back({emote.second, emote.second->name.string,
+                                      "Twitch Emote"});
                 }
             }
 

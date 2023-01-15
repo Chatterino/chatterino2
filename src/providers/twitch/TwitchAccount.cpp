@@ -31,7 +31,32 @@ TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
     , userName_(username)
     , userId_(userID)
     , isAnon_(username == ANONYMOUS_USERNAME)
+    , globallyAccessibleTwitchEmotes_(std::make_shared<EmoteMap>())
 {
+    // this is ugly
+    auto *iTwitchEmotes = getIApp()->getEmotes()->getTwitchEmotes();
+    auto *twitchEmotes = dynamic_cast<TwitchEmotes *>(iTwitchEmotes);
+    assert(twitchEmotes);
+    auto c = twitchEmotes->setsChanged.connect([this] {
+        EmoteMap newEmoteMap;
+
+        for (const auto &emoteSet : getApp()->emotes->twitch.twitchEmoteSets)
+        {
+            if (!this->globallyAccessibleEmoteSetIDs_.contains(emoteSet.first))
+            {
+                continue;
+            }
+
+            for (const auto &emote : emoteSet.second->emotes)
+            {
+                newEmoteMap.emplace(emote.first, emote.second);
+            }
+        }
+
+        this->globallyAccessibleTwitchEmotes_.set(
+            std::make_shared<EmoteMap>(newEmoteMap));
+    });
+    this->bSignals_.emplace_back(std::move(c));
 }
 
 QString TwitchAccount::toString() const
@@ -264,6 +289,25 @@ void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
 
             channel->addMessage(makeSystemMessage(errorMessage));
         });
+}
+
+void TwitchAccount::setGlobalUserStateEmoteSetIDs(QStringList emoteSetIDs)
+{
+    qDebug() << "XXX: Set global user state emote set ids to" << emoteSetIDs;
+    this->globallyAccessibleEmoteSetIDs_ = std::move(emoteSetIDs);
+
+    getApp()->emotes->twitch.loadSets(this->globallyAccessibleEmoteSetIDs_);
+}
+
+QStringList TwitchAccount::globalUserStateEmoteSetIDs() const
+{
+    return this->globallyAccessibleEmoteSetIDs_;
+}
+
+std::shared_ptr<const EmoteMap> TwitchAccount::globallyAccessibleTwitchEmotes()
+    const
+{
+    return this->globallyAccessibleTwitchEmotes_.get();
 }
 
 }  // namespace chatterino

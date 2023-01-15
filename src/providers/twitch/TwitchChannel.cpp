@@ -77,6 +77,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
                        name)
+    , twitchEmotes_(std::make_shared<EmoteMap>())
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , seventvEmotes_(std::make_shared<EmoteMap>())
@@ -88,6 +89,28 @@ TwitchChannel::TwitchChannel(const QString &name)
         getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
             this->refreshPubSub();
+        }));
+
+    this->bSignals_.emplace_back(
+        getApp()->emotes->twitch.setsChanged.connect([this] {
+            // Rebuild Twitch emotes map
+            auto newEmoteMap = std::make_shared<EmoteMap>();
+
+            for (const auto &emoteSet :
+                 getApp()->emotes->twitch.twitchEmoteSets)
+            {
+                if (!this->twitchEmoteSets_.contains(emoteSet.first))
+                {
+                    continue;
+                }
+
+                for (const auto &emote : emoteSet.second->emotes)
+                {
+                    newEmoteMap->emplace(emote.first, emote.second);
+                }
+            }
+
+            this->twitchEmotes_.set(newEmoteMap);
         }));
 
     this->refreshPubSub();
@@ -573,6 +596,20 @@ SharedAccessGuard<const TwitchChannel::StreamStatus>
     return this->streamStatus_.accessConst();
 }
 
+boost::optional<EmotePtr> TwitchChannel::twitchEmote(
+    const EmoteName &name) const
+{
+    auto emotes = this->twitchEmotes_.get();
+    auto it = emotes->find(name);
+
+    if (it == emotes->end())
+    {
+        return boost::none;
+    }
+
+    return it->second;
+}
+
 boost::optional<EmotePtr> TwitchChannel::bttvEmote(const EmoteName &name) const
 {
     auto emotes = this->bttvEmotes_.get();
@@ -606,6 +643,11 @@ boost::optional<EmotePtr> TwitchChannel::seventvEmote(
     return it->second;
 }
 
+std::shared_ptr<const EmoteMap> TwitchChannel::twitchEmotes() const
+{
+    return this->twitchEmotes_.get();
+}
+
 std::shared_ptr<const EmoteMap> TwitchChannel::bttvEmotes() const
 {
     return this->bttvEmotes_.get();
@@ -623,7 +665,12 @@ std::shared_ptr<const EmoteMap> TwitchChannel::seventvEmotes() const
 
 void TwitchChannel::setTwitchEmoteSets(QStringList &&emoteSets)
 {
-    this->twitchEmoteSets = emoteSets;
+    this->twitchEmoteSets_ = emoteSets;
+}
+
+QStringList TwitchChannel::twitchEmoteSets() const
+{
+    return this->twitchEmoteSets_;
 }
 
 const QString &TwitchChannel::seventvUserID() const

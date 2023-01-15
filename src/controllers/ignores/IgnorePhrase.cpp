@@ -95,22 +95,15 @@ bool IgnorePhrase::containsEmote() const
 {
     if (!this->emotesChecked_)
     {
-        // TODO: Implement
-        /*
-        const auto &accvec = getApp()->accounts->twitch.accounts;
-        for (const auto &acc : accvec)
+        const auto currentUser = getApp()->accounts->twitch.getCurrent();
+        const auto twitchEmotes = currentUser->globallyAccessibleTwitchEmotes();
+        for (const auto &emote : *twitchEmotes)
         {
-            const auto &accemotes = *acc->accessEmotes();
-            for (const auto &emote : accemotes.emotes)
+            if (this->replace_.contains(emote.first.string, Qt::CaseSensitive))
             {
-                if (this->replace_.contains(emote.first.string,
-                                            Qt::CaseSensitive))
-                {
-                    this->emotes_.emplace(emote.first, emote.second);
-                }
+                this->emotes_.emplace(emote.first, emote.second);
             }
         }
-        */
         this->emotesChecked_ = true;
     }
     return !this->emotes_.empty();

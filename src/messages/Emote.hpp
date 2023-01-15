@@ -13,6 +13,12 @@
 namespace chatterino {
 
 struct Emote {
+    enum class Type {
+        Other,
+        Twitch,
+        TwitchGlobal,
+    };
+
     EmoteName name;
     ImageSet images;
     Tooltip tooltip;
@@ -25,6 +31,8 @@ struct Emote {
      * the original (base) name of the emote.
      */
     boost::optional<EmoteName> baseName;
+
+    Type type;
 
     // FOURTF: no solution yet, to be refactored later
     const QString &getCopyString() const

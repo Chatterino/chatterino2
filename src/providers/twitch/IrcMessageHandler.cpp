@@ -783,7 +783,10 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleGlobalUserStateMessage(
     Communi::IrcMessage *message)
 {
-    // TODO: Handle global emotes but we also want to handle the userstate from #jtv as a global userstate so we can refresh emotes on-demand (and maybe on a timer)
+    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    QStringList emoteSets = message->tag("emote-sets").toString().split(",");
+
+    currentUser->setGlobalUserStateEmoteSetIDs(emoteSets);
 }
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)

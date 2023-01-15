@@ -109,24 +109,24 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     b.emplace<TextElement>(words[1] + ":", MessageElementFlag::Text,
                            MessageColor::Text, FontStyle::ChatMediumBold);
 
+    const auto currentUser = app->accounts->twitch.getCurrent();
+    const auto &emoteSetIDs = currentUser->globalUserStateEmoteSetIDs();
+    const auto &twitchEmoteSets = app->emotes->twitch.twitchEmoteSets;
+    const auto &twitchEmotes = currentUser->globallyAccessibleTwitchEmotes();
     const auto &bttvemotes = app->twitch->getBttvEmotes();
     const auto &ffzemotes = app->twitch->getFfzEmotes();
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {
-        {
-            // Twitch emote
-            // TODO: Re-implement
-            /*
-            auto it = accemotes.emotes.find({words[i]});
-            if (it != accemotes.emotes.end())
+        {  // Twitch emote
+            auto emoteIt = twitchEmotes->find({words[i]});
+            if (emoteIt != twitchEmotes->end())
             {
-                b.emplace<EmoteElement>(it->second,
+                b.emplace<EmoteElement>(emoteIt->second,
                                         MessageElementFlag::TwitchEmote);
                 continue;
             }
-            */
         }  // Twitch emote
 
         {  // bttv/ffz emote
@@ -822,7 +822,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             const auto &twitchEmotes = getApp()->emotes->twitch;
 
-            for (const auto &emoteSetID : twitchChannel->twitchEmoteSets)
+            for (const auto &emoteSetID : twitchChannel->twitchEmoteSets())
             {
                 channel->addMessage(makeSystemMessage(
                     QString("Emote set ID available in this channel: %1")

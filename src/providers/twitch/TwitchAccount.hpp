@@ -7,6 +7,7 @@
 #include "messages/Emote.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/signals2.hpp>
 #include <QColor>
 #include <QElapsedTimer>
 #include <QString>
@@ -25,27 +26,6 @@ using ChannelPtr = std::shared_ptr<Channel>;
 class TwitchAccount : public Account
 {
 public:
-    struct TwitchEmote {
-        EmoteId id;
-        EmoteName name;
-    };
-
-    struct EmoteSet {
-        QString key;
-        QString channelName;
-        QString text;
-        bool local{false};
-        std::vector<TwitchEmote> emotes;
-    };
-
-    struct TwitchAccountEmoteData {
-        std::vector<std::shared_ptr<EmoteSet>> emoteSets;
-
-        // this EmoteMap should contain all emotes available globally
-        // excluding locally available emotes, such as follower ones
-        EmoteMap emotes;
-    };
-
     TwitchAccount(const QString &username, const QString &oauthToken_,
                   const QString &oauthClient_, const QString &_userID);
 
@@ -82,6 +62,11 @@ public:
     void autoModAllow(const QString msgID, ChannelPtr channel);
     void autoModDeny(const QString msgID, ChannelPtr channel);
 
+    void setGlobalUserStateEmoteSetIDs(QStringList emoteSetIDs);
+    [[nodiscard]] QStringList globalUserStateEmoteSetIDs() const;
+    [[nodiscard]] std::shared_ptr<const EmoteMap>
+        globallyAccessibleTwitchEmotes() const;
+
 private:
     QString oauthClient_;
     QString oauthToken_;
@@ -94,7 +79,11 @@ private:
     UniqueAccess<std::set<TwitchUser>> ignores_;
     UniqueAccess<std::set<QString>> ignoresUserIds_;
 
-    QStringList globallyAccessibleEmoteSetIDs;
+    QStringList globallyAccessibleEmoteSetIDs_;
+
+    Atomic<std::shared_ptr<const EmoteMap>> globallyAccessibleTwitchEmotes_;
+
+    std::vector<boost::signals2::scoped_connection> bSignals_;
 };
 
 }  // namespace chatterino
