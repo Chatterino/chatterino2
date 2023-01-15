@@ -74,9 +74,6 @@ QString getCommand(const QString &link)
         return QString();
     }
 
-    // link
-    command += " " + link;
-
     return command;
 }
 #endif
@@ -100,7 +97,7 @@ bool openLinkIncognito(const QString &link)
     auto command = getCommand(link);
 
     // TODO: split command into program path and incognito argument
-    return QProcess::startDetached(command, {});
+    return QProcess::startDetached(command, {link});
 #else
     return false;
 #endif
