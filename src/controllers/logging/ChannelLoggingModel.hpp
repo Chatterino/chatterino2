@@ -20,7 +20,7 @@ public:
 protected:
     // turn a vector item into a model row
     ChannelLog getItemFromRow(std::vector<QStandardItem *> &row,
-                              const ChannelLog &channelLog) override;
+                              const ChannelLog &original) override;
 
     // turns a row in the model into a vector item
     void getRowFromItem(const ChannelLog &item,
