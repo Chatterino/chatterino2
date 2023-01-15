@@ -36,6 +36,7 @@
 - Dev: Fixed `final-dtor-non-final-class` warnings. (#4296)
 - Dev: Fixed `ambiguous-reversed-operator` warnings. (#4296)
 - Dev: Format YAML and JSON files with prettier. (#4304)
+- Dev: Format and Lint CMake Files. (#4306)
 
 ## 2.4.0
 
