@@ -7,6 +7,9 @@
 
 namespace chatterino {
 
+/**
+ * @brief Contains the description of a channel that will be logged
+ **/
 class ChannelLog
 {
     QString channelName_;
