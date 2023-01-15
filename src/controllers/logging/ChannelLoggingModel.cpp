@@ -18,7 +18,7 @@ ChannelLog ChannelLoggingModel::getItemFromRow(
 void ChannelLoggingModel::getRowFromItem(const ChannelLog &item,
                                          std::vector<QStandardItem *> &row)
 {
-    setStringItem(row[0], item.channel);
+    setStringItem(row[Column::Channel], item.channel);
 }
 
 }  // namespace chatterino
