@@ -12,7 +12,8 @@ ChannelLoggingModel ::ChannelLoggingModel(QObject *parent)
 ChannelLog ChannelLoggingModel::getItemFromRow(
     std::vector<QStandardItem *> &row, const ChannelLog & /*original*/)
 {
-    return ChannelLog(row[Column::Channel]->data(Qt::DisplayRole).toString());
+    auto channelName = row[Column::Channel]->data(Qt::DisplayRole).toString();
+    return {channelName};
 }
 
 void ChannelLoggingModel::getRowFromItem(const ChannelLog &item,
