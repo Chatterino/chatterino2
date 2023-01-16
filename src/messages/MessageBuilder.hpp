@@ -1,10 +1,12 @@
 #pragma once
 
-#include "messages/MessageElement.hpp"
+#include "messages/MessageColor.hpp"
 
 #include <QRegularExpression>
+#include <QTime>
 
 #include <ctime>
+#include <memory>
 #include <utility>
 
 namespace chatterino {
@@ -15,6 +17,11 @@ struct AutomodUserAction;
 struct AutomodInfoAction;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
+
+class MessageElement;
+class TextElement;
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
 
 struct SystemMessageTag {
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "messages/Message.hpp"
 #include "messages/search/MessagePredicate.hpp"
 
 namespace chatterino {

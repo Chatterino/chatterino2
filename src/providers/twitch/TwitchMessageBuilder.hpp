@@ -2,13 +2,9 @@
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
-#include "messages/MessageThread.hpp"
 #include "messages/SharedMessageBuilder.hpp"
-#include "providers/twitch/api/Helix.hpp"
-#include "providers/twitch/ChannelPointReward.hpp"
-#include "providers/twitch/PubSubActions.hpp"
-#include "providers/twitch/TwitchBadge.hpp"
 
+#include <boost/optional.hpp>
 #include <IrcMessage>
 #include <QString>
 #include <QVariant>
@@ -20,6 +16,11 @@ using EmotePtr = std::shared_ptr<const Emote>;
 
 class Channel;
 class TwitchChannel;
+class MessageThread;
+struct HelixVip;
+using HelixModerator = HelixVip;
+struct ChannelPointReward;
+struct DeleteAction;
 
 struct TwitchEmoteOccurrence {
     int start;

@@ -1,16 +1,23 @@
 #pragma once
 
-#include "messages/Image.hpp"
+#include "common/Aliases.hpp"
+
+#include <memory>
 
 namespace chatterino {
+
+class Image;
+using ImagePtr = std::shared_ptr<Image>;
+ImagePtr getEmptyImagePtr();
 
 class ImageSet
 {
 public:
     ImageSet();
-    ImageSet(const ImagePtr &image1, const ImagePtr &image2 = Image::getEmpty(),
-             const ImagePtr &image3 = Image::getEmpty(),
-             const ImagePtr &image4 = Image::getEmpty());
+    ImageSet(const ImagePtr &image1,
+             const ImagePtr &image2 = getEmptyImagePtr(),
+             const ImagePtr &image3 = getEmptyImagePtr(),
+             const ImagePtr &image4 = getEmptyImagePtr());
     ImageSet(const Url &image1, const Url &image2 = {}, const Url &image3 = {},
              const Url &image4 = {});
 

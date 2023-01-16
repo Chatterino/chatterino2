@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/CommandContext.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"

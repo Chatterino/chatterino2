@@ -4,6 +4,7 @@
 #include "widgets/BaseWidget.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
+#include <QTimer>
 
 #include <functional>
 
@@ -95,7 +96,7 @@ protected:
 
 private:
     void init();
-    void moveIntoDesktopRect(QWidget *parent, QPoint point);
+    void moveIntoDesktopRect(QPoint point);
     void calcButtonsSizes();
     void drawCustomWindowFrame(QPainter &painter);
     void onFocusLost();

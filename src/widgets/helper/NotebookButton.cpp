@@ -1,8 +1,10 @@
 #include "widgets/helper/NotebookButton.hpp"
 
+#include "common/QLogging.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/helper/Button.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
@@ -67,7 +69,7 @@ void NotebookButton::paintEvent(QPaintEvent *event)
         case Plus: {
             painter.setPen([&] {
                 QColor tmp = foreground;
-                if (SplitContainer::isDraggingSplit)
+                if (isDraggingSplit())
                 {
                     tmp = this->theme->tabs.selected.line.regular;
                 }
@@ -181,22 +183,30 @@ void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
 
 void NotebookButton::dropEvent(QDropEvent *event)
 {
-    if (SplitContainer::isDraggingSplit)
+    auto *draggedSplit = dynamic_cast<Split *>(event->source());
+    if (!draggedSplit)
     {
-        event->acceptProposedAction();
-
-        Notebook *notebook = dynamic_cast<Notebook *>(this->parentWidget());
-
-        if (notebook != nuuls)
-        {
-            SplitContainer *page = new SplitContainer(notebook);
-            auto *tab = notebook->addPage(page);
-            page->setTab(tab);
-
-            SplitContainer::draggingSplit->setParent(page);
-            page->appendSplit(SplitContainer::draggingSplit);
-        }
+        qCDebug(chatterinoWidget)
+            << "Dropped something that wasn't a split onto a notebook button";
+        return;
     }
+
+    auto *notebook = dynamic_cast<Notebook *>(this->parentWidget());
+    if (!notebook)
+    {
+        qCDebug(chatterinoWidget) << "Dropped a split onto a notebook button "
+                                     "without a parent notebook";
+        return;
+    }
+
+    event->acceptProposedAction();
+
+    auto *page = new SplitContainer(notebook);
+    auto *tab = notebook->addPage(page);
+    page->setTab(tab);
+
+    draggedSplit->setParent(page);
+    page->insertSplit(draggedSplit);
 }
 
 void NotebookButton::hideEvent(QHideEvent *)

@@ -1,13 +1,12 @@
 #pragma once
 
+#include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
 #include "common/UniqueAccess.hpp"
-#include "messages/MessageBuilder.hpp"
-#include "providers/twitch/TwitchBadge.hpp"
-#include "singletons/Paths.hpp"
-#include "singletons/Settings.hpp"
 
 #include <boost/optional.hpp>
+#include <pajlada/settings.hpp>
+#include <pajlada/settings/settinglistener.hpp>
 #include <QColor>
 #include <QUrl>
 
@@ -17,27 +16,20 @@
 
 namespace chatterino {
 
+class Badge;
+struct MessageParseArgs;
+enum class MessageFlag : int64_t;
+using MessageFlags = FlagsEnum<MessageFlag>;
+
 struct HighlightResult {
     HighlightResult(bool _alert, bool _playSound,
                     boost::optional<QUrl> _customSoundUrl,
-                    std::shared_ptr<QColor> _color, bool _showInMentions)
-        : alert(_alert)
-        , playSound(_playSound)
-        , customSoundUrl(std::move(_customSoundUrl))
-        , color(std::move(_color))
-        , showInMentions(_showInMentions)
-    {
-    }
+                    std::shared_ptr<QColor> _color, bool _showInMentions);
 
     /**
      * @brief Construct an empty HighlightResult with all side-effects disabled
      **/
-    static HighlightResult emptyResult()
-    {
-        return {
-            false, false, boost::none, nullptr, false,
-        };
-    }
+    static HighlightResult emptyResult();
 
     /**
      * @brief true if highlight should trigger the taskbar to flash
@@ -66,77 +58,21 @@ struct HighlightResult {
      **/
     bool showInMentions{false};
 
-    bool operator==(const HighlightResult &other) const
-    {
-        if (this->alert != other.alert)
-        {
-            return false;
-        }
-        if (this->playSound != other.playSound)
-        {
-            return false;
-        }
-        if (this->customSoundUrl != other.customSoundUrl)
-        {
-            return false;
-        }
-
-        if (this->color && other.color)
-        {
-            if (*this->color != *other.color)
-            {
-                return false;
-            }
-        }
-
-        if (this->showInMentions != other.showInMentions)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    bool operator!=(const HighlightResult &other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const HighlightResult &other) const;
+    bool operator!=(const HighlightResult &other) const;
 
     /**
      * @brief Returns true if no side-effect has been enabled
      **/
-    [[nodiscard]] bool empty() const
-    {
-        return !this->alert && !this->playSound &&
-               !this->customSoundUrl.has_value() && !this->color &&
-               !this->showInMentions;
-    }
+    [[nodiscard]] bool empty() const;
 
     /**
      * @brief Returns true if all side-effects have been enabled
      **/
-    [[nodiscard]] bool full() const
-    {
-        return this->alert && this->playSound &&
-               this->customSoundUrl.has_value() && this->color &&
-               this->showInMentions;
-    }
+    [[nodiscard]] bool full() const;
 
     friend std::ostream &operator<<(std::ostream &os,
-                                    const HighlightResult &result)
-    {
-        os << "Alert: " << (result.alert ? "Yes" : "No") << ", "
-           << "Play sound: " << (result.playSound ? "Yes" : "No") << " ("
-           << (result.customSoundUrl
-                   ? result.customSoundUrl.get().toString().toStdString()
-                   : "")
-           << ")"
-           << ", "
-           << "Color: "
-           << (result.color ? result.color->name().toStdString() : "") << ", "
-           << "Show in mentions: " << (result.showInMentions ? "Yes" : "No");
-        return os;
-    }
+                                    const HighlightResult &result);
 };
 
 struct HighlightCheck {

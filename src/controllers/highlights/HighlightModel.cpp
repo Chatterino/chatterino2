@@ -1,6 +1,9 @@
-#include "HighlightModel.hpp"
+#include "controllers/highlights/HighlightModel.hpp"
 
 #include "Application.hpp"
+#include "common/SignalVectorModel.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
+#include "providers/colors/ColorProvider.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/StandardItemHelper.hpp"

@@ -70,6 +70,10 @@ set(SOURCE_FILES
 
         controllers/filters/FilterModel.cpp
         controllers/filters/FilterModel.hpp
+        controllers/filters/FilterRecord.cpp
+        controllers/filters/FilterRecord.hpp
+        controllers/filters/FilterSet.cpp
+        controllers/filters/FilterSet.hpp
         controllers/filters/parser/FilterParser.cpp
         controllers/filters/parser/FilterParser.hpp
         controllers/filters/parser/Tokenizer.cpp
@@ -114,6 +118,11 @@ set(SOURCE_FILES
         controllers/moderationactions/ModerationAction.hpp
         controllers/moderationactions/ModerationActionModel.cpp
         controllers/moderationactions/ModerationActionModel.hpp
+
+        controllers/logging/ChannelLog.cpp
+        controllers/logging/ChannelLog.hpp
+        controllers/logging/ChannelLoggingModel.cpp
+        controllers/logging/ChannelLoggingModel.hpp
 
         controllers/nicknames/NicknamesModel.cpp
         controllers/nicknames/NicknamesModel.hpp
@@ -205,8 +214,6 @@ set(SOURCE_FILES
 
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp
-        providers/bttv/LoadBttvChannelEmote.cpp
-        providers/bttv/LoadBttvChannelEmote.hpp
 
         providers/chatterino/ChatterinoBadges.cpp
         providers/chatterino/ChatterinoBadges.hpp
@@ -333,8 +340,6 @@ set(SOURCE_FILES
         singletons/Theme.hpp
         singletons/Toasts.cpp
         singletons/Toasts.hpp
-        singletons/TooltipPreviewImage.cpp
-        singletons/TooltipPreviewImage.hpp
         singletons/Updates.cpp
         singletons/Updates.hpp
         singletons/WindowManager.cpp
@@ -349,6 +354,7 @@ set(SOURCE_FILES
         util/AttachToConsole.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
+        util/ConcurrentMap.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
         util/DisplayBadge.cpp
@@ -375,12 +381,14 @@ set(SOURCE_FILES
         util/RatelimitBucket.hpp
         util/SampleData.cpp
         util/SampleData.hpp
+        util/SharedPtrElementLess.hpp
         util/SplitCommand.cpp
         util/SplitCommand.hpp
         util/StreamLink.cpp
         util/StreamLink.hpp
         util/StreamerMode.cpp
         util/StreamerMode.hpp
+        util/ThreadGuard.hpp
         util/Twitch.cpp
         util/Twitch.hpp
         util/TypeName.hpp
@@ -541,6 +549,8 @@ set(SOURCE_FILES
 
         widgets/splits/ClosedSplits.cpp
         widgets/splits/ClosedSplits.hpp
+        widgets/splits/DraggedSplit.cpp
+        widgets/splits/DraggedSplit.hpp
         widgets/splits/InputCompletionItem.cpp
         widgets/splits/InputCompletionItem.hpp
         widgets/splits/InputCompletionPopup.cpp
@@ -649,15 +659,17 @@ if (BUILD_APP)
         )
 
     if (MSVC)
-        get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
-        get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
-        set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
+        if (NOT VCPKG_INSTALLED_DIR)
+            get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
+            get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
+            set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
 
-        install(TARGETS ${EXECUTABLE_PROJECT}
-                RUNTIME DESTINATION .
-                )
+            install(TARGETS ${EXECUTABLE_PROJECT}
+                    RUNTIME DESTINATION .
+                    )
 
-        install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
+            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
+        endif()
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
@@ -681,6 +693,12 @@ if (BUILD_APP)
                 DESTINATION share/icons/hicolor/256x256/apps
                 )
     endif ()
+
+    if(CHATTERINO_ENABLE_LTO)
+        message(STATUS "Enabling LTO for ${EXECUTABLE_PROJECT}")
+        set_property(TARGET ${EXECUTABLE_PROJECT}
+            PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif()
 endif ()
 
 if (USE_PRECOMPILED_HEADERS)
@@ -805,28 +823,32 @@ if (MSVC)
     # Someone adds /W3 before we add /W4.
     # This makes sure, only /W4 is specified.
     string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    # 4714 - function marked as __forceinline not inlined
-    # 4996 - occurs when the compiler encounters a function or variable that is marked as deprecated.
-    #        These functions may have a different preferred name, may be insecure or have
-    #        a more secure variant, or may be obsolete.
-    # 4505 - unreferenced local version has been removed
-    # 4127 - conditional expression is constant
-    # 4503 - decorated name length exceeded, name was truncated
-    # 4100 - unreferences formal parameter
-    # 4305 - possible truncation of data
-    # 4267 - possible loss of data in return
+    # 4505 - "unreferenced local version has been removed"
+    #        Although this might give hints on dead code,
+    #        there are some cases where it's distracting.
+    #
+    # 4100 - "unreferenced formal parameter"
+    #        There are a lot of functions and methods where
+    #        an argument was given a name but never used.
+    #        There's a clang-tidy rule that will catch this
+    #        for new/updated functions/methods.
+    #
+    # 4267 - "possible loss of data in return"
+    #        These are implicit conversions from size_t to int/qsizetype.
+    #        We don't use size_t in a lot of cases, since
+    #        Qt doesn't use it - it uses int (or qsizetype in Qt6).
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
         /W4
-        # Disable the following warnings
-        /wd4714
-        /wd4996
+        # 5038 - warnings about initialization order
+        /w15038
+        # 4855 - implicit capture of 'this' via '[=]' is deprecated
+        /w14855
+        # Disable the following warnings (see reasoning above)
         /wd4505
-        /wd4127
-        /wd4503
         /wd4100
-        /wd4305
         /wd4267
     )
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
 else ()
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
         -Wall
@@ -848,6 +870,10 @@ else ()
         target_compile_options(${LIBRARY_PROJECT} PUBLIC
             -Wno-unused-local-typedef
             -Wno-unused-private-field
+            -Werror=inconsistent-missing-override
+            -Werror=final-dtor-non-final-class
+            -Werror=ambiguous-reversed-operator
+
         )
     else ()
         target_compile_options(${LIBRARY_PROJECT} PUBLIC
@@ -855,3 +881,9 @@ else ()
         )
     endif()
 endif ()
+
+if(CHATTERINO_ENABLE_LTO)
+    message(STATUS "Enabling LTO for ${LIBRARY_PROJECT}")
+    set_property(TARGET ${LIBRARY_PROJECT}
+                 PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()

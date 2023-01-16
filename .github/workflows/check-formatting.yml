@@ -7,7 +7,7 @@ on:
       - chatterino7
   pull_request:
 
-concurrency: 
+concurrency:
   group: check-formatting-${{ github.ref }}
   cancel-in-progress: true
 

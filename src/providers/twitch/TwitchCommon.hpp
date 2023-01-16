@@ -3,6 +3,8 @@
 #include <QColor>
 #include <QString>
 
+#include <vector>
+
 namespace chatterino {
 
 #ifndef ATTR_UNUSED

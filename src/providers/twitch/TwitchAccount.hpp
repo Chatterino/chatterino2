@@ -2,11 +2,9 @@
 
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
-#include "common/Channel.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
-#include "providers/twitch/TwitchUser.hpp"
 #include "util/QStringHash.hpp"
 
 #include <QColor>
@@ -19,6 +17,10 @@
 #include <set>
 
 namespace chatterino {
+
+struct TwitchUser;
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
 
 class TwitchAccount : public Account
 {

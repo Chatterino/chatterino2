@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QVBoxLayout>
 
 class QScrollArea;
 

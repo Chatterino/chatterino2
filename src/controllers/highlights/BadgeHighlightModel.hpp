@@ -1,14 +1,13 @@
 #pragma once
 
 #include "common/SignalVectorModel.hpp"
-#include "controllers/highlights/HighlightBadge.hpp"
-#include "providers/twitch/TwitchBadges.hpp"
 
 #include <QObject>
 
 namespace chatterino {
 
 class HighlightController;
+class HighlightBadge;
 
 class BadgeHighlightModel : public SignalVectorModel<HighlightBadge>
 {

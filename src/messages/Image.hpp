@@ -76,8 +76,8 @@ public:
     int height() const;
     bool animated() const;
 
-    bool operator==(const Image &image) const;
-    bool operator!=(const Image &image) const;
+    bool operator==(const Image &image) = delete;
+    bool operator!=(const Image &image) = delete;
 
 private:
     Image();
@@ -101,6 +101,9 @@ private:
 
     friend class ImageExpirationPool;
 };
+
+// forward-declarable function that calls Image::getEmpty() under the hood.
+ImagePtr getEmptyImagePtr();
 
 class ImageExpirationPool
 {

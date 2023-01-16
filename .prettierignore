@@ -1,6 +1,23 @@
+# emoji.json should remain minified
+resources/emoji.json
+
 # Ignore submodule files
 lib/*/
 conan-pkgs/*/
 cmake/sanitizers-cmake/
 
-.github/
+# Build folders
+*build-*/
+[bB]uild
+/_build/
+
+# Editors
+.vscode
+.vs
+.idea
+dependencies
+.cache
+.editorconfig
+
+# vcpkg
+vcpkg_installed/

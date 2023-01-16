@@ -2,6 +2,7 @@
 
 #include "common/Modes.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"

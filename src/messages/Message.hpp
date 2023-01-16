@@ -1,11 +1,10 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
-#include "providers/twitch/TwitchBadge.hpp"
 #include "util/QStringHash.hpp"
-#include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <boost/noncopyable.hpp>
+#include <QColor>
 #include <QTime>
 
 #include <cinttypes>
@@ -15,6 +14,8 @@
 namespace chatterino {
 class MessageElement;
 class MessageThread;
+class Badge;
+class ScrollbarHighlight;
 
 enum class MessageFlag : int64_t {
     None = 0LL,

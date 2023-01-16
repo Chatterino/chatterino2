@@ -1,13 +1,13 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 
 #include "Application.hpp"
-#include "BaseSettings.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/seventv/paints/PaintDropShadow.hpp"
 #include "providers/seventv/SeventvPaints.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 
