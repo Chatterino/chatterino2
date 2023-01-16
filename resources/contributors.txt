@@ -16,6 +16,7 @@ Mm2PL | https://github.com/mm2pl | :/avatars/mm2pl.png | Collaborator
 YungLPR | https://github.com/leon-richardt | | Collaborator
 dnsge | https://github.com/dnsge | | Collaborator
 Felanbird | https://github.com/Felanbird | | Collaborator
+kornes | https://github.com/kornes | | Collaborator
 
 Cranken | https://github.com/Cranken | | Contributor
 hemirt | https://github.com/hemirt | | Contributor
