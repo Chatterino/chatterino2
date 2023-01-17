@@ -2,12 +2,14 @@
 
 ## Unversioned
 
+- Minor: Change the highlight order to prioritize Message highlights over User highlights. (#4303)
 - Minor: Added ability to negate search options by prefixing it with an exclamation mark (e.g. `!badge:mod` to search for messages where the author does not have the moderator badge). (#4207)
 - Minor: Search window input will automatically use currently selected text if present. (#4178)
 - Minor: Cleared up highlight sound settings (#4194)
 - Minor: Tables in settings window will now scroll to newly added rows. (#4216)
 - Minor: Added link to streamlink docs for easier user setup. (#4217)
 - Minor: Added setting to turn off rendering of reply context. (#4224)
+- Minor: Added setting to select which channels to log. (#4302)
 - Bugfix: Fixed crash that would occur when performing certain actions after removing all tabs. (#4271)
 - Bugfix: Fixed highlight sounds not reloading on change properly. (#4194)
 - Bugfix: Fixed CTRL + C not working in reply thread popups. (#4209)
@@ -33,6 +35,7 @@
 - Dev: Fixed `inconsistent-missing-override` warnings. (#4296)
 - Dev: Fixed `final-dtor-non-final-class` warnings. (#4296)
 - Dev: Fixed `ambiguous-reversed-operator` warnings. (#4296)
+- Dev: Format YAML and JSON files with prettier. (#4304)
 
 ## 2.4.0
 
