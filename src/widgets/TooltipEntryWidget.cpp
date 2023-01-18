@@ -1,21 +1,23 @@
-#include "TooltipEntry.hpp"
+#include "TooltipEntryWidget.hpp"
 
 #include <QVBoxLayout>
 
 namespace chatterino {
 
-TooltipEntry::TooltipEntry(QWidget *parent)
-    : TooltipEntry(nullptr, "", 0, 0, parent)
+TooltipEntryWidget::TooltipEntryWidget(QWidget *parent)
+    : TooltipEntryWidget(nullptr, "", 0, 0, parent)
 {
 }
 
-TooltipEntry::TooltipEntry(ImagePtr image, const QString &text, QWidget *parent)
-    : TooltipEntry(image, text, 0, 0, parent)
+TooltipEntryWidget::TooltipEntryWidget(ImagePtr image, const QString &text,
+                                       QWidget *parent)
+    : TooltipEntryWidget(image, text, 0, 0, parent)
 {
 }
 
-TooltipEntry::TooltipEntry(ImagePtr image, const QString &text, int customWidth,
-                           int customHeight, QWidget *parent)
+TooltipEntryWidget::TooltipEntryWidget(ImagePtr image, const QString &text,
+                                       int customWidth, int customHeight,
+                                       QWidget *parent)
     : QWidget(parent)
     , image_(image)
     , customImgWidth_(customWidth)
@@ -37,12 +39,12 @@ TooltipEntry::TooltipEntry(ImagePtr image, const QString &text, int customWidth,
     layout->addWidget(this->displayText_, Qt::AlignHCenter);
 }
 
-void TooltipEntry::setWordWrap(bool wrap)
+void TooltipEntryWidget::setWordWrap(bool wrap)
 {
     this->displayText_->setWordWrap(wrap);
 }
 
-void TooltipEntry::setImageScale(int w, int h)
+void TooltipEntryWidget::setImageScale(int w, int h)
 {
     if (this->customImgWidth_ == w && this->customImgHeight_ == h)
     {
@@ -53,12 +55,12 @@ void TooltipEntry::setImageScale(int w, int h)
     this->refreshPixmap();
 }
 
-void TooltipEntry::setText(const QString &text)
+void TooltipEntryWidget::setText(const QString &text)
 {
     this->displayText_->setText(text);
 }
 
-void TooltipEntry::setImage(ImagePtr image)
+void TooltipEntryWidget::setImage(ImagePtr image)
 {
     if (this->image_ == image)
     {
@@ -70,14 +72,14 @@ void TooltipEntry::setImage(ImagePtr image)
     this->refreshPixmap();
 }
 
-void TooltipEntry::clearImage()
+void TooltipEntryWidget::clearImage()
 {
     this->displayImage_->hide();
     this->image_ = nullptr;
     this->setImageScale(0, 0);
 }
 
-bool TooltipEntry::refreshPixmap()
+bool TooltipEntryWidget::refreshPixmap()
 {
     if (!this->image_)
     {
@@ -106,12 +108,12 @@ bool TooltipEntry::refreshPixmap()
     return true;
 }
 
-bool TooltipEntry::animated() const
+bool TooltipEntryWidget::animated() const
 {
     return this->image_ && this->image_->animated();
 }
 
-ImagePtr TooltipEntry::getImage() const
+ImagePtr TooltipEntryWidget::getImage() const
 {
     return this->image_;
 }

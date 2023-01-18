@@ -1,7 +1,7 @@
 #pragma once
 
 #include "widgets/BaseWindow.hpp"
-#include "widgets/TooltipEntry.hpp"
+#include "widgets/TooltipEntryWidget.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 #include <QLabel>
@@ -13,7 +13,7 @@ namespace chatterino {
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
 
-struct TooltipEntryRecord {
+struct TooltipEntry {
     ImagePtr image;
     QString text;
     int customWidth = 0;
@@ -30,14 +30,11 @@ public:
     TooltipWidget(BaseWidget *parent = nullptr);
     ~TooltipWidget() override = default;
 
-    void setRecord(const TooltipEntryRecord &record);
-    void setRecords(const std::vector<TooltipEntryRecord> &records);
+    void setOne(const TooltipEntry &record);
+    void set(const std::vector<TooltipEntry> &records);
 
-    // void setText(QString text);
     void setWordWrap(bool wrap);
-    void clearImage();
-    // void setImage(ImagePtr image);
-    // void setImageScale(int w, int h);
+    void clearEntries();
 
 protected:
     void showEvent(QShowEvent *) override;
@@ -52,12 +49,11 @@ private:
     void updateFont();
 
     void setVisibleEntries(int n);
-    TooltipEntry *entryAt(int n);
+    TooltipEntryWidget *entryAt(int n);
 
     // set to true when tooltip image did not finish loading yet (pixmapOrLoad returned false)
     bool attemptRefresh{false};
 
-    std::vector<TooltipEntry> entries_;
     int visibleEntries_ = 0;
 
     pajlada::Signals::SignalHolder connections_;

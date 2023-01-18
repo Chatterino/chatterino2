@@ -952,7 +952,7 @@ void SplitHeader::enterEvent(QEvent *event)
         }
 
         auto *tooltip = TooltipWidget::instance();
-        tooltip->setRecord({nullptr, this->tooltipText_});
+        tooltip->setOne({nullptr, this->tooltipText_});
         tooltip->setWordWrap(true);
         tooltip->adjustSize();
         auto pos = this->mapToGlobal(this->rect().bottomLeft()) +

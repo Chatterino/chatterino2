@@ -1675,7 +1675,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             {
                 if (emoteElement)
                 {
-                    tooltipWidget->setRecord({
+                    tooltipWidget->setOne({
                         emoteElement->getEmote()->images.getImage(3.0),
                         element->getTooltip(),
                     });
@@ -1686,7 +1686,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     // Should never be empty but ensure it
                     if (!layeredEmotes.empty())
                     {
-                        std::vector<TooltipEntryRecord> records;
+                        std::vector<TooltipEntry> records;
                         records.reserve(layeredEmotes.size());
 
                         auto &emoteTooltips =
@@ -1699,12 +1699,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                                  emoteTooltips[i]});
                         }
 
-                        tooltipWidget->setRecords(records);
+                        tooltipWidget->set(records);
                     }
                 }
                 else if (badgeElement)
                 {
-                    tooltipWidget->setRecord({
+                    tooltipWidget->setOne({
                         badgeElement->getEmote()->images.getImage(3.0),
                         element->getTooltip(),
                     });
@@ -1712,7 +1712,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
             else
             {
-                tooltipWidget->clearImage();
+                tooltipWidget->clearEntries();
             }
         }
         else
@@ -1735,7 +1735,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             auto thumbnailSize = getSettings()->thumbnailSize;
             if (!thumbnailSize)
             {
-                tooltipWidget->clearImage();
+                tooltipWidget->clearEntries();
             }
             else
             {
@@ -1752,13 +1752,13 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                 if (element->getThumbnailType() ==
                     MessageElement::ThumbnailType::Link_Thumbnail)
                 {
-                    tooltipWidget->setRecord({std::move(thumb),
-                                              element->getTooltip(),
-                                              thumbnailSize, thumbnailSize});
+                    tooltipWidget->setOne({std::move(thumb),
+                                           element->getTooltip(), thumbnailSize,
+                                           thumbnailSize});
                 }
                 else
                 {
-                    tooltipWidget->setRecord({std::move(thumb), ""});
+                    tooltipWidget->setOne({std::move(thumb), ""});
                 }
             }
         }

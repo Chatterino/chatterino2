@@ -65,12 +65,12 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     });
 }
 
-void TooltipWidget::setRecord(const TooltipEntryRecord &record)
+void TooltipWidget::setOne(const TooltipEntry &record)
 {
-    this->setRecords({record});
+    this->set({record});
 }
 
-void TooltipWidget::setRecords(const std::vector<TooltipEntryRecord> &records)
+void TooltipWidget::set(const std::vector<TooltipEntry> &records)
 {
     if (records.size() > this->layout_->count())
     {
@@ -78,7 +78,8 @@ void TooltipWidget::setRecords(const std::vector<TooltipEntryRecord> &records)
         int requiredAmount = records.size() - this->layout_->count();
         for (int i = 0; i < requiredAmount; ++i)
         {
-            this->layout_->addWidget(new TooltipEntry(), Qt::AlignHCenter);
+            this->layout_->addWidget(new TooltipEntryWidget(),
+                                     Qt::AlignHCenter);
         }
     }
 
@@ -86,8 +87,7 @@ void TooltipWidget::setRecords(const std::vector<TooltipEntryRecord> &records)
 
     for (int i = 0; i < records.size(); ++i)
     {
-        auto entry = this->entryAt(i);
-        if (entry)
+        if (auto entry = this->entryAt(i))
         {
             auto &record = records[i];
             entry->setImage(record.image);
@@ -118,9 +118,10 @@ void TooltipWidget::setVisibleEntries(int n)
 }
 
 // May be nullptr
-TooltipEntry *TooltipWidget::entryAt(int n)
+TooltipEntryWidget *TooltipWidget::entryAt(int n)
 {
-    return dynamic_cast<TooltipEntry *>(this->layout_->itemAt(n)->widget());
+    return dynamic_cast<TooltipEntryWidget *>(
+        this->layout_->itemAt(n)->widget());
 }
 
 void TooltipWidget::themeChangedEvent()
@@ -158,14 +159,14 @@ void TooltipWidget::setWordWrap(bool wrap)
     }
 }
 
-void TooltipWidget::clearImage()
+void TooltipWidget::clearEntries()
 {
     this->setVisibleEntries(0);
 }
 
 void TooltipWidget::hideEvent(QHideEvent *)
 {
-    this->clearImage();
+    this->clearEntries();
 }
 
 void TooltipWidget::showEvent(QShowEvent *)
