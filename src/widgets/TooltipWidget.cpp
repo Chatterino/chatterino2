@@ -6,9 +6,27 @@
 #include "singletons/WindowManager.hpp"
 
 #include <QPainter>
-#include <QVBoxLayout>
 
 namespace chatterino {
+
+namespace {
+
+    // https://stackoverflow.com/a/22646928
+    void clearWidgetsFromLayout(QLayout *layout)
+    {
+        if (layout == nullptr)
+        {
+            return;
+        }
+
+        while (auto item = layout->takeAt(0))
+        {
+            delete item->widget();
+            clearWidgetsFromLayout(item->layout());
+        }
+    }
+
+}  // namespace
 
 TooltipWidget *TooltipWidget::instance()
 {
@@ -20,8 +38,6 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     : BaseWindow({BaseWindow::TopMost, BaseWindow::DontFocus,
                   BaseWindow::DisableLayoutSave},
                  parent)
-    , displayImage_(new QLabel(this))
-    , displayText_(new QLabel(this))
 {
     this->setStyleSheet("color: #fff; background: rgba(11, 11, 11, 0.8)");
     this->setAttribute(Qt::WA_TranslucentBackground);
@@ -29,18 +45,11 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
 
     this->setStayInScreenRect(true);
 
-    displayImage_->setAlignment(Qt::AlignHCenter);
-    displayImage_->setStyleSheet("background: transparent");
-
-    displayText_->setAlignment(Qt::AlignHCenter);
-    displayText_->setStyleSheet("background: transparent");
-
     auto *layout = new QVBoxLayout(this);
     layout->setSizeConstraint(QLayout::SetFixedSize);
     layout->setContentsMargins(10, 5, 10, 5);
-    layout->addWidget(displayImage_);
-    layout->addWidget(displayText_);
     this->setLayout(layout);
+    this->layout_ = layout;
 
     this->connections_.managedConnect(getFonts()->fontChanged, [this] {
         this->updateFont();
@@ -49,22 +58,88 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
 
     auto windows = getApp()->windows;
     this->connections_.managedConnect(windows->gifRepaintRequested, [this] {
-        if (this->image_ && this->image_->animated())
+        for (int i = 0; i < this->visibleEntries_; ++i)
         {
-            this->refreshPixmap();
+            auto entry = this->entryAt(i);
+            if (entry && entry->animated())
+            {
+                entry->refreshPixmap();
+            }
         }
     });
 
     this->connections_.managedConnect(windows->miscUpdate, [this] {
-        if (this->image_ && this->attemptRefresh)
+        for (int i = 0; i < this->visibleEntries_; ++i)
         {
-            if (this->refreshPixmap())
+            auto entry = this->entryAt(i);
+            if (entry->getImage())
             {
-                this->attemptRefresh = false;
-                this->adjustSize();
+                if (entry->refreshPixmap())
+                {
+                    this->attemptRefresh = false;
+                    this->adjustSize();
+                }
             }
         }
     });
+}
+
+void TooltipWidget::setRecord(const TooltipEntryRecord &record)
+{
+    this->setRecords({record});
+}
+
+void TooltipWidget::setRecords(const std::vector<TooltipEntryRecord> &records)
+{
+    if (records.size() > this->layout_->count())
+    {
+        // Need to add more TooltipEntry instances
+        int requiredAmount = records.size() - this->layout_->count();
+        for (int i = 0; i < requiredAmount; ++i)
+        {
+            this->layout_->addWidget(new TooltipEntry());
+        }
+    }
+
+    this->setVisibleEntries(records.size());
+
+    for (int i = 0; i < records.size(); ++i)
+    {
+        auto entry = this->entryAt(i);
+        if (entry)
+        {
+            auto &record = records[i];
+            entry->setImage(record.image);
+            entry->setText(record.text);
+            entry->setImageScale(record.customWidth, record.customHeight);
+        }
+    }
+}
+
+void TooltipWidget::setVisibleEntries(int n)
+{
+    for (int i = 0; i < this->layout_->count(); ++i)
+    {
+        if (auto entry = this->entryAt(i))
+        {
+            if (i <= n - 1)
+            {
+                entry->show();
+            }
+            else
+            {
+                entry->hide();
+                entry->clearImage();
+            }
+        }
+    }
+    this->visibleEntries_ = n;
+}
+
+// May be nullptr
+TooltipEntry *TooltipWidget::entryAt(int n)
+{
+    return dynamic_cast<TooltipEntry *>(this->layout_->itemAt(n)->widget());
 }
 
 void TooltipWidget::themeChangedEvent()
@@ -90,44 +165,21 @@ void TooltipWidget::updateFont()
         getFonts()->getFont(FontStyle::ChatMediumSmall, this->scale()));
 }
 
-void TooltipWidget::setText(QString text)
-{
-    this->displayText_->setText(text);
-}
-
 void TooltipWidget::setWordWrap(bool wrap)
 {
-    this->displayText_->setWordWrap(wrap);
+    for (int i = 0; i < this->visibleEntries_; ++i)
+    {
+        auto entry = this->entryAt(i);
+        if (entry)
+        {
+            entry->setWordWrap(wrap);
+        }
+    }
 }
 
 void TooltipWidget::clearImage()
 {
-    this->displayImage_->hide();
-    this->image_ = nullptr;
-    this->setImageScale(0, 0);
-}
-
-void TooltipWidget::setImage(ImagePtr image)
-{
-    if (this->image_ == image)
-    {
-        return;
-    }
-    // hide image until loaded and reset scale
-    this->clearImage();
-    this->image_ = std::move(image);
-    this->refreshPixmap();
-}
-
-void TooltipWidget::setImageScale(int w, int h)
-{
-    if (this->customImgWidth == w && this->customImgHeight == h)
-    {
-        return;
-    }
-    this->customImgWidth = w;
-    this->customImgHeight = h;
-    this->refreshPixmap();
+    this->setVisibleEntries(0);
 }
 
 void TooltipWidget::hideEvent(QHideEvent *)
@@ -138,34 +190,6 @@ void TooltipWidget::hideEvent(QHideEvent *)
 void TooltipWidget::showEvent(QShowEvent *)
 {
     this->adjustSize();
-}
-
-bool TooltipWidget::refreshPixmap()
-{
-    if (!this->image_)
-    {
-        return false;
-    }
-
-    auto pixmap = this->image_->pixmapOrLoad();
-    if (!pixmap)
-    {
-        this->attemptRefresh = true;
-        return false;
-    }
-
-    if (this->customImgWidth > 0 || this->customImgHeight > 0)
-    {
-        this->displayImage_->setPixmap(pixmap->scaled(
-            this->customImgWidth, this->customImgHeight, Qt::KeepAspectRatio));
-    }
-    else
-    {
-        this->displayImage_->setPixmap(*pixmap);
-    }
-    this->displayImage_->show();
-
-    return true;
 }
 
 void TooltipWidget::changeEvent(QEvent *)

@@ -334,6 +334,8 @@ public:
                         MessageElementFlags flags) override;
 
     QString getCleanCopyString() const;
+    const std::vector<EmotePtr> &getEmotes() const;
+    const std::vector<QString> &getEmoteTooltips() const;
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(
@@ -341,12 +343,14 @@ protected:
         QSize largestSize);
 
 private:
-    void updateTooltipText();
+    QString getCopyString() const;
+    void updateTooltips();
     std::vector<ImagePtr> getLoadedImages(float scale);
 
     std::vector<EmotePtr> emotes_;
     std::unique_ptr<TextElement> textElement_;
     MessageColor textElementColor_;
+    std::vector<QString> emoteTooltips_;
 };
 
 class BadgeElement : public MessageElement

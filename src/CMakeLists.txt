@@ -404,6 +404,8 @@ set(SOURCE_FILES
         widgets/Scrollbar.hpp
         widgets/StreamView.cpp
         widgets/StreamView.hpp
+        widgets/TooltipEntry.cpp
+        widgets/TooltipEntry.hpp
         widgets/TooltipWidget.cpp
         widgets/TooltipWidget.hpp
         widgets/Window.cpp

@@ -1654,10 +1654,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     auto element = &hoverLayoutElement->getCreator();
     bool isLinkValid = hoverLayoutElement->getLink().isValid();
     auto emoteElement = dynamic_cast<const EmoteElement *>(element);
+    auto layeredEmoteElement =
+        dynamic_cast<const LayeredEmoteElement *>(element);
+    bool isNotEmote = emoteElement == nullptr && layeredEmoteElement == nullptr;
 
     if (element->getTooltip().isEmpty() ||
-        (isLinkValid && emoteElement == nullptr &&
-         !getSettings()->linkInfoTooltip))
+        (isLinkValid && isNotEmote && !getSettings()->linkInfoTooltip))
     {
         tooltipWidget->hide();
     }
@@ -1665,7 +1667,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     {
         auto badgeElement = dynamic_cast<const BadgeElement *>(element);
 
-        if ((badgeElement || emoteElement) &&
+        if ((badgeElement || emoteElement || layeredEmoteElement) &&
             getSettings()->emotesTooltipPreview.getValue())
         {
             if (event->modifiers() == Qt::ShiftModifier ||
@@ -1673,13 +1675,39 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             {
                 if (emoteElement)
                 {
-                    tooltipWidget->setImage(
-                        emoteElement->getEmote()->images.getImage(3.0));
+                    tooltipWidget->setRecord({
+                        emoteElement->getEmote()->images.getImage(3.0),
+                        element->getTooltip(),
+                    });
+                }
+                else if (layeredEmoteElement)
+                {
+                    auto &layeredEmotes = layeredEmoteElement->getEmotes();
+                    // Should never be empty but ensure it
+                    if (!layeredEmotes.empty())
+                    {
+                        std::vector<TooltipEntryRecord> records;
+                        records.reserve(layeredEmotes.size());
+
+                        auto &emoteTooltips =
+                            layeredEmoteElement->getEmoteTooltips();
+                        for (size_t i = 0; i < layeredEmotes.size(); ++i)
+                        {
+                            auto &emote = layeredEmotes[i];
+                            records.push_back(
+                                {emote->images.getImage(i == 0 ? 3.0 : 2.0),
+                                 emoteTooltips[i]});
+                        }
+
+                        tooltipWidget->setRecords(records);
+                    }
                 }
                 else if (badgeElement)
                 {
-                    tooltipWidget->setImage(
-                        badgeElement->getEmote()->images.getImage(3.0));
+                    tooltipWidget->setRecord({
+                        badgeElement->getEmote()->images.getImage(3.0),
+                        element->getTooltip(),
+                    });
                 }
             }
             else
@@ -1720,19 +1748,23 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     shouldHideThumbnail
                         ? Image::fromResourcePixmap(getResources().streamerMode)
                         : element->getThumbnail();
-                tooltipWidget->setImage(std::move(thumb));
 
                 if (element->getThumbnailType() ==
                     MessageElement::ThumbnailType::Link_Thumbnail)
                 {
-                    tooltipWidget->setImageScale(thumbnailSize, thumbnailSize);
+                    tooltipWidget->setRecord({std::move(thumb),
+                                              element->getTooltip(),
+                                              thumbnailSize, thumbnailSize});
+                }
+                else
+                {
+                    tooltipWidget->setRecord({std::move(thumb), ""});
                 }
             }
         }
 
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(isLinkValid);
-        tooltipWidget->setText(element->getTooltip());
         tooltipWidget->show();
     }
 

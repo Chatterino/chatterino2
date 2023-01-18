@@ -239,13 +239,13 @@ LayeredEmoteElement::LayeredEmoteElement(std::vector<EmotePtr> &&emotes,
     , emotes_(std::move(emotes))
     , textElementColor_(textElementColor)
 {
-    this->updateTooltipText();
+    this->updateTooltips();
 }
 
 void LayeredEmoteElement::addEmoteLayer(const EmotePtr &emote)
 {
     this->emotes_.push_back(emote);
-    this->updateTooltipText();
+    this->updateTooltips();
 }
 
 void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
@@ -312,17 +312,31 @@ MessageLayoutElement *LayeredEmoteElement::makeImageLayoutElement(
     return new LayeredImageLayoutElement(*this, images, sizes, largestSize);
 }
 
-void LayeredEmoteElement::updateTooltipText()
+void LayeredEmoteElement::updateTooltips()
 {
     if (!this->emotes_.empty())
     {
+        QString copyStr = this->getCopyString();
         // todo: figure out what this should be
-        this->textElement_.reset(
-            new TextElement(this->emotes_.front()->getCopyString(),
-                            MessageElementFlag::Misc, this->textElementColor_));
-
-        this->setTooltip(this->emotes_.front()->tooltip.string);
+        this->textElement_.reset(new TextElement(
+            copyStr, MessageElementFlag::Misc, this->textElementColor_));
+        this->setTooltip(copyStr);
     }
+
+    std::vector<QString> result;
+    result.reserve(this->emotes_.size());
+
+    for (auto &emote : this->emotes_)
+    {
+        result.push_back(emote->tooltip.string);
+    }
+
+    this->emoteTooltips_ = std::move(result);
+}
+
+const std::vector<QString> &LayeredEmoteElement::getEmoteTooltips() const
+{
+    return this->emoteTooltips_;
 }
 
 QString LayeredEmoteElement::getCleanCopyString() const
@@ -338,6 +352,25 @@ QString LayeredEmoteElement::getCleanCopyString() const
             TwitchEmotes::cleanUpEmoteCode(this->emotes_[i]->getCopyString());
     }
     return result;
+}
+
+QString LayeredEmoteElement::getCopyString() const
+{
+    QString result;
+    for (size_t i = 0; i < this->emotes_.size(); ++i)
+    {
+        if (i != 0)
+        {
+            result += " ";
+        }
+        result += this->emotes_[i]->getCopyString();
+    }
+    return result;
+}
+
+const std::vector<EmotePtr> &LayeredEmoteElement::getEmotes() const
+{
+    return this->emotes_;
 }
 
 // BADGE

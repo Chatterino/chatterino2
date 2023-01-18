@@ -1,15 +1,24 @@
 #pragma once
 
 #include "widgets/BaseWindow.hpp"
+#include "widgets/TooltipEntry.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 #include <QLabel>
+#include <QVBoxLayout>
 #include <QWidget>
 
 namespace chatterino {
 
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
+
+struct TooltipEntryRecord {
+    ImagePtr image;
+    QString text;
+    int customWidth = 0;
+    int customHeight = 0;
+};
 
 class TooltipWidget : public BaseWindow
 {
@@ -21,11 +30,14 @@ public:
     TooltipWidget(BaseWidget *parent = nullptr);
     ~TooltipWidget() override = default;
 
-    void setText(QString text);
+    void setRecord(const TooltipEntryRecord &record);
+    void setRecords(const std::vector<TooltipEntryRecord> &records);
+
+    // void setText(QString text);
     void setWordWrap(bool wrap);
     void clearImage();
-    void setImage(ImagePtr image);
-    void setImageScale(int w, int h);
+    // void setImage(ImagePtr image);
+    // void setImageScale(int w, int h);
 
 protected:
     void showEvent(QShowEvent *) override;
@@ -39,18 +51,18 @@ protected:
 private:
     void updateFont();
 
-    // used by WindowManager::gifRepaintRequested signal to progress frames when tooltip image is animated
-    bool refreshPixmap();
+    void setVisibleEntries(int n);
+    TooltipEntry *entryAt(int n);
 
     // set to true when tooltip image did not finish loading yet (pixmapOrLoad returned false)
     bool attemptRefresh{false};
 
-    ImagePtr image_ = nullptr;
-    int customImgWidth = 0;
-    int customImgHeight = 0;
-    QLabel *displayImage_;
-    QLabel *displayText_;
+    std::vector<TooltipEntry> entries_;
+    int visibleEntries_ = 0;
+
     pajlada::Signals::SignalHolder connections_;
+
+    QVBoxLayout *layout_;
 };
 
 }  // namespace chatterino
