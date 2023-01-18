@@ -233,7 +233,15 @@ void LayeredImageLayoutElement::paint(QPainter &painter)
         }
 
         auto pixmap = img->pixmapOrLoad();
-        if (pixmap && !img->animated())
+        if (img->animated())
+        {
+            // As soon as we see an animated emote layer, we can stop rendering
+            // the static emotes. The paintAnimated function will render any
+            // static emotes layered on top of the first seen animated emote.
+            return;
+        }
+
+        if (pixmap)
         {
             // Matching the web chat behavior, we center the emote within the overall
             // binding box. E.g. small overlay emotes like cvMask will sit in the direct
@@ -250,25 +258,33 @@ void LayeredImageLayoutElement::paint(QPainter &painter)
 void LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
     auto fullRect = QRectF(this->getRect());
+    fullRect.moveTop(fullRect.y() + yOffset);
+    bool animatedFlag = false;
 
     for (size_t i = 0; i < this->images_.size(); ++i)
     {
         auto &img = this->images_[i];
-        if (img == nullptr || !img->animated())
+        if (img == nullptr)
         {
             continue;
         }
 
-        if (auto pixmap = img->pixmapOrLoad())
+        // If we have a static emote layered on top of an animated emote, we need
+        // to render the static emote again after animating anything below it.
+        if (img->animated() || animatedFlag)
         {
-            // Matching the web chat behavior, we center the emote within the overall
-            // binding box. E.g. small overlay emotes like cvMask will sit in the direct
-            // center of even wide emotes.
-            auto &size = this->sizes_[i];
-            QRectF destRect(0, 0, size.width(), size.height());
-            destRect.moveCenter(fullRect.center());
+            if (auto pixmap = img->pixmapOrLoad())
+            {
+                // Matching the web chat behavior, we center the emote within the overall
+                // binding box. E.g. small overlay emotes like cvMask will sit in the direct
+                // center of even wide emotes.
+                auto &size = this->sizes_[i];
+                QRectF destRect(0, 0, size.width(), size.height());
+                destRect.moveCenter(fullRect.center());
 
-            painter.drawPixmap(destRect, *pixmap, QRectF());
+                painter.drawPixmap(destRect, *pixmap, QRectF());
+                animatedFlag = true;
+            }
         }
     }
 }
