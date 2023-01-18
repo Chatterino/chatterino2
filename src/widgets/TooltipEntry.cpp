@@ -33,8 +33,8 @@ TooltipEntry::TooltipEntry(ImagePtr image, const QString &text, int customWidth,
     this->displayText_->setAlignment(Qt::AlignHCenter);
     this->displayText_->setStyleSheet("background: transparent");
 
-    layout->addWidget(this->displayImage_);
-    layout->addWidget(this->displayText_);
+    layout->addWidget(this->displayImage_, Qt::AlignHCenter);
+    layout->addWidget(this->displayText_, Qt::AlignHCenter);
 }
 
 void TooltipEntry::setWordWrap(bool wrap)

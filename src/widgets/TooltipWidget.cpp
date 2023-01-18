@@ -9,25 +9,6 @@
 
 namespace chatterino {
 
-namespace {
-
-    // https://stackoverflow.com/a/22646928
-    void clearWidgetsFromLayout(QLayout *layout)
-    {
-        if (layout == nullptr)
-        {
-            return;
-        }
-
-        while (auto item = layout->takeAt(0))
-        {
-            delete item->widget();
-            clearWidgetsFromLayout(item->layout());
-        }
-    }
-
-}  // namespace
-
 TooltipWidget *TooltipWidget::instance()
 {
     static TooltipWidget *tooltipWidget = new TooltipWidget();
@@ -97,7 +78,7 @@ void TooltipWidget::setRecords(const std::vector<TooltipEntryRecord> &records)
         int requiredAmount = records.size() - this->layout_->count();
         for (int i = 0; i < requiredAmount; ++i)
         {
-            this->layout_->addWidget(new TooltipEntry());
+            this->layout_->addWidget(new TooltipEntry(), Qt::AlignHCenter);
         }
     }
 
