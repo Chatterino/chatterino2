@@ -83,6 +83,24 @@ protected:
     ImagePtr image_;
 };
 
+class LayeredImageLayoutElement : public MessageLayoutElement
+{
+public:
+    LayeredImageLayoutElement(MessageElement &creator,
+                              std::vector<ImagePtr> images, const QSize &size);
+
+protected:
+    void addCopyTextToString(QString &str, uint32_t from = 0,
+                             uint32_t to = UINT32_MAX) const override;
+    int getSelectionIndexCount() const override;
+    void paint(QPainter &painter) override;
+    void paintAnimated(QPainter &painter, int yOffset) override;
+    int getMouseOverIndex(const QPoint &abs) const override;
+    int getXFromIndex(int index) override;
+
+    std::vector<ImagePtr> images_;
+};
+
 class ImageWithBackgroundLayoutElement : public ImageLayoutElement
 {
 public:

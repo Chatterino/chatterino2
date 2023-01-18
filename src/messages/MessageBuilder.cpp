@@ -667,6 +667,25 @@ void MessageBuilder::append(std::unique_ptr<MessageElement> element)
     this->message().elements.push_back(std::move(element));
 }
 
+bool MessageBuilder::empty()
+{
+    return this->message().elements.empty();
+}
+
+MessageElement &MessageBuilder::back()
+{
+    return *this->message().elements.back();
+}
+
+std::unique_ptr<MessageElement> MessageBuilder::releaseBack()
+{
+    assert(!this->empty());
+
+    auto ptr = std::move(this->message().elements.back());
+    this->message().elements.pop_back();
+    return ptr;
+}
+
 QString MessageBuilder::matchLink(const QString &string)
 {
     LinkParser linkParser(string);

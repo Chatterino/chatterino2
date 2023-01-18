@@ -1064,6 +1064,34 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 
     if (emote)
     {
+        if (flags.has(MessageElementFlag::ZeroWidthEmote) && !this->empty())
+        {
+            // Attempt to merge current zero-width emote into any previous emotes
+            auto asEmote = dynamic_cast<EmoteElement *>(&this->back());
+            if (asEmote)
+            {
+                // Make sure to access asEmote before taking ownership when releasing
+                auto baseEmote = asEmote->getEmote();
+                // Need to remove EmoteElement and replace with LayeredEmoteElement
+                auto baseEmoteElement = this->releaseBack();
+
+                std::vector<EmotePtr> layers = {baseEmote, emote.get()};
+                this->emplace<LayeredEmoteElement>(std::move(layers),
+                                                   baseEmoteElement->getFlags(),
+                                                   this->textColor_);
+                return Success;
+            }
+
+            auto asLayered = dynamic_cast<LayeredEmoteElement *>(&this->back());
+            if (asLayered)
+            {
+                asLayered->addEmoteLayer(emote.get());
+                return Success;
+            }
+
+            // No emote to merge with, just show as regular emote
+        }
+
         this->emplace<EmoteElement>(emote.get(), flags, this->textColor_);
         return Success;
     }

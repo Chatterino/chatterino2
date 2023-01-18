@@ -185,6 +185,109 @@ int ImageLayoutElement::getXFromIndex(int index)
 }
 
 //
+// LAYERED IMAGE
+//
+
+LayeredImageLayoutElement::LayeredImageLayoutElement(
+    MessageElement &creator, std::vector<ImagePtr> images, const QSize &size)
+    : MessageLayoutElement(creator, size)
+    , images_(std::move(images))
+{
+    this->trailingSpace = creator.hasTrailingSpace();
+}
+
+void LayeredImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                                    uint32_t to) const
+{
+    const auto *layeredEmoteElement =
+        dynamic_cast<LayeredEmoteElement *>(&this->getCreator());
+    if (layeredEmoteElement)
+    {
+        // cleaning is taken care in call
+        str += layeredEmoteElement->getCleanCopyString();
+        if (this->hasTrailingSpace())
+        {
+            str += " ";
+        }
+    }
+}
+
+int LayeredImageLayoutElement::getSelectionIndexCount() const
+{
+    return this->trailingSpace ? 2 : 1;
+}
+
+void LayeredImageLayoutElement::paint(QPainter &painter)
+{
+    for (auto img : this->images_)
+    {
+        if (img == nullptr)
+        {
+            continue;
+        }
+
+        auto pixmap = img->pixmapOrLoad();
+        if (pixmap && !img->animated())
+        {
+            painter.drawPixmap(QRectF(this->getRect()), *pixmap, QRectF());
+        }
+    }
+}
+
+void LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+{
+    // if (this->image_ == nullptr)
+    // {
+    //     return;
+    // }
+
+    // if (this->image_->animated())
+    // {
+    //     if (auto pixmap = this->image_->pixmapOrLoad())
+    //     {
+    //         auto rect = this->getRect();
+    //         rect.moveTop(rect.y() + yOffset);
+    //         painter.drawPixmap(QRectF(rect), *pixmap, QRectF());
+    //     }
+    // }
+
+    for (auto img : this->images_)
+    {
+        if (img == nullptr || !img->animated())
+        {
+            continue;
+        }
+
+        if (auto pixmap = img->pixmapOrLoad())
+        {
+            painter.drawPixmap(QRectF(this->getRect()), *pixmap, QRectF());
+        }
+    }
+}
+
+int LayeredImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
+{
+    return 0;
+}
+
+int LayeredImageLayoutElement::getXFromIndex(int index)
+{
+    if (index <= 0)
+    {
+        return this->getRect().left();
+    }
+    else if (index == 1)
+    {
+        // fourtf: remove space width
+        return this->getRect().right();
+    }
+    else
+    {
+        return this->getRect().right();
+    }
+}
+
+//
 // IMAGE WITH BACKGROUND
 //
 ImageWithBackgroundLayoutElement::ImageWithBackgroundLayoutElement(

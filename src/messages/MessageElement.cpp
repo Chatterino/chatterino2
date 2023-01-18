@@ -15,6 +15,22 @@
 
 namespace chatterino {
 
+namespace {
+
+    QSize getBindingSize(std::vector<ImagePtr> &images)
+    {
+        int width = 0, height = 0;
+        for (auto &img : images)
+        {
+            width = std::max(width, img->width());
+            height = std::max(height, img->height());
+        }
+
+        return QSize(width, height);
+    }
+
+}  // namespace
+
 MessageElement::MessageElement(MessageElementFlags flags)
     : flags_(flags)
 {
@@ -214,6 +230,104 @@ MessageLayoutElement *EmoteElement::makeImageLayoutElement(
     const ImagePtr &image, const QSize &size)
 {
     return new ImageLayoutElement(*this, image, size);
+}
+
+LayeredEmoteElement::LayeredEmoteElement(std::vector<EmotePtr> &&emotes,
+                                         MessageElementFlags flags,
+                                         const MessageColor &textElementColor)
+    : MessageElement(flags)
+    , emotes_(std::move(emotes))
+    , textElementColor_(textElementColor)
+{
+    this->updateTooltipText();
+}
+
+void LayeredEmoteElement::addEmoteLayer(const EmotePtr &emote)
+{
+    this->emotes_.push_back(emote);
+    this->updateTooltipText();
+}
+
+void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
+                                         MessageElementFlags flags)
+{
+    if (flags.hasAny(this->getFlags()))
+    {
+        if (flags.has(MessageElementFlag::EmoteImages))
+        {
+            auto images = this->getLoadedImages(container.getScale());
+            if (images.empty())
+            {
+                return;
+            }
+
+            auto emoteScale = getSettings()->emoteScale.getValue();
+            auto size =
+                getBindingSize(images) * (emoteScale * container.getScale());
+
+            container.addElement(this->makeImageLayoutElement(images, size)
+                                     ->setLink(this->getLink()));
+        }
+        else
+        {
+            if (this->textElement_)
+            {
+                this->textElement_->addToContainer(container,
+                                                   MessageElementFlag::Misc);
+            }
+        }
+    }
+}
+
+std::vector<ImagePtr> LayeredEmoteElement::getLoadedImages(float scale)
+{
+    std::vector<ImagePtr> res;
+    res.reserve(this->emotes_.size());
+
+    for (auto emote : this->emotes_)
+    {
+        auto image = emote->images.getImageOrLoaded(scale);
+        if (image->isEmpty())
+        {
+            continue;
+        }
+        res.push_back(image);
+    }
+    return res;
+}
+
+MessageLayoutElement *LayeredEmoteElement::makeImageLayoutElement(
+    const std::vector<ImagePtr> &images, const QSize &size)
+{
+    return new LayeredImageLayoutElement(*this, images, size);
+}
+
+void LayeredEmoteElement::updateTooltipText()
+{
+    if (!this->emotes_.empty())
+    {
+        // todo: figure out what this should be
+        this->textElement_.reset(
+            new TextElement(this->emotes_.front()->getCopyString(),
+                            MessageElementFlag::Misc, this->textElementColor_));
+
+        this->setTooltip(this->emotes_.front()->tooltip.string);
+    }
+}
+
+QString LayeredEmoteElement::getCleanCopyString() const
+{
+    QString result;
+    for (size_t i = 0; i < this->emotes_.size(); ++i)
+    {
+        if (i != 0)
+        {
+            result += " ";
+        }
+        result +=
+            TwitchEmotes::cleanUpEmoteCode(this->emotes_[i]->getCopyString());
+    }
+    return result;
 }
 
 // BADGE

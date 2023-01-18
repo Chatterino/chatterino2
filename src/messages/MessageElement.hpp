@@ -321,6 +321,33 @@ private:
     EmotePtr emote_;
 };
 
+class LayeredEmoteElement : public MessageElement
+{
+public:
+    LayeredEmoteElement(
+        std::vector<EmotePtr> &&emotes, MessageElementFlags flags,
+        const MessageColor &textElementColor = MessageColor::Text);
+
+    void addEmoteLayer(const EmotePtr &emote);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+    QString getCleanCopyString() const;
+
+protected:
+    virtual MessageLayoutElement *makeImageLayoutElement(
+        const std::vector<ImagePtr> &image, const QSize &size);
+
+private:
+    void updateTooltipText();
+    std::vector<ImagePtr> getLoadedImages(float scale);
+
+    std::vector<EmotePtr> emotes_;
+    std::unique_ptr<TextElement> textElement_;
+    MessageColor textElementColor_;
+};
+
 class BadgeElement : public MessageElement
 {
 public:

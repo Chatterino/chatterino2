@@ -97,6 +97,10 @@ public:
     QString matchLink(const QString &string);
     void addLink(const QString &origLink, const QString &matchedLink);
 
+    bool empty();
+    MessageElement &back();
+    std::unique_ptr<MessageElement> releaseBack();
+
     /**
      * Adds the text, applies irc colors, adds links,
      * and updates the message's messageText.
