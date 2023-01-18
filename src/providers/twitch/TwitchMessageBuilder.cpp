@@ -1014,6 +1014,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
+    bool zeroWidth = false;
 
     // Emote order:
     //  - FrankerFaceZ Channel
@@ -1035,10 +1036,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
              (emote = this->twitchChannel->seventvEmote(name)))
     {
         flags = MessageElementFlag::SevenTVEmote;
-        if (emote.value()->zeroWidth)
-        {
-            flags.set(MessageElementFlag::ZeroWidthEmote);
-        }
+        zeroWidth = emote.value()->zeroWidth;
     }
     else if ((emote = globalFfzEmotes.emote(name)))
     {
@@ -1047,24 +1045,17 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     else if ((emote = globalBttvEmotes.emote(name)))
     {
         flags = MessageElementFlag::BttvEmote;
-
-        if (zeroWidthEmotes.contains(name.string))
-        {
-            flags.set(MessageElementFlag::ZeroWidthEmote);
-        }
+        zeroWidth = zeroWidthEmotes.contains(name.string);
     }
     else if ((emote = globalSeventvEmotes.globalEmote(name)))
     {
         flags = MessageElementFlag::SevenTVEmote;
-        if (emote.value()->zeroWidth)
-        {
-            flags.set(MessageElementFlag::ZeroWidthEmote);
-        }
+        zeroWidth = emote.value()->zeroWidth;
     }
 
     if (emote)
     {
-        if (flags.has(MessageElementFlag::ZeroWidthEmote) && !this->empty())
+        if (zeroWidth && !this->empty())
         {
             // Attempt to merge current zero-width emote into any previous emotes
             auto asEmote = dynamic_cast<EmoteElement *>(&this->back());

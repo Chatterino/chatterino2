@@ -141,9 +141,7 @@ enum class MessageElementFlag : int64_t {
     LowercaseLink = (1LL << 29),
     OriginalLink = (1LL << 30),
 
-    // ZeroWidthEmotes are emotes that are supposed to overlay over any pre-existing emotes
-    // e.g. BTTV's SoSnowy during christmas season or 7TV's RainTime
-    ZeroWidthEmote = (1LL << 31),
+    // Unused: (1LL << 31)
 
     // for elements of the message reply
     RepliedMessage = (1LL << 32),
