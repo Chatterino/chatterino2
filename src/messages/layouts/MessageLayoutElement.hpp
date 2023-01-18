@@ -87,7 +87,8 @@ class LayeredImageLayoutElement : public MessageLayoutElement
 {
 public:
     LayeredImageLayoutElement(MessageElement &creator,
-                              std::vector<ImagePtr> images, const QSize &size);
+                              std::vector<ImagePtr> images,
+                              std::vector<QSize> sizes, QSize largestSize);
 
 protected:
     void addCopyTextToString(QString &str, uint32_t from = 0,
@@ -99,6 +100,7 @@ protected:
     int getXFromIndex(int index) override;
 
     std::vector<ImagePtr> images_;
+    std::vector<QSize> sizes_;
 };
 
 class ImageWithBackgroundLayoutElement : public ImageLayoutElement

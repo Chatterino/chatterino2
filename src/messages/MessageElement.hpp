@@ -337,7 +337,8 @@ public:
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(
-        const std::vector<ImagePtr> &image, const QSize &size);
+        const std::vector<ImagePtr> &image, const std::vector<QSize> &sizes,
+        QSize largestSize);
 
 private:
     void updateTooltipText();

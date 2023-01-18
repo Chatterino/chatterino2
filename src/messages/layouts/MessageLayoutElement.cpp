@@ -189,10 +189,13 @@ int ImageLayoutElement::getXFromIndex(int index)
 //
 
 LayeredImageLayoutElement::LayeredImageLayoutElement(
-    MessageElement &creator, std::vector<ImagePtr> images, const QSize &size)
-    : MessageLayoutElement(creator, size)
+    MessageElement &creator, std::vector<ImagePtr> images,
+    std::vector<QSize> sizes, QSize largestSize)
+    : MessageLayoutElement(creator, largestSize)
     , images_(std::move(images))
+    , sizes_(std::move(sizes))
 {
+    assert(this->images_.size() == this->sizes_.size());
     this->trailingSpace = creator.hasTrailingSpace();
 }
 
@@ -219,8 +222,11 @@ int LayeredImageLayoutElement::getSelectionIndexCount() const
 
 void LayeredImageLayoutElement::paint(QPainter &painter)
 {
-    for (auto img : this->images_)
+    auto fullRect = QRectF(this->getRect());
+
+    for (size_t i = 0; i < this->images_.size(); ++i)
     {
+        auto &img = this->images_[i];
         if (img == nullptr)
         {
             continue;
@@ -229,30 +235,25 @@ void LayeredImageLayoutElement::paint(QPainter &painter)
         auto pixmap = img->pixmapOrLoad();
         if (pixmap && !img->animated())
         {
-            painter.drawPixmap(QRectF(this->getRect()), *pixmap, QRectF());
+            // Matching the web chat behavior, we center the emote within the overall
+            // binding box. E.g. small overlay emotes like cvMask will sit in the direct
+            // center of even wide emotes.
+            auto &size = this->sizes_[i];
+            QRectF destRect(0, 0, size.width(), size.height());
+            destRect.moveCenter(fullRect.center());
+
+            painter.drawPixmap(destRect, *pixmap, QRectF());
         }
     }
 }
 
 void LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
-    // if (this->image_ == nullptr)
-    // {
-    //     return;
-    // }
+    auto fullRect = QRectF(this->getRect());
 
-    // if (this->image_->animated())
-    // {
-    //     if (auto pixmap = this->image_->pixmapOrLoad())
-    //     {
-    //         auto rect = this->getRect();
-    //         rect.moveTop(rect.y() + yOffset);
-    //         painter.drawPixmap(QRectF(rect), *pixmap, QRectF());
-    //     }
-    // }
-
-    for (auto img : this->images_)
+    for (size_t i = 0; i < this->images_.size(); ++i)
     {
+        auto &img = this->images_[i];
         if (img == nullptr || !img->animated())
         {
             continue;
@@ -260,7 +261,14 @@ void LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 
         if (auto pixmap = img->pixmapOrLoad())
         {
-            painter.drawPixmap(QRectF(this->getRect()), *pixmap, QRectF());
+            // Matching the web chat behavior, we center the emote within the overall
+            // binding box. E.g. small overlay emotes like cvMask will sit in the direct
+            // center of even wide emotes.
+            auto &size = this->sizes_[i];
+            QRectF destRect(0, 0, size.width(), size.height());
+            destRect.moveCenter(fullRect.center());
+
+            painter.drawPixmap(destRect, *pixmap, QRectF());
         }
     }
 }

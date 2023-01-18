@@ -262,10 +262,19 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
             }
 
             auto emoteScale = getSettings()->emoteScale.getValue();
-            auto size =
-                getBindingSize(images) * (emoteScale * container.getScale());
+            float overallScale = emoteScale * container.getScale();
 
-            container.addElement(this->makeImageLayoutElement(images, size)
+            auto largestSize = getBindingSize(images) * overallScale;
+            std::vector<QSize> individualSizes;
+            individualSizes.reserve(this->emotes_.size());
+            for (auto img : images)
+            {
+                individualSizes.push_back(QSize(img->width(), img->height()) *
+                                          overallScale);
+            }
+
+            container.addElement(this->makeImageLayoutElement(
+                                         images, individualSizes, largestSize)
                                      ->setLink(this->getLink()));
         }
         else
@@ -297,9 +306,10 @@ std::vector<ImagePtr> LayeredEmoteElement::getLoadedImages(float scale)
 }
 
 MessageLayoutElement *LayeredEmoteElement::makeImageLayoutElement(
-    const std::vector<ImagePtr> &images, const QSize &size)
+    const std::vector<ImagePtr> &images, const std::vector<QSize> &sizes,
+    QSize largestSize)
 {
-    return new LayeredImageLayoutElement(*this, images, size);
+    return new LayeredImageLayoutElement(*this, images, sizes, largestSize);
 }
 
 void LayeredEmoteElement::updateTooltipText()
