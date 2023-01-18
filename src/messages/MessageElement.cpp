@@ -317,7 +317,6 @@ void LayeredEmoteElement::updateTooltips()
     if (!this->emotes_.empty())
     {
         QString copyStr = this->getCopyString();
-        // todo: figure out what this should be
         this->textElement_.reset(new TextElement(
             copyStr, MessageElementFlag::Misc, this->textElementColor_));
         this->setTooltip(copyStr);
