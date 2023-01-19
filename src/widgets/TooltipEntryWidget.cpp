@@ -24,6 +24,7 @@ TooltipEntryWidget::TooltipEntryWidget(ImagePtr image, const QString &text,
     , customImgHeight_(customHeight)
 {
     auto *layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(layout);
 
     this->displayImage_ = new QLabel();
