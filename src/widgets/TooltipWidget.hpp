@@ -4,7 +4,9 @@
 #include "widgets/TooltipEntryWidget.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
+#include <QGridLayout>
 #include <QLabel>
+#include <QLayout>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -20,6 +22,8 @@ struct TooltipEntry {
     int customHeight = 0;
 };
 
+enum class TooltipStyle { Vertical, Grid };
+
 class TooltipWidget : public BaseWindow
 {
     Q_OBJECT
@@ -30,8 +34,10 @@ public:
     TooltipWidget(BaseWidget *parent = nullptr);
     ~TooltipWidget() override = default;
 
-    void setOne(const TooltipEntry &record);
-    void set(const std::vector<TooltipEntry> &records);
+    void setOne(const TooltipEntry &record,
+                TooltipStyle style = TooltipStyle::Vertical);
+    void set(const std::vector<TooltipEntry> &records,
+             TooltipStyle style = TooltipStyle::Vertical);
 
     void setWordWrap(bool wrap);
     void clearEntries();
@@ -48,17 +54,25 @@ protected:
 private:
     void updateFont();
 
-    void setVisibleEntries(int n);
+    QLayout *currentLayout() const;
+    int currentLayoutCount() const;
     TooltipEntryWidget *entryAt(int n);
 
-    // set to true when tooltip image did not finish loading yet (pixmapOrLoad returned false)
-    bool attemptRefresh{false};
+    void setVisibleEntries(int n);
+    void setCurrentStyle(TooltipStyle style);
+    void addNewEntry(int absoluteIndex);
+
+    void deleteCurrentLayout();
+    void initializeVLayout();
+    void initializeGLayout();
 
     int visibleEntries_ = 0;
 
-    pajlada::Signals::SignalHolder connections_;
+    TooltipStyle currentStyle_;
+    QVBoxLayout *vLayout_;
+    QGridLayout *gLayout_;
 
-    QVBoxLayout *layout_;
+    pajlada::Signals::SignalHolder connections_;
 };
 
 }  // namespace chatterino

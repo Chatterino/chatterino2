@@ -64,6 +64,7 @@
 #define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
 #define CHAT_HOVER_PAUSE_DURATION 1000
+#define TOOLTIP_EMOTE_ENTRIES_LIMIT 7
 
 namespace chatterino {
 namespace {
@@ -1691,15 +1692,44 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
                         auto &emoteTooltips =
                             layeredEmoteElement->getEmoteTooltips();
-                        for (size_t i = 0; i < layeredEmotes.size(); ++i)
+
+                        // Someone performing some tomfoolery could put an emote with tens,
+                        // if not hundreds of zero-width emotes on a single emote. If the
+                        // tooltip may take up more than three rows, truncate everything else.
+                        bool truncating = false;
+                        size_t upperLimit = layeredEmotes.size();
+                        if (layeredEmotes.size() > TOOLTIP_EMOTE_ENTRIES_LIMIT)
                         {
-                            auto &emote = layeredEmotes[i];
-                            records.push_back(
-                                {emote->images.getImage(i == 0 ? 3.0 : 2.0),
-                                 emoteTooltips[i]});
+                            upperLimit = TOOLTIP_EMOTE_ENTRIES_LIMIT - 1;
+                            truncating = true;
                         }
 
-                        tooltipWidget->set(records);
+                        for (size_t i = 0; i < upperLimit; ++i)
+                        {
+                            auto &emote = layeredEmotes[i];
+                            if (i == 0)
+                            {
+                                // Large image and full description
+                                records.push_back({emote->images.getImage(3.0),
+                                                   emoteTooltips[i]});
+                            }
+                            else
+                            {
+                                // Smaller image and just emote name
+                                records.push_back({emote->images.getImage(1.0),
+                                                   emote->name.string});
+                            }
+                        }
+
+                        if (truncating)
+                        {
+                            records.push_back({nullptr, "..."});
+                        }
+
+                        auto style = layeredEmotes.size() > 2
+                                         ? TooltipStyle::Grid
+                                         : TooltipStyle::Vertical;
+                        tooltipWidget->set(records, style);
                     }
                 }
                 else if (badgeElement)

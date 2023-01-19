@@ -7,6 +7,9 @@
 
 #include <QPainter>
 
+// number of columns in grid mode
+#define GRID_NUM_COLS 3
+
 namespace chatterino {
 
 TooltipWidget *TooltipWidget::instance()
@@ -26,11 +29,10 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
 
     this->setStayInScreenRect(true);
 
-    auto *layout = new QVBoxLayout(this);
-    layout->setSizeConstraint(QLayout::SetFixedSize);
-    layout->setContentsMargins(10, 5, 10, 5);
-    this->setLayout(layout);
-    this->layout_ = layout;
+    // Default to using vertical layout
+    this->initializeVLayout();
+    this->setLayout(this->vLayout_);
+    this->currentStyle_ = TooltipStyle::Vertical;
 
     this->connections_.managedConnect(getFonts()->fontChanged, [this] {
         this->updateFont();
@@ -57,7 +59,6 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
             {
                 if (entry->refreshPixmap())
                 {
-                    this->attemptRefresh = false;
                     this->adjustSize();
                 }
             }
@@ -65,21 +66,24 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     });
 }
 
-void TooltipWidget::setOne(const TooltipEntry &record)
+void TooltipWidget::setOne(const TooltipEntry &record, TooltipStyle style)
 {
-    this->set({record});
+    this->set({record}, style);
 }
 
-void TooltipWidget::set(const std::vector<TooltipEntry> &records)
+void TooltipWidget::set(const std::vector<TooltipEntry> &records,
+                        TooltipStyle style)
 {
-    if (records.size() > this->layout_->count())
+    this->setCurrentStyle(style);
+
+    int delta = records.size() - this->currentLayoutCount();
+    if (delta > 0)
     {
         // Need to add more TooltipEntry instances
-        int requiredAmount = records.size() - this->layout_->count();
-        for (int i = 0; i < requiredAmount; ++i)
+        int base = this->currentLayoutCount();
+        for (int i = 0; i < delta; ++i)
         {
-            this->layout_->addWidget(new TooltipEntryWidget(),
-                                     Qt::AlignHCenter);
+            this->addNewEntry(base + i);
         }
     }
 
@@ -99,7 +103,7 @@ void TooltipWidget::set(const std::vector<TooltipEntry> &records)
 
 void TooltipWidget::setVisibleEntries(int n)
 {
-    for (int i = 0; i < this->layout_->count(); ++i)
+    for (int i = 0; i < this->currentLayoutCount(); ++i)
     {
         if (auto entry = this->entryAt(i))
         {
@@ -117,11 +121,127 @@ void TooltipWidget::setVisibleEntries(int n)
     this->visibleEntries_ = n;
 }
 
+void TooltipWidget::addNewEntry(int absoluteIndex)
+{
+    switch (this->currentStyle_)
+    {
+        case TooltipStyle::Vertical:
+            this->vLayout_->addWidget(new TooltipEntryWidget(),
+                                      Qt::AlignHCenter);
+            return;
+        case TooltipStyle::Grid:
+            if (absoluteIndex == 0)
+            {
+                // Top row spans all columns
+                this->gLayout_->addWidget(new TooltipEntryWidget(), 0, 0, 1,
+                                          GRID_NUM_COLS, Qt::AlignCenter);
+            }
+            else
+            {
+                int row = ((absoluteIndex - 1) / GRID_NUM_COLS) + 1;
+                int col = (absoluteIndex - 1) % GRID_NUM_COLS;
+                this->gLayout_->addWidget(new TooltipEntryWidget(), row, col,
+                                          Qt::AlignCenter);
+            }
+            return;
+        default:
+            return;
+    }
+}
+
+// May be nullptr
+QLayout *TooltipWidget::currentLayout() const
+{
+    switch (this->currentStyle_)
+    {
+        case TooltipStyle::Vertical:
+            return this->vLayout_;
+        case TooltipStyle::Grid:
+            return this->gLayout_;
+        default:
+            return nullptr;
+    }
+}
+
+int TooltipWidget::currentLayoutCount() const
+{
+    if (auto *layout = this->currentLayout())
+    {
+        return layout->count();
+    }
+    return 0;
+}
+
 // May be nullptr
 TooltipEntryWidget *TooltipWidget::entryAt(int n)
 {
-    return dynamic_cast<TooltipEntryWidget *>(
-        this->layout_->itemAt(n)->widget());
+    if (auto *layout = this->currentLayout())
+    {
+        return dynamic_cast<TooltipEntryWidget *>(layout->itemAt(n)->widget());
+    }
+    return nullptr;
+}
+
+void TooltipWidget::setCurrentStyle(TooltipStyle style)
+{
+    if (this->currentStyle_ == style)
+    {
+        // Nothing to update
+        return;
+    }
+
+    this->clearEntries();
+    this->deleteCurrentLayout();
+
+    switch (style)
+    {
+        case TooltipStyle::Vertical:
+            this->initializeVLayout();
+            this->setLayout(this->vLayout_);
+            break;
+        case TooltipStyle::Grid:
+            this->initializeGLayout();
+            this->setLayout(this->gLayout_);
+            break;
+        default:
+            break;
+    }
+
+    this->currentStyle_ = style;
+}
+
+void TooltipWidget::deleteCurrentLayout()
+{
+    auto *currentLayout = this->layout();
+    delete currentLayout;
+
+    switch (this->currentStyle_)
+    {
+        case TooltipStyle::Vertical:
+            this->vLayout_ = nullptr;
+            break;
+        case TooltipStyle::Grid:
+            this->gLayout_ = nullptr;
+            break;
+        default:
+            break;
+    }
+}
+
+void TooltipWidget::initializeVLayout()
+{
+    auto *vLayout = new QVBoxLayout(this);
+    vLayout->setSizeConstraint(QLayout::SetFixedSize);
+    vLayout->setContentsMargins(10, 5, 10, 5);
+    this->vLayout_ = vLayout;
+}
+
+void TooltipWidget::initializeGLayout()
+{
+    auto *gLayout = new QGridLayout(this);
+    gLayout->setSizeConstraint(QLayout::SetFixedSize);
+    gLayout->setContentsMargins(10, 5, 10, 5);
+    this->gLayout_ = gLayout;
 }
 
 void TooltipWidget::themeChangedEvent()

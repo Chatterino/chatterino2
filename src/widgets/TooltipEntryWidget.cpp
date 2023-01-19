@@ -23,10 +23,8 @@ TooltipEntryWidget::TooltipEntryWidget(ImagePtr image, const QString &text,
     , customImgWidth_(customWidth)
     , customImgHeight_(customHeight)
 {
-    auto layout = new QVBoxLayout(this);
+    auto *layout = new QVBoxLayout(this);
     this->setLayout(layout);
-    layout->setSizeConstraint(QLayout::SetFixedSize);
-    layout->setContentsMargins(10, 5, 10, 5);
 
     this->displayImage_ = new QLabel();
     this->displayImage_->setAlignment(Qt::AlignHCenter);
@@ -35,8 +33,8 @@ TooltipEntryWidget::TooltipEntryWidget(ImagePtr image, const QString &text,
     this->displayText_->setAlignment(Qt::AlignHCenter);
     this->displayText_->setStyleSheet("background: transparent");
 
-    layout->addWidget(this->displayImage_, Qt::AlignHCenter);
-    layout->addWidget(this->displayText_, Qt::AlignHCenter);
+    layout->addWidget(this->displayImage_);
+    layout->addWidget(this->displayText_);
 }
 
 void TooltipEntryWidget::setWordWrap(bool wrap)
