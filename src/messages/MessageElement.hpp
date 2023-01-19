@@ -335,20 +335,20 @@ public:
     const std::vector<EmotePtr> &getEmotes() const;
     const std::vector<QString> &getEmoteTooltips() const;
 
-protected:
-    virtual MessageLayoutElement *makeImageLayoutElement(
+private:
+    MessageLayoutElement *makeImageLayoutElement(
         const std::vector<ImagePtr> &image, const std::vector<QSize> &sizes,
         QSize largestSize);
 
-private:
     QString getCopyString() const;
     void updateTooltips();
     std::vector<ImagePtr> getLoadedImages(float scale);
 
     std::vector<EmotePtr> emotes_;
+    std::vector<QString> emoteTooltips_;
+
     std::unique_ptr<TextElement> textElement_;
     MessageColor textElementColor_;
-    std::vector<QString> emoteTooltips_;
 };
 
 class BadgeElement : public MessageElement
