@@ -1055,7 +1055,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 
     if (emote)
     {
-        if (zeroWidth && !this->empty())
+        if (getSettings()->enableZeroWidthEmotes && zeroWidth && !this->empty())
         {
             // Attempt to merge current zero-width emote into any previous emotes
             auto asEmote = dynamic_cast<EmoteElement *>(&this->back());

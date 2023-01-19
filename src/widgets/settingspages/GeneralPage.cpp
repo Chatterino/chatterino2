@@ -374,6 +374,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Animate", s.animateEmotes);
     layout.addCheckbox("Animate only when Chatterino is focused",
                        s.animationsWhenFocused);
+    layout.addCheckbox("Enable zero-width emotes", s.enableZeroWidthEmotes);
     layout.addCheckbox("Enable emote auto-completion by typing :",
                        s.emoteCompletionWithColon);
     layout.addDropdown<float>(
