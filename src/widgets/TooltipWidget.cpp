@@ -141,7 +141,7 @@ void TooltipWidget::addNewEntry(int absoluteIndex)
                 int row = ((absoluteIndex - 1) / GRID_NUM_COLS) + 1;
                 int col = (absoluteIndex - 1) % GRID_NUM_COLS;
                 this->gLayout_->addWidget(new TooltipEntryWidget(), row, col,
-                                          Qt::AlignCenter);
+                                          Qt::AlignHCenter | Qt::AlignBottom);
             }
             return;
         default:
@@ -233,6 +233,7 @@ void TooltipWidget::initializeVLayout()
     auto *vLayout = new QVBoxLayout(this);
     vLayout->setSizeConstraint(QLayout::SetFixedSize);
     vLayout->setContentsMargins(10, 5, 10, 5);
+    vLayout->setSpacing(10);
     this->vLayout_ = vLayout;
 }
 
@@ -241,6 +242,8 @@ void TooltipWidget::initializeGLayout()
     auto *gLayout = new QGridLayout(this);
     gLayout->setSizeConstraint(QLayout::SetFixedSize);
     gLayout->setContentsMargins(10, 5, 10, 5);
+    gLayout->setHorizontalSpacing(8);
+    gLayout->setVerticalSpacing(10);
     this->gLayout_ = gLayout;
 }
 
