@@ -16,7 +16,7 @@
 #include "util/StreamerMode.hpp"
 
 #include <QFileInfo>
-#include <QMediaPlayer>
+#include <QSoundEffect>
 
 namespace chatterino {
 
@@ -198,11 +198,11 @@ void SharedMessageBuilder::appendChannelName()
         ->setLink(link);
 }
 
-inline QMediaPlayer *getPlayer()
+inline QSoundEffect *getPlayer()
 {
     if (isGuiThread())
     {
-        static auto player = new QMediaPlayer;
+        static QSoundEffect player = new QSoundEffect;
         return player;
     }
     else
@@ -234,11 +234,10 @@ void SharedMessageBuilder::triggerHighlights()
     {
         if (auto player = getPlayer())
         {
-            // Set media if the highlight sound url has changed, or if media is buffered
-            if (currentPlayerUrl != this->highlightSoundUrl_ ||
-                player->mediaStatus() == QMediaPlayer::BufferedMedia)
+            // Set player source and url if the highlight sound url has changed
+            if (currentPlayerUrl != this->highlightSoundUrl_)
             {
-                player->setMedia(this->highlightSoundUrl_);
+                player->setSource(this->highlightSoundUrl_);
 
                 currentPlayerUrl = this->highlightSoundUrl_;
             }

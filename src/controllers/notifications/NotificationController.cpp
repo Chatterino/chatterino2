@@ -21,7 +21,7 @@
 
 #include <QDesktopServices>
 #include <QDir>
-#include <QMediaPlayer>
+#include <QSoundEffect>
 #include <QUrl>
 
 #include <unordered_set>
@@ -97,7 +97,7 @@ void NotificationController::removeChannelNotification(
 }
 void NotificationController::playSound()
 {
-    static auto player = new QMediaPlayer;
+    static QSoundEffect player = new QSoundEffect;
     static QUrl currentPlayerUrl;
 
     QUrl highlightSoundUrl =
@@ -106,11 +106,10 @@ void NotificationController::playSound()
                   getSettings()->notificationPathSound.getValue())
             : QUrl("qrc:/sounds/ping2.wav");
 
-    // Set media if the highlight sound url has changed, or if media is buffered
-    if (currentPlayerUrl != highlightSoundUrl ||
-        player->mediaStatus() == QMediaPlayer::BufferedMedia)
+    // Set player source and url if the highlight sound url has changed
+    if (currentPlayerUrl != highlightSoundUrl)
     {
-        player->setMedia(highlightSoundUrl);
+        player->setSource(highlightSoundUrl);
 
         currentPlayerUrl = highlightSoundUrl;
     }
