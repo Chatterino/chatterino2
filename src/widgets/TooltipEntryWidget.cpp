@@ -88,7 +88,7 @@ bool TooltipEntryWidget::refreshPixmap()
     auto pixmap = this->image_->pixmapOrLoad();
     if (!pixmap)
     {
-        this->attemptRefresh = true;
+        this->attemptRefresh_ = true;
         return false;
     }
 
@@ -112,9 +112,14 @@ bool TooltipEntryWidget::animated() const
     return this->image_ && this->image_->animated();
 }
 
-ImagePtr TooltipEntryWidget::getImage() const
+bool TooltipEntryWidget::hasImage() const
 {
-    return this->image_;
+    return this->image_ != nullptr;
+}
+
+bool TooltipEntryWidget::attemptRefresh() const
+{
+    return this->attemptRefresh_;
 }
 
 }  // namespace chatterino

@@ -52,16 +52,20 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     });
 
     this->connections_.managedConnect(windows->miscUpdate, [this] {
+        bool needSizeAdjustment = false;
         for (int i = 0; i < this->visibleEntries_; ++i)
         {
             auto entry = this->entryAt(i);
-            if (entry->getImage())
+            if (entry->hasImage() && entry->attemptRefresh())
             {
-                if (entry->refreshPixmap())
-                {
-                    this->adjustSize();
-                }
+                bool successfullyUpdated = entry->refreshPixmap();
+                needSizeAdjustment |= successfullyUpdated;
             }
+        }
+
+        if (needSizeAdjustment)
+        {
+            this->adjustSize();
         }
     });
 }

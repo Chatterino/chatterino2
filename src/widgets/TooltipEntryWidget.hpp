@@ -27,13 +27,14 @@ public:
     bool refreshPixmap();
 
     bool animated() const;
-    ImagePtr getImage() const;
+    bool hasImage() const;
+    bool attemptRefresh() const;
 
 private:
     QLabel *displayImage_;
     QLabel *displayText_;
 
-    bool attemptRefresh{false};
+    bool attemptRefresh_ = false;
 
     ImagePtr image_ = nullptr;
     int customImgWidth_ = 0;
