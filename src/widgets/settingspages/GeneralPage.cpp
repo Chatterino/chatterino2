@@ -190,7 +190,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         tabDirectionDropdown->minimumSizeHint().width());
 
     layout.addCheckbox(
-        "Show message reply context", s.hideReplyContext, true, "This setting will only affect how messages are shown. You can reply "
+        "Show message reply context", s.hideReplyContext, true,
+        "This setting will only affect how messages are shown. You can reply "
         "to a message regardless of this setting.");
     layout.addCheckbox("Show message reply button", s.showReplyButton, false,
                        "Show a reply button next to every chat message");
