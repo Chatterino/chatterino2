@@ -37,6 +37,7 @@
 - Dev: Fixed `final-dtor-non-final-class` warnings. (#4296)
 - Dev: Fixed `ambiguous-reversed-operator` warnings. (#4296)
 - Dev: Format YAML and JSON files with prettier. (#4304)
+- Dev: Use QSoundEffect instead of QMediaPlayer. (#4285, #4316)
 
 ## 2.4.0
 

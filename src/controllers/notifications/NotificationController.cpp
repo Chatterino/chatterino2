@@ -97,7 +97,7 @@ void NotificationController::removeChannelNotification(
 }
 void NotificationController::playSound()
 {
-    static auto player = new QSoundEffect;
+    static auto *player = new QSoundEffect;
     static QUrl currentPlayerUrl;
 
     QUrl highlightSoundUrl =
