@@ -202,7 +202,7 @@ inline QSoundEffect *getPlayer()
 {
     if (isGuiThread())
     {
-        static QSoundEffect player = new QSoundEffect;
+        static QSoundEffect *player = new QSoundEffect;
         return player;
     }
     else
