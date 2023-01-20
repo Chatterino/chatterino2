@@ -19,6 +19,15 @@ const QChar RTL_EMBED(0x202B);
 
 namespace chatterino {
 
+namespace {
+    void alignRectBottomCenter(QRectF &rect, const QRectF &reference)
+    {
+        QPointF newCenter(reference.center().x(),
+                          reference.bottom() - (rect.height() / 2.0));
+        rect.moveCenter(newCenter);
+    }
+}  // namespace
+
 const QRect &MessageLayoutElement::getRect() const
 {
     return this->rect_;
@@ -248,7 +257,7 @@ void LayeredImageLayoutElement::paint(QPainter &painter)
             // center of even wide emotes.
             auto &size = this->sizes_[i];
             QRectF destRect(0, 0, size.width(), size.height());
-            destRect.moveCenter(fullRect.center());
+            alignRectBottomCenter(destRect, fullRect);
 
             painter.drawPixmap(destRect, *pixmap, QRectF());
         }
@@ -280,7 +289,7 @@ void LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
                 // center of even wide emotes.
                 auto &size = this->sizes_[i];
                 QRectF destRect(0, 0, size.width(), size.height());
-                destRect.moveCenter(fullRect.center());
+                alignRectBottomCenter(destRect, fullRect);
 
                 painter.drawPixmap(destRect, *pixmap, QRectF());
                 animatedFlag = true;
