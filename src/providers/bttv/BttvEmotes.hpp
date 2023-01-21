@@ -36,7 +36,7 @@ public:
                             bool manualRefresh);
 
     /**
-     * Adds an emote to the `map`.
+     * Adds an emote to the `channelEmoteMap`.
      * This will _copy_ the emote map and
      * update the `Atomic`.
      *
@@ -44,11 +44,11 @@ public:
      */
     static EmotePtr addEmote(
         const QString &channelDisplayName,
-        Atomic<std::shared_ptr<const EmoteMap>> &map,
+        Atomic<std::shared_ptr<const EmoteMap>> &channelEmoteMap,
         const BttvLiveUpdateEmoteUpdateAddMessage &message);
 
     /**
-     * Updates an emote in this `map`.
+     * Updates an emote in this `channelEmoteMap`.
      * This will _copy_ the emote map and
      * update the `Atomic`.
      *
@@ -56,18 +56,18 @@ public:
      */
     static boost::optional<std::pair<EmotePtr, EmotePtr>> updateEmote(
         const QString &channelDisplayName,
-        Atomic<std::shared_ptr<const EmoteMap>> &map,
+        Atomic<std::shared_ptr<const EmoteMap>> &channelEmoteMap,
         const BttvLiveUpdateEmoteUpdateAddMessage &message);
 
     /**
-     * Removes an emote from this `map`.
+     * Removes an emote from this `channelEmoteMap`.
      * This will _copy_ the emote map and
      * update the `Atomic`.
      *
      * @return The removed emote if any emote was removed.
      */
     static boost::optional<EmotePtr> removeEmote(
-        Atomic<std::shared_ptr<const EmoteMap>> &map,
+        Atomic<std::shared_ptr<const EmoteMap>> &channelEmoteMap,
         const BttvLiveUpdateEmoteRemoveMessage &message);
 
 private:

@@ -278,27 +278,27 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
 
 EmotePtr BttvEmotes::addEmote(
     const QString &channelDisplayName,
-    Atomic<std::shared_ptr<const EmoteMap>> &map,
+    Atomic<std::shared_ptr<const EmoteMap>> &channelEmoteMap,
     const BttvLiveUpdateEmoteUpdateAddMessage &message)
 {
     // This copies the map.
-    EmoteMap updatedMap = *map.get();
+    EmoteMap updatedMap = *channelEmoteMap.get();
     auto result = createChannelEmote(channelDisplayName, message.jsonEmote);
 
     auto emote = std::make_shared<const Emote>(std::move(result.emote));
     updatedMap[result.name] = emote;
-    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
+    channelEmoteMap.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
 
     return emote;
 }
 
 boost::optional<std::pair<EmotePtr, EmotePtr>> BttvEmotes::updateEmote(
     const QString &channelDisplayName,
-    Atomic<std::shared_ptr<const EmoteMap>> &map,
+    Atomic<std::shared_ptr<const EmoteMap>> &channelEmoteMap,
     const BttvLiveUpdateEmoteUpdateAddMessage &message)
 {
     // This copies the map.
-    EmoteMap updatedMap = *map.get();
+    EmoteMap updatedMap = *channelEmoteMap.get();
 
     // Step 1: remove the existing emote
     auto it = updatedMap.findEmote(QString(), message.emoteID);
@@ -323,17 +323,17 @@ boost::optional<std::pair<EmotePtr, EmotePtr>> BttvEmotes::updateEmote(
     auto name = emote.name;
     auto emotePtr = std::make_shared<const Emote>(std::move(emote));
     updatedMap[name] = emotePtr;
-    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
+    channelEmoteMap.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
 
     return std::make_pair(oldEmotePtr, emotePtr);
 }
 
 boost::optional<EmotePtr> BttvEmotes::removeEmote(
-    Atomic<std::shared_ptr<const EmoteMap>> &map,
+    Atomic<std::shared_ptr<const EmoteMap>> &channelEmoteMap,
     const BttvLiveUpdateEmoteRemoveMessage &message)
 {
     // This copies the map.
-    EmoteMap updatedMap = *map.get();
+    EmoteMap updatedMap = *channelEmoteMap.get();
     auto it = updatedMap.findEmote(QString(), message.emoteID);
     if (it == updatedMap.end())
     {
@@ -343,7 +343,7 @@ boost::optional<EmotePtr> BttvEmotes::removeEmote(
     }
     auto emote = it->second;
     updatedMap.erase(it);
-    map.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
+    channelEmoteMap.set(std::make_shared<EmoteMap>(std::move(updatedMap)));
 
     return emote;
 }
