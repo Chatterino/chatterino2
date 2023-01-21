@@ -10,6 +10,7 @@
 #include "util/Qt.hpp"
 #include "util/StandardItemHelper.hpp"
 #include "widgets/helper/EditableModelView.hpp"
+#include "widgets/TooltipWidget.hpp"
 
 #include <QHeaderView>
 #include <QLabel>
@@ -49,6 +50,33 @@ CommandPage::CommandPage()
         getApp()->commands->items.append(
             Command{"/command", "I made a new command HeyGuys"});
     });
+
+    QItemSelectionModel *selectionModel =
+        view->getTableView()->selectionModel();
+    QObject::connect(
+        selectionModel, &QItemSelectionModel::currentChanged, this,
+        [this, view](const QModelIndex &current, const QModelIndex &previous) {
+            auto data = previous.sibling(previous.row(), 0).data();
+            for (int i = 0; i < current.model()->rowCount(); i++)
+            {
+                if (i != previous.row() &&
+                    data == current.model()->index(i, 0).data())
+                {
+                    QString warningText = QString("Trigger '%1' already exists")
+                                              .arg(data.toString());
+                    auto *tooltip = TooltipWidget::instance();
+                    tooltip->clearImage();
+                    tooltip->setText(warningText);
+                    tooltip->adjustSize();
+                    auto pos = this->mapToGlobal(
+                        QPoint(0, view->getTableView()->rowViewportPosition(
+                                      current.row())));
+                    tooltip->moveTo(this, pos, false);
+                    tooltip->show();
+                    break;
+                }
+            }
+        });
 
     // TODO: asyncronously check path
     if (QFile(c1settingsPath()).exists())
