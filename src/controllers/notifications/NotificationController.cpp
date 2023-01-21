@@ -106,12 +106,15 @@ void NotificationController::playSound()
                   getSettings()->notificationPathSound.getValue())
             : QUrl("qrc:/sounds/ping2.wav");
 
-    if (currentPlayerUrl != highlightSoundUrl)
+    // Set media if the highlight sound url has changed, or if media is buffered
+    if (currentPlayerUrl != highlightSoundUrl ||
+        player->mediaStatus() == QMediaPlayer::BufferedMedia)
     {
         player->setMedia(highlightSoundUrl);
 
         currentPlayerUrl = highlightSoundUrl;
     }
+
     player->play();
 }
 
