@@ -23,6 +23,7 @@
 - Bugfix: Fixed crash that could occur when closing down a split at the wrong time. (#4277)
 - Bugfix: Fixed crash that could occur when closing down the last of a channel when reloading emotes. (#4278)
 - Bugfix: Fixed scrollbar highlight colors when changing message history limit. (#4288)
+- Bugfix: Fixed the split "Search" menu action not opening the correct search window. (#4305)
 - Bugfix: Fixed an issue on Windows when opening links in incognito mode that contained forward slashes in hash (#4307)
 - Dev: Remove protocol from QApplication's Organization Domain (so changed from `https://www.chatterino.com` to `chatterino.com`). (#4256)
 - Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
