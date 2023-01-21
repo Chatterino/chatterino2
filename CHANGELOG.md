@@ -11,6 +11,7 @@
 - Minor: Added link to streamlink docs for easier user setup. (#4217)
 - Minor: Added setting to turn off rendering of reply context. (#4224)
 - Minor: Added setting to select which channels to log. (#4302)
+- Minor: Added support for HTTP and Socks5 proxies through environment variables. (#4321)
 - Bugfix: Fixed crash that would occur when performing certain actions after removing all tabs. (#4271)
 - Bugfix: Fixed highlight sounds not reloading on change properly. (#4194)
 - Bugfix: Fixed CTRL + C not working in reply thread popups. (#4209)
