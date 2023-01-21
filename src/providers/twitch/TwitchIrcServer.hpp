@@ -20,6 +20,7 @@ class Settings;
 class Paths;
 class PubSub;
 class TwitchChannel;
+class BttvLiveUpdates;
 class SeventvEventAPI;
 
 class TwitchIrcServer final : public AbstractIrcServer, public Singleton
@@ -66,6 +67,7 @@ public:
     IndirectChannel watchingChannel;
 
     PubSub *pubsub;
+    std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 
     const BttvEmotes &getBttvEmotes() const;
