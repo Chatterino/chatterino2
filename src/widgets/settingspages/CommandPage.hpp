@@ -12,11 +12,13 @@ class CommandPage : public SettingsPage
 {
 public:
     CommandPage();
-    bool handleCommandDuplicates(EditableModelView *view);
 
 private:
     QTimer commandsEditTimer_;
     QLabel *duplicateCommandWarning;
+    EditableModelView *view;
+
+    bool checkCommandDuplicates();
 };
 
 }  // namespace chatterino

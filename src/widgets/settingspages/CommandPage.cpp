@@ -39,24 +39,24 @@ CommandPage::CommandPage()
     LayoutCreator<CommandPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    EditableModelView *view =
+    this->view =
         layout.emplace<EditableModelView>(app->commands->createModel(nullptr))
             .getElement();
 
-    view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
-    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+    this->view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
+    this->view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
-    view->addButtonPressed.connect([] {
+    this->view->addButtonPressed.connect([] {
         getApp()->commands->items.append(
             Command{"/command", "I made a new command HeyGuys"});
     });
 
     QItemSelectionModel *selectionModel =
-        view->getTableView()->selectionModel();
+        this->view->getTableView()->selectionModel();
     QObject::connect(
         selectionModel, &QItemSelectionModel::currentChanged, this,
-        [this, view](const QModelIndex &current, const QModelIndex &previous) {
-            if (this->handleCommandDuplicates(view))
+        [this](const QModelIndex &current, const QModelIndex &previous) {
+            if (this->checkCommandDuplicates())
             {
                 this->duplicateCommandWarning->show();
             }
@@ -66,7 +66,7 @@ CommandPage::CommandPage()
             }
         });
 
-    bool duplicatesExist = this->handleCommandDuplicates(view);
+    bool duplicatesExist = this->checkCommandDuplicates();
 
     // TODO: asyncronously check path
     if (QFile(c1settingsPath()).exists())
@@ -116,13 +116,13 @@ CommandPage::CommandPage()
     this->commandsEditTimer_.setSingleShot(true);
 }
 
-bool CommandPage::handleCommandDuplicates(EditableModelView *view)
+bool CommandPage::checkCommandDuplicates()
 {
     bool retval = false;
-    QMap<QString, QList<int>> map = *new QMap<QString, QList<int>>();
-    for (int i = 0; i < view->getModel()->rowCount(); i++)
+    QMap<QString, QList<int>> map = QMap<QString, QList<int>>();
+    for (int i = 0; i < this->view->getModel()->rowCount(); i++)
     {
-        QString commandName = view->getModel()->index(i, 0).data().toString();
+        QString commandName = this->view->getModel()->index(i, 0).data().toString();
         if (map.contains(commandName))
         {
             QList<int> value = map[commandName];
@@ -142,13 +142,13 @@ bool CommandPage::handleCommandDuplicates(EditableModelView *view)
             retval = true;
             foreach (int value, map[key])
             {
-                view->getModel()->setData(view->getModel()->index(value, 0),
+                this->view->getModel()->setData(this->view->getModel()->index(value, 0),
                                           QColor("yellow"), Qt::ForegroundRole);
             }
         }
         else
         {
-            view->getModel()->setData(view->getModel()->index(map[key][0], 0),
+            this->view->getModel()->setData(this->view->getModel()->index(map[key][0], 0),
                                       QColor("white"), Qt::ForegroundRole);
         }
     }
