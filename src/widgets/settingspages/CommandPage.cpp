@@ -122,7 +122,8 @@ bool CommandPage::checkCommandDuplicates()
     QMap<QString, QList<int>> map = QMap<QString, QList<int>>();
     for (int i = 0; i < this->view->getModel()->rowCount(); i++)
     {
-        QString commandName = this->view->getModel()->index(i, 0).data().toString();
+        QString commandName =
+            this->view->getModel()->index(i, 0).data().toString();
         if (map.contains(commandName))
         {
             QList<int> value = map[commandName];
@@ -142,14 +143,16 @@ bool CommandPage::checkCommandDuplicates()
             retval = true;
             foreach (int value, map[key])
             {
-                this->view->getModel()->setData(this->view->getModel()->index(value, 0),
-                                          QColor("yellow"), Qt::ForegroundRole);
+                this->view->getModel()->setData(
+                    this->view->getModel()->index(value, 0), QColor("yellow"),
+                    Qt::ForegroundRole);
             }
         }
         else
         {
-            this->view->getModel()->setData(this->view->getModel()->index(map[key][0], 0),
-                                      QColor("white"), Qt::ForegroundRole);
+            this->view->getModel()->setData(
+                this->view->getModel()->index(map[key][0], 0), QColor("white"),
+                Qt::ForegroundRole);
         }
     }
 
