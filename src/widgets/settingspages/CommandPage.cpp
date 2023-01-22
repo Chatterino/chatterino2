@@ -13,6 +13,7 @@
 #include "widgets/TooltipWidget.hpp"
 
 #include <QHeaderView>
+#include <QColor>
 #include <QLabel>
 #include <QPushButton>
 #include <QStandardItemModel>
@@ -56,27 +57,17 @@ CommandPage::CommandPage()
     QObject::connect(
         selectionModel, &QItemSelectionModel::currentChanged, this,
         [this, view](const QModelIndex &current, const QModelIndex &previous) {
-            auto data = previous.sibling(previous.row(), 0).data();
-            for (int i = 0; i < current.model()->rowCount(); i++)
+            if (this->handleCommandDuplicates(view))
             {
-                if (i != previous.row() &&
-                    data == current.model()->index(i, 0).data())
-                {
-                    QString warningText = QString("Trigger '%1' already exists")
-                                              .arg(data.toString());
-                    auto *tooltip = TooltipWidget::instance();
-                    tooltip->clearImage();
-                    tooltip->setText(warningText);
-                    tooltip->adjustSize();
-                    auto pos = this->mapToGlobal(
-                        QPoint(0, view->getTableView()->rowViewportPosition(
-                                      current.row())));
-                    tooltip->moveTo(this, pos, false);
-                    tooltip->show();
-                    break;
-                }
+                this->duplicateCommandWarning->show();
+            }
+            else
+            {
+                this->duplicateCommandWarning->hide();
             }
         });
+
+    bool duplicatesExist = this->handleCommandDuplicates(view);
 
     // TODO: asyncronously check path
     if (QFile(c1settingsPath()).exists())
@@ -109,8 +100,60 @@ CommandPage::CommandPage()
     text->setStyleSheet("color: #bbb");
     text->setOpenExternalLinks(true);
 
+    this->duplicateCommandWarning =
+        layout.emplace<QLabel>("Duplicate trigger names detected").getElement();
+    this->duplicateCommandWarning->setStyleSheet("color: yellow");
+    if (duplicatesExist)
+    {
+        this->duplicateCommandWarning->show();
+    }
+    else
+    {
+        this->duplicateCommandWarning->hide();
+    }
+
     // ---- end of layout
     this->commandsEditTimer_.setSingleShot(true);
+}
+
+bool CommandPage::handleCommandDuplicates(EditableModelView *view)
+{
+    bool retval = false;
+    QMap<QString, QList<int>> map = *new QMap<QString, QList<int>>();
+    for (int i = 0; i < view->getModel()->rowCount(); i++)
+    {
+        QString commandName = view->getModel()->index(i, 0).data().toString();
+        if (map.contains(commandName))
+        {
+            QList<int> value = map[commandName];
+            value.append(i);
+            map.insert(commandName, value);
+        }
+        else
+        {
+            map.insert(commandName, {i});
+        }
+    }
+
+    foreach (const QString &key, map.keys())
+    {
+        if (map[key].length() != 1)
+        {
+            retval = true;
+            foreach (int value, map[key])
+            {
+                view->getModel()->setData(view->getModel()->index(value, 0),
+                                          QColor("yellow"), Qt::ForegroundRole);
+            }
+        }
+        else
+        {
+            view->getModel()->setData(view->getModel()->index(map[key][0], 0),
+                                      QColor("white"), Qt::ForegroundRole);
+        }
+    }
+
+    return retval;
 }
 
 }  // namespace chatterino
