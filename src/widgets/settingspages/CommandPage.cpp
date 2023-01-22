@@ -56,17 +56,8 @@ CommandPage::CommandPage()
     QObject::connect(
         selectionModel, &QItemSelectionModel::currentChanged, this,
         [this](const QModelIndex &current, const QModelIndex &previous) {
-            if (this->checkCommandDuplicates())
-            {
-                this->duplicateCommandWarning->show();
-            }
-            else
-            {
-                this->duplicateCommandWarning->hide();
-            }
+            this->checkCommandDuplicates();
         });
-
-    bool duplicatesExist = this->checkCommandDuplicates();
 
     // TODO: asyncronously check path
     if (QFile(c1settingsPath()).exists())
@@ -103,14 +94,7 @@ CommandPage::CommandPage()
         layout.emplace<QLabel>("Duplicate command names / triggers detected")
             .getElement();
     this->duplicateCommandWarning->setStyleSheet("color: yellow");
-    if (duplicatesExist)
-    {
-        this->duplicateCommandWarning->show();
-    }
-    else
-    {
-        this->duplicateCommandWarning->hide();
-    }
+    this->checkCommandDuplicates();
 
     // ---- end of layout
     this->commandsEditTimer_.setSingleShot(true);
@@ -119,7 +103,7 @@ CommandPage::CommandPage()
 bool CommandPage::checkCommandDuplicates()
 {
     bool retval = false;
-    QMap<QString, QList<int>> map = QMap<QString, QList<int>>();
+    QMap<QString, QList<int>> map;
     for (int i = 0; i < this->view->getModel()->rowCount(); i++)
     {
         QString commandName =
@@ -154,6 +138,15 @@ bool CommandPage::checkCommandDuplicates()
                 this->view->getModel()->index(map[key][0], 0), QColor("white"),
                 Qt::ForegroundRole);
         }
+    }
+
+    if (retval)
+    {
+        this->duplicateCommandWarning->show();
+    }
+    else
+    {
+        this->duplicateCommandWarning->hide();
     }
 
     return retval;
