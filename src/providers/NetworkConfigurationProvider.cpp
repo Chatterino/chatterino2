@@ -29,6 +29,14 @@ QNetworkProxy createProxyFromUrl(const QUrl &url)
     else
     {
         proxy.setType(QNetworkProxy::HttpProxy);
+        if (!proxy.user().isEmpty() || !proxy.password().isEmpty())
+        {
+            // for some reason, Qt doesn't set the Proxy-Authorization header
+            const auto auth = proxy.user() + ":" + proxy.password();
+            const auto base64 = auth.toUtf8().toBase64();
+            proxy.setRawHeader("Proxy-Authorization",
+                               QByteArray("Basic ").append(base64));
+        }
     }
 
     return proxy;
