@@ -12,8 +12,8 @@
 #include "widgets/helper/EditableModelView.hpp"
 #include "widgets/TooltipWidget.hpp"
 
-#include <QHeaderView>
 #include <QColor>
+#include <QHeaderView>
 #include <QLabel>
 #include <QPushButton>
 #include <QStandardItemModel>
