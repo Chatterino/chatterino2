@@ -1,5 +1,12 @@
 #pragma once
 
+#include "common/QLogging.hpp"
+
+#include <QNetworkProxy>
+#include <websocketpp/connection.hpp>
+
+#include <string>
+
 namespace chatterino {
 
 class Env;
@@ -17,6 +24,38 @@ public:
      * Currently a proxy is applied if configured.
      */
     static void applyFromEnv(const Env &env);
+
+    template <class C>
+    static void applyToWebSocket(
+        const std::shared_ptr<websocketpp::connection<C>> &connection)
+    {
+        const auto applicationProxy = QNetworkProxy::applicationProxy();
+        if (applicationProxy.type() != QNetworkProxy::HttpProxy)
+        {
+            return;
+        }
+        std::string url = "http://";
+        url += applicationProxy.hostName().toStdString();
+        url += ":";
+        url += std::to_string(applicationProxy.port());
+        websocketpp::lib::error_code ec;
+        connection->set_proxy(url, ec);
+        if (ec)
+        {
+            qCDebug(chatterinoNetwork)
+                << "Couldn't set websocket proxy:" << ec.value();
+            return;
+        }
+
+        connection->set_proxy_basic_auth(
+            applicationProxy.user().toStdString(),
+            applicationProxy.password().toStdString(), ec);
+        if (ec)
+        {
+            qCDebug(chatterinoNetwork)
+                << "Couldn't set websocket proxy auth:" << ec.value();
+        }
+    }
 };
 
 }  // namespace chatterino
