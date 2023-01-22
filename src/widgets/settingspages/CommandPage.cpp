@@ -10,7 +10,6 @@
 #include "util/Qt.hpp"
 #include "util/StandardItemHelper.hpp"
 #include "widgets/helper/EditableModelView.hpp"
-#include "widgets/TooltipWidget.hpp"
 
 #include <QColor>
 #include <QHeaderView>
@@ -101,7 +100,7 @@ CommandPage::CommandPage()
     text->setOpenExternalLinks(true);
 
     this->duplicateCommandWarning =
-        layout.emplace<QLabel>("Duplicate trigger names detected").getElement();
+        layout.emplace<QLabel>("Duplicate command names / triggers detected").getElement();
     this->duplicateCommandWarning->setStyleSheet("color: yellow");
     if (duplicatesExist)
     {
