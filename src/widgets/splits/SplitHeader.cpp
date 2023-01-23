@@ -373,8 +373,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     menu->addAction(
         "Popup", this->split_, &Split::popup,
         h->getDisplaySequence(HotkeyCategory::Window, "popup", {{"split"}}));
-    menu->addAction("Search", this->split_, &Split::showSearch,
-                    h->getDisplaySequence(HotkeyCategory::Split, "showSearch"));
+    menu->addAction(
+        "Search", this->split_,
+        [this] {
+            this->split_->showSearch(true);
+        },
+        h->getDisplaySequence(HotkeyCategory::Split, "showSearch"));
     menu->addAction(
         "Set filters", this->split_, &Split::setFiltersDialog,
         h->getDisplaySequence(HotkeyCategory::Split, "pickFilters"));
