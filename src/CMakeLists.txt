@@ -668,10 +668,6 @@ if (BUILD_APP)
 
         if (X_VCPKG_APPLOCAL_DEPS_INSTALL)
             install(TARGETS ${EXECUTABLE_PROJECT} RUNTIME DESTINATION .)
-            install(CODE "message(\"-- Flattening plugins/\")")
-            # vcpkg will add the plugin folders (like "iconengines" or "mediaformats") inside a `plugins` folder.
-            # We need to flatten this folder, thus we're running `mv plugins/* . && rm plugins` in powershell.
-            install(CODE "execute_process(COMMAND powershell \"& { Move-Item -Path \\\"${CMAKE_INSTALL_PREFIX}/plugins/*\\\" -Destination \\\"${CMAKE_INSTALL_PREFIX}\\\"; Remove-Item \\\"${CMAKE_INSTALL_PREFIX}/plugins\\\" }\" COMMAND_ERROR_IS_FATAL ANY)")
         else()
             install(TARGETS ${EXECUTABLE_PROJECT} 
                 RUNTIME_DEPENDENCIES 
