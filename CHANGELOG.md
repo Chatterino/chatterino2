@@ -26,6 +26,7 @@
 - Bugfix: Fixed scrollbar highlight colors when changing message history limit. (#4288)
 - Bugfix: Fixed the split "Search" menu action not opening the correct search window. (#4305)
 - Bugfix: Fixed an issue on Windows when opening links in incognito mode that contained forward slashes in hash (#4307)
+- Bugfix: Fixed an issue where beta versions wouldn't update to stable versions correctly. (#4329)
 - Dev: Remove protocol from QApplication's Organization Domain (so changed from `https://www.chatterino.com` to `chatterino.com`). (#4256)
 - Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
 - Dev: Migrated to C++ 20 (#4252, #4257)
