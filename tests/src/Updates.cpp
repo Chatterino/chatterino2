@@ -16,6 +16,12 @@ TEST(Updates, MustBeDowngrade)
         << "2.4.4-beta must be a downgrade of 2.4.5";
     EXPECT_TRUE(Updates::isDowngradeOf("2.4.5-beta", "2.4.5"))
         << "2.4.5-beta must be a downgrade of 2.4.5";
+    EXPECT_TRUE(Updates::isDowngradeOf("2.4.5-beta.1", "2.4.5-beta.2"))
+        << "2.4.5-beta.1 must be a downgrade of 2.4.5-beta.2";
+    EXPECT_TRUE(Updates::isDowngradeOf("2.4.5-beta", "2.4.5-beta.2"))
+        << "2.4.5-beta must be a downgrade of 2.4.5-beta.2";
+    EXPECT_TRUE(Updates::isDowngradeOf("2.4.5-beta.2", "2.4.6-beta.1"))
+        << "2.4.5-beta.2 must be a downgrade of 2.4.6-beta.1";
 }
 
 TEST(Updates, MustNotBeDowngrade)
