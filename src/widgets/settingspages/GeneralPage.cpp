@@ -725,8 +725,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Subscriber ", s.showBadgesSubscription);
     layout.addCheckbox("Vanity", s.showBadgesVanity, false,
                        "e.g. prime, bits, sub gifter");
-    // these currently have no real use
-    // layout.addCheckbox("Dankerino", s.showBadgesDankerino);
     layout.addCheckbox("Chatterino", s.showBadgesChatterino, false,
                        "e.g. Chatterino Supporter/Contributor/Developer");
     layout.addCheckbox("FrankerFaceZ", s.showBadgesFfz, false,

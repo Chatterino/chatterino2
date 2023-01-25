@@ -16,7 +16,6 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
-#include "providers/dankerino/DankerinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/irc/Irc2.hpp"
 #include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
@@ -80,7 +79,6 @@ Application::Application(Settings &_settings, Paths &_paths)
     , highlights(&this->emplace<HighlightController>())
     , twitch(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
-    , dankerinoBadges(&this->emplace<DankerinoBadges>())
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
     , userData(&this->emplace<UserDataController>())
