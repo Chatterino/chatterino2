@@ -1,14 +1,16 @@
 #pragma once
 
 #include "common/SignalVector.hpp"
-#include "providers/irc/IrcChannel2.hpp"
-#include "providers/irc/IrcServer.hpp"
 
 #include <rapidjson/rapidjson.h>
 
 class QAbstractTableModel;
 
 namespace chatterino {
+
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
+class IrcServer;
 
 enum class IrcAuthType { Anonymous, Custom, Pass, Sasl };
 

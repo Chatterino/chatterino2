@@ -1,9 +1,5 @@
 #pragma once
 
-#include "common/Aliases.hpp"
-#include "common/Outcome.hpp"
-#include "common/ProviderId.hpp"
-
 #include <boost/optional.hpp>
 #include <boost/preprocessor.hpp>
 #include <QString>
@@ -19,11 +15,6 @@ enum class HighlightState {
     Highlighted,
     NewMessage,
 };
-
-inline QString qS(const std::string &string)
-{
-    return QString::fromStdString(string);
-}
 
 const Qt::KeyboardModifiers showSplitOverlayModifiers =
     Qt::ControlModifier | Qt::AltModifier;

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
+
+#include <boost/optional.hpp>
 
 #include <memory>
 
@@ -12,12 +12,10 @@ namespace chatterino {
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteMap;
+class Channel;
 
 class FfzEmotes final
 {
-    static constexpr const char *globalEmoteApiUrl =
-        "https://api.frankerfacez.com/v1/set/global";
-
 public:
     FfzEmotes();
 

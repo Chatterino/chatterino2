@@ -1,6 +1,7 @@
 #include "controllers/hotkeys/HotkeyModel.hpp"
 
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/Hotkey.hpp"
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {

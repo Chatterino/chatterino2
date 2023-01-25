@@ -2,16 +2,20 @@
 
 #include "Application.hpp"
 #include "controllers/highlights/BadgeHighlightModel.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistModel.hpp"
+#include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/UserHighlightModel.hpp"
+#include "providers/colors/ColorProvider.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/StandardItemHelper.hpp"
 #include "widgets/dialogs/BadgePickerDialog.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 
 #include <QFileDialog>
 #include <QHeaderView>
@@ -59,8 +63,8 @@ HighlightingPage::HighlightingPage()
                 highlights.emplace<QLabel>(
                     "Play notification sounds and highlight messages based on "
                     "certain patterns.\n"
-                    "Message highlights are prioritized over badge highlights, "
-                    "but under user highlights");
+                    "Message highlights are prioritized over badge highlights "
+                    "and user highlights.");
 
                 auto view =
                     highlights
@@ -105,8 +109,8 @@ HighlightingPage::HighlightingPage()
                 pingUsers.emplace<QLabel>(
                     "Play notification sounds and highlight messages from "
                     "certain users.\n"
-                    "User highlights are prioritized over message and badge "
-                    "highlights.");
+                    "User highlights are prioritized badge highlights, but "
+                    "under message highlights.");
                 EditableModelView *view =
                     pingUsers
                         .emplace<EditableModelView>(
@@ -269,7 +273,7 @@ HighlightingPage::HighlightingPage()
             auto selectFile = customSound.emplace<QPushButton>("Change...");
 
             QObject::connect(selectFile.getElement(), &QPushButton::clicked,
-                             this, [=]() mutable {
+                             this, [this]() mutable {
                                  auto fileName = QFileDialog::getOpenFileName(
                                      this, tr("Open Sound"), "",
                                      tr("Audio Files (*.mp3 *.wav)"));

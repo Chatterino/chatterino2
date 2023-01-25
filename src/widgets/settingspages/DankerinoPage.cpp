@@ -1,19 +1,19 @@
 #include "DankerinoPage.hpp"
 
-#include <QFontDialog>
-#include <QFormLayout>
-#include <QGroupBox>
-#include <QLabel>
-#include <QScrollArea>
-
 #include "Application.hpp"
 #include "common/Version.hpp"
+#include "singletons/Settings.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 
 #include <QDesktopServices>
 #include <QFileDialog>
+#include <QFontDialog>
+#include <QFormLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QScrollArea>
 
 namespace chatterino {
 

@@ -5,6 +5,8 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Link.hpp"
+#include "messages/Message.hpp"
+#include "messages/MessageThread.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -22,7 +24,6 @@
 #include "widgets/splits/InputCompletionPopup.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
-#include "widgets/splits/SplitInput.hpp"
 
 #include <QCompleter>
 #include <QPainter>
@@ -137,21 +138,22 @@ void SplitInput::initLayout()
     QObject::connect(this->ui_.textEdit, &QTextEdit::textChanged, this,
                      &SplitInput::onTextChanged);
 
-    this->managedConnections_.managedConnect(app->fonts->fontChanged, [=]() {
-        this->ui_.textEdit->setFont(
-            app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
-        this->ui_.replyLabel->setFont(
-            app->fonts->getFont(FontStyle::ChatMediumBold, this->scale()));
-    });
+    this->managedConnections_.managedConnect(
+        app->fonts->fontChanged, [=, this]() {
+            this->ui_.textEdit->setFont(
+                app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+            this->ui_.replyLabel->setFont(
+                app->fonts->getFont(FontStyle::ChatMediumBold, this->scale()));
+        });
 
     // open emote popup
-    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [=] {
+    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [this] {
         this->openEmotePopup();
     });
 
     // clear input and remove reply thread
     QObject::connect(this->ui_.cancelReplyButton, &EffectLabel::leftClicked,
-                     [=] {
+                     [this] {
                          this->clearInput();
                      });
 
@@ -625,7 +627,7 @@ void SplitInput::installKeyPressedEvent()
 {
     this->ui_.textEdit->keyPressed.disconnectAll();
     this->ui_.textEdit->keyPressed.connect([this](QKeyEvent *event) {
-        if (auto popup = this->inputCompletionPopup_.get())
+        if (auto *popup = this->inputCompletionPopup_.get())
         {
             if (popup->isVisible())
             {
@@ -674,11 +676,11 @@ void SplitInput::onCursorPositionChanged()
 
 void SplitInput::updateCompletionPopup()
 {
-    auto channel = this->split_->getChannel().get();
-    auto tc = dynamic_cast<TwitchChannel *>(channel);
+    auto *channel = this->split_->getChannel().get();
+    auto *tc = dynamic_cast<TwitchChannel *>(channel);
     bool showEmoteCompletion = getSettings()->emoteCompletionWithColon;
     bool showUsernameCompletion =
-        tc && getSettings()->showUsernameCompletionMenu;
+        tc != nullptr && getSettings()->showUsernameCompletionMenu;
     if (!showEmoteCompletion && !showUsernameCompletion)
     {
         this->hideCompletionPopup();
@@ -704,22 +706,32 @@ void SplitInput::updateCompletionPopup()
             this->hideCompletionPopup();
             return;
         }
-        else if (text[i] == ':' && showEmoteCompletion)
+
+        if (text[i] == ':' && showEmoteCompletion)
         {
             if (i == 0 || text[i - 1].isSpace())
+            {
                 this->showCompletionPopup(text.mid(i, position - i + 1).mid(1),
                                           true);
+            }
             else
+            {
                 this->hideCompletionPopup();
+            }
             return;
         }
-        else if (text[i] == '@' && showUsernameCompletion)
+
+        if (text[i] == '@' && showUsernameCompletion)
         {
             if (i == 0 || text[i - 1].isSpace())
+            {
                 this->showCompletionPopup(text.mid(i, position - i + 1).mid(1),
                                           false);
+            }
             else
+            {
                 this->hideCompletionPopup();
+            }
             return;
         }
     }
@@ -734,7 +746,7 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
         this->inputCompletionPopup_ = new InputCompletionPopup(this);
         this->inputCompletionPopup_->setInputAction(
             [that = QObjectRef(this)](const QString &text) mutable {
-                if (auto this2 = that.get())
+                if (auto *this2 = that.get())
                 {
                     this2->insertCompletionText(text);
                     this2->hideCompletionPopup();
@@ -742,13 +754,17 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
             });
     }
 
-    auto popup = this->inputCompletionPopup_.get();
+    auto *popup = this->inputCompletionPopup_.get();
     assert(popup);
 
-    if (emoteCompletion)  // autocomplete emotes
+    if (emoteCompletion)
+    {
         popup->updateEmotes(text, this->split_->getChannel());
-    else  // autocomplete usernames
+    }
+    else
+    {
         popup->updateUsers(text, this->split_->getChannel());
+    }
 
     auto pos = this->mapToGlobal({0, 0}) - QPoint(0, popup->height()) +
                QPoint((this->width() - popup->width()) / 2, 0);
@@ -759,11 +775,13 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
 
 void SplitInput::hideCompletionPopup()
 {
-    if (auto popup = this->inputCompletionPopup_.get())
+    if (auto *popup = this->inputCompletionPopup_.get())
+    {
         popup->hide();
+    }
 }
 
-void SplitInput::insertCompletionText(const QString &input_)
+void SplitInput::insertCompletionText(const QString &input_) const
 {
     auto &edit = *this->ui_.textEdit;
     auto input = input_ + ' ';

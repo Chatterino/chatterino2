@@ -1,6 +1,7 @@
 #include "StreamSettingsDialog.hpp"
 
 #include "Application.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/WindowManager.hpp"
@@ -10,6 +11,7 @@
 #include "widgets/Window.hpp"
 
 #include <QMessageBox>
+
 #include <chrono>
 
 namespace chatterino {

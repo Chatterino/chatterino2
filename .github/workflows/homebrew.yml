@@ -1,9 +1,9 @@
-name: 'Publish Homebrew Cask on Release'
+name: "Publish Homebrew Cask on Release"
 on:
   push:
     tags:
       # Should match semver for mainline releases (not including -beta)
-      - 'v2.[0-9]+.[0-9]+'
+      - "v2.[0-9]+.[0-9]+"
       # TODO: handle beta and nightly releases
       # Need to make those casks manually first
       # - v2.[0-9]+.[0-9]+-beta(?:[0-9]+)
@@ -16,8 +16,8 @@ env:
 
 jobs:
   update_stable_homebrew_cask:
-    name: 'Update the stable homebrew cask'
-    runs-on: 'macos-latest'
+    name: "Update the stable homebrew cask"
+    runs-on: "macos-latest"
     steps:
       # Pulls out the version from the ref (e.g. refs/tags/v2.3.1 -> 2.3.1)
       - name: Execute brew bump-cask-pr with version

@@ -1,17 +1,11 @@
 #pragma once
 
-#include "Application.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/ChannelChatters.hpp"
-#include "common/ChatterSet.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
-#include "messages/MessageThread.hpp"
-#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
-#include "providers/twitch/api/Helix.hpp"
-#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 
@@ -55,6 +49,14 @@ class SeventvEmotes;
 class FfzEmotes;
 class BttvEmotes;
 class SeventvEmotes;
+struct SeventvEventAPIEmoteAddDispatch;
+struct SeventvEventAPIEmoteUpdateDispatch;
+struct SeventvEventAPIEmoteRemoveDispatch;
+struct SeventvEventAPIUserConnectionUpdateDispatch;
+struct ChannelPointReward;
+class MessageThread;
+struct CheerEmoteSet;
+struct HelixStream;
 
 class TwitchIrcServer;
 
@@ -76,7 +78,21 @@ public:
         bool submode = false;
         bool r9k = false;
         bool emoteOnly = false;
+
+        /**
+         * @brief Number of minutes required for users to be followed before typing in chat
+         *
+         * Special cases:
+         * -1 = follower mode off
+         *  0 = follower mode on, no time requirement
+         **/
         int followerOnly = -1;
+
+        /**
+         * @brief Number of seconds required to wait before typing emotes
+         *
+         * 0 = slow mode off
+         **/
         int slowMode = 0;
     };
 

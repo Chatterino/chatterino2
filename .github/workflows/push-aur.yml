@@ -6,7 +6,7 @@ on:
     branches:
       - dankerino
 
-concurrency: 
+concurrency:
   group: build-archlinux-${{ github.ref }}
   cancel-in-progress: true
 

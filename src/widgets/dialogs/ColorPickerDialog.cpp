@@ -2,9 +2,13 @@
 
 #include "providers/colors/ColorProvider.hpp"
 #include "singletons/Theme.hpp"
+#include "util/LayoutCreator.hpp"
+#include "widgets/helper/ColorButton.hpp"
+#include "widgets/helper/QColorPicker.hpp"
 
 #include <QDialogButtonBox>
 #include <QLineEdit>
+#include <QSet>
 
 namespace chatterino {
 
@@ -94,13 +98,14 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         layout.emplace<QHBoxLayout>().emplace<QDialogButtonBox>(this);
     {
         auto *button_ok = buttons->addButton(QDialogButtonBox::Ok);
-        QObject::connect(button_ok, &QPushButton::clicked, [=](bool) {
+        QObject::connect(button_ok, &QPushButton::clicked, [this](bool) {
             this->ok();
         });
         auto *button_cancel = buttons->addButton(QDialogButtonBox::Cancel);
-        QObject::connect(button_cancel, &QAbstractButton::clicked, [=](bool) {
-            this->close();
-        });
+        QObject::connect(button_cancel, &QAbstractButton::clicked,
+                         [this](bool) {
+                             this->close();
+                         });
     }
 
     this->themeChangedEvent();
@@ -226,7 +231,7 @@ void ColorPickerDialog::initRecentColors(LayoutCreator<QWidget> &creator)
 
         grid->addWidget(button, rowInd, columnInd);
 
-        QObject::connect(button, &QPushButton::clicked, [=] {
+        QObject::connect(button, &QPushButton::clicked, [=, this] {
             this->selectColor(button->color(), false);
         });
 
@@ -260,7 +265,7 @@ void ColorPickerDialog::initDefaultColors(LayoutCreator<QWidget> &creator)
 
         grid->addWidget(button, rowInd, columnInd);
 
-        QObject::connect(button, &QPushButton::clicked, [=] {
+        QObject::connect(button, &QPushButton::clicked, [=, this] {
             this->selectColor(button->color(), false);
         });
 
@@ -299,7 +304,7 @@ void ColorPickerDialog::initColorPicker(LayoutCreator<QWidget> &creator)
 
     QObject::connect(
         luminancePicker, &QColorLuminancePicker::newHsv,
-        [=](int h, int s, int v) {
+        [this](int h, int s, int v) {
             int alpha = this->ui_.picker.spinBoxes[SpinBox::ALPHA]->value();
             this->selectColor(QColor::fromHsv(h, s, v, alpha), true);
         });
@@ -344,7 +349,7 @@ void ColorPickerDialog::initSpinBoxes(LayoutCreator<QWidget> &creator)
     {
         QObject::connect(
             this->ui_.picker.spinBoxes[i],
-            QOverload<int>::of(&QSpinBox::valueChanged), [=](int value) {
+            QOverload<int>::of(&QSpinBox::valueChanged), [=, this](int value) {
                 this->selectColor(QColor(red->value(), green->value(),
                                          blue->value(), alpha->value()),
                                   false);

@@ -10,14 +10,13 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/splits/SplitInput.hpp"
 
@@ -194,8 +193,22 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Show message reply context", s.hideReplyContext, true,
         "This setting will only affect how messages are shown. You can reply "
         "to a message regardless of this setting.");
-    layout.addCheckbox("Show message reply button", s.showReplyButton);
-    layout.addCheckbox("Show tab close button", s.showTabCloseButton);
+    layout.addCheckbox("Show message reply button", s.showReplyButton, false,
+                       "Show a reply button next to every chat message");
+
+    auto removeTabSeq = getApp()->hotkeys->getDisplaySequence(
+        HotkeyCategory::Window, "removeTab");
+    QString removeTabShortcut = "an assigned hotkey (Window -> remove tab)";
+    if (!removeTabSeq.isEmpty())
+    {
+        removeTabShortcut =
+            removeTabSeq.toString(QKeySequence::SequenceFormat::NativeText);
+    }
+    layout.addCheckbox(
+        "Show tab close button", s.showTabCloseButton, false,
+        "When disabled, the x to close a tab will be hidden.\nTabs can still "
+        "be closed by right-clicking or pressing " +
+            removeTabShortcut + ".");
     layout.addCheckbox("Always on top", s.windowTopMost, false,
                        "Always keep Chatterino as the top window.");
 #ifdef USEWINSDK
@@ -218,7 +231,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            s.hidePreferencesButton, true);
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
-    layout.addCheckbox("Show which channels are live in tabs", s.showTabLive);
+    layout.addCheckbox("Mark tabs with live channels", s.showTabLive, false,
+                       "Shows a red dot in the top right corner of a tab to "
+                       "indicate one of the channels in the tab is live.");
 
     layout.addTitle("Chat");
 
@@ -284,9 +299,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "message limits");
 
     layout.addTitle("Messages");
-    layout.addCheckbox("Separate with lines", s.separateMessages);
-    layout.addCheckbox("Alternate background color", s.alternateMessages);
-    layout.addCheckbox("Show deleted messages", s.hideModerated, true);
+    layout.addCheckbox(
+        "Separate with lines", s.separateMessages, false,
+        "Adds a line inbetween each message to help better tell them apart.");
+    layout.addCheckbox("Alternate background color", s.alternateMessages, false,
+                       "Slightly change the background behind every other "
+                       "message to help better tell them apart.");
+    layout.addCheckbox("Hide deleted messages", s.hideModerated, false,
+                       "When enabled, messages deleted by moderators will "
+                       "be hidden.");
     layout.addDropdown<QString>(
         "Timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
@@ -318,7 +339,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addSeperator();
     layout.addCheckbox("Draw a line below the most recent message before "
                        "switching applications.",
-                       s.showLastMessageIndicator);
+                       s.showLastMessageIndicator, false,
+                       "Adds an underline below the most recent message "
+                       "sent before you tabbed out of Chatterino.");
     layout.addDropdown<std::underlying_type<Qt::BrushStyle>::type>(
         "Line style", {"Dotted", "Solid"}, s.lastMessagePattern,
         [](int value) {
@@ -367,8 +390,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         });
 
     layout.addCheckbox("Remove spaces between emotes",
-                       s.removeSpacesBetweenEmotes);
+                       s.removeSpacesBetweenEmotes, false,
+                       "When enabled, adjacent emotes will no longer have an "
+                       "added space seperating them.");
     layout.addCheckbox("Show unlisted 7TV emotes", s.showUnlistedSevenTVEmotes);
+    // TODO: Add a tooltip explaining what an unlisted 7TV emote is
+    // but wait until https://github.com/Chatterino/wiki/pull/255 is resolved,
+    // as an official description from 7TV devs is best
     s.showUnlistedSevenTVEmotes.connect(
         []() {
             getApp()->twitch->forEachChannelAndSpecialChannels(
@@ -556,8 +584,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addDescription("Chatterino only attaches to known browsers to avoid "
                           "attaching to other windows by accident.");
-    layout.addCheckbox("Attach to any browser (may cause issues)",
-                       s.attachExtensionToAnyProcess);
+    layout.addCheckbox(
+        "Attach to any browser (may cause issues)",
+        s.attachExtensionToAnyProcess, false,
+        "Attempt to force the Chatterino Browser Extension to work in certain "
+        "browsers that do not work automatically.\ne.g. Librewolf");
 #endif
 
     layout.addTitle("AppData & Cache");
@@ -733,7 +764,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Show moderation messages", s.hideModerationActions, true,
         "Show messages for timeouts, bans, and other moderator actions.");
     layout.addCheckbox("Show deletions of single messages",
-                       s.hideDeletionActions, true);
+                       s.hideDeletionActions, true,
+                       "Show when a single message is deleted.\ne.g. A message "
+                       "from TreuKS was deleted: abc");
     layout.addCheckbox(
         "Colorize users without color set (gray names)", s.colorizeNicknames,
         false,
@@ -783,7 +816,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             [](auto args) {
                 return args.index + 1;
             },
-            false);
+            false,
+            "Customizes how you see Asian Language names.\nUsing an option "
+            "that includes \"localized\" will display the username in it's "
+            "respective Asian language.\ne.g. "
+            "Username and localized: testaccount_420(테스트계정420)\n"
+            "Username: testaccount_420\n"
+            "Localized name: 테스트계정420");
     nameDropdown->setMinimumWidth(nameDropdown->minimumSizeHint().width());
 
     layout.addDropdown<float>(
@@ -798,8 +837,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return fuzzyToFloat(args.value, 63.f);
         });
     layout.addCheckbox("Double click to open links and other elements in chat",
-                       s.linksDoubleClickOnly);
-    layout.addCheckbox("Unshorten links", s.unshortLinks);
+                       s.linksDoubleClickOnly, false,
+                       "When enabled, opening links/usercards requires "
+                       "double-clicking.\nUseful making sure you don't "
+                       "accidentally click on suspicious links.");
+    layout.addCheckbox(
+        "Unshorten links", s.unshortLinks, false,
+        "When enabled, \"right-click + copy link\" will copy the unshortened "
+        "version of the link.\ne.g. https://bit.ly/mrfors -> "
+        "https://forsen.tv/");
 
     layout.addCheckbox(
         "Only search for emote autocompletion at the start of emote names",
@@ -816,8 +862,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers, false,
                        "Show whispers as messages in all splits instead "
                        "of just /whispers.");
-    layout.addCheckbox("Highlight received inline whispers",
-                       s.highlightInlineWhispers);
+    layout.addCheckbox(
+        "Highlight received inline whispers", s.highlightInlineWhispers, false,
+        "Highlight the whispers shown in all splits.\nIf \"Show Twitch "
+        "whispers inline\" is disabled, this setting will do nothing.");
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
     // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history
@@ -849,8 +897,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits, false,
                        "Combine consecutive cheermotes (sent in a single "
                        "message) into one cheermote.");
-    layout.addCheckbox("Messages in /mentions highlights tab",
-                       s.highlightMentions);
+    layout.addCheckbox(
+        "Messages in /mentions highlights tab", s.highlightMentions, false,
+        // update this tooltip if https://github.com/Chatterino/chatterino2/pull/1557 is ever merged
+        "When disabled, the /mentions tab will not highlight in "
+        "red when you are mentioned.");
     layout.addCheckbox(
         "Strip leading mention in replies", s.stripReplyMention, false,
         "When disabled, messages sent in reply threads will include the "

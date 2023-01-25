@@ -3,8 +3,11 @@
 #include "Application.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
+#include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
+#include "messages/Selection.hpp"
+#include "providers/colors/ColorProvider.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -274,7 +277,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     if (isLastReadMessage)
     {
         QColor color;
-        if (getSettings()->lastMessageColor != "")
+        if (getSettings()->lastMessageColor != QStringLiteral(""))
         {
             color = QColor(getSettings()->lastMessageColor.getValue());
         }

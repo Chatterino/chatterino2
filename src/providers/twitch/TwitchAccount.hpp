@@ -2,11 +2,9 @@
 
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
-#include "common/Channel.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
-#include "providers/twitch/TwitchUser.hpp"
 #include "util/QStringHash.hpp"
 
 #include <QColor>
@@ -20,38 +18,9 @@
 
 namespace chatterino {
 
-enum FollowResult {
-    FollowResult_Following,
-    FollowResult_NotFollowing,
-    FollowResult_Failed,
-};
-
-struct TwitchEmoteSetResolverResponse {
-    const QString channelName;
-    const QString channelId;
-    const QString type;
-    const int tier;
-    const bool isCustom;
-    // Example response:
-    //    {
-    //      "channel_name": "zneix",
-    //      "channel_id": "99631238",
-    //      "type": "",
-    //      "tier": 1,
-    //      "custom": false
-    //    }
-
-    TwitchEmoteSetResolverResponse(QJsonObject jsonObject)
-        : channelName(jsonObject.value("channel_name").toString())
-        , channelId(jsonObject.value("channel_id").toString())
-        , type(jsonObject.value("type").toString())
-        , tier(jsonObject.value("tier").toInt())
-        , isCustom(jsonObject.value("custom").toBool())
-    {
-    }
-};
-
-std::vector<QStringList> getEmoteSetBatches(QStringList emoteSetKeys);
+struct TwitchUser;
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
 
 class TwitchAccount : public Account
 {
@@ -68,8 +37,6 @@ public:
         bool local{false};
         std::vector<TwitchEmote> emotes;
     };
-
-    std::map<QString, EmoteSet> staticEmoteSets;
 
     struct TwitchAccountEmoteData {
         std::vector<std::shared_ptr<EmoteSet>> emoteSets;
@@ -127,8 +94,6 @@ public:
     void autoModDeny(const QString msgID, ChannelPtr channel);
 
 private:
-    void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);
-
     QString oauthClient_;
     QString oauthToken_;
     QString userName_;

@@ -26,7 +26,6 @@
 
 #include <boost/optional.hpp>
 #include <QDebug>
-#include <QDesktopWidget>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -557,7 +556,7 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
 {
     switch (node->getType())
     {
-        case SplitNode::_Split: {
+        case SplitNode::Type::Split: {
             obj.insert("type", "split");
             obj.insert("moderationMode", node->getSplit()->getModerationMode());
 
@@ -571,11 +570,12 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             obj.insert("filters", filters);
         }
         break;
-        case SplitNode::HorizontalContainer:
-        case SplitNode::VerticalContainer: {
-            obj.insert("type", node->getType() == SplitNode::HorizontalContainer
-                                   ? "horizontal"
-                                   : "vertical");
+        case SplitNode::Type::HorizontalContainer:
+        case SplitNode::Type::VerticalContainer: {
+            obj.insert("type",
+                       node->getType() == SplitNode::Type::HorizontalContainer
+                           ? "horizontal"
+                           : "vertical");
 
             QJsonArray itemsArr;
             for (const std::unique_ptr<SplitNode> &n : node->getChildren())

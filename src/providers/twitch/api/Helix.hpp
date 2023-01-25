@@ -7,6 +7,7 @@
 
 #include <boost/optional.hpp>
 #include <QJsonArray>
+#include <QJsonObject>
 #include <QString>
 #include <QStringList>
 #include <QUrl>
@@ -377,20 +378,7 @@ struct HelixChatters {
 
     HelixChatters() = default;
 
-    explicit HelixChatters(const QJsonObject &jsonObject)
-        : total(jsonObject.value("total").toInt())
-        , cursor(jsonObject.value("pagination")
-                     .toObject()
-                     .value("cursor")
-                     .toString())
-    {
-        const auto &data = jsonObject.value("data").toArray();
-        for (const auto &chatter : data)
-        {
-            auto userLogin = chatter.toObject().value("user_login").toString();
-            this->chatters.insert(userLogin);
-        }
-    }
+    explicit HelixChatters(const QJsonObject &jsonObject);
 };
 
 using HelixModerator = HelixVip;

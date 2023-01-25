@@ -1,14 +1,11 @@
 #pragma once
 
-#include "providers/twitch/ChatterinoWebSocketppLogger.hpp"
-#include "providers/twitch/PubSubActions.hpp"
-#include "providers/twitch/PubSubClient.hpp"
 #include "providers/twitch/PubSubClientOptions.hpp"
-#include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/PubSubWebsocket.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
 #include "util/ExponentialBackoff.hpp"
+#include "util/QStringHash.hpp"
 
+#include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
 #include <QString>
@@ -23,6 +20,25 @@
 #include <vector>
 
 namespace chatterino {
+
+class TwitchAccount;
+class PubSubClient;
+
+struct ClearChatAction;
+struct DeleteAction;
+struct ModeChangedAction;
+struct ModerationStateAction;
+struct BanAction;
+struct UnbanAction;
+struct PubSubAutoModQueueMessage;
+struct AutomodAction;
+struct AutomodUserAction;
+struct AutomodInfoAction;
+struct PubSubWhisperMessage;
+
+struct PubSubListenMessage;
+struct PubSubMessage;
+struct PubSubMessageMessage;
 
 class PubSub
 {
@@ -57,17 +73,9 @@ public:
     PubSub(const QString &host,
            std::chrono::seconds pingInterval = std::chrono::seconds(15));
 
-    void setAccount(std::shared_ptr<TwitchAccount> account)
-    {
-        this->token_ = account->getOAuthToken();
-        this->userID_ = account->getUserId();
-    }
+    void setAccount(std::shared_ptr<TwitchAccount> account);
 
-    void setAccountData(QString token, QString userID)
-    {
-        this->token_ = token;
-        this->userID_ = userID;
-    }
+    void setAccountData(QString token, QString userID);
 
     ~PubSub() = delete;
 

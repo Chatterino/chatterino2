@@ -1,8 +1,6 @@
-#include "NicknamesModel.hpp"
+#include "controllers/nicknames/NicknamesModel.hpp"
 
-#include "Application.hpp"
-#include "providers/twitch/api/Helix.hpp"
-#include "singletons/Settings.hpp"
+#include "controllers/nicknames/Nickname.hpp"
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {

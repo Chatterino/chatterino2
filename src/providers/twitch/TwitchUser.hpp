@@ -1,6 +1,5 @@
 #pragma once
 
-#include "providers/twitch/api/Helix.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize.hpp>
@@ -10,6 +9,8 @@
 #include <cassert>
 
 namespace chatterino {
+
+struct HelixBlock;
 
 struct TwitchUser {
     QString id;
@@ -24,12 +25,7 @@ struct TwitchUser {
         this->displayName = other.displayName;
     }
 
-    void fromHelixBlock(const HelixBlock &ignore)
-    {
-        this->id = ignore.userId;
-        this->name = ignore.userName;
-        this->displayName = ignore.displayName;
-    }
+    void fromHelixBlock(const HelixBlock &ignore);
 
     bool operator<(const TwitchUser &rhs) const
     {

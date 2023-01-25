@@ -1,6 +1,7 @@
 #include "ChannelPointReward.hpp"
 
 #include "common/QLogging.hpp"
+#include "messages/Image.hpp"
 
 namespace chatterino {
 

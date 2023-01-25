@@ -1,12 +1,12 @@
 #include "singletons/Settings.hpp"
 
-#include "Application.hpp"
+#include "controllers/filters/FilterRecord.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
-#include "singletons/Paths.hpp"
-#include "singletons/Resources.hpp"
-#include "singletons/WindowManager.hpp"
+#include "controllers/moderationactions/ModerationAction.hpp"
+#include "controllers/nicknames/Nickname.hpp"
 #include "util/PersistSignalVector.hpp"
 #include "util/WindowsHelper.hpp"
 
@@ -25,6 +25,7 @@ ConcurrentSettings::ConcurrentSettings()
     , filterRecords(*new SignalVector<FilterRecordPtr>())
     , nicknames(*new SignalVector<Nickname>())
     , moderationActions(*new SignalVector<ModerationAction>)
+    , loggedChannels(*new SignalVector<ChannelLog>)
 {
     persist(this->highlightedMessages, "/highlighting/highlights");
     persist(this->blacklistedUsers, "/highlighting/blacklist");
@@ -36,6 +37,7 @@ ConcurrentSettings::ConcurrentSettings()
     persist(this->nicknames, "/nicknames");
     // tagged users?
     persist(this->moderationActions, "/moderation/actions");
+    persist(this->loggedChannels, "/logging/channels");
 }
 
 bool ConcurrentSettings::isHighlightedUser(const QString &username)

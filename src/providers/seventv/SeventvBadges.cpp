@@ -1,6 +1,7 @@
 #include "providers/seventv/SeventvBadges.hpp"
 
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "messages/Emote.hpp"
 #include "singletons/Settings.hpp"

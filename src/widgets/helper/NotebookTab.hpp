@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/Common.hpp"
-#include "widgets/BaseWidget.hpp"
 #include "widgets/helper/Button.hpp"
 #include "widgets/Notebook.hpp"
 
@@ -14,8 +13,6 @@ namespace chatterino {
 
 #define NOTEBOOK_TAB_HEIGHT 28
 
-// class Notebook;
-class Notebook;
 class SplitContainer;
 
 class NotebookTab : public Button

@@ -1,6 +1,7 @@
 #include "DankerinoBadges.hpp"
 
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "messages/Emote.hpp"
 
@@ -39,7 +40,7 @@ void DankerinoBadges::loadDankerinoBadges()
                     "dankerino/badges.json");
 
     NetworkRequest(url)
-        .onSuccess([this](auto result) -> Outcome {
+        .onSuccess([this](const NetworkResult &result) -> Outcome {
             auto jsonRoot = result.parseJson();
             int index = 0;
             for (const auto &jsonBadge_ : jsonRoot.value("badges").toArray())

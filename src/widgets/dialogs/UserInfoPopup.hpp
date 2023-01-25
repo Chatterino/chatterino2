@@ -1,13 +1,13 @@
 #pragma once
 
+#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Paths.hpp"
 #include "widgets/DraggablePopup.hpp"
-#include "widgets/helper/ChannelView.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
-
 #include <QMovie>
+
 #include <chrono>
 
 class QCheckBox;
@@ -21,6 +21,8 @@ inline static const QString SEVENTV_CDR_PP = "https://cdn.7tv.app/pp/%1/%2";
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 class Label;
+class ChannelView;
+class Split;
 
 class UserInfoPopup final : public DraggablePopup
 {

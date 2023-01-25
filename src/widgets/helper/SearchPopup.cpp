@@ -1,7 +1,10 @@
 #include "SearchPopup.hpp"
 
+#include "Application.hpp"
 #include "common/Channel.hpp"
+#include "controllers/filters/FilterSet.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "messages/MessageElement.hpp"
 #include "messages/search/AuthorPredicate.hpp"
 #include "messages/search/BadgePredicate.hpp"
 #include "messages/search/ChannelPredicate.hpp"
@@ -12,6 +15,7 @@
 #include "messages/search/SubtierPredicate.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QHBoxLayout>
 #include <QLineEdit>

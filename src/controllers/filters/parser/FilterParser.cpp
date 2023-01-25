@@ -3,6 +3,9 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "controllers/filters/parser/Types.hpp"
+#include "messages/Message.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 
 namespace filterparser {

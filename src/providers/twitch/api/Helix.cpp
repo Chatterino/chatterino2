@@ -1,5 +1,7 @@
 #include "providers/twitch/api/Helix.hpp"
 
+#include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 
@@ -19,6 +21,19 @@ static constexpr auto NUM_CHATTERS_TO_FETCH = 1000;
 namespace chatterino {
 
 static IHelix *instance = nullptr;
+
+HelixChatters::HelixChatters(const QJsonObject &jsonObject)
+    : total(jsonObject.value("total").toInt())
+    , cursor(
+          jsonObject.value("pagination").toObject().value("cursor").toString())
+{
+    const auto &data = jsonObject.value("data").toArray();
+    for (const auto &chatter : data)
+    {
+        auto userLogin = chatter.toObject().value("user_login").toString();
+        this->chatters.insert(userLogin);
+    }
+}
 
 void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
                        ResultCallback<std::vector<HelixUser>> successCallback,
@@ -1928,7 +1943,7 @@ void Helix::onFetchChattersSuccess(
 
     this->fetchChatters(
         broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, chatters.cursor,
-        [=](auto chatters) {
+        [=, this](auto chatters) {
             this->onFetchChattersSuccess(
                 finalChatters, broadcasterID, moderatorID, maxChattersToFetch,
                 successCallback, failureCallback, chatters);
@@ -2038,7 +2053,7 @@ void Helix::onFetchModeratorsSuccess(
 
     this->fetchModerators(
         broadcasterID, NUM_MODERATORS_TO_FETCH_PER_REQUEST, moderators.cursor,
-        [=](auto moderators) {
+        [=, this](auto moderators) {
             this->onFetchModeratorsSuccess(
                 finalModerators, broadcasterID, maxModeratorsToFetch,
                 successCallback, failureCallback, moderators);
@@ -2349,7 +2364,7 @@ void Helix::getChatters(
     // Initiate the recursive calls
     this->fetchChatters(
         broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, "",
-        [=](auto chatters) {
+        [=, this](auto chatters) {
             this->onFetchChattersSuccess(
                 finalChatters, broadcasterID, moderatorID, maxChattersToFetch,
                 successCallback, failureCallback, chatters);
@@ -2368,7 +2383,7 @@ void Helix::getModerators(
     // Initiate the recursive calls
     this->fetchModerators(
         broadcasterID, NUM_MODERATORS_TO_FETCH_PER_REQUEST, "",
-        [=](auto moderators) {
+        [=, this](auto moderators) {
             this->onFetchModeratorsSuccess(
                 finalModerators, broadcasterID, maxModeratorsToFetch,
                 successCallback, failureCallback, moderators);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "controllers/filters/parser/FilterParser.hpp"
-#include "controllers/filters/parser/Types.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
@@ -17,52 +16,21 @@ namespace chatterino {
 class FilterRecord
 {
 public:
-    bool operator==(const FilterRecord &other) const
-    {
-        return std::tie(this->name_, this->filter_, this->id_) ==
-               std::tie(other.name_, other.filter_, other.id_);
-    }
+    FilterRecord(const QString &name, const QString &filter);
 
-    FilterRecord(const QString &name, const QString &filter)
-        : name_(name)
-        , filter_(filter)
-        , id_(QUuid::createUuid())
-        , parser_(std::make_unique<filterparser::FilterParser>(filter))
-    {
-    }
+    FilterRecord(const QString &name, const QString &filter, const QUuid &id);
 
-    FilterRecord(const QString &name, const QString &filter, const QUuid &id)
-        : name_(name)
-        , filter_(filter)
-        , id_(id)
-        , parser_(std::make_unique<filterparser::FilterParser>(filter))
-    {
-    }
+    const QString &getName() const;
 
-    const QString &getName() const
-    {
-        return this->name_;
-    }
+    const QString &getFilter() const;
 
-    const QString &getFilter() const
-    {
-        return this->filter_;
-    }
+    const QUuid &getId() const;
 
-    const QUuid &getId() const
-    {
-        return this->id_;
-    }
+    bool valid() const;
 
-    bool valid() const
-    {
-        return this->parser_->valid();
-    }
+    bool filter(const filterparser::ContextMap &context) const;
 
-    bool filter(const filterparser::ContextMap &context) const
-    {
-        return this->parser_->execute(context);
-    }
+    bool operator==(const FilterRecord &other) const;
 
 private:
     QString name_;

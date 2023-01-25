@@ -1,5 +1,4 @@
-#ifndef AB_SETTINGS_H
-#define AB_SETTINGS_H
+#pragma once
 
 #include "common/ChatterinoSetting.hpp"
 
@@ -46,8 +45,3 @@ Settings *getSettings();
 AB_SETTINGS_CLASS *getABSettings();
 
 }  // namespace chatterino
-
-#ifdef CHATTERINO
-#    include "singletons/Settings.hpp"
-#endif
-#endif

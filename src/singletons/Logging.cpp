@@ -1,6 +1,5 @@
 #include "singletons/Logging.hpp"
 
-#include "Application.hpp"
 #include "singletons/helper/LoggingChannel.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -9,21 +8,40 @@
 #include <QStandardPaths>
 
 #include <memory>
-#include <unordered_map>
 #include <utility>
 
 namespace chatterino {
 
-void Logging::initialize(Settings &settings, Paths &paths)
+void Logging::initialize(Settings &settings, Paths & /*paths*/)
 {
+    settings.loggedChannels.delayedItemsChanged.connect([this, &settings]() {
+        this->threadGuard.guard();
+
+        this->onlyLogListedChannels.clear();
+
+        for (const auto &loggedChannel : *settings.loggedChannels.readOnly())
+        {
+            this->onlyLogListedChannels.insert(loggedChannel.channelName());
+        }
+    });
 }
 
 void Logging::addMessage(const QString &channelName, MessagePtr message,
                          const QString &platformName)
 {
+    this->threadGuard.guard();
+
     if (!getSettings()->enableLogging)
     {
         return;
+    }
+
+    if (getSettings()->onlyLogListedChannels)
+    {
+        if (!this->onlyLogListedChannels.contains(channelName))
+        {
+            return;
+        }
     }
 
     auto platIt = this->loggingChannels_.find(platformName);

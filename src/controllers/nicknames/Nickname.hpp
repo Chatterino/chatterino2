@@ -1,10 +1,10 @@
 #pragma once
 
-#include "controllers/accounts/AccountController.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
 #include <pajlada/serialize.hpp>
+#include <QRegularExpression>
 #include <QString>
 
 #include <memory>

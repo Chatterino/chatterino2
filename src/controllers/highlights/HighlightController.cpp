@@ -1,6 +1,17 @@
 #include "controllers/highlights/HighlightController.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
+#include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
+#include "providers/colors/ColorProvider.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
+#include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 
 namespace {
 
@@ -281,6 +292,89 @@ void rebuildBadgeHighlights(Settings &settings,
 
 namespace chatterino {
 
+HighlightResult::HighlightResult(bool _alert, bool _playSound,
+                                 boost::optional<QUrl> _customSoundUrl,
+                                 std::shared_ptr<QColor> _color,
+                                 bool _showInMentions)
+    : alert(_alert)
+    , playSound(_playSound)
+    , customSoundUrl(std::move(_customSoundUrl))
+    , color(std::move(_color))
+    , showInMentions(_showInMentions)
+{
+}
+
+HighlightResult HighlightResult::emptyResult()
+{
+    return {
+        false, false, boost::none, nullptr, false,
+    };
+}
+
+bool HighlightResult::operator==(const HighlightResult &other) const
+{
+    if (this->alert != other.alert)
+    {
+        return false;
+    }
+    if (this->playSound != other.playSound)
+    {
+        return false;
+    }
+    if (this->customSoundUrl != other.customSoundUrl)
+    {
+        return false;
+    }
+
+    if (this->color && other.color)
+    {
+        if (*this->color != *other.color)
+        {
+            return false;
+        }
+    }
+
+    if (this->showInMentions != other.showInMentions)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool HighlightResult::operator!=(const HighlightResult &other) const
+{
+    return !(*this == other);
+}
+
+bool HighlightResult::empty() const
+{
+    return !this->alert && !this->playSound &&
+           !this->customSoundUrl.has_value() && !this->color &&
+           !this->showInMentions;
+}
+
+bool HighlightResult::full() const
+{
+    return this->alert && this->playSound && this->customSoundUrl.has_value() &&
+           this->color && this->showInMentions;
+}
+
+std::ostream &operator<<(std::ostream &os, const HighlightResult &result)
+{
+    os << "Alert: " << (result.alert ? "Yes" : "No") << ", "
+       << "Play sound: " << (result.playSound ? "Yes" : "No") << " ("
+       << (result.customSoundUrl
+               ? result.customSoundUrl.get().toString().toStdString()
+               : "")
+       << ")"
+       << ", "
+       << "Color: " << (result.color ? result.color->name().toStdString() : "")
+       << ", "
+       << "Show in mentions: " << (result.showInMentions ? "Yes" : "No");
+    return os;
+}
+
 void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
 {
     this->rebuildListener_.addSetting(settings.enableSelfHighlight);
@@ -351,15 +445,15 @@ void HighlightController::rebuildChecks(Settings &settings)
     checks->clear();
 
     // CURRENT ORDER:
-    // Subscription -> Whisper -> User -> Message -> Reply Threads -> Badge
+    // Subscription -> Whisper -> Message -> User -> Reply Threads -> Badge
 
     rebuildSubscriptionHighlights(settings, *checks);
 
     rebuildWhisperHighlights(settings, *checks);
 
-    rebuildUserHighlights(settings, *checks);
-
     rebuildMessageHighlights(settings, *checks);
+
+    rebuildUserHighlights(settings, *checks);
 
     rebuildReplyThreadHighlight(settings, *checks);
 

@@ -2,8 +2,8 @@ name: Changelog Check
 
 on:
   pull_request:
-    branches: [ dankerino ]
-    types: [ opened, synchronize, reopened, ready_for_review, labeled, unlabeled ]
+    branches: [dankerino]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 jobs:
   check-changelog:
@@ -13,5 +13,5 @@ jobs:
       - name: Changelog check
         uses: dangoslen/changelog-enforcer@v3
         with:
-          changeLogPath: 'CHANGELOG.md'
-          skipLabels: 'no changelog entry needed, ci, submodules'
+          changeLogPath: "CHANGELOG.md"
+          skipLabels: "no changelog entry needed, ci, submodules"

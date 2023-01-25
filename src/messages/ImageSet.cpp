@@ -1,5 +1,6 @@
 #include "messages/ImageSet.hpp"
 
+#include "messages/Image.hpp"
 #include "singletons/Settings.hpp"
 
 namespace chatterino {

@@ -1,7 +1,6 @@
 #include "AbstractIrcServer.hpp"
 
 #include "common/Channel.hpp"
-#include "common/Common.hpp"
 #include "common/QLogging.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
@@ -37,7 +36,7 @@ AbstractIrcServer::AbstractIrcServer()
         {
             return;
         }
-        if (message.at(0) == "$")
+        if (message.at(0) == '$')
         {
             this->readConnection_->sendRaw("JOIN " + message.mid(1));
         }
@@ -243,7 +242,7 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
             {
                 return;
             }
-            if (channelName.at(0) == "$")
+            if (channelName.at(0) == '$')
             {
                 this->readConnection_->sendRaw("PART " + channelName.mid(1));
             }

@@ -1,11 +1,14 @@
 #pragma once
 
-#include "messages/Emote.hpp"
 #include "widgets/listview/GenericListItem.hpp"
 
 #include <functional>
+#include <memory>
 
 namespace chatterino {
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
 
 class InputCompletionItem : public GenericListItem
 {

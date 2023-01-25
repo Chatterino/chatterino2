@@ -2,7 +2,6 @@
 
 #include "util/QObjectRef.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "widgets/dialogs/EmotePopup.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -112,7 +111,7 @@ protected:
     void updateCompletionPopup();
     void showCompletionPopup(const QString &text, bool emoteCompletion);
     void hideCompletionPopup();
-    void insertCompletionText(const QString &text);
+    void insertCompletionText(const QString &input_) const;
     void openEmotePopup();
 
     void updateCancelReplyButton();

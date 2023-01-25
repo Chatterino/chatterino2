@@ -18,7 +18,7 @@ class Scrollbar : public BaseWidget
     Q_OBJECT
 
 public:
-    Scrollbar(ChannelView *parent = nullptr);
+    Scrollbar(size_t messagesLimit, ChannelView *parent = nullptr);
 
     void addHighlight(ScrollbarHighlight highlight);
     void addHighlightsAtStart(

@@ -1,5 +1,6 @@
 #include "messages/search/AuthorPredicate.hpp"
 
+#include "messages/Message.hpp"
 #include "util/Qt.hpp"
 
 namespace chatterino {

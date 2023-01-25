@@ -46,6 +46,12 @@ set_target_properties(${PROJECT_NAME}
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
     )
 
+if(CHATTERINO_ENABLE_LTO)
+    message(STATUS "Enabling LTO for ${PROJECT_NAME}")
+    set_property(TARGET ${PROJECT_NAME}
+        PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
 # gtest_add_tests manages to discover the tests because it looks through the source files
 # HOWEVER, it fails to run, because we have some bug that causes the QApplication exit to stall when no network requests have been made.
 # ctest runs each test individually, so for now we require that testers just run the ./bin/chatterino-test binary without any filters applied

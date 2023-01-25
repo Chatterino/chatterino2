@@ -6,6 +6,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
@@ -14,34 +15,46 @@
 #include "widgets/listview/GenericListView.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
 
-namespace chatterino {
 namespace {
 
-    struct _Emote {
-        EmotePtr emote;
-        QString displayName;
-        QString providerName;
-    };
+using namespace chatterino;
 
-    void addEmotes(std::vector<_Emote> &out, const EmoteMap &map,
-                   const QString &text, const QString &providerName)
-    {
-        for (auto &&emote : map)
-            if (emote.first.string.contains(text, Qt::CaseInsensitive))
-                out.push_back(
-                    {emote.second, emote.second->name.string, providerName});
-    }
+struct CompletionEmote {
+    EmotePtr emote;
+    QString displayName;
+    QString providerName;
+};
 
-    void addEmojis(std::vector<_Emote> &out, const EmojiMap &map,
-                   const QString &text)
+void addEmotes(std::vector<CompletionEmote> &out, const EmoteMap &map,
+               const QString &text, const QString &providerName)
+{
+    for (auto &&emote : map)
     {
-        map.each([&](const QString &, const std::shared_ptr<EmojiData> &emoji) {
-            for (auto &&shortCode : emoji->shortCodes)
-                if (shortCode.contains(text, Qt::CaseInsensitive))
-                    out.push_back({emoji->emote, shortCode, "Emoji"});
-        });
+        if (emote.first.string.contains(text, Qt::CaseInsensitive))
+        {
+            out.push_back(
+                {emote.second, emote.second->name.string, providerName});
+        }
     }
+}
+
+void addEmojis(std::vector<CompletionEmote> &out, const EmojiMap &map,
+               const QString &text)
+{
+    map.each([&](const QString &, const std::shared_ptr<EmojiData> &emoji) {
+        for (auto &&shortCode : emoji->shortCodes)
+        {
+            if (shortCode.contains(text, Qt::CaseInsensitive))
+            {
+                out.push_back({emoji->emote, shortCode, "Emoji"});
+            }
+        }
+    });
+}
+
 }  // namespace
+
+namespace chatterino {
 
 InputCompletionPopup::InputCompletionPopup(QWidget *parent)
     : BasePopup({BasePopup::EnableCustomFrame, BasePopup::Frameless,
@@ -53,30 +66,17 @@ InputCompletionPopup::InputCompletionPopup(QWidget *parent)
 
     QObject::connect(&this->redrawTimer_, &QTimer::timeout, this, [this] {
         if (this->isVisible())
+        {
             this->ui_.listView->doItemsLayout();
+        }
     });
     this->redrawTimer_.setInterval(33);
 }
 
-void InputCompletionPopup::initLayout()
-{
-    LayoutCreator creator = {this};
-
-    auto listView =
-        creator.emplace<GenericListView>().assign(&this->ui_.listView);
-    listView->setInvokeActionOnTab(true);
-
-    listView->setModel(&this->model_);
-    QObject::connect(listView.getElement(), &GenericListView::closeRequested,
-                     this, [this] {
-                         this->close();
-                     });
-}
-
 void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
 {
-    std::vector<_Emote> emotes;
-    auto tc = dynamic_cast<TwitchChannel *>(channel.get());
+    std::vector<CompletionEmote> emotes;
+    auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
     // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
     if (channel->isTwitchChannel())
     {
@@ -91,7 +91,7 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
             if (tc &&
                 localEmoteData->find(tc->roomId()) != localEmoteData->end())
             {
-                if (auto localEmotes = &localEmoteData->at(tc->roomId()))
+                if (const auto *localEmotes = &localEmoteData->at(tc->roomId()))
                 {
                     addEmotes(emotes, *localEmotes, text,
                               "Local Twitch Emotes");
@@ -103,9 +103,13 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
         {
             // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
             if (auto bttv = tc->bttvEmotes())
+            {
                 addEmotes(emotes, *bttv, text, "Channel BetterTTV");
+            }
             if (auto ffz = tc->ffzEmotes())
+            {
                 addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
+            }
             if (auto seventv = tc->seventvEmotes())
             {
                 addEmotes(emotes, *seventv, text, "Channel 7TV");
@@ -113,9 +117,13 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
         }
 
         if (auto bttvG = getApp()->twitch->getBttvEmotes().emotes())
+        {
             addEmotes(emotes, *bttvG, text, "Global BetterTTV");
+        }
         if (auto ffzG = getApp()->twitch->getFfzEmotes().emotes())
+        {
             addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
+        }
         if (auto seventvG = getApp()->twitch->getSeventvEmotes().globalEmotes())
         {
             addEmotes(emotes, *seventvG, text, "Global 7TV");
@@ -149,8 +157,10 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
             emote.emote, emote.displayName + " - " + emote.providerName,
             this->callback_));
 
-        if (count++ == maxEntryCount)
+        if (count++ == MAX_ENTRY_COUNT)
+        {
             break;
+        }
     }
 
     if (!emotes.empty())
@@ -161,38 +171,41 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
 
 void InputCompletionPopup::updateUsers(const QString &text, ChannelPtr channel)
 {
-    auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-    if (twitchChannel)
+    auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+    if (!tc)
     {
-        auto chatters = twitchChannel->accessChatters()->filterByPrefix(text);
-        this->model_.clear();
-        int count = 0;
-        for (const auto &name : chatters)
-        {
-            if (getSettings()->lowercaseUsernames)
-            {
-                this->model_.addItem(std::make_unique<InputCompletionItem>(
-                    nullptr, name.toLower(), this->callback_));
-            }
-            else
-            {
-                this->model_.addItem(std::make_unique<InputCompletionItem>(
-                    nullptr, name, this->callback_));
-            }
+        return;
+    }
 
-            if (count++ == maxEntryCount)
-                break;
-        }
-        if (!chatters.empty())
+    auto chatters = tc->accessChatters()->filterByPrefix(text);
+    this->model_.clear();
+
+    if (chatters.empty())
+    {
+        return;
+    }
+
+    int count = 0;
+    for (const auto &name : chatters)
+    {
+        if (getSettings()->lowercaseUsernames)
         {
-            this->ui_.listView->setCurrentIndex(this->model_.index(0));
+            this->model_.addItem(std::make_unique<InputCompletionItem>(
+                nullptr, name.toLower(), this->callback_));
+        }
+        else
+        {
+            this->model_.addItem(std::make_unique<InputCompletionItem>(
+                nullptr, name, this->callback_));
+        }
+
+        if (count++ == MAX_ENTRY_COUNT)
+        {
+            break;
         }
     }
-}
 
-bool InputCompletionPopup::eventFilter(QObject *watched, QEvent *event)
-{
-    return this->ui_.listView->eventFilter(watched, event);
+    this->ui_.listView->setCurrentIndex(this->model_.index(0));
 }
 
 void InputCompletionPopup::setInputAction(ActionCallback callback)
@@ -200,14 +213,34 @@ void InputCompletionPopup::setInputAction(ActionCallback callback)
     this->callback_ = std::move(callback);
 }
 
-void InputCompletionPopup::showEvent(QShowEvent *)
+bool InputCompletionPopup::eventFilter(QObject *watched, QEvent *event)
+{
+    return this->ui_.listView->eventFilter(watched, event);
+}
+
+void InputCompletionPopup::showEvent(QShowEvent * /*event*/)
 {
     this->redrawTimer_.start();
 }
 
-void InputCompletionPopup::hideEvent(QHideEvent *)
+void InputCompletionPopup::hideEvent(QHideEvent * /*event*/)
 {
     this->redrawTimer_.stop();
+}
+
+void InputCompletionPopup::initLayout()
+{
+    LayoutCreator creator = {this};
+
+    auto listView =
+        creator.emplace<GenericListView>().assign(&this->ui_.listView);
+    listView->setInvokeActionOnTab(true);
+
+    listView->setModel(&this->model_);
+    QObject::connect(listView.getElement(), &GenericListView::closeRequested,
+                     this, [this] {
+                         this->close();
+                     });
 }
 
 }  // namespace chatterino

@@ -3,8 +3,8 @@
 #include <QAbstractListModel>
 
 #include <chrono>
-#include <mutex>
 #include <set>
+#include <shared_mutex>
 
 namespace chatterino {
 
@@ -38,29 +38,30 @@ class CompletionModel : public QAbstractListModel
             TwitchCommand,
         };
 
-        TaggedString(const QString &string, Type type);
+        TaggedString(QString _string, Type type);
 
         bool isEmote() const;
         bool operator<(const TaggedString &that) const;
 
-        QString string;
-        Type type;
+        const QString string;
+        const Type type;
     };
 
 public:
     CompletionModel(Channel &channel);
 
-    virtual int columnCount(const QModelIndex &) const override;
-    virtual QVariant data(const QModelIndex &index, int) const override;
-    virtual int rowCount(const QModelIndex &) const override;
+    int columnCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    int rowCount(const QModelIndex &parent) const override;
 
     void refresh(const QString &prefix, bool isFirstWord = false);
 
     static bool compareStrings(const QString &a, const QString &b);
 
 private:
+    mutable std::shared_mutex itemsMutex_;
     std::set<TaggedString> items_;
-    mutable std::mutex itemsMutex_;
+
     Channel &channel_;
 };
 

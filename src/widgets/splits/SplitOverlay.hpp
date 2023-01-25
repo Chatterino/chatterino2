@@ -1,8 +1,8 @@
 #pragma once
 
-#include "pajlada/signals/signalholder.hpp"
 #include "widgets/BaseWidget.hpp"
 
+#include <pajlada/signals/signalholder.hpp>
 #include <QGridLayout>
 #include <QPushButton>
 

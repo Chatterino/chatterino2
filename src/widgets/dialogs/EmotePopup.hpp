@@ -1,9 +1,6 @@
 #pragma once
 
-#include "providers/emoji/Emojis.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
 #include "widgets/BasePopup.hpp"
-#include "widgets/Notebook.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QLineEdit>
@@ -14,6 +11,8 @@ struct Link;
 class ChannelView;
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
+class Notebook;
+class TwitchChannel;
 
 class EmotePopup : public BasePopup
 {
@@ -22,7 +21,7 @@ public:
 
     void loadChannel(ChannelPtr channel);
 
-    virtual void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
 
     pajlada::Signals::Signal<Link> linkClicked;
 
@@ -43,13 +42,9 @@ private:
     QLineEdit *search_;
     Notebook *notebook_;
 
-    void loadEmojis(ChannelView &view, EmojiMap &emojiMap);
-    void loadEmojis(Channel &channel, EmojiMap &emojiMap, const QString &title);
     void filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
                             const QString &searchText);
     void filterEmotes(const QString &text);
-    EmoteMap *filterEmoteMap(const QString &text,
-                             std::shared_ptr<const EmoteMap> emotes);
     void addShortcuts() override;
 };
 

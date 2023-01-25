@@ -1,5 +1,6 @@
 #include "IrcServer.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageColor.hpp"
