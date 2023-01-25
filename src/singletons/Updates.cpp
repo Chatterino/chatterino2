@@ -15,6 +15,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QRegularExpression>
+#include <semver/semver.hpp>
 
 namespace chatterino {
 namespace {
@@ -43,31 +44,23 @@ Updates &Updates::instance()
 /// Checks if the online version is newer or older than the current version.
 bool Updates::isDowngradeOf(const QString &online, const QString &current)
 {
-    static auto matchVersion =
-        QRegularExpression(R"((\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?)");
-
-    // Versions are just strings, they don't need to follow a specific
-    // format so we can only assume if one version is newer than another
-    // one.
-
-    // We match x.x.x.x with each version level being optional.
-
-    auto onlineMatch = matchVersion.match(online);
-    auto currentMatch = matchVersion.match(current);
-
-    for (int i = 1; i <= 4; i++)
+    semver::version onlineVersion;
+    if (!onlineVersion.from_string_noexcept(online.toStdString()))
     {
-        if (onlineMatch.captured(i).toInt() < currentMatch.captured(i).toInt())
-        {
-            return true;
-        }
-        if (onlineMatch.captured(i).toInt() > currentMatch.captured(i).toInt())
-        {
-            break;
-        }
+        qCWarning(chatterinoUpdate) << "Unable to parse online version"
+                                    << online << "into a proper semver string";
+        return false;
     }
 
-    return false;
+    semver::version currentVersion;
+    if (!currentVersion.from_string_noexcept(current.toStdString()))
+    {
+        qCWarning(chatterinoUpdate) << "Unable to parse current version"
+                                    << current << "into a proper semver string";
+        return false;
+    }
+
+    return onlineVersion < currentVersion;
 }
 
 const QString &Updates::getCurrentVersion() const
