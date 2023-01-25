@@ -1,6 +1,9 @@
 #include "singletons/Updates.hpp"
 
+#include "common/Version.hpp"
+
 #include <gtest/gtest.h>
+#include <semver/semver.hpp>
 
 using namespace chatterino;
 
@@ -30,4 +33,10 @@ TEST(Updates, MustNotBeDowngrade)
         << "2.4.5 must not be a downgrade of 2.4.5";
     EXPECT_FALSE(Updates::isDowngradeOf("2.4.5", "2.4.5-beta"))
         << "2.4.5 must not be a downgrade of 2.4.5-beta";
+}
+
+TEST(Updates, ValidateCurrentVersion)
+{
+    EXPECT_NO_THROW(auto v = semver::from_string(CHATTERINO_VERSION))
+        << "Current version must be valid semver";
 }
