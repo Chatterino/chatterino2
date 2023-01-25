@@ -23,37 +23,6 @@ namespace {
         return getSettings()->betaUpdates ? "beta" : "stable";
     }
 
-    /// Checks if the online version is newer or older than the current version.
-    bool isDowngradeOf(const QString &online, const QString &current)
-    {
-        static auto matchVersion =
-            QRegularExpression(R"((\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?)");
-
-        // Versions are just strings, they don't need to follow a specific
-        // format so we can only assume if one version is newer than another
-        // one.
-
-        // We match x.x.x.x with each version level being optional.
-
-        auto onlineMatch = matchVersion.match(online);
-        auto currentMatch = matchVersion.match(current);
-
-        for (int i = 1; i <= 4; i++)
-        {
-            if (onlineMatch.captured(i).toInt() <
-                currentMatch.captured(i).toInt())
-            {
-                return true;
-            }
-            if (onlineMatch.captured(i).toInt() >
-                currentMatch.captured(i).toInt())
-            {
-                break;
-            }
-        }
-
-        return false;
-    }
 }  // namespace
 
 Updates::Updates()
@@ -69,6 +38,36 @@ Updates &Updates::instance()
     static Updates instance;
 
     return instance;
+}
+
+/// Checks if the online version is newer or older than the current version.
+bool Updates::isDowngradeOf(const QString &online, const QString &current)
+{
+    static auto matchVersion =
+        QRegularExpression(R"((\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?)");
+
+    // Versions are just strings, they don't need to follow a specific
+    // format so we can only assume if one version is newer than another
+    // one.
+
+    // We match x.x.x.x with each version level being optional.
+
+    auto onlineMatch = matchVersion.match(online);
+    auto currentMatch = matchVersion.match(current);
+
+    for (int i = 1; i <= 4; i++)
+    {
+        if (onlineMatch.captured(i).toInt() < currentMatch.captured(i).toInt())
+        {
+            return true;
+        }
+        if (onlineMatch.captured(i).toInt() > currentMatch.captured(i).toInt())
+        {
+            break;
+        }
+    }
+
+    return false;
 }
 
 const QString &Updates::getCurrentVersion() const
@@ -313,8 +312,8 @@ void Updates::checkForUpdates()
             if (this->currentVersion_ != this->onlineVersion_)
             {
                 this->setStatus_(UpdateAvailable);
-                this->isDowngrade_ =
-                    isDowngradeOf(this->onlineVersion_, this->currentVersion_);
+                this->isDowngrade_ = Updates::isDowngradeOf(
+                    this->onlineVersion_, this->currentVersion_);
             }
             else
             {
