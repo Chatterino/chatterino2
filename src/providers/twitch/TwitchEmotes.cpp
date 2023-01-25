@@ -49,7 +49,7 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
             ImageSet{
                 Image::fromUrl(getEmoteLink(id, "1.0"), 1),
                 Image::fromUrl(getEmoteLink(id, "2.0"), 0.5),
-                Image::fromUrl(getEmoteLink(id, "3.0"), 0.286),
+                Image::fromUrl(getEmoteLink(id, "3.0"), 0.25),
             },
             Tooltip{name.toHtmlEscaped() + "<br>Twitch Emote"},
             Url{QString("https://emotes.raccatta.cc/twitch/emote/%1")
