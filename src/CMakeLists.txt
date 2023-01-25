@@ -202,6 +202,13 @@ set(SOURCE_FILES
 
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp
+        providers/bttv/BttvLiveUpdates.cpp
+        providers/bttv/BttvLiveUpdates.hpp
+
+        providers/bttv/liveupdates/BttvLiveUpdateMessages.cpp
+        providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp
+        providers/bttv/liveupdates/BttvLiveUpdateSubscription.cpp
+        providers/bttv/liveupdates/BttvLiveUpdateSubscription.hpp
 
         providers/dankerino/DankerinoBadges.cpp
         providers/dankerino/DankerinoBadges.hpp

@@ -3,15 +3,20 @@
 # TODO: Parse this into a CONTRIBUTORS.md too
 
 # Adding yourself? Copy and paste this template at the bottom of this file and fill in the fields in a PR!
-# Name | Link | Avatar (Loaded as a resource) | Title (description of work done).
+# Name | Link | Avatar (Loaded as a resource, avatars are not required) | Title (description of work done).
 
 # Avatar should be located in avatars/ directory. Its size should be 128x128 (get it from https://github.com/username.png?size=128).
-# Make sure to reduce avatar's size as much as possible with tool like pngcrush or optipng (if the file is in png format) and run ./generate_resources.py
+# Make sure to reduce avatar's size as much as possible with tool like pngcrush or optipng (if the file is in png format).
 # Contributor is what we use for someone who has contributed in general (like sent a programming-related PR).
 
 fourtf | https://fourtf.com | :/avatars/fourtf.png | Author, main developer
 pajlada | https://pajlada.se | :/avatars/pajlada.png | Collaborator, co-developer
 zneix | https://github.com/zneix | :/avatars/zneix.png | Collaborator
+Mm2PL | https://github.com/mm2pl | :/avatars/mm2pl.png | Collaborator
+YungLPR | https://github.com/leon-richardt | | Collaborator
+dnsge | https://github.com/dnsge | | Collaborator
+Felanbird | https://github.com/Felanbird | | Collaborator
+kornes | https://github.com/kornes | | Collaborator
 
 Cranken | https://github.com/Cranken | | Contributor
 hemirt | https://github.com/hemirt | | Contributor
@@ -32,11 +37,8 @@ vanolpfan | https://github.com/vanolpfan |  | Contributor
 machgo | https://github.com/machgo |  | Contributor
 TranRed | https://github.com/TranRed |  | Contributor
 RAnders00 | https://github.com/RAnders00 | | Contributor
-YungLPR | https://github.com/leon-richardt | | Contributor
-Mm2PL | https://github.com/mm2pl | :/avatars/mm2pl.png | Contributor
 gempir | https://github.com/gempir | | Contributor
 mfmarlow | https://github.com/mfmarlow | | Contributor
-dnsge | https://github.com/dnsge | | Contributor
 y0dax | https://github.com/y0dax | | Contributor
 Iulian Onofrei | https://github.com/revolter | :/avatars/revolter.jpg | Contributor
 matthewde | https://github.com/m4tthewde | :/avatars/matthewde.jpg | Contributor
@@ -54,6 +56,7 @@ iProdigy | https://github.com/iProdigy | :/avatars/iprodigy.png | Contributor
 Jaxkey | https://github.com/Jaxkey | :/avatars/jaxkey.png | Contributor
 Explooosion | https://github.com/Explooosion-code | :/avatars/explooosion_code.png | Contributor
 mohad12211 | https://github.com/mohad12211 | :/avatars/mohad12211.png | Contributor
+Wissididom | https://github.com/Wissididom | :/avatars/wissididom.png | Contributor
 
 # If you are a contributor add yourself above this line
 

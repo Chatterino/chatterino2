@@ -593,17 +593,37 @@ MessageBuilder::MessageBuilder(LiveUpdatesUpdateEmoteMessageTag /*unused*/,
                                const QString &oldEmoteName)
     : MessageBuilder()
 {
-    auto text = QString("renamed %1 emote %2 to %3.")
-                    .arg(platform, oldEmoteName, emoteName);
+    QString text;
+    if (actor.isEmpty())
+    {
+        text = "Renamed";
+    }
+    else
+    {
+        text = "renamed";
+    }
+    text +=
+        QString(" %1 emote %2 to %3.").arg(platform, oldEmoteName, emoteName);
 
     this->emplace<TimestampElement>();
-    this->emplace<TextElement>(actor, MessageElementFlag::Username,
-                               MessageColor::System)
-        ->setLink({Link::UserInfo, actor});
+    if (!actor.isEmpty())
+    {
+        this->emplace<TextElement>(actor, MessageElementFlag::Username,
+                                   MessageColor::System)
+            ->setLink({Link::UserInfo, actor});
+    }
     this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
 
-    auto finalText = QString("%1 %2").arg(actor, text);
+    QString finalText;
+    if (actor.isEmpty())
+    {
+        finalText = text;
+    }
+    else
+    {
+        finalText = QString("%1 %2").arg(actor, text);
+    }
 
     this->message().loginName = actor;
     this->message().messageText = finalText;

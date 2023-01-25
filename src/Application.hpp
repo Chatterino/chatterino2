@@ -151,6 +151,7 @@ public:
 private:
     void addSingleton(Singleton *singleton);
     void initPubSub();
+    void initBttvLiveUpdates();
     void initSeventvEventAPI();
     void initNm(Paths &paths);
 

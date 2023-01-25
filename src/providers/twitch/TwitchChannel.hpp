@@ -48,6 +48,8 @@ class TwitchBadges;
 class SeventvEmotes;
 class FfzEmotes;
 class BttvEmotes;
+struct BttvLiveUpdateEmoteUpdateAddMessage;
+struct BttvLiveUpdateEmoteRemoveMessage;
 class SeventvEmotes;
 struct SeventvEventAPIEmoteAddDispatch;
 struct SeventvEventAPIEmoteUpdateDispatch;
@@ -140,6 +142,13 @@ public:
     const QString &seventvUserID() const;
     const QString &seventvEmoteSetID() const;
 
+    /** Adds a BTTV channel emote to this channel. */
+    void addBttvEmote(const BttvLiveUpdateEmoteUpdateAddMessage &message);
+    /** Updates a BTTV channel emote in this channel. */
+    void updateBttvEmote(const BttvLiveUpdateEmoteUpdateAddMessage &message);
+    /** Removes a BTTV channel emote from this channel. */
+    void removeBttvEmote(const BttvLiveUpdateEmoteRemoveMessage &message);
+
     /** Adds a 7TV channel emote to this channel. */
     void addSeventvEmote(const SeventvEventAPIEmoteAddDispatch &dispatch);
     /** Updates a 7TV channel emote's name in this channel */
@@ -207,6 +216,8 @@ private:
     void fetchDisplayName();
     void cleanUpReplyThreads();
     void showLoginMessage();
+    /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
+    void joinBttvChannel() const;
 
     void setLive(bool newLiveStatus);
     void setMod(bool value);
