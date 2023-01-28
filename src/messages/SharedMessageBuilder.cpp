@@ -17,7 +17,6 @@
 #include "util/StreamerMode.hpp"
 
 #include <QFileInfo>
-#include <QMediaPlayer>
 
 namespace {
 
