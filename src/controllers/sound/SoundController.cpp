@@ -13,6 +13,7 @@
 
 namespace chatterino {
 
+// NUM_SOUNDS specifies how many simultaneous default ping sounds & decoders to create
 constexpr const auto NUM_SOUNDS = 4;
 
 SoundController::SoundController()
@@ -23,7 +24,6 @@ SoundController::SoundController()
 {
 }
 
-// TODO: How do we know what the default ping sound is?
 void SoundController::initialize(Settings &settings, Paths &paths)
 {
     (void)(settings);
@@ -120,34 +120,49 @@ void SoundController::initialize(Settings &settings, Paths &paths)
                 (void *)this->defaultPingData.data(),
                 this->defaultPingData.size() * sizeof(char), &decoderConfig,
                 dec.get());
+            if (result != MA_SUCCESS)
+            {
+                qCWarning(chatterinoSound)
+                    << "Error initializing default ping decoder from memory:"
+                    << result;
+                return;
+            }
 
             result = ma_sound_init_from_data_source(
                 this->engine.get(), dec.get(),
                 MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_DECODE, nullptr,
                 snd.get());
+            if (result != MA_SUCCESS)
+            {
+                qCWarning(chatterinoSound)
+                    << "Error initializing default sound from data source:"
+                    << result;
+                return;
+            }
 
             this->defaultPingDecoders.emplace_back(std::move(dec));
             this->defaultPingSounds.emplace_back(std::move(snd));
         }
-
-        qCDebug(chatterinoSound) << "init sound! ";
     }
+
+    qCInfo(chatterinoSound) << "miniaudio sound system initialized";
 
     this->initialized = true;
 }
 
 SoundController::~SoundController()
 {
+    // NOTE: This destructor is never called because the `runGui` function calls _exit before that happens
+    // I have manually called the destructor prior to _exit being called to ensure this logic is sound
+
     for (const auto &snd : this->defaultPingSounds)
     {
         ma_sound_uninit(snd.get());
     }
-    this->defaultPingSounds.clear();
     for (const auto &dec : this->defaultPingDecoders)
     {
         ma_decoder_uninit(dec.get());
     }
-    this->defaultPingDecoders.clear();
 
     ma_engine_uninit(this->engine.get());
     ma_device_uninit(this->device.get());
