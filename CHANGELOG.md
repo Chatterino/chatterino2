@@ -40,6 +40,7 @@
 - Dev: Fixed `final-dtor-non-final-class` warnings. (#4296)
 - Dev: Fixed `ambiguous-reversed-operator` warnings. (#4296)
 - Dev: Format YAML and JSON files with prettier. (#4304)
+- Dev: Changed conan generator to [`CMakeDeps`](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html). See PR for migration notes. (#4335)
 
 ## 2.4.0
 
