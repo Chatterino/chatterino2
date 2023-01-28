@@ -140,6 +140,9 @@ set(SOURCE_FILES
         controllers/userdata/UserDataController.hpp
         controllers/userdata/UserData.hpp
 
+        controllers/sound/SoundController.cpp
+        controllers/sound/SoundController.hpp
+
         debug/Benchmark.cpp
         debug/Benchmark.hpp
 
