@@ -166,6 +166,7 @@ jobs:
           build_dir: build
           config_file: ".clang-tidy"
           split_workflow: true
+          exclude: "tests/*,lib/*"
 
       - uses: actions/upload-artifact@v3
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')

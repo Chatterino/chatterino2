@@ -786,6 +786,9 @@ endif ()
 
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
 
+# semver dependency https://github.com/Neargye/semver
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
+
 if (WinToast_FOUND)
     target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
