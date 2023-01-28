@@ -106,6 +106,15 @@ void SoundController::initialize(Settings &settings, Paths &paths)
     {
         // TODO: Can we optimize this?
         BenchmarkGuard b("init sounds");
+
+        ma_uint32 soundFlags = 0;
+        // Decode the sound during loading instead of during playback
+        soundFlags |= MA_SOUND_FLAG_DECODE;
+        // Disable pitch control (we don't use it, so this saves some performance)
+        soundFlags |= MA_SOUND_FLAG_NO_PITCH;
+        // Disable spatialization control, this brings the volume up to "normal levels"
+        soundFlags |= MA_SOUND_FLAG_NO_SPATIALIZATION;
+
         for (auto i = 0; i < NUM_SOUNDS; ++i)
         {
             auto decoderConfig =
@@ -129,9 +138,7 @@ void SoundController::initialize(Settings &settings, Paths &paths)
             }
 
             result = ma_sound_init_from_data_source(
-                this->engine.get(), dec.get(),
-                MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_DECODE, nullptr,
-                snd.get());
+                this->engine.get(), dec.get(), soundFlags, nullptr, snd.get());
             if (result != MA_SUCCESS)
             {
                 qCWarning(chatterinoSound)
