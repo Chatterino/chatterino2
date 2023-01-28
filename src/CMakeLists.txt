@@ -777,6 +777,14 @@ target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/sem
 # miniaudio dependency https://github.com/mackron/miniaudio
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
 
+if (UNIX)
+    if (CMAKE_DL_LIBS)
+        # libdl is a requirement for miniaudio on Linux
+        message(STATUS "Linking with CMake DL libs: '${CMAKE_DL_LIBS}'")
+        target_link_libraries(${LIBRARY_PROJECT} PUBLIC ${CMAKE_DL_LIBS})
+    endif ()
+endif ()
+
 if (WinToast_FOUND)
     target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
