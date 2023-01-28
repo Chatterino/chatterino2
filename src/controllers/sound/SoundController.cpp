@@ -115,13 +115,12 @@ void SoundController::initialize(Settings &settings, Paths &paths)
         // Disable spatialization control, this brings the volume up to "normal levels"
         soundFlags |= MA_SOUND_FLAG_NO_SPATIALIZATION;
 
+        auto decoderConfig = ma_decoder_config_init(ma_format_f32, 0, 48000);
+        // This must match the encoding format of our default ping sound
+        decoderConfig.encodingFormat = ma_encoding_format_wav;
+
         for (auto i = 0; i < NUM_SOUNDS; ++i)
         {
-            auto decoderConfig =
-                ma_decoder_config_init(ma_format_f32, 0, 48000);
-            // This must match the encoding format of our default ping sound
-            decoderConfig.encodingFormat = ma_encoding_format_wav;
-
             auto dec = std::make_unique<ma_decoder>();
             auto snd = std::make_unique<ma_sound>();
 
