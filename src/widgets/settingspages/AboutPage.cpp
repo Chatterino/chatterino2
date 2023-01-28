@@ -110,6 +110,9 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "semver",
                        "https://github.com/Neargye/semver",
                        ":/licenses/semver.txt");
+            addLicense(form.getElement(), "miniaudio",
+                       "https://github.com/mackron/miniaudio",
+                       ":/licenses/miniaudio.txt");
         }
 
         // Attributions

@@ -774,6 +774,9 @@ target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 # semver dependency https://github.com/Neargye/semver
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
 
+# miniaudio dependency https://github.com/mackron/miniaudio
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
+
 if (WinToast_FOUND)
     target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC

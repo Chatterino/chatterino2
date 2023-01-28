@@ -6,7 +6,7 @@
 #include "singletons/Settings.hpp"
 
 #define MINIAUDIO_IMPLEMENTATION
-#include <miniaudio/miniaudio.h>
+#include <miniaudio.h>
 
 #include <limits>
 #include <memory>

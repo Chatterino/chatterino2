@@ -46,7 +46,7 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/Window.hpp"
 
-#include <miniaudio/miniaudio.h>
+#include <miniaudio.h>
 #include <QDesktopServices>
 
 #include <atomic>
