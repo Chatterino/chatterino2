@@ -90,11 +90,10 @@ jobs:
         run: |
           mkdir build
           cd build
-          conan install ..  -b missing
+          conan install .. -b missing
           cmake `
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=Release `
-              -DUSE_CONAN=ON `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               ..
           set cl=/MP
