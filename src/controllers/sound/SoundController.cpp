@@ -170,13 +170,13 @@ void SoundController::play(const QUrl &sound)
 
     if (sound.isLocalFile())
     {
-        auto result = ma_engine_play_sound(
-            this->engine.get(), qPrintable(sound.toString(QUrl::RemoveScheme)),
-            nullptr);
+        auto soundPath = sound.toLocalFile();
+        auto result = ma_engine_play_sound(this->engine.get(),
+                                           qPrintable(soundPath), nullptr);
         if (result != MA_SUCCESS)
         {
-            qCWarning(chatterinoSound)
-                << "Failed to play sound" << sound << ":" << result;
+            qCWarning(chatterinoSound) << "Failed to play sound" << sound
+                                       << soundPath << ":" << result;
         }
 
         return;
