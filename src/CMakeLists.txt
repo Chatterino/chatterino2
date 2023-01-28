@@ -191,6 +191,8 @@ set(SOURCE_FILES
         messages/search/SubtierPredicate.cpp
         messages/search/SubtierPredicate.hpp
 
+        providers/Crashpad.cpp
+        providers/Crashpad.hpp
         providers/IvrApi.cpp
         providers/IvrApi.hpp
         providers/LinkResolver.cpp
@@ -809,15 +811,15 @@ if (WinToast_FOUND)
 endif ()
 
 target_link_libraries(${LIBRARY_PROJECT}
-        PUBLIC
-        ${Boost_LIBRARIES}
-        )
+    PUBLIC
+    ${Boost_LIBRARIES}
+    )
 
 target_link_libraries(${LIBRARY_PROJECT}
-        PUBLIC
-        OpenSSL::SSL
-        OpenSSL::Crypto
-        )
+    PUBLIC
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    )
 
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${RapidJSON_INCLUDE_DIRS})
 
@@ -827,6 +829,12 @@ if (LIBRT)
         ${LIBRT}
         )
 endif ()
+
+if (crashpad_FOUND)
+    target_include_directories(${LIBRARY_PROJECT} PUBLIC ${crashpad_INCLUDE_DIRS})
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC crashpad::mini_chromium_base)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC crashpad::client)
+endif()
 
 # Configure compiler warnings
 if (MSVC)

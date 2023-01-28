@@ -141,6 +141,8 @@ void Paths::initSubDirectories()
     this->messageLogDirectory = makePath("Logs");
     this->miscDirectory = makePath("Misc");
     this->twitchProfileAvatars = makePath("ProfileAvatars");
+    this->crashdumpDirectory = makePath("Crashes");
+    this->crashMetricsDirectory = makePath("CrashMetrics");
     //QDir().mkdir(this->twitchProfileAvatars + "/twitch");
 }
 
