@@ -4,6 +4,7 @@ boost/1.80.0
 
 [generators]
 CMakeDeps
+CMakeToolchain
 
 [options]
 openssl:shared=True
