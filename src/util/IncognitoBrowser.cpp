@@ -45,7 +45,7 @@ QString injectPrivateSwitch(QString command)
     return QString();
 }
 
-QString getCommand(const QString &link)
+QString getCommand()
 {
     // get default browser prog id
     auto browserId = QSettings("HKEY_CURRENT_"
@@ -74,9 +74,6 @@ QString getCommand(const QString &link)
         return QString();
     }
 
-    // link
-    command += " " + link;
-
     return command;
 }
 #endif
@@ -88,7 +85,7 @@ namespace chatterino {
 bool supportsIncognitoLinks()
 {
 #ifdef Q_OS_WIN
-    return !getCommand("").isNull();
+    return !getCommand().isNull();
 #else
     return false;
 #endif
@@ -97,10 +94,10 @@ bool supportsIncognitoLinks()
 bool openLinkIncognito(const QString &link)
 {
 #ifdef Q_OS_WIN
-    auto command = getCommand(link);
+    auto command = getCommand();
 
     // TODO: split command into program path and incognito argument
-    return QProcess::startDetached(command, {});
+    return QProcess::startDetached(command, {link});
 #else
     return false;
 #endif

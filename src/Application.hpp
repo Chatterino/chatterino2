@@ -19,6 +19,7 @@ class HighlightController;
 class HotkeyController;
 class IUserDataController;
 class UserDataController;
+class SoundController;
 
 class Theme;
 class WindowManager;
@@ -95,6 +96,7 @@ public:
     SeventvBadges *const seventvBadges{};
     SeventvPaints *const seventvPaints{};
     UserDataController *const userData{};
+    SoundController *const sound{};
 
     /*[[deprecated]]*/ Logging *const logging{};
 
@@ -152,6 +154,7 @@ public:
 private:
     void addSingleton(Singleton *singleton);
     void initPubSub();
+    void initBttvLiveUpdates();
     void initSeventvEventAPI();
     void initNm(Paths &paths);
 
