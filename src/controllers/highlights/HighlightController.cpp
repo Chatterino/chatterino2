@@ -215,7 +215,8 @@ void rebuildUserHighlights(Settings &settings,
         bool showInMentions = settings.showSelfMessagesHighlightInMentions;
 
         checks.emplace_back(HighlightCheck{
-            [=](const auto &args, const auto &badges, const auto &senderName,
+            [showInMentions](
+                const auto &args, const auto &badges, const auto &senderName,
                 const auto &originalMessage, const auto &flags,
                 const auto self) -> boost::optional<HighlightResult> {
                 (void)args;             //unused
