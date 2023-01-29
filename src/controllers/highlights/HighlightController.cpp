@@ -217,11 +217,12 @@ void rebuildUserHighlights(Settings &settings,
 
         checks.emplace_back(HighlightCheck{
             [=](const auto &args, const auto &badges, const auto &senderName,
-                const auto &originalMessage,
+                const auto &originalMessage, const auto &flags,
                 const auto self) -> boost::optional<HighlightResult> {
                 (void)args;             //unused
                 (void)badges;           //unused
                 (void)senderName;       //unused
+                (void)flags;            //unused
                 (void)originalMessage;  //unused
 
                 if (!self)
