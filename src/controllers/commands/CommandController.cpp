@@ -51,6 +51,10 @@
 #include <QRegularExpression>
 #include <QUrl>
 
+extern "C" {
+#include <lua.h>
+}
+
 namespace {
 
 using namespace chatterino;
@@ -3127,7 +3131,10 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
     this->registerCommand("lualol", [](const auto &ctx) {
-        getApp()->plugins->callEvery("test");
+        getApp()->plugins->callEveryWithArgs(
+            "test", 1, [ctx](const auto & /*pl*/, lua_State *L) {
+                lua_pushstring(L, ctx.channel->getName().toStdString().c_str());
+            });
         return "";
     });
 }
