@@ -230,9 +230,12 @@ void rebuildUserHighlights(Settings &settings,
                     return boost::none;
                 }
 
+                // Highlight color is provided by the ColorProvider and will be updated by
+                auto highlightColor = ColorProvider::instance().color(
+                    ColorType::SelfMessageHighlight);
+
                 return HighlightResult{false, false, (QUrl) nullptr,
-                                       std::make_shared<QColor>(customColor),
-                                       showInMentions};
+                                       highlightColor, showInMentions};
             }});
     }
 
@@ -420,7 +423,8 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
     this->rebuildListener_.addSetting(settings.enableSelfMessagesHighlight);
     this->rebuildListener_.addSetting(
         settings.showSelfMessagesHighlightInMentions);
-    this->rebuildListener_.addSetting(settings.selfMessagesHighlightColor);
+    // We do not need to rebuild the listener for the selfMessagesHighlightColor
+    // The color is dynamically fetched any time the self message highlight is triggered
     this->rebuildListener_.addSetting(settings.subHighlightSoundUrl);
 
     this->rebuildListener_.addSetting(settings.enableThreadHighlight);
