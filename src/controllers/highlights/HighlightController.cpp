@@ -213,7 +213,6 @@ void rebuildUserHighlights(Settings &settings,
     if (settings.enableSelfMessagesHighlight)
     {
         bool showInMentions = settings.showSelfMessagesHighlightInMentions;
-        auto customColor = settings.selfMessagesHighlightColor;
 
         checks.emplace_back(HighlightCheck{
             [=](const auto &args, const auto &badges, const auto &senderName,
