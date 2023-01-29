@@ -10,6 +10,7 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
+#include "controllers/plugins/PluginController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -3123,6 +3124,10 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         getIApp()->getUserData()->setUserColor(userID, color);
 
+        return "";
+    });
+    this->registerCommand("lualol", [](const auto &ctx) {
+        getApp()->plugins->callEvery("test");
         return "";
     });
 }

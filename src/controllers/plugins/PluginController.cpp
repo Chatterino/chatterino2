@@ -1,8 +1,12 @@
 #include "PluginController.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 
-#include <QApplication>
+#include <memory>
+#include <utility>
 
 extern "C" {
 #include <lauxlib.h>
@@ -47,9 +51,63 @@ void PluginController::load(QFileInfo index, QDir pluginDir)
     qCDebug(chatterinoLua) << "Running lua file" << index;
     lua_State *l = luaL_newstate();
     luaL_openlibs(l);
+    this->loadChatterinoLib(l);
 
     luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
-    lua_close(l);
+
+    auto pluginName = pluginDir.dirName();
+    auto plugin = std::make_unique<Plugin>(pluginName, l);
+    this->plugins.insert({pluginName, std::move(plugin)});
+    qCInfo(chatterinoLua) << "Loaded" << pluginName << "plugin from" << index;
+}
+
+void PluginController::callEvery(const QString &functionName)
+{
+    for (const auto &[name, plugin] : this->plugins)
+    {
+        lua_getglobal(plugin->state_, functionName.toStdString().c_str());
+        lua_pcall(plugin->state_, 0, 0, 0);
+    }
+}
+
+constexpr int C_FALSE = 0;
+constexpr int C_TRUE = 1;
+
+extern "C" {
+
+int luaC2SystemMsg(lua_State *L)
+{
+    if (lua_gettop(L) != 2)
+    {
+        luaL_error(L, "need exactly 2 arguments");  // NOLINT
+        lua_pushboolean(L, C_FALSE);
+        return 1;
+    }
+    const char *channel = luaL_optstring(L, 1, NULL);
+    const char *text = luaL_optstring(L, 2, NULL);
+    lua_pop(L, 2);
+    const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
+    if (chn->isEmpty())
+    {
+        lua_pushboolean(L, C_FALSE);
+        return 1;
+    }
+    chn->addMessage(makeSystemMessage(text));
+    lua_pushboolean(L, C_TRUE);
+    return 0;
+}
+
+// NOLINTNEXTLINE
+static const luaL_Reg C2LIB[] = {
+    {"system_msg", luaC2SystemMsg},
+    {nullptr, nullptr},
+};
+}
+
+void PluginController::loadChatterinoLib(lua_State *L)
+{
+    lua_pushglobaltable(L);
+    luaL_setfuncs(L, C2LIB, 0);
 }
 
 };  // namespace chatterino
