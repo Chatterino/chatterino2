@@ -81,7 +81,7 @@ void ColorProvider::initTypeColorMap()
                  HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR)});
     }
 
-    customColor = getSettings()->selfMessagesHighlightColor;
+    customColor = getSettings()->selfMessageHighlightColor;
     if (QColor(customColor).isValid())
     {
         this->typeColorMap_.insert({ColorType::SelfMessageHighlight,

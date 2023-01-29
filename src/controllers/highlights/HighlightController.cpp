@@ -210,9 +210,9 @@ void rebuildUserHighlights(Settings &settings,
 {
     auto userHighlights = settings.highlightedUsers.readOnly();
 
-    if (settings.enableSelfMessagesHighlight)
+    if (settings.enableSelfMessageHighlight)
     {
-        bool showInMentions = settings.showSelfMessagesHighlightInMentions;
+        bool showInMentions = settings.showSelfMessageHighlightInMentions;
 
         checks.emplace_back(HighlightCheck{
             [showInMentions](
@@ -420,9 +420,9 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
     this->rebuildListener_.addSetting(settings.enableSubHighlight);
     this->rebuildListener_.addSetting(settings.enableSubHighlightSound);
     this->rebuildListener_.addSetting(settings.enableSubHighlightTaskbar);
-    this->rebuildListener_.addSetting(settings.enableSelfMessagesHighlight);
+    this->rebuildListener_.addSetting(settings.enableSelfMessageHighlight);
     this->rebuildListener_.addSetting(
-        settings.showSelfMessagesHighlightInMentions);
+        settings.showSelfMessageHighlightInMentions);
     // We do not need to rebuild the listener for the selfMessagesHighlightColor
     // The color is dynamically fetched any time the self message highlight is triggered
     this->rebuildListener_.addSetting(settings.subHighlightSoundUrl);

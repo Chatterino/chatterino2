@@ -44,12 +44,12 @@ void UserHighlightModel::afterInit()
     // User highlight settings for your own messages
     std::vector<QStandardItem *> messagesRow = this->createRow();
     setBoolItem(messagesRow[Column::Pattern],
-                getSettings()->enableSelfMessagesHighlight.getValue(), true,
+                getSettings()->enableSelfMessageHighlight.getValue(), true,
                 false);
     messagesRow[Column::Pattern]->setData("Your messages (automatic)",
                                           Qt::DisplayRole);
     setBoolItem(messagesRow[Column::ShowInMentions],
-                getSettings()->showSelfMessagesHighlightInMentions.getValue(),
+                getSettings()->showSelfMessageHighlightInMentions.getValue(),
                 true, false);
     messagesRow[Column::FlashTaskbar]->setFlags({});
     messagesRow[Column::PlaySound]->setFlags({});
@@ -77,7 +77,7 @@ void UserHighlightModel::customRowSetData(
                 if (rowIndex ==
                     HighlightModel::UserHighlightRowIndexes::SelfMessageRow)
                 {
-                    getSettings()->enableSelfMessagesHighlight.setValue(
+                    getSettings()->enableSelfMessageHighlight.setValue(
                         value.toBool());
                 }
             }
@@ -89,7 +89,7 @@ void UserHighlightModel::customRowSetData(
                 if (rowIndex ==
                     HighlightModel::UserHighlightRowIndexes::SelfMessageRow)
                 {
-                    getSettings()->showSelfMessagesHighlightInMentions.setValue(
+                    getSettings()->showSelfMessageHighlightInMentions.setValue(
                         value.toBool());
                 }
             }
@@ -104,7 +104,7 @@ void UserHighlightModel::customRowSetData(
                     HighlightModel::UserHighlightRowIndexes::SelfMessageRow)
                 {
                     // Update the setting with the new value
-                    getSettings()->selfMessagesHighlightColor.setValue(
+                    getSettings()->selfMessageHighlightColor.setValue(
                         colorName);
                     // Update the color provider with the new color to be used for future
                     const_cast<ColorProvider &>(ColorProvider::instance())
