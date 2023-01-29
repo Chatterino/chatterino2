@@ -148,6 +148,30 @@ else()
     add_subdirectory("${CMAKE_SOURCE_DIR}/lib/settings" EXCLUDE_FROM_ALL)
 endif()
 
+#find_package(Lua REQUIRED)
+add_custom_target(
+    Lua ALL
+    COMMAND make
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/lua
+)
+#include(ExternalProject)
+#
+#ExternalProject_Add(lua
+#   URL "https://www.lua.org/ftp/lua-5.4.4.tar.gz"
+#   CONFIGURE_COMMAND ""
+#   BUILD_COMMAND make generic
+#   BUILD_ALWAYS true
+#   BUILD_IN_SOURCE true
+#   INSTALL_COMMAND ""
+#   SOURCE_DIR "${CMAKE_SOURCE_DIR}/lib/lua"
+#)
+#add_library(liblua
+#    STATIC
+#    IMPORTED
+#)
+#ExternalProject_Get_property(lua SOURCE_DIR)
+#message("liblua will be found at \'${SOURCE_DIR}/src\'")
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

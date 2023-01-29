@@ -136,6 +136,9 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
+        controllers/plugins/PluginController.hpp
+        controllers/plugins/PluginController.cpp
+
         controllers/userdata/UserDataController.cpp
         controllers/userdata/UserDataController.hpp
         controllers/userdata/UserData.hpp
@@ -597,6 +600,7 @@ if (CHATTERINO_GENERATE_COVERAGE)
         )
 endif ()
 
+add_dependencies(${LIBRARY_PROJECT} Lua)
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         Qt${MAJOR_QT_VERSION}::Core
@@ -615,7 +619,9 @@ target_link_libraries(${LIBRARY_PROJECT}
         RapidJSON::RapidJSON
         LRUCache
         MagicEnum
+        "${CMAKE_SOURCE_DIR}/lib/lua/liblua.a"
         )
+
 if (BUILD_WITH_QTKEYCHAIN)
     target_link_libraries(${LIBRARY_PROJECT}
             PUBLIC

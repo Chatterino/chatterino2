@@ -20,6 +20,7 @@ class HotkeyController;
 class IUserDataController;
 class UserDataController;
 class SoundController;
+class PluginController;
 
 class Theme;
 class WindowManager;
@@ -94,6 +95,8 @@ public:
     SeventvBadges *const seventvBadges{};
     UserDataController *const userData{};
     SoundController *const sound{};
+
+    PluginController *const plugins{};
 
     /*[[deprecated]]*/ Logging *const logging{};
 
