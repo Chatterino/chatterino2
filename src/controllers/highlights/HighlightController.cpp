@@ -230,7 +230,7 @@ void rebuildUserHighlights(Settings &settings,
                     return boost::none;
                 }
 
-                // Highlight color is provided by the ColorProvider and will be updated by
+                // Highlight color is provided by the ColorProvider and will be updated accordingly
                 auto highlightColor = ColorProvider::instance().color(
                     ColorType::SelfMessageHighlight);
 
