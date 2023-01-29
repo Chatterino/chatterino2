@@ -289,12 +289,11 @@ public:
                                          ""};
 
     BoolSetting enableSelfMessagesHighlight = {
-        "/highlighting/selfMessagesHighlight/nameIsHighlightKeyword", false};
+        "/highlighting/selfMessagesHighlight/enabled", false};
     BoolSetting showSelfMessagesHighlightInMentions = {
-        "/highlighting/selfMessagesHighlight/showSelfMessagesInMentions",
-        false};
+        "/highlighting/selfMessagesHighlight/showInMentions", false};
     QStringSetting selfMessagesHighlightColor = {
-        "/highlighting/selfMessagesHighlightColor", ""};
+        "/highlighting/selfMessagesHighlight/color", ""};
 
     BoolSetting enableWhisperHighlight = {
         "/highlighting/whisperHighlight/whispersHighlighted", true};
