@@ -4,6 +4,10 @@
 #include "common/QLogging.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/WindowManager.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
 
 #include <memory>
 #include <utility>
@@ -67,6 +71,18 @@ void PluginController::callEvery(const QString &functionName)
     {
         lua_getglobal(plugin->state_, functionName.toStdString().c_str());
         lua_pcall(plugin->state_, 0, 0, 0);
+    }
+}
+
+void PluginController::callEveryWithArgs(
+    const QString &functionName, int count,
+    std::function<void(const std::unique_ptr<Plugin> &pl, lua_State *L)> argCb)
+{
+    for (const auto &[name, plugin] : this->plugins)
+    {
+        lua_getglobal(plugin->state_, functionName.toStdString().c_str());
+        argCb(plugin, plugin->state_);
+        lua_pcall(plugin->state_, count, 0, 0);
     }
 }
 

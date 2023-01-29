@@ -50,6 +50,10 @@ public:
     void initialize(Settings &settings, Paths &paths) override;
     void save() override{};
     void callEvery(const QString &functionName);
+    void callEveryWithArgs(
+        const QString &functionName, int count,
+        std::function<void(const std::unique_ptr<Plugin> &pl, lua_State *L)>
+            argCb);
 
 private:
     void load(QFileInfo index, QDir pluginDir);
