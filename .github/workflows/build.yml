@@ -76,28 +76,34 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: echo "C:\Program Files\Conan\conan\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
+      - name: Enable Developer Command Prompt
+        if: startsWith(matrix.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1.12.0
+
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
           choco install conan -y
 
-      - name: Enable Developer Command Prompt
+      - name: Setup Conan (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.12.0
+        run: |
+          conan profile new --detect --force default
+          conan profile update conf.tools.cmake.cmaketoolchain:generator=Ninja default
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
           mkdir build
           cd build
-          conan install .. -b missing
+          conan install .. -s build_type=Release -b missing -pr:b=default
           cmake `
-              -G"NMake Makefiles" `
+              -GNinja `
               -DCMAKE_BUILD_TYPE=Release `
+              -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               ..
-          set cl=/MP
-          nmake /S /NOLOGO
+          ninja
           windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
           cp bin/chatterino.exe Chatterino2/
           echo nightly > Chatterino2/modes
