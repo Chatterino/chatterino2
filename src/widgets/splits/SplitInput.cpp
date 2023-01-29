@@ -5,6 +5,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "messages/layouts/MessageLayout.hpp"
 #include "messages/Link.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageThread.hpp"
@@ -13,6 +14,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/Clamp.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
@@ -74,6 +76,15 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
                                            this->clearShortcuts();
                                            this->addShortcuts();
                                        });
+
+    this->signalHolder_.managedConnect(
+        getIApp()->getWindows()->gifRepaintRequested, [&] {
+            this->updateReplyMessage();
+        });
+}
+
+SplitInput::~SplitInput()
+{
 }
 
 void SplitInput::initLayout()
@@ -88,10 +99,17 @@ void SplitInput::initLayout()
     // reply label stuff
     auto replyWrapper =
         layout.emplace<QWidget>().assign(&this->ui_.replyWrapper);
-    this->ui_.replyWrapper->setContentsMargins(0, 0, 0, 0);
 
-    auto replyHbox = replyWrapper.emplace<QHBoxLayout>().withoutMargin().assign(
-        &this->ui_.replyHbox);
+    auto replyVbox =
+        replyWrapper.setLayoutType<QVBoxLayout>().withoutMargin().assign(
+            &this->ui_.replyVbox);
+    replyVbox->setSpacing(5);
+
+    auto replyHbox =
+        replyVbox.emplace<QHBoxLayout>().assign(&this->ui_.replyHbox);
+
+    this->ui_.replySpacer = new QSpacerItem(0, 0);
+    replyVbox->addSpacerItem(this->ui_.replySpacer);
 
     auto replyLabel = replyHbox.emplace<QLabel>().assign(&this->ui_.replyLabel);
     replyLabel->setAlignment(Qt::AlignLeft);
@@ -359,7 +377,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
         if (this->enableInlineReplying_)
         {
             // Remove @username prefix that is inserted when doing inline replies
-            message.remove(0, this->replyThread_->displayName.length() +
+            message.remove(0, this->replyThread_->root()->displayName.length() +
                                   1);  // remove "@username"
 
             if (!message.isEmpty() && message.at(0) == ' ')
@@ -373,7 +391,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
             getApp()->commands->execCommand(message, c, false);
 
         // Reply within TwitchChannel
-        tc->sendReply(sendMessage, this->replyThread_->id);
+        tc->sendReply(sendMessage, this->replyThread_->root()->id);
 
         this->postMessageSend(message, arguments);
         return "";
@@ -399,7 +417,14 @@ void SplitInput::postMessageSend(const QString &message,
 
 int SplitInput::scaledMaxHeight() const
 {
-    return int(150 * this->scale());
+    if (this->replyMessageLayout_)
+    {
+        return int(250 * this->scale());
+    }
+    else
+    {
+        return int(150 * this->scale());
+    }
 }
 
 void SplitInput::addShortcuts()
@@ -994,12 +1019,12 @@ void SplitInput::editTextChanged()
             // We need to verify that
             // 1. the @username prefix exists and
             // 2. if a character exists after the @username, it is a space
-            QString replyPrefix = "@" + this->replyThread_->displayName;
+            QString replyPrefix = "@" + this->replyThread_->root()->displayName;
             if (!text.startsWith(replyPrefix) ||
                 (text.length() > replyPrefix.length() &&
                  text.at(replyPrefix.length()) != ' '))
             {
-                this->replyThread_ = nullptr;
+                this->clearReplyThread();
             }
         }
 
@@ -1039,14 +1064,23 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
     painter.setPen(borderColor);
     painter.drawRect(completeAreaRect);
 
-    if (this->enableInlineReplying_ && this->replyThread_ != nullptr)
+    if (this->enableInlineReplying_ && this->replyMessageLayout_ != nullptr)
     {
-        // Move top of rect down to not include reply label
-        baseRect.setTop(baseRect.top() + this->ui_.replyWrapper->height());
+        Selection emptySelection;
+        bool windowFocused = this->window() == QApplication::activeWindow();
+        this->replyMessageLayout_->paint(
+            painter, this->width(), this->ui_.replySpacer->geometry().top(), 0,
+            emptySelection, false, windowFocused, false);
 
-        QRect onlyInputRect = baseRect.marginsRemoved(removeMargins);
+        int inputTop = this->ui_.replySpacer->geometry().top() +
+                       this->replyMessageLayout_->getHeight();
+
+        QRect inputRect = completeAreaRect;
+        inputRect.setTop(inputTop);
+
+        painter.fillRect(inputRect, this->theme->splits.input.background);
         painter.setPen(borderColor);
-        painter.drawRect(onlyInputRect);
+        painter.drawRect(inputRect);
     }
 }
 
@@ -1060,6 +1094,8 @@ void SplitInput::resizeEvent(QResizeEvent *)
     {
         this->ui_.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
+
+    this->layoutReplyMessage();
 }
 
 void SplitInput::giveFocus(Qt::FocusReason reason)
@@ -1073,7 +1109,7 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
     if (this->enableInlineReplying_ && oldParent)
     {
         // Remove old reply prefix
-        auto replyPrefix = "@" + oldParent->displayName;
+        auto replyPrefix = "@" + oldParent->root()->displayName;
         auto plainText = this->ui_.textEdit->toPlainText().trimmed();
         if (plainText.startsWith(replyPrefix))
         {
@@ -1088,8 +1124,12 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
 
     if (this->enableInlineReplying_)
     {
+        auto &replyRoot = this->replyThread_->root();
+        this->replyMessageLayout_ = std::make_unique<MessageLayout>(replyRoot);
+        this->layoutReplyMessage();
+
         // Only enable reply label if inline replying
-        auto replyPrefix = "@" + this->replyThread_->displayName;
+        auto replyPrefix = "@" + this->replyThread_->root()->displayName;
         auto plainText = this->ui_.textEdit->toPlainText().trimmed();
         if (!plainText.startsWith(replyPrefix))
         {
@@ -1102,7 +1142,7 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
             this->ui_.textEdit->resetCompletion();
         }
         this->ui_.replyLabel->setText("Replying to @" +
-                                      this->replyThread_->displayName);
+                                      this->replyThread_->root()->displayName);
     }
 }
 
@@ -1116,10 +1156,13 @@ void SplitInput::clearInput()
     this->currMsg_ = "";
     this->ui_.textEdit->setText("");
     this->ui_.textEdit->moveCursor(QTextCursor::Start);
-    if (this->enableInlineReplying_)
-    {
-        this->replyThread_ = nullptr;
-    }
+    this->clearReplyThread();
+}
+
+void SplitInput::clearReplyThread()
+{
+    this->replyThread_.reset();
+    this->replyMessageLayout_.reset();
 }
 
 bool SplitInput::shouldPreventInput(const QString &text) const
@@ -1143,6 +1186,47 @@ bool SplitInput::shouldPreventInput(const QString &text) const
     }
 
     return text.length() > TWITCH_MESSAGE_LIMIT;
+}
+
+void SplitInput::layoutReplyMessage()
+{
+    if (!this->replyMessageLayout_)
+    {
+        return;
+    }
+
+    auto app = getIApp();
+    auto flags = app->getWindows()->getWordFlags();
+    bool updateRequired =
+        this->replyMessageLayout_->layout(this->width(), this->scale(), flags);
+
+    qCDebug(chatterinoUpdate) << "update required:" << updateRequired;
+    qCDebug(chatterinoUpdate)
+        << "height required:" << this->replyMessageLayout_->getHeight();
+
+    this->ui_.replySpacer->changeSize(this->width(),
+                                      this->replyMessageLayout_->getHeight(),
+                                      QSizePolicy::Fixed, QSizePolicy::Fixed);
+    this->ui_.replyVbox->invalidate();
+    qCDebug(chatterinoUpdate) << "geo:" << this->ui_.replySpacer->geometry();
+
+    if (updateRequired)
+    {
+        this->updateGeometry();
+        this->update();
+        qCDebug(chatterinoUpdate)
+            << "geo2:" << this->ui_.replySpacer->geometry();
+    }
+}
+
+void SplitInput::updateReplyMessage()
+{
+    if (!this->replyMessageLayout_)
+    {
+        return;
+    }
+
+    this->update();
 }
 
 }  // namespace chatterino

@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QPaintEvent>
 #include <QPointer>
+#include <QSpacerItem>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -20,6 +21,8 @@ class Split;
 class EmotePopup;
 class InputCompletionPopup;
 class EffectLabel;
+class MessageLayout;
+class MessageThread;
 class ResizingTextEdit;
 class ChannelView;
 enum class CompletionKind;
@@ -32,6 +35,8 @@ public:
     SplitInput(Split *_chatWidget, bool enableInlineReplying = true);
     SplitInput(QWidget *parent, Split *_chatWidget, ChannelView *_channelView,
                bool enableInlineReplying = true);
+
+    ~SplitInput();
 
     bool hasSelection() const;
     void clearSelection() const;
@@ -87,7 +92,7 @@ protected:
     /// Clears the input box, clears reply thread if inline replies are enabled
     void clearInput();
 
-protected:
+private:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
@@ -103,6 +108,10 @@ protected:
     void hideCompletionPopup();
     void insertCompletionText(const QString &input_) const;
     void openEmotePopup();
+    void clearReplyThread();
+
+    void layoutReplyMessage();
+    void updateReplyMessage();
 
     void updateCancelReplyButton();
 
@@ -129,12 +138,15 @@ protected:
         QVBoxLayout *vbox;
 
         QWidget *replyWrapper;
+        QVBoxLayout *replyVbox;
         QHBoxLayout *replyHbox;
+        QSpacerItem *replySpacer;
         QLabel *replyLabel;
         EffectLabel *cancelReplyButton;
     } ui_{};
 
-    MessagePtr replyThread_ = nullptr;
+    std::shared_ptr<MessageThread> replyThread_ = nullptr;
+    std::unique_ptr<MessageLayout> replyMessageLayout_;
     bool enableInlineReplying_;
 
     pajlada::Signals::SignalHolder managedConnections_;
