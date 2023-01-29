@@ -4,9 +4,9 @@ cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_
 include(FeatureSummary)
 
 list(APPEND CMAKE_MODULE_PATH
-        "${CMAKE_SOURCE_DIR}/cmake"
-        "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
-        )
+    "${CMAKE_SOURCE_DIR}/cmake"
+    "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
+    )
 
 project(chatterino VERSION 2.4.0)
 
@@ -48,15 +48,15 @@ endif ()
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/GIT.cmake)
 
 find_package(Qt${MAJOR_QT_VERSION} REQUIRED
-        COMPONENTS
-        Core
-        Widgets
-        Gui
-        Network
-        Multimedia
-        Svg
-        Concurrent
-        )
+    COMPONENTS
+    Core
+    Widgets
+    Gui
+    Network
+    Multimedia
+    Svg
+    Concurrent
+    )
 
 message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 
