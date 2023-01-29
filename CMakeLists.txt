@@ -148,6 +148,12 @@ else()
     add_subdirectory("${CMAKE_SOURCE_DIR}/lib/settings" EXCLUDE_FROM_ALL)
 endif()
 
+add_custom_target(
+    Lua ALL
+    COMMAND make
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/lua
+)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

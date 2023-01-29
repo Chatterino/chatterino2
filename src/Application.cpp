@@ -10,6 +10,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/plugins/PluginController.hpp"
 #include "controllers/sound/SoundController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -52,7 +53,6 @@
 #include <atomic>
 
 namespace chatterino {
-
 static std::atomic<bool> isAppInitialized{false};
 
 Application *Application::instance = nullptr;
@@ -85,6 +85,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , seventvBadges(&this->emplace<SeventvBadges>())
     , userData(&this->emplace<UserDataController>())
     , sound(&this->emplace<SoundController>())
+    , plugins(&this->emplace<PluginController>())
     , logging(&this->emplace<Logging>())
 {
     this->instance = this;
@@ -143,7 +144,8 @@ void Application::initialize(Settings &settings, Paths &paths)
                     if (auto channel = split->getChannel(); !channel->isEmpty())
                     {
                         channel->addMessage(makeSystemMessage(
-                            "Chatterino unexpectedly crashed and restarted. "
+                            "Chatterino unexpectedly crashed and "
+                            "restarted. "
                             "You can disable automatic restarts in the "
                             "settings."));
                     }
