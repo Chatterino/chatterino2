@@ -36,6 +36,7 @@ if (GIT_EXECUTABLE)
             COMMAND ${GIT_EXECUTABLE} rev-parse --is-inside-work-tree
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             RESULT_VARIABLE GIT_REPOSITORY_NOT_FOUND
+            OUTPUT_QUIET
             ERROR_QUIET
     )
     if (GIT_REPOSITORY_NOT_FOUND)

@@ -19,6 +19,7 @@ class HighlightController;
 class HotkeyController;
 class IUserDataController;
 class UserDataController;
+class SoundController;
 
 class Theme;
 class WindowManager;
@@ -94,6 +95,7 @@ public:
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
     UserDataController *const userData{};
+    SoundController *const sound{};
 
     /*[[deprecated]]*/ Logging *const logging{};
 

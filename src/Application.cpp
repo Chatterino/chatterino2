@@ -10,6 +10,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/sound/SoundController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
@@ -46,6 +47,7 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/Window.hpp"
 
+#include <miniaudio.h>
 #include <QDesktopServices>
 
 #include <atomic>
@@ -84,6 +86,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
     , userData(&this->emplace<UserDataController>())
+    , sound(&this->emplace<SoundController>())
     , logging(&this->emplace<Logging>())
 {
     this->instance = this;
