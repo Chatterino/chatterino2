@@ -3,7 +3,7 @@
 ## Unversioned
 
 - Major: Added live emote updates for BTTV (#4147)
-- Minor: Added option to highlight own messages in Highlights page under Users tab. (#3833)
+- Minor: Added option to highlight your own messages in Highlights page under Users tab. (#3833)
 - Minor: Change the highlight order to prioritize Message highlights over User highlights. (#4303)
 - Minor: Added ability to negate search options by prefixing it with an exclamation mark (e.g. `!badge:mod` to search for messages where the author does not have the moderator badge). (#4207)
 - Minor: Search window input will automatically use currently selected text if present. (#4178)
