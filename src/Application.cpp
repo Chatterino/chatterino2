@@ -4,32 +4,38 @@
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/sound/SoundController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "debug/AssertInGuiThread.hpp"
+#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/Irc2.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/seventv/SeventvPaints.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
+#include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubManager.hpp"
+#include "providers/twitch/PubSubMessages.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
+#include "singletons/helper/LoggingChannel.hpp"
 #include "singletons/Logging.hpp"
-#include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Toasts.hpp"
@@ -37,11 +43,11 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
-#include "util/RapidjsonHelpers.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/Window.hpp"
 
+#include <miniaudio.h>
 #include <QDesktopServices>
 
 #include <atomic>
@@ -80,6 +86,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , seventvBadges(&this->emplace<SeventvBadges>())
     , seventvPaints(&this->emplace<SeventvPaints>())
     , userData(&this->emplace<UserDataController>())
+    , sound(&this->emplace<SoundController>())
     , logging(&this->emplace<Logging>())
 {
     this->instance = this;
@@ -155,6 +162,7 @@ void Application::initialize(Settings &settings, Paths &paths)
     }
     this->initPubSub();
 
+    this->initBttvLiveUpdates();
     this->initSeventvEventAPI();
 }
 
@@ -553,7 +561,7 @@ void Application::initPubSub()
 
     this->twitch->pubsub->start();
 
-    auto RequestModerationActions = [=]() {
+    auto RequestModerationActions = [this]() {
         this->twitch->pubsub->setAccount(
             getApp()->accounts->twitch.getCurrent());
         // TODO(pajlada): Unlisten to all authed topics instead of only
@@ -563,7 +571,7 @@ void Application::initPubSub()
     };
 
     this->accounts->twitch.currentUserChanged.connect(
-        [=] {
+        [this] {
             this->twitch->pubsub->unlistenAllModerationActions();
             this->twitch->pubsub->unlistenAutomod();
             this->twitch->pubsub->unlistenWhispers();
@@ -573,6 +581,51 @@ void Application::initPubSub()
     this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);
 
     RequestModerationActions();
+}
+
+void Application::initBttvLiveUpdates()
+{
+    if (!this->twitch->bttvLiveUpdates)
+    {
+        qCDebug(chatterinoBttv)
+            << "Skipping initialization of Live Updates as it's disabled";
+        return;
+    }
+
+    this->twitch->bttvLiveUpdates->signals_.emoteAdded.connect(
+        [&](const auto &data) {
+            auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
+
+            postToThread([chan, data] {
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->addBttvEmote(data);
+                }
+            });
+        });
+    this->twitch->bttvLiveUpdates->signals_.emoteUpdated.connect(
+        [&](const auto &data) {
+            auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
+
+            postToThread([chan, data] {
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->updateBttvEmote(data);
+                }
+            });
+        });
+    this->twitch->bttvLiveUpdates->signals_.emoteRemoved.connect(
+        [&](const auto &data) {
+            auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
+
+            postToThread([chan, data] {
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->removeBttvEmote(data);
+                }
+            });
+        });
+    this->twitch->bttvLiveUpdates->start();
 }
 
 void Application::initSeventvEventAPI()

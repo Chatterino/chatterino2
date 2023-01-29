@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
@@ -11,6 +12,7 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -21,7 +23,6 @@
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/PostToThread.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -330,7 +331,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                                 SplitContainer *container = nb.addPage(true);
                                 Split *split = new Split(container);
                                 split->setChannel(channel);
-                                container->appendSplit(split);
+                                container->insertSplit(split);
                             });
                         menu->popup(QCursor::pos());
                         menu->raise();
@@ -951,7 +952,7 @@ void UserInfoPopup::loadAvatar(const HelixUser &user)
         static auto manager = new QNetworkAccessManager();
         auto *reply = manager->get(req);
 
-        QObject::connect(reply, &QNetworkReply::finished, this, [=] {
+        QObject::connect(reply, &QNetworkReply::finished, this, [=, this] {
             if (reply->error() == QNetworkReply::NoError)
             {
                 const auto data = reply->readAll();

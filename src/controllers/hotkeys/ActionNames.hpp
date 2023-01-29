@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HotkeyCategory.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
 
 #include <QString>
 

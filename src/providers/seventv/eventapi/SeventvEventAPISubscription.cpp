@@ -1,7 +1,10 @@
 #include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
 
+#include <QDebug>
 #include <QJsonDocument>
 #include <QJsonObject>
+
+#include <tuple>
 
 namespace {
 

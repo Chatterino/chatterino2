@@ -12,6 +12,9 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' }}
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -20,23 +23,31 @@ jobs:
         os: [windows-latest, ubuntu-20.04, macos-latest]
         qt-version: [5.15.2]
         pch: [true]
+        force-lto: [false]
         include:
           - os: ubuntu-20.04
             qt-version: 5.15.2
             pch: false
+            force-lto: true
       fail-fast: false
 
     steps:
+      - name: Force LTO
+        if: matrix.force-lto == true
+        run: |
+          echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
+        shell: bash
+
       - name: Set environment variables for windows-latest
         if: matrix.os == 'windows-latest'
         run: |
-            echo "vs_version=2022" >> $GITHUB_ENV
+          echo "vs_version=2022" >> "$GITHUB_ENV"
         shell: bash
 
       - uses: actions/checkout@v3
         with:
           submodules: true
-          fetch-depth: 0  # allows for tags access
+          fetch-depth: 0 # allows for tags access
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3.0.0
@@ -52,7 +63,7 @@ jobs:
         uses: actions/cache@v3
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.txt') }}
-          path:  ~/.conan/
+          path: ~/.conan/
 
       - name: Cache conan packages part 2
         if: startsWith(matrix.os, 'windows')
@@ -68,25 +79,36 @@ jobs:
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-            choco install conan -y
+          choco install conan -y
 
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
         uses: ilammy/msvc-dev-cmd@v1.12.0
 
+      - name: Setup Conan (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          conan profile new --detect --force default
+          conan profile update conf.tools.cmake.cmaketoolchain:generator="NMake Makefiles" default
+
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-            mkdir build
-            cd build
-            conan install ..  -b missing
-            cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..
-            set cl=/MP
-            nmake /S /NOLOGO
-            windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
-            cp bin/chatterino.exe Chatterino2/
-            echo nightly > Chatterino2/modes
-            7z a chatterino-windows-x86-64.zip Chatterino2/
+          mkdir build
+          cd build
+          conan install .. -s build_type=Release -b missing -pr:b=default
+          cmake `
+              -G"NMake Makefiles" `
+              -DCMAKE_BUILD_TYPE=Release `
+              -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
+              -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
+              ..
+          set cl=/MP
+          nmake /S /NOLOGO
+          windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
+          cp bin/chatterino.exe Chatterino2/
+          echo nightly > Chatterino2/modes
+          7z a chatterino-windows-x86-64.zip Chatterino2/
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -104,41 +126,42 @@ jobs:
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            sudo apt-get update
-            sudo apt-get -y install \
-                cmake \
-                virtualenv \
-                rapidjson-dev \
-                libfuse2 \
-                libssl-dev \
-                libboost-dev \
-                libxcb-randr0-dev \
-                libboost-system-dev \
-                libboost-filesystem-dev \
-                libpulse-dev \
-                libxkbcommon-x11-0 \
-                libgstreamer-plugins-base1.0-0 \
-                build-essential \
-                libgl1-mesa-dev \
-                libxcb-icccm4 \
-                libxcb-image0 \
-                libxcb-keysyms1 \
-                libxcb-render-util0 \
-                libxcb-xinerama0
+          sudo apt-get update
+          sudo apt-get -y install \
+              cmake \
+              virtualenv \
+              rapidjson-dev \
+              libfuse2 \
+              libssl-dev \
+              libboost-dev \
+              libxcb-randr0-dev \
+              libboost-system-dev \
+              libboost-filesystem-dev \
+              libpulse-dev \
+              libxkbcommon-x11-0 \
+              libgstreamer-plugins-base1.0-0 \
+              build-essential \
+              libgl1-mesa-dev \
+              libxcb-icccm4 \
+              libxcb-image0 \
+              libxcb-keysyms1 \
+              libxcb-render-util0 \
+              libxcb-xinerama0
 
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            mkdir build
-            cd build
-            cmake \
-              -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
-              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
-              -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
-              ..
-            make -j$(nproc)
+          mkdir build
+          cd build
+          cmake \
+            -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
+            -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
+            -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+            ..
+          make -j"$(nproc)"
         shell: bash
 
       - name: clang-tidy review
@@ -147,8 +170,9 @@ jobs:
         id: review
         with:
           build_dir: build
-          config_file: '.clang-tidy'
+          config_file: ".clang-tidy"
           split_workflow: true
+          exclude: "tests/*,lib/*"
 
       - uses: actions/upload-artifact@v3
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
@@ -161,15 +185,15 @@ jobs:
       - name: Package - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            cd build
-            sh ./../.CI/CreateAppImage.sh
+          cd build
+          sh ./../.CI/CreateAppImage.sh
         shell: bash
 
       - name: Package - .deb (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            cd build
-            sh ./../.CI/CreateUbuntuDeb.sh
+          cd build
+          sh ./../.CI/CreateUbuntuDeb.sh
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
@@ -190,31 +214,32 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-            brew install boost openssl rapidjson p7zip create-dmg cmake tree
+          brew install boost openssl rapidjson p7zip create-dmg cmake tree
         shell: bash
 
       - name: Build (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-            mkdir build
-            cd build
-            cmake \
-                -DCMAKE_BUILD_TYPE=Release \
-                -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
-                -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-                -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
-                ..
-            make -j$(sysctl -n hw.logicalcpu)
+          mkdir build
+          cd build
+          cmake \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+              -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
+              -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+              ..
+          make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
 
       - name: Package (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-            ls -la
-            pwd
-            ls -la build || true
-            cd build
-            sh ./../.CI/CreateDMG.sh
+          ls -la
+          pwd
+          ls -la build || true
+          cd build
+          sh ./../.CI/CreateDMG.sh
         shell: bash
 
       - name: Upload artifact (MacOS)

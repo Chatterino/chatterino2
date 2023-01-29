@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/SignalVectorModel.hpp"
-#include "controllers/hotkeys/Hotkey.hpp"
 #include "util/QStringHash.hpp"
 
 #include <unordered_map>
@@ -9,6 +8,7 @@
 namespace chatterino {
 
 class HotkeyController;
+class Hotkey;
 
 class HotkeyModel : public SignalVectorModel<std::shared_ptr<Hotkey>>
 {

@@ -3,12 +3,9 @@
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
 #include "common/SignalVector.hpp"
-#include "controllers/filters/FilterRecord.hpp"
-#include "controllers/highlights/HighlightBadge.hpp"
-#include "controllers/highlights/HighlightPhrase.hpp"
-#include "controllers/moderationactions/ModerationAction.hpp"
-#include "controllers/nicknames/Nickname.hpp"
+#include "controllers/logging/ChannelLog.hpp"
 #include "singletons/Toasts.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/SplitInput.hpp"
@@ -24,7 +21,10 @@ class HighlightPhrase;
 class HighlightBlacklistUser;
 class IgnorePhrase;
 class FilterRecord;
+using FilterRecordPtr = std::shared_ptr<FilterRecord>;
 class Nickname;
+class HighlightBadge;
+class ModerationAction;
 
 /// Settings which are available for reading on all threads.
 class ConcurrentSettings
@@ -41,6 +41,7 @@ public:
     SignalVector<FilterRecordPtr> &filterRecords;
     SignalVector<Nickname> &nicknames;
     SignalVector<ModerationAction> &moderationActions;
+    SignalVector<ChannelLog> &loggedChannels;
 
     bool isHighlightedUser(const QString &username);
     bool isBlacklistedUser(const QString &username);
@@ -230,6 +231,7 @@ public:
 
     BoolSetting enableBTTVGlobalEmotes = {"/emotes/bttv/global", true};
     BoolSetting enableBTTVChannelEmotes = {"/emotes/bttv/channel", true};
+    BoolSetting enableBTTVLiveUpdates = {"/emotes/bttv/liveupdates", true};
     BoolSetting enableFFZGlobalEmotes = {"/emotes/ffz/global", true};
     BoolSetting enableFFZChannelEmotes = {"/emotes/ffz/channel", true};
     BoolSetting enableSevenTVGlobalEmotes = {"/emotes/seventv/global", true};
@@ -371,6 +373,8 @@ public:
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
+    BoolSetting onlyLogListedChannels = {"/logging/onlyLogListedChannels",
+                                         false};
 
     QStringSetting logPath = {"/logging/path", ""};
 
@@ -529,7 +533,3 @@ private:
 };
 
 }  // namespace chatterino
-
-#ifdef CHATTERINO
-#    include "singletons/Settings.hpp"
-#endif

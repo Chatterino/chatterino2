@@ -1,12 +1,13 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 
-#include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 
@@ -14,6 +15,7 @@
 #include <QJsonDocument>
 #include <QThread>
 
+#include <array>
 #include <utility>
 
 /**

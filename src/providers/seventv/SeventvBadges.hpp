@@ -1,10 +1,10 @@
 #pragma once
 
 #include "common/Aliases.hpp"
+#include "common/Singleton.hpp"
 #include "util/QStringHash.hpp"
 
 #include <boost/optional.hpp>
-#include <common/Singleton.hpp>
 
 #include <memory>
 #include <shared_mutex>

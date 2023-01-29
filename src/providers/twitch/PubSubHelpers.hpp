@@ -1,11 +1,9 @@
 #pragma once
 
 #include "common/QLogging.hpp"
-#include "util/RapidjsonHelpers.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include <QJsonObject>
 
 #include <memory>
 

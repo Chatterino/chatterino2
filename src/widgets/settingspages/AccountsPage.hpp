@@ -1,11 +1,12 @@
 #pragma once
 
-#include "widgets/AccountSwitchWidget.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
 #include <QPushButton>
 
 namespace chatterino {
+
+class AccountSwitchWidget;
 
 class AccountsPage : public SettingsPage
 {

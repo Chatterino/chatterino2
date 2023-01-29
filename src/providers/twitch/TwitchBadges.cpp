@@ -1,9 +1,12 @@
 #include "TwitchBadges.hpp"
 
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
+#include "util/DisplayBadge.hpp"
 
 #include <QBuffer>
 #include <QIcon>

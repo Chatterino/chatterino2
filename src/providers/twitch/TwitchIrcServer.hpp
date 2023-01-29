@@ -3,11 +3,12 @@
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/Singleton.hpp"
-#include "pajlada/signals/signalholder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+
+#include <pajlada/signals/signalholder.hpp>
 
 #include <chrono>
 #include <memory>
@@ -19,6 +20,7 @@ class Settings;
 class Paths;
 class PubSub;
 class TwitchChannel;
+class BttvLiveUpdates;
 class SeventvEventAPI;
 
 class TwitchIrcServer final : public AbstractIrcServer, public Singleton
@@ -65,6 +67,7 @@ public:
     IndirectChannel watchingChannel;
 
     PubSub *pubsub;
+    std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 
     const BttvEmotes &getBttvEmotes() const;

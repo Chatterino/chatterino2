@@ -1,7 +1,5 @@
 #pragma once
 
-#include "controllers/hotkeys/Hotkey.hpp"
-
 #include <QDialog>
 
 #include <memory>
@@ -14,7 +12,9 @@ class EditHotkeyDialog;
 
 namespace chatterino {
 
-class EditHotkeyDialog : public QDialog
+class Hotkey;
+
+class EditHotkeyDialog final : public QDialog
 {
     Q_OBJECT
 

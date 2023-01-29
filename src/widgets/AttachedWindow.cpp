@@ -1,4 +1,4 @@
-#include "AttachedWindow.hpp"
+#include "widgets/AttachedWindow.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
@@ -13,14 +13,14 @@
 #include <memory>
 
 #ifdef USEWINSDK
-// clang-format off
 #    include "util/WindowsHelper.hpp"
 
-#    include "Windows.h"
+// clang-format off
 // don't even think about reordering these
+#    include "Windows.h"
 #    include "Psapi.h"
-#    pragma comment(lib, "Dwmapi.lib")
 // clang-format on
+#    pragma comment(lib, "Dwmapi.lib")
 #endif
 
 namespace chatterino {

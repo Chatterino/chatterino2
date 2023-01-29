@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/NetworkCommon.hpp"
-#include "common/NetworkResult.hpp"
 
 #include <QHttpMultiPart>
 

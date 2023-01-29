@@ -1,17 +1,11 @@
 #pragma once
 
-#include "Application.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/ChannelChatters.hpp"
-#include "common/ChatterSet.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
-#include "messages/MessageThread.hpp"
-#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
-#include "providers/twitch/api/Helix.hpp"
-#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 
@@ -53,7 +47,17 @@ class EmoteMap;
 class TwitchBadges;
 class FfzEmotes;
 class BttvEmotes;
+struct BttvLiveUpdateEmoteUpdateAddMessage;
+struct BttvLiveUpdateEmoteRemoveMessage;
 class SeventvEmotes;
+struct SeventvEventAPIEmoteAddDispatch;
+struct SeventvEventAPIEmoteUpdateDispatch;
+struct SeventvEventAPIEmoteRemoveDispatch;
+struct SeventvEventAPIUserConnectionUpdateDispatch;
+struct ChannelPointReward;
+class MessageThread;
+struct CheerEmoteSet;
+struct HelixStream;
 
 class TwitchIrcServer;
 
@@ -75,7 +79,21 @@ public:
         bool submode = false;
         bool r9k = false;
         bool emoteOnly = false;
+
+        /**
+         * @brief Number of minutes required for users to be followed before typing in chat
+         *
+         * Special cases:
+         * -1 = follower mode off
+         *  0 = follower mode on, no time requirement
+         **/
         int followerOnly = -1;
+
+        /**
+         * @brief Number of seconds required to wait before typing emotes
+         *
+         * 0 = slow mode off
+         **/
         int slowMode = 0;
     };
 
@@ -125,6 +143,13 @@ public:
 
     const QString &seventvUserID() const;
     const QString &seventvEmoteSetID() const;
+
+    /** Adds a BTTV channel emote to this channel. */
+    void addBttvEmote(const BttvLiveUpdateEmoteUpdateAddMessage &message);
+    /** Updates a BTTV channel emote in this channel. */
+    void updateBttvEmote(const BttvLiveUpdateEmoteUpdateAddMessage &message);
+    /** Removes a BTTV channel emote from this channel. */
+    void removeBttvEmote(const BttvLiveUpdateEmoteRemoveMessage &message);
 
     /** Adds a 7TV channel emote to this channel. */
     void addSeventvEmote(const SeventvEventAPIEmoteAddDispatch &dispatch);
@@ -193,6 +218,8 @@ private:
     void fetchDisplayName();
     void cleanUpReplyThreads();
     void showLoginMessage();
+    /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
+    void joinBttvChannel() const;
 
     void setLive(bool newLiveStatus);
     void setMod(bool value);

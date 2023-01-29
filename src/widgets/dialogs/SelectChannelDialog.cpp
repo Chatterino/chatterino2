@@ -4,7 +4,10 @@
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "providers/irc/Irc2.hpp"
+#include "providers/irc/IrcChannel2.hpp"
+#include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/IrcConnectionEditor.hpp"
@@ -223,13 +226,14 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         layout.emplace<QHBoxLayout>().emplace<QDialogButtonBox>(this);
     {
         auto *button_ok = buttons->addButton(QDialogButtonBox::Ok);
-        QObject::connect(button_ok, &QPushButton::clicked, [=](bool) {
+        QObject::connect(button_ok, &QPushButton::clicked, [this](bool) {
             this->ok();
         });
         auto *button_cancel = buttons->addButton(QDialogButtonBox::Cancel);
-        QObject::connect(button_cancel, &QAbstractButton::clicked, [=](bool) {
-            this->close();
-        });
+        QObject::connect(button_cancel, &QAbstractButton::clicked,
+                         [this](bool) {
+                             this->close();
+                         });
     }
 
     this->setMinimumSize(300, 310);
@@ -409,9 +413,12 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
         if (radio)
         {
             radio->setChecked(true);
+            return true;
         }
-
-        return true;
+        else
+        {
+            return false;
+        }
     }
     else if (event->type() == QEvent::KeyPress)
     {

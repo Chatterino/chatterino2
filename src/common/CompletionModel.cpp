@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/ChatterSet.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "messages/Emote.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -94,7 +95,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     // Twitch channel
     auto *tc = dynamic_cast<TwitchChannel *>(&this->channel_);
 
-    auto addString = [=](const QString &str, TaggedString::Type type) {
+    auto addString = [=, this](const QString &str, TaggedString::Type type) {
         // Special case for handling default Twitch commands
         if (type == TaggedString::TwitchCommand)
         {

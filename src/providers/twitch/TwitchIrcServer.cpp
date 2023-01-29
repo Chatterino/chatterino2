@@ -1,18 +1,20 @@
 #include "TwitchIrcServer.hpp"
 
 #include "Application.hpp"
-#include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/bttv/BttvLiveUpdates.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchHelpers.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
@@ -26,7 +28,13 @@
 using namespace std::chrono_literals;
 
 #define TWITCH_PUBSUB_URL "wss://pubsub-edge.twitch.tv"
-#define SEVENTV_EVENTAPI_URL "wss://events.7tv.io/v3"
+
+namespace {
+
+const QString BTTV_LIVE_UPDATES_URL = "wss://sockets.betterttv.net/ws";
+const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
+
+}  // namespace
 
 namespace chatterino {
 
@@ -39,6 +47,14 @@ TwitchIrcServer::TwitchIrcServer()
     this->initializeIrc();
 
     this->pubsub = new PubSub(TWITCH_PUBSUB_URL);
+
+    if (getSettings()->enableBTTVLiveUpdates &&
+        getSettings()->enableBTTVChannelEmotes)
+    {
+        this->bttvLiveUpdates =
+            std::make_unique<BttvLiveUpdates>(BTTV_LIVE_UPDATES_URL);
+    }
+
     if (getSettings()->enableSevenTVEventAPI &&
         getSettings()->enableSevenTVChannelEmotes)
     {
@@ -66,7 +82,7 @@ void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
     this->reloadSevenTVGlobalEmotes();
 
     /* Refresh all twitch channel's live status in bulk every 30 seconds after starting chatterino */
-    QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [=] {
+    QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [this] {
         this->bulkRefreshLiveStatus();
     });
     this->bulkLiveStatusTimer_.start(30 * 1000);
@@ -110,7 +126,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
         connection->setPassword(oauthToken);
     }
 
-    // https://dev.twitch.tv/docs/irc/guide/#connecting-to-twitch-irc
+    // https://dev.twitch.tv/docs/irc#connecting-to-the-twitch-irc-server
     // SSL disabled: irc://irc.chat.twitch.tv:6667 (or port 80)
     // SSL enabled: irc://irc.chat.twitch.tv:6697 (or port 443)
     connection->setHost(Env::get().twitchServerHost);

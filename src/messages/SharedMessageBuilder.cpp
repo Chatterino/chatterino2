@@ -5,7 +5,11 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
+#include "controllers/nicknames/Nickname.hpp"
+#include "controllers/sound/SoundController.hpp"
+#include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
@@ -13,33 +17,32 @@
 #include "util/StreamerMode.hpp"
 
 #include <QFileInfo>
-#include <QMediaPlayer>
-
-namespace chatterino {
 
 namespace {
 
-    /**
-     * Gets the default sound url if the user set one,
-     * or the chatterino default ping sound if no url is set.
-     */
-    QUrl getFallbackHighlightSound()
-    {
-        QString path = getSettings()->pathHighlightSound;
-        bool fileExists = !path.isEmpty() && QFileInfo::exists(path) &&
-                          QFileInfo(path).isFile();
+using namespace chatterino;
 
-        if (fileExists)
-        {
-            return QUrl::fromLocalFile(path);
-        }
-        else
-        {
-            return QUrl("qrc:/sounds/ping2.wav");
-        }
+/**
+ * Gets the default sound url if the user set one,
+ * or the chatterino default ping sound if no url is set.
+ */
+QUrl getFallbackHighlightSound()
+{
+    QString path = getSettings()->pathHighlightSound;
+    bool fileExists =
+        !path.isEmpty() && QFileInfo::exists(path) && QFileInfo(path).isFile();
+
+    if (fileExists)
+    {
+        return QUrl::fromLocalFile(path);
     }
 
+    return QUrl("qrc:/sounds/ping2.wav");
+}
+
 }  // namespace
+
+namespace chatterino {
 
 SharedMessageBuilder::SharedMessageBuilder(
     Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
@@ -195,23 +198,8 @@ void SharedMessageBuilder::appendChannelName()
         ->setLink(link);
 }
 
-inline QMediaPlayer *getPlayer()
-{
-    if (isGuiThread())
-    {
-        static auto player = new QMediaPlayer;
-        return player;
-    }
-    else
-    {
-        return nullptr;
-    }
-}
-
 void SharedMessageBuilder::triggerHighlights()
 {
-    static QUrl currentPlayerUrl;
-
     if (isInStreamerMode() && getSettings()->streamerModeMuteMentions)
     {
         // We are in streamer mode with muting mention sounds enabled. Do nothing.
@@ -229,18 +217,7 @@ void SharedMessageBuilder::triggerHighlights()
 
     if (this->highlightSound_ && resolveFocus)
     {
-        if (auto player = getPlayer())
-        {
-            // update the media player url if necessary
-            if (currentPlayerUrl != this->highlightSoundUrl_)
-            {
-                player->setMedia(this->highlightSoundUrl_);
-
-                currentPlayerUrl = this->highlightSoundUrl_;
-            }
-
-            player->play();
-        }
+        getApp()->sound->play(this->highlightSoundUrl_);
     }
 
     if (this->highlightAlert_)

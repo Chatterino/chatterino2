@@ -2,13 +2,18 @@
 
 #include "providers/liveupdates/BasicPubSubClient.hpp"
 #include "providers/liveupdates/BasicPubSubManager.hpp"
-#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
-#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
 #include "util/QStringHash.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
+
+struct SeventvEventAPISubscription;
+struct SeventvEventAPIDispatch;
+struct SeventvEventAPIEmoteAddDispatch;
+struct SeventvEventAPIEmoteUpdateDispatch;
+struct SeventvEventAPIEmoteRemoveDispatch;
+struct SeventvEventAPIUserConnectionUpdateDispatch;
 
 class SeventvEventAPI : public BasicPubSubManager<SeventvEventAPISubscription>
 {

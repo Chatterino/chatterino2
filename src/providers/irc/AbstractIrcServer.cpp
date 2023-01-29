@@ -1,7 +1,6 @@
 #include "AbstractIrcServer.hpp"
 
 #include "common/Channel.hpp"
-#include "common/Common.hpp"
 #include "common/QLogging.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"

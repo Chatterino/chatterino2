@@ -3,6 +3,8 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
+#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
@@ -347,6 +349,11 @@ ImagePtr Image::getEmpty()
     return empty;
 }
 
+ImagePtr getEmptyImagePtr()
+{
+    return Image::getEmpty();
+}
+
 Image::Image()
     : empty_(true)
 {
@@ -542,23 +549,6 @@ void Image::expireFrames()
     assertInGuiThread();
     this->frames_->clear();
     this->shouldLoad_ = true;  // Mark as needing load again
-}
-
-bool Image::operator==(const Image &other) const
-{
-    if (this->isEmpty() && other.isEmpty())
-        return true;
-    if (!this->url_.string.isEmpty() && this->url_ == other.url_)
-        return true;
-    if (this->frames_->first() == other.frames_->first())
-        return true;
-
-    return false;
-}
-
-bool Image::operator!=(const Image &other) const
-{
-    return !this->operator==(other);
 }
 
 ImageExpirationPool::ImageExpirationPool()

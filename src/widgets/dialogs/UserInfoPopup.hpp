@@ -3,7 +3,6 @@
 #include "singletons/Paths.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/DraggablePopup.hpp"
-#include "widgets/helper/ChannelView.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -21,6 +20,9 @@ inline static const QString SEVENTV_USER_API =
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 class Label;
+class ChannelView;
+class Split;
+class HelixUser;
 
 class UserInfoPopup final : public DraggablePopup
 {

@@ -1,6 +1,7 @@
 #include "controllers/highlights/HighlightBlacklistModel.hpp"
 
 #include "Application.hpp"
+#include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "singletons/Settings.hpp"
 #include "util/StandardItemHelper.hpp"
 

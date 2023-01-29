@@ -131,7 +131,7 @@ Open up your terminal with the Visual Studio environment variables, then enter t
 
 1. `mkdir build`
 2. `cd build`
-3. `cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..`
+3. `cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" ..`
 4. `nmake`
 
 ## Building on MSVC with AddressSanitizer
@@ -160,7 +160,7 @@ Now open the project in CLion. You will be greeted with the _Open Project Wizard
 
 ```
 -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64\lib\cmake\Qt5
--DUSE_CONAN=ON
+-DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake"
 ```
 
 and the _Build Directory_ to `build`.

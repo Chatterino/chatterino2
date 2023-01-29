@@ -2,6 +2,7 @@
 
 #include "common/Modes.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
@@ -14,6 +15,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QRegularExpression>
+#include <semver/semver.hpp>
 
 namespace chatterino {
 namespace {
@@ -22,37 +24,6 @@ namespace {
         return getSettings()->betaUpdates ? "beta" : "stable";
     }
 
-    /// Checks if the online version is newer or older than the current version.
-    bool isDowngradeOf(const QString &online, const QString &current)
-    {
-        static auto matchVersion =
-            QRegularExpression(R"((\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?)");
-
-        // Versions are just strings, they don't need to follow a specific
-        // format so we can only assume if one version is newer than another
-        // one.
-
-        // We match x.x.x.x with each version level being optional.
-
-        auto onlineMatch = matchVersion.match(online);
-        auto currentMatch = matchVersion.match(current);
-
-        for (int i = 1; i <= 4; i++)
-        {
-            if (onlineMatch.captured(i).toInt() <
-                currentMatch.captured(i).toInt())
-            {
-                return true;
-            }
-            if (onlineMatch.captured(i).toInt() >
-                currentMatch.captured(i).toInt())
-            {
-                break;
-            }
-        }
-
-        return false;
-    }
 }  // namespace
 
 Updates::Updates()
@@ -68,6 +39,28 @@ Updates &Updates::instance()
     static Updates instance;
 
     return instance;
+}
+
+/// Checks if the online version is newer or older than the current version.
+bool Updates::isDowngradeOf(const QString &online, const QString &current)
+{
+    semver::version onlineVersion;
+    if (!onlineVersion.from_string_noexcept(online.toStdString()))
+    {
+        qCWarning(chatterinoUpdate) << "Unable to parse online version"
+                                    << online << "into a proper semver string";
+        return false;
+    }
+
+    semver::version currentVersion;
+    if (!currentVersion.from_string_noexcept(current.toStdString()))
+    {
+        qCWarning(chatterinoUpdate) << "Unable to parse current version"
+                                    << current << "into a proper semver string";
+        return false;
+    }
+
+    return onlineVersion < currentVersion;
 }
 
 const QString &Updates::getCurrentVersion() const
@@ -312,8 +305,8 @@ void Updates::checkForUpdates()
             if (this->currentVersion_ != this->onlineVersion_)
             {
                 this->setStatus_(UpdateAvailable);
-                this->isDowngrade_ =
-                    isDowngradeOf(this->onlineVersion_, this->currentVersion_);
+                this->isDowngrade_ = Updates::isDowngradeOf(
+                    this->onlineVersion_, this->currentVersion_);
             }
             else
             {

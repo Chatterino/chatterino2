@@ -22,6 +22,8 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/LimitedQueue.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/BasicPubSub.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/SeventvEventAPI.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/BttvLiveUpdates.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Updates.cpp
     # Add your new file above this line!
     )
 
@@ -45,6 +47,12 @@ set_target_properties(${PROJECT_NAME}
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
     )
+
+if(CHATTERINO_ENABLE_LTO)
+    message(STATUS "Enabling LTO for ${PROJECT_NAME}")
+    set_property(TARGET ${PROJECT_NAME}
+        PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
 # gtest_add_tests manages to discover the tests because it looks through the source files
 # HOWEVER, it fails to run, because we have some bug that causes the QApplication exit to stall when no network requests have been made.

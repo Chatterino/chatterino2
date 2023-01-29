@@ -10,14 +10,13 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/splits/SplitInput.hpp"
 
@@ -433,6 +432,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.emojiSet);
     layout.addCheckbox("Show BTTV global emotes", s.enableBTTVGlobalEmotes);
     layout.addCheckbox("Show BTTV channel emotes", s.enableBTTVChannelEmotes);
+    layout.addCheckbox("Enable BTTV live emote updates (requires restart)",
+                       s.enableBTTVLiveUpdates);
     layout.addCheckbox("Show FFZ global emotes", s.enableFFZGlobalEmotes);
     layout.addCheckbox("Show FFZ channel emotes", s.enableFFZChannelEmotes);
     layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);

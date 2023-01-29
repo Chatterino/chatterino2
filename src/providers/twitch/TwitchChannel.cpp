@@ -1,19 +1,28 @@
 #include "providers/twitch/TwitchChannel.hpp"
 
+#include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
+#include "messages/Link.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageElement.hpp"
+#include "messages/MessageThread.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
-#include "providers/bttv/LoadBttvChannelEmote.hpp"
+#include "providers/bttv/BttvLiveUpdates.hpp"
+#include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
 #include "providers/RecentMessagesApi.hpp"
+#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -38,7 +47,11 @@
 
 namespace chatterino {
 namespace {
-    constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
+#if QT_VERSION < QT_VERSION_CHECK(6, 1, 0)
+    const QString MAGIC_MESSAGE_SUFFIX = QString((const char *)u8" \U000E0000");
+#else
+    const QString MAGIC_MESSAGE_SUFFIX = QString::fromUtf8(u8" \U000E0000");
+#endif
     constexpr int TITLE_REFRESH_PERIOD = 10000;
     constexpr int CLIP_CREATION_COOLDOWN = 5000;
     const QString CLIPS_LINK("https://clips.twitch.tv/%1");
@@ -72,7 +85,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([=] {
+        getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
             this->refreshPubSub();
         }));
@@ -92,6 +105,7 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->refreshFFZChannelEmotes(false);
         this->refreshBTTVChannelEmotes(false);
         this->refreshSevenTVChannelEmotes(false);
+        this->joinBttvChannel();
     });
 
     this->connected.connect([this]() {
@@ -110,6 +124,11 @@ TwitchChannel::TwitchChannel(const QString &name)
     this->destroyed.connect([this]() {
         getApp()->twitch->dropSeventvChannel(this->seventvUserID_,
                                              this->seventvEmoteSetID_);
+
+        if (getApp()->twitch->bttvLiveUpdates)
+        {
+            getApp()->twitch->bttvLiveUpdates->partChannel(this->roomId());
+        }
     });
 
     this->messageRemovedFromStart.connect([this](MessagePtr &msg) {
@@ -124,13 +143,13 @@ TwitchChannel::TwitchChannel(const QString &name)
 
     // timers
 
-    QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [=] {
+    QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [this] {
         this->refreshChatters();
     });
 
     this->chattersListTimer_.start(5 * 60 * 1000);
 
-    QObject::connect(&this->threadClearTimer_, &QTimer::timeout, [=] {
+    QObject::connect(&this->threadClearTimer_, &QTimer::timeout, [this] {
         // We periodically check for any dangling reply threads that missed
         // being cleaned up on messageRemovedFromStart. This could occur if
         // some other part of the program, like a user card, held a reference
@@ -609,6 +628,66 @@ const QString &TwitchChannel::seventvUserID() const
 const QString &TwitchChannel::seventvEmoteSetID() const
 {
     return this->seventvEmoteSetID_;
+}
+
+void TwitchChannel::joinBttvChannel() const
+{
+    if (getApp()->twitch->bttvLiveUpdates)
+    {
+        const auto currentAccount = getApp()->accounts->twitch.getCurrent();
+        QString userName;
+        if (currentAccount && !currentAccount->isAnon())
+        {
+            userName = currentAccount->getUserName();
+        }
+        getApp()->twitch->bttvLiveUpdates->joinChannel(this->roomId(),
+                                                       userName);
+    }
+}
+
+void TwitchChannel::addBttvEmote(
+    const BttvLiveUpdateEmoteUpdateAddMessage &message)
+{
+    auto emote = BttvEmotes::addEmote(this->getDisplayName(), this->bttvEmotes_,
+                                      message);
+
+    this->addOrReplaceLiveUpdatesAddRemove(true, "BTTV", QString() /*actor*/,
+                                           emote->name.string);
+}
+
+void TwitchChannel::updateBttvEmote(
+    const BttvLiveUpdateEmoteUpdateAddMessage &message)
+{
+    auto updated = BttvEmotes::updateEmote(this->getDisplayName(),
+                                           this->bttvEmotes_, message);
+    if (!updated)
+    {
+        return;
+    }
+
+    const auto [oldEmote, newEmote] = *updated;
+    if (oldEmote->name == newEmote->name)
+    {
+        return;  // only the creator changed
+    }
+
+    auto builder = MessageBuilder(liveUpdatesUpdateEmoteMessage, "BTTV",
+                                  QString() /* actor */, newEmote->name.string,
+                                  oldEmote->name.string);
+    this->addMessage(builder.release());
+}
+
+void TwitchChannel::removeBttvEmote(
+    const BttvLiveUpdateEmoteRemoveMessage &message)
+{
+    auto removed = BttvEmotes::removeEmote(this->bttvEmotes_, message);
+    if (!removed)
+    {
+        return;
+    }
+
+    this->addOrReplaceLiveUpdatesAddRemove(false, "BTTV", QString() /*actor*/,
+                                           removed.get()->name.string);
 }
 
 void TwitchChannel::addSeventvEmote(

@@ -2,8 +2,6 @@
 
 #include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
-#include "messages/layouts/MessageLayoutElement.hpp"
-#include "messages/Selection.hpp"
 
 #include <QPoint>
 #include <QRect>
@@ -18,6 +16,8 @@ namespace chatterino {
 enum class MessageFlag : int64_t;
 enum class FirstWord { Neutral, RTL, LTR };
 using MessageFlags = FlagsEnum<MessageFlag>;
+class MessageLayoutElement;
+struct Selection;
 
 struct Margin {
     int top;
