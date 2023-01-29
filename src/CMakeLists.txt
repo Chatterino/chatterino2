@@ -603,7 +603,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Widgets
         Qt${MAJOR_QT_VERSION}::Gui
         Qt${MAJOR_QT_VERSION}::Network
-        Qt${MAJOR_QT_VERSION}::Multimedia
         Qt${MAJOR_QT_VERSION}::Svg
         Qt${MAJOR_QT_VERSION}::Concurrent
 
@@ -809,30 +808,16 @@ if (WinToast_FOUND)
         WinToast)
 endif ()
 
-if (USE_CONAN AND TARGET CONAN_PKG::boost)
-    target_link_libraries(${LIBRARY_PROJECT}
-        PUBLIC
-        CONAN_PKG::boost
-        )
-else ()
-    target_link_libraries(${LIBRARY_PROJECT}
+target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         ${Boost_LIBRARIES}
         )
-endif ()
 
-if (USE_CONAN AND TARGET CONAN_PKG::openssl)
-    target_link_libraries(${LIBRARY_PROJECT}
-        PUBLIC
-        CONAN_PKG::openssl
-        )
-else ()
-    target_link_libraries(${LIBRARY_PROJECT}
+target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         OpenSSL::SSL
         OpenSSL::Crypto
         )
-endif ()
 
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${RapidJSON_INCLUDE_DIRS})
 

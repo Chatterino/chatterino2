@@ -3,7 +3,8 @@ openssl/1.1.1s
 boost/1.80.0
 
 [generators]
-cmake
+CMakeDeps
+CMakeToolchain
 
 [options]
 openssl:shared=True

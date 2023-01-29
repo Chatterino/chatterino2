@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 3.12)
-cmake_policy(SET CMP0087 NEW)
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
+cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
 include(FeatureSummary)
 
 list(APPEND CMAKE_MODULE_PATH
@@ -24,8 +25,6 @@ option(BUILD_TRANSLATIONS "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
 
-option(USE_CONAN "Use conan" OFF)
-
 if(CHATTERINO_LTO)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
@@ -38,13 +37,6 @@ if (BUILD_WITH_QT6)
     set(MAJOR_QT_VERSION "6")
 else()
     set(MAJOR_QT_VERSION "5")
-endif()
-
-if (USE_CONAN OR CONAN_EXPORTED)
-    include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
-else ()
-    set(QT_CREATOR_SKIP_CONAN_SETUP ON)
 endif()
 
 find_program(CCACHE_PROGRAM ccache)
@@ -61,7 +53,6 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Widgets
     Gui
     Network
-    Multimedia
     Svg
     Concurrent
     )
@@ -75,8 +66,9 @@ endif ()
 find_package(Sanitizers)
 
 # Find boost on the system
-find_package(Boost REQUIRED)
-find_package(Boost COMPONENTS random)
+# `OPTIONAL_COMPONENTS random` is required for vcpkg builds to link.
+# `OPTIONAL` is required, because conan doesn't set `boost_random_FOUND`.
+find_package(Boost REQUIRED OPTIONAL_COMPONENTS random)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
