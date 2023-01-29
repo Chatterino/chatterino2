@@ -64,7 +64,6 @@
 #    include <QListView>
 #    include <QListWidget>
 #    include <QMap>
-#    include <QMediaPlayer>
 #    include <QMenu>
 #    include <QMessageBox>
 #    include <QMimeData>
