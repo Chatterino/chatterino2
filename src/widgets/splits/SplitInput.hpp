@@ -2,7 +2,6 @@
 
 #include "util/QObjectRef.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "widgets/dialogs/EmotePopup.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -12,25 +11,50 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include <memory>
+
 namespace chatterino {
 
 class Split;
 class EmotePopup;
 class InputCompletionPopup;
 class EffectLabel;
+class MessageThread;
 class ResizingTextEdit;
+class ChannelView;
+
+// MessageOverflow is used for controlling how to guide the user into not
+// sending a message that will be discarded by Twitch
+enum MessageOverflow {
+    // Allow overflowing characters to be inserted into the input box, but highlight them in red
+    Highlight,
+
+    // Prevent more characters from being inserted into the input box
+    Prevent,
+
+    // Do nothing
+    Allow,
+};
 
 class SplitInput : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    SplitInput(Split *_chatWidget);
+    SplitInput(Split *_chatWidget, bool enableInlineReplying = true);
+    SplitInput(QWidget *parent, Split *_chatWidget, ChannelView *_channelView,
+               bool enableInlineReplying = true);
 
-    void clearSelection();
+    bool hasSelection() const;
+    void clearSelection() const;
+
     bool isEditFirstWord() const;
     QString getInputText() const;
     void insertText(const QString &text);
+
+    void setReply(std::shared_ptr<MessageThread> reply,
+                  bool showInlineReplying = true);
+    void setPlaceholderText(const QString &text);
 
     /**
      * @brief Hide the widget
@@ -56,6 +80,7 @@ public:
     bool isHidden() const;
 
     pajlada::Signals::Signal<const QString &> textChanged;
+    pajlada::Signals::NoArgSignal selectionChanged;
 
 protected:
     void scaleChangedEvent(float scale_) override;
@@ -64,7 +89,18 @@ protected:
     void paintEvent(QPaintEvent * /*event*/) override;
     void resizeEvent(QResizeEvent * /*event*/) override;
 
-private:
+    void mousePressEvent(QMouseEvent *event) override;
+
+    virtual void giveFocus(Qt::FocusReason reason);
+
+    QString handleSendMessage(std::vector<QString> &arguments);
+    void postMessageSend(const QString &message,
+                         const std::vector<QString> &arguments);
+
+    /// Clears the input box, clears reply thread if inline replies are enabled
+    void clearInput();
+
+protected:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
@@ -75,14 +111,21 @@ private:
     void updateCompletionPopup();
     void showCompletionPopup(const QString &text, bool emoteCompletion);
     void hideCompletionPopup();
-    void insertCompletionText(const QString &text);
+    void insertCompletionText(const QString &input_) const;
     void openEmotePopup();
+
+    void updateCancelReplyButton();
 
     // scaledMaxHeight returns the height in pixels that this widget can grow to
     // This does not take hidden into account, so callers must take hidden into account themselves
     int scaledMaxHeight() const;
 
+    // Returns true if the channel this input is connected to is a Twitch channel,
+    // the user's setting is set to Prevent, and the given text goes beyond the Twitch message length limit
+    bool shouldPreventInput(const QString &text) const;
+
     Split *const split_;
+    ChannelView *const channelView_;
     QObjectRef<EmotePopup> emotePopup_;
     QObjectRef<InputCompletionPopup> inputCompletionPopup_;
 
@@ -92,7 +135,16 @@ private:
         EffectLabel *emoteButton;
 
         QHBoxLayout *hbox;
+        QVBoxLayout *vbox;
+
+        QWidget *replyWrapper;
+        QHBoxLayout *replyHbox;
+        QLabel *replyLabel;
+        EffectLabel *cancelReplyButton;
     } ui_;
+
+    std::shared_ptr<MessageThread> replyThread_ = nullptr;
+    bool enableInlineReplying_;
 
     pajlada::Signals::SignalHolder managedConnections_;
     QStringList prevMsg_;
@@ -109,6 +161,7 @@ private slots:
     void editTextChanged();
 
     friend class Split;
+    friend class ReplyThreadPopup;
 };
 
 }  // namespace chatterino

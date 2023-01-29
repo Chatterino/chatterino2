@@ -2,20 +2,24 @@
 
 #include "Application.hpp"
 #include "debug/Benchmark.hpp"
+#include "messages/layouts/MessageLayoutContainer.hpp"
+#include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
-#include "messages/layouts/MessageLayoutContainer.hpp"
+#include "messages/Selection.hpp"
+#include "providers/colors/ColorProvider.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
+#include "util/StreamerMode.hpp"
 
 #include <QApplication>
 #include <QDebug>
 #include <QPainter>
-#include <QThread>
 #include <QtGlobal>
+#include <QThread>
 
 #define MARGIN_LEFT (int)(8 * this->scale)
 #define MARGIN_RIGHT (int)(8 * this->scale)
@@ -55,10 +59,20 @@ const Message *MessageLayout::getMessage()
     return this->message_.get();
 }
 
+const MessagePtr &MessageLayout::getMessagePtr() const
+{
+    return this->message_;
+}
+
 // Height
 int MessageLayout::getHeight() const
 {
     return container_->getHeight();
+}
+
+int MessageLayout::getWidth() const
+{
+    return this->container_->getWidth();
 }
 
 // Layout
@@ -124,25 +138,40 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         messageFlags.unset(MessageFlag::Collapsed);
     }
 
+    bool hideModerated = getSettings()->hideModerated;
+    bool hideModerationActions = getSettings()->hideModerationActions;
+    bool hideSimilar = getSettings()->hideSimilar;
+    bool hideReplies = !flags.has(MessageElementFlag::RepliedMessage);
+
     this->container_->begin(width, this->scale_, messageFlags);
 
     for (const auto &element : this->message_->elements)
     {
-        if (getSettings()->hideModerated &&
-            this->message_->flags.has(MessageFlag::Disabled))
+        if (hideModerated && this->message_->flags.has(MessageFlag::Disabled))
         {
             continue;
         }
 
-        if (getSettings()->hideModerationActions &&
-            (this->message_->flags.has(MessageFlag::Timeout) ||
-             this->message_->flags.has(MessageFlag::Untimeout)))
+        if (this->message_->flags.has(MessageFlag::Timeout) ||
+            this->message_->flags.has(MessageFlag::Untimeout))
+        {
+            // This condition has been set up to execute isInStreamerMode() as the last thing
+            // as it could end up being expensive.
+            if (hideModerationActions ||
+                (getSettings()->streamerModeHideModActions &&
+                 isInStreamerMode()))
+            {
+                continue;
+            }
+        }
+
+        if (hideSimilar && this->message_->flags.has(MessageFlag::Similar))
         {
             continue;
         }
 
-        if (getSettings()->hideSimilar &&
-            this->message_->flags.has(MessageFlag::Similar))
+        if (hideReplies &&
+            element->getFlags().has(MessageElementFlag::RepliedMessage))
         {
             continue;
         }
@@ -247,7 +276,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     if (isLastReadMessage)
     {
         QColor color;
-        if (getSettings()->lastMessageColor != "")
+        if (getSettings()->lastMessageColor != QStringLiteral(""))
         {
             color = QColor(getSettings()->lastMessageColor.getValue());
         }
@@ -294,8 +323,16 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
         }
     }();
 
-    if (this->message_->flags.has(MessageFlag::FirstMessage) &&
-        getSettings()->enableFirstMessageHighlight.getValue())
+    if (this->message_->flags.has(MessageFlag::ElevatedMessage) &&
+        getSettings()->enableElevatedMessageHighlight.getValue())
+    {
+        backgroundColor = blendColors(backgroundColor,
+                                      *ColorProvider::instance().color(
+                                          ColorType::ElevatedMessageHighlight));
+    }
+
+    else if (this->message_->flags.has(MessageFlag::FirstMessage) &&
+             getSettings()->enableFirstMessageHighlight.getValue())
     {
         backgroundColor = blendColors(
             backgroundColor,
@@ -408,10 +445,27 @@ int MessageLayout::getSelectionIndex(QPoint position)
     return this->container_->getSelectionIndex(position);
 }
 
-void MessageLayout::addSelectionText(QString &str, int from, int to,
+void MessageLayout::addSelectionText(QString &str, uint32_t from, uint32_t to,
                                      CopyMode copymode)
 {
     this->container_->addSelectionText(str, from, to, copymode);
+}
+
+bool MessageLayout::isReplyable() const
+{
+    if (this->message_->loginName.isEmpty())
+    {
+        return false;
+    }
+
+    if (this->message_->flags.hasAny(
+            {MessageFlag::System, MessageFlag::Subscription,
+             MessageFlag::Timeout, MessageFlag::Whisper}))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 }  // namespace chatterino

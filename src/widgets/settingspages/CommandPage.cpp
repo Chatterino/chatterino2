@@ -1,23 +1,21 @@
 #include "CommandPage.hpp"
 
+#include "Application.hpp"
+#include "controllers/commands/Command.hpp"
+#include "controllers/commands/CommandController.hpp"
+#include "controllers/commands/CommandModel.hpp"
+#include "singletons/Settings.hpp"
+#include "util/CombinePath.hpp"
+#include "util/LayoutCreator.hpp"
+#include "util/Qt.hpp"
+#include "util/StandardItemHelper.hpp"
+#include "widgets/helper/EditableModelView.hpp"
+
 #include <QHeaderView>
 #include <QLabel>
 #include <QPushButton>
 #include <QStandardItemModel>
 #include <QTableView>
-#include <QTextEdit>
-
-#include "Application.hpp"
-#include "controllers/commands/CommandController.hpp"
-#include "controllers/commands/CommandModel.hpp"
-#include "util/LayoutCreator.hpp"
-#include "util/StandardItemHelper.hpp"
-#include "widgets/helper/EditableModelView.hpp"
-//#include "widgets/helper/ComboBoxItemDelegate.hpp"
-#include "util/CombinePath.hpp"
-#include "util/Qt.hpp"
-
-#include <QLabel>
 #include <QTextEdit>
 
 // clang-format off

@@ -1,9 +1,9 @@
 #include "widgets/BaseWidget.hpp"
 
 #include "BaseSettings.hpp"
-#include "BaseTheme.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "singletons/Theme.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <QChildEvent>
@@ -11,6 +11,7 @@
 #include <QIcon>
 #include <QLayout>
 #include <QtGlobal>
+
 #include <algorithm>
 
 namespace chatterino {

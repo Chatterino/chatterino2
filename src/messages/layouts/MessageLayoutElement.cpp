@@ -10,6 +10,12 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <QPainterPath>
+
+namespace {
+
+const QChar RTL_EMBED(0x202B);
+}  // namespace
 
 namespace chatterino {
 
@@ -102,8 +108,8 @@ ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
     this->trailingSpace = creator.hasTrailingSpace();
 }
 
-void ImageLayoutElement::addCopyTextToString(QString &str, int from,
-                                             int to) const
+void ImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                             uint32_t to) const
 {
     const auto *emoteElement =
         dynamic_cast<EmoteElement *>(&this->getCreator());
@@ -206,6 +212,44 @@ void ImageWithBackgroundLayoutElement::paint(QPainter &painter)
 }
 
 //
+// IMAGE WITH CIRCLE BACKGROUND
+//
+ImageWithCircleBackgroundLayoutElement::ImageWithCircleBackgroundLayoutElement(
+    MessageElement &creator, ImagePtr image, const QSize &imageSize,
+    QColor color, int padding)
+    : ImageLayoutElement(creator, image,
+                         imageSize + QSize(padding, padding) * 2)
+    , color_(color)
+    , imageSize_(imageSize)
+    , padding_(padding)
+{
+}
+
+void ImageWithCircleBackgroundLayoutElement::paint(QPainter &painter)
+{
+    if (this->image_ == nullptr)
+    {
+        return;
+    }
+
+    auto pixmap = this->image_->pixmapOrLoad();
+    if (pixmap && !this->image_->animated())
+    {
+        QRectF boxRect(this->getRect());
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QBrush(this->color_, Qt::SolidPattern));
+        painter.drawEllipse(boxRect);
+
+        QRectF imgRect;
+        imgRect.setTopLeft(boxRect.topLeft());
+        imgRect.setSize(this->imageSize_);
+        imgRect.translate(this->padding_, this->padding_);
+
+        painter.drawPixmap(imgRect, *pixmap, QRectF());
+    }
+}
+
+//
 // TEXT
 //
 
@@ -228,8 +272,8 @@ void TextLayoutElement::listenToLinkChanges()
         });
 }
 
-void TextLayoutElement::addCopyTextToString(QString &str, int from,
-                                            int to) const
+void TextLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                            uint32_t to) const
 {
     str += this->getText().mid(from, to - from);
 
@@ -247,14 +291,19 @@ int TextLayoutElement::getSelectionIndexCount() const
 void TextLayoutElement::paint(QPainter &painter)
 {
     auto app = getApp();
+    QString text = this->getText();
+    if (text.isRightToLeft() || this->reversedNeutral)
+    {
+        text.prepend(RTL_EMBED);
+    }
 
     painter.setPen(this->color_);
 
     painter.setFont(app->fonts->getFont(this->style_, this->scale_));
 
     painter.drawText(
-        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
-        this->getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
+        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000), text,
+        QTextOption(Qt::AlignLeft | Qt::AlignTop));
 }
 
 void TextLayoutElement::paintAnimated(QPainter &, int)
@@ -278,7 +327,8 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
         auto &&text = this->getText();
         auto width = metrics.horizontalAdvance(this->getText()[i]);
 
-        if (x + width > abs.x())
+        // accept mouse to be at only 50%+ of character width to increase index
+        if (x + (width * 0.5) > abs.x())
         {
             if (text.size() > i + 1 && QChar::isLowSurrogate(text[i].unicode()))
             {
@@ -337,8 +387,8 @@ TextIconLayoutElement::TextIconLayoutElement(MessageElement &creator,
 {
 }
 
-void TextIconLayoutElement::addCopyTextToString(QString &str, int from,
-                                                int to) const
+void TextIconLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                                uint32_t to) const
 {
 }
 
@@ -400,6 +450,81 @@ int TextIconLayoutElement::getXFromIndex(int index)
     {
         return this->getRect().right();
     }
+}
+
+ReplyCurveLayoutElement::ReplyCurveLayoutElement(MessageElement &creator,
+                                                 int width, float thickness,
+                                                 float radius,
+                                                 float neededMargin)
+    : MessageLayoutElement(creator, QSize(width, 0))
+    , pen_(QColor("#888"), thickness, Qt::SolidLine, Qt::RoundCap)
+    , radius_(radius)
+    , neededMargin_(neededMargin)
+{
+}
+
+void ReplyCurveLayoutElement::paint(QPainter &painter)
+{
+    QRectF paintRect(this->getRect());
+    QPainterPath path;
+
+    QRectF curveRect = paintRect.marginsRemoved(QMarginsF(
+        this->neededMargin_, this->neededMargin_, 0, this->neededMargin_));
+
+    // Make sure that our curveRect can always fit the radius curve
+    if (curveRect.height() < this->radius_)
+    {
+        curveRect.setTop(curveRect.top() -
+                         (this->radius_ - curveRect.height()));
+    }
+
+    QPointF bStartPoint(curveRect.left(), curveRect.top() + this->radius_);
+    QPointF bEndPoint(curveRect.left() + this->radius_, curveRect.top());
+    QPointF bControlPoint(curveRect.topLeft());
+
+    // Draw line from bottom left to curve
+    path.moveTo(curveRect.bottomLeft());
+    path.lineTo(bStartPoint);
+
+    // Draw curve path
+    path.quadTo(bControlPoint, bEndPoint);
+
+    // Draw line from curve to top right
+    path.lineTo(curveRect.topRight());
+
+    // Render curve
+    painter.setPen(this->pen_);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.drawPath(path);
+}
+
+void ReplyCurveLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+{
+}
+
+int ReplyCurveLayoutElement::getMouseOverIndex(const QPoint &abs) const
+{
+    return 0;
+}
+
+int ReplyCurveLayoutElement::getXFromIndex(int index)
+{
+    if (index <= 0)
+    {
+        return this->getRect().left();
+    }
+
+    return this->getRect().right();
+}
+
+void ReplyCurveLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                                  uint32_t to) const
+{
+}
+
+int ReplyCurveLayoutElement::getSelectionIndexCount() const
+{
+    return 1;
 }
 
 }  // namespace chatterino

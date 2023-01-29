@@ -5,10 +5,10 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
 
 namespace chatterino {
 
@@ -22,10 +22,8 @@ NewPopupItem::NewPopupItem(const QString &channelName)
 void NewPopupItem::action()
 {
     auto *app = getApp();
-    auto &popup = app->windows->createWindow(WindowType::Popup, true);
-    auto *split =
-        popup.getNotebook().getOrAddSelectedPage()->appendNewSplit(false);
-    split->setChannel(app->twitch->getOrAddChannel(this->channelName_));
+    auto channel = app->twitch->getOrAddChannel(this->channelName_);
+    app->windows->openInPopup(channel);
 }
 
 void NewPopupItem::paint(QPainter *painter, const QRect &rect) const

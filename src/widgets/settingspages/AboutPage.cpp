@@ -85,7 +85,7 @@ AboutPage::AboutPage()
                        ":/licenses/libcommuni_BSD3.txt");
             addLicense(form.getElement(), "OpenSSL", "https://www.openssl.org/",
                        ":/licenses/openssl.txt");
-            addLicense(form.getElement(), "RapidJson", "http://rapidjson.org/",
+            addLicense(form.getElement(), "RapidJson", "https://rapidjson.org/",
                        ":/licenses/rapidjson.txt");
             addLicense(form.getElement(), "Pajlada/Settings",
                        "https://github.com/pajlada/settings",
@@ -107,6 +107,12 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "magic_enum",
                        "https://github.com/Neargye/magic_enum",
                        ":/licenses/magic_enum.txt");
+            addLicense(form.getElement(), "semver",
+                       "https://github.com/Neargye/semver",
+                       ":/licenses/semver.txt");
+            addLicense(form.getElement(), "miniaudio",
+                       "https://github.com/mackron/miniaudio",
+                       ":/licenses/miniaudio.txt");
         }
 
         // Attributions
@@ -204,8 +210,9 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name,
     auto *b = new QLabel("<a href=\"" + licenseLink + "\">show license</a>");
     QObject::connect(
         b, &QLabel::linkActivated, [parent = this, name, licenseLink] {
-            auto window =
-                new BasePopup(BaseWindow::Flags::EnableCustomFrame, parent);
+            auto window = new BasePopup({BaseWindow::Flags::EnableCustomFrame,
+                                         BaseWindow::DisableLayoutSave},
+                                        parent);
             window->setWindowTitle("Chatterino - License for " + name);
             window->setAttribute(Qt::WA_DeleteOnClose);
             auto layout = new QVBoxLayout();

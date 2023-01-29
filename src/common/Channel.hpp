@@ -4,11 +4,11 @@
 #include "common/FlagsEnum.hpp"
 #include "messages/LimitedQueue.hpp"
 
+#include <boost/optional.hpp>
+#include <pajlada/signals/signal.hpp>
 #include <QDate>
 #include <QString>
 #include <QTimer>
-#include <boost/optional.hpp>
-#include <pajlada/signals/signal.hpp>
 
 #include <memory>
 
@@ -16,7 +16,7 @@ namespace chatterino {
 
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
-enum class MessageFlag : uint32_t;
+enum class MessageFlag : int64_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 enum class TimeoutStackStyle : int {
@@ -49,13 +49,20 @@ public:
     // SIGNALS
     pajlada::Signals::Signal<const QString &, const QString &, bool &>
         sendMessageSignal;
+    pajlada::Signals::Signal<const QString &, const QString &, const QString &,
+                             bool &>
+        sendReplySignal;
     pajlada::Signals::Signal<MessagePtr &> messageRemovedFromStart;
     pajlada::Signals::Signal<MessagePtr &, boost::optional<MessageFlags>>
         messageAppended;
     pajlada::Signals::Signal<std::vector<MessagePtr> &> messagesAddedAtStart;
     pajlada::Signals::Signal<size_t, MessagePtr &> messageReplaced;
+    /// Invoked when some number of messages were filled in using time received
+    pajlada::Signals::Signal<const std::vector<MessagePtr> &> filledInMessages;
     pajlada::Signals::NoArgSignal destroyed;
     pajlada::Signals::NoArgSignal displayNameChanged;
+    /// Invoked when AbstractIrcServer::onReadConnected occurs
+    pajlada::Signals::NoArgSignal connected;
 
     Type getType() const;
     const QString &getName() const;
@@ -72,18 +79,24 @@ public:
     void addMessage(
         MessagePtr message,
         boost::optional<MessageFlags> overridingFlags = boost::none);
-    void addMessagesAtStart(std::vector<MessagePtr> &messages_);
+    void addMessagesAtStart(const std::vector<MessagePtr> &messages_);
+
+    /// Inserts the given messages in order by Message::serverReceivedTime.
+    void fillInMissingMessages(const std::vector<MessagePtr> &messages);
+
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
     void replaceMessage(size_t index, MessagePtr replacement);
     void deleteMessage(QString messageID);
+
     MessagePtr findMessage(QString messageID);
 
     bool hasMessages() const;
 
     // CHANNEL INFO
     virtual bool canSendMessage() const;
+    virtual bool isWritable() const;  // whether split input will be usable
     virtual void sendMessage(const QString &message);
     virtual bool isMod() const;
     virtual bool isBroadcaster() const;

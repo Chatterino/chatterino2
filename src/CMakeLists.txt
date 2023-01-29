@@ -1,13 +1,12 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 set(SOURCE_FILES
         Application.cpp
         Application.hpp
         BaseSettings.cpp
         BaseSettings.hpp
-        BaseTheme.cpp
-        BaseTheme.hpp
         BrowserExtension.cpp
         BrowserExtension.hpp
         RunGui.cpp
@@ -59,15 +58,22 @@ set(SOURCE_FILES
         controllers/accounts/AccountModel.cpp
         controllers/accounts/AccountModel.hpp
 
-        controllers/commands/Command.cpp
-        controllers/commands/Command.hpp
+        controllers/commands/builtin/twitch/ChatSettings.cpp
+        controllers/commands/builtin/twitch/ChatSettings.hpp
+        controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
+        controllers/commands/Command.cpp
+        controllers/commands/Command.hpp
         controllers/commands/CommandModel.cpp
         controllers/commands/CommandModel.hpp
 
         controllers/filters/FilterModel.cpp
         controllers/filters/FilterModel.hpp
+        controllers/filters/FilterRecord.cpp
+        controllers/filters/FilterRecord.hpp
+        controllers/filters/FilterSet.cpp
+        controllers/filters/FilterSet.hpp
         controllers/filters/parser/FilterParser.cpp
         controllers/filters/parser/FilterParser.hpp
         controllers/filters/parser/Tokenizer.cpp
@@ -105,11 +111,18 @@ set(SOURCE_FILES
         controllers/ignores/IgnoreController.hpp
         controllers/ignores/IgnoreModel.cpp
         controllers/ignores/IgnoreModel.hpp
+        controllers/ignores/IgnorePhrase.cpp
+        controllers/ignores/IgnorePhrase.hpp
 
         controllers/moderationactions/ModerationAction.cpp
         controllers/moderationactions/ModerationAction.hpp
         controllers/moderationactions/ModerationActionModel.cpp
         controllers/moderationactions/ModerationActionModel.hpp
+
+        controllers/logging/ChannelLog.cpp
+        controllers/logging/ChannelLog.hpp
+        controllers/logging/ChannelLoggingModel.cpp
+        controllers/logging/ChannelLoggingModel.hpp
 
         controllers/nicknames/NicknamesModel.cpp
         controllers/nicknames/NicknamesModel.hpp
@@ -122,6 +135,13 @@ set(SOURCE_FILES
 
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
+
+        controllers/userdata/UserDataController.cpp
+        controllers/userdata/UserDataController.hpp
+        controllers/userdata/UserData.hpp
+
+        controllers/sound/SoundController.cpp
+        controllers/sound/SoundController.hpp
 
         debug/Benchmark.cpp
         debug/Benchmark.hpp
@@ -140,10 +160,10 @@ set(SOURCE_FILES
         messages/MessageBuilder.hpp
         messages/MessageColor.cpp
         messages/MessageColor.hpp
-        messages/MessageContainer.cpp
-        messages/MessageContainer.hpp
         messages/MessageElement.cpp
         messages/MessageElement.hpp
+        messages/MessageThread.cpp
+        messages/MessageThread.hpp
 
         messages/SharedMessageBuilder.cpp
         messages/SharedMessageBuilder.hpp
@@ -156,6 +176,8 @@ set(SOURCE_FILES
         messages/layouts/MessageLayoutElement.hpp
         messages/search/AuthorPredicate.cpp
         messages/search/AuthorPredicate.hpp
+        messages/search/BadgePredicate.cpp
+        messages/search/BadgePredicate.hpp
         messages/search/ChannelPredicate.cpp
         messages/search/ChannelPredicate.hpp
         messages/search/LinkPredicate.cpp
@@ -166,16 +188,25 @@ set(SOURCE_FILES
         messages/search/RegexPredicate.hpp
         messages/search/SubstringPredicate.cpp
         messages/search/SubstringPredicate.hpp
+        messages/search/SubtierPredicate.cpp
+        messages/search/SubtierPredicate.hpp
 
         providers/IvrApi.cpp
         providers/IvrApi.hpp
         providers/LinkResolver.cpp
         providers/LinkResolver.hpp
+        providers/RecentMessagesApi.cpp
+        providers/RecentMessagesApi.hpp
 
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp
-        providers/bttv/LoadBttvChannelEmote.cpp
-        providers/bttv/LoadBttvChannelEmote.hpp
+        providers/bttv/BttvLiveUpdates.cpp
+        providers/bttv/BttvLiveUpdates.hpp
+
+        providers/bttv/liveupdates/BttvLiveUpdateMessages.cpp
+        providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp
+        providers/bttv/liveupdates/BttvLiveUpdateSubscription.cpp
+        providers/bttv/liveupdates/BttvLiveUpdateSubscription.hpp
 
         providers/chatterino/ChatterinoBadges.cpp
         providers/chatterino/ChatterinoBadges.hpp
@@ -207,6 +238,26 @@ set(SOURCE_FILES
         providers/irc/IrcMessageBuilder.hpp
         providers/irc/IrcServer.cpp
         providers/irc/IrcServer.hpp
+
+        providers/liveupdates/BasicPubSubClient.hpp
+        providers/liveupdates/BasicPubSubManager.hpp
+        providers/liveupdates/BasicPubSubWebsocket.hpp
+
+        providers/seventv/SeventvBadges.cpp
+        providers/seventv/SeventvBadges.hpp
+        providers/seventv/SeventvEmotes.cpp
+        providers/seventv/SeventvEmotes.hpp
+        providers/seventv/SeventvEventAPI.cpp
+        providers/seventv/SeventvEventAPI.hpp
+
+        providers/seventv/eventapi/SeventvEventAPIClient.cpp
+        providers/seventv/eventapi/SeventvEventAPIClient.hpp
+        providers/seventv/eventapi/SeventvEventAPIDispatch.cpp
+        providers/seventv/eventapi/SeventvEventAPIDispatch.hpp
+        providers/seventv/eventapi/SeventvEventAPIMessage.cpp
+        providers/seventv/eventapi/SeventvEventAPIMessage.hpp
+        providers/seventv/eventapi/SeventvEventAPISubscription.cpp
+        providers/seventv/eventapi/SeventvEventAPISubscription.hpp
 
         providers/twitch/ChannelPointReward.cpp
         providers/twitch/ChannelPointReward.hpp
@@ -282,8 +333,6 @@ set(SOURCE_FILES
         singletons/Theme.hpp
         singletons/Toasts.cpp
         singletons/Toasts.hpp
-        singletons/TooltipPreviewImage.cpp
-        singletons/TooltipPreviewImage.hpp
         singletons/Updates.cpp
         singletons/Updates.hpp
         singletons/WindowManager.cpp
@@ -298,6 +347,7 @@ set(SOURCE_FILES
         util/AttachToConsole.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
+        util/ConcurrentMap.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
         util/DisplayBadge.cpp
@@ -324,16 +374,21 @@ set(SOURCE_FILES
         util/RatelimitBucket.hpp
         util/SampleData.cpp
         util/SampleData.hpp
+        util/SharedPtrElementLess.hpp
         util/SplitCommand.cpp
         util/SplitCommand.hpp
         util/StreamLink.cpp
         util/StreamLink.hpp
         util/StreamerMode.cpp
         util/StreamerMode.hpp
+        util/ThreadGuard.hpp
         util/Twitch.cpp
         util/Twitch.hpp
+        util/TypeName.hpp
         util/WindowsHelper.cpp
         util/WindowsHelper.hpp
+
+        util/serialize/Container.hpp
 
         widgets/AccountSwitchPopup.cpp
         widgets/AccountSwitchPopup.hpp
@@ -347,6 +402,8 @@ set(SOURCE_FILES
         widgets/BaseWidget.hpp
         widgets/BaseWindow.cpp
         widgets/BaseWindow.hpp
+        widgets/DraggablePopup.cpp
+        widgets/DraggablePopup.hpp
         widgets/FramelessEmbedWindow.cpp
         widgets/FramelessEmbedWindow.hpp
         widgets/Label.cpp
@@ -383,6 +440,8 @@ set(SOURCE_FILES
         widgets/dialogs/NotificationPopup.hpp
         widgets/dialogs/QualityPopup.cpp
         widgets/dialogs/QualityPopup.hpp
+        widgets/dialogs/ReplyThreadPopup.cpp
+        widgets/dialogs/ReplyThreadPopup.hpp
         widgets/dialogs/SelectChannelDialog.cpp
         widgets/dialogs/SelectChannelDialog.hpp
         widgets/dialogs/SelectChannelFiltersDialog.cpp
@@ -483,6 +542,8 @@ set(SOURCE_FILES
 
         widgets/splits/ClosedSplits.cpp
         widgets/splits/ClosedSplits.hpp
+        widgets/splits/DraggedSplit.cpp
+        widgets/splits/DraggedSplit.hpp
         widgets/splits/InputCompletionItem.cpp
         widgets/splits/InputCompletionItem.hpp
         widgets/splits/InputCompletionPopup.cpp
@@ -498,11 +559,7 @@ set(SOURCE_FILES
         widgets/splits/SplitOverlay.cpp
         widgets/splits/SplitOverlay.hpp
 
-        autogenerated/ResourcesAutogen.cpp
-        autogenerated/ResourcesAutogen.hpp
-
         ${CMAKE_SOURCE_DIR}/resources/resources.qrc
-        ${CMAKE_SOURCE_DIR}/resources/resources_autogenerated.qrc
         )
 
 if (WIN32)
@@ -520,7 +577,25 @@ endif ()
 # Generate source groups for use in IDEs
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 
+# Add autogenerated files
+list(APPEND SOURCE_FILES ${RES_AUTOGEN_FILES})
+
 add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
+
+if (CHATTERINO_GENERATE_COVERAGE)
+    include(CodeCoverage)
+    append_coverage_compiler_flags_to_target(${LIBRARY_PROJECT})
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC gcov)
+    message(STATUS "project source dir: ${PROJECT_SOURCE_DIR}/src")
+    setup_target_for_coverage_lcov(
+        NAME coverage
+        EXECUTABLE ./bin/chatterino-test
+        BASE_DIRECTORY ${PROJECT_SOURCE_DIR}/src
+        EXCLUDE "/usr/include/*"
+        EXCLUDE "build-*/*"
+        EXCLUDE "lib/*"
+        )
+endif ()
 
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
@@ -562,7 +637,7 @@ if (BUILD_APP)
     endif()
     add_sanitizers(${EXECUTABLE_PROJECT})
 
-    target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
 
     target_link_libraries(${EXECUTABLE_PROJECT} PUBLIC ${LIBRARY_PROJECT})
 
@@ -576,16 +651,36 @@ if (BUILD_APP)
         RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
         )
 
-    if (MSVC)
-        get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
-        get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
-        set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
+    if (WIN32)
+        if (NOT WINDEPLOYQT_PATH)
+            get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
+            get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
+            string(APPEND WINDEPLOYQT_PATH ${QT_BIN_DIR} /windeployqt.exe)
+        else()
+            file(TO_CMAKE_PATH "${WINDEPLOYQT_PATH}" WINDEPLOYQT_PATH)
+        endif()
 
-        install(TARGETS ${EXECUTABLE_PROJECT}
-                RUNTIME DESTINATION .
-                )
+        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(WINDEPLOYQT_MODE --debug)
+        else()
+            set(WINDEPLOYQT_MODE --release)
+        endif()
 
-        install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
+        set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
+        string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
+
+        if (X_VCPKG_APPLOCAL_DEPS_INSTALL)
+            install(TARGETS ${EXECUTABLE_PROJECT} RUNTIME DESTINATION .)
+        else()
+            install(TARGETS ${EXECUTABLE_PROJECT} 
+                RUNTIME_DEPENDENCIES 
+                    PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
+                    POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
+                    DIRECTORIES ${QT_BIN_DIR}
+                RUNTIME DESTINATION .)
+            install(CODE "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
+            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")        
+        endif()
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
@@ -609,6 +704,12 @@ if (BUILD_APP)
                 DESTINATION share/icons/hicolor/256x256/apps
                 )
     endif ()
+
+    if(CHATTERINO_ENABLE_LTO)
+        message(STATUS "Enabling LTO for ${EXECUTABLE_PROJECT}")
+        set_property(TARGET ${EXECUTABLE_PROJECT}
+            PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif()
 endif ()
 
 if (USE_PRECOMPILED_HEADERS)
@@ -639,7 +740,6 @@ endif ()
 target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO
     UNICODE
-    AB_CUSTOM_THEME
     AB_CUSTOM_SETTINGS
     IRC_STATIC
     IRC_NAMESPACE=Communi
@@ -687,7 +787,21 @@ if (APPLE AND BUILD_APP)
         )
 endif ()
 
-target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
+
+# semver dependency https://github.com/Neargye/semver
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
+
+# miniaudio dependency https://github.com/mackron/miniaudio
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
+
+if (UNIX)
+    if (CMAKE_DL_LIBS)
+        # libdl is a requirement for miniaudio on Linux
+        message(STATUS "Linking with CMake DL libs: '${CMAKE_DL_LIBS}'")
+        target_link_libraries(${LIBRARY_PROJECT} PUBLIC ${CMAKE_DL_LIBS})
+    endif ()
+endif ()
 
 if (WinToast_FOUND)
     target_link_libraries(${LIBRARY_PROJECT}
@@ -729,3 +843,72 @@ if (LIBRT)
         )
 endif ()
 
+# Configure compiler warnings
+if (MSVC)
+    # Someone adds /W3 before we add /W4.
+    # This makes sure, only /W4 is specified.
+    string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    # 4505 - "unreferenced local version has been removed"
+    #        Although this might give hints on dead code,
+    #        there are some cases where it's distracting.
+    #
+    # 4100 - "unreferenced formal parameter"
+    #        There are a lot of functions and methods where
+    #        an argument was given a name but never used.
+    #        There's a clang-tidy rule that will catch this
+    #        for new/updated functions/methods.
+    #
+    # 4267 - "possible loss of data in return"
+    #        These are implicit conversions from size_t to int/qsizetype.
+    #        We don't use size_t in a lot of cases, since
+    #        Qt doesn't use it - it uses int (or qsizetype in Qt6).
+    target_compile_options(${LIBRARY_PROJECT} PUBLIC
+        /W4
+        # 5038 - warnings about initialization order
+        /w15038
+        # 4855 - implicit capture of 'this' via '[=]' is deprecated
+        /w14855
+        # Disable the following warnings (see reasoning above)
+        /wd4505
+        /wd4100
+        /wd4267
+    )
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
+else ()
+    target_compile_options(${LIBRARY_PROJECT} PUBLIC
+        -Wall
+        # Disable the following warnings
+        -Wno-unused-function
+        -Wno-switch
+        -Wno-deprecated-declarations
+        -Wno-sign-compare
+        -Wno-unused-variable
+
+        # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
+        -Wno-strict-aliasing
+
+        -Werror=return-type
+        -Werror=reorder
+    )
+
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${LIBRARY_PROJECT} PUBLIC
+            -Wno-unused-local-typedef
+            -Wno-unused-private-field
+            -Werror=inconsistent-missing-override
+            -Werror=final-dtor-non-final-class
+            -Werror=ambiguous-reversed-operator
+
+        )
+    else ()
+        target_compile_options(${LIBRARY_PROJECT} PUBLIC
+            -Wno-class-memaccess
+        )
+    endif()
+endif ()
+
+if(CHATTERINO_ENABLE_LTO)
+    message(STATUS "Enabling LTO for ${LIBRARY_PROJECT}")
+    set_property(TARGET ${LIBRARY_PROJECT}
+                 PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()

@@ -3,8 +3,9 @@
 #include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
 
-#include <QPixmap>
 #include <boost/noncopyable.hpp>
+#include <QPixmap>
+
 #include <cinttypes>
 #include <memory>
 
@@ -37,8 +38,10 @@ public:
     ~MessageLayout();
 
     const Message *getMessage();
+    const MessagePtr &getMessagePtr() const;
 
     int getHeight() const;
+    int getWidth() const;
 
     MessageLayoutFlags flags;
 
@@ -57,11 +60,13 @@ public:
     int getLastCharacterIndex() const;
     int getFirstMessageCharacterIndex() const;
     int getSelectionIndex(QPoint position);
-    void addSelectionText(QString &str, int from = 0, int to = INT_MAX,
+    void addSelectionText(QString &str, uint32_t from = 0,
+                          uint32_t to = UINT32_MAX,
                           CopyMode copymode = CopyMode::Everything);
 
     // Misc
     bool isDisabled() const;
+    bool isReplyable() const;
 
 private:
     // variables

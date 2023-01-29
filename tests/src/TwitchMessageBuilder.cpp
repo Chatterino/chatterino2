@@ -1,18 +1,89 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 
+#include "Application.hpp"
 #include "common/Channel.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "mocks/UserData.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
-
-#include "ircconnection.h"
+#include "singletons/Emotes.hpp"
 
 #include <gtest/gtest.h>
+#include <IrcConnection>
 #include <QDebug>
 #include <QString>
+
 #include <unordered_map>
 #include <vector>
 
 using namespace chatterino;
+
+namespace {
+
+class MockApplication : IApplication
+{
+public:
+    Theme *getThemes() override
+    {
+        return nullptr;
+    }
+    Fonts *getFonts() override
+    {
+        return nullptr;
+    }
+    IEmotes *getEmotes() override
+    {
+        return &this->emotes;
+    }
+    AccountController *getAccounts() override
+    {
+        return nullptr;
+    }
+    HotkeyController *getHotkeys() override
+    {
+        return nullptr;
+    }
+    WindowManager *getWindows() override
+    {
+        return nullptr;
+    }
+    Toasts *getToasts() override
+    {
+        return nullptr;
+    }
+    CommandController *getCommands() override
+    {
+        return nullptr;
+    }
+    NotificationController *getNotifications() override
+    {
+        return nullptr;
+    }
+    HighlightController *getHighlights() override
+    {
+        return nullptr;
+    }
+    TwitchIrcServer *getTwitch() override
+    {
+        return nullptr;
+    }
+    ChatterinoBadges *getChatterinoBadges() override
+    {
+        return nullptr;
+    }
+    FfzBadges *getFfzBadges() override
+    {
+        return nullptr;
+    }
+    IUserDataController *getUserData() override
+    {
+        return &this->userData;
+    }
+
+    Emotes emotes;
+    mock::UserDataController userData;
+};
+
+}  // namespace
 
 TEST(TwitchMessageBuilder, CommaSeparatedListTagParsing)
 {
@@ -56,6 +127,22 @@ TEST(TwitchMessageBuilder, CommaSeparatedListTagParsing)
             << "Input " << test.input.toStdString() << " failed";
     }
 }
+
+class TestTwitchMessageBuilder : public ::testing::Test
+{
+protected:
+    void SetUp() override
+    {
+        this->mockApplication = std::make_unique<MockApplication>();
+    }
+
+    void TearDown() override
+    {
+        this->mockApplication.reset();
+    }
+
+    std::unique_ptr<MockApplication> mockApplication;
+};
 
 TEST(TwitchMessageBuilder, BadgeInfoParsing)
 {
@@ -126,5 +213,182 @@ TEST(TwitchMessageBuilder, BadgeInfoParsing)
             SharedMessageBuilder::parseBadgeTag(privmsg->tags());
         EXPECT_EQ(outputBadges, test.expectedBadges)
             << "Input for badges " << test.input.toStdString() << " failed";
+    }
+}
+
+TEST_F(TestTwitchMessageBuilder, ParseTwitchEmotes)
+{
+    struct TestCase {
+        QByteArray input;
+        std::vector<TwitchEmoteOccurrence> expectedTwitchEmotes;
+    };
+
+    auto *twitchEmotes = this->mockApplication->getEmotes()->getTwitchEmotes();
+
+    std::vector<TestCase> testCases{
+        {
+            // action /me message
+            R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=90ef1e46-8baa-4bf2-9c54-272f39d6fa11;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662206235860;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :ACTION Kappa)",
+            {
+                {{
+                    0,  // start
+                    4,  // end
+                    twitchEmotes->getOrCreateEmote(EmoteId{"25"},
+                                                   EmoteName{"Kappa"}),  // ptr
+                    EmoteName{"Kappa"},                                  // name
+                }},
+            },
+        },
+        {
+            R"(@badge-info=subscriber/17;badges=subscriber/12,no_audio/1;color=#EBA2C0;display-name=jammehcow;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662201093248;turbo=0;user-id=82674227;user-type= :jammehcow!jammehcow@jammehcow.tmi.twitch.tv PRIVMSG #pajlada :Kappa)",
+            {
+                {{
+                    0,  // start
+                    4,  // end
+                    twitchEmotes->getOrCreateEmote(EmoteId{"25"},
+                                                   EmoteName{"Kappa"}),  // ptr
+                    EmoteName{"Kappa"},                                  // name
+                }},
+            },
+        },
+        {
+            R"(@badge-info=;badges=no_audio/1;color=#DAA520;display-name=Mm2PL;emote-only=1;emotes=1902:0-4;first-msg=0;flags=;id=9b1c3cb9-7817-47ea-add1-f9d4a9b4f846;mod=0;returning-chatter=0;room-id=11148817;subscriber=0;tmi-sent-ts=1662201095690;turbo=0;user-id=117691339;user-type= :mm2pl!mm2pl@mm2pl.tmi.twitch.tv PRIVMSG #pajlada :Keepo)",
+            {
+                {{
+                    0,  // start
+                    4,  // end
+                    twitchEmotes->getOrCreateEmote(EmoteId{"1902"},
+                                                   EmoteName{"Keepo"}),  // ptr
+                    EmoteName{"Keepo"},                                  // name
+                }},
+            },
+        },
+        {
+            R"(@badge-info=;badges=no_audio/1;color=#DAA520;display-name=Mm2PL;emote-only=1;emotes=25:0-4/1902:6-10/305954156:12-19;first-msg=0;flags=;id=7be87072-bf24-4fa3-b3df-0ea6fa5f1474;mod=0;returning-chatter=0;room-id=11148817;subscriber=0;tmi-sent-ts=1662201102276;turbo=0;user-id=117691339;user-type= :mm2pl!mm2pl@mm2pl.tmi.twitch.tv PRIVMSG #pajlada :Kappa Keepo PogChamp)",
+            {
+                {
+                    {
+                        0,  // start
+                        4,  // end
+                        twitchEmotes->getOrCreateEmote(
+                            EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
+                        EmoteName{"Kappa"},                      // name
+                    },
+                    {
+                        6,   // start
+                        10,  // end
+                        twitchEmotes->getOrCreateEmote(
+                            EmoteId{"1902"}, EmoteName{"Keepo"}),  // ptr
+                        EmoteName{"Keepo"},                        // name
+                    },
+                    {
+                        12,  // start
+                        19,  // end
+                        twitchEmotes->getOrCreateEmote(
+                            EmoteId{"305954156"},
+                            EmoteName{"PogChamp"}),  // ptr
+                        EmoteName{"PogChamp"},       // name
+                    },
+                },
+            },
+        },
+        {
+            R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emote-only=1;emotes=25:0-4,6-10;first-msg=0;flags=;id=f7516287-e5d1-43ca-974e-fe0cff84400b;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662204375009;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :Kappa Kappa)",
+            {
+                {
+                    {
+                        0,  // start
+                        4,  // end
+                        twitchEmotes->getOrCreateEmote(
+                            EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
+                        EmoteName{"Kappa"},                      // name
+                    },
+                    {
+                        6,   // start
+                        10,  // end
+                        twitchEmotes->getOrCreateEmote(
+                            EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
+                        EmoteName{"Kappa"},                      // name
+                    },
+                },
+            },
+        },
+        {
+            R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emotes=25:0-4,8-12;first-msg=0;flags=;id=44f85d39-b5fb-475d-8555-f4244f2f7e82;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662204423418;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :Kappa 😂 Kappa)",
+            {
+                {
+                    {
+                        0,  // start
+                        4,  // end
+                        twitchEmotes->getOrCreateEmote(
+                            EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
+                        EmoteName{"Kappa"},                      // name
+                    },
+                    {
+                        9,   // start - modified due to emoji
+                        13,  // end - modified due to emoji
+                        twitchEmotes->getOrCreateEmote(
+                            EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
+                        EmoteName{"Kappa"},                      // name
+                    },
+                },
+            },
+        },
+        {
+            // start out of range
+            R"(@emotes=84608:9-10 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
+            {},
+        },
+        {
+            // one character emote
+            R"(@emotes=84608:0-0 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
+            {
+                {
+                    0,  // start
+                    0,  // end
+                    twitchEmotes->getOrCreateEmote(EmoteId{"84608"},
+                                                   EmoteName{"f"}),  // ptr
+                    EmoteName{"f"},                                  // name
+                },
+            },
+        },
+        {
+            // two character emote
+            R"(@emotes=84609:0-1 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
+            {
+                {
+                    0,  // start
+                    1,  // end
+                    twitchEmotes->getOrCreateEmote(EmoteId{"84609"},
+                                                   EmoteName{"fo"}),  // ptr
+                    EmoteName{"fo"},                                  // name
+                },
+            },
+        },
+        {
+            // end out of range
+            R"(@emotes=84608:0-15 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
+            {},
+        },
+        {
+            // range bad (end character before start)
+            R"(@emotes=84608:15-2 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
+            {},
+        },
+    };
+
+    for (const auto &test : testCases)
+    {
+        auto *privmsg = static_cast<Communi::IrcPrivateMessage *>(
+            Communi::IrcPrivateMessage::fromData(test.input, nullptr));
+        QString originalMessage = privmsg->content();
+
+        // TODO: Add tests with replies
+        auto actualTwitchEmotes = TwitchMessageBuilder::parseTwitchEmotes(
+            privmsg->tags(), originalMessage, 0);
+
+        EXPECT_EQ(actualTwitchEmotes, test.expectedTwitchEmotes)
+            << "Input for twitch emotes " << test.input.toStdString()
+            << " failed";
     }
 }

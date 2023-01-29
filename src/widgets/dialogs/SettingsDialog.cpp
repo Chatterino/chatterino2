@@ -4,9 +4,10 @@
 #include "common/Args.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "singletons/Resources.hpp"
+#include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/Button.hpp"
+#include "widgets/helper/SettingsDialogTab.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
 #include "widgets/settingspages/CommandPage.hpp"
@@ -26,12 +27,16 @@
 namespace chatterino {
 
 SettingsDialog::SettingsDialog(QWidget *parent)
-    : BaseWindow(
-          {BaseWindow::Flags::DisableCustomScaling, BaseWindow::Flags::Dialog},
-          parent)
+    : BaseWindow({BaseWindow::Flags::DisableCustomScaling,
+                  BaseWindow::Flags::Dialog, BaseWindow::DisableLayoutSave},
+                 parent)
 {
     this->setObjectName("SettingsDialog");
     this->setWindowTitle("Chatterino Settings");
+    // Disable the ? button in the titlebar until we decide to use it
+    this->setWindowFlags(this->windowFlags() &
+                         ~Qt::WindowContextHelpButtonHint);
+
     this->resize(915, 600);
     this->themeChangedEvent();
     this->scaleChangedEvent(this->scale());
@@ -41,9 +46,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     this->overrideBackgroundColor_ = QColor("#111111");
     this->scaleChangedEvent(this->scale());  // execute twice to width of item
 
-    // Disable the ? button in the titlebar until we decide to use it
-    this->setWindowFlags(this->windowFlags() &
-                         ~Qt::WindowContextHelpButtonHint);
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
                                        [this]() {
@@ -54,6 +56,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 
 void SettingsDialog::addShortcuts()
 {
+    this->setSearchPlaceholderText();
     HotkeyController::HotkeyMap actions{
         {"search",
          [this](std::vector<QString>) -> QString {
@@ -71,6 +74,19 @@ void SettingsDialog::addShortcuts()
     this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
+void SettingsDialog::setSearchPlaceholderText()
+{
+    QString searchHotkey;
+    auto searchSeq = getApp()->hotkeys->getDisplaySequence(
+        HotkeyCategory::PopupWindow, "search");
+    if (!searchSeq.isEmpty())
+    {
+        searchHotkey =
+            "(" + searchSeq.toString(QKeySequence::SequenceFormat::NativeText) +
+            ")";
+    }
+    this->ui_.search->setPlaceholderText("Find in settings... " + searchHotkey);
+}
 
 void SettingsDialog::initUi()
 {
@@ -85,7 +101,7 @@ void SettingsDialog::initUi()
                     .withoutMargin()
                     .emplace<QLineEdit>()
                     .assign(&this->ui_.search);
-    edit->setPlaceholderText("Find in settings... (Ctrl+F by default)");
+    this->setSearchPlaceholderText();
     edit->setClearButtonEnabled(true);
     edit->findChild<QAbstractButton *>()->setIcon(
         QPixmap(":/buttons/clearSearch.png"));
@@ -109,7 +125,7 @@ void SettingsDialog::initUi()
         .assign(&this->ui_.pageStack)
         .withoutMargin();
 
-    this->ui_.pageStack->setMargin(0);
+    this->ui_.pageStack->setContentsMargins(0, 0, 0, 0);
 
     outerBox->addSpacing(12);
 
@@ -179,9 +195,7 @@ void SettingsDialog::filterElements(const QString &text)
 
 void SettingsDialog::addTabs()
 {
-    this->ui_.tabContainer->setMargin(0);
     this->ui_.tabContainer->setSpacing(0);
-
     this->ui_.tabContainer->setContentsMargins(0, 20, 0, 20);
 
     // Constructors are wrapped in std::function to remove some strain from first time loading.

@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/StandardItemHelper.hpp"
@@ -27,7 +28,7 @@ HighlightPhrase UserHighlightModel::getItemFromRow(
         row[Column::Color]->data(Qt::DecorationRole).value<QColor>();
 
     return HighlightPhrase{
-        row[Column::Pattern]->data(Qt::DisplayRole).toString(),
+        row[Column::Pattern]->data(Qt::DisplayRole).toString().trimmed(),
         row[Column::ShowInMentions]->data(Qt::CheckStateRole).toBool(),
         row[Column::FlashTaskbar]->data(Qt::CheckStateRole).toBool(),
         row[Column::PlaySound]->data(Qt::CheckStateRole).toBool(),

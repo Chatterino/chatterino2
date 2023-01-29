@@ -1,16 +1,11 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 
-#include "common/NetworkRequest.hpp"
-#include "debug/Benchmark.hpp"
+#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
-#include "util/RapidjsonHelpers.hpp"
+#include "util/QStringHash.hpp"
 
 namespace chatterino {
-
-TwitchEmotes::TwitchEmotes()
-{
-}
 
 QString TwitchEmotes::cleanUpEmoteCode(const QString &dirtyEmoteCode)
 {

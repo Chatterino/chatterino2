@@ -1,8 +1,14 @@
 #pragma once
 
-#include "messages/Message.hpp"
-
 #include <QRegularExpression>
+
+#include <memory>
+
+namespace chatterino {
+
+struct Message;
+
+}
 
 namespace filterparser {
 

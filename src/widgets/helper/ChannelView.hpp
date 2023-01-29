@@ -1,21 +1,23 @@
 #pragma once
 
-#include <QPaintEvent>
-#include <QScroller>
-#include <QTimer>
-#include <QWheelEvent>
-#include <QWidget>
-#include <pajlada/signals/signal.hpp>
-#include <unordered_map>
-#include <unordered_set>
-
 #include "common/FlagsEnum.hpp"
-#include "controllers/filters/FilterSet.hpp"
-#include "messages/Image.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Selection.hpp"
+#include "util/ThreadGuard.hpp"
 #include "widgets/BaseWidget.hpp"
+
+#include <pajlada/signals/signal.hpp>
+#include <QMenu>
+#include <QPaintEvent>
+#include <QScroller>
+#include <QTimer>
+#include <QVariantAnimation>
+#include <QWheelEvent>
+#include <QWidget>
+
+#include <unordered_map>
+#include <unordered_set>
 
 namespace chatterino {
 enum class HighlightState;
@@ -26,7 +28,7 @@ using ChannelPtr = std::shared_ptr<Channel>;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 
-enum class MessageFlag : uint32_t;
+enum class MessageFlag : int64_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 class MessageLayout;
@@ -39,6 +41,9 @@ class Scrollbar;
 class EffectLabel;
 struct Link;
 class MessageLayoutElement;
+class Split;
+class FilterSet;
+using FilterSetPtr = std::shared_ptr<FilterSet>;
 
 enum class PauseReason {
     Mouse,
@@ -61,18 +66,46 @@ class ChannelView final : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit ChannelView(BaseWidget *parent = nullptr);
+    enum class Context {
+        None,
+        UserCard,
+        ReplyThread,
+        Search,
+    };
+
+    explicit ChannelView(BaseWidget *parent = nullptr, Split *split = nullptr,
+                         Context context = Context::None,
+                         size_t messagesLimit = 1000);
 
     void queueUpdate();
     Scrollbar &getScrollBar();
+
     QString getSelectedText();
     bool hasSelection();
     void clearSelection();
+    /**
+     * Copies the currently selected text to the users clipboard.
+     *
+     * @see ::getSelectedText()
+     */
+    void copySelectedText();
+
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
     void setOverrideFlags(boost::optional<MessageElementFlags> value);
     const boost::optional<MessageElementFlags> &getOverrideFlags() const;
     void updateLastReadMessage();
+
+    /**
+     * Attempts to scroll to a message in this channel.
+     * @return <code>true</code> if the message was found and highlighted.
+     */
+    bool scrollToMessage(const MessagePtr &message);
+    /**
+     * Attempts to scroll to a message id in this channel.
+     * @return <code>true</code> if the message was found and highlighted.
+     */
+    bool scrollToMessageId(const QString &id);
 
     /// Pausing
     bool pausable() const;
@@ -99,6 +132,8 @@ public:
 
     void clearMessages();
 
+    Context getContext() const;
+
     /**
      * @brief Creates and shows a UserInfoPopup dialog
      *
@@ -107,6 +142,13 @@ public:
      **/
     void showUserInfoPopup(const QString &userName,
                            QString alternativePopoutChannel = QString());
+
+    /**
+     * @brief This method is meant to be used when filtering out channels.
+     *        It <b>must</b> return true if a message belongs in this channel.
+     *        It <b>might</b> return true if a message doesn't belong in this channel.
+     */
+    bool mayContainMessage(const MessagePtr &message);
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
@@ -151,11 +193,12 @@ private:
     void messageAddedAtStart(std::vector<MessagePtr> &messages);
     void messageRemoveFromStart(MessagePtr &message);
     void messageReplaced(size_t index, MessagePtr &replacement);
+    void messagesUpdated();
 
-    void performLayout(bool causedByScollbar = false);
+    void performLayout(bool causedByScrollbar = false);
     void layoutVisibleMessages(
-        LimitedQueueSnapshot<MessageLayoutPtr> &messages);
-    void updateScrollbar(LimitedQueueSnapshot<MessageLayoutPtr> &messages,
+        const LimitedQueueSnapshot<MessageLayoutPtr> &messages);
+    void updateScrollbar(const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
                          bool causedByScrollbar);
 
     void drawMessages(QPainter &painter);
@@ -196,6 +239,18 @@ private:
     void enableScrolling(const QPointF &scrollStart);
     void disableScrolling();
 
+    /**
+     * Scrolls to a message layout that must be from this view.
+     *
+     * @param layout Must be from this channel.
+     * @param messageIdx Must be an index into this channel.
+     */
+    void scrollToMessageLayout(MessageLayout *layout, size_t messageIdx);
+
+    void setInputReply(const MessagePtr &message);
+    void showReplyThreadPopup(const MessagePtr &message);
+    bool canReplyToMessages() const;
+
     QTimer *layoutCooldown_;
     bool layoutQueued_;
 
@@ -211,19 +266,23 @@ private:
         pauses_;
     boost::optional<SteadyClock::time_point> pauseEnd_;
     int pauseScrollOffset_ = 0;
-    int pauseSelectionOffset_ = 0;
+    // Keeps track how many message indices we need to offset the selection when we resume scrolling
+    uint32_t pauseSelectionOffset_ = 0;
 
     boost::optional<MessageElementFlags> overrideFlags_;
     MessageLayoutPtr lastReadMessage_;
 
+    ThreadGuard snapshotGuard_;
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
     ChannelPtr channel_ = nullptr;
     ChannelPtr underlyingChannel_ = nullptr;
     ChannelPtr sourceChannel_ = nullptr;
+    Split *split_ = nullptr;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
+    bool showScrollBar_ = false;
 
     FilterSetPtr channelFilters_;
 
@@ -255,6 +314,11 @@ private:
     QPointF currentMousePosition_;
     QTimer scrollTimer_;
 
+    // We're only interested in the pointer, not the contents
+    MessageLayout *highlightedMessage_ = nullptr;
+    QVariantAnimation highlightAnimation_;
+    void setupHighlightAnimationColors();
+
     struct {
         QCursor neutral;
         QCursor up;
@@ -263,6 +327,8 @@ private:
 
     Selection selection_;
     bool selecting_ = false;
+
+    const Context context_;
 
     LimitedQueue<MessageLayoutPtr> messages_;
 

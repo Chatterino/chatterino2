@@ -1,21 +1,22 @@
-#include <QApplication>
-#include <QCommandLineParser>
-#include <QMessageBox>
-#include <QStringList>
-#include <memory>
-
 #include "BrowserExtension.hpp"
-#include "RunGui.hpp"
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "providers/IvrApi.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "RunGui.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/AttachToConsole.hpp"
 #include "util/IncognitoBrowser.hpp"
+
+#include <QApplication>
+#include <QCommandLineParser>
+#include <QMessageBox>
+#include <QStringList>
+
+#include <memory>
 
 using namespace chatterino;
 
@@ -25,7 +26,7 @@ int main(int argc, char **argv)
 
     QCoreApplication::setApplicationName("chatterino");
     QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
-    QCoreApplication::setOrganizationDomain("https://www.chatterino.com");
+    QCoreApplication::setOrganizationDomain("chatterino.com");
 
     Paths *paths{};
 

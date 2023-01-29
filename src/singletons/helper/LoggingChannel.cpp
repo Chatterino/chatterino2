@@ -1,20 +1,20 @@
 #include "LoggingChannel.hpp"
 
-#include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "messages/Message.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QDir>
 
-#include <ctime>
-
 namespace chatterino {
 
 QByteArray endline("\n");
 
-LoggingChannel::LoggingChannel(const QString &_channelName)
+LoggingChannel::LoggingChannel(const QString &_channelName,
+                               const QString &_platform)
     : channelName(_channelName)
+    , platform(_platform)
 {
     if (this->channelName.startsWith("/whispers"))
     {
@@ -34,8 +34,9 @@ LoggingChannel::LoggingChannel(const QString &_channelName)
             QStringLiteral("Channels") + QDir::separator() + channelName;
     }
 
-    // FOURTF: change this when adding more providers
-    this->subDirectory = "Twitch/" + this->subDirectory;
+    // enforce capitalized platform names
+    this->subDirectory = platform[0].toUpper() + platform.mid(1).toLower() +
+                         QDir::separator() + this->subDirectory;
 
     getSettings()->logPath.connect([this](const QString &logPath, auto) {
         this->baseDirectory =
@@ -106,7 +107,7 @@ void LoggingChannel::addMessage(MessagePtr message)
 
 QString LoggingChannel::generateOpeningString(const QDateTime &now) const
 {
-    QString ret = QLatin1Literal("# Start logging at ");
+    QString ret("# Start logging at ");
 
     ret.append(now.toString("yyyy-MM-dd HH:mm:ss "));
     ret.append(now.timeZoneAbbreviation());
@@ -117,7 +118,7 @@ QString LoggingChannel::generateOpeningString(const QDateTime &now) const
 
 QString LoggingChannel::generateClosingString(const QDateTime &now) const
 {
-    QString ret = QLatin1Literal("# Stop logging at ");
+    QString ret("# Stop logging at ");
 
     ret.append(now.toString("yyyy-MM-dd HH:mm:ss"));
     ret.append(now.timeZoneAbbreviation());

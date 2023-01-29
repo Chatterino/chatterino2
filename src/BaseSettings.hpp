@@ -1,11 +1,10 @@
-#ifndef AB_SETTINGS_H
-#define AB_SETTINGS_H
+#pragma once
 
 #include "common/ChatterinoSetting.hpp"
 
-#include <rapidjson/document.h>
-#include <QString>
 #include <pajlada/settings/settingdata.hpp>
+#include <QString>
+#include <rapidjson/document.h>
 
 #include <memory>
 
@@ -46,8 +45,3 @@ Settings *getSettings();
 AB_SETTINGS_CLASS *getABSettings();
 
 }  // namespace chatterino
-
-#ifdef CHATTERINO
-#    include "singletons/Settings.hpp"
-#endif
-#endif

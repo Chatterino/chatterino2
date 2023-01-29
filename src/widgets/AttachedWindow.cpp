@@ -1,22 +1,25 @@
-#include "AttachedWindow.hpp"
+#include "widgets/AttachedWindow.hpp"
 
 #include "Application.hpp"
-#include "ForwardDecl.hpp"
 #include "common/QLogging.hpp"
+#include "ForwardDecl.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QTimer>
 #include <QVBoxLayout>
+
 #include <memory>
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
 
-#    include "Windows.h"
+// clang-format off
 // don't even think about reordering these
+#    include "Windows.h"
 #    include "Psapi.h"
+// clang-format on
 #    pragma comment(lib, "Dwmapi.lib")
 #endif
 
@@ -48,7 +51,7 @@ AttachedWindow::AttachedWindow(void *_target, int _yOffset)
     , yOffset_(_yOffset)
 {
     QLayout *layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(layout);
 
     auto *split = new Split(this);

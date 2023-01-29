@@ -1,16 +1,20 @@
 #pragma once
 
-#include <memory>
-#include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
+
+#include <boost/optional.hpp>
+
+#include <memory>
 
 namespace chatterino {
 
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteMap;
+class Channel;
+struct BttvLiveUpdateEmoteUpdateAddMessage;
+struct BttvLiveUpdateEmoteRemoveMessage;
 
 class BttvEmotes final
 {
@@ -30,6 +34,41 @@ public:
                             const QString &channelDisplayName,
                             std::function<void(EmoteMap &&)> callback,
                             bool manualRefresh);
+
+    /**
+     * Adds an emote to the `channelEmoteMap`.
+     * This will _copy_ the emote map and
+     * update the `Atomic`.
+     *
+     * @return The added emote.
+     */
+    static EmotePtr addEmote(
+        const QString &channelDisplayName,
+        Atomic<std::shared_ptr<const EmoteMap>> &channelEmoteMap,
+        const BttvLiveUpdateEmoteUpdateAddMessage &message);
+
+    /**
+     * Updates an emote in this `channelEmoteMap`.
+     * This will _copy_ the emote map and
+     * update the `Atomic`.
+     *
+     * @return pair<old emote, new emote> if any emote was updated.
+     */
+    static boost::optional<std::pair<EmotePtr, EmotePtr>> updateEmote(
+        const QString &channelDisplayName,
+        Atomic<std::shared_ptr<const EmoteMap>> &channelEmoteMap,
+        const BttvLiveUpdateEmoteUpdateAddMessage &message);
+
+    /**
+     * Removes an emote from this `channelEmoteMap`.
+     * This will _copy_ the emote map and
+     * update the `Atomic`.
+     *
+     * @return The removed emote if any emote was removed.
+     */
+    static boost::optional<EmotePtr> removeEmote(
+        Atomic<std::shared_ptr<const EmoteMap>> &channelEmoteMap,
+        const BttvLiveUpdateEmoteRemoveMessage &message);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;

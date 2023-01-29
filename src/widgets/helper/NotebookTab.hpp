@@ -1,20 +1,18 @@
 #pragma once
 
 #include "common/Common.hpp"
-#include "widgets/BaseWidget.hpp"
 #include "widgets/helper/Button.hpp"
+#include "widgets/Notebook.hpp"
 
-#include <QMenu>
-#include <QPropertyAnimation>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <QMenu>
+#include <QPropertyAnimation>
 
 namespace chatterino {
 
 #define NOTEBOOK_TAB_HEIGHT 28
 
-// class Notebook;
-class Notebook;
 class SplitContainer;
 
 class NotebookTab : public Button
@@ -40,6 +38,7 @@ public:
     void setSelected(bool value);
 
     void setInLastRow(bool value);
+    void setTabLocation(NotebookTabLocation location);
 
     void setLive(bool isLive);
     void setHighlightState(HighlightState style);
@@ -94,6 +93,7 @@ private:
     bool mouseDownX_{};
     bool isInLastRow_{};
     int mouseWheelDelta_ = 0;
+    NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
 
     HighlightState highlightState_ = HighlightState::None;
     bool highlightEnabled_ = true;

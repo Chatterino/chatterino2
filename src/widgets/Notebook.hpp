@@ -1,13 +1,13 @@
 #pragma once
 
-#include "pajlada/signals/signal.hpp"
 #include "widgets/BaseWidget.hpp"
 
+#include <pajlada/signals/signal.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QList>
 #include <QMenu>
 #include <QMessageBox>
 #include <QWidget>
-#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 
@@ -17,7 +17,7 @@ class NotebookButton;
 class NotebookTab;
 class SplitContainer;
 
-enum NotebookTabDirection { Horizontal = 0, Vertical = 1 };
+enum NotebookTabLocation { Top = 0, Left = 1, Right = 2, Bottom = 3 };
 
 class Notebook : public BaseWidget
 {
@@ -58,7 +58,7 @@ public:
 
     void performLayout(bool animate = false);
 
-    void setTabDirection(NotebookTabDirection direction);
+    void setTabLocation(NotebookTabLocation location);
 
     bool isNotebookLayoutLocked() const;
     void setLockNotebookLayout(bool value);
@@ -86,11 +86,17 @@ protected:
     }
 
 private:
+    void updateTabVisibilityMenuAction();
+    void resizeAddButton();
+
     bool containsPage(QWidget *page);
-    Item &findItem(QWidget *page);
+    Item *findItem(QWidget *page);
 
     static bool containsChild(const QObject *obj, const QObject *child);
     NotebookTab *getTabFromPage(QWidget *page);
+
+    // Returns the number of buttons in `customButtons_` that are visible
+    size_t visibleButtonCount() const;
 
     QList<Item> items_;
     QMenu menu_;
@@ -104,8 +110,9 @@ private:
     bool showAddButton_ = false;
     int lineOffset_ = 20;
     bool lockNotebookLayout_ = false;
-    NotebookTabDirection tabDirection_ = NotebookTabDirection::Horizontal;
+    NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
     QAction *lockNotebookLayoutAction_;
+    QAction *showTabsAction_;
 };
 
 class SplitNotebook : public Notebook

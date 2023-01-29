@@ -1,5 +1,11 @@
 #include "SplitOverlay.hpp"
 
+#include "Application.hpp"
+#include "singletons/Resources.hpp"
+#include "singletons/Theme.hpp"
+#include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
+
 #include <QEvent>
 #include <QGraphicsBlurEffect>
 #include <QGraphicsEffect>
@@ -7,12 +13,6 @@
 #include <QGridLayout>
 #include <QPainter>
 #include <QPushButton>
-
-#include "Application.hpp"
-#include "singletons/Resources.hpp"
-#include "singletons/Theme.hpp"
-#include "widgets/splits/Split.hpp"
-#include "widgets/splits/SplitContainer.hpp"
 
 namespace chatterino {
 
@@ -22,7 +22,7 @@ SplitOverlay::SplitOverlay(Split *parent)
 {
     QGridLayout *layout = new QGridLayout(this);
     this->layout_ = layout;
-    layout->setMargin(1);
+    layout->setContentsMargins(1, 1, 1, 1);
     layout->setSpacing(1);
 
     layout->setRowStretch(1, 1);

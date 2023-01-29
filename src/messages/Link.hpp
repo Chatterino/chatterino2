@@ -23,6 +23,9 @@ public:
         JumpToChannel,
         Reconnect,
         CopyToClipboard,
+        ReplyToMessage,
+        ViewThread,
+        JumpToMessage,
     };
 
     Link();

@@ -5,15 +5,13 @@
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QScreen>
-
 #include <QVBoxLayout>
 
 namespace chatterino {
 
 NotificationPopup::NotificationPopup()
-    : BaseWindow(BaseWindow::Frameless)
+    : BaseWindow({BaseWindow::Frameless, BaseWindow::DisableLayoutSave})
     , channel_(std::make_shared<Channel>("notifications", Channel::Type::None))
 
 {
@@ -32,8 +30,7 @@ void NotificationPopup::updatePosition()
 {
     Location location = BottomRight;
 
-    QDesktopWidget *desktop = QApplication::desktop();
-    const QRect rect = desktop->availableGeometry();
+    const QRect rect = QGuiApplication::primaryScreen()->availableGeometry();
 
     switch (location)
     {

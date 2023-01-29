@@ -1,6 +1,0 @@
-trailingComma = "es5"
-
-[[overrides]]
-files = ["*.md"]
-[overrides.options]
-proseWrap = "preserve"

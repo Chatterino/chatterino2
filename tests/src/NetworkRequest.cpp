@@ -1,11 +1,10 @@
 #include "common/NetworkRequest.hpp"
+
 #include "common/NetworkManager.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
-#include "providers/twitch/api/Helix.hpp"
-
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
+#include "providers/twitch/api/Helix.hpp"
 
 #include <gtest/gtest.h>
 
@@ -145,6 +144,11 @@ TEST(NetworkRequest, Error)
             .onError([code, &mut, &requestDone, &requestDoneCondition,
                       url](NetworkResult result) {
                 EXPECT_EQ(result.status(), code);
+                if (code == 402)
+                {
+                    EXPECT_EQ(result.getData(),
+                              QString("Fuck you, pay me!").toUtf8());
+                }
 
                 {
                     std::unique_lock lck(mut);

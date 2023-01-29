@@ -10,9 +10,11 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -20,15 +22,14 @@
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/PostToThread.hpp"
 #include "util/StreamerMode.hpp"
-#include "widgets/Label.hpp"
-#include "widgets/Scrollbar.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/Label.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -91,15 +92,27 @@ namespace {
         LimitedQueueSnapshot<MessagePtr> snapshot =
             channel->getMessageSnapshot();
 
-        ChannelPtr channelPtr(
-            new Channel(channel->getName(), Channel::Type::None));
+        ChannelPtr channelPtr;
+        if (channel->isTwitchChannel())
+        {
+            channelPtr = std::make_shared<TwitchChannel>(channel->getName());
+        }
+        else
+        {
+            channelPtr = std::make_shared<Channel>(channel->getName(),
+                                                   Channel::Type::None);
+        }
 
         for (size_t i = 0; i < snapshot.size(); i++)
         {
             MessagePtr message = snapshot[i];
+
+            auto overrideFlags = boost::optional<MessageFlags>(message->flags);
+            overrideFlags->set(MessageFlag::DoNotLog);
+
             if (checkMessageUserName(userName, message))
             {
-                channelPtr->addMessage(message);
+                channelPtr->addMessage(message, overrideFlags);
             }
         }
 
@@ -118,32 +131,17 @@ namespace {
 
 }  // namespace
 
-#ifdef Q_OS_LINUX
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::Dialog,
-                                                BaseWindow::EnableCustomFrame};
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
-    BaseWindow::EnableCustomFrame};
-#else
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::EnableCustomFrame};
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
-    BaseWindow::EnableCustomFrame, BaseWindow::Frameless,
-    BaseWindow::FramelessDraggable};
-#endif
-
-UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
-    : BaseWindow(closeAutomatically ? userInfoPopupFlagsCloseAutomatically
-                                    : userInfoPopupFlags,
-                 parent)
-    , hack_(new bool)
-    , dragTimer_(this)
+UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
+                             Split *split)
+    : DraggablePopup(closeAutomatically, parent)
+    , split_(split)
+    , closeAutomatically_(closeAutomatically)
 {
+    assert(split != nullptr &&
+           "split being nullptr causes lots of bugs down the road");
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
-
-    if (closeAutomatically)
-        this->setActionOnFocusLoss(BaseWindow::Delete);
-    else
-        this->setAttribute(Qt::WA_DeleteOnClose);
+    this->updateFocusLoss();
 
     HotkeyController::HotkeyMap actions{
         {"delete",
@@ -315,7 +313,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                                 SplitContainer *container = nb.addPage(true);
                                 Split *split = new Split(container);
                                 split->setChannel(channel);
-                                container->appendSplit(split);
+                                container->insertSplit(split);
                             });
                         menu->popup(QCursor::pos());
                         menu->raise();
@@ -354,6 +352,22 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
                 this->ui_.localizedNameLabel->setVisible(false);
                 this->ui_.localizedNameCopyButton->setVisible(false);
+
+                // button to pin the window (only if we close automatically)
+                if (this->closeAutomatically_)
+                {
+                    this->ui_.pinButton = box.emplace<Button>().getElement();
+                    this->ui_.pinButton->setPixmap(
+                        getApp()->themes->buttons.pin);
+                    this->ui_.pinButton->setScaleIndependantSize(18, 18);
+                    this->ui_.pinButton->setToolTip("Pin Window");
+                    QObject::connect(this->ui_.pinButton, &Button::leftClicked,
+                                     [this]() {
+                                         this->closeAutomatically_ =
+                                             !this->closeAutomatically_;
+                                         this->updateFocusLoss();
+                                     });
+                }
             }
 
             // items on the left
@@ -498,7 +512,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
         this->ui_.noMessagesLabel = new Label("No recent messages");
         this->ui_.noMessagesLabel->setVisible(false);
 
-        this->ui_.latestMessages = new ChannelView(this);
+        this->ui_.latestMessages =
+            new ChannelView(this, this->split_, ChannelView::Context::UserCard,
+                            getSettings()->scrollbackUsercardLimit);
         this->ui_.latestMessages->setMinimumSize(400, 275);
         this->ui_.latestMessages->setSizePolicy(QSizePolicy::Expanding,
                                                 QSizePolicy::Expanding);
@@ -510,21 +526,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
     this->installEvents();
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
-
-    this->dragTimer_.callOnTimeout(
-        [this, hack = std::weak_ptr<bool>(this->hack_)] {
-            if (!hack.lock())
-            {
-                // Ensure this timer is never called after the object has been destroyed
-                return;
-            }
-            if (!this->isMoving_)
-            {
-                return;
-            }
-
-            this->move(this->requestedDragPos_);
-        });
 }
 
 void UserInfoPopup::themeChangedEvent()
@@ -548,36 +549,6 @@ void UserInfoPopup::scaleChangedEvent(float /*scale*/)
 
         this->setGeometry(geo);
     });
-}
-
-void UserInfoPopup::mousePressEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::MouseButton::LeftButton)
-    {
-        this->dragTimer_.start(std::chrono::milliseconds(17));
-        this->startPosDrag_ = event->pos();
-        this->movingRelativePos = event->localPos();
-    }
-}
-
-void UserInfoPopup::mouseReleaseEvent(QMouseEvent *event)
-{
-    this->dragTimer_.stop();
-    this->isMoving_ = false;
-}
-
-void UserInfoPopup::mouseMoveEvent(QMouseEvent *event)
-{
-    // Drag the window by the amount changed from inital position
-    // Note that we provide a few *units* of deadzone so people don't
-    // start dragging the window if they are slow at clicking.
-    auto movePos = event->pos() - this->startPosDrag_;
-    if (this->isMoving_ || movePos.manhattanLength() > 10.0)
-    {
-        this->requestedDragPos_ =
-            (event->screenPos() - this->movingRelativePos).toPoint();
-        this->isMoving_ = true;
-    }
 }
 
 void UserInfoPopup::installEvents()
@@ -765,7 +736,7 @@ void UserInfoPopup::updateLatestMessages()
 
 void UserInfoPopup::updateUserData()
 {
-    std::weak_ptr<bool> hack = this->hack_;
+    std::weak_ptr<bool> hack = this->lifetimeHack_;
     auto currentUser = getApp()->accounts->twitch.getCurrent();
 
     const auto onUserFetchFailed = [this, hack] {
@@ -922,13 +893,33 @@ void UserInfoPopup::updateUserData()
     this->ui_.ignoreHighlights->setEnabled(false);
 }
 
+void UserInfoPopup::updateFocusLoss()
+{
+    if (this->closeAutomatically_)
+    {
+        this->setActionOnFocusLoss(BaseWindow::Delete);
+        if (this->ui_.pinButton != nullptr)
+        {
+            this->ui_.pinButton->setPixmap(getApp()->themes->buttons.pin);
+        }
+    }
+    else
+    {
+        this->setActionOnFocusLoss(BaseWindow::Nothing);
+        if (this->ui_.pinButton != nullptr)
+        {
+            this->ui_.pinButton->setPixmap(getResources().buttons.pinEnabled);
+        }
+    }
+}
+
 void UserInfoPopup::loadAvatar(const QUrl &url)
 {
     QNetworkRequest req(url);
     static auto manager = new QNetworkAccessManager();
     auto *reply = manager->get(req);
 
-    QObject::connect(reply, &QNetworkReply::finished, this, [=] {
+    QObject::connect(reply, &QNetworkReply::finished, this, [=, this] {
         if (reply->error() == QNetworkReply::NoError)
         {
             const auto data = reply->readAll();

@@ -5,9 +5,8 @@ on:
   push:
     branches:
       - master
-  pull_request:
 
-concurrency: 
+concurrency:
   group: build-archlinux-${{ github.ref }}
   cancel-in-progress: true
 

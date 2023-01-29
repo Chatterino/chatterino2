@@ -12,6 +12,7 @@
 #include <QHeaderView>
 #include <QTableView>
 #include <QVBoxLayout>
+
 #include <algorithm>
 
 namespace chatterino {
@@ -33,10 +34,8 @@ AccountsPage::AccountsPage()
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
 
     view->addButtonPressed.connect([this] {
-        static auto loginWidget = new LoginWidget(this);
-
-        loginWidget->show();
-        loginWidget->raise();
+        LoginDialog d(this);
+        d.exec();
     });
 
     view->getTableView()->setStyleSheet("background: #333");

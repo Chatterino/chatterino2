@@ -1,6 +1,17 @@
 #include "controllers/highlights/HighlightController.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
+#include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
+#include "providers/colors/ColorProvider.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
+#include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 
 namespace {
 
@@ -11,10 +22,12 @@ auto highlightPhraseCheck(const HighlightPhrase &highlight) -> HighlightCheck
     return HighlightCheck{
         [highlight](const auto &args, const auto &badges,
                     const auto &senderName, const auto &originalMessage,
+                    const auto &flags,
                     const auto self) -> boost::optional<HighlightResult> {
             (void)args;        // unused
             (void)badges;      // unused
             (void)senderName;  // unused
+            (void)flags;       // unused
 
             if (self)
             {
@@ -48,8 +61,7 @@ void rebuildSubscriptionHighlights(Settings &settings,
     {
         auto highlightSound = settings.enableSubHighlightSound.getValue();
         auto highlightAlert = settings.enableSubHighlightTaskbar.getValue();
-        auto highlightSoundUrlValue =
-            settings.whisperHighlightSoundUrl.getValue();
+        auto highlightSoundUrlValue = settings.subHighlightSoundUrl.getValue();
         boost::optional<QUrl> highlightSoundUrl;
         if (!highlightSoundUrlValue.isEmpty())
         {
@@ -60,11 +72,12 @@ void rebuildSubscriptionHighlights(Settings &settings,
 
         checks.emplace_back(HighlightCheck{
             [=](const auto &args, const auto &badges, const auto &senderName,
-                const auto &originalMessage,
+                const auto &originalMessage, const auto &flags,
                 const auto self) -> boost::optional<HighlightResult> {
                 (void)badges;           // unused
                 (void)senderName;       // unused
                 (void)originalMessage;  // unused
+                (void)flags;            // unused
                 (void)self;             // unused
 
                 if (!args.isSubscriptionMessage)
@@ -105,11 +118,12 @@ void rebuildWhisperHighlights(Settings &settings,
 
         checks.emplace_back(HighlightCheck{
             [=](const auto &args, const auto &badges, const auto &senderName,
-                const auto &originalMessage,
+                const auto &originalMessage, const auto &flags,
                 const auto self) -> boost::optional<HighlightResult> {
                 (void)badges;           // unused
                 (void)senderName;       // unused
                 (void)originalMessage;  // unused
+                (void)flags;            // unused
                 (void)self;             // unused
 
                 if (!args.isReceivedWhisper)
@@ -124,6 +138,44 @@ void rebuildWhisperHighlights(Settings &settings,
                     ColorProvider::instance().color(ColorType::Whisper),
                     false,
                 };
+            }});
+    }
+}
+
+void rebuildReplyThreadHighlight(Settings &settings,
+                                 std::vector<HighlightCheck> &checks)
+{
+    if (settings.enableThreadHighlight)
+    {
+        auto highlightSound = settings.enableThreadHighlightSound.getValue();
+        auto highlightAlert = settings.enableThreadHighlightTaskbar.getValue();
+        auto highlightSoundUrlValue =
+            settings.threadHighlightSoundUrl.getValue();
+        boost::optional<QUrl> highlightSoundUrl;
+        if (!highlightSoundUrlValue.isEmpty())
+        {
+            highlightSoundUrl = highlightSoundUrlValue;
+        }
+        auto highlightInMentions =
+            settings.showThreadHighlightInMentions.getValue();
+        checks.emplace_back(HighlightCheck{
+            [=](const auto & /*args*/, const auto & /*badges*/,
+                const auto & /*senderName*/, const auto & /*originalMessage*/,
+                const auto &flags,
+                const auto self) -> boost::optional<HighlightResult> {
+                if (flags.has(MessageFlag::ParticipatedThread) && !self)
+                {
+                    return HighlightResult{
+                        highlightAlert,
+                        highlightSound,
+                        highlightSoundUrl,
+                        ColorProvider::instance().color(
+                            ColorType::ThreadMessageHighlight),
+                        highlightInMentions,
+                    };
+                }
+
+                return boost::none;
             }});
     }
 }
@@ -188,10 +240,12 @@ void rebuildUserHighlights(Settings &settings,
         checks.emplace_back(HighlightCheck{
             [highlight](const auto &args, const auto &badges,
                         const auto &senderName, const auto &originalMessage,
+                        const auto &flags,
                         const auto self) -> boost::optional<HighlightResult> {
                 (void)args;             // unused
                 (void)badges;           // unused
                 (void)originalMessage;  // unused
+                (void)flags;            // unused
                 (void)self;             // unused
 
                 if (!highlight.isMatch(senderName))
@@ -206,9 +260,11 @@ void rebuildUserHighlights(Settings &settings,
                 }
 
                 return HighlightResult{
-                    highlight.hasAlert(),       highlight.hasSound(),
-                    highlightSoundUrl,          highlight.getColor(),
-                    highlight.showInMentions(),
+                    highlight.hasAlert(),        //
+                    highlight.hasSound(),        //
+                    highlightSoundUrl,           //
+                    highlight.getColor(),        //
+                    highlight.showInMentions(),  //
                 };
             }});
     }
@@ -224,10 +280,12 @@ void rebuildBadgeHighlights(Settings &settings,
         checks.emplace_back(HighlightCheck{
             [highlight](const auto &args, const auto &badges,
                         const auto &senderName, const auto &originalMessage,
+                        const auto &flags,
                         const auto self) -> boost::optional<HighlightResult> {
                 (void)args;             // unused
                 (void)senderName;       // unused
                 (void)originalMessage;  // unused
+                (void)flags;            // unused
                 (void)self;             // unused
 
                 for (const Badge &badge : badges)
@@ -241,11 +299,11 @@ void rebuildBadgeHighlights(Settings &settings,
                         }
 
                         return HighlightResult{
-                            highlight.hasAlert(),
-                            highlight.hasSound(),
-                            highlightSoundUrl,
-                            highlight.getColor(),
-                            false,  // showInMentions
+                            highlight.hasAlert(),        //
+                            highlight.hasSound(),        //
+                            highlightSoundUrl,           //
+                            highlight.getColor(),        //
+                            highlight.showInMentions(),  //
                         };
                     }
                 }
@@ -259,14 +317,102 @@ void rebuildBadgeHighlights(Settings &settings,
 
 namespace chatterino {
 
+HighlightResult::HighlightResult(bool _alert, bool _playSound,
+                                 boost::optional<QUrl> _customSoundUrl,
+                                 std::shared_ptr<QColor> _color,
+                                 bool _showInMentions)
+    : alert(_alert)
+    , playSound(_playSound)
+    , customSoundUrl(std::move(_customSoundUrl))
+    , color(std::move(_color))
+    , showInMentions(_showInMentions)
+{
+}
+
+HighlightResult HighlightResult::emptyResult()
+{
+    return {
+        false, false, boost::none, nullptr, false,
+    };
+}
+
+bool HighlightResult::operator==(const HighlightResult &other) const
+{
+    if (this->alert != other.alert)
+    {
+        return false;
+    }
+    if (this->playSound != other.playSound)
+    {
+        return false;
+    }
+    if (this->customSoundUrl != other.customSoundUrl)
+    {
+        return false;
+    }
+
+    if (this->color && other.color)
+    {
+        if (*this->color != *other.color)
+        {
+            return false;
+        }
+    }
+
+    if (this->showInMentions != other.showInMentions)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool HighlightResult::operator!=(const HighlightResult &other) const
+{
+    return !(*this == other);
+}
+
+bool HighlightResult::empty() const
+{
+    return !this->alert && !this->playSound &&
+           !this->customSoundUrl.has_value() && !this->color &&
+           !this->showInMentions;
+}
+
+bool HighlightResult::full() const
+{
+    return this->alert && this->playSound && this->customSoundUrl.has_value() &&
+           this->color && this->showInMentions;
+}
+
+std::ostream &operator<<(std::ostream &os, const HighlightResult &result)
+{
+    os << "Alert: " << (result.alert ? "Yes" : "No") << ", "
+       << "Play sound: " << (result.playSound ? "Yes" : "No") << " ("
+       << (result.customSoundUrl
+               ? result.customSoundUrl.get().toString().toStdString()
+               : "")
+       << ")"
+       << ", "
+       << "Color: " << (result.color ? result.color->name().toStdString() : "")
+       << ", "
+       << "Show in mentions: " << (result.showInMentions ? "Yes" : "No");
+    return os;
+}
+
 void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
 {
+    this->rebuildListener_.addSetting(settings.enableSelfHighlight);
+    this->rebuildListener_.addSetting(settings.enableSelfHighlightSound);
+    this->rebuildListener_.addSetting(settings.enableSelfHighlightTaskbar);
+    this->rebuildListener_.addSetting(settings.selfHighlightSoundUrl);
+    this->rebuildListener_.addSetting(settings.showSelfHighlightInMentions);
+
     this->rebuildListener_.addSetting(settings.enableWhisperHighlight);
     this->rebuildListener_.addSetting(settings.enableWhisperHighlightSound);
     this->rebuildListener_.addSetting(settings.enableWhisperHighlightTaskbar);
     this->rebuildListener_.addSetting(settings.whisperHighlightSoundUrl);
-    this->rebuildListener_.addSetting(settings.whisperHighlightColor);
-    this->rebuildListener_.addSetting(settings.enableSelfHighlight);
+
     this->rebuildListener_.addSetting(settings.enableSubHighlight);
     this->rebuildListener_.addSetting(settings.enableSubHighlightSound);
     this->rebuildListener_.addSetting(settings.enableSubHighlightTaskbar);
@@ -274,6 +420,13 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
     this->rebuildListener_.addSetting(
         settings.showSelfMessagesHighlightInMentions);
     this->rebuildListener_.addSetting(settings.selfMessagesHighlightColor);
+    this->rebuildListener_.addSetting(settings.subHighlightSoundUrl);
+
+    this->rebuildListener_.addSetting(settings.enableThreadHighlight);
+    this->rebuildListener_.addSetting(settings.enableThreadHighlightSound);
+    this->rebuildListener_.addSetting(settings.enableThreadHighlightTaskbar);
+    this->rebuildListener_.addSetting(settings.threadHighlightSoundUrl);
+    this->rebuildListener_.addSetting(settings.showThreadHighlightInMentions);
 
     this->rebuildListener_.setCB([this, &settings] {
         qCDebug(chatterinoHighlights)
@@ -321,22 +474,25 @@ void HighlightController::rebuildChecks(Settings &settings)
     checks->clear();
 
     // CURRENT ORDER:
-    // Subscription -> Whisper -> User -> Message -> Badge
+    // Subscription -> Whisper -> Message -> User -> Reply Threads -> Badge
 
     rebuildSubscriptionHighlights(settings, *checks);
 
     rebuildWhisperHighlights(settings, *checks);
 
+    rebuildMessageHighlights(settings, *checks);
+
     rebuildUserHighlights(settings, *checks);
 
-    rebuildMessageHighlights(settings, *checks);
+    rebuildReplyThreadHighlight(settings, *checks);
 
     rebuildBadgeHighlights(settings, *checks);
 }
 
 std::pair<bool, HighlightResult> HighlightController::check(
     const MessageParseArgs &args, const std::vector<Badge> &badges,
-    const QString &senderName, const QString &originalMessage) const
+    const QString &senderName, const QString &originalMessage,
+    const MessageFlags &messageFlags) const
 {
     bool highlighted = false;
     auto result = HighlightResult::emptyResult();
@@ -349,8 +505,8 @@ std::pair<bool, HighlightResult> HighlightController::check(
 
     for (const auto &check : *checks)
     {
-        if (auto checkResult =
-                check.cb(args, badges, senderName, originalMessage, self);
+        if (auto checkResult = check.cb(args, badges, senderName,
+                                        originalMessage, messageFlags, self);
             checkResult)
         {
             highlighted = true;

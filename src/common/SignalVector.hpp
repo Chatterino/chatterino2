@@ -1,12 +1,13 @@
 #pragma once
 
-#include <QStandardItemModel>
-#include <QTimer>
+#include "debug/AssertInGuiThread.hpp"
+
 #include <boost/noncopyable.hpp>
 #include <pajlada/signals/signal.hpp>
-#include <vector>
+#include <QStandardItemModel>
+#include <QTimer>
 
-#include "debug/AssertInGuiThread.hpp"
+#include <vector>
 
 namespace chatterino {
 
@@ -38,10 +39,10 @@ public:
     SignalVector(std::function<bool(const T &, const T &)> &&compare)
         : SignalVector()
     {
-        itemCompare_ = std::move(compare);
+        this->itemCompare_ = std::move(compare);
     }
 
-    virtual bool isSorted() const
+    bool isSorted() const
     {
         return bool(this->itemCompare_);
     }
@@ -76,9 +77,13 @@ public:
         else
         {
             if (index == -1)
+            {
                 index = this->items_.size();
+            }
             else
+            {
                 assert(index >= 0 && index <= this->items_.size());
+            }
 
             this->items_.insert(this->items_.begin() + index, item);
         }

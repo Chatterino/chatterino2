@@ -3,18 +3,19 @@
 #include "common/Aliases.hpp"
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
-#include "pajlada/signals/signalholder.hpp"
 #include "widgets/BaseWidget.hpp"
 
+#include <boost/signals2.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QFont>
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <boost/signals2.hpp>
 
 namespace chatterino {
 
 class ChannelView;
+class MessageThread;
 class SplitHeader;
 class SplitInput;
 class SplitContainer;
@@ -74,6 +75,8 @@ public:
 
     void setContainer(SplitContainer *container);
 
+    void setInputReply(const std::shared_ptr<MessageThread> &reply);
+
     static pajlada::Signals::Signal<Qt::KeyboardModifiers>
         modifierStatusChanged;
     static Qt::KeyboardModifiers modifierStatus;
@@ -127,6 +130,14 @@ private:
      */
     void joinChannelInNewTab(ChannelPtr channel);
 
+    /**
+     * @brief Refresh moderation mode layouts/buttons
+     *
+     * Should be called after after the moderation mode is changed or
+     * moderation actions have been changed
+     **/
+    void refreshModerationMode();
+
     IndirectChannel channel_;
 
     bool moderationMode_{};
@@ -165,7 +176,6 @@ public slots:
     void openBrowserPlayer();
     void openInStreamlink();
     void openWithCustomScheme();
-    void copyToClipboard();
     void startWatching();
     void setFiltersDialog();
     void showSearch(bool singleChannel);

@@ -246,6 +246,11 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
                      this, &ResizingTextEdit::insertCompletion);
 }
 
+void ResizingTextEdit::resetCompletion()
+{
+    this->completionInProgress_ = false;
+}
+
 void ResizingTextEdit::insertCompletion(const QString &completion)
 {
     if (this->completer_->widget() != this)
@@ -281,29 +286,33 @@ bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
 
 void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 {
-    if (source->hasImage())
+    if (getSettings()->imageUploaderEnabled)
     {
-        this->imagePasted.invoke(source);
-        return;
-    }
-    else if (source->hasUrls())
-    {
-        bool hasUploadable = false;
-        auto mimeDb = QMimeDatabase();
-        for (const QUrl url : source->urls())
-        {
-            QMimeType mime = mimeDb.mimeTypeForUrl(url);
-            if (mime.name().startsWith("image"))
-            {
-                hasUploadable = true;
-                break;
-            }
-        }
-
-        if (hasUploadable)
+        if (source->hasImage())
         {
             this->imagePasted.invoke(source);
             return;
+        }
+
+        if (source->hasUrls())
+        {
+            bool hasUploadable = false;
+            auto mimeDb = QMimeDatabase();
+            for (const QUrl &url : source->urls())
+            {
+                QMimeType mime = mimeDb.mimeTypeForUrl(url);
+                if (mime.name().startsWith("image"))
+                {
+                    hasUploadable = true;
+                    break;
+                }
+            }
+
+            if (hasUploadable)
+            {
+                this->imagePasted.invoke(source);
+                return;
+            }
         }
     }
 

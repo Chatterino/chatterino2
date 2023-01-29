@@ -1,4 +1,5 @@
 #include "IrcConnectionEditor.hpp"
+
 #include "ui_IrcConnectionEditor.h"
 
 namespace chatterino {

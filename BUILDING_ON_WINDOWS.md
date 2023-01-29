@@ -33,7 +33,7 @@ Note: This installation will take about 2.1 GB of disk space.
 
 ### For our websocket library, we need OpenSSL 1.1
 
-1. Download OpenSSL for windows, version `1.1.1p`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1p.exe)**
+1. Download OpenSSL for windows, version `1.1.1s`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1s.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 
@@ -83,7 +83,7 @@ Compiling with Breakpad support enables crash reports that can be of use for dev
 
 ## Run the build in Qt Creator
 
-1. Open the `chatterino.pro` file by double-clicking it, or by opening it via Qt Creator.
+1. Open the `CMakeLists.txt` file by double-clicking it, or by opening it via Qt Creator.
 2. You will be presented with a screen that is titled "Configure Project". In this screen, you should have at least one option present ready to be configured, like this:
    ![Qt Create Configure Project screenshot](https://user-images.githubusercontent.com/69117321/169887645-2ae0871a-fe8a-4eb9-98db-7b996dea3a54.png)
 3. Select the profile(s) you want to build with and click "Configure Project".
@@ -134,6 +134,17 @@ Open up your terminal with the Visual Studio environment variables, then enter t
 3. `cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..`
 4. `nmake`
 
+## Building on MSVC with AddressSanitizer
+
+Make sure you installed `C++ AddressSanitizer` in your VisualStudio installation like described in the [Microsoft Docs](https://learn.microsoft.com/en-us/cpp/sanitizers/asan#install-the-addresssanitizer).
+
+To build Chatterino with AddressSanitizer on MSVC, you need to add `-DCMAKE_CXX_FLAGS=/fsanitize=address` to your CMake options.
+
+When you start Chatterino, and it's complaining about `clang_rt.asan_dbg_dynamic-x86_64.dll` missing,
+copy the file found in `<VisualStudio-installation-path>\VC\Tools\MSVC\<version>\bin\Hostx64\x64\clang_rt.asan_dbg_dynamic-x86_64.dll` to the `Chatterino` folder inside your `build` folder.
+
+To learn more about AddressSanitizer and MSVC, visit the [Microsoft Docs](https://learn.microsoft.com/en-us/cpp/sanitizers/asan).
+
 ## Building/Running in CLion
 
 _Note:_ We're using `build` instead of the CLion default `cmake-build-debug` folder.
@@ -150,7 +161,6 @@ Now open the project in CLion. You will be greeted with the _Open Project Wizard
 ```
 -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64\lib\cmake\Qt5
 -DUSE_CONAN=ON
--DCMAKE_CXX_FLAGS=/bigobj
 ```
 
 and the _Build Directory_ to `build`.
@@ -189,3 +199,29 @@ Now you can run the `chatterino | Debug` configuration.
 
 If you want to run the portable version of Chatterino, create a file called `modes` inside of `build/bin` and
 write `portable` into it.
+
+### Debugging
+
+To visualize QT types like `QString`, you need to inform CLion and LLDB
+about these types.
+
+1. Set `Enable NatVis renderers for LLDB option`
+   in `Settings | Build, Execution, Deployment | Debugger | Data Views | C/C++` (should be enabled by default).
+2. Use the official NatVis file for QT from [`qt-labs/vstools`](https://github.com/qt-labs/vstools) by saving them to
+   the project root using PowerShell:
+
+<!--
+When switching to QT6 these need to be updated to qt6.natvis.xml.
+We need to do the replacement as the QT tools:
+https://github.com/qt-labs/vstools/blob/0769d945f8d0040917d654d9731e6b65951e102c/QtVsTools.Package/QtVsToolsPackage.cs#L390-L393
+-->
+
+```powershell
+(iwr "https://github.com/qt-labs/vstools/raw/dev/QtVsTools.Package/qt5.natvis.xml").Content -replace '##NAMESPACE##::', '' | Out-File qt5.natvis
+# [OR] using the permalink
+(iwr "https://github.com/qt-labs/vstools/raw/0769d945f8d0040917d654d9731e6b65951e102c/QtVsTools.Package/qt5.natvis.xml").Content -replace '##NAMESPACE##::', '' | Out-File qt5.natvis
+```
+
+Now you can debug the application and see QT types rendered correctly.
+If this didn't work for you, try following
+the [tutorial from JetBrains](https://www.jetbrains.com/help/clion/qt-tutorial.html#debug-renderers).

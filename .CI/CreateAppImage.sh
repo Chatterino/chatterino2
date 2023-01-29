@@ -14,7 +14,6 @@ script_path=$(readlink -f "$0")
 script_dir=$(dirname "$script_path")
 chatterino_dir=$(dirname "$script_dir")
 
-qmake_path=$(command -v qmake)
 
 echo "Running LDD on chatterino binary:"
 ldd ./bin/chatterino
@@ -42,8 +41,7 @@ echo "Run LinuxDeployQT"
     appdir/usr/share/applications/*.desktop \
     -no-translations \
     -bundle-non-qt-libs \
-    -unsupported-allow-new-glibc \
-    -qmake="$qmake_path"
+    -unsupported-allow-new-glibc
 
 rm -rf appdir/home
 rm -f appdir/AppRun

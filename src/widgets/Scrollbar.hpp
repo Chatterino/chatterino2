@@ -4,10 +4,10 @@
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
+#include <pajlada/signals/signal.hpp>
 #include <QMutex>
 #include <QPropertyAnimation>
 #include <QWidget>
-#include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 
@@ -18,7 +18,7 @@ class Scrollbar : public BaseWidget
     Q_OBJECT
 
 public:
-    Scrollbar(ChannelView *parent = nullptr);
+    Scrollbar(size_t messagesLimit, ChannelView *parent = nullptr);
 
     void addHighlight(ScrollbarHighlight highlight);
     void addHighlightsAtStart(

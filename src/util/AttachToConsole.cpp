@@ -1,7 +1,9 @@
-#include "AttachToConsole.hpp"
+#include "util/AttachToConsole.hpp"
 
 #ifdef USEWINSDK
 #    include <Windows.h>
+
+#    include <iostream>
 #endif
 
 namespace chatterino {

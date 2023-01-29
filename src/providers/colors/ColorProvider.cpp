@@ -1,5 +1,7 @@
 #include "providers/colors/ColorProvider.hpp"
 
+#include "controllers/highlights/HighlightPhrase.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 
 namespace chatterino {
@@ -146,6 +148,34 @@ void ColorProvider::initTypeColorMap()
             {ColorType::FirstMessageHighlight,
              std::make_shared<QColor>(
                  HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR)});
+    }
+
+    customColor = getSettings()->elevatedMessageHighlightColor;
+    if (QColor(customColor).isValid())
+    {
+        this->typeColorMap_.insert({ColorType::ElevatedMessageHighlight,
+                                    std::make_shared<QColor>(customColor)});
+    }
+    else
+    {
+        this->typeColorMap_.insert(
+            {ColorType::ElevatedMessageHighlight,
+             std::make_shared<QColor>(
+                 HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR)});
+    }
+
+    customColor = getSettings()->threadHighlightColor;
+    if (QColor(customColor).isValid())
+    {
+        this->typeColorMap_.insert({ColorType::ThreadMessageHighlight,
+                                    std::make_shared<QColor>(customColor)});
+    }
+    else
+    {
+        this->typeColorMap_.insert(
+            {ColorType::ThreadMessageHighlight,
+             std::make_shared<QColor>(
+                 HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR)});
     }
 }
 

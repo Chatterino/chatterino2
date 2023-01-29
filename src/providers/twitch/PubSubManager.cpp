@@ -2,11 +2,15 @@
 
 #include "common/QLogging.hpp"
 #include "providers/twitch/PubSubActions.hpp"
+#include "providers/twitch/PubSubClient.hpp"
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
+
+#include <QJsonArray>
 
 #include <algorithm>
 #include <exception>
@@ -476,6 +480,18 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         bind(&PubSub::onConnectionFail, this, ::_1));
 }
 
+void PubSub::setAccount(std::shared_ptr<TwitchAccount> account)
+{
+    this->token_ = account->getOAuthToken();
+    this->userID_ = account->getUserId();
+}
+
+void PubSub::setAccountData(QString token, QString userID)
+{
+    this->token_ = token;
+    this->userID_ = userID;
+}
+
 void PubSub::addClient()
 {
     if (this->addingClient)
@@ -816,7 +832,7 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
     qCDebug(chatterinoPubSub) << "PubSub connection opened!";
 
     const auto topicsToTake =
-        (std::min)(this->requests.size(), PubSubClient::MAX_LISTENS);
+        std::min(this->requests.size(), PubSubClient::MAX_LISTENS);
 
     std::vector<QString> newTopics(
         std::make_move_iterator(this->requests.begin()),

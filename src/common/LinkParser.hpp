@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QRegularExpressionMatch>
 #include <QString>
 
 namespace chatterino {

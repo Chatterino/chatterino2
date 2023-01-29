@@ -1,15 +1,14 @@
 #include "NicknamesPage.hpp"
 
+#include "controllers/nicknames/Nickname.hpp"
 #include "controllers/nicknames/NicknamesModel.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
-#include <QTableView>
-
 #include <QHeaderView>
+#include <QTableView>
 
 namespace chatterino {
 

@@ -1,13 +1,13 @@
-#include "FramelessEmbedWindow.hpp"
+#include "widgets/FramelessEmbedWindow.hpp"
+
+#include "Application.hpp"
+#include "common/Args.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QHBoxLayout>
-#include "Application.hpp"
-#include "QJsonDocument"
-#include "QMessageBox"
-#include "providers/twitch/TwitchIrcServer.hpp"
-//#include "widgets/helper/ChannelView.hpp"
-#include "common/Args.hpp"
-#include "widgets/splits/Split.hpp"
+#include <QJsonDocument>
+#include <QMessageBox>
 
 #ifdef USEWINSDK
 #    include "Windows.h"
@@ -16,7 +16,7 @@
 namespace chatterino {
 
 FramelessEmbedWindow::FramelessEmbedWindow()
-    : BaseWindow(BaseWindow::Frameless)
+    : BaseWindow({BaseWindow::Frameless, BaseWindow::DisableLayoutSave})
 {
     this->split_ = new Split((QWidget *)nullptr);
     auto layout = new QHBoxLayout;
