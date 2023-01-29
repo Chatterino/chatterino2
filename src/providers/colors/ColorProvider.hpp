@@ -16,7 +16,7 @@ enum class ColorType {
     FirstMessageHighlight,
     ElevatedMessageHighlight,
     ThreadMessageHighlight,
-    // Used in automatic self messages highlighing
+    // Used in automatic highlights of your own messages
     SelfMessageHighlight,
 };
 
