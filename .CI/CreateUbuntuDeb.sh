@@ -53,8 +53,9 @@ echo "$packaging_dir/"
 # move directory up
 # mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/" # remove INSTALL_ROOT
 
-mkdir -p "$packaging_dir/lib/qt"
+# mkdir -p "$packaging_dir/lib/qt"
 # cp -R "../qt" "$packaging_dir/lib"
+mkdir -p "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib"
 cp -R "../qt/Qt/5.15.2/gcc_64/lib/libQt5Core"* "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib/"
 cp -R "../qt/Qt/5.15.2/gcc_64/lib/libQt5Concurrent"* "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib/"
 cp -R "../qt/Qt/5.15.2/gcc_64/lib/libQt5Gui"* "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib/"
