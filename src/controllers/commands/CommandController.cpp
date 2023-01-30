@@ -3233,6 +3233,11 @@ bool CommandController::registerPluginCommand(const QString &commandName)
     };
     return true;
 }
+
+bool CommandController::unregisterPluginCommand(const QString &commandName)
+{
+    return this->commands_.erase(commandName) != 0;
+}
 void CommandController::registerCommand(const QString &commandName,
                                         CommandFunctionVariants commandFunction)
 {
