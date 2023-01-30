@@ -217,11 +217,32 @@ int luaC2RegisterCommand(lua_State *L)
 
     return 0;
 }
+int luaC2SendMsg(lua_State *L)
+{
+    const char *channel = luaL_optstring(L, 1, NULL);
+    const char *text = luaL_optstring(L, 2, NULL);
+    lua_pop(L, 2);
+
+    const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
+    if (chn->isEmpty())
+    {
+        qCDebug(chatterinoLua) << "send_msg: no channel" << channel;
+        lua_pushboolean(L, C_FALSE);
+        return 1;
+    }
+    QString message = text;
+    message = message.replace('\n', ' ');
+    QString outText = getApp()->commands->execCommand(message, chn, false);
+    chn->sendMessage(outText);
+    lua_pushboolean(L, C_TRUE);
+    return 1;
+}
 
 // NOLINTNEXTLINE
 static const luaL_Reg C2LIB[] = {
     {"system_msg", luaC2SystemMsg},
     {"register_command", luaC2RegisterCommand},
+    {"send_msg", luaC2SendMsg},
     {nullptr, nullptr},
 };
 }
