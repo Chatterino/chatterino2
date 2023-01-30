@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/commands/CommandContext.hpp"
+#include "controllers/plugins/LuaUtilities.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/WindowManager.hpp"
@@ -98,25 +99,7 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
 
             auto *L = plugin->state_;  // NOLINT
             lua_getfield(L, LUA_REGISTRYINDEX, funcName.toStdString().c_str());
-            // put args on stack
-            lua_createtable(L, 0, 2);
-            auto outIdx = lua_gettop(L);
-
-            lua_createtable(L, ctx.words.count(), 0);
-            auto wordsIdx = lua_gettop(L);
-
-            int i = 1;
-            for (const auto &w : ctx.words)
-            {
-                lua_pushstring(L, w.toStdString().c_str());
-                lua_seti(L, wordsIdx, i);
-                i += 1;
-            }
-
-            lua_setfield(L, outIdx, "words");
-
-            lua_pushstring(L, ctx.channel->getName().toStdString().c_str());
-            lua_setfield(L, outIdx, "channelName");
+            lua::push(L, ctx);
 
             auto res = lua_pcall(L, 1, 0, 0);
             if (res != LUA_OK)

@@ -138,6 +138,8 @@ set(SOURCE_FILES
 
         controllers/plugins/PluginController.hpp
         controllers/plugins/PluginController.cpp
+        controllers/plugins/LuaUtilities.cpp
+        controllers/plugins/LuaUtilities.hpp
 
         controllers/userdata/UserDataController.cpp
         controllers/userdata/UserDataController.hpp
