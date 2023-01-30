@@ -21,6 +21,7 @@ MessageView::MessageView()
 
 MessageView::MessageView(MessagePtr message)
     : message_(std::move(message))
+    , width_(0)
 {
     this->createMessageLayout();
 

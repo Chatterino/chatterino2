@@ -9,6 +9,8 @@ namespace chatterino {
 
 class MessageLayout;
 
+/// MessageView is a fixed-width widget that displays a single message.
+/// For the message to be rendered, you must call setWidth.
 class MessageView : public BaseWidget
 {
     Q_OBJECT

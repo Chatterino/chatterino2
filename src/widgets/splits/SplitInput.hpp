@@ -123,21 +123,25 @@ private:
     QPointer<InputCompletionPopup> inputCompletionPopup_;
 
     struct {
-        ResizingTextEdit *textEdit;
-        QLabel *textEditLength;
-        EffectLabel *sendButton;
-        EffectLabel *emoteButton;
-
-        QHBoxLayout *hbox;
+        // vbox for all components
         QVBoxLayout *vbox;
 
+        // reply widgets
         QWidget *replyWrapper;
         QVBoxLayout *replyVbox;
         QHBoxLayout *replyHbox;
         MessageView *replyMessage;
         QLabel *replyLabel;
         EffectLabel *cancelReplyButton;
-    } ui_{};
+
+        // input widgets
+        QWidget *inputWrapper;
+        QHBoxLayout *inputHbox;
+        ResizingTextEdit *textEdit;
+        QLabel *textEditLength;
+        EffectLabel *sendButton;
+        EffectLabel *emoteButton;
+    } ui_;
 
     std::shared_ptr<MessageThread> replyThread_ = nullptr;
     bool enableInlineReplying_;

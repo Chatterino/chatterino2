@@ -85,15 +85,17 @@ void SplitInput::initLayout()
     auto layout =
         layoutCreator.setLayoutType<QVBoxLayout>().withoutMargin().assign(
             &this->ui_.vbox);
+    layout->setSpacing(0);
 
     // reply label stuff
     auto replyWrapper =
         layout.emplace<QWidget>().assign(&this->ui_.replyWrapper);
+    replyWrapper->setContentsMargins(0, 0, 0, 0);
 
     auto replyVbox =
         replyWrapper.setLayoutType<QVBoxLayout>().withoutMargin().assign(
             &this->ui_.replyVbox);
-    replyVbox->setSpacing(5);
+    replyVbox->setSpacing(0);
 
     auto replyHbox =
         replyVbox.emplace<QHBoxLayout>().assign(&this->ui_.replyHbox);
@@ -115,9 +117,14 @@ void SplitInput::initLayout()
     replyCancelButton->hide();
     replyLabel->hide();
 
+    auto inputWrapper =
+        layout.emplace<QWidget>().assign(&this->ui_.inputWrapper);
+    inputWrapper->setContentsMargins(0, 0, 0, 0);
+
     // hbox for input, right box
     auto hboxLayout =
-        layout.emplace<QHBoxLayout>().withoutMargin().assign(&this->ui_.hbox);
+        inputWrapper.setLayoutType<QHBoxLayout>().withoutMargin().assign(
+            &this->ui_.inputHbox);
 
     // input
     auto textEdit =
@@ -1048,21 +1055,32 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
 
     QMargins removeMargins(s - 1, s - 1, s, s);
     QRect baseRect = this->rect();
-
-    // completeAreaRect includes the reply label
     QRect completeAreaRect = baseRect.marginsRemoved(removeMargins);
-    painter.fillRect(completeAreaRect, this->theme->splits.input.background);
+
+    QRect inputBoxRect = this->ui_.inputWrapper->geometry();
+    inputBoxRect.setX(completeAreaRect.x());
+    inputBoxRect.setWidth(completeAreaRect.width());
+
+    painter.fillRect(inputBoxRect, this->theme->splits.input.background);
     painter.setPen(borderColor);
-    painter.drawRect(completeAreaRect);
+    painter.drawRect(inputBoxRect);
 
     if (this->enableInlineReplying_ && this->replyThread_ != nullptr)
     {
-        QRect inputRect = completeAreaRect;
-        inputRect.setTop(this->ui_.replyMessage->geometry().bottom());
+        QRect replyRect = this->ui_.replyWrapper->geometry();
+        replyRect.setX(completeAreaRect.x());
+        replyRect.setWidth(completeAreaRect.width());
 
-        painter.fillRect(inputRect, this->theme->splits.input.background);
+        painter.fillRect(replyRect, this->theme->splits.input.background);
         painter.setPen(borderColor);
-        painter.drawRect(inputRect);
+        painter.drawRect(replyRect);
+
+        QPoint replyLabelBorderStart(
+            replyRect.x(),
+            replyRect.y() + this->ui_.replyHbox->geometry().height());
+        QPoint replyLabelBorderEnd(replyRect.right(),
+                                   replyLabelBorderStart.y());
+        painter.drawLine(replyLabelBorderStart, replyLabelBorderEnd);
     }
 }
 
@@ -1102,6 +1120,7 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
         this->ui_.textEdit->resetCompletion();
     }
 
+    assert(reply != nullptr);
     this->replyThread_ = std::move(reply);
 
     if (this->enableInlineReplying_)
@@ -1109,6 +1128,9 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
         auto &replyRoot = this->replyThread_->root();
         this->ui_.replyMessage->setMessage(replyRoot);
         this->ui_.replyMessage->setWidth(this->width());
+
+        // add spacing between reply box and input box
+        this->ui_.vbox->setSpacing(int(8 * this->scale()));
 
         // Only enable reply label if inline replying
         auto replyPrefix = "@" + this->replyThread_->root()->displayName;
@@ -1145,6 +1167,7 @@ void SplitInput::clearReplyThread()
 {
     this->replyThread_.reset();
     this->ui_.replyMessage->clearMessage();
+    this->ui_.vbox->setSpacing(0);
 }
 
 bool SplitInput::shouldPreventInput(const QString &text) const
