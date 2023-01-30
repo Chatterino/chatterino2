@@ -38,6 +38,6 @@
 [submodule "lib/miniaudio"]
 	path = lib/miniaudio
 	url = https://github.com/mackron/miniaudio.git
-[submodule "lib/lua"]
-	path = lib/lua
+[submodule "lib/lua/src"]
+	path = lib/lua/src
 	url = https://github.com/lua/lua

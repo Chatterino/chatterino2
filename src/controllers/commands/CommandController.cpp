@@ -45,15 +45,12 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
+#include <lua.h>
 #include <QApplication>
 #include <QDesktopServices>
 #include <QFile>
 #include <QRegularExpression>
 #include <QUrl>
-
-extern "C" {
-#include <lua.h>
-}
 
 namespace {
 
