@@ -34,40 +34,44 @@ void PluginController::initialize(Settings &settings, Paths &paths)
     {
         if (info.isDir())
         {
-            // look for index.lua
             auto pluginDir = QDir(info.absoluteFilePath());
-            auto index = QFileInfo(pluginDir.filePath("index.lua"));
-            qCDebug(chatterinoLua)
-                << "trying" << info << "," << index << "at" << pluginDir;
-            if (!index.exists())
-            {
-                qCDebug(chatterinoLua)
-                    << "Missing index.lua in plugin directory" << pluginDir;
-                continue;
-            }
-            qCDebug(chatterinoLua)
-                << "found index.lua, now looking for info.json!";
-            auto info = QFileInfo(pluginDir.filePath("info.json"));
-            if (!info.exists())
-            {
-                qCDebug(chatterinoLua)
-                    << "Missing info.json in plugin directory" << pluginDir;
-                continue;
-            }
-            QFile infoFile(info.absoluteFilePath());
-            infoFile.open(QIODevice::ReadOnly);
-            auto everything = infoFile.readAll();
-            auto doc = QJsonDocument::fromJson(everything);
-            if (!doc.isObject())
-            {
-                qCDebug(chatterinoLua)
-                    << "info.json root is not an object" << pluginDir;
-                continue;
-            }
-
-            this->load(index, pluginDir, PluginMeta(doc.object()));
+            this->tryLoadFromDir(pluginDir);
         }
     }
+}
+bool PluginController::tryLoadFromDir(const QDir &pluginDir)
+{
+    // look for index.lua
+    auto index = QFileInfo(pluginDir.filePath("index.lua"));
+    qCDebug(chatterinoLua) << "looking for index.lua and info.json in"
+                           << pluginDir.path();
+    if (!index.exists())
+    {
+        qCDebug(chatterinoLua)
+            << "Missing index.lua in plugin directory" << pluginDir;
+        return false;
+    }
+    qCDebug(chatterinoLua) << "found index.lua, now looking for info.json!";
+    auto infojson = QFileInfo(pluginDir.filePath("info.json"));
+    if (!infojson.exists())
+    {
+        qCDebug(chatterinoLua)
+            << "Missing info.json in plugin directory" << pluginDir;
+        return false;
+    }
+    QFile infoFile(infojson.absoluteFilePath());
+    infoFile.open(QIODevice::ReadOnly);
+    auto everything = infoFile.readAll();
+    auto doc = QJsonDocument::fromJson(everything);
+    if (!doc.isObject())
+    {
+        qCDebug(chatterinoLua)
+            << "info.json root is not an object" << pluginDir;
+        return false;
+    }
+
+    this->load(index, pluginDir, PluginMeta(doc.object()));
+    return true;
 }
 
 void PluginController::load(QFileInfo index, QDir pluginDir, PluginMeta meta)
@@ -78,11 +82,29 @@ void PluginController::load(QFileInfo index, QDir pluginDir, PluginMeta meta)
     this->loadChatterinoLib(l);
 
     auto pluginName = pluginDir.dirName();
-    auto plugin = std::make_unique<Plugin>(pluginName, l, meta);
+    auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
     this->plugins_.insert({pluginName, std::move(plugin)});
 
     luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     qCInfo(chatterinoLua) << "Loaded" << pluginName << "plugin from" << index;
+}
+
+bool PluginController::reload(const QString &codename)
+{
+    auto it = this->plugins_.find(codename);
+    if (it == this->plugins_.end())
+    {
+        return false;
+    }
+    lua_close(it->second->state_);
+    for (const auto &[cmd, _] : it->second->ownedCommands)
+    {
+        getApp()->commands->unregisterPluginCommand(cmd);
+    }
+    QDir loadDir = it->second->loadDirectory_;
+    this->plugins_.erase(codename);
+    this->tryLoadFromDir(loadDir);
+    return true;
 }
 
 void PluginController::callEvery(const QString &functionName)

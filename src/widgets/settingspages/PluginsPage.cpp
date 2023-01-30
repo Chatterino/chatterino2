@@ -10,6 +10,7 @@
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QLabel>
+#include <QPushButton>
 
 namespace chatterino {
 
@@ -47,6 +48,12 @@ PluginsPage::PluginsPage()
         homepage->setOpenExternalLinks(true);
 
         pl->addRow("Homepage", homepage);
+
+        auto *reload = new QPushButton("Reload");
+        QObject::connect(reload, &QPushButton::pressed, [=]() {
+            getApp()->plugins->reload(codename);
+        });
+        pl->addRow(reload);
     }
 }
 }  // namespace chatterino

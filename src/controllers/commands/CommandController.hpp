@@ -44,6 +44,7 @@ public:
         std::unordered_map<QString, QString> context = {});
 
     bool registerPluginCommand(const QString &commandName);
+    bool unregisterPluginCommand(const QString &commandName);
 
 private:
     void load(Paths &paths);

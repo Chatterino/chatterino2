@@ -47,9 +47,12 @@ class Plugin
 public:
     QString codename;
     PluginMeta meta;
-    Plugin(QString codename, lua_State *state, PluginMeta meta)
+
+    Plugin(QString codename, lua_State *state, PluginMeta meta,
+           const QDir &loadDirectory)
         : codename(std::move(codename))
         , meta(std::move(meta))
+        , loadDirectory_(loadDirectory)
         , state_(state)
     {
     }
@@ -71,6 +74,7 @@ public:
     }
 
 private:
+    QDir loadDirectory_;
     lua_State *state_;
 
     // maps command name -> function name
@@ -112,9 +116,12 @@ public:
         return this->plugins_;
     }
 
+    bool reload(const QString &codename);
+
 private:
     void load(QFileInfo index, QDir pluginDir, PluginMeta meta);
     void loadChatterinoLib(lua_State *l);
+    bool tryLoadFromDir(const QDir &pluginDir);
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
 };
 
