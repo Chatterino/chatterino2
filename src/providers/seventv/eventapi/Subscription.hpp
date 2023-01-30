@@ -3,7 +3,10 @@
 #include <magic_enum.hpp>
 #include <QByteArray>
 #include <QHash>
+#include <QJsonObject>
 #include <QString>
+
+#include <variant>
 
 namespace chatterino::seventv::eventapi {
 
@@ -31,10 +34,25 @@ enum class Opcode {
     Signal = 37,
 };
 
+struct ObjectIDCondition {
+    ObjectIDCondition(QString objectID);
+
+    QString objectID;
+
+    QJsonObject encode() const;
+
+    friend QDebug &operator<<(QDebug &dbg,
+                              const ObjectIDCondition &subscription);
+    bool operator==(const ObjectIDCondition &rhs) const;
+    bool operator!=(const ObjectIDCondition &rhs) const;
+};
+
+using Condition = std::variant<ObjectIDCondition>;
+
 struct Subscription {
     bool operator==(const Subscription &rhs) const;
     bool operator!=(const Subscription &rhs) const;
-    QString condition;
+    Condition condition;
     SubscriptionType type;
 
     QByteArray encodeSubscribe() const;
@@ -66,11 +84,23 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
 namespace std {
 
 template <>
+struct hash<chatterino::seventv::eventapi::ObjectIDCondition> {
+    size_t operator()(
+        const chatterino::seventv::eventapi::ObjectIDCondition &c) const
+    {
+        return (size_t)qHash(c.objectID);
+    }
+};
+
+template <>
 struct hash<chatterino::seventv::eventapi::Subscription> {
     size_t operator()(
         const chatterino::seventv::eventapi::Subscription &sub) const
     {
-        return (size_t)qHash(sub.condition, qHash((int)sub.type));
+        const size_t conditionHash =
+            std::hash<chatterino::seventv::eventapi::Condition>{}(
+                sub.condition);
+        return (size_t)qHash(conditionHash, qHash((int)sub.type));
     }
 };
 

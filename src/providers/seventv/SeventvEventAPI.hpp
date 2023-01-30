@@ -62,7 +62,12 @@ protected:
 private:
     void handleDispatch(const Dispatch &dispatch);
 
+    void onEmoteSetUpdate(const Dispatch &dispatch);
+    void onUserUpdate(const Dispatch &dispatch);
+
+    /** emote-set ids */
     std::unordered_set<QString> subscribedEmoteSets_;
+    /** user ids */
     std::unordered_set<QString> subscribedUsers_;
     std::chrono::milliseconds heartbeatInterval_;
 };

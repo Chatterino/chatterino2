@@ -5,6 +5,7 @@
 #include <QJsonObject>
 
 #include <tuple>
+#include <utility>
 
 namespace {
 
@@ -12,26 +13,18 @@ using namespace chatterino::seventv::eventapi;
 
 const char *typeToString(SubscriptionType type)
 {
-    switch (type)
-    {
-        case SubscriptionType::UpdateEmoteSet:
-            return "emote_set.update";
-        case SubscriptionType::UpdateUser:
-            return "user.update";
-        default:
-            return "";
-    }
+    return magic_enum::enum_name(type).data();
 }
 
-QJsonObject createDataJson(const char *typeName, const QString &condition)
+QJsonObject createDataJson(const char *typeName, const Condition &condition)
 {
     QJsonObject data;
     data["type"] = typeName;
-    {
-        QJsonObject conditionObj;
-        conditionObj["object_id"] = condition;
-        data["condition"] = conditionObj;
-    }
+    data["condition"] = std::visit(
+        [](const auto &c) {
+            return c.encode();
+        },
+        condition);
     return data;
 }
 
@@ -70,8 +63,42 @@ QByteArray Subscription::encodeUnsubscribe() const
 
 QDebug &operator<<(QDebug &dbg, const Subscription &subscription)
 {
-    dbg << "7TV-Subscription{ condition:" << subscription.condition
-        << "type:" << (int)subscription.type << '}';
+    std::visit(
+        [&](const auto &cond) {
+            dbg << "Subscription{ condition:" << cond
+                << "type:" << magic_enum::enum_name(subscription.type).data()
+                << '}';
+        },
+        subscription.condition);
+    return dbg;
+}
+
+ObjectIDCondition::ObjectIDCondition(QString objectID)
+    : objectID(std::move(objectID))
+{
+}
+
+QJsonObject ObjectIDCondition::encode() const
+{
+    QJsonObject obj;
+    obj["object_id"] = this->objectID;
+
+    return obj;
+}
+
+bool ObjectIDCondition::operator==(const ObjectIDCondition &rhs) const
+{
+    return this->objectID == rhs.objectID;
+}
+
+bool ObjectIDCondition::operator!=(const ObjectIDCondition &rhs) const
+{
+    return !(*this == rhs);
+}
+
+QDebug &operator<<(QDebug &dbg, const ObjectIDCondition &condition)
+{
+    dbg << "{ objectID:" << condition.objectID << "}";
     return dbg;
 }
 
