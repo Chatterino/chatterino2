@@ -8,15 +8,15 @@
 
 namespace {
 
-using namespace chatterino;
+using namespace chatterino::seventv::eventapi;
 
-const char *typeToString(SeventvEventAPISubscriptionType type)
+const char *typeToString(SubscriptionType type)
 {
     switch (type)
     {
-        case SeventvEventAPISubscriptionType::UpdateEmoteSet:
+        case SubscriptionType::UpdateEmoteSet:
             return "emote_set.update";
-        case SeventvEventAPISubscriptionType::UpdateUser:
+        case SubscriptionType::UpdateUser:
             return "user.update";
         default:
             return "";
@@ -37,44 +37,42 @@ QJsonObject createDataJson(const char *typeName, const QString &condition)
 
 }  // namespace
 
-namespace chatterino {
+namespace chatterino::seventv::eventapi {
 
-bool SeventvEventAPISubscription::operator==(
-    const SeventvEventAPISubscription &rhs) const
+bool Subscription::operator==(const Subscription &rhs) const
 {
     return std::tie(this->condition, this->type) ==
            std::tie(rhs.condition, rhs.type);
 }
 
-bool SeventvEventAPISubscription::operator!=(
-    const SeventvEventAPISubscription &rhs) const
+bool Subscription::operator!=(const Subscription &rhs) const
 {
     return !(rhs == *this);
 }
 
-QByteArray SeventvEventAPISubscription::encodeSubscribe() const
+QByteArray Subscription::encodeSubscribe() const
 {
     const auto *typeName = typeToString(this->type);
     QJsonObject root;
-    root["op"] = (int)SeventvEventAPIOpcode::Subscribe;
+    root["op"] = (int)Opcode::Subscribe;
     root["d"] = createDataJson(typeName, this->condition);
     return QJsonDocument(root).toJson();
 }
 
-QByteArray SeventvEventAPISubscription::encodeUnsubscribe() const
+QByteArray Subscription::encodeUnsubscribe() const
 {
     const auto *typeName = typeToString(this->type);
     QJsonObject root;
-    root["op"] = (int)SeventvEventAPIOpcode::Unsubscribe;
+    root["op"] = (int)Opcode::Unsubscribe;
     root["d"] = createDataJson(typeName, this->condition);
     return QJsonDocument(root).toJson();
 }
 
-QDebug &operator<<(QDebug &dbg, const SeventvEventAPISubscription &subscription)
+QDebug &operator<<(QDebug &dbg, const Subscription &subscription)
 {
-    dbg << "SeventvEventAPISubscription{ condition:" << subscription.condition
+    dbg << "7TV-Subscription{ condition:" << subscription.condition
         << "type:" << (int)subscription.type << '}';
     return dbg;
 }
 
-}  // namespace chatterino
+}  // namespace chatterino::seventv::eventapi

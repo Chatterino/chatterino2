@@ -9,6 +9,7 @@
 #include <utility>
 
 namespace chatterino {
+using namespace seventv::eventapi;
 
 SeventvEventAPI::SeventvEventAPI(
     QString host, std::chrono::milliseconds defaultHeartbeatInterval)
@@ -22,13 +23,12 @@ void SeventvEventAPI::subscribeUser(const QString &userID,
 {
     if (!userID.isEmpty() && this->subscribedUsers_.insert(userID).second)
     {
-        this->subscribe({userID, SeventvEventAPISubscriptionType::UpdateUser});
+        this->subscribe({userID, SubscriptionType::UpdateUser});
     }
     if (!emoteSetID.isEmpty() &&
         this->subscribedEmoteSets_.insert(emoteSetID).second)
     {
-        this->subscribe(
-            {emoteSetID, SeventvEventAPISubscriptionType::UpdateEmoteSet});
+        this->subscribe({emoteSetID, SubscriptionType::UpdateEmoteSet});
     }
 }
 
@@ -36,8 +36,7 @@ void SeventvEventAPI::unsubscribeEmoteSet(const QString &id)
 {
     if (this->subscribedEmoteSets_.erase(id) > 0)
     {
-        this->unsubscribe(
-            {id, SeventvEventAPISubscriptionType::UpdateEmoteSet});
+        this->unsubscribe({id, SubscriptionType::UpdateEmoteSet});
     }
 }
 
@@ -45,27 +44,26 @@ void SeventvEventAPI::unsubscribeUser(const QString &id)
 {
     if (this->subscribedUsers_.erase(id) > 0)
     {
-        this->unsubscribe({id, SeventvEventAPISubscriptionType::UpdateUser});
+        this->unsubscribe({id, SubscriptionType::UpdateUser});
     }
 }
 
-std::shared_ptr<BasicPubSubClient<SeventvEventAPISubscription>>
-    SeventvEventAPI::createClient(liveupdates::WebsocketClient &client,
-                                  websocketpp::connection_hdl hdl)
+std::shared_ptr<BasicPubSubClient<Subscription>> SeventvEventAPI::createClient(
+    liveupdates::WebsocketClient &client, websocketpp::connection_hdl hdl)
 {
-    auto shared = std::make_shared<SeventvEventAPIClient>(
-        client, hdl, this->heartbeatInterval_);
-    return std::static_pointer_cast<
-        BasicPubSubClient<SeventvEventAPISubscription>>(std::move(shared));
+    auto shared =
+        std::make_shared<Client>(client, hdl, this->heartbeatInterval_);
+    return std::static_pointer_cast<BasicPubSubClient<Subscription>>(
+        std::move(shared));
 }
 
 void SeventvEventAPI::onMessage(
     websocketpp::connection_hdl hdl,
-    BasicPubSubManager<SeventvEventAPISubscription>::WebsocketMessagePtr msg)
+    BasicPubSubManager<Subscription>::WebsocketMessagePtr msg)
 {
     const auto &payload = QString::fromStdString(msg->get_payload());
 
-    auto pMessage = parseSeventvEventAPIBaseMessage(payload);
+    auto pMessage = parseBaseMessage(payload);
 
     if (!pMessage)
     {
@@ -76,11 +74,10 @@ void SeventvEventAPI::onMessage(
     auto message = *pMessage;
     switch (message.op)
     {
-        case SeventvEventAPIOpcode::Hello: {
+        case Opcode::Hello: {
             if (auto client = this->findClient(hdl))
             {
-                if (auto *stvClient =
-                        dynamic_cast<SeventvEventAPIClient *>(client.get()))
+                if (auto *stvClient = dynamic_cast<Client *>(client.get()))
                 {
                     stvClient->setHeartbeatInterval(
                         message.data["heartbeat_interval"].toInt());
@@ -88,19 +85,18 @@ void SeventvEventAPI::onMessage(
             }
         }
         break;
-        case SeventvEventAPIOpcode::Heartbeat: {
+        case Opcode::Heartbeat: {
             if (auto client = this->findClient(hdl))
             {
-                if (auto *stvClient =
-                        dynamic_cast<SeventvEventAPIClient *>(client.get()))
+                if (auto *stvClient = dynamic_cast<Client *>(client.get()))
                 {
                     stvClient->handleHeartbeat();
                 }
             }
         }
         break;
-        case SeventvEventAPIOpcode::Dispatch: {
-            auto dispatch = message.toInner<SeventvEventAPIDispatch>();
+        case Opcode::Dispatch: {
+            auto dispatch = message.toInner<Dispatch>();
             if (!dispatch)
             {
                 qCDebug(chatterinoSeventvEventAPI)
@@ -110,11 +106,10 @@ void SeventvEventAPI::onMessage(
             this->handleDispatch(*dispatch);
         }
         break;
-        case SeventvEventAPIOpcode::Reconnect: {
+        case Opcode::Reconnect: {
             if (auto client = this->findClient(hdl))
             {
-                if (auto *stvClient =
-                        dynamic_cast<SeventvEventAPIClient *>(client.get()))
+                if (auto *stvClient = dynamic_cast<Client *>(client.get()))
                 {
                     stvClient->close("Reconnecting");
                 }
@@ -128,11 +123,11 @@ void SeventvEventAPI::onMessage(
     }
 }
 
-void SeventvEventAPI::handleDispatch(const SeventvEventAPIDispatch &dispatch)
+void SeventvEventAPI::handleDispatch(const Dispatch &dispatch)
 {
     switch (dispatch.type)
     {
-        case SeventvEventAPISubscriptionType::UpdateEmoteSet: {
+        case SubscriptionType::UpdateEmoteSet: {
             // dispatchBody: {
             //   pushed:  Array<{ key, value            }>,
             //   pulled:  Array<{ key,        old_value }>,
@@ -146,8 +141,7 @@ void SeventvEventAPI::handleDispatch(const SeventvEventAPIDispatch &dispatch)
                     continue;
                 }
 
-                SeventvEventAPIEmoteAddDispatch added(
-                    dispatch, pushed["value"].toObject());
+                EmoteAddDispatch added(dispatch, pushed["value"].toObject());
 
                 if (added.validate())
                 {
@@ -167,9 +161,9 @@ void SeventvEventAPI::handleDispatch(const SeventvEventAPIDispatch &dispatch)
                     continue;
                 }
 
-                SeventvEventAPIEmoteUpdateDispatch update(
-                    dispatch, updated["old_value"].toObject(),
-                    updated["value"].toObject());
+                EmoteUpdateDispatch update(dispatch,
+                                           updated["old_value"].toObject(),
+                                           updated["value"].toObject());
 
                 if (update.validate())
                 {
@@ -189,8 +183,8 @@ void SeventvEventAPI::handleDispatch(const SeventvEventAPIDispatch &dispatch)
                     continue;
                 }
 
-                SeventvEventAPIEmoteRemoveDispatch removed(
-                    dispatch, pulled["old_value"].toObject());
+                EmoteRemoveDispatch removed(dispatch,
+                                            pulled["old_value"].toObject());
 
                 if (removed.validate())
                 {
@@ -204,7 +198,7 @@ void SeventvEventAPI::handleDispatch(const SeventvEventAPIDispatch &dispatch)
             }
         }
         break;
-        case SeventvEventAPISubscriptionType::UpdateUser: {
+        case SubscriptionType::UpdateUser: {
             // dispatchBody: {
             //   updated: Array<{ key, value: Array<{key, value}> }>
             // }
@@ -223,7 +217,7 @@ void SeventvEventAPI::handleDispatch(const SeventvEventAPIDispatch &dispatch)
                         continue;
                     }
 
-                    SeventvEventAPIUserConnectionUpdateDispatch update(
+                    UserConnectionUpdateDispatch update(
                         dispatch, value, (size_t)updated["index"].toInt());
 
                     if (update.validate())

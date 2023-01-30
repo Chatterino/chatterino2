@@ -5,68 +5,66 @@
 #include <QJsonObject>
 #include <QString>
 
-namespace chatterino {
+namespace chatterino::seventv::eventapi {
 
 // https://github.com/SevenTV/EventAPI/tree/ca4ff15cc42b89560fa661a76c5849047763d334#message-payload
-struct SeventvEventAPIDispatch {
-    SeventvEventAPISubscriptionType type;
+struct Dispatch {
+    SubscriptionType type;
     QJsonObject body;
     QString id;
     // it's okay for this to be empty
     QString actorName;
 
-    SeventvEventAPIDispatch(QJsonObject obj);
+    Dispatch(QJsonObject obj);
 };
 
-struct SeventvEventAPIEmoteAddDispatch {
+struct EmoteAddDispatch {
     QString emoteSetID;
     QString actorName;
     QJsonObject emoteJson;
     QString emoteID;
 
-    SeventvEventAPIEmoteAddDispatch(const SeventvEventAPIDispatch &dispatch,
-                                    QJsonObject emote);
+    EmoteAddDispatch(const Dispatch &dispatch, QJsonObject emote);
 
     bool validate() const;
 };
 
-struct SeventvEventAPIEmoteRemoveDispatch {
+struct EmoteRemoveDispatch {
     QString emoteSetID;
     QString actorName;
     QString emoteName;
     QString emoteID;
 
-    SeventvEventAPIEmoteRemoveDispatch(const SeventvEventAPIDispatch &dispatch,
-                                       QJsonObject emote);
+    EmoteRemoveDispatch(const Dispatch &dispatch, QJsonObject emote);
 
     bool validate() const;
 };
 
-struct SeventvEventAPIEmoteUpdateDispatch {
+struct EmoteUpdateDispatch {
     QString emoteSetID;
     QString actorName;
     QString emoteID;
     QString oldEmoteName;
     QString emoteName;
 
-    SeventvEventAPIEmoteUpdateDispatch(const SeventvEventAPIDispatch &dispatch,
-                                       QJsonObject oldValue, QJsonObject value);
+    EmoteUpdateDispatch(const Dispatch &dispatch, QJsonObject oldValue,
+                        QJsonObject value);
 
     bool validate() const;
 };
 
-struct SeventvEventAPIUserConnectionUpdateDispatch {
+struct UserConnectionUpdateDispatch {
     QString userID;
     QString actorName;
     QString oldEmoteSetID;
     QString emoteSetID;
     size_t connectionIndex;
 
-    SeventvEventAPIUserConnectionUpdateDispatch(
-        const SeventvEventAPIDispatch &dispatch, const QJsonObject &update,
-        size_t connectionIndex);
+    UserConnectionUpdateDispatch(const Dispatch &dispatch,
+                                 const QJsonObject &update,
+                                 size_t connectionIndex);
 
     bool validate() const;
 };
 
-}  // namespace chatterino
+}  // namespace chatterino::seventv::eventapi

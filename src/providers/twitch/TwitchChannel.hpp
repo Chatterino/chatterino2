@@ -49,11 +49,15 @@ class FfzEmotes;
 class BttvEmotes;
 struct BttvLiveUpdateEmoteUpdateAddMessage;
 struct BttvLiveUpdateEmoteRemoveMessage;
+
 class SeventvEmotes;
-struct SeventvEventAPIEmoteAddDispatch;
-struct SeventvEventAPIEmoteUpdateDispatch;
-struct SeventvEventAPIEmoteRemoveDispatch;
-struct SeventvEventAPIUserConnectionUpdateDispatch;
+namespace seventv::eventapi {
+    struct EmoteAddDispatch;
+    struct EmoteUpdateDispatch;
+    struct EmoteRemoveDispatch;
+    struct UserConnectionUpdateDispatch;
+}  // namespace seventv::eventapi
+
 struct ChannelPointReward;
 class MessageThread;
 struct CheerEmoteSet;
@@ -149,14 +153,16 @@ public:
     void removeBttvEmote(const BttvLiveUpdateEmoteRemoveMessage &message);
 
     /** Adds a 7TV channel emote to this channel. */
-    void addSeventvEmote(const SeventvEventAPIEmoteAddDispatch &dispatch);
+    void addSeventvEmote(const seventv::eventapi::EmoteAddDispatch &dispatch);
     /** Updates a 7TV channel emote's name in this channel */
-    void updateSeventvEmote(const SeventvEventAPIEmoteUpdateDispatch &dispatch);
+    void updateSeventvEmote(
+        const seventv::eventapi::EmoteUpdateDispatch &dispatch);
     /** Removes a 7TV channel emote from this channel */
-    void removeSeventvEmote(const SeventvEventAPIEmoteRemoveDispatch &dispatch);
+    void removeSeventvEmote(
+        const seventv::eventapi::EmoteRemoveDispatch &dispatch);
     /** Updates the current 7TV user. Currently, only the emote-set is updated. */
     void updateSeventvUser(
-        const SeventvEventAPIUserConnectionUpdateDispatch &dispatch);
+        const seventv::eventapi::UserConnectionUpdateDispatch &dispatch);
 
     // Update the channel's 7TV information (the channel's 7TV user ID and emote set ID)
     void updateSeventvData(const QString &newUserID,

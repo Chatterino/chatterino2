@@ -9,6 +9,7 @@
 #include <QString>
 
 using namespace chatterino;
+using namespace chatterino::seventv::eventapi;
 using namespace std::chrono_literals;
 
 const QString EMOTE_SET_A = "60b39e943e203cc169dfc106";
@@ -21,10 +22,10 @@ TEST(SeventvEventAPI, AllEvents)
     auto *eventAPI = new SeventvEventAPI(host, std::chrono::milliseconds(1000));
     eventAPI->start();
 
-    boost::optional<SeventvEventAPIEmoteAddDispatch> addDispatch;
-    boost::optional<SeventvEventAPIEmoteUpdateDispatch> updateDispatch;
-    boost::optional<SeventvEventAPIEmoteRemoveDispatch> removeDispatch;
-    boost::optional<SeventvEventAPIUserConnectionUpdateDispatch> userDispatch;
+    boost::optional<EmoteAddDispatch> addDispatch;
+    boost::optional<EmoteUpdateDispatch> updateDispatch;
+    boost::optional<EmoteRemoveDispatch> removeDispatch;
+    boost::optional<UserConnectionUpdateDispatch> userDispatch;
 
     eventAPI->signals_.emoteAdded.connect([&](const auto &d) {
         addDispatch = d;

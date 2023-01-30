@@ -224,7 +224,7 @@ EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal)
 }
 
 EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
-                            const SeventvEventAPIEmoteUpdateDispatch &dispatch)
+                            const EmoteUpdateDispatch &dispatch)
 {
     bool toNonAliased = oldEmote->baseName.has_value() &&
                         dispatch.emoteName == oldEmote->baseName->string;
@@ -401,7 +401,7 @@ void SeventvEmotes::loadChannelEmotes(
 
 boost::optional<EmotePtr> SeventvEmotes::addEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &map,
-    const SeventvEventAPIEmoteAddDispatch &dispatch)
+    const EmoteAddDispatch &dispatch)
 {
     // Check for visibility first, so we don't copy the map.
     auto emoteData = dispatch.emoteJson["data"].toObject();
@@ -429,7 +429,7 @@ boost::optional<EmotePtr> SeventvEmotes::addEmote(
 
 boost::optional<EmotePtr> SeventvEmotes::updateEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &map,
-    const SeventvEventAPIEmoteUpdateDispatch &dispatch)
+    const EmoteUpdateDispatch &dispatch)
 {
     auto oldMap = map.get();
     auto oldEmote = oldMap->findEmote(dispatch.emoteName, dispatch.emoteID);
@@ -451,7 +451,7 @@ boost::optional<EmotePtr> SeventvEmotes::updateEmote(
 
 boost::optional<EmotePtr> SeventvEmotes::removeEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &map,
-    const SeventvEventAPIEmoteRemoveDispatch &dispatch)
+    const EmoteRemoveDispatch &dispatch)
 {
     // This copies the map.
     EmoteMap updatedMap = *map.get();
