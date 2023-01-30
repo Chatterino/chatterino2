@@ -9,25 +9,26 @@
 #include <cstdlib>
 
 namespace chatterino::lua {
-int pushEmptyArray(lua_State *L, int countArray)
+
+StackIdx pushEmptyArray(lua_State *L, int countArray)
 {
     lua_createtable(L, countArray, 0);
     return lua_gettop(L);
 }
 
-int pushEmptyTable(lua_State *L, int countProperties)
+StackIdx pushEmptyTable(lua_State *L, int countProperties)
 {
     lua_createtable(L, 0, countProperties);
     return lua_gettop(L);
 }
 
-int push(lua_State *L, const QString &str)
+StackIdx push(lua_State *L, const QString &str)
 {
     lua_pushstring(L, str.toStdString().c_str());
     return lua_gettop(L);
 }
 
-int push(lua_State *L, const CommandContext &ctx)
+StackIdx push(lua_State *L, const CommandContext &ctx)
 {
     auto outIdx = pushEmptyTable(L, 2);
 
@@ -39,13 +40,13 @@ int push(lua_State *L, const CommandContext &ctx)
     return outIdx;
 }
 
-int push(lua_State *L, const bool &b)
+StackIdx push(lua_State *L, const bool &b)
 {
     lua_pushboolean(L, int(b));
     return lua_gettop(L);
 }
 
-bool peek(lua_State *L, double *out, int idx)
+bool peek(lua_State *L, double *out, StackIdx idx)
 {
     int ok{0};
     auto v = lua_tonumberx(L, idx, &ok);
@@ -56,7 +57,7 @@ bool peek(lua_State *L, double *out, int idx)
     return ok != 0;
 }
 
-bool peek(lua_State *L, QString *out, int idx)
+bool peek(lua_State *L, QString *out, StackIdx idx)
 {
     size_t len{0};
     const char *str = lua_tolstring(L, idx, &len);

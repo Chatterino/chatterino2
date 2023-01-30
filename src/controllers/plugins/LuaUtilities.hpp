@@ -12,16 +12,18 @@ class CommandContext;
 
 namespace chatterino::lua {
 
-int pushEmptyArray(lua_State *L, int countArray);
-int pushEmptyTable(lua_State *L, int countProperties);
+using StackIdx = int;
 
-int push(lua_State *L, const CommandContext &ctx);
-int push(lua_State *L, const QString &str);
-int push(lua_State *L, const bool &b);
+StackIdx pushEmptyArray(lua_State *L, int countArray);
+StackIdx pushEmptyTable(lua_State *L, int countProperties);
+
+StackIdx push(lua_State *L, const CommandContext &ctx);
+StackIdx push(lua_State *L, const QString &str);
+StackIdx push(lua_State *L, const bool &b);
 
 // returns OK?
-bool peek(lua_State *L, double *out, int idx = -1);
-bool peek(lua_State *L, QString *out, int idx = -1);
+bool peek(lua_State *L, double *out, StackIdx idx = -1);
+bool peek(lua_State *L, QString *out, StackIdx idx = -1);
 
 /// TEMPLATES
 
@@ -54,7 +56,7 @@ int push(lua_State *L, QList<T> vec)
 }
 
 template <typename T>
-bool pop(lua_State *L, T *out, int idx = -1)
+bool pop(lua_State *L, T *out, StackIdx idx = -1)
 {
     auto ok = peek(L, out, idx);
     if (ok)
