@@ -55,23 +55,13 @@ echo "$packaging_dir/"
 
 # mkdir -p "$packaging_dir/lib/qt"
 # cp -R "../qt" "$packaging_dir/lib"
-if [ -d "$packaging_dir/lib/Qt/5.15.2" ]; then
-    mkdir -p "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib"
-    cp -R "../qt/Qt/5.15.2/gcc_64/lib/libQt5Core"* "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib/"
-    cp -R "../qt/Qt/5.15.2/gcc_64/lib/libQt5Concurrent"* "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib/"
-    cp -R "../qt/Qt/5.15.2/gcc_64/lib/libQt5Gui"* "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib/"
-    cp -R "../qt/Qt/5.15.2/gcc_64/lib/libQt5Network"* "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib/"
-    cp -R "../qt/Qt/5.15.2/gcc_64/lib/libQt5Svg"* "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib/"
-    cp -R "../qt/Qt/5.15.2/gcc_64/lib/libQt5Widgets"* "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib/"
-else
-    mkdir -p "$packaging_dir/lib/Qt/5.12.12/gcc_64/lib"
-    cp -R "../qt/Qt/5.12.12/gcc_64/lib/libQt5Core"* "$packaging_dir/lib/Qt/5.12.12/gcc_64/lib/"
-    cp -R "../qt/Qt/5.12.12/gcc_64/lib/libQt5Concurrent"* "$packaging_dir/lib/Qt/5.12.12/gcc_64/lib/"
-    cp -R "../qt/Qt/5.12.12/gcc_64/lib/libQt5Gui"* "$packaging_dir/lib/Qt/5.12.12/gcc_64/lib/"
-    cp -R "../qt/Qt/5.12.12/gcc_64/lib/libQt5Network"* "$packaging_dir/lib/Qt/5.12.12/gcc_64/lib/"
-    cp -R "../qt/Qt/5.12.12/gcc_64/lib/libQt5Svg"* "$packaging_dir/lib/Qt/5.12.12/gcc_64/lib/"
-    cp -R "../qt/Qt/5.12.12/gcc_64/lib/libQt5Widgets"* "$packaging_dir/lib/Qt/5.12.12/gcc_64/lib/"
-fi
+mkdir -p "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib"
+cp ../qt/Qt/{5.12.12,5.15.2}/gcc_64/lib/libQt5Core* $packaging_dir/lib/Qt/{5.12.12,5.15.2}/gcc_64/lib/
+cp ../qt/Qt/{5.12.12,5.15.2}/gcc_64/lib/libQt5Concurrent* $packaging_dir/lib/Qt/{5.12.12,5.15.2}/gcc_64/lib/
+cp ../qt/Qt/{5.12.12,5.15.2}/gcc_64/lib/libQt5Gui* $packaging_dir/lib/Qt/{5.12.12,5.15.2}/gcc_64/lib/
+cp ../qt/Qt/{5.12.12,5.15.2}/gcc_64/lib/libQt5Network* $packaging_dir/lib/Qt/{5.12.12,5.15.2}/gcc_64/lib/
+cp ../qt/Qt/{5.12.12,5.15.2}/gcc_64/lib/libQt5Svg* $packaging_dir/lib/Qt/{5.12.12,5.15.2}/gcc_64/lib/
+cp ../qt/Qt/{5.12.12,5.15.2}/gcc_64/lib/libQt5Widgets* $packaging_dir/lib/Qt/{5.12.12,5.15.2}/gcc_64/lib/
 # rm -vrf "$packaging_dir/home" || true
 
 echo "Building package..."
