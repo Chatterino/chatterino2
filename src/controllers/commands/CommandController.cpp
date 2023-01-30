@@ -3127,13 +3127,6 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
-    this->registerCommand("lualol", [](const auto &ctx) {
-        getApp()->plugins->callEveryWithArgs(
-            "test", 1, [ctx](const auto & /*pl*/, lua_State *L) {
-                lua_pushstring(L, ctx.channel->getName().toStdString().c_str());
-            });
-        return "";
-    });
 }
 
 void CommandController::save()
