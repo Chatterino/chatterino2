@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Add scripting capabilities with Lua (#4341)
 - Major: Added live emote updates for BTTV (#4147)
 - Minor: Change the highlight order to prioritize Message highlights over User highlights. (#4303)
 - Minor: Added ability to negate search options by prefixing it with an exclamation mark (e.g. `!badge:mod` to search for messages where the author does not have the moderator badge). (#4207)

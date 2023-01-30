@@ -600,10 +600,11 @@ if (CHATTERINO_GENERATE_COVERAGE)
         )
 endif ()
 
-add_dependencies(${LIBRARY_PROJECT} Lua)
-target_include_directories(${LIBRARY_PROJECT}
-    PUBLIC "${CMAKE_SOURCE_DIR}/lib/lua/"
-    )
+
+#add_dependencies(${LIBRARY_PROJECT} Lua)
+#target_include_directories(${LIBRARY_PROJECT}
+#    PUBLIC "${CMAKE_SOURCE_DIR}/lib/lua/"
+#    )
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         Qt${MAJOR_QT_VERSION}::Core
@@ -622,7 +623,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         RapidJSON::RapidJSON
         LRUCache
         MagicEnum
-        "${CMAKE_SOURCE_DIR}/lib/lua/liblua.a"
+        lua
         )
 
 if (BUILD_WITH_QTKEYCHAIN)

@@ -12,12 +12,11 @@
 #include <memory>
 #include <utility>
 
-extern "C" {
-#include <lauxlib.h>
-#include <lua.h>
-#include <lualib.h>
-#include <qfileinfo.h>
-}
+//extern "C" {
+#include "lauxlib.h"
+#include "lua.h"
+#include "lualib.h"
+//}
 
 namespace chatterino {
 
