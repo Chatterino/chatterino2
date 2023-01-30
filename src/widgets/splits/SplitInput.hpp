@@ -8,7 +8,6 @@
 #include <QLineEdit>
 #include <QPaintEvent>
 #include <QPointer>
-#include <QSpacerItem>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -21,8 +20,8 @@ class Split;
 class EmotePopup;
 class InputCompletionPopup;
 class EffectLabel;
-class MessageLayout;
 class MessageThread;
+class MessageView;
 class ResizingTextEdit;
 class ChannelView;
 enum class CompletionKind;
@@ -35,8 +34,6 @@ public:
     SplitInput(Split *_chatWidget, bool enableInlineReplying = true);
     SplitInput(QWidget *parent, Split *_chatWidget, ChannelView *_channelView,
                bool enableInlineReplying = true);
-
-    ~SplitInput();
 
     bool hasSelection() const;
     void clearSelection() const;
@@ -110,9 +107,6 @@ private:
     void openEmotePopup();
     void clearReplyThread();
 
-    void layoutReplyMessage();
-    void updateReplyMessage();
-
     void updateCancelReplyButton();
 
     // scaledMaxHeight returns the height in pixels that this widget can grow to
@@ -140,13 +134,12 @@ private:
         QWidget *replyWrapper;
         QVBoxLayout *replyVbox;
         QHBoxLayout *replyHbox;
-        QSpacerItem *replySpacer;
+        MessageView *replyMessage;
         QLabel *replyLabel;
         EffectLabel *cancelReplyButton;
     } ui_{};
 
     std::shared_ptr<MessageThread> replyThread_ = nullptr;
-    std::unique_ptr<MessageLayout> replyMessageLayout_;
     bool enableInlineReplying_;
 
     pajlada::Signals::SignalHolder managedConnections_;

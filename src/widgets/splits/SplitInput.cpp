@@ -5,7 +5,6 @@
 #include "common/QLogging.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "messages/layouts/MessageLayout.hpp"
 #include "messages/Link.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageThread.hpp"
@@ -14,13 +13,13 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/Clamp.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
+#include "widgets/helper/MessageView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -76,15 +75,6 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
                                            this->clearShortcuts();
                                            this->addShortcuts();
                                        });
-
-    this->signalHolder_.managedConnect(
-        getIApp()->getWindows()->gifRepaintRequested, [&] {
-            this->updateReplyMessage();
-        });
-}
-
-SplitInput::~SplitInput()
-{
 }
 
 void SplitInput::initLayout()
@@ -108,8 +98,8 @@ void SplitInput::initLayout()
     auto replyHbox =
         replyVbox.emplace<QHBoxLayout>().assign(&this->ui_.replyHbox);
 
-    this->ui_.replySpacer = new QSpacerItem(0, 0);
-    replyVbox->addSpacerItem(this->ui_.replySpacer);
+    this->ui_.replyMessage = new MessageView();
+    replyVbox->addWidget(this->ui_.replyMessage);
 
     auto replyLabel = replyHbox.emplace<QLabel>().assign(&this->ui_.replyLabel);
     replyLabel->setAlignment(Qt::AlignLeft);
@@ -417,8 +407,9 @@ void SplitInput::postMessageSend(const QString &message,
 
 int SplitInput::scaledMaxHeight() const
 {
-    if (this->replyMessageLayout_)
+    if (this->replyThread_ != nullptr)
     {
+        // give more space for showing the message being replied to
         return int(250 * this->scale());
     }
     else
@@ -1064,19 +1055,10 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
     painter.setPen(borderColor);
     painter.drawRect(completeAreaRect);
 
-    if (this->enableInlineReplying_ && this->replyMessageLayout_ != nullptr)
+    if (this->enableInlineReplying_ && this->replyThread_ != nullptr)
     {
-        Selection emptySelection;
-        bool windowFocused = this->window() == QApplication::activeWindow();
-        this->replyMessageLayout_->paint(
-            painter, this->width(), this->ui_.replySpacer->geometry().top(), 0,
-            emptySelection, false, windowFocused, false);
-
-        int inputTop = this->ui_.replySpacer->geometry().top() +
-                       this->replyMessageLayout_->getHeight();
-
         QRect inputRect = completeAreaRect;
-        inputRect.setTop(inputTop);
+        inputRect.setTop(this->ui_.replyMessage->geometry().bottom());
 
         painter.fillRect(inputRect, this->theme->splits.input.background);
         painter.setPen(borderColor);
@@ -1095,7 +1077,7 @@ void SplitInput::resizeEvent(QResizeEvent *)
         this->ui_.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
 
-    this->layoutReplyMessage();
+    this->ui_.replyMessage->setWidth(this->width());
 }
 
 void SplitInput::giveFocus(Qt::FocusReason reason)
@@ -1125,8 +1107,8 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
     if (this->enableInlineReplying_)
     {
         auto &replyRoot = this->replyThread_->root();
-        this->replyMessageLayout_ = std::make_unique<MessageLayout>(replyRoot);
-        this->layoutReplyMessage();
+        this->ui_.replyMessage->setMessage(replyRoot);
+        this->ui_.replyMessage->setWidth(this->width());
 
         // Only enable reply label if inline replying
         auto replyPrefix = "@" + this->replyThread_->root()->displayName;
@@ -1162,7 +1144,7 @@ void SplitInput::clearInput()
 void SplitInput::clearReplyThread()
 {
     this->replyThread_.reset();
-    this->replyMessageLayout_.reset();
+    this->ui_.replyMessage->clearMessage();
 }
 
 bool SplitInput::shouldPreventInput(const QString &text) const
@@ -1186,47 +1168,6 @@ bool SplitInput::shouldPreventInput(const QString &text) const
     }
 
     return text.length() > TWITCH_MESSAGE_LIMIT;
-}
-
-void SplitInput::layoutReplyMessage()
-{
-    if (!this->replyMessageLayout_)
-    {
-        return;
-    }
-
-    auto app = getIApp();
-    auto flags = app->getWindows()->getWordFlags();
-    bool updateRequired =
-        this->replyMessageLayout_->layout(this->width(), this->scale(), flags);
-
-    qCDebug(chatterinoUpdate) << "update required:" << updateRequired;
-    qCDebug(chatterinoUpdate)
-        << "height required:" << this->replyMessageLayout_->getHeight();
-
-    this->ui_.replySpacer->changeSize(this->width(),
-                                      this->replyMessageLayout_->getHeight(),
-                                      QSizePolicy::Fixed, QSizePolicy::Fixed);
-    this->ui_.replyVbox->invalidate();
-    qCDebug(chatterinoUpdate) << "geo:" << this->ui_.replySpacer->geometry();
-
-    if (updateRequired)
-    {
-        this->updateGeometry();
-        this->update();
-        qCDebug(chatterinoUpdate)
-            << "geo2:" << this->ui_.replySpacer->geometry();
-    }
-}
-
-void SplitInput::updateReplyMessage()
-{
-    if (!this->replyMessageLayout_)
-    {
-        return;
-    }
-
-    this->update();
 }
 
 }  // namespace chatterino
