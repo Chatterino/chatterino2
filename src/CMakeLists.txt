@@ -542,6 +542,8 @@ set(SOURCE_FILES
         widgets/settingspages/NicknamesPage.hpp
         widgets/settingspages/NotificationPage.cpp
         widgets/settingspages/NotificationPage.hpp
+        widgets/settingspages/PluginsPage.cpp
+        widgets/settingspages/PluginsPage.hpp
         widgets/settingspages/SettingsPage.cpp
         widgets/settingspages/SettingsPage.hpp
 
