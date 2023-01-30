@@ -51,5 +51,8 @@ set(LUA_SRC
 )
 
 add_library(lua STATIC ${LUA_SRC})
-#target_link_libraries(lua ${LIBS})
+target_include_directories(lua
+    PUBLIC
+    ${LUA_INCLUDE_DIRS}
+)
 set_source_files_properties(${LUA_SRC} PROPERTIES LANGUAGE CXX)
