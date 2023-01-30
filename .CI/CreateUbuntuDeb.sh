@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+#ubuntu_release=$(cat /etc/lsb-release | grep '^DISTRIB_RELEASE=*' | sed -e 's/DISTRIB_RELEASE=//g')
+ubuntu_release=$(cat /etc/lsb-release | sed -n 's/^DISTRIB_RELEASE=//p')
+echo $ubuntu_release # Test
+
 if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     echo "ERROR: No chatterino binary file found. This script must be run in the build folder, and chatterino must be built first."
     exit 1
