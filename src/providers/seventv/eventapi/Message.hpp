@@ -1,6 +1,6 @@
 #pragma once
 
-#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
+#include "providers/seventv/eventapi/Subscription.hpp"
 
 #include <boost/optional.hpp>
 #include <magic_enum.hpp>

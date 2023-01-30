@@ -1,4 +1,4 @@
-#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
+#include "providers/seventv/eventapi/Subscription.hpp"
 
 #include <QDebug>
 #include <QJsonDocument>

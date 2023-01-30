@@ -7,7 +7,7 @@
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
+#include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 

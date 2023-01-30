@@ -1,8 +1,8 @@
 #include "providers/seventv/SeventvEventAPI.hpp"
 
-#include "providers/seventv/eventapi/SeventvEventAPIClient.hpp"
-#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
-#include "providers/seventv/eventapi/SeventvEventAPIMessage.hpp"
+#include "providers/seventv/eventapi/Client.hpp"
+#include "providers/seventv/eventapi/Dispatch.hpp"
+#include "providers/seventv/eventapi/Message.hpp"
 
 #include <QJsonArray>
 

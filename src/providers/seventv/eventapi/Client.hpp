@@ -3,7 +3,7 @@
 #include "providers/liveupdates/BasicPubSubClient.hpp"
 // this needs to be included for the specialization
 // of std::hash for SeventvEventAPISubscription
-#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
+#include "providers/seventv/eventapi/Subscription.hpp"
 
 namespace chatterino {
 

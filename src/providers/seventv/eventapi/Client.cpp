@@ -1,6 +1,6 @@
-#include "providers/seventv/eventapi/SeventvEventAPIClient.hpp"
+#include "providers/seventv/eventapi/Client.hpp"
 
-#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
+#include "providers/seventv/eventapi/Subscription.hpp"
 #include "providers/twitch/PubSubHelpers.hpp"
 
 #include <utility>
