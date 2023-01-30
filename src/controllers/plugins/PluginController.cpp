@@ -118,7 +118,38 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
             lua_pushstring(L, ctx.channel->getName().toStdString().c_str());
             lua_setfield(L, outIdx, "channelName");
 
-            lua_pcall(L, 1, 0, 0);
+            auto res = lua_pcall(L, 1, 0, 0);
+            if (res != LUA_OK)
+            {
+                QString errName;
+                switch (res)
+                {
+                    case LUA_ERRRUN:
+                        errName = "runtime error";
+                        break;
+                    case LUA_ERRMEM:
+                        errName = "memory error";
+                        break;
+                    case LUA_ERRERR:
+                        errName = "error???";
+                        break;
+                    default:
+                        errName = "unknown";
+                }
+                const char *errText = luaL_optstring(L, -1, NULL);
+                if (errText != nullptr)
+                {
+                    ctx.channel->addMessage(
+                        makeSystemMessage(QString("Lua error: (%1) %2")
+                                              .arg(errName, QString(errText))));
+                }
+                else
+                {
+                    ctx.channel->addMessage(
+                        makeSystemMessage("Lua error: " + errName));
+                }
+                return "";
+            }
             return "";
         }
     }
