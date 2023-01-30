@@ -37,7 +37,6 @@ Depends: libboost-filesystem-dev, libxcb-xinerama0
 EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 cat >> "$packaging_dir/DEBIAN/postinst" << EOF
-#!/bin/sh
 export LD_LIBRARY_PATH=/lib/qt/Qt/5.15.2/gcc_64/lib:"$LD_LIBRARY_PATH"
 EOF
 chmod 555 "$packaging_dir/DEBIAN/postinst"
