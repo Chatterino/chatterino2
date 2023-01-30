@@ -120,8 +120,12 @@ void SeventvEventAPI::onMessage(
             }
         }
         break;
+        case Opcode::Ack: {
+            // unhandled
+        }
+        break;
         default: {
-            qCDebug(chatterinoSeventvEventAPI) << "Unhandled op: " << payload;
+            qCDebug(chatterinoSeventvEventAPI) << "Unhandled op:" << payload;
         }
         break;
     }
