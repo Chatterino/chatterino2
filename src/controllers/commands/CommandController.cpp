@@ -3228,6 +3228,18 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     return text;
 }
 
+bool CommandController::registerPluginCommand(const QString &commandName)
+{
+    if (this->commands_.contains(commandName))
+    {
+        return false;
+    }
+
+    this->commands_[commandName] = [commandName](const CommandContext &ctx) {
+        return getApp()->plugins->tryExecPluginCommand(commandName, ctx);
+    };
+    return true;
+}
 void CommandController::registerCommand(const QString &commandName,
                                         CommandFunctionVariants commandFunction)
 {
