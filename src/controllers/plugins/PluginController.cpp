@@ -143,9 +143,6 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
     return "";
 }
 
-constexpr int C_FALSE = 0;
-constexpr int C_TRUE = 1;
-
 extern "C" {
 
 int luaC2SystemMsg(lua_State *L)
@@ -154,22 +151,25 @@ int luaC2SystemMsg(lua_State *L)
     {
         qCDebug(chatterinoLua) << "system_msg: need 2 args";
         luaL_error(L, "need exactly 2 arguments");  // NOLINT
-        lua_pushboolean(L, C_FALSE);
+        lua::push(L, false);
         return 1;
     }
-    const char *channel = luaL_optstring(L, 1, NULL);
-    const char *text = luaL_optstring(L, 2, NULL);
-    lua_pop(L, 2);
+    //const char *channel = luaL_optstring(L, 1, NULL);
+    QString channel;
+    QString text;
+    lua::pop(L, &text);
+    lua::pop(L, &channel);
+    //const char *text = luaL_optstring(L, 2, NULL);
     const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
     if (chn->isEmpty())
     {
         qCDebug(chatterinoLua) << "system_msg: no channel" << channel;
-        lua_pushboolean(L, C_FALSE);
+        lua::push(L, false);
         return 1;
     }
     qCDebug(chatterinoLua) << "system_msg: OK!";
     chn->addMessage(makeSystemMessage(text));
-    lua_pushboolean(L, C_TRUE);
+    lua::push(L, true);
     return 1;
 }
 
@@ -182,7 +182,13 @@ int luaC2RegisterCommand(lua_State *L)
         return 0;
     }
 
-    const char *name = luaL_optstring(L, 1, NULL);
+    QString name;
+    if (!lua::peek(L, &name, 1))
+    {
+        // NOLINTNEXTLINE
+        luaL_error(L, "cannot get string (1st arg of register_command)");
+        return 0;
+    }
     if (lua_isnoneornil(L, 2))
     {
         // NOLINTNEXTLINE
@@ -202,22 +208,23 @@ int luaC2RegisterCommand(lua_State *L)
 }
 int luaC2SendMsg(lua_State *L)
 {
-    const char *channel = luaL_optstring(L, 1, NULL);
-    const char *text = luaL_optstring(L, 2, NULL);
-    lua_pop(L, 2);
+    QString text;
+    QString channel;
+    lua::pop(L, &text);
+    lua::pop(L, &channel);
 
     const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
     if (chn->isEmpty())
     {
         qCDebug(chatterinoLua) << "send_msg: no channel" << channel;
-        lua_pushboolean(L, C_FALSE);
+        lua::push(L, false);
         return 1;
     }
     QString message = text;
     message = message.replace('\n', ' ');
     QString outText = getApp()->commands->execCommand(message, chn, false);
     chn->sendMessage(outText);
-    lua_pushboolean(L, C_TRUE);
+    lua::push(L, true);
     return 1;
 }
 
