@@ -43,13 +43,14 @@ EOF
 chmod 555 "$packaging_dir/DEBIAN/postinst"
 
 echo "Running make install in package dir"
-DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
+# DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
+DESTDIR="$packaging_dir" make -j"$(nproc)" install; find "$packaging_dir/"
 echo ""
 
 echo "$packaging_dir$(pwd)/appdir/usr"
 echo "$packaging_dir/"
 # move directory up
-mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/"
+# mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/" # remove INSTALL_ROOT
 
 mkdir -p "$packaging_dir/lib/qt"
 cp -R "../qt" "$packaging_dir/lib"
