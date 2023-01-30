@@ -41,7 +41,7 @@ export LD_LIBRARY_PATH=/lib/qt/Qt/5.15.2/gcc_64/lib:"$LD_LIBRARY_PATH"
 EOF
 chmod 555 "$packaging_dir/DEBIAN/postinst"
 
-cp -R ./appdir $packaging_dir
+cp -R ./appdir/usr $packaging_dir
 # echo "Running make install in package dir"
 # DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
 # DESTDIR="$packaging_dir" make -j"$(nproc)" install; find "$packaging_dir/"
