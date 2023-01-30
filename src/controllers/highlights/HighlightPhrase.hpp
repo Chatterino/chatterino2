@@ -79,6 +79,8 @@ public:
      * Qt>=5.13.
      */
     static QColor FALLBACK_HIGHLIGHT_COLOR;
+    // Used for automatic self messages highlighing
+    static QColor FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR;
     static QColor FALLBACK_REDEEMED_HIGHLIGHT_COLOR;
     static QColor FALLBACK_SUB_COLOR;
     static QColor FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR;

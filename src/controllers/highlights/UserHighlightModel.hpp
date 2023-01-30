@@ -22,6 +22,12 @@ protected:
 
     virtual void getRowFromItem(const HighlightPhrase &item,
                                 std::vector<QStandardItem *> &row) override;
+
+    virtual void afterInit() override;
+
+    virtual void customRowSetData(const std::vector<QStandardItem *> &row,
+                                  int column, const QVariant &value, int role,
+                                  int rowIndex) override;
 };
 
 }  // namespace chatterino
