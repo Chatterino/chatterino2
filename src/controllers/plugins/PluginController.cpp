@@ -48,7 +48,6 @@ void PluginController::initialize(Settings &settings, Paths &paths)
             this->load(index, pluginDir);
         }
     }
-    //    QApplication::exit();
 }
 
 void PluginController::load(QFileInfo index, QDir pluginDir)
@@ -154,12 +153,10 @@ int luaC2SystemMsg(lua_State *L)
         lua::push(L, false);
         return 1;
     }
-    //const char *channel = luaL_optstring(L, 1, NULL);
     QString channel;
     QString text;
     lua::pop(L, &text);
     lua::pop(L, &channel);
-    //const char *text = luaL_optstring(L, 2, NULL);
     const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
     if (chn->isEmpty())
     {
