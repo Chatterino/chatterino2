@@ -43,6 +43,8 @@ public:
         ChannelPtr channel, const Message *message = nullptr,
         std::unordered_map<QString, QString> context = {});
 
+    bool registerPluginCommand(const QString &commandName);
+
 private:
     void load(Paths &paths);
 
