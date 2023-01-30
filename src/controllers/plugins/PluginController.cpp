@@ -11,6 +11,8 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/Window.hpp"
 
+#include <QJsonDocument>
+
 #include <memory>
 #include <utility>
 
@@ -43,14 +45,32 @@ void PluginController::initialize(Settings &settings, Paths &paths)
                     << "Missing index.lua in plugin directory" << pluginDir;
                 continue;
             }
-            qCDebug(chatterinoLua) << "found index.lua, running it!";
+            qCDebug(chatterinoLua)
+                << "found index.lua, now looking for info.json!";
+            auto info = QFileInfo(pluginDir.filePath("info.json"));
+            if (!info.exists())
+            {
+                qCDebug(chatterinoLua)
+                    << "Missing info.json in plugin directory" << pluginDir;
+                continue;
+            }
+            QFile infoFile(info.absoluteFilePath());
+            infoFile.open(QIODevice::ReadOnly);
+            auto everything = infoFile.readAll();
+            auto doc = QJsonDocument::fromJson(everything);
+            if (!doc.isObject())
+            {
+                qCDebug(chatterinoLua)
+                    << "info.json root is not an object" << pluginDir;
+                continue;
+            }
 
-            this->load(index, pluginDir);
+            this->load(index, pluginDir, PluginMeta(doc.object()));
         }
     }
 }
 
-void PluginController::load(QFileInfo index, QDir pluginDir)
+void PluginController::load(QFileInfo index, QDir pluginDir, PluginMeta meta)
 {
     qCDebug(chatterinoLua) << "Running lua file" << index;
     lua_State *l = luaL_newstate();
@@ -58,8 +78,8 @@ void PluginController::load(QFileInfo index, QDir pluginDir)
     this->loadChatterinoLib(l);
 
     auto pluginName = pluginDir.dirName();
-    auto plugin = std::make_unique<Plugin>(pluginName, l);
-    this->plugins.insert({pluginName, std::move(plugin)});
+    auto plugin = std::make_unique<Plugin>(pluginName, l, meta);
+    this->plugins_.insert({pluginName, std::move(plugin)});
 
     luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     qCInfo(chatterinoLua) << "Loaded" << pluginName << "plugin from" << index;
@@ -67,7 +87,7 @@ void PluginController::load(QFileInfo index, QDir pluginDir)
 
 void PluginController::callEvery(const QString &functionName)
 {
-    for (const auto &[name, plugin] : this->plugins)
+    for (const auto &[name, plugin] : this->plugins_)
     {
         lua_getglobal(plugin->state_, functionName.toStdString().c_str());
         lua_pcall(plugin->state_, 0, 0, 0);
@@ -78,7 +98,7 @@ void PluginController::callEveryWithArgs(
     const QString &functionName, int count,
     std::function<void(const std::unique_ptr<Plugin> &pl, lua_State *L)> argCb)
 {
-    for (const auto &[name, plugin] : this->plugins)
+    for (const auto &[name, plugin] : this->plugins_)
     {
         lua_getglobal(plugin->state_, functionName.toStdString().c_str());
         argCb(plugin, plugin->state_);
@@ -89,7 +109,7 @@ void PluginController::callEveryWithArgs(
 QString PluginController::tryExecPluginCommand(const QString &commandName,
                                                const CommandContext &ctx)
 {
-    for (auto &[name, plugin] : this->plugins)
+    for (auto &[name, plugin] : this->plugins_)
     {
         if (auto it = plugin->ownedCommands.find(commandName);
             it != plugin->ownedCommands.end())

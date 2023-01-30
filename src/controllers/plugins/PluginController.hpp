@@ -9,6 +9,8 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QString>
 
 #include <map>
@@ -20,12 +22,34 @@ struct lua_State;
 
 namespace chatterino {
 
+struct PluginMeta {
+    QString name;
+    QString description;
+    QString authors;
+    QString homepage;
+    std::vector<QString> tags;
+
+    explicit PluginMeta(const QJsonObject &obj)
+        : name(obj.value("name").toString())
+        , description(obj.value("description").toString())
+        , authors(obj.value("authors").toString())
+        , homepage(obj.value("homepage").toString())
+    {
+        for (const auto &t : obj.value("tags").toArray())
+        {
+            tags.push_back(t.toString());
+        }
+    }
+};
+
 class Plugin
 {
 public:
-    QString name;
-    Plugin(QString name, lua_State *state)
-        : name(std::move(name))
+    QString codename;
+    PluginMeta meta;
+    Plugin(QString codename, lua_State *state, PluginMeta meta)
+        : codename(std::move(codename))
+        , meta(std::move(meta))
         , state_(state)
     {
     }
@@ -73,7 +97,7 @@ public:
     // This is required to be public because of c functions
     Plugin *getPluginByStatePtr(lua_State *L)
     {
-        for (auto &[name, plugin] : this->plugins)
+        for (auto &[name, plugin] : this->plugins_)
         {
             if (plugin->state_ == L)
             {
@@ -83,10 +107,15 @@ public:
         return nullptr;
     }
 
+    const std::map<QString, std::unique_ptr<Plugin>> &plugins() const
+    {
+        return this->plugins_;
+    }
+
 private:
-    void load(QFileInfo index, QDir pluginDir);
+    void load(QFileInfo index, QDir pluginDir, PluginMeta meta);
     void loadChatterinoLib(lua_State *l);
-    std::map<QString, std::unique_ptr<Plugin>> plugins;
+    std::map<QString, std::unique_ptr<Plugin>> plugins_;
 };
 
 };  // namespace chatterino
