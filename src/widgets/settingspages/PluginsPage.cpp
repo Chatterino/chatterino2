@@ -39,7 +39,7 @@ PluginsPage::PluginsPage()
         auto plgroup = groupLayout.emplace<QGroupBox>(plugin->meta.name);
         auto pl = plgroup.setLayoutType<QFormLayout>();
         auto *descrText = new QLabel(plugin->meta.description);
-        descrText->setTextFormat(Qt::TextFormat::MarkdownText);
+        //descrText->setTextFormat(Qt::TextFormat::MarkdownText);
         descrText->setWordWrap(true);
         descrText->setStyleSheet("color: #bbb");
         pl->addRow(descrText);
@@ -50,8 +50,8 @@ PluginsPage::PluginsPage()
         pl->addRow("Homepage", homepage);
 
         auto *reload = new QPushButton("Reload");
-        QObject::connect(reload, &QPushButton::pressed, [=]() {
-            getApp()->plugins->reload(codename);
+        QObject::connect(reload, &QPushButton::pressed, [name = codename]() {
+            getApp()->plugins->reload(name);
         });
         pl->addRow(reload);
     }
