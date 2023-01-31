@@ -26,9 +26,37 @@ namespace chatterino {
 
 void PluginController::initialize(Settings &settings, Paths &paths)
 {
-    (void)(settings);
+    (void)paths;
 
-    auto dir = QDir(paths.pluginsDirectory);
+    settings.enableAnyPlugins.connect([this](bool enabled) {
+        if (enabled)
+        {
+            this->actuallyInitialize();
+        }
+        else
+        {
+            // uninitialize plugins
+            for (const auto &[codename, plugin] : this->plugins_)
+            {
+                this->reload(codename);
+            }
+            // can safely delete them now, after lua freed its stuff
+            this->plugins_.clear();
+        }
+    });
+    this->actuallyInitialize();
+}
+
+// this function exists to allow for connecting to enableAnyPlugins option
+void PluginController::actuallyInitialize()
+{
+    if (!getSettings()->enableAnyPlugins)
+    {
+        qCDebug(chatterinoLua)
+            << "Loading plugins disabled via Setting, skipping";
+        return;
+    }
+    auto dir = QDir(getPaths()->pluginsDirectory);
     qCDebug(chatterinoLua) << "loading plugins from " << dir;
     for (const auto &info : dir.entryInfoList())
     {
@@ -110,6 +138,15 @@ void PluginController::load(QFileInfo index, QDir pluginDir, PluginMeta meta)
 
     auto pluginName = pluginDir.dirName();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
+    for (const auto &[codename, other] : this->plugins_)
+    {
+        if (other->meta.name == meta.name)
+        {
+            plugin->isDupeName = true;
+            other->isDupeName = true;
+        }
+    }
+
     this->plugins_.insert({pluginName, std::move(plugin)});
 
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
@@ -130,14 +167,22 @@ bool PluginController::reload(const QString &codename)
     {
         return false;
     }
-    lua_close(it->second->state_);
+    if (it->second->state_ != nullptr)
+    {
+        lua_close(it->second->state_);
+        it->second->state_ = nullptr;
+    }
     for (const auto &[cmd, _] : it->second->ownedCommands)
     {
         getApp()->commands->unregisterPluginCommand(cmd);
     }
-    QDir loadDir = it->second->loadDirectory_;
-    this->plugins_.erase(codename);
-    this->tryLoadFromDir(loadDir);
+    it->second->ownedCommands.clear();
+    if (this->isEnabled(codename))
+    {
+        QDir loadDir = it->second->loadDirectory_;
+        this->plugins_.erase(codename);
+        this->tryLoadFromDir(loadDir);
+    }
     return true;
 }
 
@@ -289,6 +334,17 @@ void PluginController::loadChatterinoLib(lua_State *L)
 {
     lua_pushglobaltable(L);
     luaL_setfuncs(L, C2LIB, 0);
+}
+
+bool PluginController::isEnabled(const QString &codename)
+{
+    if (!getSettings()->enableAnyPlugins)
+    {
+        return false;
+    }
+    auto vec = getSettings()->enabledPlugins.getValue();
+    auto it = std::find(vec.begin(), vec.end(), codename);
+    return it != vec.end();
 }
 
 };  // namespace chatterino

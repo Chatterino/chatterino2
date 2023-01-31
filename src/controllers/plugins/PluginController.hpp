@@ -12,7 +12,9 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QString>
+#include <semver/semver.hpp>
 
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <utility>
@@ -27,16 +29,33 @@ struct PluginMeta {
     QString description;
     QString authors;
     QString homepage;
+
+    QString license;
+    semver::version version;
+
     std::vector<QString> tags;
 
     std::set<QString> libraryPermissions;
 
     explicit PluginMeta(const QJsonObject &obj)
-        : name(obj.value("name").toString())
+        : name(obj.value("name").toString("A Plugin with no name"))
         , description(obj.value("description").toString())
         , authors(obj.value("authors").toString())
         , homepage(obj.value("homepage").toString())
+        , license(obj.value("license").toString("[unknown]"))
+
     {
+        auto v = semver::from_string_noexcept(
+            obj.value("version").toString().toStdString());
+        if (v.has_value())
+        {
+            this->version = v.value();
+        }
+        else
+        {
+            this->version = semver::version(0, 0, 0);
+            description.append("\nWarning: invalid version");
+        }
         for (const auto &t : obj.value("tags").toArray())
         {
             this->tags.push_back(t.toString());
@@ -53,6 +72,7 @@ class Plugin
 public:
     QString codename;
     PluginMeta meta;
+    bool isDupeName{};
 
     Plugin(QString codename, lua_State *state, PluginMeta meta,
            const QDir &loadDirectory)
@@ -133,8 +153,10 @@ public:
     }
 
     bool reload(const QString &codename);
+    bool isEnabled(const QString &codename);
 
 private:
+    void actuallyInitialize();
     void load(QFileInfo index, QDir pluginDir, PluginMeta meta);
     void loadChatterinoLib(lua_State *l);
 
