@@ -3231,13 +3231,20 @@ bool CommandController::registerPluginCommand(const QString &commandName)
     this->commands_[commandName] = [commandName](const CommandContext &ctx) {
         return getApp()->plugins->tryExecPluginCommand(commandName, ctx);
     };
+    this->pluginCommands_.append(commandName);
     return true;
 }
 
 bool CommandController::unregisterPluginCommand(const QString &commandName)
 {
+    if (!this->pluginCommands_.contains(commandName))
+    {
+        return false;
+    }
+    this->pluginCommands_.removeAll(commandName);
     return this->commands_.erase(commandName) != 0;
 }
+
 void CommandController::registerCommand(const QString &commandName,
                                         CommandFunctionVariants commandFunction)
 {
