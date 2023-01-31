@@ -37,10 +37,6 @@ Version::Version()
     this->fullVersion_ += " DEBUG";
 #endif
 
-#ifdef CHATTERINO_WITH_CRASHPAD
-    this->fullVersion_ += " with crashpad";
-#endif
-
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     this->isSupportedOS_ = true;
 #else
@@ -103,6 +99,9 @@ QStringList Version::buildTags() const
 #endif
 #ifdef _MSC_FULL_VER
     tags.append("MSVC " + QString::number(_MSC_FULL_VER, 10));
+#endif
+#ifdef CHATTERINO_WITH_CRASHPAD
+    tags.append("Crashpad");
 #endif
 
     return tags;
