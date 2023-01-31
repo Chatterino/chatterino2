@@ -85,16 +85,22 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: ilammy/msvc-dev-cmd@v1.12.0
 
+      - name: Setup Conan (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          conan profile new --detect --force default
+          conan profile update conf.tools.cmake.cmaketoolchain:generator="NMake Makefiles" default
+
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
           mkdir build
           cd build
-          conan install ..  -b missing
+          conan install .. -s build_type=Release -b missing -pr:b=default
           cmake `
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=Release `
-              -DUSE_CONAN=ON `
+              -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               ..
           set cl=/MP
@@ -166,6 +172,7 @@ jobs:
           build_dir: build
           config_file: ".clang-tidy"
           split_workflow: true
+          exclude: "tests/*,lib/*"
 
       - uses: actions/upload-artifact@v3
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')

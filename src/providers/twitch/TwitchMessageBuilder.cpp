@@ -35,7 +35,6 @@
 #include <boost/variant.hpp>
 #include <QColor>
 #include <QDebug>
-#include <QMediaPlayer>
 #include <QStringRef>
 
 namespace {
