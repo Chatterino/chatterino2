@@ -6,6 +6,8 @@
 #include "controllers/plugins/LuaUtilities.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
