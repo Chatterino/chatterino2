@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "controllers/plugins/PluginController.hpp"
+#include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
@@ -34,10 +35,13 @@ void PluginsPage::rebuildContent()
     auto group = layout.emplace<QGroupBox>("Plugins");
     auto groupLayout = group.setLayoutType<QFormLayout>();
 
-    auto *description =
-        new QLabel("You can load plugins by putting them into "
-                   "<chatterino-app-data-folder>/Plugins/. Each one is a "
-                   "new directory.");
+    auto *description = new QLabel(
+        "You can load plugins by putting them into " +
+        formatRichNamedLink("file:///" + getPaths()->pluginsDirectory,
+                            "the Plugins directory") +
+        ". Each one is a "
+        "new directory.");
+    description->setOpenExternalLinks(true);
     description->setWordWrap(true);
     description->setStyleSheet("color: #bbb");
     groupLayout->addRow(description);
