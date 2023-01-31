@@ -79,6 +79,16 @@ public:
         return true;
     }
 
+    std::set<QString> listRegisteredCommands()
+    {
+        std::set<QString> out;
+        for (const auto &[name, _] : this->ownedCommands)
+        {
+            out.insert(name);
+        }
+        return out;
+    }
+
 private:
     QDir loadDirectory_;
     lua_State *state_;

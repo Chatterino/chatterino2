@@ -83,6 +83,18 @@ void PluginsPage::rebuildContent()
         }
         pl->addRow("Used libraries", libs);
 
+        QString cmds;
+        for (const auto &cmdName : plugin->listRegisteredCommands())
+        {
+            if (!cmds.isEmpty())
+            {
+                cmds += ", ";
+            }
+
+            cmds += cmdName;
+        }
+        pl->addRow("Commands", new QLabel(cmds));
+
         auto *reload = new QPushButton("Reload");
         QObject::connect(reload, &QPushButton::pressed,
                          [name = codename, this]() {
