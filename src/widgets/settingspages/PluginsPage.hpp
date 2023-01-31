@@ -2,8 +2,11 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
+#include <QDebug>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QWidget>
+
 namespace chatterino {
 class Plugin;
 
@@ -11,10 +14,16 @@ class PluginsPage : public SettingsPage
 {
 public:
     PluginsPage();
+    ~PluginsPage() override
+    {
+        qDebug() << "plugins page deleted";
+    }
 
 private:
     void rebuildContent();
 
-    LayoutCreator<QScrollArea> scrollArea_;
+    LayoutCreator<QWidget> scrollAreaWidget_;
+    QGroupBox *generalGroup;
+    QFrame *dataFrame_;
 };
 }  // namespace chatterino
