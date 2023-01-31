@@ -49,6 +49,32 @@ PluginsPage::PluginsPage()
 
         pl->addRow("Homepage", homepage);
 
+        QString libString;
+        bool hasDangerous = false;
+        for (const auto &library : plugin->meta.libraryPermissions)
+        {
+            if (!libString.isEmpty())
+            {
+                libString += ", ";
+            }
+            if (library == "os" || library == "io")
+            {
+                hasDangerous = true;
+            }
+            libString += library;
+        }
+        if (hasDangerous)
+        {
+            libString += "\nDetected potentially dangerous libraries used, be "
+                         "careful with this plugin";
+        }
+        auto *libs = new QLabel(libString);
+        if (hasDangerous)
+        {
+            libs->setStyleSheet("color: red");
+        }
+        pl->addRow("Used libraries", libs);
+
         auto *reload = new QPushButton("Reload");
         QObject::connect(reload, &QPushButton::pressed, [name = codename]() {
             getApp()->plugins->reload(name);
