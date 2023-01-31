@@ -231,6 +231,10 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         addString(emote.first.string, TaggedString::Type::BTTVGlobalEmote);
     }
 
+    for (const auto &command : getApp()->commands->pluginCommands())
+    {
+        addString(command, TaggedString::PluginCommand);
+    }
     // Custom Chatterino commands
     for (const auto &command : getApp()->commands->items)
     {

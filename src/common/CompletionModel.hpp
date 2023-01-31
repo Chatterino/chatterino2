@@ -34,6 +34,7 @@ class CompletionModel : public QAbstractListModel
             CustomCommand,
             ChatterinoCommand,
             TwitchCommand,
+            PluginCommand,
         };
 
         TaggedString(QString _string, Type type);

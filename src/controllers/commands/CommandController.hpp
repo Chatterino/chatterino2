@@ -46,6 +46,11 @@ public:
     bool registerPluginCommand(const QString &commandName);
     bool unregisterPluginCommand(const QString &commandName);
 
+    const QStringList &pluginCommands()
+    {
+        return this->pluginCommands_;
+    }
+
 private:
     void load(Paths &paths);
 
@@ -76,6 +81,7 @@ private:
         commandsSetting_;
 
     QStringList defaultChatterinoCommandAutoCompletions_;
+    QStringList pluginCommands_;
 };
 
 }  // namespace chatterino
