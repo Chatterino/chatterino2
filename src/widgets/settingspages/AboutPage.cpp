@@ -113,6 +113,11 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "miniaudio",
                        "https://github.com/mackron/miniaudio",
                        ":/licenses/miniaudio.txt");
+#ifdef CHATTERINO_WITH_CRASHPAD
+            addLicense(form.getElement(), "crashpad",
+                       "https://chromium.googlesource.com/crashpad/crashpad",
+                       ":/licenses/crashpad.txt");
+#endif
         }
 
         // Attributions
