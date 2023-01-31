@@ -830,9 +830,8 @@ if (LIBRT)
         )
 endif ()
 
-if (crashpad_FOUND)
-    target_include_directories(${LIBRARY_PROJECT} PUBLIC ${crashpad_INCLUDE_DIRS})
-    target_link_libraries(${LIBRARY_PROJECT} PUBLIC crashpad::mini_chromium_base)
+if (BUILD_WITH_CRASHPAD)
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_CRASHPAD)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC crashpad::client)
 endif()
 

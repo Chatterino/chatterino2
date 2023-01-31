@@ -20,9 +20,11 @@ class Chatterino2(ConanFile):
 
     def imports(self):
         if os_info.is_windows:
-            for pattern in ["*.dll", "crashpad_handler.exe"]:
-                self.copy(pattern, src="bin", dst="bin", keep_path=False)
-                self.copy(pattern, src="bin", dst="Chatterino2", keep_path=False)
+            self.copy("*.dll", src="bin", dst="bin", keep_path=False)
+            self.copy("*.dll", src="bin", dst="Chatterino2", keep_path=False)
+
+            self.copy("crashpad_handler.exe", src="bin", dst="bin/crashpad", keep_path=False)
+            self.copy("crashpad_handler.exe", src="bin", dst="Chatterino2/crashpad", keep_path=False)
         else:
             self.copy("*.so*", src="lib", dst="bin", keep_path=False)
-            self.copy("crashpad_handler", src="lib", dst="bin", keep_path=False)
+            self.copy("crashpad_handler", src="lib", dst="bin/crashpad", keep_path=False)

@@ -37,6 +37,10 @@ Version::Version()
     this->fullVersion_ += " DEBUG";
 #endif
 
+#ifdef CHATTERINO_WITH_CRASHPAD
+    this->fullVersion_ += " with crashpad";
+#endif
+
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     this->isSupportedOS_ = true;
 #else

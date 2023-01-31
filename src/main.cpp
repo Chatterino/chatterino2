@@ -56,7 +56,9 @@ int main(int argc, char **argv)
 
     initArgs(a);
 
-    const auto crashpadHandler = crasquish::installCrashHandler();
+#ifdef CHATTERINO_WITH_CRASHPAD
+    const auto crashpadHandler = installCrashHandler();
+#endif
 
     // run in gui mode or browser extension host mode
     if (getArgs().shouldRunBrowserExtensionHost)

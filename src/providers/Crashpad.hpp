@@ -1,8 +1,12 @@
-#include <client/crashpad_client.h>
-#include <memory>
+#ifdef CHATTERINO_WITH_CRASHPAD
+#    include <client/crashpad_client.h>
 
-namespace chatterino::crasquish {
+#    include <memory>
+
+namespace chatterino {
 
 std::unique_ptr<crashpad::CrashpadClient> installCrashHandler();
 
-}  // namespace chatterino::crasquish
+}  // namespace chatterino
+
+#endif
