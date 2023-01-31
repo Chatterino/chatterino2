@@ -7,7 +7,7 @@
 #include <vector>
 struct lua_State;
 namespace chatterino {
-class CommandContext;
+struct CommandContext;
 }  // namespace chatterino
 
 namespace chatterino::lua {
