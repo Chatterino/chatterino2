@@ -29,6 +29,8 @@ struct PluginMeta {
     QString homepage;
     std::vector<QString> tags;
 
+    std::set<QString> libraryPermissions;
+
     explicit PluginMeta(const QJsonObject &obj)
         : name(obj.value("name").toString())
         , description(obj.value("description").toString())
@@ -37,7 +39,11 @@ struct PluginMeta {
     {
         for (const auto &t : obj.value("tags").toArray())
         {
-            tags.push_back(t.toString());
+            this->tags.push_back(t.toString());
+        }
+        for (const auto &t : obj.value("library_permissions").toArray())
+        {
+            this->libraryPermissions.insert(t.toString());
         }
     }
 };
@@ -121,6 +127,9 @@ public:
 private:
     void load(QFileInfo index, QDir pluginDir, PluginMeta meta);
     void loadChatterinoLib(lua_State *l);
+
+    // This function adds lua standard libraries into the state
+    void openLibrariesFor(lua_State *L, PluginMeta meta);
     bool tryLoadFromDir(const QDir &pluginDir);
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
 };

@@ -73,19 +73,52 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
     this->load(index, pluginDir, PluginMeta(doc.object()));
     return true;
 }
+void PluginController::openLibrariesFor(lua_State *L, PluginMeta meta)
+{
+    // copied from linit.c
+    static const std::array<luaL_Reg, 11> loadedlibs = {
+        luaL_Reg{LUA_GNAME, luaopen_base},
+        luaL_Reg{LUA_LOADLIBNAME, luaopen_package},
+        luaL_Reg{LUA_COLIBNAME, luaopen_coroutine},
+        luaL_Reg{LUA_TABLIBNAME, luaopen_table},
+        luaL_Reg{LUA_IOLIBNAME, luaopen_io},
+        luaL_Reg{LUA_OSLIBNAME, luaopen_os},
+        luaL_Reg{LUA_STRLIBNAME, luaopen_string},
+        luaL_Reg{LUA_MATHLIBNAME, luaopen_math},
+        luaL_Reg{LUA_UTF8LIBNAME, luaopen_utf8},
+        luaL_Reg{LUA_DBLIBNAME, luaopen_debug},
+        luaL_Reg{NULL, NULL},
+    };
+
+    for (const auto &reg : loadedlibs)
+    {
+        if (meta.libraryPermissions.contains(QString(reg.name)))
+        {
+            luaL_requiref(L, reg.name, reg.func, int(true));
+            lua_pop(L, 1);
+        }
+    }
+}
 
 void PluginController::load(QFileInfo index, QDir pluginDir, PluginMeta meta)
 {
     qCDebug(chatterinoLua) << "Running lua file" << index;
     lua_State *l = luaL_newstate();
-    luaL_openlibs(l);
+    this->openLibrariesFor(l, meta);
     this->loadChatterinoLib(l);
 
     auto pluginName = pluginDir.dirName();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
     this->plugins_.insert({pluginName, std::move(plugin)});
 
-    luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
+    int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
+    if (err != 0)
+    {
+        qCWarning(chatterinoLua)
+            << "Failed to load" << pluginName << "plugin from" << index << ": "
+            << lua::humanErrorText(l, err);
+        return;
+    }
     qCInfo(chatterinoLua) << "Loaded" << pluginName << "plugin from" << index;
 }
 
