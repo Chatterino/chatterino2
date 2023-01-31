@@ -57,7 +57,7 @@ PluginsPage::PluginsPage()
             {
                 libString += ", ";
             }
-            if (library == "os" || library == "io")
+            if (library == "os" || library == "io" || library == "package")
             {
                 hasDangerous = true;
             }
