@@ -6,11 +6,17 @@
 
 #include <vector>
 struct lua_State;
+class QJsonObject;
 namespace chatterino {
 struct CommandContext;
 }  // namespace chatterino
 
 namespace chatterino::lua {
+
+/**
+ * @brief Converts a lua error code and potentially string on top of the stack into a human readable message
+ */
+QString humanErrorText(lua_State *L, int errCode);
 
 using StackIdx = int;
 

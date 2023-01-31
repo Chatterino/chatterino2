@@ -10,6 +10,42 @@
 
 namespace chatterino::lua {
 
+QString humanErrorText(lua_State *L, int errCode)
+{
+    QString errName;
+    switch (errCode)
+    {
+        case LUA_OK:
+            return "ok";
+        case LUA_ERRRUN:
+            errName = "(runtime error)";
+            break;
+        case LUA_ERRMEM:
+            errName = "(memory error)";
+            break;
+        case LUA_ERRERR:
+            errName = "(error while handling another error)";
+            break;
+        case LUA_ERRSYNTAX:
+            errName = "(syntax error)";
+            break;
+        case LUA_YIELD:
+            errName = "(illegal coroutine yield)";
+            break;
+        case LUA_ERRFILE:
+            errName = "(file error)";
+            break;
+        default:
+            errName = "(unknown error type)";
+    }
+    QString errText;
+    if (peek(L, &errText))
+    {
+        errName += " " + errText;
+    }
+    return errName;
+}
+
 StackIdx pushEmptyArray(lua_State *L, int countArray)
 {
     lua_createtable(L, countArray, 0);
