@@ -76,7 +76,8 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
 void PluginController::openLibrariesFor(lua_State *L, PluginMeta meta)
 {
     // copied from linit.c
-    static const std::array<luaL_Reg, 11> loadedlibs = {
+    // NOLINTNEXTLINE
+    static const std::vector<luaL_Reg> loadedlibs = {
         luaL_Reg{LUA_GNAME, luaopen_base},
         luaL_Reg{LUA_LOADLIBNAME, luaopen_package},
         luaL_Reg{LUA_COLIBNAME, luaopen_coroutine},
