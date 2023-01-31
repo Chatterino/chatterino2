@@ -11,16 +11,24 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
+#include <qwidget.h>
 
 namespace chatterino {
 
 PluginsPage::PluginsPage()
+    : scrollArea_(nullptr)
 {
     LayoutCreator<PluginsPage> layoutCreator(this);
+    this->scrollArea_ = layoutCreator.emplace<QScrollArea>();
 
-    auto scroll = layoutCreator.emplace<QScrollArea>();
-    auto widget = scroll.emplaceScrollAreaWidget();
-    removeScrollAreaBackground(scroll.getElement(), widget.getElement());
+    this->rebuildContent();
+}
+
+void PluginsPage::rebuildContent()
+{
+    auto widget = this->scrollArea_.emplaceScrollAreaWidget();
+    removeScrollAreaBackground(this->scrollArea_.getElement(),
+                               widget.getElement());
 
     auto layout = widget.setLayoutType<QVBoxLayout>();
     auto group = layout.emplace<QGroupBox>("Plugins");
@@ -76,9 +84,11 @@ PluginsPage::PluginsPage()
         pl->addRow("Used libraries", libs);
 
         auto *reload = new QPushButton("Reload");
-        QObject::connect(reload, &QPushButton::pressed, [name = codename]() {
-            getApp()->plugins->reload(name);
-        });
+        QObject::connect(reload, &QPushButton::pressed,
+                         [name = codename, this]() {
+                             getApp()->plugins->reload(name);
+                             this->rebuildContent();
+                         });
         pl->addRow(reload);
     }
 }
