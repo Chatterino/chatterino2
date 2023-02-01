@@ -14,10 +14,6 @@ class PluginsPage : public SettingsPage
 {
 public:
     PluginsPage();
-    ~PluginsPage() override
-    {
-        qDebug() << "plugins page deleted";
-    }
 
 private:
     void rebuildContent();
