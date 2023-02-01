@@ -39,9 +39,10 @@ struct PluginMeta {
 
     explicit PluginMeta(const QJsonObject &obj)
         : name(obj.value("name").toString("A Plugin with no name"))
-        , description(obj.value("description").toString())
-        , authors(obj.value("authors").toString())
-        , homepage(obj.value("homepage").toString())
+        , description(obj.value("description").toString("Nothing here"))
+        , authors(
+              obj.value("authors").toString("[please tell me who made this]"))
+        , homepage(obj.value("homepage").toString("[https://example.com]"))
         , license(obj.value("license").toString("[unknown]"))
 
     {
@@ -54,7 +55,7 @@ struct PluginMeta {
         else
         {
             this->version = semver::version(0, 0, 0);
-            description.append("\nWarning: invalid version");
+            description.append("\nWarning: invalid version. Use semver.");
         }
         for (const auto &t : obj.value("tags").toArray())
         {
