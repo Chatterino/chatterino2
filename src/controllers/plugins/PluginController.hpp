@@ -1,10 +1,7 @@
 #pragma once
 
-#include "Application.hpp"
-#include "common/QLogging.hpp"
 #include "common/Singleton.hpp"
-#include "controllers/commands/CommandContext.hpp"
-#include "controllers/commands/CommandController.hpp"
+#include "controllers/plugins/Plugin.hpp"
 #include "singletons/Paths.hpp"
 
 #include <QDir>
@@ -12,7 +9,6 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QString>
-#include <semver/semver.hpp>
 
 #include <algorithm>
 #include <map>
@@ -23,109 +19,6 @@
 struct lua_State;
 
 namespace chatterino {
-
-struct PluginMeta {
-    QString name;
-    QString description;
-    QString authors;
-    QString homepage;
-
-    QString license;
-    semver::version version;
-
-    std::vector<QString> tags;
-
-    std::set<QString> libraryPermissions;
-
-    explicit PluginMeta(const QJsonObject &obj)
-        : name(obj.value("name").toString("A Plugin with no name"))
-        , description(obj.value("description").toString("Nothing here"))
-        , authors(
-              obj.value("authors").toString("[please tell me who made this]"))
-        , homepage(obj.value("homepage").toString("[https://example.com]"))
-        , license(obj.value("license").toString("[unknown]"))
-
-    {
-        auto v = semver::from_string_noexcept(
-            obj.value("version").toString().toStdString());
-        if (v.has_value())
-        {
-            this->version = v.value();
-        }
-        else
-        {
-            this->version = semver::version(0, 0, 0);
-            description.append("\nWarning: invalid version. Use semver.");
-        }
-        for (const auto &t : obj.value("tags").toArray())
-        {
-            this->tags.push_back(t.toString());
-        }
-        for (const auto &t : obj.value("library_permissions").toArray())
-        {
-            this->libraryPermissions.insert(t.toString());
-        }
-    }
-
-    bool hasDangerousLibraries()
-    {
-        const auto *perms = &this->libraryPermissions;
-        return perms->contains("io") || perms->contains("package") ||
-               perms->contains("os");
-    }
-};
-
-class Plugin
-{
-public:
-    QString codename;
-    PluginMeta meta;
-    bool isDupeName{};
-
-    Plugin(QString codename, lua_State *state, PluginMeta meta,
-           const QDir &loadDirectory)
-        : codename(std::move(codename))
-        , meta(std::move(meta))
-        , loadDirectory_(loadDirectory)
-        , state_(state)
-    {
-    }
-
-    bool registerCommand(const QString &name, const QString &functionName)
-    {
-        if (this->ownedCommands.find(name) != this->ownedCommands.end())
-        {
-            return false;
-        }
-
-        auto ok = getApp()->commands->registerPluginCommand(name);
-        if (!ok)
-        {
-            return false;
-        }
-        this->ownedCommands.insert({name, functionName});
-        return true;
-    }
-
-    std::set<QString> listRegisteredCommands()
-    {
-        std::set<QString> out;
-        for (const auto &[name, _] : this->ownedCommands)
-        {
-            out.insert(name);
-        }
-        return out;
-    }
-
-private:
-    QDir loadDirectory_;
-    lua_State *state_;
-
-    // maps command name -> function name
-    std::map<QString, QString> ownedCommands;
-
-    friend class PluginController;
-};
 
 class PluginController : public Singleton
 {
