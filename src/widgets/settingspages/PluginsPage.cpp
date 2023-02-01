@@ -93,19 +93,15 @@ void PluginsPage::rebuildContent()
         pl->addRow("License", new QLabel(plugin->meta.license));
 
         QString libString;
-        bool hasDangerous = false;
         for (const auto &library : plugin->meta.libraryPermissions)
         {
             if (!libString.isEmpty())
             {
                 libString += ", ";
             }
-            if (library == "os" || library == "io" || library == "package")
-            {
-                hasDangerous = true;
-            }
             libString += library;
         }
+        bool hasDangerous = plugin->meta.hasDangerousLibraries();
         if (hasDangerous)
         {
             libString += "\nDetected potentially dangerous libraries used, be "
