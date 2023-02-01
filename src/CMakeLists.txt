@@ -136,6 +136,8 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
+        controllers/plugins/Plugin.cpp
+        controllers/plugins/Plugin.hpp
         controllers/plugins/PluginController.hpp
         controllers/plugins/PluginController.cpp
         controllers/plugins/LuaUtilities.cpp
