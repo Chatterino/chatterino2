@@ -66,6 +66,13 @@ struct PluginMeta {
             this->libraryPermissions.insert(t.toString());
         }
     }
+
+    bool hasDangerousLibraries()
+    {
+        const auto *perms = &this->libraryPermissions;
+        return perms->contains("io") || perms->contains("package") ||
+               perms->contains("os");
+    }
 };
 
 class Plugin
