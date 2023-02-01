@@ -630,6 +630,22 @@ else()
         )
 endif()
 
+# Set the output of TARGET to be 
+# - CMAKE_BIN_DIR/lib for libraries
+# - CMAKE_BIN_DIR/bin for BINARIES
+# an additional argument specifies the subdirectory.
+function(set_target_directory_hierarchy TARGET)
+    set_target_properties(${TARGET}
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ARGV1}"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ARGV1}"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/${ARGV1}"
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin/${ARGV1}"
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin/${ARGV1}"
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin/${ARGV1}"
+    )
+endfunction()
+
 if (BUILD_APP)
     if (APPLE)
         add_executable(${EXECUTABLE_PROJECT} ${MACOS_BUNDLE_ICON_FILE} main.cpp)
@@ -642,15 +658,7 @@ if (BUILD_APP)
 
     target_link_libraries(${EXECUTABLE_PROJECT} PUBLIC ${LIBRARY_PROJECT})
 
-    set_target_properties(${EXECUTABLE_PROJECT}
-        PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin"
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin"
-        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
-        )
+    set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
     if (WIN32)
         if (NOT WINDEPLOYQT_PATH)
@@ -833,6 +841,7 @@ endif ()
 if (BUILD_WITH_CRASHPAD)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_CRASHPAD)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC crashpad::client)
+    set_target_directory_hierarchy(crashpad_handler crashpad)
 endif()
 
 # Configure compiler warnings

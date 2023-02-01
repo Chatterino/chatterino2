@@ -21,12 +21,5 @@
       "name": "openssl",
       "version-string": "1.1.1n"
     }
-  ],
-  "features": {
-    "with-crashpad": {
-      "dependencies": ["crashpad"],
-      "description": "Provide crashpad through vcpkg"
-    }
-  },
-  "default-features": ["with-crashpad"]
+  ]
 }

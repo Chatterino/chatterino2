@@ -150,7 +150,7 @@ else()
 endif()
 
 if (BUILD_WITH_CRASHPAD)
-    find_package(crashpad REQUIRED)
+    add_subdirectory("${CMAKE_SOURCE_DIR}/lib/crashpad" EXCLUDE_FROM_ALL)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
