@@ -23,7 +23,6 @@ PluginsPage::PluginsPage()
     : scrollAreaWidget_(nullptr)
     , dataFrame_(nullptr)
 {
-    qDebug() << "plugins page created";
     LayoutCreator<PluginsPage> layoutCreator(this);
     auto scrollArea = layoutCreator.emplace<QScrollArea>();
 
