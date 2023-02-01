@@ -117,6 +117,8 @@ private:
     // the user's setting is set to Prevent, and the given text goes beyond the Twitch message length limit
     bool shouldPreventInput(const QString &text) const;
 
+    int marginForTheme() const;
+
     Split *const split_;
     ChannelView *const channelView_;
     QPointer<EmotePopup> emotePopup_;

@@ -86,6 +86,8 @@ void SplitInput::initLayout()
         layoutCreator.setLayoutType<QVBoxLayout>().withoutMargin().assign(
             &this->ui_.vbox);
     layout->setSpacing(0);
+    auto marginPx = this->marginForTheme();
+    layout->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
 
     // reply label stuff
     auto replyWrapper =
@@ -226,6 +228,10 @@ void SplitInput::scaleChangedEvent(float scale)
     if (!this->hidden)
     {
         this->setMaximumHeight(this->scaledMaxHeight());
+        if (this->replyThread_ != nullptr)
+        {
+            this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
+        }
     }
     this->ui_.textEdit->setFont(
         app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
@@ -254,8 +260,6 @@ void SplitInput::themeChangedEvent()
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     this->ui_.textEdit->setPalette(placeholderPalette);
 #endif
-    auto marginPx = (this->theme->isLightTheme() ? 4 : 2) * this->scale();
-    this->ui_.vbox->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
 
     this->ui_.emoteButton->getLabel().setStyleSheet("color: #000");
 
@@ -266,6 +270,14 @@ void SplitInput::themeChangedEvent()
     else
     {
         this->ui_.replyLabel->setStyleSheet("color: #ccc");
+    }
+
+    // update vbox
+    auto marginPx = this->marginForTheme();
+    this->ui_.vbox->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
+    if (this->replyThread_ != nullptr)
+    {
+        this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
     }
 }
 
@@ -1039,27 +1051,14 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
-    int s;
-    QColor borderColor;
+    int s = this->marginForTheme();
+    QColor borderColor =
+        this->theme->isLightTheme() ? QColor("#ccc") : QColor("#333");
 
-    if (this->theme->isLightTheme())
-    {
-        s = int(3 * this->scale());
-        borderColor = QColor("#ccc");
-    }
-    else
-    {
-        s = int(1 * this->scale());
-        borderColor = QColor("#333");
-    }
-
-    QMargins removeMargins(s - 1, s - 1, s, s);
     QRect baseRect = this->rect();
-    QRect completeAreaRect = baseRect.marginsRemoved(removeMargins);
-
     QRect inputBoxRect = this->ui_.inputWrapper->geometry();
-    inputBoxRect.setX(completeAreaRect.x());
-    inputBoxRect.setWidth(completeAreaRect.width());
+    inputBoxRect.setX(baseRect.x());
+    inputBoxRect.setWidth(baseRect.width());
 
     painter.fillRect(inputBoxRect, this->theme->splits.input.background);
     painter.setPen(borderColor);
@@ -1068,8 +1067,8 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
     if (this->enableInlineReplying_ && this->replyThread_ != nullptr)
     {
         QRect replyRect = this->ui_.replyWrapper->geometry();
-        replyRect.setX(completeAreaRect.x());
-        replyRect.setWidth(completeAreaRect.width());
+        replyRect.setX(baseRect.x());
+        replyRect.setWidth(baseRect.width());
 
         painter.fillRect(replyRect, this->theme->splits.input.background);
         painter.setPen(borderColor);
@@ -1130,7 +1129,7 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
         this->ui_.replyMessage->setWidth(this->width());
 
         // add spacing between reply box and input box
-        this->ui_.vbox->setSpacing(int(8 * this->scale()));
+        this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
 
         // Only enable reply label if inline replying
         auto replyPrefix = "@" + this->replyThread_->root()->displayName;
@@ -1191,6 +1190,18 @@ bool SplitInput::shouldPreventInput(const QString &text) const
     }
 
     return text.length() > TWITCH_MESSAGE_LIMIT;
+}
+
+int SplitInput::marginForTheme() const
+{
+    if (this->theme->isLightTheme())
+    {
+        return int(3 * this->scale());
+    }
+    else
+    {
+        return int(1 * this->scale());
+    }
 }
 
 }  // namespace chatterino
