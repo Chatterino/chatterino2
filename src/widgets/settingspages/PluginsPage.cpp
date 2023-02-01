@@ -48,11 +48,8 @@ PluginsPage::PluginsPage()
 
         auto *box = this->createCheckBox("Enable plugins",
                                          getSettings()->enableAnyPlugins);
-        QObject::connect(box, &QCheckBox::released, [this, box]() {
-            //using namespace std::chrono_literals;
-            //QTimer::singleShot(10000ms, [this]() {
+        QObject::connect(box, &QCheckBox::released, [this]() {
             this->rebuildContent();
-            //});
         });
         groupLayout->addRow(box);
     }
