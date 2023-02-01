@@ -140,6 +140,7 @@ void PluginController::load(QFileInfo index, QDir pluginDir, PluginMeta meta)
 
     auto pluginName = pluginDir.dirName();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
+
     for (const auto &[codename, other] : this->plugins_)
     {
         if (other->meta.name == meta.name)
@@ -148,8 +149,13 @@ void PluginController::load(QFileInfo index, QDir pluginDir, PluginMeta meta)
             other->isDupeName = true;
         }
     }
-
     this->plugins_.insert({pluginName, std::move(plugin)});
+    if (!this->isEnabled(pluginName))
+    {
+        qCInfo(chatterinoLua) << "Skipping loading" << pluginName << "("
+                              << meta.name << ") because it is disabled";
+        return;
+    }
 
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
