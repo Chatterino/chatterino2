@@ -113,6 +113,8 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "miniaudio",
                        "https://github.com/mackron/miniaudio",
                        ":/licenses/miniaudio.txt");
+            addLicense(form.getElement(), "lua", "https://lua.org",
+                       ":/licenses/lua.txt");
         }
 
         // Attributions
