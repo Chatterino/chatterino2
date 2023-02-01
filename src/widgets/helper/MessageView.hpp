@@ -29,6 +29,7 @@ public:
 protected:
     void paintEvent(QPaintEvent * /*event*/) override;
     void themeChangedEvent() override;
+    void scaleChangedEvent(float /*newScale*/) override;
 
 private:
     void createMessageLayout();

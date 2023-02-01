@@ -84,6 +84,11 @@ void MessageView::themeChangedEvent()
     this->layoutMessage();
 }
 
+void MessageView::scaleChangedEvent(float /*newScale*/)
+{
+    this->layoutMessage();
+}
+
 void MessageView::maybeUpdate()
 {
     if (this->messageLayout_ != nullptr)
