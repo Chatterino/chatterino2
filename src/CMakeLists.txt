@@ -819,15 +819,15 @@ if (WinToast_FOUND)
 endif ()
 
 target_link_libraries(${LIBRARY_PROJECT}
-    PUBLIC
-    ${Boost_LIBRARIES}
-    )
+        PUBLIC
+        ${Boost_LIBRARIES}
+        )
 
 target_link_libraries(${LIBRARY_PROJECT}
-    PUBLIC
-    OpenSSL::SSL
-    OpenSSL::Crypto
-    )
+        PUBLIC
+        OpenSSL::SSL
+        OpenSSL::Crypto
+        )
 
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${RapidJSON_INCLUDE_DIRS})
 

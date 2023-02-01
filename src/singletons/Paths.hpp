@@ -28,9 +28,6 @@ public:
     // Directory for crashdumps. Same as <appDataDirectory>/Crashes
     QString crashdumpDirectory;
 
-    // Directory for crashpad metrics. Same as <appDataDirectory>/CrashMetrics
-    QString crashMetricsDirectory;
-
     // Hash of QCoreApplication::applicationFilePath()
     QString applicationFilePathHash;
 

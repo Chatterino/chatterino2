@@ -403,7 +403,6 @@ QString TwitchChannel::prepareMessage(const QString &message) const
 void TwitchChannel::sendMessage(const QString &message)
 {
     auto app = getApp();
-
     if (!app->accounts->twitch.isLoggedIn())
     {
         if (!message.isEmpty())

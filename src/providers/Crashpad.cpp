@@ -13,7 +13,15 @@
 
 namespace {
 
+/// The name of the crashpad handler executable.
+/// This varies across platforms
+#    if defined(Q_OS_UNIX)
+const QString CRASHPAD_EXECUTABLE_NAME = QStringLiteral("crashpad_handler");
+#    elif defined(Q_OS_WINDOWS)
 const QString CRASHPAD_EXECUTABLE_NAME = QStringLiteral("crashpad_handler.exe");
+#    else
+#        error Unsupported platform
+#    endif
 
 /// Converts a QString into the platform string representation.
 #    if defined(Q_OS_UNIX)
@@ -36,6 +44,15 @@ namespace chatterino {
 
 std::unique_ptr<crashpad::CrashpadClient> installCrashHandler()
 {
+    // Currently, the following directory layout is assumed:
+    // [applicationDirPath]
+    //  │
+    //  ├─chatterino
+    //  │
+    //  ╰─[crashpad]
+    //     │
+    //     ╰─crashpad_handler
+    // TODO: The location of the binary might vary across platforms
     auto crashpadBinDir = QDir(QApplication::applicationDirPath());
 
     if (!crashpadBinDir.cd("crashpad"))
@@ -52,14 +69,17 @@ std::unique_ptr<crashpad::CrashpadClient> installCrashHandler()
     const auto handlerPath = base::FilePath(nativeString(
         crashpadBinDir.absoluteFilePath(CRASHPAD_EXECUTABLE_NAME)));
 
-    const auto reportsDir =
+    // Argument passed in --database
+    // > Crash reports are written to this database, and if uploads are enabled,
+    //   uploaded from this database to a crash report collection server.
+    const auto databaseDir =
         base::FilePath(nativeString(getPaths()->crashdumpDirectory));
-    const auto metricsDir =
-        base::FilePath(nativeString(getPaths()->crashMetricsDirectory));
 
     auto client = std::make_unique<crashpad::CrashpadClient>();
 
-    if (!client->StartHandler(handlerPath, reportsDir, metricsDir, {}, {}, {},
+    // See https://chromium.googlesource.com/crashpad/crashpad/+/HEAD/handler/crashpad_handler.md
+    // for documentation on available options.
+    if (!client->StartHandler(handlerPath, databaseDir, {}, {}, {}, {},
                               true, false))
     {
         qCDebug(chatterinoApp) << "Failed to start crashpad handler";
