@@ -79,8 +79,8 @@ std::unique_ptr<crashpad::CrashpadClient> installCrashHandler()
 
     // See https://chromium.googlesource.com/crashpad/crashpad/+/HEAD/handler/crashpad_handler.md
     // for documentation on available options.
-    if (!client->StartHandler(handlerPath, databaseDir, {}, {}, {}, {},
-                              true, false))
+    if (!client->StartHandler(handlerPath, databaseDir, {}, {}, {}, {}, true,
+                              false))
     {
         qCDebug(chatterinoApp) << "Failed to start crashpad handler";
         return nullptr;

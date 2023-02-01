@@ -1,6 +1,7 @@
 #include "BrowserExtension.hpp"
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "providers/Crashpad.hpp"
 #include "providers/IvrApi.hpp"
@@ -16,6 +17,7 @@
 #include <QStringList>
 
 #include <memory>
+
 
 using namespace chatterino;
 
