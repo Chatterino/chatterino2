@@ -18,7 +18,6 @@
 
 #include <memory>
 
-
 using namespace chatterino;
 
 int main(int argc, char **argv)
