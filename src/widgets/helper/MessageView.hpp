@@ -28,6 +28,7 @@ public:
 
 protected:
     void paintEvent(QPaintEvent * /*event*/) override;
+    void themeChangedEvent() override;
 
 private:
     void createMessageLayout();

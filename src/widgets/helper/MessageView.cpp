@@ -79,6 +79,11 @@ void MessageView::paintEvent(QPaintEvent * /*event*/)
                                 false, windowFocused, false);
 }
 
+void MessageView::themeChangedEvent()
+{
+    this->layoutMessage();
+}
+
 void MessageView::maybeUpdate()
 {
     if (this->messageLayout_ != nullptr)
@@ -101,6 +106,7 @@ void MessageView::layoutMessage()
     if (updateRequired)
     {
         this->setFixedSize(this->width_, this->messageLayout_->getHeight());
+        this->update();
     }
 }
 
