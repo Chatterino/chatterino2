@@ -341,7 +341,13 @@ static const luaL_Reg C2LIB[] = {
 void PluginController::loadChatterinoLib(lua_State *L)
 {
     lua_pushglobaltable(L);
+    auto global = lua_gettop(L);
+
+    // count of elements in C2LIB - 1 (to account for terminator)
+    lua::pushEmptyTable(L, 3);
+
     luaL_setfuncs(L, C2LIB, 0);
+    lua_setfield(L, global, "c2");
 }
 
 bool PluginController::isEnabled(const QString &codename)
