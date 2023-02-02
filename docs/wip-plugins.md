@@ -4,6 +4,43 @@ If Chatterino is compiled with the `CHATTERINO_PLUGINS` CMake option, it can
 load and execute Lua files. Note that while there are attempts at making this
 decently safe, we cannot guarantee safety.
 
+## Plugin structure
+
+Chatterino searches for plugins in the `Plugins` directory in the app data, right next to `Settings` and `Logs`.
+
+Each plugin should have its own directory.
+
+```
+Chatterino dir/
+└── plugin_name/
+    ├── index.lua
+    └── info.json
+```
+
+`index.lua` will be the file loaded when the plugin is enabled. You may load other files using `loadfile` Lua global function.
+
+`info.json` contains metadata about the plugin, like its name, description,
+authors, homepage link, tags, version, license name. The version field **must**
+be [semver 2.0](https://semver.org/) compliant. The general idea of `info.json`
+will not change however the exact contents probably will, for example with
+permission system ideas.
+Example file:
+```json
+{
+    "name": "Test plugin",
+    "description": "This plugin is for testing stuff.",
+    "authors": "Mm2PL",
+    "homepage": "https://github.com/Chatterino/Chatterino2",
+    "tags": [
+        "test"
+    ],
+    "version": "0.0.0",
+    "license": "MIT"
+}
+```
+
+An example plugin is available at [https://github.com/Mm2PL/Chatterino-test-plugin](https://github.com/Mm2PL/Chatterino-test-plugin)
+
 ## API
 
 The following parts of the Lua standard library are loaded:
