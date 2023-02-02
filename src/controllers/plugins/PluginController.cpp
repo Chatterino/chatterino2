@@ -304,12 +304,13 @@ int luaC2RegisterCommand(lua_State *L)
 
     auto callbackSavedName = QString("c2commandcb-%1").arg(name);
     lua_setfield(L, LUA_REGISTRYINDEX, callbackSavedName.toStdString().c_str());
-    pl->registerCommand(name, callbackSavedName);
+    auto ok = pl->registerCommand(name, callbackSavedName);
 
     // delete both name and callback
     lua_pop(L, 2);
 
-    return 0;
+    lua::push(L, ok);
+    return 1;
 }
 int luaC2SendMsg(lua_State *L)
 {
