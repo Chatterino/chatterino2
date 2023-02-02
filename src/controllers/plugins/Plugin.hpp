@@ -26,8 +26,6 @@ struct PluginMeta {
 
     std::vector<QString> tags;
 
-    std::set<QString> libraryPermissions;
-
     explicit PluginMeta(const QJsonObject &obj)
         : name(obj.value("name").toString("A Plugin with no name"))
         , description(obj.value("description").toString("Nothing here"))
@@ -51,17 +49,6 @@ struct PluginMeta {
         {
             this->tags.push_back(t.toString());
         }
-        for (const auto &t : obj.value("library_permissions").toArray())
-        {
-            this->libraryPermissions.insert(t.toString());
-        }
-    }
-
-    bool hasDangerousLibraries()
-    {
-        const auto *perms = &this->libraryPermissions;
-        return perms->contains("io") || perms->contains("package") ||
-               perms->contains("os");
     }
 };
 
