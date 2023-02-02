@@ -101,7 +101,9 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
     this->load(index, pluginDir, PluginMeta(doc.object()));
     return true;
 }
-void PluginController::openLibrariesFor(lua_State *L, PluginMeta meta)
+
+void PluginController::openLibrariesFor(lua_State *L,
+                                        const PluginMeta & /*meta*/)
 {
     // Stuff to change, remove or hide behind a permission system:
     static const std::vector<luaL_Reg> loadedlibs = {
@@ -135,12 +137,13 @@ void PluginController::openLibrariesFor(lua_State *L, PluginMeta meta)
     }
 }
 
-void PluginController::load(QFileInfo index, QDir pluginDir, PluginMeta meta)
+void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
+                            const PluginMeta &meta)
 {
     qCDebug(chatterinoLua) << "Running lua file" << index;
     lua_State *l = luaL_newstate();
-    this->openLibrariesFor(l, meta);
-    this->loadChatterinoLib(l);
+    PluginController::openLibrariesFor(l, meta);
+    PluginController::loadChatterinoLib(l);
 
     auto pluginName = pluginDir.dirName();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
@@ -154,7 +157,7 @@ void PluginController::load(QFileInfo index, QDir pluginDir, PluginMeta meta)
         }
     }
     this->plugins_.insert({pluginName, std::move(plugin)});
-    if (!this->isEnabled(pluginName))
+    if (!PluginController::isEnabled(pluginName))
     {
         qCInfo(chatterinoLua) << "Skipping loading" << pluginName << "("
                               << meta.name << ") because it is disabled";
@@ -189,7 +192,7 @@ bool PluginController::reload(const QString &codename)
         getApp()->commands->unregisterPluginCommand(cmd);
     }
     it->second->ownedCommands.clear();
-    if (this->isEnabled(codename))
+    if (PluginController::isEnabled(codename))
     {
         QDir loadDir = it->second->loadDirectory_;
         this->plugins_.erase(codename);
@@ -209,7 +212,8 @@ void PluginController::callEvery(const QString &functionName)
 
 void PluginController::callEveryWithArgs(
     const QString &functionName, int count,
-    std::function<void(const std::unique_ptr<Plugin> &pl, lua_State *L)> argCb)
+    const std::function<void(const std::unique_ptr<Plugin> &pl, lua_State *L)>
+        &argCb)
 {
     for (const auto &[name, plugin] : this->plugins_)
     {
