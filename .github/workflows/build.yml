@@ -24,11 +24,28 @@ jobs:
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
         force-lto: [false]
+        plugins: [false]
         include:
           - os: ubuntu-20.04
             qt-version: 5.15.2
             pch: false
             force-lto: true
+          - os: ubuntu-20.04
+            qt-version: 5.15.2
+            pch: true
+            force-lto: false
+            plugins: true
+          - os: windows-latest
+            qt-version: 5.15.2
+            pch: true
+            force-lto: false
+            plugins: true
+          - os: macos-latest
+            qt-version: 5.15.2
+            pch: true
+            force-lto: false
+            plugins: true
+
       fail-fast: false
 
     steps:
@@ -36,6 +53,12 @@ jobs:
         if: matrix.force-lto == true
         run: |
           echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Enable plugin support
+        if: matrix.plugins == true
+        run: |
+          echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Set environment variables for windows-latest
@@ -102,6 +125,7 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
+              -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
               ..
           set cl=/MP
           nmake /S /NOLOGO
@@ -111,10 +135,17 @@ jobs:
           7z a chatterino-windows-x86-64.zip Chatterino2/
 
       - name: Upload artifact (Windows)
-        if: startsWith(matrix.os, 'windows')
+        if: startsWith(matrix.os, 'windows') && matrix.plugins == false
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}.zip
+          path: build/chatterino-windows-x86-64.zip
+
+      - name: Upload artifact (Windows, plugins)
+        if: startsWith(matrix.os, 'windows') && matrix.plugins == true
+        uses: actions/upload-artifact@v3
+        with:
+          name: chatterino-windows-x86-64-${{ matrix.qt-version }}-plugins.zip
           path: build/chatterino-windows-x86-64.zip
 
       - name: Clean Conan pkgs
@@ -160,6 +191,7 @@ jobs:
             -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+            -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
             ..
           make -j"$(nproc)"
         shell: bash
@@ -197,17 +229,31 @@ jobs:
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.plugins == false
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
+      - name: Upload artifact - AppImage (Ubuntu, plugins)
+        if: startsWith(matrix.os, 'ubuntu') && matrix.plugins == true
+        uses: actions/upload-artifact@v3
+        with:
+          name: Chatterino-x86_64-${{ matrix.qt-version }}-plugins.AppImage
+          path: build/Chatterino-x86_64.AppImage
+
       - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.plugins == false
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-${{ matrix.qt-version }}.deb
+          path: build/Chatterino-x86_64.deb
+
+      - name: Upload artifact - .deb (Ubuntu, plugins)
+        if: startsWith(matrix.os, 'ubuntu') && matrix.plugins == true
+        uses: actions/upload-artifact@v3
+        with:
+          name: Chatterino-${{ matrix.qt-version }}-plugins.deb
           path: build/Chatterino-x86_64.deb
 
       # MACOS
@@ -228,6 +274,7 @@ jobs:
               -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
               -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+              -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
@@ -243,12 +290,18 @@ jobs:
         shell: bash
 
       - name: Upload artifact (MacOS)
-        if: startsWith(matrix.os, 'macos')
+        if: startsWith(matrix.os, 'macos') && matrix.plugins == false
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-osx-${{ matrix.qt-version }}.dmg
           path: build/chatterino-osx.dmg
 
+      - name: Upload artifact (MacOS, plugins)
+        if: startsWith(matrix.os, 'macos') && matrix.plugins == true
+        uses: actions/upload-artifact@v3
+        with:
+          name: chatterino-osx-${{ matrix.qt-version }}.dmg
+          path: build/chatterino-osx.dmg
   create-release:
     needs: build
     runs-on: ubuntu-latest
