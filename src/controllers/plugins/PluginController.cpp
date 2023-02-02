@@ -1,28 +1,26 @@
 #include "PluginController.hpp"
+#ifdef CHATTERINO_HAVE_PLUGINS
 
-#include "Application.hpp"
-#include "common/QLogging.hpp"
-#include "controllers/commands/CommandContext.hpp"
-#include "controllers/plugins/LuaUtilities.hpp"
-#include "messages/MessageBuilder.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Paths.hpp"
-#include "singletons/Settings.hpp"
-#include "singletons/WindowManager.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/splits/Split.hpp"
-#include "widgets/Window.hpp"
+#    include "Application.hpp"
+#    include "common/QLogging.hpp"
+#    include "controllers/commands/CommandContext.hpp"
+#    include "controllers/plugins/LuaUtilities.hpp"
+#    include "lauxlib.h"
+#    include "lua.h"
+#    include "lualib.h"
+#    include "messages/MessageBuilder.hpp"
+#    include "providers/twitch/TwitchIrcServer.hpp"
+#    include "singletons/Paths.hpp"
+#    include "singletons/Settings.hpp"
+#    include "singletons/WindowManager.hpp"
+#    include "widgets/Notebook.hpp"
+#    include "widgets/splits/Split.hpp"
+#    include "widgets/Window.hpp"
 
-#include <QJsonDocument>
+#    include <QJsonDocument>
 
-#include <memory>
-#include <utility>
-
-//extern "C" {
-#include "lauxlib.h"
-#include "lua.h"
-#include "lualib.h"
-//}
+#    include <memory>
+#    include <utility>
 
 namespace chatterino {
 
@@ -362,3 +360,4 @@ bool PluginController::isEnabled(const QString &codename)
 }
 
 };  // namespace chatterino
+#endif

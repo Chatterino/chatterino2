@@ -3220,7 +3220,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     return text;
 }
-
+#ifdef CHATTERINO_HAVE_PLUGINS
 bool CommandController::registerPluginCommand(const QString &commandName)
 {
     if (this->commands_.contains(commandName))
@@ -3244,6 +3244,7 @@ bool CommandController::unregisterPluginCommand(const QString &commandName)
     this->pluginCommands_.removeAll(commandName);
     return this->commands_.erase(commandName) != 0;
 }
+#endif
 
 void CommandController::registerCommand(const QString &commandName,
                                         CommandFunctionVariants commandFunction)

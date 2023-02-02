@@ -1,11 +1,12 @@
 #pragma once
-#include "util/LayoutCreator.hpp"
-#include "widgets/settingspages/SettingsPage.hpp"
+#ifdef CHATTERINO_HAVE_PLUGINS
+#    include "util/LayoutCreator.hpp"
+#    include "widgets/settingspages/SettingsPage.hpp"
 
-#include <QDebug>
-#include <QFormLayout>
-#include <QGroupBox>
-#include <QWidget>
+#    include <QDebug>
+#    include <QFormLayout>
+#    include <QGroupBox>
+#    include <QWidget>
 
 namespace chatterino {
 class Plugin;
@@ -23,3 +24,4 @@ private:
     QFrame *dataFrame_;
 };
 }  // namespace chatterino
+#endif

@@ -1,10 +1,11 @@
 #pragma once
 
-#include "lua.h"
+#ifdef CHATTERINO_HAVE_PLUGINS
+#    include "lua.h"
 
-#include <qlist.h>
+#    include <qlist.h>
 
-#include <vector>
+#    include <vector>
 struct lua_State;
 class QJsonObject;
 namespace chatterino {
@@ -73,3 +74,4 @@ bool pop(lua_State *L, T *out, StackIdx idx = -1)
 }
 
 }  // namespace chatterino::lua
+#endif

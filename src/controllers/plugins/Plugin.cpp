@@ -1,4 +1,5 @@
 #include "Plugin.hpp"
+#ifdef CHATTERINO_HAVE_PLUGINS
 
 namespace chatterino {
 bool Plugin::registerCommand(const QString &name, const QString &functionName)
@@ -27,3 +28,4 @@ std::set<QString> Plugin::listRegisteredCommands()
     return out;
 }
 }  // namespace chatterino
+#endif

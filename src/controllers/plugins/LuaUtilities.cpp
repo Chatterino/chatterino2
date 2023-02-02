@@ -1,12 +1,13 @@
 #include "LuaUtilities.hpp"
+#ifdef CHATTERINO_HAVE_PLUGINS
 
-#include "common/Channel.hpp"
-#include "controllers/commands/CommandContext.hpp"
-#include "lauxlib.h"
-#include "lua.h"
+#    include "common/Channel.hpp"
+#    include "controllers/commands/CommandContext.hpp"
+#    include "lauxlib.h"
+#    include "lua.h"
 
-#include <climits>
-#include <cstdlib>
+#    include <climits>
+#    include <cstdlib>
 
 namespace chatterino::lua {
 
@@ -109,3 +110,4 @@ bool peek(lua_State *L, QString *out, StackIdx idx)
     return true;
 }
 }  // namespace chatterino::lua
+#endif

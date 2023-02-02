@@ -625,8 +625,10 @@ target_link_libraries(${LIBRARY_PROJECT}
         RapidJSON::RapidJSON
         LRUCache
         MagicEnum
-        lua
         )
+if (CHATTERINO_PLUGINS)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua)
+endif()
 
 if (BUILD_WITH_QTKEYCHAIN)
     target_link_libraries(${LIBRARY_PROJECT}
