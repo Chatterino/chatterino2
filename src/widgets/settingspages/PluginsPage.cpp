@@ -106,7 +106,7 @@ void PluginsPage::rebuildContent()
         pl->addRow("Commands", new QLabel(cmds));
 
         QString enableOrDisableStr = "Enable";
-        if (getApp()->plugins->isEnabled(codename))
+        if (PluginController::isEnabled(codename))
         {
             enableOrDisableStr = "Disable";
         }
@@ -116,7 +116,7 @@ void PluginsPage::rebuildContent()
             enableDisable, &QPushButton::pressed, [name = codename, this]() {
                 std::vector<QString> val =
                     getSettings()->enabledPlugins.getValue();
-                if (getApp()->plugins->isEnabled(name))
+                if (PluginController::isEnabled(name))
                 {
                     val.erase(std::remove(val.begin(), val.end(), name),
                               val.end());

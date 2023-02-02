@@ -30,8 +30,8 @@ public:
     void callEvery(const QString &functionName);
     void callEveryWithArgs(
         const QString &functionName, int count,
-        std::function<void(const std::unique_ptr<Plugin> &pl, lua_State *L)>
-            argCb);
+        const std::function<void(const std::unique_ptr<Plugin> &pl,
+                                 lua_State *L)> &argCb);
 
     QString tryExecPluginCommand(const QString &commandName,
                                  const CommandContext &ctx);
@@ -56,15 +56,16 @@ public:
     }
 
     bool reload(const QString &codename);
-    bool isEnabled(const QString &codename);
+    static bool isEnabled(const QString &codename);
 
 private:
     void actuallyInitialize();
-    void load(QFileInfo index, QDir pluginDir, PluginMeta meta);
-    void loadChatterinoLib(lua_State *l);
+    void load(const QFileInfo &index, const QDir &pluginDir,
+              const PluginMeta &meta);
 
     // This function adds lua standard libraries into the state
-    void openLibrariesFor(lua_State *L, PluginMeta meta);
+    static void openLibrariesFor(lua_State *L, const PluginMeta & /*meta*/);
+    static void loadChatterinoLib(lua_State *l);
     bool tryLoadFromDir(const QDir &pluginDir);
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
 };
