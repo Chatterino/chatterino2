@@ -113,8 +113,10 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "miniaudio",
                        "https://github.com/mackron/miniaudio",
                        ":/licenses/miniaudio.txt");
+#ifdef CHATTERINO_HAVE_PLUGINS
             addLicense(form.getElement(), "lua", "https://lua.org",
                        ":/licenses/lua.txt");
+#endif
         }
 
         // Attributions

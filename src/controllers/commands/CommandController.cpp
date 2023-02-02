@@ -12,7 +12,6 @@
 #include "controllers/commands/CommandModel.hpp"
 #include "controllers/plugins/PluginController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
-#include "lua.h"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
@@ -51,6 +50,10 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QUrl>
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+#    include "lua.h"
+#endif
 
 namespace {
 
