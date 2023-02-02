@@ -1,21 +1,22 @@
 #include "PluginsPage.hpp"
+#ifdef CHATTERINO_HAVE_PLUGINS
 
-#include "Application.hpp"
-#include "controllers/plugins/PluginController.hpp"
-#include "singletons/Paths.hpp"
-#include "singletons/Settings.hpp"
-#include "util/Helpers.hpp"
-#include "util/LayoutCreator.hpp"
-#include "util/RemoveScrollAreaBackground.hpp"
+#    include "Application.hpp"
+#    include "controllers/plugins/PluginController.hpp"
+#    include "singletons/Paths.hpp"
+#    include "singletons/Settings.hpp"
+#    include "util/Helpers.hpp"
+#    include "util/LayoutCreator.hpp"
+#    include "util/RemoveScrollAreaBackground.hpp"
 
-#include <QCheckBox>
-#include <QFormLayout>
-#include <QGroupBox>
-#include <QLabel>
-#include <qobject.h>
-#include <QObject>
-#include <QPushButton>
-#include <QWidget>
+#    include <QCheckBox>
+#    include <QFormLayout>
+#    include <QGroupBox>
+#    include <QLabel>
+#    include <qobject.h>
+#    include <QObject>
+#    include <QPushButton>
+#    include <QWidget>
 
 namespace chatterino {
 
@@ -163,3 +164,4 @@ void PluginsPage::rebuildContent()
 }
 
 }  // namespace chatterino
+#endif

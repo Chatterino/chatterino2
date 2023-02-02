@@ -1,20 +1,22 @@
 #pragma once
 
-#include "common/Singleton.hpp"
-#include "controllers/plugins/Plugin.hpp"
-#include "singletons/Paths.hpp"
+#ifdef CHATTERINO_HAVE_PLUGINS
 
-#include <QDir>
-#include <QFileInfo>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QString>
+#    include "common/Singleton.hpp"
+#    include "controllers/plugins/Plugin.hpp"
+#    include "singletons/Paths.hpp"
 
-#include <algorithm>
-#include <map>
-#include <memory>
-#include <utility>
-#include <vector>
+#    include <QDir>
+#    include <QFileInfo>
+#    include <QJsonArray>
+#    include <QJsonObject>
+#    include <QString>
+
+#    include <algorithm>
+#    include <map>
+#    include <memory>
+#    include <utility>
+#    include <vector>
 
 struct lua_State;
 
@@ -68,3 +70,4 @@ private:
 };
 
 };  // namespace chatterino
+#endif
