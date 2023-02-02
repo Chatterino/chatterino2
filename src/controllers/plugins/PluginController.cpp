@@ -103,29 +103,35 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
 }
 void PluginController::openLibrariesFor(lua_State *L, PluginMeta meta)
 {
-    // copied from linit.c
-    // NOLINTNEXTLINE
+    // Stuff to change, remove or hide behind a permission system:
     static const std::vector<luaL_Reg> loadedlibs = {
         luaL_Reg{LUA_GNAME, luaopen_base},
-        luaL_Reg{LUA_LOADLIBNAME, luaopen_package},
-        luaL_Reg{LUA_COLIBNAME, luaopen_coroutine},
+        // - print - writes to stdout, should be replaced with a per-plugin log
+        // - load, loadstring, loadfile, dofile - don't allow bytecode, *require* valid utf8 (which bytecode by design isn't)
+
+        // luaL_Reg{LUA_LOADLIBNAME, luaopen_package},
+        // - explicit fs access, probably best to make our own require() function
+
+        //luaL_Reg{LUA_COLIBNAME, luaopen_coroutine},
+        // - needs special support
         luaL_Reg{LUA_TABLIBNAME, luaopen_table},
-        luaL_Reg{LUA_IOLIBNAME, luaopen_io},
-        luaL_Reg{LUA_OSLIBNAME, luaopen_os},
+        // luaL_Reg{LUA_IOLIBNAME, luaopen_io},
+        // - explicit fs access, needs wrapper with permissions, no usage ideas yet
+        // luaL_Reg{LUA_OSLIBNAME, luaopen_os},
+        // - fs access
+        // - environ access
+        // - exit
         luaL_Reg{LUA_STRLIBNAME, luaopen_string},
         luaL_Reg{LUA_MATHLIBNAME, luaopen_math},
         luaL_Reg{LUA_UTF8LIBNAME, luaopen_utf8},
-        luaL_Reg{LUA_DBLIBNAME, luaopen_debug},
-        luaL_Reg{NULL, NULL},
+        // luaL_Reg{LUA_DBLIBNAME, luaopen_debug},
+        // - this allows the plugin developer to unleash all hell
     };
 
     for (const auto &reg : loadedlibs)
     {
-        if (meta.libraryPermissions.contains(QString(reg.name)))
-        {
-            luaL_requiref(L, reg.name, reg.func, int(true));
-            lua_pop(L, 1);
-        }
+        luaL_requiref(L, reg.name, reg.func, int(true));
+        lua_pop(L, 1);
     }
 }
 

@@ -93,28 +93,6 @@ void PluginsPage::rebuildContent()
         pl->addRow("Homepage", homepage);
         pl->addRow("License", new QLabel(plugin->meta.license));
 
-        QString libString;
-        for (const auto &library : plugin->meta.libraryPermissions)
-        {
-            if (!libString.isEmpty())
-            {
-                libString += ", ";
-            }
-            libString += library;
-        }
-        bool hasDangerous = plugin->meta.hasDangerousLibraries();
-        if (hasDangerous)
-        {
-            libString += "\nDetected potentially dangerous libraries used, be "
-                         "careful with this plugin";
-        }
-        auto *libs = new QLabel(libString);
-        if (hasDangerous)
-        {
-            libs->setStyleSheet("color: red");
-        }
-        pl->addRow("Used libraries", libs);
-
         QString cmds;
         for (const auto &cmdName : plugin->listRegisteredCommands())
         {
