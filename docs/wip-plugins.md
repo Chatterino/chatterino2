@@ -25,17 +25,16 @@ be [semver 2.0](https://semver.org/) compliant. The general idea of `info.json`
 will not change however the exact contents probably will, for example with
 permission system ideas.
 Example file:
+
 ```json
 {
-    "name": "Test plugin",
-    "description": "This plugin is for testing stuff.",
-    "authors": "Mm2PL",
-    "homepage": "https://github.com/Chatterino/Chatterino2",
-    "tags": [
-        "test"
-    ],
-    "version": "0.0.0",
-    "license": "MIT"
+  "name": "Test plugin",
+  "description": "This plugin is for testing stuff.",
+  "authors": "Mm2PL",
+  "homepage": "https://github.com/Chatterino/Chatterino2",
+  "tags": ["test"],
+  "version": "0.0.0",
+  "license": "MIT"
 }
 ```
 
@@ -44,11 +43,12 @@ An example plugin is available at [https://github.com/Mm2PL/Chatterino-test-plug
 ## API
 
 The following parts of the Lua standard library are loaded:
- - `_G` (all globals)
- - `table`
- - `string`
- - `math`
- - `utf8`
+
+- `_G` (all globals)
+- `table`
+- `string`
+- `math`
+- `utf8`
 
 The official manual for them is available [here](https://www.lua.org/manual/5.4/manual.html#6).
 
@@ -63,6 +63,7 @@ Returns `true` if everything went ok, `false` if there already exists another
 command with this name.
 
 Example:
+
 ```lua
 function cmdWords(ctx)
     -- ctx contains:
@@ -75,15 +76,17 @@ c2.register_command("/wordsl", cmdWords)
 ```
 
 Limitations/known issues:
- - commands registered in functions, not in the global scope might not show up in the settings UI,
-   rebuilding the window content caused by reloading another plugin will solve this
- - spaces in command names aren't handled very well (https://github.com/Chatterino/chatterino2/issues/1517)
+
+- commands registered in functions, not in the global scope might not show up in the settings UI,
+  rebuilding the window content caused by reloading another plugin will solve this
+- spaces in command names aren't handled very well (https://github.com/Chatterino/chatterino2/issues/1517)
 
 ### `send_msg(channel, text)`
 
 Sends a message to `channel` with the specified text. Also executes commands.
 
 Example:
+
 ```
 function cmdShout(ctx)
     table.remove(ctx.words, 1)
@@ -94,7 +97,8 @@ c2.register_command("/shout", cmdShout)
 ```
 
 Limitations/Known issues:
- - it is possible to trigger your own Lua command with this causing a potentially infinite loop
+
+- it is possible to trigger your own Lua command with this causing a potentially infinite loop
 
 ### `system_msg(channel, text)`
 
@@ -104,10 +108,10 @@ throw an error if the number of arguments received doesn't match what it
 expects.
 
 Example:
+
 ```lua
 local ok = c2.system_msg("pajlada", "test")
 if (not ok)
     -- channel not found
 end
 ```
-
