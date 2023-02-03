@@ -121,16 +121,6 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->loadRecentMessagesReconnect();
     });
 
-    this->destroyed.connect([this]() {
-        getApp()->twitch->dropSeventvChannel(this->seventvUserID_,
-                                             this->seventvEmoteSetID_);
-
-        if (getApp()->twitch->bttvLiveUpdates)
-        {
-            getApp()->twitch->bttvLiveUpdates->partChannel(this->roomId());
-        }
-    });
-
     this->messageRemovedFromStart.connect([this](MessagePtr &msg) {
         if (msg->replyThread)
         {
@@ -167,6 +157,17 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->addMessage(makeSystemMessage("asef"));
     }
 #endif
+}
+
+TwitchChannel::~TwitchChannel()
+{
+    getApp()->twitch->dropSeventvChannel(this->seventvUserID_,
+                                         this->seventvEmoteSetID_);
+
+    if (getApp()->twitch->bttvLiveUpdates)
+    {
+        getApp()->twitch->bttvLiveUpdates->partChannel(this->roomId());
+    }
 }
 
 void TwitchChannel::initialize()

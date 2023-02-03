@@ -102,6 +102,7 @@ public:
     };
 
     explicit TwitchChannel(const QString &channelName);
+    ~TwitchChannel() override;
 
     void initialize();
 
