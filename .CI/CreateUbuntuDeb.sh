@@ -33,7 +33,7 @@ Priority: optional
 Architecture: amd64
 Maintainer: Mm2PL <mm2pl@kotmisia.pl>
 Description: Testing out chatterino as a Ubuntu package
-Depends: libboost-filesystem-dev, libxcb-xinerama0, libdbus-1-3
+Depends: libboost-filesystem-dev, libxcb-xinerama0
 EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 cat >> "$packaging_dir/DEBIAN/postinst" << EOF
@@ -41,8 +41,8 @@ export LD_LIBRARY_PATH=/lib/qt/Qt/5.15.2/gcc_64/lib:"$LD_LIBRARY_PATH"
 EOF
 chmod 555 "$packaging_dir/DEBIAN/postinst"
 
-cp -R ./appdir/usr/bin $packaging_dir/usr/bin
-cp -R ./appdir/usr/share $packaging_dir/usr/share
+# cp -R ./appdir/usr/bin $packaging_dir/usr/bin
+# cp -R ./appdir/usr/share $packaging_dir/usr/share
 # echo "Running make install in package dir"
 # DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
 # DESTDIR="$packaging_dir" make -j"$(nproc)" install; find "$packaging_dir/"
