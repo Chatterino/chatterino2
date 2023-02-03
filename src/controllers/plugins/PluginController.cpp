@@ -1,13 +1,11 @@
 #include "PluginController.hpp"
-#ifdef CHATTERINO_HAVE_PLUGINS
 
+#ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
+#    include "controllers/plugins/ApiChatterino.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
-#    include "lauxlib.h"
-#    include "lua.h"
-#    include "lualib.h"
 #    include "messages/MessageBuilder.hpp"
 #    include "providers/twitch/TwitchIrcServer.hpp"
 #    include "singletons/Paths.hpp"
@@ -16,6 +14,11 @@
 #    include "widgets/Notebook.hpp"
 #    include "widgets/splits/Split.hpp"
 #    include "widgets/Window.hpp"
+
+// lua stuff
+#    include "lauxlib.h"
+#    include "lua.h"
+#    include "lualib.h"
 
 #    include <QJsonDocument>
 
@@ -135,6 +138,41 @@ void PluginController::openLibrariesFor(lua_State *L,
         luaL_requiref(L, reg.name, reg.func, int(true));
         lua_pop(L, 1);
     }
+
+    // NOLINTNEXTLINE
+    static const luaL_Reg C2LIB[] = {
+        {"system_msg", lua::api::c2_system_msg},
+        {"register_command", lua::api::c2_register_command},
+        {"send_msg", lua::api::c2_send_msg},
+        {nullptr, nullptr},
+    };
+    lua_pushglobaltable(L);
+    auto global = lua_gettop(L);
+
+    // count of elements in C2LIB - 1 (to account for terminator)
+    lua::pushEmptyTable(L, 3);
+
+    luaL_setfuncs(L, C2LIB, 0);
+    lua_setfield(L, global, "c2");
+
+    // ban functions
+    // Note: this might not be fully secure? some kind of metatable fuckery might come up?
+
+    lua_pushglobaltable(L);
+    auto gtable = lua_gettop(L);
+    lua_getfield(L, gtable, "load");
+
+    // possibly randomize this name at runtime to prevent some attacks?
+    lua_setfield(L, LUA_REGISTRYINDEX, "real_load");
+
+    // NOLINTNEXTLINE
+    static const luaL_Reg replacementFuncs[] = {
+        {"load", lua::api::g_load},
+        {nullptr, nullptr},
+    };
+    luaL_setfuncs(L, replacementFuncs, 0);
+
+    lua_pop(L, 1);
 }
 
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
@@ -143,7 +181,6 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     qCDebug(chatterinoLua) << "Running lua file" << index;
     lua_State *l = luaL_newstate();
     PluginController::openLibrariesFor(l, meta);
-    PluginController::loadChatterinoLib(l);
 
     auto pluginName = pluginDir.dirName();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
@@ -252,111 +289,6 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
         << "yet a call to execute it came in";
     assert(false && "missing plugin command owner");
     return "";
-}
-
-extern "C" {
-
-int luaC2SystemMsg(lua_State *L)
-{
-    if (lua_gettop(L) != 2)
-    {
-        qCDebug(chatterinoLua) << "system_msg: need 2 args";
-        luaL_error(L, "need exactly 2 arguments");  // NOLINT
-        lua::push(L, false);
-        return 1;
-    }
-    QString channel;
-    QString text;
-    lua::pop(L, &text);
-    lua::pop(L, &channel);
-    const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
-    if (chn->isEmpty())
-    {
-        qCDebug(chatterinoLua) << "system_msg: no channel" << channel;
-        lua::push(L, false);
-        return 1;
-    }
-    qCDebug(chatterinoLua) << "system_msg: OK!";
-    chn->addMessage(makeSystemMessage(text));
-    lua::push(L, true);
-    return 1;
-}
-
-int luaC2RegisterCommand(lua_State *L)
-{
-    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
-    if (pl == nullptr)
-    {
-        luaL_error(L, "internal error: no plugin");  // NOLINT
-        return 0;
-    }
-
-    QString name;
-    if (!lua::peek(L, &name, 1))
-    {
-        // NOLINTNEXTLINE
-        luaL_error(L, "cannot get string (1st arg of register_command)");
-        return 0;
-    }
-    if (lua_isnoneornil(L, 2))
-    {
-        // NOLINTNEXTLINE
-        luaL_error(L, "missing argument for register_command: function "
-                      "\"pointer\"");
-        return 0;
-    }
-
-    auto callbackSavedName = QString("c2commandcb-%1").arg(name);
-    lua_setfield(L, LUA_REGISTRYINDEX, callbackSavedName.toStdString().c_str());
-    auto ok = pl->registerCommand(name, callbackSavedName);
-
-    // delete both name and callback
-    lua_pop(L, 2);
-
-    lua::push(L, ok);
-    return 1;
-}
-int luaC2SendMsg(lua_State *L)
-{
-    QString text;
-    QString channel;
-    lua::pop(L, &text);
-    lua::pop(L, &channel);
-
-    const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
-    if (chn->isEmpty())
-    {
-        qCDebug(chatterinoLua) << "send_msg: no channel" << channel;
-        lua::push(L, false);
-        return 1;
-    }
-    QString message = text;
-    message = message.replace('\n', ' ');
-    QString outText = getApp()->commands->execCommand(message, chn, false);
-    chn->sendMessage(outText);
-    lua::push(L, true);
-    return 1;
-}
-
-// NOLINTNEXTLINE
-static const luaL_Reg C2LIB[] = {
-    {"system_msg", luaC2SystemMsg},
-    {"register_command", luaC2RegisterCommand},
-    {"send_msg", luaC2SendMsg},
-    {nullptr, nullptr},
-};
-}
-
-void PluginController::loadChatterinoLib(lua_State *L)
-{
-    lua_pushglobaltable(L);
-    auto global = lua_gettop(L);
-
-    // count of elements in C2LIB - 1 (to account for terminator)
-    lua::pushEmptyTable(L, 3);
-
-    luaL_setfuncs(L, C2LIB, 0);
-    lua_setfield(L, global, "c2");
 }
 
 bool PluginController::isEnabled(const QString &codename)
