@@ -4,6 +4,8 @@
 
 #include <rapidjson/rapidjson.h>
 
+#include <unordered_map>
+
 class QAbstractTableModel;
 
 namespace chatterino {
