@@ -41,8 +41,7 @@ struct ObjectIDCondition {
 
     QJsonObject encode() const;
 
-    friend QDebug &operator<<(QDebug &dbg,
-                              const ObjectIDCondition &subscription);
+    friend QDebug &operator<<(QDebug &dbg, const ObjectIDCondition &condition);
     bool operator==(const ObjectIDCondition &rhs) const;
     bool operator!=(const ObjectIDCondition &rhs) const;
 };
