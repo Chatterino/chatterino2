@@ -9,6 +9,7 @@
 #include <utility>
 
 namespace chatterino {
+
 using namespace seventv::eventapi;
 
 SeventvEventAPI::SeventvEventAPI(

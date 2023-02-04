@@ -16,7 +16,6 @@ namespace seventv::eventapi {
     struct EmoteUpdateDispatch;
     struct EmoteRemoveDispatch;
 }  // namespace seventv::eventapi
-using namespace seventv::eventapi;
 
 // https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/emote-set.model.go#L29-L36
 enum class SeventvActiveEmoteFlag : int64_t {
@@ -90,7 +89,7 @@ public:
      */
     static boost::optional<EmotePtr> addEmote(
         Atomic<std::shared_ptr<const EmoteMap>> &map,
-        const EmoteAddDispatch &dispatch);
+        const seventv::eventapi::EmoteAddDispatch &dispatch);
 
     /**
      * Updates an emote in this `map`.
@@ -101,7 +100,7 @@ public:
      */
     static boost::optional<EmotePtr> updateEmote(
         Atomic<std::shared_ptr<const EmoteMap>> &map,
-        const EmoteUpdateDispatch &dispatch);
+        const seventv::eventapi::EmoteUpdateDispatch &dispatch);
 
     /**
      * Removes an emote from this `map`.
@@ -112,7 +111,7 @@ public:
      */
     static boost::optional<EmotePtr> removeEmote(
         Atomic<std::shared_ptr<const EmoteMap>> &map,
-        const EmoteRemoveDispatch &dispatch);
+        const seventv::eventapi::EmoteRemoveDispatch &dispatch);
 
     /** Fetches an emote-set by its id */
     static void getEmoteSet(
