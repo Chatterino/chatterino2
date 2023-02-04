@@ -61,7 +61,7 @@ echo "$packaging_dir/"
 # cp -R "../qt" "$packaging_dir/lib"
 mkdir -p "$packaging_dir/lib/Qt/5.15.2/gcc_64/lib"
 for i in "5.12.12" "5.15.2"; do
-    for j in "libQt5Core" "libQt5Concurrent" "libQt5Gui" "libQt5Network" "libQt5Svg" "libQt5Widgets"; do
+    for j in "libQt5Core" "libQt5Concurrent" "libQt5Gui" "libQt5Network" "libQt5Svg" "libQt5Widgets" "libQt5DBus"; do
         cp ../qt/Qt/$i/gcc_64/lib/$j* $packaging_dir/lib/Qt/$i/gcc_64/lib/ 2>/dev/null || true
     done
 done
