@@ -148,8 +148,7 @@ void Application::initialize(Settings &settings, Paths &paths)
                     if (auto channel = split->getChannel(); !channel->isEmpty())
                     {
                         channel->addMessage(makeSystemMessage(
-                            "Chatterino unexpectedly crashed and "
-                            "restarted. "
+                            "Chatterino unexpectedly crashed and restarted. "
                             "You can disable automatic restarts in the "
                             "settings."));
                     }
