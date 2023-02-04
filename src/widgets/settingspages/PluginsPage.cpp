@@ -13,7 +13,6 @@
 #    include <QFormLayout>
 #    include <QGroupBox>
 #    include <QLabel>
-#    include <qobject.h>
 #    include <QObject>
 #    include <QPushButton>
 #    include <QWidget>

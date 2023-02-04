@@ -3,7 +3,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "lua.h"
 
-#    include <qlist.h>
+#    include <QList>
 
 #    include <vector>
 struct lua_State;
