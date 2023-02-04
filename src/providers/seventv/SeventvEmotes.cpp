@@ -30,6 +30,7 @@
 namespace {
 
 using namespace chatterino;
+using namespace seventv::eventapi;
 
 // These declarations won't throw an exception.
 const QString CHANNEL_HAS_NO_EMOTES("This channel has no 7TV channel emotes.");
@@ -244,6 +245,8 @@ EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
 }  // namespace
 
 namespace chatterino {
+
+using namespace seventv::eventapi;
 
 SeventvEmotes::SeventvEmotes()
     : global_(std::make_shared<EmoteMap>())
