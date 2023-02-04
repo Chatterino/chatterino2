@@ -31,6 +31,7 @@ StackIdx push(lua_State *L, const bool &b);
 // returns OK?
 bool peek(lua_State *L, double *out, StackIdx idx = -1);
 bool peek(lua_State *L, QString *out, StackIdx idx = -1);
+bool peek(lua_State *L, QByteArray *out, StackIdx idx = -1);
 
 /// TEMPLATES
 

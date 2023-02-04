@@ -109,5 +109,21 @@ bool peek(lua_State *L, QString *out, StackIdx idx)
     *out = QString::fromUtf8(str, int(len));
     return true;
 }
+
+bool peek(lua_State *L, QByteArray *out, StackIdx idx)
+{
+    size_t len{0};
+    const char *str = lua_tolstring(L, idx, &len);
+    if (str == nullptr)
+    {
+        return false;
+    }
+    if (len >= INT_MAX)
+    {
+        assert(false && "string longer than INT_MAX, shit's fucked, yo");
+    }
+    *out = QByteArray(str, int(len));
+    return true;
+}
 }  // namespace chatterino::lua
 #endif
