@@ -115,3 +115,25 @@ if (not ok)
     -- channel not found
 end
 ```
+
+### Changed globals
+
+#### `load(chunk [, chunkname [, mode [, env]]])`
+
+This function behaves really similarity to Lua's `load`, however it does not allow for bytecode to be executed.
+It achieves this by forcing all inputs to be encoded with `UTF-8`.
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-load)
+
+#### `execfile(filename)`
+
+This function mimics Lua's `dofile` however relative paths are relative to your plugin's directory.
+You are restricted to loading files in your plugin's directory. You cannot load files with bytecode inside.
+
+Example:
+```
+execfile("stuff.lua") -- executes Plugins/name/stuff.lua
+execfile("./stuff.lua") -- executes Plugins/name/stuff.lua
+execfile("../stuff.lua") -- tries to load Plugins/stuff.lua and errors
+execfile("luac.out") -- tried to load Plugins/name/luac.out and errors because it contains non-utf8 data
+```
