@@ -72,6 +72,11 @@ public:
 
     std::set<QString> listRegisteredCommands();
 
+    const QDir &loadDirectory() const
+    {
+        return this->loadDirectory_;
+    }
+
 private:
     QDir loadDirectory_;
     lua_State *state_;

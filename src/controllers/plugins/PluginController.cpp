@@ -165,12 +165,24 @@ void PluginController::openLibrariesFor(lua_State *L,
     // possibly randomize this name at runtime to prevent some attacks?
     lua_setfield(L, LUA_REGISTRYINDEX, "real_load");
 
+    lua_getfield(L, gtable, "dofile");
+    lua_setfield(L, LUA_REGISTRYINDEX, "real_dofile");
+
     // NOLINTNEXTLINE
     static const luaL_Reg replacementFuncs[] = {
         {"load", lua::api::g_load},
+
+        // chatterino dofile is way more similar to require() than dofile()
+        {"execfile", lua::api::g_dofile},
         {nullptr, nullptr},
     };
     luaL_setfuncs(L, replacementFuncs, 0);
+
+    lua_pushnil(L);
+    lua_setfield(L, gtable, "loadfile");
+
+    lua_pushnil(L);
+    lua_setfield(L, gtable, "dofile");
 
     lua_pop(L, 1);
 }
