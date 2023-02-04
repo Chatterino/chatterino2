@@ -13,6 +13,9 @@
 #    include "lauxlib.h"
 #    include "lua.h"
 #    include "lualib.h"
+
+#    include <QFileInfo>
+#    include <QTextCodec>
 namespace chatterino::lua::api {
 
 int c2_register_command(lua_State *L)
@@ -135,9 +138,78 @@ int g_load(lua_State *L)
     }
 
     lua_call(L, countArgs, LUA_MULTRET);
-    qCDebug(chatterinoLua) << "FDM " << lua_gettop(L);
 
     return lua_gettop(L);
 }
+
+int g_dofile(lua_State *L)
+{
+    auto countArgs = lua_gettop(L);
+    // Lua allows dofile() which loads from stdin, but this is very useless in our case
+    if (countArgs == 0)
+    {
+        lua_pushnil(L);
+        // NOLINTNEXTLINE
+        luaL_error(L, "it is not allowed to call dofile() without arguments");
+        return 1;
+    }
+
+    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+    QString fname;
+    if (!lua::pop(L, &fname))
+    {
+        lua_pushnil(L);
+        // NOLINTNEXTLINE
+        luaL_error(L, "chatterino g_dofile: expected a string for a filename");
+        return 1;
+    }
+    auto dir = QUrl(pl->loadDirectory().canonicalPath() + "/");
+    auto file = dir.resolved(fname);
+
+    qCDebug(chatterinoLua) << "plugin" << pl->codename << "is trying to load"
+                           << file << "(its dir is" << dir << ")";
+    if (!dir.isParentOf(file))
+    {
+        lua_pushnil(L);
+        // NOLINTNEXTLINE
+        luaL_error(L, "chatterino g_dofile: filename must be inside of the "
+                      "plugin directory");
+        return 1;
+    }
+
+    auto path = file.path(QUrl::FullyDecoded);
+    // validate utf-8 to block bytecode exploits
+    QFile qf(path);
+    qf.open(QIODevice::ReadOnly);
+    if (qf.size() > 10'000'000)
+    {
+        lua_pushnil(L);
+        // NOLINTNEXTLINE
+        luaL_error(L, "chatterino g_dofile: size limit of 10MB exceeded, what "
+                      "the hell are you doing");
+        return 1;
+    }
+    auto data = qf.readAll();
+    auto *utf8 = QTextCodec::codecForName("UTF-8");
+    QTextCodec::ConverterState state;
+    utf8->toUnicode(data.constData(), data.size(), &state);
+    if (state.invalidChars != 0)
+    {
+        lua_pushnil(L);
+        // NOLINTNEXTLINE
+        luaL_error(L, "invalid utf-8 in dofile() target (%s) is not allowed",
+                   fname.toStdString().c_str());
+        return 1;
+    }
+
+    // fetch dofile and call it
+    lua_getfield(L, LUA_REGISTRYINDEX, "real_dofile");
+    // maybe data race here if symlink was swapped?
+    lua::push(L, path);
+    lua_call(L, 1, LUA_MULTRET);
+
+    return lua_gettop(L);
+}
+
 }  // namespace chatterino::lua::api
 #endif
