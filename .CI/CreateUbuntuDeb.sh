@@ -46,8 +46,6 @@ echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 # cp -R ./appdir/usr/share/icons $packaging_dir/usr/share
 # cp -R ./appdir/usr/share/applications $packaging_dir/usr/share
 
-sed -i 's/Exec=chatterino/Exec=env LD_LIBRARY_PATH=\/lib\/Qt\/5.15.2\/gcc_64\/lib\/ chatterino/g' $packaging_dir/usr/share/applications/com.chatterino.chatterino.desktop
-
 echo "Running make install in package dir"
 DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
 # DESTDIR="$packaging_dir" make -j"$(nproc)" install; find "$packaging_dir/"
@@ -58,6 +56,8 @@ echo "$packaging_dir$(pwd)/appdir/usr"
 echo "$packaging_dir/"
 # move directory up
 mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/" # remove INSTALL_ROOT
+
+sed -i 's/Exec=chatterino/Exec=env LD_LIBRARY_PATH=\/lib\/Qt\/5.15.2\/gcc_64\/lib\/ chatterino/g' $packaging_dir/usr/share/applications/com.chatterino.chatterino.desktop
 
 mkdir -p "$packaging_dir/lib/qt"
 cp -R "../qt" "$packaging_dir/lib"
