@@ -25,7 +25,6 @@ mkdir package/DEBIAN -p
 packaging_dir="$(realpath ./package)"
 
 echo "Making control file"
-# Backup-Depends: qtmultimedia5-dev, cmake, g++, rapidjson-dev, libfuse2, libssl-dev, libboost-dev, libxcb-randr0-dev, libboost-system-dev, libboost-filesystem-dev, libxkbcommon-x11-0, libgstreamer-plugins-base1.0-0, libgl1-mesa-dev, libxcb-icccm4, libxcb-image0, libxcb-keysyms1, libxcb-render-util0, libxcb-xinerama0, qttools5-dev, libqt5multimedia5, qt5-image-formats-plugins, libqt5svg5-dev, libqt5core5a, libcrypto++6
 cat >> "$packaging_dir/DEBIAN/control" << EOF
 Package: chatterino
 Section: net
@@ -46,6 +45,9 @@ cp -R ./appdir/usr/bin $packaging_dir/usr
 mkdir -p $packaging_dir/usr/share
 cp -R ./appdir/usr/share/icons $packaging_dir/usr/share
 cp -R ./appdir/usr/share/applications $packaging_dir/usr/share
+
+sed -i 's/Exec=chatterino/Exec=env LD_LIBRARY_PATH=\/lib\/Qt\/5.15.2\/gcc_64\/lib\/ chatterino/g' $packaging_dir/usr/share/applications/com.chatterino.chatterino.desktop
+
 # echo "Running make install in package dir"
 # DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
 # DESTDIR="$packaging_dir" make -j"$(nproc)" install; find "$packaging_dir/"
