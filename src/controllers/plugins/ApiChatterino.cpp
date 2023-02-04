@@ -105,10 +105,13 @@ static const QChar REPLACEMENT_CHARACTER = QChar(0xFFFD);
 int g_load(lua_State *L)
 {
     auto countArgs = lua_gettop(L);
-    QString str;
-    if (lua::peek(L, &str, 1))
+    QByteArray data;
+    if (lua::peek(L, &data, 1))
     {
-        if (str.contains(REPLACEMENT_CHARACTER))
+        auto *utf8 = QTextCodec::codecForName("UTF-8");
+        QTextCodec::ConverterState state;
+        utf8->toUnicode(data.constData(), data.size(), &state);
+        if (state.invalidChars != 0)
         {
             // NOLINTNEXTLINE
             luaL_error(L, "invalid utf-8 in load() is not allowed");
