@@ -44,7 +44,7 @@ An example plugin is available at [https://github.com/Mm2PL/Chatterino-test-plug
 
 The following parts of the Lua standard library are loaded:
 
-- `_G` (all globals)
+- `_G` (most globals)
 - `table`
 - `string`
 - `math`
@@ -56,7 +56,7 @@ The official manual for them is available [here](https://www.lua.org/manual/5.4/
 
 All Chatterino functions are exposed in a global table called `c2`. The following functions are available
 
-### `register_command(name, handler)`
+#### `register_command(name, handler)`
 
 Registers a new command called `name` which when executed will call `handler`.
 Returns `true` if everything went ok, `false` if there already exists another
@@ -72,7 +72,7 @@ function cmdWords(ctx)
     c2.system_msg(ctx.channelName, "Words are: " .. table.concat(ctx.words, " "))
 end
 
-c2.register_command("/wordsl", cmdWords)
+c2.register_command("/words", cmdWords)
 ```
 
 Limitations/known issues:
@@ -81,7 +81,7 @@ Limitations/known issues:
   rebuilding the window content caused by reloading another plugin will solve this
 - spaces in command names aren't handled very well (https://github.com/Chatterino/chatterino2/issues/1517)
 
-### `send_msg(channel, text)`
+#### `send_msg(channel, text)`
 
 Sends a message to `channel` with the specified text. Also executes commands.
 
@@ -100,7 +100,7 @@ Limitations/Known issues:
 
 - it is possible to trigger your own Lua command with this causing a potentially infinite loop
 
-### `system_msg(channel, text)`
+#### `system_msg(channel, text)`
 
 Creates a system message and adds it to the twitch channel specified by
 `channel`. Returns `true` if everything went ok, `false` otherwise. It will
