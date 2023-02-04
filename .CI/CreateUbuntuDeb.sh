@@ -3,7 +3,7 @@ set -e
 
 #ubuntu_release=$(cat /etc/lsb-release | grep '^DISTRIB_RELEASE=*' | sed -e 's/DISTRIB_RELEASE=//g')
 ubuntu_release=$(cat /etc/lsb-release | sed -n 's/^DISTRIB_RELEASE=//p')
-echo $ubuntu_release # Test
+echo $ubuntu_release # Test (thought that it might be helpful for later if we want to make something depending on the operation system version)
 
 if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     echo "ERROR: No chatterino binary file found. This script must be run in the build folder, and chatterino must be built first."
@@ -57,6 +57,7 @@ echo "$packaging_dir/"
 # move directory up
 mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/" # remove INSTALL_ROOT
 
+# Add LD_LIBRARY_PATH to environment of .desktop file
 sed -i 's/Exec=chatterino/Exec=env LD_LIBRARY_PATH=\/usr\/lib\/qt\/Qt\/5.15.2\/gcc_64\/lib\/ chatterino/g' $packaging_dir/usr/share/applications/com.chatterino.chatterino.desktop
 
 mkdir -p "$packaging_dir/lib/qt"
@@ -71,5 +72,5 @@ rm -vrf "$packaging_dir/home" || true
 
 echo "Building package..."
 dpkg-deb --build "$packaging_dir" "Chatterino-x86_64.deb"
-dpkg -I Chatterino-x86_64.deb
-dpkg -c Chatterino-x86_64.deb
+dpkg -I Chatterino-x86_64.deb # Shows Info from controlfile
+dpkg -c Chatterino-x86_64.deb # Shows folders and files inside .deb file
