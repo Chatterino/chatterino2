@@ -41,7 +41,9 @@ echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 # EOF
 # chmod 555 "$packaging_dir/DEBIAN/postinst"
 
+mkdir -p $packaging_dir/usr/bin
 cp -R ./appdir/usr/bin $packaging_dir/usr/bin
+mkdir -p $packaging_dir/usr/share
 cp -R ./appdir/usr/share $packaging_dir/usr/share
 # echo "Running make install in package dir"
 # DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
