@@ -43,7 +43,9 @@ echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 
 mkdir -p $packaging_dir/usr
 cp -R ./appdir/usr/bin $packaging_dir/usr
-cp -R ./appdir/usr/share $packaging_dir/usr
+mkdir -p $packaging_dir/usr/share
+cp -R ./appdir/usr/share/icons $packaging_dir/usr/share
+cp -R ./appdir/usr/share/applications $packaging_dir/usr/share
 # echo "Running make install in package dir"
 # DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
 # DESTDIR="$packaging_dir" make -j"$(nproc)" install; find "$packaging_dir/"
