@@ -1,10 +1,5 @@
 project(lua CXX)
 
-set(LUA_VERSION_MAJOR 5)
-set(LUA_VERSION_MINOR 4)
-set(LUA_VERSION_PATCH 4)
-set(LUA_VERSION "${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}.${LUA_VERSION_PATCH}")
-
 #[====[
 Updating this list:
 remove all listed files
