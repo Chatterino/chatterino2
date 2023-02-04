@@ -4,7 +4,7 @@
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
-#    include "controllers/plugins/ApiChatterino.hpp"
+#    include "controllers/plugins/LuaApi.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "messages/MessageBuilder.hpp"
 #    include "providers/twitch/TwitchIrcServer.hpp"
@@ -72,17 +72,17 @@ void PluginController::actuallyInitialize()
 }
 bool PluginController::tryLoadFromDir(const QDir &pluginDir)
 {
-    // look for index.lua
-    auto index = QFileInfo(pluginDir.filePath("index.lua"));
-    qCDebug(chatterinoLua) << "looking for index.lua and info.json in"
+    // look for init.lua
+    auto index = QFileInfo(pluginDir.filePath("init.lua"));
+    qCDebug(chatterinoLua) << "looking for init.lua and info.json in"
                            << pluginDir.path();
     if (!index.exists())
     {
         qCDebug(chatterinoLua)
-            << "Missing index.lua in plugin directory" << pluginDir;
+            << "Missing init.lua in plugin directory" << pluginDir;
         return false;
     }
-    qCDebug(chatterinoLua) << "found index.lua, now looking for info.json!";
+    qCDebug(chatterinoLua) << "found init.lua, now looking for info.json!";
     auto infojson = QFileInfo(pluginDir.filePath("info.json"));
     if (!infojson.exists())
     {
