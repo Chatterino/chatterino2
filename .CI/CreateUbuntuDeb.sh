@@ -57,7 +57,7 @@ echo "$packaging_dir/"
 # move directory up
 mv "$packaging_dir$(pwd)/appdir/usr" "$packaging_dir/" # remove INSTALL_ROOT
 
-sed -i 's/Exec=chatterino/Exec=env LD_LIBRARY_PATH=\/lib\/Qt\/5.15.2\/gcc_64\/lib\/ chatterino/g' $packaging_dir/usr/share/applications/com.chatterino.chatterino.desktop
+sed -i 's/Exec=chatterino/Exec=env LD_LIBRARY_PATH=\/usr\/lib\/qt\/Qt\/5.15.2\/gcc_64\/lib\/ chatterino/g' $packaging_dir/usr/share/applications/com.chatterino.chatterino.desktop
 
 mkdir -p "$packaging_dir/lib/qt"
 cp -R "../qt" "$packaging_dir/lib"
