@@ -18,7 +18,7 @@
 #include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
 #include "providers/RecentMessagesApi.hpp"
-#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
+#include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -121,16 +121,6 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->loadRecentMessagesReconnect();
     });
 
-    this->destroyed.connect([this]() {
-        getApp()->twitch->dropSeventvChannel(this->seventvUserID_,
-                                             this->seventvEmoteSetID_);
-
-        if (getApp()->twitch->bttvLiveUpdates)
-        {
-            getApp()->twitch->bttvLiveUpdates->partChannel(this->roomId());
-        }
-    });
-
     this->messageRemovedFromStart.connect([this](MessagePtr &msg) {
         if (msg->replyThread)
         {
@@ -167,6 +157,17 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->addMessage(makeSystemMessage("asef"));
     }
 #endif
+}
+
+TwitchChannel::~TwitchChannel()
+{
+    getApp()->twitch->dropSeventvChannel(this->seventvUserID_,
+                                         this->seventvEmoteSetID_);
+
+    if (getApp()->twitch->bttvLiveUpdates)
+    {
+        getApp()->twitch->bttvLiveUpdates->partChannel(this->roomId());
+    }
 }
 
 void TwitchChannel::initialize()
@@ -691,7 +692,7 @@ void TwitchChannel::removeBttvEmote(
 }
 
 void TwitchChannel::addSeventvEmote(
-    const SeventvEventAPIEmoteAddDispatch &dispatch)
+    const seventv::eventapi::EmoteAddDispatch &dispatch)
 {
     if (!SeventvEmotes::addEmote(this->seventvEmotes_, dispatch))
     {
@@ -703,7 +704,7 @@ void TwitchChannel::addSeventvEmote(
 }
 
 void TwitchChannel::updateSeventvEmote(
-    const SeventvEventAPIEmoteUpdateDispatch &dispatch)
+    const seventv::eventapi::EmoteUpdateDispatch &dispatch)
 {
     if (!SeventvEmotes::updateEmote(this->seventvEmotes_, dispatch))
     {
@@ -717,7 +718,7 @@ void TwitchChannel::updateSeventvEmote(
 }
 
 void TwitchChannel::removeSeventvEmote(
-    const SeventvEventAPIEmoteRemoveDispatch &dispatch)
+    const seventv::eventapi::EmoteRemoveDispatch &dispatch)
 {
     auto removed = SeventvEmotes::removeEmote(this->seventvEmotes_, dispatch);
     if (!removed)
@@ -730,7 +731,7 @@ void TwitchChannel::removeSeventvEmote(
 }
 
 void TwitchChannel::updateSeventvUser(
-    const SeventvEventAPIUserConnectionUpdateDispatch &dispatch)
+    const seventv::eventapi::UserConnectionUpdateDispatch &dispatch)
 {
     if (dispatch.connectionIndex != this->seventvUserTwitchConnectionIndex_)
     {
