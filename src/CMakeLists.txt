@@ -136,8 +136,8 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
-        controllers/plugins/ApiChatterino.cpp
-        controllers/plugins/ApiChatterino.hpp
+        controllers/plugins/LuaApi.cpp
+        controllers/plugins/LuaApi.hpp
         controllers/plugins/Plugin.cpp
         controllers/plugins/Plugin.hpp
         controllers/plugins/PluginController.hpp
