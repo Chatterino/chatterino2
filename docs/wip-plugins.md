@@ -131,6 +131,7 @@ This function mimics Lua's `dofile` however relative paths are relative to your 
 You are restricted to loading files in your plugin's directory. You cannot load files with bytecode inside.
 
 Example:
+
 ```
 execfile("stuff.lua") -- executes Plugins/name/stuff.lua
 execfile("./stuff.lua") -- executes Plugins/name/stuff.lua
