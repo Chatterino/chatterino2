@@ -44,6 +44,7 @@
 - Dev: Format YAML and JSON files with prettier. (#4304)
 - Dev: Added CMake Install Support on Windows. (#4300)
 - Dev: Changed conan generator to [`CMakeDeps`](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html) and [`CMakeToolchain`](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmaketoolchain.html). See PR for migration notes. (#4335)
+- Dev: Refactored 7TV EventAPI implementation. (#4342)
 
 ## 2.4.0
 

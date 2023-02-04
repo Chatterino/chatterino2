@@ -250,14 +250,14 @@ set(SOURCE_FILES
         providers/seventv/SeventvEventAPI.cpp
         providers/seventv/SeventvEventAPI.hpp
 
-        providers/seventv/eventapi/SeventvEventAPIClient.cpp
-        providers/seventv/eventapi/SeventvEventAPIClient.hpp
-        providers/seventv/eventapi/SeventvEventAPIDispatch.cpp
-        providers/seventv/eventapi/SeventvEventAPIDispatch.hpp
-        providers/seventv/eventapi/SeventvEventAPIMessage.cpp
-        providers/seventv/eventapi/SeventvEventAPIMessage.hpp
-        providers/seventv/eventapi/SeventvEventAPISubscription.cpp
-        providers/seventv/eventapi/SeventvEventAPISubscription.hpp
+        providers/seventv/eventapi/Client.cpp
+        providers/seventv/eventapi/Client.hpp
+        providers/seventv/eventapi/Dispatch.cpp
+        providers/seventv/eventapi/Dispatch.hpp
+        providers/seventv/eventapi/Message.cpp
+        providers/seventv/eventapi/Message.hpp
+        providers/seventv/eventapi/Subscription.cpp
+        providers/seventv/eventapi/Subscription.hpp
 
         providers/twitch/ChannelPointReward.cpp
         providers/twitch/ChannelPointReward.hpp
