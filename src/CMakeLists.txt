@@ -846,7 +846,19 @@ endif()
 
 # Configure compiler warnings
 if (MSVC)
-    string(REPLACE "/Ob1" "/Ob3" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+    # Change flags for RelWithDebInfo
+
+    # Default: "/debug /INCREMENTAL"
+    # Changes:
+    #   - Disable incremental linking to reduce padding
+    #   - Enable all optimizations - by default when /DEBUG is specified,
+    #     these optimizations will be disabled. We need /DEBUG to generate a PDB.
+    set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/DEBUG /INCREMENTAL:NO /OPT:REF,ICF,LBR")
+
+    # Use the function inlining level from 'Release' mode (2).
+    string(REPLACE "/Ob1" "/Ob2" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+
+    # Configure warnings
 
     # Someone adds /W3 before we add /W4.
     # This makes sure, only /W4 is specified.
@@ -876,6 +888,7 @@ if (MSVC)
         /wd4100
         /wd4267
     )
+    # Disable min/max macros from Windows.h
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
 else ()
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
