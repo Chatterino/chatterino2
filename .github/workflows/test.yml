@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:master
+  TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.6
 
 concurrency:
   group: test-${{ github.ref }}
