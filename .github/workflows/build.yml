@@ -96,26 +96,37 @@ jobs:
         run: |
           mkdir build
           cd build
-          conan install .. -s build_type=Release -b missing -pr:b=default
+          conan install .. -s build_type=RelWithDebInfo -b missing -pr:b=default
           cmake `
               -G"NMake Makefiles" `
-              -DCMAKE_BUILD_TYPE=Release `
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
+              -DBUILD_WITH_CRASHPAD=On `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               ..
           set cl=/MP
           nmake /S /NOLOGO
+          nmake /S /NOLOGO crashpad_handler
           windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
           cp bin/chatterino.exe Chatterino2/
+          cp bin/crashpad Chatterino2/
           echo nightly > Chatterino2/modes
           7z a chatterino-windows-x86-64.zip Chatterino2/
+          zstd -9 bin/chatterino.pdb -o bin/chatterino.pdb.zst
 
-      - name: Upload artifact (Windows)
+      - name: Upload artifact (Windows - binary)
         if: startsWith(matrix.os, 'windows')
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}.zip
           path: build/chatterino-windows-x86-64.zip
+
+      - name: Upload artifact (Windows - symbols)
+        if: (startsWith(matrix.os, 'windows') && matrix.qt-version == '5.15.2')
+        uses: actions/upload-artifact@v3
+        with:
+          name: chatterino-windows-x86-64-${{ matrix.qt-version }}-symbols.pdb.zst
+          path: bin/chatterino.pdb.zst
 
       - name: Clean Conan pkgs
         if: startsWith(matrix.os, 'windows')
