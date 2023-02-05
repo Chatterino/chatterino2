@@ -122,7 +122,7 @@ jobs:
           path: build/chatterino-windows-x86-64.zip
 
       - name: Upload artifact (Windows - symbols)
-        if: (startsWith(matrix.os, 'windows') && matrix.qt-version == '5.15.2')
+        if: startsWith(matrix.os, 'windows')
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}-symbols.pdb.zst
