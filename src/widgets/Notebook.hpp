@@ -37,6 +37,7 @@ public:
     int indexOf(QWidget *page) const;
     virtual void select(QWidget *page, bool focusPage = true);
     void selectIndex(int index, bool focusPage = true);
+    void selectVisibleIndex(int index, bool focusPage = true);
     void selectNextTab(bool focusPage = true);
     void selectPreviousTab(bool focusPage = true);
     void selectLastTab(bool focusPage = true);

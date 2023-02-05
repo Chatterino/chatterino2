@@ -260,6 +260,30 @@ void Notebook::selectIndex(int index, bool focusPage)
     this->select(this->items_[index].page, focusPage);
 }
 
+void Notebook::selectVisibleIndex(int index, bool focusPage)
+{
+    if (!this->tabFilter_)
+    {
+        this->selectIndex(index, focusPage);
+        return;
+    }
+
+    int i = 0;
+    for (auto &item : this->items_)
+    {
+        if (this->tabFilter_(item.tab))
+        {
+            if (i == index)
+            {
+                // found the index'th visible page
+                this->select(item.page, focusPage);
+                return;
+            }
+            ++i;
+        }
+    }
+}
+
 void Notebook::selectNextTab(bool focusPage)
 {
     const int size = this->items_.size();
