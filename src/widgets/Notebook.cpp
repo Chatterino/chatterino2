@@ -262,43 +262,95 @@ void Notebook::selectIndex(int index, bool focusPage)
 
 void Notebook::selectNextTab(bool focusPage)
 {
-    if (this->items_.size() <= 1)
+    const int size = this->items_.size();
+
+    if (!this->tabFilter_)
     {
+        if (size <= 1)
+        {
+            return;
+        }
+
+        auto index = (this->indexOf(this->selectedPage_) + 1) % size;
+        this->select(this->items_[index].page, focusPage);
         return;
     }
 
-    auto index =
-        (this->indexOf(this->selectedPage_) + 1) % this->items_.count();
+    // find next tab that is permitted by filter
+    const int startIndex = this->indexOf(this->selectedPage_);
 
-    this->select(this->items_[index].page, focusPage);
+    auto index = (startIndex + 1) % size;
+    while (index != startIndex)
+    {
+        if (this->tabFilter_(this->items_[index].tab))
+        {
+            this->select(this->items_[index].page, focusPage);
+            return;
+        }
+        index = (index + 1) % size;
+    }
 }
 
 void Notebook::selectPreviousTab(bool focusPage)
 {
-    if (this->items_.size() <= 1)
+    const int size = this->items_.size();
+
+    if (!this->tabFilter_)
     {
+        if (size <= 1)
+        {
+            return;
+        }
+
+        int index = this->indexOf(this->selectedPage_) - 1;
+        if (index < 0)
+        {
+            index += size;
+        }
+
+        this->select(this->items_[index].page, focusPage);
         return;
     }
 
-    int index = this->indexOf(this->selectedPage_) - 1;
+    // find next previous tab that is permitted by filter
+    const int startIndex = this->indexOf(this->selectedPage_);
 
-    if (index < 0)
+    auto index = startIndex == 0 ? size - 1 : startIndex - 1;
+    while (index != startIndex)
     {
-        index += this->items_.count();
-    }
+        if (this->tabFilter_(this->items_[index].tab))
+        {
+            this->select(this->items_[index].page, focusPage);
+            return;
+        }
 
-    this->select(this->items_[index].page, focusPage);
+        index = index == 0 ? size - 1 : index - 1;
+    }
 }
 
 void Notebook::selectLastTab(bool focusPage)
 {
-    const auto size = this->items_.size();
-    if (size <= 1)
+    if (!this->tabFilter_)
     {
+        const auto size = this->items_.size();
+        if (size <= 1)
+        {
+            return;
+        }
+
+        this->select(this->items_[size - 1].page, focusPage);
         return;
     }
 
-    this->select(this->items_[size - 1].page, focusPage);
+    // find first tab permitted by filter starting from the end
+    for (auto it = this->items_.rbegin(); it != this->items_.rend(); ++it)
+    {
+        if (this->tabFilter_(it->tab))
+        {
+            this->select(it->page, focusPage);
+            return;
+        }
+    }
 }
 
 int Notebook::getPageCount() const
