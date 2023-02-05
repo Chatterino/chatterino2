@@ -379,72 +379,66 @@ void Notebook::setShowTabs(bool value)
 {
     this->showTabs_ = value;
 
+    this->setShowAddButton(value);
     this->performLayout();
 
-    this->setShowAddButton(value);
+    this->updateTabVisibility();
+    this->updateTabVisibilityMenuAction();
 
     // show a popup upon hiding tabs
     if (!value && getSettings()->informOnTabVisibilityToggle.getValue())
     {
-        auto unhideSeq = getApp()->hotkeys->getDisplaySequence(
-            HotkeyCategory::Window, "setTabVisibility", {{}});
-        if (unhideSeq.isEmpty())
-        {
-            unhideSeq = getApp()->hotkeys->getDisplaySequence(
-                HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
-        }
-        if (unhideSeq.isEmpty())
-        {
-            unhideSeq = getApp()->hotkeys->getDisplaySequence(
-                HotkeyCategory::Window, "setTabVisibility", {{"on"}});
-        }
-        QString hotkeyInfo = "(currently unbound)";
-        if (!unhideSeq.isEmpty())
-        {
-            hotkeyInfo =
-                "(" +
-                unhideSeq.toString(QKeySequence::SequenceFormat::NativeText) +
-                ")";
-        }
-        QMessageBox msgBox(this->window());
-        msgBox.window()->setWindowTitle("Chatterino - hidden tabs");
-        msgBox.setText("You've just hidden your tabs.");
-        msgBox.setInformativeText(
-            "You can toggle tabs by using the keyboard shortcut " + hotkeyInfo +
-            " or right-clicking the tab area and selecting \"Toggle "
-            "visibility of tabs\".");
-        msgBox.addButton(QMessageBox::Ok);
-        auto *dsaButton =
-            msgBox.addButton("Don't show again", QMessageBox::YesRole);
-
-        msgBox.setDefaultButton(QMessageBox::Ok);
-
-        msgBox.exec();
-
-        if (msgBox.clickedButton() == dsaButton)
-        {
-            getSettings()->informOnTabVisibilityToggle.setValue(false);
-        }
+        this->showTabVisibilityInfoPopup();
     }
-    updateTabVisibilityMenuAction();
-    this->updateTabVisibility();
+}
+
+void Notebook::showTabVisibilityInfoPopup()
+{
+    auto unhideSeq = getApp()->hotkeys->getDisplaySequence(
+        HotkeyCategory::Window, "setTabVisibility", {{}});
+    if (unhideSeq.isEmpty())
+    {
+        unhideSeq = getApp()->hotkeys->getDisplaySequence(
+            HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
+    }
+    if (unhideSeq.isEmpty())
+    {
+        unhideSeq = getApp()->hotkeys->getDisplaySequence(
+            HotkeyCategory::Window, "setTabVisibility", {{"on"}});
+    }
+    QString hotkeyInfo = "(currently unbound)";
+    if (!unhideSeq.isEmpty())
+    {
+        hotkeyInfo =
+            "(" + unhideSeq.toString(QKeySequence::SequenceFormat::NativeText) +
+            ")";
+    }
+    QMessageBox msgBox(this->window());
+    msgBox.window()->setWindowTitle("Chatterino - hidden tabs");
+    msgBox.setText("You've just hidden your tabs.");
+    msgBox.setInformativeText(
+        "You can toggle tabs by using the keyboard shortcut " + hotkeyInfo +
+        " or right-clicking the tab area and selecting \"Toggle "
+        "visibility of tabs\".");
+    msgBox.addButton(QMessageBox::Ok);
+    auto *dsaButton =
+        msgBox.addButton("Don't show again", QMessageBox::YesRole);
+
+    msgBox.setDefaultButton(QMessageBox::Ok);
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == dsaButton)
+    {
+        getSettings()->informOnTabVisibilityToggle.setValue(false);
+    }
 }
 
 void Notebook::updateTabVisibility()
 {
-    // If tabs are hidden or there is no special filter, normal behavior
-    if (!this->showTabs_ || !this->tabPredicate_)
-    {
-        for (auto &item : this->items_)
-        {
-            item.tab->setHidden(!this->showTabs_);
-        }
-        return;
-    }
-
     for (auto &item : this->items_)
     {
-        item.tab->setHidden(!this->tabPredicate_(item));
+        item.tab->setVisible(this->shouldShowTab(item.tab));
     }
 }
 
@@ -524,10 +518,13 @@ void Notebook::performLayout(bool animated)
 
     std::vector<Item> filteredItems;
     filteredItems.reserve(this->items_.size());
-    if (this->tabPredicate_)
+    if (this->tabFilter_)
     {
         std::copy_if(this->items_.begin(), this->items_.end(),
-                     std::back_inserter(filteredItems), this->tabPredicate_);
+                     std::back_inserter(filteredItems),
+                     [this](const auto &item) {
+                         return this->tabFilter_(item.tab);
+                     });
     }
     else
     {
@@ -1075,11 +1072,22 @@ size_t Notebook::visibleButtonCount() const
     return i;
 }
 
-void Notebook::setTabFilter(std::function<bool(const Item &)> filter)
+void Notebook::setTabFilter(std::function<bool(const NotebookTab *)> filter)
 {
-    this->tabPredicate_ = std::move(filter);
+    this->tabFilter_ = std::move(filter);
     this->performLayout();
     this->updateTabVisibility();
+}
+
+bool Notebook::shouldShowTab(const NotebookTab *tab) const
+{
+    // If tabs are hidden or there is no filter, use normal behavior
+    if (!this->showTabs_ || !this->tabFilter_)
+    {
+        return this->showTabs_;
+    }
+
+    return this->tabFilter_(tab);
 }
 
 SplitNotebook::SplitNotebook(Window *parent)
@@ -1101,8 +1109,8 @@ SplitNotebook::SplitNotebook(Window *parent)
         [this](bool liveTabsOnly, auto) {
             if (liveTabsOnly)
             {
-                this->setTabFilter([](const Item &item) {
-                    return item.tab->isLive();
+                this->setTabFilter([](const NotebookTab *tab) {
+                    return tab->isLive();
                 });
             }
             else
@@ -1216,7 +1224,7 @@ SplitContainer *SplitNotebook::addPage(bool select)
     auto tab = Notebook::addPage(container, QString(), select);
     container->setTab(tab);
     tab->setParent(this);
-    tab->setVisible(this->getShowTabs());
+    tab->setVisible(this->shouldShowTab(tab));
     return container;
 }
 

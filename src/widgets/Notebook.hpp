@@ -87,9 +87,11 @@ protected:
         return items_;
     }
 
-    void setTabFilter(std::function<bool(const Item &)> filter);
+    void setTabFilter(std::function<bool(const NotebookTab *)> filter);
+    bool shouldShowTab(const NotebookTab *tab) const;
 
 private:
+    void showTabVisibilityInfoPopup();
     void updateTabVisibility();
     void updateTabVisibilityMenuAction();
     void resizeAddButton();
@@ -119,7 +121,7 @@ private:
     QAction *lockNotebookLayoutAction_;
     QAction *showTabsAction_;
 
-    std::function<bool(const Item &)> tabPredicate_ = nullptr;
+    std::function<bool(const NotebookTab *)> tabFilter_ = nullptr;
 };
 
 class SplitNotebook : public Notebook
