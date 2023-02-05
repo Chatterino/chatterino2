@@ -126,7 +126,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}-symbols.pdb.7z
-          path: bin/chatterino.pdb.7z
+          path: build/bin/chatterino.pdb.7z
 
       - name: Clean Conan pkgs
         if: startsWith(matrix.os, 'windows')
