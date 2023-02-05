@@ -24,11 +24,13 @@ jobs:
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
         force-lto: [false]
+        crashpad: [true]
         include:
           - os: ubuntu-20.04
             qt-version: 5.15.2
             pch: false
             force-lto: true
+            crashpad: false
       fail-fast: false
 
     steps:
@@ -36,6 +38,12 @@ jobs:
         if: matrix.force-lto == true
         run: |
           echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Set Crashpad
+        if: matrix.crashpad == true
+        run: |
+          echo "C2_ENABLE_CRASHPAD=ON" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Set environment variables for windows-latest
@@ -62,14 +70,14 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.txt') }}
+          key: ${{ runner.os }}-${{ matrix.crashpad }}-conan-user-${{ hashFiles('**/conanfile.txt') }}
           path: ~/.conan/
 
       - name: Cache conan packages part 2
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
+          key: ${{ runner.os }}-${{ matrix.crashpad }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
           path: C:/.conan/
 
       - name: Add Conan to path
@@ -101,7 +109,7 @@ jobs:
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
-              -DBUILD_WITH_CRASHPAD=On `
+              -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               ..
           set cl=/MP
