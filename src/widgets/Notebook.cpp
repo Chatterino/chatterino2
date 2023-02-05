@@ -380,10 +380,6 @@ void Notebook::setShowTabs(bool value)
     this->showTabs_ = value;
 
     this->performLayout();
-    for (auto &item : this->items_)
-    {
-        item.tab->setHidden(!value);
-    }
 
     this->setShowAddButton(value);
 
@@ -431,6 +427,25 @@ void Notebook::setShowTabs(bool value)
         }
     }
     updateTabVisibilityMenuAction();
+    this->updateTabVisibility();
+}
+
+void Notebook::updateTabVisibility()
+{
+    // If tabs are hidden or there is no special filter, normal behavior
+    if (!this->showTabs_ || !this->tabPredicate_)
+    {
+        for (auto &item : this->items_)
+        {
+            item.tab->setHidden(!this->showTabs_);
+        }
+        return;
+    }
+
+    for (auto &item : this->items_)
+    {
+        item.tab->setHidden(!this->tabPredicate_(item));
+    }
 }
 
 void Notebook::updateTabVisibilityMenuAction()
@@ -507,6 +522,19 @@ void Notebook::performLayout(bool animated)
     const auto buttonWidth = tabHeight;
     const auto buttonHeight = tabHeight - 1;
 
+    std::vector<Item> filteredItems;
+    filteredItems.reserve(this->items_.size());
+    if (this->tabPredicate_)
+    {
+        std::copy_if(this->items_.begin(), this->items_.end(),
+                     std::back_inserter(filteredItems), this->tabPredicate_);
+    }
+    else
+    {
+        std::copy(this->items_.begin(), this->items_.end(),
+                  std::back_inserter(filteredItems));
+    }
+
     if (this->tabLocation_ == NotebookTabLocation::Top)
     {
         auto x = left;
@@ -533,13 +561,13 @@ void Notebook::performLayout(bool animated)
             // layout tabs
             /// Notebook tabs need to know if they are in the last row.
             auto firstInBottomRow =
-                this->items_.size() ? &this->items_.front() : nullptr;
+                filteredItems.size() ? &filteredItems.front() : nullptr;
 
-            for (auto &item : this->items_)
+            for (auto &item : filteredItems)
             {
                 /// Break line if element doesn't fit.
-                auto isFirst = &item == &this->items_.front();
-                auto isLast = &item == &this->items_.back();
+                auto isFirst = &item == &filteredItems.front();
+                auto isLast = &item == &filteredItems.back();
 
                 auto fitsInLine = ((isLast ? addButtonWidth : 0) + x +
                                    item.tab->width()) <= width();
@@ -559,7 +587,7 @@ void Notebook::performLayout(bool animated)
 
             /// Update which tabs are in the last row
             auto inLastRow = false;
-            for (const auto &item : this->items_)
+            for (const auto &item : filteredItems)
             {
                 if (&item == firstInBottomRow)
                 {
@@ -630,7 +658,7 @@ void Notebook::performLayout(bool animated)
         {
             return;
         }
-        int count = this->items_.size() + (this->showAddButton_ ? 1 : 0);
+        int count = filteredItems.size() + (this->showAddButton_ ? 1 : 0);
         int columnCount = ceil((float)count / tabsPerColumn);
 
         // only add width of all the tabs if they are not hidden
@@ -641,13 +669,15 @@ void Notebook::performLayout(bool animated)
                 bool isLastColumn = col == columnCount - 1;
                 auto largestWidth = 0;
                 int tabStart = col * tabsPerColumn;
-                int tabEnd = std::min((col + 1) * tabsPerColumn,
-                                      (int)this->items_.size());
+                int tabEnd =
+                    std::min(static_cast<size_t>((col + 1) * tabsPerColumn),
+                             filteredItems.size());
 
                 for (int i = tabStart; i < tabEnd; i++)
                 {
-                    largestWidth = std::max(
-                        this->items_.at(i).tab->normalTabWidth(), largestWidth);
+                    largestWidth =
+                        std::max(filteredItems.at(i).tab->normalTabWidth(),
+                                 largestWidth);
                 }
 
                 if (isLastColumn && this->showAddButton_)
@@ -661,7 +691,7 @@ void Notebook::performLayout(bool animated)
 
                 for (int i = tabStart; i < tabEnd; i++)
                 {
-                    auto item = this->items_.at(i);
+                    auto item = filteredItems.at(i);
 
                     /// Layout tab
                     item.tab->growWidth(largestWidth);
@@ -732,7 +762,7 @@ void Notebook::performLayout(bool animated)
         {
             return;
         }
-        int count = this->items_.size() + (this->showAddButton_ ? 1 : 0);
+        int count = filteredItems.size() + (this->showAddButton_ ? 1 : 0);
         int columnCount = ceil((float)count / tabsPerColumn);
 
         // only add width of all the tabs if they are not hidden
@@ -743,13 +773,15 @@ void Notebook::performLayout(bool animated)
                 bool isLastColumn = col == columnCount - 1;
                 auto largestWidth = 0;
                 int tabStart = col * tabsPerColumn;
-                int tabEnd = std::min((col + 1) * tabsPerColumn,
-                                      (int)this->items_.size());
+                int tabEnd =
+                    std::min(static_cast<size_t>((col + 1) * tabsPerColumn),
+                             filteredItems.size());
 
                 for (int i = tabStart; i < tabEnd; i++)
                 {
-                    largestWidth = std::max(
-                        this->items_.at(i).tab->normalTabWidth(), largestWidth);
+                    largestWidth =
+                        std::max(filteredItems.at(i).tab->normalTabWidth(),
+                                 largestWidth);
                 }
 
                 if (isLastColumn && this->showAddButton_)
@@ -768,7 +800,7 @@ void Notebook::performLayout(bool animated)
 
                 for (int i = tabStart; i < tabEnd; i++)
                 {
-                    auto item = this->items_.at(i);
+                    auto item = filteredItems.at(i);
 
                     /// Layout tab
                     item.tab->growWidth(largestWidth);
@@ -838,13 +870,13 @@ void Notebook::performLayout(bool animated)
             // layout tabs
             /// Notebook tabs need to know if they are in the last row.
             auto firstInBottomRow =
-                this->items_.size() ? &this->items_.front() : nullptr;
+                filteredItems.size() ? &filteredItems.front() : nullptr;
 
-            for (auto &item : this->items_)
+            for (auto &item : filteredItems)
             {
                 /// Break line if element doesn't fit.
-                auto isFirst = &item == &this->items_.front();
-                auto isLast = &item == &this->items_.back();
+                auto isFirst = &item == &filteredItems.front();
+                auto isLast = &item == &filteredItems.back();
 
                 auto fitsInLine = ((isLast ? addButtonWidth : 0) + x +
                                    item.tab->width()) <= width();
@@ -864,7 +896,7 @@ void Notebook::performLayout(bool animated)
 
             /// Update which tabs are in the last row
             auto inLastRow = false;
-            for (const auto &item : this->items_)
+            for (const auto &item : filteredItems)
             {
                 if (&item == firstInBottomRow)
                 {
@@ -1043,6 +1075,13 @@ size_t Notebook::visibleButtonCount() const
     return i;
 }
 
+void Notebook::setTabFilter(std::function<bool(const Item &)> filter)
+{
+    this->tabPredicate_ = std::move(filter);
+    this->performLayout();
+    this->updateTabVisibility();
+}
+
 SplitNotebook::SplitNotebook(Window *parent)
     : Notebook(parent)
 {
@@ -1057,6 +1096,21 @@ SplitNotebook::SplitNotebook(Window *parent)
     {
         this->addCustomButtons();
     }
+
+    getSettings()->liveTabsOnly.connect(
+        [this](bool liveTabsOnly, auto) {
+            if (liveTabsOnly)
+            {
+                this->setTabFilter([](const Item &item) {
+                    return item.tab->isLive();
+                });
+            }
+            else
+            {
+                this->setTabFilter(nullptr);
+            }
+        },
+        this->signalHolder_, true);
 
     this->signalHolder_.managedConnect(
         getApp()->windows->selectSplit, [this](Split *split) {

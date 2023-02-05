@@ -189,6 +189,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     tabDirectionDropdown->setMinimumWidth(
         tabDirectionDropdown->minimumSizeHint().width());
 
+    layout.addCheckbox("Only show live tabs", s.liveTabsOnly, false,
+                       "Only show tabs which have a channel that is live");
+
     layout.addCheckbox(
         "Show message reply context", s.hideReplyContext, true,
         "This setting will only affect how messages are shown. You can reply "

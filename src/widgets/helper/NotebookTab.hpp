@@ -41,6 +41,7 @@ public:
     void setTabLocation(NotebookTabLocation location);
 
     void setLive(bool isLive);
+    bool isLive() const;
     void setHighlightState(HighlightState style);
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;

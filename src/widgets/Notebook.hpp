@@ -9,6 +9,8 @@
 #include <QMessageBox>
 #include <QWidget>
 
+#include <functional>
+
 namespace chatterino {
 
 class Window;
@@ -85,7 +87,10 @@ protected:
         return items_;
     }
 
+    void setTabFilter(std::function<bool(const Item &)> filter);
+
 private:
+    void updateTabVisibility();
     void updateTabVisibilityMenuAction();
     void resizeAddButton();
 
@@ -113,6 +118,8 @@ private:
     NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
     QAction *lockNotebookLayoutAction_;
     QAction *showTabsAction_;
+
+    std::function<bool(const Item &)> tabPredicate_ = nullptr;
 };
 
 class SplitNotebook : public Notebook

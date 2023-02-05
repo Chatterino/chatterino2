@@ -336,6 +336,11 @@ void NotebookTab::setLive(bool isLive)
     }
 }
 
+bool NotebookTab::isLive() const
+{
+    return this->isLive_;
+}
+
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
     if (this->isSelected() || (!this->highlightEnabled_ &&
