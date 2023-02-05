@@ -58,14 +58,15 @@ public:
     bool getShowAddButton() const;
     void setShowAddButton(bool value);
 
-    void performLayout(bool animate = false);
-
     void setTabLocation(NotebookTabLocation location);
 
     bool isNotebookLayoutLocked() const;
     void setLockNotebookLayout(bool value);
 
     void addNotebookActionsToMenu(QMenu *menu);
+
+    // Update layout and tab visibility
+    void refresh();
 
 protected:
     virtual void scaleChangedEvent(float scale_) override;
@@ -91,6 +92,8 @@ protected:
     bool shouldShowTab(const NotebookTab *tab) const;
 
 private:
+    void performLayout(bool animate = false);
+
     void showTabVisibilityInfoPopup();
     void updateTabVisibility();
     void updateTabVisibilityMenuAction();

@@ -936,7 +936,16 @@ void SplitContainer::refreshTabLiveStatus()
         }
     }
 
-    this->tab_->setLive(liveStatus);
+    if (this->tab_->isLive() != liveStatus)
+    {
+        this->tab_->setLive(liveStatus);
+
+        auto *notebook = dynamic_cast<Notebook *>(this->parentWidget());
+        if (notebook)
+        {
+            notebook->refresh();
+        }
+    }
 }
 
 //

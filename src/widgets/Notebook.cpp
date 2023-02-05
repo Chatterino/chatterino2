@@ -434,6 +434,12 @@ void Notebook::showTabVisibilityInfoPopup()
     }
 }
 
+void Notebook::refresh()
+{
+    this->performLayout();
+    this->updateTabVisibility();
+}
+
 void Notebook::updateTabVisibility()
 {
     for (auto &item : this->items_)

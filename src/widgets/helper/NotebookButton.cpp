@@ -211,12 +211,12 @@ void NotebookButton::dropEvent(QDropEvent *event)
 
 void NotebookButton::hideEvent(QHideEvent *)
 {
-    this->parent_->performLayout();
+    this->parent_->refresh();
 }
 
 void NotebookButton::showEvent(QShowEvent *)
 {
-    this->parent_->performLayout();
+    this->parent_->refresh();
 }
 
 }  // namespace chatterino
