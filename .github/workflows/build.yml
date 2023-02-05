@@ -109,7 +109,8 @@ jobs:
           nmake /S /NOLOGO crashpad_handler
           windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
           cp bin/chatterino.exe Chatterino2/
-          cp bin/crashpad Chatterino2/
+          mkdir Chatterino2/crashpad
+          cp bin/crashpad/crashpad_handler.exe Chatterino2/crashpad/crashpad_handler.exe
           echo nightly > Chatterino2/modes
           7z a chatterino-windows-x86-64.zip Chatterino2/
           7z a bin/chatterino.pdb.7z bin/chatterino.pdb
