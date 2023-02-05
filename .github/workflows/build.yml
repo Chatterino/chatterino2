@@ -112,7 +112,7 @@ jobs:
           cp bin/crashpad Chatterino2/
           echo nightly > Chatterino2/modes
           7z a chatterino-windows-x86-64.zip Chatterino2/
-          zstd -9 bin/chatterino.pdb -o bin/chatterino.pdb.zst
+          7z a bin/chatterino.pdb.7z bin/chatterino.pdb
 
       - name: Upload artifact (Windows - binary)
         if: startsWith(matrix.os, 'windows')
@@ -125,8 +125,8 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/upload-artifact@v3
         with:
-          name: chatterino-windows-x86-64-${{ matrix.qt-version }}-symbols.pdb.zst
-          path: bin/chatterino.pdb.zst
+          name: chatterino-windows-x86-64-${{ matrix.qt-version }}-symbols.pdb.7z
+          path: bin/chatterino.pdb.7z
 
       - name: Clean Conan pkgs
         if: startsWith(matrix.os, 'windows')
