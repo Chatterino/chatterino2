@@ -2,6 +2,12 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
+#include "controllers/filters/parser/expressions/BinaryOperation.hpp"
+#include "controllers/filters/parser/expressions/Expression.hpp"
+#include "controllers/filters/parser/expressions/ListExpression.hpp"
+#include "controllers/filters/parser/expressions/RegexExpression.hpp"
+#include "controllers/filters/parser/expressions/UnaryOperation.hpp"
+#include "controllers/filters/parser/expressions/ValueExpression.hpp"
 #include "controllers/filters/parser/Types.hpp"
 #include "messages/Message.hpp"
 #include "providers/twitch/TwitchBadge.hpp"

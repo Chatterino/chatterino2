@@ -74,6 +74,18 @@ set(SOURCE_FILES
         controllers/filters/FilterRecord.hpp
         controllers/filters/FilterSet.cpp
         controllers/filters/FilterSet.hpp
+        controllers/filters/parser/expressions/Expression.cpp
+        controllers/filters/parser/expressions/Expression.hpp
+        controllers/filters/parser/expressions/BinaryOperation.cpp
+        controllers/filters/parser/expressions/BinaryOperation.hpp
+        controllers/filters/parser/expressions/ListExpression.cpp
+        controllers/filters/parser/expressions/ListExpression.hpp
+        controllers/filters/parser/expressions/RegexExpression.cpp
+        controllers/filters/parser/expressions/RegexExpression.hpp
+        controllers/filters/parser/expressions/UnaryOperation.hpp
+        controllers/filters/parser/expressions/UnaryOperation.cpp
+        controllers/filters/parser/expressions/ValueExpression.cpp
+        controllers/filters/parser/expressions/ValueExpression.hpp
         controllers/filters/parser/FilterParser.cpp
         controllers/filters/parser/FilterParser.hpp
         controllers/filters/parser/Tokenizer.cpp

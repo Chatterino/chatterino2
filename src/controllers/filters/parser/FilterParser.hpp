@@ -2,6 +2,7 @@
 
 #include "controllers/filters/parser/Tokenizer.hpp"
 #include "controllers/filters/parser/Types.hpp"
+#include "controllers/filters/parser/expressions/Expression.hpp"
 
 namespace chatterino {
 
