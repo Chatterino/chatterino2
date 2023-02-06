@@ -28,6 +28,7 @@ Example file:
 
 ```json
 {
+  "$schema": "https://raw.githubusercontent.com/Chatterino/chatterino2/master/docs/plugin-info.schema.json",
   "name": "Test plugin",
   "description": "This plugin is for testing stuff.",
   "authors": "Mm2PL",
