@@ -2,6 +2,7 @@
 #include "Application.hpp"
 #include "controllers/commands/CommandController.hpp"
 
+#include <magic_enum.hpp>
 #include <QDir>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -16,24 +17,55 @@ struct lua_State;
 namespace chatterino {
 
 struct PluginMeta {
+    // required fields
     QString name;
     QString description;
     QString authors;
-    QString homepage;
-
     QString license;
     semver::version version;
 
+    // optional
+    QString homepage;
     std::vector<QString> tags;
 
+    bool valid{};
+    std::vector<QString> invalidWhy;
+
     explicit PluginMeta(const QJsonObject &obj)
-        : name(obj.value("name").toString("A Plugin with no name"))
-        , description(obj.value("description").toString("Nothing here"))
-        , authors(
-              obj.value("authors").toString("[please tell me who made this]"))
-        , homepage(obj.value("homepage").toString("[https://example.com]"))
-        , license(obj.value("license").toString("[unknown]"))
+        : homepage(obj.value("homepage").toString(""))
     {
+        auto nameObj = obj.value("name");
+        if (!nameObj.isString())
+        {
+            this->invalidWhy.emplace_back("name is not a string");
+            this->valid = false;
+        }
+        this->name = nameObj.toString();
+
+        auto descrObj = obj.value("description");
+        if (!descrObj.isString())
+        {
+            this->invalidWhy.emplace_back("description is not a string");
+            this->valid = false;
+        }
+        this->description = descrObj.toString();
+
+        auto authorsObj = obj.value("authors");
+        if (!authorsObj.isString())
+        {
+            this->invalidWhy.emplace_back("description is not a string");
+            this->valid = false;
+        }
+        this->authors = authorsObj.toString();
+
+        auto licenseObj = obj.value("license");
+        if (!licenseObj.isString())
+        {
+            this->invalidWhy.emplace_back("license is not a string");
+            this->valid = false;
+        }
+        this->license = licenseObj.toString();
+
         auto v = semver::from_string_noexcept(
             obj.value("version").toString().toStdString());
         if (v.has_value())
@@ -42,12 +74,36 @@ struct PluginMeta {
         }
         else
         {
+            this->invalidWhy.emplace_back("unable to parse version");
+            this->valid = false;
             this->version = semver::version(0, 0, 0);
-            description.append("\nWarning: invalid version. Use semver.");
         }
-        for (const auto &t : obj.value("tags").toArray())
+        auto tagsObj = obj.value("tags");
+        if (!tagsObj.isUndefined())
         {
-            this->tags.push_back(t.toString());
+            if (!tagsObj.isArray())
+            {
+                this->invalidWhy.emplace_back("tags is not an array");
+                this->valid = false;
+                return;
+            }
+
+            auto tagsArr = tagsObj.toArray();
+            for (int i = 0; i < tagsArr.size(); i++)
+            {
+                const auto &t = tagsArr.at(i);
+                if (!t.isString())
+                {
+                    this->invalidWhy.push_back(
+                        QString("tags element #%1 is not a string (it is a %2)")
+                            .arg(i)
+                            .arg(QString::fromStdString(
+                                std::string(magic_enum::enum_name(t.type())))));
+                    this->valid = false;
+                    return;
+                }
+                this->tags.push_back(t.toString());
+            }
         }
     }
 };
