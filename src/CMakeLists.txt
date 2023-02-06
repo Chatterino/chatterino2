@@ -593,6 +593,14 @@ list(APPEND SOURCE_FILES ${RES_AUTOGEN_FILES})
 
 add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
+if(CHATTERINO_PLUGINS)
+    target_compile_definitions(${LIBRARY_PROJECT}
+        PRIVATE
+        CHATTERINO_HAVE_PLUGINS
+    )
+    message(STATUS "Building Chatterino with lua plugin support enabled.")
+endif()
+
 if (CHATTERINO_GENERATE_COVERAGE)
     include(CodeCoverage)
     append_coverage_compiler_flags_to_target(${LIBRARY_PROJECT})
