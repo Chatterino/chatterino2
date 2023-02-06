@@ -11,7 +11,7 @@ Chatterino searches for plugins in the `Plugins` directory in the app data, righ
 Each plugin should have its own directory.
 
 ```
-Chatterino dir/
+Chatterino Plugins dir/
 └── plugin_name/
     ├── init.lua
     └── info.json
