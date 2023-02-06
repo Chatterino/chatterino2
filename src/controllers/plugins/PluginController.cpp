@@ -101,7 +101,18 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
         return false;
     }
 
-    this->load(index, pluginDir, PluginMeta(doc.object()));
+    auto meta = PluginMeta(doc.object());
+    if (!meta.invalidWhy.empty())
+    {
+        qCDebug(chatterinoLua)
+            << "Plugin from" << pluginDir << "is invalid because:";
+        for (const auto &why : meta.invalidWhy)
+        {
+            qCDebug(chatterinoLua) << "- " << why;
+        }
+        return false;
+    }
+    this->load(index, pluginDir, meta);
     return true;
 }
 
