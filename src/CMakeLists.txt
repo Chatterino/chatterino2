@@ -616,7 +616,6 @@ if (CHATTERINO_GENERATE_COVERAGE)
         )
 endif ()
 
-
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         Qt${MAJOR_QT_VERSION}::Core
