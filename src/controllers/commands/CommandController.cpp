@@ -3219,6 +3219,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     return text;
 }
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 bool CommandController::registerPluginCommand(const QString &commandName)
 {
