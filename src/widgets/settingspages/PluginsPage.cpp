@@ -70,14 +70,20 @@ void PluginsPage::rebuildContent()
     auto layout = frame.setLayoutType<QVBoxLayout>();
     for (const auto &[codename, plugin] : getApp()->plugins->plugins())
     {
-        auto headerText = QString("%1 (%2)").arg(
-            plugin->meta.name,
-            QString::fromStdString(plugin->meta.version.to_string()));
+        QString headerText;
         if (plugin->isDupeName)
         {
-            // add ", from <folder name>)" in place of ")"
-            headerText.chop(1);
-            headerText += ", from " + codename + ")";
+            headerText = QString("%1 (%2, from %3)")
+                             .arg(plugin->meta.name,
+                                  QString::fromStdString(
+                                      plugin->meta.version.to_string()),
+                                  codename);
+        }
+        else
+        {
+            headerText = QString("%1 (%2)").arg(
+                plugin->meta.name,
+                QString::fromStdString(plugin->meta.version.to_string()));
         }
         auto plgroup = layout.emplace<QGroupBox>(headerText);
         auto pl = plgroup.setLayoutType<QFormLayout>();
