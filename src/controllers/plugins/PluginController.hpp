@@ -4,7 +4,6 @@
 
 #    include "common/Singleton.hpp"
 #    include "controllers/plugins/Plugin.hpp"
-#    include "singletons/Paths.hpp"
 
 #    include <QDir>
 #    include <QFileInfo>
@@ -21,6 +20,8 @@
 struct lua_State;
 
 namespace chatterino {
+
+class Paths;
 
 class PluginController : public Singleton
 {
