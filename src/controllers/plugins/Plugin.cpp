@@ -1,5 +1,8 @@
 #include "Plugin.hpp"
+
 #ifdef CHATTERINO_HAVE_PLUGINS
+
+#    include "lua.h"
 
 namespace chatterino {
 bool Plugin::registerCommand(const QString &name, const QString &functionName)
@@ -27,5 +30,14 @@ std::set<QString> Plugin::listRegisteredCommands()
     }
     return out;
 }
+
+Plugin::~Plugin()
+{
+    if (this->state_ != nullptr)
+    {
+        lua_close(this->state_);
+    }
+}
+
 }  // namespace chatterino
 #endif

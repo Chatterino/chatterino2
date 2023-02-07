@@ -125,6 +125,8 @@ public:
     {
     }
 
+    ~Plugin();
+
     bool registerCommand(const QString &name, const QString &functionName);
 
     std::set<QString> listRegisteredCommands();
