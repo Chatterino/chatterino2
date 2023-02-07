@@ -51,10 +51,6 @@
 #include <QRegularExpression>
 #include <QUrl>
 
-#ifdef CHATTERINO_HAVE_PLUGINS
-#    include "lua.h"
-#endif
-
 namespace {
 
 using namespace chatterino;
