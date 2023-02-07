@@ -52,7 +52,8 @@ void PluginController::actuallyInitialize()
     this->plugins_.clear();
     auto dir = QDir(getPaths()->pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
-    for (const auto &info : dir.entryInfoList(QDir::NoDotAndDotDot))
+    for (const auto &info :
+         dir.entryInfoList(QDir::NoFilter | QDir::NoDotAndDotDot))
     {
         if (info.isDir())
         {
