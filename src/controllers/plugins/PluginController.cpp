@@ -151,7 +151,7 @@ void PluginController::openLibrariesFor(lua_State *L,
     }
 
     // NOLINTNEXTLINE(*-avoid-c-arrays)
-    static const luaL_Reg C2LIB[] = {
+    static const luaL_Reg c2Lib[] = {
         {"system_msg", lua::api::c2_system_msg},
         {"register_command", lua::api::c2_register_command},
         {"send_msg", lua::api::c2_send_msg},
@@ -163,7 +163,7 @@ void PluginController::openLibrariesFor(lua_State *L,
     // count of elements in C2LIB - 1 (to account for terminator)
     lua::pushEmptyTable(L, 3);
 
-    luaL_setfuncs(L, C2LIB, 0);
+    luaL_setfuncs(L, c2Lib, 0);
     lua_setfield(L, global, "c2");
 
     // ban functions
