@@ -55,6 +55,7 @@
 #include <atomic>
 
 namespace chatterino {
+
 static std::atomic<bool> isAppInitialized{false};
 
 Application *Application::instance = nullptr;
