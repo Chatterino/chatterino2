@@ -87,7 +87,7 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
     if (!infojson.exists())
     {
         qCDebug(chatterinoLua)
-            << "Missing info.json in plugin directory" << pluginDir;
+            << "Missing info.json in plugin directory" << pluginDir.path();
         return false;
     }
     QFile infoFile(infojson.absoluteFilePath());
@@ -97,7 +97,7 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
     if (!doc.isObject())
     {
         qCDebug(chatterinoLua)
-            << "info.json root is not an object" << pluginDir;
+            << "info.json root is not an object" << pluginDir.path();
         return false;
     }
 
