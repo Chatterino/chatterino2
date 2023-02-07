@@ -150,7 +150,7 @@ void PluginController::openLibrariesFor(lua_State *L,
         lua_pop(L, 1);
     }
 
-    // NOLINTNEXTLINE
+    // NOLINTNEXTLINE(*-avoid-c-arrays)
     static const luaL_Reg C2LIB[] = {
         {"system_msg", lua::api::c2_system_msg},
         {"register_command", lua::api::c2_register_command},
@@ -179,7 +179,7 @@ void PluginController::openLibrariesFor(lua_State *L,
     lua_getfield(L, gtable, "dofile");
     lua_setfield(L, LUA_REGISTRYINDEX, "real_dofile");
 
-    // NOLINTNEXTLINE
+    // NOLINTNEXTLINE(*-avoid-c-arrays)
     static const luaL_Reg replacementFuncs[] = {
         {"load", lua::api::g_load},
 
