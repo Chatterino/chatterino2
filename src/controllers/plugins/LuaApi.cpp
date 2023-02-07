@@ -16,6 +16,9 @@
 
 #    include <QFileInfo>
 #    include <QTextCodec>
+
+// NOLINTBEGIN(*vararg)
+// luaL_error is a c-style vararg function, this makes clang-tidy not dislike it so much
 namespace chatterino::lua::api {
 
 int c2_register_command(lua_State *L)
@@ -23,20 +26,18 @@ int c2_register_command(lua_State *L)
     auto *pl = getApp()->plugins->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
-        luaL_error(L, "internal error: no plugin");  // NOLINT
+        luaL_error(L, "internal error: no plugin");
         return 0;
     }
 
     QString name;
     if (!lua::peek(L, &name, 1))
     {
-        // NOLINTNEXTLINE
         luaL_error(L, "cannot get string (1st arg of register_command)");
         return 0;
     }
     if (lua_isnoneornil(L, 2))
     {
-        // NOLINTNEXTLINE
         luaL_error(L, "missing argument for register_command: function "
                       "\"pointer\"");
         return 0;
@@ -80,7 +81,7 @@ int c2_system_msg(lua_State *L)
     if (lua_gettop(L) != 2)
     {
         qCDebug(chatterinoLua) << "system_msg: need 2 args";
-        luaL_error(L, "need exactly 2 arguments");  // NOLINT
+        luaL_error(L, "need exactly 2 arguments");
         lua::push(L, false);
         return 1;
     }
@@ -113,14 +114,12 @@ int g_load(lua_State *L)
         utf8->toUnicode(data.constData(), data.size(), &state);
         if (state.invalidChars != 0)
         {
-            // NOLINTNEXTLINE
             luaL_error(L, "invalid utf-8 in load() is not allowed");
             return 0;
         }
     }
     else
     {
-        // NOLINTNEXTLINE
         luaL_error(L, "using reader function in load() is not allowed");
         return 0;
     }
@@ -152,7 +151,6 @@ int g_dofile(lua_State *L)
     if (countArgs == 0)
     {
         lua_pushnil(L);
-        // NOLINTNEXTLINE
         luaL_error(L, "it is not allowed to call dofile() without arguments");
         return 1;
     }
@@ -162,7 +160,6 @@ int g_dofile(lua_State *L)
     if (!lua::pop(L, &fname))
     {
         lua_pushnil(L);
-        // NOLINTNEXTLINE
         luaL_error(L, "chatterino g_dofile: expected a string for a filename");
         return 1;
     }
@@ -174,7 +171,6 @@ int g_dofile(lua_State *L)
     if (!dir.isParentOf(file))
     {
         lua_pushnil(L);
-        // NOLINTNEXTLINE
         luaL_error(L, "chatterino g_dofile: filename must be inside of the "
                       "plugin directory");
         return 1;
@@ -187,7 +183,6 @@ int g_dofile(lua_State *L)
     if (qf.size() > 10'000'000)
     {
         lua_pushnil(L);
-        // NOLINTNEXTLINE
         luaL_error(L, "chatterino g_dofile: size limit of 10MB exceeded, what "
                       "the hell are you doing");
         return 1;
@@ -199,7 +194,6 @@ int g_dofile(lua_State *L)
     if (state.invalidChars != 0)
     {
         lua_pushnil(L);
-        // NOLINTNEXTLINE
         luaL_error(L, "invalid utf-8 in dofile() target (%s) is not allowed",
                    fname.toStdString().c_str());
         return 1;
@@ -215,4 +209,5 @@ int g_dofile(lua_State *L)
 }
 
 }  // namespace chatterino::lua::api
+// NOLINTEND(*vararg)
 #endif
