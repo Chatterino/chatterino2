@@ -1,16 +1,17 @@
 #pragma once
-#include "Application.hpp"
-#include "controllers/commands/CommandController.hpp"
+#ifdef CHATTERINO_HAVE_PLUGINS
+#    include "Application.hpp"
+#    include "controllers/commands/CommandController.hpp"
 
-#include <magic_enum.hpp>
-#include <QDir>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QString>
-#include <semver/semver.hpp>
+#    include <magic_enum.hpp>
+#    include <QDir>
+#    include <QJsonArray>
+#    include <QJsonObject>
+#    include <QString>
+#    include <semver/semver.hpp>
 
-#include <set>
-#include <vector>
+#    include <set>
+#    include <vector>
 
 struct lua_State;
 
@@ -143,3 +144,4 @@ private:
     friend class PluginController;
 };
 }  // namespace chatterino
+#endif
