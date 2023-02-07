@@ -287,7 +287,7 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
         {
             const auto &funcName = it->second;
 
-            auto *L = plugin->state_;  // NOLINT
+            auto *L = plugin->state_;
             lua_getfield(L, LUA_REGISTRYINDEX, funcName.toStdString().c_str());
             lua::push(L, ctx);
 
