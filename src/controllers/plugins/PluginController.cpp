@@ -60,8 +60,8 @@ void PluginController::actuallyInitialize()
         return;
     }
     auto dir = QDir(getPaths()->pluginsDirectory);
-    qCDebug(chatterinoLua) << "loading plugins from " << dir;
-    for (const auto &info : dir.entryInfoList())
+    qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
+    for (const auto &info : dir.entryInfoList(QDir::NoDotAndDotDot))
     {
         if (info.isDir())
         {
@@ -74,15 +74,15 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
 {
     // look for init.lua
     auto index = QFileInfo(pluginDir.filePath("init.lua"));
-    qCDebug(chatterinoLua) << "looking for init.lua and info.json in"
+    qCDebug(chatterinoLua) << "Looking for init.lua and info.json in"
                            << pluginDir.path();
     if (!index.exists())
     {
         qCDebug(chatterinoLua)
-            << "Missing init.lua in plugin directory" << pluginDir;
+            << "Missing init.lua in plugin directory:" << pluginDir.path();
         return false;
     }
-    qCDebug(chatterinoLua) << "found init.lua, now looking for info.json!";
+    qCDebug(chatterinoLua) << "Found init.lua, now looking for info.json!";
     auto infojson = QFileInfo(pluginDir.filePath("info.json"));
     if (!infojson.exists())
     {
@@ -201,7 +201,6 @@ void PluginController::openLibrariesFor(lua_State *L,
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
                             const PluginMeta &meta)
 {
-    qCDebug(chatterinoLua) << "Running lua file" << index;
     lua_State *l = luaL_newstate();
     PluginController::openLibrariesFor(l, meta);
 
@@ -223,7 +222,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
                               << meta.name << ") because it is disabled";
         return;
     }
-
+    qCDebug(chatterinoLua) << "Running lua file:" << index;
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
     {
