@@ -31,6 +31,7 @@ void PluginController::initialize(Settings &settings, Paths &paths)
 {
     (void)paths;
 
+    // actuallyInitialize will be called by this connection
     settings.enableAnyPlugins.connect([this](bool enabled) {
         if (enabled)
         {
@@ -47,7 +48,6 @@ void PluginController::initialize(Settings &settings, Paths &paths)
             this->plugins_.clear();
         }
     });
-    this->actuallyInitialize();
 }
 
 // this function exists to allow for connecting to enableAnyPlugins option
