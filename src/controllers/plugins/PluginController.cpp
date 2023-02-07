@@ -35,11 +35,6 @@ void PluginController::initialize(Settings &settings, Paths &paths)
         else
         {
             // uninitialize plugins
-            for (const auto &[codename, plugin] : this->plugins_)
-            {
-                this->reload(codename);
-            }
-            // can safely delete them now, after lua freed its stuff
             this->plugins_.clear();
         }
     });
@@ -54,6 +49,7 @@ void PluginController::actuallyInitialize()
             << "Loading plugins disabled via Setting, skipping";
         return;
     }
+    this->plugins_.clear();
     auto dir = QDir(getPaths()->pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
     for (const auto &info : dir.entryInfoList(QDir::NoDotAndDotDot))
