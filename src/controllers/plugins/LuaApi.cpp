@@ -102,7 +102,6 @@ int c2_system_msg(lua_State *L)
     return 1;
 }
 
-static const QChar REPLACEMENT_CHARACTER = QChar(0xFFFD);
 int g_load(lua_State *L)
 {
     auto countArgs = lua_gettop(L);
