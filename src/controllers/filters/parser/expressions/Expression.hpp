@@ -1,8 +1,8 @@
 #pragma once
 
+#include "controllers/filters/parser/Tokenizer.hpp"
 #include "controllers/filters/parser/Types.hpp"
 
-#include <QMetaType>
 #include <QString>
 #include <QVariant>
 
