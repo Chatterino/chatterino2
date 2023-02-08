@@ -65,7 +65,7 @@ Writes a message to the Chatterino log. The `level` argument should be a
 
 Example:
 
-```
+```lua
 c2.log(c2.LogLevel.Warning, "Hello, this should show up in the Chatterino log by default")
 
 c2.log(c2.LogLevel.Debug, "Hello world")
@@ -112,7 +112,7 @@ Sends a message to `channel` with the specified text. Also executes commands.
 
 Example:
 
-```
+```lua
 function cmdShout(ctx)
     table.remove(ctx.words, 1)
     local output = table.concat(ctx.words, " ")
@@ -157,7 +157,7 @@ You are restricted to loading files in your plugin's directory. You cannot load 
 
 Example:
 
-```
+```lua
 execfile("stuff.lua") -- executes Plugins/name/stuff.lua
 execfile("./stuff.lua") -- executes Plugins/name/stuff.lua
 execfile("../stuff.lua") -- tries to load Plugins/stuff.lua and errors
