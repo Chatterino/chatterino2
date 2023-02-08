@@ -15,6 +15,7 @@
 #    include "lualib.h"
 
 #    include <QFileInfo>
+#    include <QLoggingCategory>
 #    include <QTextCodec>
 
 // NOLINTBEGIN(*vararg)
@@ -100,6 +101,63 @@ int c2_system_msg(lua_State *L)
     chn->addMessage(makeSystemMessage(text));
     lua::push(L, true);
     return 1;
+}
+
+namespace {
+    void logHelper(lua_State *L, Plugin *pl, QDebug stream, int argc)
+    {
+        stream.noquote();
+        stream << "[" + pl->codename + ":" + pl->meta.name + "]";
+        for (int i = 1; i <= argc; i++)
+        {
+            stream << lua::toString(L, i);
+        }
+        lua_pop(L, argc);
+    }
+
+}  // namespace
+
+int c2_log(lua_State *L)
+{
+    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+    if (pl == nullptr)
+    {
+        luaL_error(L, "print: internal error: no plugin?");
+        return 0;
+    }
+    auto logc = lua_gettop(L) - 1;
+    // this is the expansion of qCDebug() macro
+    auto temp =
+        (QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE,
+                        QT_MESSAGELOG_FUNC, chatterinoLua().categoryName()));
+
+    LogLevel lvl{};
+    if (!lua::pop(L, &lvl, 1))
+    {
+        luaL_error(L, "Invalid log level, use one from c2.LogLevel.");
+        return 0;
+    }
+    QDebug stream{(QString *)nullptr};
+    switch (lvl)
+    {
+        case LogLevel::Debug:
+            stream = temp.debug();
+            break;
+        case LogLevel::Critical:
+            stream = temp.critical();
+            break;
+        case LogLevel::Info:
+            stream = temp.info();
+            break;
+        case LogLevel::Warning:
+            stream = temp.warning();
+            break;
+        default:
+            assert(false && "if this happens magic_enum must have failed us");
+            break;
+    }
+    logHelper(L, pl, stream, logc);
+    return 0;
 }
 
 int g_load(lua_State *L)
@@ -205,6 +263,24 @@ int g_dofile(lua_State *L)
     lua_call(L, 1, LUA_MULTRET);
 
     return lua_gettop(L);
+}
+
+int g_print(lua_State *L)
+{
+    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+    if (pl == nullptr)
+    {
+        luaL_error(L, "print: internal error: no plugin?");
+        return 0;
+    }
+    auto argc = lua_gettop(L);
+    // this is the expansion of qCDebug() macro
+    auto stream =
+        (QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE,
+                        QT_MESSAGELOG_FUNC, chatterinoLua().categoryName())
+             .debug());
+    logHelper(L, pl, stream, argc);
+    return 0;
 }
 
 }  // namespace chatterino::lua::api

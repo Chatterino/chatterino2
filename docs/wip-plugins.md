@@ -55,7 +55,31 @@ The official manual for them is available [here](https://www.lua.org/manual/5.4/
 
 ### Chatterino API
 
-All Chatterino functions are exposed in a global table called `c2`. The following functions are available
+All Chatterino functions are exposed in a global table called `c2`. The following members are available:
+
+#### `log(level, args...)`
+
+Writes a message to the Chatterino log. The `level` argument should be a
+`LogLevel` member. All `args` should be convertible to a string with
+`tostring()`.
+
+Example:
+
+```
+c2.log(c2.LogLevel.Warning, "Hello, this should show up in the Chatterino log by default")
+
+c2.log(c2.LogLevel.Debug, "Hello world")
+-- Equivalent to doing qCDebug(chatterinoLua) << "[pluginDirectory:Plugin Name]" << "Hello, world"; from C++
+```
+
+#### `LogLevel` enum
+
+This table describes log levels available to Lua Plugins. The values behind the names may change, do not count on them. It has the following keys:
+
+- `Debug`
+- `Info`
+- `Warning`
+- `Critical`
 
 #### `register_command(name, handler)`
 
@@ -139,3 +163,7 @@ execfile("./stuff.lua") -- executes Plugins/name/stuff.lua
 execfile("../stuff.lua") -- tries to load Plugins/stuff.lua and errors
 execfile("luac.out") -- tried to load Plugins/name/luac.out and errors because it contains non-utf8 data
 ```
+
+#### `print(Args...)`
+
+The `print` global function is equivalent to calling `c2.log(c2.LogLevel.Debug, Args...)`
