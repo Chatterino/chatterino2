@@ -5,6 +5,7 @@
 
 #    include <QList>
 
+#    include <string>
 #    include <vector>
 struct lua_State;
 class QJsonObject;
@@ -34,6 +35,9 @@ bool peek(lua_State *L, double *out, StackIdx idx = -1);
 bool peek(lua_State *L, QString *out, StackIdx idx = -1);
 bool peek(lua_State *L, QByteArray *out, StackIdx idx = -1);
 bool peek(lua_State *L, std::string *out, StackIdx idx = -1);
+
+// forces conversion of value at idx to a string
+QString toString(lua_State *L, StackIdx idx = -1);
 
 /// TEMPLATES
 
