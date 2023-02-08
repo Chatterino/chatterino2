@@ -36,23 +36,29 @@ QVariant ListExpression::execute(const ContextMap &context) const
     }
 }
 
-PossibleType ListExpression::returnType() const
+PossibleType ListExpression::synthesizeType() const
 {
+    std::vector<PossibleType> types;
+    types.reserve(this->list_.size());
     for (const auto &exp : this->list_)
     {
-        if (exp->returnType() != QMetaType::QString)
+        auto typ = exp->synthesizeType();
+        if (!typ)
         {
-            return QMetaType::QVariantList;
+            return typ;  // Ill-typed
         }
+
+        types.push_back(typ);
     }
 
-    // Every item evaluates to a string
-    return QMetaType::QStringList;
-}
+    if (types.size() == 2 && types[0] == Type::RegularExpression &&
+        types[1] == Type::Int)
+    {
+        // Specific {RegularExpression, Int} form
+        return Type::MatchingSpecifier;
+    }
 
-bool ListExpression::validateTypes(TypeValidator &validator) const
-{
-    return true;  // Nothing to do
+    return Type::List;
 }
 
 QString ListExpression::debug() const

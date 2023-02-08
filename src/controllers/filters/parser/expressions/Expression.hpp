@@ -18,8 +18,7 @@ public:
 
     virtual QVariant execute(const ContextMap &) const;
 
-    virtual PossibleType returnType() const;
-    virtual bool validateTypes(TypeValidator &validator) const;
+    virtual PossibleType synthesizeType() const;
 
     virtual QString debug() const;
     virtual QString filterString() const;

@@ -7,13 +7,9 @@ QVariant Expression::execute(const ContextMap &) const
     return false;
 }
 
-PossibleType Expression::returnType() const
+PossibleType Expression::synthesizeType() const
 {
-    return QMetaType::Bool;
-}
-bool Expression::validateTypes(TypeValidator &validator) const
-{
-    return true;
+    return IllTyped{this, "Not implemented"};
 }
 
 QString Expression::debug() const

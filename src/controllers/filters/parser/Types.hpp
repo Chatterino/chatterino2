@@ -1,6 +1,10 @@
 #pragma once
 
+#include <QString>
+#include <QVariant>
+
 #include <memory>
+#include <optional>
 #include <set>
 
 namespace chatterino {
@@ -66,50 +70,50 @@ enum TokenType {
     NONE = 200
 };
 
-QString metaTypeToString(QMetaType::Type type);
 QString tokenTypeToInfoString(TokenType type);
+
+enum class Type {
+    String,
+    Int,
+    Bool,
+    Color,
+    RegularExpression,
+    List,
+    MatchingSpecifier,  // 2-element list in {RegularExpression, Int} form
+    Map
+};
+
+struct IllTyped {
+    const Expression *expr;
+    QString message;
+};
 
 class PossibleType
 {
 public:
-    PossibleType(QMetaType::Type t);
-    PossibleType(std::initializer_list<QMetaType::Type> t);
+    // Synthesized type
+    PossibleType(Type t);
+    // Ill-typed
+    PossibleType(IllTyped illTyped);
 
     QString string() const;
 
-    bool operator==(QMetaType::Type t) const;
+    bool operator==(Type t) const;
     bool operator==(const PossibleType &p) const;
-    bool operator!=(QMetaType::Type t) const;
+    bool operator!=(Type t) const;
     bool operator!=(const PossibleType &p) const;
 
-private:
-    std::set<QMetaType::Type> types_;
-};
+    bool well() const;
+    operator bool() const;
 
-class TypeValidator
-{
-public:
-    TypeValidator();
-
-    bool must(bool condition, const QString &message);
-
-    bool must(bool condition, TokenType op, const PossibleType &left,
-              const PossibleType &right);
-    bool must(bool condition, TokenType op, const PossibleType &left,
-              const PossibleType &right, const Expression *wholeExp);
-
-    bool must(bool condition, TokenType op, const PossibleType &right,
-              const Expression *wholeExp);
-
-    void fail(const QString &message);
-
-    bool valid() const;
-    const QString &failureMessage();
+    const std::optional<IllTyped> &illTypedDescription() const;
 
 private:
-    bool valid_ = true;
-    QString failureMessage_ = "";
+    Type type_;
+    std::optional<IllTyped> illTyped_;
 };
+
+bool isList(PossibleType typ);
 
 inline bool variantIs(const QVariant &a, QMetaType::Type type)
 {

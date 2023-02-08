@@ -10,33 +10,34 @@ namespace filterparser {
 
 struct IdentifierDescription {
     QString humanDescription;
-    QMetaType::Type type;
+    Type type;
 };
 
+using T = Type;
+
 static const QMap<QString, IdentifierDescription> validIdentifiersMap = {
-    {"author.badges", {"author badges", QMetaType::QStringList}},
-    {"author.color", {"author color", QMetaType::QColor}},
-    {"author.name", {"author name", QMetaType::QString}},
-    {"author.no_color", {"author has no color?", QMetaType::Bool}},
-    {"author.subbed", {"author subscribed?", QMetaType::Bool}},
-    {"author.sub_length", {"author sub length", QMetaType::Int}},
-    {"channel.name", {"channel name", QMetaType::QString}},
-    {"channel.watching", {"/watching channel?", QMetaType::Bool}},
-    {"channel.live", {"channel live?", QMetaType::Bool}},
-    {"flags.highlighted", {"highlighted?", QMetaType::Bool}},
-    {"flags.points_redeemed", {"redeemed points?", QMetaType::Bool}},
-    {"flags.sub_message", {"sub/resub message?", QMetaType::Bool}},
-    {"flags.system_message", {"system message?", QMetaType::Bool}},
-    {"flags.reward_message",
-     {"channel point reward message?", QMetaType::Bool}},
-    {"flags.first_message", {"first message?", QMetaType::Bool}},
-    {"flags.elevated_message", {"elevated message?", QMetaType::Bool}},
-    {"flags.cheer_message", {"cheer message?", QMetaType::Bool}},
-    {"flags.whisper", {"whisper message?", QMetaType::Bool}},
-    {"flags.reply", {"reply message?", QMetaType::Bool}},
-    {"flags.automod", {"automod message?", QMetaType::Bool}},
-    {"message.content", {"message text", QMetaType::QString}},
-    {"message.length", {"message length", QMetaType::Int}}};
+    {"author.badges", {"author badges", T::List}},
+    {"author.color", {"author color", T::Color}},
+    {"author.name", {"author name", T::String}},
+    {"author.no_color", {"author has no color?", T::Bool}},
+    {"author.subbed", {"author subscribed?", T::Bool}},
+    {"author.sub_length", {"author sub length", T::Int}},
+    {"channel.name", {"channel name", T::String}},
+    {"channel.watching", {"/watching channel?", T::Bool}},
+    {"channel.live", {"channel live?", T::Bool}},
+    {"flags.highlighted", {"highlighted?", T::Bool}},
+    {"flags.points_redeemed", {"redeemed points?", T::Bool}},
+    {"flags.sub_message", {"sub/resub message?", T::Bool}},
+    {"flags.system_message", {"system message?", T::Bool}},
+    {"flags.reward_message", {"channel point reward message?", T::Bool}},
+    {"flags.first_message", {"first message?", T::Bool}},
+    {"flags.elevated_message", {"elevated message?", T::Bool}},
+    {"flags.cheer_message", {"cheer message?", T::Bool}},
+    {"flags.whisper", {"whisper message?", T::Bool}},
+    {"flags.reply", {"reply message?", T::Bool}},
+    {"flags.automod", {"automod message?", T::Bool}},
+    {"message.content", {"message text", T::String}},
+    {"message.length", {"message length", T::Int}}};
 
 // clang-format off
 static const QRegularExpression tokenRegex(

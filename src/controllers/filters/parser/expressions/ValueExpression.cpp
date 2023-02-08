@@ -19,24 +19,26 @@ QVariant ValueExpression::execute(const ContextMap &context) const
     return this->value_;
 }
 
-PossibleType ValueExpression::returnType() const
+PossibleType ValueExpression::synthesizeType() const
 {
-    if (this->type_ == TokenType::IDENTIFIER)
+    switch (this->type_)
     {
-        auto it = validIdentifiersMap.find(this->value_.toString());
-        if (it != validIdentifiersMap.end())
-        {
-            return it.value().type;
+        case TokenType::IDENTIFIER: {
+            auto it = validIdentifiersMap.find(this->value_.toString());
+            if (it != validIdentifiersMap.end())
+            {
+                return it.value().type;
+            }
+
+            return IllTyped{this, "Unable to synthesize identifier type"};
         }
-
-        return Expression::returnType();  // Invalid fallback
+        case TokenType::INT:
+            return Type::Int;
+        case TokenType::STRING:
+            return Type::String;
+        default:
+            return IllTyped{this, "Invalid value type"};
     }
-    return static_cast<QMetaType::Type>(this->value_.type());
-}
-
-bool ValueExpression::validateTypes(TypeValidator &validator) const
-{
-    return true;  // Nothing to do
 }
 
 TokenType ValueExpression::type()

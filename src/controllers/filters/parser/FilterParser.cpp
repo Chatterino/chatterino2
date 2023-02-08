@@ -125,11 +125,17 @@ FilterParser::FilterParser(const QString &text)
 {
     if (this->valid_)
     {
-        TypeValidator validator;
-        bool typesValid = this->builtExpression_->validateTypes(validator);
-        if (!typesValid)
+        auto resultType = this->builtExpression_->synthesizeType();
+        if (!resultType)
         {
-            this->errorLog("Invalid types\n" + validator.failureMessage());
+            this->errorLog(resultType.illTypedDescription()->message);
+            return;
+        }
+
+        if (resultType != Type::Bool)
+        {
+            this->errorLog(QString("Expected type Bool but got %1")
+                               .arg(resultType.string()));
         }
     }
 }

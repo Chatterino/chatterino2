@@ -1,30 +1,39 @@
 #include "Types.hpp"
 
-#include "controllers/filters/parser/Tokenizer.hpp"
 #include "controllers/filters/parser/expressions/Expression.hpp"
+#include "controllers/filters/parser/Tokenizer.hpp"
 
 namespace filterparser {
 
-QString metaTypeToString(QMetaType::Type type)
+bool isList(PossibleType typ)
 {
-    using T = QMetaType;
+    using T = Type;
+    return typ == T::List || typ == T::MatchingSpecifier;
+}
+
+QString typeToString(Type type)
+{
+    using T = Type;
     switch (type)
     {
-        case T::QString:
-            return "string";
-        case T::Bool:
-            return "boolean";
+        case T::String:
+            return "String";
         case T::Int:
-            return "integer";
-        case T::QVariantList:
-        case T::QStringList:
-            return "list";
-        case T::QRegExp:
-            return "regular expression";
-        case T::QColor:
-            return "color";
+            return "Int";
+        case T::Bool:
+            return "Bool";
+        case T::Color:
+            return "Color";
+        case T::RegularExpression:
+            return "RegularExpression";
+        case T::List:
+            return "List";
+        case T::MatchingSpecifier:
+            return "MatchingSpecifier";
+        case T::Map:
+            return "Map";
         default:
-            return QString::fromUtf8(QMetaType::typeName(type));
+            return "Unknown";
     }
 }
 
@@ -100,60 +109,48 @@ QString tokenTypeToInfoString(TokenType type)
     }
 }
 
-PossibleType::PossibleType(QMetaType::Type t)
+PossibleType::PossibleType(Type t)
+    : type_(t)
+    , illTyped_({})
 {
-    this->types_.insert(t);
 }
 
-PossibleType::PossibleType(std::initializer_list<QMetaType::Type> t)
-    : types_(t)
+PossibleType::PossibleType(IllTyped illTyped)
+    : type_(Type::Bool)  // arbitrary default
+    , illTyped_(std::move(illTyped))
 {
-    assert(!this->types_.empty());
 }
 
 QString PossibleType::string() const
 {
-    if (this->types_.size() == 1)
+    if (this->well())
     {
-        return metaTypeToString(*this->types_.begin());
+        return typeToString(this->type_);
     }
-    else
-    {
-        QStringList names;
-        names.reserve(this->types_.size());
-        for (QMetaType::Type t : this->types_)
-        {
-            names.push_back(metaTypeToString(t));
-        }
-        return "(" + names.join(" | ") + ")";
-    }
+
+    return "IllTyped";
 }
 
-bool PossibleType::operator==(QMetaType::Type t) const
+bool PossibleType::operator==(Type t) const
 {
-    return this->types_.count(t) != 0;
+    assert(this->well());
+    return this->type_ == t;
 }
 
 bool PossibleType::operator==(const PossibleType &p) const
 {
-    // Check if there are any common types between the two sets
-    auto i = this->types_.cbegin();
-    auto j = p.types_.cbegin();
-    while (i != this->types_.cend() && j != p.types_.cend())
+    assert(this->well());
+    if (!p.well())
     {
-        if (*i == *j)
-            return true;
-        else if (*i < *j)
-            ++i;
-        else
-            ++j;
+        return false;  // Ill-type never equal
     }
-    return false;
+
+    return this->type_ == p.type_;
 }
 
-bool PossibleType::operator!=(QMetaType::Type t) const
+bool PossibleType::operator!=(Type t) const
 {
-    return this->types_.count(t) == 0;
+    return !this->operator==(t);
 }
 
 bool PossibleType::operator!=(const PossibleType &p) const
@@ -161,70 +158,20 @@ bool PossibleType::operator!=(const PossibleType &p) const
     return !this->operator==(p);
 }
 
-TypeValidator::TypeValidator()
+bool PossibleType::well() const
 {
+    // whether we are well-typed
+    return !this->illTyped_.has_value();
 }
 
-bool TypeValidator::must(bool condition, const QString &message)
+PossibleType::operator bool() const
 {
-    if (!condition)
-    {
-        this->fail(message);
-    }
-    return condition;
+    return this->well();
 }
 
-bool TypeValidator::must(bool condition, TokenType op, const PossibleType &left,
-                         const PossibleType &right)
+const std::optional<IllTyped> &PossibleType::illTypedDescription() const
 {
-    if (!condition)
-    {
-        this->fail(
-            QStringLiteral("Can't compute %1 for %2 and %3")
-                .arg(tokenTypeToInfoString(op), left.string(), right.string()));
-    }
-    return condition;
-}
-
-bool TypeValidator::must(bool condition, TokenType op, const PossibleType &left,
-                         const PossibleType &right, const Expression *wholeExp)
-{
-    if (!condition)
-    {
-        this->fail(
-            QStringLiteral("Can't compute %1 for %2 and %3\n\nExpression: %4")
-                .arg(tokenTypeToInfoString(op), left.string(), right.string(),
-                     wholeExp->filterString()));
-    }
-    return condition;
-}
-
-bool TypeValidator::must(bool condition, TokenType op,
-                         const PossibleType &right, const Expression *wholeExp)
-{
-    if (!condition)
-    {
-        this->fail(QStringLiteral("Can't compute %1 for %2\n\nExpression: %4")
-                       .arg(tokenTypeToInfoString(op), right.string(),
-                            wholeExp->filterString()));
-    }
-    return condition;
-}
-
-void TypeValidator::fail(const QString &message)
-{
-    this->valid_ = false;
-    this->failureMessage_ = message;
-}
-
-bool TypeValidator::valid() const
-{
-    return this->valid_;
-}
-
-const QString &TypeValidator::failureMessage()
-{
-    return this->failureMessage_;
+    return this->illTyped_;
 }
 
 }  // namespace filterparser

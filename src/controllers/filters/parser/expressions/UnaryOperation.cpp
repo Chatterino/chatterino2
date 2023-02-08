@@ -22,33 +22,22 @@ QVariant UnaryOperation::execute(const ContextMap &context) const
     }
 }
 
-PossibleType UnaryOperation::returnType() const
+PossibleType UnaryOperation::synthesizeType() const
 {
-    auto right = this->right_->returnType();
+    auto right = this->right_->synthesizeType();
+    if (!right)
+    {
+        return right;
+    }
+
     switch (this->op_)
     {
         case NOT:
-            return QMetaType::Bool;
+            if (right == Type::Bool)
+                return Type::Bool;
+            return IllTyped{this, "Can only negate boolean values"};
         default:
-            return QMetaType::Bool;
-    }
-}
-
-bool UnaryOperation::validateTypes(TypeValidator &validator) const
-{
-    if (!this->right_->validateTypes(validator))
-    {
-        return false;
-    }
-
-    auto right = this->right_->returnType();
-    switch (this->op_)
-    {
-        case NOT:
-            return validator.must(right == QMetaType::Bool, this->op_, right,
-                                  this);
-        default:
-            return false;
+            return IllTyped{this, "Not implemented"};
     }
 }
 

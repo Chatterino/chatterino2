@@ -14,14 +14,9 @@ QVariant RegexExpression::execute(const ContextMap &) const
     return this->regex_;
 }
 
-PossibleType RegexExpression::returnType() const
+PossibleType RegexExpression::synthesizeType() const
 {
-    return QMetaType::QRegularExpression;
-}
-
-bool RegexExpression::validateTypes(TypeValidator &validator) const
-{
-    return true;  // Nothing to do
+    return Type::RegularExpression;
 }
 
 QString RegexExpression::debug() const
