@@ -61,7 +61,12 @@ StackIdx pushEmptyTable(lua_State *L, int countProperties)
 
 StackIdx push(lua_State *L, const QString &str)
 {
-    lua_pushstring(L, str.toStdString().c_str());
+    return lua::push(L, str.toStdString());
+}
+
+StackIdx push(lua_State *L, const std::string &str)
+{
+    lua_pushstring(L, str.c_str());
     return lua_gettop(L);
 }
 
@@ -123,6 +128,22 @@ bool peek(lua_State *L, QByteArray *out, StackIdx idx)
         assert(false && "string longer than INT_MAX, shit's fucked, yo");
     }
     *out = QByteArray(str, int(len));
+    return true;
+}
+
+bool peek(lua_State *L, std::string *out, StackIdx idx)
+{
+    size_t len{0};
+    const char *str = lua_tolstring(L, idx, &len);
+    if (str == nullptr)
+    {
+        return false;
+    }
+    if (len >= INT_MAX)
+    {
+        assert(false && "string longer than INT_MAX, shit's fucked, yo");
+    }
+    *out = std::string(str, len);
     return true;
 }
 }  // namespace chatterino::lua
