@@ -147,15 +147,20 @@ void PluginController::openLibrariesFor(lua_State *L,
         {"system_msg", lua::api::c2_system_msg},
         {"register_command", lua::api::c2_register_command},
         {"send_msg", lua::api::c2_send_msg},
+        {"log", lua::api::c2_log},
         {nullptr, nullptr},
     };
     lua_pushglobaltable(L);
     auto global = lua_gettop(L);
 
-    // count of elements in C2LIB - 1 (to account for terminator)
-    lua::pushEmptyTable(L, 3);
+    // count of elements in C2LIB + LogLevel
+    auto c2libIdx = lua::pushEmptyTable(L, 5);
 
     luaL_setfuncs(L, c2Lib, 0);
+
+    lua::pushEnumTable<lua::api::LogLevel>(L);
+    lua_setfield(L, c2libIdx, "LogLevel");
+
     lua_setfield(L, global, "c2");
 
     // ban functions
@@ -177,6 +182,8 @@ void PluginController::openLibrariesFor(lua_State *L,
 
         // chatterino dofile is way more similar to require() than dofile()
         {"execfile", lua::api::g_dofile},
+
+        {"print", lua::api::g_print},
         {nullptr, nullptr},
     };
     luaL_setfuncs(L, replacementFuncs, 0);
