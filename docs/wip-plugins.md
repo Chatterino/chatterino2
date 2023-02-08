@@ -64,6 +64,7 @@ Writes a message to the Chatterino log. The `level` argument should be a
 `tostring()`.
 
 Example:
+
 ```
 c2.log(c2.LogLevel.Warning, "Hello, this should show up in the Chatterino log by default")
 
