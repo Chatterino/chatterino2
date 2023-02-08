@@ -146,5 +146,12 @@ bool peek(lua_State *L, std::string *out, StackIdx idx)
     *out = std::string(str, len);
     return true;
 }
+
+QString toString(lua_State *L, StackIdx idx)
+{
+    size_t len{};
+    const auto *ptr = luaL_tolstring(L, idx, &len);
+    return QString::fromUtf8(ptr, int(len));
+}
 }  // namespace chatterino::lua
 #endif
