@@ -315,7 +315,7 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
         {
             qCWarning(chatterinoTwitch).nospace()
                 << "[TwitchChannel " << this->getName()
-                << "] Cought std::bad_function_call when adding channel point "
+                << "] Caught std::bad_function_call when adding channel point "
                    "reward ChannelPointReward{ id: "
                 << reward.id << ", title: " << reward.title << " }.";
         }
