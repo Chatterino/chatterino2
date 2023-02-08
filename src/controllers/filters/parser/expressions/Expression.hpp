@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-namespace filterparser {
+namespace chatterino::filters {
 
 class Expression
 {
@@ -27,4 +27,4 @@ public:
 using ExpressionPtr = std::unique_ptr<Expression>;
 using ExpressionList = std::vector<std::unique_ptr<Expression>>;
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

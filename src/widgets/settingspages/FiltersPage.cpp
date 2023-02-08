@@ -91,7 +91,7 @@ void FiltersPage::tableCellClicked(const QModelIndex &clicked,
     {
         QMessageBox popup(this->window());
 
-        filterparser::FilterParser f(
+        filters::FilterParser f(
             view->getModel()->data(clicked.siblingAtColumn(1)).toString());
 
         if (f.valid())

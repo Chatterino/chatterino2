@@ -6,7 +6,7 @@
 #include <QRegularExpression>
 #include <QString>
 
-namespace filterparser {
+namespace chatterino::filters {
 
 struct IdentifierDescription {
     QString humanDescription;
@@ -133,4 +133,4 @@ private:
 
     TokenType tokenize(const QString &text);
 };
-}  // namespace filterparser
+}  // namespace chatterino::filters

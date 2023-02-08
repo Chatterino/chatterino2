@@ -3,7 +3,7 @@
 #include "controllers/filters/parser/expressions/Expression.hpp"
 #include "controllers/filters/parser/Types.hpp"
 
-namespace filterparser {
+namespace chatterino::filters {
 
 class ListExpression : public Expression
 {
@@ -19,4 +19,4 @@ private:
     ExpressionList list_;
 };
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

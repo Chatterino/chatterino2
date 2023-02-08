@@ -28,7 +28,7 @@ public:
 
     bool valid() const;
 
-    bool filter(const filterparser::ContextMap &context) const;
+    bool filter(const filters::ContextMap &context) const;
 
     bool operator==(const FilterRecord &other) const;
 
@@ -37,7 +37,7 @@ private:
     QString filter_;
     QUuid id_;
 
-    std::unique_ptr<filterparser::FilterParser> parser_;
+    std::unique_ptr<filters::FilterParser> parser_;
 };
 
 using FilterRecordPtr = std::shared_ptr<FilterRecord>;

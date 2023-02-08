@@ -1,6 +1,6 @@
 #include "RegexExpression.hpp"
 
-namespace filterparser {
+namespace chatterino::filters {
 
 RegexExpression::RegexExpression(QString regex, bool caseInsensitive)
     : regexString_(regex)
@@ -32,4 +32,4 @@ QString RegexExpression::filterString() const
         .arg(s.replace("\"", "\\\""));
 }
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

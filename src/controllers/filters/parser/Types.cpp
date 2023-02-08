@@ -3,7 +3,7 @@
 #include "controllers/filters/parser/expressions/Expression.hpp"
 #include "controllers/filters/parser/Tokenizer.hpp"
 
-namespace filterparser {
+namespace chatterino::filters {
 
 bool isList(PossibleType typ)
 {
@@ -102,4 +102,4 @@ const std::optional<IllTyped> &PossibleType::illTypedDescription() const
     return this->illTyped_;
 }
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

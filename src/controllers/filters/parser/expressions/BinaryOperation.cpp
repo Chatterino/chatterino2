@@ -2,7 +2,7 @@
 
 #include <QRegularExpression>
 
-namespace filterparser {
+namespace chatterino::filters {
 
 BinaryOperation::BinaryOperation(TokenType op, ExpressionPtr left,
                                  ExpressionPtr right)
@@ -420,4 +420,4 @@ QString BinaryOperation::filterString() const
         .arg(this->right_->filterString());
 }
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

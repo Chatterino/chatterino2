@@ -1,6 +1,6 @@
 #include "ListExpression.hpp"
 
-namespace filterparser {
+namespace chatterino::filters {
 
 ListExpression::ListExpression(ExpressionList &&list)
     : list_(std::move(list)){};
@@ -81,4 +81,4 @@ QString ListExpression::filterString() const
     return QString("{%1}").arg(strings.join(", "));
 }
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

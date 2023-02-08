@@ -2,7 +2,7 @@
 
 #include "controllers/filters/parser/Tokenizer.hpp"
 
-namespace filterparser {
+namespace chatterino::filters {
 
 ValueExpression::ValueExpression(QVariant value, TokenType type)
     : value_(value)
@@ -67,4 +67,4 @@ QString ValueExpression::filterString() const
     }
 }
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

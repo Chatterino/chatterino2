@@ -1,6 +1,6 @@
 #include "UnaryOperation.hpp"
 
-namespace filterparser {
+namespace chatterino::filters {
 
 UnaryOperation::UnaryOperation(TokenType op, ExpressionPtr right)
     : op_(op)
@@ -62,4 +62,4 @@ QString UnaryOperation::filterString() const
     return QString("%1(%2)").arg(opText).arg(this->right_->filterString());
 }
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

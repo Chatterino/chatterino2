@@ -14,7 +14,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 
-namespace filterparser {
+namespace chatterino::filters {
 
 ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 {
@@ -408,4 +408,4 @@ const QString FilterParser::filterString() const
     return this->builtExpression_->filterString();
 }
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

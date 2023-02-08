@@ -5,7 +5,7 @@
 
 #include <QRegularExpression>
 
-namespace filterparser {
+namespace chatterino::filters {
 
 class RegexExpression : public Expression
 {
@@ -23,4 +23,4 @@ private:
     QRegularExpression regex_;
 };
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

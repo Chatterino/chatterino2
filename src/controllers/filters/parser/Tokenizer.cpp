@@ -2,7 +2,7 @@
 
 #include "common/QLogging.hpp"
 
-namespace filterparser {
+namespace chatterino::filters {
 
 QString tokenTypeToInfoString(TokenType type)
 {
@@ -262,4 +262,4 @@ bool Tokenizer::typeIsMathOp(TokenType token)
     return token > TokenType::MATH_START && token < TokenType::MATH_END;
 }
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

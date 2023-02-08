@@ -6,7 +6,7 @@ FilterRecord::FilterRecord(const QString &name, const QString &filter)
     : name_(name)
     , filter_(filter)
     , id_(QUuid::createUuid())
-    , parser_(std::make_unique<filterparser::FilterParser>(filter))
+    , parser_(std::make_unique<filters::FilterParser>(filter))
 {
 }
 
@@ -15,7 +15,7 @@ FilterRecord::FilterRecord(const QString &name, const QString &filter,
     : name_(name)
     , filter_(filter)
     , id_(id)
-    , parser_(std::make_unique<filterparser::FilterParser>(filter))
+    , parser_(std::make_unique<filters::FilterParser>(filter))
 {
 }
 
@@ -39,7 +39,7 @@ bool FilterRecord::valid() const
     return this->parser_->valid();
 }
 
-bool FilterRecord::filter(const filterparser::ContextMap &context) const
+bool FilterRecord::filter(const filters::ContextMap &context) const
 {
     return this->parser_->execute(context);
 }

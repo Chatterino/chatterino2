@@ -3,7 +3,7 @@
 #include "controllers/filters/parser/expressions/Expression.hpp"
 #include "controllers/filters/parser/Types.hpp"
 
-namespace filterparser {
+namespace chatterino::filters {
 
 class BinaryOperation : public Expression
 {
@@ -21,4 +21,4 @@ private:
     ExpressionPtr right_;
 };
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

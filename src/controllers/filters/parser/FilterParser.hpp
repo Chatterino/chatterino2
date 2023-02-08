@@ -1,8 +1,8 @@
 #pragma once
 
+#include "controllers/filters/parser/expressions/Expression.hpp"
 #include "controllers/filters/parser/Tokenizer.hpp"
 #include "controllers/filters/parser/Types.hpp"
-#include "controllers/filters/parser/expressions/Expression.hpp"
 
 namespace chatterino {
 
@@ -10,7 +10,7 @@ class Channel;
 
 }  // namespace chatterino
 
-namespace filterparser {
+namespace chatterino::filters {
 
 ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel);
 
@@ -43,4 +43,4 @@ private:
     Tokenizer tokenizer_;
     ExpressionPtr builtExpression_;
 };
-}  // namespace filterparser
+}  // namespace chatterino::filters

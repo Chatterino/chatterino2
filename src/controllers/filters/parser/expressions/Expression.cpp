@@ -1,6 +1,6 @@
 #include "Expression.hpp"
 
-namespace filterparser {
+namespace chatterino::filters {
 
 QVariant Expression::execute(const ContextMap &) const
 {
@@ -22,4 +22,4 @@ QString Expression::filterString() const
     return "";
 }
 
-}  // namespace filterparser
+}  // namespace chatterino::filters

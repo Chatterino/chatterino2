@@ -13,7 +13,7 @@ struct Message;
 
 }
 
-namespace filterparser {
+namespace chatterino::filters {
 
 class Expression;
 
@@ -83,4 +83,4 @@ inline bool variantTypesMatch(QVariant &a, QVariant &b, QMetaType::Type type)
     return variantIs(a, type) && variantIs(b, type);
 }
 
-}  // namespace filterparser
+}  // namespace chatterino::filters
