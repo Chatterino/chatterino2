@@ -30,6 +30,7 @@
 - Bugfix: Fixed an issue on Windows when opening links in incognito mode that contained forward slashes in hash (#4307)
 - Bugfix: Fixed an issue where beta versions wouldn't update to stable versions correctly. (#4329)
 - Bugfix: Avoided crash that could occur when receiving channel point reward information. (#4360)
+- Bugfix: Don't rely on undocumented registry keys to find the default browser on Windows. (#4362)
 - Dev: Changed sound backend from Qt to miniaudio. (#4334)
 - Dev: Remove protocol from QApplication's Organization Domain (so changed from `https://www.chatterino.com` to `chatterino.com`). (#4256)
 - Dev: Ignore `WM_SHOWWINDOW` hide events, causing fewer attempted rescales. (#4198)
