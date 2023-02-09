@@ -22,8 +22,10 @@
 
 namespace chatterino {
 
-// This is to make sure that combined emoji go through properly, see
-// https://github.com/Chatterino/chatterino2/issues/3384 and
+// This is for compatibility with older Chatterino versions. Twitch didn't use
+// to allow ZERO WIDTH JOINER unicode character, so Chatterino used ESCAPE_TAG
+// instead.
+// See https://github.com/Chatterino/chatterino2/issues/3384 and
 // https://mm2pl.github.io/emoji_rfc.pdf for more details
 const QString ZERO_WIDTH_JOINER = QString(QChar(0x200D));
 
