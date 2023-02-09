@@ -370,10 +370,6 @@ QString TwitchChannel::prepareMessage(const QString &message) const
     auto app = getApp();
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
 
-    // This is to make sure that combined emoji go through properly, see
-    // https://github.com/Chatterino/chatterino2/issues/3384 and
-    // https://mm2pl.github.io/emoji_rfc.pdf for more details
-    parsedMessage.replace(ZERO_WIDTH_JOINER, ESCAPE_TAG);
     parsedMessage = parsedMessage.simplified();
 
     if (parsedMessage.isEmpty())
