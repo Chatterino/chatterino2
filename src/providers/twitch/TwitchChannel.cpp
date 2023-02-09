@@ -304,7 +304,21 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
             << "[TwitchChannel" << this->getName()
             << "] Channel point reward added:" << reward.id << ","
             << reward.title << "," << reward.isUserInputRequired;
-        this->channelPointRewardAdded.invoke(reward);
+
+        // TODO: There's an underlying bug here. This bug should be fixed.
+        // This only attempts to prevent a crash when invoking the signal.
+        try
+        {
+            this->channelPointRewardAdded.invoke(reward);
+        }
+        catch (const std::bad_function_call &)
+        {
+            qCWarning(chatterinoTwitch).nospace()
+                << "[TwitchChannel " << this->getName()
+                << "] Caught std::bad_function_call when adding channel point "
+                   "reward ChannelPointReward{ id: "
+                << reward.id << ", title: " << reward.title << " }.";
+        }
     }
 }
 
