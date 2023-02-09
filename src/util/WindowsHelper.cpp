@@ -6,6 +6,9 @@
 
 #ifdef USEWINSDK
 
+#    include <Shlwapi.h>
+#    include <VersionHelpers.h>
+
 namespace chatterino {
 
 typedef enum MONITOR_DPI_TYPE {
@@ -17,6 +20,8 @@ typedef enum MONITOR_DPI_TYPE {
 
 typedef HRESULT(CALLBACK *GetDpiForMonitor_)(HMONITOR, MONITOR_DPI_TYPE, UINT *,
                                              UINT *);
+typedef HRESULT(CALLBACK *AssocQueryString_)(ASSOCF, ASSOCSTR, LPCWSTR, LPCWSTR,
+                                             LPWSTR, DWORD *);
 
 boost::optional<UINT> getWindowDpi(HWND hwnd)
 {
@@ -81,6 +86,54 @@ void setRegisteredForStartup(bool isRegistered)
     {
         settings.remove("Chatterino");
     }
+}
+
+QString getAssociatedCommand(ASSOCIATION_QUERY_TYPE queryType, LPCWSTR query)
+{
+    static HINSTANCE shlwapi = LoadLibrary(L"shlwapi");
+    static auto assocQueryString = AssocQueryString_(
+        (shlwapi == NULL) ? NULL
+                          : GetProcAddress(shlwapi, "AssocQueryStringW"));
+
+    if (assocQueryString == NULL)
+    {
+        return QString();
+    }
+
+    // always error out instead of returning a truncated string when the
+    // buffer is too small - avoids race condition when the user changes their
+    // default browser between calls to AssocQueryString
+    auto flags = ASSOCF_VERIFY | ASSOCF_NOTRUNCATE;
+
+    if (queryType == AQT_PROTOCOL)
+    {
+        // ASSOCF_IS_PROTOCOL was introduced in Windows 8
+        if (IsWindows8OrGreater())
+        {
+            flags |= ASSOCF_IS_PROTOCOL;
+        }
+        else
+        {
+            return QString();
+        }
+    }
+
+    DWORD resultSize = 0;
+    assocQueryString(flags, ASSOCSTR_COMMAND, query, NULL, NULL, &resultSize);
+    if (resultSize == 0)
+    {
+        return QString();
+    }
+
+    QString result;
+    auto buf = new TCHAR[resultSize];
+    if (SUCCEEDED(assocQueryString(flags, ASSOCSTR_COMMAND, query, NULL, buf,
+                                   &resultSize)))
+    {
+        result = QString::fromWCharArray(buf, resultSize);
+    }
+    delete[] buf;
+    return result;
 }
 
 }  // namespace chatterino
