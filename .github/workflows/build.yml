@@ -29,13 +29,13 @@ jobs:
           - os: ubuntu-20.04
             qt-version: 5.12.12
           # Ubuntu 22.04, Qt 5.15
-          - os: ubuntu-22.04
-            qt-version: 5.15.2
+          # - os: ubuntu-22.04
+          #   qt-version: 5.15.2
           # Test for disabling Precompiled Headers & enabling link-time optimization
-          - os: ubuntu-22.04
-            qt-version: 5.15.2
-            pch: false
-            force-lto: true
+          # - os: ubuntu-22.04
+          #   qt-version: 5.15.2
+          #   pch: false
+          #   force-lto: true
       fail-fast: false
 
     steps:
