@@ -1,9 +1,11 @@
 #!/bin/sh
+
 set -e
 
-#ubuntu_release=$(cat /etc/lsb-release | grep '^DISTRIB_RELEASE=*' | sed -e 's/DISTRIB_RELEASE=//g')
-ubuntu_release=$(cat /etc/lsb-release | sed -n 's/^DISTRIB_RELEASE=//p')
-echo $ubuntu_release # Test (thought that it might be helpful for later if we want to make something depending on the operation system version)
+# Get the Ubuntu Release (e.g. 20.04 or 22.04)
+ubuntu_release="$(lsb_release -rs)"
+
+echo "Building Ubuntu .deb file on '$ubuntu_release'"
 
 if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     echo "ERROR: No chatterino binary file found. This script must be run in the build folder, and chatterino must be built first."
