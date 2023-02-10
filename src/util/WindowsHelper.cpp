@@ -123,11 +123,15 @@ QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
 
     DWORD resultSize = 0;
     if (FAILED(assocQueryString(flags, ASSOCSTR_COMMAND, query, NULL, NULL,
-                                &resultSize)) ||
+                                &resultSize)))
+    {
+        return QString();
+    }
+
+    if (resultSize <= 1)
+    {
         // resultSize includes the null terminator. if resultSize is 1, the
         // returned value would be the empty string.
-        resultSize == 0 || resultSize == 1)
-    {
         return QString();
     }
 
