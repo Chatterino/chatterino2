@@ -34,7 +34,7 @@ Priority: optional
 Architecture: amd64
 Maintainer: Mm2PL <mm2pl@kotmisia.pl>
 Description: Testing out chatterino as a Ubuntu package
-Depends: libboost-filesystem1.71.0, libxcb-xinerama0
+# Depends: libboost-filesystem1.71.0, libxcb-xinerama0
 EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 # cat >> "$packaging_dir/DEBIAN/postinst" << EOF
