@@ -259,28 +259,6 @@ bool PluginController::reload(const QString &codename)
     return true;
 }
 
-void PluginController::callEvery(const QString &functionName)
-{
-    for (const auto &[name, plugin] : this->plugins_)
-    {
-        lua_getglobal(plugin->state_, functionName.toStdString().c_str());
-        lua_pcall(plugin->state_, 0, 0, 0);
-    }
-}
-
-void PluginController::callEveryWithArgs(
-    const QString &functionName, int count,
-    const std::function<void(const std::unique_ptr<Plugin> &pl, lua_State *L)>
-        &argCb)
-{
-    for (const auto &[name, plugin] : this->plugins_)
-    {
-        lua_getglobal(plugin->state_, functionName.toStdString().c_str());
-        argCb(plugin, plugin->state_);
-        lua_pcall(plugin->state_, count, 0, 0);
-    }
-}
-
 QString PluginController::tryExecPluginCommand(const QString &commandName,
                                                const CommandContext &ctx)
 {
