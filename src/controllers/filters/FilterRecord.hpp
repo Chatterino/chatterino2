@@ -1,6 +1,6 @@
 #pragma once
 
-#include "controllers/filters/parser/FilterParser.hpp"
+#include "controllers/filters/lang/FilterParser.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 

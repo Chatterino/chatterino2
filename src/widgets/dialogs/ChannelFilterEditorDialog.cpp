@@ -1,6 +1,6 @@
 #include "ChannelFilterEditorDialog.hpp"
 
-#include "controllers/filters/parser/FilterParser.hpp"
+#include "controllers/filters/lang/FilterParser.hpp"
 
 #include <QLabel>
 #include <QPushButton>

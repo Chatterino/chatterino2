@@ -1,14 +1,14 @@
 #pragma once
 
-#include "controllers/filters/parser/expressions/Expression.hpp"
-#include "controllers/filters/parser/Types.hpp"
+#include "controllers/filters/lang/expressions/Expression.hpp"
+#include "controllers/filters/lang/Types.hpp"
 
 namespace chatterino::filters {
 
-class BinaryOperation : public Expression
+class UnaryOperation : public Expression
 {
 public:
-    BinaryOperation(TokenType op, ExpressionPtr left, ExpressionPtr right);
+    UnaryOperation(TokenType op, ExpressionPtr right);
 
     QVariant execute(const ContextMap &context) const override;
     PossibleType synthesizeType() const override;
@@ -17,7 +17,6 @@ public:
 
 private:
     TokenType op_;
-    ExpressionPtr left_;
     ExpressionPtr right_;
 };
 

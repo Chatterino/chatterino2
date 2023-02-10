@@ -1,6 +1,6 @@
 #include "ValueExpression.hpp"
 
-#include "controllers/filters/parser/Tokenizer.hpp"
+#include "controllers/filters/lang/Tokenizer.hpp"
 
 namespace chatterino::filters {
 

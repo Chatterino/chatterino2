@@ -1,6 +1,6 @@
 #pragma once
 
-#include "controllers/filters/parser/Types.hpp"
+#include "controllers/filters/lang/Types.hpp"
 
 #include <QMap>
 #include <QRegularExpression>

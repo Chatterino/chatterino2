@@ -1,7 +1,7 @@
 #pragma once
 
-#include "controllers/filters/parser/expressions/Expression.hpp"
-#include "controllers/filters/parser/Types.hpp"
+#include "controllers/filters/lang/expressions/Expression.hpp"
+#include "controllers/filters/lang/Types.hpp"
 
 namespace chatterino::filters {
 
