@@ -28,6 +28,8 @@ jobs:
           # Ubuntu 20.04, Qt 5.12
           - os: ubuntu-20.04
             qt-version: 5.12.12
+            pch: true
+            force-lto: false
           # Ubuntu 22.04, Qt 5.15
           # - os: ubuntu-22.04
           #   qt-version: 5.15.2
