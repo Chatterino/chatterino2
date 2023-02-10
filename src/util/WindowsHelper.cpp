@@ -91,14 +91,14 @@ void setRegisteredForStartup(bool isRegistered)
 QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
 {
     static HINSTANCE shlwapi = LoadLibrary(L"shlwapi");
-    if (shlwapi == NULL)
+    if (shlwapi == nullptr)
     {
         return QString();
     }
 
     static auto assocQueryString =
         AssocQueryString_(GetProcAddress(shlwapi, "AssocQueryStringW"));
-    if (assocQueryString == NULL)
+    if (assocQueryString == nullptr)
     {
         return QString();
     }
@@ -122,8 +122,8 @@ QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
     }
 
     DWORD resultSize = 0;
-    if (FAILED(assocQueryString(flags, ASSOCSTR_COMMAND, query, NULL, NULL,
-                                &resultSize)))
+    if (FAILED(assocQueryString(flags, ASSOCSTR_COMMAND, query, nullptr,
+                                nullptr, &resultSize)))
     {
         return QString();
     }
@@ -137,7 +137,7 @@ QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
 
     QString result;
     auto buf = new wchar_t[resultSize];
-    if (SUCCEEDED(assocQueryString(flags, ASSOCSTR_COMMAND, query, NULL, buf,
+    if (SUCCEEDED(assocQueryString(flags, ASSOCSTR_COMMAND, query, nullptr, buf,
                                    &resultSize)))
     {
         // QString::fromWCharArray expects the length in characters *not
