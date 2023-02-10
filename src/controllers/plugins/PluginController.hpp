@@ -28,11 +28,6 @@ class PluginController : public Singleton
 public:
     void initialize(Settings &settings, Paths &paths) override;
     void save() override{};
-    void callEvery(const QString &functionName);
-    void callEveryWithArgs(
-        const QString &functionName, int count,
-        const std::function<void(const std::unique_ptr<Plugin> &pl,
-                                 lua_State *L)> &argCb);
 
     QString tryExecPluginCommand(const QString &commandName,
                                  const CommandContext &ctx);
