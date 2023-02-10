@@ -1,12 +1,11 @@
 #include "util/IncognitoBrowser.hpp"
+#ifdef USEWINSDK
+#    include "util/WindowsHelper.hpp"
+#endif
 
 #include <QProcess>
 #include <QRegularExpression>
 #include <QVariant>
-
-#ifdef USEWINSDK
-#    include "WindowsHelper.hpp"
-#endif
 
 namespace {
 
@@ -51,18 +50,21 @@ QString injectPrivateSwitch(QString command)
 QString getCommand()
 {
     // get default browser start command, by protocol if possible, falling back to extension if not
-    QString command = getAssociatedCommand(AQT_PROTOCOL, L"http");
+    QString command =
+        getAssociatedCommand(AssociationQueryType::Protocol, L"http");
 
     if (command.isNull())
     {
         // failed to fetch default browser by protocol, try by file extension instead
-        command = getAssociatedCommand(AQT_FILE_EXTENSION, L".html");
+        command =
+            getAssociatedCommand(AssociationQueryType::FileExtension, L".html");
     }
 
     if (command.isNull())
     {
         // also try the equivalent .htm extension
-        command = getAssociatedCommand(AQT_FILE_EXTENSION, L".htm");
+        command =
+            getAssociatedCommand(AssociationQueryType::FileExtension, L".htm");
     }
 
     if (command.isNull())

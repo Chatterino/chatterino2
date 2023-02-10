@@ -7,10 +7,7 @@
 
 namespace chatterino {
 
-typedef enum ASSOCIATION_QUERY_TYPE {
-    AQT_PROTOCOL,
-    AQT_FILE_EXTENSION
-} ASSOCIATION_QUERY_TYPE;
+enum class AssociationQueryType { Protocol, FileExtension };
 
 boost::optional<UINT> getWindowDpi(HWND hwnd);
 void flushClipboard();
@@ -18,7 +15,7 @@ void flushClipboard();
 bool isRegisteredForStartup();
 void setRegisteredForStartup(bool isRegistered);
 
-QString getAssociatedCommand(ASSOCIATION_QUERY_TYPE queryType, LPCWSTR query);
+QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query);
 
 }  // namespace chatterino
 

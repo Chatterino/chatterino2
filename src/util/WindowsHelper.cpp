@@ -88,7 +88,7 @@ void setRegisteredForStartup(bool isRegistered)
     }
 }
 
-QString getAssociatedCommand(ASSOCIATION_QUERY_TYPE queryType, LPCWSTR query)
+QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
 {
     static HINSTANCE shlwapi = LoadLibrary(L"shlwapi");
     static auto assocQueryString = AssocQueryString_(
@@ -103,9 +103,9 @@ QString getAssociatedCommand(ASSOCIATION_QUERY_TYPE queryType, LPCWSTR query)
     // always error out instead of returning a truncated string when the
     // buffer is too small - avoids race condition when the user changes their
     // default browser between calls to AssocQueryString
-    auto flags = ASSOCF_VERIFY | ASSOCF_NOTRUNCATE;
+    ASSOCF flags = ASSOCF_NOTRUNCATE;
 
-    if (queryType == AQT_PROTOCOL)
+    if (queryType == AssociationQueryType::Protocol)
     {
         // ASSOCF_IS_PROTOCOL was introduced in Windows 8
         if (IsWindows8OrGreater())
@@ -119,14 +119,15 @@ QString getAssociatedCommand(ASSOCIATION_QUERY_TYPE queryType, LPCWSTR query)
     }
 
     DWORD resultSize = 0;
-    assocQueryString(flags, ASSOCSTR_COMMAND, query, NULL, NULL, &resultSize);
-    if (resultSize == 0)
+    if (!SUCCEEDED(assocQueryString(flags, ASSOCSTR_COMMAND, query, NULL, NULL,
+                                    &resultSize)) ||
+        resultSize == 0)
     {
         return QString();
     }
 
     QString result;
-    auto buf = new TCHAR[resultSize];
+    auto buf = new wchar_t[resultSize];
     if (SUCCEEDED(assocQueryString(flags, ASSOCSTR_COMMAND, query, NULL, buf,
                                    &resultSize)))
     {
