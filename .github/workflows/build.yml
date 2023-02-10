@@ -20,12 +20,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-20.04, macos-latest]
+        os: [windows-latest, macos-latest]
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
         force-lto: [false]
         include:
+          # Ubuntu 20.04, Qt 5.12
           - os: ubuntu-20.04
+            qt-version: 5.12.12
+          # Ubuntu 22.04, Qt 5.15
+          - os: ubuntu-22.04
+            qt-version: 5.15.2
+          # Test for disabling Precompiled Headers & enabling link-time optimization
+          - os: ubuntu-22.04
             qt-version: 5.15.2
             pch: false
             force-lto: true
