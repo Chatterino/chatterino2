@@ -134,7 +134,10 @@ QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
     if (SUCCEEDED(assocQueryString(flags, ASSOCSTR_COMMAND, query, NULL, buf,
                                    &resultSize)))
     {
-        result = QString::fromWCharArray(buf, resultSize);
+        // QString::fromWCharArray expects the length in characters *not
+        // including* the null terminator, but AssocQueryStringW calculates
+        // length including the null terminator
+        result = QString::fromWCharArray(buf, resultSize - 1);
     }
     delete[] buf;
     return result;
