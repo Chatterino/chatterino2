@@ -91,10 +91,13 @@ void setRegisteredForStartup(bool isRegistered)
 QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
 {
     static HINSTANCE shlwapi = LoadLibrary(L"shlwapi");
-    static auto assocQueryString = AssocQueryString_(
-        (shlwapi == NULL) ? NULL
-                          : GetProcAddress(shlwapi, "AssocQueryStringW"));
+    if (shlwapi == NULL)
+    {
+        return QString();
+    }
 
+    static auto assocQueryString =
+        AssocQueryString_(GetProcAddress(shlwapi, "AssocQueryStringW"));
     if (assocQueryString == NULL)
     {
         return QString();
