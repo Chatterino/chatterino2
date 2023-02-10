@@ -4,26 +4,19 @@
 #include "controllers/filters/lang/Tokenizer.hpp"
 #include "controllers/filters/lang/Types.hpp"
 
-namespace chatterino {
-
-class Channel;
-
-}  // namespace chatterino
-
 namespace chatterino::filters {
-
-ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel);
 
 class FilterParser
 {
 public:
     FilterParser(const QString &text);
-    bool execute(const ContextMap &context) const;
+
     bool valid() const;
+    Type returnType() const;
+    ExpressionPtr release();
 
     const QStringList &errors() const;
     const QString debugString() const;
-    const QString filterString() const;
 
 private:
     ExpressionPtr parseExpression(bool top = false);
@@ -42,5 +35,7 @@ private:
     QString text_;
     Tokenizer tokenizer_;
     ExpressionPtr builtExpression_;
+    Type returnType_ = Type::Bool;
 };
+
 }  // namespace chatterino::filters

@@ -7,17 +7,10 @@
 #include <optional>
 #include <set>
 
-namespace chatterino {
-
-struct Message;
-
-}
-
 namespace chatterino::filters {
 
 class Expression;
 
-using MessagePtr = std::shared_ptr<const chatterino::Message>;
 using ContextMap = QMap<QString, QVariant>;
 
 enum class Type {
@@ -30,6 +23,8 @@ enum class Type {
     MatchingSpecifier,  // 2-element list in {RegularExpression, Int} form
     Map
 };
+
+QString typeToString(Type type);
 
 struct IllTyped {
     const Expression *expr;
@@ -45,6 +40,7 @@ public:
     PossibleType(IllTyped illTyped);
 
     QString string() const;
+    Type unwrap() const;
 
     bool operator==(Type t) const;
     bool operator==(const PossibleType &p) const;

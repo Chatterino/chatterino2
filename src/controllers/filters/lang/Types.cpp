@@ -59,6 +59,12 @@ QString PossibleType::string() const
     return "IllTyped";
 }
 
+Type PossibleType::unwrap() const
+{
+    assert(this->well());
+    return this->type_;
+}
+
 bool PossibleType::operator==(Type t) const
 {
     assert(this->well());

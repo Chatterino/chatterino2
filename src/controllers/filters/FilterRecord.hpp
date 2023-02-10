@@ -1,6 +1,6 @@
 #pragma once
 
-#include "controllers/filters/lang/FilterParser.hpp"
+#include "controllers/filters/lang/Filter.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
@@ -34,10 +34,10 @@ public:
 
 private:
     QString name_;
-    QString filter_;
+    QString filterText_;
     QUuid id_;
 
-    std::unique_ptr<filters::FilterParser> parser_;
+    std::unique_ptr<filters::Filter> filter_;
 };
 
 using FilterRecordPtr = std::shared_ptr<FilterRecord>;

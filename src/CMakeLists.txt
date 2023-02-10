@@ -86,6 +86,8 @@ set(SOURCE_FILES
         controllers/filters/lang/expressions/UnaryOperation.cpp
         controllers/filters/lang/expressions/ValueExpression.cpp
         controllers/filters/lang/expressions/ValueExpression.hpp
+        controllers/filters/lang/Filter.cpp
+        controllers/filters/lang/Filter.hpp
         controllers/filters/lang/FilterParser.cpp
         controllers/filters/lang/FilterParser.hpp
         controllers/filters/lang/Tokenizer.cpp
