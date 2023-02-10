@@ -119,8 +119,8 @@ QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
     }
 
     DWORD resultSize = 0;
-    if (!SUCCEEDED(assocQueryString(flags, ASSOCSTR_COMMAND, query, NULL, NULL,
-                                    &resultSize)) ||
+    if (FAILED(assocQueryString(flags, ASSOCSTR_COMMAND, query, NULL, NULL,
+                                &resultSize)) ||
         resultSize == 0)
     {
         return QString();
