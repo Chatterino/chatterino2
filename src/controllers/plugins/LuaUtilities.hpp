@@ -20,6 +20,13 @@ struct CommandContext;
 namespace chatterino::lua {
 
 /**
+ * @brief Dumps the Lua stack into qCDebug(chatterinoLua)
+ *
+ * @param tag is a string to let you know which dump is which when browsing logs
+ */
+void stackDump(lua_State *L, const QString &tag);
+
+/**
  * @brief Converts a lua error code and potentially string on top of the stack into a human readable message
  */
 QString humanErrorText(lua_State *L, int errCode);
