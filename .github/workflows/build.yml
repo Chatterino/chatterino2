@@ -17,7 +17,7 @@ env:
 
 jobs:
   build:
-    name: 'Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (PCH:${{ matrix.pch }}, LTO:${{ matrix.force-lto }})'
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (PCH:${{ matrix.pch }}, LTO:${{ matrix.force-lto }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -25,7 +25,7 @@ jobs:
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
         force-lto: [false]
-        skip_artifact: ['no']
+        skip_artifact: ["no"]
         include:
           # Ubuntu 20.04, Qt 5.12
           - os: ubuntu-20.04
@@ -42,7 +42,7 @@ jobs:
             qt-version: 5.15.2
             pch: false
             force-lto: true
-            skip_artifact: 'yes'
+            skip_artifact: "yes"
       fail-fast: false
 
     steps:
