@@ -59,7 +59,7 @@ Depends: $dependencies
 Section: net
 Priority: optional
 Homepage: https://github.com/Chatterino/chatterino2
-Description: Testing out chatterino as a Ubuntu package
+Description: Ubuntu package built for $ubuntu_release
 EOF
 cat "$packaging_dir/DEBIAN/control"
 breakline
