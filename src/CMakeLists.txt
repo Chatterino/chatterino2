@@ -195,6 +195,8 @@ set(SOURCE_FILES
         providers/IvrApi.hpp
         providers/LinkResolver.cpp
         providers/LinkResolver.hpp
+        providers/NetworkConfigurationProvider.cpp
+        providers/NetworkConfigurationProvider.hpp
         providers/RecentMessagesApi.cpp
         providers/RecentMessagesApi.hpp
 
