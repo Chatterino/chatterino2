@@ -114,11 +114,7 @@ void PluginController::openLibrariesFor(lua_State *L,
     // Stuff to change, remove or hide behind a permission system:
     static const std::vector<luaL_Reg> loadedlibs = {
         luaL_Reg{LUA_GNAME, luaopen_base},
-        // - print - writes to stdout, should be replaced with a per-plugin log
-        // - load, loadstring, loadfile, dofile - don't allow bytecode, *require* valid utf8 (which bytecode by design isn't)
-
-        // luaL_Reg{LUA_LOADLIBNAME, luaopen_package},
-        // - explicit fs access, probably best to make our own require() function
+        // - load - don't allow in release mode
 
         //luaL_Reg{LUA_COLIBNAME, luaopen_coroutine},
         // - needs special support
@@ -132,9 +128,10 @@ void PluginController::openLibrariesFor(lua_State *L,
         luaL_Reg{LUA_STRLIBNAME, luaopen_string},
         luaL_Reg{LUA_MATHLIBNAME, luaopen_math},
         luaL_Reg{LUA_UTF8LIBNAME, luaopen_utf8},
-        // luaL_Reg{LUA_DBLIBNAME, luaopen_debug},
-        // - this allows the plugin developer to unleash all hell
     };
+    // Warning: Do not add debug library to this, it would make the security of
+    // this a living nightmare due to stuff like registry access
+    // - Mm2PL
 
     for (const auto &reg : loadedlibs)
     {
