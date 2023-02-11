@@ -17,18 +17,32 @@ env:
 
 jobs:
   build:
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (PCH:${{ matrix.pch }}, LTO:${{ matrix.force-lto }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-20.04, macos-latest]
+        os: [windows-latest, macos-latest]
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
         force-lto: [false]
+        skip_artifact: ["no"]
         include:
+          # Ubuntu 20.04, Qt 5.12
           - os: ubuntu-20.04
+            qt-version: 5.12.12
+            pch: true
+            force-lto: false
+          # Ubuntu 22.04, Qt 5.15
+          - os: ubuntu-22.04
+            qt-version: 5.15.2
+            pch: true
+            force-lto: false
+          # Test for disabling Precompiled Headers & enabling link-time optimization
+          - os: ubuntu-22.04
             qt-version: 5.15.2
             pch: false
             force-lto: true
+            skip_artifact: "yes"
       fail-fast: false
 
     steps:
@@ -147,12 +161,18 @@ jobs:
               libxcb-render-util0 \
               libxcb-xinerama0
 
+      - name: Apply Qt patches (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.qt-version, '5.')
+        run: |
+          patch "$Qt5_DIR/include/QtConcurrent/qtconcurrentthreadengine.h" .patches/qt5-on-newer-gcc.patch
+        shell: bash
+
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           mkdir build
           cd build
-          cmake \
+          CXXFLAGS=-fno-sized-deallocation cmake \
             -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
             -DCMAKE_BUILD_TYPE=Release \
             -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
@@ -182,31 +202,31 @@ jobs:
             clang-tidy-review-metadata.json
 
       - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         run: |
           cd build
           sh ./../.CI/CreateAppImage.sh
         shell: bash
 
       - name: Package - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         run: |
           cd build
           sh ./../.CI/CreateUbuntuDeb.sh
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-${{ matrix.qt-version }}.deb
+          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
           path: build/Chatterino-x86_64.deb
 
       # MACOS
@@ -266,7 +286,12 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-5.15.2.deb
+          name: Chatterino-ubuntu-20.04.deb
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: Chatterino-ubuntu-22.04.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
