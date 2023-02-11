@@ -17,6 +17,7 @@ env:
 
 jobs:
   build:
+    name: 'Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (PCH:${{ matrix.pch }}, LTO:${{ matrix.force-lto }})'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -24,6 +25,7 @@ jobs:
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
         force-lto: [false]
+        skip_artifact: ['no']
         include:
           # Ubuntu 20.04, Qt 5.12
           - os: ubuntu-20.04
@@ -36,10 +38,11 @@ jobs:
             pch: true
             force-lto: false
           # Test for disabling Precompiled Headers & enabling link-time optimization
-          # - os: ubuntu-22.04
-          #   qt-version: 5.15.2
-          #   pch: false
-          #   force-lto: true
+          - os: ubuntu-22.04
+            qt-version: 5.15.2
+            pch: false
+            force-lto: true
+            skip_artifact: 'yes'
       fail-fast: false
 
     steps:
@@ -199,28 +202,28 @@ jobs:
             clang-tidy-review-metadata.json
 
       - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         run: |
           cd build
           sh ./../.CI/CreateAppImage.sh
         shell: bash
 
       - name: Package - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         run: |
           cd build
           sh ./../.CI/CreateUbuntuDeb.sh
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
