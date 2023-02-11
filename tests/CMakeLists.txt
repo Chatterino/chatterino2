@@ -23,6 +23,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/BasicPubSub.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/SeventvEventAPI.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/BttvLiveUpdates.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Updates.cpp
     # Add your new file above this line!
     )
 

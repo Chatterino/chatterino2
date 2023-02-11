@@ -674,7 +674,11 @@ void NotebookTab::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void NotebookTab::enterEvent(QEnterEvent *event)
+#else
 void NotebookTab::enterEvent(QEvent *event)
+#endif
 {
     this->mouseOver_ = true;
 

@@ -1,0 +1,8 @@
+FROM chatterino-ubuntu-22.04-build
+
+ADD .CI /src/.CI
+
+WORKDIR /src/build
+
+# package deb
+RUN ./../.CI/CreateUbuntuDeb.sh

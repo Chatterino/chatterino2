@@ -140,6 +140,9 @@ set(SOURCE_FILES
         controllers/userdata/UserDataController.hpp
         controllers/userdata/UserData.hpp
 
+        controllers/sound/SoundController.cpp
+        controllers/sound/SoundController.hpp
+
         debug/Benchmark.cpp
         debug/Benchmark.hpp
 
@@ -249,14 +252,14 @@ set(SOURCE_FILES
         providers/seventv/SeventvEventAPI.cpp
         providers/seventv/SeventvEventAPI.hpp
 
-        providers/seventv/eventapi/SeventvEventAPIClient.cpp
-        providers/seventv/eventapi/SeventvEventAPIClient.hpp
-        providers/seventv/eventapi/SeventvEventAPIDispatch.cpp
-        providers/seventv/eventapi/SeventvEventAPIDispatch.hpp
-        providers/seventv/eventapi/SeventvEventAPIMessage.cpp
-        providers/seventv/eventapi/SeventvEventAPIMessage.hpp
-        providers/seventv/eventapi/SeventvEventAPISubscription.cpp
-        providers/seventv/eventapi/SeventvEventAPISubscription.hpp
+        providers/seventv/eventapi/Client.cpp
+        providers/seventv/eventapi/Client.hpp
+        providers/seventv/eventapi/Dispatch.cpp
+        providers/seventv/eventapi/Dispatch.hpp
+        providers/seventv/eventapi/Message.cpp
+        providers/seventv/eventapi/Message.hpp
+        providers/seventv/eventapi/Subscription.cpp
+        providers/seventv/eventapi/Subscription.hpp
 
         providers/twitch/ChannelPointReward.cpp
         providers/twitch/ChannelPointReward.hpp
@@ -602,7 +605,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Widgets
         Qt${MAJOR_QT_VERSION}::Gui
         Qt${MAJOR_QT_VERSION}::Network
-        Qt${MAJOR_QT_VERSION}::Multimedia
         Qt${MAJOR_QT_VERSION}::Svg
         Qt${MAJOR_QT_VERSION}::Concurrent
 
@@ -650,17 +652,35 @@ if (BUILD_APP)
         RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
         )
 
-    if (MSVC)
-        if (NOT VCPKG_INSTALLED_DIR)
+    if (WIN32)
+        if (NOT WINDEPLOYQT_PATH)
             get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
             get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
-            set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
+            string(APPEND WINDEPLOYQT_PATH ${QT_BIN_DIR} /windeployqt.exe)
+        else()
+            file(TO_CMAKE_PATH "${WINDEPLOYQT_PATH}" WINDEPLOYQT_PATH)
+        endif()
 
-            install(TARGETS ${EXECUTABLE_PROJECT}
-                    RUNTIME DESTINATION .
-                    )
+        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(WINDEPLOYQT_MODE --debug)
+        else()
+            set(WINDEPLOYQT_MODE --release)
+        endif()
 
-            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
+        set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
+        string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
+
+        if (X_VCPKG_APPLOCAL_DEPS_INSTALL)
+            install(TARGETS ${EXECUTABLE_PROJECT} RUNTIME DESTINATION .)
+        else()
+            install(TARGETS ${EXECUTABLE_PROJECT} 
+                RUNTIME_DEPENDENCIES 
+                    PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
+                    POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
+                    DIRECTORIES ${QT_BIN_DIR}
+                RUNTIME DESTINATION .)
+            install(CODE "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
+            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")        
         endif()
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
@@ -770,36 +790,36 @@ endif ()
 
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
 
+# semver dependency https://github.com/Neargye/semver
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
+
+# miniaudio dependency https://github.com/mackron/miniaudio
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
+
+if (UNIX)
+    if (CMAKE_DL_LIBS)
+        # libdl is a requirement for miniaudio on Linux
+        message(STATUS "Linking with CMake DL libs: '${CMAKE_DL_LIBS}'")
+        target_link_libraries(${LIBRARY_PROJECT} PUBLIC ${CMAKE_DL_LIBS})
+    endif ()
+endif ()
+
 if (WinToast_FOUND)
     target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         WinToast)
 endif ()
 
-if (USE_CONAN AND TARGET CONAN_PKG::boost)
-    target_link_libraries(${LIBRARY_PROJECT}
-        PUBLIC
-        CONAN_PKG::boost
-        )
-else ()
-    target_link_libraries(${LIBRARY_PROJECT}
+target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         ${Boost_LIBRARIES}
         )
-endif ()
 
-if (USE_CONAN AND TARGET CONAN_PKG::openssl)
-    target_link_libraries(${LIBRARY_PROJECT}
-        PUBLIC
-        CONAN_PKG::openssl
-        )
-else ()
-    target_link_libraries(${LIBRARY_PROJECT}
+target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         OpenSSL::SSL
         OpenSSL::Crypto
         )
-endif ()
 
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${RapidJSON_INCLUDE_DIRS})
 
