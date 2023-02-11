@@ -163,7 +163,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake \
+          CXXFLAGS=-fno-sized-deallocation cmake \
             -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
             -DCMAKE_BUILD_TYPE=Release \
             -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
