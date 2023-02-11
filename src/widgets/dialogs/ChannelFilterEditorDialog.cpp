@@ -238,7 +238,7 @@ QString ChannelFilterEditorDialog::BinaryOperationSpecifier::expressionText()
         return this->left_->expressionText();
     }
 
-    return QString("(%1) %2 (%3)")
+    return QString("(%1 %2 %3)")
         .arg(this->left_->expressionText())
         .arg(opText)
         .arg(this->right_->expressionText());
