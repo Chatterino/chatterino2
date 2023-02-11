@@ -6,6 +6,9 @@
 
 #ifdef USEWINSDK
 
+#    include <Shlwapi.h>
+#    include <VersionHelpers.h>
+
 namespace chatterino {
 
 typedef enum MONITOR_DPI_TYPE {
@@ -17,6 +20,8 @@ typedef enum MONITOR_DPI_TYPE {
 
 typedef HRESULT(CALLBACK *GetDpiForMonitor_)(HMONITOR, MONITOR_DPI_TYPE, UINT *,
                                              UINT *);
+typedef HRESULT(CALLBACK *AssocQueryString_)(ASSOCF, ASSOCSTR, LPCWSTR, LPCWSTR,
+                                             LPWSTR, DWORD *);
 
 boost::optional<UINT> getWindowDpi(HWND hwnd)
 {
@@ -81,6 +86,67 @@ void setRegisteredForStartup(bool isRegistered)
     {
         settings.remove("Chatterino");
     }
+}
+
+QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
+{
+    static HINSTANCE shlwapi = LoadLibrary(L"shlwapi");
+    if (shlwapi == nullptr)
+    {
+        return QString();
+    }
+
+    static auto assocQueryString =
+        AssocQueryString_(GetProcAddress(shlwapi, "AssocQueryStringW"));
+    if (assocQueryString == nullptr)
+    {
+        return QString();
+    }
+
+    // always error out instead of returning a truncated string when the
+    // buffer is too small - avoids race condition when the user changes their
+    // default browser between calls to AssocQueryString
+    ASSOCF flags = ASSOCF_NOTRUNCATE;
+
+    if (queryType == AssociationQueryType::Protocol)
+    {
+        // ASSOCF_IS_PROTOCOL was introduced in Windows 8
+        if (IsWindows8OrGreater())
+        {
+            flags |= ASSOCF_IS_PROTOCOL;
+        }
+        else
+        {
+            return QString();
+        }
+    }
+
+    DWORD resultSize = 0;
+    if (FAILED(assocQueryString(flags, ASSOCSTR_COMMAND, query, nullptr,
+                                nullptr, &resultSize)))
+    {
+        return QString();
+    }
+
+    if (resultSize <= 1)
+    {
+        // resultSize includes the null terminator. if resultSize is 1, the
+        // returned value would be the empty string.
+        return QString();
+    }
+
+    QString result;
+    auto buf = new wchar_t[resultSize];
+    if (SUCCEEDED(assocQueryString(flags, ASSOCSTR_COMMAND, query, nullptr, buf,
+                                   &resultSize)))
+    {
+        // QString::fromWCharArray expects the length in characters *not
+        // including* the null terminator, but AssocQueryStringW calculates
+        // length including the null terminator
+        result = QString::fromWCharArray(buf, resultSize - 1);
+    }
+    delete[] buf;
+    return result;
 }
 
 }  // namespace chatterino
