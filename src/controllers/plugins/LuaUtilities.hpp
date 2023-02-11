@@ -24,9 +24,21 @@ namespace chatterino::lua {
  */
 QString humanErrorText(lua_State *L, int errCode);
 
+/**
+ * Represents an index into Lua's stack
+ */
 using StackIdx = int;
 
+/**
+ * @brief Creates a table with countArray array properties on the Lua stack
+ * @return stack index of the newly created table
+ */
 StackIdx pushEmptyArray(lua_State *L, int countArray);
+
+/**
+ * @brief Creates a table with countProperties named properties on the Lua stack
+ * @return stack index of the newly created table
+ */
 StackIdx pushEmptyTable(lua_State *L, int countProperties);
 
 StackIdx push(lua_State *L, const CommandContext &ctx);
@@ -40,11 +52,16 @@ bool peek(lua_State *L, QString *out, StackIdx idx = -1);
 bool peek(lua_State *L, QByteArray *out, StackIdx idx = -1);
 bool peek(lua_State *L, std::string *out, StackIdx idx = -1);
 
-// forces conversion of value at idx to a string
+/**
+ * @brief Converts Lua object at stack index idx to a string.
+ */
 QString toString(lua_State *L, StackIdx idx = -1);
 
 /// TEMPLATES
 
+/**
+ * @brief Converts object at stack index idx to enum given by template parameter T
+ */
 template <typename T,
           typename std::enable_if<std::is_enum_v<T>, bool>::type = true>
 bool peek(lua_State *L, T *out, StackIdx idx = -1)
@@ -64,8 +81,15 @@ bool peek(lua_State *L, T *out, StackIdx idx = -1)
     return false;
 }
 
+/**
+ * @brief Converts a vector<T> to Lua and pushes it onto the stack.
+ *
+ * Needs StackIdx push(lua_State*, T); to work.
+ *
+ * @return Stack index of newly created table.
+ */
 template <typename T>
-int push(lua_State *L, std::vector<T> vec)
+StackIdx push(lua_State *L, std::vector<T> vec)
 {
     auto out = pushEmptyArray(L, vec.size());
     int i = 1;
@@ -78,8 +102,15 @@ int push(lua_State *L, std::vector<T> vec)
     return out;
 }
 
+/**
+ * @brief Converts a QList<T> to Lua and pushes it onto the stack.
+ *
+ * Needs StackIdx push(lua_State*, T); to work.
+ *
+ * @return Stack index of newly created table.
+ */
 template <typename T>
-int push(lua_State *L, QList<T> vec)
+StackIdx push(lua_State *L, QList<T> vec)
 {
     auto out = pushEmptyArray(L, vec.size());
     int i = 1;
@@ -92,6 +123,11 @@ int push(lua_State *L, QList<T> vec)
     return out;
 }
 
+/**
+ * @brief Converts an enum given by T to Lua (into a string) and pushes it onto the stack.
+ *
+ * @return Stack index of newly created string.
+ */
 template <typename T, std::enable_if<std::is_enum_v<T>>>
 StackIdx push(lua_State *L, T inp)
 {
@@ -99,6 +135,11 @@ StackIdx push(lua_State *L, T inp)
     return lua::push(L, std::string(name));
 }
 
+/**
+ * @brief Converts a Lua object into c++ and removes it from the stack.
+ *
+ * Relies on bool peek(lua_State*, T*, StackIdx) existing.
+ */
 template <typename T>
 bool pop(lua_State *L, T *out, StackIdx idx = -1)
 {
@@ -110,6 +151,13 @@ bool pop(lua_State *L, T *out, StackIdx idx = -1)
     return ok;
 }
 
+/**
+ * @brief Creates a table mapping enum names to unique values.
+ *
+ * Values in this table may change.
+ *
+ * @returns stack index of newly created table
+ */
 template <typename T>
 StackIdx pushEnumTable(lua_State *L)
 {

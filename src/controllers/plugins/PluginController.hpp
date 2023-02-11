@@ -51,7 +51,18 @@ public:
         return this->plugins_;
     }
 
+    /**
+     * @brief Reload plugin given by codename
+     *
+     * @param codename This is the 'codename' of the plugin, the name of the directory it is in
+     */
     bool reload(const QString &codename);
+
+    /**
+     * @brief Checks settings to tell if a plugin named by codename.
+     *
+     * It accounts for plugins being enabled/disabled globally.
+     */
     static bool isEnabled(const QString &codename);
 
 private:

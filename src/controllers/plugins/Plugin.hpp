@@ -127,8 +127,17 @@ public:
 
     ~Plugin();
 
+    /**
+     * @brief Perform all necessary tasks to bind a command name to this plugin
+     * @param name name of the command to create
+     * @param functionName name of the function that should be called when the command is executed
+     * @return true if addition succeeded, false otherwise (for example because the command name is already taken)
+     */
     bool registerCommand(const QString &name, const QString &functionName);
 
+    /**
+     * @brief Get names of all commands belonging to this plugin
+     */
     std::set<QString> listRegisteredCommands();
 
     const QDir &loadDirectory() const
