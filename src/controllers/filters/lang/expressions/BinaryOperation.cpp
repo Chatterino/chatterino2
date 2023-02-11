@@ -290,9 +290,12 @@ PossibleType BinaryOperation::synthesizeType() const
 
 QString BinaryOperation::debug() const
 {
-    return QString("(%1 %2 %3)")
-        .arg(this->left_->debug(), tokenTypeToInfoString(this->op_),
-             this->right_->debug());
+    return QString("BinaryOp[%1](%2 : %3, %4 : %5)")
+        .arg(tokenTypeToInfoString(this->op_))
+        .arg(this->left_->debug())
+        .arg(this->left_->synthesizeType().string())
+        .arg(this->right_->debug())
+        .arg(this->right_->synthesizeType().string());
 }
 
 QString BinaryOperation::filterString() const

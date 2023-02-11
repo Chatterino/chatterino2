@@ -8,21 +8,10 @@ QString tokenTypeToInfoString(TokenType type)
 {
     switch (type)
     {
-        case CONTROL_START:
-        case CONTROL_END:
-        case BINARY_START:
-        case BINARY_END:
-        case UNARY_START:
-        case UNARY_END:
-        case MATH_START:
-        case MATH_END:
-        case OTHER_START:
-        case NONE:
-            return "<unknown>";
         case AND:
-            return "<and>";
+            return "And";
         case OR:
-            return "<or>";
+            return "Or";
         case LP:
             return "<left parenthesis>";
         case RP:
@@ -34,43 +23,53 @@ QString tokenTypeToInfoString(TokenType type)
         case COMMA:
             return "<comma>";
         case PLUS:
-            return "<plus>";
+            return "Plus";
         case MINUS:
-            return "<minus>";
+            return "Minus";
         case MULTIPLY:
-            return "<multiply>";
+            return "Multiply";
         case DIVIDE:
-            return "<divide>";
+            return "Divide";
         case MOD:
-            return "<modulus>";
+            return "Mod";
         case EQ:
-            return "<equals>";
+            return "Eq";
         case NEQ:
-            return "<not equals>";
+            return "NotEq";
         case LT:
-            return "<less than>";
+            return "LessThan";
         case GT:
-            return "<greater than>";
+            return "GreaterThan";
         case LTE:
-            return "<less than equal>";
+            return "LessThanEq";
         case GTE:
-            return "<greater than equal>";
+            return "GreaterThanEq";
         case CONTAINS:
-            return "<contains>";
+            return "Contains";
         case STARTS_WITH:
-            return "<starts with>";
+            return "StartsWith";
         case ENDS_WITH:
-            return "<ends with>";
+            return "EndsWith";
         case MATCH:
-            return "<match>";
+            return "Match";
         case NOT:
-            return "<not>";
+            return "Not";
         case STRING:
             return "<string>";
         case INT:
             return "<int>";
         case IDENTIFIER:
             return "<identifier>";
+        case CONTROL_START:
+        case CONTROL_END:
+        case BINARY_START:
+        case BINARY_END:
+        case UNARY_START:
+        case UNARY_END:
+        case MATH_START:
+        case MATH_END:
+        case OTHER_START:
+        case NONE:
         default:
             return "<unknown>";
     }

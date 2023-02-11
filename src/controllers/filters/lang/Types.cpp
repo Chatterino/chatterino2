@@ -8,7 +8,8 @@ namespace chatterino::filters {
 bool isList(PossibleType typ)
 {
     using T = Type;
-    return typ == T::List || typ == T::MatchingSpecifier;
+    return typ == T::List || typ == T::StringList ||
+           typ == T::MatchingSpecifier;
 }
 
 QString typeToString(Type type)
@@ -28,6 +29,8 @@ QString typeToString(Type type)
             return "RegularExpression";
         case T::List:
             return "List";
+        case T::StringList:
+            return "StringList";
         case T::MatchingSpecifier:
             return "MatchingSpecifier";
         case T::Map:

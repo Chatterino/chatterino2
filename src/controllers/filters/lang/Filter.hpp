@@ -36,6 +36,7 @@ public:
     QVariant execute(const ContextMap &context) const;
 
     QString filterString() const;
+    QString debugString() const;
 
 private:
     Filter(ExpressionPtr expression, Type returnType);

@@ -43,8 +43,10 @@ PossibleType UnaryOperation::synthesizeType() const
 
 QString UnaryOperation::debug() const
 {
-    return QString("(%1 %2)").arg(tokenTypeToInfoString(this->op_),
-                                  this->right_->debug());
+    return QString("UnaryOp[%1](%2 : %3)")
+        .arg(tokenTypeToInfoString(this->op_))
+        .arg(this->right_->debug())
+        .arg(this->right_->synthesizeType().string());
 }
 
 QString UnaryOperation::filterString() const

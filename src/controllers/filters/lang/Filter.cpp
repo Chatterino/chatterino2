@@ -147,4 +147,9 @@ QString Filter::filterString() const
     return this->expression_->filterString();
 }
 
+QString Filter::debugString() const
+{
+    return this->expression_->debug();
+}
+
 }  // namespace chatterino::filters

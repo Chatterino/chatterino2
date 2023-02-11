@@ -14,7 +14,7 @@ PossibleType Expression::synthesizeType() const
 
 QString Expression::debug() const
 {
-    return "(false)";
+    return "";
 }
 
 QString Expression::filterString() const

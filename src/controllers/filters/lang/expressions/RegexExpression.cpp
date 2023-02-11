@@ -21,7 +21,7 @@ PossibleType RegexExpression::synthesizeType() const
 
 QString RegexExpression::debug() const
 {
-    return this->regexString_;
+    return QString("RegEx(%1)").arg(this->regexString_);
 }
 
 QString RegexExpression::filterString() const

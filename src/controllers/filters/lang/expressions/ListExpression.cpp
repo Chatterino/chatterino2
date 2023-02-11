@@ -40,12 +40,18 @@ PossibleType ListExpression::synthesizeType() const
 {
     std::vector<PossibleType> types;
     types.reserve(this->list_.size());
+    bool allStrings = true;
     for (const auto &exp : this->list_)
     {
         auto typ = exp->synthesizeType();
         if (!typ)
         {
             return typ;  // Ill-typed
+        }
+
+        if (typ != Type::String)
+        {
+            allStrings = false;
         }
 
         types.push_back(typ);
@@ -58,7 +64,7 @@ PossibleType ListExpression::synthesizeType() const
         return Type::MatchingSpecifier;
     }
 
-    return Type::List;
+    return allStrings ? Type::StringList : Type::List;
 }
 
 QString ListExpression::debug() const
@@ -66,9 +72,12 @@ QString ListExpression::debug() const
     QStringList debugs;
     for (const auto &exp : this->list_)
     {
-        debugs.append(exp->debug());
+        debugs.append(QString("%1 : %2")
+                          .arg(exp->debug())
+                          .arg(exp->synthesizeType().string()));
     }
-    return QString("{%1}").arg(debugs.join(", "));
+
+    return QString("List(%1)").arg(debugs.join(", "));
 }
 
 QString ListExpression::filterString() const

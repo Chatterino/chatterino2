@@ -48,7 +48,7 @@ TokenType ValueExpression::type()
 
 QString ValueExpression::debug() const
 {
-    return this->value_.toString();
+    return QString("Val(%1)").arg(this->value_.toString());
 }
 
 QString ValueExpression::filterString() const
