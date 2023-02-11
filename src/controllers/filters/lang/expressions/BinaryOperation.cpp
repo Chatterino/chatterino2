@@ -118,7 +118,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                 auto list = left.toStringList();
                 return !list.isEmpty() &&
                        list.first().compare(right.toString(),
-                                            Qt::CaseInsensitive);
+                                            Qt::CaseInsensitive) == 0;
             }
 
             if (variantIs(left.type(), QMetaType::QVariantList))
@@ -142,7 +142,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                 auto list = left.toStringList();
                 return !list.isEmpty() &&
                        list.last().compare(right.toString(),
-                                           Qt::CaseInsensitive);
+                                           Qt::CaseInsensitive) == 0;
             }
 
             if (variantIs(left.type(), QMetaType::QVariantList))
