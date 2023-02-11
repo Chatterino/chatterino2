@@ -16,7 +16,7 @@ struct IdentifierDescription {
 using T = Type;
 
 static const QMap<QString, IdentifierDescription> validIdentifiersMap = {
-    {"author.badges", {"author badges", T::List}},
+    {"author.badges", {"author badges", T::StringList}},
     {"author.color", {"author color", T::Color}},
     {"author.name", {"author name", T::String}},
     {"author.no_color", {"author has no color?", T::Bool}},
