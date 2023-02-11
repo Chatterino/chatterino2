@@ -65,11 +65,11 @@ TEST(Filters, TypeSynthesis)
     // clang-format off
     std::vector<TestCase> tests
     {
-        {R".(1 + 1).", T::Int}, 
+        {R".(1 + 1).", T::Int},
         {R".(author.color).", T::Color},
         {R".(author.name).", T::String},
         {R".(!author.subbed).", T::Bool},
-        {R".(author.badges).", T::List},
+        {R".(author.badges).", T::StringList},
         {R".(channel.name == "forsen" && author.badges contains "moderator").", T::Bool},
         {R".(message.content match {r"(\d\d)/(\d\d)/(\d\d\d\d)", 3}).", T::String},
     };
@@ -86,7 +86,8 @@ TEST(Filters, TypeSynthesis)
         T type = filter.returnType();
         EXPECT_EQ(type, expected)
             << "Filter{ " << qUtf8Printable(input) << " } has type " << type
-            << " instead of " << expected;
+            << " instead of " << expected
+            << ".\nDebug: " << qUtf8Printable(filter.debugString());
     }
 }
 
@@ -108,9 +109,38 @@ TEST(Filters, Evaluation)
     // clang-format off
     std::vector<TestCase> tests
     {
-        {R".(1 + 1).", QVariant(2)}, 
+        // Evaluation semantics
+        {R".(1 + 1).", QVariant(2)},
+        {R".(!(1 == 1)).", QVariant(false)},
         {R".(2 + 3 * 4).", QVariant(20)},  // math operators have the same precedence
-        {R".(1 > 2 || 3 > 1).", QVariant(true)}, 
+        {R".(1 > 2 || 3 >= 3).", QVariant(true)},
+        {R".(1 > 2 && 3 > 1).", QVariant(false)},
+        {R".("abc" + 123).", QVariant("abc123")},
+        {R".("abc" + "456").", QVariant("abc456")},
+        {R".(3 - 4).", QVariant(-1)},
+        {R".(3 * 4).", QVariant(12)},
+        {R".(8 / 3).", QVariant(2)},
+        {R".(7 % 3).", QVariant(1)},
+        {R".(5 == 5).", QVariant(true)},
+        {R".(5 == "5").", QVariant(true)},
+        {R".(5 != 7).", QVariant(true)},
+        {R".(5 == "abc").", QVariant(false)},
+        {R".("ABC123" == "abc123").", QVariant(true)},  // String comparison is case-insensitive
+        {R".("Hello world" contains "Hello").", QVariant(true)},
+        {R".("Hello world" contains "LLO W").", QVariant(true)},  // Case-insensitive
+        {R".({"abc", "def"} contains "abc").", QVariant(true)},
+        {R".({"abc", "def"} contains "ABC").", QVariant(true)},  // Case-insensitive when list is all strings
+        {R".({123, "def"} contains "DEF").", QVariant(false)},  // Case-sensitive if list not all strings
+        {R".({"a123", "b456"} startswith "a123").", QVariant(true)},
+        {R".({"a123", "b456"} startswith "A123").", QVariant(true)},
+        {R".({} startswith "A123").", QVariant(false)},
+        {R".("Hello world" startswith "Hello").", QVariant(true)},
+        {R".("Hello world" startswith "world").", QVariant(false)},
+        {R".({"a123", "b456"} endswith "b456").", QVariant(true)},
+        {R".({"a123", "b456"} endswith "B456").", QVariant(true)},
+        {R".("Hello world" endswith "world").", QVariant(true)},
+        {R".("Hello world" endswith "Hello").", QVariant(false)},
+        // Context map usage
         {R".(author.name).", QVariant("icelys")},
         {R".(!author.subbed).", QVariant(true)},
         {R".(author.color == "#ff0000").", QVariant(true)},
@@ -134,6 +164,7 @@ TEST(Filters, Evaluation)
         EXPECT_EQ(result, expected)
             << "Filter{ " << qUtf8Printable(input) << " } evaluated to "
             << qUtf8Printable(result.toString()) << " instead of "
-            << qUtf8Printable(expected.toString());
+            << qUtf8Printable(expected.toString())
+            << ".\nDebug: " << qUtf8Printable(filter.debugString());
     }
 }
