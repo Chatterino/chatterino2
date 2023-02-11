@@ -158,6 +158,12 @@ jobs:
               libxcb-render-util0 \
               libxcb-xinerama0
 
+      - name: Apply Qt patches (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.qt-version, '5.')
+        run: |
+          patch "$Qt5_DIR/include/QtConcurrent/qtconcurrentthreadengine.h" .patches/qt5-on-newer-gcc.patch
+        shell: bash
+
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
