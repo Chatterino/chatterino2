@@ -18,10 +18,10 @@ ubuntu_release="$(lsb_release -rs)"
 # Refactor opportunity:
 case "$ubuntu_release" in
     20.04)
-        dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, libboost-filesystem1.71.0"
+        dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, qt5-image-formats-plugins, libboost-filesystem1.71.0"
         ;;
     22.04)
-        dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, libboost-filesystem1.74.0"
+        dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, qt5-image-formats-plugins, libboost-filesystem1.74.0"
         ;;
     *)
         echo "Unsupported Ubuntu release $ubuntu_release"
