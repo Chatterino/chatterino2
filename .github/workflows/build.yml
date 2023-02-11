@@ -223,7 +223,7 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-${{ matrix.qt-version }}.deb
+          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
           path: build/Chatterino-x86_64.deb
 
       # MACOS
@@ -283,7 +283,12 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-5.15.2.deb
+          name: Chatterino-ubuntu-20.04.deb
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: Chatterino-ubuntu-22.04.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
