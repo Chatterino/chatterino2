@@ -2,6 +2,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 
 #    include "common/Channel.hpp"
+#    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "lauxlib.h"
 #    include "lua.h"
@@ -10,6 +11,43 @@
 #    include <cstdlib>
 
 namespace chatterino::lua {
+
+void stackDump(lua_State *L, const QString &tag)
+{
+    qCDebug(chatterinoLua) << "--------------------";
+    auto count = lua_gettop(L);
+    if (!tag.isEmpty())
+    {
+        qCDebug(chatterinoLua) << "Tag: " << tag;
+    }
+    qCDebug(chatterinoLua) << "Count elems: " << count;
+    for (int i = 1; i <= count; i++)
+    {
+        auto typeint = lua_type(L, i);
+        if (typeint == LUA_TSTRING)
+        {
+            QString str;
+            lua::peek(L, &str, i);
+            qCDebug(chatterinoLua)
+                << "At" << i << "is a" << lua_typename(L, typeint) << "("
+                << typeint << "): " << str;
+        }
+        else if (typeint == LUA_TTABLE)
+        {
+            qCDebug(chatterinoLua)
+                << "At" << i << "is a" << lua_typename(L, typeint) << "("
+                << typeint << ")"
+                << "its length is " << lua_rawlen(L, i);
+        }
+        else
+        {
+            qCDebug(chatterinoLua)
+                << "At" << i << "is a" << lua_typename(L, typeint) << "("
+                << typeint << ")";
+        }
+    }
+    qCDebug(chatterinoLua) << "--------------------";
+}
 
 QString humanErrorText(lua_State *L, int errCode)
 {
