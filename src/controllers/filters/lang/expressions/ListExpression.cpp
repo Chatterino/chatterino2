@@ -85,7 +85,7 @@ QString ListExpression::filterString() const
     QStringList strings;
     for (const auto &exp : this->list_)
     {
-        strings.append(QString("(%1)").arg(exp->filterString()));
+        strings.append(exp->filterString());
     }
     return QString("{%1}").arg(strings.join(", "));
 }

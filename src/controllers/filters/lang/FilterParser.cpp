@@ -10,6 +10,13 @@
 
 namespace chatterino::filters {
 
+QString explainIllType(const IllTyped &ill)
+{
+    return QString("%1\n\nOccurred here:\n%2")
+        .arg(ill.message)
+        .arg(ill.expr->filterString());
+}
+
 FilterParser::FilterParser(const QString &text)
     : text_(text)
     , tokenizer_(Tokenizer(text))
@@ -23,7 +30,7 @@ FilterParser::FilterParser(const QString &text)
     auto returnType = this->builtExpression_->synthesizeType();
     if (!returnType.well())
     {
-        this->errorLog(returnType.illTypedDescription()->message);
+        this->errorLog(explainIllType(*returnType.illTypedDescription()));
         return;
     }
 

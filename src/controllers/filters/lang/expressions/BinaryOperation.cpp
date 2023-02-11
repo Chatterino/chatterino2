@@ -342,7 +342,7 @@ QString BinaryOperation::filterString() const
         }
     }();
 
-    return QString("(%1) %2 (%3)")
+    return QString("(%1 %2 %3)")
         .arg(this->left_->filterString())
         .arg(opText)
         .arg(this->right_->filterString());
