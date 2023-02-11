@@ -286,12 +286,12 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-ubuntu-20.04.deb
+          name: Chatterino-ubuntu-20.04-Qt-5.12.12.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-ubuntu-20.04-Qt-5.12.12.deb
+          name: Chatterino-ubuntu-22.04-Qt-5.15.2.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
