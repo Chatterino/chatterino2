@@ -272,7 +272,7 @@ PossibleType BinaryOperation::synthesizeType() const
             return IllTyped{
                 this, "Can only perform with a List, a Map, or two Strings"};
         case MATCH: {
-            if (left != Type::String)  // todo: matching on converted ints? {
+            if (left != Type::String)
                 return IllTyped{this, "Left argument must be a String"};
 
             if (right == Type::RegularExpression)
@@ -287,81 +287,6 @@ PossibleType BinaryOperation::synthesizeType() const
             return IllTyped{this, "Not implemented"};
     }
 }
-
-// bool BinaryOperation::validateTypes(TypeValidator &validator) const
-// {
-//     if (!this->left_->validateTypes(validator) ||
-//         !this->right_->validateTypes(validator))
-//     {
-//         return false;
-//     }
-
-//     auto left = this->left_->returnType();
-//     auto right = this->right_->returnType();
-//     switch (this->op_)
-//     {
-//         case PLUS:
-//             if (left == QMetaType::QString)
-//             {
-//                 return true;
-//             }
-//             return validator.must(
-//                 left == QMetaType::Int && right == QMetaType::Int, this->op_,
-//                 left, right, this);
-//         case MINUS:
-//         case MULTIPLY:
-//         case DIVIDE:
-//         case MOD:
-//         case LT:
-//         case GT:
-//             return validator.must(
-//                 left == QMetaType::Int && right == QMetaType::Int, this->op_,
-//                 left, right, this);
-//         case OR:
-//         case AND:
-//             return validator.must(
-//                 left == QMetaType::Bool && right == QMetaType::Bool, this->op_,
-//                 left, right, this);
-//         case EQ:
-//         case NEQ:
-//             // todo:
-//             // validator.must(left == right || left == QMetaType::QString,
-//             //                this->op_, left, right, this);
-//             return true;
-//         case LTE:
-//         case GTE:
-//             return validator.must(
-//                 left == QMetaType::Int && right == QMetaType::Int, this->op_,
-//                 left, right, this);
-//         case CONTAINS:
-//         case STARTS_WITH:
-//         case ENDS_WITH:
-//             return validator.must(left == QMetaType::QVariantList ||
-//                                       left == QMetaType::QStringList ||
-//                                       left == QMetaType::QString,
-//                                   this->op_, left, right, this);
-//         case MATCH: {
-//             if (left != QMetaType::QString)
-//             {
-//                 validator.fail(
-//                     QStringLiteral(
-//                         "Can't match on type %1, only string\n\nExpression: %s")
-//                         .arg(left.string(), this->filterString()));
-//                 return false;
-//             }
-
-//             if (right == QMetaType::QRegularExpression ||
-//                 right == QMetaType::QVariantList)
-//             {
-//                 return true;
-//             }
-
-//             return validator.must(false, this->op_, left, right, this);
-//         }
-//         default:
-//             return false;
-//     }
-// }
 
 QString BinaryOperation::debug() const
 {
