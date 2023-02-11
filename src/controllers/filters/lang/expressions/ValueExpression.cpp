@@ -30,7 +30,7 @@ PossibleType ValueExpression::synthesizeType() const
                 return it.value().type;
             }
 
-            return IllTyped{this, "Unable to synthesize identifier type"};
+            return IllTyped{this, "Unbound identifier"};
         }
         case TokenType::INT:
             return Type::Int;

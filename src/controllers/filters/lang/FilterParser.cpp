@@ -12,7 +12,7 @@ namespace chatterino::filters {
 
 QString explainIllType(const IllTyped &ill)
 {
-    return QString("%1\n\nOccurred here:\n%2")
+    return QString("%1\n\nProblem occurred here:\n%2")
         .arg(ill.message)
         .arg(ill.expr->filterString());
 }

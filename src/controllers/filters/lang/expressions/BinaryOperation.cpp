@@ -235,13 +235,14 @@ PossibleType BinaryOperation::synthesizeType() const
             if (left == Type::Int && right == Type::Int)
                 return Type::Int;
 
-            return IllTyped{this, "Can only perform with Ints"};
+            return IllTyped{this, "Can only perform operation with Ints"};
         case OR:
         case AND:
             if (left == Type::Bool && right == Type::Bool)
                 return Type::Bool;
 
-            return IllTyped{this, "Can only perform with Bools"};
+            return IllTyped{this,
+                            "Can only perform logical operations with Bools"};
         case EQ:
         case NEQ:
             // equals/not equals always produces a valid output
@@ -253,7 +254,7 @@ PossibleType BinaryOperation::synthesizeType() const
             if (left == Type::Int && right == Type::Int)
                 return Type::Bool;
 
-            return IllTyped{this, "Can only perform with Ints"};
+            return IllTyped{this, "Can only perform comparisons with Ints"};
         case STARTS_WITH:
         case ENDS_WITH:
             if (isList(left))
@@ -261,8 +262,9 @@ PossibleType BinaryOperation::synthesizeType() const
             if (left == Type::String && right == Type::String)
                 return Type::Bool;
 
-            return IllTyped{this,
-                            "Can only perform with a List or two Strings"};
+            return IllTyped{
+                this,
+                "Can only perform starts/ends with a List or two Strings"};
         case CONTAINS:
             if (isList(left) || left == Type::Map)
                 return Type::Bool;
@@ -270,10 +272,12 @@ PossibleType BinaryOperation::synthesizeType() const
                 return Type::Bool;
 
             return IllTyped{
-                this, "Can only perform with a List, a Map, or two Strings"};
+                this,
+                "Can only perform contains with a List, a Map, or two Strings"};
         case MATCH: {
             if (left != Type::String)
-                return IllTyped{this, "Left argument must be a String"};
+                return IllTyped{this,
+                                "Left argument of match must be a String"};
 
             if (right == Type::RegularExpression)
                 return Type::Bool;
