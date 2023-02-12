@@ -85,6 +85,7 @@ jobs:
 
       - name: Disable plugin support
         if: matrix.plugins == false
+        run: |
           echo "artifact_descr=no-plugins" >> "$GITHUB_ENV"
         shell: bash
 
@@ -187,7 +188,7 @@ jobs:
         if: startsWith(matrix.os, 'windows') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
-          name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ artifact_descr }}.zip
+          name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ env.artifact_descr }}.zip
           path: build/chatterino-windows-x86-64.zip
 
       - name: Upload artifact (Windows - symbols)
@@ -286,7 +287,7 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ artifact_descr }}.AppImage
+          name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ env.artifact_descr }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - AppImage (Ubuntu, plugins)
@@ -300,7 +301,7 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}-${{ artifact_descr }}.deb
+          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}-${{ env.artifact_descr }}.deb
           path: build/Chatterino-x86_64.deb
 
       # MACOS
@@ -340,7 +341,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v3
         with:
-          name: chatterino-osx-${{ matrix.qt-version }}-${{ artifact_descr }}.dmg
+          name: chatterino-osx-${{ matrix.qt-version }}-${{ env.artifact_descr }}.dmg
           path: build/chatterino-osx.dmg
   create-release:
     needs: build
