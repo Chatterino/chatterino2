@@ -12,6 +12,7 @@
 - Minor: Added link to streamlink docs for easier user setup. (#4217)
 - Minor: Added setting to turn off rendering of reply context. (#4224)
 - Minor: Added setting to select which channels to log. (#4302)
+- Minor: Added crashpad to capture crashes on Windows locally. See PR for build/crash analysis instructions. (#4351)
 - Bugfix: Fixed crash that would occur when performing certain actions after removing all tabs. (#4271)
 - Bugfix: Fixed highlight sounds not reloading on change properly. (#4194)
 - Bugfix: Fixed CTRL + C not working in reply thread popups. (#4209)
@@ -46,7 +47,6 @@
 - Dev: Added CMake Install Support on Windows. (#4300)
 - Dev: Changed conan generator to [`CMakeDeps`](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html) and [`CMakeToolchain`](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmaketoolchain.html). See PR for migration notes. (#4335)
 - Dev: Refactored 7TV EventAPI implementation. (#4342)
-- Dev: Added support for building with crashpad. See PR for build instructions. (#4351)
 
 ## 2.4.0
 
