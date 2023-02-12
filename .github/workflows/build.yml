@@ -31,6 +31,11 @@ jobs:
             pch: false
             force-lto: true
             crashpad: false
+          - os: windows-latest
+            qt-version: 5.15.2
+            pch: true
+            force-lto: false
+            crashpad: false
       fail-fast: false
 
     steps:
@@ -114,24 +119,32 @@ jobs:
               ..
           set cl=/MP
           nmake /S /NOLOGO
+
+      - name: Build crashpad (Windows)
+        if: startsWith(matrix.os, 'windows') && matrix.crashpad
+        run: |
           nmake /S /NOLOGO crashpad_handler
-          windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
-          cp bin/chatterino.exe Chatterino2/
           mkdir Chatterino2/crashpad
           cp bin/crashpad/crashpad_handler.exe Chatterino2/crashpad/crashpad_handler.exe
-          echo nightly > Chatterino2/modes
-          7z a chatterino-windows-x86-64.zip Chatterino2/
           7z a bin/chatterino.pdb.7z bin/chatterino.pdb
 
-      - name: Upload artifact (Windows - binary)
+      - name: Package (windows)
         if: startsWith(matrix.os, 'windows')
+        run: |
+          windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
+          cp bin/chatterino.exe Chatterino2/
+          echo nightly > Chatterino2/modes
+          7z a chatterino-windows-x86-64.zip Chatterino2/
+
+      - name: Upload artifact (Windows - binary)
+        if: startsWith(matrix.os, 'windows') && matrix.crashpad
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}.zip
           path: build/chatterino-windows-x86-64.zip
 
       - name: Upload artifact (Windows - symbols)
-        if: startsWith(matrix.os, 'windows')
+        if: startsWith(matrix.os, 'windows') && matrix.crashpad
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}-symbols.pdb.7z
