@@ -3,7 +3,7 @@
 #include "common/QLogging.hpp"
 
 #include <QNetworkProxy>
-#include <websocketpp/connection.hpp>
+#include <websocketpp/error.hpp>
 
 #include <string>
 
@@ -25,9 +25,7 @@ public:
      */
     static void applyFromEnv(const Env &env);
 
-    template <class C>
-    static void applyToWebSocket(
-        const std::shared_ptr<websocketpp::connection<C>> &connection)
+    static void applyToWebSocket(const auto &connection)
     {
         const auto applicationProxy = QNetworkProxy::applicationProxy();
         if (applicationProxy.type() != QNetworkProxy::HttpProxy)

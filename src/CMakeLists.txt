@@ -191,6 +191,8 @@ set(SOURCE_FILES
         messages/search/SubtierPredicate.cpp
         messages/search/SubtierPredicate.hpp
 
+        providers/Crashpad.cpp
+        providers/Crashpad.hpp
         providers/IvrApi.cpp
         providers/IvrApi.hpp
         providers/LinkResolver.cpp
@@ -630,6 +632,22 @@ else()
         )
 endif()
 
+# Set the output of TARGET to be 
+# - CMAKE_BIN_DIR/lib for libraries
+# - CMAKE_BIN_DIR/bin for BINARIES
+# an additional argument specifies the subdirectory.
+function(set_target_directory_hierarchy TARGET)
+    set_target_properties(${TARGET}
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ARGV1}"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ARGV1}"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/${ARGV1}"
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin/${ARGV1}"
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin/${ARGV1}"
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin/${ARGV1}"
+    )
+endfunction()
+
 if (BUILD_APP)
     if (APPLE)
         add_executable(${EXECUTABLE_PROJECT} ${MACOS_BUNDLE_ICON_FILE} main.cpp)
@@ -642,15 +660,7 @@ if (BUILD_APP)
 
     target_link_libraries(${EXECUTABLE_PROJECT} PUBLIC ${LIBRARY_PROJECT})
 
-    set_target_properties(${EXECUTABLE_PROJECT}
-        PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin"
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin"
-        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
-        )
+    set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
     if (WIN32)
         if (NOT WINDEPLOYQT_PATH)
@@ -830,8 +840,29 @@ if (LIBRT)
         )
 endif ()
 
+if (BUILD_WITH_CRASHPAD)
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_CRASHPAD)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC crashpad::client)
+    set_target_directory_hierarchy(crashpad_handler crashpad)
+endif()
+
 # Configure compiler warnings
 if (MSVC)
+    # Change flags for RelWithDebInfo
+
+    # Default: "/debug /INCREMENTAL"
+    # Changes:
+    #   - Disable incremental linking to reduce padding
+    #   - Enable all optimizations - by default when /DEBUG is specified,
+    #     these optimizations will be disabled. We need /DEBUG to generate a PDB.
+    # See https://gitlab.kitware.com/cmake/cmake/-/issues/20812 for more details.
+    set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/DEBUG /INCREMENTAL:NO /OPT:REF,ICF,LBR")
+
+    # Use the function inlining level from 'Release' mode (2).
+    string(REPLACE "/Ob1" "/Ob2" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+
+    # Configure warnings
+
     # Someone adds /W3 before we add /W4.
     # This makes sure, only /W4 is specified.
     string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -860,6 +891,7 @@ if (MSVC)
         /wd4100
         /wd4267
     )
+    # Disable min/max macros from Windows.h
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
 else ()
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
