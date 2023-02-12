@@ -168,10 +168,10 @@ void PluginController::openLibrariesFor(lua_State *L,
 
     // possibly randomize this name at runtime to prevent some attacks?
 
-#ifndef NDEBUG
+#    ifndef NDEBUG
     lua_getfield(L, gtable, "load");
     lua_setfield(L, LUA_REGISTRYINDEX, "real_load");
-#endif
+#    endif
 
     lua_getfield(L, gtable, "dofile");
     lua_setfield(L, LUA_REGISTRYINDEX, "real_dofile");
