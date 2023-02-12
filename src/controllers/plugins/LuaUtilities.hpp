@@ -148,7 +148,7 @@ bool pop(lua_State *L, T *out, StackIdx idx = -1)
     {
         if (idx < 0)
         {
-            idx = lua_gettop(L) + idx;
+            idx = lua_gettop(L) + idx + 1;
         }
         lua_remove(L, idx);
     }
