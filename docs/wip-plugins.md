@@ -145,6 +145,7 @@ end
 
 #### `load(chunk [, chunkname [, mode [, env]]])`
 
+This function is only available if Chatterino is compiled in debug mode. It is meant for debugging with little exception.
 This function behaves really similarity to Lua's `load`, however it does not allow for bytecode to be executed.
 It achieves this by forcing all inputs to be encoded with `UTF-8`.
 
