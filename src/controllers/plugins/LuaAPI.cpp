@@ -1,5 +1,5 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
-#    include "LuaApi.hpp"
+#    include "LuaAPI.hpp"
 
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
