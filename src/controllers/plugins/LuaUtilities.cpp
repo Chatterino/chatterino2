@@ -1,5 +1,5 @@
-#include "LuaUtilities.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "controllers/plugins/LuaUtilities.hpp"
 
 #    include "common/Channel.hpp"
 #    include "common/QLogging.hpp"
