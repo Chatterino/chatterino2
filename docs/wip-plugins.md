@@ -17,7 +17,7 @@ Chatterino Plugins dir/
     └── info.json
 ```
 
-`init.lua` will be the file loaded when the plugin is enabled. You may load other files using `loadfile` Lua global function.
+`init.lua` will be the file loaded when the plugin is enabled. You may load other files using [`execfile` global function](#execfilefilename=).
 
 `info.json` contains metadata about the plugin, like its name, description,
 authors, homepage link, tags, version, license name. The version field **must**
