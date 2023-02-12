@@ -1,5 +1,5 @@
-#include "PluginsPage.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "widgets/settingspages/PluginsPage.hpp"
 
 #    include "Application.hpp"
 #    include "controllers/plugins/PluginController.hpp"

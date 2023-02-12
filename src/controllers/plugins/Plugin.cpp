@@ -1,6 +1,5 @@
-#include "Plugin.hpp"
-
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "controllers/plugins/Plugin.hpp"
 
 #    include "lua.h"
 
