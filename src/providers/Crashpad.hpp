@@ -1,3 +1,5 @@
+#pragma once
+
 #ifdef CHATTERINO_WITH_CRASHPAD
 #    include <client/crashpad_client.h>
 
