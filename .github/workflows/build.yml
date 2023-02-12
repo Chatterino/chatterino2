@@ -17,8 +17,8 @@ env:
 
 jobs:
   build:
-    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (PCH:${{ matrix.pch }}, LTO:${{ matrix.force-lto }})"
     runs-on: ${{ matrix.os }}
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (PCH:${{ matrix.pch }}, LTO:${{ matrix.force-lto }})"
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
