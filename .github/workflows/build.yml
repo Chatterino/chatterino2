@@ -138,6 +138,8 @@ jobs:
       - name: Build crashpad (Windows)
         if: startsWith(matrix.os, 'windows') && matrix.crashpad
         run: |
+          cd build
+          set cl=/MP
           nmake /S /NOLOGO crashpad_handler
           mkdir Chatterino2/crashpad
           cp bin/crashpad/crashpad_handler.exe Chatterino2/crashpad/crashpad_handler.exe
