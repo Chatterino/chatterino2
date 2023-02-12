@@ -51,6 +51,14 @@ CommandPage::CommandPage()
             Command{"/command", "I made a new command HeyGuys"});
     });
 
+    QItemSelectionModel *selectionModel =
+        this->view->getTableView()->selectionModel();
+    QObject::connect(
+        selectionModel, &QItemSelectionModel::currentChanged, this,
+        [this](const QModelIndex &current, const QModelIndex &previous) {
+            this->checkCommandDuplicates();
+        });
+
     // TODO: asyncronously check path
     if (QFile(c1settingsPath()).exists())
     {
@@ -87,12 +95,6 @@ CommandPage::CommandPage()
             .getElement();
     this->duplicateCommandWarning->setStyleSheet("color: yellow");
     this->checkCommandDuplicates();
-
-    QPushButton *checkDuplicates = new QPushButton("Check Duplicates");
-    this->view->addCustomButton(checkDuplicates);
-    QObject::connect(checkDuplicates, &QPushButton::clicked, this, [this] {
-        this->checkCommandDuplicates();
-    });
 
     // ---- end of layout
     this->commandsEditTimer_.setSingleShot(true);

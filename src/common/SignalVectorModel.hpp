@@ -169,7 +169,6 @@ public:
                 this->rows_[row].items, this->rows_[row].original.get());
             this->vector_->insert(item, vecRow, this);
         }
-        emit dataChanged(index, index);
 
         return true;
     }
