@@ -7,7 +7,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
-#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
+#include "providers/seventv/eventapi/Subscription.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
