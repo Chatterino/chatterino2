@@ -162,6 +162,10 @@ public:
         else
         {
             int vecRow = this->getVectorIndexFromModelIndex(row);
+            if (vecRow >= vector_->readOnly()->size())
+            {
+                return false;
+            }
             this->vector_->removeAt(vecRow, this);
 
             assert(this->rows_[row].original);
