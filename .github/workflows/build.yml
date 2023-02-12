@@ -59,6 +59,19 @@ jobs:
         if: matrix.plugins == true
         run: |
           echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
+          echo "artifact_descr=plugins" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Disable plugin support
+        if: matrix.plugins == false
+        run: |
+          echo "artifact_descr=no-plugins" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Set Crashpad
+        if: matrix.crashpad == true
+        run: |
+          echo "C2_ENABLE_CRASHPAD=ON" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Set environment variables for windows-latest
@@ -135,17 +148,10 @@ jobs:
           7z a chatterino-windows-x86-64.zip Chatterino2/
 
       - name: Upload artifact (Windows)
-        if: startsWith(matrix.os, 'windows') && matrix.plugins == false
+        if: startsWith(matrix.os, 'windows')
         uses: actions/upload-artifact@v3
         with:
-          name: chatterino-windows-x86-64-${{ matrix.qt-version }}.zip
-          path: build/chatterino-windows-x86-64.zip
-
-      - name: Upload artifact (Windows, plugins)
-        if: startsWith(matrix.os, 'windows') && matrix.plugins == true
-        uses: actions/upload-artifact@v3
-        with:
-          name: chatterino-windows-x86-64-${{ matrix.qt-version }}-plugins.zip
+          name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ env.artifact_descr }}.zip
           path: build/chatterino-windows-x86-64.zip
 
       - name: Clean Conan pkgs
@@ -229,31 +235,17 @@ jobs:
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.plugins == false
+        if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
-          path: build/Chatterino-x86_64.AppImage
-
-      - name: Upload artifact - AppImage (Ubuntu, plugins)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.plugins == true
-        uses: actions/upload-artifact@v3
-        with:
-          name: Chatterino-x86_64-${{ matrix.qt-version }}-plugins.AppImage
+          name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ env.artifact_descr }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.plugins == false
+        if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-${{ matrix.qt-version }}.deb
-          path: build/Chatterino-x86_64.deb
-
-      - name: Upload artifact - .deb (Ubuntu, plugins)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.plugins == true
-        uses: actions/upload-artifact@v3
-        with:
-          name: Chatterino-${{ matrix.qt-version }}-plugins.deb
+          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}-${{ env.artifact_descr }}.deb
           path: build/Chatterino-x86_64.deb
 
       # MACOS
@@ -290,17 +282,10 @@ jobs:
         shell: bash
 
       - name: Upload artifact (MacOS)
-        if: startsWith(matrix.os, 'macos') && matrix.plugins == false
+        if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v3
         with:
-          name: chatterino-osx-${{ matrix.qt-version }}.dmg
-          path: build/chatterino-osx.dmg
-
-      - name: Upload artifact (MacOS, plugins)
-        if: startsWith(matrix.os, 'macos') && matrix.plugins == true
-        uses: actions/upload-artifact@v3
-        with:
-          name: chatterino-osx-${{ matrix.qt-version }}.dmg
+          name: chatterino-osx-${{ matrix.qt-version }}-${{ env.artifact_descr }}.dmg
           path: build/chatterino-osx.dmg
   create-release:
     needs: build
