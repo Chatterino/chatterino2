@@ -162,10 +162,10 @@ int c2_log(lua_State *L)
 
 int g_load(lua_State *L)
 {
-#ifdef NDEBUG
+#    ifdef NDEBUG
     luaL_error(L, "load() is only usable in debug mode");
     return 0;
-#else
+#    else
     auto countArgs = lua_gettop(L);
     QByteArray data;
     if (lua::peek(L, &data, 1))
@@ -203,7 +203,7 @@ int g_load(lua_State *L)
     lua_call(L, countArgs, LUA_MULTRET);
 
     return lua_gettop(L);
-#endif
+#    endif
 }
 
 int g_dofile(lua_State *L)
