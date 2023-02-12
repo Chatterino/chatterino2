@@ -373,8 +373,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     menu->addAction(
         "Popup", this->split_, &Split::popup,
         h->getDisplaySequence(HotkeyCategory::Window, "popup", {{"split"}}));
-    menu->addAction("Search", this->split_, &Split::showSearch,
-                    h->getDisplaySequence(HotkeyCategory::Split, "showSearch"));
+    menu->addAction(
+        "Search", this->split_,
+        [this] {
+            this->split_->showSearch(true);
+        },
+        h->getDisplaySequence(HotkeyCategory::Split, "showSearch"));
     menu->addAction(
         "Set filters", this->split_, &Split::setFiltersDialog,
         h->getDisplaySequence(HotkeyCategory::Split, "pickFilters"));
@@ -941,7 +945,11 @@ void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
     this->doubleClicked_ = true;
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void SplitHeader::enterEvent(QEnterEvent *event)
+#else
 void SplitHeader::enterEvent(QEvent *event)
+#endif
 {
     if (!this->tooltipText_.isEmpty())
     {

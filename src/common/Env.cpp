@@ -44,6 +44,17 @@ namespace {
         return defaultValue;
     }
 
+    boost::optional<QString> readOptionalStringEnv(const char *envName)
+    {
+        auto envString = std::getenv(envName);
+        if (envString != nullptr)
+        {
+            return QString(envString);
+        }
+
+        return boost::none;
+    }
+
     uint16_t readPortEnv(const char *envName, uint16_t defaultValue)
     {
         auto envString = std::getenv(envName);
@@ -89,6 +100,7 @@ Env::Env()
           readStringEnv("CHATTERINO2_TWITCH_SERVER_HOST", "irc.chat.twitch.tv"))
     , twitchServerPort(readPortEnv("CHATTERINO2_TWITCH_SERVER_PORT", 443))
     , twitchServerSecure(readBoolEnv("CHATTERINO2_TWITCH_SERVER_SECURE", true))
+    , proxyUrl(readOptionalStringEnv("CHATTERINO2_PROXY_URL"))
 {
 }
 

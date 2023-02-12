@@ -17,18 +17,32 @@ env:
 
 jobs:
   build:
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (PCH:${{ matrix.pch }}, LTO:${{ matrix.force-lto }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-20.04, macos-latest]
+        os: [windows-latest, macos-latest]
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
         force-lto: [false]
+        skip_artifact: ["no"]
         include:
+          # Ubuntu 20.04, Qt 5.12
           - os: ubuntu-20.04
+            qt-version: 5.12.12
+            pch: true
+            force-lto: false
+          # Ubuntu 22.04, Qt 5.15
+          - os: ubuntu-22.04
+            qt-version: 5.15.2
+            pch: true
+            force-lto: false
+          # Test for disabling Precompiled Headers & enabling link-time optimization
+          - os: ubuntu-22.04
             qt-version: 5.15.2
             pch: false
             force-lto: true
+            skip_artifact: "yes"
       fail-fast: false
 
     steps:
@@ -83,18 +97,24 @@ jobs:
 
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.12.0
+        uses: ilammy/msvc-dev-cmd@v1.12.1
+
+      - name: Setup Conan (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          conan profile new --detect --force default
+          conan profile update conf.tools.cmake.cmaketoolchain:generator="NMake Makefiles" default
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
           mkdir build
           cd build
-          conan install ..  -b missing
+          conan install .. -s build_type=Release -b missing -pr:b=default
           cmake `
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=Release `
-              -DUSE_CONAN=ON `
+              -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               ..
           set cl=/MP
@@ -133,7 +153,6 @@ jobs:
               libboost-filesystem-dev \
               libpulse-dev \
               libxkbcommon-x11-0 \
-              libgstreamer-plugins-base1.0-0 \
               build-essential \
               libgl1-mesa-dev \
               libxcb-icccm4 \
@@ -142,12 +161,18 @@ jobs:
               libxcb-render-util0 \
               libxcb-xinerama0
 
+      - name: Apply Qt patches (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.qt-version, '5.')
+        run: |
+          patch "$Qt5_DIR/include/QtConcurrent/qtconcurrentthreadengine.h" .patches/qt5-on-newer-gcc.patch
+        shell: bash
+
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           mkdir build
           cd build
-          cmake \
+          CXXFLAGS=-fno-sized-deallocation cmake \
             -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
             -DCMAKE_BUILD_TYPE=Release \
             -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
@@ -166,6 +191,7 @@ jobs:
           build_dir: build
           config_file: ".clang-tidy"
           split_workflow: true
+          exclude: "tests/*,lib/*"
 
       - uses: actions/upload-artifact@v3
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
@@ -176,31 +202,31 @@ jobs:
             clang-tidy-review-metadata.json
 
       - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         run: |
           cd build
           sh ./../.CI/CreateAppImage.sh
         shell: bash
 
       - name: Package - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         run: |
           cd build
           sh ./../.CI/CreateUbuntuDeb.sh
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-${{ matrix.qt-version }}.deb
+          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
           path: build/Chatterino-x86_64.deb
 
       # MACOS
@@ -260,7 +286,12 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-5.15.2.deb
+          name: Chatterino-ubuntu-20.04-Qt-5.12.12.deb
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: Chatterino-ubuntu-22.04-Qt-5.15.2.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3

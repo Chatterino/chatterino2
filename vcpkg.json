@@ -1,8 +1,8 @@
 {
-  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "chatterino",
   "version": "2.0.0",
-  "builtin-baseline": "5ba2b95aea2a39aa89444949c7a047af38c401c1",
+  "builtin-baseline": "43f56137beabcd470ac2650cdf3954761f65b70e",
   "dependencies": [
     "benchmark",
     "boost-asio",
@@ -14,7 +14,6 @@
     "boost-variant",
     "gtest",
     "openssl",
-    "qt5-multimedia",
     "qt5-tools"
   ],
   "overrides": [

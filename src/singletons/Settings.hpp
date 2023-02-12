@@ -225,6 +225,7 @@ public:
 
     BoolSetting enableBTTVGlobalEmotes = {"/emotes/bttv/global", true};
     BoolSetting enableBTTVChannelEmotes = {"/emotes/bttv/channel", true};
+    BoolSetting enableBTTVLiveUpdates = {"/emotes/bttv/liveupdates", true};
     BoolSetting enableFFZGlobalEmotes = {"/emotes/ffz/global", true};
     BoolSetting enableFFZChannelEmotes = {"/emotes/ffz/channel", true};
     BoolSetting enableSevenTVGlobalEmotes = {"/emotes/seventv/global", true};
@@ -286,6 +287,13 @@ public:
         "/highlighting/selfHighlightSoundUrl", ""};
     QStringSetting selfHighlightColor = {"/highlighting/selfHighlightColor",
                                          ""};
+
+    BoolSetting enableSelfMessageHighlight = {
+        "/highlighting/selfMessageHighlight/enabled", false};
+    BoolSetting showSelfMessageHighlightInMentions = {
+        "/highlighting/selfMessageHighlight/showInMentions", false};
+    QStringSetting selfMessageHighlightColor = {
+        "/highlighting/selfMessageHighlight/color", ""};
 
     BoolSetting enableWhisperHighlight = {
         "/highlighting/whisperHighlight/whispersHighlighted", true};

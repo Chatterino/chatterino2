@@ -1,9 +1,11 @@
 #include "BrowserExtension.hpp"
 #include "common/Args.hpp"
+#include "common/Env.hpp"
 #include "common/Modes.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "providers/IvrApi.hpp"
+#include "providers/NetworkConfigurationProvider.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "RunGui.hpp"
 #include "singletons/Paths.hpp"
@@ -80,6 +82,8 @@ int main(int argc, char **argv)
         {
             attachToConsole();
         }
+
+        NetworkConfigurationProvider::applyFromEnv(Env::get());
 
         IvrApi::initialize();
         Helix::initialize();
