@@ -1,6 +1,7 @@
 #include "providers/twitch/PubSubManager.hpp"
 
 #include "common/QLogging.hpp"
+#include "providers/NetworkConfigurationProvider.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubClient.hpp"
 #include "providers/twitch/PubSubHelpers.hpp"
@@ -513,6 +514,8 @@ void PubSub::addClient()
             << "Unable to establish connection:" << ec.message().c_str();
         return;
     }
+
+    NetworkConfigurationProvider::applyToWebSocket(con);
 
     this->websocketClient.connect(con);
 }
