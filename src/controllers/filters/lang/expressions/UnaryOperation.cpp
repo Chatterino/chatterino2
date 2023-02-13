@@ -14,9 +14,7 @@ QVariant UnaryOperation::execute(const ContextMap &context) const
     switch (this->op_)
     {
         case NOT:
-            if (right.canConvert<bool>())
-                return !right.toBool();
-            return false;
+            return right.canConvert<bool>() && !right.toBool();
         default:
             return false;
     }
@@ -34,7 +32,9 @@ PossibleType UnaryOperation::synthesizeType() const
     {
         case NOT:
             if (right == Type::Bool)
+            {
                 return Type::Bool;
+            }
             return IllTyped{this, "Can only negate boolean values"};
         default:
             return IllTyped{this, "Not implemented"};
@@ -57,7 +57,7 @@ QString UnaryOperation::filterString() const
             case NOT:
                 return "!";
             default:
-                return QString();
+                return "";
         }
     }();
 

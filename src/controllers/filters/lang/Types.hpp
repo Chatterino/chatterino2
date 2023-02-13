@@ -58,7 +58,7 @@ private:
     std::optional<IllTyped> illTyped_;
 };
 
-bool isList(PossibleType typ);
+bool isList(const PossibleType &typ);
 
 inline bool variantIs(const QVariant &a, QMetaType::Type type)
 {

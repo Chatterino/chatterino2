@@ -41,7 +41,6 @@ public:
 private:
     Filter(ExpressionPtr expression, Type returnType);
 
-private:
     ExpressionPtr expression_;
     Type returnType_;
 };

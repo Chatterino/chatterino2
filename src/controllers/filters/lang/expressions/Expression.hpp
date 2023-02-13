@@ -16,7 +16,7 @@ class Expression
 public:
     virtual ~Expression() = default;
 
-    virtual QVariant execute(const ContextMap &) const;
+    virtual QVariant execute(const ContextMap & /*context*/) const;
 
     virtual PossibleType synthesizeType() const;
 

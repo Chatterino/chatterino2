@@ -2,14 +2,14 @@
 
 namespace chatterino::filters {
 
-RegexExpression::RegexExpression(QString regex, bool caseInsensitive)
+RegexExpression::RegexExpression(const QString &regex, bool caseInsensitive)
     : regexString_(regex)
     , caseInsensitive_(caseInsensitive)
     , regex_(QRegularExpression(
           regex, caseInsensitive ? QRegularExpression::CaseInsensitiveOption
                                  : QRegularExpression::NoPatternOption)){};
 
-QVariant RegexExpression::execute(const ContextMap &) const
+QVariant RegexExpression::execute(const ContextMap & /*context*/) const
 {
     return this->regex_;
 }

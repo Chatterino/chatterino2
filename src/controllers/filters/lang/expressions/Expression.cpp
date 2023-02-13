@@ -2,7 +2,7 @@
 
 namespace chatterino::filters {
 
-QVariant Expression::execute(const ContextMap &) const
+QVariant Expression::execute(const ContextMap & /*context*/) const
 {
     return false;
 }

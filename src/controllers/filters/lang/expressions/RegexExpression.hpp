@@ -10,7 +10,7 @@ namespace chatterino::filters {
 class RegexExpression : public Expression
 {
 public:
-    RegexExpression(QString regex, bool caseInsensitive);
+    RegexExpression(const QString &regex, bool caseInsensitive);
 
     QVariant execute(const ContextMap &context) const override;
     PossibleType synthesizeType() const override;

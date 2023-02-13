@@ -5,7 +5,7 @@
 namespace chatterino::filters {
 
 ValueExpression::ValueExpression(QVariant value, TokenType type)
-    : value_(value)
+    : value_(std::move(value))
     , type_(type)
 {
 }

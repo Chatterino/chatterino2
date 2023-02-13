@@ -342,7 +342,7 @@ QString BinaryOperation::filterString() const
             case MATCH:
                 return "match";
             default:
-                return QString();
+                return "";
         }
     }();
 

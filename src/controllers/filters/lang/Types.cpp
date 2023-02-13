@@ -5,7 +5,7 @@
 
 namespace chatterino::filters {
 
-bool isList(PossibleType typ)
+bool isList(const PossibleType &typ)
 {
     using T = Type;
     return typ == T::List || typ == T::StringList ||
@@ -42,7 +42,6 @@ QString typeToString(Type type)
 
 PossibleType::PossibleType(Type t)
     : type_(t)
-    , illTyped_({})
 {
 }
 

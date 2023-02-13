@@ -30,10 +30,8 @@ QVariant ListExpression::execute(const ContextMap &context) const
         }
         return strings;
     }
-    else
-    {
-        return results;
-    }
+
+    return results;
 }
 
 PossibleType ListExpression::synthesizeType() const
