@@ -42,7 +42,7 @@ fi
 
 chatterino_version=$(git describe 2>/dev/null | cut -c 2-) || true
 if [ -z "$chatterino_version" ]; then
-    # Fall back to this in case the build happened outside of a git repo
+    # Fall back to this in case the build happened outside of a git repo or a repo without tags
     chatterino_version="0.0.0-dev"
 fi
 
