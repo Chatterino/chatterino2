@@ -91,7 +91,19 @@ void PluginsPage::rebuildContent()
         descrText->setWordWrap(true);
         descrText->setStyleSheet("color: #bbb");
         pl->addRow(descrText);
-        pl->addRow("Authors", new QLabel(plugin->meta.authors));
+
+        QString authorsTxt;
+        for (const auto &author : plugin->meta.authors)
+        {
+            if (!authorsTxt.isEmpty())
+            {
+                authorsTxt += ", ";
+            }
+
+            authorsTxt += author;
+        }
+        pl->addRow("Authors", new QLabel(authorsTxt));
+
         auto *homepage = new QLabel(formatRichLink(plugin->meta.homepage));
         homepage->setOpenExternalLinks(true);
 
