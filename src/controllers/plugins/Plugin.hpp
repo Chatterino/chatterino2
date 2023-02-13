@@ -22,7 +22,7 @@ struct PluginMeta {
     // required fields
     QString name;
     QString description;
-    QString authors;
+    std::vector<QString> authors;
     QString license;
     semver::version version;
 
@@ -53,12 +53,31 @@ struct PluginMeta {
         this->description = descrObj.toString();
 
         auto authorsObj = obj.value("authors");
-        if (!authorsObj.isString())
+        if (authorsObj.isArray())
         {
-            this->invalidWhy.emplace_back("description is not a string");
+            auto authorsArr = authorsObj.toArray();
+            for (int i = 0; i < authorsArr.size(); i++)
+            {
+                const auto &t = authorsArr.at(i);
+                if (!t.isString())
+                {
+                    this->invalidWhy.push_back(
+                        QString(
+                            "authors element #%1 is not a string (it is a %2)")
+                            .arg(i)
+                            .arg(QString::fromStdString(
+                                std::string(magic_enum::enum_name(t.type())))));
+                    this->valid = false;
+                    return;
+                }
+                this->authors.push_back(t.toString());
+            }
+        }
+        else
+        {
+            this->invalidWhy.emplace_back("authors is not an array");
             this->valid = false;
         }
-        this->authors = authorsObj.toString();
 
         auto licenseObj = obj.value("license");
         if (!licenseObj.isString())
