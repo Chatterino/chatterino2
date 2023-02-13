@@ -1,9 +1,9 @@
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
-#    include "lua.h"
-#    include "lualib.h"
 
+#    include <lua.h>
+#    include <lualib.h>
 #    include <magic_enum.hpp>
 #    include <QList>
 
