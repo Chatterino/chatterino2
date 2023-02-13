@@ -4,6 +4,7 @@
 #include "common/Modes.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
+#include "providers/Crashpad.hpp"
 #include "providers/IvrApi.hpp"
 #include "providers/NetworkConfigurationProvider.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -11,7 +12,6 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/AttachToConsole.hpp"
-#include "util/IncognitoBrowser.hpp"
 
 #include <QApplication>
 #include <QCommandLineParser>
@@ -58,6 +58,10 @@ int main(int argc, char **argv)
     }
 
     initArgs(a);
+
+#ifdef CHATTERINO_WITH_CRASHPAD
+    const auto crashpadHandler = installCrashHandler();
+#endif
 
     // run in gui mode or browser extension host mode
     if (getArgs().shouldRunBrowserExtensionHost)
