@@ -308,7 +308,7 @@ jobs:
   create-release:
     needs: build
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+    # if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
 
     steps:
       - uses: actions/download-artifact@v3
@@ -340,6 +340,12 @@ jobs:
         with:
           name: chatterino-osx-5.15.2.dmg
           path: release-artifacts/
+
+      - name: Update nightly-build tag
+        run: |
+          git tag -f nightly-build
+          git push -f origin nightly-build
+        shell: bash
 
       - name: Create release
         uses: ncipollo/release-action@v1.12.0
