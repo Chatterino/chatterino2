@@ -15,6 +15,9 @@ packaging_dir="package"
 # Get the Ubuntu Release (e.g. 20.04 or 22.04)
 ubuntu_release="$(lsb_release -rs)"
 
+# The final path where we'll save the .deb package
+deb_path="Chatterino-${ubuntu_release}-x86_64.deb"
+
 # Refactor opportunity:
 case "$ubuntu_release" in
     20.04)
@@ -77,15 +80,15 @@ breakline
 
 
 echo "Building package"
-dpkg-deb --build "$packaging_dir" "Chatterino-x86_64.deb"
+dpkg-deb --build "$packaging_dir" "$deb_path"
 breakline
 
 
 echo "Package info"
-dpkg --info Chatterino-x86_64.deb
+dpkg --info "$deb_path"
 breakline
 
 
 echo "Package contents"
-dpkg --contents Chatterino-x86_64.deb # Shows folders and files inside .deb file
+dpkg --contents "$deb_path"
 breakline

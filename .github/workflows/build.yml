@@ -264,7 +264,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
-          path: build/Chatterino-x86_64.deb
+          path: build/Chatterino-${{ matrix.os }}-x86_64.deb
 
       # MACOS
       - name: Install dependencies (MacOS)
