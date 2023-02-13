@@ -3,8 +3,9 @@
 
 #    include "common/Channel.hpp"
 #    include "controllers/commands/CommandContext.hpp"
-#    include "lauxlib.h"
-#    include "lua.h"
+
+#    include <lauxlib.h>
+#    include <lua.h>
 
 #    include <climits>
 #    include <cstdlib>
