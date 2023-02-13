@@ -10,11 +10,9 @@
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
 
-// lua stuff
 #    include <lauxlib.h>
 #    include <lua.h>
 #    include <lualib.h>
-
 #    include <QJsonDocument>
 
 #    include <memory>
