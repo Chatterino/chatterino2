@@ -17,7 +17,7 @@ Chatterino Plugins dir/
     └── info.json
 ```
 
-`init.lua` will be the file loaded when the plugin is enabled. You may load other files using [`execfile` global function](#execfilefilename=).
+`init.lua` will be the file loaded when the plugin is enabled. You may load other files using [`import` global function](#importfilename=).
 
 `info.json` contains metadata about the plugin, like its name, description,
 authors, homepage link, tags, version, license name. The version field **must**
@@ -151,7 +151,7 @@ It achieves this by forcing all inputs to be encoded with `UTF-8`.
 
 See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-load)
 
-#### `execfile(filename)`
+#### `import(filename)`
 
 This function mimics Lua's `dofile` however relative paths are relative to your plugin's directory.
 You are restricted to loading files in your plugin's directory. You cannot load files with bytecode inside.
@@ -159,10 +159,10 @@ You are restricted to loading files in your plugin's directory. You cannot load 
 Example:
 
 ```lua
-execfile("stuff.lua") -- executes Plugins/name/stuff.lua
-execfile("./stuff.lua") -- executes Plugins/name/stuff.lua
-execfile("../stuff.lua") -- tries to load Plugins/stuff.lua and errors
-execfile("luac.out") -- tried to load Plugins/name/luac.out and errors because it contains non-utf8 data
+import("stuff.lua") -- executes Plugins/name/stuff.lua
+import("./stuff.lua") -- executes Plugins/name/stuff.lua
+import("../stuff.lua") -- tries to load Plugins/stuff.lua and errors
+import("luac.out") -- tried to load Plugins/name/luac.out and errors because it contains non-utf8 data
 ```
 
 #### `print(Args...)`

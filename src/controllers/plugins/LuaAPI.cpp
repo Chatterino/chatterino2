@@ -206,7 +206,7 @@ int g_load(lua_State *L)
 #    endif
 }
 
-int g_dofile(lua_State *L)
+int g_import(lua_State *L)
 {
     auto countArgs = lua_gettop(L);
     // Lua allows dofile() which loads from stdin, but this is very useless in our case
