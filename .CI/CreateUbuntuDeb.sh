@@ -48,7 +48,7 @@ elif [ "$chatterino_version" = "ightly-build" ]; then
     chatterino_version=$(git describe --abbrev=0 --tags `git rev-list --tags --skip=1 --max-count=1` 2>/dev/null | cut -c 2-) || true
     echo "Found Chatterino nightly build via git. Falling back to the second to last tag"
     if [ -z "$chatterino_version" ]; then
-        # Fall back to this in case the build happened in a git repo without tags
+        # Fall back to this in case the build happened in a git repo with just the nightly-build tag
         chatterino_version="0.0.0-dev"
     fi
 fi
