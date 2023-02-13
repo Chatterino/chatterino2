@@ -4,6 +4,7 @@
 #include "common/Version.hpp"
 #include "providers/liveupdates/BasicPubSubClient.hpp"
 #include "providers/liveupdates/BasicPubSubWebsocket.hpp"
+#include "providers/NetworkConfigurationProvider.hpp"
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "util/DebugCount.hpp"
 #include "util/ExponentialBackoff.hpp"
@@ -335,6 +336,8 @@ private:
                 << "Unable to establish connection:" << ec.message().c_str();
             return;
         }
+
+        NetworkConfigurationProvider::applyToWebSocket(con);
 
         this->websocketClient_.connect(con);
     }

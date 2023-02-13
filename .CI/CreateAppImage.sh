@@ -57,3 +57,6 @@ exec "$here/usr/bin/chatterino" "$@"' > appdir/AppRun
 chmod a+x appdir/AppRun
 
 ./appimagetool-x86_64.AppImage appdir
+
+# TODO: Create appimage in a unique directory instead maybe idk?
+rm -rf appdir

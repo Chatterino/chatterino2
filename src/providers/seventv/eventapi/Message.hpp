@@ -1,6 +1,6 @@
 #pragma once
 
-#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
+#include "providers/seventv/eventapi/Subscription.hpp"
 
 #include <boost/optional.hpp>
 #include <magic_enum.hpp>
@@ -8,27 +8,26 @@
 #include <QJsonObject>
 #include <QString>
 
-namespace chatterino {
+namespace chatterino::seventv::eventapi {
 
-struct SeventvEventAPIMessage {
+struct Message {
     QJsonObject data;
 
-    SeventvEventAPIOpcode op;
+    Opcode op;
 
-    SeventvEventAPIMessage(QJsonObject _json);
+    Message(QJsonObject _json);
 
     template <class InnerClass>
     boost::optional<InnerClass> toInner();
 };
 
 template <class InnerClass>
-boost::optional<InnerClass> SeventvEventAPIMessage::toInner()
+boost::optional<InnerClass> Message::toInner()
 {
     return InnerClass{this->data};
 }
 
-static boost::optional<SeventvEventAPIMessage> parseSeventvEventAPIBaseMessage(
-    const QString &blob)
+static boost::optional<Message> parseBaseMessage(const QString &blob)
 {
     QJsonDocument jsonDoc(QJsonDocument::fromJson(blob.toUtf8()));
 
@@ -37,7 +36,7 @@ static boost::optional<SeventvEventAPIMessage> parseSeventvEventAPIBaseMessage(
         return boost::none;
     }
 
-    return SeventvEventAPIMessage(jsonDoc.object());
+    return Message(jsonDoc.object());
 }
 
-}  // namespace chatterino
+}  // namespace chatterino::seventv::eventapi

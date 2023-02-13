@@ -17,18 +17,40 @@ env:
 
 jobs:
   build:
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (PCH:${{ matrix.pch }}, LTO:${{ matrix.force-lto }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-20.04, macos-latest]
+        os: [windows-latest, macos-latest]
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
         force-lto: [false]
+        skip_artifact: ["no"]
+        crashpad: [true]
         include:
+          # Ubuntu 20.04, Qt 5.12
           - os: ubuntu-20.04
+            qt-version: 5.12.12
+            pch: true
+            force-lto: false
+          # Ubuntu 22.04, Qt 5.15
+          - os: ubuntu-22.04
+            qt-version: 5.15.2
+            pch: true
+            force-lto: false
+          # Test for disabling Precompiled Headers & enabling link-time optimization
+          - os: ubuntu-22.04
             qt-version: 5.15.2
             pch: false
             force-lto: true
+            skip_artifact: "yes"
+          # Test for disabling crashpad on Windows
+          - os: windows-latest
+            qt-version: 5.15.2
+            pch: false
+            force-lto: true
+            skip_artifact: "yes"
+            crashpad: false
       fail-fast: false
 
     steps:
@@ -36,6 +58,12 @@ jobs:
         if: matrix.force-lto == true
         run: |
           echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Set Crashpad
+        if: matrix.crashpad == true
+        run: |
+          echo "C2_ENABLE_CRASHPAD=ON" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Set environment variables for windows-latest
@@ -46,7 +74,7 @@ jobs:
 
       - uses: actions/checkout@v3
         with:
-          submodules: true
+          submodules: recursive
           fetch-depth: 0 # allows for tags access
 
       - name: Install Qt
@@ -62,14 +90,14 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.txt') }}
+          key: ${{ runner.os }}-${{ matrix.crashpad }}-conan-user-${{ hashFiles('**/conanfile.txt') }}
           path: ~/.conan/
 
       - name: Cache conan packages part 2
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
+          key: ${{ runner.os }}-${{ matrix.crashpad }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
           path: C:/.conan/
 
       - name: Add Conan to path
@@ -83,7 +111,7 @@ jobs:
 
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.12.0
+        uses: ilammy/msvc-dev-cmd@v1.12.1
 
       - name: Setup Conan (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -96,26 +124,49 @@ jobs:
         run: |
           mkdir build
           cd build
-          conan install .. -s build_type=Release -b missing -pr:b=default
+          conan install .. -s build_type=RelWithDebInfo -b missing -pr:b=default
           cmake `
               -G"NMake Makefiles" `
-              -DCMAKE_BUILD_TYPE=Release `
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
+              -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               ..
           set cl=/MP
           nmake /S /NOLOGO
+
+      - name: Build crashpad (Windows)
+        if: startsWith(matrix.os, 'windows') && matrix.crashpad
+        run: |
+          cd build
+          set cl=/MP
+          nmake /S /NOLOGO crashpad_handler
+          mkdir Chatterino2/crashpad
+          cp bin/crashpad/crashpad_handler.exe Chatterino2/crashpad/crashpad_handler.exe
+          7z a bin/chatterino.pdb.7z bin/chatterino.pdb
+
+      - name: Package (windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          cd build
           windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
           cp bin/chatterino.exe Chatterino2/
           echo nightly > Chatterino2/modes
           7z a chatterino-windows-x86-64.zip Chatterino2/
 
-      - name: Upload artifact (Windows)
-        if: startsWith(matrix.os, 'windows')
+      - name: Upload artifact (Windows - binary)
+        if: startsWith(matrix.os, 'windows') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}.zip
           path: build/chatterino-windows-x86-64.zip
+
+      - name: Upload artifact (Windows - symbols)
+        if: startsWith(matrix.os, 'windows') && matrix.skip_artifact != 'yes'
+        uses: actions/upload-artifact@v3
+        with:
+          name: chatterino-windows-x86-64-${{ matrix.qt-version }}-symbols.pdb.7z
+          path: build/bin/chatterino.pdb.7z
 
       - name: Clean Conan pkgs
         if: startsWith(matrix.os, 'windows')
@@ -139,7 +190,6 @@ jobs:
               libboost-filesystem-dev \
               libpulse-dev \
               libxkbcommon-x11-0 \
-              libgstreamer-plugins-base1.0-0 \
               build-essential \
               libgl1-mesa-dev \
               libxcb-icccm4 \
@@ -148,12 +198,18 @@ jobs:
               libxcb-render-util0 \
               libxcb-xinerama0
 
+      - name: Apply Qt patches (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.qt-version, '5.')
+        run: |
+          patch "$Qt5_DIR/include/QtConcurrent/qtconcurrentthreadengine.h" .patches/qt5-on-newer-gcc.patch
+        shell: bash
+
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           mkdir build
           cd build
-          cmake \
+          CXXFLAGS=-fno-sized-deallocation cmake \
             -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
             -DCMAKE_BUILD_TYPE=Release \
             -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
@@ -183,31 +239,31 @@ jobs:
             clang-tidy-review-metadata.json
 
       - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         run: |
           cd build
           sh ./../.CI/CreateAppImage.sh
         shell: bash
 
       - name: Package - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         run: |
           cd build
           sh ./../.CI/CreateUbuntuDeb.sh
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-${{ matrix.qt-version }}.deb
+          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
           path: build/Chatterino-x86_64.deb
 
       # MACOS
@@ -267,7 +323,12 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-5.15.2.deb
+          name: Chatterino-ubuntu-20.04-Qt-5.12.12.deb
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: Chatterino-ubuntu-22.04-Qt-5.15.2.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3

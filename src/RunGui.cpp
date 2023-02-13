@@ -162,7 +162,7 @@ namespace {
     // true.
     void initSignalHandler()
     {
-#ifdef NDEBUG
+#if defined(NDEBUG) && !defined(CHATTERINO_WITH_CRASHPAD)
         signalsInitTime = std::chrono::steady_clock::now();
 
         signal(SIGSEGV, handleSignal);

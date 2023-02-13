@@ -2,18 +2,22 @@
 
 #include "providers/liveupdates/BasicPubSubClient.hpp"
 // this needs to be included for the specialization
-// of std::hash for SeventvEventAPISubscription
-#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
+// of std::hash for Subscription
+#include "providers/seventv/eventapi/Subscription.hpp"
 
 namespace chatterino {
+class SeventvEventAPI;
 
-class SeventvEventAPIClient
-    : public BasicPubSubClient<SeventvEventAPISubscription>
+}  // namespace chatterino
+
+namespace chatterino::seventv::eventapi {
+
+class Client : public BasicPubSubClient<Subscription>
 {
 public:
-    SeventvEventAPIClient(liveupdates::WebsocketClient &websocketClient,
-                          liveupdates::WebsocketHandle handle,
-                          std::chrono::milliseconds heartbeatInterval);
+    Client(liveupdates::WebsocketClient &websocketClient,
+           liveupdates::WebsocketHandle handle,
+           std::chrono::milliseconds heartbeatInterval);
 
     void setHeartbeatInterval(int intervalMs);
     void handleHeartbeat();
@@ -29,7 +33,7 @@ private:
     // This will be set once on the welcome message.
     std::chrono::milliseconds heartbeatInterval_;
 
-    friend class SeventvEventAPI;
+    friend SeventvEventAPI;
 };
 
-}  // namespace chatterino
+}  // namespace chatterino::seventv::eventapi
