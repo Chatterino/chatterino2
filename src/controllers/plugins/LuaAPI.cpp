@@ -12,7 +12,6 @@
 #    include <lauxlib.h>
 #    include <lua.h>
 #    include <lualib.h>
-
 #    include <QFileInfo>
 #    include <QLoggingCategory>
 #    include <QTextCodec>
