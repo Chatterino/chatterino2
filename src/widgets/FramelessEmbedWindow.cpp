@@ -27,8 +27,13 @@ FramelessEmbedWindow::FramelessEmbedWindow()
 }
 
 #ifdef USEWINSDK
+#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+bool FramelessEmbedWindow::nativeEvent(const QByteArray &eventType,
+                                       void *message, qintptr *result)
+#    else
 bool FramelessEmbedWindow::nativeEvent(const QByteArray &eventType,
                                        void *message, long *result)
+#    endif
 {
     MSG *msg = reinterpret_cast<MSG *>(message);
 
