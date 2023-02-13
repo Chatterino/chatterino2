@@ -1,4 +1,5 @@
 #pragma once
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "util/LayoutCreator.hpp"
 #    include "widgets/settingspages/SettingsPage.hpp"
@@ -23,5 +24,7 @@ private:
     QGroupBox *generalGroup;
     QFrame *dataFrame_;
 };
+
 }  // namespace chatterino
+
 #endif
