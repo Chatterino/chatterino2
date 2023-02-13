@@ -16,7 +16,7 @@ packaging_dir="package"
 ubuntu_release="$(lsb_release -rs)"
 
 # The final path where we'll save the .deb package
-deb_path="Chatterino-${ubuntu_release}-x86_64.deb"
+deb_path="Chatterino-ubuntu-${ubuntu_release}-x86_64.deb"
 
 # Refactor opportunity:
 case "$ubuntu_release" in
