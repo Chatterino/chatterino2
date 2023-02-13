@@ -313,7 +313,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: recursive
           fetch-depth: 0 # allows for tags access
       - uses: actions/download-artifact@v3
         with:
