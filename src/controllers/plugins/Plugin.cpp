@@ -4,6 +4,7 @@
 #    include "lua.h"
 
 namespace chatterino {
+
 bool Plugin::registerCommand(const QString &name, const QString &functionName)
 {
     if (this->ownedCommands.find(name) != this->ownedCommands.end())
