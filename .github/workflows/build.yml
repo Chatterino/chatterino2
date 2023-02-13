@@ -264,7 +264,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
-          path: build/Chatterino-x86_64.deb
+          path: build/Chatterino-${{ matrix.os }}-x86_64.deb
 
       # MACOS
       - name: Install dependencies (MacOS)
@@ -314,6 +314,11 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: chatterino-windows-x86-64-5.15.2.zip
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: chatterino-windows-x86-64-5.15.2-symbols.pdb.zip
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
