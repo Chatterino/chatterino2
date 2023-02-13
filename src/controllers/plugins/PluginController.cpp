@@ -25,7 +25,7 @@ void PluginController::initialize(Settings &settings, Paths &paths)
     (void)paths;
 
     // actuallyInitialize will be called by this connection
-    settings.enableAnyPlugins.connect([this](bool enabled) {
+    settings.pluginSupportEnabled.connect([this](bool enabled) {
         if (enabled)
         {
             this->actuallyInitialize();
@@ -41,7 +41,7 @@ void PluginController::initialize(Settings &settings, Paths &paths)
 // this function exists to allow for connecting to enableAnyPlugins option
 void PluginController::actuallyInitialize()
 {
-    if (!getSettings()->enableAnyPlugins)
+    if (!getSettings()->pluginSupportEnabled)
     {
         qCDebug(chatterinoLua)
             << "Loading plugins disabled via Setting, skipping";
@@ -292,7 +292,7 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
 
 bool PluginController::isEnabled(const QString &codename)
 {
-    if (!getSettings()->enableAnyPlugins)
+    if (!getSettings()->pluginSupportEnabled)
     {
         return false;
     }
