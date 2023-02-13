@@ -47,7 +47,7 @@ PluginsPage::PluginsPage()
         groupLayout->addRow(description);
 
         auto *box = this->createCheckBox("Enable plugins",
-                                         getSettings()->enableAnyPlugins);
+                                         getSettings()->pluginSupportEnabled);
         QObject::connect(box, &QCheckBox::released, [this]() {
             this->rebuildContent();
         });
