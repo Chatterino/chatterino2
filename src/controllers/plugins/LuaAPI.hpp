@@ -16,8 +16,6 @@ int c2_log(lua_State *L);
 // These ones are global
 int g_load(lua_State *L);
 int g_print(lua_State *L);
-
-// this one is exposed as execfile
 int g_import(lua_State *L);
 // NOLINTEND(readability-identifier-naming)
 
