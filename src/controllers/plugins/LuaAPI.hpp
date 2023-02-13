@@ -1,4 +1,5 @@
 #pragma once
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 
 struct lua_State;
