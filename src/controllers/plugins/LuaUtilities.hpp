@@ -187,4 +187,5 @@ StackIdx pushEnumTable(lua_State *L)
 }
 
 }  // namespace chatterino::lua
+
 #endif
