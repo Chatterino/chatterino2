@@ -53,6 +53,7 @@
 - Dev: Disabled ImageExpirationPool in tests. (#4363)
 - Dev: Don't rely on undocumented registry keys to find the default browser on Windows. (#4362)
 - Dev: Use `QEnterEvent` for `QWidget::enterEvent` on Qt 6. (#4365)
+- Dev: Use `qintptr` in `QWidget::nativeEvent` on Qt 6. (#4376)
 
 ## 2.4.0
 
