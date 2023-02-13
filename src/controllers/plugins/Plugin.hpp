@@ -1,4 +1,5 @@
 #pragma once
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
 #    include "controllers/commands/CommandController.hpp"
