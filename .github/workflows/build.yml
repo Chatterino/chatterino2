@@ -318,6 +318,11 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
+          name: chatterino-windows-x86-64-5.15.2-symbols.pdb.zip
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        with:
           name: Chatterino-x86_64-5.15.2.AppImage
           path: release-artifacts/
 
