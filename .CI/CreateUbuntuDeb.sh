@@ -41,8 +41,8 @@ if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
 fi
 
 chatterino_version=$(git describe 2>/dev/null) || true
-if [[ ${chatterino_version:0:1} == 'v' ]]; then
-    chatterino_version=${chatterino_version:1}
+if [ "$(echo "$chatterino_version" | cut -c1-1)" = 'v' ]; then
+    chatterino_version="$(echo "$chatterino_version" | cut -c2-)"
 else
     chatterino_version="0.0.0-dev"
 fi
