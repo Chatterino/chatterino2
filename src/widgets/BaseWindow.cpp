@@ -631,8 +631,13 @@ void BaseWindow::moveIntoDesktopRect(QPoint point)
     this->move(point);
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
+                             qintptr *result)
+#else
 bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                              long *result)
+#endif
 {
 #ifdef USEWINSDK
     MSG *msg = reinterpret_cast<MSG *>(message);
@@ -830,7 +835,11 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 #endif
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+bool BaseWindow::handleNCCALCSIZE(MSG *msg, qintptr *result)
+#else
 bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
+#endif
 {
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame())
@@ -914,7 +923,11 @@ bool BaseWindow::handleMOVE(MSG *msg)
     return false;
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+bool BaseWindow::handleNCHITTEST(MSG *msg, qintptr *result)
+#else
 bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
+#endif
 {
 #ifdef USEWINSDK
     const LONG border_width = 8;  // in pixels
