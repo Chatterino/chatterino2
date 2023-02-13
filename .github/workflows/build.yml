@@ -311,6 +311,10 @@ jobs:
     # if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
 
     steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0 # allows for tags access
       - uses: actions/download-artifact@v3
         with:
           name: chatterino-windows-x86-64-5.15.2.zip
