@@ -182,11 +182,10 @@ void PluginController::openLibrariesFor(lua_State *L,
     // NOLINTNEXTLINE(*-avoid-c-arrays)
     static const luaL_Reg replacementFuncs[] = {
         {"load", lua::api::g_load},
-
-        // chatterino dofile is way more similar to require() than dofile()
-        {"execfile", lua::api::g_dofile},
-
         {"print", lua::api::g_print},
+
+        // This function replaces both `dofile` and `require`, see docs/wip-plugins.md for more info
+        {"import", lua::api::g_import},
         {nullptr, nullptr},
     };
     luaL_setfuncs(L, replacementFuncs, 0);
