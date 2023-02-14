@@ -202,7 +202,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     auto pluginName = pluginDir.dirName();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
 
-    for (const auto &[codename, other] : this->plugins_)
+    for (const auto &[id, other] : this->plugins_)
     {
         if (other->meta.name == meta.name)
         {
@@ -229,9 +229,9 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     qCInfo(chatterinoLua) << "Loaded" << pluginName << "plugin from" << index;
 }
 
-bool PluginController::reload(const QString &codename)
+bool PluginController::reload(const QString &id)
 {
-    auto it = this->plugins_.find(codename);
+    auto it = this->plugins_.find(id);
     if (it == this->plugins_.end())
     {
         return false;
@@ -247,7 +247,7 @@ bool PluginController::reload(const QString &codename)
     }
     it->second->ownedCommands.clear();
     QDir loadDir = it->second->loadDirectory_;
-    this->plugins_.erase(codename);
+    this->plugins_.erase(id);
     this->tryLoadFromDir(loadDir);
     return true;
 }
@@ -283,14 +283,14 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
     return "";
 }
 
-bool PluginController::isEnabled(const QString &codename)
+bool PluginController::isEnabled(const QString &id)
 {
     if (!getSettings()->pluginSupportEnabled)
     {
         return false;
     }
     auto vec = getSettings()->enabledPlugins.getValue();
-    auto it = std::find(vec.begin(), vec.end(), codename);
+    auto it = std::find(vec.begin(), vec.end(), id);
     return it != vec.end();
 }
 

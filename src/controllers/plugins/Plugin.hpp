@@ -193,13 +193,13 @@ struct PluginMeta {
 class Plugin
 {
 public:
-    QString codename;
+    QString id;
     PluginMeta meta;
     bool isDupeName{};
 
-    Plugin(QString codename, lua_State *state, PluginMeta meta,
+    Plugin(QString id, lua_State *state, PluginMeta meta,
            const QDir &loadDirectory)
-        : codename(std::move(codename))
+        : id(std::move(id))
         , meta(std::move(meta))
         , loadDirectory_(loadDirectory)
         , state_(state)
