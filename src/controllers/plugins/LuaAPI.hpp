@@ -21,7 +21,7 @@ int g_import(lua_State *L);
 
 // Exposed as c2.LogLevel
 // Represents "calls" to qCDebug, qCInfo ...
-enum LogLevel { Debug, Info, Warning, Critical };
+enum class LogLevel { Debug, Info, Warning, Critical };
 
 }  // namespace chatterino::lua::api
 
