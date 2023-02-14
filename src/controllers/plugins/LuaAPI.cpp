@@ -16,6 +16,22 @@
 #    include <QLoggingCategory>
 #    include <QTextCodec>
 
+namespace {
+using namespace chatterino;
+
+void logHelper(lua_State *L, Plugin *pl, QDebug stream, int argc)
+{
+    stream.noquote();
+    stream << "[" + pl->id + ":" + pl->meta.name + "]";
+    for (int i = 1; i <= argc; i++)
+    {
+        stream << lua::toString(L, i);
+    }
+    lua_pop(L, argc);
+}
+
+}  // namespace
+
 // NOLINTBEGIN(*vararg)
 // luaL_error is a c-style vararg function, this makes clang-tidy not dislike it so much
 namespace chatterino::lua::api {
@@ -100,20 +116,6 @@ int c2_system_msg(lua_State *L)
     lua::push(L, true);
     return 1;
 }
-
-namespace {
-    void logHelper(lua_State *L, Plugin *pl, QDebug stream, int argc)
-    {
-        stream.noquote();
-        stream << "[" + pl->id + ":" + pl->meta.name + "]";
-        for (int i = 1; i <= argc; i++)
-        {
-            stream << lua::toString(L, i);
-        }
-        lua_pop(L, argc);
-    }
-
-}  // namespace
 
 int c2_log(lua_State *L)
 {
