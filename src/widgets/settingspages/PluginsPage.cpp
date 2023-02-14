@@ -123,10 +123,12 @@ void PluginsPage::rebuildContent()
         }
         pl->addRow("Authors", new QLabel(authorsTxt));
 
-        auto *homepage = new QLabel(formatRichLink(plugin->meta.homepage));
-        homepage->setOpenExternalLinks(true);
-
-        pl->addRow("Homepage", homepage);
+        if (!plugin->meta.homepage.isEmpty())
+        {
+            auto *homepage = new QLabel(formatRichLink(plugin->meta.homepage));
+            homepage->setOpenExternalLinks(true);
+            pl->addRow("Homepage", homepage);
+        }
         pl->addRow("License", new QLabel(plugin->meta.license));
 
         QString cmds;
