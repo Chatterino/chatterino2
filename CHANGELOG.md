@@ -16,6 +16,7 @@
 - Minor: Remove sending part of the multipart emoji workaround (#4361)
 - Minor: Added crashpad to capture crashes on Windows locally. See PR for build/crash analysis instructions. (#4351)
 - Minor: Added channel name to /mentions log entries (#4371)
+- Bugfix: Fixed User Card moderation actions not working after Twitch IRC chat command deprecation. (#4378)
 - Bugfix: Fixed crash that would occur when performing certain actions after removing all tabs. (#4271)
 - Bugfix: Fixed highlight sounds not reloading on change properly. (#4194)
 - Bugfix: Fixed CTRL + C not working in reply thread popups. (#4209)
