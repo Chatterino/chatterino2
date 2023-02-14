@@ -955,7 +955,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                                   QString message) {
         using Error = HelixGetChattersError;
 
-        QString errorMessage = QString("Failed to get chatter count: ");
+        QString errorMessage = QString("Failed to get chatter count - ");
 
         switch (error)
         {
@@ -1063,7 +1063,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto formatModsError = [](HelixGetModeratorsError error, QString message) {
         using Error = HelixGetModeratorsError;
 
-        QString errorMessage = QString("Failed to get moderators: ");
+        QString errorMessage = QString("Failed to get moderators - ");
 
         switch (error)
         {
