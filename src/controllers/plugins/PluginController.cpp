@@ -92,14 +92,17 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
     }
 
     auto meta = PluginMeta(doc.object());
-    if (!meta.invalidWhy.empty())
+    if (!meta.isValid())
     {
         qCDebug(chatterinoLua)
             << "Plugin from" << pluginDir << "is invalid because:";
-        for (const auto &why : meta.invalidWhy)
+        for (const auto &why : meta.errors)
         {
             qCDebug(chatterinoLua) << "- " << why;
         }
+        auto plugin = std::make_unique<Plugin>(pluginDir.dirName(), nullptr,
+                                               meta, pluginDir);
+        this->plugins_.insert({pluginDir.dirName(), std::move(plugin)});
         return false;
     }
     this->load(index, pluginDir, meta);

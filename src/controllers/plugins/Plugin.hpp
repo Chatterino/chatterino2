@@ -30,27 +30,42 @@ struct PluginMeta {
     QString homepage;
     std::vector<QString> tags;
 
-    bool valid{};
-    std::vector<QString> invalidWhy;
+    std::vector<QString> errors;
+
+    bool isValid() const
+    {
+        return this->errors.empty();
+    }
 
     explicit PluginMeta(const QJsonObject &obj)
         : homepage(obj.value("homepage").toString(""))
     {
         auto nameObj = obj.value("name");
-        if (!nameObj.isString())
+        if (nameObj.isString())
         {
-            this->invalidWhy.emplace_back("name is not a string");
-            this->valid = false;
+            this->name = nameObj.toString();
         }
-        this->name = nameObj.toString();
+        else
+        {
+            auto type = QString::fromStdString(
+                std::string(magic_enum::enum_name(nameObj.type())));
+            this->errors.emplace_back(
+                QString("name is not a string (its type is %1)").arg(type));
+        }
 
         auto descrObj = obj.value("description");
-        if (!descrObj.isString())
+        if (descrObj.isString())
         {
-            this->invalidWhy.emplace_back("description is not a string");
-            this->valid = false;
+            this->description = descrObj.toString();
         }
-        this->description = descrObj.toString();
+        else
+        {
+            auto type = QString::fromStdString(
+                std::string(magic_enum::enum_name(descrObj.type())));
+            this->errors.emplace_back(
+                QString("description is not a string (its type is %1)")
+                    .arg(type));
+        }
 
         auto authorsObj = obj.value("authors");
         if (authorsObj.isArray())
@@ -61,42 +76,60 @@ struct PluginMeta {
                 const auto &t = authorsArr.at(i);
                 if (!t.isString())
                 {
-                    this->invalidWhy.push_back(
+                    this->errors.push_back(
                         QString(
                             "authors element #%1 is not a string (it is a %2)")
                             .arg(i)
                             .arg(QString::fromStdString(
                                 std::string(magic_enum::enum_name(t.type())))));
-                    this->valid = false;
-                    return;
+                    break;
                 }
                 this->authors.push_back(t.toString());
             }
         }
         else
         {
-            this->invalidWhy.emplace_back("authors is not an array");
-            this->valid = false;
+            auto type = QString::fromStdString(
+                std::string(magic_enum::enum_name(authorsObj.type())));
+            this->errors.emplace_back(
+                QString("authors is not an array (its type is %1)").arg(type));
         }
 
         auto licenseObj = obj.value("license");
-        if (!licenseObj.isString())
+        if (licenseObj.isString())
         {
-            this->invalidWhy.emplace_back("license is not a string");
-            this->valid = false;
-        }
-        this->license = licenseObj.toString();
-
-        auto v = semver::from_string_noexcept(
-            obj.value("version").toString().toStdString());
-        if (v.has_value())
-        {
-            this->version = v.value();
+            this->license = licenseObj.toString();
         }
         else
         {
-            this->invalidWhy.emplace_back("unable to parse version");
-            this->valid = false;
+            auto type = QString::fromStdString(
+                std::string(magic_enum::enum_name(licenseObj.type())));
+            this->errors.emplace_back(
+                QString("license is not a string (its type is %1)").arg(type));
+        }
+
+        auto verObj = obj.value("version");
+        if (verObj.isString())
+        {
+            auto v =
+                semver::from_string_noexcept(verObj.toString().toStdString());
+            if (v.has_value())
+            {
+                this->version = v.value();
+            }
+            else
+            {
+                this->errors.emplace_back(
+                    "unable to parse version (use semver)");
+                this->version = semver::version(0, 0, 0);
+            }
+        }
+        else
+        {
+            auto type = QString::fromStdString(
+                std::string(magic_enum::enum_name(verObj.type())));
+            this->errors.emplace_back(
+                QString("version is not a string (its type is %1)").arg(type));
             this->version = semver::version(0, 0, 0);
         }
         auto tagsObj = obj.value("tags");
@@ -104,8 +137,10 @@ struct PluginMeta {
         {
             if (!tagsObj.isArray())
             {
-                this->invalidWhy.emplace_back("tags is not an array");
-                this->valid = false;
+                auto type = QString::fromStdString(
+                    std::string(magic_enum::enum_name(licenseObj.type())));
+                this->errors.emplace_back(
+                    QString("tags is not an array (its type is %1)").arg(type));
                 return;
             }
 
@@ -115,12 +150,12 @@ struct PluginMeta {
                 const auto &t = tagsArr.at(i);
                 if (!t.isString())
                 {
-                    this->invalidWhy.push_back(
-                        QString("tags element #%1 is not a string (it is a %2)")
+                    this->errors.push_back(
+                        QString(
+                            "tags element #%1 is not a string (its type is %2)")
                             .arg(i)
                             .arg(QString::fromStdString(
                                 std::string(magic_enum::enum_name(t.type())))));
-                    this->valid = false;
                     return;
                 }
                 this->tags.push_back(t.toString());
