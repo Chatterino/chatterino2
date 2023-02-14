@@ -250,12 +250,9 @@ bool PluginController::reload(const QString &codename)
         getApp()->commands->unregisterPluginCommand(cmd);
     }
     it->second->ownedCommands.clear();
-    if (PluginController::isEnabled(codename))
-    {
-        QDir loadDir = it->second->loadDirectory_;
-        this->plugins_.erase(codename);
-        this->tryLoadFromDir(loadDir);
-    }
+    QDir loadDir = it->second->loadDirectory_;
+    this->plugins_.erase(codename);
+    this->tryLoadFromDir(loadDir);
     return true;
 }
 
