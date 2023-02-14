@@ -28,7 +28,7 @@ void PluginController::initialize(Settings &settings, Paths &paths)
     settings.pluginSupportEnabled.connect([this](bool enabled) {
         if (enabled)
         {
-            this->actuallyInitialize();
+            this->loadPlugins();
         }
         else
         {
@@ -38,8 +38,7 @@ void PluginController::initialize(Settings &settings, Paths &paths)
     });
 }
 
-// this function exists to allow for connecting to enableAnyPlugins option
-void PluginController::actuallyInitialize()
+void PluginController::loadPlugins()
 {
     this->plugins_.clear();
     auto dir = QDir(getPaths()->pluginsDirectory);
