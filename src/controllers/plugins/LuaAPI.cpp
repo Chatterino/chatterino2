@@ -105,7 +105,7 @@ namespace {
     void logHelper(lua_State *L, Plugin *pl, QDebug stream, int argc)
     {
         stream.noquote();
-        stream << "[" + pl->codename + ":" + pl->meta.name + "]";
+        stream << "[" + pl->id + ":" + pl->meta.name + "]";
         for (int i = 1; i <= argc; i++)
         {
             stream << lua::toString(L, i);
@@ -226,8 +226,8 @@ int g_import(lua_State *L)
     auto dir = QUrl(pl->loadDirectory().canonicalPath() + "/");
     auto file = dir.resolved(fname);
 
-    qCDebug(chatterinoLua) << "plugin" << pl->codename << "is trying to load"
-                           << file << "(its dir is" << dir << ")";
+    qCDebug(chatterinoLua) << "plugin" << pl->id << "is trying to load" << file
+                           << "(its dir is" << dir << ")";
     if (!dir.isParentOf(file))
     {
         lua_pushnil(L);

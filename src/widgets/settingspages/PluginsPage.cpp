@@ -68,7 +68,7 @@ void PluginsPage::rebuildContent()
     this->dataFrame_ = frame.getElement();
     this->scrollAreaWidget_.append(this->dataFrame_);
     auto layout = frame.setLayoutType<QVBoxLayout>();
-    for (const auto &[codename, plugin] : getApp()->plugins->plugins())
+    for (const auto &[id, plugin] : getApp()->plugins->plugins())
     {
         QString headerText;
         if (plugin->isDupeName)
@@ -77,7 +77,7 @@ void PluginsPage::rebuildContent()
                              .arg(plugin->meta.name,
                                   QString::fromStdString(
                                       plugin->meta.version.to_string()),
-                                  codename);
+                                  id);
         }
         else
         {
@@ -146,15 +146,14 @@ void PluginsPage::rebuildContent()
         if (plugin->meta.isValid())
         {
             QString enableOrDisableStr = "Enable";
-            if (PluginController::isEnabled(codename))
+            if (PluginController::isEnabled(id))
             {
                 enableOrDisableStr = "Disable";
             }
 
             auto *enableDisable = new QPushButton(enableOrDisableStr);
             QObject::connect(
-                enableDisable, &QPushButton::pressed,
-                [name = codename, this]() {
+                enableDisable, &QPushButton::pressed, [name = id, this]() {
                     std::vector<QString> val =
                         getSettings()->enabledPlugins.getValue();
                     if (PluginController::isEnabled(name))
@@ -174,11 +173,10 @@ void PluginsPage::rebuildContent()
         }
 
         auto *reload = new QPushButton("Reload");
-        QObject::connect(reload, &QPushButton::pressed,
-                         [name = codename, this]() {
-                             getApp()->plugins->reload(name);
-                             this->rebuildContent();
-                         });
+        QObject::connect(reload, &QPushButton::pressed, [name = id, this]() {
+            getApp()->plugins->reload(name);
+            this->rebuildContent();
+        });
         pl->addRow(reload);
     }
 }
