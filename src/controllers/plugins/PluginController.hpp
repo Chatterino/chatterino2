@@ -65,7 +65,7 @@ public:
     static bool isEnabled(const QString &codename);
 
 private:
-    void actuallyInitialize();
+    void loadPlugins();
     void load(const QFileInfo &index, const QDir &pluginDir,
               const PluginMeta &meta);
 
