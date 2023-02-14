@@ -87,6 +87,25 @@ void PluginsPage::rebuildContent()
         }
         auto plgroup = layout.emplace<QGroupBox>(headerText);
         auto pl = plgroup.setLayoutType<QFormLayout>();
+
+        if (!plugin->meta.isValid())
+        {
+            QString errors = "<ul>";
+            for (const auto &err : plugin->meta.errors)
+            {
+                errors += "<li>" + err.toHtmlEscaped() + "</li>";
+            }
+            errors += "</ul>";
+
+            auto *warningLabel = new QLabel(
+                "There were errors while loading metadata for this plugin:" +
+                errors);
+            warningLabel->setTextFormat(Qt::RichText);
+            warningLabel->setParent(this->dataFrame_);
+            warningLabel->setStyleSheet("color: #f00");
+            pl->addRow(warningLabel);
+        }
+
         auto *descrText = new QLabel(plugin->meta.description);
         descrText->setWordWrap(true);
         descrText->setStyleSheet("color: #bbb");
@@ -122,31 +141,35 @@ void PluginsPage::rebuildContent()
         }
         pl->addRow("Commands", new QLabel(cmds));
 
-        QString enableOrDisableStr = "Enable";
-        if (PluginController::isEnabled(codename))
+        if (plugin->meta.isValid())
         {
-            enableOrDisableStr = "Disable";
-        }
+            QString enableOrDisableStr = "Enable";
+            if (PluginController::isEnabled(codename))
+            {
+                enableOrDisableStr = "Disable";
+            }
 
-        auto *enableDisable = new QPushButton(enableOrDisableStr);
-        QObject::connect(
-            enableDisable, &QPushButton::pressed, [name = codename, this]() {
-                std::vector<QString> val =
-                    getSettings()->enabledPlugins.getValue();
-                if (PluginController::isEnabled(name))
-                {
-                    val.erase(std::remove(val.begin(), val.end(), name),
-                              val.end());
-                }
-                else
-                {
-                    val.push_back(name);
-                }
-                getSettings()->enabledPlugins.setValue(val);
-                getApp()->plugins->reload(name);
-                this->rebuildContent();
-            });
-        pl->addRow(enableDisable);
+            auto *enableDisable = new QPushButton(enableOrDisableStr);
+            QObject::connect(
+                enableDisable, &QPushButton::pressed,
+                [name = codename, this]() {
+                    std::vector<QString> val =
+                        getSettings()->enabledPlugins.getValue();
+                    if (PluginController::isEnabled(name))
+                    {
+                        val.erase(std::remove(val.begin(), val.end(), name),
+                                  val.end());
+                    }
+                    else
+                    {
+                        val.push_back(name);
+                    }
+                    getSettings()->enabledPlugins.setValue(val);
+                    getApp()->plugins->reload(name);
+                    this->rebuildContent();
+                });
+            pl->addRow(enableDisable);
+        }
 
         auto *reload = new QPushButton("Reload");
         QObject::connect(reload, &QPushButton::pressed,
