@@ -195,7 +195,6 @@ class Plugin
 public:
     QString id;
     PluginMeta meta;
-    bool isDupeName{};
 
     Plugin(QString id, lua_State *state, PluginMeta meta,
            const QDir &loadDirectory)

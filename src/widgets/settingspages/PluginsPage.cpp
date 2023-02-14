@@ -71,21 +71,11 @@ void PluginsPage::rebuildContent()
     layout->setParent(this->dataFrame_);
     for (const auto &[id, plugin] : getApp()->plugins->plugins())
     {
-        QString groupHeaderText;
-        if (plugin->isDupeName)
-        {
-            groupHeaderText = QString("%1 (%2, from %3)")
-                                  .arg(plugin->meta.name,
-                                       QString::fromStdString(
-                                           plugin->meta.version.to_string()),
-                                       id);
-        }
-        else
-        {
-            groupHeaderText = QString("%1 (%2)").arg(
-                plugin->meta.name,
-                QString::fromStdString(plugin->meta.version.to_string()));
-        }
+        auto groupHeaderText =
+            QString("%1 (%2, from %3)")
+                .arg(plugin->meta.name,
+                     QString::fromStdString(plugin->meta.version.to_string()),
+                     id);
         auto groupBox = layout.emplace<QGroupBox>(groupHeaderText);
         groupBox->setParent(this->dataFrame_);
         auto pluginEntry = groupBox.setLayoutType<QFormLayout>();

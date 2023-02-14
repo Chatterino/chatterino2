@@ -198,15 +198,6 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
 
     auto pluginName = pluginDir.dirName();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
-
-    for (const auto &[id, other] : this->plugins_)
-    {
-        if (other->meta.name == meta.name)
-        {
-            plugin->isDupeName = true;
-            other->isDupeName = true;
-        }
-    }
     this->plugins_.insert({pluginName, std::move(plugin)});
     if (!PluginController::isEnabled(pluginName))
     {
