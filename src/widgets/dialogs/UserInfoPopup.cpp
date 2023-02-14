@@ -5,6 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Message.hpp"
@@ -223,6 +224,10 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                            .arg(this->userName_)
                            .arg(calculateTimeoutDuration(button));
              }
+
+             msg = getApp()->commands->execCommand(
+                 msg, this->underlyingChannel_, false);
+
              this->underlyingChannel_->sendMessage(msg);
              return "";
          }},
