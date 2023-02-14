@@ -68,6 +68,7 @@ void PluginsPage::rebuildContent()
     this->dataFrame_ = frame.getElement();
     this->scrollAreaWidget_.append(this->dataFrame_);
     auto layout = frame.setLayoutType<QVBoxLayout>();
+    layout->setParent(this->dataFrame_);
     for (const auto &[id, plugin] : getApp()->plugins->plugins())
     {
         QString groupHeaderText;
@@ -85,8 +86,10 @@ void PluginsPage::rebuildContent()
                 plugin->meta.name,
                 QString::fromStdString(plugin->meta.version.to_string()));
         }
-        auto pluginEntry = layout.emplace<QGroupBox>(groupHeaderText)
-                               .setLayoutType<QFormLayout>();
+        auto groupBox = layout.emplace<QGroupBox>(groupHeaderText);
+        groupBox->setParent(this->dataFrame_);
+        auto pluginEntry = groupBox.setLayoutType<QFormLayout>();
+        pluginEntry->setParent(groupBox.getElement());
 
         if (!plugin->meta.isValid())
         {
@@ -99,14 +102,15 @@ void PluginsPage::rebuildContent()
 
             auto *warningLabel = new QLabel(
                 "There were errors while loading metadata for this plugin:" +
-                errors);
+                    errors,
+                this->dataFrame_);
             warningLabel->setTextFormat(Qt::RichText);
-            warningLabel->setParent(this->dataFrame_);
             warningLabel->setStyleSheet("color: #f00");
             pluginEntry->addRow(warningLabel);
         }
 
-        auto *description = new QLabel(plugin->meta.description);
+        auto *description =
+            new QLabel(plugin->meta.description, this->dataFrame_);
         description->setWordWrap(true);
         description->setStyleSheet("color: #bbb");
         pluginEntry->addRow(description);
@@ -121,15 +125,18 @@ void PluginsPage::rebuildContent()
 
             authorsTxt += author;
         }
-        pluginEntry->addRow("Authors", new QLabel(authorsTxt));
+        pluginEntry->addRow("Authors",
+                            new QLabel(authorsTxt, this->dataFrame_));
 
         if (!plugin->meta.homepage.isEmpty())
         {
-            auto *homepage = new QLabel(formatRichLink(plugin->meta.homepage));
+            auto *homepage = new QLabel(formatRichLink(plugin->meta.homepage),
+                                        this->dataFrame_);
             homepage->setOpenExternalLinks(true);
             pluginEntry->addRow("Homepage", homepage);
         }
-        pluginEntry->addRow("License", new QLabel(plugin->meta.license));
+        pluginEntry->addRow("License",
+                            new QLabel(plugin->meta.license, this->dataFrame_));
 
         QString commandsTxt;
         for (const auto &cmdName : plugin->listRegisteredCommands())
@@ -141,7 +148,8 @@ void PluginsPage::rebuildContent()
 
             commandsTxt += cmdName;
         }
-        pluginEntry->addRow("Commands", new QLabel(commandsTxt));
+        pluginEntry->addRow("Commands",
+                            new QLabel(commandsTxt, this->dataFrame_));
 
         if (plugin->meta.isValid())
         {
@@ -151,7 +159,7 @@ void PluginsPage::rebuildContent()
                 toggleTxt = "Disable";
             }
 
-            auto *toggleButton = new QPushButton(toggleTxt);
+            auto *toggleButton = new QPushButton(toggleTxt, this->dataFrame_);
             QObject::connect(
                 toggleButton, &QPushButton::pressed, [name = id, this]() {
                     std::vector<QString> val =
@@ -172,7 +180,7 @@ void PluginsPage::rebuildContent()
             pluginEntry->addRow(toggleButton);
         }
 
-        auto *reloadButton = new QPushButton("Reload");
+        auto *reloadButton = new QPushButton("Reload", this->dataFrame_);
         QObject::connect(reloadButton, &QPushButton::pressed,
                          [name = id, this]() {
                              getApp()->plugins->reload(name);
