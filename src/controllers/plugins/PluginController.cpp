@@ -41,12 +41,6 @@ void PluginController::initialize(Settings &settings, Paths &paths)
 // this function exists to allow for connecting to enableAnyPlugins option
 void PluginController::actuallyInitialize()
 {
-    if (!getSettings()->pluginSupportEnabled)
-    {
-        qCDebug(chatterinoLua)
-            << "Loading plugins disabled via Setting, skipping";
-        return;
-    }
     this->plugins_.clear();
     auto dir = QDir(getPaths()->pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
