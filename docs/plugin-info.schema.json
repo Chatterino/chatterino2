@@ -17,7 +17,7 @@
       "type": "array",
       "description": "An array of authors of this Plugin.",
       "items": {
-          "type": "string"
+        "type": "string"
       }
     },
     "homepage": {
