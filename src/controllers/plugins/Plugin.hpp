@@ -51,8 +51,21 @@ struct PluginMeta {
     }
 
     explicit PluginMeta(const QJsonObject &obj)
-        : homepage(obj.value("homepage").toString(""))
     {
+        auto homepageObj = obj.value("homepage");
+        if (homepageObj.isString())
+        {
+            this->homepage = homepageObj.toString();
+        }
+        else if (!homepageObj.isUndefined())
+        {
+            auto type = QString::fromStdString(
+                std::string(magic_enum::enum_name(homepageObj.type())));
+            this->errors.emplace_back(
+                QString(
+                    "homepage is defined but is not a string (its type is %1)")
+                    .arg(type));
+        }
         auto nameObj = obj.value("name");
         if (nameObj.isString())
         {
