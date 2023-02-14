@@ -70,23 +70,23 @@ void PluginsPage::rebuildContent()
     auto layout = frame.setLayoutType<QVBoxLayout>();
     for (const auto &[id, plugin] : getApp()->plugins->plugins())
     {
-        QString headerText;
+        QString groupHeaderText;
         if (plugin->isDupeName)
         {
-            headerText = QString("%1 (%2, from %3)")
-                             .arg(plugin->meta.name,
-                                  QString::fromStdString(
-                                      plugin->meta.version.to_string()),
-                                  id);
+            groupHeaderText = QString("%1 (%2, from %3)")
+                                  .arg(plugin->meta.name,
+                                       QString::fromStdString(
+                                           plugin->meta.version.to_string()),
+                                       id);
         }
         else
         {
-            headerText = QString("%1 (%2)").arg(
+            groupHeaderText = QString("%1 (%2)").arg(
                 plugin->meta.name,
                 QString::fromStdString(plugin->meta.version.to_string()));
         }
-        auto plgroup = layout.emplace<QGroupBox>(headerText);
-        auto pl = plgroup.setLayoutType<QFormLayout>();
+        auto pluginEntry = layout.emplace<QGroupBox>(groupHeaderText)
+                               .setLayoutType<QFormLayout>();
 
         if (!plugin->meta.isValid())
         {
@@ -103,13 +103,13 @@ void PluginsPage::rebuildContent()
             warningLabel->setTextFormat(Qt::RichText);
             warningLabel->setParent(this->dataFrame_);
             warningLabel->setStyleSheet("color: #f00");
-            pl->addRow(warningLabel);
+            pluginEntry->addRow(warningLabel);
         }
 
-        auto *descrText = new QLabel(plugin->meta.description);
-        descrText->setWordWrap(true);
-        descrText->setStyleSheet("color: #bbb");
-        pl->addRow(descrText);
+        auto *description = new QLabel(plugin->meta.description);
+        description->setWordWrap(true);
+        description->setStyleSheet("color: #bbb");
+        pluginEntry->addRow(description);
 
         QString authorsTxt;
         for (const auto &author : plugin->meta.authors)
@@ -121,39 +121,39 @@ void PluginsPage::rebuildContent()
 
             authorsTxt += author;
         }
-        pl->addRow("Authors", new QLabel(authorsTxt));
+        pluginEntry->addRow("Authors", new QLabel(authorsTxt));
 
         if (!plugin->meta.homepage.isEmpty())
         {
             auto *homepage = new QLabel(formatRichLink(plugin->meta.homepage));
             homepage->setOpenExternalLinks(true);
-            pl->addRow("Homepage", homepage);
+            pluginEntry->addRow("Homepage", homepage);
         }
-        pl->addRow("License", new QLabel(plugin->meta.license));
+        pluginEntry->addRow("License", new QLabel(plugin->meta.license));
 
-        QString cmds;
+        QString commandsTxt;
         for (const auto &cmdName : plugin->listRegisteredCommands())
         {
-            if (!cmds.isEmpty())
+            if (!commandsTxt.isEmpty())
             {
-                cmds += ", ";
+                commandsTxt += ", ";
             }
 
-            cmds += cmdName;
+            commandsTxt += cmdName;
         }
-        pl->addRow("Commands", new QLabel(cmds));
+        pluginEntry->addRow("Commands", new QLabel(commandsTxt));
 
         if (plugin->meta.isValid())
         {
-            QString enableOrDisableStr = "Enable";
+            QString toggleTxt = "Enable";
             if (PluginController::isEnabled(id))
             {
-                enableOrDisableStr = "Disable";
+                toggleTxt = "Disable";
             }
 
-            auto *enableDisable = new QPushButton(enableOrDisableStr);
+            auto *toggleButton = new QPushButton(toggleTxt);
             QObject::connect(
-                enableDisable, &QPushButton::pressed, [name = id, this]() {
+                toggleButton, &QPushButton::pressed, [name = id, this]() {
                     std::vector<QString> val =
                         getSettings()->enabledPlugins.getValue();
                     if (PluginController::isEnabled(name))
@@ -169,15 +169,16 @@ void PluginsPage::rebuildContent()
                     getApp()->plugins->reload(name);
                     this->rebuildContent();
                 });
-            pl->addRow(enableDisable);
+            pluginEntry->addRow(toggleButton);
         }
 
-        auto *reload = new QPushButton("Reload");
-        QObject::connect(reload, &QPushButton::pressed, [name = id, this]() {
-            getApp()->plugins->reload(name);
-            this->rebuildContent();
-        });
-        pl->addRow(reload);
+        auto *reloadButton = new QPushButton("Reload");
+        QObject::connect(reloadButton, &QPushButton::pressed,
+                         [name = id, this]() {
+                             getApp()->plugins->reload(name);
+                             this->rebuildContent();
+                         });
+        pluginEntry->addRow(reloadButton);
     }
 }
 
