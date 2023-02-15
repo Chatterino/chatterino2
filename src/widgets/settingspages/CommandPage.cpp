@@ -51,12 +51,24 @@ CommandPage::CommandPage()
             Command{"/command", "I made a new command HeyGuys"});
     });
 
-    QItemSelectionModel *selectionModel =
-        this->view->getTableView()->selectionModel();
+    QObject::connect(view->getModel(), &QAbstractItemModel::rowsInserted, this,
+                     [this](const QModelIndex &parent, int first, int last) {
+                         this->checkCommandDuplicates();
+                     });
+
+    QObject::connect(view->getModel(), &QAbstractItemModel::rowsRemoved, this,
+                     [this](const QModelIndex &parent, int first, int last) {
+                         this->checkCommandDuplicates();
+                     });
+
     QObject::connect(
-        selectionModel, &QItemSelectionModel::currentChanged, this,
-        [this](const QModelIndex &current, const QModelIndex &previous) {
-            this->checkCommandDuplicates();
+        view->getModel(), &QAbstractItemModel::dataChanged, this,
+        [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
+               const QVector<int> &roles = QVector<int>()) {
+            if (roles.contains(Qt::EditRole))
+            {
+                this->checkCommandDuplicates();
+            }
         });
 
     // TODO: asyncronously check path

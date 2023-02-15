@@ -172,6 +172,10 @@ public:
             TVectorItem item = this->getItemFromRow(
                 this->rows_[row].items, this->rows_[row].original.get());
             this->vector_->insert(item, vecRow, this);
+
+            QVector<int> roles = QVector<int>();
+            roles.append(role);
+            emit dataChanged(index, index, roles);
         }
 
         return true;
