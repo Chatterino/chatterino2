@@ -1,44 +1,42 @@
-#include "providers/seventv/eventapi/SeventvEventAPIClient.hpp"
+#include "providers/seventv/eventapi/Client.hpp"
 
-#include "providers/seventv/eventapi/SeventvEventAPISubscription.hpp"
+#include "providers/seventv/eventapi/Subscription.hpp"
 #include "providers/twitch/PubSubHelpers.hpp"
 
 #include <utility>
 
-namespace chatterino {
+namespace chatterino::seventv::eventapi {
 
-SeventvEventAPIClient::SeventvEventAPIClient(
-    liveupdates::WebsocketClient &websocketClient,
-    liveupdates::WebsocketHandle handle,
-    std::chrono::milliseconds heartbeatInterval)
-    : BasicPubSubClient<SeventvEventAPISubscription>(websocketClient,
-                                                     std::move(handle))
+Client::Client(liveupdates::WebsocketClient &websocketClient,
+               liveupdates::WebsocketHandle handle,
+               std::chrono::milliseconds heartbeatInterval)
+    : BasicPubSubClient<Subscription>(websocketClient, std::move(handle))
     , lastHeartbeat_(std::chrono::steady_clock::now())
     , heartbeatInterval_(heartbeatInterval)
 {
 }
 
-void SeventvEventAPIClient::onConnectionEstablished()
+void Client::onConnectionEstablished()
 {
     this->lastHeartbeat_.store(std::chrono::steady_clock::now(),
                                std::memory_order_release);
     this->checkHeartbeat();
 }
 
-void SeventvEventAPIClient::setHeartbeatInterval(int intervalMs)
+void Client::setHeartbeatInterval(int intervalMs)
 {
     qCDebug(chatterinoSeventvEventAPI)
         << "Setting expected heartbeat interval to" << intervalMs << "ms";
     this->heartbeatInterval_ = std::chrono::milliseconds(intervalMs);
 }
 
-void SeventvEventAPIClient::handleHeartbeat()
+void Client::handleHeartbeat()
 {
     this->lastHeartbeat_.store(std::chrono::steady_clock::now(),
                                std::memory_order_release);
 }
 
-void SeventvEventAPIClient::checkHeartbeat()
+void Client::checkHeartbeat()
 {
     // Following the heartbeat docs, a connection is dead
     // after three missed heartbeats.
@@ -54,8 +52,7 @@ void SeventvEventAPIClient::checkHeartbeat()
         return;
     }
 
-    auto self = std::dynamic_pointer_cast<SeventvEventAPIClient>(
-        this->shared_from_this());
+    auto self = std::dynamic_pointer_cast<Client>(this->shared_from_this());
 
     runAfter(this->websocketClient_.get_io_service(), this->heartbeatInterval_,
              [self](auto) {
@@ -67,4 +64,4 @@ void SeventvEventAPIClient::checkHeartbeat()
              });
 }
 
-}  // namespace chatterino
+}  // namespace chatterino::seventv::eventapi

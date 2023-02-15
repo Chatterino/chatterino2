@@ -294,6 +294,13 @@ public:
     QStringSetting selfHighlightColor = {"/highlighting/selfHighlightColor",
                                          ""};
 
+    BoolSetting enableSelfMessageHighlight = {
+        "/highlighting/selfMessageHighlight/enabled", false};
+    BoolSetting showSelfMessageHighlightInMentions = {
+        "/highlighting/selfMessageHighlight/showInMentions", false};
+    QStringSetting selfMessageHighlightColor = {
+        "/highlighting/selfMessageHighlight/color", ""};
+
     BoolSetting enableWhisperHighlight = {
         "/highlighting/whisperHighlight/whispersHighlighted", true};
     BoolSetting enableWhisperHighlightSound = {

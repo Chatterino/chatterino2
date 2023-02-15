@@ -84,6 +84,9 @@ namespace {
         for (const auto jsonMessage : jsonMessages)
         {
             auto content = jsonMessage.toString();
+
+            // For explanation of why this exists, see src/providers/twitch/TwitchChannel.hpp,
+            // where these constants are defined
             content.replace(COMBINED_FIXER, ZERO_WIDTH_JOINER);
 
             auto message =

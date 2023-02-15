@@ -7,7 +7,7 @@
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/seventv/eventapi/SeventvEventAPIDispatch.hpp"
+#include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 
@@ -30,6 +30,7 @@
 namespace {
 
 using namespace chatterino;
+using namespace seventv::eventapi;
 
 // These declarations won't throw an exception.
 const QString CHANNEL_HAS_NO_EMOTES("This channel has no 7TV channel emotes.");
@@ -223,7 +224,7 @@ EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal)
 }
 
 EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
-                            const SeventvEventAPIEmoteUpdateDispatch &dispatch)
+                            const EmoteUpdateDispatch &dispatch)
 {
     bool toNonAliased = oldEmote->baseName.has_value() &&
                         dispatch.emoteName == oldEmote->baseName->string;
@@ -243,6 +244,8 @@ EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
 }  // namespace
 
 namespace chatterino {
+
+using namespace seventv::eventapi;
 
 SeventvEmotes::SeventvEmotes()
     : global_(std::make_shared<EmoteMap>())
@@ -400,7 +403,7 @@ void SeventvEmotes::loadChannelEmotes(
 
 boost::optional<EmotePtr> SeventvEmotes::addEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &map,
-    const SeventvEventAPIEmoteAddDispatch &dispatch)
+    const EmoteAddDispatch &dispatch)
 {
     // Check for visibility first, so we don't copy the map.
     auto emoteData = dispatch.emoteJson["data"].toObject();
@@ -428,7 +431,7 @@ boost::optional<EmotePtr> SeventvEmotes::addEmote(
 
 boost::optional<EmotePtr> SeventvEmotes::updateEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &map,
-    const SeventvEventAPIEmoteUpdateDispatch &dispatch)
+    const EmoteUpdateDispatch &dispatch)
 {
     auto oldMap = map.get();
     auto oldEmote = oldMap->findEmote(dispatch.emoteName, dispatch.emoteID);
@@ -450,7 +453,7 @@ boost::optional<EmotePtr> SeventvEmotes::updateEmote(
 
 boost::optional<EmotePtr> SeventvEmotes::removeEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &map,
-    const SeventvEventAPIEmoteRemoveDispatch &dispatch)
+    const EmoteRemoveDispatch &dispatch)
 {
     // This copies the map.
     EmoteMap updatedMap = *map.get();

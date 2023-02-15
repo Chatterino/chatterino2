@@ -84,12 +84,6 @@ void sendWhisperMessage(const QString &text)
     auto app = getApp();
     QString toSend = text.simplified();
 
-    // This is to make sure that combined emoji go through properly, see
-    // https://github.com/Chatterino/chatterino2/issues/3384 and
-    // https://mm2pl.github.io/emoji_rfc.pdf for more details
-    // Constants used here are defined in TwitchChannel.hpp
-    toSend.replace(ZERO_WIDTH_JOINER, ESCAPE_TAG);
-
     app->twitch->sendMessage("jtv", toSend);
 }
 
@@ -961,7 +955,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                                   QString message) {
         using Error = HelixGetChattersError;
 
-        QString errorMessage = QString("Failed to get chatter count: ");
+        QString errorMessage = QString("Failed to get chatter count - ");
 
         switch (error)
         {
@@ -1069,7 +1063,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto formatModsError = [](HelixGetModeratorsError error, QString message) {
         using Error = HelixGetModeratorsError;
 
-        QString errorMessage = QString("Failed to get moderators: ");
+        QString errorMessage = QString("Failed to get moderators - ");
 
         switch (error)
         {
