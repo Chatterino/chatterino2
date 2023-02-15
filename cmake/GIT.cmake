@@ -53,7 +53,7 @@ if (GIT_EXECUTABLE)
         )
 
         execute_process(
-                COMMAND ${GIT_EXECUTABLE} describe
+                COMMAND ${GIT_EXECUTABLE} describe --tags
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                 OUTPUT_VARIABLE GIT_RELEASE
                 OUTPUT_STRIP_TRAILING_WHITESPACE
