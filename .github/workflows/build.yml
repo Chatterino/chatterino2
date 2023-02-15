@@ -349,6 +349,9 @@ jobs:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
 
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # allows for tags access
       - uses: actions/download-artifact@v3
         with:
           name: chatterino-windows-x86-64-5.15.2.zip
@@ -390,3 +393,9 @@ jobs:
           prerelease: true
           name: Nightly Release
           tag: nightly-build
+
+      - name: Update nightly-build tag
+        run: |
+          git tag -f nightly-build
+          git push -f origin nightly-build
+        shell: bash

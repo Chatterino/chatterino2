@@ -40,9 +40,10 @@ if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     exit 1
 fi
 
-chatterino_version=$(git describe 2>/dev/null | cut -c 2-) || true
-if [ -z "$chatterino_version" ]; then
-    # Fall back to this in case the build happened outside of a git repo
+chatterino_version=$(git describe 2>/dev/null) || true
+if [ "$(echo "$chatterino_version" | cut -c1-1)" = 'v' ]; then
+    chatterino_version="$(echo "$chatterino_version" | cut -c2-)"
+else
     chatterino_version="0.0.0-dev"
 fi
 
