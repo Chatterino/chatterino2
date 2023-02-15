@@ -5,7 +5,7 @@
 - Major: Added live emote updates for BTTV. (#4147)
 - Minor: Added setting to turn off rendering of reply context. (#4224)
 - Minor: Changed the highlight order to prioritize Message highlights over User highlights. (#4303)
-- Minor: Added the option to highlight your own messages in the Highlights page under the Users tab. (#3833)
+- Minor: Added a setting to highlight your own messages in Highlights -> Users. (#3833)
 - Minor: Added the ability to negate search options by prefixing it with an exclamation mark (e.g. `!badge:mod` to search for messages where the author does not have the moderator badge). (#4207)
 - Minor: Search window input will automatically use currently selected text if present. (#4178)
 - Minor: Grouped highlight sound columns together and improved wording for the default sound setting. (#4194)
