@@ -8,7 +8,7 @@
 - Minor: Added the option to highlight your own messages in the Highlights page under the Users tab. (#3833)
 - Minor: Added the ability to negate search options by prefixing it with an exclamation mark (e.g. `!badge:mod` to search for messages where the author does not have the moderator badge). (#4207)
 - Minor: Search window input will automatically use currently selected text if present. (#4178)
-- Minor: Cleared up highlight sound settings to reduce confusion. (#4194)
+- Minor: Grouped highlight sound columns together and improved wording for the default sound setting. (#4194)
 - Minor: Tables in settings window will now scroll to newly added rows. (#4216)
 - Minor: Added setting to select which channels to log. (#4302)
 - Minor: Added channel name to /mentions log entries. (#4371)
