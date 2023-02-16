@@ -14,6 +14,7 @@ concurrency:
 
 env:
   C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' }}
+  CHATTERINO_REQUIRE_CLEAN_GIT: On
 
 jobs:
   build:
