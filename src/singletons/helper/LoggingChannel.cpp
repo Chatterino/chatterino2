@@ -95,6 +95,11 @@ void LoggingChannel::addMessage(MessagePtr message)
     }
 
     QString str;
+    if (channelName.startsWith("/mentions"))
+    {
+        str.append("#" + message->channelName + " ");
+    }
+
     str.append('[');
     str.append(now.toString("HH:mm:ss"));
     str.append("] ");

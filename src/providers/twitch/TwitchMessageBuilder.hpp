@@ -9,6 +9,8 @@
 #include <QString>
 #include <QVariant>
 
+#include <unordered_map>
+
 namespace chatterino {
 
 struct Emote;

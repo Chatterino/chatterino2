@@ -6,6 +6,7 @@
 #include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Message.hpp"
@@ -224,6 +225,10 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                            .arg(this->userName_)
                            .arg(calculateTimeoutDuration(button));
              }
+
+             msg = getApp()->commands->execCommand(
+                 msg, this->underlyingChannel_, false);
+
              this->underlyingChannel_->sendMessage(msg);
              return "";
          }},
@@ -558,25 +563,35 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                 case TimeoutWidget::Ban: {
                     if (this->underlyingChannel_)
                     {
-                        this->underlyingChannel_->sendMessage("/ban " +
-                                                              this->userName_);
+                        QString value = "/ban " + this->userName_;
+                        value = getApp()->commands->execCommand(
+                            value, this->underlyingChannel_, false);
+
+                        this->underlyingChannel_->sendMessage(value);
                     }
                 }
                 break;
                 case TimeoutWidget::Unban: {
                     if (this->underlyingChannel_)
                     {
-                        this->underlyingChannel_->sendMessage("/unban " +
-                                                              this->userName_);
+                        QString value = "/unban " + this->userName_;
+                        value = getApp()->commands->execCommand(
+                            value, this->underlyingChannel_, false);
+
+                        this->underlyingChannel_->sendMessage(value);
                     }
                 }
                 break;
                 case TimeoutWidget::Timeout: {
                     if (this->underlyingChannel_)
                     {
-                        this->underlyingChannel_->sendMessage(
-                            "/timeout " + this->userName_ + " " +
-                            QString::number(arg));
+                        QString value = "/timeout " + this->userName_ + " " +
+                                        QString::number(arg);
+
+                        value = getApp()->commands->execCommand(
+                            value, this->underlyingChannel_, false);
+
+                        this->underlyingChannel_->sendMessage(value);
                     }
                 }
                 break;

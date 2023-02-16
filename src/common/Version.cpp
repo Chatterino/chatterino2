@@ -107,6 +107,9 @@ QStringList Version::buildTags() const
 #ifdef _MSC_FULL_VER
     tags.append("MSVC " + QString::number(_MSC_FULL_VER, 10));
 #endif
+#ifdef CHATTERINO_WITH_CRASHPAD
+    tags.append("Crashpad");
+#endif
 
     return tags;
 }

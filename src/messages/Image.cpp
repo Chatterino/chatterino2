@@ -272,7 +272,9 @@ namespace detail {
 // IMAGE2
 Image::~Image()
 {
+#ifndef DISABLE_IMAGE_EXPIRATION_POOL
     ImageExpirationPool::instance().removeImagePtr(this);
+#endif
 
     if (this->empty_ && !this->frames_)
     {
@@ -425,7 +427,9 @@ void Image::load() const
         Image *this2 = const_cast<Image *>(this);
         this2->shouldLoad_ = false;
         this2->actuallyLoad();
+#ifndef DISABLE_IMAGE_EXPIRATION_POOL
         ImageExpirationPool::instance().addImagePtr(this2->shared_from_this());
+#endif
     }
 }
 
@@ -551,6 +555,8 @@ void Image::expireFrames()
     this->shouldLoad_ = true;  // Mark as needing load again
 }
 
+#ifndef DISABLE_IMAGE_EXPIRATION_POOL
+
 ImageExpirationPool::ImageExpirationPool()
 {
     QObject::connect(&this->freeTimer_, &QTimer::timeout, [this] {
@@ -593,10 +599,10 @@ void ImageExpirationPool::freeOld()
 {
     std::lock_guard<std::mutex> lock(this->mutex_);
 
-#ifndef NDEBUG
+#    ifndef NDEBUG
     size_t numExpired = 0;
     size_t eligible = 0;
-#endif
+#    endif
 
     auto now = std::chrono::steady_clock::now();
     for (auto it = this->allImages_.begin(); it != this->allImages_.end();)
@@ -617,17 +623,17 @@ void ImageExpirationPool::freeOld()
             continue;
         }
 
-#ifndef NDEBUG
+#    ifndef NDEBUG
         ++eligible;
-#endif
+#    endif
 
         // Check if image has expired and, if so, expire its frame data
         auto diff = now - img->lastUsed_;
         if (diff > IMAGE_POOL_IMAGE_LIFETIME)
         {
-#ifndef NDEBUG
+#    ifndef NDEBUG
             ++numExpired;
-#endif
+#    endif
             img->expireFrames();
             // erase without mutex locking issue
             it = this->allImages_.erase(it);
@@ -637,10 +643,12 @@ void ImageExpirationPool::freeOld()
         ++it;
     }
 
-#ifndef NDEBUG
+#    ifndef NDEBUG
     qCDebug(chatterinoImage) << "freed frame data for" << numExpired << "/"
                              << eligible << "eligible images";
-#endif
+#    endif
 }
+
+#endif
 
 }  // namespace chatterino

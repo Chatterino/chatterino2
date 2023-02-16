@@ -1,0 +1,13 @@
+FROM chatterino-ubuntu-20.04-build
+
+ADD .CI /src/.CI
+
+WORKDIR /src/build
+
+# RUN apt-get install -y wget
+
+# create appimage
+# RUN pwd && ./../.CI/CreateAppImage.sh
+
+# package deb
+RUN pwd && ./../.CI/CreateUbuntuDeb.sh
