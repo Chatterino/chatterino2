@@ -33,6 +33,7 @@
 - Bugfix: Fixed the split "Search" menu action not opening the correct search window. (#4305)
 - Bugfix: Fixed an issue on Windows when opening links in incognito mode that contained forward slashes in hash (#4307)
 - Bugfix: Fixed an issue where beta versions wouldn't update to stable versions correctly. (#4329)
+- Bugfix: Fixed builds from GitHub showing up as modified. (#4384)
 - Bugfix: Avoided crash that could occur when receiving channel point reward information. (#4360)
 - Dev: Changed sound backend from Qt to miniaudio. (#4334)
 - Dev: Removed protocol from QApplication's Organization Domain (so changed from `https://www.chatterino.com` to `chatterino.com`). (#4256)
