@@ -28,7 +28,7 @@ Makefile*
 *build-*/
 [bB]uild
 /_build/
-/qt/
+# /qt/
 
 # QtCreator
 

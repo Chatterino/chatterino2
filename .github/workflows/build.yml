@@ -82,9 +82,8 @@ jobs:
         uses: jurplel/install-qt-action@v3.0.0
         with:
           cache: true
-          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
           version: ${{ matrix.qt-version }}
-          dir: "${{ github.workspace }}/qt/"
 
       # WINDOWS
       - name: Cache conan packages part 1
