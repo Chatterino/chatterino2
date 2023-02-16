@@ -16,6 +16,7 @@
 - Minor: Added support for HTTP and Socks5 proxies through environment variables. (#4321)
 - Minor: Added crashpad to capture crashes on Windows locally. See PR for build/crash analysis instructions. (#4351)
 - Bugfix: Fixed User Card moderation actions not working after Twitch IRC chat command deprecation. (#4378)
+- Bugfix: Fixed User Card broadcaster actions (mod, unmod, vip, unvip) not working after Twitch IRC chat command deprecation. (#4386)
 - Bugfix: Fixed crash that would occur when performing certain actions after removing all tabs. (#4271)
 - Bugfix: Fixed highlight sounds not reloading on change properly. (#4194)
 - Bugfix: Fixed CTRL + C not working in reply thread popups. (#4209)
