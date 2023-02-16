@@ -1,16 +1,16 @@
 # This script will set the following variables:
 # GIT_HASH
-# If the git binary is found and the git work tree is intact, GIT_HASH is worked out using the `git rev-parse --short HEAD` command
-# The value of GIT_HASH can be overriden by defining the GIT_HASH environment variable
+#   If the git binary is found and the git work tree is intact, GIT_HASH is worked out using the `git rev-parse --short HEAD` command
+#   The value of GIT_HASH can be overriden by defining the GIT_HASH environment variable
 # GIT_COMMIT
-# If the git binary is found and the git work tree is intact, GIT_COMMIT is worked out using the `git rev-parse HEAD` command
-# The value of GIT_COMMIT can be overriden by defining the GIT_COMMIT environment variable
+#   If the git binary is found and the git work tree is intact, GIT_COMMIT is worked out using the `git rev-parse HEAD` command
+#   The value of GIT_COMMIT can be overriden by defining the GIT_COMMIT environment variable
 # GIT_RELEASE
-# If the git binary is found and the git work tree is intact, GIT_RELEASE is worked out using the `git describe` command
-# The value of GIT_RELEASE can be overriden by defining the GIT_RELEASE environment variable
+#   If the git binary is found and the git work tree is intact, GIT_RELEASE is worked out using the `git describe` command
+#   The value of GIT_RELEASE can be overriden by defining the GIT_RELEASE environment variable
 # GIT_MODIFIED
-# If the git binary is found and the git work tree is intact, GIT_MODIFIED is worked out by checking if output of `git status --porcelain -z` command is empty
-# The value of GIT_MODIFIED cannot be overriden
+#   If the git binary is found and the git work tree is intact, GIT_MODIFIED is worked out by checking if output of `git status --porcelain -z` command is empty
+#   The value of GIT_MODIFIED cannot be overriden
 
 find_package(Git)
 
