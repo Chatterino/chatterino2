@@ -15,6 +15,7 @@
 - Minor: Added link to streamlink docs for easier user setup. (#4217)
 - Minor: Added support for HTTP and Socks5 proxies through environment variables. (#4321)
 - Minor: Added crashpad to capture crashes on Windows locally. See PR for build/crash analysis instructions. (#4351)
+- Minor: Github releases now include flatpakref files for nightly builds
 - Bugfix: Fixed User Card moderation actions not working after Twitch IRC chat command deprecation. (#4378)
 - Bugfix: Fixed User Card broadcaster actions (mod, unmod, vip, unvip) not working after Twitch IRC chat command deprecation. (#4387)
 - Bugfix: Fixed crash that would occur when performing certain actions after removing all tabs. (#4271)
