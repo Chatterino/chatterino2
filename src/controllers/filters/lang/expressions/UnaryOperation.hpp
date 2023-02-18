@@ -11,8 +11,8 @@ public:
     UnaryOperation(TokenType op, ExpressionPtr right);
 
     QVariant execute(const ContextMap &context) const override;
-    PossibleType synthesizeType() const override;
-    QString debug() const override;
+    PossibleType synthesizeType(const TypingContext &context) const override;
+    QString debug(const TypingContext &context) const override;
     QString filterString() const override;
 
 private:

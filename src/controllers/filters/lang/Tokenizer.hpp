@@ -8,36 +8,29 @@
 
 namespace chatterino::filters {
 
-struct IdentifierDescription {
-    QString humanDescription;
-    Type type;
-};
-
-using T = Type;
-
-static const QMap<QString, IdentifierDescription> validIdentifiersMap = {
-    {"author.badges", {"author badges", T::StringList}},
-    {"author.color", {"author color", T::Color}},
-    {"author.name", {"author name", T::String}},
-    {"author.no_color", {"author has no color?", T::Bool}},
-    {"author.subbed", {"author subscribed?", T::Bool}},
-    {"author.sub_length", {"author sub length", T::Int}},
-    {"channel.name", {"channel name", T::String}},
-    {"channel.watching", {"/watching channel?", T::Bool}},
-    {"channel.live", {"channel live?", T::Bool}},
-    {"flags.highlighted", {"highlighted?", T::Bool}},
-    {"flags.points_redeemed", {"redeemed points?", T::Bool}},
-    {"flags.sub_message", {"sub/resub message?", T::Bool}},
-    {"flags.system_message", {"system message?", T::Bool}},
-    {"flags.reward_message", {"channel point reward message?", T::Bool}},
-    {"flags.first_message", {"first message?", T::Bool}},
-    {"flags.elevated_message", {"elevated message?", T::Bool}},
-    {"flags.cheer_message", {"cheer message?", T::Bool}},
-    {"flags.whisper", {"whisper message?", T::Bool}},
-    {"flags.reply", {"reply message?", T::Bool}},
-    {"flags.automod", {"automod message?", T::Bool}},
-    {"message.content", {"message text", T::String}},
-    {"message.length", {"message length", T::Int}}};
+static const QMap<QString, QString> validIdentifiersMap = {
+    {"author.badges", "author badges"},
+    {"author.color", "author color"},
+    {"author.name", "author name"},
+    {"author.no_color", "author has no color?"},
+    {"author.subbed", "author subscribed?"},
+    {"author.sub_length", "author sub length"},
+    {"channel.name", "channel name"},
+    {"channel.watching", "/watching channel?"},
+    {"channel.live", "channel live?"},
+    {"flags.highlighted", "highlighted?"},
+    {"flags.points_redeemed", "redeemed points?"},
+    {"flags.sub_message", "sub/resub message?"},
+    {"flags.system_message", "system message?"},
+    {"flags.reward_message", "channel point reward message?"},
+    {"flags.first_message", "first message?"},
+    {"flags.elevated_message", "elevated message?"},
+    {"flags.cheer_message", "cheer message?"},
+    {"flags.whisper", "whisper message?"},
+    {"flags.reply", "reply message?"},
+    {"flags.automod", "automod message?"},
+    {"message.content", "message text"},
+    {"message.length", "message length"}};
 
 // clang-format off
 static const QRegularExpression tokenRegex(

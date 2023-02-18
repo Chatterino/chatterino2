@@ -6,6 +6,7 @@
 #include "controllers/filters/lang/expressions/RegexExpression.hpp"
 #include "controllers/filters/lang/expressions/UnaryOperation.hpp"
 #include "controllers/filters/lang/expressions/ValueExpression.hpp"
+#include "controllers/filters/lang/Filter.hpp"
 #include "controllers/filters/lang/Types.hpp"
 
 namespace chatterino::filters {
@@ -27,7 +28,8 @@ FilterParser::FilterParser(const QString &text)
         return;
     }
 
-    auto returnType = this->builtExpression_->synthesizeType();
+    auto returnType =
+        this->builtExpression_->synthesizeType(messageTypingContext);
     if (!returnType.well())
     {
         this->errorLog(explainIllType(*returnType.illTypedDescription()));
@@ -304,7 +306,7 @@ const QStringList &FilterParser::errors() const
 
 const QString FilterParser::debugString() const
 {
-    return this->builtExpression_->debug();
+    return this->builtExpression_->debug(messageTypingContext);
 }
 
 }  // namespace chatterino::filters

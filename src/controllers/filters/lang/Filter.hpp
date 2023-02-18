@@ -18,6 +18,30 @@ using MessagePtr = std::shared_ptr<const Message>;
 
 namespace chatterino::filters {
 
+static const QMap<QString, Type> messageTypingContext = {
+    {"author.badges", Type::StringList},
+    {"author.color", Type::Color},
+    {"author.name", Type::String},
+    {"author.no_color", Type::Bool},
+    {"author.subbed", Type::Bool},
+    {"author.sub_length", Type::Int},
+    {"channel.name", Type::String},
+    {"channel.watching", Type::Bool},
+    {"channel.live", Type::Bool},
+    {"flags.highlighted", Type::Bool},
+    {"flags.points_redeemed", Type::Bool},
+    {"flags.sub_message", Type::Bool},
+    {"flags.system_message", Type::Bool},
+    {"flags.reward_message", Type::Bool},
+    {"flags.first_message", Type::Bool},
+    {"flags.elevated_message", Type::Bool},
+    {"flags.cheer_message", Type::Bool},
+    {"flags.whisper", Type::Bool},
+    {"flags.reply", Type::Bool},
+    {"flags.automod", Type::Bool},
+    {"message.content", Type::String},
+    {"message.length", Type::Int}};
+
 ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel);
 
 class Filter;
@@ -36,7 +60,7 @@ public:
     QVariant execute(const ContextMap &context) const;
 
     QString filterString() const;
-    QString debugString() const;
+    QString debugString(const TypingContext &context) const;
 
 private:
     Filter(ExpressionPtr expression, Type returnType);

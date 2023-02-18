@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QMap>
 #include <QString>
 #include <QVariant>
 
@@ -10,8 +11,6 @@
 namespace chatterino::filters {
 
 class Expression;
-
-using ContextMap = QMap<QString, QVariant>;
 
 enum class Type {
     String,
@@ -24,6 +23,9 @@ enum class Type {
     MatchingSpecifier,  // 2-element list in {RegularExpression, Int} form
     Map
 };
+
+using ContextMap = QMap<QString, QVariant>;
+using TypingContext = QMap<QString, Type>;
 
 QString typeToString(Type type);
 

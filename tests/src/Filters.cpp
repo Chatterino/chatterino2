@@ -8,6 +8,8 @@
 using namespace chatterino;
 using namespace chatterino::filters;
 
+TypingContext typingContext = messageTypingContext;
+
 namespace chatterino::filters {
 
 std::ostream &operator<<(std::ostream &os, Type t)
@@ -86,8 +88,8 @@ TEST(Filters, TypeSynthesis)
         T type = filter.returnType();
         EXPECT_EQ(type, expected)
             << "Filter{ " << qUtf8Printable(input) << " } has type " << type
-            << " instead of " << expected
-            << ".\nDebug: " << qUtf8Printable(filter.debugString());
+            << " instead of " << expected << ".\nDebug: "
+            << qUtf8Printable(filter.debugString(typingContext));
     }
 }
 
@@ -164,7 +166,7 @@ TEST(Filters, Evaluation)
         EXPECT_EQ(result, expected)
             << "Filter{ " << qUtf8Printable(input) << " } evaluated to "
             << qUtf8Printable(result.toString()) << " instead of "
-            << qUtf8Printable(expected.toString())
-            << ".\nDebug: " << qUtf8Printable(filter.debugString());
+            << qUtf8Printable(expected.toString()) << ".\nDebug: "
+            << qUtf8Printable(filter.debugString(typingContext));
     }
 }

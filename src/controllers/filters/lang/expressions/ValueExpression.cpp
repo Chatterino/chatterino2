@@ -19,15 +19,15 @@ QVariant ValueExpression::execute(const ContextMap &context) const
     return this->value_;
 }
 
-PossibleType ValueExpression::synthesizeType() const
+PossibleType ValueExpression::synthesizeType(const TypingContext &context) const
 {
     switch (this->type_)
     {
         case TokenType::IDENTIFIER: {
-            auto it = validIdentifiersMap.find(this->value_.toString());
-            if (it != validIdentifiersMap.end())
+            auto it = context.find(this->value_.toString());
+            if (it != context.end())
             {
-                return it.value().type;
+                return it.value();
             }
 
             return IllTyped{this, "Unbound identifier"};
@@ -46,7 +46,7 @@ TokenType ValueExpression::type()
     return this->type_;
 }
 
-QString ValueExpression::debug() const
+QString ValueExpression::debug(const TypingContext & /*context*/) const
 {
     return QString("Val(%1)").arg(this->value_.toString());
 }

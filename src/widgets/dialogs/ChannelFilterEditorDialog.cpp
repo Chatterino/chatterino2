@@ -5,8 +5,6 @@
 #include <QLabel>
 #include <QPushButton>
 
-#include <algorithm>
-
 namespace chatterino {
 
 namespace {
@@ -102,10 +100,7 @@ ChannelFilterEditorDialog::ValueSpecifier::ValueSpecifier()
     this->typeCombo_->insertItems(
         0, {"Constant Text", "Constant Number", "Variable"});
 
-    for (auto &v : filters::validIdentifiersMap.values())
-    {
-        this->varCombo_->addItem(v.humanDescription);
-    }
+    this->varCombo_->insertItems(0, filters::validIdentifiersMap.values());
 
     this->layout_->addWidget(this->typeCombo_);
     this->layout_->addWidget(this->varCombo_, 1);
@@ -147,7 +142,7 @@ void ChannelFilterEditorDialog::ValueSpecifier::setValue(const QString &value)
     if (this->typeCombo_->currentIndex() == 2)
     {
         this->varCombo_->setCurrentText(
-            filters::validIdentifiersMap.value(value).humanDescription);
+            filters::validIdentifiersMap.value(value));
     }
     else
     {
@@ -169,20 +164,9 @@ QString ChannelFilterEditorDialog::ValueSpecifier::expressionText()
                 this->valueInput_->text().replace("\"", "\\\""));
         case 1:  // number
             return this->valueInput_->text();
-        case 2: {  // variable
-            auto it = std::find_if(
-                filters::validIdentifiersMap.cbegin(),
-                filters::validIdentifiersMap.cend(), [this](const auto &v) {
-                    return v.humanDescription == this->varCombo_->currentText();
-                });
-
-            if (it != filters::validIdentifiersMap.cend())
-            {
-                return it.key();
-            }
-
-            return "";
-        }
+        case 2:  // variable
+            return filters::validIdentifiersMap.key(
+                this->varCombo_->currentText());
         default:
             return "";
     }

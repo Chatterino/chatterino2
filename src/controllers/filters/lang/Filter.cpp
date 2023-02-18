@@ -14,7 +14,14 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 {
     auto watchingChannel = chatterino::getApp()->twitch->watchingChannel.get();
 
-    /* Known Identifiers
+    /* 
+     * Looking to add a new identifier to filters? Here's what to do: 
+     *  1. Update validIdentifiersMap in Tokenizer.hpp
+     *  2. Add the identifier to the list below
+     *  3. Add the type of the identifier to messageTypingContext in Filter.hpp
+     *  4. Add the value for the identifier to the ContextMap returned by this function
+     * 
+     * List of identifiers:
      *
      * author.badges
      * author.color
@@ -98,7 +105,6 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
         {"message.length", m->messageText.length()},
     };
     {
-        using namespace chatterino;
         auto *tc = dynamic_cast<TwitchChannel *>(channel);
         if (channel && !channel->isEmpty() && tc)
         {
@@ -147,9 +153,9 @@ QString Filter::filterString() const
     return this->expression_->filterString();
 }
 
-QString Filter::debugString() const
+QString Filter::debugString(const TypingContext &context) const
 {
-    return this->expression_->debug();
+    return this->expression_->debug(context);
 }
 
 }  // namespace chatterino::filters

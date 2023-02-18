@@ -204,10 +204,10 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
     }
 }
 
-PossibleType BinaryOperation::synthesizeType() const
+PossibleType BinaryOperation::synthesizeType(const TypingContext &context) const
 {
-    auto left = this->left_->synthesizeType();
-    auto right = this->right_->synthesizeType();
+    auto left = this->left_->synthesizeType(context);
+    auto right = this->right_->synthesizeType(context);
 
     // Return if either operand is ill-typed
     if (!left)
@@ -292,14 +292,14 @@ PossibleType BinaryOperation::synthesizeType() const
     }
 }
 
-QString BinaryOperation::debug() const
+QString BinaryOperation::debug(const TypingContext &context) const
 {
     return QString("BinaryOp[%1](%2 : %3, %4 : %5)")
         .arg(tokenTypeToInfoString(this->op_))
-        .arg(this->left_->debug())
-        .arg(this->left_->synthesizeType().string())
-        .arg(this->right_->debug())
-        .arg(this->right_->synthesizeType().string());
+        .arg(this->left_->debug(context))
+        .arg(this->left_->synthesizeType(context).string())
+        .arg(this->right_->debug(context))
+        .arg(this->right_->synthesizeType(context).string());
 }
 
 QString BinaryOperation::filterString() const

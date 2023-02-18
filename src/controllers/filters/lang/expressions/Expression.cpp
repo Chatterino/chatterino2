@@ -7,12 +7,12 @@ QVariant Expression::execute(const ContextMap & /*context*/) const
     return false;
 }
 
-PossibleType Expression::synthesizeType() const
+PossibleType Expression::synthesizeType(const TypingContext & /*context*/) const
 {
     return IllTyped{this, "Not implemented"};
 }
 
-QString Expression::debug() const
+QString Expression::debug(const TypingContext & /*context*/) const
 {
     return "";
 }
