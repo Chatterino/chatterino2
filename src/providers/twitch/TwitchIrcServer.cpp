@@ -325,7 +325,7 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
             continue;
 
         if (twitchChannel->roomId() == channelId &&
-            QStringView{twitchChannel->getName()}.split(':').size() < 3)
+            twitchChannel->getName().count(':') < 2)
         {
             return twitchChannel;
         }
