@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.4.1
+
 - Major: Added live emote updates for BTTV. (#4147)
 - Minor: Added setting to turn off rendering of reply context. (#4224)
 - Minor: Changed the highlight order to prioritize Message highlights over User highlights. (#4303)
