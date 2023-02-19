@@ -3191,7 +3191,8 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         }
     }
 
-    auto maxSpaces = std::min(this->maxSpaces_, words.length() - 1);
+    // We have checks to ensure words cannot be empty, so this can never wrap around
+    auto maxSpaces = std::min(this->maxSpaces_, (qsizetype)words.length() - 1);
     for (int i = 0; i < maxSpaces; ++i)
     {
         commandName += ' ' + words[i + 1];
