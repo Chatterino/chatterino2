@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Bugfix: Only store the five most recent crashdumps. (#4392)
+- Minor: Delete all but the last 5 crashdumps on application start. (#4392)
 
 ## 2.4.1
 
