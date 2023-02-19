@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Dev: Fix homebrew update action. (#4394)
+
 ## 2.4.1
 
 - Major: Added live emote updates for BTTV. (#4147)
