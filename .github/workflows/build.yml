@@ -39,9 +39,9 @@ jobs:
             qt-version: 5.15.2
             pch: true
             force-lto: false
-          # Ubuntu 22.04, Qt 6.2.6
+          # Ubuntu 22.04, Qt 6.2.4
           - os: ubuntu-22.04
-            qt-version: 6.2.6
+            qt-version: 6.2.4
             pch: false
             force-lto: false
           # Test for disabling Precompiled Headers & enabling link-time optimization
