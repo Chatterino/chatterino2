@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Dev: Add capability to build Chatterino with Qt6. (#4393)
+
 ## 2.4.1
 
 - Major: Added live emote updates for BTTV. (#4147)
