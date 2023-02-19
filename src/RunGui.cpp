@@ -20,7 +20,6 @@
 #include <QtConcurrent>
 
 #include <csignal>
-#include <ranges>
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
@@ -194,9 +193,16 @@ namespace {
         dir.setNameFilters({"*.dmp"});
 
         size_t deletedCount = 0;
-        for (auto &&info :
-             dir.entryInfoList(QDir::Files, QDir::Time) | std::views::drop(5))
+        // TODO: use std::views::drop once supported by all compilers
+        size_t filesToSkip = 5;
+        for (auto &&info : dir.entryInfoList(QDir::Files, QDir::Time))
         {
+            if (filesToSkip > 0)
+            {
+                filesToSkip--;
+                continue;
+            }
+
             if (QFile(info.absoluteFilePath()).remove())
             {
                 deletedCount++;
