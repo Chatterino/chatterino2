@@ -8,6 +8,7 @@
 #include "widgets/BasePopup.hpp"
 #include "widgets/helper/SignalLabel.hpp"
 
+#include <QFile>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QLabel>
