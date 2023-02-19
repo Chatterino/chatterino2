@@ -1,6 +1,8 @@
 #include "util/IncognitoBrowser.hpp"
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
+#elif defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
+#    include "util/XDGHelper.hpp"
 #endif
 
 #include <QProcess>
@@ -10,7 +12,7 @@ namespace {
 
 using namespace chatterino;
 
-QString getPrivateSwitch(QString browserExecutable)
+QString getPrivateSwitch(QString const &browserExecutable)
 {
     // list of command line switches to turn on private browsing in browsers
     static auto switches = std::vector<std::pair<QString, QString>>{
@@ -66,8 +68,20 @@ QString getDefaultBrowserExecutable()
     }
 
     return command;
+#elif defined(Q_OS_UNIX) && !defined(Q_OS_DARWIN)
+    auto desktopFile = getDefaultBrowserDesktopFile();
+    if (desktopFile.has_value())
+    {
+        auto entry = (*desktopFile)["Desktop Entry"];
+        auto exec = entry.find("Exec");
+        if (exec != entry.end())
+        {
+            return parseExeFromDesktopExecKey(exec->second.trimmed());
+        }
+    }
+    return {};
 #else
-    return QString();
+    return {};
 #endif
 }
 
