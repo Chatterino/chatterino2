@@ -271,8 +271,6 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: |
           brew install boost openssl rapidjson p7zip create-dmg cmake tree
-          test_bash="v1.2.3"
-          echo "'$test_bash' -> '${test_bash:1}'"
         shell: bash
 
       - name: Build (MacOS)
