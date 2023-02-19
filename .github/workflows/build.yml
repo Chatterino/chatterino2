@@ -14,6 +14,7 @@ concurrency:
 
 env:
   C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' }}
+  CHATTERINO_REQUIRE_CLEAN_GIT: On
 
 jobs:
   build:
@@ -76,9 +77,8 @@ jobs:
         uses: jurplel/install-qt-action@v3.0.0
         with:
           cache: true
-          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
           version: ${{ matrix.qt-version }}
-          dir: "${{ github.workspace }}/qt/"
 
       # WINDOWS
       - name: Cache conan packages part 1
@@ -333,6 +333,11 @@ jobs:
         with:
           name: chatterino-osx-5.15.2.dmg
           path: release-artifacts/
+
+      - name: Copy flatpakref
+        run: |
+          cp .CI/chatterino-nightly.flatpakref release-artifacts/
+        shell: bash
 
       - name: Create release
         uses: ncipollo/release-action@v1.12.0
