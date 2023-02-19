@@ -190,6 +190,13 @@ namespace {
     // improved in the future.
     void clearCrashes(QDir dir)
     {
+        // crashpad crashdumps are stored inside the Crashes/report directory
+        if (!dir.cd("reports"))
+        {
+            // no reports directory exists = no files to delete
+            return;
+        }
+
         dir.setNameFilters({"*.dmp"});
 
         size_t deletedCount = 0;
@@ -246,14 +253,9 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
             clearCache(cachePath);
         });
 
-        auto crashReportsDir = QDir(crashDirectory);
-        // check if the /reports directory exists
-        if (crashReportsDir.cd("reports"))
-        {
-            QtConcurrent::run([crashReportsDir]() {
-                clearCrashes(crashReportsDir);
-            });
-        }
+        QtConcurrent::run([crashDirectory]() {
+            clearCrashes(crashDirectory);
+        });
     });
 
     chatterino::NetworkManager::init();
