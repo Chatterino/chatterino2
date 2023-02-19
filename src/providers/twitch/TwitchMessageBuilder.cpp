@@ -905,7 +905,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 shiftIndicesAfter(from + len, midsize - len);
 
                 auto midExtendedRef =
-                    this->originalMessage_.midRef(pos1, pos2 - pos1);
+                    QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
 
                 for (auto &tup : vret)
                 {
@@ -970,7 +970,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 shiftIndicesAfter(from + len, replacesize - len);
 
                 auto midExtendedRef =
-                    this->originalMessage_.midRef(pos1, pos2 - pos1);
+                    QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
 
                 for (auto &tup : vret)
                 {
