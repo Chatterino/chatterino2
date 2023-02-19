@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Delete all but the last 5 crashdumps on application start. (#4392)
 - Dev: Add capability to build Chatterino with Qt6. (#4393)
 - Dev: Fix homebrew update action. (#4394)
 
