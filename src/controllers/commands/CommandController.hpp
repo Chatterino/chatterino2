@@ -62,7 +62,7 @@ private:
 
     // User-created commands
     QMap<QString, Command> userCommands_;
-    int maxSpaces_ = 0;
+    qsizetype maxSpaces_ = 0;
 
     std::shared_ptr<pajlada::Settings::SettingManager> sm_;
     // Because the setting manager is not initialized until the initialize
