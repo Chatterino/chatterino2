@@ -641,8 +641,8 @@ void Notebook::performLayout(bool animated)
                 bool isLastColumn = col == columnCount - 1;
                 auto largestWidth = 0;
                 int tabStart = col * tabsPerColumn;
-                int tabEnd =
-                    std::min((col + 1) * tabsPerColumn, this->items_.size());
+                int tabEnd = std::min((col + 1) * tabsPerColumn,
+                                      (int)this->items_.size());
 
                 for (int i = tabStart; i < tabEnd; i++)
                 {
@@ -743,8 +743,8 @@ void Notebook::performLayout(bool animated)
                 bool isLastColumn = col == columnCount - 1;
                 auto largestWidth = 0;
                 int tabStart = col * tabsPerColumn;
-                int tabEnd =
-                    std::min((col + 1) * tabsPerColumn, this->items_.size());
+                int tabEnd = std::min((col + 1) * tabsPerColumn,
+                                      (int)this->items_.size());
 
                 for (int i = tabStart; i < tabEnd; i++)
                 {

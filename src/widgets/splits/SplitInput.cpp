@@ -699,7 +699,7 @@ void SplitInput::updateCompletionPopup()
         return;
     }
 
-    for (int i = clamp(position, 0, text.length() - 1); i >= 0; i--)
+    for (int i = clamp(position, 0, (int)text.length() - 1); i >= 0; i--)
     {
         if (text[i] == ' ')
         {
@@ -789,7 +789,7 @@ void SplitInput::insertCompletionText(const QString &input_) const
     auto text = edit.toPlainText();
     auto position = edit.textCursor().position() - 1;
 
-    for (int i = clamp(position, 0, text.length() - 1); i >= 0; i--)
+    for (int i = clamp(position, 0, (int)text.length() - 1); i >= 0; i--)
     {
         bool done = false;
         if (text[i] == ':')
