@@ -821,7 +821,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
     };
 
     auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase,
-                                         const QStringView &midrepl,
+                                         const auto &midrepl,
                                          int startIndex) mutable {
         if (!phrase.containsEmote())
         {
@@ -904,8 +904,13 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
                 shiftIndicesAfter(from + len, midsize - len);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
                 auto midExtendedRef =
                     QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
+#else
+                auto midExtendedRef =
+                    this->originalMessage_.midRef(pos1, pos2 - pos1);
+#endif
 
                 for (auto &tup : vret)
                 {
@@ -969,8 +974,13 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
                 shiftIndicesAfter(from + len, replacesize - len);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
                 auto midExtendedRef =
                     QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
+#else
+                auto midExtendedRef =
+                    this->originalMessage_.midRef(pos1, pos2 - pos1);
+#endif
 
                 for (auto &tup : vret)
                 {
