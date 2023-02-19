@@ -62,7 +62,11 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
 
     auto textUpToCursor = currentText.left(tc.selectionStart());
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    auto words = QStringView{textUpToCursor}.split(' ');
+#else
     auto words = textUpToCursor.splitRef(' ');
+#endif
     if (words.size() == 0)
     {
         return QString();

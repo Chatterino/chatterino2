@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Dev: Add capability to build Chatterino with Qt6. (#4393)
 - Dev: Fix homebrew update action. (#4394)
 
 ## 2.4.1
