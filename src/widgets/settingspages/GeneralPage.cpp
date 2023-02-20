@@ -189,8 +189,29 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     tabDirectionDropdown->setMinimumWidth(
         tabDirectionDropdown->minimumSizeHint().width());
 
-    layout.addCheckbox("Only show live tabs", s.liveTabsOnly, false,
-                       "Only show tabs which have a channel that is live");
+    layout.addDropdown<std::underlying_type<NotebookTabVisibility>::type>(
+        "Tab visibility", {"All tabs", "Only live tabs"}, s.tabVisibility,
+        [](auto val) {
+            switch (val)
+            {
+                case NotebookTabVisibility::LiveOnly:
+                    return "Only live tabs";
+                case NotebookTabVisibility::Default:
+                default:
+                    return "All tabs";
+            }
+        },
+        [](auto args) {
+            if (args.value == "Only live tabs")
+            {
+                return NotebookTabVisibility::LiveOnly;
+            }
+            else
+            {
+                return NotebookTabVisibility::Default;
+            }
+        },
+        false, "Choose which tabs are visible in the notebook");
 
     layout.addCheckbox(
         "Show message reply context", s.hideReplyContext, true,

@@ -1186,17 +1186,20 @@ SplitNotebook::SplitNotebook(Window *parent)
         this->addCustomButtons();
     }
 
-    getSettings()->liveTabsOnly.connect(
-        [this](bool liveTabsOnly, auto) {
-            if (liveTabsOnly)
+    getSettings()->tabVisibility.connect(
+        [this](int val, auto) {
+            auto visibility = NotebookTabVisibility(val);
+            switch (visibility)
             {
-                this->setTabFilter([](const NotebookTab *tab) {
-                    return tab->isLive() || tab->isSelected();
-                });
-            }
-            else
-            {
-                this->setTabFilter(nullptr);
+                case NotebookTabVisibility::LiveOnly:
+                    this->setTabFilter([](const NotebookTab *tab) {
+                        return tab->isLive() || tab->isSelected();
+                    });
+                    break;
+                case NotebookTabVisibility::Default:
+                default:
+                    this->setTabFilter(nullptr);
+                    break;
             }
         },
         this->signalHolder_, true);
