@@ -589,9 +589,17 @@ void Window::addShortcuts()
                  {
                      mode = 2;
                  }
-                 else if (arg == "toggleLiveOnly")
+                 else if (arg == "default")
                  {
                      mode = 3;
+                 }
+                 else if (arg == "liveOnly")
+                 {
+                     mode = 4;
+                 }
+                 else if (arg == "toggleLiveOnly")
+                 {
+                     mode = 5;
                  }
                  else
                  {
@@ -600,7 +608,8 @@ void Window::addShortcuts()
                          << arg;
                      return QString("Invalid argument for setTabVisibility "
                                     "hotkey: %1. Use \"on\", \"off\", "
-                                    "\"toggleLiveOnly\" or \"toggle\".")
+                                    "\"toggle\", \"default\", \"liveOnly\", or "
+                                    "\"toggleLiveOnly\".")
                          .arg(arg);
                  }
              }
@@ -624,6 +633,18 @@ void Window::addShortcuts()
                      NotebookTabVisibility::Default);
              }
              else if (mode == 3)
+             {
+                 this->notebook_->setShowTabs(true);
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::Default);
+             }
+             else if (mode == 4)
+             {
+                 this->notebook_->setShowTabs(true);
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::LiveOnly);
+             }
+             else if (mode == 5)
              {
                  if (!this->notebook_->getShowTabs())
                  {

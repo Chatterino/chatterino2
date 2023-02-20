@@ -202,7 +202,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"setTabVisibility",
           ActionDefinition{
               "Set tab visibility",
-              "[on, off, toggleLiveOnly, or toggle. default: toggle]",
+              "[on, off, toggle, default, liveOnly, or toggleLiveOnly. "
+              "default: toggle]",
               0,
               1,
           }}}},
