@@ -1,20 +1,18 @@
-#include "PluginController.hpp"
-
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "controllers/plugins/PluginController.hpp"
+
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
-#    include "controllers/plugins/LuaApi.hpp"
+#    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "messages/MessageBuilder.hpp"
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
 
-// lua stuff
-#    include "lauxlib.h"
-#    include "lua.h"
-#    include "lualib.h"
-
+#    include <lauxlib.h>
+#    include <lua.h>
+#    include <lualib.h>
 #    include <QJsonDocument>
 
 #    include <memory>
@@ -27,10 +25,10 @@ void PluginController::initialize(Settings &settings, Paths &paths)
     (void)paths;
 
     // actuallyInitialize will be called by this connection
-    settings.enableAnyPlugins.connect([this](bool enabled) {
+    settings.pluginSupportEnabled.connect([this](bool enabled) {
         if (enabled)
         {
-            this->actuallyInitialize();
+            this->loadPlugins();
         }
         else
         {
@@ -40,15 +38,8 @@ void PluginController::initialize(Settings &settings, Paths &paths)
     });
 }
 
-// this function exists to allow for connecting to enableAnyPlugins option
-void PluginController::actuallyInitialize()
+void PluginController::loadPlugins()
 {
-    if (!getSettings()->enableAnyPlugins)
-    {
-        qCDebug(chatterinoLua)
-            << "Loading plugins disabled via Setting, skipping";
-        return;
-    }
     this->plugins_.clear();
     auto dir = QDir(getPaths()->pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
@@ -94,14 +85,17 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
     }
 
     auto meta = PluginMeta(doc.object());
-    if (!meta.invalidWhy.empty())
+    if (!meta.isValid())
     {
         qCDebug(chatterinoLua)
             << "Plugin from" << pluginDir << "is invalid because:";
-        for (const auto &why : meta.invalidWhy)
+        for (const auto &why : meta.errors)
         {
             qCDebug(chatterinoLua) << "- " << why;
         }
+        auto plugin = std::make_unique<Plugin>(pluginDir.dirName(), nullptr,
+                                               meta, pluginDir);
+        this->plugins_.insert({pluginDir.dirName(), std::move(plugin)});
         return false;
     }
     this->load(index, pluginDir, meta);
@@ -165,10 +159,13 @@ void PluginController::openLibrariesFor(lua_State *L,
 
     lua_pushglobaltable(L);
     auto gtable = lua_gettop(L);
-    lua_getfield(L, gtable, "load");
 
     // possibly randomize this name at runtime to prevent some attacks?
+
+#    ifndef NDEBUG
+    lua_getfield(L, gtable, "load");
     lua_setfield(L, LUA_REGISTRYINDEX, "real_load");
+#    endif
 
     lua_getfield(L, gtable, "dofile");
     lua_setfield(L, LUA_REGISTRYINDEX, "real_dofile");
@@ -176,11 +173,10 @@ void PluginController::openLibrariesFor(lua_State *L,
     // NOLINTNEXTLINE(*-avoid-c-arrays)
     static const luaL_Reg replacementFuncs[] = {
         {"load", lua::api::g_load},
-
-        // chatterino dofile is way more similar to require() than dofile()
-        {"execfile", lua::api::g_dofile},
-
         {"print", lua::api::g_print},
+
+        // This function replaces both `dofile` and `require`, see docs/wip-plugins.md for more info
+        {"import", lua::api::g_import},
         {nullptr, nullptr},
     };
     luaL_setfuncs(L, replacementFuncs, 0);
@@ -202,15 +198,6 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
 
     auto pluginName = pluginDir.dirName();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
-
-    for (const auto &[codename, other] : this->plugins_)
-    {
-        if (other->meta.name == meta.name)
-        {
-            plugin->isDupeName = true;
-            other->isDupeName = true;
-        }
-    }
     this->plugins_.insert({pluginName, std::move(plugin)});
     if (!PluginController::isEnabled(pluginName))
     {
@@ -230,9 +217,9 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     qCInfo(chatterinoLua) << "Loaded" << pluginName << "plugin from" << index;
 }
 
-bool PluginController::reload(const QString &codename)
+bool PluginController::reload(const QString &id)
 {
-    auto it = this->plugins_.find(codename);
+    auto it = this->plugins_.find(id);
     if (it == this->plugins_.end())
     {
         return false;
@@ -247,12 +234,9 @@ bool PluginController::reload(const QString &codename)
         getApp()->commands->unregisterPluginCommand(cmd);
     }
     it->second->ownedCommands.clear();
-    if (PluginController::isEnabled(codename))
-    {
-        QDir loadDir = it->second->loadDirectory_;
-        this->plugins_.erase(codename);
-        this->tryLoadFromDir(loadDir);
-    }
+    QDir loadDir = it->second->loadDirectory_;
+    this->plugins_.erase(id);
+    this->tryLoadFromDir(loadDir);
     return true;
 }
 
@@ -287,14 +271,14 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
     return "";
 }
 
-bool PluginController::isEnabled(const QString &codename)
+bool PluginController::isEnabled(const QString &id)
 {
-    if (!getSettings()->enableAnyPlugins)
+    if (!getSettings()->pluginSupportEnabled)
     {
         return false;
     }
     auto vec = getSettings()->enabledPlugins.getValue();
-    auto it = std::find(vec.begin(), vec.end(), codename);
+    auto it = std::find(vec.begin(), vec.end(), id);
     return it != vec.end();
 }
 

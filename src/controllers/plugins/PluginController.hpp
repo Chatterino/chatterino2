@@ -27,7 +27,6 @@ class PluginController : public Singleton
 {
 public:
     void initialize(Settings &settings, Paths &paths) override;
-    void save() override{};
 
     QString tryExecPluginCommand(const QString &commandName,
                                  const CommandContext &ctx);
@@ -52,21 +51,21 @@ public:
     }
 
     /**
-     * @brief Reload plugin given by codename
+     * @brief Reload plugin given by id
      *
-     * @param codename This is the 'codename' of the plugin, the name of the directory it is in
+     * @param id This is the unique identifier of the plugin, the name of the directory it is in
      */
-    bool reload(const QString &codename);
+    bool reload(const QString &id);
 
     /**
-     * @brief Checks settings to tell if a plugin named by codename.
+     * @brief Checks settings to tell if a plugin named by id.
      *
      * It accounts for plugins being enabled/disabled globally.
      */
-    static bool isEnabled(const QString &codename);
+    static bool isEnabled(const QString &id);
 
 private:
-    void actuallyInitialize();
+    void loadPlugins();
     void load(const QFileInfo &index, const QDir &pluginDir,
               const PluginMeta &meta);
 

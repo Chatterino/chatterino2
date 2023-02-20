@@ -25,6 +25,9 @@ public:
     // Directory for miscellaneous files. Same as <appDataDirectory>/Misc
     QString miscDirectory;
 
+    // Directory for crashdumps. Same as <appDataDirectory>/Crashes
+    QString crashdumpDirectory;
+
     // Hash of QCoreApplication::applicationFilePath()
     QString applicationFilePathHash;
 

@@ -1,5 +1,5 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
-#    include "LuaApi.hpp"
+#    include "controllers/plugins/LuaAPI.hpp"
 
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
@@ -9,14 +9,28 @@
 #    include "messages/MessageBuilder.hpp"
 #    include "providers/twitch/TwitchIrcServer.hpp"
 
-// lua stuff
-#    include "lauxlib.h"
-#    include "lua.h"
-#    include "lualib.h"
-
+#    include <lauxlib.h>
+#    include <lua.h>
+#    include <lualib.h>
 #    include <QFileInfo>
 #    include <QLoggingCategory>
 #    include <QTextCodec>
+
+namespace {
+using namespace chatterino;
+
+void logHelper(lua_State *L, Plugin *pl, QDebug stream, int argc)
+{
+    stream.noquote();
+    stream << "[" + pl->id + ":" + pl->meta.name + "]";
+    for (int i = 1; i <= argc; i++)
+    {
+        stream << lua::toString(L, i);
+    }
+    lua_pop(L, argc);
+}
+
+}  // namespace
 
 // NOLINTBEGIN(*vararg)
 // luaL_error is a c-style vararg function, this makes clang-tidy not dislike it so much
@@ -103,20 +117,6 @@ int c2_system_msg(lua_State *L)
     return 1;
 }
 
-namespace {
-    void logHelper(lua_State *L, Plugin *pl, QDebug stream, int argc)
-    {
-        stream.noquote();
-        stream << "[" + pl->codename + ":" + pl->meta.name + "]";
-        for (int i = 1; i <= argc; i++)
-        {
-            stream << lua::toString(L, i);
-        }
-        lua_pop(L, argc);
-    }
-
-}  // namespace
-
 int c2_log(lua_State *L)
 {
     auto *pl = getApp()->plugins->getPluginByStatePtr(L);
@@ -162,6 +162,10 @@ int c2_log(lua_State *L)
 
 int g_load(lua_State *L)
 {
+#    ifdef NDEBUG
+    luaL_error(L, "load() is only usable in debug mode");
+    return 0;
+#    else
     auto countArgs = lua_gettop(L);
     QByteArray data;
     if (lua::peek(L, &data, 1))
@@ -199,9 +203,10 @@ int g_load(lua_State *L)
     lua_call(L, countArgs, LUA_MULTRET);
 
     return lua_gettop(L);
+#    endif
 }
 
-int g_dofile(lua_State *L)
+int g_import(lua_State *L)
 {
     auto countArgs = lua_gettop(L);
     // Lua allows dofile() which loads from stdin, but this is very useless in our case
@@ -223,8 +228,8 @@ int g_dofile(lua_State *L)
     auto dir = QUrl(pl->loadDirectory().canonicalPath() + "/");
     auto file = dir.resolved(fname);
 
-    qCDebug(chatterinoLua) << "plugin" << pl->codename << "is trying to load"
-                           << file << "(its dir is" << dir << ")";
+    qCDebug(chatterinoLua) << "plugin" << pl->id << "is trying to load" << file
+                           << "(its dir is" << dir << ")";
     if (!dir.isParentOf(file))
     {
         lua_pushnil(L);

@@ -1,4 +1,5 @@
 #pragma once
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 
 struct lua_State;
@@ -15,14 +16,12 @@ int c2_log(lua_State *L);
 // These ones are global
 int g_load(lua_State *L);
 int g_print(lua_State *L);
-
-// this one is exposed as execfile
-int g_dofile(lua_State *L);
+int g_import(lua_State *L);
 // NOLINTEND(readability-identifier-naming)
 
 // Exposed as c2.LogLevel
 // Represents "calls" to qCDebug, qCInfo ...
-enum LogLevel { Debug, Info, Warning, Critical };
+enum class LogLevel { Debug, Info, Warning, Critical };
 
 }  // namespace chatterino::lua::api
 

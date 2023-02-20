@@ -1,9 +1,9 @@
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
-#    include "lua.h"
-#    include "lualib.h"
 
+#    include <lua.h>
+#    include <lualib.h>
 #    include <magic_enum.hpp>
 #    include <QList>
 
@@ -155,7 +155,7 @@ bool pop(lua_State *L, T *out, StackIdx idx = -1)
     {
         if (idx < 0)
         {
-            idx = lua_gettop(L) + idx;
+            idx = lua_gettop(L) + idx + 1;
         }
         lua_remove(L, idx);
     }
@@ -187,4 +187,5 @@ StackIdx pushEnumTable(lua_State *L)
 }
 
 }  // namespace chatterino::lua
+
 #endif

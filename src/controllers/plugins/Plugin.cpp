@@ -1,10 +1,10 @@
-#include "Plugin.hpp"
-
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "controllers/plugins/Plugin.hpp"
 
-#    include "lua.h"
+#    include <lua.h>
 
 namespace chatterino {
+
 bool Plugin::registerCommand(const QString &name, const QString &functionName)
 {
     if (this->ownedCommands.find(name) != this->ownedCommands.end())

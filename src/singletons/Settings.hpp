@@ -288,6 +288,13 @@ public:
     QStringSetting selfHighlightColor = {"/highlighting/selfHighlightColor",
                                          ""};
 
+    BoolSetting enableSelfMessageHighlight = {
+        "/highlighting/selfMessageHighlight/enabled", false};
+    BoolSetting showSelfMessageHighlightInMentions = {
+        "/highlighting/selfMessageHighlight/showInMentions", false};
+    QStringSetting selfMessageHighlightColor = {
+        "/highlighting/selfMessageHighlight/color", ""};
+
     BoolSetting enableWhisperHighlight = {
         "/highlighting/whisperHighlight/whispersHighlighted", true};
     BoolSetting enableWhisperHighlightSound = {
@@ -520,9 +527,9 @@ public:
          {"d", 1},
          {"w", 1}}};
 
-    BoolSetting enableAnyPlugins = {"/plugins/load", false};
+    BoolSetting pluginSupportEnabled = {"/plugins/supportEnabled", false};
     ChatterinoSetting<std::vector<QString>> enabledPlugins = {
-        "/plugins/enabled", {}};
+        "/plugins/enabledIds", {}};
 
 private:
     void updateModerationActions();

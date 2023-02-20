@@ -210,6 +210,35 @@ void rebuildUserHighlights(Settings &settings,
 {
     auto userHighlights = settings.highlightedUsers.readOnly();
 
+    if (settings.enableSelfMessageHighlight)
+    {
+        bool showInMentions = settings.showSelfMessageHighlightInMentions;
+
+        checks.emplace_back(HighlightCheck{
+            [showInMentions](
+                const auto &args, const auto &badges, const auto &senderName,
+                const auto &originalMessage, const auto &flags,
+                const auto self) -> boost::optional<HighlightResult> {
+                (void)args;             //unused
+                (void)badges;           //unused
+                (void)senderName;       //unused
+                (void)flags;            //unused
+                (void)originalMessage;  //unused
+
+                if (!self)
+                {
+                    return boost::none;
+                }
+
+                // Highlight color is provided by the ColorProvider and will be updated accordingly
+                auto highlightColor = ColorProvider::instance().color(
+                    ColorType::SelfMessageHighlight);
+
+                return HighlightResult{false, false, (QUrl) nullptr,
+                                       highlightColor, showInMentions};
+            }});
+    }
+
     for (const auto &highlight : *userHighlights)
     {
         checks.emplace_back(HighlightCheck{
@@ -391,6 +420,11 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
     this->rebuildListener_.addSetting(settings.enableSubHighlight);
     this->rebuildListener_.addSetting(settings.enableSubHighlightSound);
     this->rebuildListener_.addSetting(settings.enableSubHighlightTaskbar);
+    this->rebuildListener_.addSetting(settings.enableSelfMessageHighlight);
+    this->rebuildListener_.addSetting(
+        settings.showSelfMessageHighlightInMentions);
+    // We do not need to rebuild the listener for the selfMessagesHighlightColor
+    // The color is dynamically fetched any time the self message highlight is triggered
     this->rebuildListener_.addSetting(settings.subHighlightSoundUrl);
 
     this->rebuildListener_.addSetting(settings.enableThreadHighlight);

@@ -1,5 +1,5 @@
-#include "PluginsPage.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "widgets/settingspages/PluginsPage.hpp"
 
 #    include "Application.hpp"
 #    include "controllers/plugins/PluginController.hpp"
@@ -47,7 +47,7 @@ PluginsPage::PluginsPage()
         groupLayout->addRow(description);
 
         auto *box = this->createCheckBox("Enable plugins",
-                                         getSettings()->enableAnyPlugins);
+                                         getSettings()->pluginSupportEnabled);
         QObject::connect(box, &QCheckBox::released, [this]() {
             this->rebuildContent();
         });
@@ -68,83 +68,118 @@ void PluginsPage::rebuildContent()
     this->dataFrame_ = frame.getElement();
     this->scrollAreaWidget_.append(this->dataFrame_);
     auto layout = frame.setLayoutType<QVBoxLayout>();
-    for (const auto &[codename, plugin] : getApp()->plugins->plugins())
+    layout->setParent(this->dataFrame_);
+    for (const auto &[id, plugin] : getApp()->plugins->plugins())
     {
-        QString headerText;
-        if (plugin->isDupeName)
-        {
-            headerText = QString("%1 (%2, from %3)")
-                             .arg(plugin->meta.name,
-                                  QString::fromStdString(
-                                      plugin->meta.version.to_string()),
-                                  codename);
-        }
-        else
-        {
-            headerText = QString("%1 (%2)").arg(
-                plugin->meta.name,
-                QString::fromStdString(plugin->meta.version.to_string()));
-        }
-        auto plgroup = layout.emplace<QGroupBox>(headerText);
-        auto pl = plgroup.setLayoutType<QFormLayout>();
-        auto *descrText = new QLabel(plugin->meta.description);
-        descrText->setWordWrap(true);
-        descrText->setStyleSheet("color: #bbb");
-        pl->addRow(descrText);
-        pl->addRow("Authors", new QLabel(plugin->meta.authors));
-        auto *homepage = new QLabel(formatRichLink(plugin->meta.homepage));
-        homepage->setOpenExternalLinks(true);
+        auto groupHeaderText =
+            QString("%1 (%2, from %3)")
+                .arg(plugin->meta.name,
+                     QString::fromStdString(plugin->meta.version.to_string()),
+                     id);
+        auto groupBox = layout.emplace<QGroupBox>(groupHeaderText);
+        groupBox->setParent(this->dataFrame_);
+        auto pluginEntry = groupBox.setLayoutType<QFormLayout>();
+        pluginEntry->setParent(groupBox.getElement());
 
-        pl->addRow("Homepage", homepage);
-        pl->addRow("License", new QLabel(plugin->meta.license));
-
-        QString cmds;
-        for (const auto &cmdName : plugin->listRegisteredCommands())
+        if (!plugin->meta.isValid())
         {
-            if (!cmds.isEmpty())
+            QString errors = "<ul>";
+            for (const auto &err : plugin->meta.errors)
             {
-                cmds += ", ";
+                errors += "<li>" + err.toHtmlEscaped() + "</li>";
+            }
+            errors += "</ul>";
+
+            auto *warningLabel = new QLabel(
+                "There were errors while loading metadata for this plugin:" +
+                    errors,
+                this->dataFrame_);
+            warningLabel->setTextFormat(Qt::RichText);
+            warningLabel->setStyleSheet("color: #f00");
+            pluginEntry->addRow(warningLabel);
+        }
+
+        auto *description =
+            new QLabel(plugin->meta.description, this->dataFrame_);
+        description->setWordWrap(true);
+        description->setStyleSheet("color: #bbb");
+        pluginEntry->addRow(description);
+
+        QString authorsTxt;
+        for (const auto &author : plugin->meta.authors)
+        {
+            if (!authorsTxt.isEmpty())
+            {
+                authorsTxt += ", ";
             }
 
-            cmds += cmdName;
+            authorsTxt += author;
         }
-        pl->addRow("Commands", new QLabel(cmds));
+        pluginEntry->addRow("Authors",
+                            new QLabel(authorsTxt, this->dataFrame_));
 
-        QString enableOrDisableStr = "Enable";
-        if (PluginController::isEnabled(codename))
+        if (!plugin->meta.homepage.isEmpty())
         {
-            enableOrDisableStr = "Disable";
+            auto *homepage = new QLabel(formatRichLink(plugin->meta.homepage),
+                                        this->dataFrame_);
+            homepage->setOpenExternalLinks(true);
+            pluginEntry->addRow("Homepage", homepage);
+        }
+        pluginEntry->addRow("License",
+                            new QLabel(plugin->meta.license, this->dataFrame_));
+
+        QString commandsTxt;
+        for (const auto &cmdName : plugin->listRegisteredCommands())
+        {
+            if (!commandsTxt.isEmpty())
+            {
+                commandsTxt += ", ";
+            }
+
+            commandsTxt += cmdName;
+        }
+        pluginEntry->addRow("Commands",
+                            new QLabel(commandsTxt, this->dataFrame_));
+
+        if (plugin->meta.isValid())
+        {
+            QString toggleTxt = "Enable";
+            if (PluginController::isEnabled(id))
+            {
+                toggleTxt = "Disable";
+            }
+
+            auto *toggleButton = new QPushButton(toggleTxt, this->dataFrame_);
+            QObject::connect(
+                toggleButton, &QPushButton::pressed, [name = id, this]() {
+                    std::vector<QString> val =
+                        getSettings()->enabledPlugins.getValue();
+                    if (PluginController::isEnabled(name))
+                    {
+                        val.erase(std::remove(val.begin(), val.end(), name),
+                                  val.end());
+                    }
+                    else
+                    {
+                        val.push_back(name);
+                    }
+                    getSettings()->enabledPlugins.setValue(val);
+                    getApp()->plugins->reload(name);
+                    this->rebuildContent();
+                });
+            pluginEntry->addRow(toggleButton);
         }
 
-        auto *enableDisable = new QPushButton(enableOrDisableStr);
-        QObject::connect(
-            enableDisable, &QPushButton::pressed, [name = codename, this]() {
-                std::vector<QString> val =
-                    getSettings()->enabledPlugins.getValue();
-                if (PluginController::isEnabled(name))
-                {
-                    val.erase(std::remove(val.begin(), val.end(), name),
-                              val.end());
-                }
-                else
-                {
-                    val.push_back(name);
-                }
-                getSettings()->enabledPlugins.setValue(val);
-                getApp()->plugins->reload(name);
-                this->rebuildContent();
-            });
-        pl->addRow(enableDisable);
-
-        auto *reload = new QPushButton("Reload");
-        QObject::connect(reload, &QPushButton::pressed,
-                         [name = codename, this]() {
+        auto *reloadButton = new QPushButton("Reload", this->dataFrame_);
+        QObject::connect(reloadButton, &QPushButton::pressed,
+                         [name = id, this]() {
                              getApp()->plugins->reload(name);
                              this->rebuildContent();
                          });
-        pl->addRow(reload);
+        pluginEntry->addRow(reloadButton);
     }
 }
 
 }  // namespace chatterino
+
 #endif

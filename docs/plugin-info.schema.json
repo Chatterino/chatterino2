@@ -14,8 +14,11 @@
       "description": "Plugin description shown to the user."
     },
     "authors": {
-      "type": "string",
-      "description": "A string describing authors of the Plugin. This could be a list of names, an organisation or something else, as long as it's clear who made the Plugin."
+      "type": "array",
+      "description": "An array of authors of this Plugin.",
+      "items": {
+        "type": "string"
+      }
     },
     "homepage": {
       "type": "string",

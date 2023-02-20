@@ -1,11 +1,12 @@
-#include "LuaUtilities.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "controllers/plugins/LuaUtilities.hpp"
 
 #    include "common/Channel.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
-#    include "lauxlib.h"
-#    include "lua.h"
+
+#    include <lauxlib.h>
+#    include <lua.h>
 
 #    include <climits>
 #    include <cstdlib>
