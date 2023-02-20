@@ -589,14 +589,18 @@ void Window::addShortcuts()
                  {
                      mode = 2;
                  }
+                 else if (arg == "toggleLiveOnly")
+                 {
+                     mode = 3;
+                 }
                  else
                  {
                      qCWarning(chatterinoHotkeys)
                          << "Invalid argument for setStreamerMode hotkey: "
                          << arg;
                      return QString("Invalid argument for setTabVisibility "
-                                    "hotkey: %1. Use \"on\", \"off\" or "
-                                    "\"toggle\".")
+                                    "hotkey: %1. Use \"on\", \"off\", "
+                                    "\"toggleLiveOnly\" or \"toggle\".")
                          .arg(arg);
                  }
              }
@@ -604,14 +608,39 @@ void Window::addShortcuts()
              if (mode == 0)
              {
                  this->notebook_->setShowTabs(false);
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::Default);
              }
              else if (mode == 1)
              {
                  this->notebook_->setShowTabs(true);
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::Default);
              }
              else if (mode == 2)
              {
                  this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::Default);
+             }
+             else if (mode == 3)
+             {
+                 if (!this->notebook_->getShowTabs())
+                 {
+                     // Tabs are currently hidden, so the intention is to show
+                     // tabs again before enabling the live only setting
+                     this->notebook_->setShowTabs(true);
+                     getSettings()->tabVisibility.setValue(
+                         NotebookTabVisibility::LiveOnly);
+                 }
+                 else
+                 {
+                     getSettings()->tabVisibility.setValue(
+                         getSettings()->tabVisibility.getEnum() ==
+                                 NotebookTabVisibility::LiveOnly
+                             ? NotebookTabVisibility::Default
+                             : NotebookTabVisibility::LiveOnly);
+                 }
              }
              return "";
          }},
