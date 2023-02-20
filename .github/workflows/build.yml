@@ -263,7 +263,7 @@ jobs:
             clang-tidy-review-metadata.json
 
       - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu-20.04') && matrix.skip_artifact != 'yes'
         run: |
           cd build
           sh ./../.CI/CreateAppImage.sh
@@ -277,7 +277,7 @@ jobs:
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu-20.04') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
@@ -351,7 +351,7 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-x86_64-5.15.2.AppImage
+          name: Chatterino-x86_64-5.12.12.AppImage
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
