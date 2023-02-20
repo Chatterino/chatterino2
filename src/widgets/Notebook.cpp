@@ -90,9 +90,7 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
     }
 
     this->performLayout();
-
-    tab->show();
-
+    tab->setVisible(this->shouldShowTab(tab));
     return tab;
 }
 
@@ -214,6 +212,7 @@ void Notebook::select(QWidget *page, bool focusPage)
     this->selectedPage_ = page;
 
     this->performLayout();
+    this->updateTabVisibility();
 }
 
 bool Notebook::containsPage(QWidget *page)
@@ -1192,7 +1191,7 @@ SplitNotebook::SplitNotebook(Window *parent)
             if (liveTabsOnly)
             {
                 this->setTabFilter([](const NotebookTab *tab) {
-                    return tab->isLive();
+                    return tab->isLive() || tab->isSelected();
                 });
             }
             else
@@ -1306,7 +1305,6 @@ SplitContainer *SplitNotebook::addPage(bool select)
     auto tab = Notebook::addPage(container, QString(), select);
     container->setTab(tab);
     tab->setParent(this);
-    tab->setVisible(this->shouldShowTab(tab));
     return container;
 }
 
