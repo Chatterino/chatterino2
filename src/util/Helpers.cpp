@@ -174,6 +174,12 @@ QString localizeNumbers(unsigned int number)
     return locale.toString(number);
 }
 
+QString localizeNumbers(qsizetype number)
+{
+    QLocale locale;
+    return locale.toString(number);
+}
+
 QString kFormatNumbers(const int &number)
 {
     return QString("%1K").arg(number / 1000);

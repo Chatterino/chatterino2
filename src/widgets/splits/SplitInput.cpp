@@ -699,7 +699,7 @@ void SplitInput::updateCompletionPopup()
         return;
     }
 
-    for (int i = clamp(position, 0, text.length() - 1); i >= 0; i--)
+    for (int i = clamp(position, 0, (int)text.length() - 1); i >= 0; i--)
     {
         if (text[i] == ' ')
         {
@@ -766,7 +766,7 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
         popup->updateUsers(text, this->split_->getChannel());
     }
 
-    auto pos = this->mapToGlobal({0, 0}) - QPoint(0, popup->height()) +
+    auto pos = this->mapToGlobal(QPoint{0, 0}) - QPoint(0, popup->height()) +
                QPoint((this->width() - popup->width()) / 2, 0);
 
     popup->move(pos);
@@ -789,7 +789,7 @@ void SplitInput::insertCompletionText(const QString &input_) const
     auto text = edit.toPlainText();
     auto position = edit.textCursor().position() - 1;
 
-    for (int i = clamp(position, 0, text.length() - 1); i >= 0; i--)
+    for (int i = clamp(position, 0, (int)text.length() - 1); i >= 0; i--)
     {
         bool done = false;
         if (text[i] == ':')

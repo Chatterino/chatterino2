@@ -15,6 +15,7 @@ concurrency:
 env:
   C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' }}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
+  C2_BUILD_WITH_QT6: Off
 
 jobs:
   build:
@@ -38,6 +39,11 @@ jobs:
           - os: ubuntu-22.04
             qt-version: 5.15.2
             pch: true
+            force-lto: false
+          # Ubuntu 22.04, Qt 6.2.4
+          - os: ubuntu-22.04
+            qt-version: 6.2.4
+            pch: false
             force-lto: false
           # Test for disabling Precompiled Headers & enabling link-time optimization
           - os: ubuntu-22.04
@@ -73,6 +79,12 @@ jobs:
           echo "vs_version=2022" >> "$GITHUB_ENV"
         shell: bash
 
+      - name: Set BUILD_WITH_QT6
+        if: startsWith(matrix.qt-version, '6.')
+        run: |
+          echo "C2_BUILD_WITH_QT6=ON" >> "$GITHUB_ENV"
+        shell: bash
+
       - uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -94,11 +106,21 @@ jobs:
             echo "☑ Checked out old position"
         shell: bash
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v3.0.0
+      - name: Install Qt5
+        if: startsWith(matrix.qt-version, '5.')
+        uses: jurplel/install-qt-action@v3.1.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
+          version: ${{ matrix.qt-version }}
+
+      - name: Install Qt6
+        if: startsWith(matrix.qt-version, '6.')
+        uses: jurplel/install-qt-action@v3.1.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
+          modules: qt5compat
           version: ${{ matrix.qt-version }}
 
       # WINDOWS
@@ -147,6 +169,7 @@ jobs:
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
+              -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
               ..
           set cl=/MP
           nmake /S /NOLOGO
@@ -232,6 +255,7 @@ jobs:
             -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+            -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
             ..
           make -j"$(nproc)"
         shell: bash
@@ -255,7 +279,7 @@ jobs:
             clang-tidy-review-metadata.json
 
       - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu-20.04') && matrix.skip_artifact != 'yes'
         run: |
           cd build
           sh ./../.CI/CreateAppImage.sh
@@ -269,7 +293,7 @@ jobs:
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu-20.04') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
@@ -300,6 +324,7 @@ jobs:
               -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
               -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+              -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
@@ -342,7 +367,7 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-x86_64-5.15.2.AppImage
+          name: Chatterino-x86_64-5.12.12.AppImage
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
@@ -359,6 +384,11 @@ jobs:
         with:
           name: chatterino-osx-5.15.2.dmg
           path: release-artifacts/
+
+      - name: Copy flatpakref
+        run: |
+          cp .CI/chatterino-nightly.flatpakref release-artifacts/
+        shell: bash
 
       - name: Create release
         uses: ncipollo/release-action@v1.12.0

@@ -2,6 +2,13 @@
 
 ## Unversioned
 
+- Minor: Delete all but the last 5 crashdumps on application start. (#4392)
+- Bugfix: Fixed uploaded AppImage not being able most web requests. (#4400)
+- Dev: Add capability to build Chatterino with Qt6. (#4393)
+- Dev: Fix homebrew update action. (#4394)
+
+## 2.4.1
+
 - Major: Added live emote updates for BTTV. (#4147)
 - Minor: Added setting to turn off rendering of reply context. (#4224)
 - Minor: Changed the highlight order to prioritize Message highlights over User highlights. (#4303)
@@ -15,7 +22,9 @@
 - Minor: Added link to streamlink docs for easier user setup. (#4217)
 - Minor: Added support for HTTP and Socks5 proxies through environment variables. (#4321)
 - Minor: Added crashpad to capture crashes on Windows locally. See PR for build/crash analysis instructions. (#4351)
+- Minor: Github releases now include flatpakref files for nightly builds
 - Bugfix: Fixed User Card moderation actions not working after Twitch IRC chat command deprecation. (#4378)
+- Bugfix: Fixed User Card broadcaster actions (mod, unmod, vip, unvip) not working after Twitch IRC chat command deprecation. (#4387)
 - Bugfix: Fixed crash that would occur when performing certain actions after removing all tabs. (#4271)
 - Bugfix: Fixed highlight sounds not reloading on change properly. (#4194)
 - Bugfix: Fixed CTRL + C not working in reply thread popups. (#4209)
@@ -176,6 +185,7 @@
 - Bugfix: Fixed crash happening when QuickSwitcher is used with a popout window. (#4187)
 - Bugfix: Fixed low contrast of text in settings tooltips. (#4188)
 - Bugfix: Fixed being unable to see the usercard of VIPs who have Asian language display names. (#4174)
+- Bugfix: Fixed whispers always being shown in the /mentions split. (#4389)
 - Bugfix: Fixed messages where Right-to-Left order is mixed in multiple lines. (#4173)
 - Bugfix: Fixed the wrong right-click menu showing in the chat input box. (#4177)
 - Bugfix: Fixed popup windows not appearing/minimizing correctly on the Windows taskbar. (#4181)

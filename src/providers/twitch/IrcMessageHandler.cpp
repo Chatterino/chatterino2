@@ -837,7 +837,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     getApp()->twitch->lastUserThatWhisperedMe.set(builder.userName);
 
-    if (_message->flags.has(MessageFlag::Highlighted))
+    if (_message->flags.has(MessageFlag::ShowInMentions))
     {
         getApp()->twitch->mentionsChannel->addMessage(_message);
     }

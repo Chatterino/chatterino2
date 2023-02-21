@@ -632,6 +632,14 @@ target_link_libraries(${LIBRARY_PROJECT}
         LRUCache
         MagicEnum
         )
+
+if (BUILD_WITH_QT6)
+    target_link_libraries(${LIBRARY_PROJECT}
+            PUBLIC
+            Qt${MAJOR_QT_VERSION}::Core5Compat
+            )
+endif ()
+
 if (BUILD_WITH_QTKEYCHAIN)
     target_link_libraries(${LIBRARY_PROJECT}
             PUBLIC

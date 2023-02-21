@@ -74,6 +74,7 @@ QString shortenString(const QString &str, unsigned maxWidth = 50);
 
 QString localizeNumbers(const int &number);
 QString localizeNumbers(unsigned int number);
+QString localizeNumbers(qsizetype number);
 
 QString kFormatNumbers(const int &number);
 
