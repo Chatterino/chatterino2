@@ -7,9 +7,9 @@
 To build, from the repo root
 
 1. Build a docker image that contains all the build artifacts and source from building Chatterino on Ubuntu 20.04  
-   `docker build -t chatterino-ubuntu-20.04-build -f .docker/Dockerfile-ubuntu-20.04-build .`
+   `docker buildx build -t chatterino-ubuntu-20.04-build -f .docker/Dockerfile-ubuntu-20.04-build .`
 1. Build a docker image that uses the above-built image & packages it into a .deb file  
-   `docker build -t chatterino-ubuntu-20.04-package -f .docker/Dockerfile-ubuntu-20.04-package .`
+   `docker buildx build -t chatterino-ubuntu-20.04-package -f .docker/Dockerfile-ubuntu-20.04-package .`
 
 To extract the final package, you can run the following command:  
 `docker run -v $PWD:/opt/mount --rm -it chatterino-ubuntu-20.04-package bash -c "cp /src/build/Chatterino-x86_64.deb /opt/mount/"`
@@ -21,9 +21,11 @@ To extract the final package, you can run the following command:
 To build, from the repo root
 
 1. Build a docker image that contains all the build artifacts and source from building Chatterino on Ubuntu 22.04  
-   `docker build -t chatterino-ubuntu-22.04-build -f .docker/Dockerfile-ubuntu-22.04-build .`
+   `docker buildx build -t chatterino-ubuntu-22.04-build -f .docker/Dockerfile-ubuntu-22.04-build .`
 1. Build a docker image that uses the above-built image & packages it into a .deb file  
-   `docker build -t chatterino-ubuntu-22.04-package -f .docker/Dockerfile-ubuntu-22.04-package .`
+   `docker buildx build -t chatterino-ubuntu-22.04-package -f .docker/Dockerfile-ubuntu-22.04-package .`
 
 To extract the final package, you can run the following command:  
 `docker run -v $PWD:/opt/mount --rm -it chatterino-ubuntu-22.04-package bash -c "cp /src/build/Chatterino-x86_64.deb /opt/mount/"`
+
+NOTE: The AppImage from Ubuntu 22.04 is broken. Approach with caution
