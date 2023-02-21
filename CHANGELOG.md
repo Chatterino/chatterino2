@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Minor: Delete all but the last 5 crashdumps on application start. (#4392)
+- Minor: Added setting to only show tabs with live channels. (#4358)
 - Dev: Add capability to build Chatterino with Qt6. (#4393)
 - Dev: Fix homebrew update action. (#4394)
 
@@ -22,7 +23,6 @@
 - Minor: Added support for HTTP and Socks5 proxies through environment variables. (#4321)
 - Minor: Added crashpad to capture crashes on Windows locally. See PR for build/crash analysis instructions. (#4351)
 - Minor: Github releases now include flatpakref files for nightly builds
-- Minor: Added setting to only show tabs with live channels. (#4358)
 - Bugfix: Fixed User Card moderation actions not working after Twitch IRC chat command deprecation. (#4378)
 - Bugfix: Fixed User Card broadcaster actions (mod, unmod, vip, unvip) not working after Twitch IRC chat command deprecation. (#4387)
 - Bugfix: Fixed crash that would occur when performing certain actions after removing all tabs. (#4271)
