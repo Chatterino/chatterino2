@@ -2,6 +2,12 @@
 
 ## Unversioned
 
+- Minor: Delete all but the last 5 crashdumps on application start. (#4392)
+- Dev: Add capability to build Chatterino with Qt6. (#4393)
+- Dev: Fix homebrew update action. (#4394)
+
+## 2.4.1
+
 - Major: Added live emote updates for BTTV. (#4147)
 - Minor: Added setting to turn off rendering of reply context. (#4224)
 - Minor: Changed the highlight order to prioritize Message highlights over User highlights. (#4303)
@@ -150,6 +156,7 @@
 - Bugfix: Fixed crash happening when QuickSwitcher is used with a popout window. (#4187)
 - Bugfix: Fixed low contrast of text in settings tooltips. (#4188)
 - Bugfix: Fixed being unable to see the usercard of VIPs who have Asian language display names. (#4174)
+- Bugfix: Fixed whispers always being shown in the /mentions split. (#4389)
 - Bugfix: Fixed messages where Right-to-Left order is mixed in multiple lines. (#4173)
 - Bugfix: Fixed the wrong right-click menu showing in the chat input box. (#4177)
 - Bugfix: Fixed popup windows not appearing/minimizing correctly on the Windows taskbar. (#4181)

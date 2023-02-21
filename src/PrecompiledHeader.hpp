@@ -105,7 +105,6 @@
 #    include <QThreadPool>
 #    include <QTime>
 #    include <QTimer>
-#    include <QtWidgets/QAction>
 #    include <QtWidgets/QApplication>
 #    include <QtWidgets/QButtonGroup>
 #    include <QtWidgets/QDialog>

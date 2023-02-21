@@ -7,6 +7,7 @@
 
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
+#include <QFile>
 
 #include <limits>
 #include <memory>

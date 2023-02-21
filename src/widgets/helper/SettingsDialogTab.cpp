@@ -54,7 +54,7 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     QStyleOption opt;
-    opt.init(this);
+    opt.initFrom(this);
 
     this->style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
 
