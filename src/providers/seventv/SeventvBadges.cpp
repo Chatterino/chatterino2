@@ -19,7 +19,7 @@ void SeventvBadges::initialize(Settings & /*settings*/, Paths & /*paths*/)
 
 boost::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id)
 {
-    const std::shared_lock lock(this->mutex_);
+    std::shared_lock lock(this->mutex_);
 
     auto it = this->badgeMap_.find(id.string);
     if (it != this->badgeMap_.end())
@@ -45,7 +45,7 @@ void SeventvBadges::loadSeventvBadges()
         .onSuccess([this](const NetworkResult &result) -> Outcome {
             auto root = result.parseJson();
 
-            const std::unique_lock lock(this->mutex_);
+            std::unique_lock lock(this->mutex_);
 
             int index = 0;
             for (const auto &jsonBadge : root.value("badges").toArray())
