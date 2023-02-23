@@ -35,6 +35,7 @@
 
 #include <QCheckBox>
 #include <QDesktopServices>
+#include <QFile>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
