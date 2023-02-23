@@ -1094,7 +1094,8 @@ void UserInfoPopup::fetchSevenTVAvatar(const HelixUser &user)
                             auto data = outcome.getData();
                             QCryptographicHash hash(
                                 QCryptographicHash::Algorithm::Sha1);
-                            auto SHA = QString(data.size()).toUtf8();
+                            auto SHA =
+                                QString(static_cast<int>(data.size())).toUtf8();
                             hash.addData(SHA.data(), SHA.size() + 1);
 
                             auto filename =
