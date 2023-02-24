@@ -71,6 +71,7 @@ bool isInStreamerMode()
                 p.exitStatus() == QProcess::NormalExit)
             {
                 cache = (p.exitCode() == 0);
+                getApp()->streamerModeChanged.invoke();
                 return (p.exitCode() == 0);
             }
 

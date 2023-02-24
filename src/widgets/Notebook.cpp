@@ -4,10 +4,12 @@
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
+#include "util/StreamerMode.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookButton.hpp"
@@ -1154,6 +1156,29 @@ void SplitNotebook::addCustomButtons()
     auto updateBtn = this->addCustomButton();
 
     initUpdateButton(*updateBtn, this->signalHolder_);
+
+    // streamer mode
+    auto *streamerModeIcon = this->addCustomButton();
+    if (getTheme()->isLightTheme())
+    {
+        streamerModeIcon->setPixmap(
+            getResources().buttons.streamerModeEnabledLight);
+    }
+    else
+    {
+        streamerModeIcon->setPixmap(
+            getResources().buttons.streamerModeEnabledDark);
+    }
+    streamerModeIcon->setVisible(isInStreamerMode());
+    this->signalHolder_.managedConnect(
+        getApp()->streamerModeChanged, [streamerModeIcon]() {
+            streamerModeIcon->setVisible(isInStreamerMode());
+        });
+    QObject::connect(streamerModeIcon, &NotebookButton::leftClicked,
+                     [this, streamerModeIcon] {
+                         getApp()->windows->showSettingsDialog(
+                             this, SettingsDialogPreference::StreamerMode);
+                     });
 }
 
 SplitContainer *SplitNotebook::addPage(bool select)
