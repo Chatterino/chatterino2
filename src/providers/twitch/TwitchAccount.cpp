@@ -4,6 +4,7 @@
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -440,6 +441,38 @@ void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
 
             channel->addMessage(makeSystemMessage(errorMessage));
         });
+}
+
+const QString &TwitchAccount::getSeventvUserID() const
+{
+    return this->seventvUserID_;
+}
+
+void TwitchAccount::loadSeventvUserID()
+{
+    if (!this->seventvUserID_.isEmpty())
+    {
+        return;
+    }
+
+    // TODO: this is duplicate functionality
+    static const QString seventvUserInfoUrl =
+        QStringLiteral("https://7tv.io/v3/users/twitch/%1");
+
+    NetworkRequest(seventvUserInfoUrl.arg(this->getUserId()),
+                   NetworkRequestType::Get)
+        .timeout(20000)
+        .onSuccess([this](const auto &response) {
+            const auto json = response.parseJson();
+            const auto id = json["user"].toObject()["id"].toString();
+            if (!id.isEmpty())
+            {
+                this->seventvUserID_ = id;
+            }
+            return Success;
+        })
+        .concurrent()
+        .execute();
 }
 
 }  // namespace chatterino

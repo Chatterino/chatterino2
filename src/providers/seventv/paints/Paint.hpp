@@ -12,16 +12,18 @@ namespace chatterino {
 class Paint
 {
 public:
-    virtual QBrush asBrush(const QColor userColor,
-                           const QRectF drawingRect) const = 0;
+    virtual QBrush asBrush(QColor userColor, QRectF drawingRect) const = 0;
     virtual std::vector<PaintDropShadow> getDropShadows() const = 0;
     virtual bool animated() const = 0;
 
-    QPixmap getPixmap(const QString text, const QFont font,
-                      const QColor userColor, const QSize size,
-                      const float scale) const;
+    QPixmap getPixmap(QString text, QFont font, QColor userColor, QSize size,
+                      float scale) const;
 
-    virtual ~Paint(){};
+    Paint(QString id)
+        : id(std::move(id)){};
+    virtual ~Paint() = default;
+
+    QString id;
 
 protected:
     QColor overlayColors(const QColor background,

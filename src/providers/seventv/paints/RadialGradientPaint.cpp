@@ -1,17 +1,17 @@
-#include "RadialGradientPaint.hpp"
+#include "providers/seventv/paints/RadialGradientPaint.hpp"
 
 #include <algorithm>
 
 namespace chatterino {
 
 RadialGradientPaint::RadialGradientPaint(
-    const QString name, const QGradientStops stops, const bool repeat,
-    const std::vector<PaintDropShadow> dropShadows)
-    : Paint()
-    , name_(name)
-    , stops_(stops)
+    QString name, QString id, QGradientStops stops, bool repeat,
+    std::vector<PaintDropShadow> dropShadows)
+    : Paint(std::move(id))
+    , name_(std::move(name))
+    , stops_(std::move(stops))
     , repeat_(repeat)
-    , dropShadows_(dropShadows)
+    , dropShadows_(std::move(dropShadows))
 {
 }
 

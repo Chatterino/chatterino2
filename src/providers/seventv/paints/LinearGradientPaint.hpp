@@ -10,12 +10,11 @@ namespace chatterino {
 class LinearGradientPaint : public Paint
 {
 public:
-    LinearGradientPaint(const QString name, const std::optional<QColor> color,
-                        const QGradientStops stops, const bool repeat,
-                        const float angle, const std::vector<PaintDropShadow>);
+    LinearGradientPaint(QString name, QString id, std::optional<QColor> color,
+                        QGradientStops stops, bool repeat, float angle,
+                        std::vector<PaintDropShadow> dropShadows);
 
-    QBrush asBrush(const QColor userColor,
-                   const QRectF drawingRect) const override;
+    QBrush asBrush(QColor userColor, QRectF drawingRect) const override;
     std::vector<PaintDropShadow> getDropShadows() const override;
     bool animated() const override;
 

@@ -15,6 +15,16 @@ enum class SubscriptionType {
     UpdateEmoteSet,
     UpdateUser,
 
+    AnyCosmetic,
+    CreateCosmetic,
+    UpdateCosmetic,
+    DeleteCosmetic,
+
+    AnyEntitlement,
+    CreateEntitlement,
+    UpdateEntitlement,
+    DeleteEntitlement,
+
     INVALID,
 };
 
@@ -46,7 +56,19 @@ struct ObjectIDCondition {
     bool operator!=(const ObjectIDCondition &rhs) const;
 };
 
-using Condition = std::variant<ObjectIDCondition>;
+struct ChannelCondition {
+    ChannelCondition(QString twitchID);
+
+    QString twitchID;
+
+    QJsonObject encode() const;
+
+    friend QDebug &operator<<(QDebug &dbg, const ChannelCondition &condition);
+    bool operator==(const ChannelCondition &rhs) const;
+    bool operator!=(const ChannelCondition &rhs) const;
+};
+
+using Condition = std::variant<ObjectIDCondition, ChannelCondition>;
 
 struct Subscription {
     bool operator==(const Subscription &rhs) const;
@@ -74,6 +96,22 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
             return "emote_set.update";
         case SubscriptionType::UpdateUser:
             return "user.update";
+        case SubscriptionType::AnyCosmetic:
+            return "cosmetic.*";
+        case SubscriptionType::CreateCosmetic:
+            return "cosmetic.create";
+        case SubscriptionType::UpdateCosmetic:
+            return "cosmetic.update";
+        case SubscriptionType::DeleteCosmetic:
+            return "cosmetic.delete";
+        case SubscriptionType::AnyEntitlement:
+            return "entitlement.*";
+        case SubscriptionType::CreateEntitlement:
+            return "entitlement.create";
+        case SubscriptionType::UpdateEntitlement:
+            return "entitlement.update";
+        case SubscriptionType::DeleteEntitlement:
+            return "entitlement.delete";
 
         default:
             return default_tag;
@@ -88,6 +126,15 @@ struct hash<chatterino::seventv::eventapi::ObjectIDCondition> {
         const chatterino::seventv::eventapi::ObjectIDCondition &c) const
     {
         return (size_t)qHash(c.objectID);
+    }
+};
+
+template <>
+struct hash<chatterino::seventv::eventapi::ChannelCondition> {
+    size_t operator()(
+        const chatterino::seventv::eventapi::ChannelCondition &c) const
+    {
+        return qHash(c.twitchID);
     }
 };
 

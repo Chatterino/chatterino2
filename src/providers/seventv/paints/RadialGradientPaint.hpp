@@ -1,17 +1,16 @@
 #pragma once
 
-#include "Paint.hpp"
+#include "providers/seventv/paints/Paint.hpp"
 
 namespace chatterino {
 
 class RadialGradientPaint : public Paint
 {
 public:
-    RadialGradientPaint(const QString name, const QGradientStops stops,
-                        const bool repeat, const std::vector<PaintDropShadow>);
+    RadialGradientPaint(QString name, QString id, QGradientStops stops,
+                        bool repeat, std::vector<PaintDropShadow>);
 
-    QBrush asBrush(const QColor userColor,
-                   const QRectF drawingRect) const override;
+    QBrush asBrush(QColor userColor, QRectF drawingRect) const override;
     std::vector<PaintDropShadow> getDropShadows() const override;
     bool animated() const override;
 

@@ -1,18 +1,19 @@
-#include "LinearGradientPaint.hpp"
+#include "providers/seventv/paints/LinearGradientPaint.hpp"
+
+#include <utility>
 
 namespace chatterino {
 
 LinearGradientPaint::LinearGradientPaint(
-    const QString name, const std::optional<QColor> color,
-    const QGradientStops stops, const bool repeat, const float angle,
-    const std::vector<PaintDropShadow> dropShadows)
-    : Paint()
-    , name_(name)
-    , color_(color)
-    , stops_(stops)
+    QString name, QString id, std::optional<QColor> color, QGradientStops stops,
+    bool repeat, float angle, std::vector<PaintDropShadow> dropShadows)
+    : Paint(std::move(id))
+    , name_(std::move(name))
+    , color_(std::move(color))
+    , stops_(std::move(stops))
     , repeat_(repeat)
     , angle_(angle)
-    , dropShadows_(dropShadows)
+    , dropShadows_(std::move(dropShadows))
 {
 }
 

@@ -1,15 +1,17 @@
-#include "UrlPaint.hpp"
+#include "providers/seventv/paints/UrlPaint.hpp"
 
 #include <QPainter>
 
+#include <utility>
+
 namespace chatterino {
 
-UrlPaint::UrlPaint(const QString name, const ImagePtr image,
-                   const std::vector<PaintDropShadow> dropShadows)
-    : Paint()
-    , name_(name)
-    , image_(image)
-    , dropShadows_(dropShadows)
+UrlPaint::UrlPaint(QString name, QString id, ImagePtr image,
+                   std::vector<PaintDropShadow> dropShadows)
+    : Paint(std::move(id))
+    , name_(std::move(name))
+    , image_(std::move(image))
+    , dropShadows_(std::move(dropShadows))
 {
 }
 

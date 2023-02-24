@@ -5,12 +5,14 @@
 #include "common/Atomic.hpp"
 #include "common/FlagsEnum.hpp"
 
+#include <QJsonObject>
+
 #include <memory>
 
 namespace chatterino {
 
+class ImageSet;
 class Channel;
-
 namespace seventv::eventapi {
     struct EmoteAddDispatch;
     struct EmoteUpdateDispatch;
@@ -118,6 +120,13 @@ public:
         const QString &emoteSetId,
         std::function<void(EmoteMap &&, QString)> successCallback,
         std::function<void(QString)> errorCallback);
+
+    /**
+     * Creates an image set from a 7TV emote or badge.
+     *
+     * @param emoteData { host: { files: [], url } }
+     */
+    static ImageSet createImageSet(const QJsonObject &emoteData);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;
