@@ -9,6 +9,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Updates.hpp"
@@ -186,6 +187,18 @@ void Window::addCustomTitlebarButtons()
             this->userLabel_->rect().bottomLeft()));
     });
     this->userLabel_->setMinimumWidth(20 * scale());
+
+    // streamer mode
+    auto *streamerModeIcon =
+        this->addTitleBarButton(TitleBarButtonStyle::StreamerMode, [this] {
+            getApp()->windows->showSettingsDialog(
+                this, SettingsDialogPreference::StreamerMode);
+        });
+    streamerModeIcon->setPixmap(getResources().buttons.streamerModeEnabledDark);
+    this->signalHolder_.managedConnect(
+        getApp()->streamerModeChanged, [streamerModeIcon]() {
+            streamerModeIcon->setVisible(isInStreamerMode());
+        });
 }
 
 void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)

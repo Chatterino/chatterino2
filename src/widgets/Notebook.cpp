@@ -1174,11 +1174,10 @@ void SplitNotebook::addCustomButtons()
         getApp()->streamerModeChanged, [streamerModeIcon]() {
             streamerModeIcon->setVisible(isInStreamerMode());
         });
-    QObject::connect(streamerModeIcon, &NotebookButton::leftClicked,
-                     [this, streamerModeIcon] {
-                         getApp()->windows->showSettingsDialog(
-                             this, SettingsDialogPreference::StreamerMode);
-                     });
+    QObject::connect(streamerModeIcon, &NotebookButton::leftClicked, [this] {
+        getApp()->windows->showSettingsDialog(
+            this, SettingsDialogPreference::StreamerMode);
+    });
 }
 
 SplitContainer *SplitNotebook::addPage(bool select)
