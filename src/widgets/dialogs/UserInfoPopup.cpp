@@ -35,6 +35,7 @@
 
 #include <QCheckBox>
 #include <QDesktopServices>
+#include <QFile>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
@@ -1044,7 +1045,7 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
             static auto *manager = new QNetworkAccessManager();
             auto *reply = manager->get(req);
 
-            QObject::connect(reply, &QNetworkReply::finished, this, [=] {
+            QObject::connect(reply, &QNetworkReply::finished, this, [=, this] {
                 if (reply->error() == QNetworkReply::NoError)
                 {
                     this->avatarUrl_ = url;
