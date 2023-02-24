@@ -58,6 +58,13 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Concurrent
     )
 
+if (BUILD_WITH_QT6)
+    find_package(Qt${MAJOR_QT_VERSION} REQUIRED
+        COMPONENTS
+        Core5Compat
+        )
+endif ()
+
 message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 
 if (WIN32)
