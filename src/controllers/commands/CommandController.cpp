@@ -2669,8 +2669,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                 // The messages from IRC are formatted like this:
                 // "You cannot {op} moderator {mod} unless you are the owner of this channel."
                 // "You cannot {op} the broadcaster."
-                errorMessage += QString("You cannot %1 %2.")
-                                    .arg(operation, userTarget);
+                errorMessage +=
+                    QString("You cannot %1 %2.").arg(operation, userTarget);
             }
             break;
 
@@ -2830,7 +2830,8 @@ void CommandController::initialize(Settings &, Paths &paths)
     });
 
     this->registerCommand("/banid", [formatBanTimeoutError](
-                                      const QStringList &words, auto channel) {
+                                        const QStringList &words,
+                                        auto channel) {
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
         if (twitchChannel == nullptr)
         {
@@ -2840,9 +2841,10 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         const auto *usageStr =
-            "Usage: \"/banid <userid> [reason]\" - Permanently prevent a user ID "
-            "from chatting. Reason is optional and will be shown to the target "
-            "user and other moderators. Use \"/unban <username>\" to remove a ban.";
+            "Usage: \"/banid <userid> [reason]\" - Permanently prevent a user "
+            "ID from chatting. Reason is optional and will be shown to the "
+            "target user and other moderators. Use \"/unban <username>\" to "
+            "remove a ban.";
         if (words.size() < 2)
         {
             channel->addMessage(makeSystemMessage(usageStr));
@@ -2861,15 +2863,14 @@ void CommandController::initialize(Settings &, Paths &paths)
         auto reason = words.mid(2).join(' ');
 
         getHelix()->banUser(
-            twitchChannel->roomId(), currentUser->getUserId(),
-            target, boost::none, reason,
+            twitchChannel->roomId(), currentUser->getUserId(), target,
+            boost::none, reason,
             [] {
                 // No response for bans, they're emitted over pubsub/IRC instead
             },
-            [channel, target, formatBanTimeoutError](
-                auto error, auto message) {
-                auto errorMessage = formatBanTimeoutError(
-                    "ban", error, message, "#" + target);
+            [channel, target, formatBanTimeoutError](auto error, auto message) {
+                auto errorMessage =
+                    formatBanTimeoutError("ban", error, message, "#" + target);
                 channel->addMessage(makeSystemMessage(errorMessage));
             });
 
