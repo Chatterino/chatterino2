@@ -194,8 +194,17 @@ void Window::addCustomTitlebarButtons()
             getApp()->windows->showSettingsDialog(
                 this, SettingsDialogPreference::StreamerMode);
         });
+    if (getTheme()->isLightTheme())
+    {
+        streamerModeIcon->setPixmap(
+            getResources().buttons.streamerModeEnabledLight);
+    }
+    else
+    {
+        streamerModeIcon->setPixmap(
+            getResources().buttons.streamerModeEnabledDark);
+    }
     streamerModeIcon->setVisible(isInStreamerMode());
-    streamerModeIcon->setPixmap(getResources().buttons.streamerModeEnabledDark);
     this->signalHolder_.managedConnect(
         getApp()->streamerModeChanged, [streamerModeIcon]() {
             streamerModeIcon->setVisible(isInStreamerMode());
