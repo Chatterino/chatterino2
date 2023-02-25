@@ -123,6 +123,7 @@ bool isInStreamerMode()
                     if (broadcastingBinaries().contains(processName))
                     {
                         cache = true;
+                        getApp()->streamerModeChanged.invoke();
                         return true;
                     }
                 }
