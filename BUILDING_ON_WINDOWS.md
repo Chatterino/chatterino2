@@ -1,6 +1,6 @@
 # Building on Windows
 
-**Note that installing all of the development prerequisites and libraries will require about 30 GB of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**
+**Note that installing all of the development prerequisites and libraries will require about 40 GB of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**
 
 This guide assumes you are on a 64-bit system. You might need to manually search out alternate download links should you desire to build Chatterino on a 32-bit system.
 
@@ -12,7 +12,7 @@ Download and install [Visual Studio 2022 Community](https://visualstudio.microso
 
 Notes:
 
-- This installation will take about 17 GB of disk space
+- This installation will take about 21 GB of disk space
 - You do not need to sign in with a Microsoft account after setup completes. You may simply exit the login dialog.
 
 
