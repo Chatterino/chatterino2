@@ -86,12 +86,12 @@ Install [conan](https://conan.io/downloads.html) and make sure it's in your `PAT
 
 Then in a terminal, configure conan to use `NMake Makefiles` as its generator:
 
-#### Build
-
 1. Generate a new profile  
   `conan profile new --detect --force default`
 1. Configure the profile to use `NMake Makefiles` as its generator  
   `conan profile update conf.tools.cmake.cmaketoolchain:generator="NMake Makefiles" default`
+
+#### Build
 
 Open up your terminal with the Visual Studio environment variables (e.g. `x64 Native Tools Command Prompt for VS 2022`), cd to the cloned c2 directory and run the following commands:
 
