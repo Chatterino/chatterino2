@@ -90,6 +90,7 @@ bool isInStreamerMode()
             qCWarning(chatterinoStreamerMode) << "pgrep execution timed out!";
 
             cache = false;
+            getApp()->streamerModeChanged.invoke();
             return false;
 #endif
 
@@ -135,6 +136,7 @@ bool isInStreamerMode()
             }
 
             cache = false;
+            getApp()->streamerModeChanged.invoke();
 #endif
             return false;
     }
