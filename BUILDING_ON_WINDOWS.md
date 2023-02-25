@@ -15,7 +15,6 @@ Notes:
 - This installation will take about 21 GB of disk space
 - You do not need to sign in with a Microsoft account after setup completes. You may simply exit the login dialog.
 
-
 ### Qt
 
 1. Visit the [Qt Open Source Page](https://www.qt.io/download-open-source).
@@ -87,9 +86,9 @@ Install [conan](https://conan.io/downloads.html) and make sure it's in your `PAT
 Then in a terminal, configure conan to use `NMake Makefiles` as its generator:
 
 1. Generate a new profile  
-  `conan profile new --detect --force default`
+   `conan profile new --detect --force default`
 1. Configure the profile to use `NMake Makefiles` as its generator  
-  `conan profile update conf.tools.cmake.cmaketoolchain:generator="NMake Makefiles" default`
+   `conan profile update conf.tools.cmake.cmaketoolchain:generator="NMake Makefiles" default`
 
 #### Build
 
@@ -141,7 +140,7 @@ To produce all supplement files for a standalone build, follow these steps (adju
         cd C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release\release
         C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe chatterino.exe
 
-6.  The `releases` directory will now be populated with all the required files to make the chatterino build standalone.
+5.  The `releases` directory will now be populated with all the required files to make the chatterino build standalone.
 
 You can now create a zip archive of all the contents in `releases` and distribute the program as is, without requiring any development tools to be present on the target system. (However, the vcredist package must be present, as usual - see the [README](README.md)).
 
