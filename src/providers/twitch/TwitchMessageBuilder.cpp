@@ -221,11 +221,6 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::FirstMessage);
     }
 
-    if (this->tags.contains("pinned-chat-paid-amount"))
-    {
-        this->message().flags.set(MessageFlag::ElevatedMessage);
-    }
-
     if (this->tags.contains("bits"))
     {
         this->message().flags.set(MessageFlag::CheerMessage);
