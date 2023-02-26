@@ -322,15 +322,6 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
             return app->themes->messages.backgrounds.regular;
         }
     }();
-
-    if (this->message_->flags.has(MessageFlag::ElevatedMessage) &&
-        getSettings()->enableElevatedMessageHighlight.getValue())
-    {
-        backgroundColor = blendColors(backgroundColor,
-                                      *ColorProvider::instance().color(
-                                          ColorType::ElevatedMessageHighlight));
-    }
-
     else if (this->message_->flags.has(MessageFlag::FirstMessage) &&
              getSettings()->enableFirstMessageHighlight.getValue())
     {
