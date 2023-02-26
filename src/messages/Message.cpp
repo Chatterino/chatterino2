@@ -46,12 +46,6 @@ SBHighlight Message::getScrollBarHighlight() const
             ColorProvider::instance().color(ColorType::RedeemedHighlight),
             SBHighlight::Default, true);
     }
-    else if (this->flags.has(MessageFlag::ElevatedMessage))
-    {
-        return SBHighlight(ColorProvider::instance().color(
-                               ColorType::ElevatedMessageHighlight),
-                           SBHighlight::Default, false, false, true);
-    }
     else if (this->flags.has(MessageFlag::FirstMessage))
     {
         return SBHighlight(
