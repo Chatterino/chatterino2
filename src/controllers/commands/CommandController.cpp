@@ -2843,8 +2843,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         const auto *usageStr =
             "Usage: \"/banid <userID> [reason]\" - Permanently prevent a user "
             "from chatting via their user ID. Reason is optional and will be "
-            "shown to the target user and other moderators. Use \"/unban "
-            "<username>\" to remove a ban.";
+            "shown to the target user and other moderators.";
         if (words.size() < 2)
         {
             channel->addMessage(makeSystemMessage(usageStr));
