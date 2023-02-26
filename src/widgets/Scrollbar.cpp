@@ -260,8 +260,6 @@ void Scrollbar::paintEvent(QPaintEvent *)
     bool enableRedeemedHighlights = getSettings()->enableRedeemedHighlight;
     bool enableFirstMessageHighlights =
         getSettings()->enableFirstMessageHighlight;
-    bool enableElevatedMessageHighlights =
-        getSettings()->enableElevatedMessageHighlight;
 
     //    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
     //                     this->themeManager->ScrollbarArrow);
@@ -314,12 +312,6 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
         if (highlight.isFirstMessageHighlight() &&
             !enableFirstMessageHighlights)
-        {
-            continue;
-        }
-
-        if (highlight.isElevatedMessageHighlight() &&
-            !enableElevatedMessageHighlights)
         {
             continue;
         }
