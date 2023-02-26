@@ -19,7 +19,6 @@ ScrollbarHighlight::ScrollbarHighlight(const std::shared_ptr<QColor> color,
     , style_(style)
     , isRedeemedHighlight_(isRedeemedHighlight)
     , isFirstMessageHighlight_(isFirstMessageHighlight)
-    , isElevatedMessageHighlight_(isElevatedMessageHighlight)
 {
 }
 
