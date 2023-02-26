@@ -45,7 +45,6 @@ enum class MessageFlag : int64_t {
     ShowInMentions = (1LL << 22),
     FirstMessage = (1LL << 23),
     ReplyMessage = (1LL << 24),
-    ElevatedMessage = (1LL << 25),
     ParticipatedThread = (1LL << 26),
     CheerMessage = (1LL << 27),
     LiveUpdatesAdd = (1LL << 28),
