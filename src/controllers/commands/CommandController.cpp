@@ -2842,7 +2842,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         const auto *usageStr =
             "Usage: \"/banid <userID> [reason]\" - Permanently prevent a user "
-            "from chatting via their userID. Reason is optional and will be "
+            "from chatting via their user ID. Reason is optional and will be "
             "shown to the target user and other moderators. Use \"/unban "
             "<username>\" to remove a ban.";
         if (words.size() < 2)
