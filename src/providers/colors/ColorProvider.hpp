@@ -14,7 +14,6 @@ enum class ColorType {
     Whisper,
     RedeemedHighlight,
     FirstMessageHighlight,
-    ElevatedMessageHighlight,
     ThreadMessageHighlight,
     // Used in automatic highlights of your own messages
     SelfMessageHighlight,
