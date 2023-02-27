@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unversioned
-
+- Minor: Removed Elevated Messages (#4415)
 - Minor: Delete all but the last 5 crashdumps on application start. (#4392)
 - Minor: Added `/banid` command that allows banning by user ID. (#4411)
 - Bugfix: Fixed uploaded AppImage not being able most web requests. (#4400)
