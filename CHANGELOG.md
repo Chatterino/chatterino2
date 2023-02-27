@@ -8,6 +8,7 @@
 - Bugfix: Fixed a potential race condition due to using the wrong lock when loading 7TV badges. (#4402)
 - Dev: Add capability to build Chatterino with Qt6. (#4393)
 - Dev: Fix homebrew update action. (#4394)
+- Dev: Conan 2.0 is now used instead of Conan 1.0. (#4417)
 
 ## 2.4.1
 
