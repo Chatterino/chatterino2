@@ -112,15 +112,15 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-${{ matrix.crashpad }}-conan-user-${{ hashFiles('**/conanfile.txt') }}
-          path: ~/.conan/
+          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}
+          path: ~/.conan2/
 
       - name: Cache conan packages part 2
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-${{ matrix.crashpad }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
-          path: C:/.conan/
+          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.py') }}
+          path: C:/.conan2/
 
       - name: Add Conan to path
         if: startsWith(matrix.os, 'windows')
@@ -138,15 +138,19 @@ jobs:
       - name: Setup Conan (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-          conan profile new --detect --force default
-          conan profile update conf.tools.cmake.cmaketoolchain:generator="NMake Makefiles" default
+          conan --version
+          conan profile detect
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
           mkdir build
           cd build
-          conan install .. -s build_type=RelWithDebInfo -b missing -pr:b=default
+          conan install .. `
+              -s build_type=RelWithDebInfo `
+              -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" `
+              -b missing `
+              --output-folder=.
           cmake `
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
