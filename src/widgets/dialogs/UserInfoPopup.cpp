@@ -35,6 +35,7 @@
 
 #include <QCheckBox>
 #include <QDesktopServices>
+#include <QFile>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
@@ -1088,22 +1089,23 @@ void UserInfoPopup::fetchSevenTVAvatar(const HelixUser &user)
 
                 NetworkRequest(URI)
                     .timeout(20000)
-                    .onSuccess(
-                        [=, this](const NetworkResult &outcome) -> Outcome {
-                            auto data = outcome.getData();
-                            QCryptographicHash hash(
-                                QCryptographicHash::Algorithm::Sha1);
-                            auto SHA = QString(data.size()).toUtf8();
-                            hash.addData(SHA.data(), SHA.size() + 1);
+                    .onSuccess([=,
+                                this](const NetworkResult &outcome) -> Outcome {
+                        auto data = outcome.getData();
+                        QCryptographicHash hash(
+                            QCryptographicHash::Algorithm::Sha1);
+                        auto SHA = QString(QChar(static_cast<int>(data.size())))
+                                       .toUtf8();
+                        hash.addData(SHA.data(), SHA.size() + 1);
 
-                            auto filename =
-                                this->getFilename(hash.result().toHex());
+                        auto filename =
+                            this->getFilename(hash.result().toHex());
 
-                            this->saveCacheAvatar(data, filename);
-                            this->setSevenTVAvatar(filename);
+                        this->saveCacheAvatar(data, filename);
+                        this->setSevenTVAvatar(filename);
 
-                            return Success;
-                        })
+                        return Success;
+                    })
                     .execute();
             }
             return Success;
