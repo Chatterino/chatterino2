@@ -116,7 +116,7 @@ StackIdx push(lua_State *L, const CommandContext &ctx)
     push(L, ctx.words);
     lua_setfield(L, outIdx, "words");
     push(L, ctx.channel->getName());
-    lua_setfield(L, outIdx, "channelName");
+    lua_setfield(L, outIdx, "channel_name");
 
     return outIdx;
 }
