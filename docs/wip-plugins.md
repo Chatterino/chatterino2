@@ -41,6 +41,13 @@ Example file:
 
 An example plugin is available at [https://github.com/Mm2PL/Chatterino-test-plugin](https://github.com/Mm2PL/Chatterino-test-plugin)
 
+## Plugins with Typescript
+
+If you prefer, you may use [TypescriptToLua](https://typescripttolua.github.io)
+to typecheck your plugins. There is a `chatterino.d.ts` file describing the API
+in this directory. However this has several drawbacks like harder debugging at
+runtime.
+
 ## API
 
 The following parts of the Lua standard library are loaded:
