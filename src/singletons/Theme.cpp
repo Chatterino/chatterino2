@@ -259,12 +259,18 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->splits.input.border = getColor(0, sat, flat ? 1 : 1);
     this->splits.input.text = this->messages.textColors.regular;
     this->splits.input.styleSheet =
-        "background:" + this->splits.input.background.name() + ";" +
-        "border:" + this->tabs.selected.backgrounds.regular.color().name() +
-        ";" + "color:" + this->messages.textColors.regular.name() + ";" +
-        "selection-background-color:" +
-        (isLight ? "#68B1FF"
-                 : this->tabs.selected.backgrounds.regular.color().name());
+        QString("* { background: %1;"
+                "border: %2;"
+                "color: %3;"
+                "selection-background-color: %4; }"
+                "QMenu::item:disabled { color: %5; }")
+            .arg(this->splits.input.background.name(),
+                 this->tabs.selected.backgrounds.regular.color().name(),
+                 this->messages.textColors.regular.name(),
+                 (isLight
+                      ? "#68B1FF"
+                      : this->tabs.selected.backgrounds.regular.color().name()),
+                 this->messages.textColors.system.name());
 
     this->splits.input.focusedLine = this->tabs.highlighted.line.regular;
 
