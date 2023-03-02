@@ -374,6 +374,28 @@ const std::vector<EmotePtr> &LayeredEmoteElement::getEmotes() const
     return this->emotes_;
 }
 
+std::vector<EmotePtr> LayeredEmoteElement::getUniqueEmotes() const
+{
+    // Functor for std::copy_if that keeps track of seen elements
+    struct NotDuplicate {
+        bool operator()(const EmotePtr &element)
+        {
+            return seen.insert(element).second;
+        }
+
+    private:
+        std::set<EmotePtr> seen;
+    };
+
+    // Get unique emotes while maintaining relative layering order
+    NotDuplicate dup;
+    std::vector<EmotePtr> unique;
+    std::copy_if(this->emotes_.begin(), this->emotes_.end(),
+                 std::back_insert_iterator(unique), dup);
+
+    return unique;
+}
+
 // BADGE
 BadgeElement::BadgeElement(const EmotePtr &emote, MessageElementFlags flags)
     : MessageElement(flags)

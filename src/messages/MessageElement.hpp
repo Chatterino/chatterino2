@@ -333,6 +333,7 @@ public:
 
     QString getCleanCopyString() const;
     const std::vector<EmotePtr> &getEmotes() const;
+    std::vector<EmotePtr> getUniqueEmotes() const;
     const std::vector<QString> &getEmoteTooltips() const;
 
 private:

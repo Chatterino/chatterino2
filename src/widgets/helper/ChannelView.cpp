@@ -2199,26 +2199,8 @@ void ChannelView::addImageContextMenuItems(
         else if (auto layeredElement =
                      dynamic_cast<const LayeredEmoteElement *>(&creator))
         {
-            // Functor for std::copy_if that keeps track of seen elements
-            struct NotDuplicate {
-                bool operator()(const EmotePtr &element)
-                {
-                    return seen.insert(element).second;
-                }
-
-            private:
-                std::set<EmotePtr> seen;
-            };
-
-            // Get unique emotes while maintaining relative layering order
-            NotDuplicate dup;
-            std::vector<EmotePtr> unique;
-            std::copy_if(layeredElement->getEmotes().begin(),
-                         layeredElement->getEmotes().end(),
-                         std::back_insert_iterator(unique), dup);
-
             // Give each emote its own submenu
-            for (auto &emote : unique)
+            for (auto &emote : layeredElement->getUniqueEmotes())
             {
                 auto emoteAction = menu.addAction(emote->name.string);
                 auto emoteMenu = new QMenu;
