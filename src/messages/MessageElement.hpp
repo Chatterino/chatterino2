@@ -319,6 +319,9 @@ private:
     EmotePtr emote_;
 };
 
+// A LayeredEmoteElement represents multiple Emotes layered on top of each other.
+// This class takes care of rendering animated and non-animated emotes in the
+// correct order and aligning them in the right way.
 class LayeredEmoteElement : public MessageElement
 {
 public:
@@ -331,6 +334,7 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
 
+    // Returns a concatenation of each emote layer's cleaned copy string
     QString getCleanCopyString() const;
     const std::vector<EmotePtr> &getEmotes() const;
     std::vector<EmotePtr> getUniqueEmotes() const;

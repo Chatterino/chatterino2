@@ -1713,13 +1713,13 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                             auto &emote = layeredEmotes[i];
                             if (i == 0)
                             {
-                                // Large image and full description
+                                // First entry gets a large image and full description
                                 entries.push_back({emote->images.getImage(3.0),
                                                    emoteTooltips[i]});
                             }
                             else
                             {
-                                // Smaller image and just emote name
+                                // Every other entry gets a small image and just the emote name
                                 entries.push_back({emote->images.getImage(1.0),
                                                    emote->name.string});
                             }
