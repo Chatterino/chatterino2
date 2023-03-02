@@ -70,17 +70,17 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     });
 }
 
-void TooltipWidget::setOne(const TooltipEntry &record, TooltipStyle style)
+void TooltipWidget::setOne(const TooltipEntry &entry, TooltipStyle style)
 {
-    this->set({record}, style);
+    this->set({entry}, style);
 }
 
-void TooltipWidget::set(const std::vector<TooltipEntry> &records,
+void TooltipWidget::set(const std::vector<TooltipEntry> &entries,
                         TooltipStyle style)
 {
     this->setCurrentStyle(style);
 
-    int delta = records.size() - this->currentLayoutCount();
+    int delta = entries.size() - this->currentLayoutCount();
     if (delta > 0)
     {
         // Need to add more TooltipEntry instances
@@ -91,16 +91,16 @@ void TooltipWidget::set(const std::vector<TooltipEntry> &records,
         }
     }
 
-    this->setVisibleEntries(records.size());
+    this->setVisibleEntries(entries.size());
 
-    for (int i = 0; i < records.size(); ++i)
+    for (int i = 0; i < entries.size(); ++i)
     {
-        if (auto entry = this->entryAt(i))
+        if (auto entryWidget = this->entryAt(i))
         {
-            auto &record = records[i];
-            entry->setImage(record.image);
-            entry->setText(record.text);
-            entry->setImageScale(record.customWidth, record.customHeight);
+            auto &entry = entries[i];
+            entryWidget->setImage(entry.image);
+            entryWidget->setText(entry.text);
+            entryWidget->setImageScale(entry.customWidth, entry.customHeight);
         }
     }
 }

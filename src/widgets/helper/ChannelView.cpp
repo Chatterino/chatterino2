@@ -1691,8 +1691,8 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     // Should never be empty but ensure it
                     if (!layeredEmotes.empty())
                     {
-                        std::vector<TooltipEntry> records;
-                        records.reserve(layeredEmotes.size());
+                        std::vector<TooltipEntry> entries;
+                        entries.reserve(layeredEmotes.size());
 
                         auto &emoteTooltips =
                             layeredEmoteElement->getEmoteTooltips();
@@ -1714,26 +1714,26 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                             if (i == 0)
                             {
                                 // Large image and full description
-                                records.push_back({emote->images.getImage(3.0),
+                                entries.push_back({emote->images.getImage(3.0),
                                                    emoteTooltips[i]});
                             }
                             else
                             {
                                 // Smaller image and just emote name
-                                records.push_back({emote->images.getImage(1.0),
+                                entries.push_back({emote->images.getImage(1.0),
                                                    emote->name.string});
                             }
                         }
 
                         if (truncating)
                         {
-                            records.push_back({nullptr, "..."});
+                            entries.push_back({nullptr, "..."});
                         }
 
                         auto style = layeredEmotes.size() > 2
                                          ? TooltipStyle::Grid
                                          : TooltipStyle::Vertical;
-                        tooltipWidget->set(records, style);
+                        tooltipWidget->set(entries, style);
                     }
                 }
                 else if (badgeElement)

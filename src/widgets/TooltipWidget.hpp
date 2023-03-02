@@ -34,9 +34,9 @@ public:
     TooltipWidget(BaseWidget *parent = nullptr);
     ~TooltipWidget() override = default;
 
-    void setOne(const TooltipEntry &record,
+    void setOne(const TooltipEntry &entry,
                 TooltipStyle style = TooltipStyle::Vertical);
-    void set(const std::vector<TooltipEntry> &records,
+    void set(const std::vector<TooltipEntry> &entries,
              TooltipStyle style = TooltipStyle::Vertical);
 
     void setWordWrap(bool wrap);
