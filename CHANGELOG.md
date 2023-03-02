@@ -6,7 +6,7 @@
 - Minor: Added `/banid` command that allows banning by user ID. (#4411)
 - Bugfix: Fixed uploaded AppImage not being able most web requests. (#4400)
 - Bugfix: Fixed a potential race condition due to using the wrong lock when loading 7TV badges. (#4402)
-- Bugfix: Disabled items in the input context-menu are now dimmed. (#4423)
+- Bugfix: Fixed disabled items in context-menus having a weird or the default text color. (#4423)
 - Dev: Add capability to build Chatterino with Qt6. (#4393)
 - Dev: Fix homebrew update action. (#4394)
 
