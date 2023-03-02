@@ -17,10 +17,12 @@ namespace chatterino {
 
 namespace {
 
-    QSize getBindingSize(std::vector<ImagePtr> &images)
+    // Computes the bounding box for the given vector of images
+    QSize getBoundingBoxSize(const std::vector<ImagePtr> &images)
     {
-        int width = 0, height = 0;
-        for (auto &img : images)
+        int width = 0;
+        int height = 0;
+        for (const auto &img : images)
         {
             width = std::max(width, img->width());
             height = std::max(height, img->height());
@@ -264,7 +266,7 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
             auto emoteScale = getSettings()->emoteScale.getValue();
             float overallScale = emoteScale * container.getScale();
 
-            auto largestSize = getBindingSize(images) * overallScale;
+            auto largestSize = getBoundingBoxSize(images) * overallScale;
             std::vector<QSize> individualSizes;
             individualSizes.reserve(this->emotes_.size());
             for (auto img : images)
