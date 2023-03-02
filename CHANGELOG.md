@@ -6,6 +6,8 @@
 - Minor: Added `/banid` command that allows banning by user ID. (#4411)
 - Bugfix: Fixed uploaded AppImage not being able most web requests. (#4400)
 - Bugfix: Fixed a potential race condition due to using the wrong lock when loading 7TV badges. (#4402)
+- Bugfix: Fixed an issue where animated emotes would render on top of zero-width emotes. (#4314)
+- Bugfix: Fixed an issue where it was difficult to hover a zero-width emote. (#4314)
 - Dev: Add capability to build Chatterino with Qt6. (#4393)
 - Dev: Fix homebrew update action. (#4394)
 
@@ -45,8 +47,6 @@
 - Bugfix: Fixed an issue where beta versions wouldn't update to stable versions correctly. (#4329)
 - Bugfix: Fixed builds from GitHub showing up as modified. (#4384)
 - Bugfix: Avoided crash that could occur when receiving channel point reward information. (#4360)
-- Bugfix: Fixed an issue where animated emotes would render on top of zero-width emotes. (#4314)
-- Bugfix: Fixed an issue where it was difficult to hover a zero-width emote. (#4314)
 - Dev: Changed sound backend from Qt to miniaudio. (#4334)
 - Dev: Removed sending part of the multipart emoji workaround. (#4361)
 - Dev: Removed protocol from QApplication's Organization Domain (so changed from `https://www.chatterino.com` to `chatterino.com`). (#4256)
