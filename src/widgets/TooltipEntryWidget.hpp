@@ -13,8 +13,6 @@ class TooltipEntryWidget : public QWidget
 
 public:
     TooltipEntryWidget(QWidget *parent = nullptr);
-    TooltipEntryWidget(ImagePtr image, const QString &text,
-                       QWidget *parent = nullptr);
     TooltipEntryWidget(ImagePtr image, const QString &text, int customWidth,
                        int customHeight, QWidget *parent = nullptr);
 
@@ -31,8 +29,8 @@ public:
     bool attemptRefresh() const;
 
 private:
-    QLabel *displayImage_;
-    QLabel *displayText_;
+    QLabel *displayImage_ = nullptr;
+    QLabel *displayText_ = nullptr;
 
     bool attemptRefresh_ = false;
 

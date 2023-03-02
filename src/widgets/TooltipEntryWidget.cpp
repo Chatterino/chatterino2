@@ -1,4 +1,4 @@
-#include "TooltipEntryWidget.hpp"
+#include "widgets/TooltipEntryWidget.hpp"
 
 #include <QVBoxLayout>
 
@@ -6,12 +6,6 @@ namespace chatterino {
 
 TooltipEntryWidget::TooltipEntryWidget(QWidget *parent)
     : TooltipEntryWidget(nullptr, "", 0, 0, parent)
-{
-}
-
-TooltipEntryWidget::TooltipEntryWidget(ImagePtr image, const QString &text,
-                                       QWidget *parent)
-    : TooltipEntryWidget(image, text, 0, 0, parent)
 {
 }
 
