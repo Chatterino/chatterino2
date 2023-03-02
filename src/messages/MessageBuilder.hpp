@@ -123,7 +123,7 @@ protected:
     virtual void addTextOrEmoji(EmotePtr emote);
     virtual void addTextOrEmoji(const QString &value);
 
-    bool empty();
+    bool isEmpty() const;
     MessageElement &back();
     std::unique_ptr<MessageElement> releaseBack();
 

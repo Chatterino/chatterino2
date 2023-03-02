@@ -687,19 +687,20 @@ void MessageBuilder::append(std::unique_ptr<MessageElement> element)
     this->message().elements.push_back(std::move(element));
 }
 
-bool MessageBuilder::empty()
+bool MessageBuilder::isEmpty() const
 {
-    return this->message().elements.empty();
+    return this->message_->elements.empty();
 }
 
 MessageElement &MessageBuilder::back()
 {
+    assert(!this->isEmpty());
     return *this->message().elements.back();
 }
 
 std::unique_ptr<MessageElement> MessageBuilder::releaseBack()
 {
-    assert(!this->empty());
+    assert(!this->isEmpty());
 
     auto ptr = std::move(this->message().elements.back());
     this->message().elements.pop_back();
