@@ -41,6 +41,8 @@ public:
         QColor text;
         QColor borderUnfocused;
         QColor borderFocused;
+
+        QString contextMenuStyleSheet;
     } window;
 
     /// TABS

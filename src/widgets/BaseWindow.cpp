@@ -320,6 +320,11 @@ void BaseWindow::themeChangedEvent()
         palette.setColor(QPalette::WindowText, this->theme->window.text);
         this->setPalette(palette);
     }
+
+    if (!this->flags_.has(BaseWindow::DisableStyleSheet))
+    {
+        this->setStyleSheet(this->theme->window.contextMenuStyleSheet);
+    }
 }
 
 bool BaseWindow::event(QEvent *event)
