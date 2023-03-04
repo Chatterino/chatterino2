@@ -132,7 +132,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
           conan --version
-          conan profile detect
+          conan profile detect -f
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
