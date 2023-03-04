@@ -57,7 +57,7 @@ private:
 
     struct {
         GenericListView *listView;
-    } ui_;
+    } ui_{};
 
     GenericListModel model_;
     ActionCallback callback_;
