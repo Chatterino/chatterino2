@@ -195,11 +195,6 @@ jobs:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}-symbols.pdb.7z
           path: build/bin/chatterino.pdb.7z
 
-      - name: Clean Conan pkgs
-        if: startsWith(matrix.os, 'windows')
-        run: conan remove "*" -fsb
-        shell: bash
-
       # LINUX
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
