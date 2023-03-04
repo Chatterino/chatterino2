@@ -134,7 +134,7 @@ private:
     pajlada::Signals::SignalHolder signalHolder_;
 
     // Main window on Windows has basically a duplicate of this in Window
-    NotebookButton *streamerModeIcon_;
+    NotebookButton *streamerModeIcon_{};
 
     void updateStreamerModeIcon();
 };

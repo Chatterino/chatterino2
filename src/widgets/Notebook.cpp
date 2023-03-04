@@ -1172,6 +1172,10 @@ void SplitNotebook::addCustomButtons()
 
 void SplitNotebook::updateStreamerModeIcon()
 {
+    if (this->streamerModeIcon_ == nullptr)
+    {
+        return;
+    }
     // A duplicate of this code is in Window class
     // That copy handles the TitleBar icon in Window (main window on Windows)
     // This one is the one near splits (on linux and mac or non-main windows on Windows)
