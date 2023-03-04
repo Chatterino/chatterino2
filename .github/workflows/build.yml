@@ -108,19 +108,12 @@ jobs:
           version: ${{ matrix.qt-version }}
 
       # WINDOWS
-      - name: Cache conan packages part 1
+      - name: Cache conan packages
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v3
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}
           path: ~/.conan2/
-
-      - name: Cache conan packages part 2
-        if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v3
-        with:
-          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.py') }}
-          path: C:/.conan2/
 
       - name: Add Conan to path
         if: startsWith(matrix.os, 'windows')
