@@ -189,26 +189,49 @@ void Window::addCustomTitlebarButtons()
     this->userLabel_->setMinimumWidth(20 * scale());
 
     // streamer mode
-    auto *streamerModeIcon =
+    this->streamerModeTitlebarIcon_ =
         this->addTitleBarButton(TitleBarButtonStyle::StreamerMode, [this] {
             getApp()->windows->showSettingsDialog(
                 this, SettingsDialogPreference::StreamerMode);
         });
+    this->signalHolder_.managedConnect(getApp()->streamerModeChanged, [this]() {
+        this->updateStreamerModeIcon();
+    });
+}
+
+void Window::updateStreamerModeIcon()
+{
+    // A duplicate of this code is in SplitNotebook class (in Notebook.{c,h}pp)
+    // That one is the one near splits (on linux and mac or non-main windows on Windows)
+    // This copy handles the TitleBar icon in Window (main window on Windows)
+    if (this->streamerModeTitlebarIcon_ == nullptr)
+    {
+        return;
+    }
+#ifdef Q_OS_WIN
+    assert(this->getType() == WindowType::Main);
     if (getTheme()->isLightTheme())
     {
-        streamerModeIcon->setPixmap(
+        this->streamerModeTitlebarIcon_->setPixmap(
             getResources().buttons.streamerModeEnabledLight);
     }
     else
     {
-        streamerModeIcon->setPixmap(
+        this->streamerModeTitlebarIcon_->setPixmap(
             getResources().buttons.streamerModeEnabledDark);
     }
-    streamerModeIcon->setVisible(isInStreamerMode());
-    this->signalHolder_.managedConnect(
-        getApp()->streamerModeChanged, [streamerModeIcon]() {
-            streamerModeIcon->setVisible(isInStreamerMode());
-        });
+    this->streamerModeTitlebarIcon_->setVisible(isInStreamerMode());
+#else
+    // clang-format off
+    assert(false && "Streamer mode TitleBar icon should not exist on non-Windows OSes");
+    // clang-format on
+#endif
+}
+
+void Window::themeChangedEvent()
+{
+    this->updateStreamerModeIcon();
+    BaseWindow::themeChangedEvent();
 }
 
 void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)

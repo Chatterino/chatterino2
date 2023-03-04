@@ -123,6 +123,7 @@ public:
     SplitContainer *addPage(bool select = false);
     SplitContainer *getOrAddSelectedPage();
     void select(QWidget *page, bool focusPage = true) override;
+    void themeChangedEvent() override;
 
 protected:
     void showEvent(QShowEvent *event) override;
@@ -131,6 +132,11 @@ private:
     void addCustomButtons();
 
     pajlada::Signals::SignalHolder signalHolder_;
+
+    // Main window on Windows has basically a duplicate of this in Window
+    NotebookButton *streamerModeIcon_;
+
+    void updateStreamerModeIcon();
 };
 
 }  // namespace chatterino

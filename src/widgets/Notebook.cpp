@@ -1158,26 +1158,39 @@ void SplitNotebook::addCustomButtons()
     initUpdateButton(*updateBtn, this->signalHolder_);
 
     // streamer mode
-    auto *streamerModeIcon = this->addCustomButton();
-    QObject::connect(streamerModeIcon, &NotebookButton::leftClicked, [this] {
-        getApp()->windows->showSettingsDialog(
-            this, SettingsDialogPreference::StreamerMode);
+    this->streamerModeIcon_ = this->addCustomButton();
+    QObject::connect(this->streamerModeIcon_, &NotebookButton::leftClicked,
+                     [this] {
+                         getApp()->windows->showSettingsDialog(
+                             this, SettingsDialogPreference::StreamerMode);
+                     });
+    this->signalHolder_.managedConnect(getApp()->streamerModeChanged, [this]() {
+        this->updateStreamerModeIcon();
     });
+    this->updateStreamerModeIcon();
+}
+
+void SplitNotebook::updateStreamerModeIcon()
+{
+    // A duplicate of this code is in Window class
+    // That copy handles the TitleBar icon in Window (main window on Windows)
+    // This one is the one near splits (on linux and mac or non-main windows on Windows)
     if (getTheme()->isLightTheme())
     {
-        streamerModeIcon->setPixmap(
+        this->streamerModeIcon_->setPixmap(
             getResources().buttons.streamerModeEnabledLight);
     }
     else
     {
-        streamerModeIcon->setPixmap(
+        this->streamerModeIcon_->setPixmap(
             getResources().buttons.streamerModeEnabledDark);
     }
-    streamerModeIcon->setVisible(isInStreamerMode());
-    this->signalHolder_.managedConnect(
-        getApp()->streamerModeChanged, [streamerModeIcon]() {
-            streamerModeIcon->setVisible(isInStreamerMode());
-        });
+    this->streamerModeIcon_->setVisible(isInStreamerMode());
+}
+
+void SplitNotebook::themeChangedEvent()
+{
+    this->updateStreamerModeIcon();
 }
 
 SplitContainer *SplitNotebook::addPage(bool select)
