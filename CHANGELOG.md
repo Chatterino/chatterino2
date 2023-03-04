@@ -8,6 +8,7 @@
 - Bugfix: Fixed a potential race condition due to using the wrong lock when loading 7TV badges. (#4402)
 - Dev: Add capability to build Chatterino with Qt6. (#4393)
 - Dev: Fix homebrew update action. (#4394)
+- Dev: Added the aibility to clone `Message`s and `MessageElement`s. (#4428)
 
 ## 2.4.1
 
