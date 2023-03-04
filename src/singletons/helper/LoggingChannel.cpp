@@ -106,7 +106,7 @@ void LoggingChannel::addMessage(MessagePtr message)
     str.append("] ");
 
     QString messageSearchText = message->searchText;
-    if (message->flags.has(MessageFlag::ReplyMessage))
+    if ((message->flags.has(MessageFlag::ReplyMessage) && getSettings()->stripReplyMention) && !getSettings()->hideReplyContext)
     {
         qsizetype colonIndex = messageSearchText.indexOf(':');
         if (colonIndex != -1)
