@@ -150,7 +150,6 @@ public:
     }
     IUserDataController *getUserData() override;
 
-    // parameter: enabled
     pajlada::Signals::NoArgSignal streamerModeChanged;
 
 private:
