@@ -79,6 +79,11 @@ const MessageElement::ThumbnailType &MessageElement::getThumbnailType() const
     return this->thumbnailType_;
 }
 
+const QString &MessageElement::getText() const
+{
+    return this->text_;
+}
+
 const Link &MessageElement::getLink() const
 {
     return this->link_;
@@ -392,6 +397,16 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
         this->words_.push_back({word, -1});
         // fourtf: add logic to store multiple spaces after message
     }
+}
+
+MessageColor TextElement::color() const
+{
+    return this->color_;
+}
+
+FontStyle TextElement::style() const
+{
+    return this->style_;
 }
 
 void TextElement::addToContainer(MessageLayoutContainer &container,

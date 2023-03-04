@@ -186,6 +186,7 @@ public:
     const ImagePtr &getThumbnail() const;
     const ThumbnailType &getThumbnailType() const;
 
+    const QString &getText() const;
     const Link &getLink() const;
     bool hasTrailingSpace() const;
     MessageElementFlags getFlags() const;
@@ -271,6 +272,9 @@ public:
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::ChatMedium);
     ~TextElement() override = default;
+
+    MessageColor color() const;
+    FontStyle style() const;
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
