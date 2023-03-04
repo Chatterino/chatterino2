@@ -11,6 +11,9 @@
 #include "util/IrcHelpers.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
+#include <algorithm>
+#include <iterator>
+
 using SBHighlight = chatterino::ScrollbarHighlight;
 
 namespace chatterino {
@@ -60,6 +63,36 @@ SBHighlight Message::getScrollBarHighlight() const
     }
 
     return SBHighlight();
+}
+
+std::shared_ptr<const Message> Message::cloneWith(
+    const std::function<void(Message &)> &fn) const
+{
+    Message cloned;
+    cloned.flags = this->flags;
+    cloned.parseTime = this->parseTime;
+    cloned.id = this->id;
+    cloned.searchText = this->searchText;
+    cloned.messageText = this->messageText;
+    cloned.loginName = this->loginName;
+    cloned.displayName = this->displayName;
+    cloned.localizedName = this->localizedName;
+    cloned.timeoutUser = this->timeoutUser;
+    cloned.channelName = this->channelName;
+    cloned.usernameColor = this->usernameColor;
+    cloned.serverReceivedTime = this->serverReceivedTime;
+    cloned.badges = this->badges;
+    cloned.badgeInfos = this->badgeInfos;
+    cloned.highlightColor = this->highlightColor;
+    cloned.replyThread = this->replyThread;
+    cloned.count = this->count;
+    std::transform(this->elements.cbegin(), this->elements.cend(),
+                   std::back_inserter(cloned.elements),
+                   [](const auto &element) {
+                       return element->clone();
+                   });
+    fn(cloned);
+    return std::make_shared<Message>(cloned);
 }
 
 // Static

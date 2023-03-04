@@ -194,11 +194,15 @@ public:
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElementFlags flags) = 0;
 
+    virtual std::unique_ptr<MessageElement> clone() const = 0;
+
     pajlada::Signals::NoArgSignal linkChanged;
 
 protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
+
+    void cloneFrom(const MessageElement &source);
 
 private:
     QString text_;
@@ -218,6 +222,8 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
 
+    std::unique_ptr<MessageElement> clone() const override;
+
     static EmptyElement &instance();
 
 private:
@@ -233,6 +239,8 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
 
+    std::unique_ptr<MessageElement> clone() const override;
+
 private:
     ImagePtr image_;
 };
@@ -246,6 +254,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    std::unique_ptr<MessageElement> clone() const override;
 
 private:
     ImagePtr image_;
@@ -264,6 +274,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    std::unique_ptr<MessageElement> clone() const override;
 
 private:
     MessageColor color_;
@@ -287,6 +299,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    std::unique_ptr<MessageElement> clone() const override;
 
 private:
     MessageColor color_;
@@ -312,6 +326,8 @@ public:
                         MessageElementFlags flags_) override;
     EmotePtr getEmote() const;
 
+    std::unique_ptr<MessageElement> clone() const override;
+
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
                                                          const QSize &size);
@@ -331,11 +347,11 @@ public:
 
     EmotePtr getEmote() const;
 
+    std::unique_ptr<MessageElement> clone() const override;
+
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
                                                          const QSize &size);
-
-private:
     EmotePtr emote_;
 };
 
@@ -343,6 +359,8 @@ class ModBadgeElement : public BadgeElement
 {
 public:
     ModBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
+
+    std::unique_ptr<MessageElement> clone() const override;
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -354,6 +372,8 @@ class VipBadgeElement : public BadgeElement
 public:
     VipBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
 
+    std::unique_ptr<MessageElement> clone() const override;
+
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
                                                  const QSize &size) override;
@@ -364,6 +384,8 @@ class FfzBadgeElement : public BadgeElement
 public:
     FfzBadgeElement(const EmotePtr &data, MessageElementFlags flags_,
                     QColor color_);
+
+    std::unique_ptr<MessageElement> clone() const override;
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -383,6 +405,8 @@ public:
 
     TextElement *formatTime(const QTime &time);
 
+    std::unique_ptr<MessageElement> clone() const override;
+
 private:
     QTime time_;
     std::unique_ptr<TextElement> element_;
@@ -398,6 +422,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    std::unique_ptr<MessageElement> clone() const override;
 };
 
 // Forces a linebreak
@@ -408,6 +434,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    std::unique_ptr<MessageElement> clone() const override;
 };
 
 // Image element which will pick the quality of the image based on ui scale
@@ -418,6 +446,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    std::unique_ptr<MessageElement> clone() const override;
 
 private:
     ImageSet images_;
@@ -430,6 +460,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    std::unique_ptr<MessageElement> clone() const override;
 };
 
 }  // namespace chatterino
