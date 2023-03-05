@@ -69,6 +69,11 @@ namespace {
             auto author =
                 EmoteAuthor{emoteJson["owner"]["display_name"].toString()};
             auto urls = emoteJson["urls"].toObject();
+            if (emoteJson["animated"].isObject())
+            {
+                // prefer animated images if available
+                urls = emoteJson["animated"].toObject();
+            }
 
             Emote emote;
             fillInEmoteData(urls, name,
