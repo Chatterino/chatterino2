@@ -162,24 +162,6 @@ QString shortenString(const QString &str, unsigned maxWidth)
     return shortened;
 }
 
-QString localizeNumbers(const int &number)
-{
-    QLocale locale;
-    return locale.toString(number);
-}
-
-QString localizeNumbers(unsigned int number)
-{
-    QLocale locale;
-    return locale.toString(number);
-}
-
-QString localizeNumbers(qsizetype number)
-{
-    QLocale locale;
-    return locale.toString(number);
-}
-
 QString kFormatNumbers(const int &number)
 {
     return QString("%1K").arg(number / 1000);

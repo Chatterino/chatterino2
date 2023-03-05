@@ -233,6 +233,8 @@ set(SOURCE_FILES
         providers/ffz/FfzBadges.hpp
         providers/ffz/FfzEmotes.cpp
         providers/ffz/FfzEmotes.hpp
+        providers/ffz/FfzUtil.cpp
+        providers/ffz/FfzUtil.hpp
 
         providers/irc/AbstractIrcServer.cpp
         providers/irc/AbstractIrcServer.hpp
