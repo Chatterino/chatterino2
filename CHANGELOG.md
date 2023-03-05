@@ -3,6 +3,8 @@
 ## Unversioned
 
 - Minor: Delete all but the last 5 crashdumps on application start. (#4392)
+- Minor: Added `/banid` command that allows banning by user ID. (#4411)
+- Bugfix: Fixed FrankerFaceZ emotes/badges not loading due to API change. (#4432)
 - Bugfix: Fixed uploaded AppImage not being able most web requests. (#4400)
 - Bugfix: Fixed a potential race condition due to using the wrong lock when loading 7TV badges. (#4402)
 - Dev: Add capability to build Chatterino with Qt6. (#4393)
