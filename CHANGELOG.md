@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed blocked user list being empty when opening the settings dialog for the first time. (#4437)
+
 ## 2.4.2
 
 - Minor: Added `/banid` command that allows banning by user ID. (#4411)
