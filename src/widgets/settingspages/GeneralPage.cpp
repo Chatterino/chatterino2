@@ -326,6 +326,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                    : args.value;
         },
         true, "a = am/pm, zzz = milliseconds");
+    layout.addDropdown<QString>(
+        "Message layout", {"\\R\\n\\t\\M\\b\\u\\m\\r", "\\R\\n\\t\\M\\b\\u\\n\\m\\r"},
+        s.messageLayout,
+        [](auto val) {
+            return val;
+        },
+        [](auto args) {
+            return args.value;
+        },
+        true,
+        "\\R: reply thread\n\\t: timestamp\n\\M: mod tools\n\\b: badges\n"
+        "\\u: username\n\\m: message\n\\r: reply\n\\n: line break");
     layout.addDropdown<int>(
         "Limit message height",
         {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},

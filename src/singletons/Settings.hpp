@@ -118,6 +118,9 @@ public:
     EnumSetting<NotebookTabLocation> tabDirection = {"/appearance/tabDirection",
                                                      NotebookTabLocation::Top};
 
+    QStringSetting messageLayout = {"/appearance/messageLayout",
+                                    "\\R\\n\\t\\M\\b\\u\\m\\r"};
+
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
     BoolSetting hideReplyContext = {"/appearance/hideReplyContext", false};

@@ -154,6 +154,9 @@ enum class MessageElementFlag : int64_t {
     // (1LL << 34) through (1LL << 36) are occupied by
     // SevenTVEmoteImage, SevenTVEmoteText, and BadgeSevenTV,
 
+    // used in message layout
+    LineBreak = (1LL << 37),
+
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | SevenTVEmoteImage | TwitchEmoteImage |
               BitsAmount | Text | AlwaysShow,

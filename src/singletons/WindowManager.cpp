@@ -197,6 +197,8 @@ void WindowManager::updateWordTypeMask()
                                          : MEF::OriginalLink);
     flags.set(MEF::ChannelPointReward);
 
+    flags.set(MEF::LineBreak);
+
     // update flags
     MessageElementFlags newFlags = static_cast<MessageElementFlags>(flags);
 

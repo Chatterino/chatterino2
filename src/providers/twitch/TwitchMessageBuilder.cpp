@@ -231,60 +231,111 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::CheerMessage);
     }
 
-    // reply threads
-    this->parseThread();
-
-    // timestamp
-    this->message().serverReceivedTime = calculateMessageTime(this->ircMessage);
-    this->emplace<TimestampElement>(this->message().serverReceivedTime.time());
-
-    if (this->shouldAddModerationElements())
+    bool firstIteration = true;
+    for (auto &c : getSettings()->messageLayout.getValue().split("\\"))
     {
-        this->emplace<TwitchModerationElement>();
+        if (!firstIteration)
+        {
+            if (c.startsWith("R"))  // reply threads
+            {
+                this->parseThread();
+            }
+            else if (c.startsWith("t"))  // timestamp
+            {
+                this->message().serverReceivedTime =
+                    calculateMessageTime(this->ircMessage);
+                this->emplace<TimestampElement>(
+                    this->message().serverReceivedTime.time());
+            }
+            else if (c.startsWith("M"))  // moderation
+            {
+                if (this->shouldAddModerationElements())
+                {
+                    this->emplace<TwitchModerationElement>();
+                }
+            }
+            else if (c.startsWith("b"))  // badges
+            {
+                this->appendTwitchBadges();
+
+                this->appendChatterinoBadges();
+                this->appendFfzBadges();
+                this->appendSeventvBadges();
+            }
+            else if (c.startsWith("u"))  // username
+            {
+                this->appendUsername();
+            }
+            else if (c.startsWith("n"))  // new line
+            {
+                this->emplace<LinebreakElement>(MessageElementFlag::LineBreak);
+            }
+            else if (c.startsWith("m"))  // message
+            {
+                // QString bits;
+                auto iterator = this->tags.find("bits");
+                if (iterator != this->tags.end())
+                {
+                    this->hasBits_ = true;
+                    this->bitsLeft = iterator.value().toInt();
+                    this->bits = iterator.value().toString();
+                }
+
+                // Twitch emotes
+                auto twitchEmotes = TwitchMessageBuilder::parseTwitchEmotes(
+                    this->tags, this->originalMessage_, this->messageOffset_);
+
+                // This runs through all ignored phrases and runs its replacements on this->originalMessage_
+                this->runIgnoreReplaces(twitchEmotes);
+
+                std::sort(twitchEmotes.begin(), twitchEmotes.end(),
+                          [](const auto &a, const auto &b) {
+                              return a.start < b.start;
+                          });
+                twitchEmotes.erase(
+                    std::unique(twitchEmotes.begin(), twitchEmotes.end(),
+                                [](const auto &first, const auto &second) {
+                                    return first.start == second.start;
+                                }),
+                    twitchEmotes.end());
+
+                // words
+                QStringList splits = this->originalMessage_.split(' ');
+
+                this->addWords(splits, twitchEmotes);
+
+                this->message().messageText = this->originalMessage_;
+                this->message().searchText = this->message().localizedName +
+                                             " " + this->userName + ": " +
+                                             this->originalMessage_;
+            }
+            else if (c.startsWith("r"))  // reply button
+            {
+                if (this->thread_)
+                {
+                    auto &img = getResources().buttons.replyThreadDark;
+                    this->emplace<CircularImageElement>(
+                            Image::fromResourcePixmap(img, 0.15), 2, Qt::gray,
+                            MessageElementFlag::ReplyButton)
+                        ->setLink({Link::ViewThread, this->thread_->rootId()});
+                }
+                else
+                {
+                    auto &img = getResources().buttons.replyDark;
+                    this->emplace<CircularImageElement>(
+                            Image::fromResourcePixmap(img, 0.15), 2, Qt::gray,
+                            MessageElementFlag::ReplyButton)
+                        ->setLink({Link::ReplyToMessage, this->message().id});
+                }
+            }
+            c.remove(0, 1);
+        }
+        if (c.length() > 0)
+        {
+            this->addTextOrEmoji(c);
+        }
+        firstIteration = false;
     }
-
-    this->appendTwitchBadges();
-
-    this->appendChatterinoBadges();
-    this->appendFfzBadges();
-    this->appendSeventvBadges();
-
-    this->appendUsername();
-
-    //    QString bits;
-    auto iterator = this->tags.find("bits");
-    if (iterator != this->tags.end())
-    {
-        this->hasBits_ = true;
-        this->bitsLeft = iterator.value().toInt();
-        this->bits = iterator.value().toString();
-    }
-
-    // Twitch emotes
-    auto twitchEmotes = TwitchMessageBuilder::parseTwitchEmotes(
-        this->tags, this->originalMessage_, this->messageOffset_);
-
-    // This runs through all ignored phrases and runs its replacements on this->originalMessage_
-    this->runIgnoreReplaces(twitchEmotes);
-
-    std::sort(twitchEmotes.begin(), twitchEmotes.end(),
-              [](const auto &a, const auto &b) {
-                  return a.start < b.start;
-              });
-    twitchEmotes.erase(std::unique(twitchEmotes.begin(), twitchEmotes.end(),
-                                   [](const auto &first, const auto &second) {
-                                       return first.start == second.start;
-                                   }),
-                       twitchEmotes.end());
-
-    // words
-    QStringList splits = this->originalMessage_.split(' ');
-
-    this->addWords(splits, twitchEmotes);
-
-    this->message().messageText = this->originalMessage_;
-    this->message().searchText = this->message().localizedName + " " +
-                                 this->userName + ": " + this->originalMessage_;
 
     // highlights
     this->parseHighlights();
@@ -295,23 +346,6 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::HighlightedWhisper, true);
         this->message().highlightColor =
             ColorProvider::instance().color(ColorType::Whisper);
-    }
-
-    if (this->thread_)
-    {
-        auto &img = getResources().buttons.replyThreadDark;
-        this->emplace<CircularImageElement>(
-                Image::fromResourcePixmap(img, 0.15), 2, Qt::gray,
-                MessageElementFlag::ReplyButton)
-            ->setLink({Link::ViewThread, this->thread_->rootId()});
-    }
-    else
-    {
-        auto &img = getResources().buttons.replyDark;
-        this->emplace<CircularImageElement>(
-                Image::fromResourcePixmap(img, 0.15), 2, Qt::gray,
-                MessageElementFlag::ReplyButton)
-            ->setLink({Link::ReplyToMessage, this->message().id});
     }
 
     return this->release();

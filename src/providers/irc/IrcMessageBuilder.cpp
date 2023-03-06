@@ -56,16 +56,41 @@ MessagePtr IrcMessageBuilder::build()
     // PUSH ELEMENTS
     this->appendChannelName();
 
-    this->message().serverReceivedTime = calculateMessageTime(this->ircMessage);
-    this->emplace<TimestampElement>(this->message().serverReceivedTime.time());
+    bool firstIteration = true;
+    for (auto &c : getSettings()->messageLayout.getValue().split("\\"))
+    {
+        if (!firstIteration)
+        {
+            if (c.startsWith("t"))
+            {
+                // timestamp
+                this->message().serverReceivedTime =
+                    calculateMessageTime(this->ircMessage);
+                this->emplace<TimestampElement>(
+                    this->message().serverReceivedTime.time());
+            }
+            else if (c.startsWith("u"))
+            {
+                // username
+                this->appendUsername();
+            }
+            else if (c.startsWith("m"))
+            {
+                // message
+                this->addIrcMessageText(this->originalMessage_);
 
-    this->appendUsername();
-
-    // message
-    this->addIrcMessageText(this->originalMessage_);
-
-    this->message().searchText = this->message().localizedName + " " +
-                                 this->userName + ": " + this->originalMessage_;
+                this->message().searchText = this->message().localizedName +
+                                             " " + this->userName + ": " +
+                                             this->originalMessage_;
+            }
+            c.remove(0, 1);
+        }
+        if (c.length() > 0)
+        {
+            this->addTextOrEmoji(c);
+        }
+        firstIteration = false;
+    }
 
     // highlights
     this->parseHighlights();
