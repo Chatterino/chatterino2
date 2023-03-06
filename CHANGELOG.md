@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Dev: Added tests and benchmarks for `LinkParser`. (#4436)
+
 ## 2.4.2
 
 - Minor: Added `/banid` command that allows banning by user ID. (#4411)
