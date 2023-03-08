@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Dev: Ignore unhandled BTTV user-events. (#4438)
+
 ## 2.4.2
 
 - Minor: Added `/banid` command that allows banning by user ID. (#4411)
