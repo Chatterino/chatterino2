@@ -83,6 +83,10 @@ void BttvLiveUpdates::onMessage(
 
         this->signals_.emoteRemoved.invoke(message);
     }
+    else if (eventType == "lookup_user")
+    {
+        // ignored
+    }
     else
     {
         qCDebug(chatterinoBttv) << "Unhandled event:" << json;
