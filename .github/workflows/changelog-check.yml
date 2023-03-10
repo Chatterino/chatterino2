@@ -1,0 +1,17 @@
+name: Changelog Check
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+jobs:
+  check-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      # Gives an error if there's no change in the changelog (except using label)
+      - name: Changelog check
+        uses: dangoslen/changelog-enforcer@v3
+        with:
+          changeLogPath: "CHANGELOG.md"
+          skipLabels: "no changelog entry needed, ci, submodules"

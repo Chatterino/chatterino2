@@ -1,0 +1,40 @@
+[submodule "lib/libcommuni"]
+	path = lib/libcommuni
+	url = https://github.com/Chatterino/libcommuni
+	branch = chatterino-cmake
+[submodule "lib/WinToast"]
+	path = lib/WinToast
+	url = https://github.com/mohabouje/WinToast.git
+[submodule "lib/settings"]
+	path = lib/settings
+	url = https://github.com/pajlada/settings
+[submodule "lib/signals"]
+	path = lib/signals
+	url = https://github.com/pajlada/signals
+[submodule "lib/serialize"]
+	path = lib/serialize
+	url = https://github.com/pajlada/serialize
+[submodule "lib/rapidjson"]
+	path = lib/rapidjson
+	url = https://github.com/Tencent/rapidjson
+[submodule "lib/qtkeychain"]
+	path = lib/qtkeychain
+	url = https://github.com/Chatterino/qtkeychain
+[submodule "lib/websocketpp"]
+	path = lib/websocketpp
+	url = https://github.com/zaphoyd/websocketpp
+[submodule "cmake/sanitizers-cmake"]
+	path = cmake/sanitizers-cmake
+	url = https://github.com/arsenm/sanitizers-cmake
+[submodule "lib/magic_enum"]
+	path = lib/magic_enum
+	url = https://github.com/Neargye/magic_enum
+[submodule "lib/googletest"]
+	path = lib/googletest
+	url = https://github.com/google/googletest.git
+[submodule "lib/miniaudio"]
+	path = lib/miniaudio
+	url = https://github.com/mackron/miniaudio.git
+[submodule "lib/crashpad"]
+	path = lib/crashpad
+	url = https://github.com/getsentry/crashpad

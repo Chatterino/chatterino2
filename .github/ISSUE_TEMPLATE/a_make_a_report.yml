@@ -1,0 +1,52 @@
+name: Issue report
+description: Report something that's missing, that you have trouble with or that stopped working
+labels: [issue-report]
+
+body:
+  - type: checkboxes
+    id: acknowledgments
+    attributes:
+      label: Checklist
+      description:
+      options:
+        - label: I'm reporting a problem with Chatterino
+          required: true
+        - label: I've verified that I'm running **the most** recent nightly build or stable release
+          required: true
+        - label: I've looked for my problem on the [wiki](https://wiki.chatterino.com/Help/)
+          required: true
+        - label: I've searched the [issues and pull requests](https://github.com/Chatterino/chatterino2/issues?q=) for similar looking reports
+          required: true
+
+  - type: textarea
+    id: description
+    validations:
+      required: true
+    attributes:
+      label: Describe your issue
+      description: |
+        Write a brief description of your issue.
+        Important:
+            Focus on the problem instead of a concrete solution. This ensures that the focus of the thread is to resolve your issue.
+            If you want to voice a concrete idea you can add a comment below after posting the issue.
+      placeholder: |
+        Examples:
+          - I cannot do X.
+          - I have trouble doing X.
+          - Feature X has stopped working for me.
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: While optional, it's highly encouraged to include screenshots or videos to illustrate what you mean.
+      placeholder: You can upload them using the text editor's dedicated button.
+
+  - type: input
+    id: versions
+    validations:
+      required: true
+    attributes:
+      label: OS and Chatterino Version
+      description: The name of your Operating System and the version shown in Chatterino's about settings page (⚙ -> about tab).
+      placeholder: Chatterino 2.3.5 (commit 81a62764, 2022-04-05) on Windows 10 Version 2009, kernel 10.0.19043
