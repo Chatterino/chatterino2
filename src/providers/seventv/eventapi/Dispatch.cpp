@@ -138,4 +138,15 @@ bool EntitlementCreateDeleteDispatch::validate() const
            !this->refID.isEmpty() && this->kind != CosmeticKind::INVALID;
 }
 
+EmoteSetCreateDispatch::EmoteSetCreateDispatch(const QJsonObject &emoteSet)
+    : emoteSetID(emoteSet["id"].toString())
+    , isPersonal((emoteSet["flags"].toInt() & 4) != 0)
+{
+}
+
+bool EmoteSetCreateDispatch::validate() const
+{
+    return !this->emoteSetID.isEmpty();
+}
+
 }  // namespace chatterino::seventv::eventapi

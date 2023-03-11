@@ -8,6 +8,7 @@
 #include <QTime>
 
 #include <cinttypes>
+#include <functional>
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -88,6 +89,15 @@ struct Message : boost::noncopyable {
     std::vector<QString> seventvEventTargetEmotes;
 
     ScrollbarHighlight getScrollBarHighlight() const;
+
+    /**
+     * Clones this message. Before contructing the shared pointer, 
+     * `fn` is called with a reference to the new message.
+     *
+     * @return An identical message, independent from this one.
+     */
+    std::shared_ptr<const Message> cloneWith(
+        const std::function<void(Message &)> &fn) const;
 };
 
 using MessagePtr = std::shared_ptr<const Message>;

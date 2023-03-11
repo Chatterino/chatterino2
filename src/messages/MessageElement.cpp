@@ -13,6 +13,8 @@
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 
+#include <memory>
+
 namespace chatterino {
 
 MessageElement::MessageElement(MessageElementFlags flags)
@@ -77,6 +79,11 @@ const MessageElement::ThumbnailType &MessageElement::getThumbnailType() const
     return this->thumbnailType_;
 }
 
+const QString &MessageElement::getText() const
+{
+    return this->text_;
+}
+
 const Link &MessageElement::getLink() const
 {
     return this->link_;
@@ -98,6 +105,16 @@ MessageElement *MessageElement::updateLink()
     return this;
 }
 
+void MessageElement::cloneFrom(const MessageElement &source)
+{
+    this->text_ = source.text_;
+    this->link_ = source.link_;
+    this->tooltip_ = source.tooltip_;
+    this->thumbnail_ = source.thumbnail_;
+    this->thumbnailType_ = source.thumbnailType_;
+    this->flags_ = source.flags_;
+}
+
 // Empty
 EmptyElement::EmptyElement()
     : MessageElement(MessageElementFlag::None)
@@ -107,6 +124,13 @@ EmptyElement::EmptyElement()
 void EmptyElement::addToContainer(MessageLayoutContainer &container,
                                   MessageElementFlags flags)
 {
+}
+
+std::unique_ptr<MessageElement> EmptyElement::clone() const
+{
+    auto el = std::make_unique<EmptyElement>();
+    el->cloneFrom(*this);
+    return el;
 }
 
 EmptyElement &EmptyElement::instance()
@@ -136,6 +160,13 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+std::unique_ptr<MessageElement> ImageElement::clone() const
+{
+    auto el = std::make_unique<ImageElement>(this->image_, this->getFlags());
+    el->cloneFrom(*this);
+    return el;
+}
+
 CircularImageElement::CircularImageElement(ImagePtr image, int padding,
                                            QColor background,
                                            MessageElementFlags flags)
@@ -159,6 +190,14 @@ void CircularImageElement::addToContainer(MessageLayoutContainer &container,
                                   this->background_, this->padding_))
                                  ->setLink(this->getLink()));
     }
+}
+
+std::unique_ptr<MessageElement> CircularImageElement::clone() const
+{
+    auto el = std::make_unique<CircularImageElement>(
+        this->image_, this->padding_, this->background_, this->getFlags());
+    el->cloneFrom(*this);
+    return el;
 }
 
 // EMOTE
@@ -216,6 +255,15 @@ MessageLayoutElement *EmoteElement::makeImageLayoutElement(
     return new ImageLayoutElement(*this, image, size);
 }
 
+std::unique_ptr<MessageElement> EmoteElement::clone() const
+{
+    auto el = std::make_unique<EmoteElement>(this->emote_, this->getFlags());
+    el->textElement_ = std::unique_ptr<TextElement>(
+        dynamic_cast<TextElement *>(this->textElement_->clone().release()));
+    el->cloneFrom(*this);
+    return el;
+}
+
 // BADGE
 BadgeElement::BadgeElement(const EmotePtr &emote, MessageElementFlags flags)
     : MessageElement(flags)
@@ -255,6 +303,13 @@ MessageLayoutElement *BadgeElement::makeImageLayoutElement(
     return element;
 }
 
+std::unique_ptr<MessageElement> BadgeElement::clone() const
+{
+    auto el = std::make_unique<BadgeElement>(this->emote_, this->getFlags());
+    el->cloneFrom(*this);
+    return el;
+}
+
 // MOD BADGE
 ModBadgeElement::ModBadgeElement(const EmotePtr &data,
                                  MessageElementFlags flags_)
@@ -274,6 +329,13 @@ MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
     return element;
 }
 
+std::unique_ptr<MessageElement> ModBadgeElement::clone() const
+{
+    auto el = std::make_unique<ModBadgeElement>(this->emote_, this->getFlags());
+    el->cloneFrom(*this);
+    return el;
+}
+
 // VIP BADGE
 VipBadgeElement::VipBadgeElement(const EmotePtr &data,
                                  MessageElementFlags flags_)
@@ -288,6 +350,13 @@ MessageLayoutElement *VipBadgeElement::makeImageLayoutElement(
         (new ImageLayoutElement(*this, image, size))->setLink(this->getLink());
 
     return element;
+}
+
+std::unique_ptr<MessageElement> VipBadgeElement::clone() const
+{
+    auto el = std::make_unique<VipBadgeElement>(this->emote_, this->getFlags());
+    el->cloneFrom(*this);
+    return el;
 }
 
 // FFZ Badge
@@ -308,6 +377,14 @@ MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
     return element;
 }
 
+std::unique_ptr<MessageElement> FfzBadgeElement::clone() const
+{
+    auto el = std::make_unique<FfzBadgeElement>(this->emote_, this->getFlags(),
+                                                this->color);
+    el->cloneFrom(*this);
+    return el;
+}
+
 // TEXT
 TextElement::TextElement(const QString &text, MessageElementFlags flags,
                          const MessageColor &color, FontStyle style)
@@ -320,6 +397,30 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
         this->words_.push_back({word, -1});
         // fourtf: add logic to store multiple spaces after message
     }
+}
+
+TextElement::TextElement(std::vector<Word> &&words, MessageElementFlags flags,
+                         const MessageColor &color, FontStyle style)
+    : MessageElement(flags)
+    , color_(color)
+    , style_(style)
+    , words_(std::move(words))
+{
+}
+
+MessageColor TextElement::color() const
+{
+    return this->color_;
+}
+
+FontStyle TextElement::style() const
+{
+    return this->style_;
+}
+
+const std::vector<TextElement::Word> &TextElement::words() const
+{
+    return this->words_;
 }
 
 void TextElement::addToContainer(MessageLayoutContainer &container,
@@ -422,6 +523,15 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 text.mid(wordStart), width, this->hasTrailingSpace()));
         }
     }
+}
+
+std::unique_ptr<MessageElement> TextElement::clone() const
+{
+    auto el = std::make_unique<TextElement>(QString(), this->getFlags(),
+                                            this->color_, this->style_);
+    el->words_ = this->words_;
+    el->cloneFrom(*this);
+    return el;
 }
 
 SingleLineTextElement::SingleLineTextElement(const QString &text,
@@ -572,6 +682,15 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+std::unique_ptr<MessageElement> SingleLineTextElement::clone() const
+{
+    auto el = std::make_unique<SingleLineTextElement>(
+        QString(), this->getFlags(), this->color_, this->style_);
+    el->words_ = this->words_;
+    el->cloneFrom(*this);
+    return el;
+}
+
 // TIMESTAMP
 TimestampElement::TimestampElement(QTime time)
     : MessageElement(MessageElementFlag::Timestamp)
@@ -604,6 +723,13 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 
     return new TextElement(format, MessageElementFlag::Timestamp,
                            MessageColor::System, FontStyle::ChatMedium);
+}
+
+std::unique_ptr<MessageElement> TimestampElement::clone() const
+{
+    auto el = std::make_unique<TimestampElement>(this->time_);
+    el->cloneFrom(*this);
+    return el;
 }
 
 // TWITCH MODERATION
@@ -640,6 +766,13 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+std::unique_ptr<MessageElement> TwitchModerationElement::clone() const
+{
+    auto el = std::make_unique<TwitchModerationElement>();
+    el->cloneFrom(*this);
+    return el;
+}
+
 LinebreakElement::LinebreakElement(MessageElementFlags flags)
     : MessageElement(flags)
 {
@@ -652,6 +785,13 @@ void LinebreakElement::addToContainer(MessageLayoutContainer &container,
     {
         container.breakLine();
     }
+}
+
+std::unique_ptr<MessageElement> LinebreakElement::clone() const
+{
+    auto el = std::make_unique<LinebreakElement>(this->getFlags());
+    el->cloneFrom(*this);
+    return el;
 }
 
 ScalingImageElement::ScalingImageElement(ImageSet images,
@@ -679,6 +819,14 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+std::unique_ptr<MessageElement> ScalingImageElement::clone() const
+{
+    auto el =
+        std::make_unique<ScalingImageElement>(this->images_, this->getFlags());
+    el->cloneFrom(*this);
+    return el;
+}
+
 ReplyCurveElement::ReplyCurveElement()
     : MessageElement(MessageElementFlag::RepliedMessage)
 {
@@ -699,6 +847,13 @@ void ReplyCurveElement::addToContainer(MessageLayoutContainer &container,
             new ReplyCurveLayoutElement(*this, width * scale, thickness * scale,
                                         radius * scale, margin * scale));
     }
+}
+
+std::unique_ptr<MessageElement> ReplyCurveElement::clone() const
+{
+    auto el = std::make_unique<ReplyCurveElement>();
+    el->cloneFrom(*this);
+    return el;
 }
 
 }  // namespace chatterino

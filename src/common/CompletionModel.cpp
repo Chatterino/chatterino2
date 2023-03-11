@@ -6,6 +6,7 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "messages/Emote.hpp"
+#include "providers/seventv/SeventvPersonalEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
@@ -211,6 +212,17 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
             addString(formatUserMention(name, isFirstWord,
                                         getSettings()->mentionUsersWithComma),
                       TaggedString::Type::Username);
+        }
+    }
+
+    // 7TV Personal
+    if (const auto map = getApp()->seventvPersonalEmotes->getEmoteSetForUser(
+            getApp()->accounts->twitch.getCurrent()->getUserId()))
+    {
+        for (const auto &emote : *map.get())
+        {
+            addString(emote.first.string,
+                      TaggedString::Type::SeventvPersonalEmote);
         }
     }
 

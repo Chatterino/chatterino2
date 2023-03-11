@@ -12,7 +12,10 @@ namespace chatterino::seventv::eventapi {
 
 // https://github.com/SevenTV/EventAPI/tree/ca4ff15cc42b89560fa661a76c5849047763d334#subscription-types
 enum class SubscriptionType {
+    AnyEmoteSet,
+    CreateEmoteSet,
     UpdateEmoteSet,
+
     UpdateUser,
 
     AnyCosmetic,
@@ -92,6 +95,10 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
     using chatterino::seventv::eventapi::SubscriptionType;
     switch (value)
     {
+        case SubscriptionType::AnyEmoteSet:
+            return "emote_set.*";
+        case SubscriptionType::CreateEmoteSet:
+            return "emote_set.create";
         case SubscriptionType::UpdateEmoteSet:
             return "emote_set.update";
         case SubscriptionType::UpdateUser:

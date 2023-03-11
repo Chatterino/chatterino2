@@ -10,6 +10,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/seventv/SeventvPersonalEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -429,6 +430,14 @@ void EmotePopup::loadChannel(ChannelPtr channel)
                   "7TV", MessageElementFlag::SevenTVEmote);
     }
 
+    // personal
+    if (const auto map = getApp()->seventvPersonalEmotes->getEmoteSetForUser(
+            getApp()->accounts->twitch.getCurrent()->getUserId()))
+    {
+        addEmotes(*subChannel, *map.get(), "7TV",
+                  MessageElementFlag::SevenTVEmote);
+    }
+
     this->globalEmotesView_->setChannel(globalChannel);
     this->subEmotesView_->setChannel(subChannel);
     this->channelEmotesView_->setChannel(channelChannel);
@@ -524,6 +533,17 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     {
         addEmotes(*searchChannel, seventvChannelEmotes, "7TV (Channel)",
                   MessageElementFlag::SevenTVEmote);
+    }
+
+    if (const auto map = getApp()->seventvPersonalEmotes->getEmoteSetForUser(
+            getApp()->accounts->twitch.getCurrent()->getUserId()))
+    {
+        auto seventvPersonalEmotes = filterEmoteMap(searchText, map.get());
+        if (!seventvPersonalEmotes.empty())
+        {
+            addEmotes(*searchChannel, seventvPersonalEmotes,
+                      "SevenTV (Personal)", MessageElementFlag::SevenTVEmote);
+        }
     }
 }
 

@@ -8,6 +8,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/Link.hpp"
@@ -45,6 +46,8 @@
 #include <QThread>
 #include <QTimer>
 #include <rapidjson/document.h>
+
+#include <algorithm>
 
 namespace chatterino {
 namespace {
@@ -1648,6 +1651,104 @@ void TwitchChannel::listenSevenTVCosmetics()
         getApp()->twitch->seventvEventAPI->subscribeTwitchChannel(
             this->roomId());
     }
+}
+
+void TwitchChannel::upsertPersonalSeventvEmotes(
+    const QString &userLogin, const std::shared_ptr<const EmoteMap> &emoteMap)
+{
+    assertInGuiThread();
+    auto snapshot = this->getMessageSnapshot();
+    if (snapshot.size() == 0)
+    {
+        return;
+    }
+
+    const auto findMessage = [&]() -> std::optional<MessagePtr> {
+        auto end = std::max<ptrdiff_t>(0, (ptrdiff_t)snapshot.size() - 5);
+
+        // explicitly using signed integers here to represent '-1'
+        for (ptrdiff_t i = (ptrdiff_t)snapshot.size() - 1; i >= end; i--)
+        {
+            const auto &message = snapshot[i];
+            if (message->loginName == userLogin)
+            {
+                return message;
+            }
+        }
+
+        return std::nullopt;
+    };
+
+    const auto message = findMessage();
+    if (!message)
+    {
+        return;
+    }
+
+    auto cloned = message.value()->cloneWith([&](Message &message) {
+        // We create a new vector of elements,
+        // if we encounter a `TextElement` that contains any emote,
+        // we insert an `EmoteElement` at the position.
+        std::vector<std::unique_ptr<MessageElement>> elements;
+        elements.reserve(message.elements.size());
+
+        std::for_each(
+            std::make_move_iterator(message.elements.begin()),
+            std::make_move_iterator(message.elements.end()),
+            [&](auto &&element) {
+                auto *elementPtr = element.get();
+                auto *textElement = dynamic_cast<TextElement *>(elementPtr);
+
+                // Check if this contains the message text
+                if (textElement != nullptr &&
+                    textElement->getFlags().has(MessageElementFlag::Text))
+                {
+                    std::vector<TextElement::Word> words;
+                    // Append the text element and clear the vector.
+                    const auto flush = [&]() {
+                        elements.emplace_back(std::make_unique<TextElement>(
+                            std::move(words), textElement->getFlags(),
+                            textElement->color(), textElement->style()));
+                        words.clear();
+                    };
+
+                    // Search for a word that matches any emote.
+                    for (const auto &word : textElement->words())
+                    {
+                        auto emoteIt = emoteMap->find(EmoteName{word.text});
+                        if (emoteIt != emoteMap->cend())
+                        {
+                            MessageElementFlags emoteFlags(
+                                MessageElementFlag::SevenTVEmote);
+                            if (emoteIt->second->zeroWidth)
+                            {
+                                emoteFlags.set(
+                                    MessageElementFlag::ZeroWidthEmote);
+                            }
+
+                            flush();
+                            elements.emplace_back(
+                                std::make_unique<EmoteElement>(emoteIt->second,
+                                                               emoteFlags));
+                        }
+                        else
+                        {
+                            words.emplace_back(word);
+                        }
+                    }
+                    flush();
+                }
+                else
+                {
+                    elements.emplace_back(
+                        std::forward<decltype(element)>(element));
+                }
+            });
+
+        message.elements = std::move(elements);
+    });
+
+    this->replaceMessage(message.value(), cloned);
 }
 
 }  // namespace chatterino

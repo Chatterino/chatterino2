@@ -7,6 +7,7 @@
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/seventv/SeventvCosmetics.hpp"
 #include "providers/seventv/SeventvPaints.hpp"
+#include "providers/seventv/SeventvPersonalEmotes.hpp"
 #include "util/PostToThread.hpp"
 
 #include <QJsonArray>
@@ -51,6 +52,7 @@ void SeventvEventAPI::subscribeTwitchChannel(const QString &id)
             {ChannelCondition{id}, SubscriptionType::CreateEntitlement});
         this->subscribe(
             {ChannelCondition{id}, SubscriptionType::DeleteEntitlement});
+        this->subscribe({ChannelCondition{id}, SubscriptionType::AnyEmoteSet});
     }
 }
 
@@ -82,6 +84,8 @@ void SeventvEventAPI::unsubscribeTwitchChannel(const QString &id)
             {ChannelCondition{id}, SubscriptionType::CreateEntitlement});
         this->unsubscribe(
             {ChannelCondition{id}, SubscriptionType::DeleteEntitlement});
+        this->unsubscribe(
+            {ChannelCondition{id}, SubscriptionType::AnyEmoteSet});
     }
 }
 
@@ -168,6 +172,10 @@ void SeventvEventAPI::handleDispatch(const Dispatch &dispatch)
 {
     switch (dispatch.type)
     {
+        case SubscriptionType::CreateEmoteSet: {
+            this->onEmoteSetCreate(dispatch);
+        }
+        break;
         case SubscriptionType::UpdateEmoteSet: {
             this->onEmoteSetUpdate(dispatch);
         }
@@ -370,6 +378,16 @@ void SeventvEventAPI::onEntitlementCreate(
                 entitlement.refID, UserName{entitlement.userName});
         }
         break;
+        case CosmeticKind::EmoteSet: {
+            if (auto set = Application::instance->seventvPersonalEmotes
+                               ->assignUserToEmoteSet(entitlement.refID,
+                                                      entitlement.userID))
+            {
+                this->signals_.personalEmoteSetAdded.invoke(
+                    {entitlement.userName, *set});
+            }
+        }
+        break;
         default:
             break;
     }
@@ -394,6 +412,25 @@ void SeventvEventAPI::onEntitlementDelete(
         break;
         default:
             break;
+    }
+}
+
+void SeventvEventAPI::onEmoteSetCreate(const Dispatch &dispatch)
+{
+    // We're using Application::instance, because we're not in the GUI thread.
+    // `seventvBadges` and `seventvPaints` do their own locking.
+    EmoteSetCreateDispatch createDispatch(dispatch.body["object"].toObject());
+    if (!createDispatch.validate())
+    {
+        qCDebug(chatterinoSeventvEventAPI)
+            << "Invalid dispatch" << dispatch.body;
+        return;
+    }
+
+    if (createDispatch.isPersonal)
+    {
+        Application::instance->seventvPersonalEmotes->createEmoteSet(
+            createDispatch.emoteSetID);
     }
 }
 // NOLINTEND(readability-convert-member-functions-to-static)

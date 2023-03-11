@@ -438,8 +438,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show FFZ channel emotes", s.enableFFZChannelEmotes);
     layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);
     layout.addCheckbox("Show 7TV channel emotes", s.enableSevenTVChannelEmotes);
-    layout.addCheckbox("Enable 7TV live emote updates (requires restart)",
-                       s.enableSevenTVEventAPI);
+    layout.addCheckbox("Show 7TV personal emotes",
+                       s.enableSevenTVPersonalEmotes, false,
+                       "This requires '7TV live updates' to work.");
+    layout.addCheckbox("Enable 7TV live updates (requires restart)",
+                       s.enableSevenTVEventAPI, false,
+                       "When enabled, channel emotes will get updated "
+                       "automatically (no reload required) and cosmetics "
+                       "(badges/paints/personal emotes) will get updated.");
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(

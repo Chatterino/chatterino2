@@ -174,6 +174,11 @@ public:
     void updateSeventvData(const QString &newUserID,
                            const QString &newEmoteSetID);
 
+    // Update the user's last message and insert the personal emotes if necessary.
+    void upsertPersonalSeventvEmotes(
+        const QString &userLogin,
+        const std::shared_ptr<const EmoteMap> &emoteMap);
+
     // Badges
     boost::optional<EmotePtr> ffzCustomModBadge() const;
     boost::optional<EmotePtr> ffzCustomVipBadge() const;
