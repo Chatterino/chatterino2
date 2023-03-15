@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Dev: Only log debug messages when NDEBUG is not defined. (#4442)
+
 ## 2.4.2
 
 - Minor: Added `/banid` command that allows banning by user ID. (#4411)
