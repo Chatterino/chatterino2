@@ -149,11 +149,10 @@ void Theme::actuallyUpdate(double multiplier)
 
     this->messages.disabled = getGray(1, 0.6);
 
-    int complementaryGray = this->isLightTheme() ? 20 : 230;
     this->messages.highlightAnimationStart =
-        QColor(complementaryGray, complementaryGray, complementaryGray, 110);
+        QColor::fromHslF(0, 0, isLight ? 0.9 : 0.08, 0.43);
     this->messages.highlightAnimationEnd =
-        QColor(complementaryGray, complementaryGray, complementaryGray, 0);
+        QColor::fromHslF(0, 0, isLight ? 0.9 : 0.08, 0);
 
     // Scrollbar
     this->scrollbars.background = QColor(0, 0, 0, 0);
@@ -161,25 +160,14 @@ void Theme::actuallyUpdate(double multiplier)
     this->scrollbars.thumbSelected = getGray(0.65);
 
     // Selection
-    this->messages.selection =
-        isLightTheme() ? QColor(0, 0, 0, 64) : QColor(255, 255, 255, 64);
+    this->messages.selection = QColor::fromHsl(0, 0, isLight ? 0 : 255, 54);
 
-    if (this->isLightTheme())
-    {
-        this->splits.dropTargetRect = QColor(255, 255, 255, 0x00);
-        this->splits.dropTargetRectBorder = QColor(0, 148, 255, 0x00);
-
-        this->splits.resizeHandle = QColor(0, 148, 255, 0xff);
-        this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x50);
-    }
-    else
-    {
-        this->splits.dropTargetRect = QColor(0, 148, 255, 0x00);
-        this->splits.dropTargetRectBorder = QColor(0, 148, 255, 0x00);
-
-        this->splits.resizeHandle = QColor(0, 148, 255, 0x70);
-        this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
-    }
+    // Splits
+    this->splits.dropTargetRect = QColor(0, 148, 255, 0);
+    this->splits.dropTargetRectBorder = QColor(0, 148, 255, 0);
+    this->splits.resizeHandle = QColor(0, 148, 255, isLight ? 255 : 112);
+    this->splits.resizeHandleBackground =
+        QColor(0, 148, 255, isLight ? 80 : 32);
 
     this->splits.header.background = getGray(isLight ? 1 : 0.9);
     this->splits.header.border = getGray(isLight ? 1 : 0.85);
