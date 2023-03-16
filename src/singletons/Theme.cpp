@@ -141,7 +141,14 @@ void Theme::actuallyUpdate(double multiplier)
         isLight ? QColor(0, 0, 0, 64) : QColor(255, 255, 255, 64);
 
     // Splits
-    this->splits.dropTargetRect = QColor(0, 148, 255, 0);
+    if (isLight)
+    {
+        this->splits.dropTargetRect = QColor(255, 255, 255, 0);
+    }
+    else
+    {
+        this->splits.dropTargetRect = QColor(0, 148, 255, 0);
+    }
     this->splits.dropTargetRectBorder = QColor(0, 148, 255, 0);
     this->splits.dropPreview = QColor(0, 148, 255, 48);
     this->splits.dropPreviewBorder = QColor(0, 148, 255);
