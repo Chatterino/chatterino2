@@ -165,6 +165,8 @@ void Theme::actuallyUpdate(double multiplier)
     // Splits
     this->splits.dropTargetRect = QColor(0, 148, 255, 0);
     this->splits.dropTargetRectBorder = QColor(0, 148, 255, 0);
+    this->splits.dropPreview = QColor(0, 148, 255, 48);
+    this->splits.dropPreviewBorder = QColor(0, 148, 255);
     this->splits.resizeHandle = QColor(0, 148, 255, isLight ? 255 : 112);
     this->splits.resizeHandleBackground =
         QColor(0, 148, 255, isLight ? 80 : 32);
@@ -189,8 +191,6 @@ void Theme::actuallyUpdate(double multiplier)
     this->splits.messageSeperator =
         isLight ? QColor(127, 127, 127) : QColor(60, 60, 60);
     this->splits.background = getGray(1);
-    this->splits.dropPreview = QColor(0, 148, 255, 0x30);
-    this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
 
     // Copy button
     if (this->isLightTheme())
