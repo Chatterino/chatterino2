@@ -213,7 +213,7 @@ void Theme::actuallyUpdate(double multiplier)
     }
 }
 
-void Theme::normalizeColor(QColor &color)
+void Theme::normalizeColor(QColor &color) const
 {
     if (this->isLightTheme())
     {

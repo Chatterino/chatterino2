@@ -111,7 +111,7 @@ public:
         QPixmap pin;
     } buttons;
 
-    void normalizeColor(QColor &color);
+    void normalizeColor(QColor &color) const;
     void update();
 
     pajlada::Signals::NoArgSignal updated;
