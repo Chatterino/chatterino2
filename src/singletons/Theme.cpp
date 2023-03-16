@@ -136,7 +136,8 @@ void Theme::actuallyUpdate(double multiplier)
     this->scrollbars.thumbSelected = getGray(0.65);
 
     // Selection
-    this->messages.selection = QColor::fromHsl(0, 0, isLight ? 0 : 255, 54);
+    this->messages.selection =
+        isLight ? QColor(0, 0, 0, 64) : QColor(255, 255, 255, 64);
 
     // Splits
     this->splits.dropTargetRect = QColor(0, 148, 255, 0);
