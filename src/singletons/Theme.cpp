@@ -125,10 +125,11 @@ void Theme::actuallyUpdate(double multiplier)
 
     this->messages.disabled = getGray(1, 0.6);
 
+    int complementaryGray = isLight ? 20 : 230;
     this->messages.highlightAnimationStart =
-        QColor::fromHslF(0, 0, isLight ? 0.9 : 0.08, 0.43);
+        QColor(complementaryGray, complementaryGray, complementaryGray, 110);
     this->messages.highlightAnimationEnd =
-        QColor::fromHslF(0, 0, isLight ? 0.9 : 0.08, 0);
+        QColor(complementaryGray, complementaryGray, complementaryGray, 0);
 
     // Scrollbar
     this->scrollbars.background = QColor(0, 0, 0, 0);
