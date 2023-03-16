@@ -80,7 +80,7 @@ void Theme::actuallyUpdate(double multiplier)
 
         // message (referenced later)
         this->messages.textColors.caret =  //
-            this->messages.textColors.regular = isLight_ ? "#000" : "#fff";
+            this->messages.textColors.regular = isLight ? "#000" : "#fff";
 
         QColor highlighted = isLight ? QColor("#ff0000") : QColor("#ee6166");
 
@@ -131,10 +131,10 @@ void Theme::actuallyUpdate(double multiplier)
 
     // Message
     this->messages.textColors.link =
-        isLight_ ? QColor(66, 134, 244) : QColor(66, 134, 244);
+        isLight ? QColor(66, 134, 244) : QColor(66, 134, 244);
     this->messages.textColors.system = QColor(140, 127, 127);
     this->messages.textColors.chatPlaceholder =
-        isLight_ ? QColor(175, 159, 159) : QColor(93, 85, 85);
+        isLight ? QColor(175, 159, 159) : QColor(93, 85, 85);
 
     this->messages.backgrounds.regular = getColor(0, 0, 1);
     this->messages.backgrounds.alternate = getColor(0, 0, 0.96);
