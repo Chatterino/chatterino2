@@ -94,12 +94,12 @@ void Theme::actuallyUpdate(double multiplier)
     if (isLight)
     {
         this->tabs.regular = {
-            .text = QColor("#444"),
+            .text = "#444",
             .backgrounds = {Qt::white, "#eee", Qt::white},
             .line = tabLine(Qt::white),
         };
         this->tabs.newMessage = {
-            .text = QColor("#222"),
+            .text = "#222",
             .backgrounds = {Qt::white, "#eee", Qt::white},
             .line = tabLine("#bbb"),
         };
@@ -117,17 +117,17 @@ void Theme::actuallyUpdate(double multiplier)
     else
     {
         this->tabs.regular = {
-            .text = QColor("#aaa"),
+            .text = "#aaa",
             .backgrounds = tabBackground("#252525"),
             .line = tabLine("#444"),
         };
         this->tabs.newMessage = {
-            .text = QColor("#eee"),
+            .text = "#eee",
             .backgrounds = tabBackground("#252525"),
             .line = tabLine("#888"),
         };
         this->tabs.highlighted = {
-            .text = QColor("#eee"),
+            .text = "#eee",
             .backgrounds = tabBackground("#252525"),
             .line = tabLine("#ee6166"),
         };
