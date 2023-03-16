@@ -76,62 +76,38 @@ void Theme::actuallyUpdate(double multiplier)
 #endif
     this->window.text = isLight ? "#000" : "#eee";
 
-    /// TABS
-
-    // creates a `TabColors::line`, where all colors are the same
-    auto tabLine = [](auto color) -> decltype(TabColors::line) {
-        return {.regular = color, .hover = color, .unfocused = color};
-    };
-    // creates a `TabColors::backgrounds`, where all colors are the same
-    auto tabBackground = [](auto color) -> decltype(TabColors::backgrounds) {
-        return {.regular = color, .hover = color, .unfocused = color};
-    };
-
+    /// TABSs
     if (isLight)
     {
-        this->tabs.regular = {
-            .text = "#444",
-            .backgrounds = {Qt::white, "#eee", Qt::white},
-            .line = tabLine(Qt::white),
-        };
-        this->tabs.newMessage = {
-            .text = "#222",
-            .backgrounds = {Qt::white, "#eee", Qt::white},
-            .line = tabLine("#bbb"),
-        };
-        this->tabs.highlighted = {
-            .text = Qt::black,
-            .backgrounds = {Qt::white, "#eee", Qt::white},
-            .line = tabLine("#ff0000"),
-        };
+        this->tabs.regular = {.text = "#444",
+                              .backgrounds = {"#fff", "#eee", "#fff"},
+                              .line = {"#fff", "#fff", "#fff"}};
+        this->tabs.newMessage = {.text = "#222",
+                                 .backgrounds = {"#fff", "#eee", "#fff"},
+                                 .line = {"#bbb", "#bbb", "#bbb"}};
+        this->tabs.highlighted = {.text = "#000",
+                                  .backgrounds = {"#fff", "#eee", "#fff"},
+                                  .line = {"#f00", "#f00", "#f00"}};
         this->tabs.selected = {
-            .text = Qt::black,
-            .backgrounds = tabBackground("#b4d7ff"),
-            .line = tabLine(this->accent),
-        };
+            .text = "#000",
+            .backgrounds = {"#b4d7ff", "#b4d7ff", "#b4d7ff"},
+            .line = {this->accent, this->accent, this->accent}};
     }
     else
     {
-        this->tabs.regular = {
-            .text = "#aaa",
-            .backgrounds = tabBackground("#252525"),
-            .line = tabLine("#444"),
-        };
-        this->tabs.newMessage = {
-            .text = "#eee",
-            .backgrounds = tabBackground("#252525"),
-            .line = tabLine("#888"),
-        };
-        this->tabs.highlighted = {
-            .text = "#eee",
-            .backgrounds = tabBackground("#252525"),
-            .line = tabLine("#ee6166"),
-        };
+        this->tabs.regular = {.text = "#aaa",
+                              .backgrounds{"#252525", "#252525", "#252525"},
+                              .line = {"#444", "#444", "#444"}};
+        this->tabs.newMessage = {.text = "#eee",
+                                 .backgrounds{"#252525", "#252525", "#252525"},
+                                 .line = {"#888", "#888", "#888"}};
+        this->tabs.highlighted = {.text = "#eee",
+                                  .backgrounds{"#252525", "#252525", "#252525"},
+                                  .line = {"#ee6166", "#ee6166", "#ee6166"}};
         this->tabs.selected = {
-            .text = Qt::white,
-            .backgrounds = tabBackground("#555555"),
-            .line = tabLine(this->accent),
-        };
+            .text = "#fff",
+            .backgrounds{"#555", "#555", "#555"},
+            .line = {this->accent, this->accent, this->accent}};
     }
 
     this->tabs.dividerLine = this->tabs.selected.backgrounds.regular;
