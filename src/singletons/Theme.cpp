@@ -76,10 +76,6 @@ void Theme::actuallyUpdate(double multiplier)
 #endif
     this->window.text = isLight ? "#000" : "#eee";
 
-    // message (referenced later)
-    this->messages.textColors.caret =  //
-        this->messages.textColors.regular = isLight ? "#000" : "#fff";
-
     /// TABS
 
     // creates a `TabColors::line`, where all colors are the same
@@ -141,6 +137,8 @@ void Theme::actuallyUpdate(double multiplier)
     this->tabs.dividerLine = this->tabs.selected.backgrounds.regular;
 
     // Message
+    this->messages.textColors.caret = isLight ? "#000" : "#fff";
+    this->messages.textColors.regular = isLight ? "#000" : "#fff";
     this->messages.textColors.link = QColor(66, 134, 244);
     this->messages.textColors.system = QColor(140, 127, 127);
     this->messages.textColors.chatPlaceholder =
