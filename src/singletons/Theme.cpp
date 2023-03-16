@@ -15,26 +15,20 @@ double getMultiplierByTheme(const QString &themeName)
     {
         return 0.8;
     }
-    else if (themeName == "White")
+    if (themeName == "White")
     {
         return 1.0;
     }
-    else if (themeName == "Black")
+    if (themeName == "Black")
     {
         return -1.0;
     }
-    else if (themeName == "Dark")
+    if (themeName == "Dark")
     {
         return -0.8;
     }
-    /*
-        else if (themeName == "Custom")
-        {
-            return getSettings()->customThemeMultiplier.getValue();
-        }
-        */
 
-    return -0.8;
+    return -0.8;  // default: Dark
 }
 }  // namespace
 
