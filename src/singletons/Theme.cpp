@@ -61,7 +61,6 @@ void Theme::update()
 void Theme::actuallyUpdate(double multiplier)
 {
     this->isLight_ = multiplier > 0;
-    bool lightWin = isLight_;
 
     const auto isLight = this->isLightTheme();
 
@@ -72,21 +71,21 @@ void Theme::actuallyUpdate(double multiplier)
     /// WINDOW
     {
 #ifdef Q_OS_LINUX
-        this->window.background = lightWin ? "#fff" : QColor(61, 60, 56);
+        this->window.background = isLight ? "#fff" : QColor(61, 60, 56);
 #else
-        this->window.background = lightWin ? "#fff" : "#111";
+        this->window.background = isLight ? "#fff" : "#111";
 #endif
 
-        QColor fg = this->window.text = lightWin ? "#000" : "#eee";
+        QColor fg = this->window.text = isLight ? "#000" : "#eee";
 
         // message (referenced later)
         this->messages.textColors.caret =  //
             this->messages.textColors.regular = isLight_ ? "#000" : "#fff";
 
-        QColor highlighted = lightWin ? QColor("#ff0000") : QColor("#ee6166");
+        QColor highlighted = isLight ? QColor("#ff0000") : QColor("#ee6166");
 
         /// TABS
-        if (lightWin)
+        if (isLight)
         {
             this->tabs.regular = {
                 QColor("#444"),
