@@ -5,7 +5,6 @@
 #include "util/RapidJsonSerializeQString.hpp"
 
 #include <pajlada/settings/setting.hpp>
-#include <QBrush>
 #include <QColor>
 
 namespace chatterino {

@@ -103,9 +103,11 @@ void Theme::actuallyUpdate(double multiplier)
             .backgrounds = {Qt::white, "#eee", Qt::white},
             .line = tabLine("#bbb"),
         };
-        this->tabs.highlighted = {.text = Qt::black,
-                                  .backgrounds = {Qt::white, "#eee", Qt::white},
-                                  .line = tabLine("#ff0000")};
+        this->tabs.highlighted = {
+            .text = Qt::black,
+            .backgrounds = {Qt::white, "#eee", Qt::white},
+            .line = tabLine("#ff0000"),
+        };
         this->tabs.selected = {
             .text = Qt::black,
             .backgrounds = tabBackground("#b4d7ff"),
@@ -129,7 +131,6 @@ void Theme::actuallyUpdate(double multiplier)
             .backgrounds = tabBackground("#252525"),
             .line = tabLine("#ee6166"),
         };
-
         this->tabs.selected = {
             .text = Qt::white,
             .backgrounds = tabBackground("#555555"),
