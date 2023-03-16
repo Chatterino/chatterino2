@@ -193,7 +193,7 @@ void Theme::actuallyUpdate(double multiplier)
     this->splits.background = getGray(1);
 
     // Copy button
-    if (this->isLightTheme())
+    if (isLight)
     {
         this->buttons.copy = getResources().buttons.copyDark;
         this->buttons.pin = getResources().buttons.pinDisabledDark;
