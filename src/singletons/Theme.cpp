@@ -64,7 +64,6 @@ void Theme::actuallyUpdate(double multiplier)
     bool lightWin = isLight_;
 
     const auto isLight = this->isLightTheme();
-    const auto flat = isLight;
 
     auto getColor = [multiplier](double h, double s, double l, double a = 1.0) {
         return QColor::fromHslF(h, s, ((l - 0.5) * multiplier) + 0.5, a);
@@ -175,8 +174,8 @@ void Theme::actuallyUpdate(double multiplier)
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
     }
 
-    this->splits.header.background = getColor(0, 0, flat ? 1 : 0.9);
-    this->splits.header.border = getColor(0, 0, flat ? 1 : 0.85);
+    this->splits.header.background = getColor(0, 0, isLight ? 1 : 0.9);
+    this->splits.header.border = getColor(0, 0, isLight ? 1 : 0.85);
     this->splits.header.text = this->messages.textColors.regular;
     this->splits.header.focusedBackground =
         getColor(0, 0, isLight ? 0.95 : 0.79);
@@ -184,7 +183,7 @@ void Theme::actuallyUpdate(double multiplier)
     this->splits.header.focusedText = QColor::fromHsvF(
         0.58388, isLight ? 1.0 : 0.482, isLight ? 0.6375 : 1.0);
 
-    this->splits.input.background = getColor(0, 0, flat ? 0.95 : 0.95);
+    this->splits.input.background = getColor(0, 0, isLight ? 0.95 : 0.95);
     this->splits.input.text = this->messages.textColors.regular;
     this->splits.input.styleSheet =
         "background:" + this->splits.input.background.name() + ";" +
