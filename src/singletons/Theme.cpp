@@ -63,7 +63,6 @@ void Theme::actuallyUpdate(double multiplier)
     this->isLight_ = multiplier > 0;
     bool lightWin = isLight_;
 
-    const auto sat = qreal(0);
     const auto isLight = this->isLightTheme();
     const auto flat = isLight;
 
@@ -139,10 +138,10 @@ void Theme::actuallyUpdate(double multiplier)
     this->messages.textColors.chatPlaceholder =
         isLight_ ? QColor(175, 159, 159) : QColor(93, 85, 85);
 
-    this->messages.backgrounds.regular = getColor(0, sat, 1);
-    this->messages.backgrounds.alternate = getColor(0, sat, 0.96);
+    this->messages.backgrounds.regular = getColor(0, 0, 1);
+    this->messages.backgrounds.alternate = getColor(0, 0, 0.96);
 
-    this->messages.disabled = getColor(0, sat, 1, 0.6);
+    this->messages.disabled = getColor(0, 0, 1, 0.6);
 
     int complementaryGray = this->isLightTheme() ? 20 : 230;
     this->messages.highlightAnimationStart =
@@ -152,8 +151,8 @@ void Theme::actuallyUpdate(double multiplier)
 
     // Scrollbar
     this->scrollbars.background = QColor(0, 0, 0, 0);
-    this->scrollbars.thumb = getColor(0, sat, 0.70);
-    this->scrollbars.thumbSelected = getColor(0, sat, 0.65);
+    this->scrollbars.thumb = getColor(0, 0, 0.70);
+    this->scrollbars.thumbSelected = getColor(0, 0, 0.65);
 
     // Selection
     this->messages.selection =
@@ -176,16 +175,16 @@ void Theme::actuallyUpdate(double multiplier)
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
     }
 
-    this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
-    this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);
+    this->splits.header.background = getColor(0, 0, flat ? 1 : 0.9);
+    this->splits.header.border = getColor(0, 0, flat ? 1 : 0.85);
     this->splits.header.text = this->messages.textColors.regular;
     this->splits.header.focusedBackground =
-        getColor(0, sat, isLight ? 0.95 : 0.79);
-    this->splits.header.focusedBorder = getColor(0, sat, isLight ? 0.90 : 0.78);
+        getColor(0, 0, isLight ? 0.95 : 0.79);
+    this->splits.header.focusedBorder = getColor(0, 0, isLight ? 0.90 : 0.78);
     this->splits.header.focusedText = QColor::fromHsvF(
         0.58388, isLight ? 1.0 : 0.482, isLight ? 0.6375 : 1.0);
 
-    this->splits.input.background = getColor(0, sat, flat ? 0.95 : 0.95);
+    this->splits.input.background = getColor(0, 0, flat ? 0.95 : 0.95);
     this->splits.input.text = this->messages.textColors.regular;
     this->splits.input.styleSheet =
         "background:" + this->splits.input.background.name() + ";" +
@@ -197,7 +196,7 @@ void Theme::actuallyUpdate(double multiplier)
 
     this->splits.messageSeperator =
         isLight ? QColor(127, 127, 127) : QColor(60, 60, 60);
-    this->splits.background = getColor(0, sat, 1);
+    this->splits.background = getColor(0, 0, 1);
     this->splits.dropPreview = QColor(0, 148, 255, 0x30);
     this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
 
