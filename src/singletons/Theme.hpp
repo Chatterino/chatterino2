@@ -22,9 +22,9 @@ public:
     struct TabColors {
         QColor text;
         struct {
-            QBrush regular;
-            QBrush hover;
-            QBrush unfocused;
+            QColor regular;
+            QColor hover;
+            QColor unfocused;
         } backgrounds;
         struct {
             QColor regular;

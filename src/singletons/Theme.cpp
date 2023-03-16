@@ -95,21 +95,20 @@ void Theme::actuallyUpdate(double multiplier)
     {
         this->tabs.regular = {
             .text = QColor("#444"),
-            .backgrounds = {Qt::white, QColor("#eee"), Qt::white},
+            .backgrounds = {Qt::white, "#eee", Qt::white},
             .line = tabLine(Qt::white),
         };
         this->tabs.newMessage = {
             .text = QColor("#222"),
-            .backgrounds = {Qt::white, QColor("#eee"), Qt::white},
+            .backgrounds = {Qt::white, "#eee", Qt::white},
             .line = tabLine("#bbb"),
         };
-        this->tabs.highlighted = {
-            .text = Qt::black,
-            .backgrounds = {Qt::white, QColor("#eee"), Qt::white},
-            .line = tabLine("#ff0000")};
+        this->tabs.highlighted = {.text = Qt::black,
+                                  .backgrounds = {Qt::white, "#eee", Qt::white},
+                                  .line = tabLine("#ff0000")};
         this->tabs.selected = {
             .text = Qt::black,
-            .backgrounds = tabBackground(QColor("#b4d7ff")),
+            .backgrounds = tabBackground("#b4d7ff"),
             .line = tabLine(this->accent),
         };
     }
@@ -117,28 +116,28 @@ void Theme::actuallyUpdate(double multiplier)
     {
         this->tabs.regular = {
             .text = QColor("#aaa"),
-            .backgrounds = tabBackground(QColor("#252525")),
+            .backgrounds = tabBackground("#252525"),
             .line = tabLine("#444"),
         };
         this->tabs.newMessage = {
             .text = QColor("#eee"),
-            .backgrounds = tabBackground(QColor("#252525")),
+            .backgrounds = tabBackground("#252525"),
             .line = tabLine("#888"),
         };
         this->tabs.highlighted = {
             .text = QColor("#eee"),
-            .backgrounds = tabBackground(QColor("#252525")),
+            .backgrounds = tabBackground("#252525"),
             .line = tabLine("#ee6166"),
         };
 
         this->tabs.selected = {
             .text = Qt::white,
-            .backgrounds = tabBackground(QColor("#555555")),
+            .backgrounds = tabBackground("#555555"),
             .line = tabLine(this->accent),
         };
     }
 
-    this->tabs.dividerLine = this->tabs.selected.backgrounds.regular.color();
+    this->tabs.dividerLine = this->tabs.selected.backgrounds.regular;
 
     // Message
     this->messages.textColors.link = QColor(66, 134, 244);
@@ -195,11 +194,10 @@ void Theme::actuallyUpdate(double multiplier)
     this->splits.input.text = this->messages.textColors.regular;
     this->splits.input.styleSheet =
         "background:" + this->splits.input.background.name() + ";" +
-        "border:" + this->tabs.selected.backgrounds.regular.color().name() +
-        ";" + "color:" + this->messages.textColors.regular.name() + ";" +
+        "border:" + this->tabs.selected.backgrounds.regular.name() + ";" +
+        "color:" + this->messages.textColors.regular.name() + ";" +
         "selection-background-color:" +
-        (isLight ? "#68B1FF"
-                 : this->tabs.selected.backgrounds.regular.color().name());
+        (isLight ? "#68B1FF" : this->tabs.selected.backgrounds.regular.name());
 
     this->splits.messageSeperator =
         isLight ? QColor(127, 127, 127) : QColor(60, 60, 60);
