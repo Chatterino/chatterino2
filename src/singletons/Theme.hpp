@@ -6,6 +6,7 @@
 
 #include <pajlada/settings/setting.hpp>
 #include <QColor>
+#include <QPixmap>
 
 namespace chatterino {
 
