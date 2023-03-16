@@ -69,65 +69,76 @@ void Theme::actuallyUpdate(double multiplier)
     };
 
     /// WINDOW
-    {
 #ifdef Q_OS_LINUX
-        this->window.background = isLight ? "#fff" : QColor(61, 60, 56);
+    this->window.background = isLight ? "#fff" : QColor(61, 60, 56);
 #else
-        this->window.background = isLight ? "#fff" : "#111";
+    this->window.background = isLight ? "#fff" : "#111";
 #endif
+    this->window.text = isLight ? "#000" : "#eee";
 
-        QColor fg = this->window.text = isLight ? "#000" : "#eee";
+    // message (referenced later)
+    this->messages.textColors.caret =  //
+        this->messages.textColors.regular = isLight ? "#000" : "#fff";
 
-        // message (referenced later)
-        this->messages.textColors.caret =  //
-            this->messages.textColors.regular = isLight ? "#000" : "#fff";
+    /// TABS
 
-        QColor highlighted = isLight ? QColor("#ff0000") : QColor("#ee6166");
+    // creates a `TabColors::line`, where all colors are the same
+    auto tabLine = [](auto color) -> decltype(TabColors::line) {
+        return {.regular = color, .hover = color, .unfocused = color};
+    };
+    // creates a `TabColors::backgrounds`, where all colors are the same
+    auto tabBackground = [](auto color) -> decltype(TabColors::backgrounds) {
+        return {.regular = color, .hover = color, .unfocused = color};
+    };
 
-        /// TABS
-        if (isLight)
-        {
-            this->tabs.regular = {
-                QColor("#444"),
-                {QColor("#fff"), QColor("#eee"), QColor("#fff")},
-                {QColor("#fff"), QColor("#fff"), QColor("#fff")}};
-            this->tabs.newMessage = {
-                QColor("#222"),
-                {QColor("#fff"), QColor("#eee"), QColor("#fff")},
-                {QColor("#bbb"), QColor("#bbb"), QColor("#bbb")}};
-            this->tabs.highlighted = {
-                fg,
-                {QColor("#fff"), QColor("#eee"), QColor("#fff")},
-                {highlighted, highlighted, highlighted}};
-            this->tabs.selected = {
-                QColor("#000"),
-                {QColor("#b4d7ff"), QColor("#b4d7ff"), QColor("#b4d7ff")},
-                {this->accent, this->accent, this->accent}};
-        }
-        else
-        {
-            this->tabs.regular = {
-                QColor("#aaa"),
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                {QColor("#444"), QColor("#444"), QColor("#444")}};
-            this->tabs.newMessage = {
-                fg,
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                {QColor("#888"), QColor("#888"), QColor("#888")}};
-            this->tabs.highlighted = {
-                fg,
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                {highlighted, highlighted, highlighted}};
-
-            this->tabs.selected = {
-                QColor("#fff"),
-                {QColor("#555555"), QColor("#555555"), QColor("#555555")},
-                {this->accent, this->accent, this->accent}};
-        }
-
-        this->tabs.dividerLine =
-            this->tabs.selected.backgrounds.regular.color();
+    if (isLight)
+    {
+        this->tabs.regular = {
+            .text = QColor("#444"),
+            .backgrounds = {Qt::white, QColor("#eee"), Qt::white},
+            .line = tabLine(Qt::white),
+        };
+        this->tabs.newMessage = {
+            .text = QColor("#222"),
+            .backgrounds = {Qt::white, QColor("#eee"), Qt::white},
+            .line = tabLine("#bbb"),
+        };
+        this->tabs.highlighted = {
+            .text = Qt::black,
+            .backgrounds = {Qt::white, QColor("#eee"), Qt::white},
+            .line = tabLine("#ff0000")};
+        this->tabs.selected = {
+            .text = Qt::black,
+            .backgrounds = tabBackground(QColor("#b4d7ff")),
+            .line = tabLine(this->accent),
+        };
     }
+    else
+    {
+        this->tabs.regular = {
+            .text = QColor("#aaa"),
+            .backgrounds = tabBackground(QColor("#252525")),
+            .line = tabLine("#444"),
+        };
+        this->tabs.newMessage = {
+            .text = QColor("#eee"),
+            .backgrounds = tabBackground(QColor("#252525")),
+            .line = tabLine("#888"),
+        };
+        this->tabs.highlighted = {
+            .text = QColor("#eee"),
+            .backgrounds = tabBackground(QColor("#252525")),
+            .line = tabLine("#ee6166"),
+        };
+
+        this->tabs.selected = {
+            .text = Qt::white,
+            .backgrounds = tabBackground(QColor("#555555")),
+            .line = tabLine(this->accent),
+        };
+    }
+
+    this->tabs.dividerLine = this->tabs.selected.backgrounds.regular.color();
 
     // Message
     this->messages.textColors.link = QColor(66, 134, 244);
