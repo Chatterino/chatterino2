@@ -39,8 +39,6 @@ public:
     struct {
         QColor background;
         QColor text;
-        QColor borderUnfocused;
-        QColor borderFocused;
     } window;
 
     /// TABS
@@ -49,7 +47,6 @@ public:
         TabColors newMessage;
         TabColors highlighted;
         TabColors selected;
-        QColor border;
         QColor dividerLine;
     } tabs;
 
@@ -66,12 +63,9 @@ public:
         struct {
             QColor regular;
             QColor alternate;
-            // QColor whisper;
         } backgrounds;
 
         QColor disabled;
-        //        QColor seperator;
-        //        QColor seperatorInner;
         QColor selection;
 
         QColor highlightAnimationStart;
@@ -83,17 +77,7 @@ public:
         QColor background;
         QColor thumb;
         QColor thumbSelected;
-        struct {
-            QColor highlight;
-            QColor subscription;
-        } highlights;
     } scrollbars;
-
-    /// TOOLTIP
-    struct {
-        QColor text;
-        QColor background;
-    } tooltip;
 
     /// SPLITS
     struct {
@@ -113,17 +97,12 @@ public:
             QColor focusedBackground;
             QColor text;
             QColor focusedText;
-            // int margin;
         } header;
 
         struct {
-            QColor border;
             QColor background;
-            QColor selection;
-            QColor focusedLine;
             QColor text;
             QString styleSheet;
-            // int margin;
         } input;
     } splits;
 

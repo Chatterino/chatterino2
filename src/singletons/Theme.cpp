@@ -88,10 +88,6 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->isLight_ = multiplier > 0;
     bool lightWin = isLight_;
 
-    //    QColor themeColor = QColor::fromHslF(hue, 0.43, 0.5);
-    QColor themeColor = QColor::fromHslF(hue, 0.8, 0.5);
-    QColor themeColorNoSat = QColor::fromHslF(hue, 0, 0.5);
-
     const auto sat = qreal(0);
     const auto isLight = this->isLightTheme();
     const auto flat = isLight;
@@ -109,15 +105,6 @@ void Theme::actuallyUpdate(double hue, double multiplier)
 #endif
 
         QColor fg = this->window.text = lightWin ? "#000" : "#eee";
-        this->window.borderFocused = lightWin ? "#ccc" : themeColor;
-        this->window.borderUnfocused = lightWin ? "#ccc" : themeColorNoSat;
-
-        // Ubuntu style
-        // TODO: add setting for this
-        //        TabText = QColor(210, 210, 210);
-        //        TabBackground = QColor(61, 60, 56);
-        //        TabHoverText = QColor(210, 210, 210);
-        //        TabHoverBackground = QColor(73, 72, 68);
 
         // message (referenced later)
         this->messages.textColors.caret =  //
@@ -166,28 +153,6 @@ void Theme::actuallyUpdate(double hue, double multiplier)
                 {this->accent, this->accent, this->accent}};
         }
 
-        // scrollbar
-        this->scrollbars.highlights.highlight = QColor("#ee6166");
-        this->scrollbars.highlights.subscription = QColor("#C466FF");
-
-        // this->tabs.newMessage = {
-        //     fg,
-        //     {QBrush(blendColors(themeColor, "#ccc", 0.9), Qt::FDiagPattern),
-        //      QBrush(blendColors(themeColor, "#ccc", 0.9), Qt::FDiagPattern),
-        //      QBrush(blendColors(themeColorNoSat, "#ccc", 0.9),
-        //      Qt::FDiagPattern)}};
-
-        //         this->tabs.newMessage = {
-        //                fg,
-        //                {QBrush(blendColors(themeColor, "#666", 0.7),
-        //                Qt::FDiagPattern),
-        //                 QBrush(blendColors(themeColor, "#666", 0.5),
-        //                 Qt::FDiagPattern),
-        //                 QBrush(blendColors(themeColorNoSat, "#666", 0.7),
-        //                 Qt::FDiagPattern)}};
-        //            this->tabs.highlighted = {fg, {QColor("#777"),
-        //            QColor("#777"), QColor("#666")}};
-
         this->tabs.dividerLine =
             this->tabs.selected.backgrounds.regular.color();
     }
@@ -202,11 +167,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->messages.backgrounds.regular = getColor(0, sat, 1);
     this->messages.backgrounds.alternate = getColor(0, sat, 0.96);
 
-    // this->messages.backgrounds.resub
-    // this->messages.backgrounds.whisper
     this->messages.disabled = getColor(0, sat, 1, 0.6);
-    // this->messages.seperator =
-    // this->messages.seperatorInner =
 
     int complementaryGray = this->isLightTheme() ? 20 : 230;
     this->messages.highlightAnimationStart =
@@ -216,14 +177,8 @@ void Theme::actuallyUpdate(double hue, double multiplier)
 
     // Scrollbar
     this->scrollbars.background = QColor(0, 0, 0, 0);
-    //    this->scrollbars.background = splits.background;
-    //    this->scrollbars.background.setAlphaF(qreal(0.2));
     this->scrollbars.thumb = getColor(0, sat, 0.70);
     this->scrollbars.thumbSelected = getColor(0, sat, 0.65);
-
-    // tooltip
-    this->tooltip.background = QColor(0, 0, 0);
-    this->tooltip.text = QColor(255, 255, 255);
 
     // Selection
     this->messages.selection =
@@ -256,7 +211,6 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         0.58388, isLight ? 1.0 : 0.482, isLight ? 0.6375 : 1.0);
 
     this->splits.input.background = getColor(0, sat, flat ? 0.95 : 0.95);
-    this->splits.input.border = getColor(0, sat, flat ? 1 : 1);
     this->splits.input.text = this->messages.textColors.regular;
     this->splits.input.styleSheet =
         "background:" + this->splits.input.background.name() + ";" +
@@ -265,8 +219,6 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         "selection-background-color:" +
         (isLight ? "#68B1FF"
                  : this->tabs.selected.backgrounds.regular.color().name());
-
-    this->splits.input.focusedLine = this->tabs.highlighted.line.regular;
 
     this->splits.messageSeperator =
         isLight ? QColor(127, 127, 127) : QColor(60, 60, 60);
