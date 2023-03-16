@@ -174,7 +174,7 @@ void Theme::actuallyUpdate(double multiplier)
         (isLight ? "#68B1FF" : this->tabs.selected.backgrounds.regular.name());
 
     this->splits.messageSeperator =
-        QColor::fromHslF(0, 0, isLight ? 0.5 : 0.24);
+        isLight ? QColor(127, 127, 127) : QColor(60, 60, 60);
     this->splits.background = getGray(1);
 
     // Copy button
