@@ -130,8 +130,7 @@ void Theme::actuallyUpdate(double multiplier)
     }
 
     // Message
-    this->messages.textColors.link =
-        isLight ? QColor(66, 134, 244) : QColor(66, 134, 244);
+    this->messages.textColors.link = QColor(66, 134, 244);
     this->messages.textColors.system = QColor(140, 127, 127);
     this->messages.textColors.chatPlaceholder =
         isLight ? QColor(175, 159, 159) : QColor(93, 85, 85);
@@ -181,7 +180,7 @@ void Theme::actuallyUpdate(double multiplier)
     this->splits.header.focusedText = QColor::fromHsvF(
         0.58388, isLight ? 1.0 : 0.482, isLight ? 0.6375 : 1.0);
 
-    this->splits.input.background = getGray(isLight ? 0.95 : 0.95);
+    this->splits.input.background = getGray(0.95);
     this->splits.input.text = this->messages.textColors.regular;
     this->splits.input.styleSheet =
         "background:" + this->splits.input.background.name() + ";" +
