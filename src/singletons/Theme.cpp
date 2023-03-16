@@ -8,8 +8,6 @@
 
 #include <cmath>
 
-#define LOOKUP_COLOR_COUNT 360
-
 namespace {
 double getMultiplierByTheme(const QString &themeName)
 {
@@ -45,16 +43,6 @@ namespace chatterino {
 bool Theme::isLightTheme() const
 {
     return this->isLight_;
-}
-
-QColor Theme::blendColors(const QColor &color1, const QColor &color2,
-                          qreal ratio)
-{
-    int r = int(color1.red() * (1 - ratio) + color2.red() * ratio);
-    int g = int(color1.green() * (1 - ratio) + color2.green() * ratio);
-    int b = int(color1.blue() * (1 - ratio) + color2.blue() * ratio);
-
-    return QColor(r, g, b, 255);
 }
 
 Theme::Theme()
