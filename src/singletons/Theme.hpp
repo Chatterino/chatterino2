@@ -113,16 +113,14 @@ public:
 
     void normalizeColor(QColor &color);
     void update();
-    QColor blendColors(const QColor &color1, const QColor &color2, qreal ratio);
 
     pajlada::Signals::NoArgSignal updated;
 
     QStringSetting themeName{"/appearance/theme/name", "Dark"};
-    DoubleSetting themeHue{"/appearance/theme/hue", 0.0};
 
 private:
     bool isLight_ = false;
-    void actuallyUpdate(double hue, double multiplier);
+    void actuallyUpdate(double multiplier);
 
     pajlada::Signals::NoArgSignal repaintVisibleChatWidgets_;
 

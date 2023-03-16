@@ -66,24 +66,17 @@ Theme::Theme()
             this->update();
         },
         false);
-    this->themeHue.connectSimple(
-        [this](auto) {
-            this->update();
-        },
-        false);
 }
 
 void Theme::update()
 {
-    this->actuallyUpdate(this->themeHue,
-                         getMultiplierByTheme(this->themeName.getValue()));
+    this->actuallyUpdate(getMultiplierByTheme(this->themeName.getValue()));
 
     this->updated.invoke();
 }
 
-// hue: theme color (0 - 1)
 // multiplier: 1 = white, 0.8 = light, -0.8 dark, -1 black
-void Theme::actuallyUpdate(double hue, double multiplier)
+void Theme::actuallyUpdate(double multiplier)
 {
     this->isLight_ = multiplier > 0;
     bool lightWin = isLight_;
