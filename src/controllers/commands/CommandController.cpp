@@ -3194,6 +3194,11 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     QString commandName = words[0];
 
+    if (commandName.startsWith("."))
+    {
+        commandName.replace(0, 1, "/");
+    }
+
     {
         // check if user command exists
         const auto it = this->userCommands_.find(commandName);
