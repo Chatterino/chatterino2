@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Dev: Only log debug messages when NDEBUG is not defined. (#4442)
+- Minor: Fixed dot commands not being recognized. (#4455)
 
 ## 2.4.2
 
