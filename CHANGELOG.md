@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Dev: Only log debug messages when NDEBUG is not defined. (#4442)
+- Dev: Cleaned up theme related code. (#4450)
 
 ## 2.4.2
 
