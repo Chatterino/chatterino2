@@ -109,17 +109,20 @@ void TooltipWidget::setVisibleEntries(int n)
 {
     for (int i = 0; i < this->currentLayoutCount(); ++i)
     {
-        if (auto entry = this->entryAt(i))
+        auto *entry = this->entryAt(i);
+        if (entry == nullptr)
         {
-            if (i >= n)
-            {
-                entry->hide();
-                entry->clearImage();
-            }
-            else
-            {
-                entry->show();
-            }
+            continue;
+        }
+
+        if (i >= n)
+        {
+            entry->hide();
+            entry->clearImage();
+        }
+        else
+        {
+            entry->show();
         }
     }
     this->visibleEntries_ = n;
