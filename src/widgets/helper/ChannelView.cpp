@@ -2203,7 +2203,7 @@ void ChannelView::addImageContextMenuItems(
             for (auto &emote : layeredElement->getUniqueEmotes())
             {
                 auto emoteAction = menu.addAction(emote->name.string);
-                auto emoteMenu = new QMenu;
+                auto emoteMenu = new QMenu(&menu);
                 emoteAction->setMenu(emoteMenu);
                 addEmoteContextMenuItems(*emote, creatorFlags, *emoteMenu);
             }
