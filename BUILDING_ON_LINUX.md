@@ -8,7 +8,7 @@ Note on Qt version compatibility: If you are installing Qt from a package manage
 
 _Most likely works the same for other Debian-like distros_
 
-Install all of the dependencies using `sudo apt install qttools5-dev qt5-image-formats-plugins libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev libboost-filesystem-dev cmake g++`
+Install all of the dependencies using `sudo apt install qttools5-dev qt5-image-formats-plugins libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev libboost-filesystem-dev cmake g++ libsecret-1-dev`
 
 ### Arch Linux
 

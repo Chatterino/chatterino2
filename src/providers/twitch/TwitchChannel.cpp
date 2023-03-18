@@ -1720,11 +1720,10 @@ void TwitchChannel::upsertPersonalSeventvEmotes(
                         {
                             MessageElementFlags emoteFlags(
                                 MessageElementFlag::SevenTVEmote);
-                            if (emoteIt->second->zeroWidth)
-                            {
-                                emoteFlags.set(
-                                    MessageElementFlag::ZeroWidthEmote);
-                            }
+                            // TODO: This doesn't support zero-width emotes.
+                            // To support these emotes, we'd now need to look back at the added elements
+                            // and insert/update a LayeredEmoteElement.
+                            // As of now, this requires too much effort.
 
                             flush();
                             elements.emplace_back(
