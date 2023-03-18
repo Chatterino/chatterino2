@@ -51,12 +51,12 @@ void NotebookButton::paintEvent(QPaintEvent *event)
 
     if (mouseDown_ || mouseOver_)
     {
-        background = this->theme->tabs.regular.backgrounds.hover.color();
+        background = this->theme->tabs.regular.backgrounds.hover;
         foreground = this->theme->tabs.regular.text;
     }
     else
     {
-        background = this->theme->tabs.regular.backgrounds.regular.color();
+        background = this->theme->tabs.regular.backgrounds.regular;
         foreground = this->theme->tabs.regular.text;
     }
 

@@ -15,6 +15,24 @@
 
 namespace chatterino {
 
+namespace {
+
+    // Computes the bounding box for the given vector of images
+    QSize getBoundingBoxSize(const std::vector<ImagePtr> &images)
+    {
+        int width = 0;
+        int height = 0;
+        for (const auto &img : images)
+        {
+            width = std::max(width, img->width());
+            height = std::max(height, img->height());
+        }
+
+        return QSize(width, height);
+    }
+
+}  // namespace
+
 MessageElement::MessageElement(MessageElementFlags flags)
     : flags_(flags)
 {
@@ -214,6 +232,168 @@ MessageLayoutElement *EmoteElement::makeImageLayoutElement(
     const ImagePtr &image, const QSize &size)
 {
     return new ImageLayoutElement(*this, image, size);
+}
+
+LayeredEmoteElement::LayeredEmoteElement(std::vector<EmotePtr> &&emotes,
+                                         MessageElementFlags flags,
+                                         const MessageColor &textElementColor)
+    : MessageElement(flags)
+    , emotes_(std::move(emotes))
+    , textElementColor_(textElementColor)
+{
+    this->updateTooltips();
+}
+
+void LayeredEmoteElement::addEmoteLayer(const EmotePtr &emote)
+{
+    this->emotes_.push_back(emote);
+    this->updateTooltips();
+}
+
+void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
+                                         MessageElementFlags flags)
+{
+    if (flags.hasAny(this->getFlags()))
+    {
+        if (flags.has(MessageElementFlag::EmoteImages))
+        {
+            auto images = this->getLoadedImages(container.getScale());
+            if (images.empty())
+            {
+                return;
+            }
+
+            auto emoteScale = getSettings()->emoteScale.getValue();
+            float overallScale = emoteScale * container.getScale();
+
+            auto largestSize = getBoundingBoxSize(images) * overallScale;
+            std::vector<QSize> individualSizes;
+            individualSizes.reserve(this->emotes_.size());
+            for (auto img : images)
+            {
+                individualSizes.push_back(QSize(img->width(), img->height()) *
+                                          overallScale);
+            }
+
+            container.addElement(this->makeImageLayoutElement(
+                                         images, individualSizes, largestSize)
+                                     ->setLink(this->getLink()));
+        }
+        else
+        {
+            if (this->textElement_)
+            {
+                this->textElement_->addToContainer(container,
+                                                   MessageElementFlag::Misc);
+            }
+        }
+    }
+}
+
+std::vector<ImagePtr> LayeredEmoteElement::getLoadedImages(float scale)
+{
+    std::vector<ImagePtr> res;
+    res.reserve(this->emotes_.size());
+
+    for (auto emote : this->emotes_)
+    {
+        auto image = emote->images.getImageOrLoaded(scale);
+        if (image->isEmpty())
+        {
+            continue;
+        }
+        res.push_back(image);
+    }
+    return res;
+}
+
+MessageLayoutElement *LayeredEmoteElement::makeImageLayoutElement(
+    const std::vector<ImagePtr> &images, const std::vector<QSize> &sizes,
+    QSize largestSize)
+{
+    return new LayeredImageLayoutElement(*this, images, sizes, largestSize);
+}
+
+void LayeredEmoteElement::updateTooltips()
+{
+    if (!this->emotes_.empty())
+    {
+        QString copyStr = this->getCopyString();
+        this->textElement_.reset(new TextElement(
+            copyStr, MessageElementFlag::Misc, this->textElementColor_));
+        this->setTooltip(copyStr);
+    }
+
+    std::vector<QString> result;
+    result.reserve(this->emotes_.size());
+
+    for (auto &emote : this->emotes_)
+    {
+        result.push_back(emote->tooltip.string);
+    }
+
+    this->emoteTooltips_ = std::move(result);
+}
+
+const std::vector<QString> &LayeredEmoteElement::getEmoteTooltips() const
+{
+    return this->emoteTooltips_;
+}
+
+QString LayeredEmoteElement::getCleanCopyString() const
+{
+    QString result;
+    for (size_t i = 0; i < this->emotes_.size(); ++i)
+    {
+        if (i != 0)
+        {
+            result += " ";
+        }
+        result +=
+            TwitchEmotes::cleanUpEmoteCode(this->emotes_[i]->getCopyString());
+    }
+    return result;
+}
+
+QString LayeredEmoteElement::getCopyString() const
+{
+    QString result;
+    for (size_t i = 0; i < this->emotes_.size(); ++i)
+    {
+        if (i != 0)
+        {
+            result += " ";
+        }
+        result += this->emotes_[i]->getCopyString();
+    }
+    return result;
+}
+
+const std::vector<EmotePtr> &LayeredEmoteElement::getEmotes() const
+{
+    return this->emotes_;
+}
+
+std::vector<EmotePtr> LayeredEmoteElement::getUniqueEmotes() const
+{
+    // Functor for std::copy_if that keeps track of seen elements
+    struct NotDuplicate {
+        bool operator()(const EmotePtr &element)
+        {
+            return seen.insert(element).second;
+        }
+
+    private:
+        std::set<EmotePtr> seen;
+    };
+
+    // Get unique emotes while maintaining relative layering order
+    NotDuplicate dup;
+    std::vector<EmotePtr> unique;
+    std::copy_if(this->emotes_.begin(), this->emotes_.end(),
+                 std::back_insert_iterator(unique), dup);
+
+    return unique;
 }
 
 // BADGE
