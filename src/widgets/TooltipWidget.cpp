@@ -111,14 +111,14 @@ void TooltipWidget::setVisibleEntries(int n)
     {
         if (auto entry = this->entryAt(i))
         {
-            if (i <= n - 1)
-            {
-                entry->show();
-            }
-            else
+            if (i >= n)
             {
                 entry->hide();
                 entry->clearImage();
+            }
+            else
+            {
+                entry->show();
             }
         }
     }
