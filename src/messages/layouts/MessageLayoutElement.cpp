@@ -15,18 +15,17 @@
 namespace {
 
 const QChar RTL_EMBED(0x202B);
+
+void alignRectBottomCenter(QRectF &rect, const QRectF &reference)
+{
+    QPointF newCenter(reference.center().x(),
+                      reference.bottom() - (rect.height() / 2.0));
+    rect.moveCenter(newCenter);
+}
+
 }  // namespace
 
 namespace chatterino {
-
-namespace {
-    void alignRectBottomCenter(QRectF &rect, const QRectF &reference)
-    {
-        QPointF newCenter(reference.center().x(),
-                          reference.bottom() - (rect.height() / 2.0));
-        rect.moveCenter(newCenter);
-    }
-}  // namespace
 
 const QRect &MessageLayoutElement::getRect() const
 {
