@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added support for FrankerFaceZ animated emotes. (#4434)
 - Dev: Only log debug messages when NDEBUG is not defined. (#4442)
 - Dev: Cleaned up theme related code. (#4450)
 
