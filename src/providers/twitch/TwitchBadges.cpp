@@ -9,9 +9,11 @@
 #include "util/DisplayBadge.hpp"
 
 #include <QBuffer>
+#include <QFile>
 #include <QIcon>
 #include <QImageReader>
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonValue>
 #include <QThread>
 #include <QUrlQuery>
@@ -43,10 +45,24 @@ void TwitchBadges::loadTwitchBadges()
             return Success;
         })
         .onError([this](auto res) {
-            qCDebug(chatterinoTwitch)
-                << "Error loading Twitch Badges:" << res.status();
-            // Despite erroring out, we still want to reach the same point
-            // Loaded should still be set to true to not build up an endless queue, and the quuee should still be flushed.
+            qCWarning(chatterinoTwitch)
+                << "Error loading Twitch Badges from the badges API:"
+                << res.status() << " - falling back to backup";
+            QFile file(":/twitch-badges.json");
+            if (!file.open(QFile::ReadOnly))
+            {
+                // Despite erroring out, we still want to reach the same point
+                // Loaded should still be set to true to not build up an endless queue, and the quuee should still be flushed.
+                qCWarning(chatterinoTwitch)
+                    << "Error loading Twitch Badges from the local backup file";
+                this->loaded();
+                return;
+            }
+            auto bytes = file.readAll();
+            auto doc = QJsonDocument::fromJson(bytes);
+
+            this->parseTwitchBadges(doc.object());
+
             this->loaded();
         })
         .execute();
