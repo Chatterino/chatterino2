@@ -8,6 +8,7 @@
 
 #include <QUrl>
 #include <QUrlQuery>
+
 #include <map>
 
 namespace chatterino {
