@@ -12,7 +12,6 @@
 #include <QIcon>
 #include <QImageReader>
 #include <QJsonArray>
-#include <QJsonObject>
 #include <QJsonValue>
 #include <QThread>
 #include <QUrlQuery>
@@ -36,45 +35,10 @@ void TwitchBadges::loadTwitchBadges()
 
     NetworkRequest(url)
         .onSuccess([this](auto result) -> Outcome {
-            {
-                auto root = result.parseJson();
-                auto badgeSets = this->badgeSets_.access();
+            auto root = result.parseJson();
 
-                auto jsonSets = root.value("badge_sets").toObject();
-                for (auto sIt = jsonSets.begin(); sIt != jsonSets.end(); ++sIt)
-                {
-                    auto key = sIt.key();
-                    auto versions =
-                        sIt.value().toObject().value("versions").toObject();
+            this->parseTwitchBadges(root);
 
-                    for (auto vIt = versions.begin(); vIt != versions.end();
-                         ++vIt)
-                    {
-                        auto versionObj = vIt.value().toObject();
-
-                        auto emote = Emote{
-                            {""},
-                            ImageSet{
-                                Image::fromUrl({versionObj.value("image_url_1x")
-                                                    .toString()},
-                                               1),
-                                Image::fromUrl({versionObj.value("image_url_2x")
-                                                    .toString()},
-                                               .5),
-                                Image::fromUrl({versionObj.value("image_url_4x")
-                                                    .toString()},
-                                               .25),
-                            },
-                            Tooltip{versionObj.value("title").toString()},
-                            Url{versionObj.value("click_url").toString()}};
-                        // "title"
-                        // "clickAction"
-
-                        (*badgeSets)[key][vIt.key()] =
-                            std::make_shared<Emote>(emote);
-                    }
-                }
-            }
             this->loaded();
             return Success;
         })
@@ -86,6 +50,40 @@ void TwitchBadges::loadTwitchBadges()
             this->loaded();
         })
         .execute();
+}
+
+void TwitchBadges::parseTwitchBadges(QJsonObject root)
+{
+    auto badgeSets = this->badgeSets_.access();
+
+    auto jsonSets = root.value("badge_sets").toObject();
+    for (auto sIt = jsonSets.begin(); sIt != jsonSets.end(); ++sIt)
+    {
+        auto key = sIt.key();
+        auto versions = sIt.value().toObject().value("versions").toObject();
+
+        for (auto vIt = versions.begin(); vIt != versions.end(); ++vIt)
+        {
+            auto versionObj = vIt.value().toObject();
+
+            auto emote = Emote{
+                {""},
+                ImageSet{
+                    Image::fromUrl(
+                        {versionObj.value("image_url_1x").toString()}, 1),
+                    Image::fromUrl(
+                        {versionObj.value("image_url_2x").toString()}, .5),
+                    Image::fromUrl(
+                        {versionObj.value("image_url_4x").toString()}, .25),
+                },
+                Tooltip{versionObj.value("title").toString()},
+                Url{versionObj.value("click_url").toString()}};
+            // "title"
+            // "clickAction"
+
+            (*badgeSets)[key][vIt.key()] = std::make_shared<Emote>(emote);
+        }
+    }
 }
 
 void TwitchBadges::loaded()
