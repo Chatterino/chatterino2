@@ -113,13 +113,9 @@ enum class MessageElementFlag : int64_t {
     // - FFZ donator badge
     BadgeFfz = (1LL << 19),
 
-    // Slot 8: Dankerino
-    // - Dankerino contributor badge
-    BadgeDankerino = (1LL << 37),
-
     Badges = BadgeGlobalAuthority | BadgePredictions | BadgeChannelAuthority |
-             BadgeSubscription | BadgeVanity | BadgeChatterino |
-             BadgeDankerino | BadgeSevenTV | BadgeFfz,
+             BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeSevenTV |
+             BadgeFfz,
 
     ChannelName = (1LL << 20),
 
@@ -159,7 +155,6 @@ enum class MessageElementFlag : int64_t {
 
     // (1LL << 34) through (1LL << 36) are occupied by
     // SevenTVEmoteImage, SevenTVEmoteText, and BadgeSevenTV,
-    // (1LL << 37) is used by BadgeDankerino
 
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | SevenTVEmoteImage | TwitchEmoteImage |

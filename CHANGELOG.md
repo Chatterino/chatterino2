@@ -2,6 +2,13 @@
 
 ## Unversioned
 
+### Dankerino
+
+- Major: Code cleanup - removed broken Dankerino badges (#137)
+- Minor: Code cleanup - updated image code to match upstream, removed 4x (#137)
+
+### Chatterino
+
 - Minor: Delete all but the last 5 crashdumps on application start. (#4392)
 - Minor: Added `/banid` command that allows banning by user ID. (#4411)
 - Bugfix: Fixed FrankerFaceZ emotes/badges not loading due to API change. (#4432)

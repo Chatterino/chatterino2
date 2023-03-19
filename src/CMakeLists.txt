@@ -217,9 +217,6 @@ set(SOURCE_FILES
         providers/bttv/liveupdates/BttvLiveUpdateSubscription.cpp
         providers/bttv/liveupdates/BttvLiveUpdateSubscription.hpp
 
-        providers/dankerino/DankerinoBadges.cpp
-        providers/dankerino/DankerinoBadges.hpp
-
         providers/chatterino/ChatterinoBadges.cpp
         providers/chatterino/ChatterinoBadges.hpp
 

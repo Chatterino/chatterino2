@@ -12,7 +12,6 @@
 #include "messages/MessageThread.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/colors/ColorProvider.hpp"
-#include "providers/dankerino/DankerinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -304,7 +303,6 @@ MessagePtr TwitchMessageBuilder::build()
     this->appendTwitchBadges();
 
     this->appendChatterinoBadges();
-    this->appendDankerinoBadges();
     this->appendSeventvBadges();
     this->appendFfzBadges();
 
@@ -1305,14 +1303,6 @@ void TwitchMessageBuilder::appendChatterinoBadges()
     {
         this->emplace<BadgeElement>(*badge,
                                     MessageElementFlag::BadgeChatterino);
-    }
-}
-
-void TwitchMessageBuilder::appendDankerinoBadges()
-{
-    if (auto badge = getApp()->dankerinoBadges->getBadge({this->userId_}))
-    {
-        this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeDankerino);
     }
 }
 
