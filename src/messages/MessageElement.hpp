@@ -141,9 +141,7 @@ enum class MessageElementFlag : int64_t {
     LowercaseLink = (1LL << 29),
     OriginalLink = (1LL << 30),
 
-    // ZeroWidthEmotes are emotes that are supposed to overlay over any pre-existing emotes
-    // e.g. BTTV's SoSnowy during christmas season or 7TV's RainTime
-    ZeroWidthEmote = (1LL << 31),
+    // Unused: (1LL << 31)
 
     // for elements of the message reply
     RepliedMessage = (1LL << 32),
@@ -321,6 +319,43 @@ protected:
 private:
     std::unique_ptr<TextElement> textElement_;
     EmotePtr emote_;
+};
+
+// A LayeredEmoteElement represents multiple Emotes layered on top of each other.
+// This class takes care of rendering animated and non-animated emotes in the
+// correct order and aligning them in the right way.
+class LayeredEmoteElement : public MessageElement
+{
+public:
+    LayeredEmoteElement(
+        std::vector<EmotePtr> &&emotes, MessageElementFlags flags,
+        const MessageColor &textElementColor = MessageColor::Text);
+
+    void addEmoteLayer(const EmotePtr &emote);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+    // Returns a concatenation of each emote layer's cleaned copy string
+    QString getCleanCopyString() const;
+    const std::vector<EmotePtr> &getEmotes() const;
+    std::vector<EmotePtr> getUniqueEmotes() const;
+    const std::vector<QString> &getEmoteTooltips() const;
+
+private:
+    MessageLayoutElement *makeImageLayoutElement(
+        const std::vector<ImagePtr> &image, const std::vector<QSize> &sizes,
+        QSize largestSize);
+
+    QString getCopyString() const;
+    void updateTooltips();
+    std::vector<ImagePtr> getLoadedImages(float scale);
+
+    std::vector<EmotePtr> emotes_;
+    std::vector<QString> emoteTooltips_;
+
+    std::unique_ptr<TextElement> textElement_;
+    MessageColor textElementColor_;
 };
 
 class BadgeElement : public MessageElement

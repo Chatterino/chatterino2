@@ -1080,6 +1080,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
+    bool zeroWidth = false;
 
     // Emote order:
     //  - FrankerFaceZ Channel
@@ -1101,10 +1102,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
              (emote = this->twitchChannel->seventvEmote(name)))
     {
         flags = MessageElementFlag::SevenTVEmote;
-        if (emote.value()->zeroWidth)
-        {
-            flags.set(MessageElementFlag::ZeroWidthEmote);
-        }
+        zeroWidth = emote.value()->zeroWidth;
     }
     else if ((emote = globalFfzEmotes.emote(name)))
     {
@@ -1113,23 +1111,45 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     else if ((emote = globalBttvEmotes.emote(name)))
     {
         flags = MessageElementFlag::BttvEmote;
-
-        if (zeroWidthEmotes.contains(name.string))
-        {
-            flags.set(MessageElementFlag::ZeroWidthEmote);
-        }
+        zeroWidth = zeroWidthEmotes.contains(name.string);
     }
     else if ((emote = globalSeventvEmotes.globalEmote(name)))
     {
         flags = MessageElementFlag::SevenTVEmote;
-        if (emote.value()->zeroWidth)
-        {
-            flags.set(MessageElementFlag::ZeroWidthEmote);
-        }
+        zeroWidth = emote.value()->zeroWidth;
     }
 
     if (emote)
     {
+        if (zeroWidth && getSettings()->enableZeroWidthEmotes &&
+            !this->isEmpty())
+        {
+            // Attempt to merge current zero-width emote into any previous emotes
+            auto asEmote = dynamic_cast<EmoteElement *>(&this->back());
+            if (asEmote)
+            {
+                // Make sure to access asEmote before taking ownership when releasing
+                auto baseEmote = asEmote->getEmote();
+                // Need to remove EmoteElement and replace with LayeredEmoteElement
+                auto baseEmoteElement = this->releaseBack();
+
+                std::vector<EmotePtr> layers = {baseEmote, emote.get()};
+                this->emplace<LayeredEmoteElement>(std::move(layers),
+                                                   baseEmoteElement->getFlags(),
+                                                   this->textColor_);
+                return Success;
+            }
+
+            auto asLayered = dynamic_cast<LayeredEmoteElement *>(&this->back());
+            if (asLayered)
+            {
+                asLayered->addEmoteLayer(emote.get());
+                return Success;
+            }
+
+            // No emote to merge with, just show as regular emote
+        }
+
         this->emplace<EmoteElement>(emote.get(), flags, this->textColor_);
         return Success;
     }

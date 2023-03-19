@@ -283,10 +283,9 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
         }
         else
         {
-            color =
-                isWindowFocused
-                    ? app->themes->tabs.selected.backgrounds.regular.color()
-                    : app->themes->tabs.selected.backgrounds.unfocused.color();
+            color = isWindowFocused
+                        ? app->themes->tabs.selected.backgrounds.regular
+                        : app->themes->tabs.selected.backgrounds.unfocused;
         }
 
         QBrush brush(color, static_cast<Qt::BrushStyle>(

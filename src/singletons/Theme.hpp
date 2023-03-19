@@ -5,8 +5,8 @@
 #include "util/RapidJsonSerializeQString.hpp"
 
 #include <pajlada/settings/setting.hpp>
-#include <QBrush>
 #include <QColor>
+#include <QPixmap>
 
 namespace chatterino {
 
@@ -22,9 +22,9 @@ public:
     struct TabColors {
         QColor text;
         struct {
-            QBrush regular;
-            QBrush hover;
-            QBrush unfocused;
+            QColor regular;
+            QColor hover;
+            QColor unfocused;
         } backgrounds;
         struct {
             QColor regular;
@@ -39,8 +39,6 @@ public:
     struct {
         QColor background;
         QColor text;
-        QColor borderUnfocused;
-        QColor borderFocused;
     } window;
 
     /// TABS
@@ -49,7 +47,6 @@ public:
         TabColors newMessage;
         TabColors highlighted;
         TabColors selected;
-        QColor border;
         QColor dividerLine;
     } tabs;
 
@@ -66,12 +63,9 @@ public:
         struct {
             QColor regular;
             QColor alternate;
-            // QColor whisper;
         } backgrounds;
 
         QColor disabled;
-        //        QColor seperator;
-        //        QColor seperatorInner;
         QColor selection;
 
         QColor highlightAnimationStart;
@@ -83,17 +77,7 @@ public:
         QColor background;
         QColor thumb;
         QColor thumbSelected;
-        struct {
-            QColor highlight;
-            QColor subscription;
-        } highlights;
     } scrollbars;
-
-    /// TOOLTIP
-    struct {
-        QColor text;
-        QColor background;
-    } tooltip;
 
     /// SPLITS
     struct {
@@ -113,17 +97,12 @@ public:
             QColor focusedBackground;
             QColor text;
             QColor focusedText;
-            // int margin;
         } header;
 
         struct {
-            QColor border;
             QColor background;
-            QColor selection;
-            QColor focusedLine;
             QColor text;
             QString styleSheet;
-            // int margin;
         } input;
     } splits;
 
@@ -132,18 +111,16 @@ public:
         QPixmap pin;
     } buttons;
 
-    void normalizeColor(QColor &color);
+    void normalizeColor(QColor &color) const;
     void update();
-    QColor blendColors(const QColor &color1, const QColor &color2, qreal ratio);
 
     pajlada::Signals::NoArgSignal updated;
 
     QStringSetting themeName{"/appearance/theme/name", "Dark"};
-    DoubleSetting themeHue{"/appearance/theme/hue", 0.0};
 
 private:
     bool isLight_ = false;
-    void actuallyUpdate(double hue, double multiplier);
+    void actuallyUpdate(double multiplier);
 
     pajlada::Signals::NoArgSignal repaintVisibleChatWidgets_;
 

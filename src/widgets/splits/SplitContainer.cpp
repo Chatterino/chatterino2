@@ -688,10 +688,9 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
                          rect.top() + rect.height() / 2 + (s / 2));
     }
 
-    QBrush accentColor =
-        (QApplication::activeWindow() == this->window()
-             ? this->theme->tabs.selected.backgrounds.regular
-             : this->theme->tabs.selected.backgrounds.unfocused);
+    auto accentColor = (QApplication::activeWindow() == this->window()
+                            ? this->theme->tabs.selected.backgrounds.regular
+                            : this->theme->tabs.selected.backgrounds.unfocused);
 
     painter.fillRect(0, 0, width(), 1, accentColor);
 }

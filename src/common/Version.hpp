@@ -24,7 +24,7 @@
  *  - 2.4.0-alpha.2
  *  - 2.4.0-alpha
  **/
-#define CHATTERINO_VERSION "2.4.1"
+#define CHATTERINO_VERSION "2.4.2"
 
 #if defined(Q_OS_WIN)
 #    define CHATTERINO_OS "win"
