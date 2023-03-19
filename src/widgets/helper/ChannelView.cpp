@@ -1710,7 +1710,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
                         for (size_t i = 0; i < upperLimit; ++i)
                         {
-                            auto &emote = layeredEmotes[i];
+                            const auto &emote = layeredEmotes[i].ptr;
                             if (i == 0)
                             {
                                 // First entry gets a large image and full description
@@ -2202,10 +2202,10 @@ void ChannelView::addImageContextMenuItems(
             // Give each emote its own submenu
             for (auto &emote : layeredElement->getUniqueEmotes())
             {
-                auto emoteAction = menu.addAction(emote->name.string);
+                auto emoteAction = menu.addAction(emote.ptr->name.string);
                 auto emoteMenu = new QMenu(&menu);
                 emoteAction->setMenu(emoteMenu);
-                addEmoteContextMenuItems(*emote, creatorFlags, *emoteMenu);
+                addEmoteContextMenuItems(*emote.ptr, emote.flags, *emoteMenu);
             }
         }
     }
