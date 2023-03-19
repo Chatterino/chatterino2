@@ -84,12 +84,6 @@ void sendWhisperMessage(const QString &text)
     auto app = getApp();
     QString toSend = text.simplified();
 
-    // This is to make sure that combined emoji go through properly, see
-    // https://github.com/Chatterino/chatterino2/issues/3384 and
-    // https://mm2pl.github.io/emoji_rfc.pdf for more details
-    // Constants used here are defined in TwitchChannel.hpp
-    toSend.replace(ZERO_WIDTH_JOINER, ESCAPE_TAG);
-
     app->twitch->sendMessage("jtv", toSend);
 }
 
@@ -961,7 +955,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                                   QString message) {
         using Error = HelixGetChattersError;
 
-        QString errorMessage = QString("Failed to get chatter count: ");
+        QString errorMessage = QString("Failed to get chatter count - ");
 
         switch (error)
         {
@@ -1069,7 +1063,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto formatModsError = [](HelixGetModeratorsError error, QString message) {
         using Error = HelixGetModeratorsError;
 
-        QString errorMessage = QString("Failed to get moderators: ");
+        QString errorMessage = QString("Failed to get moderators - ");
 
         switch (error)
         {
@@ -2638,7 +2632,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     auto formatBanTimeoutError =
         [](const char *operation, HelixBanUserError error,
-           const QString &message, const QString &userDisplayName) -> QString {
+           const QString &message, const QString &userTarget) -> QString {
         using Error = HelixBanUserError;
 
         QString errorMessage = QString("Failed to %1 user - ").arg(operation);
@@ -2665,7 +2659,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             case Error::TargetBanned: {
                 // Equivalent IRC error
                 errorMessage += QString("%1 is already banned in this channel.")
-                                    .arg(userDisplayName);
+                                    .arg(userTarget);
             }
             break;
 
@@ -2675,8 +2669,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                 // The messages from IRC are formatted like this:
                 // "You cannot {op} moderator {mod} unless you are the owner of this channel."
                 // "You cannot {op} the broadcaster."
-                errorMessage += QString("You cannot %1 %2.")
-                                    .arg(operation, userDisplayName);
+                errorMessage +=
+                    QString("You cannot %1 %2.").arg(operation, userTarget);
             }
             break;
 
@@ -2830,6 +2824,53 @@ void CommandController::initialize(Settings &, Paths &paths)
                 // Equivalent error from IRC
                 channel->addMessage(makeSystemMessage(
                     QString("Invalid username: %1").arg(target)));
+            });
+
+        return "";
+    });
+
+    this->registerCommand("/banid", [formatBanTimeoutError](
+                                        const QStringList &words,
+                                        auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The /banid command only works in Twitch channels")));
+            return "";
+        }
+
+        const auto *usageStr =
+            "Usage: \"/banid <userID> [reason]\" - Permanently prevent a user "
+            "from chatting via their user ID. Reason is optional and will be "
+            "shown to the target user and other moderators.";
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(usageStr));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to ban someone!"));
+            return "";
+        }
+
+        auto target = words.at(1);
+        auto reason = words.mid(2).join(' ');
+
+        getHelix()->banUser(
+            twitchChannel->roomId(), currentUser->getUserId(), target,
+            boost::none, reason,
+            [] {
+                // No response for bans, they're emitted over pubsub/IRC instead
+            },
+            [channel, target, formatBanTimeoutError](auto error, auto message) {
+                auto errorMessage =
+                    formatBanTimeoutError("ban", error, message, "#" + target);
+                channel->addMessage(makeSystemMessage(errorMessage));
             });
 
         return "";
@@ -3197,7 +3238,8 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         }
     }
 
-    auto maxSpaces = std::min(this->maxSpaces_, words.length() - 1);
+    // We have checks to ensure words cannot be empty, so this can never wrap around
+    auto maxSpaces = std::min(this->maxSpaces_, (qsizetype)words.length() - 1);
     for (int i = 0; i < maxSpaces; ++i)
     {
         commandName += ' ' + words[i + 1];

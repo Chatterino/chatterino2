@@ -140,6 +140,9 @@ set(SOURCE_FILES
         controllers/userdata/UserDataController.hpp
         controllers/userdata/UserData.hpp
 
+        controllers/sound/SoundController.cpp
+        controllers/sound/SoundController.hpp
+
         debug/Benchmark.cpp
         debug/Benchmark.hpp
 
@@ -188,10 +191,14 @@ set(SOURCE_FILES
         messages/search/SubtierPredicate.cpp
         messages/search/SubtierPredicate.hpp
 
+        providers/Crashpad.cpp
+        providers/Crashpad.hpp
         providers/IvrApi.cpp
         providers/IvrApi.hpp
         providers/LinkResolver.cpp
         providers/LinkResolver.hpp
+        providers/NetworkConfigurationProvider.cpp
+        providers/NetworkConfigurationProvider.hpp
         providers/RecentMessagesApi.cpp
         providers/RecentMessagesApi.hpp
 
@@ -223,6 +230,8 @@ set(SOURCE_FILES
         providers/ffz/FfzBadges.hpp
         providers/ffz/FfzEmotes.cpp
         providers/ffz/FfzEmotes.hpp
+        providers/ffz/FfzUtil.cpp
+        providers/ffz/FfzUtil.hpp
 
         providers/irc/AbstractIrcServer.cpp
         providers/irc/AbstractIrcServer.hpp
@@ -252,14 +261,14 @@ set(SOURCE_FILES
         providers/seventv/SeventvEventAPI.cpp
         providers/seventv/SeventvEventAPI.hpp
 
-        providers/seventv/eventapi/SeventvEventAPIClient.cpp
-        providers/seventv/eventapi/SeventvEventAPIClient.hpp
-        providers/seventv/eventapi/SeventvEventAPIDispatch.cpp
-        providers/seventv/eventapi/SeventvEventAPIDispatch.hpp
-        providers/seventv/eventapi/SeventvEventAPIMessage.cpp
-        providers/seventv/eventapi/SeventvEventAPIMessage.hpp
-        providers/seventv/eventapi/SeventvEventAPISubscription.cpp
-        providers/seventv/eventapi/SeventvEventAPISubscription.hpp
+        providers/seventv/eventapi/Client.cpp
+        providers/seventv/eventapi/Client.hpp
+        providers/seventv/eventapi/Dispatch.cpp
+        providers/seventv/eventapi/Dispatch.hpp
+        providers/seventv/eventapi/Message.cpp
+        providers/seventv/eventapi/Message.hpp
+        providers/seventv/eventapi/Subscription.cpp
+        providers/seventv/eventapi/Subscription.hpp
 
         providers/twitch/ChannelPointReward.cpp
         providers/twitch/ChannelPointReward.hpp
@@ -609,7 +618,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Widgets
         Qt${MAJOR_QT_VERSION}::Gui
         Qt${MAJOR_QT_VERSION}::Network
-        Qt${MAJOR_QT_VERSION}::Multimedia
         Qt${MAJOR_QT_VERSION}::Svg
         Qt${MAJOR_QT_VERSION}::Concurrent
 
@@ -623,6 +631,14 @@ target_link_libraries(${LIBRARY_PROJECT}
         LRUCache
         MagicEnum
         )
+
+if (BUILD_WITH_QT6)
+    target_link_libraries(${LIBRARY_PROJECT}
+            PUBLIC
+            Qt${MAJOR_QT_VERSION}::Core5Compat
+            )
+endif ()
+
 if (BUILD_WITH_QTKEYCHAIN)
     target_link_libraries(${LIBRARY_PROJECT}
             PUBLIC
@@ -634,6 +650,22 @@ else()
         NO_QTKEYCHAIN
         )
 endif()
+
+# Set the output of TARGET to be 
+# - CMAKE_BIN_DIR/lib for libraries
+# - CMAKE_BIN_DIR/bin for BINARIES
+# an additional argument specifies the subdirectory.
+function(set_target_directory_hierarchy TARGET)
+    set_target_properties(${TARGET}
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ARGV1}"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ARGV1}"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/${ARGV1}"
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin/${ARGV1}"
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin/${ARGV1}"
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin/${ARGV1}"
+    )
+endfunction()
 
 if (BUILD_APP)
     if (APPLE)
@@ -647,27 +679,37 @@ if (BUILD_APP)
 
     target_link_libraries(${EXECUTABLE_PROJECT} PUBLIC ${LIBRARY_PROJECT})
 
-    set_target_properties(${EXECUTABLE_PROJECT}
-        PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin"
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin"
-        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
-        )
+    set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
-    if (MSVC)
-        if (NOT VCPKG_INSTALLED_DIR)
+    if (WIN32)
+        if (NOT WINDEPLOYQT_PATH)
             get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
             get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
-            set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
+            string(APPEND WINDEPLOYQT_PATH ${QT_BIN_DIR} /windeployqt.exe)
+        else()
+            file(TO_CMAKE_PATH "${WINDEPLOYQT_PATH}" WINDEPLOYQT_PATH)
+        endif()
 
-            install(TARGETS ${EXECUTABLE_PROJECT}
-                    RUNTIME DESTINATION .
-                    )
+        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(WINDEPLOYQT_MODE --debug)
+        else()
+            set(WINDEPLOYQT_MODE --release)
+        endif()
 
-            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
+        set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
+        string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
+
+        if (X_VCPKG_APPLOCAL_DEPS_INSTALL)
+            install(TARGETS ${EXECUTABLE_PROJECT} RUNTIME DESTINATION .)
+        else()
+            install(TARGETS ${EXECUTABLE_PROJECT} 
+                RUNTIME_DEPENDENCIES 
+                    PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
+                    POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
+                    DIRECTORIES ${QT_BIN_DIR}
+                RUNTIME DESTINATION .)
+            install(CODE "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
+            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")        
         endif()
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
@@ -780,36 +822,36 @@ endif ()
 
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
 
+# semver dependency https://github.com/Neargye/semver
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
+
+# miniaudio dependency https://github.com/mackron/miniaudio
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
+
+if (UNIX)
+    if (CMAKE_DL_LIBS)
+        # libdl is a requirement for miniaudio on Linux
+        message(STATUS "Linking with CMake DL libs: '${CMAKE_DL_LIBS}'")
+        target_link_libraries(${LIBRARY_PROJECT} PUBLIC ${CMAKE_DL_LIBS})
+    endif ()
+endif ()
+
 if (WinToast_FOUND)
     target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         WinToast)
 endif ()
 
-if (USE_CONAN AND TARGET CONAN_PKG::boost)
-    target_link_libraries(${LIBRARY_PROJECT}
-        PUBLIC
-        CONAN_PKG::boost
-        )
-else ()
-    target_link_libraries(${LIBRARY_PROJECT}
+target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         ${Boost_LIBRARIES}
         )
-endif ()
 
-if (USE_CONAN AND TARGET CONAN_PKG::openssl)
-    target_link_libraries(${LIBRARY_PROJECT}
-        PUBLIC
-        CONAN_PKG::openssl
-        )
-else ()
-    target_link_libraries(${LIBRARY_PROJECT}
+target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         OpenSSL::SSL
         OpenSSL::Crypto
         )
-endif ()
 
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${RapidJSON_INCLUDE_DIRS})
 
@@ -820,8 +862,29 @@ if (LIBRT)
         )
 endif ()
 
+if (BUILD_WITH_CRASHPAD)
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_CRASHPAD)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC crashpad::client)
+    set_target_directory_hierarchy(crashpad_handler crashpad)
+endif()
+
 # Configure compiler warnings
 if (MSVC)
+    # Change flags for RelWithDebInfo
+
+    # Default: "/debug /INCREMENTAL"
+    # Changes:
+    #   - Disable incremental linking to reduce padding
+    #   - Enable all optimizations - by default when /DEBUG is specified,
+    #     these optimizations will be disabled. We need /DEBUG to generate a PDB.
+    # See https://gitlab.kitware.com/cmake/cmake/-/issues/20812 for more details.
+    set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/DEBUG /INCREMENTAL:NO /OPT:REF,ICF,LBR")
+
+    # Use the function inlining level from 'Release' mode (2).
+    string(REPLACE "/Ob1" "/Ob2" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+
+    # Configure warnings
+
     # Someone adds /W3 before we add /W4.
     # This makes sure, only /W4 is specified.
     string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -850,6 +913,7 @@ if (MSVC)
         /wd4100
         /wd4267
     )
+    # Disable min/max macros from Windows.h
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
 else ()
     target_compile_options(${LIBRARY_PROJECT} PUBLIC

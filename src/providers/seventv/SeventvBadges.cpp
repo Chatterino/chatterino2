@@ -44,7 +44,7 @@ void SeventvBadges::loadSeventvBadges()
         .onSuccess([this](const NetworkResult &result) -> Outcome {
             auto root = result.parseJson();
 
-            std::shared_lock lock(this->mutex_);
+            std::unique_lock lock(this->mutex_);
 
             int index = 0;
             for (const auto &jsonBadge : root.value("badges").toArray())

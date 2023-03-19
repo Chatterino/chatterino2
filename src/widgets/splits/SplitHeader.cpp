@@ -947,7 +947,11 @@ void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
     this->doubleClicked_ = true;
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void SplitHeader::enterEvent(QEnterEvent *event)
+#else
 void SplitHeader::enterEvent(QEvent *event)
+#endif
 {
     if (!this->tooltipText_.isEmpty())
     {

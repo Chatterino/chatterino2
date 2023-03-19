@@ -64,7 +64,6 @@
 #    include <QListView>
 #    include <QListWidget>
 #    include <QMap>
-#    include <QMediaPlayer>
 #    include <QMenu>
 #    include <QMessageBox>
 #    include <QMimeData>
@@ -106,7 +105,6 @@
 #    include <QThreadPool>
 #    include <QTime>
 #    include <QTimer>
-#    include <QtWidgets/QAction>
 #    include <QtWidgets/QApplication>
 #    include <QtWidgets/QButtonGroup>
 #    include <QtWidgets/QDialog>

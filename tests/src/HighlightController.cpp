@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "BaseSettings.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
 #include "mocks/UserData.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -791,6 +792,56 @@ TEST_F(HighlightControllerTest, A)
                     std::make_shared<QColor>("#6fffffff"),  // color
                     false,
                 },
+            },
+        },
+        {
+            // TEST CASE: Whispers that do not hit a highlight phrase should not be added to /mentions
+            {
+                // input
+                .args =
+                    MessageParseArgs{
+                        .isReceivedWhisper = true,
+                    },
+                .senderName = "forsen",
+                .originalMessage = "Hello NymN!",
+            },
+            {
+                // expected
+                .state = true,  // state
+                .result =
+                    {
+                        false,        // alert
+                        false,        // playsound
+                        boost::none,  // custom sound url
+                        std::make_shared<QColor>(
+                            HighlightPhrase::
+                                FALLBACK_HIGHLIGHT_COLOR),  // color
+                        false,                              // showInMentions
+                    },
+            },
+        },
+        {
+            // TEST CASE: Whispers that do hit a highlight phrase should be added to /mentions
+            {
+                // input
+                .args =
+                    MessageParseArgs{
+                        .isReceivedWhisper = true,
+                    },
+                .senderName = "forsen",
+                .originalMessage = "!testmanxd",
+            },
+            {
+                // expected
+                .state = true,  // state
+                .result =
+                    {
+                        true,         // alert
+                        true,         // playsound
+                        boost::none,  // custom sound url
+                        std::make_shared<QColor>("#7f7f3f49"),  // color
+                        true,  // showInMentions
+                    },
             },
         },
     };
