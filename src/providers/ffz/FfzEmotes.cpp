@@ -35,7 +35,7 @@ namespace {
     {
         auto url1x = getEmoteLink(urls, "1");
         auto url2x = getEmoteLink(urls, "2");
-        auto url3x = getEmoteLink(urls, "3");
+        auto url3x = getEmoteLink(urls, "4");
 
         //, code, tooltip
         emoteData.name = name;
@@ -44,7 +44,7 @@ namespace {
                      url2x.string.isEmpty() ? Image::getEmpty()
                                             : Image::fromUrl(url2x, 0.5),
                      url3x.string.isEmpty() ? Image::getEmpty()
-                                            : Image::fromUrl(url3x, 0.250)};
+                                            : Image::fromUrl(url3x, 0.25)};
         emoteData.tooltip = {tooltip};
     }
 
