@@ -35,7 +35,7 @@ jobs:
       - name: "Unzip artifact"
         run: unzip clang-tidy-review.zip
 
-      - uses: ZedThree/clang-tidy-review/post@v0.10.1
+      - uses: ZedThree/clang-tidy-review/post@v0.12.0
         id: review
         with:
           lgtm_comment_body: ""
