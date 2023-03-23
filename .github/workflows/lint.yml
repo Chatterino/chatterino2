@@ -23,3 +23,7 @@ jobs:
         with:
           # prettier CLI arguments.
           args: --check .
+      - name: Check Theme files
+        run: |
+          npm i ajv-cli
+          npx -- ajv validate -s docs/ChatterinoTheme.schema.json -d "resources/themes/*.json"

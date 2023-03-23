@@ -44,6 +44,7 @@ Q_LOGGING_CATEGORY(chatterinoSound, "chatterino.sound", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoStreamerMode, "chatterino.streamermode",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoStreamlink, "chatterino.streamlink", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoTheme, "chatterino.theme", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoTokenizer, "chatterino.tokenizer", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoTwitch, "chatterino.twitch", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoUpdate, "chatterino.update", logThreshold);
