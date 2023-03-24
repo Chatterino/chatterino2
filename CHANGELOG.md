@@ -2,9 +2,27 @@
 
 ## Unversioned
 
-- Minor: Delete all but the last 5 crashdumps on application start. (#4392)
-- Dev: Add capability to build Chatterino with Qt6. (#4393)
-- Dev: Fix homebrew update action. (#4394)
+- Minor: Include normally-stripped mention in replies in logs. (#4420)
+- Minor: Added support for FrankerFaceZ animated emotes. (#4434)
+- Minor: Added a local backup of the Twitch Badges API in case the request fails. (#4463)
+- Bugfix: Fixed an issue where animated emotes would render on top of zero-width emotes. (#4314)
+- Bugfix: Fixed an issue where it was difficult to hover a zero-width emote. (#4314)
+- Bugfix: Fixed an issue where context-menu items for zero-width emotes displayed the wrong provider. (#4460)
+- Bugfix: Fixed an issue where the "Enable zero-width emotes" setting was showing the inverse state. (#4462)
+- Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
+- Dev: Ignore unhandled BTTV user-events. (#4438)
+- Dev: Only log debug messages when NDEBUG is not defined. (#4442)
+- Dev: Cleaned up theme related code. (#4450)
+
+## 2.4.2
+
+- Minor: Added `/banid` command that allows banning by user ID. (#4411)
+- Bugfix: Fixed FrankerFaceZ emotes/badges not loading due to an API change. (#4432)
+- Bugfix: Fixed uploaded AppImage not being able to execute most web requests. (#4400)
+- Bugfix: Fixed a potential race condition due to using the wrong lock when loading 7TV badges. (#4402)
+- Dev: Delete all but the last 5 crashdumps on application start. (#4392)
+- Dev: Added capability to build Chatterino with Qt6. (#4393)
+- Dev: Fixed homebrew update action. (#4394)
 
 ## 2.4.1
 

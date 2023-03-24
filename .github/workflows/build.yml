@@ -158,7 +158,7 @@ jobs:
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-          choco install conan -y
+          choco install conan -y --version 1.58.0
 
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
@@ -180,6 +180,7 @@ jobs:
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
+              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
@@ -294,7 +295,7 @@ jobs:
             clang-tidy-review-metadata.json
 
       - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu-20.04') && matrix.skip_artifact != 'yes'
         run: |
           cd build
           sh ./../.CI/CreateAppImage.sh
@@ -308,7 +309,7 @@ jobs:
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu-20.04') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ env.artifact_descr }}.AppImage
@@ -389,7 +390,7 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-x86_64-5.15.2.AppImage
+          name: Chatterino-x86_64-5.12.12.AppImage
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3

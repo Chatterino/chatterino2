@@ -234,6 +234,8 @@ set(SOURCE_FILES
         providers/ffz/FfzBadges.hpp
         providers/ffz/FfzEmotes.cpp
         providers/ffz/FfzEmotes.hpp
+        providers/ffz/FfzUtil.cpp
+        providers/ffz/FfzUtil.hpp
 
         providers/irc/AbstractIrcServer.cpp
         providers/irc/AbstractIrcServer.hpp
@@ -427,6 +429,8 @@ set(SOURCE_FILES
         widgets/Scrollbar.hpp
         widgets/StreamView.cpp
         widgets/StreamView.hpp
+        widgets/TooltipEntryWidget.cpp
+        widgets/TooltipEntryWidget.hpp
         widgets/TooltipWidget.cpp
         widgets/TooltipWidget.hpp
         widgets/Window.cpp

@@ -3,6 +3,7 @@
 #ifdef USEWINSDK
 
 #    include <boost/optional.hpp>
+#    include <QString>
 #    include <Windows.h>
 
 namespace chatterino {

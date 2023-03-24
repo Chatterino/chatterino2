@@ -57,6 +57,7 @@ Jaxkey | https://github.com/Jaxkey | :/avatars/jaxkey.png | Contributor
 Explooosion | https://github.com/Explooosion-code | :/avatars/explooosion_code.png | Contributor
 mohad12211 | https://github.com/mohad12211 | :/avatars/mohad12211.png | Contributor
 Wissididom | https://github.com/Wissididom | :/avatars/wissididom.png | Contributor
+03y | https://github.com/03y | | Contributor
 
 # If you are a contributor add yourself above this line
 
