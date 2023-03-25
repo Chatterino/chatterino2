@@ -2,6 +2,7 @@
 
 #include "common/QLogging.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageThread.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 
@@ -104,7 +105,20 @@ void LoggingChannel::addMessage(MessagePtr message)
     str.append(now.toString("HH:mm:ss"));
     str.append("] ");
 
-    str.append(message->searchText);
+    QString messageSearchText = message->searchText;
+    if ((message->flags.has(MessageFlag::ReplyMessage) &&
+         getSettings()->stripReplyMention) &&
+        !getSettings()->hideReplyContext)
+    {
+        qsizetype colonIndex = messageSearchText.indexOf(':');
+        if (colonIndex != -1)
+        {
+            QString rootMessageChatter =
+                message->replyThread->root()->loginName;
+            messageSearchText.insert(colonIndex + 1, " @" + rootMessageChatter);
+        }
+    }
+    str.append(messageSearchText);
     str.append(endline);
 
     this->appendLine(str);
