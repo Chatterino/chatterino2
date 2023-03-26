@@ -39,7 +39,7 @@ IgnoresPage::IgnoresPage()
     addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Messages"));
     addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"),
                 this->userListModel_);
-    onShow();
+    this->onShow();
 }
 
 void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
