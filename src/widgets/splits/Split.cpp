@@ -1165,7 +1165,9 @@ void Split::showViewerList()
 
     auto addUserList = [=](QStringList users, QString label) {
         if (users.isEmpty())
+        {
             return;
+        }
 
         addLabel(QString("%1 (%2)").arg(label, localizeNumbers(users.size())));
 
