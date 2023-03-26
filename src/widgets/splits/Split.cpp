@@ -1261,10 +1261,8 @@ void Split::showViewerList()
     // Only broadcaster can get vips, mods can get chatters
     if (channel->isBroadcaster())
     {
-        auto helixApi = getHelix();
-
         // Add moderators
-        helixApi->getModerators(
+        getHelix()->getModerators(
             twitchChannel->roomId(), 1000,
             [=](auto mods) {
                 QStringList modList;
@@ -1274,7 +1272,7 @@ void Split::showViewerList()
                 }
 
                 // Add vips
-                helixApi->getChannelVIPs(
+                getHelix()->getChannelVIPs(
                     twitchChannel->roomId(),
                     [=](auto vips) {
                         QStringList vipList;
