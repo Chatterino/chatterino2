@@ -1171,9 +1171,9 @@ void Split::showViewerList()
 
         addLabel(QString("%1 (%2)").arg(label, localizeNumbers(users.size())));
 
-        for (int i = 0; i < users.size(); i++)
+        for (const auto &user : users)
         {
-            chattersList->addItem(formatListItemText(users.at(i)));
+            chattersList->addItem(formatListItemText(user));
         }
         chattersList->addItem(new QListWidgetItem());
     };
