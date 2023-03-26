@@ -1245,8 +1245,8 @@ void Split::showViewerList()
 
                 if (isBroadcaster)
                 {
-                    addUserList(modChatters, QString("Moderators"));
-                    addUserList(vipChatters, QString("VIPs"));
+                    addUserList(modChatters, QStringLiteral("Moderators"));
+                    addUserList(vipChatters, QStringLiteral("VIPs"));
                 }
                 else
                 {
@@ -1261,7 +1261,7 @@ void Split::showViewerList()
                     chattersList->addItem(new QListWidgetItem());
                 }
 
-                addUserList(chatterList, QString("Chatters"));
+                addUserList(chatterList, QStringLiteral("Chatters"));
 
                 loadingLabel->hide();
                 performListSearch();
