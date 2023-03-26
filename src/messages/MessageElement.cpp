@@ -16,19 +16,67 @@
 namespace chatterino {
 
 namespace {
+    constexpr QSize BTTV_WIDE_EMOTE_SIZE = {112, 28};
 
-    // Computes the bounding box for the given vector of images
-    QSize getBoundingBoxSize(const std::vector<ImagePtr> &images)
+    // Computes the bounding box for the given vector of sizes
+    QSize getBoundingBoxSize(const std::vector<QSize> &sizes)
     {
         int width = 0;
         int height = 0;
-        for (const auto &img : images)
+        for (const auto &size : sizes)
         {
-            width = std::max(width, img->width());
-            height = std::max(height, img->height());
+            width = std::max(width, size.width());
+            height = std::max(height, size.height());
         }
 
-        return QSize(width, height);
+        return {width, height};
+    }
+
+    QString stringifyBttvModifier(MessageElementFlags flags)
+    {
+        using ty = std::underlying_type<MessageElementFlag>::type;
+        switch (static_cast<MessageElementFlag>(
+            static_cast<ty>(*reinterpret_cast<MessageElementFlag *>(&flags)) &
+            static_cast<ty>(MessageElementFlag::BttvModifiers)))
+        {
+            case MessageElementFlag::BttvModifierWide:
+                return QStringLiteral("w! ");
+            case MessageElementFlag::BttvModifierFlipH:
+                return QStringLiteral("h! ");
+            case MessageElementFlag::BttvModifierFlipV:
+                return QStringLiteral("v! ");
+            case MessageElementFlag::BttvModifierZeroSpace:
+                return QStringLiteral("z! ");
+            case MessageElementFlag::BttvModifierRotateRight:
+                return QStringLiteral("r! ");
+            case MessageElementFlag::BttvModifierRotateLeft:
+                return QStringLiteral("l! ");
+            default:
+                return {};
+        }
+    }
+
+    QSize emoteSize(const ImagePtr &image, MessageElementFlags flags)
+    {
+        QSize size = {image->width(), image->height()};
+        if (flags.has(MessageElementFlag::BttvModifierWide))
+        {
+            return BTTV_WIDE_EMOTE_SIZE;
+        }
+        if (flags.hasAny({MessageElementFlag::BttvModifierRotateLeft,
+                          MessageElementFlag::BttvModifierRotateRight}))
+        {
+            if (size.width() <= size.height())
+            {
+                size = {size.height(), size.width()};
+            }
+            else
+            {
+                size = {size.height() * size.height() / size.width(),
+                        size.height()};
+            }
+        }
+        return size;
     }
 
 }  // namespace
@@ -191,7 +239,7 @@ EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags,
     , emote_(emote)
 {
     this->textElement_.reset(new TextElement(
-        emote->getCopyString(), MessageElementFlag::Misc, textElementColor));
+        this->getCopyString(), MessageElementFlag::Misc, textElementColor));
 
     this->setTooltip(emote->tooltip.string);
 }
@@ -199,6 +247,16 @@ EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags,
 EmotePtr EmoteElement::getEmote() const
 {
     return this->emote_;
+}
+
+QString EmoteElement::getCopyString() const
+{
+    if (this->getFlags().has(MessageElementFlag::BttvModifiers))
+    {
+        return stringifyBttvModifier(this->getFlags()) +
+               this->getEmote()->getCopyString();
+    }
+    return this->getEmote()->getCopyString();
 }
 
 void EmoteElement::addToContainer(MessageLayoutContainer &container,
@@ -215,10 +273,10 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
 
             auto emoteScale = getSettings()->emoteScale.getValue();
 
-            auto size =
-                QSize(int(container.getScale() * image->width() * emoteScale),
-                      int(container.getScale() * image->height() * emoteScale));
-
+            QSize base = emoteSize(image, this->getFlags());
+            QSize size =
+                QSize{int(container.getScale() * emoteScale) * base.width(),
+                      int(container.getScale() * emoteScale) * base.height()};
             container.addElement(this->makeImageLayoutElement(image, size)
                                      ->setLink(this->getLink()));
         }
@@ -262,7 +320,8 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
     {
         if (flags.has(MessageElementFlag::EmoteImages))
         {
-            auto images = this->getLoadedImages(container.getScale());
+            auto [images, imageSizes] =
+                this->getLoadedImages(container.getScale());
             if (images.empty())
             {
                 return;
@@ -271,12 +330,13 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
             auto emoteScale = getSettings()->emoteScale.getValue();
             float overallScale = emoteScale * container.getScale();
 
-            auto largestSize = getBoundingBoxSize(images) * overallScale;
+            auto largestSize = getBoundingBoxSize(imageSizes) * overallScale;
+
             std::vector<QSize> individualSizes;
-            individualSizes.reserve(this->emotes_.size());
-            for (auto img : images)
+            individualSizes.reserve(imageSizes.size());
+            for (const auto &img : imageSizes)
             {
-                individualSizes.push_back(QSize(img->width(), img->height()) *
+                individualSizes.push_back(QSize(img.width(), img.height()) *
                                           overallScale);
             }
 
@@ -295,10 +355,13 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
-std::vector<ImagePtr> LayeredEmoteElement::getLoadedImages(float scale)
+std::pair<std::vector<ImagePtr>, std::vector<QSize>>
+    LayeredEmoteElement::getLoadedImages(float scale)
 {
-    std::vector<ImagePtr> res;
-    res.reserve(this->emotes_.size());
+    std::vector<ImagePtr> images;
+    std::vector<QSize> sizes;
+    images.reserve(this->emotes_.size());
+    sizes.reserve(this->emotes_.size());
 
     for (const auto &emote : this->emotes_)
     {
@@ -307,9 +370,11 @@ std::vector<ImagePtr> LayeredEmoteElement::getLoadedImages(float scale)
         {
             continue;
         }
-        res.push_back(image);
+        QSize size = emoteSize(image, emote.flags);
+        images.emplace_back(image);
+        sizes.emplace_back(size);
     }
-    return res;
+    return {images, sizes};
 }
 
 MessageLayoutElement *LayeredEmoteElement::makeImageLayoutElement(
@@ -354,6 +419,7 @@ QString LayeredEmoteElement::getCleanCopyString() const
         {
             result += " ";
         }
+        result += stringifyBttvModifier(this->emotes_[i].flags);
         result += TwitchEmotes::cleanUpEmoteCode(
             this->emotes_[i].ptr->getCopyString());
     }

@@ -160,6 +160,7 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     const MessageParseArgs &_args)
     : SharedMessageBuilder(_channel, _ircMessage, _args)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
+    , parseBttvModifiers_(getSettings()->enableBTTVEmoteModifiers)
 {
 }
 
@@ -168,6 +169,7 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     const MessageParseArgs &_args, QString content, bool isAction)
     : SharedMessageBuilder(_channel, _ircMessage, _args, content, isAction)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
+    , parseBttvModifiers_(getSettings()->enableBTTVEmoteModifiers)
 {
 }
 
@@ -464,10 +466,50 @@ void TwitchMessageBuilder::addWords(
 
         cursor += word.size() + 1;
     }
+
+    this->flushBttvModifier();
+}
+
+TwitchMessageBuilder::BttvModifier TwitchMessageBuilder::tryParseBttvModifier(
+    const QString &word)
+{
+    if (word.length() != 2 || word.at(1) != QChar(u'!')) [[likely]]
+    {
+        return BttvModifier::None;
+    }
+    switch (word.at(0).unicode())
+    {
+        case u'w':
+            return BttvModifier::Wide;
+        case u'h':
+            return BttvModifier::FlipH;
+        case u'v':
+            return BttvModifier::FlipV;
+        case u'z':
+            return BttvModifier::ZeroSpace;
+        case u'r':
+            return BttvModifier::RotateRight;
+        case u'l':
+            return BttvModifier::RotateLeft;
+        default:
+            return BttvModifier::None;
+    }
+}
+
+void TwitchMessageBuilder::flushBttvModifier()
+{
+    if (this->bttvModifier_ != BttvModifier::None)
+    {
+        this->emplace<TextElement>(this->bttvModifierString_,
+                                   MessageElementFlag::Text, this->textColor_);
+        this->bttvModifier_ = BttvModifier::None;
+        this->bttvModifierString_ = {};
+    }
 }
 
 void TwitchMessageBuilder::addTextOrEmoji(EmotePtr emote)
 {
+    this->bttvModifier_ = BttvModifier::None;
     return SharedMessageBuilder::addTextOrEmoji(emote);
 }
 
@@ -481,20 +523,35 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         return;
     }
 
+    auto nextBttvModifier = this->parseBttvModifiers_
+                                ? tryParseBttvModifier(string)
+                                : BttvModifier::None;
+    if (nextBttvModifier != BttvModifier::None)
+    {
+        this->bttvModifier_ = nextBttvModifier;
+        this->bttvModifierString_ = string;
+        return;  // skip
+    }
+
     // TODO: Implement ignored emotes
     // Format of ignored emotes:
     // Emote name: "forsenPuke" - if string in ignoredEmotes
     // Will match emote regardless of source (i.e. bttv, ffz)
     // Emote source + name: "bttv:nyanPls"
-    if (this->tryAppendEmote({string}))
+    auto didAppendEmote = this->tryAppendEmote({string});
+    if (didAppendEmote)
     {
         // Successfully appended an emote
+        this->bttvModifier_ = BttvModifier::None;
         return;
     }
 
+    auto textColor = this->textColor_;
+
+    this->flushBttvModifier();
+
     // Actually just text
     LinkParser parsed(string);
-    auto textColor = this->textColor_;
 
     if (parsed.result())
     {
@@ -1107,6 +1164,33 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     {
         flags = MessageElementFlag::SevenTVEmote;
         zeroWidth = emote.value()->zeroWidth;
+    }
+
+    switch (this->bttvModifier_)
+    {
+        // TODO: wait for CI to use a newer version of clang-format
+        // clang-format off
+        [[likely]] case BttvModifier::None:
+            break;
+            // clang-format on
+        case BttvModifier::Wide:
+            flags.set(MessageElementFlag::BttvModifierWide);
+            break;
+        case BttvModifier::FlipH:
+            flags.set(MessageElementFlag::BttvModifierFlipH);
+            break;
+        case BttvModifier::FlipV:
+            flags.set(MessageElementFlag::BttvModifierFlipV);
+            break;
+        case BttvModifier::ZeroSpace:
+            flags.set(MessageElementFlag::BttvModifierZeroSpace);
+            break;
+        case BttvModifier::RotateLeft:
+            flags.set(MessageElementFlag::BttvModifierRotateLeft);
+            break;
+        case BttvModifier::RotateRight:
+            flags.set(MessageElementFlag::BttvModifierRotateRight);
+            break;
     }
 
     if (emote)

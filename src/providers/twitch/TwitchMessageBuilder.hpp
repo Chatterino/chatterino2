@@ -115,6 +115,7 @@ private:
                   const std::vector<TwitchEmoteOccurrence> &twitchEmotes);
     void addTextOrEmoji(EmotePtr emote) override;
     void addTextOrEmoji(const QString &value) override;
+    void flushBttvModifier();
 
     void appendTwitchBadges();
     void appendChatterinoBadges();
@@ -131,6 +132,21 @@ private:
     bool bitsStacked = false;
     bool historicalMessage_ = false;
     std::shared_ptr<MessageThread> thread_;
+
+    enum class BttvModifier : uint8_t {
+        None,
+        Wide,
+        FlipH,
+        FlipV,
+        ZeroSpace,
+        RotateLeft,
+        RotateRight,
+    };
+    BttvModifier bttvModifier_ = BttvModifier::None;
+    QString bttvModifierString_;
+    bool parseBttvModifiers_;
+
+    static BttvModifier tryParseBttvModifier(const QString &word);
 
     /**
      * Starting offset to be used on index-based operations on `originalMessage_`.

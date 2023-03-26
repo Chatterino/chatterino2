@@ -262,6 +262,8 @@ public:
 
     BoolSetting enableBTTVGlobalEmotes = {"/emotes/bttv/global", true};
     BoolSetting enableBTTVChannelEmotes = {"/emotes/bttv/channel", true};
+    BoolSetting enableBTTVEmoteModifiers = {"/emotes/bttv/emotemodifiers",
+                                            true};
     BoolSetting enableBTTVLiveUpdates = {"/emotes/bttv/liveupdates", true};
     BoolSetting enableFFZGlobalEmotes = {"/emotes/ffz/global", true};
     BoolSetting enableFFZChannelEmotes = {"/emotes/ffz/channel", true};

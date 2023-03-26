@@ -152,6 +152,18 @@ enum class MessageElementFlag : int64_t {
     // (1LL << 34) through (1LL << 36) are occupied by
     // SevenTVEmoteImage, SevenTVEmoteText, and BadgeSevenTV,
 
+    BttvModifierWide = (1LL << 37),
+    BttvModifierFlipH = (1LL << 38),
+    BttvModifierFlipV = (1LL << 39),
+    BttvModifierRotateRight = (1LL << 40),
+    BttvModifierRotateLeft = (1LL << 41),
+    BttvModifierAnyTransform = BttvModifierFlipH | BttvModifierFlipV |
+                               BttvModifierRotateRight | BttvModifierRotateLeft,
+    BttvModifierZeroSpace = (1LL << 42),
+    BttvModifiers = BttvModifierWide | BttvModifierFlipH | BttvModifierFlipV |
+                    BttvModifierZeroSpace | BttvModifierRotateRight |
+                    BttvModifierRotateLeft,
+
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | SevenTVEmoteImage | TwitchEmoteImage |
               BitsAmount | Text | AlwaysShow,
@@ -310,6 +322,7 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags_) override;
     EmotePtr getEmote() const;
+    QString getCopyString() const;
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -353,7 +366,8 @@ private:
 
     QString getCopyString() const;
     void updateTooltips();
-    std::vector<ImagePtr> getLoadedImages(float scale);
+    std::pair<std::vector<ImagePtr>, std::vector<QSize>> getLoadedImages(
+        float scale);
 
     std::vector<Emote> emotes_;
     std::vector<QString> emoteTooltips_;

@@ -552,6 +552,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.emojiSet);
     layout.addCheckbox("Show BTTV global emotes", s.enableBTTVGlobalEmotes);
     layout.addCheckbox("Show BTTV channel emotes", s.enableBTTVChannelEmotes);
+    layout.addCheckbox(
+        "Show BTTV emote modifiers", s.enableBTTVEmoteModifiers, false,
+        "Enables BTTV's emote modifiers such as w!, h!, v!, z!.");
     layout.addCheckbox("Enable BTTV live emote updates (requires restart)",
                        s.enableBTTVLiveUpdates);
     layout.addCheckbox("Show FFZ global emotes", s.enableFFZGlobalEmotes);
