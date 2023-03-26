@@ -53,6 +53,7 @@
 #include <QMimeData>
 #include <QMovie>
 #include <QPainter>
+#include <QSet>
 #include <QVBoxLayout>
 
 #include <functional>
@@ -1265,20 +1266,20 @@ void Split::showViewerList()
         getHelix()->getModerators(
             twitchChannel->roomId(), 1000,
             [=](auto mods) {
-                QStringList modList;
-                for (auto mod : mods)
+                QSet<QString> modList;
+                for (const auto &mod : mods)
                 {
-                    modList.append(mod.userName.toLower());
+                    modList.insert(mod.userName.toLower());
                 }
 
                 // Add vips
                 getHelix()->getChannelVIPs(
                     twitchChannel->roomId(),
                     [=](auto vips) {
-                        QStringList vipList;
-                        for (auto vip : vips)
+                        QSet<QString> vipList;
+                        for (const auto &vip : vips)
                         {
-                            vipList.append(vip.userName.toLower());
+                            vipList.insert(vip.userName.toLower());
                         }
 
                         // Add chatters
@@ -1297,8 +1298,8 @@ void Split::showViewerList()
     }
     else if (channel->hasModRights())
     {
-        QStringList modList;
-        QStringList vipList;
+        QSet<QString> modList;
+        QSet<QString> vipList;
         loadChatters(modList, vipList, false);
     }
     else
