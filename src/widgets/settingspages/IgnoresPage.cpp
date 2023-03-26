@@ -121,7 +121,7 @@ void IgnoresPage::onShow()
 
     if (user->isAnon())
     {
-        this->userListModel_.setStringList(users);
+        this->userListModel_.setStringList({});
         return;
     }
 
