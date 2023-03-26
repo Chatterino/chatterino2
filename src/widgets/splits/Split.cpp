@@ -146,7 +146,7 @@ QString formatModsError(HelixGetModeratorsError error, QString message)
         break;
     }
     return errorMessage;
-};
+}
 
 QString formatChattersError(HelixGetChattersError error, QString message)
 {
@@ -182,7 +182,7 @@ QString formatChattersError(HelixGetChattersError error, QString message)
         break;
     }
     return errorMessage;
-};
+}
 
 }  // namespace
 
