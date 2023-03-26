@@ -1130,10 +1130,24 @@ void Split::showViewerList()
     auto chattersList = new QListWidget();
     auto resultList = new QListWidget();
 
-    auto channel = getChannel().get();
-    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel);
+    auto channel = this->getChannel();
+    if (!channel)
+    {
+        qCWarning(chatterinoWidget)
+            << "Viewer list opened when no channel was defined";
+        return;
+    }
 
-    auto loadingLabel = new QLabel("Loading...");
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+    if (twitchChannel == nullptr)
+    {
+        qCWarning(chatterinoWidget)
+            << "Viewer list opened in a non-Twitch channel";
+        return;
+    }
+
+    auto *loadingLabel = new QLabel("Loading...");
     searchBar->setPlaceholderText("Search User...");
 
     auto formatListItemText = [](QString text) {
