@@ -7,6 +7,7 @@
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -14,23 +15,24 @@
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
-#include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
-#include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #ifndef NDEBUG
-#    include <rapidjson/document.h>
 #    include "providers/twitch/PubSubManager.hpp"
 #    include "providers/twitch/PubSubMessages.hpp"
 #    include "util/SampleData.hpp"
+
+#    include <rapidjson/document.h>
 #endif
 
 #include <QApplication>
@@ -78,9 +80,11 @@ Window::Window(WindowType type, QWidget *parent)
                                        });
     if (type == WindowType::Main || type == WindowType::Popup)
     {
-        getSettings()->tabDirection.connect([this](int val) {
-            this->notebook_->setTabLocation(NotebookTabLocation(val));
-        });
+        getSettings()->tabDirection.connect(
+            [this](int val) {
+                this->notebook_->setTabLocation(NotebookTabLocation(val));
+            },
+            this->signalHolder_);
     }
 }
 
@@ -153,7 +157,7 @@ void Window::addLayout()
     this->getLayoutContainer()->setLayout(layout);
 
     // set margin
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     this->notebook_->setAllowUserTabManagement(true);
     this->notebook_->setShowAddButton(true);
@@ -420,7 +424,7 @@ void Window::addShortcuts()
              split->setChannel(
                  getApp()->twitch->getOrAddChannel(si.channelName));
              split->setFilters(si.filters);
-             splitContainer->appendSplit(split);
+             splitContainer->insertSplit(split);
              splitContainer->setSelected(split);
              this->notebook_->select(splitContainer);
              return "";
@@ -637,13 +641,13 @@ void Window::addMenuBar()
 
     QAction *nextTab = windowMenu->addAction(QString("Select next tab"));
     nextTab->setShortcuts({QKeySequence("Meta+Tab")});
-    connect(nextTab, &QAction::triggered, this, [=] {
+    connect(nextTab, &QAction::triggered, this, [this] {
         this->notebook_->selectNextTab();
     });
 
     QAction *prevTab = windowMenu->addAction(QString("Select previous tab"));
     prevTab->setShortcuts({QKeySequence("Meta+Shift+Tab")});
-    connect(prevTab, &QAction::triggered, this, [=] {
+    connect(prevTab, &QAction::triggered, this, [this] {
         this->notebook_->selectPreviousTab();
     });
 }

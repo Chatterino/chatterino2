@@ -1,16 +1,19 @@
 #include "providers/emoji/Emojis.hpp"
 
-#include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 #include "singletons/Settings.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
+#include <boost/variant.hpp>
+#include <QFile>
 #include <rapidjson/error/en.h>
 #include <rapidjson/error/error.h>
 #include <rapidjson/rapidjson.h>
-#include <QFile>
-#include <boost/variant.hpp>
+
+#include <array>
 #include <memory>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {
@@ -214,7 +217,7 @@ void Emojis::sortEmojis()
 void Emojis::loadEmojiSet()
 {
 #ifndef CHATTERINO_TEST
-    getSettings()->emojiSet.connect([=](const auto &emojiSet) {
+    getSettings()->emojiSet.connect([this](const auto &emojiSet) {
 #else
     const QString emojiSet = "twitter";
 #endif

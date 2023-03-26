@@ -1,7 +1,5 @@
 #include "providers/twitch/TwitchAccount.hpp"
 
-#include <QThread>
-
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
@@ -11,15 +9,17 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/IvrApi.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
+#include "providers/IvrApi.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchUser.hpp"
-#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
+
+#include <QThread>
 
 namespace chatterino {
 
@@ -439,73 +439,6 @@ void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
             }
 
             channel->addMessage(makeSystemMessage(errorMessage));
-        });
-}
-
-void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
-{
-    if (!emoteSet)
-    {
-        qCWarning(chatterinoTwitch) << "null emote set sent";
-        return;
-    }
-
-    auto staticSetIt = this->staticEmoteSets.find(emoteSet->key);
-    if (staticSetIt != this->staticEmoteSets.end())
-    {
-        const auto &staticSet = staticSetIt->second;
-        emoteSet->channelName = staticSet.channelName;
-        emoteSet->text = staticSet.text;
-        return;
-    }
-
-    getHelix()->getEmoteSetData(
-        emoteSet->key,
-        [emoteSet](HelixEmoteSetData emoteSetData) {
-            // Follower emotes can be only used in their origin channel
-            if (emoteSetData.emoteType == "follower")
-            {
-                emoteSet->local = true;
-            }
-
-            if (emoteSetData.ownerId.isEmpty() ||
-                emoteSetData.setId != emoteSet->key)
-            {
-                qCDebug(chatterinoTwitch)
-                    << QString("Failed to fetch emoteSetData for %1, assuming "
-                               "Twitch is the owner")
-                           .arg(emoteSet->key);
-
-                // most (if not all) emotes that fail to load are time limited event emotes owned by Twitch
-                emoteSet->channelName = "twitch";
-                emoteSet->text = "Twitch";
-
-                return;
-            }
-
-            // emote set 0 = global emotes
-            if (emoteSetData.ownerId == "0")
-            {
-                // emoteSet->channelName = QString();
-                emoteSet->text = "Twitch Global";
-                return;
-            }
-
-            getHelix()->getUserById(
-                emoteSetData.ownerId,
-                [emoteSet](HelixUser user) {
-                    emoteSet->channelName = user.login;
-                    emoteSet->text = user.displayName;
-                },
-                [emoteSetData] {
-                    qCWarning(chatterinoTwitch)
-                        << "Failed to query user by id:" << emoteSetData.ownerId
-                        << emoteSetData.setId;
-                });
-        },
-        [emoteSet] {
-            // fetching emoteset data failed
-            return;
         });
 }
 

@@ -1,16 +1,19 @@
 #include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/dialogs/switcher/NewPopupItem.hpp"
 #include "widgets/dialogs/switcher/NewTabItem.hpp"
 #include "widgets/dialogs/switcher/SwitchSplitItem.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/listview/GenericListView.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
+#include "widgets/Window.hpp"
 
 namespace chatterino {
 
@@ -32,8 +35,8 @@ namespace {
 const QSize QuickSwitcherPopup::MINIMUM_SIZE(500, 300);
 
 QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
-    : BasePopup(FlagsEnum<BaseWindow::Flags>{BaseWindow::Flags::Frameless,
-                                             BaseWindow::Flags::TopMost},
+    : BasePopup({BaseWindow::Flags::Frameless, BaseWindow::Flags::TopMost,
+                 BaseWindow::DisableLayoutSave},
                 parent)
     , switcherModel_(this)
 {
@@ -146,7 +149,7 @@ void QuickSwitcherPopup::themeChangedEvent()
     const QString selCol =
         (this->theme->isLightTheme()
              ? "#68B1FF"  // Copied from Theme::splits.input.styleSheet
-             : this->theme->tabs.selected.backgrounds.regular.color().name());
+             : this->theme->tabs.selected.backgrounds.regular.name());
 
     const QString listStyle =
         QString(

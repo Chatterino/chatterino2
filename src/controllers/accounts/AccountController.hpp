@@ -1,11 +1,10 @@
 #pragma once
 
-#include <QObject>
-
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
-#include "util/SharedPtrElementLess.hpp"
+
+#include <QObject>
 
 namespace chatterino {
 

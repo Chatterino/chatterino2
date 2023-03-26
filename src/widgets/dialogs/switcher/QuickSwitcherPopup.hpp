@@ -1,14 +1,11 @@
 #pragma once
 
-#include "common/Channel.hpp"
 #include "widgets/BasePopup.hpp"
 #include "widgets/dialogs/switcher/QuickSwitcherModel.hpp"
-#include "widgets/splits/Split.hpp"
-#include "widgets/splits/SplitContainer.hpp"
-
-#include <functional>
 
 #include <QLineEdit>
+
+#include <functional>
 
 namespace chatterino {
 

@@ -1,19 +1,22 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
-#include "providers/twitch/TwitchBadge.hpp"
 #include "util/QStringHash.hpp"
-#include "widgets/helper/ScrollbarHighlight.hpp"
 
-#include <QTime>
 #include <boost/noncopyable.hpp>
+#include <QColor>
+#include <QTime>
+
 #include <cinttypes>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace chatterino {
 class MessageElement;
 class MessageThread;
+class Badge;
+class ScrollbarHighlight;
 
 enum class MessageFlag : int64_t {
     None = 0LL,
@@ -45,6 +48,9 @@ enum class MessageFlag : int64_t {
     ElevatedMessage = (1LL << 25),
     ParticipatedThread = (1LL << 26),
     CheerMessage = (1LL << 27),
+    LiveUpdatesAdd = (1LL << 28),
+    LiveUpdatesRemove = (1LL << 29),
+    LiveUpdatesUpdate = (1LL << 30),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

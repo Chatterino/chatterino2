@@ -1,7 +1,6 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 
 #include "Application.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/LayoutHelper.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
@@ -9,6 +8,7 @@
 #include "widgets/helper/Line.hpp"
 
 #include <QRegularExpression>
+#include <QScrollArea>
 #include <QScrollBar>
 
 namespace {
@@ -18,14 +18,6 @@ const auto MAX_TOOLTIP_LINE_LENGTH_PATTERN =
     QStringLiteral(R"(.{%1}\S*\K(\s+))").arg(MAX_TOOLTIP_LINE_LENGTH);
 const QRegularExpression MAX_TOOLTIP_LINE_LENGTH_REGEX(
     MAX_TOOLTIP_LINE_LENGTH_PATTERN);
-
-const auto TOOLTIP_STYLE_SHEET = QStringLiteral(R"(QToolTip {
-padding: 2px;
-background-color: #333333;
-border: 1px solid #545454;
-}
-)");
-
 }  // namespace
 
 namespace chatterino {
@@ -47,7 +39,7 @@ GeneralPageView::GeneralPageView(QWidget *parent)
         {scrollArea, new QSpacerItem(16, 1), navigation}));
 
     QObject::connect(scrollArea->verticalScrollBar(), &QScrollBar::valueChanged,
-                     this, [=] {
+                     this, [this] {
                          this->updateNavigationHighlighting();
                      });
 }
@@ -82,7 +74,7 @@ TitleLabel *GeneralPageView::addTitle(const QString &title)
     navLabel->setCursor(Qt::PointingHandCursor);
     this->navigationLayout_->addWidget(navLabel);
 
-    QObject::connect(navLabel, &NavigationLabel::leftMouseUp, label, [=] {
+    QObject::connect(navLabel, &NavigationLabel::leftMouseUp, label, [=, this] {
         this->contentScrollArea_->verticalScrollBar()->setValue(label->y());
     });
 
@@ -409,7 +401,6 @@ void GeneralPageView::addToolTip(QWidget &widget, QString text) const
     }
 
     widget.setToolTip(text);
-    widget.setStyleSheet(TOOLTIP_STYLE_SHEET);
 }
 
 }  // namespace chatterino

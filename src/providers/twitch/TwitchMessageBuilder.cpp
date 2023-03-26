@@ -1,13 +1,23 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
+#include "controllers/userdata/UserDataController.hpp"
+#include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageThread.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
+#include "providers/colors/ColorProvider.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
+#include "providers/twitch/PubSubActions.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -22,13 +32,10 @@
 #include "util/Qt.hpp"
 #include "widgets/Window.hpp"
 
-#include <QApplication>
+#include <boost/variant.hpp>
 #include <QColor>
 #include <QDebug>
-#include <QMediaPlayer>
 #include <QStringRef>
-#include <boost/variant.hpp>
-#include "common/QLogging.hpp"
 
 namespace {
 
@@ -50,62 +57,6 @@ const QSet<QString> zeroWidthEmotes{
 namespace chatterino {
 
 namespace {
-
-    QString stylizeUsername(const QString &username, const Message &message)
-    {
-        auto app = getApp();
-
-        const QString &localizedName = message.localizedName;
-        bool hasLocalizedName = !localizedName.isEmpty();
-
-        // The full string that will be rendered in the chat widget
-        QString usernameText;
-
-        switch (getSettings()->usernameDisplayMode.getValue())
-        {
-            case UsernameDisplayMode::Username: {
-                usernameText = username;
-            }
-            break;
-
-            case UsernameDisplayMode::LocalizedName: {
-                if (hasLocalizedName)
-                {
-                    usernameText = localizedName;
-                }
-                else
-                {
-                    usernameText = username;
-                }
-            }
-            break;
-
-            default:
-            case UsernameDisplayMode::UsernameAndLocalizedName: {
-                if (hasLocalizedName)
-                {
-                    usernameText = username + "(" + localizedName + ")";
-                }
-                else
-                {
-                    usernameText = username;
-                }
-            }
-            break;
-        }
-
-        auto nicknames = getCSettings().nicknames.readOnly();
-
-        for (const auto &nickname : *nicknames)
-        {
-            if (nickname.match(usernameText))
-            {
-                break;
-            }
-        }
-
-        return usernameText;
-    }
 
     void appendTwitchEmoteOccurrences(const QString &emote,
                                       std::vector<TwitchEmoteOccurrence> &vec,
@@ -281,72 +232,7 @@ MessagePtr TwitchMessageBuilder::build()
     }
 
     // reply threads
-    if (this->thread_)
-    {
-        // set references
-        this->message().replyThread = this->thread_;
-        this->thread_->addToThread(this->weakOf());
-
-        // enable reply flag
-        this->message().flags.set(MessageFlag::ReplyMessage);
-
-        const auto &threadRoot = this->thread_->root();
-
-        QString usernameText =
-            stylizeUsername(threadRoot->loginName, *threadRoot.get());
-
-        this->emplace<ReplyCurveElement>();
-
-        // construct reply elements
-        this->emplace<TextElement>(
-                "Replying to", MessageElementFlag::RepliedMessage,
-                MessageColor::System, FontStyle::ChatMediumSmall)
-            ->setLink({Link::ViewThread, this->thread_->rootId()});
-
-        this->emplace<TextElement>(
-                "@" + usernameText + ":", MessageElementFlag::RepliedMessage,
-                threadRoot->usernameColor, FontStyle::ChatMediumSmall)
-            ->setLink({Link::UserInfo, threadRoot->displayName});
-
-        this->emplace<SingleLineTextElement>(
-                threadRoot->messageText,
-                MessageElementFlags({MessageElementFlag::RepliedMessage,
-                                     MessageElementFlag::Text}),
-                this->textColor_, FontStyle::ChatMediumSmall)
-            ->setLink({Link::ViewThread, this->thread_->rootId()});
-    }
-    else if (this->tags.find("reply-parent-msg-id") != this->tags.end())
-    {
-        // Message is a reply but we couldn't find the original message.
-        // Render the message using the additional reply tags
-
-        auto replyDisplayName = this->tags.find("reply-parent-display-name");
-        auto replyBody = this->tags.find("reply-parent-msg-body");
-
-        if (replyDisplayName != this->tags.end() &&
-            replyBody != this->tags.end())
-        {
-            auto name = replyDisplayName->toString();
-            auto body = parseTagString(replyBody->toString());
-
-            this->emplace<ReplyCurveElement>();
-
-            this->emplace<TextElement>(
-                "Replying to", MessageElementFlag::RepliedMessage,
-                MessageColor::System, FontStyle::ChatMediumSmall);
-
-            this->emplace<TextElement>(
-                    "@" + name + ":", MessageElementFlag::RepliedMessage,
-                    this->textColor_, FontStyle::ChatMediumSmall)
-                ->setLink({Link::UserInfo, name});
-
-            this->emplace<SingleLineTextElement>(
-                body,
-                MessageElementFlags({MessageElementFlag::RepliedMessage,
-                                     MessageElementFlag::Text}),
-                this->textColor_, FontStyle::ChatMediumSmall);
-        }
-    }
+    this->parseThread();
 
     // timestamp
     this->message().serverReceivedTime = calculateMessageTime(this->ircMessage);
@@ -689,8 +575,90 @@ void TwitchMessageBuilder::parseRoomID()
     }
 }
 
+void TwitchMessageBuilder::parseThread()
+{
+    if (this->thread_)
+    {
+        // set references
+        this->message().replyThread = this->thread_;
+        this->thread_->addToThread(this->weakOf());
+
+        // enable reply flag
+        this->message().flags.set(MessageFlag::ReplyMessage);
+
+        const auto &threadRoot = this->thread_->root();
+
+        QString usernameText = SharedMessageBuilder::stylizeUsername(
+            threadRoot->loginName, *threadRoot.get());
+
+        this->emplace<ReplyCurveElement>();
+
+        // construct reply elements
+        this->emplace<TextElement>(
+                "Replying to", MessageElementFlag::RepliedMessage,
+                MessageColor::System, FontStyle::ChatMediumSmall)
+            ->setLink({Link::ViewThread, this->thread_->rootId()});
+
+        this->emplace<TextElement>(
+                "@" + usernameText + ":", MessageElementFlag::RepliedMessage,
+                threadRoot->usernameColor, FontStyle::ChatMediumSmall)
+            ->setLink({Link::UserInfo, threadRoot->displayName});
+
+        this->emplace<SingleLineTextElement>(
+                threadRoot->messageText,
+                MessageElementFlags({MessageElementFlag::RepliedMessage,
+                                     MessageElementFlag::Text}),
+                this->textColor_, FontStyle::ChatMediumSmall)
+            ->setLink({Link::ViewThread, this->thread_->rootId()});
+    }
+    else if (this->tags.find("reply-parent-msg-id") != this->tags.end())
+    {
+        // Message is a reply but we couldn't find the original message.
+        // Render the message using the additional reply tags
+
+        auto replyDisplayName = this->tags.find("reply-parent-display-name");
+        auto replyBody = this->tags.find("reply-parent-msg-body");
+
+        if (replyDisplayName != this->tags.end() &&
+            replyBody != this->tags.end())
+        {
+            auto name = replyDisplayName->toString();
+            auto body = parseTagString(replyBody->toString());
+
+            this->emplace<ReplyCurveElement>();
+
+            this->emplace<TextElement>(
+                "Replying to", MessageElementFlag::RepliedMessage,
+                MessageColor::System, FontStyle::ChatMediumSmall);
+
+            this->emplace<TextElement>(
+                    "@" + name + ":", MessageElementFlag::RepliedMessage,
+                    this->textColor_, FontStyle::ChatMediumSmall)
+                ->setLink({Link::UserInfo, name});
+
+            this->emplace<SingleLineTextElement>(
+                body,
+                MessageElementFlags({MessageElementFlag::RepliedMessage,
+                                     MessageElementFlag::Text}),
+                this->textColor_, FontStyle::ChatMediumSmall);
+        }
+    }
+}
+
 void TwitchMessageBuilder::parseUsernameColor()
 {
+    const auto *userData = getIApp()->getUserData();
+    assert(userData != nullptr);
+
+    if (const auto &user = userData->getUser(this->userId_))
+    {
+        if (user->color)
+        {
+            this->usernameColor_ = user->color.value();
+            return;
+        }
+    }
+
     const auto iterator = this->tags.find("color");
     if (iterator != this->tags.end())
     {
@@ -770,7 +738,8 @@ void TwitchMessageBuilder::appendUsername()
         }
     }
 
-    QString usernameText = stylizeUsername(username, this->message());
+    QString usernameText =
+        SharedMessageBuilder::stylizeUsername(username, this->message());
 
     if (this->args.isSentWhisper)
     {
@@ -852,14 +821,14 @@ void TwitchMessageBuilder::runIgnoreReplaces(
     };
 
     auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase,
-                                         const QStringRef &midrepl,
+                                         const auto &midrepl,
                                          int startIndex) mutable {
         if (!phrase.containsEmote())
         {
             return;
         }
 
-        QVector<QStringRef> words = midrepl.split(' ');
+        auto words = midrepl.split(' ');
         int pos = 0;
         for (const auto &word : words)
         {
@@ -874,7 +843,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                     }
                     twitchEmotes.push_back(TwitchEmoteOccurrence{
                         startIndex + pos,
-                        startIndex + pos + emote.first.string.length(),
+                        startIndex + pos + (int)emote.first.string.length(),
                         emote.second,
                         emote.first,
                     });
@@ -935,8 +904,13 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
                 shiftIndicesAfter(from + len, midsize - len);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+                auto midExtendedRef =
+                    QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
+#else
                 auto midExtendedRef =
                     this->originalMessage_.midRef(pos1, pos2 - pos1);
+#endif
 
                 for (auto &tup : vret)
                 {
@@ -1000,8 +974,13 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
                 shiftIndicesAfter(from + len, replacesize - len);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+                auto midExtendedRef =
+                    QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
+#else
                 auto midExtendedRef =
                     this->originalMessage_.midRef(pos1, pos2 - pos1);
+#endif
 
                 for (auto &tup : vret)
                 {
@@ -1044,6 +1023,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
+    bool zeroWidth = false;
 
     // Emote order:
     //  - FrankerFaceZ Channel
@@ -1065,10 +1045,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
              (emote = this->twitchChannel->seventvEmote(name)))
     {
         flags = MessageElementFlag::SevenTVEmote;
-        if (emote.value()->zeroWidth)
-        {
-            flags.set(MessageElementFlag::ZeroWidthEmote);
-        }
+        zeroWidth = emote.value()->zeroWidth;
     }
     else if ((emote = globalFfzEmotes.emote(name)))
     {
@@ -1077,23 +1054,48 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     else if ((emote = globalBttvEmotes.emote(name)))
     {
         flags = MessageElementFlag::BttvEmote;
-
-        if (zeroWidthEmotes.contains(name.string))
-        {
-            flags.set(MessageElementFlag::ZeroWidthEmote);
-        }
+        zeroWidth = zeroWidthEmotes.contains(name.string);
     }
     else if ((emote = globalSeventvEmotes.globalEmote(name)))
     {
         flags = MessageElementFlag::SevenTVEmote;
-        if (emote.value()->zeroWidth)
-        {
-            flags.set(MessageElementFlag::ZeroWidthEmote);
-        }
+        zeroWidth = emote.value()->zeroWidth;
     }
 
     if (emote)
     {
+        if (zeroWidth && getSettings()->enableZeroWidthEmotes &&
+            !this->isEmpty())
+        {
+            // Attempt to merge current zero-width emote into any previous emotes
+            auto asEmote = dynamic_cast<EmoteElement *>(&this->back());
+            if (asEmote)
+            {
+                // Make sure to access asEmote before taking ownership when releasing
+                auto baseEmote = asEmote->getEmote();
+                // Need to remove EmoteElement and replace with LayeredEmoteElement
+                auto baseEmoteElement = this->releaseBack();
+
+                std::vector<LayeredEmoteElement::Emote> layers = {
+                    {baseEmote, baseEmoteElement->getFlags()},
+                    {emote.get(), flags}};
+                this->emplace<LayeredEmoteElement>(
+                    std::move(layers), baseEmoteElement->getFlags() | flags,
+                    this->textColor_);
+                return Success;
+            }
+
+            auto asLayered = dynamic_cast<LayeredEmoteElement *>(&this->back());
+            if (asLayered)
+            {
+                asLayered->addEmoteLayer({emote.get(), flags});
+                asLayered->addFlags(flags);
+                return Success;
+            }
+
+            // No emote to merge with, just show as regular emote
+        }
+
         this->emplace<EmoteElement>(emote.get(), flags, this->textColor_);
         return Success;
     }

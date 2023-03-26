@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QObject>
+
 #include <type_traits>
 
 namespace chatterino {

@@ -2,9 +2,11 @@
 
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
-#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/TwitchUser.hpp"
+#include "util/SharedPtrElementLess.hpp"
 
 namespace chatterino {
 

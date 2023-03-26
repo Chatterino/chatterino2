@@ -4,8 +4,9 @@
 
 namespace chatterino {
 
-MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
-    : flags_()
+MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags, bool negate)
+    : MessagePredicate(negate)
+    , flags_()
 {
     // Check if any comma-seperated values were passed and transform those
     for (const auto &flag : flags.split(',', Qt::SkipEmptyParts))
@@ -42,16 +43,27 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
         {
             this->flags_.set(MessageFlag::CheerMessage);
         }
+        else if (flag == "redemption")
+        {
+            this->flags_.set(MessageFlag::RedeemedChannelPointReward);
+            this->flags_.set(MessageFlag::RedeemedHighlight);
+        }
+        else if (flag == "reply")
+        {
+            this->flags_.set(MessageFlag::ReplyMessage);
+        }
     }
 }
 
-bool MessageFlagsPredicate::appliesTo(const Message &message)
+bool MessageFlagsPredicate::appliesToImpl(const Message &message)
 {
     // Exclude timeout messages from system flag when timeout flag isn't present
     if (this->flags_.has(MessageFlag::System) &&
         !this->flags_.has(MessageFlag::Timeout))
+    {
         return message.flags.hasAny(flags_) &&
                !message.flags.has(MessageFlag::Timeout);
+    }
     return message.flags.hasAny(flags_);
 }
 

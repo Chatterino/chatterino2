@@ -1,128 +1,52 @@
 #pragma once
 
-#include "Application.hpp"
-#include "controllers/accounts/AccountController.hpp"
-#include "singletons/Settings.hpp"
-
-#include "util/RapidJsonSerializeQString.hpp"
+#include "common/Aliases.hpp"
 #include "util/RapidjsonHelpers.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 
+#include <pajlada/serialize.hpp>
 #include <QRegularExpression>
 #include <QString>
-#include <pajlada/serialize.hpp>
 
 #include <memory>
+#include <unordered_map>
 
 namespace chatterino {
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
 
 class IgnorePhrase
 {
 public:
-    bool operator==(const IgnorePhrase &other) const
-    {
-        return std::tie(this->pattern_, this->isRegex_, this->isBlock_,
-                        this->replace_, this->isCaseSensitive_) ==
-               std::tie(other.pattern_, other.isRegex_, other.isBlock_,
-                        other.replace_, other.isCaseSensitive_);
-    }
-
     IgnorePhrase(const QString &pattern, bool isRegex, bool isBlock,
-                 const QString &replace, bool isCaseSensitive)
-        : pattern_(pattern)
-        , isRegex_(isRegex)
-        , regex_(pattern)
-        , isBlock_(isBlock)
-        , replace_(replace)
-        , isCaseSensitive_(isCaseSensitive)
-    {
-        if (this->isCaseSensitive_)
-        {
-            regex_.setPatternOptions(
-                QRegularExpression::UseUnicodePropertiesOption);
-        }
-        else
-        {
-            regex_.setPatternOptions(
-                QRegularExpression::CaseInsensitiveOption |
-                QRegularExpression::UseUnicodePropertiesOption);
-        }
-    }
+                 const QString &replace, bool isCaseSensitive);
 
-    const QString &getPattern() const
-    {
-        return this->pattern_;
-    }
+    bool operator==(const IgnorePhrase &other) const;
 
-    bool isRegex() const
-    {
-        return this->isRegex_;
-    }
+    const QString &getPattern() const;
 
-    bool isRegexValid() const
-    {
-        return this->regex_.isValid();
-    }
+    bool isRegex() const;
 
-    bool isMatch(const QString &subject) const
-    {
-        return !this->pattern_.isEmpty() &&
-               (this->isRegex() ? (this->regex_.isValid() &&
-                                   this->regex_.match(subject).hasMatch())
-                                : subject.contains(this->pattern_,
-                                                   this->caseSensitivity()));
-    }
+    bool isRegexValid() const;
 
-    const QRegularExpression &getRegex() const
-    {
-        return this->regex_;
-    }
+    bool isMatch(const QString &subject) const;
 
-    bool isBlock() const
-    {
-        return this->isBlock_;
-    }
+    const QRegularExpression &getRegex() const;
 
-    const QString &getReplace() const
-    {
-        return this->replace_;
-    }
+    bool isBlock() const;
 
-    bool isCaseSensitive() const
-    {
-        return this->isCaseSensitive_;
-    }
+    const QString &getReplace() const;
 
-    Qt::CaseSensitivity caseSensitivity() const
-    {
-        return this->isCaseSensitive_ ? Qt::CaseSensitive : Qt::CaseInsensitive;
-    }
+    bool isCaseSensitive() const;
 
-    const std::unordered_map<EmoteName, EmotePtr> &getEmotes() const
-    {
-        return this->emotes_;
-    }
+    Qt::CaseSensitivity caseSensitivity() const;
 
-    bool containsEmote() const
-    {
-        if (!this->emotesChecked_)
-        {
-            const auto &accvec = getApp()->accounts->twitch.accounts;
-            for (const auto &acc : accvec)
-            {
-                const auto &accemotes = *acc->accessEmotes();
-                for (const auto &emote : accemotes.emotes)
-                {
-                    if (this->replace_.contains(emote.first.string,
-                                                Qt::CaseSensitive))
-                    {
-                        this->emotes_.emplace(emote.first, emote.second);
-                    }
-                }
-            }
-            this->emotesChecked_ = true;
-        }
-        return !this->emotes_.empty();
-    }
+    const std::unordered_map<EmoteName, EmotePtr> &getEmotes() const;
+
+    bool containsEmote() const;
+
+    static IgnorePhrase createEmpty();
 
 private:
     QString pattern_;
@@ -163,10 +87,7 @@ struct Deserialize<chatterino::IgnorePhrase> {
         if (!value.IsObject())
         {
             PAJLADA_REPORT_ERROR(error)
-            return chatterino::IgnorePhrase(
-                QString(), false, false,
-                ::chatterino::getSettings()->ignoredPhraseReplace.getValue(),
-                true);
+            return chatterino::IgnorePhrase::createEmpty();
         }
 
         QString _pattern;

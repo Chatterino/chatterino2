@@ -1,15 +1,15 @@
 #include "singletons/Paths.hpp"
 
+#include "common/Modes.hpp"
 #include "singletons/Settings.hpp"
+#include "util/CombinePath.hpp"
 
 #include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QDir>
 #include <QStandardPaths>
-#include <cassert>
 
-#include "common/Modes.hpp"
-#include "util/CombinePath.hpp"
+#include <cassert>
 
 using namespace std::literals;
 
@@ -141,6 +141,7 @@ void Paths::initSubDirectories()
     this->messageLogDirectory = makePath("Logs");
     this->miscDirectory = makePath("Misc");
     this->twitchProfileAvatars = makePath("ProfileAvatars");
+    this->crashdumpDirectory = makePath("Crashes");
     //QDir().mkdir(this->twitchProfileAvatars + "/twitch");
 }
 

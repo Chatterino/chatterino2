@@ -1,14 +1,11 @@
 #include "providers/irc/IrcMessageBuilder.hpp"
 
-#include "Application.hpp"
-#include "common/IrcColors.hpp"
-#include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
-#include "providers/chatterino/ChatterinoBadges.hpp"
+#include "messages/MessageColor.hpp"
+#include "messages/MessageElement.hpp"
 #include "singletons/Emotes.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -38,6 +35,15 @@ IrcMessageBuilder::IrcMessageBuilder(
     const Communi::IrcNoticeMessage *_ircMessage, const MessageParseArgs &_args)
     : SharedMessageBuilder(Channel::getEmpty().get(), _ircMessage, _args,
                            _ircMessage->content(), false)
+{
+}
+
+IrcMessageBuilder::IrcMessageBuilder(
+    const Communi::IrcPrivateMessage *_ircMessage,
+    const MessageParseArgs &_args)
+    : SharedMessageBuilder(Channel::getEmpty().get(), _ircMessage, _args,
+                           _ircMessage->content(), false)
+    , whisperTarget_(_ircMessage->target())
 {
 }
 
@@ -80,7 +86,8 @@ void IrcMessageBuilder::appendUsername()
     this->message().displayName = username;
 
     // The full string that will be rendered in the chat widget
-    QString usernameText = username;
+    QString usernameText =
+        SharedMessageBuilder::stylizeUsername(username, this->message());
 
     if (this->args.isReceivedWhisper)
     {
@@ -93,7 +100,32 @@ void IrcMessageBuilder::appendUsername()
         this->emplace<TextElement>("->", MessageElementFlag::Username,
                                    MessageColor::System, FontStyle::ChatMedium);
 
-        this->emplace<TextElement>("you:", MessageElementFlag::Username);
+        if (this->whisperTarget_.isEmpty())
+        {
+            this->emplace<TextElement>("you:", MessageElementFlag::Username);
+        }
+        else
+        {
+            this->emplace<TextElement>(this->whisperTarget_ + ":",
+                                       MessageElementFlag::Username,
+                                       getRandomColor(this->whisperTarget_),
+                                       FontStyle::ChatMediumBold);
+        }
+    }
+    else if (this->args.isSentWhisper)
+    {
+        this->emplace<TextElement>(usernameText, MessageElementFlag::Username,
+                                   this->usernameColor_,
+                                   FontStyle::ChatMediumBold);
+
+        // Separator
+        this->emplace<TextElement>("->", MessageElementFlag::Username,
+                                   MessageColor::System, FontStyle::ChatMedium);
+
+        this->emplace<TextElement>(
+                this->whisperTarget_ + ":", MessageElementFlag::Username,
+                getRandomColor(this->whisperTarget_), FontStyle::ChatMediumBold)
+            ->setLink({Link::UserWhisper, this->whisperTarget_});
     }
     else
     {

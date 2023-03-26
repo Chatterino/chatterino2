@@ -5,12 +5,13 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/optional.hpp>
 #include <QJsonArray>
+#include <QJsonObject>
 #include <QString>
 #include <QStringList>
 #include <QUrl>
 #include <QUrlQuery>
-#include <boost/optional.hpp>
 
 #include <functional>
 #include <unordered_set>
@@ -356,20 +357,7 @@ struct HelixChatters {
 
     HelixChatters() = default;
 
-    explicit HelixChatters(const QJsonObject &jsonObject)
-        : total(jsonObject.value("total").toInt())
-        , cursor(jsonObject.value("pagination")
-                     .toObject()
-                     .value("cursor")
-                     .toString())
-    {
-        const auto &data = jsonObject.value("data").toArray();
-        for (const auto &chatter : data)
-        {
-            auto userLogin = chatter.toObject().value("user_login").toString();
-            this->chatters.insert(userLogin);
-        }
-    }
+    explicit HelixChatters(const QJsonObject &jsonObject);
 };
 
 using HelixModerator = HelixVip;
@@ -551,6 +539,7 @@ enum class HelixBanUserError {  // /timeout, /ban
     Ratelimited,
     ConflictingOperation,
     TargetBanned,
+    CannotBanUser,
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
@@ -620,6 +609,7 @@ enum class HelixStartCommercialError {
     TokenMustMatchBroadcaster,
     UserMissingScope,
     BroadcasterNotStreaming,
+    MissingLengthParameter,
     Ratelimited,
 
     // The error message is forwarded directly from the Twitch API

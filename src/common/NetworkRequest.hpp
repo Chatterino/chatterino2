@@ -1,9 +1,9 @@
 #pragma once
 
 #include "common/NetworkCommon.hpp"
-#include "common/NetworkResult.hpp"
 
 #include <QHttpMultiPart>
+
 #include <memory>
 
 namespace chatterino {

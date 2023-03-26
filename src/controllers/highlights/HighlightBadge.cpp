@@ -1,6 +1,7 @@
 #include "HighlightBadge.hpp"
 
 #include "messages/SharedMessageBuilder.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Resources.hpp"
 
 namespace chatterino {

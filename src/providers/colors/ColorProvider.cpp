@@ -1,5 +1,7 @@
 #include "providers/colors/ColorProvider.hpp"
 
+#include "controllers/highlights/HighlightPhrase.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 
 namespace chatterino {
@@ -77,6 +79,20 @@ void ColorProvider::initTypeColorMap()
             {ColorType::SelfHighlight,
              std::make_shared<QColor>(
                  HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR)});
+    }
+
+    customColor = getSettings()->selfMessageHighlightColor;
+    if (QColor(customColor).isValid())
+    {
+        this->typeColorMap_.insert({ColorType::SelfMessageHighlight,
+                                    std::make_shared<QColor>(customColor)});
+    }
+    else
+    {
+        this->typeColorMap_.insert(
+            {ColorType::SelfMessageHighlight,
+             std::make_shared<QColor>(
+                 HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR)});
     }
 
     customColor = getSettings()->subHighlightColor;

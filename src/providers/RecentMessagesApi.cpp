@@ -1,10 +1,12 @@
-#include "RecentMessagesApi.hpp"
+#include "providers/RecentMessagesApi.hpp"
 
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
+#include "messages/Message.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -16,6 +18,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QUrl>
+#include <QUrlQuery>
 
 namespace chatterino {
 
@@ -81,6 +84,9 @@ namespace {
         for (const auto jsonMessage : jsonMessages)
         {
             auto content = jsonMessage.toString();
+
+            // For explanation of why this exists, see src/providers/twitch/TwitchChannel.hpp,
+            // where these constants are defined
             content.replace(COMBINED_FIXER, ZERO_WIDTH_JOINER);
 
             auto message =

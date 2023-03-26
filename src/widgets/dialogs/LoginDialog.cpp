@@ -5,6 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 
@@ -12,19 +13,19 @@
 #    include <Windows.h>
 #endif
 
+#include <pajlada/settings/setting.hpp>
 #include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QUrl>
-#include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
 
 namespace {
 
-    void logInWithCredentials(const QString &userID, const QString &username,
-                              const QString &clientID,
+    bool logInWithCredentials(QWidget *parent, const QString &userID,
+                              const QString &username, const QString &clientID,
                               const QString &oauthToken)
     {
         QStringList errors;
@@ -48,20 +49,12 @@ namespace {
 
         if (errors.length() > 0)
         {
-            QMessageBox messageBox;
-// Set error window on top
-#ifdef USEWINSDK
-            ::SetWindowPos(HWND(messageBox.winId()), HWND_TOPMOST, 0, 0, 0, 0,
-                           SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-
-#endif
-            messageBox.setWindowTitle(
-                "Chatterino - invalid account credentials");
+            QMessageBox messageBox(parent);
+            messageBox.setWindowTitle("Invalid account credentials");
             messageBox.setIcon(QMessageBox::Critical);
             messageBox.setText(errors.join("<br>"));
-            messageBox.setStandardButtons(QMessageBox::Ok);
             messageBox.exec();
-            return;
+            return false;
         }
 
         std::string basePath = "/accounts/uid" + userID.toStdString();
@@ -75,6 +68,7 @@ namespace {
 
         getApp()->accounts->twitch.reloadUsers();
         getApp()->accounts->twitch.currentUsername = username;
+        return true;
     }
 
 }  // namespace
@@ -116,6 +110,9 @@ BasicLoginWidget::BasicLoginWidget()
         QStringList parameters = getClipboardText().split(";");
         QString oauthToken, clientID, username, userID;
 
+        // Removing clipboard content to prevent accidental paste of credentials into somewhere
+        crossPlatformCopy("");
+
         for (const auto &param : parameters)
         {
             QStringList kvParameters = param.split('=');
@@ -148,11 +145,10 @@ BasicLoginWidget::BasicLoginWidget()
             }
         }
 
-        logInWithCredentials(userID, username, clientID, oauthToken);
-
-        // Removing clipboard content to prevent accidental paste of credentials into somewhere
-        crossPlatformCopy("");
-        this->window()->close();
+        if (logInWithCredentials(this, userID, username, clientID, oauthToken))
+        {
+            this->window()->close();
+        }
     });
 }
 
@@ -181,16 +177,16 @@ AdvancedLoginWidget::AdvancedLoginWidget()
 
     this->ui_.oauthTokenInput.setEchoMode(QLineEdit::Password);
 
-    connect(&this->ui_.userIDInput, &QLineEdit::textChanged, [=]() {
+    connect(&this->ui_.userIDInput, &QLineEdit::textChanged, [this]() {
         this->refreshButtons();
     });
-    connect(&this->ui_.usernameInput, &QLineEdit::textChanged, [=]() {
+    connect(&this->ui_.usernameInput, &QLineEdit::textChanged, [this]() {
         this->refreshButtons();
     });
-    connect(&this->ui_.clientIDInput, &QLineEdit::textChanged, [=]() {
+    connect(&this->ui_.clientIDInput, &QLineEdit::textChanged, [this]() {
         this->refreshButtons();
     });
-    connect(&this->ui_.oauthTokenInput, &QLineEdit::textChanged, [=]() {
+    connect(&this->ui_.oauthTokenInput, &QLineEdit::textChanged, [this]() {
         this->refreshButtons();
     });
 
@@ -205,7 +201,7 @@ AdvancedLoginWidget::AdvancedLoginWidget()
         &this->ui_.buttonUpperRow.clearFieldsButton);
 
     connect(&this->ui_.buttonUpperRow.clearFieldsButton, &QPushButton::clicked,
-            [=]() {
+            [this]() {
                 this->ui_.userIDInput.clear();
                 this->ui_.usernameInput.clear();
                 this->ui_.clientIDInput.clear();
@@ -213,13 +209,14 @@ AdvancedLoginWidget::AdvancedLoginWidget()
             });
 
     connect(&this->ui_.buttonUpperRow.addUserButton, &QPushButton::clicked,
-            [=]() {
+            [this]() {
                 QString userID = this->ui_.userIDInput.text();
                 QString username = this->ui_.usernameInput.text();
                 QString clientID = this->ui_.clientIDInput.text();
                 QString oauthToken = this->ui_.oauthTokenInput.text();
 
-                logInWithCredentials(userID, username, clientID, oauthToken);
+                logInWithCredentials(this, userID, username, clientID,
+                                     oauthToken);
             });
 }
 
@@ -238,15 +235,15 @@ void AdvancedLoginWidget::refreshButtons()
     }
 }
 
-LoginWidget::LoginWidget(QWidget *parent)
+LoginDialog::LoginDialog(QWidget *parent)
     : QDialog(parent)
 {
-#ifdef USEWINSDK
-    ::SetWindowPos(HWND(this->winId()), HWND_TOPMOST, 0, 0, 0, 0,
-                   SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-#endif
+    this->setMinimumWidth(300);
+    this->setWindowFlags(
+        (this->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
+        Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
-    this->setWindowTitle("Chatterino - add new account");
+    this->setWindowTitle("Add new account");
 
     this->setLayout(&this->ui_.mainLayout);
     this->ui_.mainLayout.addWidget(&this->ui_.tabWidget);

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <QApplication>
-#include <memory>
-
-#include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "singletons/NativeMessaging.hpp"
+
+#include <QApplication>
+
+#include <memory>
 
 namespace chatterino {
 
@@ -17,12 +17,14 @@ class AccountController;
 class NotificationController;
 class HighlightController;
 class HotkeyController;
+class IUserDataController;
+class UserDataController;
+class SoundController;
 
 class Theme;
 class WindowManager;
 class Logging;
 class Paths;
-class AccountManager;
 class Emotes;
 class IEmotes;
 class Settings;
@@ -53,6 +55,7 @@ public:
     virtual TwitchIrcServer *getTwitch() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
+    virtual IUserDataController *getUserData() = 0;
 };
 
 class Application : public IApplication
@@ -89,6 +92,8 @@ public:
     ChatterinoBadges *const chatterinoBadges{};
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
+    UserDataController *const userData{};
+    SoundController *const sound{};
 
     /*[[deprecated]]*/ Logging *const logging{};
 
@@ -141,10 +146,13 @@ public:
     {
         return this->ffzBadges;
     }
+    IUserDataController *getUserData() override;
 
 private:
     void addSingleton(Singleton *singleton);
     void initPubSub();
+    void initBttvLiveUpdates();
+    void initSeventvEventAPI();
     void initNm(Paths &paths);
 
     template <typename T,

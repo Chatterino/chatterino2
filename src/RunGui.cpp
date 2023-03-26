@@ -1,13 +1,5 @@
 #include "RunGui.hpp"
 
-#include <QApplication>
-#include <QFile>
-#include <QPalette>
-#include <QStyleFactory>
-#include <Qt>
-#include <QtConcurrent>
-#include <csignal>
-
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
@@ -19,6 +11,15 @@
 #include "singletons/Updates.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
+
+#include <QApplication>
+#include <QFile>
+#include <QPalette>
+#include <QStyleFactory>
+#include <Qt>
+#include <QtConcurrent>
+
+#include <csignal>
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
@@ -161,7 +162,7 @@ namespace {
     // true.
     void initSignalHandler()
     {
-#ifdef NDEBUG
+#if defined(NDEBUG) && !defined(CHATTERINO_WITH_CRASHPAD)
         signalsInitTime = std::chrono::steady_clock::now();
 
         signal(SIGSEGV, handleSignal);
@@ -183,6 +184,38 @@ namespace {
             }
         }
         qCDebug(chatterinoCache) << "Deleted" << deletedCount << "files";
+    }
+
+    // We delete all but the five most recent crashdumps. This strategy may be
+    // improved in the future.
+    void clearCrashes(QDir dir)
+    {
+        // crashpad crashdumps are stored inside the Crashes/report directory
+        if (!dir.cd("reports"))
+        {
+            // no reports directory exists = no files to delete
+            return;
+        }
+
+        dir.setNameFilters({"*.dmp"});
+
+        size_t deletedCount = 0;
+        // TODO: use std::views::drop once supported by all compilers
+        size_t filesToSkip = 5;
+        for (auto &&info : dir.entryInfoList(QDir::Files, QDir::Time))
+        {
+            if (filesToSkip > 0)
+            {
+                filesToSkip--;
+                continue;
+            }
+
+            if (QFile(info.absoluteFilePath()).remove())
+            {
+                deletedCount++;
+            }
+        }
+        qCDebug(chatterinoApp) << "Deleted" << deletedCount << "crashdumps";
     }
 }  // namespace
 
@@ -214,9 +247,14 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     });
 
     // Clear the cache 1 minute after start.
-    QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory()] {
+    QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory(),
+                                   crashDirectory = paths.crashdumpDirectory] {
         QtConcurrent::run([cachePath]() {
             clearCache(cachePath);
+        });
+
+        QtConcurrent::run([crashDirectory]() {
+            clearCrashes(crashDirectory);
         });
     });
 

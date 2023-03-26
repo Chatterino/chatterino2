@@ -1,9 +1,12 @@
 #pragma once
 
-#include "messages/MessageElement.hpp"
+#include "messages/MessageColor.hpp"
 
 #include <QRegularExpression>
+#include <QTime>
+
 #include <ctime>
+#include <memory>
 #include <utility>
 
 namespace chatterino {
@@ -15,12 +18,29 @@ struct AutomodInfoAction;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 
+class MessageElement;
+class TextElement;
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
+
 struct SystemMessageTag {
 };
 struct TimeoutMessageTag {
 };
+struct LiveUpdatesUpdateEmoteMessageTag {
+};
+struct LiveUpdatesRemoveEmoteMessageTag {
+};
+struct LiveUpdatesAddEmoteMessageTag {
+};
+struct LiveUpdatesUpdateEmoteSetMessageTag {
+};
 const SystemMessageTag systemMessage{};
 const TimeoutMessageTag timeoutMessage{};
+const LiveUpdatesUpdateEmoteMessageTag liveUpdatesUpdateEmoteMessage{};
+const LiveUpdatesRemoveEmoteMessageTag liveUpdatesRemoveEmoteMessage{};
+const LiveUpdatesAddEmoteMessageTag liveUpdatesAddEmoteMessage{};
+const LiveUpdatesUpdateEmoteSetMessageTag liveUpdatesUpdateEmoteSetMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
 MessagePtr makeSystemMessage(const QString &text, const QTime &time);
@@ -53,6 +73,19 @@ public:
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);
     MessageBuilder(const AutomodUserAction &action);
+
+    MessageBuilder(LiveUpdatesAddEmoteMessageTag, const QString &platform,
+                   const QString &actor,
+                   const std::vector<QString> &emoteNames);
+    MessageBuilder(LiveUpdatesRemoveEmoteMessageTag, const QString &platform,
+                   const QString &actor,
+                   const std::vector<QString> &emoteNames);
+    MessageBuilder(LiveUpdatesUpdateEmoteMessageTag, const QString &platform,
+                   const QString &actor, const QString &emoteName,
+                   const QString &oldEmoteName);
+    MessageBuilder(LiveUpdatesUpdateEmoteSetMessageTag, const QString &platform,
+                   const QString &actor, const QString &emoteSetName);
+
     virtual ~MessageBuilder() = default;
 
     Message *operator->();
@@ -89,6 +122,10 @@ public:
 protected:
     virtual void addTextOrEmoji(EmotePtr emote);
     virtual void addTextOrEmoji(const QString &value);
+
+    bool isEmpty() const;
+    MessageElement &back();
+    std::unique_ptr<MessageElement> releaseBack();
 
     MessageColor textColor_ = MessageColor::Text;
 

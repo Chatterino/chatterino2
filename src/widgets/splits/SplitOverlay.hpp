@@ -1,10 +1,10 @@
 #pragma once
 
+#include "widgets/BaseWidget.hpp"
+
+#include <pajlada/signals/signalholder.hpp>
 #include <QGridLayout>
 #include <QPushButton>
-
-#include "pajlada/signals/signalholder.hpp"
-#include "widgets/BaseWidget.hpp"
 
 namespace chatterino {
 

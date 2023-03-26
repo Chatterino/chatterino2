@@ -1,22 +1,31 @@
 #pragma once
 
+#include "common/Aliases.hpp"
+#include "common/Common.hpp"
+
+#include <boost/noncopyable.hpp>
+#include <boost/optional.hpp>
+#include <boost/variant.hpp>
+#include <pajlada/signals/signal.hpp>
 #include <QPixmap>
 #include <QString>
 #include <QThread>
 #include <QTimer>
 #include <QVector>
+
 #include <atomic>
-#include <boost/noncopyable.hpp>
-#include <boost/optional.hpp>
-#include <boost/variant.hpp>
 #include <chrono>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <pajlada/signals/signal.hpp>
 
-#include "common/Aliases.hpp"
-#include "common/Common.hpp"
+#ifdef CHATTERINO_TEST
+// When running tests, the ImageExpirationPool destructor can be called before
+// all images are deleted, leading to a use-after-free of its mutex. This
+// happens despite the lifetime of the ImageExpirationPool being (apparently)
+// static. Therefore, just disable it during testing.
+#    define DISABLE_IMAGE_EXPIRATION_POOL
+#endif
 
 namespace chatterino {
 namespace detail {
@@ -75,8 +84,8 @@ public:
     int height() const;
     bool animated() const;
 
-    bool operator==(const Image &image) const;
-    bool operator!=(const Image &image) const;
+    bool operator==(const Image &image) = delete;
+    bool operator!=(const Image &image) = delete;
 
 private:
     Image();
@@ -100,6 +109,11 @@ private:
 
     friend class ImageExpirationPool;
 };
+
+// forward-declarable function that calls Image::getEmpty() under the hood.
+ImagePtr getEmptyImagePtr();
+
+#ifndef DISABLE_IMAGE_EXPIRATION_POOL
 
 class ImageExpirationPool
 {
@@ -126,5 +140,7 @@ private:
     std::map<Image *, std::weak_ptr<Image>> allImages_;
     std::mutex mutex_;
 };
+
+#endif
 
 }  // namespace chatterino

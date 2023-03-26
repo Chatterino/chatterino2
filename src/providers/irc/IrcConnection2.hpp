@@ -2,9 +2,8 @@
 
 #include "util/ExponentialBackoff.hpp"
 
-#include <pajlada/signals/signal.hpp>
-
 #include <IrcConnection>
+#include <pajlada/signals/signal.hpp>
 #include <QTimer>
 
 namespace chatterino {

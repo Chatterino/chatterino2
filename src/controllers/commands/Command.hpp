@@ -2,8 +2,8 @@
 
 #include "util/RapidjsonHelpers.hpp"
 
-#include <QString>
 #include <pajlada/serialize.hpp>
+#include <QString>
 
 namespace chatterino {
 

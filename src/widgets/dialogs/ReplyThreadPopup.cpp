@@ -3,12 +3,17 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "messages/Message.hpp"
 #include "messages/MessageThread.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitInput.hpp"
 
@@ -81,16 +86,34 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     });
 
     // Create SplitInput with inline replying disabled
-    this->ui_.replyInput = new SplitInput(this, this->split_, false);
+    this->ui_.replyInput =
+        new SplitInput(this, this->split_, this->ui_.threadView, false);
 
     this->bSignals_.emplace_back(
         getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->updateInputUI();
         }));
 
+    // clear SplitInput selection when selecting in ChannelView
+    this->ui_.threadView->selectionChanged.connect([this]() {
+        if (this->ui_.replyInput->hasSelection())
+        {
+            this->ui_.replyInput->clearSelection();
+        }
+    });
+
+    // clear ChannelView selection when selecting in SplitInput
+    this->ui_.replyInput->selectionChanged.connect([this]() {
+        if (this->ui_.threadView->hasSelection())
+        {
+            this->ui_.threadView->clearSelection();
+        }
+    });
+
     layout->setSpacing(0);
     // provide draggable margin if frameless
-    layout->setMargin(closeAutomatically ? 15 : 1);
+    auto marginPx = closeAutomatically ? 15 : 1;
+    layout->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
     layout->addWidget(this->ui_.threadView, 1);
     layout->addWidget(this->ui_.replyInput);
 }

@@ -1,29 +1,40 @@
 #include "TwitchIrcServer.hpp"
 
-#include <IrcCommand>
-#include <cassert>
-
 #include "Application.hpp"
-#include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/bttv/BttvLiveUpdates.hpp"
+#include "providers/seventv/eventapi/Subscription.hpp"
+#include "providers/seventv/SeventvEventAPI.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchHelpers.hpp"
+#include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 
+#include <IrcCommand>
 #include <QMetaEnum>
+
+#include <cassert>
 
 // using namespace Communi;
 using namespace std::chrono_literals;
 
 #define TWITCH_PUBSUB_URL "wss://pubsub-edge.twitch.tv"
+
+namespace {
+
+const QString BTTV_LIVE_UPDATES_URL = "wss://sockets.betterttv.net/ws";
+const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
+
+}  // namespace
 
 namespace chatterino {
 
@@ -36,6 +47,20 @@ TwitchIrcServer::TwitchIrcServer()
     this->initializeIrc();
 
     this->pubsub = new PubSub(TWITCH_PUBSUB_URL);
+
+    if (getSettings()->enableBTTVLiveUpdates &&
+        getSettings()->enableBTTVChannelEmotes)
+    {
+        this->bttvLiveUpdates =
+            std::make_unique<BttvLiveUpdates>(BTTV_LIVE_UPDATES_URL);
+    }
+
+    if (getSettings()->enableSevenTVEventAPI &&
+        getSettings()->enableSevenTVChannelEmotes)
+    {
+        this->seventvEventAPI =
+            std::make_unique<SeventvEventAPI>(SEVENTV_EVENTAPI_URL);
+    }
 
     // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) {
     // this->connect(); },
@@ -57,7 +82,7 @@ void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
     this->reloadSevenTVGlobalEmotes();
 
     /* Refresh all twitch channel's live status in bulk every 30 seconds after starting chatterino */
-    QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [=] {
+    QObject::connect(&this->bulkLiveStatusTimer_, &QTimer::timeout, [this] {
         this->bulkRefreshLiveStatus();
     });
     this->bulkLiveStatusTimer_.start(30 * 1000);
@@ -101,7 +126,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
         connection->setPassword(oauthToken);
     }
 
-    // https://dev.twitch.tv/docs/irc/guide/#connecting-to-twitch-irc
+    // https://dev.twitch.tv/docs/irc#connecting-to-the-twitch-irc-server
     // SSL disabled: irc://irc.chat.twitch.tv:6667 (or port 80)
     // SSL enabled: irc://irc.chat.twitch.tv:6697 (or port 443)
     connection->setHost(Env::get().twitchServerHost);
@@ -300,7 +325,7 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
             continue;
 
         if (twitchChannel->roomId() == channelId &&
-            twitchChannel->getName().splitRef(":").size() < 3)
+            twitchChannel->getName().count(':') < 2)
         {
             return twitchChannel;
         }
@@ -517,4 +542,78 @@ void TwitchIrcServer::reloadAllSevenTVChannelEmotes()
         }
     });
 }
+
+void TwitchIrcServer::forEachSeventvEmoteSet(
+    const QString &emoteSetId, std::function<void(TwitchChannel &)> func)
+{
+    this->forEachChannel([emoteSetId, func](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
+            channel->seventvEmoteSetID() == emoteSetId)
+        {
+            func(*channel);
+        }
+    });
+}
+void TwitchIrcServer::forEachSeventvUser(
+    const QString &userId, std::function<void(TwitchChannel &)> func)
+{
+    this->forEachChannel([userId, func](const auto &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
+            channel->seventvUserID() == userId)
+        {
+            func(*channel);
+        }
+    });
+}
+
+void TwitchIrcServer::dropSeventvChannel(const QString &userID,
+                                         const QString &emoteSetID)
+{
+    if (!this->seventvEventAPI)
+    {
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(this->channelMutex);
+
+    // ignore empty values
+    bool skipUser = userID.isEmpty();
+    bool skipSet = emoteSetID.isEmpty();
+
+    bool foundUser = skipUser;
+    bool foundSet = skipSet;
+    for (std::weak_ptr<Channel> &weak : this->channels)
+    {
+        ChannelPtr chan = weak.lock();
+        if (!chan)
+        {
+            continue;
+        }
+
+        auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
+        if (!foundSet && channel->seventvEmoteSetID() == emoteSetID)
+        {
+            foundSet = true;
+        }
+        if (!foundUser && channel->seventvUserID() == userID)
+        {
+            foundUser = true;
+        }
+
+        if (foundSet && foundUser)
+        {
+            break;
+        }
+    }
+
+    if (!foundUser)
+    {
+        this->seventvEventAPI->unsubscribeUser(userID);
+    }
+    if (!foundSet)
+    {
+        this->seventvEventAPI->unsubscribeEmoteSet(emoteSetID);
+    }
+}
+
 }  // namespace chatterino

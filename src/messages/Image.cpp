@@ -1,27 +1,30 @@
 #include "messages/Image.hpp"
 
+#include "Application.hpp"
+#include "common/Common.hpp"
+#include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
+#include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
+#include "debug/AssertInGuiThread.hpp"
+#include "debug/Benchmark.hpp"
+
+#include <boost/functional/hash.hpp>
 #include <QBuffer>
 #include <QImageReader>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QTimer>
-#include <boost/functional/hash.hpp>
+
 #include <functional>
 #include <queue>
 #include <thread>
-
-#include "Application.hpp"
-#include "common/Common.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/QLogging.hpp"
-#include "debug/AssertInGuiThread.hpp"
-#include "debug/Benchmark.hpp"
 #ifndef CHATTERINO_TEST
 #    include "singletons/Emotes.hpp"
 #endif
-#include "singletons/WindowManager.hpp"
 #include "singletons/helper/GifTimer.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 
@@ -269,7 +272,9 @@ namespace detail {
 // IMAGE2
 Image::~Image()
 {
+#ifndef DISABLE_IMAGE_EXPIRATION_POOL
     ImageExpirationPool::instance().removeImagePtr(this);
+#endif
 
     if (this->empty_ && !this->frames_)
     {
@@ -346,6 +351,11 @@ ImagePtr Image::getEmpty()
     return empty;
 }
 
+ImagePtr getEmptyImagePtr()
+{
+    return Image::getEmpty();
+}
+
 Image::Image()
     : empty_(true)
 {
@@ -417,7 +427,9 @@ void Image::load() const
         Image *this2 = const_cast<Image *>(this);
         this2->shouldLoad_ = false;
         this2->actuallyLoad();
+#ifndef DISABLE_IMAGE_EXPIRATION_POOL
         ImageExpirationPool::instance().addImagePtr(this2->shared_from_this());
+#endif
     }
 }
 
@@ -479,12 +491,14 @@ void Image::actuallyLoad()
             {
                 qCDebug(chatterinoImage)
                     << "Error: image cant be read " << shared->url().string;
+                shared->empty_ = true;
                 return Failure;
             }
 
             const auto size = reader.size();
             if (size.isEmpty())
             {
+                shared->empty_ = true;
                 return Failure;
             }
 
@@ -494,6 +508,7 @@ void Image::actuallyLoad()
                 qCDebug(chatterinoImage)
                     << "Error: image has less than 1 frame "
                     << shared->url().string << ": " << reader.errorString();
+                shared->empty_ = true;
                 return Failure;
             }
 
@@ -504,6 +519,7 @@ void Image::actuallyLoad()
             {
                 qCDebug(chatterinoImage) << "image too large in RAM";
 
+                shared->empty_ = true;
                 return Failure;
             }
 
@@ -539,22 +555,7 @@ void Image::expireFrames()
     this->shouldLoad_ = true;  // Mark as needing load again
 }
 
-bool Image::operator==(const Image &other) const
-{
-    if (this->isEmpty() && other.isEmpty())
-        return true;
-    if (!this->url_.string.isEmpty() && this->url_ == other.url_)
-        return true;
-    if (this->frames_->first() == other.frames_->first())
-        return true;
-
-    return false;
-}
-
-bool Image::operator!=(const Image &other) const
-{
-    return !this->operator==(other);
-}
+#ifndef DISABLE_IMAGE_EXPIRATION_POOL
 
 ImageExpirationPool::ImageExpirationPool()
 {
@@ -598,10 +599,10 @@ void ImageExpirationPool::freeOld()
 {
     std::lock_guard<std::mutex> lock(this->mutex_);
 
-#ifndef NDEBUG
+#    ifndef NDEBUG
     size_t numExpired = 0;
     size_t eligible = 0;
-#endif
+#    endif
 
     auto now = std::chrono::steady_clock::now();
     for (auto it = this->allImages_.begin(); it != this->allImages_.end();)
@@ -622,17 +623,17 @@ void ImageExpirationPool::freeOld()
             continue;
         }
 
-#ifndef NDEBUG
+#    ifndef NDEBUG
         ++eligible;
-#endif
+#    endif
 
         // Check if image has expired and, if so, expire its frame data
         auto diff = now - img->lastUsed_;
         if (diff > IMAGE_POOL_IMAGE_LIFETIME)
         {
-#ifndef NDEBUG
+#    ifndef NDEBUG
             ++numExpired;
-#endif
+#    endif
             img->expireFrames();
             // erase without mutex locking issue
             it = this->allImages_.erase(it);
@@ -642,10 +643,12 @@ void ImageExpirationPool::freeOld()
         ++it;
     }
 
-#ifndef NDEBUG
+#    ifndef NDEBUG
     qCDebug(chatterinoImage) << "freed frame data for" << numExpired << "/"
                              << eligible << "eligible images";
-#endif
+#    endif
 }
+
+#endif
 
 }  // namespace chatterino

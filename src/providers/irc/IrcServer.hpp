@@ -1,7 +1,6 @@
 #pragma once
 
 #include "providers/irc/AbstractIrcServer.hpp"
-#include "providers/irc/IrcAccount.hpp"
 
 namespace chatterino {
 
@@ -20,6 +19,12 @@ public:
     const QString &nick();
     const QString &userFriendlyIdentifier();
 
+    bool hasEcho() const;
+    /**
+     * @brief sends a whisper to the target user (PRIVMSG where a user is the target)
+     */
+    void sendWhisper(const QString &target, const QString &message);
+
     // AbstractIrcServer interface
 protected:
     void initializeConnectionSignals(IrcConnection *connection,
@@ -36,6 +41,8 @@ protected:
 private:
     // pointer so we don't have to circle include Irc2.hpp
     IrcServerData *data_;
+
+    bool hasEcho_{false};
 };
 
 }  // namespace chatterino

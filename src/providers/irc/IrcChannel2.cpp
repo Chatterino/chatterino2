@@ -3,6 +3,7 @@
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "messages/MessageElement.hpp"
 #include "providers/irc/IrcCommands.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/irc/IrcServer.hpp"
@@ -38,7 +39,10 @@ void IrcChannel::sendMessage(const QString &message)
         if (this->server() != nullptr)
         {
             this->server()->sendMessage(this->getName(), message);
-
+            if (this->server()->hasEcho())
+            {
+                return;
+            }
             MessageBuilder builder;
 
             builder

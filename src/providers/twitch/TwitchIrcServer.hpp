@@ -3,11 +3,12 @@
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/Singleton.hpp"
-#include "pajlada/signals/signalholder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+
+#include <pajlada/signals/signalholder.hpp>
 
 #include <chrono>
 #include <memory>
@@ -19,6 +20,8 @@ class Settings;
 class Paths;
 class PubSub;
 class TwitchChannel;
+class BttvLiveUpdates;
+class SeventvEventAPI;
 
 class TwitchIrcServer final : public AbstractIrcServer, public Singleton
 {
@@ -41,6 +44,21 @@ public:
     void reloadSevenTVGlobalEmotes();
     void reloadAllSevenTVChannelEmotes();
 
+    /** Calls `func` with all twitch channels that have `emoteSetId` added. */
+    void forEachSeventvEmoteSet(const QString &emoteSetId,
+                                std::function<void(TwitchChannel &)> func);
+    /** Calls `func` with all twitch channels where the seventv-user-id is `userId`. */
+    void forEachSeventvUser(const QString &userId,
+                            std::function<void(TwitchChannel &)> func);
+    /**
+     * Checks if any channel still needs this `userID` or `emoteSetID`.
+     * If not, it unsubscribes from the respective messages.
+     *
+     * It's currently not possible to share emote sets among users,
+     * but it's a commonly requested feature.
+     */
+    void dropSeventvChannel(const QString &userID, const QString &emoteSetID);
+
     Atomic<QString> lastUserThatWhisperedMe;
 
     const ChannelPtr whispersChannel;
@@ -49,6 +67,8 @@ public:
     IndirectChannel watchingChannel;
 
     PubSub *pubsub;
+    std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
+    std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 
     const BttvEmotes &getBttvEmotes() const;
     const FfzEmotes &getFfzEmotes() const;

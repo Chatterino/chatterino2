@@ -1,15 +1,17 @@
-#include "messages/MessageBuilder.hpp"
+#pragma once
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
-#include "messages/MessageColor.hpp"
-#include "providers/twitch/TwitchBadge.hpp"
+#include "messages/MessageBuilder.hpp"
 
 #include <IrcMessage>
 #include <QColor>
 #include <QUrl>
 
 namespace chatterino {
+
+class Badge;
+class Channel;
 
 class SharedMessageBuilder : public MessageBuilder
 {
@@ -37,6 +39,9 @@ public:
 
     // Parses "badges" tag which contains a comma separated list of key-value elements
     static std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
+
+    static QString stylizeUsername(const QString &username,
+                                   const Message &message);
 
 protected:
     virtual void parse();

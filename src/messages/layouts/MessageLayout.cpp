@@ -2,20 +2,24 @@
 
 #include "Application.hpp"
 #include "debug/Benchmark.hpp"
+#include "messages/layouts/MessageLayoutContainer.hpp"
+#include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
-#include "messages/layouts/MessageLayoutContainer.hpp"
+#include "messages/Selection.hpp"
+#include "providers/colors/ColorProvider.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
+#include "util/StreamerMode.hpp"
 
 #include <QApplication>
 #include <QDebug>
 #include <QPainter>
-#include <QThread>
 #include <QtGlobal>
+#include <QThread>
 
 #define MARGIN_LEFT (int)(8 * this->scale)
 #define MARGIN_RIGHT (int)(8 * this->scale)
@@ -148,11 +152,17 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
             continue;
         }
 
-        if (hideModerationActions &&
-            (this->message_->flags.has(MessageFlag::Timeout) ||
-             this->message_->flags.has(MessageFlag::Untimeout)))
+        if (this->message_->flags.has(MessageFlag::Timeout) ||
+            this->message_->flags.has(MessageFlag::Untimeout))
         {
-            continue;
+            // This condition has been set up to execute isInStreamerMode() as the last thing
+            // as it could end up being expensive.
+            if (hideModerationActions ||
+                (getSettings()->streamerModeHideModActions &&
+                 isInStreamerMode()))
+            {
+                continue;
+            }
         }
 
         if (hideSimilar && this->message_->flags.has(MessageFlag::Similar))
@@ -266,16 +276,15 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     if (isLastReadMessage)
     {
         QColor color;
-        if (getSettings()->lastMessageColor != "")
+        if (getSettings()->lastMessageColor != QStringLiteral(""))
         {
             color = QColor(getSettings()->lastMessageColor.getValue());
         }
         else
         {
-            color =
-                isWindowFocused
-                    ? app->themes->tabs.selected.backgrounds.regular.color()
-                    : app->themes->tabs.selected.backgrounds.unfocused.color();
+            color = isWindowFocused
+                        ? app->themes->tabs.selected.backgrounds.regular
+                        : app->themes->tabs.selected.backgrounds.unfocused;
         }
 
         QBrush brush(color, static_cast<Qt::BrushStyle>(
@@ -435,7 +444,7 @@ int MessageLayout::getSelectionIndex(QPoint position)
     return this->container_->getSelectionIndex(position);
 }
 
-void MessageLayout::addSelectionText(QString &str, int from, int to,
+void MessageLayout::addSelectionText(QString &str, uint32_t from, uint32_t to,
                                      CopyMode copymode)
 {
     this->container_->addSelectionText(str, from, to, copymode);

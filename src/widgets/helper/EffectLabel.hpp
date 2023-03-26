@@ -1,9 +1,8 @@
 #pragma once
 
-#include "widgets/BaseWidget.hpp"
-#include "widgets/Label.hpp"
 #include "widgets/helper/Button.hpp"
 #include "widgets/helper/SignalLabel.hpp"
+#include "widgets/Label.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>

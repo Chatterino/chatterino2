@@ -1,22 +1,23 @@
 #pragma once
 
+#include "common/FlagsEnum.hpp"
+#include "messages/LimitedQueue.hpp"
+#include "messages/LimitedQueueSnapshot.hpp"
+#include "messages/Selection.hpp"
+#include "util/ThreadGuard.hpp"
+#include "widgets/BaseWidget.hpp"
+
+#include <pajlada/signals/signal.hpp>
+#include <QMenu>
 #include <QPaintEvent>
 #include <QScroller>
 #include <QTimer>
 #include <QVariantAnimation>
 #include <QWheelEvent>
 #include <QWidget>
-#include <pajlada/signals/signal.hpp>
+
 #include <unordered_map>
 #include <unordered_set>
-
-#include "common/FlagsEnum.hpp"
-#include "controllers/filters/FilterSet.hpp"
-#include "messages/Image.hpp"
-#include "messages/LimitedQueue.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"
-#include "messages/Selection.hpp"
-#include "widgets/BaseWidget.hpp"
 
 namespace chatterino {
 enum class HighlightState;
@@ -41,6 +42,8 @@ class EffectLabel;
 struct Link;
 class MessageLayoutElement;
 class Split;
+class FilterSet;
+using FilterSetPtr = std::shared_ptr<FilterSet>;
 
 enum class PauseReason {
     Mouse,
@@ -71,13 +74,22 @@ public:
     };
 
     explicit ChannelView(BaseWidget *parent = nullptr, Split *split = nullptr,
-                         Context context = Context::None);
+                         Context context = Context::None,
+                         size_t messagesLimit = 1000);
 
     void queueUpdate();
     Scrollbar &getScrollBar();
+
     QString getSelectedText();
     bool hasSelection();
     void clearSelection();
+    /**
+     * Copies the currently selected text to the users clipboard.
+     *
+     * @see ::getSelectedText()
+     */
+    void copySelectedText();
+
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
     void setOverrideFlags(boost::optional<MessageElementFlags> value);
@@ -155,7 +167,11 @@ protected:
     void paintEvent(QPaintEvent *) override;
     void wheelEvent(QWheelEvent *event) override;
 
-    void enterEvent(QEvent *) override;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void enterEvent(QEnterEvent * /*event*/) override;
+#else
+    void enterEvent(QEvent * /*event*/) override;
+#endif
     void leaveEvent(QEvent *) override;
 
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -183,10 +199,10 @@ private:
     void messageReplaced(size_t index, MessagePtr &replacement);
     void messagesUpdated();
 
-    void performLayout(bool causedByScollbar = false);
+    void performLayout(bool causedByScrollbar = false);
     void layoutVisibleMessages(
-        LimitedQueueSnapshot<MessageLayoutPtr> &messages);
-    void updateScrollbar(LimitedQueueSnapshot<MessageLayoutPtr> &messages,
+        const LimitedQueueSnapshot<MessageLayoutPtr> &messages);
+    void updateScrollbar(const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
                          bool causedByScrollbar);
 
     void drawMessages(QPainter &painter);
@@ -254,11 +270,13 @@ private:
         pauses_;
     boost::optional<SteadyClock::time_point> pauseEnd_;
     int pauseScrollOffset_ = 0;
-    int pauseSelectionOffset_ = 0;
+    // Keeps track how many message indices we need to offset the selection when we resume scrolling
+    uint32_t pauseSelectionOffset_ = 0;
 
     boost::optional<MessageElementFlags> overrideFlags_;
     MessageLayoutPtr lastReadMessage_;
 
+    ThreadGuard snapshotGuard_;
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
     ChannelPtr channel_ = nullptr;

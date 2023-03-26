@@ -1,16 +1,18 @@
 #pragma once
 
 #include "providers/twitch/PubSubClientOptions.hpp"
-#include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/PubSubWebsocket.hpp"
 
-#include <QString>
 #include <pajlada/signals/signal.hpp>
+#include <QString>
 
 #include <atomic>
 #include <vector>
 
 namespace chatterino {
+
+struct PubSubMessage;
+struct PubSubListenMessage;
 
 struct TopicData {
     QString topic;

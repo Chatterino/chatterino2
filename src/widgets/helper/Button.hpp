@@ -1,9 +1,8 @@
 #pragma once
 
-#include <boost/optional.hpp>
-
 #include "widgets/BaseWidget.hpp"
 
+#include <boost/optional.hpp>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPainter>
@@ -58,7 +57,11 @@ signals:
 
 protected:
     virtual void paintEvent(QPaintEvent *) override;
-    virtual void enterEvent(QEvent *) override;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void enterEvent(QEnterEvent * /*event*/) override;
+#else
+    void enterEvent(QEvent * /*event*/) override;
+#endif
     virtual void leaveEvent(QEvent *) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;

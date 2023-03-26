@@ -1,20 +1,19 @@
 #pragma once
 
-#include "Application.hpp"
-#include "common/Channel.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <pajlada/signals/signal.hpp>
-
 #include <QLabel>
-#include <QRadioButton>
-
 #include <QLineEdit>
+#include <QRadioButton>
 
 namespace chatterino {
 
 class Notebook;
 class EditableModelView;
+class IndirectChannel;
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
 
 class SelectChannelDialog final : public BaseWindow
 {

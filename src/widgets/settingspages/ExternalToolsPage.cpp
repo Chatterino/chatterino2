@@ -1,6 +1,6 @@
 #include "ExternalToolsPage.hpp"
 
-#include "Application.hpp"
+#include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
@@ -41,7 +41,10 @@ ExternalToolsPage::ExternalToolsPage()
             " " +
             formatRichNamedLink(
                 "https://github.com/streamlink/streamlink/releases/latest",
-                "Download"));
+                "Download") +
+            " " +
+            formatRichNamedLink("https://streamlink.github.io/cli.html#twitch",
+                                "Documentation"));
         links->setTextFormat(Qt::RichText);
         links->setTextInteractionFlags(Qt::TextBrowserInteraction |
                                        Qt::LinksAccessibleByKeyboard |

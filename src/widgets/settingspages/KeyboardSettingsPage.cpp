@@ -2,14 +2,17 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/EditHotkeyDialog.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 
 #include <QFormLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QMessageBox>
 #include <QTableView>
 
 namespace chatterino {
@@ -40,13 +43,6 @@ KeyboardSettingsPage::KeyboardSettingsPage()
             auto newHotkey = dialog.data();
             int vectorIndex = getApp()->hotkeys->hotkeys_.append(newHotkey);
             getApp()->hotkeys->save();
-
-            // Select and scroll to newly added hotkey
-            auto modelRow = model->getModelIndexFromVectorIndex(vectorIndex);
-            auto modelIndex = model->index(modelRow, 0);
-            view->selectRow(modelRow);
-            view->getTableView()->scrollTo(modelIndex,
-                                           QAbstractItemView::PositionAtCenter);
         }
     });
 
@@ -89,11 +85,6 @@ void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
         auto vectorIndex =
             getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
         getApp()->hotkeys->save();
-
-        // Select the replaced hotkey
-        auto modelRow = model->getModelIndexFromVectorIndex(vectorIndex);
-        auto modelIndex = model->index(modelRow, 0);
-        view->selectRow(modelRow);
     }
 }
 

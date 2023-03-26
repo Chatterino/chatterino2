@@ -3,14 +3,15 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "mocks/UserData.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
 
-#include "ircconnection.h"
-
 #include <gtest/gtest.h>
+#include <IrcConnection>
 #include <QDebug>
 #include <QString>
+
 #include <unordered_map>
 #include <vector>
 
@@ -73,8 +74,13 @@ public:
     {
         return nullptr;
     }
+    IUserDataController *getUserData() override
+    {
+        return &this->userData;
+    }
 
     Emotes emotes;
+    mock::UserDataController userData;
 };
 
 }  // namespace

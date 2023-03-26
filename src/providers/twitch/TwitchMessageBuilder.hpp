@@ -2,16 +2,14 @@
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
-#include "messages/MessageThread.hpp"
 #include "messages/SharedMessageBuilder.hpp"
-#include "providers/twitch/ChannelPointReward.hpp"
-#include "providers/twitch/PubSubActions.hpp"
-#include "providers/twitch/TwitchBadge.hpp"
-#include "providers/twitch/api/Helix.hpp"
 
+#include <boost/optional.hpp>
 #include <IrcMessage>
 #include <QString>
 #include <QVariant>
+
+#include <unordered_map>
 
 namespace chatterino {
 
@@ -20,6 +18,11 @@ using EmotePtr = std::shared_ptr<const Emote>;
 
 class Channel;
 class TwitchChannel;
+class MessageThread;
+struct HelixVip;
+using HelixModerator = HelixVip;
+struct ChannelPointReward;
+struct DeleteAction;
 
 struct TwitchEmoteOccurrence {
     int start;
@@ -95,6 +98,9 @@ private:
     void parseUsername() override;
     void parseMessageID();
     void parseRoomID();
+    // Parse & build thread information into the message
+    // Will read information from thread_ or from IRC tags
+    void parseThread();
     void appendUsername();
 
     void runIgnoreReplaces(std::vector<TwitchEmoteOccurrence> &twitchEmotes);
