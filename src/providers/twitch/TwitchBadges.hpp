@@ -6,6 +6,7 @@
 #include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QIcon>
+#include <QJsonObject>
 #include <QMap>
 #include <QString>
 
@@ -49,6 +50,10 @@ private:
 
     TwitchBadges();
     void loadTwitchBadges();
+    /**
+     * @brief Accepts a JSON blob from https://badges.twitch.tv/v1/badges/global/display and updates our badges with it
+     **/
+    void parseTwitchBadges(QJsonObject root);
     void loaded();
     void loadEmoteImage(const QString &name, ImagePtr image,
                         BadgeIconCallback &&callback);

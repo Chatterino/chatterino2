@@ -2,7 +2,20 @@
 
 ## Unversioned
 
+- Minor: Include normally-stripped mention in replies in logs. (#4420)
+- Minor: Added support for FrankerFaceZ animated emotes. (#4434)
+- Minor: Added a local backup of the Twitch Badges API in case the request fails. (#4463)
+- Minor: Added the ability to reply to a message by `Shift + Right Click`ing the username. (#4424)
+- Bugfix: Fixed an issue where animated emotes would render on top of zero-width emotes. (#4314)
+- Bugfix: Fixed an issue where it was difficult to hover a zero-width emote. (#4314)
+- Bugfix: Fixed an issue where context-menu items for zero-width emotes displayed the wrong provider. (#4460)
+- Bugfix: Fixed an issue where the "Enable zero-width emotes" setting was showing the inverse state. (#4462)
+- Bugfix: Fixed username rendering in Qt 6. (#4476)
 - Bugfix: Fixed blocked user list being empty when opening the settings dialog for the first time. (#4437)
+- Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
+- Dev: Ignore unhandled BTTV user-events. (#4438)
+- Dev: Only log debug messages when NDEBUG is not defined. (#4442)
+- Dev: Cleaned up theme related code. (#4450)
 
 ## 2.4.2
 

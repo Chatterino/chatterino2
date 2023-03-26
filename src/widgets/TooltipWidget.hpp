@@ -1,15 +1,28 @@
 #pragma once
 
 #include "widgets/BaseWindow.hpp"
+#include "widgets/TooltipEntryWidget.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
+#include <QGridLayout>
 #include <QLabel>
+#include <QLayout>
+#include <QVBoxLayout>
 #include <QWidget>
 
 namespace chatterino {
 
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
+
+struct TooltipEntry {
+    ImagePtr image;
+    QString text;
+    int customWidth = 0;
+    int customHeight = 0;
+};
+
+enum class TooltipStyle { Vertical, Grid };
 
 class TooltipWidget : public BaseWindow
 {
@@ -21,11 +34,13 @@ public:
     TooltipWidget(BaseWidget *parent = nullptr);
     ~TooltipWidget() override = default;
 
-    void setText(QString text);
+    void setOne(const TooltipEntry &entry,
+                TooltipStyle style = TooltipStyle::Vertical);
+    void set(const std::vector<TooltipEntry> &entries,
+             TooltipStyle style = TooltipStyle::Vertical);
+
     void setWordWrap(bool wrap);
-    void clearImage();
-    void setImage(ImagePtr image);
-    void setImageScale(int w, int h);
+    void clearEntries();
 
 protected:
     void showEvent(QShowEvent *) override;
@@ -39,17 +54,24 @@ protected:
 private:
     void updateFont();
 
-    // used by WindowManager::gifRepaintRequested signal to progress frames when tooltip image is animated
-    bool refreshPixmap();
+    QLayout *currentLayout() const;
+    int currentLayoutCount() const;
+    TooltipEntryWidget *entryAt(int n);
 
-    // set to true when tooltip image did not finish loading yet (pixmapOrLoad returned false)
-    bool attemptRefresh{false};
+    void setVisibleEntries(int n);
+    void setCurrentStyle(TooltipStyle style);
+    void addNewEntry(int absoluteIndex);
 
-    ImagePtr image_ = nullptr;
-    int customImgWidth = 0;
-    int customImgHeight = 0;
-    QLabel *displayImage_;
-    QLabel *displayText_;
+    void deleteCurrentLayout();
+    void initializeVLayout();
+    void initializeGLayout();
+
+    int visibleEntries_ = 0;
+
+    TooltipStyle currentStyle_;
+    QVBoxLayout *vLayout_;
+    QGridLayout *gLayout_;
+
     pajlada::Signals::SignalHolder connections_;
 };
 
