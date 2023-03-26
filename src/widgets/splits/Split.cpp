@@ -1291,7 +1291,7 @@ void Split::showViewerList()
                         chattersList->addItem(formatListItemText(errorMessage));
                     });
             },
-            [this, chattersList, formatListItemText](auto error, auto message) {
+            [chattersList, formatListItemText](auto error, auto message) {
                 auto errorMessage = formatModsError(error, message);
                 chattersList->addItem(formatListItemText(errorMessage));
             });
