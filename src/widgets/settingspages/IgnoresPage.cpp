@@ -1,4 +1,4 @@
-#include "IgnoresPage.hpp"
+#include "widgets/settingspages/IgnoresPage.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
