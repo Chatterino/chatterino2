@@ -115,12 +115,13 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
 
 void IgnoresPage::onShow()
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     auto user = app->accounts->twitch.getCurrent();
 
     if (user->isAnon())
     {
+        this->userListModel_.setStringList(users);
         return;
     }
 
