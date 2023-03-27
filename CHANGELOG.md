@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Migrated viewer list to Helix API. (#4117)
 - Minor: Include normally-stripped mention in replies in logs. (#4420)
 - Minor: Added support for FrankerFaceZ animated emotes. (#4434)
 - Minor: Added a local backup of the Twitch Badges API in case the request fails. (#4463)
