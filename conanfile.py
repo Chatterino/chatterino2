@@ -5,10 +5,28 @@ from os import path
 
 class Chatterino(ConanFile):
     name = "Chatterino"
-    requires = "openssl/1.1.1t", "boost/1.81.0"
+    requires = "boost/1.81.0"
     settings = "os", "compiler", "build_type", "arch"
-    default_options = {"openssl*:shared": True}
+    default_options = {
+        "with_benchmark": False,
+        "with_openssl3": False,
+        "openssl*:shared": True,
+    }
+    options = {
+        "with_benchmark": [True, False],
+        # OpenSSL 3 is supported from Qt 6.2.0 onwards.
+        "with_openssl3": [True, False],
+    }
     generators = "CMakeDeps", "CMakeToolchain"
+
+    def requirements(self):
+        if self.options.get_safe("with_benchmark", False):
+            self.requires("benchmark/1.7.1")
+
+        if self.options.get_safe("with_openssl3", False):
+            self.requires("openssl/3.1.0")
+        else:
+            self.requires("openssl/1.1.1t")
 
     def generate(self):
         copy_bin = lambda dep, selector, subdir: copy(
