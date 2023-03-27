@@ -146,6 +146,7 @@ jobs:
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
+              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
@@ -241,21 +242,16 @@ jobs:
 
       - name: clang-tidy review
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        uses: ZedThree/clang-tidy-review@v0.10.1
-        id: review
+        uses: ZedThree/clang-tidy-review@v0.12.1
         with:
           build_dir: build
           config_file: ".clang-tidy"
           split_workflow: true
           exclude: "tests/*,lib/*"
 
-      - uses: actions/upload-artifact@v3
+      - name: clang-tidy-review upload
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        with:
-          name: clang-tidy-review
-          path: |
-            clang-tidy-review-output.json
-            clang-tidy-review-metadata.json
+        uses: ZedThree/clang-tidy-review/upload@v0.12.1
 
       - name: Package - .deb (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'

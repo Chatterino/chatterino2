@@ -117,6 +117,11 @@ MessageElementFlags MessageElement::getFlags() const
     return this->flags_;
 }
 
+void MessageElement::addFlags(MessageElementFlags flags)
+{
+    this->flags_.set(flags);
+}
+
 MessageElement *MessageElement::updateLink()
 {
     this->linkChanged.invoke();
@@ -282,9 +287,9 @@ std::unique_ptr<MessageElement> EmoteElement::clone() const
     return el;
 }
 
-LayeredEmoteElement::LayeredEmoteElement(std::vector<EmotePtr> &&emotes,
-                                         MessageElementFlags flags,
-                                         const MessageColor &textElementColor)
+LayeredEmoteElement::LayeredEmoteElement(
+    std::vector<LayeredEmoteElement::Emote> &&emotes, MessageElementFlags flags,
+    const MessageColor &textElementColor)
     : MessageElement(flags)
     , emotes_(std::move(emotes))
     , textElementColor_(textElementColor)
@@ -292,7 +297,7 @@ LayeredEmoteElement::LayeredEmoteElement(std::vector<EmotePtr> &&emotes,
     this->updateTooltips();
 }
 
-void LayeredEmoteElement::addEmoteLayer(const EmotePtr &emote)
+void LayeredEmoteElement::addEmoteLayer(const LayeredEmoteElement::Emote &emote)
 {
     this->emotes_.push_back(emote);
     this->updateTooltips();
@@ -343,9 +348,9 @@ std::vector<ImagePtr> LayeredEmoteElement::getLoadedImages(float scale)
     std::vector<ImagePtr> res;
     res.reserve(this->emotes_.size());
 
-    for (auto emote : this->emotes_)
+    for (const auto &emote : this->emotes_)
     {
-        auto image = emote->images.getImageOrLoaded(scale);
+        auto image = emote.ptr->images.getImageOrLoaded(scale);
         if (image->isEmpty())
         {
             continue;
@@ -375,9 +380,9 @@ void LayeredEmoteElement::updateTooltips()
     std::vector<QString> result;
     result.reserve(this->emotes_.size());
 
-    for (auto &emote : this->emotes_)
+    for (const auto &emote : this->emotes_)
     {
-        result.push_back(emote->tooltip.string);
+        result.push_back(emote.ptr->tooltip.string);
     }
 
     this->emoteTooltips_ = std::move(result);
@@ -397,8 +402,8 @@ QString LayeredEmoteElement::getCleanCopyString() const
         {
             result += " ";
         }
-        result +=
-            TwitchEmotes::cleanUpEmoteCode(this->emotes_[i]->getCopyString());
+        result += TwitchEmotes::cleanUpEmoteCode(
+            this->emotes_[i].ptr->getCopyString());
     }
     return result;
 }
@@ -412,23 +417,25 @@ QString LayeredEmoteElement::getCopyString() const
         {
             result += " ";
         }
-        result += this->emotes_[i]->getCopyString();
+        result += this->emotes_[i].ptr->getCopyString();
     }
     return result;
 }
 
-const std::vector<EmotePtr> &LayeredEmoteElement::getEmotes() const
+const std::vector<LayeredEmoteElement::Emote> &LayeredEmoteElement::getEmotes()
+    const
 {
     return this->emotes_;
 }
 
-std::vector<EmotePtr> LayeredEmoteElement::getUniqueEmotes() const
+std::vector<LayeredEmoteElement::Emote> LayeredEmoteElement::getUniqueEmotes()
+    const
 {
     // Functor for std::copy_if that keeps track of seen elements
     struct NotDuplicate {
-        bool operator()(const EmotePtr &element)
+        bool operator()(const Emote &element)
         {
-            return seen.insert(element).second;
+            return seen.insert(element.ptr).second;
         }
 
     private:
@@ -437,7 +444,7 @@ std::vector<EmotePtr> LayeredEmoteElement::getUniqueEmotes() const
 
     // Get unique emotes while maintaining relative layering order
     NotDuplicate dup;
-    std::vector<EmotePtr> unique;
+    std::vector<Emote> unique;
     std::copy_if(this->emotes_.begin(), this->emotes_.end(),
                  std::back_insert_iterator(unique), dup);
 
