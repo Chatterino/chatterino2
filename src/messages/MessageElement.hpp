@@ -189,6 +189,7 @@ public:
     const Link &getLink() const;
     bool hasTrailingSpace() const;
     MessageElementFlags getFlags() const;
+    void addFlags(MessageElementFlags flags);
     MessageElement *updateLink();
 
     virtual void addToContainer(MessageLayoutContainer &container,
@@ -327,19 +328,24 @@ private:
 class LayeredEmoteElement : public MessageElement
 {
 public:
+    struct Emote {
+        EmotePtr ptr;
+        MessageElementFlags flags;
+    };
+
     LayeredEmoteElement(
-        std::vector<EmotePtr> &&emotes, MessageElementFlags flags,
+        std::vector<Emote> &&emotes, MessageElementFlags flags,
         const MessageColor &textElementColor = MessageColor::Text);
 
-    void addEmoteLayer(const EmotePtr &emote);
+    void addEmoteLayer(const Emote &emote);
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
 
     // Returns a concatenation of each emote layer's cleaned copy string
     QString getCleanCopyString() const;
-    const std::vector<EmotePtr> &getEmotes() const;
-    std::vector<EmotePtr> getUniqueEmotes() const;
+    const std::vector<Emote> &getEmotes() const;
+    std::vector<Emote> getUniqueEmotes() const;
     const std::vector<QString> &getEmoteTooltips() const;
 
 private:
@@ -351,7 +357,7 @@ private:
     void updateTooltips();
     std::vector<ImagePtr> getLoadedImages(float scale);
 
-    std::vector<EmotePtr> emotes_;
+    std::vector<Emote> emotes_;
     std::vector<QString> emoteTooltips_;
 
     std::unique_ptr<TextElement> textElement_;

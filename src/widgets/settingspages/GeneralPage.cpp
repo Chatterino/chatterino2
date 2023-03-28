@@ -375,7 +375,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Animate only when Chatterino is focused",
                        s.animationsWhenFocused);
     layout.addCheckbox(
-        "Enable zero-width emotes", s.enableZeroWidthEmotes,
+        "Enable zero-width emotes", s.enableZeroWidthEmotes, false,
         "When disabled, emotes that overlap other emotes, such as BTTV's "
         "cvMask and 7TV's RainTime, will appear as normal emotes.");
     layout.addCheckbox("Enable emote auto-completion by typing :",

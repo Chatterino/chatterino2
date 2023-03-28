@@ -1133,17 +1133,20 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
                 // Need to remove EmoteElement and replace with LayeredEmoteElement
                 auto baseEmoteElement = this->releaseBack();
 
-                std::vector<EmotePtr> layers = {baseEmote, emote.get()};
-                this->emplace<LayeredEmoteElement>(std::move(layers),
-                                                   baseEmoteElement->getFlags(),
-                                                   this->textColor_);
+                std::vector<LayeredEmoteElement::Emote> layers = {
+                    {baseEmote, baseEmoteElement->getFlags()},
+                    {emote.get(), flags}};
+                this->emplace<LayeredEmoteElement>(
+                    std::move(layers), baseEmoteElement->getFlags() | flags,
+                    this->textColor_);
                 return Success;
             }
 
             auto asLayered = dynamic_cast<LayeredEmoteElement *>(&this->back());
             if (asLayered)
             {
-                asLayered->addEmoteLayer(emote.get());
+                asLayered->addEmoteLayer({emote.get(), flags});
+                asLayered->addFlags(flags);
                 return Success;
             }
 
