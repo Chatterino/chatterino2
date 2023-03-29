@@ -12,6 +12,7 @@
 - Bugfix: Fixed an issue where context-menu items for zero-width emotes displayed the wrong provider. (#4460)
 - Bugfix: Fixed an issue where the "Enable zero-width emotes" setting was showing the inverse state. (#4462)
 - Bugfix: Fixed username rendering in Qt 6. (#4476)
+- Bugfix: Fixed placeholder color in Qt 6. (#4477)
 - Bugfix: Fixed blocked user list being empty when opening the settings dialog for the first time. (#4437)
 - Bugfix: Fixed blocked user list sticking around when switching from a logged in user to being logged out. (#4437)
 - Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
