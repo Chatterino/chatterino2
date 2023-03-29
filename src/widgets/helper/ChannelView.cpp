@@ -2091,13 +2091,25 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 
                 if (link.type == Link::UserInfo)
                 {
-                    const bool commaMention =
-                        getSettings()->mentionUsersWithComma;
-                    const bool isFirstWord =
-                        split && split->getInput().isEditFirstWord();
-                    auto userMention = formatUserMention(
-                        link.value, isFirstWord, commaMention);
-                    insertText("@" + userMention + " ");
+                    if (hoveredElement->getFlags().has(
+                            MessageElementFlag::Username) &&
+                        event->modifiers() == Qt::ShiftModifier)
+                    {
+                        // Start a new reply if Shift+Right-clicking the message username
+                        this->setInputReply(layout->getMessagePtr());
+                    }
+                    else
+                    {
+                        // Insert @username into split input
+                        const bool commaMention =
+                            getSettings()->mentionUsersWithComma;
+                        const bool isFirstWord =
+                            split && split->getInput().isEditFirstWord();
+                        auto userMention = formatUserMention(
+                            link.value, isFirstWord, commaMention);
+                        insertText("@" + userMention + " ");
+                    }
+
                     return;
                 }
 
