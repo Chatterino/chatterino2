@@ -129,7 +129,7 @@ jobs:
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-          choco install conan -y
+          choco install conan -y --version 1.58.0
 
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
@@ -151,6 +151,7 @@ jobs:
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
+              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
@@ -246,24 +247,19 @@ jobs:
 
       - name: clang-tidy review
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        uses: ZedThree/clang-tidy-review@v0.10.1
-        id: review
+        uses: ZedThree/clang-tidy-review@v0.12.2
         with:
           build_dir: build
           config_file: ".clang-tidy"
           split_workflow: true
           exclude: "tests/*,lib/*"
 
-      - uses: actions/upload-artifact@v3
+      - name: clang-tidy-review upload
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        with:
-          name: clang-tidy-review
-          path: |
-            clang-tidy-review-output.json
-            clang-tidy-review-metadata.json
+        uses: ZedThree/clang-tidy-review/upload@v0.12.2
 
       - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu-20.04') && matrix.skip_artifact != 'yes'
         run: |
           cd build
           sh ./../.CI/CreateAppImage.sh
@@ -277,7 +273,7 @@ jobs:
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu-20.04') && matrix.skip_artifact != 'yes'
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
@@ -351,7 +347,7 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: Chatterino-x86_64-5.15.2.AppImage
+          name: Chatterino-x86_64-5.12.12.AppImage
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
