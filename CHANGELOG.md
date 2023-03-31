@@ -15,6 +15,7 @@
 - Bugfix: Fixed placeholder color in Qt 6. (#4477)
 - Bugfix: Fixed blocked user list being empty when opening the settings dialog for the first time. (#4437)
 - Bugfix: Fixed blocked user list sticking around when switching from a logged in user to being logged out. (#4437)
+- Bugfix: Fixed search popup ignoring setting for message scrollback limit. (#4496)
 - Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
 - Dev: Ignore unhandled BTTV user-events. (#4438)
 - Dev: Only log debug messages when NDEBUG is not defined. (#4442)
