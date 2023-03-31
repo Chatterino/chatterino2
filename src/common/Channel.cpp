@@ -29,6 +29,7 @@ Channel::Channel(const QString &name, Type type)
     , lastDate_(QDate::currentDate())
     , name_(name)
     , type_(type)
+    , messages_(getSettings()->scrollbackSplitLimit)
 {
 }
 
