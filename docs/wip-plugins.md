@@ -109,9 +109,9 @@ c2.register_command("/words", cmdWords)
 
 Limitations/known issues:
 
-- commands registered in functions, not in the global scope might not show up in the settings UI,
-  rebuilding the window content caused by reloading another plugin will solve this
-- spaces in command names aren't handled very well (https://github.com/Chatterino/chatterino2/issues/1517)
+- Commands registered in functions, not in the global scope might not show up in the settings UI,
+  rebuilding the window content caused by reloading another plugin will solve this.
+- Spaces in command names aren't handled very well (https://github.com/Chatterino/chatterino2/issues/1517).
 
 #### `send_msg(channel, text)`
 
