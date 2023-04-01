@@ -42,12 +42,12 @@ QDebug qdebugStreamForLogLevel(lua::api::LogLevel lvl)
     {
         case LogLevel::Debug:
             return base.debug();
-        case LogLevel::Critical:
-            return base.critical();
         case LogLevel::Info:
             return base.info();
         case LogLevel::Warning:
             return base.warning();
+        case LogLevel::Critical:
+            return base.critical();
         default:
             assert(false && "if this happens magic_enum must have failed us");
             return {(QString *)nullptr};
