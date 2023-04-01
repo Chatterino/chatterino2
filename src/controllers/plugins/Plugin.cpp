@@ -1,7 +1,11 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/Plugin.hpp"
 
+#    include "controllers/commands/CommandController.hpp"
+
 #    include <lua.h>
+#    include <magic_enum.hpp>
+#    include <QJsonArray>
 #    include <QJsonObject>
 
 namespace chatterino {

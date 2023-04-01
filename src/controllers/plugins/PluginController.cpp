@@ -4,6 +4,7 @@
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
+#    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "messages/MessageBuilder.hpp"

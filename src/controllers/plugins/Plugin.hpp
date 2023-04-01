@@ -2,12 +2,8 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
-#    include "controllers/commands/CommandController.hpp"
 
-#    include <magic_enum.hpp>
 #    include <QDir>
-#    include <QJsonArray>
-#    include <QJsonObject>
 #    include <QString>
 #    include <semver/semver.hpp>
 
