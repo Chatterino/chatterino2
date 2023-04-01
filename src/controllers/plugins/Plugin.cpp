@@ -19,8 +19,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else if (!homepageObj.isUndefined())
     {
-        auto type = QString::fromStdString(
-            std::string(magic_enum::enum_name(homepageObj.type())));
+        QString type = magic_enum::enum_name(homepageObj.type()).data();
         this->errors.emplace_back(
             QString("homepage is defined but is not a string (its type is %1)")
                 .arg(type));
@@ -32,8 +31,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        auto type = QString::fromStdString(
-            std::string(magic_enum::enum_name(nameObj.type())));
+        QString type = magic_enum::enum_name(nameObj.type()).data();
         this->errors.emplace_back(
             QString("name is not a string (its type is %1)").arg(type));
     }
@@ -45,8 +43,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        auto type = QString::fromStdString(
-            std::string(magic_enum::enum_name(descrObj.type())));
+        QString type = magic_enum::enum_name(descrObj.type()).data();
         this->errors.emplace_back(
             QString("description is not a string (its type is %1)").arg(type));
     }
@@ -60,11 +57,11 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
             const auto &t = authorsArr.at(i);
             if (!t.isString())
             {
+                QString type = magic_enum::enum_name(t.type()).data();
                 this->errors.push_back(
                     QString("authors element #%1 is not a string (it is a %2)")
                         .arg(i)
-                        .arg(QString::fromStdString(
-                            std::string(magic_enum::enum_name(t.type())))));
+                        .arg(type));
                 break;
             }
             this->authors.push_back(t.toString());
@@ -72,8 +69,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        auto type = QString::fromStdString(
-            std::string(magic_enum::enum_name(authorsObj.type())));
+        QString type = magic_enum::enum_name(authorsObj.type()).data();
         this->errors.emplace_back(
             QString("authors is not an array (its type is %1)").arg(type));
     }
@@ -85,8 +81,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        auto type = QString::fromStdString(
-            std::string(magic_enum::enum_name(licenseObj.type())));
+        QString type = magic_enum::enum_name(licenseObj.type()).data();
         this->errors.emplace_back(
             QString("license is not a string (its type is %1)").arg(type));
     }
@@ -107,8 +102,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        auto type = QString::fromStdString(
-            std::string(magic_enum::enum_name(verObj.type())));
+        QString type = magic_enum::enum_name(verObj.type()).data();
         this->errors.emplace_back(
             QString("version is not a string (its type is %1)").arg(type));
         this->version = semver::version(0, 0, 0);
@@ -118,8 +112,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     {
         if (!tagsObj.isArray())
         {
-            auto type = QString::fromStdString(
-                std::string(magic_enum::enum_name(licenseObj.type())));
+            QString type = magic_enum::enum_name(tagsObj.type()).data();
             this->errors.emplace_back(
                 QString("tags is not an array (its type is %1)").arg(type));
             return;
@@ -131,11 +124,11 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
             const auto &t = tagsArr.at(i);
             if (!t.isString())
             {
+                QString type = magic_enum::enum_name(t.type()).data();
                 this->errors.push_back(
                     QString("tags element #%1 is not a string (its type is %2)")
                         .arg(i)
-                        .arg(QString::fromStdString(
-                            std::string(magic_enum::enum_name(t.type())))));
+                        .arg(type));
                 return;
             }
             this->tags.push_back(t.toString());
