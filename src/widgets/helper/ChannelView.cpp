@@ -25,10 +25,10 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Clamp.hpp"
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/Helpers.hpp"
-#include "util/Clamp.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamerMode.hpp"
 #include "util/Twitch.hpp"
@@ -334,7 +334,8 @@ void ChannelView::updatePauses()
         this->pauseScrollMinimumOffset_ = 0;
         this->pauseScrollMaximumOffset_ = 0;
 
-        if (this->scrollBar_->getMinimum() > this->scrollBar_->getDesiredValue())
+        if (this->scrollBar_->getMinimum() >
+            this->scrollBar_->getDesiredValue())
         {
             this->scrollBar_->scrollToTop();
         }
@@ -916,7 +917,8 @@ void ChannelView::messageAppended(MessagePtr &message,
             }
             else
             {
-                if (this->scrollBar_->getMinimum() > this->scrollBar_->getDesiredValue())
+                if (this->scrollBar_->getMinimum() >
+                    this->scrollBar_->getDesiredValue())
                 {
                     this->scrollBar_->scrollToTop();
                 }
@@ -1274,8 +1276,9 @@ void ChannelView::drawMessages(QPainter &painter)
 {
     auto &messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start = size_t(clamp(this->scrollBar_->getCurrentValue() -
-            this->scrollBar_->getMinimum(), qreal(0), this->scrollBar_->getCurrentValue()));
+    size_t start = size_t(clamp(
+        this->scrollBar_->getCurrentValue() - this->scrollBar_->getMinimum(),
+        qreal(0), this->scrollBar_->getCurrentValue()));
 
     if (start >= messagesSnapshot.size())
     {
