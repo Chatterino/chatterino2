@@ -143,7 +143,6 @@ int c2_system_msg(lua_State *L)
         lua::push(L, false);
         return 1;
     }
-    qCDebug(chatterinoLua) << "system_msg: OK!";
     chn->addMessage(makeSystemMessage(text));
     lua::push(L, true);
     return 1;
