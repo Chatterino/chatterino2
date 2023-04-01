@@ -130,7 +130,7 @@ c2.register_command("/shout", cmdShout)
 
 Limitations/Known issues:
 
-- it is possible to trigger your own Lua command with this causing a potentially infinite loop
+- It is possible to trigger your own Lua command with this causing a potentially infinite loop.
 
 #### `system_msg(channel, text)`
 
