@@ -19,6 +19,7 @@
 - Dev: Ignore unhandled BTTV user-events. (#4438)
 - Dev: Only log debug messages when NDEBUG is not defined. (#4442)
 - Dev: Cleaned up theme related code. (#4450)
+- Dev: Ensure tests have default-initialized settings. (#4498)
 
 ## 2.4.2
 
