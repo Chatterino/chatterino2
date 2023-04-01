@@ -30,6 +30,30 @@ void logHelper(lua_State *L, Plugin *pl, QDebug stream, int argc)
     lua_pop(L, argc);
 }
 
+QDebug qdebugStreamForLogLevel(lua::api::LogLevel lvl)
+{
+    auto base =
+        (QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE,
+                        QT_MESSAGELOG_FUNC, chatterinoLua().categoryName()));
+
+    using LogLevel = lua::api::LogLevel;
+
+    switch (lvl)
+    {
+        case LogLevel::Debug:
+            return base.debug();
+        case LogLevel::Critical:
+            return base.critical();
+        case LogLevel::Info:
+            return base.info();
+        case LogLevel::Warning:
+            return base.warning();
+        default:
+            assert(false && "if this happens magic_enum must have failed us");
+            return {(QString *)nullptr};
+    }
+}
+
 }  // namespace
 
 // NOLINTBEGIN(*vararg)
@@ -127,35 +151,13 @@ int c2_log(lua_State *L)
     }
     auto logc = lua_gettop(L) - 1;
     // This is almost the expansion of qCDebug() macro, actual thing is wrapped in a for loop
-    auto temp =
-        (QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE,
-                        QT_MESSAGELOG_FUNC, chatterinoLua().categoryName()));
-
     LogLevel lvl{};
     if (!lua::pop(L, &lvl, 1))
     {
         luaL_error(L, "Invalid log level, use one from c2.LogLevel.");
         return 0;
     }
-    QDebug stream{(QString *)nullptr};
-    switch (lvl)
-    {
-        case LogLevel::Debug:
-            stream = temp.debug();
-            break;
-        case LogLevel::Critical:
-            stream = temp.critical();
-            break;
-        case LogLevel::Info:
-            stream = temp.info();
-            break;
-        case LogLevel::Warning:
-            stream = temp.warning();
-            break;
-        default:
-            assert(false && "if this happens magic_enum must have failed us");
-            break;
-    }
+    QDebug stream = qdebugStreamForLogLevel(lvl);
     logHelper(L, pl, stream, logc);
     return 0;
 }
