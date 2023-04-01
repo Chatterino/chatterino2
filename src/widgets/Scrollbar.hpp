@@ -35,6 +35,7 @@ public:
 
     void setMaximum(qreal value);
     void offsetMaximum(qreal value);
+    void resetMaximum();
     void setMinimum(qreal value);
     void offsetMinimum(qreal value);
     void setLargeChange(qreal value);

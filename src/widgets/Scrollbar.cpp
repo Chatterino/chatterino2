@@ -25,6 +25,8 @@ Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
     this->currentValueAnimation_.setDuration(150);
     this->currentValueAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::OutCubic));
+    connect(&this->currentValueAnimation_, &QAbstractAnimation::finished, this,
+            &Scrollbar::resetMaximum);
 
     setMouseTracking(true);
 }
@@ -99,6 +101,17 @@ void Scrollbar::offsetMaximum(qreal value)
     updateScroll();
 }
 
+void Scrollbar::resetMaximum()
+{
+    if (this->minimum_ > 0)
+    {
+        this->maximum_ -= this->minimum_;
+        this->desiredValue_ -= this->minimum_;
+        this->currentValue_ -= this->minimum_;
+        this->minimum_ = 0;
+    }
+}
+
 void Scrollbar::setMinimum(qreal value)
 {
     this->minimum_ = value;
@@ -132,6 +145,8 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
     animated &= getSettings()->enableSmoothScrolling;
     value = std::max(this->minimum_,
                      std::min(this->maximum_ - this->largeChange_, value));
+
+    bool noAnimation = false;
 
     if (std::abs(this->currentValue_ + this->smoothScrollingOffset_ - value) >
         0.0001)
@@ -169,6 +184,7 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
                     ((this->getMaximum() - this->getLargeChange()) - value) <=
                     0.0001;
                 setCurrentValue(value);
+                noAnimation = true;
             }
         }
     }
@@ -177,6 +193,11 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
     this->desiredValue_ = value;
 
     this->desiredValueChanged_.invoke();
+
+    if (noAnimation)
+    {
+        this->resetMaximum();
+    }
 }
 
 qreal Scrollbar::getMaximum() const
