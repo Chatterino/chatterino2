@@ -282,5 +282,23 @@ bool PluginController::isEnabled(const QString &id)
     return it != vec.end();
 }
 
+Plugin *PluginController::getPluginByStatePtr(lua_State *L)
+{
+    for (auto &[name, plugin] : this->plugins_)
+    {
+        if (plugin->state_ == L)
+        {
+            return plugin.get();
+        }
+    }
+    return nullptr;
+}
+
+const std::map<QString, std::unique_ptr<Plugin>> &PluginController::plugins()
+    const
+{
+    return this->plugins_;
+}
+
 };  // namespace chatterino
 #endif

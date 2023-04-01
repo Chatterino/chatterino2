@@ -33,22 +33,9 @@ public:
 
     // NOTE: this pointer does not own the Plugin, unique_ptr still owns it
     // This is required to be public because of c functions
-    Plugin *getPluginByStatePtr(lua_State *L)
-    {
-        for (auto &[name, plugin] : this->plugins_)
-        {
-            if (plugin->state_ == L)
-            {
-                return plugin.get();
-            }
-        }
-        return nullptr;
-    }
+    Plugin *getPluginByStatePtr(lua_State *L);
 
-    const std::map<QString, std::unique_ptr<Plugin>> &plugins() const
-    {
-        return this->plugins_;
-    }
+    const std::map<QString, std::unique_ptr<Plugin>> &plugins() const;
 
     /**
      * @brief Reload plugin given by id
