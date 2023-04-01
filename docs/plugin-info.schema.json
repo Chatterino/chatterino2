@@ -4,6 +4,7 @@
   "title": "Plugin info",
   "description": "Describes a Chatterino2 plugin (draft)",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "name": {
       "type": "string",
