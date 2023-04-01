@@ -61,7 +61,7 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
                            << pluginDir.path();
     if (!index.exists())
     {
-        qCDebug(chatterinoLua)
+        qCWarning(chatterinoLua)
             << "Missing init.lua in plugin directory:" << pluginDir.path();
         return false;
     }
@@ -69,7 +69,7 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
     auto infojson = QFileInfo(pluginDir.filePath("info.json"));
     if (!infojson.exists())
     {
-        qCDebug(chatterinoLua)
+        qCWarning(chatterinoLua)
             << "Missing info.json in plugin directory" << pluginDir.path();
         return false;
     }
@@ -79,7 +79,7 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
     auto doc = QJsonDocument::fromJson(everything);
     if (!doc.isObject())
     {
-        qCDebug(chatterinoLua)
+        qCWarning(chatterinoLua)
             << "info.json root is not an object" << pluginDir.path();
         return false;
     }
@@ -87,11 +87,11 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
     auto meta = PluginMeta(doc.object());
     if (!meta.isValid())
     {
-        qCDebug(chatterinoLua)
+        qCWarning(chatterinoLua)
             << "Plugin from" << pluginDir << "is invalid because:";
         for (const auto &why : meta.errors)
         {
-            qCDebug(chatterinoLua) << "- " << why;
+            qCWarning(chatterinoLua) << "- " << why;
         }
         auto plugin = std::make_unique<Plugin>(pluginDir.dirName(), nullptr,
                                                meta, pluginDir);
@@ -202,8 +202,8 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     if (!PluginController::isPluginEnabled(pluginName) ||
         !getSettings()->pluginsEnabled)
     {
-        qCInfo(chatterinoLua) << "Skipping loading" << pluginName << "("
-                              << meta.name << ") because it is disabled";
+        qCDebug(chatterinoLua) << "Skipping loading" << pluginName << "("
+                               << meta.name << ") because it is disabled";
         return;
     }
     qCDebug(chatterinoLua) << "Running lua file:" << index;
