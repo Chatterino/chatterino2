@@ -269,7 +269,8 @@ private:
     std::unordered_map<PauseReason, boost::optional<SteadyClock::time_point>>
         pauses_;
     boost::optional<SteadyClock::time_point> pauseEnd_;
-    int pauseScrollOffset_ = 0;
+    int pauseScrollMinimumOffset_ = 0;
+    int pauseScrollMaximumOffset_ = 0;
     // Keeps track how many message indices we need to offset the selection when we resume scrolling
     uint32_t pauseSelectionOffset_ = 0;
 

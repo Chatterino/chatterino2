@@ -34,7 +34,9 @@ public:
     bool isAtBottom() const;
 
     void setMaximum(qreal value);
+    void offsetMaximum(qreal value);
     void setMinimum(qreal value);
+    void offsetMinimum(qreal value);
     void setLargeChange(qreal value);
     void setSmallChange(qreal value);
     void setDesiredValue(qreal value, bool animated = false);

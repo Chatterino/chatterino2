@@ -28,6 +28,7 @@
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/Helpers.hpp"
+#include "util/Clamp.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamerMode.hpp"
 #include "util/Twitch.hpp"
@@ -328,8 +329,15 @@ void ChannelView::updatePauses()
         this->pauseEnd_ = boost::none;
         this->pauseTimer_.stop();
 
-        this->scrollBar_->offset(this->pauseScrollOffset_);
-        this->pauseScrollOffset_ = 0;
+        this->scrollBar_->offsetMinimum(this->pauseScrollMinimumOffset_);
+        this->scrollBar_->offsetMaximum(this->pauseScrollMaximumOffset_);
+        this->pauseScrollMinimumOffset_ = 0;
+        this->pauseScrollMaximumOffset_ = 0;
+
+        if (this->scrollBar_->getMinimum() > this->scrollBar_->getDesiredValue())
+        {
+            this->scrollBar_->scrollToTop();
+        }
 
         this->queueLayout();
     }
@@ -525,8 +533,6 @@ void ChannelView::updateScrollbar(
     }
     this->showScrollBar_ = showScrollbar;
 
-    this->scrollBar_->setMaximum(messages.size());
-
     // If we were showing the latest messages and the scrollbar now wants to be
     // rendered, scroll to bottom
     if (this->enableScrollingToBottom_ && this->showingLatestMessages_ &&
@@ -544,6 +550,8 @@ void ChannelView::clearMessages()
     // Clear all stored messages in this chat widget
     this->messages_.clear();
     this->scrollBar_->clearHighlights();
+    this->scrollBar_->setMaximum(0);
+    this->scrollBar_->setMinimum(0);
     this->queueLayout();
 
     this->lastMessageHasAlternateBackground_ = false;
@@ -771,6 +779,8 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
 
     auto snapshot = underlyingChannel->getMessageSnapshot();
 
+    this->scrollBar_->setMaximum(snapshot.size());
+
     for (const auto &msg : snapshot)
     {
         auto messageLayout = std::make_shared<MessageLayout>(msg);
@@ -881,19 +891,36 @@ void ChannelView::messageAppended(MessagePtr &message,
     this->lastMessageHasAlternateBackground_ =
         !this->lastMessageHasAlternateBackground_;
 
+    if (this->paused())
+    {
+        this->pauseScrollMaximumOffset_++;
+    }
+    else
+    {
+        this->scrollBar_->offsetMaximum(1);
+    }
+
     if (this->messages_.pushBack(messageRef))
     {
         if (this->paused())
         {
-            if (!this->scrollBar_->isAtBottom())
-                this->pauseScrollOffset_--;
+            this->pauseScrollMinimumOffset_++;
         }
         else
         {
+            this->scrollBar_->offsetMinimum(1);
+
             if (this->scrollBar_->isAtBottom())
+            {
                 this->scrollBar_->scrollToBottom();
+            }
             else
-                this->scrollBar_->offset(-1);
+            {
+                if (this->scrollBar_->getMinimum() > this->scrollBar_->getDesiredValue())
+                {
+                    this->scrollBar_->scrollToTop();
+                }
+            }
         }
     }
 
@@ -946,6 +973,7 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     /// Add the messages at the start
     if (this->messages_.pushFront(messageRefs).size() > 0)
     {
+        this->scrollBar_->offsetMaximum(messages.size());
         if (this->scrollBar_->isAtBottom())
             this->scrollBar_->scrollToBottom();
         else
@@ -1246,7 +1274,8 @@ void ChannelView::drawMessages(QPainter &painter)
 {
     auto &messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start = size_t(this->scrollBar_->getCurrentValue());
+    size_t start = size_t(clamp(this->scrollBar_->getCurrentValue() -
+            this->scrollBar_->getMinimum(), qreal(0), this->scrollBar_->getCurrentValue()));
 
     if (start >= messagesSnapshot.size())
     {
@@ -1254,7 +1283,9 @@ void ChannelView::drawMessages(QPainter &painter)
     }
 
     int y = int(-(messagesSnapshot[start].get()->getHeight() *
-                  (fmod(this->scrollBar_->getCurrentValue(), 1))));
+                  (fmod(this->scrollBar_->getCurrentValue() -
+                            this->scrollBar_->getMinimum(),
+                        1))));
 
     MessageLayout *end = nullptr;
     bool windowFocused = this->window() == QApplication::activeWindow();
@@ -1355,7 +1386,8 @@ void ChannelView::wheelEvent(QWheelEvent *event)
 
         auto &snapshot = this->getMessagesSnapshot();
         int snapshotLength = int(snapshot.size());
-        int i = std::min<int>(int(desired), snapshotLength);
+        int i = std::min<int>(int(desired - this->scrollBar_->getMinimum()),
+                              snapshotLength - 1);
 
         if (delta > 0)
         {
@@ -2758,7 +2790,8 @@ bool ChannelView::tryGetMessageAt(QPoint p,
 {
     auto &messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start = this->scrollBar_->getCurrentValue();
+    size_t start =
+        this->scrollBar_->getCurrentValue() - this->scrollBar_->getMinimum();
 
     if (start >= messagesSnapshot.size())
     {
@@ -2766,7 +2799,9 @@ bool ChannelView::tryGetMessageAt(QPoint p,
     }
 
     int y = -(messagesSnapshot[start]->getHeight() *
-              (fmod(this->scrollBar_->getCurrentValue(), 1)));
+              (fmod(this->scrollBar_->getCurrentValue() -
+                        this->scrollBar_->getMinimum(),
+                    1)));
 
     for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
