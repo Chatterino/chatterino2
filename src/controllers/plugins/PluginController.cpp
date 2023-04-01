@@ -25,7 +25,7 @@ void PluginController::initialize(Settings &settings, Paths &paths)
     (void)paths;
 
     // actuallyInitialize will be called by this connection
-    settings.pluginSupportEnabled.connect([this](bool enabled) {
+    settings.pluginsEnabled.connect([this](bool enabled) {
         if (enabled)
         {
             this->loadPlugins();
@@ -273,7 +273,7 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
 
 bool PluginController::isEnabled(const QString &id)
 {
-    if (!getSettings()->pluginSupportEnabled)
+    if (!getSettings()->pluginsEnabled)
     {
         return false;
     }
