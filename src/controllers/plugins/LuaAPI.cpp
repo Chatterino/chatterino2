@@ -126,7 +126,7 @@ int c2_log(lua_State *L)
         return 0;
     }
     auto logc = lua_gettop(L) - 1;
-    // this is the expansion of qCDebug() macro
+    // This is almost the expansion of qCDebug() macro, actual thing is wrapped in a for loop
     auto temp =
         (QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE,
                         QT_MESSAGELOG_FUNC, chatterinoLua().categoryName()));
@@ -279,7 +279,7 @@ int g_print(lua_State *L)
         return 0;
     }
     auto argc = lua_gettop(L);
-    // this is the expansion of qCDebug() macro
+    // This is almost the expansion of qCDebug() macro, actual thing is wrapped in a for loop
     auto stream =
         (QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE,
                         QT_MESSAGELOG_FUNC, chatterinoLua().categoryName())
