@@ -881,18 +881,6 @@ void ChannelView::messageAppended(MessagePtr &message,
     this->lastMessageHasAlternateBackground_ =
         !this->lastMessageHasAlternateBackground_;
 
-    if (!this->scrollBar_->isAtBottom() &&
-        this->scrollBar_->getCurrentValueAnimation().state() ==
-            QPropertyAnimation::Running)
-    {
-        QEventLoop loop;
-
-        connect(&this->scrollBar_->getCurrentValueAnimation(),
-                &QAbstractAnimation::stateChanged, &loop, &QEventLoop::quit);
-
-        loop.exec();
-    }
-
     if (this->messages_.pushBack(messageRef))
     {
         if (this->paused())
