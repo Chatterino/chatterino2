@@ -42,6 +42,12 @@ public:
         reinterpret_cast<Q &>(this->value_) |= static_cast<Q>(flag);
     }
 
+    /** Adds the flags from `flags` in this enum. */
+    void set(FlagsEnum flags)
+    {
+        reinterpret_cast<Q &>(this->value_) |= static_cast<Q>(flags.value_);
+    }
+
     void unset(T flag)
     {
         reinterpret_cast<Q &>(this->value_) &= ~static_cast<Q>(flag);
@@ -67,6 +73,12 @@ public:
         xd.set(flag, true);
 
         return xd;
+    }
+
+    FlagsEnum operator|(FlagsEnum rhs)
+    {
+        return static_cast<T>(static_cast<Q>(this->value_) |
+                              static_cast<Q>(rhs.value_));
     }
 
     bool hasAny(FlagsEnum flags) const

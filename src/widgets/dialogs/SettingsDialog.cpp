@@ -23,6 +23,7 @@
 #include "widgets/settingspages/PluginsPage.hpp"
 
 #include <QDialogButtonBox>
+#include <QFile>
 #include <QLineEdit>
 
 namespace chatterino {

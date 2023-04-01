@@ -8,7 +8,7 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
-project(chatterino VERSION 2.4.0)
+project(chatterino VERSION 2.4.2)
 
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
@@ -17,6 +17,7 @@ option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
 option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
 option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key chain" ON)
+option(BUILD_WITH_CRASHPAD "Build chatterino with crashpad" OFF)
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
 option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
@@ -57,6 +58,13 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Svg
     Concurrent
     )
+
+if (BUILD_WITH_QT6)
+    find_package(Qt${MAJOR_QT_VERSION} REQUIRED
+        COMPONENTS
+        Core5Compat
+        )
+endif ()
 
 message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 
@@ -152,6 +160,10 @@ endif()
 if (CHATTERINO_PLUGINS)
     set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
     add_subdirectory(lib/lua)
+endif()
+
+if (BUILD_WITH_CRASHPAD)
+    add_subdirectory("${CMAKE_SOURCE_DIR}/lib/crashpad" EXCLUDE_FROM_ALL)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)

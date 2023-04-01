@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "BaseSettings.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
 #include "mocks/UserData.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -549,14 +550,14 @@ class HighlightControllerTest : public ::testing::Test
 protected:
     void SetUp() override
     {
-        {
-            // Write default settings to the mock settings json file
-            QDir().mkpath("/tmp/c2-tests");
-            QFile settingsFile("/tmp/c2-tests/settings.json");
-            assert(settingsFile.open(QIODevice::WriteOnly | QIODevice::Text));
-            QTextStream out(&settingsFile);
-            out << DEFAULT_SETTINGS;
-        }
+        // Write default settings to the mock settings json file
+        ASSERT_TRUE(QDir().mkpath("/tmp/c2-tests"));
+
+        QFile settingsFile("/tmp/c2-tests/settings.json");
+        ASSERT_TRUE(settingsFile.open(QIODevice::WriteOnly | QIODevice::Text));
+        ASSERT_GT(settingsFile.write(DEFAULT_SETTINGS.toUtf8()), 0);
+        ASSERT_TRUE(settingsFile.flush());
+        settingsFile.close();
 
         this->mockHelix = new MockHelix;
 
@@ -578,7 +579,7 @@ protected:
 
     void TearDown() override
     {
-        QDir().rmdir("/tmp/c2-tests");
+        ASSERT_TRUE(QDir("/tmp/c2-tests").removeRecursively());
         this->mockApplication.reset();
         this->settings.reset();
         this->paths.reset();
@@ -772,6 +773,56 @@ TEST_F(HighlightControllerTest, A)
                     std::make_shared<QColor>("#6fffffff"),  // color
                     false,
                 },
+            },
+        },
+        {
+            // TEST CASE: Whispers that do not hit a highlight phrase should not be added to /mentions
+            {
+                // input
+                .args =
+                    MessageParseArgs{
+                        .isReceivedWhisper = true,
+                    },
+                .senderName = "forsen",
+                .originalMessage = "Hello NymN!",
+            },
+            {
+                // expected
+                .state = true,  // state
+                .result =
+                    {
+                        false,        // alert
+                        false,        // playsound
+                        boost::none,  // custom sound url
+                        std::make_shared<QColor>(
+                            HighlightPhrase::
+                                FALLBACK_HIGHLIGHT_COLOR),  // color
+                        false,                              // showInMentions
+                    },
+            },
+        },
+        {
+            // TEST CASE: Whispers that do hit a highlight phrase should be added to /mentions
+            {
+                // input
+                .args =
+                    MessageParseArgs{
+                        .isReceivedWhisper = true,
+                    },
+                .senderName = "forsen",
+                .originalMessage = "!testmanxd",
+            },
+            {
+                // expected
+                .state = true,  // state
+                .result =
+                    {
+                        true,         // alert
+                        true,         // playsound
+                        boost::none,  // custom sound url
+                        std::make_shared<QColor>("#7f7f3f49"),  // color
+                        true,  // showInMentions
+                    },
             },
         },
     };

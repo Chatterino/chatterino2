@@ -8,6 +8,7 @@
 #include "widgets/BasePopup.hpp"
 #include "widgets/helper/SignalLabel.hpp"
 
+#include <QFile>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -120,6 +121,11 @@ AboutPage::AboutPage()
                        "https://github.com/microsoft/fluentui-system-icons",
                        ":/licenses/fluenticons.txt");
 #endif
+#ifdef CHATTERINO_WITH_CRASHPAD
+            addLicense(form.getElement(), "sentry-crashpad",
+                       "https://github.com/getsentry/crashpad",
+                       ":/licenses/crashpad.txt");
+#endif
         }
 
         // Attributions
@@ -146,7 +152,11 @@ AboutPage::AboutPage()
             contributorsFile.open(QFile::ReadOnly);
 
             QTextStream stream(&contributorsFile);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            // Default encoding of QTextStream is already UTF-8
+#else
             stream.setCodec("UTF-8");
+#endif
 
             QString line;
 

@@ -1,6 +1,6 @@
 #include "common/QLogging.hpp"
 
-#ifdef DEBUG_OFF
+#ifdef NDEBUG
 static constexpr QtMsgType logThreshold = QtWarningMsg;
 #else
 static constexpr QtMsgType logThreshold = QtDebugMsg;
@@ -29,6 +29,7 @@ Q_LOGGING_CATEGORY(chatterinoMain, "chatterino.main", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoMessage, "chatterino.message", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoNativeMessage, "chatterino.nativemessage",
                    logThreshold);
+Q_LOGGING_CATEGORY(chatterinoNetwork, "chatterino.network", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoNotification, "chatterino.notification",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoNuulsuploader, "chatterino.nuulsuploader",

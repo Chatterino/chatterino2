@@ -945,7 +945,11 @@ void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
     this->doubleClicked_ = true;
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void SplitHeader::enterEvent(QEnterEvent *event)
+#else
 void SplitHeader::enterEvent(QEvent *event)
+#endif
 {
     if (!this->tooltipText_.isEmpty())
     {
@@ -956,8 +960,7 @@ void SplitHeader::enterEvent(QEvent *event)
         }
 
         auto *tooltip = TooltipWidget::instance();
-        tooltip->clearImage();
-        tooltip->setText(this->tooltipText_);
+        tooltip->setOne({nullptr, this->tooltipText_});
         tooltip->setWordWrap(true);
         tooltip->adjustSize();
         auto pos = this->mapToGlobal(this->rect().bottomLeft()) +

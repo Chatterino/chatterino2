@@ -213,6 +213,7 @@ public:
                                            false};
     BoolSetting enableEmoteImages = {"/emotes/enableEmoteImages", true};
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
+    BoolSetting enableZeroWidthEmotes = {"/emotes/enableZeroWidthEmotes", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
     BoolSetting showUnlistedSevenTVEmotes = {
         "/emotes/showUnlistedSevenTVEmotes", false};
@@ -287,6 +288,13 @@ public:
         "/highlighting/selfHighlightSoundUrl", ""};
     QStringSetting selfHighlightColor = {"/highlighting/selfHighlightColor",
                                          ""};
+
+    BoolSetting enableSelfMessageHighlight = {
+        "/highlighting/selfMessageHighlight/enabled", false};
+    BoolSetting showSelfMessageHighlightInMentions = {
+        "/highlighting/selfMessageHighlight/showInMentions", false};
+    QStringSetting selfMessageHighlightColor = {
+        "/highlighting/selfMessageHighlight/color", ""};
 
     BoolSetting enableWhisperHighlight = {
         "/highlighting/whisperHighlight/whispersHighlighted", true};

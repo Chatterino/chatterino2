@@ -16,7 +16,12 @@ namespace {
             QFile file(":/tlds.txt");
             file.open(QFile::ReadOnly);
             QTextStream stream(&file);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            // Default encoding of QTextStream is already UTF-8, at least in Qt6
+#else
             stream.setCodec("UTF-8");
+#endif
             int safetyMax = 20000;
 
             QSet<QString> set;
