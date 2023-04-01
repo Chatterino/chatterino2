@@ -124,8 +124,7 @@ int c2_system_msg(lua_State *L)
 {
     if (lua_gettop(L) != 2)
     {
-        qCDebug(chatterinoLua) << "system_msg: need 2 args";
-        luaL_error(L, "need exactly 2 arguments");
+        luaL_error(L, "system_msg needs exactly 2 arguments");
         lua::push(L, false);
         return 1;
     }
@@ -155,7 +154,7 @@ int c2_log(lua_State *L)
     auto *pl = getApp()->plugins->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
-        luaL_error(L, "print: internal error: no plugin?");
+        luaL_error(L, "c2_log: internal error: no plugin?");
         return 0;
     }
     auto logc = lua_gettop(L) - 1;
@@ -224,7 +223,7 @@ int g_import(lua_State *L)
     if (countArgs == 0)
     {
         lua_pushnil(L);
-        luaL_error(L, "it is not allowed to call dofile() without arguments");
+        luaL_error(L, "it is not allowed to call import() without arguments");
         return 1;
     }
 
@@ -233,7 +232,7 @@ int g_import(lua_State *L)
     if (!lua::pop(L, &fname))
     {
         lua_pushnil(L);
-        luaL_error(L, "chatterino g_dofile: expected a string for a filename");
+        luaL_error(L, "chatterino g_import: expected a string for a filename");
         return 1;
     }
     auto dir = QUrl(pl->loadDirectory().canonicalPath() + "/");
@@ -244,7 +243,7 @@ int g_import(lua_State *L)
     if (!dir.isParentOf(file))
     {
         lua_pushnil(L);
-        luaL_error(L, "chatterino g_dofile: filename must be inside of the "
+        luaL_error(L, "chatterino g_import: filename must be inside of the "
                       "plugin directory");
         return 1;
     }
@@ -256,7 +255,7 @@ int g_import(lua_State *L)
     if (qf.size() > 10'000'000)
     {
         lua_pushnil(L);
-        luaL_error(L, "chatterino g_dofile: size limit of 10MB exceeded, what "
+        luaL_error(L, "chatterino g_import: size limit of 10MB exceeded, what "
                       "the hell are you doing");
         return 1;
     }
@@ -267,7 +266,7 @@ int g_import(lua_State *L)
     if (state.invalidChars != 0)
     {
         lua_pushnil(L);
-        luaL_error(L, "invalid utf-8 in dofile() target (%s) is not allowed",
+        luaL_error(L, "invalid utf-8 in import() target (%s) is not allowed",
                    fname.toStdString().c_str());
         return 1;
     }
@@ -286,7 +285,7 @@ int g_print(lua_State *L)
     auto *pl = getApp()->plugins->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
-        luaL_error(L, "print: internal error: no plugin?");
+        luaL_error(L, "c2_print: internal error: no plugin?");
         return 0;
     }
     auto argc = lua_gettop(L);
