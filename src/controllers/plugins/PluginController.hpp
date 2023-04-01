@@ -45,9 +45,9 @@ public:
     bool reload(const QString &id);
 
     /**
-     * @brief Checks settings to tell if a plugin named by id.
+     * @brief Checks settings to tell if a plugin named by id is enabled.
      *
-     * It accounts for plugins being enabled/disabled globally.
+     * It is the callers responsibility to check Settings::pluginsEnabled
      */
     static bool isPluginEnabled(const QString &id);
 
