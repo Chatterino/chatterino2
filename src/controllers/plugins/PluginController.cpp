@@ -199,7 +199,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     auto pluginName = pluginDir.dirName();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
     this->plugins_.insert({pluginName, std::move(plugin)});
-    if (!PluginController::isEnabled(pluginName))
+    if (!PluginController::isPluginEnabled(pluginName))
     {
         qCInfo(chatterinoLua) << "Skipping loading" << pluginName << "("
                               << meta.name << ") because it is disabled";
@@ -271,7 +271,7 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
     return "";
 }
 
-bool PluginController::isEnabled(const QString &id)
+bool PluginController::isPluginEnabled(const QString &id)
 {
     if (!getSettings()->pluginsEnabled)
     {

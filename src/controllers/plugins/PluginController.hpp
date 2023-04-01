@@ -49,7 +49,7 @@ public:
      *
      * It accounts for plugins being enabled/disabled globally.
      */
-    static bool isEnabled(const QString &id);
+    static bool isPluginEnabled(const QString &id);
 
 private:
     void loadPlugins();

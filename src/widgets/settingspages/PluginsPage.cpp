@@ -144,7 +144,7 @@ void PluginsPage::rebuildContent()
         if (plugin->meta.isValid())
         {
             QString toggleTxt = "Enable";
-            if (PluginController::isEnabled(id))
+            if (PluginController::isPluginEnabled(id))
             {
                 toggleTxt = "Disable";
             }
@@ -154,7 +154,7 @@ void PluginsPage::rebuildContent()
                 toggleButton, &QPushButton::pressed, [name = id, this]() {
                     std::vector<QString> val =
                         getSettings()->enabledPlugins.getValue();
-                    if (PluginController::isEnabled(name))
+                    if (PluginController::isPluginEnabled(name))
                     {
                         val.erase(std::remove(val.begin(), val.end(), name),
                                   val.end());
