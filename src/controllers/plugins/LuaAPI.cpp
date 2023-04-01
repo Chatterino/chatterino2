@@ -103,7 +103,12 @@ int c2_send_msg(lua_State *L)
     const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
     if (chn->isEmpty())
     {
-        qCDebug(chatterinoLua) << "send_msg: no channel" << channel;
+        auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+
+        qCWarning(chatterinoLua)
+            << "Plugin" << pl->id
+            << "tried to send a message (using send_msg) to channel" << channel
+            << "which is not known";
         lua::push(L, false);
         return 1;
     }
@@ -131,7 +136,11 @@ int c2_system_msg(lua_State *L)
     const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
     if (chn->isEmpty())
     {
-        qCDebug(chatterinoLua) << "system_msg: no channel" << channel;
+        auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+        qCWarning(chatterinoLua)
+            << "Plugin" << pl->id
+            << "tried to show a system message (using system_msg) in channel"
+            << channel << "which is not known";
         lua::push(L, false);
         return 1;
     }
