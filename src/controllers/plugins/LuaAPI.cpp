@@ -283,7 +283,6 @@ int g_import(lua_State *L)
     }
 
     auto path = file.path(QUrl::FullyDecoded);
-    // validate utf-8 to block bytecode exploits
     QFile qf(path);
     qf.open(QIODevice::ReadOnly);
     if (qf.size() > 10'000'000)
@@ -293,6 +292,8 @@ int g_import(lua_State *L)
                       "the hell are you doing");
         return 1;
     }
+
+    // validate utf-8 to block bytecode exploits
     auto data = qf.readAll();
     auto *utf8 = QTextCodec::codecForName("UTF-8");
     QTextCodec::ConverterState state;
