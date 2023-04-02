@@ -14,7 +14,7 @@ class Chatterino(ConanFile):
     }
     options = {
         "with_benchmark": [True, False],
-        # OpenSSL 3 is supported from Qt 6.2.0 onwards.
+        # Qt is built with OpenSSL 3 from version 6.5.0 onwards
         "with_openssl3": [True, False],
     }
     generators = "CMakeDeps", "CMakeToolchain"
