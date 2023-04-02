@@ -72,7 +72,8 @@ int c2_register_command(lua_State *L)
     QString name;
     if (!lua::peek(L, &name, 1))
     {
-        luaL_error(L, "cannot get string (1st arg of register_command)");
+        luaL_error(L, "cannot get command name (1st arg of register_command, "
+                      "expected a string)");
         return 0;
     }
     if (lua_isnoneornil(L, 2))
