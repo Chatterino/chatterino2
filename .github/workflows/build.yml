@@ -109,6 +109,7 @@ jobs:
 
       # WINDOWS
       - name: Setup conan variables (Windows)
+        if: startsWith(matrix.os, 'windows')
         run: |
           "C2_USE_OPENSSL3=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "True" } else { "False" })" >> "$Env:GITHUB_ENV"
           "C2_CONAN_CACHE_SUFFIX=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "-QT6" } else { "`" })" >> "$Env:GITHUB_ENV"
