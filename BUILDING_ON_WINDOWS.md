@@ -227,9 +227,9 @@ https://github.com/qt-labs/vstools/blob/0769d945f8d0040917d654d9731e6b65951e102c
 -->
 
 ```powershell
-(iwr "https://github.com/qt-labs/vstools/raw/dev/QtVsTools.Package/qt5.natvis.xml").Content -replace '##NAMESPACE##::', '' | Out-File qt5.natvis
+(irm "https://github.com/qt-labs/vstools/raw/dev/QtVsTools.Package/qt5.natvis.xml").Replace('##NAMESPACE##::', '') | Out-File qt5.natvis
 # [OR] using the permalink
-(iwr "https://github.com/qt-labs/vstools/raw/0769d945f8d0040917d654d9731e6b65951e102c/QtVsTools.Package/qt5.natvis.xml").Content -replace '##NAMESPACE##::', '' | Out-File qt5.natvis
+(irm "https://github.com/qt-labs/vstools/raw/0769d945f8d0040917d654d9731e6b65951e102c/QtVsTools.Package/qt5.natvis.xml").Replace('##NAMESPACE##::', '') | Out-File qt5.natvis
 ```
 
 Now you can debug the application and see QT types rendered correctly.
