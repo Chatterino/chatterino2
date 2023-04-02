@@ -144,7 +144,8 @@ int c2_system_msg(lua_State *L)
 {
     if (lua_gettop(L) != 2)
     {
-        luaL_error(L, "system_msg needs exactly 2 arguments");
+        luaL_error(L,
+                   "system_msg needs exactly 2 arguments (channel and text)");
         lua::push(L, false);
         return 1;
     }
