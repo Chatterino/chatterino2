@@ -7,7 +7,6 @@
 #    include <QString>
 #    include <semver/semver.hpp>
 
-#    include <set>
 #    include <unordered_set>
 #    include <vector>
 
