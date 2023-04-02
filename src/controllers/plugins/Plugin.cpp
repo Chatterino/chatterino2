@@ -8,6 +8,7 @@
 #    include <QJsonArray>
 #    include <QJsonObject>
 
+#    include <unordered_map>
 #    include <unordered_set>
 
 namespace chatterino {

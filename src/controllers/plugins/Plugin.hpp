@@ -7,6 +7,7 @@
 #    include <QString>
 #    include <semver/semver.hpp>
 
+#    include <unordered_map>
 #    include <unordered_set>
 #    include <vector>
 
@@ -89,7 +90,7 @@ private:
     lua_State *state_;
 
     // maps command name -> function name
-    std::map<QString, QString> ownedCommands;
+    std::unordered_map<QString, QString> ownedCommands;
 
     friend class PluginController;
 };
