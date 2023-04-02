@@ -3,6 +3,7 @@
 #include <QAbstractListModel>
 
 #include <chrono>
+#include <mutex>
 #include <set>
 #include <shared_mutex>
 
@@ -12,6 +13,7 @@ class Channel;
 
 class CompletionModel : public QAbstractListModel
 {
+public:
     struct TaggedString {
         enum Type {
             Username,
@@ -36,6 +38,7 @@ class CompletionModel : public QAbstractListModel
             TwitchCommand,
 #ifdef CHATTERINO_HAVE_PLUGINS
             PluginCommand,
+            CustomCompletion,
 #endif
         };
 
@@ -48,22 +51,25 @@ class CompletionModel : public QAbstractListModel
         const Type type;
     };
 
-public:
     CompletionModel(Channel &channel);
 
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     int rowCount(const QModelIndex &parent) const override;
 
-    void refresh(const QString &prefix, bool isFirstWord = false);
+    void refresh(const QString &text, const QString &prefix,
+                 bool isFirstWord = false);
 
     static bool compareStrings(const QString &a, const QString &b);
 
-private:
-    mutable std::shared_mutex itemsMutex_;
     std::set<TaggedString> items_;
 
+private:
+    mutable std::shared_mutex itemsMutex_;
+
     Channel &channel_;
+
+    void addItems(const QString &text, const QString &prefix, bool isFirstWord);
 };
 
 }  // namespace chatterino

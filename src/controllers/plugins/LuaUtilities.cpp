@@ -10,7 +10,52 @@
 
 #    include <climits>
 #    include <cstdlib>
+#    include <string>
 
+namespace {
+using namespace chatterino;
+
+void printLuaObject(lua_State *L, lua::StackIdx i, int indent = 0)
+{
+    if (indent >= 10)
+    {
+        qCDebug(chatterinoLua) << "[refusing to go any further]";
+        return;
+    }
+    auto spacing = QString(" ").repeated(indent * 2);
+    auto typeint = lua_type(L, i);
+    if (typeint == LUA_TSTRING)
+    {
+        QString str;
+        lua::peek(L, &str, i);
+        qCDebug(chatterinoLua).nospace().noquote()
+            << spacing << i << ") " << lua_typename(L, typeint) << " ("
+            << typeint << "): " << str;
+    }
+    else if (typeint == LUA_TTABLE)
+    {
+        auto len = lua_rawlen(L, i);
+        QString contents;
+
+        qCDebug(chatterinoLua).nospace().noquote()
+            << spacing << i << ") " << lua_typename(L, typeint) << " ("
+            << typeint << ") "
+            << " its length is " << len << ". Contents:";
+        for (int n = 1; n <= len; n++)
+        {
+            lua_rawgeti(L, i, n);
+            printLuaObject(L, -1, indent + 1);
+            lua_pop(L, 1);
+        }
+    }
+    else
+    {
+        qCDebug(chatterinoLua).nospace().noquote()
+            << spacing << i << ") " << lua_typename(L, typeint) << " ("
+            << typeint << ") ";
+    }
+}
+}  // namespace
 namespace chatterino::lua {
 
 void stackDump(lua_State *L, const QString &tag)
@@ -24,30 +69,17 @@ void stackDump(lua_State *L, const QString &tag)
     qCDebug(chatterinoLua) << "Count elems: " << count;
     for (int i = 1; i <= count; i++)
     {
-        auto typeint = lua_type(L, i);
-        if (typeint == LUA_TSTRING)
-        {
-            QString str;
-            lua::peek(L, &str, i);
-            qCDebug(chatterinoLua)
-                << "At" << i << "is a" << lua_typename(L, typeint) << "("
-                << typeint << "): " << str;
-        }
-        else if (typeint == LUA_TTABLE)
-        {
-            qCDebug(chatterinoLua)
-                << "At" << i << "is a" << lua_typename(L, typeint) << "("
-                << typeint << ")"
-                << "its length is " << lua_rawlen(L, i);
-        }
-        else
-        {
-            qCDebug(chatterinoLua)
-                << "At" << i << "is a" << lua_typename(L, typeint) << "("
-                << typeint << ")";
-        }
+        printLuaObject(L, i);
     }
-    qCDebug(chatterinoLua) << "--------------------";
+    if (tag.isEmpty())
+    {
+        qCDebug(chatterinoLua) << "--------------------";
+    }
+    else
+    {
+        qCDebug(chatterinoLua).nospace().noquote()
+            << "-------------------- (" << tag << ")";
+    }
 }
 
 QString humanErrorText(lua_State *L, int errCode)
@@ -170,6 +202,16 @@ bool peek(lua_State *L, QByteArray *out, StackIdx idx)
     return true;
 }
 
+bool peek(lua_State *L, bool *out, StackIdx idx)
+{
+    if (!lua_isboolean(L, idx))
+    {
+        return false;
+    }
+    *out = (lua_toboolean(L, idx) != 0);
+    return true;
+}
+
 bool peek(lua_State *L, std::string *out, StackIdx idx)
 {
     size_t len{0};
@@ -192,5 +234,6 @@ QString toString(lua_State *L, StackIdx idx)
     const auto *ptr = luaL_tolstring(L, idx, &len);
     return QString::fromUtf8(ptr, int(len));
 }
+
 }  // namespace chatterino::lua
 #endif

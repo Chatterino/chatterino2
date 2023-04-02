@@ -4,6 +4,7 @@
 #include "common/CompletionModel.hpp"
 #include "singletons/Settings.hpp"
 
+#include <QDebug>
 #include <QMimeData>
 #include <QMimeDatabase>
 
@@ -152,11 +153,19 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         {
             // First type pressing tab after modifying a message, we refresh our
             // completion model
+            completionModel->refresh(
+                this->toPlainText().left(this->textCursor().selectionStart()),
+                currentCompletionPrefix, this->isFirstWord());
             this->completer_->setModel(completionModel);
-            completionModel->refresh(currentCompletionPrefix,
-                                     this->isFirstWord());
             this->completionInProgress_ = true;
             this->completer_->setCompletionPrefix(currentCompletionPrefix);
+
+            for (int i = 0; this->completer_->setCurrentRow(i); i++)
+            {
+                qDebug() << this->completer_->currentCompletion()
+                         << " is match number " << i;
+            }
+            this->completer_->setCurrentRow(0);
             this->completer_->complete();
             return;
         }
@@ -164,9 +173,12 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         // scrolling through selections
         if (event->key() == Qt::Key_Tab)
         {
+            qDebug() << "Wrap over test" << this->completer_->currentRow()
+                     << "check for +1";
             if (!this->completer_->setCurrentRow(
                     this->completer_->currentRow() + 1))
             {
+                qDebug() << "Wrap over test fail";
                 // wrap over and start again
                 this->completer_->setCurrentRow(0);
             }
@@ -182,7 +194,19 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             }
         }
 
+        if (this->completer_->currentRow() < 0)
+        {
+            qDebug() << "lmao" << this->completer_->setCurrentRow(0)
+                     << this->completer_->completionCount();
+        }
+
+        qDebug() << "dun?" << this->completer_->currentRow();
         this->completer_->complete();
+        qDebug() << "dun?!" << this->completer_->currentRow();
+        for (const auto &e : completionModel->items_)
+        {
+            qDebug() << "-" << e.string << e.type;
+        }
         return;
     }
 

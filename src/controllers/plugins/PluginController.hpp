@@ -2,6 +2,7 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+#    include "common/CompletionModel.hpp"
 #    include "common/Singleton.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
@@ -51,6 +52,12 @@ public:
      * It is the callers responsibility to check Settings::pluginsEnabled
      */
     static bool isPluginEnabled(const QString &id);
+
+    bool addPluginCompletions(
+        const QString &text, const QString &prefix, bool isFirstWord,
+        std::function<void(const QString &str,
+                           CompletionModel::TaggedString::Type type)>
+            callback);
 
 private:
     void loadPlugins();

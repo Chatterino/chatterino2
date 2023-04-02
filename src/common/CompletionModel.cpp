@@ -15,6 +15,12 @@
 #include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"
 
+#include <magic_enum.hpp>
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+#    include "controllers/plugins/PluginController.hpp"
+#endif
+
 #include <QtAlgorithms>
 
 #include <utility>
@@ -81,19 +87,10 @@ int CompletionModel::rowCount(const QModelIndex &parent) const
     return this->items_.size();
 }
 
-void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
+void CompletionModel::addItems(const QString &text, const QString &prefix,
+                               bool isFirstWord)
 {
-    std::unique_lock lock(this->itemsMutex_);
-
     this->items_.clear();
-
-    if (prefix.length() < 2 || !this->channel_.isTwitchChannel())
-    {
-        return;
-    }
-
-    // Twitch channel
-    auto *tc = dynamic_cast<TwitchChannel *>(&this->channel_);
 
     auto addString = [=, this](const QString &str, TaggedString::Type type) {
         // Special case for handling default Twitch commands
@@ -129,6 +126,23 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
             this->items_.emplace(str + " ", type);
         }
     };
+
+#if CHATTERINO_HAVE_PLUGINS
+    auto done = getApp()->plugins->addPluginCompletions(text, prefix,
+                                                        isFirstWord, addString);
+    if (done)
+    {
+        return;
+    }
+#endif
+
+    if (prefix.length() < 2 || !this->channel_.isTwitchChannel())
+    {
+        return;
+    }
+
+    // Twitch channel
+    auto *tc = dynamic_cast<TwitchChannel *>(&this->channel_);
 
     if (auto account = getApp()->accounts->twitch.getCurrent())
     {
@@ -253,6 +267,25 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     for (const auto &command : TWITCH_DEFAULT_COMMANDS)
     {
         addString(command, TaggedString::TwitchCommand);
+    }
+}
+
+void CompletionModel::refresh(const QString &text, const QString &prefix,
+                              bool isFirstWord)
+{
+    qDebug() << "REFRESH with" << text << ";" << prefix << ";" << isFirstWord;
+    std::unique_lock lock(this->itemsMutex_);
+
+    qDebug() << "lmao:";
+    for (const auto &e : this->items_)
+    {
+        qDebug() << "xd" << e.string
+                 << magic_enum::enum_value<TaggedString::Type>(e.type);
+    }
+    qDebug() << "----------------------lmao";
+    if (this->items_.empty())
+    {
+        this->items_.emplace("", TaggedString::Type::CustomCommand);
     }
 }
 

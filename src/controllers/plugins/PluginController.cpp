@@ -2,6 +2,7 @@
 #    include "controllers/plugins/PluginController.hpp"
 
 #    include "Application.hpp"
+#    include "common/CompletionModel.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/commands/CommandController.hpp"
@@ -44,6 +45,15 @@ void PluginController::loadPlugins()
     this->plugins_.clear();
     auto dir = QDir(getPaths()->pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
+
+    /*
+    qCDebug(chatterinoLua) << "loading plugins from " << dir;
+    for (const auto &pl : this->plugins_)
+    {
+        lua_close(pl.second->state_);
+    }
+    this->plugins_.clear();
+    */
     for (const auto &info :
          dir.entryInfoList(QDir::NoFilter | QDir::NoDotAndDotDot))
     {
@@ -145,13 +155,16 @@ void PluginController::openLibrariesFor(lua_State *L,
     lua_pushglobaltable(L);
     auto global = lua_gettop(L);
 
-    // count of elements in C2LIB + LogLevel
-    auto c2libIdx = lua::pushEmptyTable(L, 5);
+    // count of elements in C2LIB + LogLevel + CompletionType
+    auto c2libIdx = lua::pushEmptyTable(L, 6);
 
     luaL_setfuncs(L, c2Lib, 0);
 
     lua::pushEnumTable<lua::api::LogLevel>(L);
     lua_setfield(L, c2libIdx, "LogLevel");
+
+    lua::pushEnumTable<CompletionModel::TaggedString::Type>(L);
+    lua_setfield(L, c2libIdx, "CompletionType");
 
     lua_setfield(L, global, "c2");
 
@@ -296,6 +309,70 @@ const std::map<QString, std::unique_ptr<Plugin>> &PluginController::plugins()
     const
 {
     return this->plugins_;
+}
+
+bool PluginController::addPluginCompletions(
+    const QString &text, const QString &prefix, bool isFirstWord,
+    std::function<void(const QString &str,
+                       CompletionModel::TaggedString::Type type)>
+        callback)
+{
+    bool done{};
+    constexpr auto ARG_COUNT = 3;
+    for (const auto &[name, plugin] : this->plugins_)
+    {
+        auto before = lua_gettop(plugin->state_);
+        lua_getglobal(plugin->state_, "onCompletionsRequested");
+        if (lua_isnil(plugin->state_, -1))
+        {
+            lua_pop(plugin->state_, 1);
+            continue;
+        }
+        lua::push(plugin->state_, text);
+        lua::push(plugin->state_, prefix);
+        lua::push(plugin->state_, isFirstWord);
+
+        auto res = lua_pcall(plugin->state_, ARG_COUNT, 1, 0);
+        if (res != LUA_OK)
+        {
+            qCDebug(chatterinoLua) << "error while calling completion handler"
+                                   << lua::humanErrorText(plugin->state_, res);
+            continue;
+        }
+        //lua::stackDump(plugin->state_, "after pcall");
+
+        std::vector<std::pair<QString, CompletionModel::TaggedString::Type>>
+            out;
+        //lua_isnil(plugin->state_, -1);
+
+        if (!lua::peek(plugin->state_, &out))
+        {
+            qCDebug(chatterinoLua) << "FeelsDonkMan ?";
+            continue;
+        }
+        lua_getfield(plugin->state_, -1, "done");
+
+        lua::peek(plugin->state_, &done);
+
+        auto after = lua_gettop(plugin->state_);
+        if (after < before)
+        {
+            assert(false && "fuck.");
+        }
+        lua_pop(plugin->state_, after - before);
+
+        for (const auto &[str, tagType] : out)
+        {
+            callback(str, tagType);
+        }
+        if (done)
+        {
+            qCDebug(chatterinoLua)
+                << "we done here, plugin" << plugin->id << "said so";
+            break;
+        }
+    }
+    return done;
 }
 
 };  // namespace chatterino

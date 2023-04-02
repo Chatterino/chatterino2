@@ -2,15 +2,19 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+#    include "common/QLogging.hpp"
+
 #    include <lua.h>
 #    include <lualib.h>
 #    include <magic_enum.hpp>
 #    include <QList>
 
+#    include <memory>
 #    include <string>
 #    include <string_view>
 #    include <type_traits>
 #    include <vector>
+
 struct lua_State;
 class QJsonObject;
 namespace chatterino {
@@ -54,6 +58,7 @@ StackIdx push(lua_State *L, const std::string &str);
 StackIdx push(lua_State *L, const bool &b);
 
 // returns OK?
+bool peek(lua_State *L, bool *out, StackIdx idx = -1);
 bool peek(lua_State *L, double *out, StackIdx idx = -1);
 bool peek(lua_State *L, QString *out, StackIdx idx = -1);
 bool peek(lua_State *L, QByteArray *out, StackIdx idx = -1);
@@ -86,6 +91,93 @@ bool peek(lua_State *L, T *out, StackIdx idx = -1)
     }
 
     return false;
+}
+
+template <typename T, typename U>
+bool peek(lua_State *L, std::optional<std::pair<T, U>> *opt, StackIdx idx = -1)
+{
+    if (!lua_istable(L, idx))
+    {
+        return false;
+    }
+    auto len = lua_rawlen(L, idx);
+    if (len != 2)  // a pair has two elements, duh
+    {
+        return false;
+    }
+
+    T left;
+    U right;
+    lua_geti(L, idx, 1);
+    if (!lua::peek(L, &left))
+    {
+        lua_seti(L, LUA_REGISTRYINDEX, 1);  // lazy
+        qCDebug(chatterinoLua)
+            << "Failed to convert lua object into c++: at pair left:";
+        lua_getglobal(L, "print");
+        lua_geti(L, LUA_REGISTRYINDEX, 1);
+        lua_call(L, 1, 0);
+        return false;
+    }
+    lua_pop(L, 1);
+
+    lua_geti(L, idx, 2);
+    if (!lua::peek(L, &right))
+    {
+        lua_seti(L, LUA_REGISTRYINDEX, 1);  // lazy
+        qCDebug(chatterinoLua)
+            << "Failed to convert lua object into c++: at pair right:";
+        lua_getglobal(L, "print");
+        lua_geti(L, LUA_REGISTRYINDEX, 1);
+        lua_call(L, 1, 0);
+        return false;
+    }
+    lua_pop(L, 1);
+    opt->emplace(left, right);
+    return true;
+}
+
+template <typename T>
+bool peek(lua_State *L, std::vector<T> *vec, StackIdx idx = -1)
+{
+    if (!lua_istable(L, idx))
+    {
+        lua::stackDump(L, "!table");
+        qCDebug(chatterinoLua)
+            << "value is not a table, type is" << lua_type(L, idx);
+        return false;
+    }
+    auto len = lua_rawlen(L, idx);
+    if (len == 0)
+    {
+        qCDebug(chatterinoLua) << "value has 0 length";
+        return true;
+    }
+    if (len > 1'000'000)
+    {
+        qCDebug(chatterinoLua) << "value is too long";
+        return false;
+    }
+    // count like lua
+    for (int i = 1; i <= len; i++)
+    {
+        lua_geti(L, idx, i);
+        std::optional<T> obj;
+        if (!lua::peek(L, &obj))
+        {
+            lua_seti(L, LUA_REGISTRYINDEX, 1);  // lazy
+            qCDebug(chatterinoLua)
+                << "Failed to convert lua object into c++: at array index " << i
+                << ":";
+            lua_getglobal(L, "print");
+            lua_geti(L, LUA_REGISTRYINDEX, 1);
+            lua_call(L, 1, 0);
+            return false;
+        }
+        lua_pop(L, 1);
+        vec->push_back(obj.value());
+    }
+    return true;
 }
 
 /**
