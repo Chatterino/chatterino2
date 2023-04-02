@@ -157,6 +157,18 @@ bool TwitchMessageBuilder::isIgnored() const
     });
 }
 
+bool TwitchMessageBuilder::isIgnoredReply() const
+{
+    return isIgnoredMessage({
+        /*.message = */ this->originalMessage_,
+        /*.twitchUserID = */
+        this->tags.value("reply-parent-user-id")
+            .toString(),
+        /*.isMod = */ this->channel->isMod(),
+        /*.isBroadcaster = */ this->channel->isBroadcaster(),
+    });
+}
+
 void TwitchMessageBuilder::triggerHighlights()
 {
     if (this->historicalMessage_)
@@ -623,7 +635,15 @@ void TwitchMessageBuilder::parseThread()
             replyBody != this->tags.end())
         {
             auto name = replyDisplayName->toString();
-            auto body = parseTagString(replyBody->toString());
+            QString body;
+            if (this->isIgnoredReply())
+            {
+                body = QString("*Blocked message*");
+            }
+            else
+            {
+                body = parseTagString(replyBody->toString());
+            }
 
             this->emplace<ReplyCurveElement>();
 
