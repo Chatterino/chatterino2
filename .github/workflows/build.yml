@@ -46,12 +46,13 @@ jobs:
             qt-version: 6.2.4
             pch: false
             force-lto: false
-          # Test for disabling Precompiled Headers & enabling link-time optimization
+          # Test for disabling Precompiled Headers & enabling link-time optimization and plugins
           - os: ubuntu-22.04
             qt-version: 5.15.2
             pch: false
             force-lto: true
             skip_artifact: "yes"
+            plugins: true
           # Test for disabling crashpad on Windows
           - os: windows-latest
             qt-version: 5.15.2
@@ -60,21 +61,6 @@ jobs:
             skip_artifact: "yes"
             crashpad: false
 
-          - os: ubuntu-20.04
-            qt-version: 5.15.2
-            pch: true
-            force-lto: false
-            plugins: true
-          - os: windows-latest
-            qt-version: 5.15.2
-            pch: true
-            force-lto: false
-            plugins: true
-          - os: macos-latest
-            qt-version: 5.15.2
-            pch: true
-            force-lto: false
-            plugins: true
       fail-fast: false
 
     steps:
