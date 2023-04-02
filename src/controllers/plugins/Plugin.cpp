@@ -8,6 +8,8 @@
 #    include <QJsonArray>
 #    include <QJsonObject>
 
+#    include <unordered_set>
+
 namespace chatterino {
 
 PluginMeta::PluginMeta(const QJsonObject &obj)
@@ -152,9 +154,9 @@ bool Plugin::registerCommand(const QString &name, const QString &functionName)
     return true;
 }
 
-std::set<QString> Plugin::listRegisteredCommands()
+std::unordered_set<QString> Plugin::listRegisteredCommands()
 {
-    std::set<QString> out;
+    std::unordered_set<QString> out;
     for (const auto &[name, _] : this->ownedCommands)
     {
         out.insert(name);

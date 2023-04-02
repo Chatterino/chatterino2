@@ -8,6 +8,7 @@
 #    include <semver/semver.hpp>
 
 #    include <set>
+#    include <unordered_set>
 #    include <vector>
 
 struct lua_State;
@@ -77,7 +78,7 @@ public:
     /**
      * @brief Get names of all commands belonging to this plugin
      */
-    std::set<QString> listRegisteredCommands();
+    std::unordered_set<QString> listRegisteredCommands();
 
     const QDir &loadDirectory() const
     {
