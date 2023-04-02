@@ -23,6 +23,7 @@
 - Dev: Cleaned up theme related code. (#4450)
 - Dev: Ensure tests have default-initialized settings. (#4498)
 - Dev: Add scripting capabilities with Lua (#4341)
+- Dev: Conan 2.0 is now used instead of Conan 1.0. (#4417)
 
 ## 2.4.2
 
