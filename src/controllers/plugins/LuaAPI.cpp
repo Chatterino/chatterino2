@@ -98,8 +98,27 @@ int c2_send_msg(lua_State *L)
 {
     QString text;
     QString channel;
-    lua::pop(L, &text);
-    lua::pop(L, &channel);
+    if (lua_gettop(L) != 2)
+    {
+        luaL_error(L, "send_msg needs exactly 2 arguments (channel and text)");
+        lua::push(L, false);
+        return 1;
+    }
+    if (!lua::pop(L, &text))
+    {
+        luaL_error(
+            L, "cannot get text (2nd argument of send_msg, expected a string)");
+        lua::push(L, false);
+        return 1;
+    }
+    if (!lua::pop(L, &channel))
+    {
+        luaL_error(
+            L,
+            "cannot get channel (1st argument of send_msg, expected a string)");
+        lua::push(L, false);
+        return 1;
+    }
 
     const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
     if (chn->isEmpty())
@@ -131,8 +150,22 @@ int c2_system_msg(lua_State *L)
     }
     QString channel;
     QString text;
-    lua::pop(L, &text);
-    lua::pop(L, &channel);
+
+    if (!lua::pop(L, &text))
+    {
+        luaL_error(
+            L,
+            "cannot get text (2nd argument of system_msg, expected a string)");
+        lua::push(L, false);
+        return 1;
+    }
+    if (!lua::pop(L, &channel))
+    {
+        luaL_error(L, "cannot get channel (1st argument of system_msg, "
+                      "expected a string)");
+        lua::push(L, false);
+        return 1;
+    }
     const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
     if (chn->isEmpty())
     {
