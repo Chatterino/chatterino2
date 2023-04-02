@@ -27,6 +27,7 @@ jobs:
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
         force-lto: [false]
+        plugins: [false]
         skip_artifact: ["no"]
         crashpad: [true]
         include:
@@ -45,12 +46,13 @@ jobs:
             qt-version: 6.2.4
             pch: false
             force-lto: false
-          # Test for disabling Precompiled Headers & enabling link-time optimization
+          # Test for disabling Precompiled Headers & enabling link-time optimization and plugins
           - os: ubuntu-22.04
             qt-version: 5.15.2
             pch: false
             force-lto: true
             skip_artifact: "yes"
+            plugins: true
           # Test for disabling crashpad on Windows
           - os: windows-latest
             qt-version: 5.15.2
@@ -58,6 +60,7 @@ jobs:
             force-lto: true
             skip_artifact: "yes"
             crashpad: false
+
       fail-fast: false
 
     steps:
@@ -65,6 +68,12 @@ jobs:
         if: matrix.force-lto == true
         run: |
           echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Enable plugin support
+        if: matrix.plugins == true
+        run: |
+          echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Set Crashpad
@@ -108,19 +117,19 @@ jobs:
           version: ${{ matrix.qt-version }}
 
       # WINDOWS
-      - name: Cache conan packages part 1
+      - name: Setup conan variables (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v3
-        with:
-          key: ${{ runner.os }}-${{ matrix.crashpad }}-conan-user-${{ hashFiles('**/conanfile.txt') }}
-          path: ~/.conan/
+        run: |
+          "C2_USE_OPENSSL3=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "True" } else { "False" })" >> "$Env:GITHUB_ENV"
+          "C2_CONAN_CACHE_SUFFIX=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "-QT6" } else { "`" })" >> "$Env:GITHUB_ENV"
+        shell: powershell
 
-      - name: Cache conan packages part 2
+      - name: Cache conan packages
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-${{ matrix.crashpad }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
-          path: C:/.conan/
+          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}${{ env.C2_CONAN_CACHE_SUFFIX }}
+          path: ~/.conan2/
 
       - name: Add Conan to path
         if: startsWith(matrix.os, 'windows')
@@ -129,7 +138,7 @@ jobs:
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-          choco install conan -y --version 1.58.0
+          choco install conan -y
 
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
@@ -138,15 +147,21 @@ jobs:
       - name: Setup Conan (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-          conan profile new --detect --force default
-          conan profile update conf.tools.cmake.cmaketoolchain:generator="NMake Makefiles" default
+          conan --version
+          conan profile detect -f
+        shell: powershell
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
           mkdir build
           cd build
-          conan install .. -s build_type=RelWithDebInfo -b missing -pr:b=default
+          conan install .. `
+              -s build_type=RelWithDebInfo `
+              -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" `
+              -b missing `
+              --output-folder=. `
+              -o with_openssl3="$Env:C2_USE_OPENSSL3"
           cmake `
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
@@ -154,6 +169,7 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
+              -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
               -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
               ..
           set cl=/MP
@@ -192,9 +208,9 @@ jobs:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}-symbols.pdb.7z
           path: build/bin/chatterino.pdb.7z
 
-      - name: Clean Conan pkgs
+      - name: Clean Conan cache
         if: startsWith(matrix.os, 'windows')
-        run: conan remove "*" -fsb
+        run: conan cache clean --source --build --download "*"
         shell: bash
 
       # LINUX
@@ -240,6 +256,7 @@ jobs:
             -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+            -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
             -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
             ..
           make -j"$(nproc)"
@@ -304,6 +321,7 @@ jobs:
               -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
               -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+              -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
@@ -325,7 +343,6 @@ jobs:
         with:
           name: chatterino-osx-${{ matrix.qt-version }}.dmg
           path: build/chatterino-osx.dmg
-
   create-release:
     needs: build
     runs-on: ubuntu-latest

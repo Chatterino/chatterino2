@@ -12,12 +12,18 @@
 - Bugfix: Fixed an issue where context-menu items for zero-width emotes displayed the wrong provider. (#4460)
 - Bugfix: Fixed an issue where the "Enable zero-width emotes" setting was showing the inverse state. (#4462)
 - Bugfix: Fixed username rendering in Qt 6. (#4476)
+- Bugfix: Fixed placeholder color in Qt 6. (#4477)
 - Bugfix: Fixed blocked user list being empty when opening the settings dialog for the first time. (#4437)
 - Bugfix: Fixed blocked user list sticking around when switching from a logged in user to being logged out. (#4437)
+- Bugfix: Fixed search popup ignoring setting for message scrollback limit. (#4496)
+- Bugfix: Fixed a memory leak that occurred when loading message history. This was mostly noticeable with unstable internet connections where reconnections were frequent or long-running instances of Chatterino. (#4499)
 - Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
 - Dev: Ignore unhandled BTTV user-events. (#4438)
 - Dev: Only log debug messages when NDEBUG is not defined. (#4442)
 - Dev: Cleaned up theme related code. (#4450)
+- Dev: Ensure tests have default-initialized settings. (#4498)
+- Dev: Add scripting capabilities with Lua (#4341)
+- Dev: Conan 2.0 is now used instead of Conan 1.0. (#4417)
 
 ## 2.4.2
 
