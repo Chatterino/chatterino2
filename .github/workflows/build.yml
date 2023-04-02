@@ -27,6 +27,7 @@ jobs:
         qt-version: [5.15.2, 5.12.12]
         pch: [true]
         force-lto: [false]
+        plugins: [false]
         skip_artifact: ["no"]
         crashpad: [true]
         include:
@@ -45,12 +46,13 @@ jobs:
             qt-version: 6.2.4
             pch: false
             force-lto: false
-          # Test for disabling Precompiled Headers & enabling link-time optimization
+          # Test for disabling Precompiled Headers & enabling link-time optimization and plugins
           - os: ubuntu-22.04
             qt-version: 5.15.2
             pch: false
             force-lto: true
             skip_artifact: "yes"
+            plugins: true
           # Test for disabling crashpad on Windows
           - os: windows-latest
             qt-version: 5.15.2
@@ -58,6 +60,7 @@ jobs:
             force-lto: true
             skip_artifact: "yes"
             crashpad: false
+
       fail-fast: false
 
     steps:
@@ -65,6 +68,12 @@ jobs:
         if: matrix.force-lto == true
         run: |
           echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Enable plugin support
+        if: matrix.plugins == true
+        run: |
+          echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Set Crashpad
@@ -160,6 +169,7 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
+              -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
               -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
               ..
           set cl=/MP
@@ -246,6 +256,7 @@ jobs:
             -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+            -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
             -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
             ..
           make -j"$(nproc)"
@@ -310,6 +321,7 @@ jobs:
               -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
               -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+              -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
@@ -331,7 +343,6 @@ jobs:
         with:
           name: chatterino-osx-${{ matrix.qt-version }}.dmg
           path: build/chatterino-osx.dmg
-
   create-release:
     needs: build
     runs-on: ubuntu-latest
