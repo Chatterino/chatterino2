@@ -213,6 +213,7 @@ public:
                                            false};
     BoolSetting enableEmoteImages = {"/emotes/enableEmoteImages", true};
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
+    BoolSetting enableZeroWidthEmotes = {"/emotes/enableZeroWidthEmotes", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
     BoolSetting showUnlistedSevenTVEmotes = {
         "/emotes/showUnlistedSevenTVEmotes", false};
@@ -526,6 +527,10 @@ public:
          {"h", 1},
          {"d", 1},
          {"w", 1}}};
+
+    BoolSetting pluginsEnabled = {"/plugins/supportEnabled", false};
+    ChatterinoSetting<std::vector<QString>> enabledPlugins = {
+        "/plugins/enabledPlugins", {}};
 
 private:
     void updateModerationActions();

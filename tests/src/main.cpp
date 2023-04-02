@@ -4,6 +4,7 @@
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "singletons/Settings.hpp"
 
 #include <gtest/gtest.h>
 #include <QApplication>
@@ -26,6 +27,9 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
 
     chatterino::NetworkManager::init();
+
+    // Ensure settings are initialized before any tests are run
+    chatterino::Settings settings("/tmp/c2-empty-test");
 
     QtConcurrent::run([&app] {
         auto res = RUN_ALL_TESTS();

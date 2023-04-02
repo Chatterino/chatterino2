@@ -136,6 +136,15 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
+        controllers/plugins/LuaAPI.cpp
+        controllers/plugins/LuaAPI.hpp
+        controllers/plugins/Plugin.cpp
+        controllers/plugins/Plugin.hpp
+        controllers/plugins/PluginController.hpp
+        controllers/plugins/PluginController.cpp
+        controllers/plugins/LuaUtilities.cpp
+        controllers/plugins/LuaUtilities.hpp
+
         controllers/userdata/UserDataController.cpp
         controllers/userdata/UserDataController.hpp
         controllers/userdata/UserData.hpp
@@ -420,6 +429,8 @@ set(SOURCE_FILES
         widgets/Scrollbar.hpp
         widgets/StreamView.cpp
         widgets/StreamView.hpp
+        widgets/TooltipEntryWidget.cpp
+        widgets/TooltipEntryWidget.hpp
         widgets/TooltipWidget.cpp
         widgets/TooltipWidget.hpp
         widgets/Window.cpp
@@ -543,6 +554,8 @@ set(SOURCE_FILES
         widgets/settingspages/NicknamesPage.hpp
         widgets/settingspages/NotificationPage.cpp
         widgets/settingspages/NotificationPage.hpp
+        widgets/settingspages/PluginsPage.cpp
+        widgets/settingspages/PluginsPage.hpp
         widgets/settingspages/SettingsPage.cpp
         widgets/settingspages/SettingsPage.hpp
 
@@ -588,6 +601,14 @@ list(APPEND SOURCE_FILES ${RES_AUTOGEN_FILES})
 
 add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
+if(CHATTERINO_PLUGINS)
+    target_compile_definitions(${LIBRARY_PROJECT}
+        PRIVATE
+        CHATTERINO_HAVE_PLUGINS
+    )
+    message(STATUS "Building Chatterino with lua plugin support enabled.")
+endif()
+
 if (CHATTERINO_GENERATE_COVERAGE)
     include(CodeCoverage)
     append_coverage_compiler_flags_to_target(${LIBRARY_PROJECT})
@@ -622,6 +643,9 @@ target_link_libraries(${LIBRARY_PROJECT}
         LRUCache
         MagicEnum
         )
+if (CHATTERINO_PLUGINS)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua)
+endif()
 
 if (BUILD_WITH_QT6)
     target_link_libraries(${LIBRARY_PROJECT}

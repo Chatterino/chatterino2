@@ -53,3 +53,7 @@ CheckOptions:
     value: camelBack
   - key: readability-implicit-bool-conversion.AllowPointerConditions
     value: true
+
+  # Lua state
+  - key: readability-identifier-naming.LocalPointerIgnoredRegexp
+    value: ^L$
