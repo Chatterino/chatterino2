@@ -7,9 +7,14 @@
 namespace chatterino {
 
 struct ParsedLink {
-    QStringView protocol;
-    QStringView host;
-    QStringView rest;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    using StringView = QStringView;
+#else
+    using StringView = QStringRef;
+#endif
+    StringView protocol;
+    StringView host;
+    StringView rest;
     QString source;
 };
 

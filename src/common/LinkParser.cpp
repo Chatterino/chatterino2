@@ -94,7 +94,7 @@ LinkParser::LinkParser(const QString &unparsedString)
 
     // Host `a.b.c.com`
     QStringRef host = l;
-    QStringView rest;
+    ParsedLink::StringView rest;
     bool lastWasDot = true;
     bool inIpv6 = false;
     bool hasMatch = false;
