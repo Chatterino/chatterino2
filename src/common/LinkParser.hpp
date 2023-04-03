@@ -2,19 +2,26 @@
 
 #include <QString>
 
+#include <optional>
+
 namespace chatterino {
+
+struct ParsedLink {
+    QStringView protocol;
+    QStringView host;
+    QStringView rest;
+    QString source;
+};
 
 class LinkParser
 {
 public:
     explicit LinkParser(const QString &unparsedString);
 
-    bool hasMatch() const;
-    QString getCaptured() const;
+    const std::optional<ParsedLink> &result() const;
 
 private:
-    bool hasMatch_{false};
-    QString match_;
+    std::optional<ParsedLink> result_{};
 };
 
 }  // namespace chatterino
