@@ -24,12 +24,33 @@ struct CompletionEmote {
     QString providerName;
 };
 
+//TODO: Check with code guidelines
+
+//Returns true if each character in pattern is found sequentially within str
+static bool fuzzy_match(char const * pattern, char const * str) {
+    while (*pattern != '\0' && *str != '\0')  {
+        if (tolower(*pattern) == tolower(*str))
+            ++pattern;
+        ++str;
+    }
+
+    return *pattern == '\0' ? true : false;
+}
+
 void addEmotes(std::vector<CompletionEmote> &out, const EmoteMap &map,
                const QString &text, const QString &providerName)
 {
     for (auto &&emote : map)
     {
-        if (emote.first.string.contains(text, Qt::CaseInsensitive))
+        //TODO: Check with code guidelines
+        //TODO: Fix memory leak
+        QByteArray textba = text.toLower().toLocal8Bit();
+        const char *c_text = textba.data();
+
+        QByteArray emoteba = emote.first.string.toLower().toLocal8Bit();
+        const char *c_emote = emoteba.data();
+
+        if (fuzzy_match(c_text,c_emote))
         {
             out.push_back(
                 {emote.second, emote.second->name.string, providerName});
@@ -43,7 +64,15 @@ void addEmojis(std::vector<CompletionEmote> &out, const EmojiMap &map,
     map.each([&](const QString &, const std::shared_ptr<EmojiData> &emoji) {
         for (auto &&shortCode : emoji->shortCodes)
         {
-            if (shortCode.contains(text, Qt::CaseInsensitive))
+        //TODO: Check with code guidelines
+        //TODO: Fix memory leak
+        QByteArray textba = text.toLower().toLocal8Bit();
+        const char *c_text = textba.data();
+
+        QByteArray shortcodeba = shortCode.toLower().toLocal8Bit();
+        const char *c_shortcode = shortcodeba.data();
+
+            if (fuzzy_match(c_text,c_shortcode))
             {
                 out.push_back({emoji->emote, shortCode, "Emoji"});
             }
