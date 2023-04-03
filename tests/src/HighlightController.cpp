@@ -569,14 +569,14 @@ class HighlightControllerTest : public ::testing::Test
 protected:
     void SetUp() override
     {
-        {
-            // Write default settings to the mock settings json file
-            QDir().mkpath("/tmp/c2-tests");
-            QFile settingsFile("/tmp/c2-tests/settings.json");
-            assert(settingsFile.open(QIODevice::WriteOnly | QIODevice::Text));
-            QTextStream out(&settingsFile);
-            out << DEFAULT_SETTINGS;
-        }
+        // Write default settings to the mock settings json file
+        ASSERT_TRUE(QDir().mkpath("/tmp/c2-tests"));
+
+        QFile settingsFile("/tmp/c2-tests/settings.json");
+        ASSERT_TRUE(settingsFile.open(QIODevice::WriteOnly | QIODevice::Text));
+        ASSERT_GT(settingsFile.write(DEFAULT_SETTINGS.toUtf8()), 0);
+        ASSERT_TRUE(settingsFile.flush());
+        settingsFile.close();
 
         this->mockHelix = new MockHelix;
 
@@ -598,7 +598,7 @@ protected:
 
     void TearDown() override
     {
-        QDir().rmdir("/tmp/c2-tests");
+        ASSERT_TRUE(QDir("/tmp/c2-tests").removeRecursively());
         this->mockApplication.reset();
         this->settings.reset();
         this->paths.reset();

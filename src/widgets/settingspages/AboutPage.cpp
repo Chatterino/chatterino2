@@ -122,6 +122,13 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "miniaudio",
                        "https://github.com/mackron/miniaudio",
                        ":/licenses/miniaudio.txt");
+#ifdef CHATTERINO_HAVE_PLUGINS
+            addLicense(form.getElement(), "lua", "https://lua.org",
+                       ":/licenses/lua.txt");
+            addLicense(form.getElement(), "Fluent icons",
+                       "https://github.com/microsoft/fluentui-system-icons",
+                       ":/licenses/fluenticons.txt");
+#endif
 #ifdef CHATTERINO_WITH_CRASHPAD
             addLicense(form.getElement(), "sentry-crashpad",
                        "https://github.com/getsentry/crashpad",

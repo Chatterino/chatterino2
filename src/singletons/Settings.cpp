@@ -155,6 +155,8 @@ void Settings::moveLegacyDankerinoSettings_()
 
 Settings &Settings::instance()
 {
+    assert(instance_ != nullptr);
+
     return *instance_;
 }
 
