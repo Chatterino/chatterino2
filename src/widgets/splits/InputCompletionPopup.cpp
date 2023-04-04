@@ -43,14 +43,8 @@ void addEmotes(std::vector<CompletionEmote> &out, const EmoteMap &map,
     for (auto &&emote : map)
     {
         //TODO: Check with code guidelines
-        //TODO: Fix memory leak
-        QByteArray textba = text.toLower().toLocal8Bit();
-        const char *c_text = textba.data();
 
-        QByteArray emoteba = emote.first.string.toLower().toLocal8Bit();
-        const char *c_emote = emoteba.data();
-
-        if (fuzzy_match(c_text,c_emote))
+        if (fuzzy_match(text.toLocal8Bit().data(),emote.first.string.toLocal8Bit().data()))
         {
             out.push_back(
                 {emote.second, emote.second->name.string, providerName});
@@ -65,14 +59,8 @@ void addEmojis(std::vector<CompletionEmote> &out, const EmojiMap &map,
         for (auto &&shortCode : emoji->shortCodes)
         {
         //TODO: Check with code guidelines
-        //TODO: Fix memory leak
-        QByteArray textba = text.toLower().toLocal8Bit();
-        const char *c_text = textba.data();
 
-        QByteArray shortcodeba = shortCode.toLower().toLocal8Bit();
-        const char *c_shortcode = shortcodeba.data();
-
-            if (fuzzy_match(c_text,c_shortcode))
+            if (fuzzy_match(text.toLocal8Bit().data(),shortCode.toLocal8Bit().data()))
             {
                 out.push_back({emoji->emote, shortCode, "Emoji"});
             }
