@@ -77,71 +77,6 @@ bool isZeroWidthRecommended(const QJsonObject &emoteData)
     return flags.has(SeventvEmoteFlag::ZeroWidth);
 }
 
-ImageSet makeImageSet(const QJsonObject &emoteData)
-{
-    auto host = emoteData["host"].toObject();
-    // "//cdn.7tv[...]"
-    auto baseUrl = host["url"].toString();
-    auto files = host["files"].toArray();
-
-    // TODO: emit four images
-    std::array<ImagePtr, 3> sizes;
-    double baseWidth = 0.0;
-    int nextSize = 0;
-
-    for (auto fileItem : files)
-    {
-        if (nextSize >= sizes.size())
-        {
-            break;
-        }
-
-        auto file = fileItem.toObject();
-        if (file["format"].toString() != "WEBP")
-        {
-            continue;  // We only use webp
-        }
-
-        double width = file["width"].toDouble();
-        double scale = 1.0;  // in relation to first image
-        if (baseWidth > 0.0)
-        {
-            scale = baseWidth / width;
-        }
-        else
-        {
-            // => this is the first image
-            baseWidth = width;
-        }
-
-        auto image = Image::fromUrl(
-            {QString("https:%1/%2").arg(baseUrl, file["name"].toString())},
-            scale);
-
-        sizes.at(nextSize) = image;
-        nextSize++;
-    }
-
-    if (nextSize < sizes.size())
-    {
-        // this should be really rare
-        // this means we didn't get all sizes of an emote
-        if (nextSize == 0)
-        {
-            qCDebug(chatterinoSeventv)
-                << "Got file list without any eligible files";
-            // When this emote is typed, chatterino will crash.
-            return ImageSet{};
-        }
-        for (; nextSize < sizes.size(); nextSize++)
-        {
-            sizes.at(nextSize) = Image::getEmpty();
-        }
-    }
-
-    return ImageSet{sizes[0], sizes[1], sizes[2]};
-}
-
 Tooltip createTooltip(const QString &name, const QString &author, bool isGlobal)
 {
     return Tooltip{QString("%1<br>%2 7TV Emote<br>By: %3")
@@ -172,7 +107,7 @@ CreateEmoteResult createEmote(const QJsonObject &activeEmote,
             ? createAliasedTooltip(emoteName.string, baseEmoteName.string,
                                    author.string, isGlobal)
             : createTooltip(emoteName.string, author.string, isGlobal);
-    auto imageSet = makeImageSet(emoteData);
+    auto imageSet = SeventvEmotes::createImageSet(emoteData);
 
     auto emote =
         Emote({emoteName, imageSet, tooltip,
@@ -506,6 +441,70 @@ void SeventvEmotes::getEmoteSet(
             }
         })
         .execute();
+}
+
+ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)
+{
+    auto host = emoteData["host"].toObject();
+    // "//cdn.7tv[...]"
+    auto baseUrl = host["url"].toString();
+    auto files = host["files"].toArray();
+
+    std::array<ImagePtr, 3> sizes;
+    double baseWidth = 0.0;
+    size_t nextSize = 0;
+
+    for (auto fileItem : files)
+    {
+        if (nextSize >= sizes.size())
+        {
+            break;
+        }
+
+        auto file = fileItem.toObject();
+        if (file["format"].toString() != "WEBP")
+        {
+            continue;  // We only use webp
+        }
+
+        double width = file["width"].toDouble();
+        double scale = 1.0;  // in relation to first image
+        if (baseWidth > 0.0)
+        {
+            scale = baseWidth / width;
+        }
+        else
+        {
+            // => this is the first image
+            baseWidth = width;
+        }
+
+        auto image = Image::fromUrl(
+            {QString("https:%1/%2").arg(baseUrl, file["name"].toString())},
+            scale);
+
+        sizes.at(nextSize) = image;
+        nextSize++;
+    }
+
+    if (nextSize < sizes.size())
+    {
+        // this should be really rare
+        // this means we didn't get all sizes of an emote
+        if (nextSize == 0)
+        {
+            qCDebug(chatterinoSeventv)
+                << "Got file list without any eligible files";
+            // When this emote is typed, chatterino will crash.
+            return ImageSet{};
+        }
+        for (; nextSize < sizes.size(); nextSize++)
+        {
+            sizes.at(nextSize) = Image::getEmpty();
+        }
+    }
+
+    return ImageSet{sizes[0], sizes[1], sizes[2]};
 }
 
 }  // namespace chatterino
