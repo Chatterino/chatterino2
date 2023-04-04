@@ -973,13 +973,14 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     }
 
     /// Add the messages at the start
-    if (this->messages_.pushFront(messageRefs).size() > 0)
+    auto addedMessages = this->messages_.pushFront(messageRefs);
+    if (addedMessages.size() > 0)
     {
-        this->scrollBar_->offsetMaximum(messages.size());
+        this->scrollBar_->offsetMaximum(addedMessages.size());
         if (this->scrollBar_->isAtBottom())
             this->scrollBar_->scrollToBottom();
         else
-            this->scrollBar_->offset(qreal(messages.size()));
+            this->scrollBar_->offset(qreal(addedMessages.size()));
     }
 
     if (this->showScrollbarHighlights())
@@ -1042,6 +1043,8 @@ void ChannelView::messagesUpdated()
 
     this->messages_.clear();
     this->scrollBar_->clearHighlights();
+    this->scrollBar_->setMaximum(snapshot.size());
+    this->scrollBar_->setMinimum(0);
     this->lastMessageHasAlternateBackground_ = false;
     this->lastMessageHasAlternateBackgroundReverse_ = true;
 
