@@ -642,7 +642,7 @@ void TwitchMessageBuilder::parseThread()
 
             if (this->isIgnoredReply())
             {
-                body = QString("*Blocked user*");
+                body = QString("[Blocked user]");
             }
             else
             {
