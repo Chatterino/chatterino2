@@ -74,6 +74,9 @@ private:
     void actuallyLayout(int width, MessageElementFlags flags);
     void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection);
 
+    // Create new buffer if required, returning the buffer
+    QPixmap *ensureBuffer(QPainter &painter, int width);
+
     // variables
     MessagePtr message_;
     MessageLayoutContainer container_;
