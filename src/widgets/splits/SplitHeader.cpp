@@ -452,7 +452,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     if (twitchChannel)
     {
         auto bothSeq =
-            h->getDisplaySequence(HotkeyCategory::Split, "reloadEmotes", {{}});
+            h->getDisplaySequence(HotkeyCategory::Split, "reloadEmotes", {});
         auto channelSeq = h->getDisplaySequence(HotkeyCategory::Split,
                                                 "reloadEmotes", {{"channel"}});
         auto subSeq = h->getDisplaySequence(HotkeyCategory::Split,
@@ -485,7 +485,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     if (modModeSeq.isEmpty())
     {
         modModeSeq = h->getDisplaySequence(HotkeyCategory::Split,
-                                           "setModerationMode", {{}});
+                                           "setModerationMode", {});
         // this makes a full std::optional<> with an empty vector inside
     }
     moreMenu->addAction(
@@ -529,7 +529,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         if (notifySeq.isEmpty())
         {
             notifySeq = h->getDisplaySequence(HotkeyCategory::Split,
-                                              "setChannelNotification", {{}});
+                                              "setChannelNotification", {});
             // this makes a full std::optional<> with an empty vector inside
         }
         action->setShortcut(notifySeq);
