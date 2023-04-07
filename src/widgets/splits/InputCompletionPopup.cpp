@@ -24,18 +24,17 @@ struct CompletionEmote {
     QString providerName;
 };
 
-//TODO: Check with code guidelines
-
 //Returns true if each character in pattern is found sequentially within str
-static bool fuzzy_match(QString const & pattern, QString const & str) 
+static bool fuzzyMatch(QString const &pattern, QString const &str)
 {
-    int i = 0;int j = 0;
-    while (i < pattern.length() && j < str.length())  {
+    int i{};
+    int j{};
+    while (i < pattern.length() && j < str.length())
+    {
         if (pattern.at(i) == str.at(j))
             ++i;
         ++j;
     }
-
     return i == pattern.length();
 }
 
@@ -44,9 +43,7 @@ void addEmotes(std::vector<CompletionEmote> &out, const EmoteMap &map,
 {
     for (auto &&emote : map)
     {
-        //TODO: Check with code guidelines
-
-        if (fuzzy_match(text.toLower(),emote.first.string.toLower()))
+        if (fuzzyMatch(text.toLower(), emote.first.string.toLower()))
         {
             out.push_back(
                 {emote.second, emote.second->name.string, providerName});
@@ -60,9 +57,7 @@ void addEmojis(std::vector<CompletionEmote> &out, const EmojiMap &map,
     map.each([&](const QString &, const std::shared_ptr<EmojiData> &emoji) {
         for (auto &&shortCode : emoji->shortCodes)
         {
-        //TODO: Check with code guidelines
-
-            if (fuzzy_match(text.toLower(),shortCode.toLower()))
+            if (fuzzyMatch(text.toLower(), shortCode.toLower()))
             {
                 out.push_back({emoji->emote, shortCode, "Emoji"});
             }
