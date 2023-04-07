@@ -8,7 +8,7 @@
 using namespace chatterino;
 using namespace chatterino::filters;
 
-TypingContext typingContext = messageTypingContext;
+TypingContext typingContext = MESSAGE_TYPING_CONTEXT;
 
 namespace chatterino::filters {
 

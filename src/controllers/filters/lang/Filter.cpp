@@ -18,7 +18,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * Looking to add a new identifier to filters? Here's what to do: 
      *  1. Update validIdentifiersMap in Tokenizer.hpp
      *  2. Add the identifier to the list below
-     *  3. Add the type of the identifier to messageTypingContext in Filter.hpp
+     *  3. Add the type of the identifier to MESSAGE_TYPING_CONTEXT in Filter.hpp
      *  4. Add the value for the identifier to the ContextMap returned by this function
      * 
      * List of identifiers:

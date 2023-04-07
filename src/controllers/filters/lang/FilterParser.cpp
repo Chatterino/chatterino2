@@ -29,7 +29,7 @@ FilterParser::FilterParser(const QString &text)
     }
 
     auto returnType =
-        this->builtExpression_->synthesizeType(messageTypingContext);
+        this->builtExpression_->synthesizeType(MESSAGE_TYPING_CONTEXT);
     if (!returnType.well())
     {
         this->errorLog(explainIllType(*returnType.illTypedDescription()));
@@ -306,7 +306,7 @@ const QStringList &FilterParser::errors() const
 
 const QString FilterParser::debugString() const
 {
-    return this->builtExpression_->debug(messageTypingContext);
+    return this->builtExpression_->debug(MESSAGE_TYPING_CONTEXT);
 }
 
 }  // namespace chatterino::filters

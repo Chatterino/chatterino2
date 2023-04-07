@@ -18,7 +18,11 @@ using MessagePtr = std::shared_ptr<const Message>;
 
 namespace chatterino::filters {
 
-static const QMap<QString, Type> messageTypingContext = {
+// MESSAGE_TYPING_CONTEXT maps filter variables to their expected type at evaluation.
+// For example, flags.highlighted is a boolean variable, so it is marked as Type::Bool
+// below. These variable types will be used to check whether a filter "makes sense",
+// i.e. if all the variables and operators being used have compatible types.
+static const QMap<QString, Type> MESSAGE_TYPING_CONTEXT = {
     {"author.badges", Type::StringList},
     {"author.color", Type::Color},
     {"author.name", Type::String},
@@ -40,7 +44,8 @@ static const QMap<QString, Type> messageTypingContext = {
     {"flags.reply", Type::Bool},
     {"flags.automod", Type::Bool},
     {"message.content", Type::String},
-    {"message.length", Type::Int}};
+    {"message.length", Type::Int},
+};
 
 ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel);
 
