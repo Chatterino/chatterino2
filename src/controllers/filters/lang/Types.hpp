@@ -5,8 +5,8 @@
 #include <QVariant>
 
 #include <memory>
-#include <optional>
 #include <set>
+#include <variant>
 
 namespace chatterino::filters {
 
@@ -42,22 +42,29 @@ public:
     // Ill-typed
     PossibleType(IllTyped illTyped);
 
+    // Gets a string representation of the contained type.
     QString string() const;
+    // Unwraps the underlying type. Must be well-typed.
     Type unwrap() const;
 
+    // Requires that this is well-typed.
     bool operator==(Type t) const;
+    // Requires that this and p are well-typed.
     bool operator==(const PossibleType &p) const;
+    // Requires that this is well-typed.
     bool operator!=(Type t) const;
+    // Requires that this and p are well-typed.
     bool operator!=(const PossibleType &p) const;
 
+    // Whether this PossibleType is well-typed.
     bool well() const;
     operator bool() const;
 
-    const std::optional<IllTyped> &illTypedDescription() const;
+    // Gets the IllTyped instance described by this PossibleType. Must be ill-typed.
+    const IllTyped &illTypedDescription() const;
 
 private:
-    Type type_;
-    std::optional<IllTyped> illTyped_;
+    std::variant<Type, IllTyped> value_;
 };
 
 bool isList(const PossibleType &typ);

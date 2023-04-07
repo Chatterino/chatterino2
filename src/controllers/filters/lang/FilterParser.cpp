@@ -32,7 +32,7 @@ FilterParser::FilterParser(const QString &text)
         this->builtExpression_->synthesizeType(MESSAGE_TYPING_CONTEXT);
     if (!returnType.well())
     {
-        this->errorLog(explainIllType(*returnType.illTypedDescription()));
+        this->errorLog(explainIllType(returnType.illTypedDescription()));
         return;
     }
 
