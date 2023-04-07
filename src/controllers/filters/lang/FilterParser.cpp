@@ -28,6 +28,8 @@ FilterParser::FilterParser(const QString &text)
         return;
     }
 
+    // safety: returnType must not live longer than the parsed expression. See
+    // comment on IllTyped::expr.
     auto returnType =
         this->builtExpression_->synthesizeType(MESSAGE_TYPING_CONTEXT);
     if (!returnType.well())

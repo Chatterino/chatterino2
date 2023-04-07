@@ -30,6 +30,11 @@ using TypingContext = QMap<QString, Type>;
 QString typeToString(Type type);
 
 struct IllTyped {
+    // Important nuance to expr:
+    // During type synthesis, should an error occur and an IllTyped PossibleType be
+    // returned, expr is a pointer to an Expression that exists in the Expression
+    // tree that was parsed. Therefore, you cannot hold on to this pointer longer
+    // than the Expression tree exists. Be careful!
     const Expression *expr;
     QString message;
 };
