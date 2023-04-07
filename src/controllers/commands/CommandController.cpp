@@ -10,6 +10,7 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
+#include "controllers/plugins/PluginController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -3260,6 +3261,32 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     return text;
 }
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+bool CommandController::registerPluginCommand(const QString &commandName)
+{
+    if (this->commands_.contains(commandName))
+    {
+        return false;
+    }
+
+    this->commands_[commandName] = [commandName](const CommandContext &ctx) {
+        return getApp()->plugins->tryExecPluginCommand(commandName, ctx);
+    };
+    this->pluginCommands_.append(commandName);
+    return true;
+}
+
+bool CommandController::unregisterPluginCommand(const QString &commandName)
+{
+    if (!this->pluginCommands_.contains(commandName))
+    {
+        return false;
+    }
+    this->pluginCommands_.removeAll(commandName);
+    return this->commands_.erase(commandName) != 0;
+}
+#endif
 
 void CommandController::registerCommand(const QString &commandName,
                                         CommandFunctionVariants commandFunction)

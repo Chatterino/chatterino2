@@ -42,6 +42,15 @@ public:
         const QStringList &words, const Command &command, bool dryRun,
         ChannelPtr channel, const Message *message = nullptr,
         std::unordered_map<QString, QString> context = {});
+#ifdef CHATTERINO_HAVE_PLUGINS
+    bool registerPluginCommand(const QString &commandName);
+    bool unregisterPluginCommand(const QString &commandName);
+
+    const QStringList &pluginCommands()
+    {
+        return this->pluginCommands_;
+    }
+#endif
 
 private:
     void load(Paths &paths);
@@ -73,6 +82,9 @@ private:
         commandsSetting_;
 
     QStringList defaultChatterinoCommandAutoCompletions_;
+#ifdef CHATTERINO_HAVE_PLUGINS
+    QStringList pluginCommands_;
+#endif
 };
 
 }  // namespace chatterino

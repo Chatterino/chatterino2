@@ -13,6 +13,7 @@
 #include "messages/search/RegexPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
 #include "messages/search/SubtierPredicate.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/splits/Split.hpp"
@@ -285,8 +286,9 @@ void SearchPopup::initLayout()
 
         // CHANNELVIEW
         {
-            this->channelView_ = new ChannelView(this, this->split_,
-                                                 ChannelView::Context::Search);
+            this->channelView_ = new ChannelView(
+                this, this->split_, ChannelView::Context::Search,
+                getSettings()->scrollbackSplitLimit);
 
             layout1->addWidget(this->channelView_);
         }

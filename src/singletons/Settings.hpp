@@ -528,6 +528,10 @@ public:
          {"d", 1},
          {"w", 1}}};
 
+    BoolSetting pluginsEnabled = {"/plugins/supportEnabled", false};
+    ChatterinoSetting<std::vector<QString>> enabledPlugins = {
+        "/plugins/enabledPlugins", {}};
+
 private:
     void updateModerationActions();
 };
