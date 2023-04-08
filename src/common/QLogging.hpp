@@ -34,6 +34,7 @@ Q_DECLARE_LOGGING_CATEGORY(chatterinoSeventvEventAPI);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoSound);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoStreamerMode);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoStreamlink);
+Q_DECLARE_LOGGING_CATEGORY(chatterinoTheme);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoTokenizer);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoTwitch);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoUpdate);

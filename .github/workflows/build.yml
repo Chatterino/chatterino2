@@ -16,6 +16,9 @@ env:
   C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' }}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
   C2_BUILD_WITH_QT6: Off
+  # Last known good conan version
+  # 2.0.3 has a bug on Windows (conan-io/conan#13606)
+  CONAN_VERSION: 2.0.2
 
 jobs:
   build:
@@ -117,6 +120,10 @@ jobs:
           version: ${{ matrix.qt-version }}
 
       # WINDOWS
+      - name: Enable Developer Command Prompt (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1.12.1
+
       - name: Setup conan variables (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
@@ -124,25 +131,19 @@ jobs:
           "C2_CONAN_CACHE_SUFFIX=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "-QT6" } else { "`" })" >> "$Env:GITHUB_ENV"
         shell: powershell
 
-      - name: Cache conan packages
+      - name: Cache conan packages (Windows)
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v3
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}${{ env.C2_CONAN_CACHE_SUFFIX }}
           path: ~/.conan2/
 
-      - name: Add Conan to path
-        if: startsWith(matrix.os, 'windows')
-        run: echo "C:\Program Files\Conan\conan\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-      - name: Install dependencies (Windows)
+      - name: Install Conan (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-          choco install conan -y
-
-      - name: Enable Developer Command Prompt
-        if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.12.1
+          python3 -c "import site; import sys; print(f'{site.USER_BASE}\\Python{sys.version_info.major}{sys.version_info.minor}\\Scripts')" >> "$GITHUB_PATH"
+          pip3 install --user "conan==${{ env.CONAN_VERSION }}"
+        shell: powershell
 
       - name: Setup Conan (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -151,7 +152,7 @@ jobs:
           conan profile detect -f
         shell: powershell
 
-      - name: Build (Windows)
+      - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
           mkdir build
@@ -162,6 +163,12 @@ jobs:
               -b missing `
               --output-folder=. `
               -o with_openssl3="$Env:C2_USE_OPENSSL3"
+        shell: powershell
+
+      - name: Build (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          cd build
           cmake `
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
