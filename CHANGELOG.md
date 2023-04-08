@@ -17,6 +17,7 @@
 - Bugfix: Fixed blocked user list sticking around when switching from a logged in user to being logged out. (#4437)
 - Bugfix: Fixed search popup ignoring setting for message scrollback limit. (#4496)
 - Bugfix: Fixed a memory leak that occurred when loading message history. This was mostly noticeable with unstable internet connections where reconnections were frequent or long-running instances of Chatterino. (#4499)
+- Bugfix: Fixed emote & badge tooltips not showing up when thumbnails were hidden. (#4509)
 - Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
 - Dev: Themes are now stored as JSON files in `resources/themes`. (#4471)
 - Dev: Ignore unhandled BTTV user-events. (#4438)
