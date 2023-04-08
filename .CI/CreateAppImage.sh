@@ -10,10 +10,16 @@ if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     exit 1
 fi
 
-echo "Qt5_DIR set to: ${Qt5_DIR}"
+if [ ${C2_BUILD_WITH_QT6:-OFF} = ON ]; then
+    qtdir=$Qt6_DIR
+else
+    qtdir=$Qt5_DIR
+fi
 
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${Qt5_DIR}/lib"
-export PATH="${Qt5_DIR}/bin:$PATH"
+echo "qtdir set to: ${qtdir}"
+
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${qtdir}/lib"
+export PATH="${qtdir}/bin:$PATH"
 
 script_path=$(readlink -f "$0")
 script_dir=$(dirname "$script_path")
