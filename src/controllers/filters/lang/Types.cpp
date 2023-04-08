@@ -66,6 +66,21 @@ bool TypeClass::operator==(const IllTyped &t) const
     return false;
 }
 
+bool TypeClass::operator!=(Type t) const
+{
+    return !this->operator==(t);
+}
+
+bool TypeClass::operator!=(const TypeClass &t) const
+{
+    return !this->operator==(t);
+}
+
+bool TypeClass::operator!=(const IllTyped &t) const
+{
+    return true;
+}
+
 QString IllTyped::string() const
 {
     return "IllTyped";
