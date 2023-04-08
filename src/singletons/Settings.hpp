@@ -217,7 +217,6 @@ public:
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
     BoolSetting showUnlistedSevenTVEmotes = {
         "/emotes/showUnlistedSevenTVEmotes", false};
-    IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 1};
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
@@ -480,6 +479,7 @@ public:
 
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
+    IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 1};
     QStringSetting cachePath = {"/cache/path", ""};
     BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
     BoolSetting attachExtensionToAnyProcess = {
