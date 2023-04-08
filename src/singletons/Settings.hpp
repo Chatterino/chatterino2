@@ -74,6 +74,14 @@ enum HelixTimegateOverride : int {
     AlwaysUseHelix = 3,
 };
 
+enum ThumbnailPreviewMode : int {
+    DontShow = 0,
+
+    AlwaysShow = 1,
+
+    ShowOnShift = 2,
+};
+
 /// Settings which are availlable for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings : public ABSettings, public ConcurrentSettings
@@ -479,7 +487,10 @@ public:
 
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
-    IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 1};
+    EnumSetting<ThumbnailPreviewMode> emotesTooltipPreview = {
+        "/misc/emotesTooltipPreview",
+        ThumbnailPreviewMode::AlwaysShow,
+    };
     QStringSetting cachePath = {"/cache/path", ""};
     BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
     BoolSetting attachExtensionToAnyProcess = {

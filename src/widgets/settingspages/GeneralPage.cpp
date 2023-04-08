@@ -416,11 +416,25 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                 });
         },
         false);
-    layout.addDropdown<int>(
+    layout.addDropdown<std::underlying_type<ThumbnailPreviewMode>::type>(
         "Show emote & badge thumbnail on hover",
-        {"Don't show", "Always show", "Hold shift"}, s.emotesTooltipPreview,
-        [](int index) {
-            return index;
+        {
+            "Don't show",
+            "Always show",
+            "Hold shift",
+        },
+        s.emotesTooltipPreview,
+        [](auto val) {
+            switch (val)
+            {
+                case ThumbnailPreviewMode::DontShow:
+                    return "Don't show";
+                case ThumbnailPreviewMode::AlwaysShow:
+                    return "Always show";
+                case ThumbnailPreviewMode::ShowOnShift:
+                    return "Hold shift";
+            }
+            return "";
         },
         [](auto args) {
             return args.index;
