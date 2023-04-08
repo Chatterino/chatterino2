@@ -190,7 +190,7 @@ jobs:
           nmake /S /NOLOGO crashpad_handler
           mkdir Chatterino2/crashpad
           cp bin/crashpad/crashpad_handler.exe Chatterino2/crashpad/crashpad_handler.exe
-          7z a bin/chatterino.pdb.7z bin/chatterino.pdb
+          7z a bin/chatterino.pdb-Qt-${{ matrix.qt-version }}.7z bin/chatterino.pdb
 
       - name: Package (windows)
         if: startsWith(matrix.os, 'windows')
