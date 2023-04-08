@@ -27,15 +27,15 @@ PossibleType ValueExpression::synthesizeType(const TypingContext &context) const
             auto it = context.find(this->value_.toString());
             if (it != context.end())
             {
-                return it.value();
+                return TypeClass{it.value()};
             }
 
             return IllTyped{this, "Unbound identifier"};
         }
         case TokenType::INT:
-            return Type::Int;
+            return TypeClass{Type::Int};
         case TokenType::STRING:
-            return Type::String;
+            return TypeClass{Type::String};
         default:
             return IllTyped{this, "Invalid value type"};
     }

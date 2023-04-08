@@ -17,7 +17,7 @@ QVariant RegexExpression::execute(const ContextMap & /*context*/) const
 PossibleType RegexExpression::synthesizeType(
     const TypingContext & /*context*/) const
 {
-    return Type::RegularExpression;
+    return TypeClass{Type::RegularExpression};
 }
 
 QString RegexExpression::debug(const TypingContext & /*context*/) const

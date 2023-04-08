@@ -32,13 +32,13 @@ FilterParser::FilterParser(const QString &text)
     // comment on IllTyped::expr.
     auto returnType =
         this->builtExpression_->synthesizeType(MESSAGE_TYPING_CONTEXT);
-    if (!returnType.well())
+    if (isIllTyped(returnType))
     {
-        this->errorLog(explainIllType(returnType.illTypedDescription()));
+        this->errorLog(explainIllType(std::get<IllTyped>(returnType)));
         return;
     }
 
-    this->returnType_ = returnType.unwrap();
+    this->returnType_ = std::get<TypeClass>(returnType).type;
 }
 
 bool FilterParser::valid() const

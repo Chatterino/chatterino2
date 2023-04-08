@@ -8,12 +8,12 @@ namespace chatterino::filters {
 bool isList(const PossibleType &possibleType)
 {
     using T = Type;
-    if (!possibleType.well())
+    if (isIllTyped(possibleType))
     {
         return false;
     }
 
-    T typ = possibleType.unwrap();
+    auto typ = std::get<TypeClass>(possibleType);
     return typ == T::List || typ == T::StringList ||
            typ == T::MatchingSpecifier;
 }
@@ -46,71 +46,41 @@ QString typeToString(Type type)
     }
 }
 
-PossibleType::PossibleType(Type t)
-    : value_(t)
+QString TypeClass::string() const
 {
+    return typeToString(this->type);
 }
 
-PossibleType::PossibleType(IllTyped illTyped)
-    : value_(std::move(illTyped))
+bool TypeClass::operator==(Type t) const
 {
+    return this->type == t;
 }
 
-QString PossibleType::string() const
+bool TypeClass::operator==(const TypeClass &t) const
 {
-    if (this->well())
-    {
-        return typeToString(this->unwrap());
-    }
+    return this->type == t.type;
+}
 
+bool TypeClass::operator==(const IllTyped &t) const
+{
+    return false;
+}
+
+QString IllTyped::string() const
+{
     return "IllTyped";
 }
 
-Type PossibleType::unwrap() const
+QString possibleTypeToString(const PossibleType &possible)
 {
-    assert(this->well());
-    return std::get<Type>(this->value_);
-}
-
-bool PossibleType::operator==(Type t) const
-{
-    return this->unwrap() == t;
-}
-
-bool PossibleType::operator==(const PossibleType &p) const
-{
-    if (!this->well() || !p.well())
+    if (isWellTyped(possible))
     {
-        return false;  // Ill-type never equal
+        return std::get<TypeClass>(possible).string();
     }
-
-    return this->unwrap() == p.unwrap();
-}
-
-bool PossibleType::operator!=(Type t) const
-{
-    return !this->operator==(t);
-}
-
-bool PossibleType::operator!=(const PossibleType &p) const
-{
-    return !this->operator==(p);
-}
-
-bool PossibleType::well() const
-{
-    return std::holds_alternative<Type>(this->value_);
-}
-
-PossibleType::operator bool() const
-{
-    return this->well();
-}
-
-const IllTyped &PossibleType::illTypedDescription() const
-{
-    assert(!this->well());
-    return std::get<IllTyped>(this->value_);
+    else
+    {
+        return std::get<IllTyped>(possible).string();
+    }
 }
 
 }  // namespace chatterino::filters

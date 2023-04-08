@@ -22,18 +22,20 @@ QVariant UnaryOperation::execute(const ContextMap &context) const
 
 PossibleType UnaryOperation::synthesizeType(const TypingContext &context) const
 {
-    auto right = this->right_->synthesizeType(context);
-    if (!right)
+    auto rightSyn = this->right_->synthesizeType(context);
+    if (isIllTyped(rightSyn))
     {
-        return right;
+        return rightSyn;
     }
+
+    auto right = std::get<TypeClass>(rightSyn);
 
     switch (this->op_)
     {
         case NOT:
             if (right == Type::Bool)
             {
-                return Type::Bool;
+                return TypeClass{Type::Bool};
             }
             return IllTyped{this, "Can only negate boolean values"};
         default:
@@ -46,7 +48,7 @@ QString UnaryOperation::debug(const TypingContext &context) const
     return QString("UnaryOp[%1](%2 : %3)")
         .arg(tokenTypeToInfoString(this->op_))
         .arg(this->right_->debug(context))
-        .arg(this->right_->synthesizeType(context).string());
+        .arg(possibleTypeToString(this->right_->synthesizeType(context)));
 }
 
 QString UnaryOperation::filterString() const

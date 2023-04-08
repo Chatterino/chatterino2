@@ -36,16 +36,18 @@ QVariant ListExpression::execute(const ContextMap &context) const
 
 PossibleType ListExpression::synthesizeType(const TypingContext &context) const
 {
-    std::vector<PossibleType> types;
+    std::vector<TypeClass> types;
     types.reserve(this->list_.size());
     bool allStrings = true;
     for (const auto &exp : this->list_)
     {
-        auto typ = exp->synthesizeType(context);
-        if (!typ)
+        auto typSyn = exp->synthesizeType(context);
+        if (isIllTyped(typSyn))
         {
-            return typ;  // Ill-typed
+            return typSyn;  // Ill-typed
         }
+
+        auto typ = std::get<TypeClass>(typSyn);
 
         if (typ != Type::String)
         {
@@ -59,10 +61,10 @@ PossibleType ListExpression::synthesizeType(const TypingContext &context) const
         types[1] == Type::Int)
     {
         // Specific {RegularExpression, Int} form
-        return Type::MatchingSpecifier;
+        return TypeClass{Type::MatchingSpecifier};
     }
 
-    return allStrings ? Type::StringList : Type::List;
+    return allStrings ? TypeClass{Type::StringList} : TypeClass{Type::List};
 }
 
 QString ListExpression::debug(const TypingContext &context) const
@@ -70,9 +72,10 @@ QString ListExpression::debug(const TypingContext &context) const
     QStringList debugs;
     for (const auto &exp : this->list_)
     {
-        debugs.append(QString("%1 : %2")
-                          .arg(exp->debug(context))
-                          .arg(exp->synthesizeType(context).string()));
+        debugs.append(
+            QString("%1 : %2")
+                .arg(exp->debug(context))
+                .arg(possibleTypeToString(exp->synthesizeType(context))));
     }
 
     return QString("List(%1)").arg(debugs.join(", "));

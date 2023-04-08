@@ -29,6 +29,18 @@ using TypingContext = QMap<QString, Type>;
 
 QString typeToString(Type type);
 
+struct IllTyped;
+
+struct TypeClass {
+    Type type;
+
+    QString string() const;
+
+    bool operator==(Type t) const;
+    bool operator==(const TypeClass &t) const;
+    bool operator==(const IllTyped &t) const;
+};
+
 struct IllTyped {
     // Important nuance to expr:
     // During type synthesis, should an error occur and an IllTyped PossibleType be
@@ -37,40 +49,23 @@ struct IllTyped {
     // than the Expression tree exists. Be careful!
     const Expression *expr;
     QString message;
-};
 
-class PossibleType
-{
-public:
-    // Synthesized type
-    PossibleType(Type t);
-    // Ill-typed
-    PossibleType(IllTyped illTyped);
-
-    // Gets a string representation of the contained type.
     QString string() const;
-    // Unwraps the underlying type. Must be well-typed.
-    Type unwrap() const;
-
-    // Requires that this is well-typed.
-    bool operator==(Type t) const;
-    // Requires that this and p are well-typed.
-    bool operator==(const PossibleType &p) const;
-    // Requires that this is well-typed.
-    bool operator!=(Type t) const;
-    // Requires that this and p are well-typed.
-    bool operator!=(const PossibleType &p) const;
-
-    // Whether this PossibleType is well-typed.
-    bool well() const;
-    operator bool() const;
-
-    // Gets the IllTyped instance described by this PossibleType. Must be ill-typed.
-    const IllTyped &illTypedDescription() const;
-
-private:
-    std::variant<Type, IllTyped> value_;
 };
+
+using PossibleType = std::variant<TypeClass, IllTyped>;
+
+inline bool isWellTyped(const PossibleType &possible)
+{
+    return std::holds_alternative<TypeClass>(possible);
+}
+
+inline bool isIllTyped(const PossibleType &possible)
+{
+    return std::holds_alternative<IllTyped>(possible);
+}
+
+QString possibleTypeToString(const PossibleType &possible);
 
 bool isList(const PossibleType &typ);
 
