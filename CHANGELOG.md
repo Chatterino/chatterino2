@@ -18,6 +18,7 @@
 - Bugfix: Fixed search popup ignoring setting for message scrollback limit. (#4496)
 - Bugfix: Fixed a memory leak that occurred when loading message history. This was mostly noticeable with unstable internet connections where reconnections were frequent or long-running instances of Chatterino. (#4499)
 - Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
+- Dev: Themes are now stored as JSON files in `resources/themes`. (#4471)
 - Dev: Ignore unhandled BTTV user-events. (#4438)
 - Dev: Only log debug messages when NDEBUG is not defined. (#4442)
 - Dev: Cleaned up theme related code. (#4450)
