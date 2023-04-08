@@ -189,11 +189,11 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                     auto match =
                         list.at(0).toRegularExpression().match(matching);
 
-                    // if matched, return nth capture group. Otherwise, return false
+                    // if matched, return nth capture group. Otherwise, return ""
                     if (match.hasMatch())
                         return match.captured(list.at(1).toInt());
                     else
-                        return false;
+                        return "";
                 }
                 default:
                     return false;
