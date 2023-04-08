@@ -1674,16 +1674,20 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
         if (badgeElement || emoteElement || layeredEmoteElement)
         {
-            bool isTextOnly =
-                (event->modifiers() != Qt::ShiftModifier &&
-                 getSettings()->emotesTooltipPreview.getValue() == 2) ||
-                getSettings()->emotesTooltipPreview.getValue() == 0;
+            auto showThumbnailSetting =
+                getSettings()->emotesTooltipPreview.getValue();
+
+            bool showThumbnail =
+                showThumbnailSetting == ThumbnailPreviewMode::AlwaysShow ||
+                (showThumbnailSetting == ThumbnailPreviewMode::ShowOnShift &&
+                 event->modifiers() == Qt::ShiftModifier);
 
             if (emoteElement)
             {
                 tooltipWidget->setOne({
-                    isTextOnly ? nullptr
-                               : emoteElement->getEmote()->images.getImage(3.0),
+                    showThumbnail
+                        ? emoteElement->getEmote()->images.getImage(3.0)
+                        : nullptr,
                     element->getTooltip(),
                 });
             }
@@ -1716,18 +1720,18 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                         if (i == 0)
                         {
                             // First entry gets a large image and full description
-                            entries.push_back(
-                                {isTextOnly ? nullptr
-                                            : emote->images.getImage(3.0),
-                                 emoteTooltips[i]});
+                            entries.push_back({showThumbnail
+                                                   ? emote->images.getImage(3.0)
+                                                   : nullptr,
+                                               emoteTooltips[i]});
                         }
                         else
                         {
                             // Every other entry gets a small image and just the emote name
-                            entries.push_back(
-                                {isTextOnly ? nullptr
-                                            : emote->images.getImage(1.0),
-                                 emote->name.string});
+                            entries.push_back({showThumbnail
+                                                   ? emote->images.getImage(1.0)
+                                                   : nullptr,
+                                               emote->name.string});
                         }
                     }
 
@@ -1745,8 +1749,9 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             else if (badgeElement)
             {
                 tooltipWidget->setOne({
-                    isTextOnly ? nullptr
-                               : badgeElement->getEmote()->images.getImage(3.0),
+                    showThumbnail
+                        ? badgeElement->getEmote()->images.getImage(3.0)
+                        : nullptr,
                     element->getTooltip(),
                 });
             }
