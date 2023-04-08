@@ -31,4 +31,5 @@ INCLUDEPATH += /usr/local/opt/openssl/include
 LIBS += -L/usr/local/opt/openssl/lib
 ```
 if you get a codesigning error ```Exception Type:        EXC_BAD_ACCESS (SIGKILL (Code Signature Invalid))```
+
 you need to run this `codesign --force --deep -s - chatterino.app`
