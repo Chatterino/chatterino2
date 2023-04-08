@@ -66,7 +66,7 @@ const MessagePtr &MessageLayout::getMessagePtr() const
 // Height
 int MessageLayout::getHeight() const
 {
-    return container_.getHeight();
+    return this->container_.getHeight();
 }
 
 int MessageLayout::getWidth() const
@@ -292,7 +292,8 @@ QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width)
 #if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
     this->buffer_ = std::make_unique<QPixmap>(
         int(width * painter.device()->devicePixelRatioF()),
-        int(container_.getHeight() * painter.device()->devicePixelRatioF()));
+        int(this->container_.getHeight() *
+            painter.device()->devicePixelRatioF()));
     this->buffer_->setDevicePixelRatio(painter.device()->devicePixelRatioF());
 #else
     this->buffer_ = std::make_unique<QPixmap>(
