@@ -25,10 +25,13 @@ namespace chatterino {
 namespace {
     int getBoldness()
     {
-#ifdef CHATTERINO
-        return getSettings()->boldScale.getValue();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        // This setting uses the Qt 5 range of the font-weight (0..99).
+        // The range in Qt 6 is 1..1000.
+        return (int)(1.0 +
+                     (111.0 * getSettings()->boldScale.getValue()) / 11.0);
 #else
-        return QFont::Bold;
+        return getSettings()->boldScale.getValue();
 #endif
     }
 }  // namespace

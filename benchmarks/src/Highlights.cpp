@@ -1,5 +1,5 @@
 #include "Application.hpp"
-#include "BaseSettings.hpp"
+#include "singletons/Settings.hpp"
 #include "common/Channel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
@@ -56,7 +56,7 @@ public:
     {
         return nullptr;
     }
-    Emotes *getEmotes() override
+    IEmotes *getEmotes() override
     {
         return nullptr;
     }
@@ -97,6 +97,10 @@ public:
         return nullptr;
     }
     FfzBadges *getFfzBadges() override
+    {
+        return nullptr;
+    }
+    IUserDataController *getUserData() override
     {
         return nullptr;
     }

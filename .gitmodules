@@ -35,6 +35,9 @@
 [submodule "lib/miniaudio"]
 	path = lib/miniaudio
 	url = https://github.com/mackron/miniaudio.git
+[submodule "lib/lua/src"]
+	path = lib/lua/src
+	url = https://github.com/lua/lua
 [submodule "lib/crashpad"]
 	path = lib/crashpad
 	url = https://github.com/getsentry/crashpad

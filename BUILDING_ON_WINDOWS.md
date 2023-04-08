@@ -79,16 +79,14 @@ Note: This installation will take about 200 MB of disk space.
 
 ### Using CMake
 
-#### Install conan
+#### Install conan 2
 
-Install [conan](https://conan.io/downloads.html) and make sure it's in your `PATH` (default setting).
+Install [conan 2](https://conan.io/downloads.html) and make sure it's in your `PATH` (default setting).
 
 Then in a terminal, configure conan to use `NMake Makefiles` as its generator:
 
 1. Generate a new profile  
-   `conan profile new --detect --force default`
-1. Configure the profile to use `NMake Makefiles` as its generator  
-   `conan profile update conf.tools.cmake.cmaketoolchain:generator="NMake Makefiles" default`
+   `conan profile detect`
 
 #### Build
 
@@ -96,9 +94,11 @@ Open up your terminal with the Visual Studio environment variables (e.g. `x64 Na
 
 1. `mkdir build`
 1. `cd build`
-1. `conan install .. -s build_type=Release --build=missing`
+1. `conan install .. -s build_type=Release -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" --build=missing --output-folder=.`
 1. `cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_PREFIX_PATH="C:\Qt\5.15.2\msvc2019_64" ..`
 1. `nmake`
+
+To build a debug build, you'll also need to add the `-s compiler.runtime_type=Debug` flag to the `conan install` invocation. See [this StackOverflow post](https://stackoverflow.com/questions/59828611/windeployqt-doesnt-deploy-qwindowsd-dll-for-a-debug-application/75607313#75607313)
 
 #### Ensure DLLs are available
 
@@ -227,9 +227,9 @@ https://github.com/qt-labs/vstools/blob/0769d945f8d0040917d654d9731e6b65951e102c
 -->
 
 ```powershell
-(iwr "https://github.com/qt-labs/vstools/raw/dev/QtVsTools.Package/qt5.natvis.xml").Content -replace '##NAMESPACE##::', '' | Out-File qt5.natvis
+(irm "https://github.com/qt-labs/vstools/raw/dev/QtVsTools.Package/qt5.natvis.xml").Replace('##NAMESPACE##::', '') | Out-File qt5.natvis
 # [OR] using the permalink
-(iwr "https://github.com/qt-labs/vstools/raw/0769d945f8d0040917d654d9731e6b65951e102c/QtVsTools.Package/qt5.natvis.xml").Content -replace '##NAMESPACE##::', '' | Out-File qt5.natvis
+(irm "https://github.com/qt-labs/vstools/raw/0769d945f8d0040917d654d9731e6b65951e102c/QtVsTools.Package/qt5.natvis.xml").Replace('##NAMESPACE##::', '') | Out-File qt5.natvis
 ```
 
 Now you can debug the application and see QT types rendered correctly.
