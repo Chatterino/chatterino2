@@ -1,4 +1,4 @@
-#include "RegexExpression.hpp"
+#include "controllers/filters/lang/expressions/RegexExpression.hpp"
 
 namespace chatterino::filters {
 
