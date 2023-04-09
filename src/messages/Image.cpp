@@ -228,9 +228,8 @@ namespace detail {
             }
         }
 
-#ifndef CHATTERINO_TEST
         getApp()->windows->forceLayoutChannelViews();
-#endif
+
         loadedEventQueued = false;
     }
 
