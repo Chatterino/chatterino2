@@ -1,4 +1,4 @@
-#include "UnaryOperation.hpp"
+#include "controllers/filters/lang/expressions/UnaryOperation.hpp"
 
 namespace chatterino::filters {
 
