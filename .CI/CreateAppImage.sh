@@ -10,16 +10,20 @@ if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     exit 1
 fi
 
-if [ ${C2_BUILD_WITH_QT6:-OFF} = ON ]; then
-    qtdir=$Qt6_DIR
-else
-    qtdir=$Qt5_DIR
+if [ -n "$Qt5_DIR" ]; then
+    echo "Using Qt DIR from Qt5_DIR: $Qt5_DIR"
+    _QT_DIR="$Qt5_DIR"
+elif [ -n "$Qt6_DIR" ]; then
+    echo "Using Qt DIR from Qt6_DIR: $Qt6_DIR"
+    _QT_DIR="$Qt6_DIR"
 fi
 
-echo "qtdir set to: ${qtdir}"
-
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${qtdir}/lib"
-export PATH="${qtdir}/bin:$PATH"
+if [ -n "$_QT_DIR" ]; then
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${_QT_DIR}/lib"
+    export PATH="${_QT_DIR}/bin:$PATH"
+else
+    echo "No Qt environment variable set, assuming system-installed Qt"
+fi
 
 script_path=$(readlink -f "$0")
 script_dir=$(dirname "$script_path")

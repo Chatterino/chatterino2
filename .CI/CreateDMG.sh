@@ -5,14 +5,22 @@ if [ -d bin/chatterino.app ] && [ ! -d chatterino.app ]; then
     mv bin/chatterino.app chatterino.app
 fi
 
-if [ ${C2_BUILD_WITH_QT6:-OFF} = ON ]; then
-    qtdir=$Qt6_DIR
+if [ -n "$Qt5_DIR" ]; then
+    echo "Using Qt DIR from Qt5_DIR: $Qt5_DIR"
+    _QT_DIR="$Qt5_DIR"
+elif [ -n "$Qt6_DIR" ]; then
+    echo "Using Qt DIR from Qt6_DIR: $Qt6_DIR"
+    _QT_DIR="$Qt6_DIR"
+fi
+
+if [ -n "$_QT_DIR" ]; then
+    export PATH="${_QT_DIR}/bin:$PATH"
 else
-    qtdir=$Qt5_DIR
+    echo "No Qt environment variable set, assuming system-installed Qt"
 fi
 
 echo "Running MACDEPLOYQT"
-$qtdir/bin/macdeployqt chatterino.app
+macdeployqt chatterino.app
 echo "Creating python3 virtual environment"
 python3 -m venv venv
 echo "Entering python3 virtual environment"
