@@ -19,14 +19,6 @@
 #include <memory>
 #include <mutex>
 
-#ifdef CHATTERINO_TEST
-// When running tests, the ImageExpirationPool destructor can be called before
-// all images are deleted, leading to a use-after-free of its mutex. This
-// happens despite the lifetime of the ImageExpirationPool being (apparently)
-// static. Therefore, just disable it during testing.
-#    define DISABLE_IMAGE_EXPIRATION_POOL
-#endif
-
 namespace chatterino {
 namespace detail {
     template <typename Image>
