@@ -24,6 +24,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/SeventvEventAPI.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/BttvLiveUpdates.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Updates.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Filters.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/LinkParser.cpp
     # Add your new file above this line!
     )

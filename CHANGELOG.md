@@ -7,6 +7,7 @@
 - Minor: Added support for FrankerFaceZ animated emotes. (#4434)
 - Minor: Added a local backup of the Twitch Badges API in case the request fails. (#4463)
 - Minor: Added the ability to reply to a message by `Shift + Right Click`ing the username. (#4424)
+- Minor: Added better filter validation and error messages. (#4364)
 - Minor: Updated the look of the Black Theme to be more in line with the other themes. (#4523)
 - Bugfix: Fixed an issue where animated emotes would render on top of zero-width emotes. (#4314)
 - Bugfix: Fixed an issue where it was difficult to hover a zero-width emote. (#4314)
