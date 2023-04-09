@@ -8,6 +8,7 @@
 - Minor: Added a local backup of the Twitch Badges API in case the request fails. (#4463)
 - Minor: Added the ability to reply to a message by `Shift + Right Click`ing the username. (#4424)
 - Minor: Added better filter validation and error messages. (#4364)
+- Minor: Updated the look of the Black Theme to be more in line with the other themes. (#4523)
 - Bugfix: Fixed an issue where animated emotes would render on top of zero-width emotes. (#4314)
 - Bugfix: Fixed an issue where it was difficult to hover a zero-width emote. (#4314)
 - Bugfix: Fixed an issue where context-menu items for zero-width emotes displayed the wrong provider. (#4460)
@@ -28,6 +29,7 @@
 - Dev: Add scripting capabilities with Lua (#4341, #4504)
 - Dev: Conan 2.0 is now used instead of Conan 1.0. (#4417)
 - Dev: Added tests and benchmarks for `LinkParser`. (#4436)
+- Dev: Removed `CHATTERINO_TEST` definitions. (#4526)
 
 ## 2.4.2
 
