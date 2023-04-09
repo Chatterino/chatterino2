@@ -136,7 +136,7 @@ private:
 
 private:
     // Timer to periodically run freeOld()
-    QTimer freeTimer_;
+    QTimer *freeTimer_;
     std::map<Image *, std::weak_ptr<Image>> allImages_;
     std::mutex mutex_;
 };

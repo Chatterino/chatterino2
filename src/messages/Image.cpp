@@ -551,8 +551,9 @@ void Image::expireFrames()
 #ifndef DISABLE_IMAGE_EXPIRATION_POOL
 
 ImageExpirationPool::ImageExpirationPool()
+    : freeTimer_(new QTimer)
 {
-    QObject::connect(&this->freeTimer_, &QTimer::timeout, [this] {
+    QObject::connect(this->freeTimer_, &QTimer::timeout, [this] {
         if (isGuiThread())
         {
             this->freeOld();
@@ -565,7 +566,7 @@ ImageExpirationPool::ImageExpirationPool()
         }
     });
 
-    this->freeTimer_.start(
+    this->freeTimer_->start(
         std::chrono::duration_cast<std::chrono::milliseconds>(
             IMAGE_POOL_CLEANUP_INTERVAL));
 }
