@@ -16,9 +16,9 @@ namespace chatterino {
 class FilterRecord
 {
 public:
-    FilterRecord(const QString &name, const QString &filter);
+    FilterRecord(QString name, QString filter);
 
-    FilterRecord(const QString &name, const QString &filter, const QUuid &id);
+    FilterRecord(QString name, QString filter, const QUuid &id);
 
     const QString &getName() const;
 
@@ -33,11 +33,11 @@ public:
     bool operator==(const FilterRecord &other) const;
 
 private:
-    QString name_;
-    QString filterText_;
-    QUuid id_;
+    const QString name_;
+    const QString filterText_;
+    const QUuid id_;
 
-    std::unique_ptr<filters::Filter> filter_;
+    const std::unique_ptr<filters::Filter> filter_;
 };
 
 using FilterRecordPtr = std::shared_ptr<FilterRecord>;

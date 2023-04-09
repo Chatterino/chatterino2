@@ -4,34 +4,38 @@
 
 namespace chatterino {
 
-FilterRecord::FilterRecord(const QString &name, const QString &filter)
-    : FilterRecord(name, filter, QUuid::createUuid())
+static std::unique_ptr<filters::Filter> buildFilter(const QString &filterText)
+{
+    using namespace filters;
+    auto result = Filter::fromString(filterText);
+    if (std::holds_alternative<Filter>(result))
+    {
+        auto filter =
+            std::make_unique<Filter>(std::move(std::get<Filter>(result)));
+
+        if (filter->returnType() != Type::Bool)
+        {
+            // Only accept Bool results
+            return nullptr;
+        }
+
+        return filter;
+    }
+
+    return nullptr;
+}
+
+FilterRecord::FilterRecord(QString name, QString filter)
+    : FilterRecord(std::move(name), std::move(filter), QUuid::createUuid())
 {
 }
 
-FilterRecord::FilterRecord(const QString &name, const QString &filter,
-                           const QUuid &id)
-    : name_(name)
-    , filterText_(filter)
+FilterRecord::FilterRecord(QString name, QString filter, const QUuid &id)
+    : name_(std::move(name))
+    , filterText_(std::move(filter))
     , id_(id)
+    , filter_(buildFilter(this->filterText_))
 {
-    using namespace filters;
-    auto result = Filter::fromString(filter);
-    if (std::holds_alternative<Filter>(result))
-    {
-        this->filter_ =
-            std::make_unique<Filter>(std::move(std::get<Filter>(result)));
-
-        if (this->filter_->returnType() != Type::Bool)
-        {
-            // Only accept Bool results
-            this->filter_ = nullptr;
-        }
-    }
-    else
-    {
-        this->filter_ = nullptr;
-    }
 }
 
 const QString &FilterRecord::getName() const
