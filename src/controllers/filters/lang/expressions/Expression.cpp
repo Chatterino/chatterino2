@@ -1,4 +1,4 @@
-#include "Expression.hpp"
+#include "controllers/filters/lang/expressions/Expression.hpp"
 
 namespace chatterino::filters {
 
