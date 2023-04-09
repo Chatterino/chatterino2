@@ -1,4 +1,4 @@
-#include "ChannelFilterEditorDialog.hpp"
+#include "widgets/dialogs/ChannelFilterEditorDialog.hpp"
 
 #include "controllers/filters/lang/Tokenizer.hpp"
 
