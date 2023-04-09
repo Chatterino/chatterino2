@@ -27,6 +27,7 @@
 - Dev: Add scripting capabilities with Lua (#4341, #4504)
 - Dev: Conan 2.0 is now used instead of Conan 1.0. (#4417)
 - Dev: Added tests and benchmarks for `LinkParser`. (#4436)
+- Dev: Removed `CHATTERINO_TEST` definitions. (#4526)
 
 ## 2.4.2
 
