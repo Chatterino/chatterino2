@@ -74,12 +74,26 @@ set(SOURCE_FILES
         controllers/filters/FilterRecord.hpp
         controllers/filters/FilterSet.cpp
         controllers/filters/FilterSet.hpp
-        controllers/filters/parser/FilterParser.cpp
-        controllers/filters/parser/FilterParser.hpp
-        controllers/filters/parser/Tokenizer.cpp
-        controllers/filters/parser/Tokenizer.hpp
-        controllers/filters/parser/Types.cpp
-        controllers/filters/parser/Types.hpp
+        controllers/filters/lang/expressions/Expression.cpp
+        controllers/filters/lang/expressions/Expression.hpp
+        controllers/filters/lang/expressions/BinaryOperation.cpp
+        controllers/filters/lang/expressions/BinaryOperation.hpp
+        controllers/filters/lang/expressions/ListExpression.cpp
+        controllers/filters/lang/expressions/ListExpression.hpp
+        controllers/filters/lang/expressions/RegexExpression.cpp
+        controllers/filters/lang/expressions/RegexExpression.hpp
+        controllers/filters/lang/expressions/UnaryOperation.hpp
+        controllers/filters/lang/expressions/UnaryOperation.cpp
+        controllers/filters/lang/expressions/ValueExpression.cpp
+        controllers/filters/lang/expressions/ValueExpression.hpp
+        controllers/filters/lang/Filter.cpp
+        controllers/filters/lang/Filter.hpp
+        controllers/filters/lang/FilterParser.cpp
+        controllers/filters/lang/FilterParser.hpp
+        controllers/filters/lang/Tokenizer.cpp
+        controllers/filters/lang/Tokenizer.hpp
+        controllers/filters/lang/Types.cpp
+        controllers/filters/lang/Types.hpp
 
         controllers/highlights/BadgeHighlightModel.cpp
         controllers/highlights/BadgeHighlightModel.hpp
