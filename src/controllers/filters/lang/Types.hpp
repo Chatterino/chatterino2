@@ -70,7 +70,7 @@ inline bool isIllTyped(const PossibleType &possible)
 
 QString possibleTypeToString(const PossibleType &possible);
 
-bool isList(const PossibleType &typ);
+bool isList(const PossibleType &possibleType);
 
 inline bool variantIs(const QVariant &a, QMetaType::Type type)
 {
