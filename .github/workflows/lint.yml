@@ -1,0 +1,32 @@
+---
+name: Lint
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check formatting with Prettier
+        uses: actionsx/prettier@e90ec5455552f0f640781bdd5f5d2415acb52f1a
+        with:
+          # prettier CLI arguments.
+          args: --write .
+      - name: Show diff
+        run: git --no-pager diff --exit-code --color=never
+        shell: bash
+      - name: Check Theme files
+        run: |
+          npm i ajv-cli
+          npx -- ajv validate -s docs/ChatterinoTheme.schema.json -d "resources/themes/*.json"

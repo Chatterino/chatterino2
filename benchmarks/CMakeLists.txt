@@ -18,10 +18,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-lib)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE benchmark::benchmark)
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-    CHATTERINO_TEST
-    )
-
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"

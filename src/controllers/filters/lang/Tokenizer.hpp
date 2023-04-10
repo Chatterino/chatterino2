@@ -1,12 +1,12 @@
 #pragma once
 
-#include "controllers/filters/parser/Types.hpp"
+#include "controllers/filters/lang/Types.hpp"
 
 #include <QMap>
 #include <QRegularExpression>
 #include <QString>
 
-namespace filterparser {
+namespace chatterino::filters {
 
 static const QMap<QString, QString> validIdentifiersMap = {
     {"author.badges", "author badges"},
@@ -17,7 +17,7 @@ static const QMap<QString, QString> validIdentifiersMap = {
     {"author.sub_length", "author sub length"},
     {"channel.name", "channel name"},
     {"channel.watching", "/watching channel?"},
-    {"channel.live", "Channel live?"},
+    {"channel.live", "channel live?"},
     {"flags.highlighted", "highlighted?"},
     {"flags.points_redeemed", "redeemed points?"},
     {"flags.sub_message", "sub/resub message?"},
@@ -42,6 +42,58 @@ static const QRegularExpression tokenRegex(
     QString("[{},]")                                          // List
 );
 // clang-format on
+
+enum TokenType {
+    // control
+    CONTROL_START = 0,
+    AND = 1,
+    OR = 2,
+    LP = 3,
+    RP = 4,
+    LIST_START = 5,
+    LIST_END = 6,
+    COMMA = 7,
+    CONTROL_END = 19,
+
+    // binary operator
+    BINARY_START = 20,
+    EQ = 21,
+    NEQ = 22,
+    LT = 23,
+    GT = 24,
+    LTE = 25,
+    GTE = 26,
+    CONTAINS = 27,
+    STARTS_WITH = 28,
+    ENDS_WITH = 29,
+    MATCH = 30,
+    BINARY_END = 49,
+
+    // unary operator
+    UNARY_START = 50,
+    NOT = 51,
+    UNARY_END = 99,
+
+    // math operators
+    MATH_START = 100,
+    PLUS = 101,
+    MINUS = 102,
+    MULTIPLY = 103,
+    DIVIDE = 104,
+    MOD = 105,
+    MATH_END = 149,
+
+    // other types
+    OTHER_START = 150,
+    STRING = 151,
+    INT = 152,
+    IDENTIFIER = 153,
+    REGULAR_EXPRESSION = 154,
+
+    NONE = 200
+};
+
+QString tokenTypeToInfoString(TokenType type);
 
 class Tokenizer
 {
@@ -75,4 +127,4 @@ private:
 
     TokenType tokenize(const QString &text);
 };
-}  // namespace filterparser
+}  // namespace chatterino::filters

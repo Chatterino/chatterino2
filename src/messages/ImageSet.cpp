@@ -61,9 +61,7 @@ const ImagePtr &ImageSet::getImage3() const
 
 const std::shared_ptr<Image> &getImagePriv(const ImageSet &set, float scale)
 {
-#ifndef CHATTERINO_TEST
     scale *= getSettings()->emoteScale;
-#endif
 
     int quality = 1;
 

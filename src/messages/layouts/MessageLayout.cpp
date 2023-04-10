@@ -44,7 +44,6 @@ namespace {
 
 MessageLayout::MessageLayout(MessagePtr message)
     : message_(std::move(message))
-    , container_(std::make_shared<MessageLayoutContainer>())
 {
     DebugCount::increase("message layout");
 }
@@ -67,12 +66,12 @@ const MessagePtr &MessageLayout::getMessagePtr() const
 // Height
 int MessageLayout::getHeight() const
 {
-    return container_->getHeight();
+    return this->container_.getHeight();
 }
 
 int MessageLayout::getWidth() const
 {
-    return this->container_->getWidth();
+    return this->container_.getWidth();
 }
 
 // Layout
@@ -115,9 +114,9 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
         return false;
     }
 
-    int oldHeight = this->container_->getHeight();
+    int oldHeight = this->container_.getHeight();
     this->actuallyLayout(width, flags);
-    if (widthChanged || this->container_->getHeight() != oldHeight)
+    if (widthChanged || this->container_.getHeight() != oldHeight)
     {
         this->deleteBuffer();
     }
@@ -128,7 +127,10 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 
 void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 {
+#ifdef FOURTF
     this->layoutCount_++;
+#endif
+
     auto messageFlags = this->message_->flags;
 
     if (this->flags.has(MessageLayoutFlag::Expanded) ||
@@ -143,7 +145,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
     bool hideSimilar = getSettings()->hideSimilar;
     bool hideReplies = !flags.has(MessageElementFlag::RepliedMessage);
 
-    this->container_->begin(width, this->scale_, messageFlags);
+    this->container_.begin(width, this->scale_, messageFlags);
 
     for (const auto &element : this->message_->elements)
     {
@@ -176,20 +178,20 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
             continue;
         }
 
-        element->addToContainer(*this->container_, flags);
+        element->addToContainer(this->container_, flags);
     }
 
-    if (this->height_ != this->container_->getHeight())
+    if (this->height_ != this->container_.getHeight())
     {
         this->deleteBuffer();
     }
 
-    this->container_->end();
-    this->height_ = this->container_->getHeight();
+    this->container_.end();
+    this->height_ = this->container_.getHeight();
 
     // collapsed state
     this->flags.unset(MessageLayoutFlag::Collapsed);
-    if (this->container_->isCollapsed())
+    if (this->container_.isCollapsed())
     {
         this->flags.set(MessageLayoutFlag::Collapsed);
     }
@@ -201,25 +203,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                           bool isWindowFocused, bool isMentions)
 {
     auto app = getApp();
-    QPixmap *pixmap = this->buffer_.get();
-
-    // create new buffer if required
-    if (!pixmap)
-    {
-#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
-        pixmap = new QPixmap(int(width * painter.device()->devicePixelRatioF()),
-                             int(container_->getHeight() *
-                                 painter.device()->devicePixelRatioF()));
-        pixmap->setDevicePixelRatio(painter.device()->devicePixelRatioF());
-#else
-        pixmap =
-            new QPixmap(width, std::max(16, this->container_->getHeight()));
-#endif
-
-        this->buffer_ = std::shared_ptr<QPixmap>(pixmap);
-        this->bufferValid_ = false;
-        DebugCount::increase("message drawing buffers");
-    }
+    QPixmap *pixmap = this->ensureBuffer(painter, width);
 
     if (!this->bufferValid_ || !selection.isEmpty())
     {
@@ -232,7 +216,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     //    this->container.getHeight(), *pixmap);
 
     // draw gif emotes
-    this->container_->paintAnimatedElements(painter, y);
+    this->container_.paintAnimatedElements(painter, y);
 
     // draw disabled
     if (this->message_->flags.has(MessageFlag::Disabled))
@@ -263,13 +247,13 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     // draw selection
     if (!selection.isEmpty())
     {
-        this->container_->paintSelection(painter, messageIndex, selection, y);
+        this->container_.paintSelection(painter, messageIndex, selection, y);
     }
 
     // draw message seperation line
     if (getSettings()->separateMessages.getValue())
     {
-        painter.fillRect(0, y, this->container_->getWidth() + 64, 1,
+        painter.fillRect(0, y, this->container_.getWidth() + 64, 1,
                          app->themes->splits.messageSeperator);
     }
 
@@ -291,11 +275,35 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
         QBrush brush(color, static_cast<Qt::BrushStyle>(
                                 getSettings()->lastMessagePattern.getValue()));
 
-        painter.fillRect(0, y + this->container_->getHeight() - 1,
+        painter.fillRect(0, y + this->container_.getHeight() - 1,
                          pixmap->width(), 1, brush);
     }
 
     this->bufferValid_ = true;
+}
+
+QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width)
+{
+    if (this->buffer_ != nullptr)
+    {
+        return this->buffer_.get();
+    }
+
+    // Create new buffer
+#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
+    this->buffer_ = std::make_unique<QPixmap>(
+        int(width * painter.device()->devicePixelRatioF()),
+        int(this->container_.getHeight() *
+            painter.device()->devicePixelRatioF()));
+    this->buffer_->setDevicePixelRatio(painter.device()->devicePixelRatioF());
+#else
+    this->buffer_ = std::make_unique<QPixmap>(
+        width, std::max(16, this->container_.getHeight()));
+#endif
+
+    this->bufferValid_ = false;
+    DebugCount::increase("message drawing buffers");
+    return this->buffer_.get();
 }
 
 void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
@@ -382,7 +390,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     painter.fillRect(buffer->rect(), backgroundColor);
 
     // draw message
-    this->container_->paintElements(painter);
+    this->container_.paintElements(painter);
 
 #ifdef FOURTF
     // debug
@@ -393,7 +401,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     QTextOption option;
     option.setAlignment(Qt::AlignRight | Qt::AlignTop);
 
-    painter.drawText(QRectF(1, 1, this->container_->getWidth() - 3, 1000),
+    painter.drawText(QRectF(1, 1, this->container_.getWidth() - 3, 1000),
                      QString::number(this->layoutCount_) + ", " +
                          QString::number(++this->bufferUpdatedCount_),
                      option);
@@ -420,7 +428,7 @@ void MessageLayout::deleteCache()
     this->deleteBuffer();
 
 #ifdef XD
-    this->container_->clear();
+    this->container_.clear();
 #endif
 }
 
@@ -433,28 +441,28 @@ void MessageLayout::deleteCache()
 const MessageLayoutElement *MessageLayout::getElementAt(QPoint point)
 {
     // go through all words and return the first one that contains the point.
-    return this->container_->getElementAt(point);
+    return this->container_.getElementAt(point);
 }
 
 int MessageLayout::getLastCharacterIndex() const
 {
-    return this->container_->getLastCharacterIndex();
+    return this->container_.getLastCharacterIndex();
 }
 
 int MessageLayout::getFirstMessageCharacterIndex() const
 {
-    return this->container_->getFirstMessageCharacterIndex();
+    return this->container_.getFirstMessageCharacterIndex();
 }
 
 int MessageLayout::getSelectionIndex(QPoint position)
 {
-    return this->container_->getSelectionIndex(position);
+    return this->container_.getSelectionIndex(position);
 }
 
 void MessageLayout::addSelectionText(QString &str, uint32_t from, uint32_t to,
                                      CopyMode copymode)
 {
-    this->container_->addSelectionText(str, from, to, copymode);
+    this->container_.addSelectionText(str, from, to, copymode);
 }
 
 bool MessageLayout::isReplyable() const

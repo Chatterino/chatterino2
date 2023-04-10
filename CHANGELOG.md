@@ -14,6 +14,8 @@
 - Minor: Added support for FrankerFaceZ animated emotes. (#4434)
 - Minor: Added a local backup of the Twitch Badges API in case the request fails. (#4463)
 - Minor: Added the ability to reply to a message by `Shift + Right Click`ing the username. (#4424)
+- Minor: Added better filter validation and error messages. (#4364)
+- Minor: Updated the look of the Black Theme to be more in line with the other themes. (#4523)
 - Bugfix: Fixed an issue where animated emotes would render on top of zero-width emotes. (#4314)
 - Bugfix: Fixed an issue where it was difficult to hover a zero-width emote. (#4314)
 - Bugfix: Fixed an issue where context-menu items for zero-width emotes displayed the wrong provider. (#4460)
@@ -24,7 +26,10 @@
 - Bugfix: Fixed blocked user list sticking around when switching from a logged in user to being logged out. (#4437)
 - Bugfix: Fixed search popup ignoring setting for message scrollback limit. (#4496)
 - Bugfix: Fixed a memory leak that occurred when loading message history. This was mostly noticeable with unstable internet connections where reconnections were frequent or long-running instances of Chatterino. (#4499)
+- Bugfix: Fixed Twitch channel-specific filters not being applied correctly. (#4529)
+- Bugfix: Fixed emote & badge tooltips not showing up when thumbnails were hidden. (#4509)
 - Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
+- Dev: Themes are now stored as JSON files in `resources/themes`. (#4471, #4533)
 - Dev: Ignore unhandled BTTV user-events. (#4438)
 - Dev: Only log debug messages when NDEBUG is not defined. (#4442)
 - Dev: Cleaned up theme related code. (#4450)
@@ -32,6 +37,7 @@
 - Dev: Add scripting capabilities with Lua (#4341, #4504)
 - Dev: Conan 2.0 is now used instead of Conan 1.0. (#4417)
 - Dev: Added tests and benchmarks for `LinkParser`. (#4436)
+- Dev: Removed `CHATTERINO_TEST` definitions. (#4526)
 
 ## 2.4.2
 

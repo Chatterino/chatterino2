@@ -1,121 +1,21 @@
-#include "FilterParser.hpp"
+#include "controllers/filters/lang/FilterParser.hpp"
 
-#include "Application.hpp"
-#include "common/Channel.hpp"
-#include "controllers/filters/parser/Types.hpp"
-#include "messages/Message.hpp"
-#include "providers/twitch/TwitchBadge.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
+#include "controllers/filters/lang/expressions/BinaryOperation.hpp"
+#include "controllers/filters/lang/expressions/Expression.hpp"
+#include "controllers/filters/lang/expressions/ListExpression.hpp"
+#include "controllers/filters/lang/expressions/RegexExpression.hpp"
+#include "controllers/filters/lang/expressions/UnaryOperation.hpp"
+#include "controllers/filters/lang/expressions/ValueExpression.hpp"
+#include "controllers/filters/lang/Filter.hpp"
+#include "controllers/filters/lang/Types.hpp"
 
-namespace filterparser {
+namespace chatterino::filters {
 
-ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
+QString explainIllType(const IllTyped &ill)
 {
-    auto watchingChannel = chatterino::getApp()->twitch->watchingChannel.get();
-
-    /* Known Identifiers
-     *
-     * author.badges
-     * author.color
-     * author.name
-     * author.no_color
-     * author.subbed
-     * author.sub_length
-     *
-     * channel.name
-     * channel.watching
-     *
-     * flags.highlighted
-     * flags.points_redeemed
-     * flags.sub_message
-     * flags.system_message
-     * flags.reward_message
-     * flags.first_message
-     * flags.elevated_message
-     * flags.cheer_message
-     * flags.whisper
-     * flags.reply
-     * flags.automod
-     *
-     * message.content
-     * message.length
-     *
-     */
-
-    /*
-     * Dankerino identifiers:
-     * flags.webchat_detected
-     */
-
-    using MessageFlag = chatterino::MessageFlag;
-
-    QStringList badges;
-    badges.reserve(m->badges.size());
-    for (const auto &e : m->badges)
-    {
-        badges << e.key_;
-    }
-
-    bool watching = !watchingChannel->getName().isEmpty() &&
-                    watchingChannel->getName().compare(
-                        m->channelName, Qt::CaseInsensitive) == 0;
-
-    bool subscribed = false;
-    int subLength = 0;
-    for (const auto &subBadge : {"subscriber", "founder"})
-    {
-        if (!badges.contains(subBadge))
-        {
-            continue;
-        }
-        subscribed = true;
-        if (m->badgeInfos.find(subBadge) != m->badgeInfos.end())
-        {
-            subLength = m->badgeInfos.at(subBadge).toInt();
-        }
-    }
-    ContextMap vars = {
-        {"author.badges", std::move(badges)},
-        {"author.color", m->usernameColor},
-        {"author.name", m->displayName},
-        {"author.no_color", !m->usernameColor.isValid()},
-        {"author.subbed", subscribed},
-        {"author.sub_length", subLength},
-
-        {"channel.name", m->channelName},
-        {"channel.watching", watching},
-
-        {"flags.highlighted", m->flags.has(MessageFlag::Highlighted)},
-        {"flags.points_redeemed", m->flags.has(MessageFlag::RedeemedHighlight)},
-        {"flags.sub_message", m->flags.has(MessageFlag::Subscription)},
-        {"flags.system_message", m->flags.has(MessageFlag::System)},
-        {"flags.webchat_detected", m->flags.has(MessageFlag::WebchatDetected)},
-        {"flags.reward_message",
-         m->flags.has(MessageFlag::RedeemedChannelPointReward)},
-        {"flags.first_message", m->flags.has(MessageFlag::FirstMessage)},
-        {"flags.elevated_message", m->flags.has(MessageFlag::ElevatedMessage)},
-        {"flags.cheer_message", m->flags.has(MessageFlag::CheerMessage)},
-        {"flags.whisper", m->flags.has(MessageFlag::Whisper)},
-        {"flags.reply", m->flags.has(MessageFlag::ReplyMessage)},
-        {"flags.automod", m->flags.has(MessageFlag::AutoMod)},
-
-        {"message.content", m->messageText},
-        {"message.length", m->messageText.length()},
-    };
-    {
-        using namespace chatterino;
-        auto *tc = dynamic_cast<TwitchChannel *>(channel);
-        if (channel && !channel->isEmpty() && tc)
-        {
-            vars["channel.live"] = tc->isLive();
-        }
-        else
-        {
-            vars["channel.live"] = false;
-        }
-    }
-    return vars;
+    return QString("%1\n\nProblem occurred here:\n%2")
+        .arg(ill.message)
+        .arg(ill.expr->filterString());
 }
 
 FilterParser::FilterParser(const QString &text)
@@ -123,16 +23,39 @@ FilterParser::FilterParser(const QString &text)
     , tokenizer_(Tokenizer(text))
     , builtExpression_(this->parseExpression(true))
 {
-}
+    if (!this->valid_)
+    {
+        return;
+    }
 
-bool FilterParser::execute(const ContextMap &context) const
-{
-    return this->builtExpression_->execute(context).toBool();
+    // safety: returnType must not live longer than the parsed expression. See
+    // comment on IllTyped::expr.
+    auto returnType =
+        this->builtExpression_->synthesizeType(MESSAGE_TYPING_CONTEXT);
+    if (isIllTyped(returnType))
+    {
+        this->errorLog(explainIllType(std::get<IllTyped>(returnType)));
+        return;
+    }
+
+    this->returnType_ = std::get<TypeClass>(returnType).type;
 }
 
 bool FilterParser::valid() const
 {
     return this->valid_;
+}
+
+Type FilterParser::returnType() const
+{
+    return this->returnType_;
+}
+
+ExpressionPtr FilterParser::release()
+{
+    ExpressionPtr ret;
+    this->builtExpression_.swap(ret);
+    return ret;
 }
 
 ExpressionPtr FilterParser::parseExpression(bool top)
@@ -385,12 +308,7 @@ const QStringList &FilterParser::errors() const
 
 const QString FilterParser::debugString() const
 {
-    return this->builtExpression_->debug();
+    return this->builtExpression_->debug(MESSAGE_TYPING_CONTEXT);
 }
 
-const QString FilterParser::filterString() const
-{
-    return this->builtExpression_->filterString();
-}
-
-}  // namespace filterparser
+}  // namespace chatterino::filters
