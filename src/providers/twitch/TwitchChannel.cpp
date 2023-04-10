@@ -575,7 +575,7 @@ void TwitchChannel::setRoomModes(const RoomModes &_roomModes)
 
 bool TwitchChannel::isLive() const
 {
-    return this->streamStatus_.access()->live;
+    return this->streamStatus_.accessConst()->live;
 }
 
 SharedAccessGuard<const TwitchChannel::StreamStatus>
@@ -911,88 +911,85 @@ int TwitchChannel::chatterCount()
 
 void TwitchChannel::setLive(bool newLiveStatus)
 {
-    bool gotNewLiveStatus = false;
     {
         auto guard = this->streamStatus_.access();
-        if (guard->live != newLiveStatus)
+        if (guard->live == newLiveStatus)
         {
-            gotNewLiveStatus = true;
-            if (newLiveStatus)
+            return;
+        }
+        guard->live = newLiveStatus;
+    }
+
+    if (newLiveStatus)
+    {
+        if (getApp()->notifications->isChannelNotified(this->getName(),
+                                                       Platform::Twitch))
+        {
+            if (Toasts::isEnabled())
             {
-                if (getApp()->notifications->isChannelNotified(
-                        this->getName(), Platform::Twitch))
-                {
-                    if (Toasts::isEnabled())
-                    {
-                        getApp()->toasts->sendChannelNotification(
-                            this->getName(), guard->title, Platform::Twitch);
-                    }
-                    if (getSettings()->notificationPlaySound)
-                    {
-                        getApp()->notifications->playSound();
-                    }
-                    if (getSettings()->notificationFlashTaskbar)
-                    {
-                        getApp()->windows->sendAlert();
-                    }
-                }
-                // Channel live message
-                MessageBuilder builder;
-                TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
-                                                        &builder);
-                this->addMessage(builder.release());
-
-                // Message in /live channel
-                MessageBuilder builder2;
-                TwitchMessageBuilder::liveMessage(this->getDisplayName(),
-                                                  &builder2);
-                getApp()->twitch->liveChannel->addMessage(builder2.release());
-
-                // Notify on all channels with a ping sound
-                if (getSettings()->notificationOnAnyChannel &&
-                    !(isInStreamerMode() &&
-                      getSettings()->streamerModeSuppressLiveNotifications))
-                {
-                    getApp()->notifications->playSound();
-                }
+                getApp()->toasts->sendChannelNotification(
+                    this->getName(), this->accessStreamStatus()->title,
+                    Platform::Twitch);
             }
-            else
+            if (getSettings()->notificationPlaySound)
             {
-                // Channel offline message
-                MessageBuilder builder;
-                TwitchMessageBuilder::offlineSystemMessage(
-                    this->getDisplayName(), &builder);
-                this->addMessage(builder.release());
-
-                // "delete" old 'CHANNEL is live' message
-                LimitedQueueSnapshot<MessagePtr> snapshot =
-                    getApp()->twitch->liveChannel->getMessageSnapshot();
-                int snapshotLength = snapshot.size();
-
-                // MSVC hates this code if the parens are not there
-                int end = (std::max)(0, snapshotLength - 200);
-                auto liveMessageSearchText =
-                    QString("%1 is live!").arg(this->getDisplayName());
-
-                for (int i = snapshotLength - 1; i >= end; --i)
-                {
-                    auto &s = snapshot[i];
-
-                    if (s->messageText == liveMessageSearchText)
-                    {
-                        s->flags.set(MessageFlag::Disabled);
-                        break;
-                    }
-                }
+                getApp()->notifications->playSound();
             }
-            guard->live = newLiveStatus;
+            if (getSettings()->notificationFlashTaskbar)
+            {
+                getApp()->windows->sendAlert();
+            }
+        }
+        // Channel live message
+        MessageBuilder builder;
+        TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
+                                                &builder);
+        this->addMessage(builder.release());
+
+        // Message in /live channel
+        MessageBuilder builder2;
+        TwitchMessageBuilder::liveMessage(this->getDisplayName(), &builder2);
+        getApp()->twitch->liveChannel->addMessage(builder2.release());
+
+        // Notify on all channels with a ping sound
+        if (getSettings()->notificationOnAnyChannel &&
+            !(isInStreamerMode() &&
+              getSettings()->streamerModeSuppressLiveNotifications))
+        {
+            getApp()->notifications->playSound();
+        }
+    }
+    else
+    {
+        // Channel offline message
+        MessageBuilder builder;
+        TwitchMessageBuilder::offlineSystemMessage(this->getDisplayName(),
+                                                   &builder);
+        this->addMessage(builder.release());
+
+        // "delete" old 'CHANNEL is live' message
+        LimitedQueueSnapshot<MessagePtr> snapshot =
+            getApp()->twitch->liveChannel->getMessageSnapshot();
+        int snapshotLength = snapshot.size();
+
+        // MSVC hates this code if the parens are not there
+        int end = (std::max)(0, snapshotLength - 200);
+        auto liveMessageSearchText =
+            QString("%1 is live!").arg(this->getDisplayName());
+
+        for (int i = snapshotLength - 1; i >= end; --i)
+        {
+            auto &s = snapshot[i];
+
+            if (s->messageText == liveMessageSearchText)
+            {
+                s->flags.set(MessageFlag::Disabled);
+                break;
+            }
         }
     }
 
-    if (gotNewLiveStatus)
-    {
-        this->liveStatusChanged.invoke();
-    }
+    this->liveStatusChanged.invoke();
 }
 
 void TwitchChannel::refreshTitle()
