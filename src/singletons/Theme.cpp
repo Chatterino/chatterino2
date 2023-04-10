@@ -3,6 +3,7 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "singletons/Resources.hpp"
 
 #include <QColor>
 #include <QFile>
@@ -210,6 +211,18 @@ void Theme::parseFrom(const QJsonObject &root)
         "selection-background-color:" +
         (this->isLightTheme() ? "#68B1FF"
                               : this->tabs.selected.backgrounds.regular.name());
+
+    // Usercard buttons
+    if (this->isLightTheme())
+    {
+        this->buttons.copy = getResources().buttons.copyDark;
+        this->buttons.pin = getResources().buttons.pinDisabledDark;
+    }
+    else
+    {
+        this->buttons.copy = getResources().buttons.copyLight;
+        this->buttons.pin = getResources().buttons.pinDisabledLight;
+    }
 }
 
 void Theme::normalizeColor(QColor &color) const
