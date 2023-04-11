@@ -1,16 +1,14 @@
 #include "messages/layouts/MessageLayout.hpp"
 
 #include "Application.hpp"
-#include "debug/Benchmark.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/Selection.hpp"
 #include "providers/colors/ColorProvider.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/StreamerMode.hpp"
@@ -198,84 +196,77 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 }
 
 // Painting
-void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
-                          Selection &selection, bool isLastReadMessage,
-                          bool isWindowFocused, bool isMentions)
+void MessageLayout::paint(const MessagePaintContext &ctx)
 {
-    auto app = getApp();
-    QPixmap *pixmap = this->ensureBuffer(painter, width);
+    QPixmap *pixmap = this->ensureBuffer(ctx.painter, ctx.width);
 
-    if (!this->bufferValid_ || !selection.isEmpty())
+    if (!this->bufferValid_ || !ctx.selection.isEmpty())
     {
-        this->updateBuffer(pixmap, messageIndex, selection);
+        this->updateBuffer(pixmap, ctx);
     }
 
     // draw on buffer
-    painter.drawPixmap(0, y, *pixmap);
-    //    painter.drawPixmap(0, y, this->container.width,
-    //    this->container.getHeight(), *pixmap);
+    ctx.painter.drawPixmap(0, ctx.y, *pixmap);
 
     // draw gif emotes
-    this->container_.paintAnimatedElements(painter, y);
+    this->container_.paintAnimatedElements(ctx.painter, ctx.y);
 
     // draw disabled
     if (this->message_->flags.has(MessageFlag::Disabled))
     {
-        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                         app->themes->messages.disabled);
-        //        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-        //                         QBrush(QColor(64, 64, 64, 64)));
+        ctx.painter.fillRect(0, ctx.y, pixmap->width(), pixmap->height(),
+                             ctx.messageColors.disabled);
     }
 
     if (this->message_->flags.has(MessageFlag::RecentMessage))
     {
-        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                         app->themes->messages.disabled);
+        ctx.painter.fillRect(0, ctx.y, pixmap->width(), pixmap->height(),
+                             ctx.messageColors.disabled);
     }
 
-    if (!isMentions &&
+    if (!ctx.isMentions &&
         (this->message_->flags.has(MessageFlag::RedeemedChannelPointReward) ||
          this->message_->flags.has(MessageFlag::RedeemedHighlight)) &&
-        getSettings()->enableRedeemedHighlight.getValue())
+        ctx.preferences.enableRedeemedHighlight)
     {
-        painter.fillRect(
-            0, y, this->scale_ * 4, pixmap->height(),
+        ctx.painter.fillRect(
+            0, ctx.y, int(this->scale_ * 4), pixmap->height(),
             *ColorProvider::instance().color(ColorType::RedeemedHighlight));
     }
 
     // draw selection
-    if (!selection.isEmpty())
+    if (!ctx.selection.isEmpty())
     {
-        this->container_.paintSelection(painter, messageIndex, selection, y);
+        this->container_.paintSelection(ctx.painter, ctx.messageIndex,
+                                        ctx.selection, ctx.y);
     }
 
     // draw message seperation line
-    if (getSettings()->separateMessages.getValue())
+    if (ctx.preferences.separateMessages)
     {
-        painter.fillRect(0, y, this->container_.getWidth() + 64, 1,
-                         app->themes->splits.messageSeperator);
+        ctx.painter.fillRect(0, ctx.y, this->container_.getWidth() + 64, 1,
+                             ctx.messageColors.messageSeperator);
     }
 
     // draw last read message line
-    if (isLastReadMessage)
+    if (ctx.isLastReadMessage)
     {
         QColor color;
-        if (getSettings()->lastMessageColor != QStringLiteral(""))
+        if (ctx.preferences.lastMessageColor.isValid())
         {
-            color = QColor(getSettings()->lastMessageColor.getValue());
+            color = ctx.preferences.lastMessageColor;
         }
         else
         {
-            color = isWindowFocused
-                        ? app->themes->tabs.selected.backgrounds.regular
-                        : app->themes->tabs.selected.backgrounds.unfocused;
+            color = ctx.isWindowFocused
+                        ? ctx.messageColors.focusedLastMessageLine
+                        : ctx.messageColors.unfocusedLastMessageLine;
         }
 
-        QBrush brush(color, static_cast<Qt::BrushStyle>(
-                                getSettings()->lastMessagePattern.getValue()));
+        QBrush brush(color, ctx.preferences.lastMessagePattern);
 
-        painter.fillRect(0, y + this->container_.getHeight() - 1,
-                         pixmap->width(), 1, brush);
+        ctx.painter.fillRect(0, ctx.y + this->container_.getHeight() - 1,
+                             pixmap->width(), 1, brush);
     }
 
     this->bufferValid_ = true;
@@ -305,45 +296,42 @@ QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width)
     return this->buffer_.get();
 }
 
-void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
-                                 Selection & /*selection*/)
+void MessageLayout::updateBuffer(QPixmap *buffer,
+                                 const MessagePaintContext &ctx)
 {
     if (buffer->isNull())
+    {
         return;
-
-    auto app = getApp();
-    auto settings = getSettings();
+    }
 
     QPainter painter(buffer);
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     // draw background
-    QColor backgroundColor = [this, &app] {
-        if (getSettings()->alternateMessages.getValue() &&
+    QColor backgroundColor = [&] {
+        if (ctx.preferences.alternateMessages &&
             this->flags.has(MessageLayoutFlag::AlternateBackground))
         {
-            return app->themes->messages.backgrounds.alternate;
+            return ctx.messageColors.alternate;
         }
-        else
-        {
-            return app->themes->messages.backgrounds.regular;
-        }
+
+        return ctx.messageColors.regular;
     }();
 
     if (this->message_->flags.has(MessageFlag::ElevatedMessage) &&
-        getSettings()->enableElevatedMessageHighlight.getValue())
-    {
-        backgroundColor = blendColors(backgroundColor,
-                                      *ColorProvider::instance().color(
-                                          ColorType::ElevatedMessageHighlight));
-    }
-
-    else if (this->message_->flags.has(MessageFlag::FirstMessage) &&
-             getSettings()->enableFirstMessageHighlight.getValue())
+        ctx.preferences.enableElevatedMessageHighlight)
     {
         backgroundColor = blendColors(
             backgroundColor,
-            *ColorProvider::instance().color(ColorType::FirstMessageHighlight));
+            *ctx.colorProvider.color(ColorType::ElevatedMessageHighlight));
+    }
+
+    else if (this->message_->flags.has(MessageFlag::FirstMessage) &&
+             ctx.preferences.enableFirstMessageHighlight)
+    {
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ctx.colorProvider.color(ColorType::FirstMessageHighlight));
     }
     else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
               this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
@@ -354,22 +342,21 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
             blendColors(backgroundColor, *this->message_->highlightColor);
     }
     else if (this->message_->flags.has(MessageFlag::Subscription) &&
-             getSettings()->enableSubHighlight)
+             ctx.preferences.enableSubHighlight)
     {
         // Blend highlight color with usual background color
         backgroundColor = blendColors(
-            backgroundColor,
-            *ColorProvider::instance().color(ColorType::Subscription));
+            backgroundColor, *ctx.colorProvider.color(ColorType::Subscription));
     }
     else if ((this->message_->flags.has(MessageFlag::RedeemedHighlight) ||
               this->message_->flags.has(
                   MessageFlag::RedeemedChannelPointReward)) &&
-             settings->enableRedeemedHighlight.getValue())
+             ctx.preferences.enableRedeemedHighlight)
     {
         // Blend highlight color with usual background color
-        backgroundColor = blendColors(
-            backgroundColor,
-            *ColorProvider::instance().color(ColorType::RedeemedHighlight));
+        backgroundColor =
+            blendColors(backgroundColor,
+                        *ctx.colorProvider.color(ColorType::RedeemedHighlight));
     }
     else if (this->message_->flags.has(MessageFlag::AutoMod))
     {
@@ -383,7 +370,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     painter.fillRect(buffer->rect(), backgroundColor);
 
     // draw message
-    this->container_.paintElements(painter);
+    this->container_.paintElements(painter, ctx);
 
 #ifdef FOURTF
     // debug

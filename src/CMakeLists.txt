@@ -195,6 +195,8 @@ set(SOURCE_FILES
         messages/layouts/MessageLayout.hpp
         messages/layouts/MessageLayoutContainer.cpp
         messages/layouts/MessageLayoutContainer.hpp
+        messages/layouts/MessageLayoutContext.cpp
+        messages/layouts/MessageLayoutContext.hpp
         messages/layouts/MessageLayoutElement.cpp
         messages/layouts/MessageLayoutElement.hpp
         messages/search/AuthorPredicate.cpp

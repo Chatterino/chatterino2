@@ -1,6 +1,7 @@
 #include "MessageLayoutContainer.hpp"
 
 #include "Application.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
@@ -492,7 +493,8 @@ MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point)
 }
 
 // painting
-void MessageLayoutContainer::paintElements(QPainter &painter)
+void MessageLayoutContainer::paintElements(QPainter &painter,
+                                           const MessagePaintContext &ctx)
 {
     for (const std::unique_ptr<MessageLayoutElement> &element : this->elements_)
     {
@@ -501,7 +503,7 @@ void MessageLayoutContainer::paintElements(QPainter &painter)
         painter.drawRect(element->getRect());
 #endif
 
-        element->paint(painter);
+        element->paint(painter, ctx.messageColors);
     }
 }
 
@@ -515,7 +517,8 @@ void MessageLayoutContainer::paintAnimatedElements(QPainter &painter,
 }
 
 void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
-                                            Selection &selection, int yOffset)
+                                            const Selection &selection,
+                                            int yOffset)
 {
     auto app = getApp();
     QColor selectionColor = app->themes->messages.selection;

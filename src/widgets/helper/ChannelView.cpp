@@ -11,12 +11,14 @@
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/layouts/MessageLayout.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
+#include "providers/colors/ColorProvider.hpp"
 #include "providers/LinkResolver.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -201,6 +203,10 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
     auto curve = QEasingCurve();
     curve.setCustomType(highlightEasingFunction);
     this->highlightAnimation_.setEasingCurve(curve);
+
+    this->messageColors_.applyTheme(getTheme());
+    this->messagePreferences_.connectSettings(getSettings(),
+                                              this->channelConnections_);
 }
 
 void ChannelView::initializeLayout()
@@ -376,6 +382,7 @@ void ChannelView::themeChangedEvent()
 
     this->setupHighlightAnimationColors();
     this->queueLayout();
+    this->messageColors_.applyTheme(getTheme());
 }
 
 void ChannelView::setupHighlightAnimationColors()
@@ -1265,32 +1272,41 @@ void ChannelView::drawMessages(QPainter &painter)
         return;
     }
 
-    int y = int(-(messagesSnapshot[start].get()->getHeight() *
-                  (fmod(this->scrollBar_->getCurrentValue(), 1))));
-
     MessageLayout *end = nullptr;
-    bool windowFocused = this->window() == QApplication::activeWindow();
 
-    auto app = getApp();
-    bool isMentions = this->underlyingChannel_ == app->twitch->mentionsChannel;
+    MessagePaintContext ctx = {
+        .painter = painter,
+        .selection = this->selection_,
+        .colorProvider = ColorProvider::instance(),
+        .messageColors = this->messageColors_,
+        .preferences = this->messagePreferences_,
+
+        .width = DRAW_WIDTH,
+        .y = int(-(messagesSnapshot[start]->getHeight() *
+                   (fmod(this->scrollBar_->getCurrentValue(), 1)))),
+        .isWindowFocused = this->window() == QApplication::activeWindow(),
+        .isMentions =
+            this->underlyingChannel_ == getApp()->twitch->mentionsChannel,
+    };
+    bool showLastMessageIndicator = getSettings()->showLastMessageIndicator;
 
     for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
         MessageLayout *layout = messagesSnapshot[i].get();
 
-        bool isLastMessage = false;
-        if (getSettings()->showLastMessageIndicator)
+        ctx.isLastReadMessage = false;
+        if (showLastMessageIndicator)
         {
-            isLastMessage = this->lastReadMessage_.get() == layout;
+            ctx.isLastReadMessage = this->lastReadMessage_.get() == layout;
         }
+        ctx.messageIndex = int(i);
 
-        layout->paint(painter, DRAW_WIDTH, y, i, this->selection_,
-                      isLastMessage, windowFocused, isMentions);
+        layout->paint(ctx);
 
         if (this->highlightedMessage_ == layout)
         {
             painter.fillRect(
-                0, y, layout->getWidth(), layout->getHeight(),
+                0, ctx.y, layout->getWidth(), layout->getHeight(),
                 this->highlightAnimation_.currentValue().value<QColor>());
             if (this->highlightAnimation_.state() == QVariantAnimation::Stopped)
             {
@@ -1298,10 +1314,10 @@ void ChannelView::drawMessages(QPainter &painter)
             }
         }
 
-        y += layout->getHeight();
+        ctx.y += layout->getHeight();
 
         end = layout;
-        if (y > this->height())
+        if (ctx.y > this->height())
         {
             break;
         }
