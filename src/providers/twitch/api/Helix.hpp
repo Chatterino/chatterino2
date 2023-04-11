@@ -1184,6 +1184,18 @@ public:
         FailureCallback<HelixStartCommercialError, QString> failureCallback)
         final;
 
+    // Get global Twitch badges
+    // https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
+    void getGlobalBadges(
+        ResultCallback<HelixGlobalBadges> successCallback,
+        FailureCallback<HelixGetGlobalBadgesError, QString> failureCallback) final;
+
+    // Get badges for the `broadcasterID` channel
+    // https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
+    void getChannelBadges(
+        QString broadcasterID, ResultCallback<HelixChannelBadges> successCallback,
+        FailureCallback<HelixGetChannelBadgesError, QString> failureCallback) final;
+
     void update(QString clientId, QString oauthToken) final;
 
     static void initialize();

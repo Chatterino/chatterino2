@@ -2468,6 +2468,114 @@ void Helix::startCommercial(
         .execute();
 }
 
+// Twitch global badges
+// https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
+void Helix::getGlobalBadges(
+    ResultCallback<HelixGlobalBadges> successCallback,
+    FailureCallback<HelixGetGlobalBadgesError, QString> failureCallback)
+{
+    using Error = HelixGetGlobalBadgesError;
+    this->makeRequest("chat/badges/global")
+        .onSuccess([successCallback](auto result) -> Outcome {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for getting global badges was "
+                    << result.status() << "but we expected it to be 200";
+            }
+
+            auto response = result.parseJson();
+            successCallback(HelixGlobalBadges(response));
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 401: {
+                    if (message.contains("OAuth token"))
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error data:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
+// Badges for the `broadcasterID` channel
+// https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
+void Helix::getChannelBadges(
+    QString broadcasterID, ResultCallback<HelixChannelBadges> successCallback,
+    FailureCallback<HelixGetChannelBadgesError, QString> failureCallback)
+{
+    using Error = HelixGetChannelBadgesError;
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+
+    this->makeRequest("chat/badges", urlQuery)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for getting badges was "
+                    << result.status() << "but we expected it to be 200";
+            }
+
+            auto response = result.parseJson();
+            successCallback(HelixChannelBadges(response));
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.contains("OAuth token"))
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error data:" << result.status()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
