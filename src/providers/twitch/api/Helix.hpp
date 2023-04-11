@@ -616,6 +616,22 @@ enum class HelixStartCommercialError {
     Forwarded,
 };
 
+enum class HelixGetGlobalBadgesError {
+    Unknown,
+    UserNotAuthorized,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+enum class HelixGetChannelBadgesError {
+    Unknown,
+    UserNotAuthorized,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 class IHelix
 {
 public:
