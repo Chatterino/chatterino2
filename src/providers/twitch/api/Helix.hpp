@@ -384,6 +384,59 @@ struct HelixModerators {
     }
 };
 
+struct HelixBadgeVersion
+{
+    QString id;
+    Url imageURL1x;
+    Url imageURL2x;
+    Url imageURL4x;
+    QString title;
+    QString clickURL;
+
+    explicit HelixBadgeVersion(QJsonObject jsonObject)
+        : id(jsonObject.value("id").toString())
+        , imageURL1x(Url{jsonObject.value("image_url_1x").toString()})
+        , imageURL2x(Url{jsonObject.value("image_url_2x").toString()})
+        , imageURL4x(Url{jsonObject.value("image_url_4x").toString()})
+        , title(jsonObject.value("title").toString())
+        , clickURL(Url{jsonObject.value("click_url").toString()})
+    {
+    }
+};
+
+struct HelixBadgeSet
+{
+    QString set_id;
+    std::vector<HelixBadgeVersion> versions;
+
+    explicit HelixBadgeSet(const QJsonObject& json)
+        : set_id(json.value("set_id").toString())
+    {
+        const auto json_versions = json.value("versions").toArray();
+        for (const auto& version : json_versions)
+        {
+            HelixBadgeVersion badge_version(version.toObject());
+            versions.push_back(badge_version);
+        }
+    }
+};
+
+struct HelixGlobalBadges {
+    std::vector<HelixBadgeSet> data;
+    HelixGlobalBadges() = default;
+    explicit HelixGlobalBadges(const QJsonObject &jsonObject)
+    {
+        const auto &data = jsonObject.value("data").toArray();
+        for (const auto &set : data)
+        {
+            HelixBadgeSet badgeSet(set.toObject());
+            this->data.push_back(badgeSet);
+        }
+    }
+};
+
+using HelixChannelBadges = HelixGlobalBadges;
+
 enum class HelixAnnouncementColor {
     Blue,
     Green,
@@ -618,7 +671,6 @@ enum class HelixStartCommercialError {
 
 enum class HelixGetGlobalBadgesError {
     Unknown,
-    UserNotAuthorized,
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
@@ -626,7 +678,6 @@ enum class HelixGetGlobalBadgesError {
 
 enum class HelixGetChannelBadgesError {
     Unknown,
-    UserNotAuthorized,
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
@@ -912,8 +963,7 @@ public:
     virtual void startCommercial(
         QString broadcasterID, int length,
         ResultCallback<HelixStartCommercialResponse> successCallback,
-        FailureCallback<HelixStartCommercialError, QString>
-            failureCallback) = 0;
+        FailureCallback<HelixStartCommercialError, QString> failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 

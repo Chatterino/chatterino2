@@ -2476,6 +2476,8 @@ void Helix::getGlobalBadges(
 {
     using Error = HelixGetGlobalBadgesError;
     this->makeRequest("chat/badges/global")
+        .type(NetworkRequestType::Get)
+        .header("Content-Type", "application/json")
         .onSuccess([successCallback](auto result) -> Outcome {
             if (result.status() != 200)
             {
@@ -2495,14 +2497,7 @@ void Helix::getGlobalBadges(
             switch (result.status())
             {
                 case 401: {
-                    if (message.contains("OAuth token"))
-                    {
-                        failureCallback(Error::UserNotAuthorized, message);
-                    }
-                    else
-                    {
-                        failureCallback(Error::Forwarded, message);
-                    }
+                    failureCallback(Error::Forwarded, message);
                 }
                 break;
 
@@ -2529,6 +2524,8 @@ void Helix::getChannelBadges(
     urlQuery.addQueryItem("broadcaster_id", broadcasterID);
 
     this->makeRequest("chat/badges", urlQuery)
+        .type(NetworkRequestType::Get)
+        .header("Content-Type", "application/json")
         .onSuccess([successCallback](auto result) -> Outcome {
             if (result.status() != 200)
             {
@@ -2546,21 +2543,10 @@ void Helix::getChannelBadges(
             auto message = obj.value("message").toString();
 
             switch (result.status())
-            {
-                case 400: {
-                    failureCallback(Error::Forwarded, message);
-                }
-                break;
-
+            {   
+                case 400:
                 case 401: {
-                    if (message.contains("OAuth token"))
-                    {
-                        failureCallback(Error::UserNotAuthorized, message);
-                    }
-                    else
-                    {
-                        failureCallback(Error::Forwarded, message);
-                    }
+                    failureCallback(Error::Forwarded, message);
                 }
                 break;
 
