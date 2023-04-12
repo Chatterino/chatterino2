@@ -406,11 +406,11 @@ struct HelixBadgeVersion
 
 struct HelixBadgeSet
 {
-    QString set_id;
+    QString setID;
     std::vector<HelixBadgeVersion> versions;
 
     explicit HelixBadgeSet(const QJsonObject& json)
-        : set_id(json.value("set_id").toString())
+        : setID(json.value("set_id").toString())
     {
         const auto json_versions = json.value("versions").toArray();
         for (const auto& version : json_versions)
