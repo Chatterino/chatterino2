@@ -2475,7 +2475,7 @@ void Helix::getGlobalBadges(
     FailureCallback<HelixGetGlobalBadgesError, QString> failureCallback)
 {
     using Error = HelixGetGlobalBadgesError;
-    this->makeRequest("chat/badges/global")
+    this->makeRequest("chat/badges/global", QUrlQuery())
         .type(NetworkRequestType::Get)
         .onSuccess([successCallback](auto result) -> Outcome {
             if (result.status() != 200)
