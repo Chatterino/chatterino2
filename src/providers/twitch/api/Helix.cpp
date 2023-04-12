@@ -2477,7 +2477,6 @@ void Helix::getGlobalBadges(
     using Error = HelixGetGlobalBadgesError;
     this->makeRequest("chat/badges/global")
         .type(NetworkRequestType::Get)
-        .header("Content-Type", "application/json")
         .onSuccess([successCallback](auto result) -> Outcome {
             if (result.status() != 200)
             {
@@ -2525,7 +2524,6 @@ void Helix::getChannelBadges(
 
     this->makeRequest("chat/badges", urlQuery)
         .type(NetworkRequestType::Get)
-        .header("Content-Type", "application/json")
         .onSuccess([successCallback](auto result) -> Outcome {
             if (result.status() != 200)
             {
