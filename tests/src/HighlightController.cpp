@@ -225,15 +225,17 @@ public:
                  HelixFailureCallback failureCallback),
                 (override));
     
+    // The extra parenthesis around the failure callback is because its type contains a comma
     MOCK_METHOD(void, getGlobalBadges,
                 (ResultCallback<HelixGlobalBadges> successCallback,
-                 FailureCallback<HelixGetGlobalBadgesError, QString> failureCallback),
+                 (FailureCallback<HelixGetGlobalBadgesError, QString> failureCallback)),
                 (override));
 
+    // The extra parenthesis around the failure callback is because its type contains a comma
     MOCK_METHOD(void, getChannelBadges,
                 (QString broadcasterID,
                  ResultCallback<HelixChannelBadges> successCallback,
-                 FailureCallback<HelixGetChannelBadgesError, QString> failureCallback),
+                 (FailureCallback<HelixGetChannelBadgesError, QString> failureCallback)),
                 (override));
 
     // The extra parenthesis around the failure callback is because its type contains a comma
