@@ -8,6 +8,11 @@
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
+#include "singletons/Emotes.hpp"
+#include "singletons/helper/GifTimer.hpp"
+#include "singletons/WindowManager.hpp"
+#include "util/DebugCount.hpp"
+#include "util/PostToThread.hpp"
 
 #include <boost/functional/hash.hpp>
 #include <QBuffer>
@@ -20,13 +25,6 @@
 #include <functional>
 #include <queue>
 #include <thread>
-#ifndef CHATTERINO_TEST
-#    include "singletons/Emotes.hpp"
-#endif
-#include "singletons/helper/GifTimer.hpp"
-#include "singletons/WindowManager.hpp"
-#include "util/DebugCount.hpp"
-#include "util/PostToThread.hpp"
 
 // Duration between each check of every Image instance
 const auto IMAGE_POOL_CLEANUP_INTERVAL = std::chrono::minutes(1);
@@ -55,12 +53,10 @@ namespace detail {
         {
             DebugCount::increase("animated images");
 
-#ifndef CHATTERINO_TEST
             this->gifTimerConnection_ =
                 getApp()->emotes->gifTimer.signal.connect([this] {
                     this->advance();
                 });
-#endif
         }
 
         auto totalLength =
@@ -75,11 +71,9 @@ namespace detail {
         }
         else
         {
-#ifndef CHATTERINO_TEST
             this->durationOffset_ = std::min<int>(
                 int(getApp()->emotes->gifTimer.position() % totalLength),
                 60000);
-#endif
         }
         this->processOffset();
     }
@@ -228,9 +222,8 @@ namespace detail {
             }
         }
 
-#ifndef CHATTERINO_TEST
         getApp()->windows->forceLayoutChannelViews();
-#endif
+
         loadedEventQueued = false;
     }
 
@@ -558,8 +551,9 @@ void Image::expireFrames()
 #ifndef DISABLE_IMAGE_EXPIRATION_POOL
 
 ImageExpirationPool::ImageExpirationPool()
+    : freeTimer_(new QTimer)
 {
-    QObject::connect(&this->freeTimer_, &QTimer::timeout, [this] {
+    QObject::connect(this->freeTimer_, &QTimer::timeout, [this] {
         if (isGuiThread())
         {
             this->freeOld();
@@ -572,7 +566,7 @@ ImageExpirationPool::ImageExpirationPool()
         }
     });
 
-    this->freeTimer_.start(
+    this->freeTimer_->start(
         std::chrono::duration_cast<std::chrono::milliseconds>(
             IMAGE_POOL_CLEANUP_INTERVAL));
 }

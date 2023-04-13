@@ -25,6 +25,7 @@ option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
 option(BUILD_TRANSLATIONS "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
+option(CHATTERINO_PLUGINS "Enable EXPERIMENTAL plugin support in Chatterino" OFF)
 
 if(CHATTERINO_LTO)
     include(CheckIPOSupported)
@@ -156,16 +157,17 @@ else()
     add_subdirectory("${CMAKE_SOURCE_DIR}/lib/settings" EXCLUDE_FROM_ALL)
 endif()
 
+if (CHATTERINO_PLUGINS)
+    set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
+    add_subdirectory(lib/lua)
+endif()
+
 if (BUILD_WITH_CRASHPAD)
     add_subdirectory("${CMAKE_SOURCE_DIR}/lib/crashpad" EXCLUDE_FROM_ALL)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-if (BUILD_TESTS OR BUILD_BENCHMARKS)
-    add_definitions(-DCHATTERINO_TEST)
-endif ()
 
 # Generate resource files
 include(cmake/resources/generate_resources.cmake)

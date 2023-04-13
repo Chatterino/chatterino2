@@ -1,8 +1,79 @@
-#include "controllers/filters/parser/Tokenizer.hpp"
+#include "controllers/filters/lang/Tokenizer.hpp"
 
 #include "common/QLogging.hpp"
 
-namespace filterparser {
+namespace chatterino::filters {
+
+QString tokenTypeToInfoString(TokenType type)
+{
+    switch (type)
+    {
+        case AND:
+            return "And";
+        case OR:
+            return "Or";
+        case LP:
+            return "<left parenthesis>";
+        case RP:
+            return "<right parenthesis>";
+        case LIST_START:
+            return "<list start>";
+        case LIST_END:
+            return "<list end>";
+        case COMMA:
+            return "<comma>";
+        case PLUS:
+            return "Plus";
+        case MINUS:
+            return "Minus";
+        case MULTIPLY:
+            return "Multiply";
+        case DIVIDE:
+            return "Divide";
+        case MOD:
+            return "Mod";
+        case EQ:
+            return "Eq";
+        case NEQ:
+            return "NotEq";
+        case LT:
+            return "LessThan";
+        case GT:
+            return "GreaterThan";
+        case LTE:
+            return "LessThanEq";
+        case GTE:
+            return "GreaterThanEq";
+        case CONTAINS:
+            return "Contains";
+        case STARTS_WITH:
+            return "StartsWith";
+        case ENDS_WITH:
+            return "EndsWith";
+        case MATCH:
+            return "Match";
+        case NOT:
+            return "Not";
+        case STRING:
+            return "<string>";
+        case INT:
+            return "<int>";
+        case IDENTIFIER:
+            return "<identifier>";
+        case CONTROL_START:
+        case CONTROL_END:
+        case BINARY_START:
+        case BINARY_END:
+        case UNARY_START:
+        case UNARY_END:
+        case MATH_START:
+        case MATH_END:
+        case OTHER_START:
+        case NONE:
+        default:
+            return "<unknown>";
+    }
+}
 
 Tokenizer::Tokenizer(const QString &text)
 {
@@ -190,4 +261,4 @@ bool Tokenizer::typeIsMathOp(TokenType token)
     return token > TokenType::MATH_START && token < TokenType::MATH_END;
 }
 
-}  // namespace filterparser
+}  // namespace chatterino::filters
