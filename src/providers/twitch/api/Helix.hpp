@@ -384,8 +384,7 @@ struct HelixModerators {
     }
 };
 
-struct HelixBadgeVersion
-{
+struct HelixBadgeVersion {
     QString id;
     Url imageURL1x;
     Url imageURL2x;
@@ -404,16 +403,15 @@ struct HelixBadgeVersion
     }
 };
 
-struct HelixBadgeSet
-{
+struct HelixBadgeSet {
     QString setID;
     std::vector<HelixBadgeVersion> versions;
 
-    explicit HelixBadgeSet(const QJsonObject& json)
+    explicit HelixBadgeSet(const QJsonObject &json)
         : setID(json.value("set_id").toString())
     {
         const auto json_versions = json.value("versions").toArray();
-        for (const auto& version : json_versions)
+        for (const auto &version : json_versions)
         {
             HelixBadgeVersion badge_version(version.toObject());
             versions.push_back(badge_version);
@@ -963,19 +961,23 @@ public:
     virtual void startCommercial(
         QString broadcasterID, int length,
         ResultCallback<HelixStartCommercialResponse> successCallback,
-        FailureCallback<HelixStartCommercialError, QString> failureCallback) = 0;
+        FailureCallback<HelixStartCommercialError, QString>
+            failureCallback) = 0;
 
     // Get global Twitch badges
     // https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
     virtual void getGlobalBadges(
         ResultCallback<HelixGlobalBadges> successCallback,
-        FailureCallback<HelixGetGlobalBadgesError, QString> failureCallback) = 0;
+        FailureCallback<HelixGetGlobalBadgesError, QString>
+            failureCallback) = 0;
 
     // Get badges for the `broadcasterID` channel
     // https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
     virtual void getChannelBadges(
-        QString broadcasterID, ResultCallback<HelixChannelBadges> successCallback,
-        FailureCallback<HelixGetChannelBadgesError, QString> failureCallback) = 0;
+        QString broadcasterID,
+        ResultCallback<HelixChannelBadges> successCallback,
+        FailureCallback<HelixGetChannelBadgesError, QString>
+            failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 
@@ -1264,15 +1266,16 @@ public:
 
     // Get global Twitch badges
     // https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
-    void getGlobalBadges(
-        ResultCallback<HelixGlobalBadges> successCallback,
-        FailureCallback<HelixGetGlobalBadgesError, QString> failureCallback) final;
+    void getGlobalBadges(ResultCallback<HelixGlobalBadges> successCallback,
+                         FailureCallback<HelixGetGlobalBadgesError, QString>
+                             failureCallback) final;
 
     // Get badges for the `broadcasterID` channel
     // https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
-    void getChannelBadges(
-        QString broadcasterID, ResultCallback<HelixChannelBadges> successCallback,
-        FailureCallback<HelixGetChannelBadgesError, QString> failureCallback) final;
+    void getChannelBadges(QString broadcasterID,
+                          ResultCallback<HelixChannelBadges> successCallback,
+                          FailureCallback<HelixGetChannelBadgesError, QString>
+                              failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

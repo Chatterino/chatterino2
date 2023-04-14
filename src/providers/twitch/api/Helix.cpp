@@ -2541,7 +2541,7 @@ void Helix::getChannelBadges(
             auto message = obj.value("message").toString();
 
             switch (result.status())
-            {   
+            {
                 case 400:
                 case 401: {
                     failureCallback(Error::Forwarded, message);
