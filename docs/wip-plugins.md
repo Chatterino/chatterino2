@@ -31,7 +31,7 @@ Example file:
   "$schema": "https://raw.githubusercontent.com/Chatterino/chatterino2/master/docs/plugin-info.schema.json",
   "name": "Test plugin",
   "description": "This plugin is for testing stuff.",
-  "authors": "Mm2PL",
+  "authors": ["Mm2PL"],
   "homepage": "https://github.com/Chatterino/Chatterino2",
   "tags": ["test"],
   "version": "0.0.0",
@@ -100,8 +100,8 @@ Example:
 function cmdWords(ctx)
     -- ctx contains:
     -- words - table of words supplied to the command including the trigger
-    -- channelName - name of the channel the command is being run in
-    c2.system_msg(ctx.channelName, "Words are: " .. table.concat(ctx.words, " "))
+    -- channel_name - name of the channel the command is being run in
+    c2.system_msg(ctx.channel_name, "Words are: " .. table.concat(ctx.words, " "))
 end
 
 c2.register_command("/words", cmdWords)
@@ -123,7 +123,7 @@ Example:
 function cmdShout(ctx)
     table.remove(ctx.words, 1)
     local output = table.concat(ctx.words, " ")
-    c2.send_msg(ctx.channelName, string.upper(output))
+    c2.send_msg(ctx.channel_name, string.upper(output))
 end
 c2.register_command("/shout", cmdShout)
 ```
