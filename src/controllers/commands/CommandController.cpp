@@ -975,9 +975,9 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         stripChannelName(target);
-        QDesktopServices::openUrl(
-            QUrl(QString("https://www.twitch.tv/popout/moderator/%1/low-trust-users")
-                     .arg(target)));
+        QDesktopServices::openUrl(QUrl(
+            QString("https://www.twitch.tv/popout/moderator/%1/low-trust-users")
+                .arg(target)));
 
         return "";
     });
