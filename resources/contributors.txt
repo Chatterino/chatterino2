@@ -60,6 +60,7 @@ Wissididom | https://github.com/Wissididom | :/avatars/wissididom.png | Contribu
 03y | https://github.com/03y | | Contributor
 ScrubN | https://github.com/ScrubN | | Contributor
 Cyclone | https://github.com/PsycloneTM | :/avatars/cyclone.png | Contributor
+2547techno | https://github.com/2547techno | :/avatars/techno.png | Contributor
 
 # If you are a contributor add yourself above this line
 
