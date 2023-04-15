@@ -1131,6 +1131,13 @@ void CommandController::initialize(Settings &, Paths &paths)
             getHelix()->getModerators(
                 twitchChannel->roomId(), 500,
                 [channel, twitchChannel](auto result) {
+                    if (result.empty())
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            "This channel does not have any moderators."));
+                        return;
+                    }
+
                     // TODO: sort results?
 
                     MessageBuilder builder;
