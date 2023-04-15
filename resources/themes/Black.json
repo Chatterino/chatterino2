@@ -34,15 +34,15 @@
       "dropTargetRect": "#000094ff",
       "dropTargetRectBorder": "#000094ff",
       "header": {
-        "background": "#191919",
-        "border": "#262626",
-        "focusedBackground": "#363636",
-        "focusedBorder": "#383838",
+        "background": "#050505",
+        "border": "#121212",
+        "focusedBackground": "#1a1a1a",
+        "focusedBorder": "#1c1c1c",
         "focusedText": "#84c1ff",
         "text": "#ffffff"
       },
       "input": {
-        "background": "#0d0d0d",
+        "background": "#080808",
         "text": "#ffffff"
       },
       "messageSeperator": "#3c3c3c",
@@ -53,9 +53,9 @@
       "dividerLine": "#555555",
       "highlighted": {
         "backgrounds": {
-          "hover": "#252525",
-          "regular": "#252525",
-          "unfocused": "#252525"
+          "hover": "#0b0b0b",
+          "regular": "#0b0b0b",
+          "unfocused": "#0b0b0b"
         },
         "line": {
           "hover": "#ee6166",
@@ -66,9 +66,9 @@
       },
       "newMessage": {
         "backgrounds": {
-          "hover": "#252525",
-          "regular": "#252525",
-          "unfocused": "#252525"
+          "hover": "#0b0b0b",
+          "regular": "#0b0b0b",
+          "unfocused": "#0b0b0b"
         },
         "line": {
           "hover": "#888888",
@@ -79,9 +79,9 @@
       },
       "regular": {
         "backgrounds": {
-          "hover": "#252525",
-          "regular": "#252525",
-          "unfocused": "#252525"
+          "hover": "#0b0b0b",
+          "regular": "#0b0b0b",
+          "unfocused": "#0b0b0b"
         },
         "line": {
           "hover": "#444444",
@@ -92,9 +92,9 @@
       },
       "selected": {
         "backgrounds": {
-          "hover": "#555555",
-          "regular": "#555555",
-          "unfocused": "#555555"
+          "hover": "#333333",
+          "regular": "#333333",
+          "unfocused": "#333333"
         },
         "line": {
           "hover": "#00aeef",
@@ -105,7 +105,7 @@
       }
     },
     "window": {
-      "background": "#111111",
+      "background": "#040404",
       "text": "#eeeeee"
     }
   }
