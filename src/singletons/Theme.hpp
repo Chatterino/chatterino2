@@ -120,7 +120,9 @@ public:
 
 private:
     bool isLight_ = false;
-    void actuallyUpdate(double multiplier);
+
+    void parse();
+    void parseFrom(const QJsonObject &root);
 
     pajlada::Signals::NoArgSignal repaintVisibleChatWidgets_;
 

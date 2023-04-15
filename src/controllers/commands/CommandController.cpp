@@ -10,6 +10,7 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
+#include "controllers/plugins/PluginController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -947,6 +948,36 @@ void CommandController::initialize(Settings &, Paths &paths)
         QDesktopServices::openUrl(
             QUrl(QString("https://www.twitch.tv/popout/%1/reward-queue")
                      .arg(target)));
+
+        return "";
+    });
+
+    this->registerCommand("/lowtrust", [](const QStringList &words,
+                                          ChannelPtr channel) {
+        QString target(words.value(1));
+
+        if (target.isEmpty())
+        {
+            if (channel->getType() == Channel::Type::Twitch &&
+                !channel->isEmpty())
+            {
+                target = channel->getName();
+            }
+            else
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /lowtrust [channel]. You can also use the command "
+                    "without arguments in any Twitch channel to open its "
+                    "suspicious user activity feed. Only the broadcaster and "
+                    "moderators have permission to view this feed."));
+                return "";
+            }
+        }
+
+        stripChannelName(target);
+        QDesktopServices::openUrl(QUrl(
+            QString("https://www.twitch.tv/popout/moderator/%1/low-trust-users")
+                .arg(target)));
 
         return "";
     });
@@ -3260,6 +3291,32 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     return text;
 }
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+bool CommandController::registerPluginCommand(const QString &commandName)
+{
+    if (this->commands_.contains(commandName))
+    {
+        return false;
+    }
+
+    this->commands_[commandName] = [commandName](const CommandContext &ctx) {
+        return getApp()->plugins->tryExecPluginCommand(commandName, ctx);
+    };
+    this->pluginCommands_.append(commandName);
+    return true;
+}
+
+bool CommandController::unregisterPluginCommand(const QString &commandName)
+{
+    if (!this->pluginCommands_.contains(commandName))
+    {
+        return false;
+    }
+    this->pluginCommands_.removeAll(commandName);
+    return this->commands_.erase(commandName) != 0;
+}
+#endif
 
 void CommandController::registerCommand(const QString &commandName,
                                         CommandFunctionVariants commandFunction)

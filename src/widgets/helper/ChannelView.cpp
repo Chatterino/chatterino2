@@ -849,7 +849,7 @@ bool ChannelView::shouldIncludeMessage(const MessagePtr &m) const
                 m->loginName, Qt::CaseInsensitive) == 0)
             return true;
 
-        return this->channelFilters_->filter(m, this->channel_);
+        return this->channelFilters_->filter(m, this->underlyingChannel_);
     }
 
     return true;
@@ -1698,81 +1698,88 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     {
         auto badgeElement = dynamic_cast<const BadgeElement *>(element);
 
-        if ((badgeElement || emoteElement || layeredEmoteElement) &&
-            getSettings()->emotesTooltipPreview.getValue())
+        if (badgeElement || emoteElement || layeredEmoteElement)
         {
-            if (event->modifiers() == Qt::ShiftModifier ||
-                getSettings()->emotesTooltipPreview.getValue() == 1)
+            auto showThumbnailSetting =
+                getSettings()->emotesTooltipPreview.getValue();
+
+            bool showThumbnail =
+                showThumbnailSetting == ThumbnailPreviewMode::AlwaysShow ||
+                (showThumbnailSetting == ThumbnailPreviewMode::ShowOnShift &&
+                 event->modifiers() == Qt::ShiftModifier);
+
+            if (emoteElement)
             {
-                if (emoteElement)
+                tooltipWidget->setOne({
+                    showThumbnail
+                        ? emoteElement->getEmote()->images.getImage(3.0)
+                        : nullptr,
+                    element->getTooltip(),
+                });
+            }
+            else if (layeredEmoteElement)
+            {
+                auto &layeredEmotes = layeredEmoteElement->getEmotes();
+                // Should never be empty but ensure it
+                if (!layeredEmotes.empty())
                 {
-                    tooltipWidget->setOne({
-                        emoteElement->getEmote()->images.getImage(3.0),
-                        element->getTooltip(),
-                    });
-                }
-                else if (layeredEmoteElement)
-                {
-                    auto &layeredEmotes = layeredEmoteElement->getEmotes();
-                    // Should never be empty but ensure it
-                    if (!layeredEmotes.empty())
+                    std::vector<TooltipEntry> entries;
+                    entries.reserve(layeredEmotes.size());
+
+                    auto &emoteTooltips =
+                        layeredEmoteElement->getEmoteTooltips();
+
+                    // Someone performing some tomfoolery could put an emote with tens,
+                    // if not hundreds of zero-width emotes on a single emote. If the
+                    // tooltip may take up more than three rows, truncate everything else.
+                    bool truncating = false;
+                    size_t upperLimit = layeredEmotes.size();
+                    if (layeredEmotes.size() > TOOLTIP_EMOTE_ENTRIES_LIMIT)
                     {
-                        std::vector<TooltipEntry> entries;
-                        entries.reserve(layeredEmotes.size());
-
-                        auto &emoteTooltips =
-                            layeredEmoteElement->getEmoteTooltips();
-
-                        // Someone performing some tomfoolery could put an emote with tens,
-                        // if not hundreds of zero-width emotes on a single emote. If the
-                        // tooltip may take up more than three rows, truncate everything else.
-                        bool truncating = false;
-                        size_t upperLimit = layeredEmotes.size();
-                        if (layeredEmotes.size() > TOOLTIP_EMOTE_ENTRIES_LIMIT)
-                        {
-                            upperLimit = TOOLTIP_EMOTE_ENTRIES_LIMIT - 1;
-                            truncating = true;
-                        }
-
-                        for (size_t i = 0; i < upperLimit; ++i)
-                        {
-                            const auto &emote = layeredEmotes[i].ptr;
-                            if (i == 0)
-                            {
-                                // First entry gets a large image and full description
-                                entries.push_back({emote->images.getImage(3.0),
-                                                   emoteTooltips[i]});
-                            }
-                            else
-                            {
-                                // Every other entry gets a small image and just the emote name
-                                entries.push_back({emote->images.getImage(1.0),
-                                                   emote->name.string});
-                            }
-                        }
-
-                        if (truncating)
-                        {
-                            entries.push_back({nullptr, "..."});
-                        }
-
-                        auto style = layeredEmotes.size() > 2
-                                         ? TooltipStyle::Grid
-                                         : TooltipStyle::Vertical;
-                        tooltipWidget->set(entries, style);
+                        upperLimit = TOOLTIP_EMOTE_ENTRIES_LIMIT - 1;
+                        truncating = true;
                     }
-                }
-                else if (badgeElement)
-                {
-                    tooltipWidget->setOne({
-                        badgeElement->getEmote()->images.getImage(3.0),
-                        element->getTooltip(),
-                    });
+
+                    for (size_t i = 0; i < upperLimit; ++i)
+                    {
+                        const auto &emote = layeredEmotes[i].ptr;
+                        if (i == 0)
+                        {
+                            // First entry gets a large image and full description
+                            entries.push_back({showThumbnail
+                                                   ? emote->images.getImage(3.0)
+                                                   : nullptr,
+                                               emoteTooltips[i]});
+                        }
+                        else
+                        {
+                            // Every other entry gets a small image and just the emote name
+                            entries.push_back({showThumbnail
+                                                   ? emote->images.getImage(1.0)
+                                                   : nullptr,
+                                               emote->name.string});
+                        }
+                    }
+
+                    if (truncating)
+                    {
+                        entries.push_back({nullptr, "..."});
+                    }
+
+                    auto style = layeredEmotes.size() > 2
+                                     ? TooltipStyle::Grid
+                                     : TooltipStyle::Vertical;
+                    tooltipWidget->set(entries, style);
                 }
             }
-            else
+            else if (badgeElement)
             {
-                tooltipWidget->clearEntries();
+                tooltipWidget->setOne({
+                    showThumbnail
+                        ? badgeElement->getEmote()->images.getImage(3.0)
+                        : nullptr,
+                    element->getTooltip(),
+                });
             }
         }
         else

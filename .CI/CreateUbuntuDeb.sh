@@ -24,7 +24,12 @@ case "$ubuntu_release" in
         dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, qt5-image-formats-plugins, libboost-filesystem1.71.0"
         ;;
     22.04)
-        dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, qt5-image-formats-plugins, libboost-filesystem1.74.0"
+        if [ -n "$Qt6_DIR" ]; then
+            echo "Qt6_DIR set, assuming Qt6"
+            dependencies="libc6, libstdc++6, libqt6core6, libqt6widgets6, libqt6network6, libqt6core5compat6, libqt6svg6, qt6-qpa-plugins, qt6-image-formats-plugins"
+        else
+            dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, qt5-image-formats-plugins, libboost-filesystem1.74.0"
+        fi
         ;;
     *)
         echo "Unsupported Ubuntu release $ubuntu_release"
