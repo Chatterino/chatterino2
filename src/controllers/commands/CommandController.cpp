@@ -952,6 +952,36 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
+    this->registerCommand("/lowtrust", [](const QStringList &words,
+                                          ChannelPtr channel) {
+        QString target(words.value(1));
+
+        if (target.isEmpty())
+        {
+            if (channel->getType() == Channel::Type::Twitch &&
+                !channel->isEmpty())
+            {
+                target = channel->getName();
+            }
+            else
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /lowtrust [channel]. You can also use the command "
+                    "without arguments in any Twitch channel to open its "
+                    "suspicious user activity feed. Only the broadcaster and "
+                    "moderators have permission to view this feed."));
+                return "";
+            }
+        }
+
+        stripChannelName(target);
+        QDesktopServices::openUrl(QUrl(
+            QString("https://www.twitch.tv/popout/moderator/%1/low-trust-users")
+                .arg(target)));
+
+        return "";
+    });
+
     auto formatChattersError = [](HelixGetChattersError error,
                                   QString message) {
         using Error = HelixGetChattersError;

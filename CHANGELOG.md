@@ -11,6 +11,7 @@
 - Minor: Updated the look of the Black Theme to be more in line with the other themes. (#4523)
 - Minor: Reply context now censors blocked users. (#4502)
 - Minor: Added system message for empty mod list. (#4546)
+- Minor: Added `/lowtrust` command to open the suspicious user activity feed in browser. (#4542)
 - Bugfix: Fixed an issue where animated emotes would render on top of zero-width emotes. (#4314)
 - Bugfix: Fixed an issue where it was difficult to hover a zero-width emote. (#4314)
 - Bugfix: Fixed an issue where context-menu items for zero-width emotes displayed the wrong provider. (#4460)
@@ -32,6 +33,7 @@
 - Dev: Add scripting capabilities with Lua (#4341, #4504)
 - Dev: Conan 2.0 is now used instead of Conan 1.0. (#4417)
 - Dev: Added tests and benchmarks for `LinkParser`. (#4436)
+- Dev: Experimental builds with Qt 6 are now provided. (#4522)
 - Dev: Removed `CHATTERINO_TEST` definitions. (#4526)
 
 ## 2.4.2
