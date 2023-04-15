@@ -359,52 +359,63 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # allows for tags access
+
       - uses: actions/download-artifact@v3
+        name: Windows Qt5.15.2
         with:
           name: chatterino-windows-x86-64-Qt-5.15.2.zip
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
+        name: Windows Qt5.15 symbols
         with:
           name: chatterino-windows-x86-64-Qt-5.15.2-symbols.pdb.7z
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
+        name: Windows Qt6.5.0
         with:
-          name: chatterino-windows-x86-Qt-64-6.5.0.zip
+          name: chatterino-windows-x86-64-Qt-6.5.0.zip
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
+        name: Windows Qt6.5.0 symbols
         with:
           name: chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
+        name: Linux Qt5.12.12 AppImage
         with:
           name: Chatterino-x86_64-5.12.12.AppImage
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
+        name: Ubuntu 20.04 Qt5.12.12 deb
         with:
           name: Chatterino-ubuntu-20.04-Qt-5.12.12.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
+        name: Ubuntu 22.04 Qt5.15.2 deb
         with:
           name: Chatterino-ubuntu-22.04-Qt-5.15.2.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
+        name: Ubuntu 22.04 Qt6.2.4 deb
         with:
           name: Chatterino-ubuntu-22.04-Qt-6.2.4.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
+        name: macOS x86_64 Qt5.15.2 dmg
         with:
           name: chatterino-osx-Qt-5.15.2.dmg
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
+        name: macOS x86_64 Qt6.5.0 dmg
         with:
           name: chatterino-osx-Qt-6.5.0.dmg
           path: release-artifacts/
