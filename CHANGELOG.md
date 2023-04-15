@@ -10,6 +10,7 @@
 - Minor: Added better filter validation and error messages. (#4364)
 - Minor: Updated the look of the Black Theme to be more in line with the other themes. (#4523)
 - Minor: Reply context now censors blocked users. (#4502)
+- Minor: Added `/lowtrust` command to open the suspicious user activity feed in browser. (#4542)
 - Bugfix: Fixed an issue where animated emotes would render on top of zero-width emotes. (#4314)
 - Bugfix: Fixed an issue where it was difficult to hover a zero-width emote. (#4314)
 - Bugfix: Fixed an issue where context-menu items for zero-width emotes displayed the wrong provider. (#4460)
