@@ -37,6 +37,7 @@
 - Dev: Added tests and benchmarks for `LinkParser`. (#4436)
 - Dev: Experimental builds with Qt 6 are now provided. (#4522)
 - Dev: Removed `CHATTERINO_TEST` definitions. (#4526)
+- Dev: Builds for macOS now have `macos` in their name (previously: `osx`). (#4550)
 
 ## 2.4.2
 
