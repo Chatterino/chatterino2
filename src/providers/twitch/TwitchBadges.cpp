@@ -57,9 +57,22 @@ void TwitchBadges::loadTwitchBadges()
             this->loaded();
         },
         [this](auto error, auto message) {
-            qCWarning(chatterinoTwitch)
-                << "Error loading Twitch Badges from the Helix API:"
-                << static_cast<int>(error) << " - falling back to backup";
+            QString errorMessage("Failed to load global badges - ");
+
+            switch (error)
+            {
+                case HelixGetGlobalBadgesError::Forwarded: {
+                    errorMessage += message;
+                }
+                break;
+
+                // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                case HelixGetGlobalBadgesError::Unknown: {
+                    errorMessage += "An unknown error has occurred.";
+                }
+                break;
+            }
+            qCWarning(chatterinoTwitch) << errorMessage;
             QFile file(":/twitch-badges.json");
             if (!file.open(QFile::ReadOnly))
             {
