@@ -2475,6 +2475,7 @@ void Helix::getGlobalBadges(
     FailureCallback<HelixGetGlobalBadgesError, QString> failureCallback)
 {
     using Error = HelixGetGlobalBadgesError;
+
     this->makeRequest("chat/badges/global", QUrlQuery())
         .type(NetworkRequestType::Get)
         .onSuccess([successCallback](auto result) -> Outcome {
@@ -2519,6 +2520,7 @@ void Helix::getChannelBadges(
     FailureCallback<HelixGetChannelBadgesError, QString> failureCallback)
 {
     using Error = HelixGetChannelBadgesError;
+
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("broadcaster_id", broadcasterID);
 
