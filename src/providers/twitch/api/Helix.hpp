@@ -413,8 +413,8 @@ struct HelixBadgeSet {
         const auto jsonVersions = json.value("versions").toArray();
         for (const auto &version : jsonVersions)
         {
-            HelixBadgeVersion badge_version(version.toObject());
-            versions.push_back(badge_version);
+            HelixBadgeVersion badgeVersion(version.toObject());
+            versions.push_back(badgeVersion);
         }
     }
 };
