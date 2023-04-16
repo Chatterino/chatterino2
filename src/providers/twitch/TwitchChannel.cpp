@@ -1290,7 +1290,7 @@ void TwitchChannel::refreshBadges()
     getHelix()->getChannelBadges(
         this->roomId(),
         // successCallback
-        [this, weak = weakOf<Channel>(this)](auto result) {
+        [this, weak = weakOf<Channel>(this)](auto channelBadges) {
             auto shared = weak.lock();
             if (!shared)
             {
@@ -1298,7 +1298,6 @@ void TwitchChannel::refreshBadges()
                 return;
             }
 
-            auto channelBadges = HelixChannelBadges{result};
             auto badgeSets = this->badgeSets_.access();
 
             for (const auto &badgeSet : channelBadges.badgeSets)
