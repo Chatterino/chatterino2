@@ -410,8 +410,8 @@ struct HelixBadgeSet {
     explicit HelixBadgeSet(const QJsonObject &json)
         : setID(json.value("set_id").toString())
     {
-        const auto json_versions = json.value("versions").toArray();
-        for (const auto &version : json_versions)
+        const auto jsonVersions = json.value("versions").toArray();
+        for (const auto &version : jsonVersions)
         {
             HelixBadgeVersion badge_version(version.toObject());
             versions.push_back(badge_version);
