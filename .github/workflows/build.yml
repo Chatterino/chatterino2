@@ -348,8 +348,8 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v3
         with:
-          name: chatterino-osx-Qt-${{ matrix.qt-version }}.dmg
-          path: build/chatterino-osx-Qt-${{ matrix.qt-version }}.dmg
+          name: chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
+          path: build/chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
   create-release:
     needs: build
     runs-on: ubuntu-latest
@@ -411,13 +411,13 @@ jobs:
       - uses: actions/download-artifact@v3
         name: macOS x86_64 Qt5.15.2 dmg
         with:
-          name: chatterino-osx-Qt-5.15.2.dmg
+          name: chatterino-macos-Qt-5.15.2.dmg
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
         name: macOS x86_64 Qt6.5.0 dmg
         with:
-          name: chatterino-osx-Qt-6.5.0.dmg
+          name: chatterino-macos-Qt-6.5.0.dmg
           path: release-artifacts/
 
       - name: Copy flatpakref

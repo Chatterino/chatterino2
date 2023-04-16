@@ -28,5 +28,5 @@ echo "Entering python3 virtual environment"
 echo "Installing dmgbuild"
 python3 -m pip install dmgbuild
 echo "Running dmgbuild.."
-dmgbuild --settings ./../.CI/dmg-settings.py -D app=./chatterino.app Chatterino2 chatterino-osx-Qt-$1.dmg
+dmgbuild --settings ./../.CI/dmg-settings.py -D app=./chatterino.app Chatterino2 chatterino-macos-Qt-$1.dmg
 echo "Done!"
