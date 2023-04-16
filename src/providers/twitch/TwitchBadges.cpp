@@ -40,15 +40,16 @@ void TwitchBadges::loadTwitchBadges()
                 const auto &setID = badgeSet.setID;
                 for (const auto &version : badgeSet.versions)
                 {
-                    const auto &emote =
-                        Emote{{""},
-                              ImageSet{
-                                  Image::fromUrl(version.imageURL1x),
-                                  Image::fromUrl(version.imageURL2x, .5),
-                                  Image::fromUrl(version.imageURL4x, .25),
-                              },
-                              Tooltip{version.title},
-                              version.clickURL};
+                    const auto &emote = Emote{
+                        {""},
+                        ImageSet{
+                            Image::fromUrl(version.imageURL1x),
+                            Image::fromUrl(version.imageURL2x, .5),
+                            Image::fromUrl(version.imageURL4x, .25),
+                        },
+                        Tooltip{version.title},
+                        version.clickURL,
+                    };
                     (*badgeSets)[setID][version.id] =
                         std::make_shared<Emote>(emote);
                 }
@@ -117,7 +118,8 @@ void TwitchBadges::parseTwitchBadges(QJsonObject root)
                         {versionObj.value("image_url_4x").toString()}, .25),
                 },
                 Tooltip{versionObj.value("title").toString()},
-                Url{versionObj.value("click_url").toString()}};
+                Url{versionObj.value("click_url").toString()},
+            };
             // "title"
             // "clickAction"
 
