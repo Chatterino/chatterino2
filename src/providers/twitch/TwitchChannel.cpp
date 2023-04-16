@@ -1306,7 +1306,7 @@ void TwitchChannel::refreshBadges()
                 const auto &setID = badgeSet.setID;
                 for (const auto &version : badgeSet.versions)
                 {
-                    const auto &emote = Emote{
+                    auto emote = Emote{
                         {""},
                         ImageSet{
                             Image::fromUrl(version.imageURL1x),
