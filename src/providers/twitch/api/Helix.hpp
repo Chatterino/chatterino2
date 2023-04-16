@@ -392,7 +392,7 @@ struct HelixBadgeVersion {
     QString title;
     Url clickURL;
 
-    explicit HelixBadgeVersion(QJsonObject jsonObject)
+    explicit HelixBadgeVersion(const QJsonObject &jsonObject)
         : id(jsonObject.value("id").toString())
         , imageURL1x(Url{jsonObject.value("image_url_1x").toString()})
         , imageURL2x(Url{jsonObject.value("image_url_2x").toString()})
