@@ -2501,9 +2501,9 @@ void Helix::getGlobalBadges(
                 break;
 
                 default: {
-                    qCDebug(chatterinoTwitch)
-                        << "Unhandled error data:" << result.status()
-                        << result.getData() << obj;
+                    qCWarning(chatterinoTwitch)
+                        << "Helix global badges, unhandled error data:"
+                        << result.status() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -2549,9 +2549,9 @@ void Helix::getChannelBadges(
                 break;
 
                 default: {
-                    qCDebug(chatterinoTwitch)
-                        << "Unhandled error data:" << result.status()
-                        << result.getData() << obj;
+                    qCWarning(chatterinoTwitch)
+                        << "Helix channel badges, unhandled error data:"
+                        << result.status() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
