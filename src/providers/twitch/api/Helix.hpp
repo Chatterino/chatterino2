@@ -419,14 +419,14 @@ struct HelixBadgeSet {
 };
 
 struct HelixGlobalBadges {
-    std::vector<HelixBadgeSet> data;
+    std::vector<HelixBadgeSet> badgeSets;
 
     explicit HelixGlobalBadges(const QJsonObject &jsonObject)
     {
         const auto &data = jsonObject.value("data").toArray();
         for (const auto &set : data)
         {
-            this->data.emplace_back(set.toObject());
+            this->badgeSets.emplace_back(set.toObject());
         }
     }
 };

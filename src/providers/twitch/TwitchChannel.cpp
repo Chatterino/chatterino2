@@ -1294,7 +1294,7 @@ void TwitchChannel::refreshBadges()
             auto channelBadges = HelixChannelBadges{result};
             auto badgeSets = this->badgeSets_.access();
 
-            for (const auto &badgeSet : channelBadges.data)
+            for (const auto &badgeSet : channelBadges.badgeSets)
             {
                 const auto &setID = badgeSet.setID;
                 for (const auto &version : badgeSet.versions)
