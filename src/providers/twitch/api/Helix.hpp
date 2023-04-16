@@ -674,12 +674,7 @@ enum class HelixGetGlobalBadgesError {
     Forwarded,
 };
 
-enum class HelixGetChannelBadgesError {
-    Unknown,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
+using HelixGetChannelBadgesError = HelixGetGlobalBadgesError;
 
 class IHelix
 {
