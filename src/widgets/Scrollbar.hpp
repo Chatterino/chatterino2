@@ -47,6 +47,7 @@ public:
     qreal getSmallChange() const;
     qreal getDesiredValue() const;
     qreal getCurrentValue() const;
+    qreal getRelativeCurrentValue() const;
 
     // offset the desired value without breaking smooth scolling
     void offset(qreal value);

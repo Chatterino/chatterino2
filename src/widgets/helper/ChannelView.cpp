@@ -25,7 +25,6 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Clamp.hpp"
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/Helpers.hpp"
@@ -1279,9 +1278,7 @@ void ChannelView::drawMessages(QPainter &painter)
 {
     auto &messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start = size_t(clamp(
-        this->scrollBar_->getCurrentValue() - this->scrollBar_->getMinimum(),
-        qreal(0), this->scrollBar_->getCurrentValue()));
+    size_t start = size_t(this->scrollBar_->getRelativeCurrentValue());
 
     if (start >= messagesSnapshot.size())
     {
@@ -1289,9 +1286,7 @@ void ChannelView::drawMessages(QPainter &painter)
     }
 
     int y = int(-(messagesSnapshot[start].get()->getHeight() *
-                  (fmod(this->scrollBar_->getCurrentValue() -
-                            this->scrollBar_->getMinimum(),
-                        1))));
+                  (fmod(this->scrollBar_->getRelativeCurrentValue(), 1))));
 
     MessageLayout *end = nullptr;
     bool windowFocused = this->window() == QApplication::activeWindow();
@@ -2803,8 +2798,7 @@ bool ChannelView::tryGetMessageAt(QPoint p,
 {
     auto &messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start =
-        this->scrollBar_->getCurrentValue() - this->scrollBar_->getMinimum();
+    size_t start = this->scrollBar_->getRelativeCurrentValue();
 
     if (start >= messagesSnapshot.size())
     {
@@ -2812,9 +2806,7 @@ bool ChannelView::tryGetMessageAt(QPoint p,
     }
 
     int y = -(messagesSnapshot[start]->getHeight() *
-              (fmod(this->scrollBar_->getCurrentValue() -
-                        this->scrollBar_->getMinimum(),
-                    1)));
+              (fmod(this->scrollBar_->getRelativeCurrentValue(), 1)));
 
     for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
