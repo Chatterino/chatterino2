@@ -190,6 +190,26 @@ void SoundController::play(const QUrl &sound)
         return;
     }
 
+    auto deviceState = ma_device_get_state(this->device.get());
+
+    if (deviceState != ma_device_state_started)
+    {
+        // Device state is not as it should be, try to restart it
+        qCWarning(chatterinoSound)
+            << "Sound device was not started, attempting to restart it"
+            << deviceState;
+
+        auto result = ma_device_start(this->device.get());
+        if (result != MA_SUCCESS)
+        {
+            qCWarning(chatterinoSound)
+                << "Failed to start the sound device" << result;
+            return;
+        }
+
+        qCInfo(chatterinoSound) << "Successfully restarted the sound device";
+    }
+
     if (sound.isLocalFile())
     {
         auto soundPath = sound.toLocalFile();
