@@ -1309,7 +1309,7 @@ void TwitchChannel::refreshBadges()
                     auto emote = Emote{
                         {""},
                         ImageSet{
-                            Image::fromUrl(version.imageURL1x),
+                            Image::fromUrl(version.imageURL1x, 1),
                             Image::fromUrl(version.imageURL2x, .5),
                             Image::fromUrl(version.imageURL4x, .25),
                         },
