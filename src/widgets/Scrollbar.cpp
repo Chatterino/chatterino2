@@ -148,14 +148,12 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
 
     bool noAnimation = false;
 
-    if (std::abs(this->currentValue_ + this->smoothScrollingOffset_ - value) >
-        0.0001)
+    if (std::abs(this->currentValue_ - value) > 0.0001)
     {
         if (animated)
         {
             this->currentValueAnimation_.stop();
-            this->currentValueAnimation_.setStartValue(
-                this->currentValue_ + this->smoothScrollingOffset_);
+            this->currentValueAnimation_.setStartValue(this->currentValue_);
 
             //            if (((this->getMaximum() - this->getLargeChange()) -
             //            value) <= 0.01) {
@@ -163,7 +161,6 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
             //            }
 
             this->currentValueAnimation_.setEndValue(value);
-            this->smoothScrollingOffset_ = 0;
             this->atBottom_ = ((this->getMaximum() - this->getLargeChange()) -
                                value) <= 0.0001;
             this->currentValueAnimation_.start();
@@ -177,7 +174,6 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
             }
             else
             {
-                this->smoothScrollingOffset_ = 0;
                 this->desiredValue_ = value;
                 this->currentValueAnimation_.stop();
                 this->atBottom_ =
@@ -189,7 +185,6 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
         }
     }
 
-    this->smoothScrollingOffset_ = 0;
     this->desiredValue_ = value;
 
     this->desiredValueChanged_.invoke();
@@ -222,7 +217,7 @@ qreal Scrollbar::getSmallChange() const
 
 qreal Scrollbar::getDesiredValue() const
 {
-    return this->desiredValue_ + this->smoothScrollingOffset_;
+    return this->desiredValue_;
 }
 
 qreal Scrollbar::getCurrentValue() const
@@ -232,14 +227,7 @@ qreal Scrollbar::getCurrentValue() const
 
 void Scrollbar::offset(qreal value)
 {
-    if (this->currentValueAnimation_.state() == QPropertyAnimation::Running)
-    {
-        this->smoothScrollingOffset_ += value;
-    }
-    else
-    {
-        this->setDesiredValue(this->getDesiredValue() + value);
-    }
+    this->setDesiredValue(this->desiredValue_ + value);
 }
 
 pajlada::Signals::NoArgSignal &Scrollbar::getCurrentValueChanged()
@@ -255,8 +243,7 @@ pajlada::Signals::NoArgSignal &Scrollbar::getDesiredValueChanged()
 void Scrollbar::setCurrentValue(qreal value)
 {
     value = std::max(this->minimum_,
-                     std::min(this->maximum_ - this->largeChange_,
-                              value + this->smoothScrollingOffset_));
+                     std::min(this->maximum_ - this->largeChange_, value));
 
     if (std::abs(this->currentValue_ - value) > 0.0001)
     {

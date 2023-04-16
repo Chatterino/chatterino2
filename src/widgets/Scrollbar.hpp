@@ -97,7 +97,6 @@ private:
     qreal smallChange_ = 5;
     qreal desiredValue_ = 0;
     qreal currentValue_ = 0;
-    qreal smoothScrollingOffset_ = 0;
 
     pajlada::Signals::NoArgSignal currentValueChanged_;
     pajlada::Signals::NoArgSignal desiredValueChanged_;
