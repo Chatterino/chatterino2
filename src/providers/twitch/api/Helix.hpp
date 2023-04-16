@@ -420,7 +420,7 @@ struct HelixBadgeSet {
 
 struct HelixGlobalBadges {
     std::vector<HelixBadgeSet> data;
-    HelixGlobalBadges() = default;
+
     explicit HelixGlobalBadges(const QJsonObject &jsonObject)
     {
         const auto &data = jsonObject.value("data").toArray();
