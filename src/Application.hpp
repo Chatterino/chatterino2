@@ -20,6 +20,9 @@ class HotkeyController;
 class IUserDataController;
 class UserDataController;
 class SoundController;
+#ifdef CHATTERINO_HAVE_PLUGINS
+class PluginController;
+#endif
 
 class Theme;
 class WindowManager;
@@ -99,6 +102,10 @@ public:
     SeventvPersonalEmotes *const seventvPersonalEmotes{};
     UserDataController *const userData{};
     SoundController *const sound{};
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+    PluginController *const plugins{};
+#endif
 
     /*[[deprecated]]*/ Logging *const logging{};
 
