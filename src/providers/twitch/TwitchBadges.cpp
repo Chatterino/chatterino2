@@ -41,7 +41,7 @@ void TwitchBadges::loadTwitchBadges()
                 for (const auto &version : badgeSet.versions)
                 {
                     const auto &emote = Emote{
-                        {""},
+                        EmoteName{},
                         ImageSet{
                             Image::fromUrl(version.imageURL1x, 1),
                             Image::fromUrl(version.imageURL2x, .5),
