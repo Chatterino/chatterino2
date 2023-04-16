@@ -506,8 +506,8 @@ void Scrollbar::updateScroll()
 
     this->thumbRect_ = QRect(
         0,
-        int((this->currentValue_ - this->minimum_) / div * this->trackHeight_) +
-            1 + this->buttonHeight_,
+        int((this->getRelativeCurrentValue()) / div * this->trackHeight_) + 1 +
+            this->buttonHeight_,
         this->width(),
         int(this->largeChange_ / div * this->trackHeight_) + MIN_THUMB_HEIGHT);
 
