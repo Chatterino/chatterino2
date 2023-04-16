@@ -13,6 +13,7 @@
 - Minor: Added system message for empty mod list. (#4546)
 - Minor: Added `/lowtrust` command to open the suspicious user activity feed in browser. (#4542)
 - Minor: Migrated badges to Helix API. (#4537)
+- Bugfix: Fixed an issue where Chatterino could lose track of the sound device in certain scenarios. (#4549)
 - Bugfix: Fixed an issue where animated emotes would render on top of zero-width emotes. (#4314)
 - Bugfix: Fixed an issue where it was difficult to hover a zero-width emote. (#4314)
 - Bugfix: Fixed an issue where context-menu items for zero-width emotes displayed the wrong provider. (#4460)
