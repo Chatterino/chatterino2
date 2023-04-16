@@ -1290,7 +1290,14 @@ void TwitchChannel::refreshBadges()
     getHelix()->getChannelBadges(
         this->roomId(),
         // successCallback
-        [this](auto result) {
+        [this, weak = weakOf<Channel>(this)](auto result) {
+            auto shared = weak.lock();
+            if (!shared)
+            {
+                // The channel has been closed inbetween us making the request and the request finishing
+                return;
+            }
+
             auto channelBadges = HelixChannelBadges{result};
             auto badgeSets = this->badgeSets_.access();
 
@@ -1314,7 +1321,14 @@ void TwitchChannel::refreshBadges()
             }
         },
         // failureCallback
-        [this](auto error, auto message) {
+        [this, weak = weakOf<Channel>(this)](auto error, auto message) {
+            auto shared = weak.lock();
+            if (!shared)
+            {
+                // The channel has been closed inbetween us making the request and the request finishing
+                return;
+            }
+
             QString errorMessage("Failed to load channel badges - ");
 
             switch (error)
