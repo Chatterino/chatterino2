@@ -391,7 +391,7 @@ jobs:
           mv chatterino-macos-Qt-6.5.0.dmg EXPERIMENTAL-chatterino-macos-Qt-6.5.0-dmg
           mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
           mv chatterino-windows-x86-64-Qt-6.5.0.zip EXPERIMENTAL-chatterino-windows-x86-64-Qt-6.5.0.zip
-          mv chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z EXPERIMENTAL-chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z
+          mv chatterino-Qt-6.5.0.pdb.7z EXPERIMENTAL-chatterino-Qt-6.5.0.pdb.7z
         working-directory: release-artifacts
         shell: bash
 

@@ -35,7 +35,7 @@
 - Dev: Add scripting capabilities with Lua (#4341, #4504)
 - Dev: Conan 2.0 is now used instead of Conan 1.0. (#4417)
 - Dev: Added tests and benchmarks for `LinkParser`. (#4436)
-- Dev: Experimental builds with Qt 6 are now provided. (#4522, #4551, #4553, #4554)
+- Dev: Experimental builds with Qt 6 are now provided. (#4522, #4551, #4553, #4554, #4555)
 - Dev: Removed `CHATTERINO_TEST` definitions. (#4526)
 - Dev: Builds for macOS now have `macos` in their name (previously: `osx`). (#4550)
 
