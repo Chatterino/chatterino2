@@ -63,7 +63,7 @@ public:
         builder.append(
             std::make_unique<TextElement>(text, MessageElementFlag::Text));
         this->layout = std::make_unique<MessageLayout>(builder.release());
-        this->layout->layout(WIDTH, 1, MessageElementFlag::Text, false);
+        this->layout->layout(WIDTH, 1, 1, MessageElementFlag::Text, false);
     }
 
     MockApplication mockApplication;

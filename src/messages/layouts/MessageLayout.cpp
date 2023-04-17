@@ -74,7 +74,8 @@ int MessageLayout::getWidth() const
 
 // Layout
 // return true if redraw is required
-bool MessageLayout::layout(int width, float scale, MessageElementFlags flags,
+bool MessageLayout::layout(int width, float scale, float imageScale,
+                           MessageElementFlags flags,
                            bool shouldInvalidateBuffer)
 {
     //    BenchmarkGuard benchmark("MessageLayout::layout()");
@@ -106,6 +107,8 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags,
     // check if dpi changed
     layoutRequired |= this->scale_ != scale;
     this->scale_ = scale;
+    layoutRequired |= this->imageScale_ != imageScale;
+    this->imageScale_ = imageScale;
 
     if (!layoutRequired)
     {
@@ -148,7 +151,8 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
     bool hideSimilar = getSettings()->hideSimilar;
     bool hideReplies = !flags.has(MessageElementFlag::RepliedMessage);
 
-    this->container_.beginLayout(width, this->scale_, messageFlags);
+    this->container_.beginLayout(width, this->scale_, this->imageScale_,
+                                 messageFlags);
 
     for (const auto &element : this->message_->elements)
     {
@@ -288,16 +292,11 @@ QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width)
     }
 
     // Create new buffer
-#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
     this->buffer_ = std::make_unique<QPixmap>(
         int(width * painter.device()->devicePixelRatioF()),
         int(this->container_.getHeight() *
             painter.device()->devicePixelRatioF()));
     this->buffer_->setDevicePixelRatio(painter.device()->devicePixelRatioF());
-#else
-    this->buffer_ = std::make_unique<QPixmap>(
-        width, std::max(16, this->container_.getHeight()));
-#endif
 
     this->bufferValid_ = false;
     DebugCount::increase("message drawing buffers");

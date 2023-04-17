@@ -56,8 +56,8 @@ public:
 
     MessageLayoutFlags flags;
 
-    bool layout(int width, float scale_, MessageElementFlags flags,
-                bool shouldInvalidateBuffer);
+    bool layout(int width, float scale_, float imageScale,
+                MessageElementFlags flags, bool shouldInvalidateBuffer);
 
     // Painting
     MessagePaintResult paint(const MessagePaintContext &ctx);
@@ -128,6 +128,7 @@ private:
     int currentLayoutWidth_ = -1;
     int layoutState_ = -1;
     float scale_ = -1;
+    float imageScale_ = -1.F;
     MessageElementFlags currentWordFlags_;
 
 #ifdef FOURTF
