@@ -111,7 +111,7 @@ jobs:
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          modules: qt5compat
+          modules: qt5compat qtimageformats
           version: ${{ matrix.qt-version }}
 
       # WINDOWS
@@ -342,15 +342,15 @@ jobs:
           fetch-depth: 0 # allows for tags access
 
       - uses: actions/download-artifact@v3
-        name: Windows Qt5.15.2
+        name: macOS x86_64 Qt6.5.0 dmg
         with:
-          name: chatterino-windows-x86-64-Qt-5.15.2.zip
+          name: chatterino-macos-Qt-6.5.0.dmg
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
-        name: Windows Qt5.15 symbols
+        name: Ubuntu 22.04 Qt6.2.4 deb
         with:
-          name: chatterino-windows-x86-64-Qt-5.15.2-symbols.pdb.7z
+          name: Chatterino-ubuntu-22.04-Qt-6.2.4.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
@@ -365,16 +365,33 @@ jobs:
           name: chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z
           path: release-artifacts/
 
+      - name: Mark experimental
+        run: |
+          ls -l
+          # Mark all Qt6 builds as EXPERIMENTAL
+          mv chatterino-macos-Qt-6.5.0.dmg EXPERIMENTAL-chatterino-macos-Qt-6.5.0-dmg
+          mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
+          mv chatterino-windows-x86-64-Qt-6.5.0.zip EXPERIMENTAL-chatterino-windows-x86-64-Qt-6.5.0.zip
+          mv chatterino-Qt-6.5.0.pdb.7z EXPERIMENTAL-chatterino-Qt-6.5.0.pdb.7z
+        working-directory: release-artifacts
+        shell: bash
+
+      - uses: actions/download-artifact@v3
+        name: Windows Qt5.15.2
+        with:
+          name: chatterino-windows-x86-64-Qt-5.15.2.zip
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        name: Windows Qt5.15 symbols
+        with:
+          name: chatterino-windows-x86-64-Qt-5.15.2-symbols.pdb.7z
+          path: release-artifacts/
+
       - uses: actions/download-artifact@v3
         name: Ubuntu 22.04 Qt5.15.2 deb
         with:
           name: Chatterino-ubuntu-22.04-Qt-5.15.2.deb
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v3
-        name: Ubuntu 22.04 Qt6.2.4 deb
-        with:
-          name: Chatterino-ubuntu-22.04-Qt-6.2.4.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
@@ -383,21 +400,9 @@ jobs:
           name: chatterino-macos-Qt-5.15.2.dmg
           path: release-artifacts/
 
-      - uses: actions/download-artifact@v3
-        name: macOS x86_64 Qt6.5.0 dmg
-        with:
-          name: chatterino-macos-Qt-6.5.0.dmg
-          path: release-artifacts/
-
       - name: Copy flatpakref
         run: |
           cp .CI/chatterino-nightly.flatpakref release-artifacts/
-        shell: bash
-
-      - name: Mark experimental
-        run: |
-          for file in *; do mv -n "$file" "$(echo $file | sed 's/\(6\(\.[[:digit:]]\)\{2\}\)/\1-EXPERIMENTAL/g')"; done
-        working-directory: release-artifacts
         shell: bash
 
       - name: Create release
