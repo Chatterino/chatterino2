@@ -333,7 +333,7 @@ public:
 
             if (from != to)
             {
-                this->moveRow(this->index(from, to), from, parent, to);
+                this->moveRow(this->index(from, 0), from, parent, to);
             }
 
             // We return false since we remove items ourselves.
