@@ -28,7 +28,7 @@ namespace {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         // From qfont.cpp
         // https://github.com/qt/qtbase/blob/589c6d066f84833a7c3dda1638037f4b2e91b7aa/src/gui/text/qfont.cpp#L143-L169
-        static constexpr std::array<std::array<int, 2>, 9> legacyToOpenTypeMap({
+        static constexpr std::array<std::array<int, 2>, 9> legacyToOpenTypeMap{{
             {0, QFont::Thin},
             {12, QFont::ExtraLight},
             {25, QFont::Light},
@@ -38,7 +38,7 @@ namespace {
             {75, QFont::Bold},
             {81, QFont::ExtraBold},
             {87, QFont::Black},
-        });
+        }};
 
         const int target = getSettings()->boldScale.getValue();
 
