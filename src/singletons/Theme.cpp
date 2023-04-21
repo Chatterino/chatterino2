@@ -3,17 +3,21 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 
 #include <QColor>
+#include <QDir>
 #include <QFile>
 #include <QJsonDocument>
-#include <QJsonObject>
 #include <QSet>
 
 #include <cmath>
 
 namespace {
+
+using namespace chatterino;
+
 void parseInto(const QJsonObject &obj, const QLatin1String &key, QColor &color)
 {
     const auto &jsonValue = obj[key];
@@ -139,62 +143,161 @@ void parseColors(const QJsonObject &root, chatterino::Theme &theme)
 }
 #undef parseColor
 
-QString getThemePath(const QString &name)
+/**
+ * Load the given theme descriptor from its path
+ *
+ * Returns a JSON object containing theme data if the theme is valid, otherwise nullopt
+ *
+ * NOTE: No theme validation is done by this function
+ **/
+std::optional<QJsonObject> loadTheme(const ThemeDescriptor &theme)
 {
-    static QSet<QString> knownThemes = {"White", "Light", "Dark", "Black"};
-
-    if (knownThemes.contains(name))
+    QFile file(theme.path);
+    if (!file.open(QFile::ReadOnly))
     {
-        return QStringLiteral(":/themes/%1.json").arg(name);
+        qCWarning(chatterinoTheme)
+            << "Failed to open" << file.fileName() << "at" << theme.path;
+        return std::nullopt;
     }
-    return name;
+
+    QJsonParseError error{};
+    auto json = QJsonDocument::fromJson(file.readAll(), &error);
+    if (!json.isObject())
+    {
+        qCWarning(chatterinoTheme) << "Failed to parse" << file.fileName()
+                                   << "error:" << error.errorString();
+        return std::nullopt;
+    }
+
+    // TODO: Validate JSON schema?
+
+    return json.object();
 }
 
 }  // namespace
 
 namespace chatterino {
 
+const std::map<QString, ThemeDescriptor> Theme::builtInThemes{
+    {"White", {":/themes/White.json", false}},
+    {"Light", {":/themes/Light.json", false}},
+    {"Dark", {":/themes/Dark.json", false}},
+    {"Black", {":/themes/Black.json", false}},
+};
+
+const ThemeDescriptor Theme::fallbackTheme = Theme::builtInThemes.at("Dark");
+
 bool Theme::isLightTheme() const
 {
     return this->isLight_;
 }
 
-Theme::Theme()
+void Theme::initialize(Settings &settings, Paths &paths)
 {
-    this->update();
-
-    this->themeName.connectSimple(
-        [this](auto) {
+    this->themeName.connect(
+        [this](auto themeName) {
+            qCDebug(chatterinoTheme) << "Theme updated to" << themeName;
             this->update();
         },
         false);
+
+    this->loadAvailableThemes();
+
+    this->update();
 }
 
 void Theme::update()
 {
-    this->parse();
+    auto theme = this->availableThemes_.find(this->themeName);
+
+    std::optional<QJsonObject> themeJSON;
+
+    if (theme == this->availableThemes_.end())
+    {
+        qCWarning(chatterinoTheme)
+            << "Theme" << this->themeName
+            << "not found, falling back to the fallback theme";
+
+        themeJSON = loadTheme(fallbackTheme);
+    }
+    else
+    {
+        themeJSON = loadTheme(theme->second);
+
+        if (!themeJSON)
+        {
+            qCWarning(chatterinoTheme)
+                << "Theme" << this->themeName
+                << "not valid, falling back to the fallback theme";
+
+            // Parsing the theme failed, fall back
+            themeJSON = loadTheme(fallbackTheme);
+        }
+    }
+
+    if (!themeJSON)
+    {
+        qCWarning(chatterinoTheme)
+            << "Failed to load" << this->themeName << "or the fallback theme";
+        return;
+    }
+
+    this->parseFrom(*themeJSON);
+
     this->updated.invoke();
 }
 
-void Theme::parse()
+QStringList Theme::availableThemeNames() const
 {
-    QFile file(getThemePath(this->themeName));
-    if (!file.open(QFile::ReadOnly))
+    QStringList themeNames;
+
+    for (const auto &[name, theme] : this->availableThemes_)
     {
-        qCWarning(chatterinoTheme) << "Failed to open" << file.fileName();
-        return;
+        // NOTE: This check could also use `Theme::builtInThemes.contains(name)` instead
+        if (theme.custom)
+        {
+            themeNames.append(QString("Custom: %1").arg(name));
+        }
+        else
+        {
+            themeNames.append(name);
+        }
     }
 
-    QJsonParseError error{};
-    auto json = QJsonDocument::fromJson(file.readAll(), &error);
-    if (json.isNull())
-    {
-        qCWarning(chatterinoTheme) << "Failed to parse" << file.fileName()
-                                   << "error:" << error.errorString();
-        return;
-    }
+    return themeNames;
+}
 
-    this->parseFrom(json.object());
+void Theme::loadAvailableThemes()
+{
+    this->availableThemes_ = Theme::builtInThemes;
+
+    auto dir = QDir(getPaths()->themesDirectory);
+    for (const auto &info :
+         dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Name))
+    {
+        if (!info.isFile())
+        {
+            continue;
+        }
+
+        if (!info.fileName().endsWith(".json"))
+        {
+            continue;
+        }
+
+        auto themeDescriptor = ThemeDescriptor{info.absoluteFilePath(), true};
+
+        auto theme = loadTheme(themeDescriptor);
+        if (!theme)
+        {
+            qCWarning(chatterinoTheme) << "Failed to parse theme at" << info;
+            continue;
+        }
+
+        auto themeName = info.baseName();
+
+        this->availableThemes_.emplace(themeName, themeDescriptor);
+    }
 }
 
 void Theme::parseFrom(const QJsonObject &root)
