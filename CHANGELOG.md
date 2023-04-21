@@ -26,7 +26,6 @@
 - Bugfix: Fixed a memory leak that occurred when loading message history. This was mostly noticeable with unstable internet connections where reconnections were frequent or long-running instances of Chatterino. (#4499)
 - Bugfix: Fixed Twitch channel-specific filters not being applied correctly. (#4529)
 - Bugfix: Fixed emote & badge tooltips not showing up when thumbnails were hidden. (#4509)
-- Bugfix: Fixed a crash when dragging rows in table-views. (#4567)
 - Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
 - Dev: Themes are now stored as JSON files in `resources/themes`. (#4471, #4533)
 - Dev: Ignore unhandled BTTV user-events. (#4438)
@@ -39,6 +38,7 @@
 - Dev: Experimental builds with Qt 6 are now provided. (#4522, #4551, #4553, #4554, #4555, #4556)
 - Dev: Removed `CHATTERINO_TEST` definitions. (#4526)
 - Dev: Builds for macOS now have `macos` in their name (previously: `osx`). (#4550)
+- Dev: Fixed a crash when dragging rows in table-views in builds with Qt 6. (#4567)
 
 ## 2.4.2
 
