@@ -6,16 +6,33 @@
 
 #include <pajlada/settings/setting.hpp>
 #include <QColor>
+#include <QJsonObject>
 #include <QPixmap>
+
+#include <map>
+#include <optional>
 
 namespace chatterino {
 
 class WindowManager;
 
+struct ThemeDescriptor {
+    // Path to the theme on disk
+    // Can be a Qt resource path
+    QString path;
+
+    bool custom;
+};
+
 class Theme final : public Singleton
 {
 public:
-    Theme();
+    static const std::map<QString, ThemeDescriptor> builtInThemes;
+
+    // The built in theme that will be used if some theme parsing fails
+    static const ThemeDescriptor fallbackTheme;
+
+    void initialize(Settings &settings, Paths &paths) final;
 
     bool isLightTheme() const;
 
@@ -114,6 +131,13 @@ public:
     void normalizeColor(QColor &color) const;
     void update();
 
+    /**
+     * Return a list of available themes
+     *
+     * Custom themes are prefixed with "Custom: "
+     **/
+    QStringList availableThemeNames() const;
+
     pajlada::Signals::NoArgSignal updated;
 
     QStringSetting themeName{"/appearance/theme/name", "Dark"};
@@ -121,7 +145,15 @@ public:
 private:
     bool isLight_ = false;
 
-    void parse();
+    std::map<QString, ThemeDescriptor> availableThemes_;
+
+    /**
+     * Figure out which themes are available in the Themes directory
+     *
+     * NOTE: This is currently not built to be reloadable
+     **/
+    void loadAvailableThemes();
+
     void parseFrom(const QJsonObject &root);
 
     pajlada::Signals::NoArgSignal repaintVisibleChatWidgets_;

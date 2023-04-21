@@ -114,8 +114,27 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     auto &s = *getSettings();
 
     layout.addTitle("Interface");
-    layout.addDropdown("Theme", {"White", "Light", "Dark", "Black"},
-                       getApp()->themes->themeName);
+
+    // NOTE: Available theme names are only initialized on startup here
+    QStringList availableThemeNames = getApp()->themes->availableThemeNames();
+
+    layout.addDropdown<QString>(
+        "Theme", availableThemeNames, getApp()->themes->themeName,
+        [](auto val) {
+            if (!Theme::builtInThemes.contains(val))
+            {
+                return QString("Custom: %1").arg(val);
+            }
+
+            return val;
+        },
+        [](const DropdownArgs &args) {
+            // Remove "Custom: " prefix from the dropdown
+            // XXX: This should be a regex or "trim prefix"
+            QString value = args.value;
+            return value.replace("Custom: ", "");
+        });
+
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},
         getApp()->fonts->chatFontFamily,
