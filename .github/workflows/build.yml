@@ -400,11 +400,6 @@ jobs:
           name: chatterino-macos-Qt-5.15.2.dmg
           path: release-artifacts/
 
-      - name: Copy flatpakref
-        run: |
-          cp .CI/chatterino-nightly.flatpakref release-artifacts/
-        shell: bash
-
       - name: Create release
         uses: ncipollo/release-action@v1.12.0
         with:
