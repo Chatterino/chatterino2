@@ -25,7 +25,7 @@ Version::Version()
         QString(FROM_EXTERNAL_DEFINE(CHATTERINO_CMAKE_GEN_DATE)).remove('"');
 #endif
 
-    this->fullVersion_ = "TEST Chatterino ";
+    this->fullVersion_ = "TEST 1 Chatterino ";
     if (Modes::instance().isNightly)
     {
         this->fullVersion_ += "Nightly ";
