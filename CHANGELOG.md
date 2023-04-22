@@ -4,6 +4,7 @@
 
 ### Dankerino
 
+- Major breaking: Code clean up - removed 7tv animated avatars (#141)
 - Major: Code cleanup - removed broken Dankerino badges (#137)
 - Minor: Code cleanup - updated image code to match upstream, removed 4x (#137)
 
