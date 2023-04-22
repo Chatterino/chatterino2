@@ -67,7 +67,7 @@ namespace {
 
 LinkParser::LinkParser(const QString &unparsedString)
 {
-    this->match_ = unparsedString;
+    ParsedLink result;
 
     // This is not implemented with a regex to increase performance.
     // We keep removing parts of the url until there's either nothing left or we fail.
@@ -79,11 +79,13 @@ LinkParser::LinkParser(const QString &unparsedString)
     if (l.startsWith("https://", Qt::CaseInsensitive))
     {
         hasHttp = true;
+        result.protocol = l.mid(0, 8);
         l = l.mid(8);
     }
     else if (l.startsWith("http://", Qt::CaseInsensitive))
     {
         hasHttp = true;
+        result.protocol = l.mid(0, 7);
         l = l.mid(7);
     }
 
@@ -92,8 +94,10 @@ LinkParser::LinkParser(const QString &unparsedString)
 
     // Host `a.b.c.com`
     QStringRef host = l;
+    ParsedLink::StringView rest;
     bool lastWasDot = true;
     bool inIpv6 = false;
+    bool hasMatch = false;
 
     for (int i = 0; i < l.size(); i++)
     {
@@ -111,24 +115,28 @@ LinkParser::LinkParser(const QString &unparsedString)
         if (l[i] == ':' && !inIpv6)
         {
             host = l.mid(0, i);
+            rest = l.mid(i);
             l = l.mid(i + 1);
             goto parsePort;
         }
         else if (l[i] == '/')
         {
             host = l.mid(0, i);
+            rest = l.mid(i);
             l = l.mid(i + 1);
             goto parsePath;
         }
         else if (l[i] == '?')
         {
             host = l.mid(0, i);
+            rest = l.mid(i);
             l = l.mid(i + 1);
             goto parseQuery;
         }
         else if (l[i] == '#')
         {
             host = l.mid(0, i);
+            rest = l.mid(i);
             l = l.mid(i + 1);
             goto parseAnchor;
         }
@@ -176,32 +184,28 @@ parseAnchor:
 
 done:
     // check host
-    this->hasMatch_ = isValidHostname(host) || isValidIpv4(host)
+    hasMatch = isValidHostname(host) || isValidIpv4(host)
 #ifdef C_MATCH_IPV6_LINK
 
-                      || (hasHttp && isValidIpv6(host))
+               || (hasHttp && isValidIpv6(host))
 #endif
         ;
 
-    if (this->hasMatch_)
+    if (hasMatch)
     {
-        this->match_ = unparsedString;
+        result.host = host;
+        result.rest = rest;
+        result.source = unparsedString;
+        this->result_ = std::move(result);
     }
 
-    return;
-
 error:
-    hasMatch_ = false;
+    return;
 }
 
-bool LinkParser::hasMatch() const
+const std::optional<ParsedLink> &LinkParser::result() const
 {
-    return this->hasMatch_;
-}
-
-QString LinkParser::getCaptured() const
-{
-    return this->match_;
+    return this->result_;
 }
 
 }  // namespace chatterino

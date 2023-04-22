@@ -24,7 +24,7 @@ static void BM_LinkParsing(benchmark::State &state)
 
     // Make sure the TLDs are loaded
     {
-        benchmark::DoNotOptimize(LinkParser("xd.com").getCaptured());
+        benchmark::DoNotOptimize(LinkParser("xd.com").result());
     }
 
     for (auto _ : state)
@@ -32,10 +32,7 @@ static void BM_LinkParsing(benchmark::State &state)
         for (auto word : words)
         {
             LinkParser parser(word);
-            if (parser.hasMatch())
-            {
-                benchmark::DoNotOptimize(parser.getCaptured());
-            }
+            benchmark::DoNotOptimize(parser.result());
         }
     }
 }
