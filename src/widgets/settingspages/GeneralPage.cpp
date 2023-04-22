@@ -776,8 +776,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     }
 #endif
 
-    layout.addCheckbox("Show 7TV Animated Profile Picture",
-                       s.displaySevenTVAnimatedProfile);
     layout.addCheckbox(
         "Show moderation messages", s.hideModerationActions, true,
         "Show messages for timeouts, bans, and other moderator actions.");
