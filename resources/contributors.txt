@@ -59,6 +59,9 @@ mohad12211 | https://github.com/mohad12211 | :/avatars/mohad12211.png | Contribu
 Wissididom | https://github.com/Wissididom | :/avatars/wissididom.png | Contributor
 03y | https://github.com/03y | | Contributor
 ScrubN | https://github.com/ScrubN | | Contributor
+Cyclone | https://github.com/PsycloneTM | :/avatars/cyclone.png | Contributor
+2547techno | https://github.com/2547techno | :/avatars/techno.png | Contributor
+ZonianMidian | https://github.com/ZonianMidian | :/avatars/zonianmidian.png | Contributor
 
 # If you are a contributor add yourself above this line
 

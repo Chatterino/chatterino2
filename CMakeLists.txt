@@ -169,10 +169,6 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (BUILD_TESTS OR BUILD_BENCHMARKS)
-    add_definitions(-DCHATTERINO_TEST)
-endif ()
-
 # Generate resource files
 include(cmake/resources/generate_resources.cmake)
 
