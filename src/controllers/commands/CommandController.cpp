@@ -3190,13 +3190,15 @@ void CommandController::initialize(Settings &, Paths &paths)
                                   "works in Twitch channels"));
             return "";
         }
-        auto userID = ctx.words.at(1);
         if (ctx.words.size() < 2)
         {
             ctx.channel->addMessage(
                 makeSystemMessage(QString("Usage: %1 <TwitchUserID> [color]")
                                       .arg(ctx.words.at(0))));
+            return "";
         }
+
+        auto userID = ctx.words.at(1);
 
         auto color = ctx.words.value(2);
 
