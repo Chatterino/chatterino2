@@ -26,10 +26,42 @@ namespace {
     int getBoldness()
     {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        // This setting uses the Qt 5 range of the font-weight (0..99).
-        // The range in Qt 6 is 1..1000.
-        return (int)(1.0 +
-                     (111.0 * getSettings()->boldScale.getValue()) / 11.0);
+        // From qfont.cpp
+        // https://github.com/qt/qtbase/blob/589c6d066f84833a7c3dda1638037f4b2e91b7aa/src/gui/text/qfont.cpp#L143-L169
+        static constexpr std::array<std::array<int, 2>, 9> legacyToOpenTypeMap{{
+            {0, QFont::Thin},
+            {12, QFont::ExtraLight},
+            {25, QFont::Light},
+            {50, QFont::Normal},
+            {57, QFont::Medium},
+            {63, QFont::DemiBold},
+            {75, QFont::Bold},
+            {81, QFont::ExtraBold},
+            {87, QFont::Black},
+        }};
+
+        const int target = getSettings()->boldScale.getValue();
+
+        int result = QFont::Medium;
+        int closestDist = INT_MAX;
+
+        // Go through and find the closest mapped value
+        for (const auto [weightOld, weightNew] : legacyToOpenTypeMap)
+        {
+            const int dist = qAbs(weightOld - target);
+            if (dist < closestDist)
+            {
+                result = weightNew;
+                closestDist = dist;
+            }
+            else
+            {
+                // Break early since following values will be further away
+                break;
+            }
+        }
+
+        return result;
 #else
         return getSettings()->boldScale.getValue();
 #endif
