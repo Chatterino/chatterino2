@@ -16,6 +16,11 @@
 - Minor: Added the ability to reply to a message by `Shift + Right Click`ing the username. (#4424)
 - Minor: Added better filter validation and error messages. (#4364)
 - Minor: Updated the look of the Black Theme to be more in line with the other themes. (#4523)
+- Minor: Reply context now censors blocked users. (#4502)
+- Minor: Added system message for empty mod list. (#4546)
+- Minor: Added `/lowtrust` command to open the suspicious user activity feed in browser. (#4542)
+- Minor: Migrated badges to Helix API. (#4537)
+- Bugfix: Fixed an issue where Chatterino could lose track of the sound device in certain scenarios. (#4549)
 - Bugfix: Fixed an issue where animated emotes would render on top of zero-width emotes. (#4314)
 - Bugfix: Fixed an issue where it was difficult to hover a zero-width emote. (#4314)
 - Bugfix: Fixed an issue where context-menu items for zero-width emotes displayed the wrong provider. (#4460)
@@ -37,7 +42,10 @@
 - Dev: Add scripting capabilities with Lua (#4341, #4504)
 - Dev: Conan 2.0 is now used instead of Conan 1.0. (#4417)
 - Dev: Added tests and benchmarks for `LinkParser`. (#4436)
+- Dev: Experimental builds with Qt 6 are now provided. (#4522, #4551, #4553, #4554, #4555, #4556)
 - Dev: Removed `CHATTERINO_TEST` definitions. (#4526)
+- Dev: Builds for macOS now have `macos` in their name (previously: `osx`). (#4550)
+- Dev: Fixed a crash when dragging rows in table-views in builds with Qt 6. (#4567)
 
 ## 2.4.2
 

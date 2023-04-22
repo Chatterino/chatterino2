@@ -405,6 +405,55 @@ struct HelixModerators {
     }
 };
 
+struct HelixBadgeVersion {
+    QString id;
+    Url imageURL1x;
+    Url imageURL2x;
+    Url imageURL4x;
+    QString title;
+    Url clickURL;
+
+    explicit HelixBadgeVersion(const QJsonObject &jsonObject)
+        : id(jsonObject.value("id").toString())
+        , imageURL1x(Url{jsonObject.value("image_url_1x").toString()})
+        , imageURL2x(Url{jsonObject.value("image_url_2x").toString()})
+        , imageURL4x(Url{jsonObject.value("image_url_4x").toString()})
+        , title(jsonObject.value("title").toString())
+        , clickURL(Url{jsonObject.value("click_url").toString()})
+    {
+    }
+};
+
+struct HelixBadgeSet {
+    QString setID;
+    std::vector<HelixBadgeVersion> versions;
+
+    explicit HelixBadgeSet(const QJsonObject &json)
+        : setID(json.value("set_id").toString())
+    {
+        const auto jsonVersions = json.value("versions").toArray();
+        for (const auto &version : jsonVersions)
+        {
+            versions.emplace_back(version.toObject());
+        }
+    }
+};
+
+struct HelixGlobalBadges {
+    std::vector<HelixBadgeSet> badgeSets;
+
+    explicit HelixGlobalBadges(const QJsonObject &jsonObject)
+    {
+        const auto &data = jsonObject.value("data").toArray();
+        for (const auto &set : data)
+        {
+            this->badgeSets.emplace_back(set.toObject());
+        }
+    }
+};
+
+using HelixChannelBadges = HelixGlobalBadges;
+
 enum class HelixAnnouncementColor {
     Blue,
     Green,
@@ -636,6 +685,15 @@ enum class HelixStartCommercialError {
     // The error message is forwarded directly from the Twitch API
     Forwarded,
 };
+
+enum class HelixGetGlobalBadgesError {
+    Unknown,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+using HelixGetChannelBadgesError = HelixGetGlobalBadgesError;
 
 class IHelix
 {
@@ -932,6 +990,21 @@ public:
         QString broadcasterID, int length,
         ResultCallback<HelixStartCommercialResponse> successCallback,
         FailureCallback<HelixStartCommercialError, QString>
+            failureCallback) = 0;
+
+    // Get global Twitch badges
+    // https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
+    virtual void getGlobalBadges(
+        ResultCallback<HelixGlobalBadges> successCallback,
+        FailureCallback<HelixGetGlobalBadgesError, QString>
+            failureCallback) = 0;
+
+    // Get badges for the `broadcasterID` channel
+    // https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
+    virtual void getChannelBadges(
+        QString broadcasterID,
+        ResultCallback<HelixChannelBadges> successCallback,
+        FailureCallback<HelixGetChannelBadgesError, QString>
             failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
@@ -1234,6 +1307,19 @@ public:
         ResultCallback<HelixStartCommercialResponse> successCallback,
         FailureCallback<HelixStartCommercialError, QString> failureCallback)
         final;
+
+    // Get global Twitch badges
+    // https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
+    void getGlobalBadges(ResultCallback<HelixGlobalBadges> successCallback,
+                         FailureCallback<HelixGetGlobalBadgesError, QString>
+                             failureCallback) final;
+
+    // Get badges for the `broadcasterID` channel
+    // https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
+    void getChannelBadges(QString broadcasterID,
+                          ResultCallback<HelixChannelBadges> successCallback,
+                          FailureCallback<HelixGetChannelBadgesError, QString>
+                              failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 
