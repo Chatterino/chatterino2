@@ -56,9 +56,9 @@ bool isValidIpv4(QStringView host)
     uint8_t sectionDigits = 0;  // 0..3
     bool lastWasDot = true;
 
-    for (auto i : host)
+    for (auto c : host)
     {
-        char16_t current = i.unicode();
+        char16_t current = c.unicode();
         if (current == '.')
         {
             if (lastWasDot || octetNumber == 3)
@@ -85,6 +85,7 @@ bool isValidIpv4(QStringView host)
             return false;
         }
     }
+
     return octetNumber == 3 && !lastWasDot;
 }
 
