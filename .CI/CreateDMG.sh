@@ -53,6 +53,6 @@ echo "Done!"
 
 if [ -n "$MACOS_CODESIGN_CERTIFICATE" ]; then
     echo "Codesigning the dmg"
-    codesign -s --deep "$MACOS_CODESIGN_CERTIFICATE"
+    codesign -s "$MACOS_CODESIGN_CERTIFICATE" --deep "$_dmg_path"
     echo "Done!"
 fi
