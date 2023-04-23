@@ -33,10 +33,7 @@
     </provides>
     <releases>
         <release version="2.4.2" date="2023-03-05">
-            <description>
-                <p>See the website for the changelog:</p>
-                <p>https://chatterino.com/changelog</p>
-            </description>
+            <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.4.2</url>
         </release>
     </releases>
 </component>
