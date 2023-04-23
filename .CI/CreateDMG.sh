@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 if [ -d bin/chatterino.app ] && [ ! -d chatterino.app ]; then
     >&2 echo "Moving bin/chatterino.app down one directory"
     mv bin/chatterino.app chatterino.app
