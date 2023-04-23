@@ -80,11 +80,6 @@ TEST(LinkParser, parseIpv4Links)
         {"http://", "196.168.4.0", "#foo"},
         {"", "196.168.4.0", "/?#foo"},
         {"", "196.168.4.0", "#?/foo"},
-        {"", "256.255.255.255"},
-        {"http://", "256.255.255.255"},
-        {"", "255.256.255.255"},
-        {"", "255.255.256.255"},
-        {"", "255.255.255.256"},
         // test case-insensitiveness
         {"HTTP://", "196.168.4.0", "#Foo"},
         {"HTTPS://", "196.168.4.0", "#Foo"},
@@ -102,6 +97,8 @@ TEST(LinkParser, parseIpv4Links)
 TEST(LinkParser, doesntParseInvalidIpv4Links)
 {
     const QStringList inputs = {
+        // U+0660 - in category "number digits"
+        QStringLiteral("٠.٠.٠.٠"),
         "https://127.0.0.",
         "http://127.0.01",
         "127.0.0000.1",
@@ -112,6 +109,11 @@ TEST(LinkParser, doesntParseInvalidIpv4Links)
         "1.2.3",
         "htt://256.255.255.255",
         "aliens://256.255.255.255",
+        "256.255.255.255",
+        "http://256.255.255.255",
+        "255.256.255.255",
+        "255.255.256.255",
+        "255.255.255.256",
     };
 
     for (const auto &input : inputs)
