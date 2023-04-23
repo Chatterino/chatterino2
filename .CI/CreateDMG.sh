@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 if [ -d bin/chatterino.app ] && [ ! -d chatterino.app ]; then
     >&2 echo "Moving bin/chatterino.app down one directory"
@@ -20,7 +20,14 @@ else
 fi
 
 echo "Running MACDEPLOYQT"
-macdeployqt chatterino.app
+
+_macdeployqt_args=()
+
+if [ -n "$MACDEPLOYQT_CODESIGN" ]; then
+    _macdeployqt_args+=("-codesign=$MACDEPLOYQT_CODESIGN")
+fi
+
+macdeployqt chatterino.app "${_macdeployqt_args[@]}"
 
 if [ -z "$SKIP_VENV" ]; then
     echo "Creating python3 virtual environment"
