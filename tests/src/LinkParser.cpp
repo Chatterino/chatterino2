@@ -97,6 +97,8 @@ TEST(LinkParser, parseIpv4Links)
 TEST(LinkParser, doesntParseInvalidIpv4Links)
 {
     const QStringList inputs = {
+        // U+0660 - in category "number digits"
+        QStringLiteral("٠.٠.٠.٠"),
         "https://127.0.0.",
         "http://127.0.01",
         "127.0.0000.1",
