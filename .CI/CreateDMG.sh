@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -eo pipefail
 
 if [ -d bin/chatterino.app ] && [ ! -d chatterino.app ]; then
     >&2 echo "Moving bin/chatterino.app down one directory"
@@ -25,11 +25,16 @@ echo "Running MACDEPLOYQT"
 
 _macdeployqt_args=()
 
-if [ -n "$MACDEPLOYQT_CODESIGN" ]; then
-    _macdeployqt_args+=("-codesign=$MACDEPLOYQT_CODESIGN")
+if [ -n "$MACOS_CODESIGN_CERTIFICATE" ]; then
+    _macdeployqt_args+=("-codesign=$MACOS_CODESIGN_CERTIFICATE")
 fi
 
 macdeployqt chatterino.app "${_macdeployqt_args[@]}"
+
+if [ -n "$MACOS_CODESIGN_CERTIFICATE" ]; then
+    # Validate that chatterino.app was codesigned correctly
+    codesign -v chatterino.app
+fi
 
 if [ -z "$SKIP_VENV" ]; then
     echo "Creating python3 virtual environment"
@@ -40,6 +45,14 @@ if [ -z "$SKIP_VENV" ]; then
     python3 -m pip install dmgbuild
 fi
 
+_dmg_path="chatterino-macos-Qt-$1.dmg"
+
 echo "Running dmgbuild.."
-dmgbuild --settings ./../.CI/dmg-settings.py -D app=./chatterino.app Chatterino2 chatterino-macos-Qt-$1.dmg
+dmgbuild --settings ./../.CI/dmg-settings.py -D app=./chatterino.app Chatterino2 "$_dmg_path"
 echo "Done!"
+
+if [ -n "$MACOS_CODESIGN_CERTIFICATE" ]; then
+    echo "Codesigning the dmg"
+    codesign -s --deep "$MACOS_CODESIGN_CERTIFICATE"
+    echo "Done!"
+fi
