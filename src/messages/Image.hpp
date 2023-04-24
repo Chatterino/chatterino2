@@ -41,6 +41,7 @@ namespace detail {
         boost::optional<QPixmap> first() const;
 
     private:
+        int64_t memoryUsage() const;
         void processOffset();
         QVector<Frame<QPixmap>> items_;
         int index_{0};
