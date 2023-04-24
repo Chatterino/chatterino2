@@ -150,6 +150,9 @@ namespace detail {
         {
             DebugCount::decrease("loaded images");
         }
+        DebugCount::decrease("image bytes", this->memoryUsage());
+        DebugCount::increase("image bytes (ever unloaded)",
+                             this->memoryUsage());
 
         this->items_.clear();
         this->index_ = 0;
