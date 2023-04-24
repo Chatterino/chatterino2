@@ -109,11 +109,13 @@ ImagePtr getEmptyImagePtr();
 
 class ImageExpirationPool
 {
+    static ImageExpirationPool &instance();
+
 private:
     friend class Image;
+    friend class CommandController;
 
     ImageExpirationPool();
-    static ImageExpirationPool &instance();
 
     void addImagePtr(ImagePtr imgPtr);
     void removeImagePtr(Image *rawPtr);
@@ -125,6 +127,11 @@ private:
      * Must be ran in the GUI thread.
      */
     void freeOld();
+
+    /*
+     * debug function
+     */
+    void freeAll();
 
 private:
     // Timer to periodically run freeOld()

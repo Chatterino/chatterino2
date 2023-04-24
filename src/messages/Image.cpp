@@ -589,6 +589,20 @@ void ImageExpirationPool::removeImagePtr(Image *rawPtr)
     this->allImages_.erase(rawPtr);
 }
 
+void ImageExpirationPool::freeAll()
+{
+    {
+        std::lock_guard<std::mutex> lock(this->mutex_);
+        for (auto it = this->allImages_.begin(); it != this->allImages_.end();)
+        {
+            auto img = it->second.lock();
+            img->expireFrames();
+            it = this->allImages_.erase(it);
+        }
+    }
+    this->freeOld();
+}
+
 void ImageExpirationPool::freeOld()
 {
     std::lock_guard<std::mutex> lock(this->mutex_);
