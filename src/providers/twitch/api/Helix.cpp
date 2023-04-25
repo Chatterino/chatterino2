@@ -2560,6 +2560,77 @@ void Helix::getChannelBadges(
         .execute();
 }
 
+// https://dev.twitch.tv/docs/api/reference/#update-shield-mode-status
+void Helix::updateShieldMode(
+    QString broadcasterID, QString moderatorID, bool isActive,
+    ResultCallback<HelixShieldModeStatus> successCallback,
+    FailureCallback<HelixUpdateShieldModeError, QString> failureCallback)
+{
+    using Error = HelixUpdateShieldModeError;
+
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    QJsonObject payload;
+    payload["is_active"] = isActive;
+
+    this->makeRequest("moderation/shield_mode", urlQuery)
+        .type(NetworkRequestType::Put)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback](auto result) -> Outcome {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for updating shield mode was "
+                    << result.status() << "but we expected it to be 200";
+            }
+
+            const auto response = result.parseJson();
+            successCallback(
+                HelixShieldModeStatus(response["data"][0].toObject()));
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            const auto obj = result.parseJson();
+            auto message = obj["message"].toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                }
+                case 401: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+                case 403: {
+                    if (message.startsWith(
+                            "Requester does not have permissions",
+                            Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::MissingPermission, message);
+                        break;
+                    }
+                }
+
+                default: {
+                    qCWarning(chatterinoTwitch)
+                        << "Helix shield mode, unhandled error data:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
