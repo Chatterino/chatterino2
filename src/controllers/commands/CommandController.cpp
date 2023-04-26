@@ -3208,7 +3208,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    const auto toggleShieldMode = [](const auto &ctx,
+    const auto toggleShieldMode = [](const CommandContext &ctx,
                                      bool isActivating) -> QString {
         const QString command = isActivating ? QStringLiteral("/shield")
                                              : QStringLiteral("/shieldoff");
@@ -3219,7 +3219,6 @@ void CommandController::initialize(Settings &, Paths &paths)
                     .arg(command)));
             return {};
         }
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(ctx.channel.get());
 
         auto user = getApp()->accounts->twitch.getCurrent();
 
@@ -3233,7 +3232,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         getHelix()->updateShieldMode(
-            twitchChannel->roomId(), user->getUserId(), isActivating,
+            ctx.twitchChannel->roomId(), user->getUserId(), isActivating,
             [channel = ctx.channel](const auto &res) {
                 if (!res.isActive)
                 {
