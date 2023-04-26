@@ -6,6 +6,7 @@
 #include "util/QStringHash.hpp"
 
 #include <boost/optional.hpp>
+#include <QDateTime>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QString>
