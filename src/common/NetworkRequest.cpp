@@ -129,20 +129,6 @@ NetworkRequest NetworkRequest::concurrent() &&
     return std::move(*this);
 }
 
-NetworkRequest NetworkRequest::authorizeTwitchV5(const QString &clientID,
-                                                 const QString &oauthToken) &&
-{
-    // TODO: make two overloads, with and without oauth token
-    auto tmp = std::move(*this)
-                   .header("Client-ID", clientID)
-                   .header("Accept", "application/vnd.twitchtv.v5+json");
-
-    if (!oauthToken.isEmpty())
-        return std::move(tmp).header("Authorization", "OAuth " + oauthToken);
-    else
-        return tmp;
-}
-
 NetworkRequest NetworkRequest::multiPart(QHttpMultiPart *payload) &&
 {
     payload->setParent(this->data->lifetimeManager_);
@@ -205,12 +191,6 @@ void NetworkRequest::initializeDefaultValues()
                                .toUtf8();
 
     this->data->request_.setRawHeader("User-Agent", userAgent);
-}
-
-// Helper creator functions
-NetworkRequest NetworkRequest::twitchRequest(QUrl url)
-{
-    return NetworkRequest(url).authorizeTwitchV5(getDefaultClientID());
 }
 
 }  // namespace chatterino

@@ -58,8 +58,6 @@ public:
         const std::vector<std::pair<QByteArray, QByteArray>> &headers) &&;
     NetworkRequest timeout(int ms) &&;
     NetworkRequest concurrent() &&;
-    NetworkRequest authorizeTwitchV5(const QString &clientID,
-                                     const QString &oauthToken = QString()) &&;
     NetworkRequest multiPart(QHttpMultiPart *payload) &&;
     /**
      * This will change `RedirectPolicyAttribute`.
@@ -68,8 +66,6 @@ public:
     NetworkRequest followRedirects(bool on) &&;
 
     void execute();
-
-    static NetworkRequest twitchRequest(QUrl url);
 
 private:
     void initializeDefaultValues();
