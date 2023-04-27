@@ -462,8 +462,7 @@ void Helix::createStreamMarker(
 
     this->makeRequest("streams/markers", QUrlQuery())
         .type(NetworkRequestType::Post)
-        .header("Content-Type", "application/json")
-        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .json(payload)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             auto root = result.parseJson();
             auto data = root.value("data");
@@ -590,7 +589,6 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
                           HelixFailureCallback failureCallback)
 {
     QUrlQuery urlQuery;
-    auto data = QJsonDocument();
     auto obj = QJsonObject();
     if (!gameId.isEmpty())
     {
@@ -611,12 +609,10 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
         return;
     }
 
-    data.setObject(obj);
     urlQuery.addQueryItem("broadcaster_id", broadcasterId);
     this->makeRequest("channels", urlQuery)
         .type(NetworkRequestType::Patch)
-        .header("Content-Type", "application/json")
-        .payload(data.toJson())
+        .json(obj)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             successCallback(result);
             return Success;
@@ -640,8 +636,7 @@ void Helix::manageAutoModMessages(
 
     this->makeRequest("moderation/automod/message", QUrlQuery())
         .type(NetworkRequestType::Post)
-        .header("Content-Type", "application/json")
-        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .json(payload)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             successCallback();
             return Success;
@@ -809,8 +804,7 @@ void Helix::updateUserChatColor(
 
     this->makeRequest("chat/color", QUrlQuery())
         .type(NetworkRequestType::Put)
-        .header("Content-Type", "application/json")
-        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .json(payload)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             auto obj = result.parseJson();
             if (result.status() != 204)
@@ -1144,8 +1138,7 @@ void Helix::sendChatAnnouncement(
 
     this->makeRequest("chat/announcements", urlQuery)
         .type(NetworkRequestType::Post)
-        .header("Content-Type", "application/json")
-        .payload(QJsonDocument(body).toJson(QJsonDocument::Compact))
+        .json(body)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             if (result.status() != 204)
             {
@@ -1733,8 +1726,7 @@ void Helix::updateChatSettings(
 
     this->makeRequest("chat/settings", urlQuery)
         .type(NetworkRequestType::Patch)
-        .header("Content-Type", "application/json")
-        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .json(payload)
         .onSuccess([successCallback](auto result) -> Outcome {
             if (result.status() != 200)
             {
@@ -2053,8 +2045,7 @@ void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
 
     this->makeRequest("moderation/bans", urlQuery)
         .type(NetworkRequestType::Post)
-        .header("Content-Type", "application/json")
-        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .json(payload)
         .onSuccess([successCallback](auto result) -> Outcome {
             if (result.status() != 200)
             {
@@ -2152,8 +2143,7 @@ void Helix::sendWhisper(
 
     this->makeRequest("whispers", urlQuery)
         .type(NetworkRequestType::Post)
-        .header("Content-Type", "application/json")
-        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .json(payload)
         .onSuccess([successCallback](auto result) -> Outcome {
             if (result.status() != 204)
             {
@@ -2385,8 +2375,7 @@ void Helix::startCommercial(
 
     this->makeRequest("channels/commercial", QUrlQuery())
         .type(NetworkRequestType::Post)
-        .header("Content-Type", "application/json")
-        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .json(payload)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             auto obj = result.parseJson();
             if (obj.isEmpty())
