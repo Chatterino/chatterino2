@@ -106,6 +106,13 @@ NetworkRequest NetworkRequest::header(const char *headerName,
     return std::move(*this);
 }
 
+NetworkRequest NetworkRequest::header(QNetworkRequest::KnownHeaders header,
+                                      const QVariant &value) &&
+{
+    this->data->request_.setHeader(header, value);
+    return std::move(*this);
+}
+
 NetworkRequest NetworkRequest::headerList(
     const std::vector<std::pair<QByteArray, QByteArray>> &headers) &&
 {
@@ -191,6 +198,30 @@ void NetworkRequest::initializeDefaultValues()
                                .toUtf8();
 
     this->data->request_.setRawHeader("User-Agent", userAgent);
+}
+
+NetworkRequest NetworkRequest::json(const QJsonArray &root) &&
+{
+    return std::move(*this).json(QJsonDocument(root));
+}
+
+NetworkRequest NetworkRequest::json(const QJsonObject &root) &&
+{
+    return std::move(*this).json(QJsonDocument(root));
+}
+
+NetworkRequest NetworkRequest::json(const QJsonDocument &document) &&
+{
+    return std::move(*this).json(document.toJson(QJsonDocument::Compact));
+}
+
+NetworkRequest NetworkRequest::json(const QByteArray &payload) &&
+{
+    return std::move(*this)
+        .payload(payload)
+        .header(QNetworkRequest::ContentTypeHeader, "application/json")
+        .header(QNetworkRequest::ContentLengthHeader, payload.length())
+        .header("Accept", "application/json");
 }
 
 }  // namespace chatterino

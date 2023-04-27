@@ -6,6 +6,10 @@
 
 #include <memory>
 
+class QJsonArray;
+class QJsonObject;
+class QJsonDocument;
+
 namespace chatterino {
 
 struct NetworkData;
@@ -54,6 +58,8 @@ public:
     NetworkRequest header(const char *headerName, const char *value) &&;
     NetworkRequest header(const char *headerName, const QByteArray &value) &&;
     NetworkRequest header(const char *headerName, const QString &value) &&;
+    NetworkRequest header(QNetworkRequest::KnownHeaders header,
+                          const QVariant &value) &&;
     NetworkRequest headerList(
         const std::vector<std::pair<QByteArray, QByteArray>> &headers) &&;
     NetworkRequest timeout(int ms) &&;
@@ -64,6 +70,10 @@ public:
      * `QNetworkRequest`'s defaults are used by default (Qt 5: no-follow, Qt 6: follow).
      */
     NetworkRequest followRedirects(bool on) &&;
+    NetworkRequest json(const QJsonObject &root) &&;
+    NetworkRequest json(const QJsonArray &root) &&;
+    NetworkRequest json(const QJsonDocument &document) &&;
+    NetworkRequest json(const QByteArray &payload) &&;
 
     void execute();
 
