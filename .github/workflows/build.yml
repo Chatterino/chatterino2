@@ -336,12 +336,14 @@ jobs:
 
       - name: Package (MacOS)
         if: startsWith(matrix.os, 'macos')
+        env:
+          OUTPUT_DMG_PATH: chatterino-macos-qt-${{ matrix.qt-version}}.dmg
         run: |
           ls -la
           pwd
           ls -la build || true
           cd build
-          sh ./../.CI/CreateDMG.sh ${{ matrix.qt-version }}
+          sh ./../.CI/CreateDMG.sh
         shell: bash
 
       - name: Upload artifact (MacOS)

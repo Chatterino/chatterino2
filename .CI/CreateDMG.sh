@@ -7,6 +7,11 @@ if [ -d bin/chatterino.app ] && [ ! -d chatterino.app ]; then
     mv bin/chatterino.app chatterino.app
 fi
 
+if [ -z "$OUTPUT_DMG_PATH" ]; then
+    echo "ERROR: Must specify the path for where to save the final .dmg"
+    exit 1
+fi
+
 if [ -n "$Qt5_DIR" ]; then
     echo "Using Qt DIR from Qt5_DIR: $Qt5_DIR"
     _QT_DIR="$Qt5_DIR"
@@ -45,14 +50,12 @@ if [ -z "$SKIP_VENV" ]; then
     python3 -m pip install dmgbuild
 fi
 
-_dmg_path="chatterino-macos-Qt-$1.dmg"
-
 echo "Running dmgbuild.."
-dmgbuild --settings ./../.CI/dmg-settings.py -D app=./chatterino.app Chatterino2 "$_dmg_path"
+dmgbuild --settings ./../.CI/dmg-settings.py -D app=./chatterino.app Chatterino2 "$OUTPUT_DMG_PATH"
 echo "Done!"
 
 if [ -n "$MACOS_CODESIGN_CERTIFICATE" ]; then
     echo "Codesigning the dmg"
-    codesign -s "$MACOS_CODESIGN_CERTIFICATE" --deep "$_dmg_path"
+    codesign -s "$MACOS_CODESIGN_CERTIFICATE" --deep "$OUTPUT_DMG_PATH"
     echo "Done!"
 fi
