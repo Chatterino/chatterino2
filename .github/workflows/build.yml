@@ -343,6 +343,7 @@ jobs:
           pwd
           ls -la build || true
           cd build
+          sh ./../.CI/MacDeploy.sh
           sh ./../.CI/CreateDMG.sh
         shell: bash
 
