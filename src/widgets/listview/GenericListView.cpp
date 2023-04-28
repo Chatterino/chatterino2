@@ -109,7 +109,7 @@ void GenericListView::refreshTheme(const Theme &theme)
     const QString selCol =
         (theme.isLightTheme()
              ? "#68B1FF"  // Copied from Theme::splits.input.styleSheet
-             : theme.tabs.selected.backgrounds.regular.color().name());
+             : theme.tabs.selected.backgrounds.regular.name());
 
     const QString listStyle =
         QString(

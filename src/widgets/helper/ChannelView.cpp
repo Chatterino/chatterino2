@@ -64,6 +64,7 @@
 #define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
 #define CHAT_HOVER_PAUSE_DURATION 1000
+#define TOOLTIP_EMOTE_ENTRIES_LIMIT 7
 
 namespace chatterino {
 namespace {
@@ -837,7 +838,7 @@ bool ChannelView::shouldIncludeMessage(const MessagePtr &m) const
                 m->loginName, Qt::CaseInsensitive) == 0)
             return true;
 
-        return this->channelFilters_->filter(m, this->channel_);
+        return this->channelFilters_->filter(m, this->underlyingChannel_);
     }
 
     return true;
@@ -1658,10 +1659,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     auto element = &hoverLayoutElement->getCreator();
     bool isLinkValid = hoverLayoutElement->getLink().isValid();
     auto emoteElement = dynamic_cast<const EmoteElement *>(element);
+    auto layeredEmoteElement =
+        dynamic_cast<const LayeredEmoteElement *>(element);
+    bool isNotEmote = emoteElement == nullptr && layeredEmoteElement == nullptr;
 
     if (element->getTooltip().isEmpty() ||
-        (isLinkValid && emoteElement == nullptr &&
-         !getSettings()->linkInfoTooltip))
+        (isLinkValid && isNotEmote && !getSettings()->linkInfoTooltip))
     {
         tooltipWidget->hide();
     }
@@ -1669,26 +1672,88 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     {
         auto badgeElement = dynamic_cast<const BadgeElement *>(element);
 
-        if ((badgeElement || emoteElement) &&
-            getSettings()->emotesTooltipPreview.getValue())
+        if (badgeElement || emoteElement || layeredEmoteElement)
         {
-            if (event->modifiers() == Qt::ShiftModifier ||
-                getSettings()->emotesTooltipPreview.getValue() == 1)
+            auto showThumbnailSetting =
+                getSettings()->emotesTooltipPreview.getValue();
+
+            bool showThumbnail =
+                showThumbnailSetting == ThumbnailPreviewMode::AlwaysShow ||
+                (showThumbnailSetting == ThumbnailPreviewMode::ShowOnShift &&
+                 event->modifiers() == Qt::ShiftModifier);
+
+            if (emoteElement)
             {
-                if (emoteElement)
+                tooltipWidget->setOne({
+                    showThumbnail
+                        ? emoteElement->getEmote()->images.getImage(3.0)
+                        : nullptr,
+                    element->getTooltip(),
+                });
+            }
+            else if (layeredEmoteElement)
+            {
+                auto &layeredEmotes = layeredEmoteElement->getEmotes();
+                // Should never be empty but ensure it
+                if (!layeredEmotes.empty())
                 {
-                    tooltipWidget->setImage(
-                        emoteElement->getEmote()->images.getImage(3.0));
-                }
-                else if (badgeElement)
-                {
-                    tooltipWidget->setImage(
-                        badgeElement->getEmote()->images.getImage(3.0));
+                    std::vector<TooltipEntry> entries;
+                    entries.reserve(layeredEmotes.size());
+
+                    auto &emoteTooltips =
+                        layeredEmoteElement->getEmoteTooltips();
+
+                    // Someone performing some tomfoolery could put an emote with tens,
+                    // if not hundreds of zero-width emotes on a single emote. If the
+                    // tooltip may take up more than three rows, truncate everything else.
+                    bool truncating = false;
+                    size_t upperLimit = layeredEmotes.size();
+                    if (layeredEmotes.size() > TOOLTIP_EMOTE_ENTRIES_LIMIT)
+                    {
+                        upperLimit = TOOLTIP_EMOTE_ENTRIES_LIMIT - 1;
+                        truncating = true;
+                    }
+
+                    for (size_t i = 0; i < upperLimit; ++i)
+                    {
+                        const auto &emote = layeredEmotes[i].ptr;
+                        if (i == 0)
+                        {
+                            // First entry gets a large image and full description
+                            entries.push_back({showThumbnail
+                                                   ? emote->images.getImage(3.0)
+                                                   : nullptr,
+                                               emoteTooltips[i]});
+                        }
+                        else
+                        {
+                            // Every other entry gets a small image and just the emote name
+                            entries.push_back({showThumbnail
+                                                   ? emote->images.getImage(1.0)
+                                                   : nullptr,
+                                               emote->name.string});
+                        }
+                    }
+
+                    if (truncating)
+                    {
+                        entries.push_back({nullptr, "..."});
+                    }
+
+                    auto style = layeredEmotes.size() > 2
+                                     ? TooltipStyle::Grid
+                                     : TooltipStyle::Vertical;
+                    tooltipWidget->set(entries, style);
                 }
             }
-            else
+            else if (badgeElement)
             {
-                tooltipWidget->clearImage();
+                tooltipWidget->setOne({
+                    showThumbnail
+                        ? badgeElement->getEmote()->images.getImage(3.0)
+                        : nullptr,
+                    element->getTooltip(),
+                });
             }
         }
         else
@@ -1711,7 +1776,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             auto thumbnailSize = getSettings()->thumbnailSize;
             if (!thumbnailSize)
             {
-                tooltipWidget->clearImage();
+                tooltipWidget->clearEntries();
             }
             else
             {
@@ -1724,19 +1789,23 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     shouldHideThumbnail
                         ? Image::fromResourcePixmap(getResources().streamerMode)
                         : element->getThumbnail();
-                tooltipWidget->setImage(std::move(thumb));
 
                 if (element->getThumbnailType() ==
                     MessageElement::ThumbnailType::Link_Thumbnail)
                 {
-                    tooltipWidget->setImageScale(thumbnailSize, thumbnailSize);
+                    tooltipWidget->setOne({std::move(thumb),
+                                           element->getTooltip(), thumbnailSize,
+                                           thumbnailSize});
+                }
+                else
+                {
+                    tooltipWidget->setOne({std::move(thumb), ""});
                 }
             }
         }
 
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(isLinkValid);
-        tooltipWidget->setText(element->getTooltip());
         tooltipWidget->show();
     }
 
@@ -2029,13 +2098,25 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 
                 if (link.type == Link::UserInfo)
                 {
-                    const bool commaMention =
-                        getSettings()->mentionUsersWithComma;
-                    const bool isFirstWord =
-                        split && split->getInput().isEditFirstWord();
-                    auto userMention = formatUserMention(
-                        link.value, isFirstWord, commaMention);
-                    insertText("@" + userMention + " ");
+                    if (hoveredElement->getFlags().has(
+                            MessageElementFlag::Username) &&
+                        event->modifiers() == Qt::ShiftModifier)
+                    {
+                        // Start a new reply if Shift+Right-clicking the message username
+                        this->setInputReply(layout->getMessagePtr());
+                    }
+                    else
+                    {
+                        // Insert @username into split input
+                        const bool commaMention =
+                            getSettings()->mentionUsersWithComma;
+                        const bool isFirstWord =
+                            split && split->getInput().isEditFirstWord();
+                        auto userMention = formatUserMention(
+                            link.value, isFirstWord, commaMention);
+                        insertText("@" + userMention + " ");
+                    }
+
                     return;
                 }
 
@@ -2133,6 +2214,18 @@ void ChannelView::addImageContextMenuItems(
         {
             addEmoteContextMenuItems(*emoteElement->getEmote(), creatorFlags,
                                      menu);
+        }
+        else if (auto layeredElement =
+                     dynamic_cast<const LayeredEmoteElement *>(&creator))
+        {
+            // Give each emote its own submenu
+            for (auto &emote : layeredElement->getUniqueEmotes())
+            {
+                auto emoteAction = menu.addAction(emote.ptr->name.string);
+                auto emoteMenu = new QMenu(&menu);
+                emoteAction->setMenu(emoteMenu);
+                addEmoteContextMenuItems(*emote.ptr, emote.flags, *emoteMenu);
+            }
         }
     }
 

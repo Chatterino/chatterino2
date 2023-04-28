@@ -140,6 +140,8 @@ namespace {
                 builtMessage->flags.set(MessageFlag::RecentMessage);
                 allBuiltMessages.emplace_back(builtMessage);
             }
+
+            message->deleteLater();
         }
 
         return allBuiltMessages;

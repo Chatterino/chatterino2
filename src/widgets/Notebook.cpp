@@ -391,7 +391,8 @@ void Notebook::setShowTabs(bool value)
     if (!value && getSettings()->informOnTabVisibilityToggle.getValue())
     {
         auto unhideSeq = getApp()->hotkeys->getDisplaySequence(
-            HotkeyCategory::Window, "setTabVisibility", {{}});
+            HotkeyCategory::Window, "setTabVisibility",
+            {std::vector<QString>()});
         if (unhideSeq.isEmpty())
         {
             unhideSeq = getApp()->hotkeys->getDisplaySequence(
@@ -436,7 +437,7 @@ void Notebook::setShowTabs(bool value)
 void Notebook::updateTabVisibilityMenuAction()
 {
     auto toggleSeq = getApp()->hotkeys->getDisplaySequence(
-        HotkeyCategory::Window, "setTabVisibility", {{}});
+        HotkeyCategory::Window, "setTabVisibility", {std::vector<QString>()});
     if (toggleSeq.isEmpty())
     {
         toggleSeq = getApp()->hotkeys->getDisplaySequence(
