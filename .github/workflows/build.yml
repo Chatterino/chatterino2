@@ -337,7 +337,7 @@ jobs:
       - name: Package (MacOS)
         if: startsWith(matrix.os, 'macos')
         env:
-          OUTPUT_DMG_PATH: chatterino-macos-qt-${{ matrix.qt-version}}.dmg
+          OUTPUT_DMG_PATH: chatterino-macos-Qt-${{ matrix.qt-version}}.dmg
         run: |
           ls -la
           pwd
