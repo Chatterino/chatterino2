@@ -8,7 +8,7 @@ if [ ! -d chatterino.app ]; then
 fi
 
 if [ -z "$OUTPUT_DMG_PATH" ]; then
-    echo "ERROR: Must specify the path for where to save the final .dmg"
+    echo "ERROR: Must specify the path for where to save the final .dmg. Make sure you've set the OUTPUT_DMG_PATH environment variable."
     exit 1
 fi
 
