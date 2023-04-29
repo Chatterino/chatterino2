@@ -79,7 +79,7 @@ namespace {
 #ifdef Q_OS_WIN32
         QApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);
 
-#    ifndef
+#    ifndef Q_OS_MAC
         QApplication::setWindowIcon(QIcon(":/icon.ico"));
 
 #    endif
