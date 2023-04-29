@@ -27,6 +27,7 @@
 - Bugfix: Fixed emote & badge tooltips not showing up when thumbnails were hidden. (#4509)
 - Bugfix: Fixed links with invalid IPv4 addresses being parsed. (#4576)
 - Bugfix: Fixed Icon reverting to default when application is open. (#4577)
+- Bugfix: Fixed disabled items in context-menus having a weird text-effect or the default text color. (#4423)
 - Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
 - Dev: Themes are now stored as JSON files in `resources/themes`. (#4471, #4533)
 - Dev: Ignore unhandled BTTV user-events. (#4438)

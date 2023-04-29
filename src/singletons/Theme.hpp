@@ -39,6 +39,8 @@ public:
     struct {
         QColor background;
         QColor text;
+
+        QString contextMenuStyleSheet;
     } window;
 
     /// TABS
