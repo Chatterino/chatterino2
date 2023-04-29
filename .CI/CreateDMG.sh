@@ -27,6 +27,6 @@ echo "Done!"
 
 if [ -n "$MACOS_CODESIGN_CERTIFICATE" ]; then
     echo "Codesigning the dmg"
-    codesign -s "$MACOS_CODESIGN_CERTIFICATE" --deep "$OUTPUT_DMG_PATH"
+    codesign -s "$MACOS_CODESIGN_CERTIFICATE" --deep --force "$OUTPUT_DMG_PATH"
     echo "Done!"
 fi
