@@ -78,7 +78,6 @@ namespace {
         QApplication::setAttribute(Qt::AA_Use96Dpi, true);
 #ifdef Q_OS_WIN32
         QApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);
-
 #endif
 
         QApplication::setStyle(QStyleFactory::create("Fusion"));
