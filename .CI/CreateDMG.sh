@@ -21,6 +21,12 @@ if [ -z "$SKIP_VENV" ]; then
     python3 -m pip install dmgbuild
 fi
 
+if [ -n "$MACOS_CODESIGN_CERTIFICATE" ]; then
+    echo "Codesigning force deep inside the app"
+    codesign -s "$MACOS_CODESIGN_CERTIFICATE" --deep --force chatterino.app
+    echo "Done!"
+fi
+
 echo "Running dmgbuild.."
 dmgbuild --settings ./../.CI/dmg-settings.py -D app=./chatterino.app Chatterino2 "$OUTPUT_DMG_PATH"
 echo "Done!"
