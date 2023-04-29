@@ -292,6 +292,11 @@ bool BaseWindow::supportsCustomWindowFrame()
 
 void BaseWindow::themeChangedEvent()
 {
+    if (!this->flags_.has(BaseWindow::DisableStyleSheet))
+    {
+        this->setStyleSheet(this->theme->window.contextMenuStyleSheet);
+    }
+
     if (this->hasCustomWindowFrame())
     {
         QPalette palette;
@@ -319,11 +324,6 @@ void BaseWindow::themeChangedEvent()
         palette.setColor(QPalette::Window, this->theme->window.background);
         palette.setColor(QPalette::WindowText, this->theme->window.text);
         this->setPalette(palette);
-    }
-
-    if (!this->flags_.has(BaseWindow::DisableStyleSheet))
-    {
-        this->setStyleSheet(this->theme->window.contextMenuStyleSheet);
     }
 }
 
