@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.4.3
+
 - Major: Added support for FrankerFaceZ animated emotes. (#4434)
 - Minor: Added the ability to reply to a message by `Shift + Right Click`ing the username. (#4424)
 - Minor: Reply context now censors blocked users. (#4502)
