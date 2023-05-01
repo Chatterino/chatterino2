@@ -296,6 +296,16 @@ void Theme::loadAvailableThemes()
 
         auto themeName = info.baseName();
 
+        // Check if the theme name is the same as a built-in theme
+        if (this->availableThemes_.find(themeName) !=
+            this->availableThemes_.end())
+        {
+            qCWarning(chatterinoTheme)
+                << "Custom theme" << themeName
+                << "has the same name as a built-in theme. Skipping.";
+            continue;
+        }
+
         this->availableThemes_.emplace(themeName, themeDescriptor);
     }
 }
