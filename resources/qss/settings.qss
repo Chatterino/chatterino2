@@ -66,3 +66,14 @@ chatterino--NavigationLabel {
     font-size: 15px;
     color: #A6DDF4;
 }
+
+QMenu {
+    background: #242424;
+    border: #555555;
+    color: #ffffff;
+    selection-background-color: #555555;
+}
+
+QMenu::item:disabled {
+    color: #8c7f7f;
+}

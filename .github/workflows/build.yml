@@ -266,7 +266,7 @@ jobs:
 
       - name: clang-tidy review
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        uses: ZedThree/clang-tidy-review@v0.12.2
+        uses: ZedThree/clang-tidy-review@v0.13.0
         with:
           build_dir: build
           config_file: ".clang-tidy"
@@ -275,7 +275,7 @@ jobs:
 
       - name: clang-tidy-review upload
         if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        uses: ZedThree/clang-tidy-review/upload@v0.12.2
+        uses: ZedThree/clang-tidy-review/upload@v0.13.0
 
       - name: Package - .deb (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
@@ -317,12 +317,15 @@ jobs:
 
       - name: Package (MacOS)
         if: startsWith(matrix.os, 'macos')
+        env:
+          OUTPUT_DMG_PATH: chatterino-macos-Qt-${{ matrix.qt-version}}.dmg
         run: |
           ls -la
           pwd
           ls -la build || true
           cd build
-          sh ./../.CI/CreateDMG.sh ${{ matrix.qt-version }}
+          ./../.CI/MacDeploy.sh
+          ./../.CI/CreateDMG.sh
         shell: bash
 
       - name: Upload artifact (MacOS)
@@ -369,7 +372,7 @@ jobs:
         run: |
           ls -l
           # Mark all Qt6 builds as EXPERIMENTAL
-          mv chatterino-macos-Qt-6.5.0.dmg EXPERIMENTAL-chatterino-macos-Qt-6.5.0-dmg
+          mv chatterino-macos-Qt-6.5.0.dmg EXPERIMENTAL-chatterino-macos-Qt-6.5.0.dmg
           mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
           mv chatterino-windows-x86-64-Qt-6.5.0.zip EXPERIMENTAL-chatterino-windows-x86-64-Qt-6.5.0.zip
           mv chatterino-Qt-6.5.0.pdb.7z EXPERIMENTAL-chatterino-Qt-6.5.0.pdb.7z
@@ -403,7 +406,7 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1.12.0
         with:
-          removeArtifacts: true
+          replacesArtifacts: true
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: "release-artifacts/*"

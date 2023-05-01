@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Env.hpp"
+#include "common/LinkParser.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "common/SignalVector.hpp"
@@ -148,15 +149,15 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                     void operator()(const QString &string,
                                     MessageBuilder &b) const
                     {
-                        auto linkString = b.matchLink(string);
-                        if (linkString.isEmpty())
+                        LinkParser parser(string);
+                        if (parser.result())
                         {
-                            b.emplace<TextElement>(string,
-                                                   MessageElementFlag::Text);
+                            b.addLink(*parser.result());
                         }
                         else
                         {
-                            b.addLink(string, linkString);
+                            b.emplace<TextElement>(string,
+                                                   MessageElementFlag::Text);
                         }
                     }
                 } visitor;
@@ -3190,13 +3191,15 @@ void CommandController::initialize(Settings &, Paths &paths)
                                   "works in Twitch channels"));
             return "";
         }
-        auto userID = ctx.words.at(1);
         if (ctx.words.size() < 2)
         {
             ctx.channel->addMessage(
                 makeSystemMessage(QString("Usage: %1 <TwitchUserID> [color]")
                                       .arg(ctx.words.at(0))));
+            return "";
         }
+
+        auto userID = ctx.words.at(1);
 
         auto color = ctx.words.value(2);
 

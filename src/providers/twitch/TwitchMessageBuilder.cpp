@@ -1,6 +1,7 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 
 #include "Application.hpp"
+#include "common/LinkParser.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
@@ -466,12 +467,12 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
     }
 
     // Actually just text
-    auto linkString = this->matchLink(string);
+    LinkParser parsed(string);
     auto textColor = this->textColor_;
 
-    if (!linkString.isEmpty())
+    if (parsed.result())
     {
-        this->addLink(string, linkString);
+        this->addLink(*parsed.result());
         return;
     }
 
