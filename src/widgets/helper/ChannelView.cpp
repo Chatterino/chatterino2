@@ -1774,9 +1774,10 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     });
             }
             auto thumbnailSize = getSettings()->thumbnailSize;
-            if (!thumbnailSize)
+            if (thumbnailSize == 0)
             {
-                tooltipWidget->clearEntries();
+                // "Show thumbnails" is set to "Off", show text only
+                tooltipWidget->setOne({nullptr, element->getTooltip()});
             }
             else
             {
