@@ -256,7 +256,6 @@ void Updates::checkForUpdates()
 
     NetworkRequest(url)
         .timeout(60000)
-        .followRedirects()
         .onSuccess([this](auto result) -> Outcome {
             const auto object = result.parseJson();
             /// Version available on every platform
