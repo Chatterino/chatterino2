@@ -5,6 +5,7 @@
 ## Slated for 2.4.3
 
 - Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
+- Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
 - Dev: Improve debug output when updater fails. (#4594)
 - Dev: Add the ability to control the `followRedirect` mode for requests. (#4594)
 
