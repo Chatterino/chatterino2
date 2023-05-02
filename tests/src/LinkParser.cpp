@@ -48,6 +48,10 @@ TEST(LinkParser, parseDomainLinks)
         {"", "1.com"},
         {"", "127.0.0.1.com"},
         {"https://", "127.0.0.1.com"},
+        {"https://", "http.cat", "/200"},
+        {"https://", "http.cat"},
+        {"", "http.cat"},
+        {"", "http.cat", "/200"},
         // test case-insensitiveness
         {"HtTpS://", "127.0.0.1.CoM"},
         {"HTTP://", "XD.CHATTERINO.COM", "/#?FOO"},
@@ -146,6 +150,13 @@ TEST(LinkParser, doesntParseInvalidLinks)
         "a",
         "://chatterino.com",
         "//chatterino.com",
+        "http://pn.",
+        "http://pn./",
+        "https://pn./",
+        "pn./",
+        "pn.",
+        "http/chatterino.com",
+        "http/wiki.chatterino.com",
     };
 
     for (const auto &input : inputs)
