@@ -5,7 +5,7 @@
 ## Slated for 2.4.3
 
 - Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
-- Bugfix: Fixed link tooltips not showing unless the thumbnail setting as enabled. (#4597)
+- Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
 
 ## 2.4.3 Beta
 
