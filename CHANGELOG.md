@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Domains starting with `http` are now parsed as links again. (#4598)
+
 ## Slated for 2.4.3
 
 - Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
