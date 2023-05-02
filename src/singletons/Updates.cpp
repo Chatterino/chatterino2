@@ -195,7 +195,7 @@ void Updates::installUpdates()
                     this->setStatus_(WriteFileFailed);
                     execMessageBox(
                         "Failed to save the update file. This could be due to "
-                        "window settings or antivirus software.\n\nTry "
+                        "Windows settings or antivirus software.\n\nTry "
                         "manually downloading the update.");
 
                     QDesktopServices::openUrl(this->updateExe_);
@@ -212,7 +212,7 @@ void Updates::installUpdates()
                 {
                     execMessageBox(
                         "Failed to execute update binary. This could be due to "
-                        "window settings or antivirus software.\n\nTry "
+                        "Windows settings or antivirus software.\n\nTry "
                         "manually downloading the update.");
 
                     QDesktopServices::openUrl(this->updateExe_);
