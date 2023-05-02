@@ -212,14 +212,6 @@ void Theme::parseFrom(const QJsonObject &root)
         (this->isLightTheme() ? "#68B1FF"
                               : this->tabs.selected.backgrounds.regular.name());
 
-    this->window.contextMenuStyleSheet =
-        QStringLiteral("QMenu { background: %1; border: %2; color: %3; "
-                       "selection-background-color: %2; } "
-                       "QMenu::item:disabled { color: #8c7f7f; }")
-            .arg(splits.input.background.name(QColor::HexArgb),
-                 tabs.selected.backgrounds.regular.name(QColor::HexArgb),
-                 tabs.selected.text.name(QColor::HexArgb));
-
     // Usercard buttons
     if (this->isLightTheme())
     {
