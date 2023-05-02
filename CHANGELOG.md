@@ -2,14 +2,7 @@
 
 ## Unversioned
 
-## Slated for 2.4.3
-
-- Minor: Improved error messages when the updater fails a download. (#4594)
-- Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
-- Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
-- Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
-
-## 2.4.3 Beta
+## 2.4.4
 
 - Major: Added support for FrankerFaceZ animated emotes. (#4434)
 - Minor: Added the ability to reply to a message by `Shift + Right Click`ing the username. (#4424)
@@ -22,6 +15,7 @@
 - Minor: Re-added leading @mentions from replies in chat logs. These were accidentally removed during the reply overhaul. (#4420)
 - Minor: Added a local backup of the Twitch Badges API in case the request fails. (#4463)
 - Minor: Updated the macOS icon to be consistent with the design of other applications on macOS. (#4577)
+- Minor: Improved error messages when the updater fails a download. (#4594)
 - Bugfix: Fixed an issue where Chatterino could lose track of the sound device in certain scenarios. (#4549)
 - Bugfix: Fixed an issue where animated emotes would render on top of zero-width emotes. (#4314)
 - Bugfix: Fixed an issue where it was difficult to hover a zero-width emote. (#4314)
@@ -36,6 +30,8 @@
 - Bugfix: Fixed emote & badge tooltips not showing up when thumbnails were hidden. (#4509)
 - Bugfix: Fixed links with invalid IPv4 addresses being parsed. (#4576)
 - Bugfix: Fixed the macOS icon changing to the wrong icon when the application is open. (#4577)
+- Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
+- Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
 - Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
 - Dev: Themes are now stored as JSON files in `resources/themes`. (#4471, #4533)
 - Dev: Ignore unhandled BTTV user-events. (#4438)
@@ -52,6 +48,7 @@
 - Dev: Removed `CHATTERINO_TEST` definitions. (#4526)
 - Dev: Builds for macOS now have `macos` in their name (previously: `osx`). (#4550)
 - Dev: Fixed a crash when dragging rows in table-views in builds with Qt 6. (#4567)
+- Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
 
 ## 2.4.2
 
