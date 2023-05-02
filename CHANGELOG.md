@@ -2,7 +2,11 @@
 
 ## Unversioned
 
-## 2.4.3
+## Slated for 2.4.3
+
+- Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
+
+## 2.4.3 Beta
 
 - Major: Added support for FrankerFaceZ animated emotes. (#4434)
 - Minor: Added the ability to reply to a message by `Shift + Right Click`ing the username. (#4424)
