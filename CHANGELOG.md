@@ -4,7 +4,7 @@
 
 ## Slated for 2.4.3
 
-- Minor: Improved error messages when updater fails a download. (#4594)
+- Minor: Improved error messages when the updater fails a download. (#4594)
 - Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
 - Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
 - Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
