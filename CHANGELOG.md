@@ -2,14 +2,12 @@
 
 ## Unversioned
 
-## Slated for 2.4.3
-
 - Minor: Improved error messages when the updater fails a download. (#4594)
 - Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
 - Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
 - Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
 
-## 2.4.3 Beta
+## 2.4.3
 
 - Major: Added support for FrankerFaceZ animated emotes. (#4434)
 - Minor: Added the ability to reply to a message by `Shift + Right Click`ing the username. (#4424)
