@@ -22,45 +22,33 @@ env:
 
 jobs:
   build:
-    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (PCH:${{ matrix.pch }}, LTO:${{ matrix.force-lto }})"
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
         qt-version: [5.15.2, 6.5.0]
-        pch: [true]
         force-lto: [false]
         plugins: [false]
         skip_artifact: ["no"]
         crashpad: [true]
+        clang-tidy-review: [false]
         include:
           # Ubuntu 20.04, Qt 5.12
           - os: ubuntu-20.04
             qt-version: 5.12.12
-            pch: true
-            force-lto: false
           # Ubuntu 22.04, Qt 5.15
           - os: ubuntu-22.04
             qt-version: 5.15.2
-            pch: true
-            force-lto: false
-          # Ubuntu 22.04, Qt 6.2.4
+            clang-tidy-review: true
+          # Ubuntu 22.04, Qt 6.2.4 - tests LTO & plugins
           - os: ubuntu-22.04
             qt-version: 6.2.4
-            pch: false
-            force-lto: false
-          # Test for disabling Precompiled Headers & enabling link-time optimization and plugins
-          - os: ubuntu-22.04
-            qt-version: 5.15.2
-            pch: false
             force-lto: true
-            skip_artifact: "yes"
             plugins: true
           # Test for disabling crashpad on Windows
           - os: windows-latest
             qt-version: 5.15.2
-            pch: false
-            force-lto: true
             skip_artifact: "yes"
             crashpad: false
 
@@ -68,19 +56,19 @@ jobs:
 
     steps:
       - name: Force LTO
-        if: matrix.force-lto == true
+        if: matrix.force-lto
         run: |
           echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Enable plugin support
-        if: matrix.plugins == true
+        if: matrix.plugins
         run: |
           echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Set Crashpad
-        if: matrix.crashpad == true
+        if: matrix.crashpad
         run: |
           echo "C2_ENABLE_CRASHPAD=ON" >> "$GITHUB_ENV"
         shell: bash
@@ -167,13 +155,14 @@ jobs:
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
+        shell: pwsh
         run: |
           cd build
           cmake `
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
-              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} `
+              -DUSE_PRECOMPILED_HEADERS=OFF `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
@@ -184,6 +173,7 @@ jobs:
 
       - name: Build crashpad (Windows)
         if: startsWith(matrix.os, 'windows') && matrix.crashpad
+        shell: pwsh
         run: |
           cd build
           set cl=/MP
@@ -260,7 +250,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
             -DCMAKE_BUILD_TYPE=Release \
             -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
-            -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
+            -DUSE_PRECOMPILED_HEADERS=OFF \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
             -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
@@ -270,7 +260,7 @@ jobs:
         shell: bash
 
       - name: clang-tidy review
-        if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
+        if: matrix.clang-tidy-review
         uses: ZedThree/clang-tidy-review@v0.13.0
         with:
           build_dir: build
@@ -279,7 +269,7 @@ jobs:
           exclude: "tests/*,lib/*"
 
       - name: clang-tidy-review upload
-        if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
+        if: matrix.clang-tidy-review
         uses: ZedThree/clang-tidy-review/upload@v0.13.0
 
       - name: Package - AppImage (Ubuntu)
@@ -326,7 +316,7 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
               -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
+              -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
