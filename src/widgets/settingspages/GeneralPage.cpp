@@ -1017,7 +1017,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Show send message button", s.showSendButton, false,
         "Show a Send button next to each split input that can be "
-        "clicked instead of pressing Enter");
+        "clicked to send the message");
 
     layout.addStretch();
 
