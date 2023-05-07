@@ -11,6 +11,7 @@
 #include "util/CombinePath.hpp"
 #include "util/PostToThread.hpp"
 
+#include <QApplication>
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QProcess>
