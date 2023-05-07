@@ -136,6 +136,22 @@ Used in:
 
 - `providers/twitch/TwitchChannel.cpp` to resolve a chats available cheer emotes. This helps us parse incoming messages like `pajaCheer1000`
 
+### Get Global Badges
+
+URL: https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
+
+Used in:
+
+- `providers/twitch/TwitchBadges.cpp` to load global badges
+
+### Get Channel Badges
+
+URL: https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
+
+Used in:
+
+- `providers/twitch/TwitchChannel.cpp` to load channel badges
+
 ### Get Emote Sets
 
 URL: https://dev.twitch.tv/docs/api/reference#get-emote-sets

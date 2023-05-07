@@ -76,7 +76,7 @@ void Toasts::sendChannelNotification(const QString &channelName,
     };
 #else
     auto sendChannelNotification = [] {
-        // Unimplemented for OSX and Linux
+        // Unimplemented for macOS and Linux
     };
 #endif
     // Fetch user profile avatar

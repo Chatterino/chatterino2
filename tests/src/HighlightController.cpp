@@ -226,6 +226,21 @@ public:
                 (override));
 
     // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, getGlobalBadges,
+        (ResultCallback<HelixGlobalBadges> successCallback,
+         (FailureCallback<HelixGetGlobalBadgesError, QString> failureCallback)),
+        (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, getChannelBadges,
+                (QString broadcasterID,
+                 ResultCallback<HelixChannelBadges> successCallback,
+                 (FailureCallback<HelixGetChannelBadgesError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
     MOCK_METHOD(void, updateUserChatColor,
                 (QString userID, QString color,
                  ResultCallback<> successCallback,
@@ -410,6 +425,14 @@ public:
          ResultCallback<std::vector<HelixModerator>> successCallback,
          (FailureCallback<HelixGetModeratorsError, QString> failureCallback)),
         (override));  // /mods
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, updateShieldMode,
+                (QString broadcasterID, QString moderatorID, bool isActive,
+                 ResultCallback<HelixShieldModeStatus> successCallback,
+                 (FailureCallback<HelixUpdateShieldModeError, QString>
+                      failureCallback)),
+                (override));
 
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));

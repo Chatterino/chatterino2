@@ -6,6 +6,7 @@
 #include "util/QStringHash.hpp"
 
 #include <boost/optional.hpp>
+#include <QDateTime>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QString>
@@ -384,6 +385,55 @@ struct HelixModerators {
     }
 };
 
+struct HelixBadgeVersion {
+    QString id;
+    Url imageURL1x;
+    Url imageURL2x;
+    Url imageURL4x;
+    QString title;
+    Url clickURL;
+
+    explicit HelixBadgeVersion(const QJsonObject &jsonObject)
+        : id(jsonObject.value("id").toString())
+        , imageURL1x(Url{jsonObject.value("image_url_1x").toString()})
+        , imageURL2x(Url{jsonObject.value("image_url_2x").toString()})
+        , imageURL4x(Url{jsonObject.value("image_url_4x").toString()})
+        , title(jsonObject.value("title").toString())
+        , clickURL(Url{jsonObject.value("click_url").toString()})
+    {
+    }
+};
+
+struct HelixBadgeSet {
+    QString setID;
+    std::vector<HelixBadgeVersion> versions;
+
+    explicit HelixBadgeSet(const QJsonObject &json)
+        : setID(json.value("set_id").toString())
+    {
+        const auto jsonVersions = json.value("versions").toArray();
+        for (const auto &version : jsonVersions)
+        {
+            versions.emplace_back(version.toObject());
+        }
+    }
+};
+
+struct HelixGlobalBadges {
+    std::vector<HelixBadgeSet> badgeSets;
+
+    explicit HelixGlobalBadges(const QJsonObject &jsonObject)
+    {
+        const auto &data = jsonObject.value("data").toArray();
+        for (const auto &set : data)
+        {
+            this->badgeSets.emplace_back(set.toObject());
+        }
+    }
+};
+
+using HelixChannelBadges = HelixGlobalBadges;
+
 enum class HelixAnnouncementColor {
     Blue,
     Green,
@@ -604,6 +654,39 @@ struct HelixStartCommercialResponse {
     }
 };
 
+struct HelixShieldModeStatus {
+    /// A Boolean value that determines whether Shield Mode is active. Is `true` if Shield Mode is active; otherwise, `false`.
+    bool isActive;
+    /// An ID that identifies the moderator that last activated Shield Mode.
+    QString moderatorID;
+    /// The moderator's login name.
+    QString moderatorLogin;
+    /// The moderator's display name.
+    QString moderatorName;
+    /// The UTC timestamp of when Shield Mode was last activated.
+    QDateTime lastActivatedAt;
+
+    explicit HelixShieldModeStatus(const QJsonObject &json)
+        : isActive(json["is_active"].toBool())
+        , moderatorID(json["moderator_id"].toString())
+        , moderatorLogin(json["moderator_login"].toString())
+        , moderatorName(json["moderator_name"].toString())
+        , lastActivatedAt(QDateTime::fromString(
+              json["last_activated_at"].toString(), Qt::ISODate))
+    {
+        this->lastActivatedAt.setTimeSpec(Qt::UTC);
+    }
+};
+
+enum class HelixUpdateShieldModeError {
+    Unknown,
+    UserMissingScope,
+    MissingPermission,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 enum class HelixStartCommercialError {
     Unknown,
     TokenMustMatchBroadcaster,
@@ -615,6 +698,15 @@ enum class HelixStartCommercialError {
     // The error message is forwarded directly from the Twitch API
     Forwarded,
 };
+
+enum class HelixGetGlobalBadgesError {
+    Unknown,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+using HelixGetChannelBadgesError = HelixGetGlobalBadgesError;
 
 class IHelix
 {
@@ -897,6 +989,28 @@ public:
         QString broadcasterID, int length,
         ResultCallback<HelixStartCommercialResponse> successCallback,
         FailureCallback<HelixStartCommercialError, QString>
+            failureCallback) = 0;
+
+    // Get global Twitch badges
+    // https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
+    virtual void getGlobalBadges(
+        ResultCallback<HelixGlobalBadges> successCallback,
+        FailureCallback<HelixGetGlobalBadgesError, QString>
+            failureCallback) = 0;
+
+    // Get badges for the `broadcasterID` channel
+    // https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
+    virtual void getChannelBadges(
+        QString broadcasterID,
+        ResultCallback<HelixChannelBadges> successCallback,
+        FailureCallback<HelixGetChannelBadgesError, QString>
+            failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#update-shield-mode-status
+    virtual void updateShieldMode(
+        QString broadcasterID, QString moderatorID, bool isActive,
+        ResultCallback<HelixShieldModeStatus> successCallback,
+        FailureCallback<HelixUpdateShieldModeError, QString>
             failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
@@ -1183,6 +1297,26 @@ public:
         ResultCallback<HelixStartCommercialResponse> successCallback,
         FailureCallback<HelixStartCommercialError, QString> failureCallback)
         final;
+
+    // Get global Twitch badges
+    // https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
+    void getGlobalBadges(ResultCallback<HelixGlobalBadges> successCallback,
+                         FailureCallback<HelixGetGlobalBadgesError, QString>
+                             failureCallback) final;
+
+    // Get badges for the `broadcasterID` channel
+    // https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
+    void getChannelBadges(QString broadcasterID,
+                          ResultCallback<HelixChannelBadges> successCallback,
+                          FailureCallback<HelixGetChannelBadgesError, QString>
+                              failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#update-shield-mode-status
+    void updateShieldMode(QString broadcasterID, QString moderatorID,
+                          bool isActive,
+                          ResultCallback<HelixShieldModeStatus> successCallback,
+                          FailureCallback<HelixUpdateShieldModeError, QString>
+                              failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

@@ -51,6 +51,8 @@ set(SOURCE_FILES
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
 
+        common/enums/MessageOverflow.hpp
+
         controllers/accounts/Account.cpp
         controllers/accounts/Account.hpp
         controllers/accounts/AccountController.cpp
@@ -60,6 +62,8 @@ set(SOURCE_FILES
 
         controllers/commands/builtin/twitch/ChatSettings.cpp
         controllers/commands/builtin/twitch/ChatSettings.hpp
+        controllers/commands/builtin/twitch/ShieldMode.cpp
+        controllers/commands/builtin/twitch/ShieldMode.hpp
         controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
