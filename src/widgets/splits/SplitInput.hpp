@@ -119,6 +119,7 @@ protected:
     struct {
         ResizingTextEdit *textEdit;
         QLabel *textEditLength;
+        EffectLabel *sendButton;
         EffectLabel *emoteButton;
 
         QHBoxLayout *hbox;

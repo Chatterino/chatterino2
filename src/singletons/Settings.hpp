@@ -509,6 +509,8 @@ public:
     IntSetting lastSelectChannelTab = {"/ui/lastSelectChannelTab", 0};
     IntSetting lastSelectIrcConn = {"/ui/lastSelectIrcConn", 0};
 
+    BoolSetting showSendButton = {"/ui/showSendButton", false};
+
     // Similarity
     BoolSetting similarityEnabled = {"/similarity/similarityEnabled", false};
     BoolSetting colorSimilarDisabled = {"/similarity/colorSimilarDisabled",
