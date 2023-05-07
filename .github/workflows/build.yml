@@ -30,27 +30,42 @@ jobs:
         qt-version: [5.15.2, 6.5.0]
         force-lto: [false]
         plugins: [false]
-        skip_artifact: ["no"]
-        crashpad: [true]
+        skip-artifact: [false]
+        skip-crashpad: [false]
         clang-tidy-review: [false]
         include:
           # Ubuntu 20.04, Qt 5.12
           - os: ubuntu-20.04
             qt-version: 5.12.12
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
           # Ubuntu 22.04, Qt 5.15
           - os: ubuntu-22.04
             qt-version: 5.15.2
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
             clang-tidy-review: true
           # Ubuntu 22.04, Qt 6.2.4 - tests LTO & plugins
           - os: ubuntu-22.04
             qt-version: 6.2.4
             force-lto: true
             plugins: true
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
           # Test for disabling crashpad on Windows
           - os: windows-latest
             qt-version: 5.15.2
-            skip_artifact: "yes"
-            crashpad: false
+            force-lto: false
+            plugins: false
+            skip-artifact: true
+            skip-crashpad: true
+            clang-tidy-review: false
 
       fail-fast: false
 
@@ -68,7 +83,7 @@ jobs:
         shell: bash
 
       - name: Set Crashpad
-        if: matrix.crashpad
+        if: matrix.skip-crashpad
         run: |
           echo "C2_ENABLE_CRASHPAD=ON" >> "$GITHUB_ENV"
         shell: bash
@@ -172,7 +187,7 @@ jobs:
           nmake /S /NOLOGO
 
       - name: Build crashpad (Windows)
-        if: startsWith(matrix.os, 'windows') && matrix.crashpad
+        if: startsWith(matrix.os, 'windows') && !matrix.skip-crashpad
         shell: pwsh
         run: |
           cd build
@@ -192,14 +207,14 @@ jobs:
           7z a chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip Chatterino2/
 
       - name: Upload artifact (Windows - binary)
-        if: startsWith(matrix.os, 'windows') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'windows') && !matrix.skip-artifact
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
           path: build/chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
 
       - name: Upload artifact (Windows - symbols)
-        if: startsWith(matrix.os, 'windows') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'windows') && !matrix.skip-artifact
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}-symbols.pdb.7z
@@ -273,28 +288,28 @@ jobs:
         uses: ZedThree/clang-tidy-review/upload@v0.13.0
 
       - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu-20.04') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu-20.04') && !matrix.skip-artifact
         run: |
           cd build
           sh ./../.CI/CreateAppImage.sh
         shell: bash
 
       - name: Package - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu') && !matrix.skip-artifact
         run: |
           cd build
           sh ./../.CI/CreateUbuntuDeb.sh
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu-20.04') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu-20.04') && !matrix.skip-artifact
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu') && !matrix.skip-artifact
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
