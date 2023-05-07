@@ -150,6 +150,24 @@ NetworkRequest NetworkRequest::multiPart(QHttpMultiPart *payload) &&
     return std::move(*this);
 }
 
+NetworkRequest NetworkRequest::followRedirects(bool on) &&
+{
+    if (on)
+    {
+        this->data->request_.setAttribute(
+            QNetworkRequest::RedirectPolicyAttribute,
+            QNetworkRequest::NoLessSafeRedirectPolicy);
+    }
+    else
+    {
+        this->data->request_.setAttribute(
+            QNetworkRequest::RedirectPolicyAttribute,
+            QNetworkRequest::ManualRedirectPolicy);
+    }
+
+    return std::move(*this);
+}
+
 NetworkRequest NetworkRequest::payload(const QByteArray &payload) &&
 {
     this->data->payload_ = payload;

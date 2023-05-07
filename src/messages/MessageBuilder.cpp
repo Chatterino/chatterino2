@@ -240,10 +240,10 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
         text.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
     for (const auto &word : textFragments)
     {
-        const auto linkString = this->matchLink(word);
-        if (!linkString.isEmpty())
+        LinkParser parser(word);
+        if (parser.result())
         {
-            this->addLink(word, linkString);
+            this->addLink(*parser.result());
             continue;
         }
 
@@ -707,52 +707,25 @@ std::unique_ptr<MessageElement> MessageBuilder::releaseBack()
     return ptr;
 }
 
-QString MessageBuilder::matchLink(const QString &string)
+void MessageBuilder::addLink(const ParsedLink &parsedLink)
 {
-    LinkParser linkParser(string);
-
-    static QRegularExpression httpRegex(
-        "\\bhttps?://", QRegularExpression::CaseInsensitiveOption);
-    static QRegularExpression ftpRegex(
-        "\\bftps?://", QRegularExpression::CaseInsensitiveOption);
-    static QRegularExpression spotifyRegex(
-        "\\bspotify:", QRegularExpression::CaseInsensitiveOption);
-
-    if (!linkParser.hasMatch())
-    {
-        return QString();
-    }
-
-    QString captured = linkParser.getCaptured();
-
-    if (!captured.contains(httpRegex) && !captured.contains(ftpRegex) &&
-        !captured.contains(spotifyRegex))
-    {
-        captured.insert(0, "http://");
-    }
-
-    return captured;
-}
-
-void MessageBuilder::addLink(const QString &origLink,
-                             const QString &matchedLink)
-{
-    static QRegularExpression domainRegex(
-        R"(^(?:(?:ftp|http)s?:\/\/)?([^\/]+)(?:\/.*)?$)",
-        QRegularExpression::CaseInsensitiveOption);
-
     QString lowercaseLinkString;
-    auto match = domainRegex.match(origLink);
-    if (match.isValid())
+    QString origLink = parsedLink.source;
+    QString matchedLink;
+
+    if (parsedLink.protocol.isNull())
     {
-        lowercaseLinkString = origLink.mid(0, match.capturedStart(1)) +
-                              match.captured(1).toLower() +
-                              origLink.mid(match.capturedEnd(1));
+        matchedLink = QStringLiteral("http://") + parsedLink.source;
     }
     else
     {
-        lowercaseLinkString = origLink;
+        lowercaseLinkString += parsedLink.protocol;
+        matchedLink = parsedLink.source;
     }
+
+    lowercaseLinkString += parsedLink.host.toString().toLower();
+    lowercaseLinkString += parsedLink.rest;
+
     auto linkElement = Link(Link::Url, matchedLink);
 
     auto textColor = MessageColor(MessageColor::Link);
@@ -816,12 +789,10 @@ void MessageBuilder::addIrcMessageText(const QString &text)
         auto string = QString(word);
 
         // Actually just text
-        auto linkString = this->matchLink(string);
-        auto link = Link();
-
-        if (!linkString.isEmpty())
+        LinkParser parser(string);
+        if (parser.result())
         {
-            this->addLink(string, linkString);
+            this->addLink(*parser.result());
             continue;
         }
 
@@ -909,28 +880,24 @@ void MessageBuilder::addTextOrEmoji(const QString &string_)
     auto string = QString(string_);
 
     // Actually just text
-    auto linkString = this->matchLink(string);
-    auto link = Link();
+    LinkParser linkParser(string);
+    if (linkParser.result())
+    {
+        this->addLink(*linkParser.result());
+        return;
+    }
 
     auto &&textColor = this->textColor_;
-    if (linkString.isEmpty())
+    if (string.startsWith('@'))
     {
-        if (string.startsWith('@'))
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                       textColor, FontStyle::ChatMediumBold);
-            this->emplace<TextElement>(
-                string, MessageElementFlag::NonBoldUsername, textColor);
-        }
-        else
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::Text,
-                                       textColor);
-        }
+        this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
+                                   textColor, FontStyle::ChatMediumBold);
+        this->emplace<TextElement>(string, MessageElementFlag::NonBoldUsername,
+                                   textColor);
     }
     else
     {
-        this->addLink(string, linkString);
+        this->emplace<TextElement>(string, MessageElementFlag::Text, textColor);
     }
 }
 
