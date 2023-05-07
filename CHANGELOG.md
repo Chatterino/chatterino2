@@ -2,6 +2,11 @@
 
 ## Unversioned
 
+- Minor: Improved error messages when the updater fails a download. (#4594)
+- Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
+- Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
+- Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
+
 ## 2.4.3
 
 - Major: Added support for FrankerFaceZ animated emotes. (#4434)
@@ -29,7 +34,6 @@
 - Bugfix: Fixed emote & badge tooltips not showing up when thumbnails were hidden. (#4509)
 - Bugfix: Fixed links with invalid IPv4 addresses being parsed. (#4576)
 - Bugfix: Fixed the macOS icon changing to the wrong icon when the application is open. (#4577)
-- Bugfix: Fixed disabled items in context-menus having a weird text-effect or the default text color. (#4423)
 - Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
 - Dev: Themes are now stored as JSON files in `resources/themes`. (#4471, #4533)
 - Dev: Ignore unhandled BTTV user-events. (#4438)

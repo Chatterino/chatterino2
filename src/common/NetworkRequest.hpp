@@ -61,6 +61,11 @@ public:
     NetworkRequest authorizeTwitchV5(const QString &clientID,
                                      const QString &oauthToken = QString()) &&;
     NetworkRequest multiPart(QHttpMultiPart *payload) &&;
+    /**
+     * This will change `RedirectPolicyAttribute`.
+     * `QNetworkRequest`'s defaults are used by default (Qt 5: no-follow, Qt 6: follow).
+     */
+    NetworkRequest followRedirects(bool on) &&;
 
     void execute();
 

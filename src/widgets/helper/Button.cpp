@@ -348,27 +348,24 @@ void Button::showMenu()
     if (!this->menu_)
         return;
 
-    auto point = [this] {
-        auto point = this->mapToGlobal(
-            QPoint(this->width() - this->menu_->width(), this->height()));
+    auto menuSizeHint = this->menu_->sizeHint();
+    auto point = this->mapToGlobal(
+        QPoint(this->width() - menuSizeHint.width(), this->height()));
 
-        auto *screen = QApplication::screenAt(point);
-        if (screen == nullptr)
-        {
-            screen = QApplication::primaryScreen();
-        }
-        auto bounds = screen->availableGeometry();
+    auto *screen = QApplication::screenAt(point);
+    if (screen == nullptr)
+    {
+        screen = QApplication::primaryScreen();
+    }
+    auto bounds = screen->availableGeometry();
 
-        if (point.y() + this->menu_->height() > bounds.bottom())
-        {
-            point.setY(point.y() - this->menu_->height() - this->height());
-        }
+    if (point.y() + menuSizeHint.height() > bounds.bottom())
+    {
+        // Menu doesn't fit going down, flip it to go up instead
+        point.setY(point.y() - menuSizeHint.height() - this->height());
+    }
 
-        return point;
-    };
-
-    this->menu_->popup(point());
-    this->menu_->move(point());
+    this->menu_->popup(point);
     this->menuVisible_ = true;
 }
 
