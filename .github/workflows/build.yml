@@ -83,7 +83,7 @@ jobs:
         shell: bash
 
       - name: Set Crashpad
-        if: matrix.skip-crashpad
+        if: matrix.skip-crashpad == false
         run: |
           echo "C2_ENABLE_CRASHPAD=ON" >> "$GITHUB_ENV"
         shell: bash
