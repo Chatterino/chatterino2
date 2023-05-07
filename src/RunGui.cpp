@@ -82,7 +82,9 @@ namespace {
 
         QApplication::setStyle(QStyleFactory::create("Fusion"));
 
+#ifndef Q_OS_MAC
         QApplication::setWindowIcon(QIcon(":/icon.ico"));
+#endif
 
         installCustomPalette();
     }
