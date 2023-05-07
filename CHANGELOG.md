@@ -6,6 +6,7 @@
 - Minor: Added `/shield` and `/shieldoff` commands to toggle shield mode. (#4580)
 - Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
 - Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
+- Bugfix: Domains starting with `http` are now parsed as links again. (#4598)
 - Bugfix: Fixed click effects on buttons not being antialiased. (#4473)
 - Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
 
