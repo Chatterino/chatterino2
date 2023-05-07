@@ -38,14 +38,20 @@ static bool fuzzyMatch(QString const &pattern, QString const &str)
     return i == pattern.length();
 }
 
-void addEmotes(std::vector<CompletionEmote> &out, const EmoteMap &map,
+void addEmotes(std::vector<CompletionEmote> &out,std::vector<CompletionEmote> &outFuzzy, const EmoteMap &map,
                const QString &text, const QString &providerName)
 {
     for (auto &&emote : map)
     {
-        if (fuzzyMatch(text.toLower(), emote.first.string.toLower()))
+        if (emote.first.string.contains(text, Qt::CaseInsensitive))
         {
             out.push_back(
+                {emote.second, emote.second->name.string, providerName});
+            continue;
+        }
+        if (fuzzyMatch(text.toLower(), emote.first.string.toLower()))
+        {
+            outFuzzy.push_back(
                 {emote.second, emote.second->name.string, providerName});
         }
     }
@@ -54,15 +60,25 @@ void addEmotes(std::vector<CompletionEmote> &out, const EmoteMap &map,
 void addEmojis(std::vector<CompletionEmote> &out, const EmojiMap &map,
                const QString &text)
 {
+    std::vector<CompletionEmote> outFuzzy;
     map.each([&](const QString &, const std::shared_ptr<EmojiData> &emoji) {
         for (auto &&shortCode : emoji->shortCodes)
         {
-            if (fuzzyMatch(text.toLower(), shortCode.toLower()))
+            if (shortCode.contains(text, Qt::CaseInsensitive))
             {
                 out.push_back({emoji->emote, shortCode, "Emoji"});
+                continue;
             }
+            if (fuzzyMatch(text.toLower(), shortCode.toLower()))
+            {
+                outFuzzy.push_back({emoji->emote, shortCode, "Emoji"});
+            }
+
         }
     });
+    out.insert(out.end(), outFuzzy.begin(), outFuzzy.end());
+    outFuzzy.clear();
+    outFuzzy.shrink_to_fit();
 }
 
 }  // namespace
@@ -89,6 +105,7 @@ InputCompletionPopup::InputCompletionPopup(QWidget *parent)
 void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
 {
     std::vector<CompletionEmote> emotes;
+    std::vector<CompletionEmote> emotesFuzzy;
     auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
     // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
     if (channel->isTwitchChannel())
@@ -97,7 +114,7 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
         {
             // Twitch Emotes available globally
             auto emoteData = user->accessEmotes();
-            addEmotes(emotes, emoteData->emotes, text, "Twitch Emote");
+            addEmotes(emotes,emotesFuzzy, emoteData->emotes, text, "Twitch Emote");
 
             // Twitch Emotes available locally
             auto localEmoteData = user->accessLocalEmotes();
@@ -106,7 +123,7 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
             {
                 if (const auto *localEmotes = &localEmoteData->at(tc->roomId()))
                 {
-                    addEmotes(emotes, *localEmotes, text,
+                    addEmotes(emotes,emotesFuzzy, *localEmotes, text,
                               "Local Twitch Emotes");
                 }
             }
@@ -117,33 +134,37 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
             // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
             if (auto bttv = tc->bttvEmotes())
             {
-                addEmotes(emotes, *bttv, text, "Channel BetterTTV");
+                addEmotes(emotes,emotesFuzzy, *bttv, text, "Channel BetterTTV");
             }
             if (auto ffz = tc->ffzEmotes())
             {
-                addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
+                addEmotes(emotes,emotesFuzzy, *ffz, text, "Channel FrankerFaceZ");
             }
             if (auto seventv = tc->seventvEmotes())
             {
-                addEmotes(emotes, *seventv, text, "Channel 7TV");
+                addEmotes(emotes,emotesFuzzy, *seventv, text, "Channel 7TV");
             }
         }
 
         if (auto bttvG = getApp()->twitch->getBttvEmotes().emotes())
         {
-            addEmotes(emotes, *bttvG, text, "Global BetterTTV");
+            addEmotes(emotes,emotesFuzzy, *bttvG, text, "Global BetterTTV");
         }
         if (auto ffzG = getApp()->twitch->getFfzEmotes().emotes())
         {
-            addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
+            addEmotes(emotes,emotesFuzzy, *ffzG, text, "Global FrankerFaceZ");
         }
         if (auto seventvG = getApp()->twitch->getSeventvEmotes().globalEmotes())
         {
-            addEmotes(emotes, *seventvG, text, "Global 7TV");
+            addEmotes(emotes,emotesFuzzy, *seventvG, text, "Global 7TV");
         }
+        emotes.insert(emotes.end(),emotesFuzzy.begin(),emotesFuzzy.end());
+        emotesFuzzy.clear();
     }
 
     addEmojis(emotes, getApp()->emotes->emojis.emojis, text);
+    emotesFuzzy.clear();
+    emotesFuzzy.shrink_to_fit();
 
     // if there is an exact match, put that emote first
     for (size_t i = 1; i < emotes.size(); i++)
