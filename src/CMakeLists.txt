@@ -51,6 +51,8 @@ set(SOURCE_FILES
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
 
+        common/enums/MessageOverflow.hpp
+
         controllers/accounts/Account.cpp
         controllers/accounts/Account.hpp
         controllers/accounts/AccountController.cpp
