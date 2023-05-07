@@ -203,17 +203,12 @@ void Button::fancyPaint(QPainter &painter)
 
     for (auto effect : this->clickEffects_)
     {
-        QRadialGradient gradient(effect.position.x(), effect.position.y(),
-                                 effect.progress * qreal(width()) * 2,
-                                 effect.position.x(), effect.position.y());
-
-        gradient.setColorAt(0, QColor(c.red(), c.green(), c.blue(),
-                                      int((1 - effect.progress) * 95)));
-        gradient.setColorAt(0.9999, QColor(c.red(), c.green(), c.blue(),
-                                           int((1 - effect.progress) * 95)));
-        gradient.setColorAt(1, QColor(c.red(), c.green(), c.blue(), int(0)));
-
-        painter.fillRect(this->rect(), gradient);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QColor(c.red(), c.green(), c.blue(),
+                                int((1 - effect.progress) * 95)));
+        painter.drawEllipse(QPointF(effect.position),
+                            effect.progress * qreal(width()) * 2,
+                            effect.progress * qreal(width()) * 2);
     }
 }
 
