@@ -275,7 +275,7 @@ jobs:
         shell: bash
 
       - name: clang-tidy review
-        if: matrix.clang-tidy-review
+        if: matrix.clang-tidy-review && github.event_name == 'pull_request'
         uses: ZedThree/clang-tidy-review@v0.13.0
         with:
           build_dir: build
@@ -284,7 +284,7 @@ jobs:
           exclude: "tests/*,lib/*"
 
       - name: clang-tidy-review upload
-        if: matrix.clang-tidy-review
+        if: matrix.clang-tidy-review && github.event_name == 'pull_request'
         uses: ZedThree/clang-tidy-review/upload@v0.13.0
 
       - name: Package - AppImage (Ubuntu)
