@@ -671,9 +671,9 @@ void ImageExpirationPool::freeOld()
     qCDebug(chatterinoImage) << "freed frame data for" << numExpired << "/"
                              << eligible << "eligible images";
 #    endif
-    DebugCount::set("last image gc expired", numExpired);
-    DebugCount::set("last image gc eligible", eligible);
-    DebugCount::set("images tracked by gc", this->allImages_.size());
+    DebugCount::set("last image gc: expired", numExpired);
+    DebugCount::set("last image gc: eligible", eligible);
+    DebugCount::set("last image gc: all tracked", this->allImages_.size());
 }
 
 #endif
