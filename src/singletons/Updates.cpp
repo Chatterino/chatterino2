@@ -11,6 +11,7 @@
 #include "util/CombinePath.hpp"
 #include "util/PostToThread.hpp"
 
+#include <QApplication>
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QProcess>
@@ -122,6 +123,18 @@ void Updates::installUpdates()
                 });
             })
             .onSuccess([this](auto result) -> Outcome {
+                if (result.status() != 200)
+                {
+                    auto *box = new QMessageBox(
+                        QMessageBox::Information, "Chatterino Update",
+                        QStringLiteral("The update couldn't be downloaded "
+                                       "(HTTP status %1).")
+                            .arg(result.status()));
+                    box->setAttribute(Qt::WA_DeleteOnClose);
+                    box->exec();
+                    return Failure;
+                }
+
                 QByteArray object = result.getData();
                 auto filename =
                     combinePath(getPaths()->miscDirectory, "update.zip");
@@ -171,6 +184,18 @@ void Updates::installUpdates()
                 box->exec();
             })
             .onSuccess([this](auto result) -> Outcome {
+                if (result.status() != 200)
+                {
+                    auto *box = new QMessageBox(
+                        QMessageBox::Information, "Chatterino Update",
+                        QStringLiteral("The update couldn't be downloaded "
+                                       "(HTTP status %1).")
+                            .arg(result.status()));
+                    box->setAttribute(Qt::WA_DeleteOnClose);
+                    box->exec();
+                    return Failure;
+                }
+
                 QByteArray object = result.getData();
                 auto filePath =
                     combinePath(getPaths()->miscDirectory, "Update.exe");
@@ -254,52 +279,56 @@ void Updates::checkForUpdates()
     NetworkRequest(url)
         .timeout(60000)
         .onSuccess([this](auto result) -> Outcome {
-            auto object = result.parseJson();
+            const auto object = result.parseJson();
             /// Version available on every platform
-            QJsonValue version_val = object.value("version");
+            auto version = object["version"];
 
-            if (!version_val.isString())
+            if (!version.isString())
             {
                 this->setStatus_(SearchFailed);
-                qCDebug(chatterinoUpdate) << "error updating";
+                qCDebug(chatterinoUpdate)
+                    << "error checking version - missing 'version'" << object;
                 return Failure;
             }
 
 #if defined Q_OS_WIN || defined Q_OS_MACOS
             /// Downloads an installer for the new version
-            QJsonValue updateExe_val = object.value("updateexe");
-            if (!updateExe_val.isString())
+            auto updateExeUrl = object["updateexe"];
+            if (!updateExeUrl.isString())
             {
                 this->setStatus_(SearchFailed);
-                qCDebug(chatterinoUpdate) << "error updating";
+                qCDebug(chatterinoUpdate)
+                    << "error checking version - missing 'updateexe'" << object;
                 return Failure;
             }
-            this->updateExe_ = updateExe_val.toString();
+            this->updateExe_ = updateExeUrl.toString();
 
 #    ifdef Q_OS_WIN
             /// Windows portable
-            QJsonValue portable_val = object.value("portable_download");
-            if (!portable_val.isString())
+            auto portableUrl = object["portable_download"];
+            if (!portableUrl.isString())
             {
                 this->setStatus_(SearchFailed);
-                qCDebug(chatterinoUpdate) << "error updating";
+                qCDebug(chatterinoUpdate)
+                    << "error checking version - missing 'portable_download'"
+                    << object;
                 return Failure;
             }
-            this->updatePortable_ = portable_val.toString();
+            this->updatePortable_ = portableUrl.toString();
 #    endif
 
 #elif defined Q_OS_LINUX
-            QJsonValue updateGuide_val = object.value("updateguide");
-            if (updateGuide_val.isString())
+            QJsonValue updateGuide = object.value("updateguide");
+            if (updateGuide.isString())
             {
-                this->updateGuideLink_ = updateGuide_val.toString();
+                this->updateGuideLink_ = updateGuide.toString();
             }
 #else
             return Failure;
 #endif
 
             /// Current version
-            this->onlineVersion_ = version_val.toString();
+            this->onlineVersion_ = version.toString();
 
             /// Update available :)
             if (this->currentVersion_ != this->onlineVersion_)

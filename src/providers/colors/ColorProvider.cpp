@@ -2,7 +2,8 @@
 
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Theme.hpp"
+
+#include <QSet>
 
 namespace chatterino {
 

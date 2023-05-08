@@ -8,6 +8,7 @@
 #include "common/SignalVector.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/builtin/twitch/ChatSettings.hpp"
+#include "controllers/commands/builtin/twitch/ShieldMode.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
@@ -3231,6 +3232,9 @@ void CommandController::initialize(Settings &, Paths &paths)
             });
             return "";
         });
+
+    this->registerCommand("/shield", &commands::shieldModeOn);
+    this->registerCommand("/shieldoff", &commands::shieldModeOff);
 }
 
 void CommandController::save()
