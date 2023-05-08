@@ -129,7 +129,8 @@ private:
     void freeOld();
 
     /*
-     * debug function
+     * Debug function that unloads all images in the pool. This is intended to
+     * test for possible memory leaks from tracked images.
      */
     void freeAll();
 
