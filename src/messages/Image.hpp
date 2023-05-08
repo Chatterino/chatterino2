@@ -110,13 +110,12 @@ ImagePtr getEmptyImagePtr();
 
 class ImageExpirationPool
 {
-    static ImageExpirationPool &instance();
-
 private:
     friend class Image;
     friend class CommandController;
 
     ImageExpirationPool();
+    static ImageExpirationPool &instance();
 
     void addImagePtr(ImagePtr imgPtr);
     void removeImagePtr(Image *rawPtr);
