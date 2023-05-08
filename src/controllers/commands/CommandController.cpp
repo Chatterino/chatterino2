@@ -3212,7 +3212,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     });
 
     this->registerCommand(
-        "/force-image-gc",
+        "/debug-force-image-gc",
         [](const QStringList & /*words*/, auto /*channel*/) -> QString {
             postToThread([]() {
                 using namespace chatterino::detail;
@@ -3223,7 +3223,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
 
     this->registerCommand(
-        "/force-image-unload",
+        "/debug-force-image-unload",
         [](const QStringList & /*words*/, auto /*channel*/) -> QString {
             postToThread([]() {
                 using namespace chatterino::detail;
