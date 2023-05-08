@@ -9,10 +9,14 @@ namespace chatterino {
 namespace {
 
 #ifdef Q_OS_LINUX
-    FlagsEnum<BaseWindow::Flags> popupFlags{BaseWindow::Dialog,
-                                            BaseWindow::EnableCustomFrame};
+    FlagsEnum<BaseWindow::Flags> popupFlags{
+        BaseWindow::Dialog,
+        BaseWindow::EnableCustomFrame,
+    };
     FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
-        BaseWindow::EnableCustomFrame};
+        BaseWindow::Dialog,
+        BaseWindow::EnableCustomFrame,
+    };
 #else
     FlagsEnum<BaseWindow::Flags> popupFlags{BaseWindow::EnableCustomFrame};
     FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
