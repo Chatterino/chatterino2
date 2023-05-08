@@ -322,8 +322,25 @@ jobs:
           brew install boost openssl rapidjson p7zip create-dmg cmake tree
         shell: bash
 
-      - name: Build (MacOS)
-        if: startsWith(matrix.os, 'macos')
+      - name: Build (MacOS) (Qt5)
+        if: startsWith(matrix.os, 'macos') && startsWith(matrix.qt-version, '5.')
+        run: |
+          mkdir build
+          cd build
+          cmake \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 \
+              -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+              -DUSE_PRECOMPILED_HEADERS=OFF \
+              -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+              -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
+              -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
+              ..
+          make -j"$(sysctl -n hw.logicalcpu)"
+        shell: bash
+
+      - name: Build (MacOS) (Qt6)
+        if: startsWith(matrix.os, 'macos') && startsWith(matrix.qt-version, '6.')
         run: |
           mkdir build
           cd build
@@ -369,12 +386,6 @@ jobs:
           fetch-depth: 0 # allows for tags access
 
       - uses: actions/download-artifact@v3
-        name: macOS x86_64 Qt6.5.0 dmg
-        with:
-          name: chatterino-macos-Qt-6.5.0.dmg
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v3
         name: Ubuntu 22.04 Qt6.2.4 deb
         with:
           name: Chatterino-ubuntu-22.04-Qt-6.2.4.deb
@@ -391,17 +402,6 @@ jobs:
         with:
           name: chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z
           path: release-artifacts/
-
-      - name: Mark experimental
-        run: |
-          ls -l
-          # Mark all Qt6 builds as EXPERIMENTAL
-          mv chatterino-macos-Qt-6.5.0.dmg EXPERIMENTAL-chatterino-macos-Qt-6.5.0.dmg
-          mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
-          mv chatterino-windows-x86-64-Qt-6.5.0.zip EXPERIMENTAL-chatterino-windows-x86-64-Qt-6.5.0.zip
-          mv chatterino-Qt-6.5.0.pdb.7z EXPERIMENTAL-chatterino-Qt-6.5.0.pdb.7z
-        working-directory: release-artifacts
-        shell: bash
 
       - uses: actions/download-artifact@v3
         name: Windows Qt5.15.2
@@ -442,6 +442,19 @@ jobs:
       - name: Copy flatpakref
         run: |
           cp .CI/chatterino-nightly.flatpakref release-artifacts/
+        shell: bash
+
+      - name: Rename artifacts
+        run: |
+          ls -l
+          # Rename the macos build to indicate that it's for macOS 10.14 users
+          mv chatterino-macos-Qt-5.15.2.dmg Chatterino-macOS-10.14.dmg
+
+          # Mark all Qt6 builds as EXPERIMENTAL
+          mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
+          mv chatterino-windows-x86-64-Qt-6.5.0.zip EXPERIMENTAL-chatterino-windows-x86-64-Qt-6.5.0.zip
+          mv chatterino-Qt-6.5.0.pdb.7z EXPERIMENTAL-chatterino-Qt-6.5.0.pdb.7z
+        working-directory: release-artifacts
         shell: bash
 
       - name: Create release
