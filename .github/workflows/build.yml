@@ -322,25 +322,8 @@ jobs:
           brew install boost openssl rapidjson p7zip create-dmg cmake tree
         shell: bash
 
-      - name: Build (MacOS) (Qt5)
-        if: startsWith(matrix.os, 'macos') && startsWith(matrix.qt-version, '5.')
-        run: |
-          mkdir build
-          cd build
-          cmake \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 \
-              -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-              -DUSE_PRECOMPILED_HEADERS=OFF \
-              -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
-              -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
-              -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
-              ..
-          make -j"$(sysctl -n hw.logicalcpu)"
-        shell: bash
-
-      - name: Build (MacOS) (Qt6)
-        if: startsWith(matrix.os, 'macos') && startsWith(matrix.qt-version, '6.')
+      - name: Build (MacOS)
+        if: startsWith(matrix.os, 'macos')
         run: |
           mkdir build
           cd build
@@ -447,8 +430,8 @@ jobs:
       - name: Rename artifacts
         run: |
           ls -l
-          # Rename the macos build to indicate that it's for macOS 10.14 users
-          mv chatterino-macos-Qt-5.15.2.dmg Chatterino-macOS-10.14.dmg
+          # Rename the macos build to indicate that it's for macOS 10.15 users
+          mv chatterino-macos-Qt-5.15.2.dmg Chatterino-macOS-10.15.dmg
 
           # Mark all Qt6 builds as EXPERIMENTAL
           mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
