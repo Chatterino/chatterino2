@@ -673,7 +673,7 @@ void ImageExpirationPool::freeOld()
 #    endif
     DebugCount::set("last image gc: expired", numExpired);
     DebugCount::set("last image gc: eligible", eligible);
-    DebugCount::set("last image gc: all tracked", this->allImages_.size());
+    DebugCount::set("last image gc: left after gc", this->allImages_.size());
 }
 
 #endif
