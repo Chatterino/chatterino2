@@ -1,7 +1,6 @@
 #include "AbstractIrcServer.hpp"
 
 #include "common/Channel.hpp"
-#include "common/Common.hpp"
 #include "common/QLogging.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
@@ -327,10 +326,13 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
         if (replaceMessage)
         {
             chan->replaceMessage(snapshot[snapshot.size() - 1], reconnected);
-            continue;
+        }
+        else
+        {
+            chan->addMessage(connectedMsg);
         }
 
-        chan->addMessage(connectedMsg);
+        chan->connected.invoke();
     }
 
     this->falloffCounter_ = 1;
@@ -370,10 +372,8 @@ std::shared_ptr<Channel> AbstractIrcServer::getCustomChannel(
 
 QString AbstractIrcServer::cleanChannelName(const QString &dirtyChannelName)
 {
-    if (dirtyChannelName.startsWith('#'))
-        return dirtyChannelName.mid(1);
-    else
-        return dirtyChannelName;
+    // This function is a Noop only for IRC, for Twitch it removes a leading '#' and lowercases the name
+    return dirtyChannelName;
 }
 
 void AbstractIrcServer::addFakeMessage(const QString &data)

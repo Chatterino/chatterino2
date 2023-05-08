@@ -62,7 +62,11 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
 
     auto textUpToCursor = currentText.left(tc.selectionStart());
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    auto words = QStringView{textUpToCursor}.split(' ');
+#else
     auto words = textUpToCursor.splitRef(' ');
+#endif
     if (words.size() == 0)
     {
         return QString();
@@ -96,8 +100,10 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
     return lastWord;
 }
 
-bool ResizingTextEdit::eventFilter(QObject *, QEvent *event)
+bool ResizingTextEdit::eventFilter(QObject *obj, QEvent *event)
 {
+    (void)obj;  // unused
+
     // makes QShortcuts work in the ResizingTextEdit
     if (event->type() != QEvent::ShortcutOverride)
     {
@@ -244,6 +250,11 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
                      this, &ResizingTextEdit::insertCompletion);
 }
 
+void ResizingTextEdit::resetCompletion()
+{
+    this->completionInProgress_ = false;
+}
+
 void ResizingTextEdit::insertCompletion(const QString &completion)
 {
     if (this->completer_->widget() != this)
@@ -279,29 +290,33 @@ bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
 
 void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 {
-    if (source->hasImage())
+    if (getSettings()->imageUploaderEnabled)
     {
-        this->imagePasted.invoke(source);
-        return;
-    }
-    else if (source->hasUrls())
-    {
-        bool hasUploadable = false;
-        auto mimeDb = QMimeDatabase();
-        for (const QUrl url : source->urls())
-        {
-            QMimeType mime = mimeDb.mimeTypeForUrl(url);
-            if (mime.name().startsWith("image"))
-            {
-                hasUploadable = true;
-                break;
-            }
-        }
-
-        if (hasUploadable)
+        if (source->hasImage())
         {
             this->imagePasted.invoke(source);
             return;
+        }
+
+        if (source->hasUrls())
+        {
+            bool hasUploadable = false;
+            auto mimeDb = QMimeDatabase();
+            for (const QUrl &url : source->urls())
+            {
+                QMimeType mime = mimeDb.mimeTypeForUrl(url);
+                if (mime.name().startsWith("image"))
+                {
+                    hasUploadable = true;
+                    break;
+                }
+            }
+
+            if (hasUploadable)
+            {
+                this->imagePasted.invoke(source);
+                return;
+            }
         }
     }
 

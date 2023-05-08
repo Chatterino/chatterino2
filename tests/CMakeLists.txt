@@ -10,10 +10,22 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightPhrase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ExponentialBackoff.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchAccount.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Helpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/RatelimitBucket.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Hotkeys.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/UtilTwitch.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/IrcHelpers.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchPubSubClient.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchMessageBuilder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightController.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/FormatTime.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/LimitedQueue.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/BasicPubSub.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/SeventvEventAPI.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/BttvLiveUpdates.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Updates.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Filters.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/LinkParser.cpp
     # Add your new file above this line!
     )
 
@@ -22,11 +34,7 @@ add_sanitizers(${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-lib)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE gtest)
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-    CHATTERINO_TEST
-    )
+target_link_libraries(${PROJECT_NAME} PRIVATE gtest gmock)
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
@@ -37,6 +45,12 @@ set_target_properties(${PROJECT_NAME}
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
     )
+
+if(CHATTERINO_ENABLE_LTO)
+    message(STATUS "Enabling LTO for ${PROJECT_NAME}")
+    set_property(TARGET ${PROJECT_NAME}
+        PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
 # gtest_add_tests manages to discover the tests because it looks through the source files
 # HOWEVER, it fails to run, because we have some bug that causes the QApplication exit to stall when no network requests have been made.

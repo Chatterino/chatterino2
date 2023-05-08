@@ -1,9 +1,9 @@
 #pragma once
 
+#include <QString>
+
 #include <functional>
 #include <vector>
-
-#include <QString>
 
 class QNetworkReply;
 

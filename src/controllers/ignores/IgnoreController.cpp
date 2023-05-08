@@ -1,7 +1,10 @@
 #include "controllers/ignores/IgnoreController.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "singletons/Settings.hpp"
 
 namespace chatterino {

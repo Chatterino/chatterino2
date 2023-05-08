@@ -2,10 +2,11 @@
 
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
-#include "providers/twitch/api/Helix.hpp"
-#include "providers/twitch/api/Kraken.hpp"
+#include "providers/twitch/TwitchUser.hpp"
+#include "util/SharedPtrElementLess.hpp"
 
 namespace chatterino {
 
@@ -120,7 +121,7 @@ void TwitchAccountManager::reloadUsers()
                     qCDebug(chatterinoTwitch)
                         << "It was the current user, so we need to "
                            "reconnect stuff!";
-                    this->currentUserChanged.invoke();
+                    this->currentUserChanged();
                 }
             }
             break;
@@ -149,7 +150,6 @@ void TwitchAccountManager::load()
             qCDebug(chatterinoTwitch)
                 << "Twitch user updated to" << newUsername;
             getHelix()->update(user->getOAuthClient(), user->getOAuthToken());
-            getKraken()->update(user->getOAuthClient(), user->getOAuthToken());
             this->currentUser_ = user;
         }
         else
@@ -158,7 +158,7 @@ void TwitchAccountManager::load()
             this->currentUser_ = this->anonymousUser_;
         }
 
-        this->currentUserChanged.invoke();
+        this->currentUserChanged();
     });
 }
 

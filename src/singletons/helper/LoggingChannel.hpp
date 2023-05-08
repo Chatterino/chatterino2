@@ -1,21 +1,22 @@
 #pragma once
 
-#include "messages/Message.hpp"
-
+#include <boost/noncopyable.hpp>
 #include <QDateTime>
 #include <QFile>
 #include <QString>
-#include <boost/noncopyable.hpp>
 
 #include <memory>
 
 namespace chatterino {
 
 class Logging;
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
 
 class LoggingChannel : boost::noncopyable
 {
-    explicit LoggingChannel(const QString &_channelName);
+    explicit LoggingChannel(const QString &_channelName,
+                            const QString &platform);
 
 public:
     ~LoggingChannel();
@@ -34,6 +35,7 @@ private:
     QString generateDateString(const QDateTime &now);
 
     const QString channelName;
+    const QString platform;
     QString baseDirectory;
     QString subDirectory;
 

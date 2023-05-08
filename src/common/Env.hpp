@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/optional.hpp>
 #include <QString>
 
 namespace chatterino {
@@ -13,10 +14,10 @@ public:
 
     const QString recentMessagesApiUrl;
     const QString linkResolverUrl;
-    const QString twitchEmoteSetResolverUrl;
     const QString twitchServerHost;
     const uint16_t twitchServerPort;
     const bool twitchServerSecure;
+    const boost::optional<QString> proxyUrl;
 };
 
 }  // namespace chatterino

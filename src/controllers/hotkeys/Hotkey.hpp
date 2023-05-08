@@ -5,6 +5,8 @@
 #include <QKeySequence>
 #include <QString>
 
+#include <vector>
+
 namespace chatterino {
 
 class Hotkey

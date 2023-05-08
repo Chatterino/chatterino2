@@ -3,7 +3,9 @@
 #include "Application.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/splits/Split.hpp"
 
 namespace chatterino {
 

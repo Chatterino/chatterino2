@@ -3,9 +3,7 @@
 #include <QFile>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QNetworkRequest>
 #include <QObject>
-#include <QStringList>
 
 namespace chatterino {
 

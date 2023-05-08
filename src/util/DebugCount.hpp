@@ -1,12 +1,12 @@
 #pragma once
 
-#include <common/UniqueAccess.hpp>
-
-#include <mutex>
-#include <typeinfo>
+#include "common/UniqueAccess.hpp"
 
 #include <QMap>
 #include <QString>
+
+#include <mutex>
+#include <typeinfo>
 
 namespace chatterino {
 

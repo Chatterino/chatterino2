@@ -1,24 +1,28 @@
 #pragma once
 
-#include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
-#include "controllers/commands/Command.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
+#include "util/QStringHash.hpp"
 
-#include <QMap>
 #include <pajlada/settings.hpp>
+#include <QMap>
 
 #include <memory>
 #include <mutex>
+#include <unordered_map>
+#include <variant>
 
 namespace chatterino {
 
 class Settings;
 class Paths;
 class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
+struct Message;
 
+struct Command;
 class CommandModel;
+struct CommandContext;
 
 class CommandController final : public Singleton
 {
@@ -34,9 +38,19 @@ public:
 
     CommandModel *createModel(QObject *parent);
 
-    QString execCustomCommand(const QStringList &words, const Command &command,
-                              bool dryRun, ChannelPtr channel,
-                              std::map<QString, QString> context = {});
+    QString execCustomCommand(
+        const QStringList &words, const Command &command, bool dryRun,
+        ChannelPtr channel, const Message *message = nullptr,
+        std::unordered_map<QString, QString> context = {});
+#ifdef CHATTERINO_HAVE_PLUGINS
+    bool registerPluginCommand(const QString &commandName);
+    bool unregisterPluginCommand(const QString &commandName);
+
+    const QStringList &pluginCommands()
+    {
+        return this->pluginCommands_;
+    }
+#endif
 
 private:
     void load(Paths &paths);
@@ -44,14 +58,20 @@ private:
     using CommandFunction =
         std::function<QString(QStringList /*words*/, ChannelPtr /*channel*/)>;
 
-    void registerCommand(QString commandName, CommandFunction commandFunction);
+    using CommandFunctionWithContext = std::function<QString(CommandContext)>;
+
+    using CommandFunctionVariants =
+        std::variant<CommandFunction, CommandFunctionWithContext>;
+
+    void registerCommand(const QString &commandName,
+                         CommandFunctionVariants commandFunction);
 
     // Chatterino commands
-    QMap<QString, CommandFunction> commands_;
+    std::unordered_map<QString, CommandFunctionVariants> commands_;
 
     // User-created commands
     QMap<QString, Command> userCommands_;
-    int maxSpaces_ = 0;
+    qsizetype maxSpaces_ = 0;
 
     std::shared_ptr<pajlada::Settings::SettingManager> sm_;
     // Because the setting manager is not initialized until the initialize
@@ -62,6 +82,9 @@ private:
         commandsSetting_;
 
     QStringList defaultChatterinoCommandAutoCompletions_;
+#ifdef CHATTERINO_HAVE_PLUGINS
+    QStringList pluginCommands_;
+#endif
 };
 
 }  // namespace chatterino

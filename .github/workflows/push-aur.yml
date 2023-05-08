@@ -5,7 +5,10 @@ on:
   push:
     branches:
       - master
-  pull_request:
+
+concurrency:
+  group: build-archlinux-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:

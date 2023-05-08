@@ -2,14 +2,16 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
-#include "providers/twitch/EmoteValue.hpp"
+#include "messages/MessageThread.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -21,10 +23,6 @@
 #include "util/Helpers.hpp"
 #include "util/NuulsUploader.hpp"
 #include "util/StreamLink.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Scrollbar.hpp"
-#include "widgets/TooltipWidget.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
 #include "widgets/dialogs/SelectChannelFiltersDialog.hpp"
@@ -34,10 +32,15 @@
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/helper/SearchPopup.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/Scrollbar.hpp"
+#include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/splits/SplitHeader.hpp"
 #include "widgets/splits/SplitInput.hpp"
 #include "widgets/splits/SplitOverlay.hpp"
+#include "widgets/TooltipWidget.hpp"
+#include "widgets/Window.hpp"
 
 #include <QApplication>
 #include <QClipboard>
@@ -50,10 +53,139 @@
 #include <QMimeData>
 #include <QMovie>
 #include <QPainter>
+#include <QSet>
 #include <QVBoxLayout>
 
 #include <functional>
 #include <random>
+
+namespace {
+
+using namespace chatterino;
+
+QString formatVIPListError(HelixListVIPsError error, const QString &message)
+{
+    using Error = HelixListVIPsError;
+
+    QString errorMessage = QString("Failed to list VIPs - ");
+
+    switch (error)
+    {
+        case Error::Forwarded: {
+            errorMessage += message;
+        }
+        break;
+
+        case Error::Ratelimited: {
+            errorMessage += "You are being ratelimited by Twitch. Try "
+                            "again in a few seconds.";
+        }
+        break;
+
+        case Error::UserMissingScope: {
+            // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
+            errorMessage += "Missing required scope. "
+                            "Re-login with your "
+                            "account and try again.";
+        }
+        break;
+
+        case Error::UserNotAuthorized: {
+            // TODO(pajlada): Phrase MISSING_PERMISSION
+            errorMessage += "You don't have permission to "
+                            "perform that action.";
+        }
+        break;
+
+        case Error::UserNotBroadcaster: {
+            errorMessage +=
+                "Due to Twitch restrictions, "
+                "this command can only be used by the broadcaster. "
+                "To see the list of VIPs you must use the Twitch website.";
+        }
+        break;
+
+        case Error::Unknown: {
+            errorMessage += "An unknown error has occurred.";
+        }
+        break;
+    }
+    return errorMessage;
+}
+
+QString formatModsError(HelixGetModeratorsError error, QString message)
+{
+    using Error = HelixGetModeratorsError;
+
+    QString errorMessage = QString("Failed to get moderators: ");
+
+    switch (error)
+    {
+        case Error::Forwarded: {
+            errorMessage += message;
+        }
+        break;
+
+        case Error::UserMissingScope: {
+            errorMessage += "Missing required scope. "
+                            "Re-login with your "
+                            "account and try again.";
+        }
+        break;
+
+        case Error::UserNotAuthorized: {
+            errorMessage +=
+                "Due to Twitch restrictions, "
+                "this command can only be used by the broadcaster. "
+                "To see the list of mods you must use the Twitch website.";
+        }
+        break;
+
+        case Error::Unknown: {
+            errorMessage += "An unknown error has occurred.";
+        }
+        break;
+    }
+    return errorMessage;
+}
+
+QString formatChattersError(HelixGetChattersError error, QString message)
+{
+    using Error = HelixGetChattersError;
+
+    QString errorMessage = QString("Failed to get chatters: ");
+
+    switch (error)
+    {
+        case Error::Forwarded: {
+            errorMessage += message;
+        }
+        break;
+
+        case Error::UserMissingScope: {
+            errorMessage += "Missing required scope. "
+                            "Re-login with your "
+                            "account and try again.";
+        }
+        break;
+
+        case Error::UserNotAuthorized: {
+            errorMessage +=
+                "Due to Twitch restrictions, "
+                "this command can only be used by moderators. "
+                "To see the list of chatters you must use the Twitch website.";
+        }
+        break;
+
+        case Error::Unknown: {
+            errorMessage += "An unknown error has occurred.";
+        }
+        break;
+    }
+    return errorMessage;
+}
+
+}  // namespace
 
 namespace chatterino {
 namespace {
@@ -85,16 +217,18 @@ Split::Split(QWidget *parent)
     , channel_(Channel::getEmpty())
     , vbox_(new QVBoxLayout(this))
     , header_(new SplitHeader(this))
-    , view_(new ChannelView(this))
+    , view_(new ChannelView(this, this, ChannelView::Context::None,
+                            getSettings()->scrollbackSplitLimit))
     , input_(new SplitInput(this))
     , overlay_(new SplitOverlay(this))
 {
     this->setMouseTracking(true);
     this->view_->setPausable(true);
-    this->view_->setFocusPolicy(Qt::FocusPolicy::NoFocus);
+    this->view_->setFocusProxy(this->input_->ui_.textEdit);
+    this->setFocusProxy(this->input_->ui_.textEdit);
 
     this->vbox_->setSpacing(0);
-    this->vbox_->setMargin(1);
+    this->vbox_->setContentsMargins(1, 1, 1, 1);
 
     this->vbox_->addWidget(this->header_);
     this->vbox_->addWidget(this->view_, 1);
@@ -103,30 +237,35 @@ Split::Split(QWidget *parent)
     this->input_->ui_.textEdit->installEventFilter(parent);
 
     // update placeholder text on Twitch account change and channel change
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [this] {
+    this->bSignals_.emplace_back(
+        getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->updateInputPlaceholder();
-        });
+        }));
     this->signalHolder_.managedConnect(channelChanged, [this] {
         this->updateInputPlaceholder();
     });
     this->updateInputPlaceholder();
 
-    this->view_->mouseDown.connect([this](QMouseEvent *) {
-        this->giveFocus(Qt::MouseFocusReason);
-    });
+    // clear SplitInput selection when selecting in ChannelView
     this->view_->selectionChanged.connect([this]() {
-        if (view_->hasSelection())
+        if (this->input_->hasSelection())
         {
             this->input_->clearSelection();
+        }
+    });
+
+    // clear ChannelView selection when selecting in SplitInput
+    this->input_->selectionChanged.connect([this]() {
+        if (this->view_->hasSelection())
+        {
+            this->view_->clearSelection();
         }
     });
 
     this->view_->openChannelIn.connect([this](
                                            QString twitchChannel,
                                            FromTwitchLinkOpenChannelIn openIn) {
-        ChannelPtr channel =
-            getApp()->twitch.server->getOrAddChannel(twitchChannel);
+        ChannelPtr channel = getApp()->twitch->getOrAddChannel(twitchChannel);
         switch (openIn)
         {
             case FromTwitchLinkOpenChannelIn::Split:
@@ -148,31 +287,36 @@ Split::Split(QWidget *parent)
         }
     });
 
-    this->input_->textChanged.connect([=](const QString &newText) {
+    this->input_->textChanged.connect([this](const QString &newText) {
         if (getSettings()->showEmptyInput)
         {
+            // We always show the input regardless of the text, so we can early out here
             return;
         }
 
-        if (newText.length() == 0)
+        if (newText.isEmpty())
         {
             this->input_->hide();
         }
         else if (this->input_->isHidden())
         {
+            // Text updated and the input was previously hidden, show it
             this->input_->show();
         }
     });
 
     getSettings()->showEmptyInput.connect(
         [this](const bool &showEmptyInput, auto) {
-            if (!showEmptyInput && this->input_->getInputText().length() == 0)
+            if (showEmptyInput)
             {
-                this->input_->hide();
+                this->input_->show();
             }
             else
             {
-                this->input_->show();
+                if (this->input_->getInputText().isEmpty())
+                {
+                    this->input_->hide();
+                }
             }
         },
         this->signalHolder_);
@@ -182,6 +326,12 @@ Split::Split(QWidget *parent)
 
     this->setSizePolicy(QSizePolicy::MinimumExpanding,
                         QSizePolicy::MinimumExpanding);
+
+    // update moderation button when items changed
+    this->signalHolder_.managedConnect(
+        getSettings()->moderationActions.delayedItemsChanged, [this] {
+            this->refreshModerationMode();
+        });
 
     this->signalHolder_.managedConnect(
         modifierStatusChanged, [this](Qt::KeyboardModifiers status) {
@@ -207,12 +357,16 @@ Split::Split(QWidget *parent)
             }
         });
 
-    this->input_->ui_.textEdit->focused.connect([this] {
-        this->focused.invoke();
-    });
-    this->input_->ui_.textEdit->focusLost.connect([this] {
-        this->focusLost.invoke();
-    });
+    this->signalHolder_.managedConnect(this->input_->ui_.textEdit->focused,
+                                       [this] {
+                                           // Forward textEdit's focused event
+                                           this->focused.invoke();
+                                       });
+    this->signalHolder_.managedConnect(this->input_->ui_.textEdit->focusLost,
+                                       [this] {
+                                           // Forward textEdit's focusLost event
+                                           this->focusLost.invoke();
+                                       });
     this->input_->ui_.textEdit->imagePasted.connect(
         [this](const QMimeData *source) {
             if (!getSettings()->imageUploaderEnabled)
@@ -220,7 +374,7 @@ Split::Split(QWidget *parent)
 
             if (getSettings()->askOnImageUpload.getValue())
             {
-                QMessageBox msgBox;
+                QMessageBox msgBox(this->window());
                 msgBox.setWindowTitle("Chatterino");
                 msgBox.setText("Image upload");
                 msgBox.setInformativeText(
@@ -274,7 +428,12 @@ void Split::addShortcuts()
          }},
         {"showSearch",
          [this](std::vector<QString>) -> QString {
-             this->showSearch();
+             this->showSearch(true);
+             return "";
+         }},
+        {"showGlobalSearch",
+         [this](std::vector<QString>) -> QString {
+             this->showSearch(false);
              return "";
          }},
         {"reconnect",
@@ -326,6 +485,12 @@ void Split::addShortcuts()
         {"scrollToBottom",
          [this](std::vector<QString>) -> QString {
              this->getChannelView().getScrollBar().scrollToBottom(
+                 getSettings()->enableSmoothScrollingNewMessages.getValue());
+             return "";
+         }},
+        {"scrollToTop",
+         [this](std::vector<QString>) -> QString {
+             this->getChannelView().getScrollBar().scrollToTop(
                  getSettings()->enableSmoothScrollingNewMessages.getValue());
              return "";
          }},
@@ -599,7 +764,13 @@ void Split::joinChannelInNewTab(ChannelPtr channel)
 
     Split *split = new Split(container);
     split->setChannel(channel);
-    container->appendSplit(split);
+    container->insertSplit(split);
+}
+
+void Split::refreshModerationMode()
+{
+    this->header_->updateModerationModeIcon();
+    this->view_->queueLayout();
 }
 
 void Split::openChannelInBrowserPlayer(ChannelPtr channel)
@@ -630,7 +801,7 @@ IndirectChannel Split::getIndirectChannel()
     return this->channel_;
 }
 
-ChannelPtr Split::getChannel()
+ChannelPtr Split::getChannel() const
 {
     return this->channel_.get();
 }
@@ -684,6 +855,7 @@ void Split::setChannel(IndirectChannel newChannel)
     });
 
     this->channelChanged.invoke();
+    this->actionRequested.invoke(Action::RefreshTab);
 
     // Queue up save because: Split channel changed
     getApp()->windows->queueSave();
@@ -692,8 +864,7 @@ void Split::setChannel(IndirectChannel newChannel)
 void Split::setModerationMode(bool value)
 {
     this->moderationMode_ = value;
-    this->header_->updateModerationModeIcon();
-    this->view_->queueLayout();
+    this->refreshModerationMode();
 }
 
 bool Split::getModerationMode() const
@@ -724,11 +895,10 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setWindowTitle(dialogTitle);
     dialog->show();
-    dialog->closed.connect([=] {
+    dialog->closed.connect([=, this] {
         if (dialog->hasSeletedChannel())
         {
             this->setChannel(dialog->getSelectedChannel());
-            this->actionRequested.invoke(Action::RefreshTab);
         }
 
         callback(dialog->hasSeletedChannel());
@@ -745,16 +915,6 @@ void Split::updateGifEmotes()
 void Split::updateLastReadMessage()
 {
     this->view_->updateLastReadMessage();
-}
-
-void Split::giveFocus(Qt::FocusReason reason)
-{
-    this->input_->ui_.textEdit->setFocus(reason);
-}
-
-bool Split::hasFocus() const
-{
-    return this->input_->ui_.textEdit->hasFocus();
 }
 
 void Split::paintEvent(QPaintEvent *)
@@ -792,7 +952,11 @@ void Split::resizeEvent(QResizeEvent *event)
     this->overlay_->setGeometry(this->rect());
 }
 
-void Split::enterEvent(QEvent *event)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void Split::enterEvent(QEnterEvent * /*event*/)
+#else
+void Split::enterEvent(QEvent * /*event*/)
+#endif
 {
     this->isMouseOver_ = true;
 
@@ -816,11 +980,6 @@ void Split::leaveEvent(QEvent *event)
     TooltipWidget::instance()->hide();
 
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
-}
-
-void Split::focusInEvent(QFocusEvent *event)
-{
-    this->giveFocus(event->reason());
 }
 
 void Split::handleModifiers(Qt::KeyboardModifiers modifiers)
@@ -885,7 +1044,7 @@ void Split::popup()
     split->setModerationMode(this->getModerationMode());
     split->setFilters(this->getFilters());
 
-    window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+    window.getNotebook().getOrAddSelectedPage()->insertSplit(split);
     window.show();
 }
 
@@ -971,6 +1130,26 @@ void Split::showViewerList()
     auto chattersList = new QListWidget();
     auto resultList = new QListWidget();
 
+    auto channel = this->getChannel();
+    if (!channel)
+    {
+        qCWarning(chatterinoWidget)
+            << "Viewer list opened when no channel was defined";
+        return;
+    }
+
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+    if (twitchChannel == nullptr)
+    {
+        qCWarning(chatterinoWidget)
+            << "Viewer list opened in a non-Twitch channel";
+        return;
+    }
+
+    auto *loadingLabel = new QLabel("Loading...");
+    searchBar->setPlaceholderText("Search User...");
+
     auto formatListItemText = [](QString text) {
         auto item = new QListWidgetItem();
         item->setText(text);
@@ -978,97 +1157,219 @@ void Split::showViewerList()
         return item;
     };
 
-    static QStringList labels = {
-        "Broadcaster", "Moderators",        "VIPs",   "Staff",
-        "Admins",      "Global Moderators", "Viewers"};
-    static QStringList jsonLabels = {"broadcaster", "moderators", "vips",
-                                     "staff",       "admins",     "global_mods",
-                                     "viewers"};
-    QList<QListWidgetItem *> labelList;
-    for (auto &x : labels)
-    {
-        auto label = formatListItemText(x);
-        label->setForeground(this->theme->accent);
-        labelList.append(label);
-    }
-    auto loadingLabel = new QLabel("Loading...");
+    auto addLabel = [this, formatListItemText, chattersList](QString label) {
+        auto formattedLabel = formatListItemText(label);
+        formattedLabel->setForeground(this->theme->accent);
+        chattersList->addItem(formattedLabel);
+    };
 
-    NetworkRequest::twitchRequest("https://tmi.twitch.tv/group/user/" +
-                                  this->getChannel()->getName() + "/chatters")
-        .caller(this)
-        .onSuccess([=](auto result) -> Outcome {
-            auto obj = result.parseJson();
-            QJsonObject chattersObj = obj.value("chatters").toObject();
-
-            viewerDock->setWindowTitle(
-                QString("Viewer List - %1 (%2 chatters)")
-                    .arg(this->getChannel()->getName())
-                    .arg(localizeNumbers(obj.value("chatter_count").toInt())));
-
-            loadingLabel->hide();
-            for (int i = 0; i < jsonLabels.size(); i++)
-            {
-                auto currentCategory =
-                    chattersObj.value(jsonLabels.at(i)).toArray();
-                // If current category of chatters is empty, dont show this
-                // category.
-                if (currentCategory.empty())
-                    continue;
-
-                chattersList->addItem(labelList.at(i));
-                foreach (const QJsonValue &v, currentCategory)
-                {
-                    chattersList->addItem(formatListItemText(v.toString()));
-                }
-                chattersList->addItem(new QListWidgetItem());
-            }
-
-            return Success;
-        })
-        .execute();
-
-    searchBar->setPlaceholderText("Search User...");
-    QObject::connect(searchBar, &QLineEdit::textEdited, this, [=]() {
-        auto query = searchBar->text();
-        if (!query.isEmpty())
+    auto addUserList = [=](QStringList users, QString label) {
+        if (users.isEmpty())
         {
-            auto results = chattersList->findItems(query, Qt::MatchContains);
-            chattersList->hide();
-            resultList->clear();
-            for (auto &item : results)
-            {
-                if (!labels.contains(item->text()))
-                {
-                    resultList->addItem(formatListItemText(item->text()));
-                }
-            }
-            resultList->show();
+            return;
         }
-        else
+
+        addLabel(QString("%1 (%2)").arg(label, localizeNumbers(users.size())));
+
+        for (const auto &user : users)
+        {
+            chattersList->addItem(formatListItemText(user));
+        }
+        chattersList->addItem(new QListWidgetItem());
+    };
+
+    auto performListSearch = [=]() {
+        auto query = searchBar->text();
+        if (query.isEmpty())
         {
             resultList->hide();
             chattersList->show();
+            return;
         }
-    });
+
+        auto results = chattersList->findItems(query, Qt::MatchContains);
+        chattersList->hide();
+        resultList->clear();
+        for (auto &item : results)
+        {
+            if (!item->text().contains("("))
+            {
+                resultList->addItem(formatListItemText(item->text()));
+            }
+        }
+        resultList->show();
+    };
+
+    auto loadChatters = [=](auto modList, auto vipList, bool isBroadcaster) {
+        getHelix()->getChatters(
+            twitchChannel->roomId(),
+            getApp()->accounts->twitch.getCurrent()->getUserId(), 50000,
+            [=](auto chatters) {
+                auto broadcaster = channel->getName().toLower();
+                QStringList chatterList;
+                QStringList modChatters;
+                QStringList vipChatters;
+
+                bool addedBroadcaster = false;
+                for (auto chatter : chatters.chatters)
+                {
+                    chatter = chatter.toLower();
+
+                    if (!addedBroadcaster && chatter == broadcaster)
+                    {
+                        addedBroadcaster = true;
+                        addLabel("Broadcaster");
+                        chattersList->addItem(broadcaster);
+                        chattersList->addItem(new QListWidgetItem());
+                        continue;
+                    }
+
+                    if (modList.contains(chatter))
+                    {
+                        modChatters.append(chatter);
+                        continue;
+                    }
+
+                    if (vipList.contains(chatter))
+                    {
+                        vipChatters.append(chatter);
+                        continue;
+                    }
+
+                    chatterList.append(chatter);
+                }
+
+                modChatters.sort();
+                vipChatters.sort();
+                chatterList.sort();
+
+                if (isBroadcaster)
+                {
+                    addUserList(modChatters, QString("Moderators"));
+                    addUserList(vipChatters, QString("VIPs"));
+                }
+                else
+                {
+                    addLabel("Moderators");
+                    chattersList->addItem(
+                        "Moderators cannot check who is a moderator");
+                    chattersList->addItem(new QListWidgetItem());
+
+                    addLabel("VIPs");
+                    chattersList->addItem(
+                        "Moderators cannot check who is a VIP");
+                    chattersList->addItem(new QListWidgetItem());
+                }
+
+                addUserList(chatterList, QString("Chatters"));
+
+                loadingLabel->hide();
+                performListSearch();
+            },
+            [chattersList, formatListItemText](auto error, auto message) {
+                auto errorMessage = formatChattersError(error, message);
+                chattersList->addItem(formatListItemText(errorMessage));
+            });
+    };
+
+    QObject::connect(searchBar, &QLineEdit::textEdited, this,
+                     performListSearch);
+
+    // Only broadcaster can get vips, mods can get chatters
+    if (channel->isBroadcaster())
+    {
+        // Add moderators
+        getHelix()->getModerators(
+            twitchChannel->roomId(), 1000,
+            [=](auto mods) {
+                QSet<QString> modList;
+                for (const auto &mod : mods)
+                {
+                    modList.insert(mod.userName.toLower());
+                }
+
+                // Add vips
+                getHelix()->getChannelVIPs(
+                    twitchChannel->roomId(),
+                    [=](auto vips) {
+                        QSet<QString> vipList;
+                        for (const auto &vip : vips)
+                        {
+                            vipList.insert(vip.userName.toLower());
+                        }
+
+                        // Add chatters
+                        loadChatters(modList, vipList, true);
+                    },
+                    [chattersList, formatListItemText](auto error,
+                                                       auto message) {
+                        auto errorMessage = formatVIPListError(error, message);
+                        chattersList->addItem(formatListItemText(errorMessage));
+                    });
+            },
+            [chattersList, formatListItemText](auto error, auto message) {
+                auto errorMessage = formatModsError(error, message);
+                chattersList->addItem(formatListItemText(errorMessage));
+            });
+    }
+    else if (channel->hasModRights())
+    {
+        QSet<QString> modList;
+        QSet<QString> vipList;
+        loadChatters(modList, vipList, false);
+    }
+    else
+    {
+        chattersList->addItem(
+            formatListItemText("Due to Twitch restrictions, this feature is "
+                               "only \navailable for moderators."));
+        chattersList->addItem(
+            formatListItemText("If you would like to see the Viewer list, you "
+                               "must \nuse the Twitch website."));
+        loadingLabel->hide();
+    }
 
     QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {
         viewerDock->setMinimumWidth(300);
     });
 
-    auto listDoubleClick = [=](QString userName) {
-        if (!labels.contains(userName) && !userName.isEmpty())
+    auto listDoubleClick = [this](const QModelIndex &index) {
+        const auto itemText = index.data().toString();
+
+        // if the list item contains a parentheses it means that
+        // it's a category label so don't show a usercard
+        if (!itemText.contains("(") && !itemText.isEmpty())
         {
-            this->view_->showUserInfoPopup(userName);
+            this->view_->showUserInfoPopup(itemText);
         }
     };
 
-    QObject::connect(chattersList, &QListWidget::doubleClicked, this, [=]() {
-        listDoubleClick(chattersList->currentItem()->text());
-    });
+    QObject::connect(chattersList, &QListWidget::doubleClicked, this,
+                     listDoubleClick);
 
-    QObject::connect(resultList, &QListWidget::doubleClicked, this, [=]() {
-        listDoubleClick(resultList->currentItem()->text());
-    });
+    QObject::connect(resultList, &QListWidget::doubleClicked, this,
+                     listDoubleClick);
+
+    HotkeyController::HotkeyMap actions{
+        {"delete",
+         [viewerDock](std::vector<QString>) -> QString {
+             viewerDock->close();
+             return "";
+         }},
+        {"accept", nullptr},
+        {"reject", nullptr},
+        {"scrollPage", nullptr},
+        {"openTab", nullptr},
+        {"search",
+         [searchBar](std::vector<QString>) -> QString {
+             searchBar->setFocus();
+             searchBar->selectAll();
+             return "";
+         }},
+    };
+
+    getApp()->hotkeys->shortcutsForCategory(HotkeyCategory::PopupWindow,
+                                            actions, viewerDock);
 
     dockVbox->addWidget(searchBar);
     dockVbox->addWidget(loadingLabel);
@@ -1092,11 +1393,6 @@ void Split::openSubPage()
     {
         QDesktopServices::openUrl(twitchChannel->subscriptionUrl());
     }
-}
-
-void Split::copyToClipboard()
-{
-    crossPlatformCopy(this->view_->getSelectedText());
 }
 
 void Split::startWatching()
@@ -1137,13 +1433,29 @@ const QList<QUuid> Split::getFilters() const
     return this->view_->getFilterIds();
 }
 
-void Split::showSearch()
+void Split::showSearch(bool singleChannel)
 {
-    SearchPopup *popup = new SearchPopup(this);
-
-    popup->setChannelFilters(this->view_->getFilterSet());
+    auto *popup = new SearchPopup(this, this);
     popup->setAttribute(Qt::WA_DeleteOnClose);
-    popup->setChannel(this->getChannel());
+
+    if (singleChannel)
+    {
+        popup->addChannel(this->getChannelView());
+        popup->show();
+        return;
+    }
+
+    // Pass every ChannelView for every Split across the app to the search popup
+    auto &notebook = getApp()->windows->getMainWindow().getNotebook();
+    for (int i = 0; i < notebook.getPageCount(); ++i)
+    {
+        auto container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
+        for (auto split : container->getSplits())
+        {
+            popup->addChannel(split->getChannelView());
+        }
+    }
+
     popup->show();
 }
 
@@ -1156,6 +1468,7 @@ void Split::reloadChannelAndSubscriberEmotes()
     {
         twitchChannel->refreshBTTVChannelEmotes(true);
         twitchChannel->refreshFFZChannelEmotes(true);
+        twitchChannel->refreshSevenTVChannelEmotes(true);
     }
 }
 
@@ -1207,25 +1520,64 @@ static Iter select_randomly(Iter start, Iter end)
 
 void Split::drag()
 {
-    if (auto container = dynamic_cast<SplitContainer *>(this->parentWidget()))
+    auto *container = dynamic_cast<SplitContainer *>(this->parentWidget());
+    if (!container)
     {
-        SplitContainer::isDraggingSplit = true;
-        SplitContainer::draggingSplit = this;
-
-        auto originalLocation = container->releaseSplit(this);
-        auto drag = new QDrag(this);
-        auto mimeData = new QMimeData;
-
-        mimeData->setData("chatterino/split", "xD");
-        drag->setMimeData(mimeData);
-
-        if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
-        {
-            container->insertSplit(this, originalLocation);
-        }
-
-        SplitContainer::isDraggingSplit = false;
+        qCWarning(chatterinoWidget)
+            << "Attempted to initiate split drag without a container parent";
+        return;
     }
+
+    startDraggingSplit();
+
+    auto originalLocation = container->releaseSplit(this);
+    auto drag = new QDrag(this);
+    auto mimeData = new QMimeData;
+
+    mimeData->setData("chatterino/split", "xD");
+    drag->setMimeData(mimeData);
+
+    // drag->exec is a blocking action
+    if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
+    {
+        // The split wasn't dropped in a valid spot, return it to its original position
+        container->insertSplit(this, {.position = originalLocation});
+    }
+
+    stopDraggingSplit();
+}
+
+void Split::setInputReply(const std::shared_ptr<MessageThread> &reply)
+{
+    this->input_->setReply(reply);
 }
 
 }  // namespace chatterino
+
+QDebug operator<<(QDebug dbg, const chatterino::Split &split)
+{
+    auto channel = split.getChannel();
+    if (channel)
+    {
+        dbg.nospace() << "Split(" << (void *)&split
+                      << ", channel:" << channel->getName() << ")";
+    }
+    else
+    {
+        dbg.nospace() << "Split(" << (void *)&split << ", no channel)";
+    }
+
+    return dbg;
+}
+
+QDebug operator<<(QDebug dbg, const chatterino::Split *split)
+{
+    if (split != nullptr)
+    {
+        return operator<<(dbg, *split);
+    }
+
+    dbg.nospace() << "Split(nullptr)";
+
+    return dbg;
+}

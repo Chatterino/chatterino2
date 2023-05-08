@@ -1,16 +1,19 @@
 #include "providers/emoji/Emojis.hpp"
 
-#include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 #include "singletons/Settings.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
+#include <boost/variant.hpp>
+#include <QFile>
 #include <rapidjson/error/en.h>
 #include <rapidjson/error/error.h>
 #include <rapidjson/rapidjson.h>
-#include <QFile>
-#include <boost/variant.hpp>
+
+#include <array>
 #include <memory>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {
@@ -137,7 +140,7 @@ void Emojis::load()
 
 void Emojis::loadEmojis()
 {
-    // Current version: https://github.com/iamcal/emoji-data/blob/v7.0.2/emoji.json (Emoji version 13.1 (2021))
+    // Current version: https://github.com/iamcal/emoji-data/blob/v14.0.0/emoji.json (Emoji version 14.0 (2022))
     QFile file(":/emoji.json");
     file.open(QFile::ReadOnly);
     QTextStream s1(&file);
@@ -213,11 +216,7 @@ void Emojis::sortEmojis()
 
 void Emojis::loadEmojiSet()
 {
-#ifndef CHATTERINO_TEST
-    getSettings()->emojiSet.connect([=](const auto &emojiSet) {
-#else
-    const QString emojiSet = "twitter";
-#endif
+    getSettings()->emojiSet.connect([this](const auto &emojiSet) {
         this->emojis.each([=](const auto &name,
                               std::shared_ptr<EmojiData> &emoji) {
             QString emojiSetToUse = emojiSet;
@@ -262,9 +261,7 @@ void Emojis::loadEmojiSet()
                 EmoteName{emoji->value}, ImageSet{Image::fromUrl({url}, 0.35)},
                 Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"}, Url{}});
         });
-#ifndef CHATTERINO_TEST
     });
-#endif
 }
 
 std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(

@@ -2,10 +2,14 @@
 
 #include "Application.hpp"
 #include "MessageElement.hpp"
-#include "providers/twitch/PubsubActions.hpp"
+#include "providers/colors/ColorProvider.hpp"
+#include "providers/twitch/PubSubActions.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 #include "util/IrcHelpers.hpp"
+#include "widgets/helper/ScrollbarHighlight.hpp"
 
 using SBHighlight = chatterino::ScrollbarHighlight;
 
@@ -42,12 +46,19 @@ SBHighlight Message::getScrollBarHighlight() const
             ColorProvider::instance().color(ColorType::RedeemedHighlight),
             SBHighlight::Default, true);
     }
+    else if (this->flags.has(MessageFlag::ElevatedMessage))
+    {
+        return SBHighlight(ColorProvider::instance().color(
+                               ColorType::ElevatedMessageHighlight),
+                           SBHighlight::Default, false, false, true);
+    }
     else if (this->flags.has(MessageFlag::FirstMessage))
     {
         return SBHighlight(
             ColorProvider::instance().color(ColorType::FirstMessageHighlight),
             SBHighlight::Default, false, true);
     }
+
     return SBHighlight();
 }
 

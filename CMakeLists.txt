@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 3.8)
-cmake_policy(SET CMP0087 NEW)
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
+cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
 include(FeatureSummary)
 
 list(APPEND CMAKE_MODULE_PATH
@@ -7,7 +8,7 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
-project(chatterino VERSION 2.3.4)
+project(chatterino VERSION 2.4.3)
 
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
@@ -16,20 +17,28 @@ option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
 option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
 option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key chain" ON)
+option(BUILD_WITH_CRASHPAD "Build chatterino with crashpad" OFF)
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
+option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
+# We don't use translations, and we don't want qtkeychain to build translations
+option(BUILD_TRANSLATIONS "" OFF)
+option(BUILD_SHARED_LIBS "" OFF)
+option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
+option(CHATTERINO_PLUGINS "Enable EXPERIMENTAL plugin support in Chatterino" OFF)
 
-option(USE_CONAN "Use conan" OFF)
+if(CHATTERINO_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
+    message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO})")
+else()
+    message(STATUS "LTO: Disabled")
+endif()
 
 if (BUILD_WITH_QT6)
     set(MAJOR_QT_VERSION "6")
 else()
     set(MAJOR_QT_VERSION "5")
-endif()
-
-if (USE_CONAN OR CONAN_EXPORTED)
-    include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
 endif()
 
 find_program(CCACHE_PROGRAM ccache)
@@ -46,10 +55,18 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Widgets
     Gui
     Network
-    Multimedia
     Svg
     Concurrent
     )
+
+if (BUILD_WITH_QT6)
+    find_package(Qt${MAJOR_QT_VERSION} REQUIRED
+        COMPONENTS
+        Core5Compat
+        )
+endif ()
+
+message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 
 if (WIN32)
     find_package(WinToast REQUIRED)
@@ -58,7 +75,9 @@ endif ()
 find_package(Sanitizers)
 
 # Find boost on the system
-find_package(Boost REQUIRED)
+# `OPTIONAL_COMPONENTS random` is required for vcpkg builds to link.
+# `OPTIONAL` is required, because conan doesn't set `boost_random_FOUND`.
+find_package(Boost REQUIRED OPTIONAL_COMPONENTS random)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
@@ -80,7 +99,6 @@ endif()
 
 if (BUILD_WITH_QTKEYCHAIN)
     # Link QtKeychain statically
-    option(QTKEYCHAIN_STATIC "" ON)
     if (USE_SYSTEM_QTKEYCHAIN)
         find_package(Qt${MAJOR_QT_VERSION}Keychain REQUIRED)
     else()
@@ -101,7 +119,22 @@ find_package(RapidJSON REQUIRED)
 find_package(Websocketpp REQUIRED)
 
 if (BUILD_TESTS)
-    find_package(GTest REQUIRED)
+    # For MSVC: Prevent overriding the parent project's compiler/linker settings
+    # See https://github.com/google/googletest/blob/main/googletest/README.md#visual-studio-dynamic-vs-static-runtimes
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+    add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib/googletest" "lib/googletest")
+
+    mark_as_advanced(
+            BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
+            gmock_build_tests gtest_build_samples gtest_build_tests
+            gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
+    )
+
+    set_target_properties(gtest PROPERTIES FOLDER lib)
+    set_target_properties(gtest_main PROPERTIES FOLDER lib)
+    set_target_properties(gmock PROPERTIES FOLDER lib)
+    set_target_properties(gmock_main PROPERTIES FOLDER lib)
 endif ()
 
 if (BUILD_BENCHMARKS)
@@ -112,6 +145,7 @@ endif ()
 find_package(PajladaSerialize REQUIRED)
 find_package(PajladaSignals REQUIRED)
 find_package(LRUCache REQUIRED)
+find_package(MagicEnum REQUIRED)
 
 if (USE_SYSTEM_PAJLADA_SETTINGS)
     find_package(PajladaSettings REQUIRED)
@@ -123,12 +157,20 @@ else()
     add_subdirectory("${CMAKE_SOURCE_DIR}/lib/settings" EXCLUDE_FROM_ALL)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
+if (CHATTERINO_PLUGINS)
+    set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
+    add_subdirectory(lib/lua)
+endif()
+
+if (BUILD_WITH_CRASHPAD)
+    add_subdirectory("${CMAKE_SOURCE_DIR}/lib/crashpad" EXCLUDE_FROM_ALL)
+endif()
+
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (BUILD_TESTS OR BUILD_BENCHMARKS)
-    add_definitions(-DCHATTERINO_TEST)
-endif ()
+# Generate resource files
+include(cmake/resources/generate_resources.cmake)
 
 add_subdirectory(src)
 

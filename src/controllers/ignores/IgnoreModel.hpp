@@ -1,11 +1,12 @@
 #pragma once
 
+#include "common/SignalVectorModel.hpp"
+
 #include <QObject>
 
-#include "common/SignalVectorModel.hpp"
-#include "controllers/ignores/IgnorePhrase.hpp"
-
 namespace chatterino {
+
+class IgnorePhrase;
 
 class IgnoreModel : public SignalVectorModel<IgnorePhrase>
 {

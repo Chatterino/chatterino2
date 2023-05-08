@@ -1,4 +1,4 @@
-#include "StreamerMode.hpp"
+#include "util/StreamerMode.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
@@ -6,20 +6,22 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
-
-#ifdef USEWINSDK
-#    include <Windows.h>
-
-#    include <VersionHelpers.h>
-#    include <WtsApi32.h>
-#    pragma comment(lib, "Wtsapi32.lib")
-#endif
+#include "widgets/Window.hpp"
 
 #include <QProcess>
+
+#ifdef USEWINSDK
+// clang-format off
+// These imports cannot be ordered alphabetically.
+#    include <Windows.h>
+#    include <VersionHelpers.h>
+#    include <WtsApi32.h>
+// clang-format on
+#    pragma comment(lib, "Wtsapi32.lib")
+#endif
 
 namespace chatterino {
 
@@ -30,9 +32,11 @@ bool shouldShowWarning = true;
 const QStringList &broadcastingBinaries()
 {
 #ifdef USEWINSDK
-    static QStringList bins = {"obs.exe", "obs64.exe"};
+    static QStringList bins = {
+        "obs.exe",         "obs64.exe",        "PRISMLiveStudio.exe",
+        "XSplit.Core.exe", "TwitchStudio.exe", "vMix64.exe"};
 #else
-    static QStringList bins = {"obs"};
+    static QStringList bins = {"obs", "Twitch Studio", "Streamlabs Desktop"};
 #endif
     return bins;
 }
@@ -45,7 +49,7 @@ bool isInStreamerMode()
             return true;
         case StreamerModeSetting::Disabled:
             return false;
-        case StreamerModeSetting::DetectObs:
+        case StreamerModeSetting::DetectStreamingSoftware:
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
 
@@ -76,7 +80,7 @@ bool isInStreamerMode()
             {
                 shouldShowWarning = false;
 
-                getApp()->twitch2->addGlobalSystemMessage(
+                getApp()->twitch->addGlobalSystemMessage(
                     "Streamer Mode is set to Automatic, but pgrep is missing. "
                     "Install it to fix the issue or set Streamer Mode to "
                     "Enabled or Disabled in the Settings.");

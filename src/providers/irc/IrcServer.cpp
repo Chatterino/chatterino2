@@ -1,10 +1,10 @@
 #include "IrcServer.hpp"
 
-#include <cassert>
-#include <cstdlib>
-
+#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageColor.hpp"
+#include "messages/MessageElement.hpp"
 #include "providers/irc/Irc2.hpp"
 #include "providers/irc/IrcChannel2.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
@@ -14,6 +14,9 @@
 #include "util/QObjectRef.hpp"
 
 #include <QMetaEnum>
+
+#include <cassert>
+#include <cstdlib>
 
 namespace chatterino {
 
@@ -58,6 +61,11 @@ const QString &IrcServer::nick()
     return this->data_->nick.isEmpty() ? this->data_->user : this->data_->nick;
 }
 
+const QString &IrcServer::userFriendlyIdentifier()
+{
+    return this->data_->host;
+}
+
 void IrcServer::initializeConnectionSignals(IrcConnection *connection,
                                             ConnectionType type)
 {
@@ -86,7 +94,8 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
 
     QObject::connect(connection, &Communi::IrcConnection::nickNameRequired,
                      this, [](const QString &reserved, QString *result) {
-                         *result = reserved + (std::rand() % 100);
+                         *result = QString("%1%2").arg(
+                             reserved, QString::number(std::rand() % 100));
                      });
 
     QObject::connect(connection, &Communi::IrcConnection::noticeMessageReceived,
@@ -106,6 +115,15 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
                              }
                          }
                      });
+    QObject::connect(connection,
+                     &Communi::IrcConnection::capabilityMessageReceived, this,
+                     [this](Communi::IrcCapabilityMessage *message) {
+                         const QStringList caps = message->capabilities();
+                         if (caps.contains("echo-message"))
+                         {
+                             this->hasEcho_ = true;
+                         }
+                     });
 }
 
 void IrcServer::initializeConnection(IrcConnection *connection,
@@ -122,6 +140,7 @@ void IrcServer::initializeConnection(IrcConnection *connection,
                                                         : this->data_->nick);
     connection->setRealName(this->data_->real.isEmpty() ? this->data_->user
                                                         : this->data_->nick);
+    connection->network()->setRequestedCapabilities({"echo-message"});
 
     if (getSettings()->enableExperimentalIrc)
     {
@@ -175,6 +194,36 @@ void IrcServer::onReadConnected(IrcConnection *connection)
 
 void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
+    // Note: This doesn't use isPrivate() because it only applies to messages targeting our user,
+    // Servers or bouncers may send messages which have our user as the source
+    // (like with echo-message CAP), we need to take care of this.
+    if (!message->target().startsWith("#"))
+    {
+        MessageParseArgs args;
+        if (message->isOwn())
+        {
+            // The server sent us a whisper which has our user as the source
+            args.isSentWhisper = true;
+        }
+        else
+        {
+            args.isReceivedWhisper = true;
+        }
+
+        IrcMessageBuilder builder(message, args);
+
+        auto msg = builder.build();
+
+        for (auto &&weak : this->channels)
+        {
+            if (auto shared = weak.lock())
+            {
+                shared->addMessage(msg);
+            }
+        }
+        return;
+    }
+
     auto target = message->target();
     target = target.startsWith('#') ? target.mid(1) : target;
 
@@ -195,7 +244,7 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
             if (highlighted && showInMentions)
             {
-                getApp()->twitch2->mentionsChannel->addMessage(msg);
+                getApp()->twitch->mentionsChannel->addMessage(msg);
             }
         }
         else
@@ -214,8 +263,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
         case Communi::IrcMessage::Join: {
             auto x = static_cast<Communi::IrcJoinMessage *>(message);
 
-            if (auto it =
-                    this->channels.find(this->cleanChannelName(x->channel()));
+            if (auto it = this->channels.find(x->channel());
                 it != this->channels.end())
             {
                 if (auto shared = it->lock())
@@ -238,8 +286,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
         case Communi::IrcMessage::Part: {
             auto x = static_cast<Communi::IrcPartMessage *>(message);
 
-            if (auto it =
-                    this->channels.find(this->cleanChannelName(x->channel()));
+            if (auto it = this->channels.find(x->channel());
                 it != this->channels.end())
             {
                 if (auto shared = it->lock())
@@ -270,7 +317,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 MessageBuilder builder;
 
                 builder.emplace<TimestampElement>(
-                    calculateMessageTimestamp(message));
+                    calculateMessageTime(message).time());
                 builder.emplace<TextElement>(message->toData(),
                                              MessageElementFlag::Text);
                 builder->flags.set(MessageFlag::Debug);
@@ -284,6 +331,43 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 }
             };
     }
+}
+
+void IrcServer::sendWhisper(const QString &target, const QString &message)
+{
+    this->sendRawMessage(QString("PRIVMSG %1 :%2").arg(target, message));
+    if (this->hasEcho())
+    {
+        return;
+    }
+
+    MessageParseArgs args;
+    args.isSentWhisper = true;
+
+    MessageBuilder b;
+
+    b.emplace<TimestampElement>();
+    b.emplace<TextElement>(this->nick(), MessageElementFlag::Text,
+                           MessageColor::Text, FontStyle::ChatMediumBold);
+    b.emplace<TextElement>("->", MessageElementFlag::Text,
+                           MessageColor::System);
+    b.emplace<TextElement>(target + ":", MessageElementFlag::Text,
+                           MessageColor::Text, FontStyle::ChatMediumBold);
+    b.emplace<TextElement>(message, MessageElementFlag::Text);
+
+    auto msg = b.release();
+    for (auto &&weak : this->channels)
+    {
+        if (auto shared = weak.lock())
+        {
+            shared->addMessage(msg);
+        }
+    }
+}
+
+bool IrcServer::hasEcho() const
+{
+    return this->hasEcho_;
 }
 
 }  // namespace chatterino

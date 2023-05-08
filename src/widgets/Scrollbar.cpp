@@ -1,13 +1,11 @@
 #include "widgets/Scrollbar.hpp"
 
-#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
-#include <QDebug>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QTimer>
@@ -18,9 +16,10 @@
 
 namespace chatterino {
 
-Scrollbar::Scrollbar(ChannelView *parent)
+Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
     : BaseWidget(parent)
     , currentValueAnimation_(this, "currentValue_")
+    , highlights_(messagesLimit)
 {
     resize(int(16 * this->scale()), 100);
     this->currentValueAnimation_.setDuration(150);
@@ -32,8 +31,7 @@ Scrollbar::Scrollbar(ChannelView *parent)
 
 void Scrollbar::addHighlight(ScrollbarHighlight highlight)
 {
-    ScrollbarHighlight deleted;
-    this->highlights_.pushBack(highlight, deleted);
+    this->highlights_.pushBack(highlight);
 }
 
 void Scrollbar::addHighlightsAtStart(
@@ -62,7 +60,7 @@ void Scrollbar::clearHighlights()
     this->highlights_.clear();
 }
 
-LimitedQueueSnapshot<ScrollbarHighlight> Scrollbar::getHighlightSnapshot()
+LimitedQueueSnapshot<ScrollbarHighlight> &Scrollbar::getHighlightSnapshot()
 {
     if (!this->highlightsPaused_)
     {
@@ -75,6 +73,11 @@ LimitedQueueSnapshot<ScrollbarHighlight> Scrollbar::getHighlightSnapshot()
 void Scrollbar::scrollToBottom(bool animate)
 {
     this->setDesiredValue(this->maximum_ - this->getLargeChange(), animate);
+}
+
+void Scrollbar::scrollToTop(bool animate)
+{
+    this->setDesiredValue(this->minimum_ - this->getLargeChange(), animate);
 }
 
 bool Scrollbar::isAtBottom() const
@@ -116,7 +119,7 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
     value = std::max(this->minimum_,
                      std::min(this->maximum_ - this->largeChange_, value));
 
-    if (std::abs(this->desiredValue_ + this->smoothScrollingOffset_ - value) >
+    if (std::abs(this->currentValue_ + this->smoothScrollingOffset_ - value) >
         0.0001)
     {
         if (animated)
@@ -138,8 +141,12 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
         }
         else
         {
-            if (this->currentValueAnimation_.state() !=
+            if (this->currentValueAnimation_.state() ==
                 QPropertyAnimation::Running)
+            {
+                this->currentValueAnimation_.setEndValue(value);
+            }
+            else
             {
                 this->smoothScrollingOffset_ = 0;
                 this->desiredValue_ = value;
@@ -253,6 +260,8 @@ void Scrollbar::paintEvent(QPaintEvent *)
     bool enableRedeemedHighlights = getSettings()->enableRedeemedHighlight;
     bool enableFirstMessageHighlights =
         getSettings()->enableFirstMessageHighlight;
+    bool enableElevatedMessageHighlights =
+        getSettings()->enableElevatedMessageHighlight;
 
     //    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
     //                     this->themeManager->ScrollbarArrow);
@@ -275,7 +284,7 @@ void Scrollbar::paintEvent(QPaintEvent *)
     }
 
     // draw highlights
-    auto snapshot = this->getHighlightSnapshot();
+    auto &snapshot = this->getHighlightSnapshot();
     size_t snapshotLength = snapshot.size();
 
     if (snapshotLength == 0)
@@ -305,6 +314,12 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
         if (highlight.isFirstMessageHighlight() &&
             !enableFirstMessageHighlights)
+        {
+            continue;
+        }
+
+        if (highlight.isElevatedMessageHighlight() &&
+            !enableElevatedMessageHighlights)
         {
             continue;
         }

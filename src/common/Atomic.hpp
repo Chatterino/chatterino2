@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/noncopyable.hpp>
+
 #include <mutex>
 
 namespace chatterino {

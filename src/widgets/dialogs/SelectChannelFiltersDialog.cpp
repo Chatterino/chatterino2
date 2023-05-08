@@ -1,10 +1,12 @@
 #include "SelectChannelFiltersDialog.hpp"
 
+#include "controllers/filters/FilterRecord.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QCheckBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QScrollArea>
 #include <QVBoxLayout>
 
 namespace chatterino {
@@ -19,7 +21,15 @@ SelectChannelFiltersDialog::SelectChannelFiltersDialog(
     auto okButton = new QPushButton("Ok");
     auto cancelButton = new QPushButton("Cancel");
 
-    vbox->addLayout(itemVbox);
+    auto scrollAreaContent = new QWidget;
+    scrollAreaContent->setLayout(itemVbox);
+
+    auto scrollArea = new QScrollArea;
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scrollArea->setWidget(scrollAreaContent);
+
+    vbox->addWidget(scrollArea);
     vbox->addLayout(buttonBox);
 
     buttonBox->addStretch(1);

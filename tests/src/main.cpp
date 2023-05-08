@@ -2,33 +2,34 @@
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
-#include "providers/twitch/api/Helix.hpp"
-
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
-
-#include <gtest/gtest.h>
-
-#include <QJsonArray>
-#include <QtConcurrent>
-
-#include <chrono>
-#include <thread>
-#include "common/NetworkManager.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "singletons/Settings.hpp"
 
 #include <gtest/gtest.h>
 #include <QApplication>
+#include <QJsonArray>
+#include <QtConcurrent>
 #include <QTimer>
 
+#include <chrono>
+#include <thread>
+
 using namespace chatterino;
+
+#define SUPPORT_QT_NETWORK_TESTS
 
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
 
+#ifdef SUPPORT_QT_NETWORK_TESTS
     QApplication app(argc, argv);
 
     chatterino::NetworkManager::init();
+
+    // Ensure settings are initialized before any tests are run
+    chatterino::Settings settings("/tmp/c2-empty-test");
 
     QtConcurrent::run([&app] {
         auto res = RUN_ALL_TESTS();
@@ -39,4 +40,7 @@ int main(int argc, char **argv)
     });
 
     return app.exec();
+#else
+    return RUN_ALL_TESTS();
+#endif
 }
