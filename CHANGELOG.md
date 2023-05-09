@@ -11,6 +11,7 @@
 - Bugfix: Fixed click effects on buttons not being antialiased. (#4473)
 - Bugfix: Fixed Ctrl+Backspace not working after Select All in chat search popup. (#4461)
 - Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
+- Dev: Added tools to help debug image GC. (#4578)
 
 ## 2.4.3
 
