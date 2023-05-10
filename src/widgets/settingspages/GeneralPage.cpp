@@ -300,8 +300,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addDropdown<std::underlying_type<UsernameRightClickBehavior>::type>(
         "Username right-click behavior",
         {
-            "Reply when modifier held",
-            "Mention when modifier held",
+            "Reply with modifier",
+            "Mention with modifier",
             "Always mention",
             "Always reply",
         },
