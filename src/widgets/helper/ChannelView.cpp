@@ -2104,7 +2104,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                             MessageElementFlag::Username))
                     {
                         auto isModifierHeld =
-                            event->modifiers() == getSettings()->usernameRightClickModifier;
+                            event->modifiers() ==
+                            getSettings()->usernameRightClickModifier;
 
                         switch (getSettings()
                                     ->usernameRightClickBehavior.getValue())
