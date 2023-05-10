@@ -31,6 +31,7 @@ public:
 protected:
     virtual void updateWindowTitle();
     void showEvent(QShowEvent *event) override;
+    bool eventFilter(QObject *object, QEvent *event) override;
 
 private:
     void initLayout();

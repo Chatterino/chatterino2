@@ -1,6 +1,7 @@
 #include "widgets/splits/SplitInput.hpp"
 
 #include "Application.hpp"
+#include "common/enums/MessageOverflow.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -113,6 +114,28 @@ void SplitInput::initLayout()
         hboxLayout.emplace<ResizingTextEdit>().assign(&this->ui_.textEdit);
     connect(textEdit.getElement(), &ResizingTextEdit::textChanged, this,
             &SplitInput::editTextChanged);
+
+    hboxLayout.emplace<EffectLabel>().assign(&this->ui_.sendButton);
+    this->ui_.sendButton->getLabel().setText("SEND");
+    this->ui_.sendButton->hide();
+
+    QObject::connect(this->ui_.sendButton, &EffectLabel::leftClicked, [this] {
+        std::vector<QString> arguments;
+        this->handleSendMessage(arguments);
+    });
+
+    getSettings()->showSendButton.connect(
+        [this](const bool value, auto) {
+            if (value)
+            {
+                this->ui_.sendButton->show();
+            }
+            else
+            {
+                this->ui_.sendButton->hide();
+            }
+        },
+        this->managedConnections_);
 
     // right box
     auto box = hboxLayout.emplace<QVBoxLayout>().withoutMargin();

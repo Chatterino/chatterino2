@@ -185,6 +185,22 @@ void SearchPopup::showEvent(QShowEvent *)
     this->search();
 }
 
+bool SearchPopup::eventFilter(QObject *object, QEvent *event)
+{
+    if (object == this->searchInput_ && event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_Backspace &&
+            keyEvent->modifiers() == Qt::ControlModifier &&
+            this->searchInput_->text() == this->searchInput_->selectedText())
+        {
+            this->searchInput_->clear();
+            return true;
+        }
+    }
+    return false;
+}
+
 void SearchPopup::search()
 {
     if (this->snapshot_.size() == 0)
@@ -279,6 +295,7 @@ void SearchPopup::initLayout()
                     QPixmap(":/buttons/clearSearch.png"));
                 QObject::connect(this->searchInput_, &QLineEdit::textChanged,
                                  this, &SearchPopup::search);
+                this->searchInput_->installEventFilter(this);
             }
 
             layout1->addLayout(layout2);

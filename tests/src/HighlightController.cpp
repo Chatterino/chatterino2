@@ -445,6 +445,14 @@ public:
          (FailureCallback<HelixGetModeratorsError, QString> failureCallback)),
         (override));  // /mods
 
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, updateShieldMode,
+                (QString broadcasterID, QString moderatorID, bool isActive,
+                 ResultCallback<HelixShieldModeStatus> successCallback,
+                 (FailureCallback<HelixUpdateShieldModeError, QString>
+                      failureCallback)),
+                (override));
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 

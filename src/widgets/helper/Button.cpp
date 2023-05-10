@@ -206,17 +206,12 @@ void Button::fancyPaint(QPainter &painter)
 
     for (auto effect : this->clickEffects_)
     {
-        QRadialGradient gradient(effect.position.x(), effect.position.y(),
-                                 effect.progress * qreal(width()) * 2,
-                                 effect.position.x(), effect.position.y());
-
-        gradient.setColorAt(0, QColor(c.red(), c.green(), c.blue(),
-                                      int((1 - effect.progress) * 95)));
-        gradient.setColorAt(0.9999, QColor(c.red(), c.green(), c.blue(),
-                                           int((1 - effect.progress) * 95)));
-        gradient.setColorAt(1, QColor(c.red(), c.green(), c.blue(), int(0)));
-
-        painter.fillRect(this->rect(), gradient);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QColor(c.red(), c.green(), c.blue(),
+                                int((1 - effect.progress) * 95)));
+        painter.drawEllipse(QPointF(effect.position),
+                            effect.progress * qreal(width()) * 2,
+                            effect.progress * qreal(width()) * 2);
     }
 }
 
@@ -351,27 +346,24 @@ void Button::showMenu()
     if (!this->menu_)
         return;
 
-    auto point = [this] {
-        auto point = this->mapToGlobal(
-            QPoint(this->width() - this->menu_->width(), this->height()));
+    auto menuSizeHint = this->menu_->sizeHint();
+    auto point = this->mapToGlobal(
+        QPoint(this->width() - menuSizeHint.width(), this->height()));
 
-        auto *screen = QApplication::screenAt(point);
-        if (screen == nullptr)
-        {
-            screen = QApplication::primaryScreen();
-        }
-        auto bounds = screen->availableGeometry();
+    auto *screen = QApplication::screenAt(point);
+    if (screen == nullptr)
+    {
+        screen = QApplication::primaryScreen();
+    }
+    auto bounds = screen->availableGeometry();
 
-        if (point.y() + this->menu_->height() > bounds.bottom())
-        {
-            point.setY(point.y() - this->menu_->height() - this->height());
-        }
+    if (point.y() + menuSizeHint.height() > bounds.bottom())
+    {
+        // Menu doesn't fit going down, flip it to go up instead
+        point.setY(point.y() - menuSizeHint.height() - this->height());
+    }
 
-        return point;
-    };
-
-    this->menu_->popup(point());
-    this->menu_->move(point());
+    this->menu_->popup(point);
     this->menuVisible_ = true;
 }
 

@@ -6,6 +6,7 @@
 #include "util/QStringHash.hpp"
 
 #include <boost/optional.hpp>
+#include <QDateTime>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QString>
@@ -674,6 +675,39 @@ struct HelixStartCommercialResponse {
     }
 };
 
+struct HelixShieldModeStatus {
+    /// A Boolean value that determines whether Shield Mode is active. Is `true` if Shield Mode is active; otherwise, `false`.
+    bool isActive;
+    /// An ID that identifies the moderator that last activated Shield Mode.
+    QString moderatorID;
+    /// The moderator's login name.
+    QString moderatorLogin;
+    /// The moderator's display name.
+    QString moderatorName;
+    /// The UTC timestamp of when Shield Mode was last activated.
+    QDateTime lastActivatedAt;
+
+    explicit HelixShieldModeStatus(const QJsonObject &json)
+        : isActive(json["is_active"].toBool())
+        , moderatorID(json["moderator_id"].toString())
+        , moderatorLogin(json["moderator_login"].toString())
+        , moderatorName(json["moderator_name"].toString())
+        , lastActivatedAt(QDateTime::fromString(
+              json["last_activated_at"].toString(), Qt::ISODate))
+    {
+        this->lastActivatedAt.setTimeSpec(Qt::UTC);
+    }
+};
+
+enum class HelixUpdateShieldModeError {
+    Unknown,
+    UserMissingScope,
+    MissingPermission,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 enum class HelixStartCommercialError {
     Unknown,
     TokenMustMatchBroadcaster,
@@ -1007,6 +1041,13 @@ public:
         FailureCallback<HelixGetChannelBadgesError, QString>
             failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference/#update-shield-mode-status
+    virtual void updateShieldMode(
+        QString broadcasterID, QString moderatorID, bool isActive,
+        ResultCallback<HelixShieldModeStatus> successCallback,
+        FailureCallback<HelixUpdateShieldModeError, QString>
+            failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1319,6 +1360,13 @@ public:
     void getChannelBadges(QString broadcasterID,
                           ResultCallback<HelixChannelBadges> successCallback,
                           FailureCallback<HelixGetChannelBadgesError, QString>
+                              failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#update-shield-mode-status
+    void updateShieldMode(QString broadcasterID, QString moderatorID,
+                          bool isActive,
+                          ResultCallback<HelixShieldModeStatus> successCallback,
+                          FailureCallback<HelixUpdateShieldModeError, QString>
                               failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
