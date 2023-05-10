@@ -81,17 +81,19 @@ void Updates::installUpdates()
         assert(false);
         return;
     }
+    auto windowName =
+        QString("%1 - Update").arg(Version::instance().fullVersion());
 
 #ifdef Q_OS_MACOS
     QMessageBox *box = new QMessageBox(
-        QMessageBox::Information, "Chatterino Update",
+        QMessageBox::Information, windowName,
         "A link will open in your browser. Download and install to update.");
     box->setAttribute(Qt::WA_DeleteOnClose);
     box->exec();
     QDesktopServices::openUrl(this->updateExe_);
 #elif defined Q_OS_LINUX
     QMessageBox *box =
-        new QMessageBox(QMessageBox::Information, "Chatterino Update",
+        new QMessageBox(QMessageBox::Information, windowName,
                         "Automatic updates are currently not available on "
                         "linux. Please redownload the app to update.");
     box->setAttribute(Qt::WA_DeleteOnClose);
@@ -101,7 +103,7 @@ void Updates::installUpdates()
     if (getPaths()->isPortable())
     {
         QMessageBox *box =
-            new QMessageBox(QMessageBox::Information, "Chatterino Update",
+            new QMessageBox(QMessageBox::Information, windowName,
                             "Chatterino is downloading the update "
                             "in the background and will run the "
                             "updater once it is finished.");
@@ -110,23 +112,23 @@ void Updates::installUpdates()
 
         NetworkRequest(this->updatePortable_)
             .timeout(600000)
-            .onError([this](NetworkResult) {
+            .onError([this, windowName](NetworkResult) {
                 this->setStatus_(DownloadFailed);
 
                 postToThread([] {
                     QMessageBox *box = new QMessageBox(
-                        QMessageBox::Information, "Chatterino Update",
+                        QMessageBox::Information, windowName,
                         "Failed while trying to download the update.");
                     box->setAttribute(Qt::WA_DeleteOnClose);
                     box->show();
                     box->raise();
                 });
             })
-            .onSuccess([this](auto result) -> Outcome {
+            .onSuccess([this, windowName](auto result) -> Outcome {
                 if (result.status() != 200)
                 {
                     auto *box = new QMessageBox(
-                        QMessageBox::Information, "Chatterino Update",
+                        QMessageBox::Information, windowName,
                         QStringLiteral("The update couldn't be downloaded "
                                        "(HTTP status %1).")
                             .arg(result.status()));
@@ -164,7 +166,7 @@ void Updates::installUpdates()
     else
     {
         QMessageBox *box =
-            new QMessageBox(QMessageBox::Information, "Chatterino Update",
+            new QMessageBox(QMessageBox::Information, windowName,
                             "Chatterino is downloading the update "
                             "in the background and will run the "
                             "updater once it is finished.");
@@ -173,21 +175,21 @@ void Updates::installUpdates()
 
         NetworkRequest(this->updateExe_)
             .timeout(600000)
-            .onError([this](NetworkResult) {
+            .onError([this, windowName](NetworkResult) {
                 this->setStatus_(DownloadFailed);
 
                 QMessageBox *box = new QMessageBox(
-                    QMessageBox::Information, "Chatterino Update",
+                    QMessageBox::Information, windowName,
                     "Failed to download the update. \n\nTry manually "
                     "downloading the update.");
                 box->setAttribute(Qt::WA_DeleteOnClose);
                 box->exec();
             })
-            .onSuccess([this](auto result) -> Outcome {
+            .onSuccess([this, windowName](auto result) -> Outcome {
                 if (result.status() != 200)
                 {
                     auto *box = new QMessageBox(
-                        QMessageBox::Information, "Chatterino Update",
+                        QMessageBox::Information, windowName,
                         QStringLiteral("The update couldn't be downloaded "
                                        "(HTTP status %1).")
                             .arg(result.status()));
@@ -207,7 +209,7 @@ void Updates::installUpdates()
                 {
                     this->setStatus_(WriteFileFailed);
                     QMessageBox *box = new QMessageBox(
-                        QMessageBox::Information, "Chatterino Update",
+                        QMessageBox::Information, windowName,
                         "Failed to save the update file. This could be due to "
                         "window settings or antivirus software.\n\nTry "
                         "manually "
@@ -228,7 +230,7 @@ void Updates::installUpdates()
                 else
                 {
                     QMessageBox *box = new QMessageBox(
-                        QMessageBox::Information, "Chatterino Update",
+                        QMessageBox::Information, windowName,
                         "Failed to execute update binary. This could be due to "
                         "window "
                         "settings or antivirus software.\n\nTry manually "

@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/QLogging.hpp"
+#include "common/Version.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/irc/Irc2.hpp"
@@ -57,9 +58,11 @@ void WindowManager::showSettingsDialog(QWidget *parent,
 {
     if (getArgs().dontSaveSettings)
     {
-        QMessageBox::critical(parent, "Chatterino - Editing Settings Forbidden",
-                              "Settings cannot be edited when running with\n"
-                              "commandline arguments such as '-c'.");
+        QMessageBox::critical(
+            parent,
+            Version::instance().fullVersion() + " - Editing Settings Forbidden",
+            "Settings cannot be edited when running with\n"
+            "commandline arguments such as '-c'.");
     }
     else
     {

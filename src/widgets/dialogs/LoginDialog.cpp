@@ -4,6 +4,7 @@
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
+#include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "util/Clipboard.hpp"
@@ -81,7 +82,7 @@ BasicLoginWidget::BasicLoginWidget()
     this->ui_.loginButton.setText("Log in (Opens in browser)");
     this->ui_.pasteCodeButton.setText("Paste login info");
     this->ui_.unableToOpenBrowserHelper.setWindowTitle(
-        "Chatterino - unable to open in browser");
+        Version::instance().fullVersion() + " - unable to open in browser");
     this->ui_.unableToOpenBrowserHelper.setWordWrap(true);
     this->ui_.unableToOpenBrowserHelper.hide();
     this->ui_.unableToOpenBrowserHelper.setText(

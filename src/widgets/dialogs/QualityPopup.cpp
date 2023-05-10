@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "common/Version.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Window.hpp"
@@ -35,7 +36,8 @@ void QualityPopup::showDialog(const QString &channelURL, QStringList options)
 {
     QualityPopup *instance = new QualityPopup(channelURL, options);
 
-    instance->window()->setWindowTitle("Chatterino - select stream quality");
+    instance->window()->setWindowTitle(Version::instance().fullVersion() +
+                                       "- select stream quality");
     instance->setAttribute(Qt::WA_DeleteOnClose, true);
 
     instance->show();

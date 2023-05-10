@@ -5,6 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
+#include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -194,7 +195,8 @@ namespace {
     {
         auto window =
             new BasePopup(BaseWindow::Flags::EnableCustomFrame, parent);
-        window->setWindowTitle("Chatterino - " + title);
+        window->setWindowTitle(Version::instance().fullVersion() + " - " +
+                               title);
         window->setAttribute(Qt::WA_DeleteOnClose);
         auto layout = new QVBoxLayout();
         layout->addWidget(new QLabel(description));
@@ -375,7 +377,7 @@ Split::Split(QWidget *parent)
             if (getSettings()->askOnImageUpload.getValue())
             {
                 QMessageBox msgBox(this->window());
-                msgBox.setWindowTitle("Chatterino");
+                msgBox.setWindowTitle(Version::instance().fullVersion());
                 msgBox.setText("Image upload");
                 msgBox.setInformativeText(
                     "You are uploading an image to a 3rd party service not in "
@@ -445,7 +447,8 @@ void Split::addShortcuts()
          [](std::vector<QString>) -> QString {
              auto *popup = new DebugPopup;
              popup->setAttribute(Qt::WA_DeleteOnClose);
-             popup->setWindowTitle("Chatterino - Debug popup");
+             popup->setWindowTitle(Version::instance().fullVersion() +
+                                   " - Debug popup");
              popup->show();
              return "";
          }},

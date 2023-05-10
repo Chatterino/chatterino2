@@ -230,7 +230,8 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name,
             auto window = new BasePopup({BaseWindow::Flags::EnableCustomFrame,
                                          BaseWindow::DisableLayoutSave},
                                         parent);
-            window->setWindowTitle("Chatterino - License for " + name);
+            window->setWindowTitle(Version::instance().fullVersion() +
+                                   " - License for " + name);
             window->setAttribute(Qt::WA_DeleteOnClose);
             auto layout = new QVBoxLayout();
             auto *edit = new QTextEdit;
