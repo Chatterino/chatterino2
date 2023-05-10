@@ -10,6 +10,7 @@
 - Bugfix: Domains starting with `http` are now parsed as links again. (#4598)
 - Bugfix: Fixed click effects on buttons not being antialiased. (#4473)
 - Bugfix: Fixed Ctrl+Backspace not working after Select All in chat search popup. (#4461)
+- Bugfix: Fixed crash when scrolling up really fast. (#4621)
 - Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
 
 ## 2.4.3
