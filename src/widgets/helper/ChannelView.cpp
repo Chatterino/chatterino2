@@ -328,16 +328,10 @@ void ChannelView::updatePauses()
         this->pauseEnd_ = boost::none;
         this->pauseTimer_.stop();
 
-        this->scrollBar_->offsetMinimum(this->pauseScrollMinimumOffset_);
         this->scrollBar_->offsetMaximum(this->pauseScrollMaximumOffset_);
+        this->scrollBar_->offsetMinimum(this->pauseScrollMinimumOffset_);
         this->pauseScrollMinimumOffset_ = 0;
         this->pauseScrollMaximumOffset_ = 0;
-
-        if (this->scrollBar_->getMinimum() >
-            this->scrollBar_->getDesiredValue())
-        {
-            this->scrollBar_->scrollToTop();
-        }
 
         this->queueLayout();
     }
@@ -550,6 +544,7 @@ void ChannelView::clearMessages()
     // Clear all stored messages in this chat widget
     this->messages_.clear();
     this->scrollBar_->clearHighlights();
+    this->scrollBar_->resetMaximum();
     this->scrollBar_->setMaximum(0);
     this->scrollBar_->setMinimum(0);
     this->queueLayout();
@@ -914,14 +909,6 @@ void ChannelView::messageAppended(MessagePtr &message,
             {
                 this->scrollBar_->scrollToBottom();
             }
-            else
-            {
-                if (this->scrollBar_->getMinimum() >
-                    this->scrollBar_->getDesiredValue())
-                {
-                    this->scrollBar_->scrollToTop();
-                }
-            }
         }
     }
 
@@ -1042,6 +1029,7 @@ void ChannelView::messagesUpdated()
 
     this->messages_.clear();
     this->scrollBar_->clearHighlights();
+    this->scrollBar_->resetMaximum();
     this->scrollBar_->setMaximum(snapshot.size());
     this->scrollBar_->setMinimum(0);
     this->lastMessageHasAlternateBackground_ = false;

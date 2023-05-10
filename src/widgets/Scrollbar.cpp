@@ -124,6 +124,11 @@ void Scrollbar::offsetMinimum(qreal value)
 {
     this->minimum_ += value;
 
+    if (this->minimum_ > this->desiredValue_)
+    {
+        this->scrollToTop();
+    }
+
     updateScroll();
 }
 
@@ -187,7 +192,6 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
     }
 
     this->desiredValue_ = value;
-
     this->desiredValueChanged_.invoke();
 
     if (noAnimation)
@@ -229,7 +233,7 @@ qreal Scrollbar::getCurrentValue() const
 qreal Scrollbar::getRelativeCurrentValue() const
 {
     // currentValue - minimum can be negative if minimum is incremented while
-    // scrolling down from the top with smooth scrolling enabled.
+    // scrolling up to or down from the top when smooth scrolling is enabled.
     return clamp(this->currentValue_ - this->minimum_, qreal(0.0),
                  this->currentValue_);
 }
