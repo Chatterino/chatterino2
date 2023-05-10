@@ -82,6 +82,13 @@ enum ThumbnailPreviewMode : int {
     ShowOnShift = 2,
 };
 
+enum UsernameRightClickBehavior : int {
+    ReplyWithModifier = 0,
+    MentionWithModifier = 1,
+    AlwaysMention = 2,
+    AlwaysReply = 3,
+};
+
 /// Settings which are availlable for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings : public ABSettings, public ConcurrentSettings
@@ -189,6 +196,14 @@ public:
     BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", true};
     BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
                                         false};
+
+    EnumSetting<UsernameRightClickBehavior> usernameRightClickBehavior = {
+        "/behaviour/usernameRightClickBehavior",
+        UsernameRightClickBehavior::ReplyWithModifier};
+    EnumSetting<Qt::KeyboardModifier> usernameRightClickModifier = {
+        "/behaviour/usernameRightClickModifier",
+        Qt::KeyboardModifier::ShiftModifier};
+
     // BoolSetting twitchSeperateWriteConnection =
     // {"/behaviour/twitchSeperateWriteConnection", false};
 

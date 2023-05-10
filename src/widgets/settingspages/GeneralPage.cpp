@@ -297,6 +297,27 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         false,
         "Specify how Chatterino will handle messages that exceed Twitch "
         "message limits");
+    layout.addDropdown<std::underlying_type<UsernameRightClickBehavior>::type>(
+        "Username right-click behavior",
+        {
+            "Reply when modifier held",
+            "Mention when modifier held",
+            "Always mention",
+            "Always reply",
+        },
+        s.usernameRightClickBehavior,
+        [](auto index) {
+            return index;
+        },
+        [](auto args) {
+            return static_cast<UsernameRightClickBehavior>(args.index);
+        },
+        false,
+        "Specify how Chatterino will handle right-clicking a username in "
+        "chat.");
+    addKeyboardModifierSetting(layout,
+                               "Modifier for alternate right-click action",
+                               s.usernameRightClickModifier);
 
     layout.addTitle("Messages");
     layout.addCheckbox(

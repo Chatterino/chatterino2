@@ -2099,11 +2099,44 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 
                 if (link.type == Link::UserInfo)
                 {
+                    bool willReply = false;
                     if (hoveredElement->getFlags().has(
-                            MessageElementFlag::Username) &&
-                        event->modifiers() == Qt::ShiftModifier)
+                            MessageElementFlag::Username))
                     {
-                        // Start a new reply if Shift+Right-clicking the message username
+                        auto isModifierHeld =
+                            event->modifiers() == getSettings()->usernameRightClickModifier;
+
+                        switch (getSettings()
+                                    ->usernameRightClickBehavior.getValue())
+                        {
+                            case UsernameRightClickBehavior::ReplyWithModifier:
+                                willReply = isModifierHeld;
+                                break;
+                            case (UsernameRightClickBehavior::
+                                      MentionWithModifier):
+
+                                willReply = !isModifierHeld;
+                                break;
+                            case UsernameRightClickBehavior::AlwaysMention:
+                                willReply = false;
+                                break;
+                            case UsernameRightClickBehavior::AlwaysReply:
+                                willReply = true;
+                                break;
+                            default:
+                                qCCritical(chatterinoSettings)
+                                    << "Invalid value of "
+                                       "UsernameRightClickBehavior:"
+                                    << getSettings()
+                                           ->usernameRightClickBehavior
+                                           .getValue()
+                                    << "Expect everything to go haywire!";
+                        }
+                    }
+
+                    if (willReply)
+                    {
+                        // Start a new reply if matching user's settings
                         this->setInputReply(layout->getMessagePtr());
                     }
                     else
