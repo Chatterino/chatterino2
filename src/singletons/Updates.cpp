@@ -115,7 +115,7 @@ void Updates::installUpdates()
             .onError([this, windowName](NetworkResult) {
                 this->setStatus_(DownloadFailed);
 
-                postToThread([] {
+                postToThread([windowName] {
                     QMessageBox *box = new QMessageBox(
                         QMessageBox::Information, windowName,
                         "Failed while trying to download the update.");
