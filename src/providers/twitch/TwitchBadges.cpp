@@ -6,6 +6,7 @@
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "util/DisplayBadge.hpp"
 
 #include <QBuffer>
@@ -29,25 +30,49 @@ void TwitchBadges::loadTwitchBadges()
 {
     assert(this->loaded_ == false);
 
-    QUrl url("https://badges.twitch.tv/v1/badges/global/display");
+    getHelix()->getGlobalBadges(
+        [this](auto globalBadges) {
+            auto badgeSets = this->badgeSets_.access();
 
-    QUrlQuery urlQuery;
-    urlQuery.addQueryItem("language", "en");
-    url.setQuery(urlQuery);
-
-    NetworkRequest(url)
-        .onSuccess([this](auto result) -> Outcome {
-            auto root = result.parseJson();
-
-            this->parseTwitchBadges(root);
+            for (const auto &badgeSet : globalBadges.badgeSets)
+            {
+                const auto &setID = badgeSet.setID;
+                for (const auto &version : badgeSet.versions)
+                {
+                    const auto &emote = Emote{
+                        EmoteName{},
+                        ImageSet{
+                            Image::fromUrl(version.imageURL1x, 1),
+                            Image::fromUrl(version.imageURL2x, .5),
+                            Image::fromUrl(version.imageURL4x, .25),
+                        },
+                        Tooltip{version.title},
+                        version.clickURL,
+                    };
+                    (*badgeSets)[setID][version.id] =
+                        std::make_shared<Emote>(emote);
+                }
+            }
 
             this->loaded();
-            return Success;
-        })
-        .onError([this](auto res) {
-            qCWarning(chatterinoTwitch)
-                << "Error loading Twitch Badges from the badges API:"
-                << res.status() << " - falling back to backup";
+        },
+        [this](auto error, auto message) {
+            QString errorMessage("Failed to load global badges - ");
+
+            switch (error)
+            {
+                case HelixGetGlobalBadgesError::Forwarded: {
+                    errorMessage += message;
+                }
+                break;
+
+                // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                case HelixGetGlobalBadgesError::Unknown: {
+                    errorMessage += "An unknown error has occurred.";
+                }
+                break;
+            }
+            qCWarning(chatterinoTwitch) << errorMessage;
             QFile file(":/twitch-badges.json");
             if (!file.open(QFile::ReadOnly))
             {
@@ -64,8 +89,7 @@ void TwitchBadges::loadTwitchBadges()
             this->parseTwitchBadges(doc.object());
 
             this->loaded();
-        })
-        .execute();
+        });
 }
 
 void TwitchBadges::parseTwitchBadges(QJsonObject root)
@@ -93,7 +117,8 @@ void TwitchBadges::parseTwitchBadges(QJsonObject root)
                         {versionObj.value("image_url_4x").toString()}, .25),
                 },
                 Tooltip{versionObj.value("title").toString()},
-                Url{versionObj.value("click_url").toString()}};
+                Url{versionObj.value("click_url").toString()},
+            };
             // "title"
             // "clickAction"
 

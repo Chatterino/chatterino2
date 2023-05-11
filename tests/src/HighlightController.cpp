@@ -226,6 +226,21 @@ public:
                 (override));
 
     // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(
+        void, getGlobalBadges,
+        (ResultCallback<HelixGlobalBadges> successCallback,
+         (FailureCallback<HelixGetGlobalBadgesError, QString> failureCallback)),
+        (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, getChannelBadges,
+                (QString broadcasterID,
+                 ResultCallback<HelixChannelBadges> successCallback,
+                 (FailureCallback<HelixGetChannelBadgesError, QString>
+                      failureCallback)),
+                (override));
+
+    // The extra parenthesis around the failure callback is because its type contains a comma
     MOCK_METHOD(void, updateUserChatColor,
                 (QString userID, QString color,
                  ResultCallback<> successCallback,
@@ -411,6 +426,14 @@ public:
          (FailureCallback<HelixGetModeratorsError, QString> failureCallback)),
         (override));  // /mods
 
+    // The extra parenthesis around the failure callback is because its type contains a comma
+    MOCK_METHOD(void, updateShieldMode,
+                (QString broadcasterID, QString moderatorID, bool isActive,
+                 ResultCallback<HelixShieldModeStatus> successCallback,
+                 (FailureCallback<HelixUpdateShieldModeError, QString>
+                      failureCallback)),
+                (override));
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 
@@ -550,14 +573,14 @@ class HighlightControllerTest : public ::testing::Test
 protected:
     void SetUp() override
     {
-        {
-            // Write default settings to the mock settings json file
-            QDir().mkpath("/tmp/c2-tests");
-            QFile settingsFile("/tmp/c2-tests/settings.json");
-            assert(settingsFile.open(QIODevice::WriteOnly | QIODevice::Text));
-            QTextStream out(&settingsFile);
-            out << DEFAULT_SETTINGS;
-        }
+        // Write default settings to the mock settings json file
+        ASSERT_TRUE(QDir().mkpath("/tmp/c2-tests"));
+
+        QFile settingsFile("/tmp/c2-tests/settings.json");
+        ASSERT_TRUE(settingsFile.open(QIODevice::WriteOnly | QIODevice::Text));
+        ASSERT_GT(settingsFile.write(DEFAULT_SETTINGS.toUtf8()), 0);
+        ASSERT_TRUE(settingsFile.flush());
+        settingsFile.close();
 
         this->mockHelix = new MockHelix;
 
@@ -579,7 +602,7 @@ protected:
 
     void TearDown() override
     {
-        QDir().rmdir("/tmp/c2-tests");
+        ASSERT_TRUE(QDir("/tmp/c2-tests").removeRecursively());
         this->mockApplication.reset();
         this->settings.reset();
         this->paths.reset();

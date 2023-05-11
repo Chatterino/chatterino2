@@ -216,11 +216,7 @@ void Emojis::sortEmojis()
 
 void Emojis::loadEmojiSet()
 {
-#ifndef CHATTERINO_TEST
     getSettings()->emojiSet.connect([this](const auto &emojiSet) {
-#else
-    const QString emojiSet = "twitter";
-#endif
         this->emojis.each([=](const auto &name,
                               std::shared_ptr<EmojiData> &emoji) {
             QString emojiSetToUse = emojiSet;
@@ -265,9 +261,7 @@ void Emojis::loadEmojiSet()
                 EmoteName{emoji->value}, ImageSet{Image::fromUrl({url}, 0.35)},
                 Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"}, Url{}});
         });
-#ifndef CHATTERINO_TEST
     });
-#endif
 }
 
 std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
