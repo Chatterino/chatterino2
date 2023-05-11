@@ -2105,7 +2105,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                     {
                         auto isModifierHeld =
                             event->modifiers() ==
-                            getSettings()->usernameRightClickModifier;
+                            QFlags<Qt::KeyboardModifier>(
+                                getSettings()->usernameRightClickModifier);
 
                         switch (getSettings()
                                     ->usernameRightClickBehavior.getValue())
