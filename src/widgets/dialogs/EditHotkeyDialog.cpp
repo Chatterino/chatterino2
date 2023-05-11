@@ -8,6 +8,8 @@
 #include "controllers/hotkeys/HotkeyHelpers.hpp"
 #include "ui_EditHotkeyDialog.h"
 
+#include <qloggingcategory.h>
+
 namespace chatterino {
 
 EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
@@ -17,6 +19,8 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     , data_(hotkey)
 {
     this->ui_->setupUi(this);
+    this->ui_->easyArgsPicker->setVisible(false);
+    this->ui_->easyArgsLabel->setVisible(false);
     // dynamically add category names to the category picker
     for (const auto &[_, hotkeyCategory] : getApp()->hotkeys->categories())
     {
@@ -28,34 +32,7 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
 
     if (hotkey)
     {
-        if (!hotkey->validAction())
-        {
-            this->showEditError("Invalid action, make sure you select the "
-                                "correct action before saving.");
-        }
-
-        // editing a hotkey
-
-        // update pickers/input boxes to values from Hotkey object
-        this->ui_->categoryPicker->setCurrentIndex(size_t(hotkey->category()));
-        this->ui_->keyComboEdit->setKeySequence(
-            QKeySequence::fromString(hotkey->keySequence().toString()));
-        this->ui_->nameEdit->setText(hotkey->name());
-        // update arguments
-        QString argsText;
-        bool first = true;
-        for (const auto &arg : hotkey->arguments())
-        {
-            if (!first)
-            {
-                argsText += '\n';
-            }
-
-            argsText += arg;
-
-            first = false;
-        }
-        this->ui_->argumentsEdit->setPlainText(argsText);
+        this->setFromHotkey(hotkey);
     }
     else
     {
@@ -65,6 +42,94 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
             size_t(HotkeyCategory::SplitInput));
         this->ui_->argumentsEdit->setPlainText("");
     }
+}
+void EditHotkeyDialog::setFromHotkey(std::shared_ptr<Hotkey> hotkey)
+{
+    if (!hotkey->validAction())
+    {
+        this->showEditError("Invalid action, make sure you select the "
+                            "correct action before saving.");
+    }
+
+    // editing a hotkey
+
+    // update pickers/input boxes to values from Hotkey object
+    this->ui_->categoryPicker->setCurrentIndex(size_t(hotkey->category()));
+    this->ui_->keyComboEdit->setKeySequence(
+        QKeySequence::fromString(hotkey->keySequence().toString()));
+    this->ui_->nameEdit->setText(hotkey->name());
+
+    auto def = findHotkeyActionDefinition(hotkey->category(), hotkey->action());
+    if (def.has_value() && !def->possibleArguments.empty())
+    {
+        qCDebug(chatterinoHotkeys) << "Enabled easy picker and arg edit "
+                                      "because we arguments from hotkey";
+        this->ui_->easyArgsLabel->setVisible(true);
+        this->ui_->easyArgsPicker->setVisible(true);
+
+        this->ui_->argumentsEdit->setVisible(false);
+        this->ui_->argumentsLabel->setVisible(false);
+        this->ui_->argumentsDescription->setVisible(false);
+
+        this->ui_->easyArgsPicker->clear();
+        int matchIdx = -1;
+        for (int i = 0; i < def->possibleArguments.size(); i++)
+        {
+            const auto &[argData, displayText] = def->possibleArguments.at(i);
+            this->ui_->easyArgsPicker->addItem(displayText);
+
+            // check if matches
+            if (argData.size() != hotkey->arguments().size())
+            {
+                continue;
+            }
+            bool matches = true;
+            for (int j = 0; j < argData.size(); j++)
+            {
+                if (argData.at(j) != hotkey->arguments().at(j))
+                {
+                    matches = false;
+                    break;
+                }
+            }
+            if (matches)
+            {
+                matchIdx = i;
+            }
+        }
+        if (matchIdx != -1)
+        {
+            this->ui_->easyArgsPicker->setCurrentIndex(matchIdx);
+            return;
+        }
+
+        qCDebug(chatterinoHotkeys)
+            << "Did not match hotkey arguments for " << hotkey->toString()
+            << "using text edit instead of easy picker";
+        this->showEditError("Arguments do not match what's expected. The "
+                            "argument picker is not available.");
+        this->ui_->easyArgsLabel->setVisible(false);
+        this->ui_->easyArgsPicker->setVisible(false);
+
+        this->ui_->argumentsEdit->setVisible(true);
+        this->ui_->argumentsLabel->setVisible(true);
+        this->ui_->argumentsDescription->setVisible(true);
+    }
+    // update arguments
+    QString argsText;
+    bool first = true;
+    for (const auto &arg : hotkey->arguments())
+    {
+        if (!first)
+        {
+            argsText += '\n';
+        }
+
+        argsText += arg;
+
+        first = false;
+    }
+    this->ui_->argumentsEdit->setPlainText(argsText);
 }
 
 EditHotkeyDialog::~EditHotkeyDialog()
@@ -149,6 +214,14 @@ void EditHotkeyDialog::afterEdit()
     if (actionTemp.isValid())
     {
         action = actionTemp.toString();
+    }
+
+    auto def = findHotkeyActionDefinition(*category, action);
+    if (def.has_value() && this->ui_->easyArgsPicker->isVisible())
+    {
+        arguments =
+            def->possibleArguments.at(this->ui_->easyArgsPicker->currentIndex())
+                .first;
     }
 
     auto hotkey = std::make_shared<Hotkey>(
@@ -263,44 +336,67 @@ void EditHotkeyDialog::updateArgumentsInput()
         }
         const ActionDefinition &def = definition->second;
 
-        if (def.maxCountArguments != 0)
+        if (def.maxCountArguments == 0)
         {
-            QString text =
-                "Arguments wrapped in <> are required.\nArguments wrapped in "
-                "[] "
-                "are optional.\nArguments are separated by a newline.";
-            if (!def.argumentDescription.isEmpty())
-            {
-                this->ui_->argumentsDescription->setVisible(true);
-                this->ui_->argumentsDescription->setText(
-                    def.argumentDescription);
-            }
-            else
-            {
-                this->ui_->argumentsDescription->setVisible(false);
-            }
-
-            text = QString("Arguments wrapped in <> are required.");
-            if (def.maxCountArguments != def.minCountArguments)
-            {
-                text += QString("\nArguments wrapped in [] are optional.");
-            }
-
-            text += "\nArguments are separated by a newline.";
-
-            this->ui_->argumentsEdit->setEnabled(true);
-            this->ui_->argumentsEdit->setPlaceholderText(text);
-
-            this->ui_->argumentsLabel->setVisible(true);
-            this->ui_->argumentsDescription->setVisible(true);
-            this->ui_->argumentsEdit->setVisible(true);
-        }
-        else
-        {
+            qCDebug(chatterinoHotkeys) << "Disabled easy picker and arg edit "
+                                          "because we don't have any arguments";
             this->ui_->argumentsLabel->setVisible(false);
             this->ui_->argumentsDescription->setVisible(false);
             this->ui_->argumentsEdit->setVisible(false);
+
+            this->ui_->easyArgsLabel->setVisible(false);
+            this->ui_->easyArgsPicker->setVisible(false);
+            return;
         }
+        if (!def.argumentDescription.isEmpty())
+        {
+            this->ui_->argumentsDescription->setVisible(true);
+            this->ui_->argumentsDescription->setText(def.argumentDescription);
+        }
+        else
+        {
+            this->ui_->argumentsDescription->setVisible(false);
+        }
+
+        QString text = "Arguments wrapped in <> are required.";
+        if (def.maxCountArguments != def.minCountArguments)
+        {
+            text += QString("\nArguments wrapped in [] are optional.");
+        }
+
+        text += "\nArguments are separated by a newline.";
+
+        this->ui_->argumentsEdit->setEnabled(true);
+        this->ui_->argumentsEdit->setPlaceholderText(text);
+
+        this->ui_->argumentsLabel->setVisible(true);
+        this->ui_->argumentsDescription->setVisible(true);
+        this->ui_->argumentsEdit->setVisible(true);
+
+        // update easy picker
+        if (def.possibleArguments.empty())
+        {
+            qCDebug(chatterinoHotkeys)
+                << "Disabled easy picker because we have possible arguments";
+            this->ui_->easyArgsPicker->setVisible(false);
+            this->ui_->easyArgsLabel->setVisible(false);
+            return;
+        }
+        qCDebug(chatterinoHotkeys)
+            << "Enabled easy picker because we have possible arguments";
+        this->ui_->easyArgsPicker->setVisible(true);
+        this->ui_->easyArgsLabel->setVisible(true);
+
+        this->ui_->argumentsLabel->setVisible(false);
+        this->ui_->argumentsEdit->setVisible(false);
+        this->ui_->argumentsDescription->setVisible(false);
+
+        this->ui_->easyArgsPicker->clear();
+        for (const auto &[_, displayText] : def.possibleArguments)
+        {
+            this->ui_->easyArgsPicker->addItem(displayText);
+        }
+        this->ui_->easyArgsPicker->setCurrentIndex(0);
     }
 }
 

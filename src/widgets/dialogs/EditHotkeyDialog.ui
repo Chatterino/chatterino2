@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>359</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -76,6 +76,9 @@ see this message :)</string>
        </property>
       </widget>
      </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="categoryPicker"/>
+     </item>
      <item row="2" column="0">
       <widget class="QLabel" name="actionLabel">
        <property name="text">
@@ -107,6 +110,13 @@ see this message :)</string>
       <widget class="QKeySequenceEdit" name="keyComboEdit"/>
      </item>
      <item row="4" column="0">
+      <widget class="QLabel" name="easyArgsLabel">
+       <property name="text">
+        <string>Argument:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
       <widget class="QLabel" name="argumentsLabel">
        <property name="text">
         <string>Arguments:</string>
@@ -116,7 +126,7 @@ see this message :)</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
+     <item row="5" column="1">
       <widget class="QLabel" name="argumentsDescription">
        <property name="text">
         <string>You should never see this message :)</string>
@@ -126,7 +136,7 @@ see this message :)</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="6" column="1">
       <widget class="QPlainTextEdit" name="argumentsEdit">
        <property name="plainText">
         <string/>
@@ -136,8 +146,21 @@ see this message :)</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="categoryPicker"/>
+     <item row="4" column="1">
+      <widget class="QComboBox" name="easyArgsPicker">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="currentText">
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>Nothing here</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -169,8 +192,8 @@ see this message :)</string>
    <slot>afterEdit()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>257</x>
-     <y>290</y>
+     <x>263</x>
+     <y>352</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -185,8 +208,8 @@ see this message :)</string>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>325</x>
-     <y>290</y>
+     <x>331</x>
+     <y>352</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -201,8 +224,8 @@ see this message :)</string>
    <slot>updatePossibleActions()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>246</x>
-     <y>85</y>
+     <x>172</x>
+     <y>118</y>
     </hint>
     <hint type="destinationlabel">
      <x>75</x>
@@ -217,8 +240,8 @@ see this message :)</string>
    <slot>updateArgumentsInput()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>148</x>
-     <y>119</y>
+     <x>172</x>
+     <y>156</y>
     </hint>
     <hint type="destinationlabel">
      <x>74</x>
