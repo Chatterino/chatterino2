@@ -296,6 +296,13 @@ void Theme::loadAvailableThemes()
 
         auto themeName = info.baseName();
 
+        // Check if theme name already exists and is a built-in theme
+        auto themeIt = this->availableThemes_.find(themeName);
+        if (themeIt != this->availableThemes_.end() && !themeIt->second.custom)
+        {
+            themeName += " ";
+        }
+
         this->availableThemes_.emplace(themeName, themeDescriptor);
     }
 }
