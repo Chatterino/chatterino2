@@ -18,6 +18,7 @@
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QFileDialog>
+#include <QFont>
 #include <QHeaderView>
 #include <QPushButton>
 #include <QStandardItemModel>
@@ -363,6 +364,11 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                                         EditableModelView *view,
                                         HighlightTab tab)
 {
+    QFont boldFont;
+    boldFont.setBold(true);
+    view->getTableView()->horizontalHeader()->setFont(
+        boldFont);
+    
     switch (tab)
     {
         case HighlightTab::Messages:
