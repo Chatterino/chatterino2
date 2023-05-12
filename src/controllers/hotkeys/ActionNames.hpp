@@ -27,6 +27,11 @@ struct ActionDefinition {
     // displayName is the value that would be shown to a user when they edit or create a hotkey for an action
     QString displayName;
 
+    // argumentDescription is a description of the arguments in a format of
+    // "<required arg: description of possible values> [optional arg: possible
+    // values]" OR when possibleArguments are present a string like
+    // "Direction:" which will be shown before the values from
+    // possibleArguments in the UI.
     QString argumentDescription = "";
 
     // minCountArguments is the minimum amount of arguments the action accepts
