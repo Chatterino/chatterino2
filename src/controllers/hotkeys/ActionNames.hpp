@@ -16,8 +16,8 @@ inline const std::vector<std::pair<std::vector<QString>, QString>>
 
 inline const std::vector<std::pair<std::vector<QString>, QString>>
     HOTKEY_ARG_WITH_OR_WITHOUT_SELECTION = {
-        {{"withoutSelection"}, "Without selection"},
-        {{"withSelection"}, "With selection"},
+        {{"withoutSelection"}, "No"},
+        {{"withSelection"}, "Yes"},
 };
 
 namespace chatterino {
@@ -60,7 +60,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"scrollPage",
           ActionDefinition{
               .displayName = "Scroll",
-              .argumentDescription = "<up or down>",
+              .argumentDescription = "Direction:",
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments{
@@ -83,15 +83,15 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"focus",
           ActionDefinition{
               .displayName = "Focus neighbouring split",
-              .argumentDescription = "<up, down, left, or right>",
+              .argumentDescription = "Direction:",
               .minCountArguments = 1,
               .maxCountArguments = 1,
-              .possibleArguments{{
+              .possibleArguments{
                   {{"up"}, "Up"},
                   {{"down"}, "Down"},
                   {{"left"}, "Left"},
                   {{"right"}, "Right"},
-              }},
+              },
           }},
          {"openInBrowser", ActionDefinition{"Open channel in browser"}},
          {"openInCustomPlayer",
@@ -104,14 +104,14 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"reloadEmotes",
           ActionDefinition{
               .displayName = "Reload emotes",
-              .argumentDescription = "[channel or subscriber]",
+              .argumentDescription = "Emote type:",
               .minCountArguments = 0,
               .maxCountArguments = 1,
-              .possibleArguments{{
+              .possibleArguments{
                   {{}, "All emotes"},
                   {{"channel"}, "Channel emotes only"},
                   {{"subscriber"}, "Subscriber emotes only"},
-              }},
+              },
           }},
          {"runCommand",
           ActionDefinition{
@@ -122,7 +122,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"scrollPage",
           ActionDefinition{
               .displayName = "Scroll",
-              .argumentDescription = "<up or down>",
+              .argumentDescription = "Direction:",
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments{
@@ -135,7 +135,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"setChannelNotification",
           ActionDefinition{
               .displayName = "Set channel live notification",
-              .argumentDescription = "[on or off. default: toggle]",
+              .argumentDescription = "New value:",
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments = HOTKEY_ARG_ON_OFF_TOGGLE,
@@ -143,7 +143,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"setModerationMode",
           ActionDefinition{
               .displayName = "Set moderation mode",
-              .argumentDescription = "[on or off. default: toggle]",
+              .argumentDescription = "New value:",
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments = HOTKEY_ARG_ON_OFF_TOGGLE,
@@ -159,8 +159,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"copy",
           ActionDefinition{
               .displayName = "Copy",
-              .argumentDescription =
-                  "<source of text: split, splitInput or auto>",
+              .argumentDescription = "Source of text:",
               .minCountArguments = 1,
               .possibleArguments{
                   {{"auto"}, "Automatic"},
@@ -171,7 +170,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"cursorToStart",
           ActionDefinition{
               .displayName = "To start of message",
-              .argumentDescription = "<withSelection or withoutSelection>",
+              .argumentDescription = "Select text from cursor to start:",
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments = HOTKEY_ARG_WITH_OR_WITHOUT_SELECTION,
@@ -179,7 +178,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"cursorToEnd",
           ActionDefinition{
               .displayName = "To end of message",
-              .argumentDescription = "<withSelection or withoutSelection>",
+              .argumentDescription = "Select text from cursor to end:",
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments = HOTKEY_ARG_WITH_OR_WITHOUT_SELECTION,
@@ -195,8 +194,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"sendMessage",
           ActionDefinition{
               .displayName = "Send message",
-              .argumentDescription =
-                  "[keepInput to not clear the text after sending]",
+              .argumentDescription = "Behavior:",
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments{
@@ -222,7 +220,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"moveTab",
           ActionDefinition{
               "Move tab",
-              "<next, previous, or new index of tab>",
+              "<where to move the tab: next, previous, or new index of tab>",
               1,
           }},
          {"newSplit", ActionDefinition{"Create a new split"}},
@@ -231,19 +229,19 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"openTab",
           ActionDefinition{
               "Select tab",
-              "<last, next, previous, or index of tab to select>",
+              "<which tab to select: last, next, previous, or index>",
               1,
           }},
          {"openQuickSwitcher", ActionDefinition{"Open the quick switcher"}},
          {"popup",
           ActionDefinition{
               .displayName = "New popup",
-              .argumentDescription = "<split or window>",
+              .argumentDescription = "What should be copied",
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments{
-                  {{"split"}, "Split"},
-                  {{"window"}, "Window"},
+                  {{"split"}, "Focused Split"},
+                  {{"window"}, "Entire Tab"},
               },
           }},
          {"quit", ActionDefinition{"Quit Chatterino"}},
@@ -256,13 +254,19 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
                   "[on, off, toggle, or auto. default: toggle]",
               .minCountArguments = 0,
               .maxCountArguments = 1,
-              .possibleArguments = HOTKEY_ARG_ON_OFF_TOGGLE,
+              .possibleArguments =
+                  {
+                      {{}, "Toggle on/off"},
+                      {{"on"}, "Set to on"},
+                      {{"off"}, "Set to off"},
+                      {{"auto"}, "Set to automatic"},
+                  },
           }},
          {"toggleLocalR9K", ActionDefinition{"Toggle local R9K"}},
          {"zoom",
           ActionDefinition{
               .displayName = "Zoom in/out",
-              .argumentDescription = "<in, out, or reset>",
+              .argumentDescription = "Argument:",
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments =
@@ -275,7 +279,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"setTabVisibility",
           ActionDefinition{
               .displayName = "Set tab visibility",
-              .argumentDescription = "[on, off, or toggle. default: toggle]",
+              .argumentDescription = "New value:",
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments = HOTKEY_ARG_ON_OFF_TOGGLE,
