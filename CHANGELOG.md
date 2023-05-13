@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.4.4
+
 - Minor: Added a Send button in the input box so you can click to send a message. This is disabled by default and can be enabled with the "Show send message button" setting. (#4607)
 - Minor: Improved error messages when the updater fails a download. (#4594)
 - Minor: Added `/shield` and `/shieldoff` commands to toggle shield mode. (#4580)
