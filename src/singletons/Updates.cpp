@@ -110,6 +110,7 @@ void Updates::installUpdates()
 
         NetworkRequest(this->updatePortable_)
             .timeout(600000)
+            .followRedirects(true)
             .onError([this](NetworkResult) {
                 this->setStatus_(DownloadFailed);
 
@@ -173,6 +174,7 @@ void Updates::installUpdates()
 
         NetworkRequest(this->updateExe_)
             .timeout(600000)
+            .followRedirects(true)
             .onError([this](NetworkResult) {
                 this->setStatus_(DownloadFailed);
 
@@ -272,12 +274,12 @@ void Updates::checkForUpdates()
         return;
     }
 
-    QString url = "https://api.7tv.app/v2/chatterino/version/" CHATTERINO_OS
-                  "/" +
+    QString url = "https://7tv.io/v2/chatterino/version/" CHATTERINO_OS "/" +
                   currentBranch();
 
     NetworkRequest(url)
         .timeout(60000)
+        .followRedirects(true)
         .onSuccess([this](auto result) -> Outcome {
             const auto object = result.parseJson();
             /// Version available on every platform
