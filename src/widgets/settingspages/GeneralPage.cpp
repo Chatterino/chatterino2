@@ -1023,6 +1023,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     helixTimegateModerators->setMinimumWidth(
         helixTimegateModerators->minimumSizeHint().width());
 
+    layout.addCheckbox(
+        "Show send message button", s.showSendButton, false,
+        "Show a Send button next to each split input that can be "
+        "clicked to send the message");
+
     layout.addStretch();
 
     // invisible element for width

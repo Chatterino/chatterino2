@@ -137,16 +137,18 @@ LinkParser::LinkParser(const QString &unparsedString)
     if (remaining.startsWith(QStringLiteral("http"), Qt::CaseInsensitive) &&
         remaining.length() >= 4 + 3 + 1)  // 'http' + '://' + [any]
     {
-        remaining = remaining.mid(4);  // 'http'
+        // optimistic view assuming there's a protocol (http or https)
+        auto withProto = remaining.mid(4);  // 'http'
 
-        if (remaining[0] == QChar(u's') || remaining[0] == QChar(u'S'))
+        if (withProto[0] == QChar(u's') || withProto[0] == QChar(u'S'))
         {
-            remaining = remaining.mid(1);
+            withProto = withProto.mid(1);
         }
 
-        if (remaining.startsWith(QStringLiteral("://")))
+        if (withProto.startsWith(QStringLiteral("://")))
         {
-            remaining = remaining.mid(3);
+            // there's really a protocol => consume it
+            remaining = withProto.mid(3);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
             result.protocol = {protocol.begin(), remaining.begin()};
 #else

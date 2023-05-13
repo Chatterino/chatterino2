@@ -2,6 +2,20 @@
 
 ## Unversioned
 
+## 2.4.4
+
+- Minor: Added a Send button in the input box so you can click to send a message. This is disabled by default and can be enabled with the "Show send message button" setting. (#4607)
+- Minor: Improved error messages when the updater fails a download. (#4594)
+- Minor: Added `/shield` and `/shieldoff` commands to toggle shield mode. (#4580)
+- Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
+- Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
+- Bugfix: Domains starting with `http` are now parsed as links again. (#4598)
+- Bugfix: Reduced the size of the update prompt to prevent it from going off the users screen. (#4626)
+- Bugfix: Fixed click effects on buttons not being antialiased. (#4473)
+- Bugfix: Fixed Ctrl+Backspace not working after Select All in chat search popup. (#4461)
+- Bugfix: Fixed crash when scrolling up really fast. (#4621)
+- Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
+
 ## 2.4.3
 
 - Major: Added support for FrankerFaceZ animated emotes. (#4434)
@@ -29,7 +43,6 @@
 - Bugfix: Fixed emote & badge tooltips not showing up when thumbnails were hidden. (#4509)
 - Bugfix: Fixed links with invalid IPv4 addresses being parsed. (#4576)
 - Bugfix: Fixed the macOS icon changing to the wrong icon when the application is open. (#4577)
-- Bugfix: Fixed disabled items in context-menus having a weird text-effect or the default text color. (#4423)
 - Dev: Disabling precompiled headers on Windows is now tested in CI. (#4472)
 - Dev: Themes are now stored as JSON files in `resources/themes`. (#4471, #4533)
 - Dev: Ignore unhandled BTTV user-events. (#4438)
