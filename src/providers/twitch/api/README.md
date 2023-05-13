@@ -164,16 +164,11 @@ URL: https://dev.twitch.tv/docs/api/reference#get-channel-emotes
 
 Not used anywhere at the moment.
 
-## TMI
-
-The TMI api is undocumented.
-
 ### Get Chatters
 
-**Undocumented**
+URL: https://dev.twitch.tv/docs/api/reference/#get-chatters
 
-- We use this in `widgets/splits/Split.cpp showViewerList`
-- We use this in `providers/twitch/TwitchChannel.cpp refreshChatters`
+Used for the viewer list for moderators/broadcasters.
 
 ## PubSub
 
