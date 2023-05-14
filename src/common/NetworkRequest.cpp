@@ -31,10 +31,7 @@ NetworkRequest::NetworkRequest(QUrl url, NetworkRequestType requestType)
     this->initializeDefaultValues();
 }
 
-NetworkRequest::~NetworkRequest()
-{
-    //assert(!this->data || this->executed_);
-}
+NetworkRequest::~NetworkRequest() = default;
 
 NetworkRequest NetworkRequest::type(NetworkRequestType newRequestType) &&
 {
