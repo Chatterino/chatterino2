@@ -89,7 +89,7 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
             data->timer_->start(data->timeoutMS_);
         }
 
-        auto reply = [&]() -> QNetworkReply * {
+        auto *reply = [&]() -> QNetworkReply * {
             switch (data->requestType_)
             {
                 case NetworkRequestType::Get:
