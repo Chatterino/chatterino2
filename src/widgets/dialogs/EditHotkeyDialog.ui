@@ -42,6 +42,9 @@ see this message :)</string>
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
       <widget class="QLabel" name="nameLabel">
+       <property name="toolTip">
+        <string>Set a name for the hotkey so you will be able to identify it later</string>
+       </property>
        <property name="text">
         <string>Name:</string>
        </property>
@@ -98,6 +101,9 @@ see this message :)</string>
      </item>
      <item row="3" column="0">
       <widget class="QLabel" name="keyComboLabel">
+       <property name="toolTip">
+        <string>Pressing this keybinding will invoke the hotkey</string>
+       </property>
        <property name="text">
         <string>Keybinding:</string>
        </property>
@@ -111,6 +117,9 @@ see this message :)</string>
      </item>
      <item row="4" column="0">
       <widget class="QLabel" name="easyArgsLabel">
+       <property name="toolTip">
+        <string>You are not supposed to see this, please report this!</string>
+       </property>
        <property name="text">
         <string>Argument:</string>
        </property>
