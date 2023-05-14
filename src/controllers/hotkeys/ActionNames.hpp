@@ -78,7 +78,6 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
                   {{"down"}, "Down"},
               },
               .argumentsPrompt = "Direction:",
-              .argumentsPromptHover = "",
           }},
          {"search", ActionDefinition{"Focus search box"}},
          {"execModeratorAction",
