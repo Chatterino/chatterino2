@@ -28,8 +28,8 @@ public:
     explicit NetworkRequest(
         const std::string &url,
         NetworkRequestType requestType = NetworkRequestType::Get);
-    explicit NetworkRequest(
-        QUrl url, NetworkRequestType requestType = NetworkRequestType::Get);
+    explicit NetworkRequest(const QUrl &url, NetworkRequestType requestType =
+                                                 NetworkRequestType::Get);
 
     // Enable move
     NetworkRequest(NetworkRequest &&other) = default;

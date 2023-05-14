@@ -22,7 +22,7 @@ NetworkRequest::NetworkRequest(const std::string &url,
     this->initializeDefaultValues();
 }
 
-NetworkRequest::NetworkRequest(QUrl url, NetworkRequestType requestType)
+NetworkRequest::NetworkRequest(const QUrl &url, NetworkRequestType requestType)
     : data(new NetworkData)
 {
     this->data->request_.setUrl(url);
