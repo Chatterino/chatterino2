@@ -276,11 +276,15 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
             if (data->finally_)
             {
                 if (data->executeConcurrently_)
+                {
                     QtConcurrent::run([finally = std::move(data->finally_)] {
                         finally();
                     });
+                }
                 else
+                {
                     data->finally_();
+                }
             }
         };
 
