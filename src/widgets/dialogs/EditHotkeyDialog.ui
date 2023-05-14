@@ -157,9 +157,6 @@ see this message :)</string>
        <property name="currentText">
         <string/>
        </property>
-       <property name="placeholderText">
-        <string>Nothing here</string>
-       </property>
       </widget>
      </item>
     </layout>
