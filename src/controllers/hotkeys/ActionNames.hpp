@@ -29,9 +29,7 @@ struct ActionDefinition {
 
     // argumentDescription is a description of the arguments in a format of
     // "<required arg: description of possible values> [optional arg: possible
-    // values]" OR when possibleArguments are present a string like
-    // "Direction:" which will be shown before the values from
-    // possibleArguments in the UI.
+    // values]"
     QString argumentDescription = "";
 
     // minCountArguments is the minimum amount of arguments the action accepts
@@ -46,6 +44,13 @@ struct ActionDefinition {
     // right one is what the user sees
     std::vector<std::pair<std::vector<QString>, QString>> possibleArguments =
         {};
+
+    // When possibleArguments are present this should be a string like
+    // "Direction:" which will be shown before the values from
+    // possibleArguments in the UI. Otherwise, it should be empty.
+    QString argumentsPrompt = "";
+    // A more detailed description of what argumentsPrompt means
+    QString argumentsPromptHover = "";
 };
 
 using ActionDefinitionMap = std::map<QString, ActionDefinition>;
@@ -65,13 +70,15 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"scrollPage",
           ActionDefinition{
               .displayName = "Scroll",
-              .argumentDescription = "Direction:",
+              .argumentDescription = "<direction: up or down>",
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments{
                   {{"up"}, "Up"},
                   {{"down"}, "Down"},
               },
+              .argumentsPrompt = "Direction:",
+              .argumentsPromptHover = "",
           }},
          {"search", ActionDefinition{"Focus search box"}},
          {"execModeratorAction",
@@ -88,7 +95,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"focus",
           ActionDefinition{
               .displayName = "Focus neighbouring split",
-              .argumentDescription = "Direction:",
+              .argumentDescription = "<direction: up, down, left or right>",
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments{
@@ -97,6 +104,9 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
                   {{"left"}, "Left"},
                   {{"right"}, "Right"},
               },
+              .argumentsPrompt = "Direction:",
+              .argumentsPromptHover =
+                  "Which direction to look for a split to focus?",
           }},
          {"openInBrowser", ActionDefinition{"Open channel in browser"}},
          {"openInCustomPlayer",
@@ -109,7 +119,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"reloadEmotes",
           ActionDefinition{
               .displayName = "Reload emotes",
-              .argumentDescription = "Emote type:",
+              .argumentDescription =
+                  "[type: channel or subscriber; default: all emotes]",
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments{
@@ -117,6 +128,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
                   {{"channel"}, "Channel emotes only"},
                   {{"subscriber"}, "Subscriber emotes only"},
               },
+              .argumentsPrompt = "Emote type:",
+              .argumentsPromptHover = "Which emotes should Chatterino reload",
           }},
          {"runCommand",
           ActionDefinition{
@@ -127,31 +140,40 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"scrollPage",
           ActionDefinition{
               .displayName = "Scroll",
-              .argumentDescription = "Direction:",
+              .argumentDescription = "<up or down>",
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments{
                   {{"up"}, "Up"},
                   {{"down"}, "Down"},
               },
+              .argumentsPrompt = "Direction:",
+              .argumentsPromptHover =
+                  "Which direction do you want to see more messages",
           }},
          {"scrollToBottom", ActionDefinition{"Scroll to the bottom"}},
          {"scrollToTop", ActionDefinition{"Scroll to the top"}},
          {"setChannelNotification",
           ActionDefinition{
               .displayName = "Set channel live notification",
-              .argumentDescription = "New value:",
+              .argumentDescription = "[on or off. default: toggle]",
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments = HOTKEY_ARG_ON_OFF_TOGGLE,
+              .argumentsPrompt = "New value:",
+              .argumentsPromptHover = "Should the channel live notification be "
+                                      "enabled, disabled or toggled",
           }},
          {"setModerationMode",
           ActionDefinition{
               .displayName = "Set moderation mode",
-              .argumentDescription = "New value:",
+              .argumentDescription = "[on or off. default: toggle]",
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments = HOTKEY_ARG_ON_OFF_TOGGLE,
+              .argumentsPrompt = "New value:",
+              .argumentsPromptHover =
+                  "Should the moderation mode be enabled, disabled or toggled",
           }},
          {"showSearch", ActionDefinition{"Search current channel"}},
          {"showGlobalSearch", ActionDefinition{"Search all channels"}},
@@ -164,29 +186,37 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"copy",
           ActionDefinition{
               .displayName = "Copy",
-              .argumentDescription = "Source of text:",
+              .argumentDescription =
+                  "<source of text: auto, split or splitInput>",
               .minCountArguments = 1,
               .possibleArguments{
                   {{"auto"}, "Automatic"},
                   {{"split"}, "Split"},
                   {{"splitInput"}, "Split Input"},
               },
+              .argumentsPrompt = "Source of text:",
           }},
          {"cursorToStart",
           ActionDefinition{
               .displayName = "To start of message",
-              .argumentDescription = "Select text from cursor to start:",
+              .argumentDescription =
+                  "<selection mode: withSelection or withoutSelection>",
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments = HOTKEY_ARG_WITH_OR_WITHOUT_SELECTION,
+              .argumentsPrompt = "Select text from cursor to start:",
+              // XXX: write a hover for this that doesn't suck
           }},
          {"cursorToEnd",
           ActionDefinition{
               .displayName = "To end of message",
-              .argumentDescription = "Select text from cursor to end:",
+              .argumentDescription =
+                  "<selection mode: withSelection or withoutSelection>",
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments = HOTKEY_ARG_WITH_OR_WITHOUT_SELECTION,
+              .argumentsPrompt = "Select text from cursor to end:",
+              // XXX: write a hover for this that doesn't suck
           }},
          {"nextMessage", ActionDefinition{"Choose next sent message"}},
          {"openEmotesPopup", ActionDefinition{"Open emotes list"}},
@@ -199,13 +229,15 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"sendMessage",
           ActionDefinition{
               .displayName = "Send message",
-              .argumentDescription = "Behavior:",
+              .argumentDescription =
+                  "[keepInput to not clear the text after sending]",
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments{
                   {{}, "Default behavior"},
                   {{"keepInput"}, "Keep message in input after sending it"},
               },
+              .argumentsPrompt = "Behavior:",
           }},
          {"undo", ActionDefinition{"Undo"}},
 
@@ -241,13 +273,14 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"popup",
           ActionDefinition{
               .displayName = "New popup",
-              .argumentDescription = "What should be copied",
+              .argumentDescription = "<split or window>",
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments{
                   {{"split"}, "Focused Split"},
                   {{"window"}, "Entire Tab"},
               },
+              .argumentsPrompt = "What should be copied",
           }},
          {"quit", ActionDefinition{"Quit Chatterino"}},
          {"removeTab", ActionDefinition{"Remove current tab"}},
@@ -266,6 +299,10 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
                       {{"off"}, "Set to off"},
                       {{"auto"}, "Set to automatic"},
                   },
+              .argumentsPrompt = "New value:",
+              .argumentsPromptHover =
+                  "Should streamer mode be enabled, disabled, toggled (on/off) "
+                  "or set to auto",
           }},
          {"toggleLocalR9K", ActionDefinition{"Toggle local R9K"}},
          {"zoom",
@@ -284,11 +321,15 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"setTabVisibility",
           ActionDefinition{
               .displayName = "Set tab visibility",
-              .argumentDescription = "New value:",
+              .argumentDescription = "[on, off, or toggle. default: toggle]",
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments = HOTKEY_ARG_ON_OFF_TOGGLE,
-          }}}},
+              .argumentsPrompt = "New value:",
+              .argumentsPromptHover =
+                  "Should the tabs be enabled, disabled or toggled.",
+          }},
+     }},
 };
 
 }  // namespace chatterino

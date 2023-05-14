@@ -72,7 +72,8 @@ void EditHotkeyDialog::setFromHotkey(std::shared_ptr<Hotkey> hotkey)
         this->ui_->argumentsDescription->setVisible(false);
 
         this->ui_->easyArgsPicker->clear();
-        this->ui_->easyArgsLabel->setText(def->argumentDescription);
+        this->ui_->easyArgsLabel->setText(def->argumentsPrompt);
+        this->ui_->easyArgsLabel->setToolTip(def->argumentsPromptHover);
         int matchIdx = -1;
         for (int i = 0; i < def->possibleArguments.size(); i++)
         {
@@ -398,7 +399,8 @@ void EditHotkeyDialog::updateArgumentsInput()
             this->ui_->easyArgsPicker->addItem(displayText);
         }
         this->ui_->easyArgsPicker->setCurrentIndex(0);
-        this->ui_->easyArgsLabel->setText(def.argumentDescription);
+        this->ui_->easyArgsLabel->setText(def.argumentsPrompt);
+        this->ui_->easyArgsLabel->setToolTip(def.argumentsPromptHover);
     }
 }
 
