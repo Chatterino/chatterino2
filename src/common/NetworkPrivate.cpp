@@ -72,7 +72,7 @@ void writeToCache(const std::shared_ptr<NetworkData> &data,
     }
 }
 
-void loadUncached(const std::shared_ptr<NetworkData> &data)
+void loadUncached(std::shared_ptr<NetworkData> &&data)
 {
     DebugCount::increase("http request started");
 
@@ -316,14 +316,14 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 }
 
 // First tried to load cached, then uncached.
-void loadCached(const std::shared_ptr<NetworkData> &data)
+void loadCached(std::shared_ptr<NetworkData> &&data)
 {
     QFile cachedFile(getPaths()->cacheDirectory() + "/" + data->getHash());
 
     if (!cachedFile.exists() || !cachedFile.open(QIODevice::ReadOnly))
     {
         // File didn't exist OR File could not be opened
-        loadUncached(data);
+        loadUncached(std::move(data));
         return;
     }
     else
@@ -388,15 +388,17 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
     }
 }
 
-void load(const std::shared_ptr<NetworkData> &data)
+void load(std::shared_ptr<NetworkData> &&data)
 {
     if (data->cache_)
     {
-        QtConcurrent::run(loadCached, data);
+        QtConcurrent::run([data = std::move(data)]() mutable {
+            loadCached(std::move(data));
+        });
     }
     else
     {
-        loadUncached(data);
+        loadUncached(std::move(data));
     }
 }
 
