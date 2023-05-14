@@ -1,14 +1,8 @@
 #include "common/NetworkRequest.hpp"
 
 #include "common/NetworkPrivate.hpp"
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
-#include "debug/AssertInGuiThread.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
-#include "singletons/Paths.hpp"
-#include "util/DebugCount.hpp"
-#include "util/PostToThread.hpp"
 
 #include <QDebug>
 #include <QFile>
