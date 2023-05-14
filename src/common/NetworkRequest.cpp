@@ -2,6 +2,7 @@
 
 #include "common/NetworkPrivate.hpp"
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
@@ -12,7 +13,6 @@
 #include <QDebug>
 #include <QFile>
 #include <QtConcurrent>
-#include "common/QLogging.hpp"
 
 #include <cassert>
 
@@ -147,6 +147,24 @@ NetworkRequest NetworkRequest::multiPart(QHttpMultiPart *payload) &&
 {
     payload->setParent(this->data->lifetimeManager_);
     this->data->multiPartPayload_ = payload;
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::followRedirects(bool on) &&
+{
+    if (on)
+    {
+        this->data->request_.setAttribute(
+            QNetworkRequest::RedirectPolicyAttribute,
+            QNetworkRequest::NoLessSafeRedirectPolicy);
+    }
+    else
+    {
+        this->data->request_.setAttribute(
+            QNetworkRequest::RedirectPolicyAttribute,
+            QNetworkRequest::ManualRedirectPolicy);
+    }
+
     return std::move(*this);
 }
 

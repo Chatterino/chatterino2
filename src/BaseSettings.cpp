@@ -1,8 +1,8 @@
 #include "BaseSettings.hpp"
 
-#include <QDebug>
-
 #include "util/Clamp.hpp"
+
+#include <QDebug>
 
 namespace chatterino {
 
@@ -112,7 +112,7 @@ Settings *getSettings()
     static_assert(std::is_same_v<AB_SETTINGS_CLASS, Settings>,
                   "`AB_SETTINGS_CLASS` must be the same as `Settings`");
 
-    assert(AB_SETTINGS_CLASS::instance);
+    assert(AB_SETTINGS_CLASS::instance != nullptr);
 
     return AB_SETTINGS_CLASS::instance;
 }

@@ -1,19 +1,23 @@
 #pragma once
 
-#include <QPixmap>
-#include <QString>
-#include <QThread>
-#include <QVector>
-#include <atomic>
+#include "common/Aliases.hpp"
+#include "common/Common.hpp"
+
 #include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
+#include <pajlada/signals/signal.hpp>
+#include <QPixmap>
+#include <QString>
+#include <QThread>
+#include <QTimer>
+#include <QVector>
+
+#include <atomic>
+#include <chrono>
+#include <map>
 #include <memory>
 #include <mutex>
-#include <pajlada/signals/signal.hpp>
-
-#include "common/Aliases.hpp"
-#include "common/Common.hpp"
 
 namespace chatterino {
 namespace detail {
@@ -26,9 +30,11 @@ namespace detail {
     {
     public:
         Frames();
-        Frames(const QVector<Frame<QPixmap>> &frames);
+        Frames(QVector<Frame<QPixmap>> &&frames);
         ~Frames();
 
+        void clear();
+        bool empty() const;
         bool animated() const;
         void advance();
         boost::optional<QPixmap> current() const;
@@ -56,7 +62,7 @@ public:
     ~Image();
 
     static ImagePtr fromUrl(const Url &url, qreal scale = 1);
-    static ImagePtr fromPixmap(const QPixmap &pixmap, qreal scale = 1);
+    static ImagePtr fromResourcePixmap(const QPixmap &pixmap, qreal scale = 1);
     static ImagePtr getEmpty();
 
     const Url &url() const;
@@ -70,8 +76,8 @@ public:
     int height() const;
     bool animated() const;
 
-    bool operator==(const Image &image) const;
-    bool operator!=(const Image &image) const;
+    bool operator==(const Image &image) = delete;
+    bool operator!=(const Image &image) = delete;
 
 private:
     Image();
@@ -80,13 +86,53 @@ private:
 
     void setPixmap(const QPixmap &pixmap);
     void actuallyLoad();
+    void expireFrames();
 
     const Url url_{};
     const qreal scale_{1};
     std::atomic_bool empty_{false};
 
-    // gui thread only
+    mutable std::chrono::time_point<std::chrono::steady_clock> lastUsed_;
+
     bool shouldLoad_{false};
+
+    // gui thread only
     std::unique_ptr<detail::Frames> frames_{};
+
+    friend class ImageExpirationPool;
 };
+
+// forward-declarable function that calls Image::getEmpty() under the hood.
+ImagePtr getEmptyImagePtr();
+
+#ifndef DISABLE_IMAGE_EXPIRATION_POOL
+
+class ImageExpirationPool
+{
+private:
+    friend class Image;
+
+    ImageExpirationPool();
+    static ImageExpirationPool &instance();
+
+    void addImagePtr(ImagePtr imgPtr);
+    void removeImagePtr(Image *rawPtr);
+
+    /**
+     * @brief Frees frame data for all images that ImagePool deems to have expired.
+     * 
+     * Expiration is based on last accessed time of the Image, stored in Image::lastUsed_.
+     * Must be ran in the GUI thread.
+     */
+    void freeOld();
+
+private:
+    // Timer to periodically run freeOld()
+    QTimer *freeTimer_;
+    std::map<Image *, std::weak_ptr<Image>> allImages_;
+    std::mutex mutex_;
+};
+
+#endif
+
 }  // namespace chatterino

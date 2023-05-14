@@ -1,25 +1,21 @@
 #pragma once
 
+#include <cstdint>
 #include <tuple>
 #include <utility>
 
 namespace chatterino {
 
 struct SelectionItem {
-    int messageIndex;
-    int charIndex;
+    uint32_t messageIndex{0};
+    uint32_t charIndex{0};
 
-    SelectionItem()
+    SelectionItem() = default;
+
+    SelectionItem(uint32_t _messageIndex, uint32_t _charIndex)
+        : messageIndex(_messageIndex)
+        , charIndex(_charIndex)
     {
-        this->messageIndex = 0;
-        this->charIndex = 0;
-    }
-
-    SelectionItem(int _messageIndex, int _charIndex)
-    {
-        this->messageIndex = _messageIndex;
-
-        this->charIndex = _charIndex;
     }
 
     bool operator<(const SelectionItem &b) const
@@ -75,14 +71,54 @@ struct Selection {
         return this->selectionMin.messageIndex ==
                this->selectionMax.messageIndex;
     }
+
+    // Shift all message selection indices `offset` back
+    void shiftMessageIndex(uint32_t offset)
+    {
+        if (offset > this->selectionMin.messageIndex)
+        {
+            this->selectionMin.messageIndex = 0;
+        }
+        else
+        {
+            this->selectionMin.messageIndex -= offset;
+        }
+
+        if (offset > this->selectionMax.messageIndex)
+        {
+            this->selectionMax.messageIndex = 0;
+        }
+        else
+        {
+            this->selectionMax.messageIndex -= offset;
+        }
+
+        if (offset > this->start.messageIndex)
+        {
+            this->start.messageIndex = 0;
+        }
+        else
+        {
+            this->start.messageIndex -= offset;
+        }
+
+        if (offset > this->end.messageIndex)
+        {
+            this->end.messageIndex = 0;
+        }
+        else
+        {
+            this->end.messageIndex -= offset;
+        }
+    }
 };
 
 struct DoubleClickSelection {
-    int originalStart = 0;
-    int originalEnd = 0;
-    int origMessageIndex;
-    bool selectingLeft = false;
-    bool selectingRight = false;
+    uint32_t originalStart{0};
+    uint32_t originalEnd{0};
+    uint32_t origMessageIndex{0};
+    bool selectingLeft{false};
+    bool selectingRight{false};
     SelectionItem origStartItem;
     SelectionItem origEndItem;
 };

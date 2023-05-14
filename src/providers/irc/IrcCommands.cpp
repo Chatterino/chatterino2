@@ -43,7 +43,7 @@ Outcome invokeIrcCommand(const QString &commandName, const QString &allParams,
 
     if (cmd == "msg")
     {
-        sendRaw("PRIVMSG " + params[0] + " :" + paramsAfter(0));
+        channel.server()->sendWhisper(params[0], paramsAfter(0));
     }
     else if (cmd == "away")
     {

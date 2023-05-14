@@ -4,11 +4,12 @@
 #include "common/DownloadManager.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 
@@ -66,15 +67,16 @@ QString Toasts::findStringFromReaction(
     return Toasts::findStringFromReaction(static_cast<ToastReaction>(i));
 }
 
-void Toasts::sendChannelNotification(const QString &channelName, Platform p)
+void Toasts::sendChannelNotification(const QString &channelName,
+                                     const QString &channelTitle, Platform p)
 {
 #ifdef Q_OS_WIN
-    auto sendChannelNotification = [this, channelName, p] {
-        this->sendWindowsNotification(channelName, p);
+    auto sendChannelNotification = [this, channelName, channelTitle, p] {
+        this->sendWindowsNotification(channelName, channelTitle, p);
     };
 #else
     auto sendChannelNotification = [] {
-        // Unimplemented for OSX and Linux
+        // Unimplemented for macOS and Linux
     };
 #endif
     // Fetch user profile avatar
@@ -129,7 +131,7 @@ public:
             case ToastReaction::OpenInBrowser:
                 if (platform_ == Platform::Twitch)
                 {
-                    link = "http://www.twitch.tv/" + channelName_;
+                    link = "https://www.twitch.tv/" + channelName_;
                 }
                 QDesktopServices::openUrl(QUrl(link));
                 break;
@@ -164,7 +166,8 @@ public:
     }
 };
 
-void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
+void Toasts::sendWindowsNotification(const QString &channelName,
+                                     const QString &channelTitle, Platform p)
 {
     WinToastLib::WinToastTemplate templ = WinToastLib::WinToastTemplate(
         WinToastLib::WinToastTemplate::ImageAndText03);
@@ -180,7 +183,10 @@ void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
             Toasts::findStringFromReaction(getSettings()->openFromToast);
         mode = mode.toLower();
 
-        templ.setTextField(L"Click here to " + mode.toStdWString(),
+        templ.setTextField(QString("%1 \nClick to %2")
+                               .arg(channelTitle)
+                               .arg(mode)
+                               .toStdWString(),
                            WinToastLib::WinToastTemplate::SecondLine);
     }
 
@@ -207,6 +213,8 @@ void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
     WinToastLib::WinToast::instance()->setAppUserModelId(
         WinToastLib::WinToast::configureAUMI(L"", L"Chatterino 2", L"",
                                              aumi_version));
+    WinToastLib::WinToast::instance()->setShortcutPolicy(
+        WinToastLib::WinToast::SHORTCUT_POLICY_IGNORE);
     WinToastLib::WinToast::instance()->initialize();
     WinToastLib::WinToast::instance()->showToast(
         templ, new CustomHandler(channelName, p));

@@ -1,11 +1,13 @@
 #pragma once
 
+#include "common/SignalVectorModel.hpp"
+
 #include <QObject>
 
-#include "common/SignalVectorModel.hpp"
-#include "controllers/filters/FilterRecord.hpp"
-
 namespace chatterino {
+
+class FilterRecord;
+using FilterRecordPtr = std::shared_ptr<FilterRecord>;
 
 class FilterModel : public SignalVectorModel<FilterRecordPtr>
 {

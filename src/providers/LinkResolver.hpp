@@ -1,12 +1,16 @@
 #pragma once
 
+#include <QObject>
 #include <QString>
-#include <functional>
 
-#include "messages/Image.hpp"
-#include "messages/Link.hpp"
+#include <functional>
+#include <memory>
 
 namespace chatterino {
+
+class Image;
+struct Link;
+using ImagePtr = std::shared_ptr<Image>;
 
 class LinkResolver
 {

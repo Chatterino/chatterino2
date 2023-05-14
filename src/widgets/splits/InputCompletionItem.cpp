@@ -1,4 +1,7 @@
-#include "InputCompletionItem.hpp"
+#include "widgets/splits/InputCompletionItem.hpp"
+
+#include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 
 namespace chatterino {
 

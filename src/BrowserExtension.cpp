@@ -58,19 +58,6 @@ namespace {
 
             auto size = *reinterpret_cast<uint32_t *>(size_c);
 
-#if 0
-    bool bigEndian = isBigEndian();
-        // To avoid breaking strict-aliasing rules and potentially inducing undefined behaviour, the following code can be run instead
-        uint32_t size = 0;
-        if (bigEndian) {
-            size = size_c[3] | static_cast<uint32_t>(size_c[2]) << 8 |
-                   static_cast<uint32_t>(size_c[1]) << 16 | static_cast<uint32_t>(size_c[0]) << 24;
-        } else {
-            size = size_c[0] | static_cast<uint32_t>(size_c[1]) << 8 |
-                   static_cast<uint32_t>(size_c[2]) << 16 | static_cast<uint32_t>(size_c[3]) << 24;
-        }
-#endif
-
             std::unique_ptr<char[]> buffer(new char[size + 1]);
             std::cin.read(buffer.get(), size);
             *(buffer.get() + size) = '\0';

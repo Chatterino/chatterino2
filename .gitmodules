@@ -2,9 +2,6 @@
 	path = lib/libcommuni
 	url = https://github.com/Chatterino/libcommuni
 	branch = chatterino-cmake
-[submodule "lib/qBreakpad"]
-	path = lib/qBreakpad
-	url = https://github.com/jiakuan/qBreakpad.git
 [submodule "lib/WinToast"]
 	path = lib/WinToast
 	url = https://github.com/mohabouje/WinToast.git
@@ -29,3 +26,18 @@
 [submodule "cmake/sanitizers-cmake"]
 	path = cmake/sanitizers-cmake
 	url = https://github.com/arsenm/sanitizers-cmake
+[submodule "lib/magic_enum"]
+	path = lib/magic_enum
+	url = https://github.com/Neargye/magic_enum
+[submodule "lib/googletest"]
+	path = lib/googletest
+	url = https://github.com/google/googletest.git
+[submodule "lib/miniaudio"]
+	path = lib/miniaudio
+	url = https://github.com/mackron/miniaudio.git
+[submodule "lib/lua/src"]
+	path = lib/lua/src
+	url = https://github.com/lua/lua
+[submodule "lib/crashpad"]
+	path = lib/crashpad
+	url = https://github.com/getsentry/crashpad

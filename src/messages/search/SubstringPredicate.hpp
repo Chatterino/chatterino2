@@ -2,6 +2,8 @@
 
 #include "messages/search/MessagePredicate.hpp"
 
+#include <QString>
+
 namespace chatterino {
 
 /**
@@ -22,6 +24,7 @@ public:
      */
     SubstringPredicate(const QString &search);
 
+protected:
     /**
      * @brief Checks whether the message contains the substring passed in the
      *        constructor.
@@ -31,7 +34,7 @@ public:
      * @param message the message to check
      * @return true if the message contains the substring, false otherwise
      */
-    bool appliesTo(const Message &message);
+    bool appliesToImpl(const Message &message) override;
 
 private:
     /// Holds the substring to search for in a message's `messageText`

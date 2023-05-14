@@ -2,9 +2,11 @@
 
 #include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
+#include "messages/layouts/MessageLayoutContainer.hpp"
 
-#include <QPixmap>
 #include <boost/noncopyable.hpp>
+#include <QPixmap>
+
 #include <cinttypes>
 #include <memory>
 
@@ -37,8 +39,10 @@ public:
     ~MessageLayout();
 
     const Message *getMessage();
+    const MessagePtr &getMessagePtr() const;
 
     int getHeight() const;
+    int getWidth() const;
 
     MessageLayoutFlags flags;
 
@@ -57,34 +61,39 @@ public:
     int getLastCharacterIndex() const;
     int getFirstMessageCharacterIndex() const;
     int getSelectionIndex(QPoint position);
-    void addSelectionText(QString &str, int from = 0, int to = INT_MAX,
+    void addSelectionText(QString &str, uint32_t from = 0,
+                          uint32_t to = UINT32_MAX,
                           CopyMode copymode = CopyMode::Everything);
 
     // Misc
     bool isDisabled() const;
+    bool isReplyable() const;
 
 private:
-    // variables
-    MessagePtr message_;
-    std::shared_ptr<MessageLayoutContainer> container_;
-    std::shared_ptr<QPixmap> buffer_{};
-    bool bufferValid_ = false;
-
-    int height_ = 0;
-
-    int currentLayoutWidth_ = -1;
-    int layoutState_ = -1;
-    float scale_ = -1;
-    unsigned int layoutCount_ = 0;
-    unsigned int bufferUpdatedCount_ = 0;
-
-    MessageElementFlags currentWordFlags_;
-
-    int collapsedHeight_ = 32;
-
     // methods
     void actuallyLayout(int width, MessageElementFlags flags);
     void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection);
+
+    // Create new buffer if required, returning the buffer
+    QPixmap *ensureBuffer(QPainter &painter, int width);
+
+    // variables
+    MessagePtr message_;
+    MessageLayoutContainer container_;
+    std::unique_ptr<QPixmap> buffer_{};
+    bool bufferValid_ = false;
+
+    int height_ = 0;
+    int currentLayoutWidth_ = -1;
+    int layoutState_ = -1;
+    float scale_ = -1;
+    MessageElementFlags currentWordFlags_;
+
+#ifdef FOURTF
+    // Debug counters
+    unsigned int layoutCount_ = 0;
+    unsigned int bufferUpdatedCount_ = 0;
+#endif
 };
 
 using MessageLayoutPtr = std::shared_ptr<MessageLayout>;

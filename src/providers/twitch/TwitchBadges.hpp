@@ -1,20 +1,19 @@
 #pragma once
 
-#include <QMap>
-#include <QString>
-#include <boost/optional.hpp>
-#include <unordered_map>
-
 #include "common/UniqueAccess.hpp"
-#include "messages/Image.hpp"
-#include "util/DisplayBadge.hpp"
 #include "util/QStringHash.hpp"
 
-#include "pajlada/signals/signal.hpp"
+#include <boost/optional.hpp>
+#include <pajlada/signals/signal.hpp>
+#include <QIcon>
+#include <QJsonObject>
+#include <QMap>
+#include <QString>
 
 #include <memory>
 #include <queue>
 #include <shared_mutex>
+#include <unordered_map>
 
 namespace chatterino {
 
@@ -23,6 +22,8 @@ using EmotePtr = std::shared_ptr<const Emote>;
 
 class Settings;
 class Paths;
+class Image;
+class DisplayBadge;
 
 class TwitchBadges
 {
@@ -49,6 +50,7 @@ private:
 
     TwitchBadges();
     void loadTwitchBadges();
+    void parseTwitchBadges(QJsonObject root);
     void loaded();
     void loadEmoteImage(const QString &name, ImagePtr image,
                         BadgeIconCallback &&callback);

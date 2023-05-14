@@ -5,10 +5,10 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
 
 namespace chatterino {
 
@@ -25,9 +25,8 @@ void NewTabItem::action()
     SplitContainer *container = nb.addPage(true);
 
     Split *split = new Split(container);
-    split->setChannel(
-        getApp()->twitch.server->getOrAddChannel(this->channelName_));
-    container->appendSplit(split);
+    split->setChannel(getApp()->twitch->getOrAddChannel(this->channelName_));
+    container->insertSplit(split);
 }
 
 void NewTabItem::paint(QPainter *painter, const QRect &rect) const

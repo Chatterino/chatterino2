@@ -1,18 +1,23 @@
 #include "TwitchBadges.hpp"
 
-#include <QBuffer>
-#include <QIcon>
-#include <QImageReader>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QThread>
-#include <QUrlQuery>
-
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "util/DisplayBadge.hpp"
+
+#include <QBuffer>
+#include <QFile>
+#include <QIcon>
+#include <QImageReader>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonValue>
+#include <QThread>
+#include <QUrlQuery>
 
 namespace chatterino {
 
@@ -25,64 +30,101 @@ void TwitchBadges::loadTwitchBadges()
 {
     assert(this->loaded_ == false);
 
-    QUrl url("https://badges.twitch.tv/v1/badges/global/display");
+    getHelix()->getGlobalBadges(
+        [this](auto globalBadges) {
+            auto badgeSets = this->badgeSets_.access();
 
-    QUrlQuery urlQuery;
-    urlQuery.addQueryItem("language", "en");
-    url.setQuery(urlQuery);
-
-    NetworkRequest(url)
-        .onSuccess([this](auto result) -> Outcome {
+            for (const auto &badgeSet : globalBadges.badgeSets)
             {
-                auto root = result.parseJson();
-                auto badgeSets = this->badgeSets_.access();
-
-                auto jsonSets = root.value("badge_sets").toObject();
-                for (auto sIt = jsonSets.begin(); sIt != jsonSets.end(); ++sIt)
+                const auto &setID = badgeSet.setID;
+                for (const auto &version : badgeSet.versions)
                 {
-                    auto key = sIt.key();
-                    auto versions =
-                        sIt.value().toObject().value("versions").toObject();
-
-                    for (auto vIt = versions.begin(); vIt != versions.end();
-                         ++vIt)
-                    {
-                        auto versionObj = vIt.value().toObject();
-
-                        auto emote = Emote{
-                            {""},
-                            ImageSet{
-                                Image::fromUrl({versionObj.value("image_url_1x")
-                                                    .toString()},
-                                               1),
-                                Image::fromUrl({versionObj.value("image_url_2x")
-                                                    .toString()},
-                                               .5),
-                                Image::fromUrl({versionObj.value("image_url_4x")
-                                                    .toString()},
-                                               .25),
-                            },
-                            Tooltip{versionObj.value("title").toString()},
-                            Url{versionObj.value("click_url").toString()}};
-                        // "title"
-                        // "clickAction"
-
-                        (*badgeSets)[key][vIt.key()] =
-                            std::make_shared<Emote>(emote);
-                    }
+                    const auto &emote = Emote{
+                        EmoteName{},
+                        ImageSet{
+                            Image::fromUrl(version.imageURL1x, 1),
+                            Image::fromUrl(version.imageURL2x, .5),
+                            Image::fromUrl(version.imageURL4x, .25),
+                        },
+                        Tooltip{version.title},
+                        version.clickURL,
+                    };
+                    (*badgeSets)[setID][version.id] =
+                        std::make_shared<Emote>(emote);
                 }
             }
+
             this->loaded();
-            return Success;
-        })
-        .onError([this](auto res) {
-            qCDebug(chatterinoTwitch)
-                << "Error loading Twitch Badges:" << res.status();
-            // Despite erroring out, we still want to reach the same point
-            // Loaded should still be set to true to not build up an endless queue, and the quuee should still be flushed.
+        },
+        [this](auto error, auto message) {
+            QString errorMessage("Failed to load global badges - ");
+
+            switch (error)
+            {
+                case HelixGetGlobalBadgesError::Forwarded: {
+                    errorMessage += message;
+                }
+                break;
+
+                // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                case HelixGetGlobalBadgesError::Unknown: {
+                    errorMessage += "An unknown error has occurred.";
+                }
+                break;
+            }
+            qCWarning(chatterinoTwitch) << errorMessage;
+            QFile file(":/twitch-badges.json");
+            if (!file.open(QFile::ReadOnly))
+            {
+                // Despite erroring out, we still want to reach the same point
+                // Loaded should still be set to true to not build up an endless queue, and the quuee should still be flushed.
+                qCWarning(chatterinoTwitch)
+                    << "Error loading Twitch Badges from the local backup file";
+                this->loaded();
+                return;
+            }
+            auto bytes = file.readAll();
+            auto doc = QJsonDocument::fromJson(bytes);
+
+            this->parseTwitchBadges(doc.object());
+
             this->loaded();
-        })
-        .execute();
+        });
+}
+
+void TwitchBadges::parseTwitchBadges(QJsonObject root)
+{
+    auto badgeSets = this->badgeSets_.access();
+
+    auto jsonSets = root.value("badge_sets").toObject();
+    for (auto sIt = jsonSets.begin(); sIt != jsonSets.end(); ++sIt)
+    {
+        auto key = sIt.key();
+        auto versions = sIt.value().toObject().value("versions").toObject();
+
+        for (auto vIt = versions.begin(); vIt != versions.end(); ++vIt)
+        {
+            auto versionObj = vIt.value().toObject();
+
+            auto emote = Emote{
+                {""},
+                ImageSet{
+                    Image::fromUrl(
+                        {versionObj.value("image_url_1x").toString()}, 1),
+                    Image::fromUrl(
+                        {versionObj.value("image_url_2x").toString()}, .5),
+                    Image::fromUrl(
+                        {versionObj.value("image_url_4x").toString()}, .25),
+                },
+                Tooltip{versionObj.value("title").toString()},
+                Url{versionObj.value("click_url").toString()},
+            };
+            // "title"
+            // "clickAction"
+
+            (*badgeSets)[key][vIt.key()] = std::make_shared<Emote>(emote);
+        }
+    }
 }
 
 void TwitchBadges::loaded()
@@ -204,8 +246,18 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
             buffer.open(QIODevice::ReadOnly);
             QImageReader reader(&buffer);
 
-            QImage image;
-            if (reader.imageCount() == 0 || !reader.read(&image))
+            if (!reader.canRead() || reader.size().isEmpty())
+            {
+                return Failure;
+            }
+
+            QImage image = reader.read();
+            if (image.isNull())
+            {
+                return Failure;
+            }
+
+            if (reader.imageCount() <= 0)
             {
                 return Failure;
             }

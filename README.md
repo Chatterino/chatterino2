@@ -15,7 +15,7 @@ Windows users can also install Chatterino [from Chocolatey](https://chocolatey.o
 
 You can download the latest Chatterino 2 build over [here](https://github.com/Chatterino/chatterino2/releases/tag/nightly-build)
 
-You might also need to install the [VC++ 2017 Redistributable](https://aka.ms/vs/15/release/vc_redist.x64.exe) from Microsoft if you do not have it installed already.  
+You might also need to install the [VC++ Redistributables](https://aka.ms/vs/17/release/vc_redist.x64.exe) from Microsoft if you do not have it installed already.  
 If you still receive an error about `MSVCR120.dll missing`, then you should install the [VC++ 2013 Restributable](https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe).
 
 ## Building
@@ -36,6 +36,8 @@ git submodule update --init --recursive
 
 [Building on Windows](../master/BUILDING_ON_WINDOWS.md)
 
+[Building on Windows with vcpkg](../master/BUILDING_ON_WINDOWS_WITH_VCPKG.md)
+
 [Building on Linux](../master/BUILDING_ON_LINUX.md)
 
 [Building on Mac](../master/BUILDING_ON_MAC.md)
@@ -48,7 +50,7 @@ The code is formatted using clang format in Qt Creator. [.clang-format](src/.cla
 
 ### Get it automated with QT Creator + Beautifier + Clang Format
 
-1. Download LLVM: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/LLVM-11.0.0-win64.exe
+1. Download LLVM: https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.5/LLVM-15.0.5-win64.exe
 2. During the installation, make sure to add it to your path
 3. In QT Creator, select `Help` > `About Plugins` > `C++` > `Beautifier` to enable the plugin
 4. Restart QT Creator

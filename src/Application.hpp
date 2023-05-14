@@ -1,11 +1,11 @@
 #pragma once
 
-#include <QApplication>
-#include <memory>
-
-#include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "singletons/NativeMessaging.hpp"
+
+#include <QApplication>
+
+#include <memory>
 
 namespace chatterino {
 
@@ -15,21 +15,53 @@ class PubSub;
 class CommandController;
 class AccountController;
 class NotificationController;
+class HighlightController;
 class HotkeyController;
+class IUserDataController;
+class UserDataController;
+class SoundController;
+#ifdef CHATTERINO_HAVE_PLUGINS
+class PluginController;
+#endif
 
 class Theme;
 class WindowManager;
 class Logging;
 class Paths;
-class AccountManager;
 class Emotes;
+class IEmotes;
 class Settings;
 class Fonts;
 class Toasts;
 class ChatterinoBadges;
 class FfzBadges;
+class SeventvBadges;
 
-class Application
+class IApplication
+{
+public:
+    IApplication();
+    virtual ~IApplication() = default;
+
+    static IApplication *instance;
+
+    virtual Theme *getThemes() = 0;
+    virtual Fonts *getFonts() = 0;
+    virtual IEmotes *getEmotes() = 0;
+    virtual AccountController *getAccounts() = 0;
+    virtual HotkeyController *getHotkeys() = 0;
+    virtual WindowManager *getWindows() = 0;
+    virtual Toasts *getToasts() = 0;
+    virtual CommandController *getCommands() = 0;
+    virtual HighlightController *getHighlights() = 0;
+    virtual NotificationController *getNotifications() = 0;
+    virtual TwitchIrcServer *getTwitch() = 0;
+    virtual ChatterinoBadges *getChatterinoBadges() = 0;
+    virtual FfzBadges *getFfzBadges() = 0;
+    virtual IUserDataController *getUserData() = 0;
+};
+
+class Application : public IApplication
 {
     std::vector<std::unique_ptr<Singleton>> singletons_;
     int argc_;
@@ -58,21 +90,76 @@ public:
 
     CommandController *const commands{};
     NotificationController *const notifications{};
-    TwitchIrcServer *const twitch2{};
+    HighlightController *const highlights{};
+    TwitchIrcServer *const twitch{};
     ChatterinoBadges *const chatterinoBadges{};
     FfzBadges *const ffzBadges{};
+    SeventvBadges *const seventvBadges{};
+    UserDataController *const userData{};
+    SoundController *const sound{};
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+    PluginController *const plugins{};
+#endif
 
     /*[[deprecated]]*/ Logging *const logging{};
 
-    /// Provider-specific
-    struct {
-        /*[[deprecated("use twitch2 instead")]]*/ TwitchIrcServer *server{};
-        /*[[deprecated("use twitch2->pubsub instead")]]*/ PubSub *pubsub{};
-    } twitch;
+    Theme *getThemes() override
+    {
+        return this->themes;
+    }
+    Fonts *getFonts() override
+    {
+        return this->fonts;
+    }
+    IEmotes *getEmotes() override;
+    AccountController *getAccounts() override
+    {
+        return this->accounts;
+    }
+    HotkeyController *getHotkeys() override
+    {
+        return this->hotkeys;
+    }
+    WindowManager *getWindows() override
+    {
+        return this->windows;
+    }
+    Toasts *getToasts() override
+    {
+        return this->toasts;
+    }
+    CommandController *getCommands() override
+    {
+        return this->commands;
+    }
+    NotificationController *getNotifications() override
+    {
+        return this->notifications;
+    }
+    HighlightController *getHighlights() override
+    {
+        return this->highlights;
+    }
+    TwitchIrcServer *getTwitch() override
+    {
+        return this->twitch;
+    }
+    ChatterinoBadges *getChatterinoBadges() override
+    {
+        return this->chatterinoBadges;
+    }
+    FfzBadges *getFfzBadges() override
+    {
+        return this->ffzBadges;
+    }
+    IUserDataController *getUserData() override;
 
 private:
     void addSingleton(Singleton *singleton);
-    void initPubsub();
+    void initPubSub();
+    void initBttvLiveUpdates();
+    void initSeventvEventAPI();
     void initNm(Paths &paths);
 
     template <typename T,
@@ -88,5 +175,8 @@ private:
 };
 
 Application *getApp();
+
+// Get an interface version of the Application class - should be preferred when possible for new code
+IApplication *getIApp();
 
 }  // namespace chatterino

@@ -1,10 +1,10 @@
 #include "BadgePickerDialog.hpp"
-#include <QSizePolicy>
-#include "singletons/Resources.hpp"
 
 #include "providers/twitch/TwitchBadges.hpp"
+#include "singletons/Resources.hpp"
 
 #include <QDialogButtonBox>
+#include <QSizePolicy>
 #include <QVBoxLayout>
 
 namespace chatterino {
@@ -42,7 +42,7 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
         this->dropdown_->addItem(item.displayName(), item.badgeName());
     }
 
-    const auto updateBadge = [=](int index) {
+    const auto updateBadge = [=, this](int index) {
         BadgeOpt badge;
         if (index >= 0 && index < badges.size())
         {

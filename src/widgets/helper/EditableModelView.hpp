@@ -1,8 +1,7 @@
 #pragma once
 
-#include <QWidget>
-
 #include <pajlada/signals/signal.hpp>
+#include <QWidget>
 
 class QAbstractTableModel;
 class QTableView;
@@ -16,6 +15,7 @@ public:
     EditableModelView(QAbstractTableModel *model, bool movable = true);
 
     void setTitles(std::initializer_list<QString> titles);
+    void setValidationRegexp(QRegularExpression regexp);
 
     QTableView *getTableView();
     QAbstractTableModel *getModel();
@@ -31,9 +31,6 @@ private:
     QHBoxLayout *buttons_{};
 
     void moveRow(int dir);
-
-public:
-    void selectRow(int row);
 };
 
 }  // namespace chatterino

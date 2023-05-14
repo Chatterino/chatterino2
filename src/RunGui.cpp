@@ -1,13 +1,5 @@
 #include "RunGui.hpp"
 
-#include <QApplication>
-#include <QFile>
-#include <QPalette>
-#include <QStyleFactory>
-#include <Qt>
-#include <QtConcurrent>
-#include <csignal>
-
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
@@ -19,6 +11,15 @@
 #include "singletons/Updates.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
+
+#include <QApplication>
+#include <QFile>
+#include <QPalette>
+#include <QStyleFactory>
+#include <Qt>
+#include <QtConcurrent>
+
+#include <csignal>
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
@@ -43,27 +44,29 @@ namespace {
         dark.setColor(QPalette::Window, QColor(22, 22, 22));
         dark.setColor(QPalette::WindowText, Qt::white);
         dark.setColor(QPalette::Text, Qt::white);
-        dark.setColor(QPalette::Disabled, QPalette::WindowText,
-                      QColor(127, 127, 127));
         dark.setColor(QPalette::Base, QColor("#333"));
         dark.setColor(QPalette::AlternateBase, QColor("#444"));
         dark.setColor(QPalette::ToolTipBase, Qt::white);
         dark.setColor(QPalette::ToolTipText, Qt::white);
-        dark.setColor(QPalette::Disabled, QPalette::Text,
-                      QColor(127, 127, 127));
         dark.setColor(QPalette::Dark, QColor(35, 35, 35));
         dark.setColor(QPalette::Shadow, QColor(20, 20, 20));
         dark.setColor(QPalette::Button, QColor(70, 70, 70));
         dark.setColor(QPalette::ButtonText, Qt::white);
-        dark.setColor(QPalette::Disabled, QPalette::ButtonText,
-                      QColor(127, 127, 127));
         dark.setColor(QPalette::BrightText, Qt::red);
         dark.setColor(QPalette::Link, QColor(42, 130, 218));
         dark.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        dark.setColor(QPalette::HighlightedText, Qt::white);
+        dark.setColor(QPalette::PlaceholderText, QColor(127, 127, 127));
+
         dark.setColor(QPalette::Disabled, QPalette::Highlight,
                       QColor(80, 80, 80));
-        dark.setColor(QPalette::HighlightedText, Qt::white);
         dark.setColor(QPalette::Disabled, QPalette::HighlightedText,
+                      QColor(127, 127, 127));
+        dark.setColor(QPalette::Disabled, QPalette::ButtonText,
+                      QColor(127, 127, 127));
+        dark.setColor(QPalette::Disabled, QPalette::Text,
+                      QColor(127, 127, 127));
+        dark.setColor(QPalette::Disabled, QPalette::WindowText,
                       QColor(127, 127, 127));
 
         qApp->setPalette(dark);
@@ -78,6 +81,10 @@ namespace {
 #endif
 
         QApplication::setStyle(QStyleFactory::create("Fusion"));
+
+#ifndef Q_OS_MAC
+        QApplication::setWindowIcon(QIcon(":/icon.ico"));
+#endif
 
         installCustomPalette();
     }
@@ -159,7 +166,7 @@ namespace {
     // true.
     void initSignalHandler()
     {
-#ifdef NDEBUG
+#if defined(NDEBUG) && !defined(CHATTERINO_WITH_CRASHPAD)
         signalsInitTime = std::chrono::steady_clock::now();
 
         signal(SIGSEGV, handleSignal);
@@ -181,6 +188,38 @@ namespace {
             }
         }
         qCDebug(chatterinoCache) << "Deleted" << deletedCount << "files";
+    }
+
+    // We delete all but the five most recent crashdumps. This strategy may be
+    // improved in the future.
+    void clearCrashes(QDir dir)
+    {
+        // crashpad crashdumps are stored inside the Crashes/report directory
+        if (!dir.cd("reports"))
+        {
+            // no reports directory exists = no files to delete
+            return;
+        }
+
+        dir.setNameFilters({"*.dmp"});
+
+        size_t deletedCount = 0;
+        // TODO: use std::views::drop once supported by all compilers
+        size_t filesToSkip = 5;
+        for (auto &&info : dir.entryInfoList(QDir::Files, QDir::Time))
+        {
+            if (filesToSkip > 0)
+            {
+                filesToSkip--;
+                continue;
+            }
+
+            if (QFile(info.absoluteFilePath()).remove())
+            {
+                deletedCount++;
+            }
+        }
+        qCDebug(chatterinoApp) << "Deleted" << deletedCount << "crashdumps";
     }
 }  // namespace
 
@@ -212,9 +251,14 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     });
 
     // Clear the cache 1 minute after start.
-    QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory()] {
+    QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory(),
+                                   crashDirectory = paths.crashdumpDirectory] {
         QtConcurrent::run([cachePath]() {
             clearCache(cachePath);
+        });
+
+        QtConcurrent::run([crashDirectory]() {
+            clearCrashes(crashDirectory);
         });
     });
 

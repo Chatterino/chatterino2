@@ -2,9 +2,13 @@
 
 #include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
-#include "util/SharedPtrElementLess.hpp"
+#include "util/QStringHash.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 
+#include <boost/signals2.hpp>
+#include <QString>
+
+#include <memory>
 #include <mutex>
 #include <vector>
 
@@ -48,7 +52,8 @@ public:
 
     pajlada::Settings::Setting<QString> currentUsername{"/accounts/current",
                                                         ""};
-    pajlada::Signals::NoArgSignal currentUserChanged;
+    // pajlada::Signals::NoArgSignal currentUserChanged;
+    boost::signals2::signal<void()> currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
 
     SignalVector<std::shared_ptr<TwitchAccount>> accounts;

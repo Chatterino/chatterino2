@@ -1,9 +1,10 @@
 #pragma once
 
+#include <QColor>
+
 #include <memory>
 #include <unordered_map>
-
-#include <QColor>
+#include <vector>
 
 namespace chatterino {
 
@@ -13,6 +14,10 @@ enum class ColorType {
     Whisper,
     RedeemedHighlight,
     FirstMessageHighlight,
+    ElevatedMessageHighlight,
+    ThreadMessageHighlight,
+    // Used in automatic highlights of your own messages
+    SelfMessageHighlight,
 };
 
 class ColorProvider

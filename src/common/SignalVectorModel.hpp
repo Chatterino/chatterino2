@@ -2,14 +2,19 @@
 
 #include "common/SignalVector.hpp"
 
+#include <boost/optional.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QAbstractTableModel>
 #include <QMimeData>
 #include <QStandardItem>
-#include <boost/optional.hpp>
-
-#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
+
+template <typename T>
+class SignalVector;
+
+template <typename T>
+struct SignalVectorItemEvent;
 
 template <typename TVectorItem>
 class SignalVectorModel : public QAbstractTableModel,
@@ -328,7 +333,7 @@ public:
 
             if (from != to)
             {
-                this->moveRow(this->index(from, to), from, parent, to);
+                this->moveRow(this->index(from, 0), from, parent, to);
             }
 
             // We return false since we remove items ourselves.

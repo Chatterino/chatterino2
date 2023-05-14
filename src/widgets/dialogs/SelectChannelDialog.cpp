@@ -3,26 +3,27 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/irc/Irc2.hpp"
+#include "providers/irc/IrcChannel2.hpp"
+#include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Notebook.hpp"
 #include "widgets/dialogs/IrcConnectionEditor.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
-#include <QVBoxLayout>
-
-#include <QTableView>
-#include "providers/irc/Irc2.hpp"
-#include "widgets/helper/EditableModelView.hpp"
-
-#include <QHeaderView>
 #include <QPushButton>
+#include <QTableView>
+#include <QVBoxLayout>
 
 #define TAB_TWITCH 0
 #define TAB_IRC 1
@@ -30,9 +31,9 @@
 namespace chatterino {
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
-    : BaseWindow(
-          {BaseWindow::Flags::EnableCustomFrame, BaseWindow::Flags::Dialog},
-          parent)
+    : BaseWindow({BaseWindow::Flags::EnableCustomFrame,
+                  BaseWindow::Flags::Dialog, BaseWindow::DisableLayoutSave},
+                 parent)
     , selectedChannel_(Channel::getEmpty())
 {
     this->setWindowTitle("Select a channel to join");
@@ -207,7 +208,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
             outerBox->addRow("Server:", view);
         }
 
-        outerBox->addRow("Channel:", this->ui_.irc.channel = new QLineEdit);
+        outerBox->addRow("Channel: #", this->ui_.irc.channel = new QLineEdit);
 
         auto tab = notebook->addPage(obj.getElement());
         tab->setCustomTitle("Irc (Beta)");
@@ -225,13 +226,14 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         layout.emplace<QHBoxLayout>().emplace<QDialogButtonBox>(this);
     {
         auto *button_ok = buttons->addButton(QDialogButtonBox::Ok);
-        QObject::connect(button_ok, &QPushButton::clicked, [=](bool) {
+        QObject::connect(button_ok, &QPushButton::clicked, [this](bool) {
             this->ok();
         });
         auto *button_cancel = buttons->addButton(QDialogButtonBox::Cancel);
-        QObject::connect(button_cancel, &QAbstractButton::clicked, [=](bool) {
-            this->close();
-        });
+        QObject::connect(button_cancel, &QAbstractButton::clicked,
+                         [this](bool) {
+                             this->close();
+                         });
     }
 
     this->setMinimumSize(300, 310);
@@ -350,24 +352,24 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
         case TAB_TWITCH: {
             if (this->ui_.twitch.channel->isChecked())
             {
-                return app->twitch.server->getOrAddChannel(
+                return app->twitch->getOrAddChannel(
                     this->ui_.twitch.channelName->text().trimmed());
             }
             else if (this->ui_.twitch.watching->isChecked())
             {
-                return app->twitch.server->watchingChannel;
+                return app->twitch->watchingChannel;
             }
             else if (this->ui_.twitch.mentions->isChecked())
             {
-                return app->twitch.server->mentionsChannel;
+                return app->twitch->mentionsChannel;
             }
             else if (this->ui_.twitch.whispers->isChecked())
             {
-                return app->twitch.server->whispersChannel;
+                return app->twitch->whispersChannel;
             }
             else if (this->ui_.twitch.live->isChecked())
             {
-                return app->twitch.server->liveChannel;
+                return app->twitch->liveChannel;
             }
         }
         break;
@@ -407,20 +409,16 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
 
     if (event->type() == QEvent::FocusIn)
     {
-        widget->grabKeyboard();
-
         auto *radio = dynamic_cast<QRadioButton *>(watched);
         if (radio)
         {
             radio->setChecked(true);
+            return true;
         }
-
-        return true;
-    }
-    else if (event->type() == QEvent::FocusOut)
-    {
-        widget->releaseKeyboard();
-        return false;
+        else
+        {
+            return false;
+        }
     }
     else if (event->type() == QEvent::KeyPress)
     {

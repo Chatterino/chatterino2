@@ -3,9 +3,10 @@
 #include "common/Aliases.hpp"
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
-#include "pajlada/signals/signalholder.hpp"
 #include "widgets/BaseWidget.hpp"
 
+#include <boost/signals2.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QFont>
 #include <QShortcut>
 #include <QVBoxLayout>
@@ -14,6 +15,7 @@
 namespace chatterino {
 
 class ChannelView;
+class MessageThread;
 class SplitHeader;
 class SplitInput;
 class SplitContainer;
@@ -50,7 +52,7 @@ public:
     SplitInput &getInput();
 
     IndirectChannel getIndirectChannel();
-    ChannelPtr getChannel();
+    ChannelPtr getChannel() const;
     void setChannel(IndirectChannel newChannel);
 
     void setFilters(const QList<QUuid> ids);
@@ -63,8 +65,6 @@ public:
 
     void showChangeChannelPopup(const char *dialogTitle, bool empty,
                                 std::function<void(bool)> callback);
-    void giveFocus(Qt::FocusReason reason);
-    bool hasFocus() const;
     void updateGifEmotes();
     void updateLastReadMessage();
     void setIsTopRightSplit(bool value);
@@ -74,6 +74,8 @@ public:
     bool isInContainer() const;
 
     void setContainer(SplitContainer *container);
+
+    void setInputReply(const std::shared_ptr<MessageThread> &reply);
 
     static pajlada::Signals::Signal<Qt::KeyboardModifiers>
         modifierStatusChanged;
@@ -103,9 +105,12 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
-    void enterEvent(QEvent *event) override;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void enterEvent(QEnterEvent * /*event*/) override;
+#else
+    void enterEvent(QEvent * /*event*/) override;
+#endif
     void leaveEvent(QEvent *event) override;
-    void focusInEvent(QFocusEvent *event) override;
 
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
@@ -129,6 +134,14 @@ private:
      */
     void joinChannelInNewTab(ChannelPtr channel);
 
+    /**
+     * @brief Refresh moderation mode layouts/buttons
+     *
+     * Should be called after after the moderation mode is changed or
+     * moderation actions have been changed
+     **/
+    void refreshModerationMode();
+
     IndirectChannel channel_;
 
     bool moderationMode_{};
@@ -137,11 +150,11 @@ private:
     bool isMouseOver_{};
     bool isDragging_{};
 
-    QVBoxLayout *vbox_;
-    SplitHeader *header_;
-    ChannelView *view_;
-    SplitInput *input_;
-    SplitOverlay *overlay_;
+    QVBoxLayout *const vbox_;
+    SplitHeader *const header_;
+    ChannelView *const view_;
+    SplitInput *const input_;
+    SplitOverlay *const overlay_;
 
     NullablePtr<SelectChannelDialog> selectChannelDialog_;
 
@@ -151,6 +164,7 @@ private:
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
     pajlada::Signals::SignalHolder signalHolder_;
+    std::vector<boost::signals2::scoped_connection> bSignals_;
 
 public slots:
     void addSibling();
@@ -166,10 +180,9 @@ public slots:
     void openBrowserPlayer();
     void openInStreamlink();
     void openWithCustomScheme();
-    void copyToClipboard();
     void startWatching();
     void setFiltersDialog();
-    void showSearch();
+    void showSearch(bool singleChannel);
     void showViewerList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
@@ -177,3 +190,6 @@ public slots:
 };
 
 }  // namespace chatterino
+
+QDebug operator<<(QDebug dbg, const chatterino::Split &split);
+QDebug operator<<(QDebug dbg, const chatterino::Split *split);

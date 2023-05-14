@@ -3,6 +3,7 @@
 #include "common/NetworkManager.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/Paths.hpp"
 #include "util/DebugCount.hpp"
@@ -12,7 +13,6 @@
 #include <QFile>
 #include <QNetworkReply>
 #include <QtConcurrent>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 
@@ -218,8 +218,8 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                                         QString(data->payload_));
                     }
                     // TODO: Should this always be run on the GUI thread?
-                    postToThread([data, code = status.toInt()] {
-                        data->onError_(NetworkResult({}, code));
+                    postToThread([data, code = status.toInt(), reply] {
+                        data->onError_(NetworkResult(reply->readAll(), code));
                     });
                 }
 
