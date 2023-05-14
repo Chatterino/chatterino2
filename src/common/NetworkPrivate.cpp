@@ -77,7 +77,7 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
     DebugCount::increase("http request started");
 
     NetworkRequester requester;
-    NetworkWorker *worker = new NetworkWorker;
+    auto *worker = new NetworkWorker;
 
     worker->moveToThread(&NetworkManager::workerThread);
 
@@ -245,12 +245,16 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
             if (data->onSuccess_)
             {
                 if (data->executeConcurrently_)
+                {
                     QtConcurrent::run([onSuccess = std::move(data->onSuccess_),
                                        result = std::move(result)] {
                         onSuccess(result);
                     });
+                }
                 else
+                {
                     data->onSuccess_(result);
+                }
             }
             // log("finished {}", data->request_.url().toString());
 
@@ -330,64 +334,62 @@ void loadCached(std::shared_ptr<NetworkData> &&data)
         loadUncached(std::move(data));
         return;
     }
-    else
-    {
-        // XXX: check if bytes is empty?
-        QByteArray bytes = cachedFile.readAll();
-        NetworkResult result(bytes, 200);
 
-        qCDebug(chatterinoHTTP)
-            << QString("%1 [CACHED] 200 %2")
-                   .arg(networkRequestTypes.at(int(data->requestType_)),
-                        data->request_.url().toString());
-        if (data->onSuccess_)
+    // XXX: check if bytes is empty?
+    QByteArray bytes = cachedFile.readAll();
+    NetworkResult result(bytes, 200);
+
+    qCDebug(chatterinoHTTP)
+        << QString("%1 [CACHED] 200 %2")
+               .arg(networkRequestTypes.at(int(data->requestType_)),
+                    data->request_.url().toString());
+    if (data->onSuccess_)
+    {
+        if (data->executeConcurrently_ || isGuiThread())
         {
-            if (data->executeConcurrently_ || isGuiThread())
+            // XXX: If outcome is Failure, we should invalidate the cache file
+            // somehow/somewhere
+            /*auto outcome =*/
+            if (data->hasCaller_ && !data->caller_.get())
             {
-                // XXX: If outcome is Failure, we should invalidate the cache file
-                // somehow/somewhere
-                /*auto outcome =*/
+                return;
+            }
+            data->onSuccess_(result);
+        }
+        else
+        {
+            postToThread([data, result]() {
                 if (data->hasCaller_ && !data->caller_.get())
                 {
                     return;
                 }
+
                 data->onSuccess_(result);
-            }
-            else
-            {
-                postToThread([data, result]() {
-                    if (data->hasCaller_ && !data->caller_.get())
-                    {
-                        return;
-                    }
-
-                    data->onSuccess_(result);
-                });
-            }
+            });
         }
+    }
 
-        if (data->finally_)
+    if (data->finally_)
+    {
+        if (data->executeConcurrently_ || isGuiThread())
         {
-            if (data->executeConcurrently_ || isGuiThread())
+            if (data->hasCaller_ && !data->caller_.get())
             {
+                return;
+            }
+
+            data->finally_();
+        }
+        else
+        {
+            postToThread([data]() {
                 if (data->hasCaller_ && !data->caller_.get())
                 {
                     return;
                 }
 
                 data->finally_();
-            }
-            else
-            {
-                postToThread([data]() {
-                    if (data->hasCaller_ && !data->caller_.get())
-                    {
-                        return;
-                    }
-
-                    data->finally_();
-                });
-            }
+            });
         }
     }
 }
