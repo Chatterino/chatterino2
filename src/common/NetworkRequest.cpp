@@ -54,25 +54,25 @@ NetworkRequest NetworkRequest::caller(const QObject *caller) &&
 
 NetworkRequest NetworkRequest::onReplyCreated(NetworkReplyCreatedCallback cb) &&
 {
-    this->data->onReplyCreated_ = cb;
+    this->data->onReplyCreated_ = std::move(cb);
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::onError(NetworkErrorCallback cb) &&
 {
-    this->data->onError_ = cb;
+    this->data->onError_ = std::move(cb);
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::onSuccess(NetworkSuccessCallback cb) &&
 {
-    this->data->onSuccess_ = cb;
+    this->data->onSuccess_ = std::move(cb);
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::finally(NetworkFinallyCallback cb) &&
 {
-    this->data->finally_ = cb;
+    this->data->finally_ = std::move(cb);
     return std::move(*this);
 }
 
