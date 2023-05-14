@@ -19,6 +19,12 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     , data_(hotkey)
 {
     this->ui_->setupUi(this);
+    this->setStyleSheet(R"(QToolTip {
+    padding: 2px;
+    background-color: #333333;
+    border: 1px solid #545454;
+    color: white;
+})");
     this->ui_->easyArgsPicker->setVisible(false);
     this->ui_->easyArgsLabel->setVisible(false);
     // dynamically add category names to the category picker
