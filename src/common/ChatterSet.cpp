@@ -56,4 +56,10 @@ std::vector<QString> ChatterSet::filterByPrefix(const QString &prefix) const
     return result;
 }
 
+std::vector<std::pair<QString, QString>> ChatterSet::all() const
+{
+    return std::vector<std::pair<QString, QString>>(this->items.begin(),
+                                                    this->items.end());
+}
+
 }  // namespace chatterino
