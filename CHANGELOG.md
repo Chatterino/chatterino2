@@ -15,6 +15,7 @@
 - Bugfix: Fixed Ctrl+Backspace not working after Select All in chat search popup. (#4461)
 - Bugfix: Fixed crash when scrolling up really fast. (#4621)
 - Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
+- Dev: Added command to set Qt's logging filter/rules at runtime (`/c2:loggingrules`). (#4637)
 
 ## 2.4.3
 
