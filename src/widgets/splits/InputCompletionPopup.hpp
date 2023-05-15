@@ -1,7 +1,8 @@
 #pragma once
 
+#include "providers/autocomplete/AutocompleteModel.hpp"
 #include "widgets/BasePopup.hpp"
-#include "widgets/listview/GenericListModel.hpp"
+#include "widgets/listview/GenericListView.hpp"
 
 #include <functional>
 #include <memory>
@@ -13,17 +14,19 @@ using ChannelPtr = std::shared_ptr<Channel>;
 
 class GenericListView;
 
+enum class InputCompletionMode { None, Emote, User };
+
 class InputCompletionPopup : public BasePopup
 {
     using ActionCallback = std::function<void(const QString &)>;
 
-    constexpr static int MAX_ENTRY_COUNT = 200;
+    constexpr static size_t MAX_ENTRY_COUNT = 200;
 
 public:
     InputCompletionPopup(QWidget *parent = nullptr);
 
-    void updateEmotes(const QString &text, ChannelPtr channel);
-    void updateUsers(const QString &text, ChannelPtr channel);
+    void updateCompletion(const QString &text, InputCompletionMode mode,
+                          ChannelPtr channel);
 
     void setInputAction(ActionCallback callback);
 
@@ -35,14 +38,21 @@ protected:
 
 private:
     void initLayout();
+    void beginCompletion(InputCompletionMode mode, ChannelPtr channel);
+    void endCompletion();
+
+    std::unique_ptr<AutocompleteSource> getSource() const;
 
     struct {
         GenericListView *listView;
     } ui_;
 
-    GenericListModel model_;
+    AutocompleteModel model_;
     ActionCallback callback_;
     QTimer redrawTimer_;
+
+    InputCompletionMode currentMode_{InputCompletionMode::None};
+    ChannelPtr currentChannel_{};
 };
 
 }  // namespace chatterino

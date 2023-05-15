@@ -3,6 +3,10 @@
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Emote.hpp"
+#include "providers/autocomplete/AutocompleteEmoteSource.hpp"
+#include "providers/autocomplete/AutocompleteEmoteStrategies.hpp"
+#include "providers/autocomplete/AutocompleteUsersSource.hpp"
+#include "providers/autocomplete/AutocompleteUserStrategies.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
@@ -13,45 +17,6 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/listview/GenericListView.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
-
-namespace {
-
-using namespace chatterino;
-
-struct CompletionEmote {
-    EmotePtr emote;
-    QString displayName;
-    QString providerName;
-};
-
-void addEmotes(std::vector<CompletionEmote> &out, const EmoteMap &map,
-               const QString &text, const QString &providerName)
-{
-    for (auto &&emote : map)
-    {
-        if (emote.first.string.contains(text, Qt::CaseInsensitive))
-        {
-            out.push_back(
-                {emote.second, emote.second->name.string, providerName});
-        }
-    }
-}
-
-void addEmojis(std::vector<CompletionEmote> &out, const EmojiMap &map,
-               const QString &text)
-{
-    map.each([&](const QString &, const std::shared_ptr<EmojiData> &emoji) {
-        for (auto &&shortCode : emoji->shortCodes)
-        {
-            if (shortCode.contains(text, Qt::CaseInsensitive))
-            {
-                out.push_back({emoji->emote, shortCode, "Emoji"});
-            }
-        }
-    });
-}
-
-}  // namespace
 
 namespace chatterino {
 
@@ -72,131 +37,61 @@ InputCompletionPopup::InputCompletionPopup(QWidget *parent)
     this->redrawTimer_.setInterval(33);
 }
 
-void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
+void InputCompletionPopup::updateCompletion(const QString &text,
+                                            InputCompletionMode mode,
+                                            ChannelPtr channel)
 {
-    std::vector<CompletionEmote> emotes;
-    auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-    // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
-    if (channel->isTwitchChannel())
+    if (this->currentMode_ != mode || this->currentChannel_ != channel)
     {
-        if (auto user = getApp()->accounts->twitch.getCurrent())
-        {
-            // Twitch Emotes available globally
-            auto emoteData = user->accessEmotes();
-            addEmotes(emotes, emoteData->emotes, text, "Twitch Emote");
-
-            // Twitch Emotes available locally
-            auto localEmoteData = user->accessLocalEmotes();
-            if (tc &&
-                localEmoteData->find(tc->roomId()) != localEmoteData->end())
-            {
-                if (const auto *localEmotes = &localEmoteData->at(tc->roomId()))
-                {
-                    addEmotes(emotes, *localEmotes, text,
-                              "Local Twitch Emotes");
-                }
-            }
-        }
-
-        if (tc)
-        {
-            // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
-            if (auto bttv = tc->bttvEmotes())
-            {
-                addEmotes(emotes, *bttv, text, "Channel BetterTTV");
-            }
-            if (auto ffz = tc->ffzEmotes())
-            {
-                addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
-            }
-            if (auto seventv = tc->seventvEmotes())
-            {
-                addEmotes(emotes, *seventv, text, "Channel 7TV");
-            }
-        }
-
-        if (auto bttvG = getApp()->twitch->getBttvEmotes().emotes())
-        {
-            addEmotes(emotes, *bttvG, text, "Global BetterTTV");
-        }
-        if (auto ffzG = getApp()->twitch->getFfzEmotes().emotes())
-        {
-            addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
-        }
-        if (auto seventvG = getApp()->twitch->getSeventvEmotes().globalEmotes())
-        {
-            addEmotes(emotes, *seventvG, text, "Global 7TV");
-        }
+        // New completion context
+        this->beginCompletion(mode, std::move(channel));
     }
 
-    addEmojis(emotes, getApp()->emotes->emojis.emojis, text);
+    assert(this->model_.hasSource());
+    this->model_.updateResults(text, MAX_ENTRY_COUNT);
 
-    // if there is an exact match, put that emote first
-    for (size_t i = 1; i < emotes.size(); i++)
-    {
-        auto emoteText = emotes.at(i).displayName;
-
-        // test for match or match with colon at start for emotes like ":)"
-        if (emoteText.compare(text, Qt::CaseInsensitive) == 0 ||
-            emoteText.compare(":" + text, Qt::CaseInsensitive) == 0)
-        {
-            auto emote = emotes[i];
-            emotes.erase(emotes.begin() + int(i));
-            emotes.insert(emotes.begin(), emote);
-            break;
-        }
-    }
-
-    this->model_.clear();
-
-    int count = 0;
-    for (auto &&emote : emotes)
-    {
-        this->model_.addItem(std::make_unique<InputCompletionItem>(
-            emote.emote, emote.displayName + " - " + emote.providerName,
-            this->callback_));
-
-        if (count++ == MAX_ENTRY_COUNT)
-        {
-            break;
-        }
-    }
-
-    if (!emotes.empty())
+    // Move selection to top row
+    if (this->model_.rowCount() != 0)
     {
         this->ui_.listView->setCurrentIndex(this->model_.index(0));
     }
 }
 
-void InputCompletionPopup::updateUsers(const QString &text, ChannelPtr channel)
+std::unique_ptr<AutocompleteSource> InputCompletionPopup::getSource() const
 {
-    auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-    if (!tc)
+    assert(this->currentMode_ != InputCompletionMode::None);
+    assert(this->currentChannel_ != nullptr);
+
+    // Currently, strategies are hard coded.
+    switch (this->currentMode_)
     {
-        return;
+        case InputCompletionMode::Emote:
+            return std::make_unique<AutocompleteEmoteSource>(
+                this->currentChannel_, this->callback_,
+                std::make_unique<ClassicAutocompleteEmoteStrategy>());
+        case InputCompletionMode::User:
+            return std::make_unique<AutocompleteUsersSource>(
+                this->currentChannel_, this->callback_,
+                std::make_unique<ClassicAutocompleteUserStrategy>());
+        case InputCompletionMode::None:
+            // unreachable due to assert, not using `default` to require exhaustiveness
+            return nullptr;
     }
+}
 
-    auto chatters = tc->accessChatters()->filterByPrefix(text);
-    this->model_.clear();
+void InputCompletionPopup::beginCompletion(InputCompletionMode mode,
+                                           ChannelPtr channel)
+{
+    this->currentMode_ = mode;
+    this->currentChannel_ = std::move(channel);
+    this->model_.setSource(this->getSource());
+}
 
-    if (chatters.empty())
-    {
-        return;
-    }
-
-    int count = 0;
-    for (const auto &name : chatters)
-    {
-        this->model_.addItem(std::make_unique<InputCompletionItem>(
-            nullptr, name, this->callback_));
-
-        if (count++ == MAX_ENTRY_COUNT)
-        {
-            break;
-        }
-    }
-
-    this->ui_.listView->setCurrentIndex(this->model_.index(0));
+void InputCompletionPopup::endCompletion()
+{
+    this->currentMode_ = InputCompletionMode::None;
+    this->currentChannel_ = nullptr;
+    this->model_.setSource(nullptr);
 }
 
 void InputCompletionPopup::setInputAction(ActionCallback callback)
@@ -217,6 +112,7 @@ void InputCompletionPopup::showEvent(QShowEvent * /*event*/)
 void InputCompletionPopup::hideEvent(QHideEvent * /*event*/)
 {
     this->redrawTimer_.stop();
+    this->endCompletion();
 }
 
 void InputCompletionPopup::initLayout()

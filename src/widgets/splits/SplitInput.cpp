@@ -782,11 +782,13 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
 
     if (emoteCompletion)
     {
-        popup->updateEmotes(text, this->split_->getChannel());
+        popup->updateCompletion(text, InputCompletionMode::Emote,
+                                this->split_->getChannel());
     }
     else
     {
-        popup->updateUsers(text, this->split_->getChannel());
+        popup->updateCompletion(text, InputCompletionMode::User,
+                                this->split_->getChannel());
     }
 
     auto pos = this->mapToGlobal(QPoint{0, 0}) - QPoint(0, popup->height()) +
