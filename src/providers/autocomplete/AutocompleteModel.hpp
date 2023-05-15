@@ -8,6 +8,8 @@
 
 namespace chatterino {
 
+enum class CompletionKind { Emote, User };
+
 class AutocompleteModel : public GenericListModel
 {
 public:

@@ -735,7 +735,7 @@ void SplitInput::updateCompletionPopup()
             if (i == 0 || text[i - 1].isSpace())
             {
                 this->showCompletionPopup(text.mid(i, position - i + 1).mid(1),
-                                          true);
+                                          CompletionKind::Emote);
             }
             else
             {
@@ -749,7 +749,7 @@ void SplitInput::updateCompletionPopup()
             if (i == 0 || text[i - 1].isSpace())
             {
                 this->showCompletionPopup(text.mid(i, position - i + 1).mid(1),
-                                          false);
+                                          CompletionKind::User);
             }
             else
             {
@@ -762,7 +762,7 @@ void SplitInput::updateCompletionPopup()
     this->hideCompletionPopup();
 }
 
-void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
+void SplitInput::showCompletionPopup(const QString &text, CompletionKind kind)
 {
     if (!this->inputCompletionPopup_.get())
     {
@@ -780,16 +780,7 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
     auto *popup = this->inputCompletionPopup_.get();
     assert(popup);
 
-    if (emoteCompletion)
-    {
-        popup->updateCompletion(text, InputCompletionMode::Emote,
-                                this->split_->getChannel());
-    }
-    else
-    {
-        popup->updateCompletion(text, InputCompletionMode::User,
-                                this->split_->getChannel());
-    }
+    popup->updateCompletion(text, kind, this->split_->getChannel());
 
     auto pos = this->mapToGlobal(QPoint{0, 0}) - QPoint(0, popup->height()) +
                QPoint((this->width() - popup->width()) / 2, 0);

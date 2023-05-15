@@ -4,6 +4,8 @@
 #include "widgets/BasePopup.hpp"
 #include "widgets/listview/GenericListView.hpp"
 
+#include <boost/optional.hpp>
+
 #include <functional>
 #include <memory>
 
@@ -14,8 +16,6 @@ using ChannelPtr = std::shared_ptr<Channel>;
 
 class GenericListView;
 
-enum class InputCompletionMode { None, Emote, User };
-
 class InputCompletionPopup : public BasePopup
 {
     using ActionCallback = std::function<void(const QString &)>;
@@ -25,7 +25,7 @@ class InputCompletionPopup : public BasePopup
 public:
     InputCompletionPopup(QWidget *parent = nullptr);
 
-    void updateCompletion(const QString &text, InputCompletionMode mode,
+    void updateCompletion(const QString &text, CompletionKind kind,
                           ChannelPtr channel);
 
     void setInputAction(ActionCallback callback);
@@ -38,7 +38,7 @@ protected:
 
 private:
     void initLayout();
-    void beginCompletion(InputCompletionMode mode, ChannelPtr channel);
+    void beginCompletion(CompletionKind kind, ChannelPtr channel);
     void endCompletion();
 
     std::unique_ptr<AutocompleteSource> getSource() const;
@@ -51,7 +51,7 @@ private:
     ActionCallback callback_;
     QTimer redrawTimer_;
 
-    InputCompletionMode currentMode_{InputCompletionMode::None};
+    boost::optional<CompletionKind> currentKind_{};
     ChannelPtr currentChannel_{};
 };
 

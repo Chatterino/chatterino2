@@ -38,13 +38,13 @@ InputCompletionPopup::InputCompletionPopup(QWidget *parent)
 }
 
 void InputCompletionPopup::updateCompletion(const QString &text,
-                                            InputCompletionMode mode,
+                                            CompletionKind kind,
                                             ChannelPtr channel)
 {
-    if (this->currentMode_ != mode || this->currentChannel_ != channel)
+    if (this->currentKind_ != kind || this->currentChannel_ != channel)
     {
         // New completion context
-        this->beginCompletion(mode, std::move(channel));
+        this->beginCompletion(kind, std::move(channel));
     }
 
     assert(this->model_.hasSource());
@@ -59,37 +59,38 @@ void InputCompletionPopup::updateCompletion(const QString &text,
 
 std::unique_ptr<AutocompleteSource> InputCompletionPopup::getSource() const
 {
-    assert(this->currentMode_ != InputCompletionMode::None);
     assert(this->currentChannel_ != nullptr);
 
-    // Currently, strategies are hard coded.
-    switch (this->currentMode_)
+    if (!this->currentKind_)
     {
-        case InputCompletionMode::Emote:
+        return nullptr;
+    }
+
+    // Currently, strategies are hard coded.
+    switch (*this->currentKind_)
+    {
+        case CompletionKind::Emote:
             return std::make_unique<AutocompleteEmoteSource>(
                 this->currentChannel_, this->callback_,
                 std::make_unique<ClassicAutocompleteEmoteStrategy>());
-        case InputCompletionMode::User:
+        case CompletionKind::User:
             return std::make_unique<AutocompleteUsersSource>(
                 this->currentChannel_, this->callback_,
                 std::make_unique<ClassicAutocompleteUserStrategy>());
-        case InputCompletionMode::None:
-            // unreachable due to assert, not using `default` to require exhaustiveness
-            return nullptr;
     }
 }
 
-void InputCompletionPopup::beginCompletion(InputCompletionMode mode,
+void InputCompletionPopup::beginCompletion(CompletionKind kind,
                                            ChannelPtr channel)
 {
-    this->currentMode_ = mode;
+    this->currentKind_ = kind;
     this->currentChannel_ = std::move(channel);
     this->model_.setSource(this->getSource());
 }
 
 void InputCompletionPopup::endCompletion()
 {
-    this->currentMode_ = InputCompletionMode::None;
+    this->currentKind_ = boost::none;
     this->currentChannel_ = nullptr;
     this->model_.setSource(nullptr);
 }
