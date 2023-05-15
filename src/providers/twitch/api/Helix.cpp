@@ -2665,7 +2665,7 @@ void Helix::sendShoutout(
             switch (result.status())
             {
                 case 400: {
-                    failureCallback(Error::InvalidTarget, message);
+                    failureCallback(Error::UserNotAuthorized, message);
                     break;
                 }
                 case 401: {
