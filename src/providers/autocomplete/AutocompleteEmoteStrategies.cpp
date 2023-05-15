@@ -6,10 +6,16 @@ void ClassicAutocompleteEmoteStrategy::apply(
     const std::vector<CompletionEmote> &items,
     std::vector<CompletionEmote> &output, const QString &query) const
 {
+    QString normalizedQuery = query;
+    if (normalizedQuery.startsWith(':'))
+    {
+        normalizedQuery = normalizedQuery.mid(1);
+    }
+
     // First pass: filter by contains match
     for (const auto &item : items)
     {
-        if (item.name.contains(query, Qt::CaseInsensitive))
+        if (item.name.contains(normalizedQuery, Qt::CaseInsensitive))
         {
             output.push_back(item);
         }
@@ -21,8 +27,8 @@ void ClassicAutocompleteEmoteStrategy::apply(
         auto emoteText = output.at(i).name;
 
         // test for match or match with colon at start for emotes like ":)"
-        if (emoteText.compare(query, Qt::CaseInsensitive) == 0 ||
-            emoteText.compare(":" + query, Qt::CaseInsensitive) == 0)
+        if (emoteText.compare(normalizedQuery, Qt::CaseInsensitive) == 0 ||
+            emoteText.compare(":" + normalizedQuery, Qt::CaseInsensitive) == 0)
         {
             auto emote = output[i];
             output.erase(output.begin() + int(i));

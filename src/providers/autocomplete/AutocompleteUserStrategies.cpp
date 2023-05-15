@@ -7,6 +7,10 @@ void ClassicAutocompleteUserStrategy::apply(
     std::vector<UsersAutocompleteItem> &output, const QString &query) const
 {
     QString lowerQuery = query.toLower();
+    if (lowerQuery.startsWith('@'))
+    {
+        lowerQuery = lowerQuery.mid(1);
+    }
 
     for (const auto &item : items)
     {

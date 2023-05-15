@@ -734,7 +734,7 @@ void SplitInput::updateCompletionPopup()
         {
             if (i == 0 || text[i - 1].isSpace())
             {
-                this->showCompletionPopup(text.mid(i, position - i + 1).mid(1),
+                this->showCompletionPopup(text.mid(i, position - i + 1),
                                           CompletionKind::Emote);
             }
             else
@@ -748,7 +748,7 @@ void SplitInput::updateCompletionPopup()
         {
             if (i == 0 || text[i - 1].isSpace())
             {
-                this->showCompletionPopup(text.mid(i, position - i + 1).mid(1),
+                this->showCompletionPopup(text.mid(i, position - i + 1),
                                           CompletionKind::User);
             }
             else
