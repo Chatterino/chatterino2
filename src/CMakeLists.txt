@@ -229,6 +229,19 @@ set(SOURCE_FILES
         providers/RecentMessagesApi.cpp
         providers/RecentMessagesApi.hpp
 
+        providers/autocomplete/AutocompleteEmoteStrategies.cpp
+        providers/autocomplete/AutocompleteEmoteStrategies.hpp
+        providers/autocomplete/AutocompleteEmoteSource.cpp
+        providers/autocomplete/AutocompleteEmoteSource.hpp
+        providers/autocomplete/AutocompleteModel.cpp
+        providers/autocomplete/AutocompleteModel.hpp
+        providers/autocomplete/AutocompleteSource.hpp
+        providers/autocomplete/AutocompleteStrategy.hpp
+        providers/autocomplete/AutocompleteUserStrategies.cpp
+        providers/autocomplete/AutocompleteUserStrategies.hpp
+        providers/autocomplete/AutocompleteUsersSource.cpp
+        providers/autocomplete/AutocompleteUsersSource.hpp
+
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp
         providers/bttv/BttvLiveUpdates.cpp
