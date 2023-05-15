@@ -637,6 +637,15 @@ enum class HelixListVIPsError {  // /vips
     Forwarded,
 };  // /vips
 
+enum class HelixSendShoutOutError {
+    Unknown,
+    UserNotAuthorized,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 struct HelixStartCommercialResponse {
     // Length of the triggered commercial
     int length;
@@ -1013,6 +1022,12 @@ public:
         FailureCallback<HelixUpdateShieldModeError, QString>
             failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+    virtual void sendShoutout(
+        QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixSendShoutOutError, QString> failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1317,6 +1332,12 @@ public:
                           ResultCallback<HelixShieldModeStatus> successCallback,
                           FailureCallback<HelixUpdateShieldModeError, QString>
                               failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+    void sendShoutout(
+        QString fromBroadCasterID, QString toBroadcasterID, QString moderatorID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixSendShoutOutError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

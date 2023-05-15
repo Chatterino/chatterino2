@@ -2631,6 +2631,66 @@ void Helix::updateShieldMode(
         .execute();
 }
 
+// https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+void Helix::sendShoutout(
+    QString fromBroadCasterID, QString toBroadcasterID, QString moderatorID,
+    ResultCallback<> successCallback,
+    FailureCallback<HelixSendShoutOutError, QString> failureCallback)
+{
+    using Error = HelixSendShoutOutError;
+
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("from_broadcaster_id", fromBroadCasterID);
+    urlQuery.addQueryItem("to_broadcaster_id", toBroadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    this->makeRequest("chat/shoutouts", urlQuery)
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .onSuccess([successCallback](auto result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for sending shoutout was "
+                    << result.status() << "but we expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) -> void {
+            const auto obj = result.parseJson();
+            auto message = obj["message"].toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    failureCallback(Error::InvalidTarget, message);
+                    break;
+                }
+                case 401: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                    break;
+                }
+                case 403: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                    break;
+                }
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                    break;
+                }
+                default: {
+                    qCWarning(chatterinoTwitch)
+                        << "Helix send shoutout, unhandled error data:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

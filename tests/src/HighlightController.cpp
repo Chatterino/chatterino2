@@ -434,6 +434,14 @@ public:
                       failureCallback)),
                 (override));
 
+    // /shoutout
+    MOCK_METHOD(
+        void, sendShoutout,
+        (QString fromBroadCasterID, QString toBroadcasterID,
+         QString moderatorID, ResultCallback<> successCallback,
+         (FailureCallback<HelixSendShoutOutError, QString> failureCallback)),
+        (override));
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 

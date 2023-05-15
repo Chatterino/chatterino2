@@ -170,6 +170,14 @@ URL: https://dev.twitch.tv/docs/api/reference/#get-chatters
 
 Used for the viewer list for moderators/broadcasters.
 
+### Send Shoutout
+
+URL: https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+
+Used in:
+
+- `controllers/commands/CommandController.cpp` to send twitch native shoutout using "/shoutout <username>"
+
 ## PubSub
 
 ### Whispers
