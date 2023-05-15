@@ -1335,7 +1335,7 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
     void sendShoutout(
-        QString fromBroadCasterID, QString toBroadcasterID, QString moderatorID,
+        QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
         ResultCallback<> successCallback,
         FailureCallback<HelixSendShoutOutError, QString> failureCallback) final;
 

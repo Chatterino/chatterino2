@@ -437,7 +437,7 @@ public:
     // /shoutout
     MOCK_METHOD(
         void, sendShoutout,
-        (QString fromBroadCasterID, QString toBroadcasterID,
+        (QString fromBroadcasterID, QString toBroadcasterID,
          QString moderatorID, ResultCallback<> successCallback,
          (FailureCallback<HelixSendShoutOutError, QString> failureCallback)),
         (override));

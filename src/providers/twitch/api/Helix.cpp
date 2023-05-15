@@ -2633,14 +2633,14 @@ void Helix::updateShieldMode(
 
 // https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
 void Helix::sendShoutout(
-    QString fromBroadCasterID, QString toBroadcasterID, QString moderatorID,
+    QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
     ResultCallback<> successCallback,
     FailureCallback<HelixSendShoutOutError, QString> failureCallback)
 {
     using Error = HelixSendShoutOutError;
 
     QUrlQuery urlQuery;
-    urlQuery.addQueryItem("from_broadcaster_id", fromBroadCasterID);
+    urlQuery.addQueryItem("from_broadcaster_id", fromBroadcasterID);
     urlQuery.addQueryItem("to_broadcaster_id", toBroadcasterID);
     urlQuery.addQueryItem("moderator_id", moderatorID);
 
