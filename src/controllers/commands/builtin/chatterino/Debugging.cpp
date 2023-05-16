@@ -23,10 +23,11 @@ QString setLoggingRules(const CommandContext &ctx)
         return {};
     }
 
-    QLoggingCategory::setFilterRules(
-        QList(ctx.words.begin() + 1, ctx.words.end()).join('\n'));
+    auto filterRules = QList(ctx.words.begin() + 1, ctx.words.end()).join('\n');
+    QLoggingCategory::setFilterRules(filterRules);
 
-    auto message = QStringLiteral("Updated filter rules.");
+    auto message =
+        QStringLiteral("Updated filter rules to '%1'.").arg(filterRules);
 
     if (!qgetenv("QT_LOGGING_RULES").isEmpty())
     {
@@ -38,7 +39,7 @@ QString setLoggingRules(const CommandContext &ctx)
     }
 
     ctx.channel->addMessage(makeSystemMessage(message));
-    return "";
+    return {};
 }
 
 }  // namespace chatterino::commands
