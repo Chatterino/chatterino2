@@ -4,6 +4,8 @@
 #include "widgets/listview/GenericListModel.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
 
+#include <QStringListModel>
+
 #include <memory>
 #include <utility>
 #include <vector>
@@ -16,8 +18,11 @@ public:
     virtual ~AutocompleteSource() = default;
 
     virtual void update(const QString &query) = 0;
-    virtual void copyToModel(GenericListModel &model,
-                             size_t maxCount = 0) const = 0;
+
+    virtual void copyToListModel(GenericListModel &model,
+                                 size_t maxCount = 0) const = 0;
+    virtual void copyToStringModel(QStringListModel &model, size_t maxCount = 0,
+                                   bool isFirstWord = false) const = 0;
 };
 
 template <typename T>
@@ -43,8 +48,8 @@ public:
         }
     }
 
-    void copyToModel(GenericListModel &model,
-                     size_t maxCount = 0) const override
+    void copyToListModel(GenericListModel &model,
+                         size_t maxCount = 0) const override
     {
         model.clear();
 
@@ -59,9 +64,28 @@ public:
         }
     }
 
+    void copyToStringModel(QStringListModel &model, size_t maxCount = 0,
+                           bool isFirstWord = false) const override
+    {
+        QStringList newData;
+
+        size_t i = 0;
+        for (const auto &item : this->output_)
+        {
+            newData.push_back(this->mapTabStringItem(item, isFirstWord));
+            if (maxCount > 0 && i++ == maxCount)
+            {
+                break;
+            }
+        }
+
+        model.setStringList(newData);
+    }
+
 protected:
     virtual std::unique_ptr<GenericListItem> mapListItem(
         const T &item) const = 0;
+    virtual QString mapTabStringItem(const T &item, bool firstWord) const = 0;
 
     void setItems(std::vector<T> newItems)
     {

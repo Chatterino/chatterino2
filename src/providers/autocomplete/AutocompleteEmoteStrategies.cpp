@@ -15,7 +15,7 @@ void ClassicAutocompleteEmoteStrategy::apply(
     // First pass: filter by contains match
     for (const auto &item : items)
     {
-        if (item.name.contains(normalizedQuery, Qt::CaseInsensitive))
+        if (item.searchName.contains(normalizedQuery, Qt::CaseInsensitive))
         {
             output.push_back(item);
         }
@@ -24,7 +24,7 @@ void ClassicAutocompleteEmoteStrategy::apply(
     // Second pass: if there is an exact match, put that emote first
     for (size_t i = 1; i < output.size(); i++)
     {
-        auto emoteText = output.at(i).name;
+        auto emoteText = output.at(i).searchName;
 
         // test for match or match with colon at start for emotes like ":)"
         if (emoteText.compare(normalizedQuery, Qt::CaseInsensitive) == 0 ||

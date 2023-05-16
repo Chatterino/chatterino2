@@ -1,6 +1,8 @@
 #include "providers/autocomplete/AutocompleteUsersSource.hpp"
 
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Settings.hpp"
+#include "util/Helpers.hpp"
 
 namespace chatterino {
 
@@ -33,6 +35,14 @@ std::unique_ptr<GenericListItem> AutocompleteUsersSource::mapListItem(
 {
     return std::make_unique<InputCompletionItem>(nullptr, user.second,
                                                  this->callback_);
+}
+
+QString AutocompleteUsersSource::mapTabStringItem(
+    const UsersAutocompleteItem &user, bool isFirstWord) const
+{
+    const auto userMention = formatUserMention(
+        user.second, isFirstWord, getSettings()->mentionUsersWithComma);
+    return "@" + userMention + " ";
 }
 
 }  // namespace chatterino

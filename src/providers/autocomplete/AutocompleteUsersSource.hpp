@@ -29,6 +29,9 @@ protected:
     std::unique_ptr<GenericListItem> mapListItem(
         const UsersAutocompleteItem &user) const override;
 
+    QString mapTabStringItem(const UsersAutocompleteItem &user,
+                             bool isFirstWord) const override;
+
 private:
     void initializeItems(ChannelPtr channel);
 

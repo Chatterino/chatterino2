@@ -12,9 +12,15 @@
 namespace chatterino {
 
 struct CompletionEmote {
-    QString name;
+    // emote image to show in input popup
     EmotePtr emote;
+    // name to check completion queries against
+    QString searchName;
+    // name to insert into split input upon tab completing
+    QString tabCompletionName;
+    // display name within input popup
     QString displayName;
+    // emote provider name for input popup
     QString providerName;
 };
 
@@ -32,6 +38,9 @@ public:
 protected:
     std::unique_ptr<GenericListItem> mapListItem(
         const CompletionEmote &emote) const override;
+
+    QString mapTabStringItem(const CompletionEmote &emote,
+                             bool isFirstWord) const override;
 
 private:
     void initializeItems(ChannelPtr channel);

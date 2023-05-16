@@ -17,8 +17,11 @@ namespace {
     {
         for (auto &&emote : map)
         {
-            out.push_back({emote.first.string, emote.second,
-                           emote.second->name.string, providerName});
+            out.push_back({.emote = emote.second,
+                           .searchName = emote.first.string,
+                           .tabCompletionName = emote.first.string,
+                           .displayName = emote.second->name.string,
+                           .providerName = providerName});
         }
     }
 
@@ -27,7 +30,12 @@ namespace {
         map.each([&](const QString &, const std::shared_ptr<EmojiData> &emoji) {
             for (auto &&shortCode : emoji->shortCodes)
             {
-                out.push_back({shortCode, emoji->emote, shortCode, "Emoji"});
+                out.push_back(
+                    {.emote = emoji->emote,
+                     .searchName = shortCode,
+                     .tabCompletionName = QStringLiteral(":%1:").arg(shortCode),
+                     .displayName = shortCode,
+                     .providerName = "Emoji"});
             }
         });
     }
@@ -112,6 +120,12 @@ std::unique_ptr<GenericListItem> AutocompleteEmoteSource::mapListItem(
     return std::make_unique<InputCompletionItem>(
         emote.emote, emote.displayName + " - " + emote.providerName,
         this->callback_);
+}
+
+QString AutocompleteEmoteSource::mapTabStringItem(const CompletionEmote &emote,
+                                                  bool /* isFirstWord */) const
+{
+    return emote.tabCompletionName + " ";
 }
 
 }  // namespace chatterino
