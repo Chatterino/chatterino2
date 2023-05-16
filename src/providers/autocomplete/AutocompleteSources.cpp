@@ -72,10 +72,10 @@ AutocompleteEmoteSource::AutocompleteEmoteSource(
 
 void AutocompleteEmoteSource::initializeItems(const Channel *channel)
 {
-    auto app = getIApp();
+    auto *app = getIApp();
 
     std::vector<CompletionEmote> emotes;
-    auto *tc = dynamic_cast<const TwitchChannel *>(channel);
+    const auto *tc = dynamic_cast<const TwitchChannel *>(channel);
     // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
     if (channel->isTwitchChannel())
     {
@@ -160,7 +160,7 @@ AutocompleteUsersSource::AutocompleteUsersSource(
 
 void AutocompleteUsersSource::initializeItems(const Channel *channel)
 {
-    auto *tc = dynamic_cast<const TwitchChannel *>(channel);
+    const auto *tc = dynamic_cast<const TwitchChannel *>(channel);
     if (!tc)
     {
         return;
