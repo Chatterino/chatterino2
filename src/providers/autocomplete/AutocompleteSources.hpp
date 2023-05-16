@@ -16,15 +16,15 @@ namespace chatterino {
 
 struct CompletionEmote {
     /// Emote image to show in input popup
-    EmotePtr emote;
+    EmotePtr emote{};
     /// Name to check completion queries against
-    QString searchName;
+    QString searchName{};
     /// Name to insert into split input upon tab completing
-    QString tabCompletionName;
+    QString tabCompletionName{};
     /// Display name within input popup
-    QString displayName;
+    QString displayName{};
     /// Emote provider name for input popup
-    QString providerName;
+    QString providerName{};
 };
 
 class AutocompleteEmoteSource
@@ -95,8 +95,8 @@ private:
 //// AutocompleteCommandsSource
 
 struct CompleteCommand {
-    QString name;
-    QChar prefix;
+    QString name{};
+    QChar prefix{};
 };
 
 class AutocompleteCommandsSource
