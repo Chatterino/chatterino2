@@ -25,7 +25,7 @@ namespace chatterino {
 // Channel
 //
 Channel::Channel(const QString &name, Type type)
-    : completionModel_(*this)
+    : completionModel(*this)
     , lastDate_(QDate::currentDate())
     , name_(name)
     , messages_(getSettings()->scrollbackSplitLimit)

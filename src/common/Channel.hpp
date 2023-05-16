@@ -109,7 +109,7 @@ public:
 
     static std::shared_ptr<Channel> getEmpty();
 
-    TabAutocompleteModel completionModel_;
+    TabAutocompleteModel completionModel;
     QDate lastDate_;
 
 protected:
