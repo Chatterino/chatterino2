@@ -14,8 +14,6 @@ namespace chatterino {
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 
-class GenericListView;
-
 class InputCompletionPopup : public BasePopup
 {
     using ActionCallback = std::function<void(const QString &)>;

@@ -1,19 +1,8 @@
-#include "InputCompletionPopup.hpp"
+#include "widgets/splits/InputCompletionPopup.hpp"
 
-#include "Application.hpp"
-#include "controllers/accounts/AccountController.hpp"
-#include "messages/Emote.hpp"
 #include "providers/autocomplete/AutocompleteSources.hpp"
 #include "providers/autocomplete/AutocompleteStrategies.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Emotes.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/listview/GenericListView.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
 
 namespace chatterino {
