@@ -22,7 +22,16 @@ QString setLoggingRules(const CommandContext &ctx)
         return {};
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     auto filterRules = QList(ctx.words.begin() + 1, ctx.words.end()).join('\n');
+#else
+    auto filterRules = [&]() {
+        auto tmpList = ctx.words;
+        tmpList.pop_front();
+        return tmpList.join('\n');
+    }();
+#endif
+
     QLoggingCategory::setFilterRules(filterRules);
 
     auto message =
