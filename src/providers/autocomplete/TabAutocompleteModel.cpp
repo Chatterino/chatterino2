@@ -82,6 +82,7 @@ boost::optional<TabAutocompleteModel::SourceKind>
         return SourceKind::Command;
     }
 
+    // Emotes can be autocompleted without using a :
     return SourceKind::Emote;
 }
 

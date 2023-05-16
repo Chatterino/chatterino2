@@ -12,16 +12,18 @@
 
 namespace chatterino {
 
+//// AutocompleteEmoteSource
+
 struct CompletionEmote {
-    // emote image to show in input popup
+    /// Emote image to show in input popup
     EmotePtr emote;
-    // name to check completion queries against
+    /// Name to check completion queries against
     QString searchName;
-    // name to insert into split input upon tab completing
+    /// Name to insert into split input upon tab completing
     QString tabCompletionName;
-    // display name within input popup
+    /// Display name within input popup
     QString displayName;
-    // emote provider name for input popup
+    /// Emote provider name for input popup
     QString providerName;
 };
 
@@ -32,6 +34,11 @@ public:
     using ActionCallback = std::function<void(const QString &)>;
     using AutocompleteEmoteStrategy = AutocompleteStrategy<CompletionEmote>;
 
+    /// @brief Initializes a source for CompletionEmotes from the given channel
+    /// @param channel Channel to initialize emotes from
+    /// @param callback ActionCallback to invoke upon InputCompletionItem selection.
+    /// See InputCompletionItem::action(). Can be nullptr.
+    /// @param strategy AutocompleteStrategy to apply
     AutocompleteEmoteSource(
         const Channel *channel, ActionCallback callback,
         std::unique_ptr<AutocompleteEmoteStrategy> strategy);
@@ -49,6 +56,8 @@ private:
     ActionCallback callback_;
 };
 
+//// AutocompleteUsersSource
+
 using UsersAutocompleteItem = std::pair<QString, QString>;
 
 class AutocompleteUsersSource
@@ -59,6 +68,13 @@ public:
     using AutocompleteUsersStrategy =
         AutocompleteStrategy<UsersAutocompleteItem>;
 
+    /// @brief Initializes a source for UsersAutocompleteItems from the given
+    /// channel.
+    /// @param channel Channel to initialize emotes from. Must be a TwitchChannel
+    /// or completion is a no-op.
+    /// @param callback ActionCallback to invoke upon InputCompletionItem selection.
+    /// See InputCompletionItem::action(). Can be nullptr.
+    /// @param strategy AutocompleteStrategy to apply
     AutocompleteUsersSource(
         const Channel *channel, ActionCallback callback,
         std::unique_ptr<AutocompleteUsersStrategy> strategy);
@@ -76,6 +92,8 @@ private:
     ActionCallback callback_;
 };
 
+//// AutocompleteCommandsSource
+
 struct CompleteCommand {
     QString name;
     QChar prefix;
@@ -88,6 +106,10 @@ public:
     using ActionCallback = std::function<void(const QString &)>;
     using AutocompleteCommandStrategy = AutocompleteStrategy<CompleteCommand>;
 
+    /// @brief Initializes a source for CompleteCommands.
+    /// @param callback ActionCallback to invoke upon InputCompletionItem selection.
+    /// See InputCompletionItem::action(). Can be nullptr.
+    /// @param strategy AutocompleteStrategy to apply
     AutocompleteCommandsSource(
         ActionCallback callback,
         std::unique_ptr<AutocompleteCommandStrategy> strategy);
