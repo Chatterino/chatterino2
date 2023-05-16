@@ -6,10 +6,10 @@ namespace chatterino {
 
 struct CommandContext;
 
-namespace commands {
-
-    QString setLoggingRules(const CommandContext &ctx);
-
-}  // namespace commands
-
 }  // namespace chatterino
+
+namespace chatterino::commands {
+
+QString setLoggingRules(const CommandContext &ctx);
+
+}  // namespace chatterino::commands
