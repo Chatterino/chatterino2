@@ -1,7 +1,7 @@
 #include "widgets/helper/ResizingTextEdit.hpp"
 
 #include "common/Common.hpp"
-#include "common/CompletionModel.hpp"
+#include "providers/autocomplete/AutomaticAutocompleteModel.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QMimeData>
@@ -145,16 +145,16 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             return;
         }
 
-        auto *completionModel =
-            static_cast<CompletionModel *>(this->completer_->model());
+        auto *completionModel = static_cast<AutomaticAutocompleteModel *>(
+            this->completer_->model());
 
         if (!this->completionInProgress_)
         {
             // First type pressing tab after modifying a message, we refresh our
             // completion model
             this->completer_->setModel(completionModel);
-            completionModel->refresh(currentCompletionPrefix,
-                                     this->isFirstWord());
+            completionModel->updateResults(currentCompletionPrefix,
+                                           this->isFirstWord());
             this->completionInProgress_ = true;
             this->completer_->setCompletionPrefix(currentCompletionPrefix);
             this->completer_->complete();

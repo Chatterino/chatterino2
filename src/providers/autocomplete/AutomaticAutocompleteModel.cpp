@@ -1,5 +1,6 @@
 #include "providers/autocomplete/AutomaticAutocompleteModel.hpp"
 
+#include "common/Channel.hpp"
 #include "providers/autocomplete/AutocompleteCommandsSource.hpp"
 #include "providers/autocomplete/AutocompleteCommandStrategies.hpp"
 #include "providers/autocomplete/AutocompleteEmoteStrategies.hpp"
@@ -7,10 +8,10 @@
 
 namespace chatterino {
 
-AutomaticAutocompleteModel::AutomaticAutocompleteModel(ChannelPtr channel,
+AutomaticAutocompleteModel::AutomaticAutocompleteModel(Channel &channel,
                                                        QObject *parent)
     : QStringListModel(parent)
-    , channel_(std::move(channel))
+    , channel_(channel)
 {
 }
 
@@ -49,12 +50,12 @@ void AutomaticAutocompleteModel::updateSourceFromQuery(const QString &query)
     {
         case SourceKind::Emote:
             this->source_ = std::make_unique<AutocompleteEmoteSource>(
-                this->channel_, nullptr,
+                &this->channel_, nullptr,
                 std::make_unique<ClassicAutocompleteEmoteStrategy>());
             break;
         case SourceKind::User:
             this->source_ = std::make_unique<AutocompleteUsersSource>(
-                this->channel_, nullptr,
+                &this->channel_, nullptr,
                 std::make_unique<ClassicAutocompleteUserStrategy>());
             break;
         case SourceKind::Command:
@@ -67,8 +68,7 @@ void AutomaticAutocompleteModel::updateSourceFromQuery(const QString &query)
 boost::optional<AutomaticAutocompleteModel::SourceKind>
     AutomaticAutocompleteModel::deduceSourceKind(const QString &query) const
 {
-    if (query.length() < 2 ||
-        (this->channel_ && !this->channel_->isTwitchChannel()))
+    if (query.length() < 2 || !this->channel_.isTwitchChannel())
     {
         return boost::none;
     }

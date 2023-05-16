@@ -32,7 +32,7 @@ public:
     using AutocompleteEmoteStrategy = AutocompleteStrategy<CompletionEmote>;
 
     AutocompleteEmoteSource(
-        ChannelPtr channel, ActionCallback callback,
+        const Channel *channel, ActionCallback callback,
         std::unique_ptr<AutocompleteEmoteStrategy> strategy);
 
 protected:
@@ -43,7 +43,7 @@ protected:
                              bool isFirstWord) const override;
 
 private:
-    void initializeItems(ChannelPtr channel);
+    void initializeItems(const Channel *channel);
 
     ActionCallback callback_;
 };

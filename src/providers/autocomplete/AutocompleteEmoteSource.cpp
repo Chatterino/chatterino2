@@ -43,20 +43,20 @@ namespace {
 }  // namespace
 
 AutocompleteEmoteSource::AutocompleteEmoteSource(
-    ChannelPtr channel, ActionCallback callback,
+    const Channel *channel, ActionCallback callback,
     std::unique_ptr<AutocompleteEmoteStrategy> strategy)
     : AutocompleteGenericSource({}, std::move(strategy))  // begin with no items
     , callback_(std::move(callback))
 {
-    this->initializeItems(std::move(channel));
+    this->initializeItems(channel);
 }
 
-void AutocompleteEmoteSource::initializeItems(ChannelPtr channel)
+void AutocompleteEmoteSource::initializeItems(const Channel *channel)
 {
     auto app = getIApp();
 
     std::vector<CompletionEmote> emotes;
-    auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+    auto *tc = dynamic_cast<const TwitchChannel *>(channel);
     // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
     if (channel->isTwitchChannel())
     {

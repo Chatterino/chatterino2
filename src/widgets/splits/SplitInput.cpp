@@ -8,6 +8,7 @@
 #include "messages/Link.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageThread.hpp"
+#include "providers/autocomplete/AutomaticAutocompleteModel.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -51,12 +52,12 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
     this->initLayout();
 
     auto completer =
-        new QCompleter(&this->split_->getChannel().get()->completionModel);
+        new QCompleter(&this->split_->getChannel()->completionModel_);
     this->ui_.textEdit->setCompleter(completer);
 
     this->signalHolder_.managedConnect(this->split_->channelChanged, [this] {
         auto channel = this->split_->getChannel();
-        auto completer = new QCompleter(&channel->completionModel);
+        auto completer = new QCompleter(&channel->completionModel_);
         this->ui_.textEdit->setCompleter(completer);
     });
 

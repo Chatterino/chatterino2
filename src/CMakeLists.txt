@@ -22,8 +22,6 @@ set(SOURCE_FILES
         common/ChatterinoSetting.hpp
         common/ChatterSet.cpp
         common/ChatterSet.hpp
-        common/CompletionModel.cpp
-        common/CompletionModel.hpp
         common/Credentials.cpp
         common/Credentials.hpp
         common/DownloadManager.cpp

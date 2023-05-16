@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Channel.hpp"
 #include "providers/autocomplete/AutocompleteSource.hpp"
 
 #include <boost/optional.hpp>
@@ -10,10 +9,12 @@
 
 namespace chatterino {
 
+class Channel;
+
 class AutomaticAutocompleteModel : public QStringListModel
 {
 public:
-    AutomaticAutocompleteModel(ChannelPtr channel, QObject *parent = nullptr);
+    AutomaticAutocompleteModel(Channel &channel, QObject *parent = nullptr);
 
     void updateResults(const QString &query, bool isFirstWord = false);
 
@@ -23,7 +24,7 @@ private:
     void updateSourceFromQuery(const QString &query);
     boost::optional<SourceKind> deduceSourceKind(const QString &query) const;
 
-    ChannelPtr channel_;
+    Channel &channel_;
     std::unique_ptr<AutocompleteSource> source_{};
     boost::optional<SourceKind> sourceKind_{};
 };

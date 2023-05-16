@@ -1,8 +1,8 @@
 #pragma once
 
-#include "common/CompletionModel.hpp"
 #include "common/FlagsEnum.hpp"
 #include "messages/LimitedQueue.hpp"
+#include "providers/autocomplete/AutomaticAutocompleteModel.hpp"
 
 #include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -109,7 +109,7 @@ public:
 
     static std::shared_ptr<Channel> getEmpty();
 
-    CompletionModel completionModel;
+    AutomaticAutocompleteModel completionModel_;
     QDate lastDate_;
 
 protected:

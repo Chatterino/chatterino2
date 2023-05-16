@@ -11,17 +11,17 @@ namespace {
 }  // namespace
 
 AutocompleteUsersSource::AutocompleteUsersSource(
-    ChannelPtr channel, ActionCallback callback,
+    const Channel *channel, ActionCallback callback,
     std::unique_ptr<AutocompleteUsersStrategy> strategy)
     : AutocompleteGenericSource({}, std::move(strategy))  // begin with no items
     , callback_(std::move(callback))
 {
-    this->initializeItems(std::move(channel));
+    this->initializeItems(channel);
 }
 
-void AutocompleteUsersSource::initializeItems(ChannelPtr channel)
+void AutocompleteUsersSource::initializeItems(const Channel *channel)
 {
-    auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+    auto *tc = dynamic_cast<const TwitchChannel *>(channel);
     if (!tc)
     {
         return;
