@@ -541,6 +541,57 @@ void Application::initPubSub()
             });
         });
 
+    this->twitch->pubsub->signals_.moderation.lowTrustUserMessage.connect(
+        [&](const auto &msg, const QString &channelID) {
+            auto chan = this->twitch->getChannelOrEmptyByID(channelID);
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            switch (msg.type)
+            {
+                case PubSubLowTrustUserMessage::Type::NewMessage: {
+                    if (msg.treatment == "ACTIVE_MONITORING")
+                    {
+                        return; // Disable ACTIVE_MONITORING messages for now,
+                        // due to duplicate messages
+                    }
+
+                    LowTrustUser_NewMessageAction action(msg.data, channelID);
+
+                    action.message = msg.messageContent.value("text").toString();
+                    action.updater_displayName = msg.updater_displayName;
+                    action.treatment = msg.treatment;
+                    action.messageID = msg.messageID;
+
+                    // low trust user doesn't provide color
+                    QColor senderColor = getRandomColor(msg.senderUserID);
+
+                    action.target = ActionUser{msg.senderUserID, msg.senderUserLogin,
+                                       msg.senderDisplayName, senderColor};
+
+                    postToThread([chan, action] {
+                        const auto p = makeLowTrustUserMessage(action);
+                        chan->addMessage(p.first);
+                        chan->addMessage(p.second);
+                    });
+                };
+                break;
+
+                case PubSubLowTrustUserMessage::Type::TreatmentUpdate: {
+                    // Left empty
+                };
+                break;
+
+                default: {
+                    qCDebug(chatterinoPubSub) << "Invalid low-trust-user type:" 
+                        << msg.typeString;
+                }
+                break;
+            }
+        });
+
     this->twitch->pubsub->signals_.pointReward.redeemed.connect(
         [&](auto &data) {
             QString channelId = data.value("channel_id").toString();

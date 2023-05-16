@@ -670,6 +670,30 @@ void PubSub::listenToAutomod(const QString &channelID)
     this->listenToTopic(topic);
 }
 
+void PubSub::listenToLowTrustUser(const QString &channelID)
+{
+    if (this->userID_.isEmpty())
+    {
+        qCDebug(chatterinoPubSub)
+            << "Unable to listen to low-trust-users topic, no user logged in";
+        return;
+    }
+
+    static const QString topicFormat("low-trust-users.%1.%2");
+    assert(!channelID.isEmpty());
+
+    auto topic = topicFormat.arg(userID_, channelID);
+
+    if (this->isListeningToTopic(topic))
+    {
+        return;
+    }
+
+    qCDebug(chatterinoPubSub) << "Listen to topic" << topic;
+
+    this->listenToTopic(topic);
+}
+
 void PubSub::listenToChannelPointRewards(const QString &channelID)
 {
     static const QString topicFormat("community-points-channel-v1.%1");
@@ -1168,6 +1192,24 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
         this->signals_.moderation.autoModMessageCaught.invoke(innerMessage,
                                                               channelID);
+    }
+    else if (topic.startsWith("low-trust-users."))
+    {
+        auto oInnerMessage = message.toInner<PubSubLowTrustUserMessage>();
+        if (!oInnerMessage)
+        {
+            return;
+        }
+
+        auto lowTrustUserMessage = *oInnerMessage;
+
+        auto topicParts = topic.split(".");
+        assert(topicParts.length() == 3);
+
+        auto channelID = topicParts[2];
+
+        this->signals_.moderation.lowTrustUserMessage.invoke(
+            lowTrustUserMessage, channelID);
     }
     else
     {

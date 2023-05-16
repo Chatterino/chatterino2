@@ -35,6 +35,7 @@ struct AutomodAction;
 struct AutomodUserAction;
 struct AutomodInfoAction;
 struct PubSubWhisperMessage;
+struct PubSubLowTrustUserMessage;
 
 struct PubSubListenMessage;
 struct PubSubMessage;
@@ -112,6 +113,10 @@ public:
 
             Signal<AutomodUserAction> automodUserMessage;
             Signal<AutomodInfoAction> automodInfoMessage;
+
+            // Low Trust User message
+            pajlada::Signals::Signal<const PubSubLowTrustUserMessage &, QString>
+                lowTrustUserMessage;
         } moderation;
 
         struct {
@@ -134,6 +139,7 @@ public:
     void listenToChannelModerationActions(const QString &channelID);
     void listenToAutomod(const QString &channelID);
 
+    void listenToLowTrustUser(const QString &channelID);
     void listenToChannelPointRewards(const QString &channelID);
 
     std::vector<QString> requests;
