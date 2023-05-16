@@ -132,7 +132,6 @@ protected:
 
 private:
     std::vector<T> items_;
-    // TODO: vector of pointers? must not invalidate by items_ change (clear right away)
     std::vector<T> output_;
 
     std::unique_ptr<AutocompleteStrategy<T>> strategy_;
