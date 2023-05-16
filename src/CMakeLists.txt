@@ -227,22 +227,14 @@ set(SOURCE_FILES
         providers/RecentMessagesApi.cpp
         providers/RecentMessagesApi.hpp
 
-        providers/autocomplete/AutocompleteCommandStrategies.cpp
-        providers/autocomplete/AutocompleteCommandStrategies.hpp
-        providers/autocomplete/AutocompleteCommandsSource.cpp
-        providers/autocomplete/AutocompleteCommandsSource.hpp
-        providers/autocomplete/AutocompleteEmoteStrategies.cpp
-        providers/autocomplete/AutocompleteEmoteStrategies.hpp
-        providers/autocomplete/AutocompleteEmoteSource.cpp
-        providers/autocomplete/AutocompleteEmoteSource.hpp
         providers/autocomplete/AutocompleteModel.cpp
         providers/autocomplete/AutocompleteModel.hpp
         providers/autocomplete/AutocompleteSource.hpp
+        providers/autocomplete/AutocompleteSources.cpp
+        providers/autocomplete/AutocompleteSources.hpp
+        providers/autocomplete/AutocompleteStrategies.cpp
+        providers/autocomplete/AutocompleteStrategies.hpp
         providers/autocomplete/AutocompleteStrategy.hpp
-        providers/autocomplete/AutocompleteUserStrategies.cpp
-        providers/autocomplete/AutocompleteUserStrategies.hpp
-        providers/autocomplete/AutocompleteUsersSource.cpp
-        providers/autocomplete/AutocompleteUsersSource.hpp
         providers/autocomplete/AutomaticAutocompleteModel.cpp
         providers/autocomplete/AutomaticAutocompleteModel.hpp
 

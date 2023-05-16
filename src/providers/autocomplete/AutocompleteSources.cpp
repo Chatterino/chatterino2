@@ -1,12 +1,17 @@
-#include "providers/autocomplete/AutocompleteEmoteSource.hpp"
+#include "providers/autocomplete/AutocompleteSources.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/Command.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "providers/emoji/Emojis.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
+#include "singletons/Settings.hpp"
+#include "util/Helpers.hpp"
 
 namespace chatterino {
 
@@ -40,7 +45,21 @@ namespace {
         });
     }
 
+    void addCommand(const QString &command, std::vector<CompleteCommand> &out)
+    {
+        if (command.startsWith('/') || command.startsWith('.'))
+        {
+            out.push_back({command.mid(1), command.at(0)});
+        }
+        else
+        {
+            out.push_back({command, '/'});
+        }
+    }
+
 }  // namespace
+
+//// AutocompleteEmoteSource
 
 AutocompleteEmoteSource::AutocompleteEmoteSource(
     const Channel *channel, ActionCallback callback,
@@ -126,6 +145,100 @@ QString AutocompleteEmoteSource::mapTabStringItem(const CompletionEmote &emote,
                                                   bool /* isFirstWord */) const
 {
     return emote.tabCompletionName + " ";
+}
+
+//// AutocompleteUsersSource
+
+AutocompleteUsersSource::AutocompleteUsersSource(
+    const Channel *channel, ActionCallback callback,
+    std::unique_ptr<AutocompleteUsersStrategy> strategy)
+    : AutocompleteGenericSource({}, std::move(strategy))  // begin with no items
+    , callback_(std::move(callback))
+{
+    this->initializeItems(channel);
+}
+
+void AutocompleteUsersSource::initializeItems(const Channel *channel)
+{
+    auto *tc = dynamic_cast<const TwitchChannel *>(channel);
+    if (!tc)
+    {
+        return;
+    }
+
+    this->setItems(tc->accessChatters()->all());
+}
+
+std::unique_ptr<GenericListItem> AutocompleteUsersSource::mapListItem(
+    const UsersAutocompleteItem &user) const
+{
+    return std::make_unique<InputCompletionItem>(nullptr, user.second,
+                                                 this->callback_);
+}
+
+QString AutocompleteUsersSource::mapTabStringItem(
+    const UsersAutocompleteItem &user, bool isFirstWord) const
+{
+    const auto userMention = formatUserMention(
+        user.second, isFirstWord, getSettings()->mentionUsersWithComma);
+    return "@" + userMention + " ";
+}
+
+//// AutocompleteCommandsSource
+
+AutocompleteCommandsSource::AutocompleteCommandsSource(
+    ActionCallback callback,
+    std::unique_ptr<AutocompleteCommandStrategy> strategy)
+    : AutocompleteGenericSource({}, std::move(strategy))  // begin with no items
+    , callback_(std::move(callback))
+{
+    this->initializeItems();
+}
+
+void AutocompleteCommandsSource::initializeItems()
+{
+    std::vector<CompleteCommand> commands;
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+    for (const auto &command : getApp()->commands->pluginCommands())
+    {
+        addCommand(command, commands);
+    }
+#endif
+
+    // Custom Chatterino commands
+    for (const auto &command : getIApp()->getCommands()->items)
+    {
+        addCommand(command.name, commands);
+    }
+
+    // Default Chatterino commands
+    auto x = getIApp()->getCommands()->getDefaultChatterinoCommandList();
+    for (const auto &command : x)
+    {
+        addCommand(command, commands);
+    }
+
+    // Default Twitch commands
+    for (const auto &command : TWITCH_DEFAULT_COMMANDS)
+    {
+        addCommand(command, commands);
+    }
+
+    this->setItems(std::move(commands));
+}
+
+std::unique_ptr<GenericListItem> AutocompleteCommandsSource::mapListItem(
+    const CompleteCommand &command) const
+{
+    return std::make_unique<InputCompletionItem>(nullptr, command.name,
+                                                 this->callback_);
+}
+
+QString AutocompleteCommandsSource::mapTabStringItem(
+    const CompleteCommand &command, bool isFirstWord) const
+{
+    return command.prefix + command.name + " ";
 }
 
 }  // namespace chatterino

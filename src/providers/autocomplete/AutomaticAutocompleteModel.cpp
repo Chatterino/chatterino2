@@ -1,10 +1,8 @@
 #include "providers/autocomplete/AutomaticAutocompleteModel.hpp"
 
 #include "common/Channel.hpp"
-#include "providers/autocomplete/AutocompleteCommandsSource.hpp"
-#include "providers/autocomplete/AutocompleteCommandStrategies.hpp"
-#include "providers/autocomplete/AutocompleteEmoteStrategies.hpp"
-#include "providers/autocomplete/AutocompleteUserStrategies.hpp"
+#include "providers/autocomplete/AutocompleteSources.hpp"
+#include "providers/autocomplete/AutocompleteStrategies.hpp"
 
 namespace chatterino {
 
