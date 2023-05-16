@@ -2665,11 +2665,35 @@ void Helix::sendShoutout(
             switch (result.status())
             {
                 case 400: {
-                    failureCallback(Error::UserNotAuthorized, message);
+                    if (message.startsWith("The broadcaster may not give "
+                                           "themselves a Shoutout.",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserIsBroadcaster, message);
+                    }
+                    else if (message.startsWith(
+                                 "The broadcaster is not streaming live or "
+                                 "does not have one or more viewers.",
+                                 Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::BroadcasterNotLive, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
                     break;
                 }
                 case 401: {
-                    failureCallback(Error::UserNotAuthorized, message);
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
                     break;
                 }
                 case 403: {
@@ -2678,6 +2702,12 @@ void Helix::sendShoutout(
                 }
                 case 429: {
                     failureCallback(Error::Ratelimited, message);
+                    break;
+                }
+                    // Helix returns 500 when user is not mod
+                case 500: {
+                    failureCallback(Error::UserNotMod,
+                                    "You are not a moderator.");
                     break;
                 }
                 default: {

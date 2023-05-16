@@ -3212,80 +3212,110 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/shield", &commands::shieldModeOn);
     this->registerCommand("/shieldoff", &commands::shieldModeOff);
 
-    this->registerCommand(
-        "/shoutout", [](const QStringList &words, auto channel) {
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /shoutout command only works in Twitch channels"));
-                return "";
-            }
-
-            auto currentUser = getApp()->accounts->twitch.getCurrent();
-            if (currentUser->isAnon())
-            {
-                channel->addMessage(makeSystemMessage(
-                    "You must be logged in to send shoutout"));
-                return "";
-            }
-
-            const auto *usageStr = "Usage: \"/shoutout <username>\" - Sends a "
-                                   "shoutout to the specified twitch user";
-
-            if (words.size() < 2)
-            {
-                channel->addMessage(makeSystemMessage(usageStr));
-                return "";
-            }
-            const auto target = words.at(1);
-
-            using Error = HelixSendShoutOutError;
-
-            getHelix()->getUserByName(
-                target,
-                [twitchChannel, channel, currentUser,
-                 &target](const auto targetUser) {
-                    getHelix()->sendShoutout(
-                        twitchChannel->roomId(), targetUser.id,
-                        currentUser->getUserId(),
-                        [channel, targetUser]() {
-                            channel->addMessage(
-                                makeSystemMessage(QString("Sent shoutout to %1")
-                                                      .arg(targetUser.login)));
-                        },
-                        [channel](auto error, auto message) {
-                            switch (error)
-                            {
-                                case Error::UserNotAuthorized: {
-                                    channel->addMessage(makeSystemMessage(
-                                        "You don't have permission to "
-                                        "perform that action."));
-                                }
-                                break;
-
-                                case Error::Ratelimited: {
-                                    channel->addMessage(makeSystemMessage(
-                                        "You are being ratelimited by Twitch. "
-                                        "Try again in a few seconds."));
-                                }
-                                break;
-
-                                default: {
-                                    channel->addMessage(makeSystemMessage(
-                                        "Error sending shoutout."));
-                                }
-                                break;
-                            }
-                        });
-                },
-                [channel, target] {
-                    // Equivalent error from IRC
-                    channel->addMessage(makeSystemMessage(
-                        QString("Invalid username: %1").arg(target)));
-                });
+    this->registerCommand("/shoutout", [](const QStringList &words,
+                                          auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /shoutout command only works in Twitch channels"));
             return "";
-        });
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to send shoutout"));
+            return "";
+        }
+
+        const auto *usageStr = "Usage: \"/shoutout <username>\" - Sends a "
+                               "shoutout to the specified twitch user";
+
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(usageStr));
+            return "";
+        }
+        const auto& target = words.at(1);
+
+        using Error = HelixSendShoutOutError;
+
+        getHelix()->getUserByName(
+            target,
+            [twitchChannel, channel, currentUser,
+             &target](const auto targetUser) {
+                getHelix()->sendShoutout(
+                    twitchChannel->roomId(), targetUser.id,
+                    currentUser->getUserId(),
+                    [channel, targetUser]() {
+                        channel->addMessage(
+                            makeSystemMessage(QString("Sent shoutout to %1")
+                                                  .arg(targetUser.login)));
+                    },
+                    [channel](auto error, auto message) {
+                        QString errorMessage = "Failed to send shoutout - ";
+                        qCInfo(chatterinoTwitch) << message;
+
+                        switch (error)
+                        {
+                            case Error::UserNotAuthorized: {
+                                errorMessage += "You don't have permission to "
+                                                "perform that action.";
+                            }
+                            break;
+
+                            case Error::UserMissingScope: {
+                                errorMessage += "Missing required scope. "
+                                                "Re-login with your "
+                                                "account and try again.";
+                            }
+                            break;
+
+                            case Error::Ratelimited: {
+                                errorMessage +=
+                                    "You are being ratelimited by Twitch. "
+                                    "Try again in a few seconds.";
+                            }
+                            break;
+
+                            case Error::UserNotMod: {
+                                errorMessage +=
+                                    "You are not a moderator of this channel.";
+                            }
+                            break;
+
+                            case Error::UserIsBroadcaster: {
+                                errorMessage += "The broadcaster may not give "
+                                                "themselves a Shoutout.";
+                            }
+                            break;
+
+                            case Error::BroadcasterNotLive: {
+                                errorMessage +=
+                                    "The broadcaster is not streaming live or "
+                                    "does not have one or more viewers.";
+                            }
+                            break;
+
+                            case Error::Unknown: {
+                                errorMessage +=
+                                    "An unknown error has occurred.";
+                            }
+                            break;
+                        }
+
+                        channel->addMessage(makeSystemMessage(errorMessage));
+                    });
+            },
+            [channel, target] {
+                // Equivalent error from IRC
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid username: %1").arg(target)));
+            });
+        return "";
+    });
 }
 
 void CommandController::save()

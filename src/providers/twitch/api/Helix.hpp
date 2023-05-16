@@ -639,7 +639,15 @@ enum class HelixListVIPsError {  // /vips
 
 enum class HelixSendShoutOutError {
     Unknown,
+    // 400
+    UserIsBroadcaster,
+    BroadcasterNotLive,
+    // 401
     UserNotAuthorized,
+    UserMissingScope,
+    // 500
+    UserNotMod,
+
     Ratelimited,
 
     // The error message is forwarded directly from the Twitch API
