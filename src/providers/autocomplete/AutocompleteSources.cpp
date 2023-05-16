@@ -236,7 +236,7 @@ std::unique_ptr<GenericListItem> AutocompleteCommandsSource::mapListItem(
 }
 
 QString AutocompleteCommandsSource::mapTabStringItem(
-    const CompleteCommand &command, bool isFirstWord) const
+    const CompleteCommand &command, bool /* isFirstWord */) const
 {
     return command.prefix + command.name + " ";
 }
