@@ -15,6 +15,14 @@ class ClassicAutocompleteEmoteStrategy
                const QString &query) const override;
 };
 
+class ClassicTabAutocompleteEmoteStrategy
+    : public AutocompleteStrategy<CompletionEmote>
+{
+    void apply(const std::vector<CompletionEmote> &items,
+               std::vector<CompletionEmote> &output,
+               const QString &query) const override;
+};
+
 //// User strategies
 
 class ClassicAutocompleteUserStrategy

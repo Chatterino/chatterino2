@@ -1,5 +1,8 @@
 #include "providers/autocomplete/AutocompleteStrategies.hpp"
 
+#include "singletons/Settings.hpp"
+#include "util/Helpers.hpp"
+
 namespace chatterino {
 
 //// Emote strategies
@@ -36,6 +39,35 @@ void ClassicAutocompleteEmoteStrategy::apply(
             output.erase(output.begin() + int(i));
             output.insert(output.begin(), emote);
             break;
+        }
+    }
+}
+
+void ClassicTabAutocompleteEmoteStrategy::apply(
+    const std::vector<CompletionEmote> &items,
+    std::vector<CompletionEmote> &output, const QString &query) const
+{
+    QString normalizedQuery = query;
+    if (normalizedQuery.startsWith(':'))
+    {
+        normalizedQuery = normalizedQuery.mid(1);
+    }
+
+    // Filter and insert with sorting
+    for (const auto &item : items)
+    {
+        if (startsWithOrContains(item.searchName, normalizedQuery,
+                                 Qt::CaseInsensitive,
+                                 getSettings()->prefixOnlyEmoteCompletion))
+        {
+            // Insert into output while maintaining sort
+            output.insert(
+                std::upper_bound(
+                    output.begin(), output.end(), item,
+                    [](const CompletionEmote &a, const CompletionEmote &b) {
+                        return compareEmoteStrings(a.searchName, b.searchName);
+                    }),
+                item);
         }
     }
 }

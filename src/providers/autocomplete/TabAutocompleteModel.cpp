@@ -47,7 +47,7 @@ void TabAutocompleteModel::updateSourceFromQuery(const QString &query)
         case SourceKind::Emote:
             this->source_ = std::make_unique<AutocompleteEmoteSource>(
                 &this->channel_, nullptr,
-                std::make_unique<ClassicAutocompleteEmoteStrategy>());
+                std::make_unique<ClassicTabAutocompleteEmoteStrategy>());
             break;
         case SourceKind::User:
             this->source_ = std::make_unique<AutocompleteUsersSource>(
