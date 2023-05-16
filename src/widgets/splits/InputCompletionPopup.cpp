@@ -75,6 +75,8 @@ std::unique_ptr<AutocompleteSource> InputCompletionPopup::getSource() const
             return std::make_unique<AutocompleteUsersSource>(
                 this->currentChannel_.get(), this->callback_,
                 std::make_unique<ClassicAutocompleteUserStrategy>());
+        default:
+            return nullptr;
     }
 }
 
