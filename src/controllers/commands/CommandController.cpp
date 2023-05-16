@@ -3238,7 +3238,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel->addMessage(makeSystemMessage(usageStr));
             return "";
         }
-        const auto& target = words.at(1);
+        const auto &target = words.at(1);
 
         using Error = HelixSendShoutOutError;
 
