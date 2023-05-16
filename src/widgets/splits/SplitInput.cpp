@@ -8,7 +8,6 @@
 #include "messages/Link.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageThread.hpp"
-#include "providers/autocomplete/AutomaticAutocompleteModel.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"

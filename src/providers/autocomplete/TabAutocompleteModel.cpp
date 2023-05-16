@@ -1,4 +1,4 @@
-#include "providers/autocomplete/AutomaticAutocompleteModel.hpp"
+#include "providers/autocomplete/TabAutocompleteModel.hpp"
 
 #include "common/Channel.hpp"
 #include "providers/autocomplete/AutocompleteSources.hpp"
@@ -6,15 +6,13 @@
 
 namespace chatterino {
 
-AutomaticAutocompleteModel::AutomaticAutocompleteModel(Channel &channel,
-                                                       QObject *parent)
+TabAutocompleteModel::TabAutocompleteModel(Channel &channel, QObject *parent)
     : QStringListModel(parent)
     , channel_(channel)
 {
 }
 
-void AutomaticAutocompleteModel::updateResults(const QString &query,
-                                               bool isFirstWord)
+void TabAutocompleteModel::updateResults(const QString &query, bool isFirstWord)
 {
     this->updateSourceFromQuery(query);
 
@@ -25,7 +23,7 @@ void AutomaticAutocompleteModel::updateResults(const QString &query,
     }
 }
 
-void AutomaticAutocompleteModel::updateSourceFromQuery(const QString &query)
+void TabAutocompleteModel::updateSourceFromQuery(const QString &query)
 {
     auto deducedKind = this->deduceSourceKind(query);
     if (!deducedKind)
@@ -63,8 +61,8 @@ void AutomaticAutocompleteModel::updateSourceFromQuery(const QString &query)
     }
 }
 
-boost::optional<AutomaticAutocompleteModel::SourceKind>
-    AutomaticAutocompleteModel::deduceSourceKind(const QString &query) const
+boost::optional<TabAutocompleteModel::SourceKind>
+    TabAutocompleteModel::deduceSourceKind(const QString &query) const
 {
     if (query.length() < 2 || !this->channel_.isTwitchChannel())
     {

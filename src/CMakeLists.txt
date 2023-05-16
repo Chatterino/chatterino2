@@ -235,8 +235,8 @@ set(SOURCE_FILES
         providers/autocomplete/AutocompleteStrategies.cpp
         providers/autocomplete/AutocompleteStrategies.hpp
         providers/autocomplete/AutocompleteStrategy.hpp
-        providers/autocomplete/AutomaticAutocompleteModel.cpp
-        providers/autocomplete/AutomaticAutocompleteModel.hpp
+        providers/autocomplete/TabAutocompleteModel.cpp
+        providers/autocomplete/TabAutocompleteModel.hpp
 
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp

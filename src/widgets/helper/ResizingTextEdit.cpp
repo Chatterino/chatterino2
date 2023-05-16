@@ -1,7 +1,7 @@
 #include "widgets/helper/ResizingTextEdit.hpp"
 
 #include "common/Common.hpp"
-#include "providers/autocomplete/AutomaticAutocompleteModel.hpp"
+#include "providers/autocomplete/TabAutocompleteModel.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QMimeData>
@@ -145,8 +145,8 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             return;
         }
 
-        auto *completionModel = static_cast<AutomaticAutocompleteModel *>(
-            this->completer_->model());
+        auto *completionModel =
+            static_cast<TabAutocompleteModel *>(this->completer_->model());
 
         if (!this->completionInProgress_)
         {

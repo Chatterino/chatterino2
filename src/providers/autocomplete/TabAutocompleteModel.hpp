@@ -11,10 +11,10 @@ namespace chatterino {
 
 class Channel;
 
-class AutomaticAutocompleteModel : public QStringListModel
+class TabAutocompleteModel : public QStringListModel
 {
 public:
-    AutomaticAutocompleteModel(Channel &channel, QObject *parent = nullptr);
+    TabAutocompleteModel(Channel &channel, QObject *parent = nullptr);
 
     void updateResults(const QString &query, bool isFirstWord = false);
 

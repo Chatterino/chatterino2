@@ -2,7 +2,7 @@
 
 #include "common/FlagsEnum.hpp"
 #include "messages/LimitedQueue.hpp"
-#include "providers/autocomplete/AutomaticAutocompleteModel.hpp"
+#include "providers/autocomplete/TabAutocompleteModel.hpp"
 
 #include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -109,7 +109,7 @@ public:
 
     static std::shared_ptr<Channel> getEmpty();
 
-    AutomaticAutocompleteModel completionModel_;
+    TabAutocompleteModel completionModel_;
     QDate lastDate_;
 
 protected:
