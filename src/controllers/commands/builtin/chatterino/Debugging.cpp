@@ -23,7 +23,8 @@ QString setLoggingRules(const CommandContext &ctx)
         return {};
     }
 
-    QLoggingCategory::setFilterRules(ctx.words.sliced(1).join('\n'));
+    QLoggingCategory::setFilterRules(
+        QList(ctx.words.begin() + 1, ctx.words.end()).join('\n'));
 
     auto message = QStringLiteral("Updated filter rules.");
 
