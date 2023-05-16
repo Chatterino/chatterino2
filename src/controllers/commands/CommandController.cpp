@@ -3213,7 +3213,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/shield", &commands::shieldModeOn);
     this->registerCommand("/shieldoff", &commands::shieldModeOff);
 
-    this->registerCommand("/c2:loggingrules", &commands::setLoggingRules);
+    this->registerCommand("/c2-set-logging-rules", &commands::setLoggingRules);
 }
 
 void CommandController::save()

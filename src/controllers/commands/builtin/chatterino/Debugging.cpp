@@ -14,10 +14,9 @@ QString setLoggingRules(const CommandContext &ctx)
     if (ctx.words.size() < 2)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "Usage: /c2:loggingrules <rules...>. To enable debug logging for "
-            "all "
-            "categories from chatterino, use 'chatterino.*.debug=true'. For "
-            "the format on the rules, see "
+            "Usage: /c2-set-logging-rules <rules...>. To enable debug logging "
+            "for all categories from chatterino, use "
+            "'chatterino.*.debug=true'. For the format on the rules, see "
             "https://doc.qt.io/qt-6/"
             "qloggingcategory.html#configuring-categories"));
         return {};
