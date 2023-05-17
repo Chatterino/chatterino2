@@ -1,5 +1,7 @@
-# emoji.json should remain minified
-resources/emoji.json
+# JSON resources should not be prettified...
+resources/*.json
+# ...themes should be prettified for readability.
+!resources/themes/*.json
 
 # Ignore submodule files
 lib/*/

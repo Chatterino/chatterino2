@@ -6,6 +6,10 @@
 
 #include <memory>
 
+class QJsonArray;
+class QJsonObject;
+class QJsonDocument;
+
 namespace chatterino {
 
 struct NetworkData;
@@ -24,8 +28,8 @@ public:
     explicit NetworkRequest(
         const std::string &url,
         NetworkRequestType requestType = NetworkRequestType::Get);
-    explicit NetworkRequest(
-        QUrl url, NetworkRequestType requestType = NetworkRequestType::Get);
+    explicit NetworkRequest(const QUrl &url, NetworkRequestType requestType =
+                                                 NetworkRequestType::Get);
 
     // Enable move
     NetworkRequest(NetworkRequest &&other) = default;
@@ -54,17 +58,24 @@ public:
     NetworkRequest header(const char *headerName, const char *value) &&;
     NetworkRequest header(const char *headerName, const QByteArray &value) &&;
     NetworkRequest header(const char *headerName, const QString &value) &&;
+    NetworkRequest header(QNetworkRequest::KnownHeaders header,
+                          const QVariant &value) &&;
     NetworkRequest headerList(
         const std::vector<std::pair<QByteArray, QByteArray>> &headers) &&;
     NetworkRequest timeout(int ms) &&;
     NetworkRequest concurrent() &&;
-    NetworkRequest authorizeTwitchV5(const QString &clientID,
-                                     const QString &oauthToken = QString()) &&;
     NetworkRequest multiPart(QHttpMultiPart *payload) &&;
+    /**
+     * This will change `RedirectPolicyAttribute`.
+     * `QNetworkRequest`'s defaults are used by default (Qt 5: no-follow, Qt 6: follow).
+     */
+    NetworkRequest followRedirects(bool on) &&;
+    NetworkRequest json(const QJsonObject &root) &&;
+    NetworkRequest json(const QJsonArray &root) &&;
+    NetworkRequest json(const QJsonDocument &document) &&;
+    NetworkRequest json(const QByteArray &payload) &&;
 
     void execute();
-
-    static NetworkRequest twitchRequest(QUrl url);
 
 private:
     void initializeDefaultValues();

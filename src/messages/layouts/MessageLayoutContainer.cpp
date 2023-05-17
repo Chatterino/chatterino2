@@ -67,10 +67,7 @@ void MessageLayoutContainer::clear()
 
 void MessageLayoutContainer::addElement(MessageLayoutElement *element)
 {
-    bool isZeroWidth =
-        element->getFlags().has(MessageElementFlag::ZeroWidthEmote);
-
-    if (!isZeroWidth && !this->fitsInLine(element->getRect().width()))
+    if (!this->fitsInLine(element->getRect().width()))
     {
         this->breakLine();
     }
@@ -175,14 +172,6 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     this->lineHeight_ = std::max(this->lineHeight_, elementLineHeight);
 
     auto xOffset = 0;
-    bool isZeroWidthEmote = element->getCreator().getFlags().has(
-        MessageElementFlag::ZeroWidthEmote);
-
-    if (isZeroWidthEmote && !isRTLMode)
-    {
-        xOffset -= element->getRect().width() + this->spaceWidth_;
-    }
-
     auto yOffset = 0;
 
     if (element->getCreator().getFlags().has(
@@ -195,7 +184,7 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
 
     if (getSettings()->removeSpacesBetweenEmotes &&
         element->getFlags().hasAny({MessageElementFlag::EmoteImages}) &&
-        !isZeroWidthEmote && shouldRemoveSpaceBetweenEmotes())
+        shouldRemoveSpaceBetweenEmotes())
     {
         // Move cursor one 'space width' to the left (right in case of RTL) to combine hug the previous emote
         if (isRTLMode)
@@ -230,16 +219,13 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     }
 
     // set current x
-    if (!isZeroWidthEmote)
+    if (isRTLMode)
     {
-        if (isRTLMode)
-        {
-            this->currentX_ -= element->getRect().width();
-        }
-        else
-        {
-            this->currentX_ += element->getRect().width();
-        }
+        this->currentX_ -= element->getRect().width();
+    }
+    else
+    {
+        this->currentX_ += element->getRect().width();
     }
 
     if (element->hasTrailingSpace())

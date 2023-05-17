@@ -72,12 +72,12 @@ void writeToCache(const std::shared_ptr<NetworkData> &data,
     }
 }
 
-void loadUncached(const std::shared_ptr<NetworkData> &data)
+void loadUncached(std::shared_ptr<NetworkData> &&data)
 {
     DebugCount::increase("http request started");
 
     NetworkRequester requester;
-    NetworkWorker *worker = new NetworkWorker;
+    auto *worker = new NetworkWorker;
 
     worker->moveToThread(&NetworkManager::workerThread);
 
@@ -89,7 +89,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             data->timer_->start(data->timeoutMS_);
         }
 
-        auto reply = [&]() -> QNetworkReply * {
+        auto *reply = [&]() -> QNetworkReply * {
             switch (data->requestType_)
             {
                 case NetworkRequestType::Get:
@@ -245,12 +245,16 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             if (data->onSuccess_)
             {
                 if (data->executeConcurrently_)
+                {
                     QtConcurrent::run([onSuccess = std::move(data->onSuccess_),
                                        result = std::move(result)] {
                         onSuccess(result);
                     });
+                }
                 else
+                {
                     data->onSuccess_(result);
+                }
             }
             // log("finished {}", data->request_.url().toString());
 
@@ -276,11 +280,15 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             if (data->finally_)
             {
                 if (data->executeConcurrently_)
+                {
                     QtConcurrent::run([finally = std::move(data->finally_)] {
                         finally();
                     });
+                }
                 else
+                {
                     data->finally_();
+                }
             }
         };
 
@@ -316,87 +324,87 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 }
 
 // First tried to load cached, then uncached.
-void loadCached(const std::shared_ptr<NetworkData> &data)
+void loadCached(std::shared_ptr<NetworkData> &&data)
 {
     QFile cachedFile(getPaths()->cacheDirectory() + "/" + data->getHash());
 
     if (!cachedFile.exists() || !cachedFile.open(QIODevice::ReadOnly))
     {
         // File didn't exist OR File could not be opened
-        loadUncached(data);
+        loadUncached(std::move(data));
         return;
     }
-    else
-    {
-        // XXX: check if bytes is empty?
-        QByteArray bytes = cachedFile.readAll();
-        NetworkResult result(bytes, 200);
 
-        qCDebug(chatterinoHTTP)
-            << QString("%1 [CACHED] 200 %2")
-                   .arg(networkRequestTypes.at(int(data->requestType_)),
-                        data->request_.url().toString());
-        if (data->onSuccess_)
+    // XXX: check if bytes is empty?
+    QByteArray bytes = cachedFile.readAll();
+    NetworkResult result(bytes, 200);
+
+    qCDebug(chatterinoHTTP)
+        << QString("%1 [CACHED] 200 %2")
+               .arg(networkRequestTypes.at(int(data->requestType_)),
+                    data->request_.url().toString());
+    if (data->onSuccess_)
+    {
+        if (data->executeConcurrently_ || isGuiThread())
         {
-            if (data->executeConcurrently_ || isGuiThread())
+            // XXX: If outcome is Failure, we should invalidate the cache file
+            // somehow/somewhere
+            /*auto outcome =*/
+            if (data->hasCaller_ && !data->caller_.get())
             {
-                // XXX: If outcome is Failure, we should invalidate the cache file
-                // somehow/somewhere
-                /*auto outcome =*/
+                return;
+            }
+            data->onSuccess_(result);
+        }
+        else
+        {
+            postToThread([data, result]() {
                 if (data->hasCaller_ && !data->caller_.get())
                 {
                     return;
                 }
+
                 data->onSuccess_(result);
-            }
-            else
-            {
-                postToThread([data, result]() {
-                    if (data->hasCaller_ && !data->caller_.get())
-                    {
-                        return;
-                    }
-
-                    data->onSuccess_(result);
-                });
-            }
+            });
         }
+    }
 
-        if (data->finally_)
+    if (data->finally_)
+    {
+        if (data->executeConcurrently_ || isGuiThread())
         {
-            if (data->executeConcurrently_ || isGuiThread())
+            if (data->hasCaller_ && !data->caller_.get())
             {
+                return;
+            }
+
+            data->finally_();
+        }
+        else
+        {
+            postToThread([data]() {
                 if (data->hasCaller_ && !data->caller_.get())
                 {
                     return;
                 }
 
                 data->finally_();
-            }
-            else
-            {
-                postToThread([data]() {
-                    if (data->hasCaller_ && !data->caller_.get())
-                    {
-                        return;
-                    }
-
-                    data->finally_();
-                });
-            }
+            });
         }
     }
 }
 
-void load(const std::shared_ptr<NetworkData> &data)
+void load(std::shared_ptr<NetworkData> &&data)
 {
     if (data->cache_)
     {
-        QtConcurrent::run(loadCached, data);
+        QtConcurrent::run([data = std::move(data)]() mutable {
+            loadCached(std::move(data));
+        });
     }
     else
     {
-        loadUncached(data);
+        loadUncached(std::move(data));
     }
 }
 

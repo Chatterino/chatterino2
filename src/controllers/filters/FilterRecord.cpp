@@ -1,21 +1,40 @@
 #include "controllers/filters/FilterRecord.hpp"
 
+#include "controllers/filters/lang/Filter.hpp"
+
 namespace chatterino {
 
-FilterRecord::FilterRecord(const QString &name, const QString &filter)
-    : name_(name)
-    , filter_(filter)
-    , id_(QUuid::createUuid())
-    , parser_(std::make_unique<filterparser::FilterParser>(filter))
+static std::unique_ptr<filters::Filter> buildFilter(const QString &filterText)
+{
+    using namespace filters;
+    auto result = Filter::fromString(filterText);
+    if (std::holds_alternative<Filter>(result))
+    {
+        auto filter =
+            std::make_unique<Filter>(std::move(std::get<Filter>(result)));
+
+        if (filter->returnType() != Type::Bool)
+        {
+            // Only accept Bool results
+            return nullptr;
+        }
+
+        return filter;
+    }
+
+    return nullptr;
+}
+
+FilterRecord::FilterRecord(QString name, QString filter)
+    : FilterRecord(std::move(name), std::move(filter), QUuid::createUuid())
 {
 }
 
-FilterRecord::FilterRecord(const QString &name, const QString &filter,
-                           const QUuid &id)
-    : name_(name)
-    , filter_(filter)
+FilterRecord::FilterRecord(QString name, QString filter, const QUuid &id)
+    : name_(std::move(name))
+    , filterText_(std::move(filter))
     , id_(id)
-    , parser_(std::make_unique<filterparser::FilterParser>(filter))
+    , filter_(buildFilter(this->filterText_))
 {
 }
 
@@ -26,7 +45,7 @@ const QString &FilterRecord::getName() const
 
 const QString &FilterRecord::getFilter() const
 {
-    return this->filter_;
+    return this->filterText_;
 }
 
 const QUuid &FilterRecord::getId() const
@@ -36,12 +55,13 @@ const QUuid &FilterRecord::getId() const
 
 bool FilterRecord::valid() const
 {
-    return this->parser_->valid();
+    return this->filter_ != nullptr;
 }
 
-bool FilterRecord::filter(const filterparser::ContextMap &context) const
+bool FilterRecord::filter(const filters::ContextMap &context) const
 {
-    return this->parser_->execute(context);
+    assert(this->valid());
+    return this->filter_->execute(context).toBool();
 }
 
 bool FilterRecord::operator==(const FilterRecord &other) const
