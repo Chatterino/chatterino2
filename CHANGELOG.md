@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
+
 ## 2.4.4
 
 - Minor: Added a Send button in the input box so you can click to send a message. This is disabled by default and can be enabled with the "Show send message button" setting. (#4607)
