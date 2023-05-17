@@ -52,9 +52,6 @@ template <typename T>
 class AutocompleteGenericSource : public AutocompleteSource
 {
 public:
-    using ListItemFunction =
-        std::function<std::unique_ptr<GenericListItem>(const T &)>;
-
     /// @brief Creates a new AutocompleteGenericSource wrapping a vector of items
     /// @param items Items to wrap
     /// @param strategy AutocompleteStrategy to use when responding to a query
@@ -109,8 +106,19 @@ public:
     }
 
 protected:
+    /// @brief Maps an output item of type T into its GenericListItem form to be
+    /// shown in the InputCompletionPopup
+    /// @param item Item to map
+    /// @return GenericListItem form of item
     virtual std::unique_ptr<GenericListItem> mapListItem(
         const T &item) const = 0;
+
+    /// @brief Maps an output item of type T into its QString form to be used for
+    /// tab autocompletion
+    /// @param item Item to map
+    /// @param firstWord Whether the tab autocompletion being requested is for
+    /// the first word in the input. Required to format mentions properly.
+    /// @return QString form of the item
     virtual QString mapTabStringItem(const T &item, bool firstWord) const = 0;
 
     /// @brief Updates the wrapped items
