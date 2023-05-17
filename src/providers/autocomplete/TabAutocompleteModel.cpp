@@ -41,24 +41,7 @@ void TabAutocompleteModel::updateSourceFromQuery(const QString &query)
     }
 
     this->sourceKind_ = *deducedKind;
-
-    switch (*deducedKind)
-    {
-        case SourceKind::Emote:
-            this->source_ = std::make_unique<AutocompleteEmoteSource>(
-                &this->channel_, nullptr,
-                std::make_unique<ClassicTabAutocompleteEmoteStrategy>());
-            break;
-        case SourceKind::User:
-            this->source_ = std::make_unique<AutocompleteUsersSource>(
-                &this->channel_, nullptr,
-                std::make_unique<ClassicAutocompleteUserStrategy>());
-            break;
-        case SourceKind::Command:
-            this->source_ = std::make_unique<AutocompleteCommandsSource>(
-                nullptr, std::make_unique<AutocompleteCommandStrategy>(true));
-            break;
-    }
+    this->source_ = this->buildSource(*deducedKind);
 }
 
 boost::optional<TabAutocompleteModel::SourceKind>
@@ -84,6 +67,27 @@ boost::optional<TabAutocompleteModel::SourceKind>
 
     // Emotes can be autocompleted without using a :
     return SourceKind::Emote;
+}
+
+std::unique_ptr<AutocompleteSource> TabAutocompleteModel::buildSource(
+    SourceKind kind) const
+{
+    switch (kind)
+    {
+        case SourceKind::Emote:
+            return std::make_unique<AutocompleteEmoteSource>(
+                &this->channel_, nullptr,
+                std::make_unique<ClassicTabAutocompleteEmoteStrategy>());
+        case SourceKind::User:
+            return std::make_unique<AutocompleteUsersSource>(
+                &this->channel_, nullptr,
+                std::make_unique<ClassicAutocompleteUserStrategy>());
+        case SourceKind::Command:
+            return std::make_unique<AutocompleteCommandsSource>(
+                nullptr, std::make_unique<AutocompleteCommandStrategy>(true));
+        default:
+            return nullptr;
+    }
 }
 
 }  // namespace chatterino

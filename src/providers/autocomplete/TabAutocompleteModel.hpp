@@ -44,6 +44,8 @@ private:
     /// @return An optional SourceKind deduced from the query
     boost::optional<SourceKind> deduceSourceKind(const QString &query) const;
 
+    std::unique_ptr<AutocompleteSource> buildSource(SourceKind kind) const;
+
     Channel &channel_;
     std::unique_ptr<AutocompleteSource> source_{};
     boost::optional<SourceKind> sourceKind_{};
