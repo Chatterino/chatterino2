@@ -50,6 +50,11 @@ public:
      */
     void clear();
 
+    /**
+     * @brief   Increases the capacity of the list model.
+     */
+    void reserve(size_t capacity);
+
 private:
     std::vector<std::unique_ptr<GenericListItem>> items_;
 };

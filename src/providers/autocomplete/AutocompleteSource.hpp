@@ -74,32 +74,31 @@ public:
     void copyToListModel(GenericListModel &model,
                          size_t maxCount = 0) const override
     {
-        model.clear();
+        size_t count = maxCount == 0 ? this->output_.size()
+                                     : std::min(this->output_.size(), maxCount);
 
-        size_t i = 0;
-        for (const auto &item : this->output_)
+        model.clear();
+        model.reserve(count);
+
+        for (size_t i = 0; i < count; ++i)
         {
-            model.addItem(this->mapListItem(item));
-            if (maxCount > 0 && i++ == maxCount)
-            {
-                break;
-            }
+            model.addItem(this->mapListItem(this->output_[i]));
         }
     }
 
     void copyToStringModel(QStringListModel &model, size_t maxCount = 0,
                            bool isFirstWord = false) const override
     {
-        QStringList newData;
+        size_t count = maxCount == 0 ? this->output_.size()
+                                     : std::min(this->output_.size(), maxCount);
 
-        size_t i = 0;
-        for (const auto &item : this->output_)
+        QStringList newData;
+        newData.reserve(count);
+
+        for (size_t i = 0; i < count; ++i)
         {
-            newData.push_back(this->mapTabStringItem(item, isFirstWord));
-            if (maxCount > 0 && i++ == maxCount)
-            {
-                break;
-            }
+            newData.push_back(
+                this->mapTabStringItem(this->output_[i], isFirstWord));
         }
 
         model.setStringList(newData);
