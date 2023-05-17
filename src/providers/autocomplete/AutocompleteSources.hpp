@@ -40,7 +40,7 @@ public:
     /// See InputCompletionItem::action(). Can be nullptr.
     /// @param strategy AutocompleteStrategy to apply
     AutocompleteEmoteSource(
-        const Channel *channel, ActionCallback callback,
+        const Channel &channel, ActionCallback callback,
         std::unique_ptr<AutocompleteEmoteStrategy> strategy);
 
 protected:
@@ -51,7 +51,7 @@ protected:
                              bool isFirstWord) const override;
 
 private:
-    void initializeItems(const Channel *channel);
+    void initializeFromChannel(const Channel *channel);
 
     ActionCallback callback_;
 };
@@ -76,7 +76,7 @@ public:
     /// See InputCompletionItem::action(). Can be nullptr.
     /// @param strategy AutocompleteStrategy to apply
     AutocompleteUsersSource(
-        const Channel *channel, ActionCallback callback,
+        const Channel &channel, ActionCallback callback,
         std::unique_ptr<AutocompleteUsersStrategy> strategy);
 
 protected:
@@ -87,7 +87,7 @@ protected:
                              bool isFirstWord) const override;
 
 private:
-    void initializeItems(const Channel *channel);
+    void initializeFromChannel(const Channel *channel);
 
     ActionCallback callback_;
 };

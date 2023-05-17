@@ -62,15 +62,15 @@ namespace {
 //// AutocompleteEmoteSource
 
 AutocompleteEmoteSource::AutocompleteEmoteSource(
-    const Channel *channel, ActionCallback callback,
+    const Channel &channel, ActionCallback callback,
     std::unique_ptr<AutocompleteEmoteStrategy> strategy)
     : AutocompleteGenericSource({}, std::move(strategy))  // begin with no items
     , callback_(std::move(callback))
 {
-    this->initializeItems(channel);
+    this->initializeFromChannel(&channel);
 }
 
-void AutocompleteEmoteSource::initializeItems(const Channel *channel)
+void AutocompleteEmoteSource::initializeFromChannel(const Channel *channel)
 {
     auto *app = getIApp();
 
@@ -150,15 +150,15 @@ QString AutocompleteEmoteSource::mapTabStringItem(const CompletionEmote &emote,
 //// AutocompleteUsersSource
 
 AutocompleteUsersSource::AutocompleteUsersSource(
-    const Channel *channel, ActionCallback callback,
+    const Channel &channel, ActionCallback callback,
     std::unique_ptr<AutocompleteUsersStrategy> strategy)
     : AutocompleteGenericSource({}, std::move(strategy))  // begin with no items
     , callback_(std::move(callback))
 {
-    this->initializeItems(channel);
+    this->initializeFromChannel(&channel);
 }
 
-void AutocompleteUsersSource::initializeItems(const Channel *channel)
+void AutocompleteUsersSource::initializeFromChannel(const Channel *channel)
 {
     const auto *tc = dynamic_cast<const TwitchChannel *>(channel);
     if (!tc)
