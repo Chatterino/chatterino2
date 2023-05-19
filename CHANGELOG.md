@@ -9,6 +9,7 @@
 - Minor: Added a Send button in the input box so you can click to send a message. This is disabled by default and can be enabled with the "Show send message button" setting. (#4607)
 - Minor: Improved error messages when the updater fails a download. (#4594)
 - Minor: Added `/shield` and `/shieldoff` commands to toggle shield mode. (#4580)
+- Minor: Added a message for when Chatterino joins a channel (#4616)
 - Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
 - Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
 - Bugfix: Domains starting with `http` are now parsed as links again. (#4598)
