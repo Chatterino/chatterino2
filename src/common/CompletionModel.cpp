@@ -258,6 +258,19 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     }
 }
 
+std::vector<QString> CompletionModel::allItems() const
+{
+    std::unique_lock lock(this->itemsMutex_);
+
+    std::vector<QString> results;
+    results.reserve(this->items_.size());
+    for (const auto &item : this->items_)
+    {
+        results.push_back(item.string);
+    }
+    return results;
+}
+
 bool CompletionModel::compareStrings(const QString &a, const QString &b)
 {
     // try comparing insensitively, if they are the same then senstively

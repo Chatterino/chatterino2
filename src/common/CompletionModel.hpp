@@ -56,6 +56,7 @@ public:
     int rowCount(const QModelIndex &parent) const override;
 
     void refresh(const QString &prefix, bool isFirstWord = false);
+    std::vector<QString> allItems() const;
 
     static bool compareStrings(const QString &a, const QString &b);
 
