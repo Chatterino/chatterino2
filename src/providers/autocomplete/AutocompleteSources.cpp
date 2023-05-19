@@ -61,7 +61,8 @@ namespace {
                            .searchName = emote.first.string,
                            .tabCompletionName = emote.first.string,
                            .displayName = emote.second->name.string,
-                           .providerName = providerName});
+                           .providerName = providerName,
+                           .isEmoji = false});
         }
     }
 
@@ -75,7 +76,8 @@ namespace {
                      .searchName = shortCode,
                      .tabCompletionName = QStringLiteral(":%1:").arg(shortCode),
                      .displayName = shortCode,
-                     .providerName = "Emoji"});
+                     .providerName = "Emoji",
+                     .isEmoji = true});
             }
         });
     }

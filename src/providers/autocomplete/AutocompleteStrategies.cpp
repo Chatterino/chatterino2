@@ -43,33 +43,45 @@ void ClassicAutocompleteEmoteStrategy::apply(
     }
 }
 
+struct CompletionEmoteOrder {
+    bool operator()(const CompletionEmote &a, const CompletionEmote &b) const
+    {
+        return compareEmoteStrings(a.searchName, b.searchName);
+    }
+};
+
 void ClassicTabAutocompleteEmoteStrategy::apply(
     const std::vector<CompletionEmote> &items,
     std::vector<CompletionEmote> &output, const QString &query) const
 {
+    bool emojiOnly = false;
     QString normalizedQuery = query;
     if (normalizedQuery.startsWith(':'))
     {
         normalizedQuery = normalizedQuery.mid(1);
+        // tab completion with : prefix should do emojis only
+        emojiOnly = true;
     }
 
-    // Filter and insert with sorting
+    std::set<CompletionEmote, CompletionEmoteOrder> emotes;
+
     for (const auto &item : items)
     {
+        if (emojiOnly ^ item.isEmoji)
+        {
+            continue;
+        }
+
         if (startsWithOrContains(item.searchName, normalizedQuery,
                                  Qt::CaseInsensitive,
                                  getSettings()->prefixOnlyEmoteCompletion))
         {
-            // Insert into output while maintaining sort
-            output.insert(
-                std::upper_bound(
-                    output.begin(), output.end(), item,
-                    [](const CompletionEmote &a, const CompletionEmote &b) {
-                        return compareEmoteStrings(a.searchName, b.searchName);
-                    }),
-                item);
+            emotes.insert(item);
         }
     }
+
+    output.reserve(emotes.size());
+    output.assign(emotes.begin(), emotes.end());
 }
 
 //// User strategies

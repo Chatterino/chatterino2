@@ -25,6 +25,8 @@ struct CompletionEmote {
     QString displayName{};
     /// Emote provider name for input popup
     QString providerName{};
+    /// Whether emote is emoji
+    bool isEmoji{};
 };
 
 class AutocompleteEmoteSource : public AutocompleteSource
