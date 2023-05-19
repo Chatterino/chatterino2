@@ -1,10 +1,10 @@
 #include "controllers/highlights/HighlightController.hpp"
 
-#include "Application.hpp"
 #include "BaseSettings.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
+#include "mocks/EmptyApplication.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -25,61 +25,19 @@ using ::testing::Exactly;
 
 namespace {
 
-class MockApplication : IApplication
+class MockApplication : EmptyApplication
 {
 public:
-    Theme *getThemes() override
-    {
-        return nullptr;
-    }
-    Fonts *getFonts() override
-    {
-        return nullptr;
-    }
-    IEmotes *getEmotes() override
-    {
-        return nullptr;
-    }
     AccountController *getAccounts() override
     {
         return &this->accounts;
     }
-    HotkeyController *getHotkeys() override
-    {
-        return nullptr;
-    }
-    WindowManager *getWindows() override
-    {
-        return nullptr;
-    }
-    Toasts *getToasts() override
-    {
-        return nullptr;
-    }
-    CommandController *getCommands() override
-    {
-        return nullptr;
-    }
-    NotificationController *getNotifications() override
-    {
-        return nullptr;
-    }
+
     HighlightController *getHighlights() override
     {
         return &this->highlights;
     }
-    ITwitchIrcServer *getTwitch() override
-    {
-        return nullptr;
-    }
-    ChatterinoBadges *getChatterinoBadges() override
-    {
-        return nullptr;
-    }
-    FfzBadges *getFfzBadges() override
-    {
-        return nullptr;
-    }
+
     IUserDataController *getUserData() override
     {
         return &this->userData;
