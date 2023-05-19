@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
+- Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
 
 ## 2.4.4
 
