@@ -124,7 +124,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](const auto &args) {
             return args.combobox->itemData(args.index, Qt::UserRole).toString();
         },
-        "Theme", Theme::fallbackTheme.name);
+        {}, Theme::fallbackTheme.name);
 
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},
