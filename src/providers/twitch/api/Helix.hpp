@@ -645,8 +645,6 @@ enum class HelixSendShoutOutError {
     // 401
     UserNotAuthorized,
     UserMissingScope,
-    // 500
-    UserNotMod,
 
     Ratelimited,
 

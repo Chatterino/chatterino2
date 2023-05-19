@@ -2647,7 +2647,7 @@ void Helix::sendShoutout(
     this->makeRequest("chat/shoutouts", urlQuery)
         .type(NetworkRequestType::Post)
         .header("Content-Type", "application/json")
-        .onSuccess([successCallback](auto result) -> Outcome {
+        .onSuccess([successCallback](NetworkResult result) -> Outcome {
             if (result.status() != 204)
             {
                 qCWarning(chatterinoTwitch)
@@ -2658,7 +2658,7 @@ void Helix::sendShoutout(
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) -> void {
+        .onError([failureCallback](NetworkResult result) -> void {
             const auto obj = result.parseJson();
             auto message = obj["message"].toString();
 
@@ -2706,8 +2706,16 @@ void Helix::sendShoutout(
                 }
                     // Helix returns 500 when user is not mod
                 case 500: {
-                    failureCallback(Error::UserNotMod,
-                                    "You are not a moderator.");
+                    if (message.isEmpty())
+                    {
+                        failureCallback(
+                            Error::Unknown,
+                            "No error details received from twitch. X_X");
+                    }
+                    else
+                    {
+                        failureCallback(Error::Unknown, message);
+                    }
                     break;
                 }
                 default: {
