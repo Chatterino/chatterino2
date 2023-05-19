@@ -10,8 +10,8 @@
 #include <QPixmap>
 #include <QVariant>
 
-#include <map>
 #include <optional>
+#include <vector>
 
 namespace chatterino {
 
