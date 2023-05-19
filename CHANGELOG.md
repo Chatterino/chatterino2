@@ -2,6 +2,10 @@
 
 ## Unversioned
 
+- Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
+
+## 2.4.4
+
 - Minor: Added a Send button in the input box so you can click to send a message. This is disabled by default and can be enabled with the "Show send message button" setting. (#4607)
 - Minor: Improved error messages when the updater fails a download. (#4594)
 - Minor: Added `/shield` and `/shieldoff` commands to toggle shield mode. (#4580)
@@ -9,8 +13,10 @@
 - Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
 - Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
 - Bugfix: Domains starting with `http` are now parsed as links again. (#4598)
+- Bugfix: Reduced the size of the update prompt to prevent it from going off the users screen. (#4626)
 - Bugfix: Fixed click effects on buttons not being antialiased. (#4473)
 - Bugfix: Fixed Ctrl+Backspace not working after Select All in chat search popup. (#4461)
+- Bugfix: Fixed crash when scrolling up really fast. (#4621)
 - Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
 
 ## 2.4.3
