@@ -12,7 +12,7 @@ If you're adding support for a new endpoint, these are the things you should kno
 
 1. Add a virtual function in the `IHelix` class. Naming should reflect the API name as best as possible.
 1. Override the virtual function in the `Helix` class.
-1. Mock the function in the `MockHelix` class in the `tests/src/HighlightController.cpp` file.
+1. Mock the function in the `MockHelix` class in the `tests/src/mocks/Helix.cpp` file.
 1. (Optional) Make a new error enum for the failure callback.
 
 For a simple example, see the `updateUserChatColor` function and its error enum `HelixUpdateUserChatColorError`.
