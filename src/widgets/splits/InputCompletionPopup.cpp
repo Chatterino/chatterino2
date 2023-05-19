@@ -56,11 +56,12 @@ namespace detail {
                                                           ChannelPtr channel)
     {
         std::vector<CompletionEmote> emotes;
+        auto *app = getIApp();
         auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
         // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
         if (channel->isTwitchChannel())
         {
-            if (auto user = getApp()->accounts->twitch.getCurrent())
+            if (auto user = app->getAccounts()->twitch.getCurrent())
             {
                 // Twitch Emotes available globally
                 auto emoteData = user->accessEmotes();
@@ -97,22 +98,22 @@ namespace detail {
                 }
             }
 
-            if (auto bttvG = getApp()->twitch->getBttvEmotes().emotes())
+            if (auto bttvG = app->getTwitch()->getBttvEmotes().emotes())
             {
                 addEmotes(emotes, *bttvG, text, "Global BetterTTV");
             }
-            if (auto ffzG = getApp()->twitch->getFfzEmotes().emotes())
+            if (auto ffzG = app->getTwitch()->getFfzEmotes().emotes())
             {
                 addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
             }
             if (auto seventvG =
-                    getApp()->twitch->getSeventvEmotes().globalEmotes())
+                    app->getTwitch()->getSeventvEmotes().globalEmotes())
             {
                 addEmotes(emotes, *seventvG, text, "Global 7TV");
             }
         }
 
-        addEmojis(emotes, getApp()->emotes->emojis.emojis, text);
+        addEmojis(emotes, app->getEmotes()->getEmojis()->getEmojis(), text);
 
         // if there is an exact match, put that emote first
         for (size_t i = 1; i < emotes.size(); i++)
