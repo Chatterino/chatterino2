@@ -118,11 +118,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addDropdown<QString>(
         "Theme", getApp()->themes->availableThemes(),
         getApp()->themes->themeName,
-        [](ComboBox *combo,
-           const QString &themeKey) -> boost::variant<int, QString> {
+        [](const auto *combo, const auto &themeKey) {
             return combo->findData(themeKey, Qt::UserRole);
         },
-        [](const DropdownArgs &args) -> QString {
+        [](const auto &args) {
             return args.combobox->itemData(args.index, Qt::UserRole).toString();
         },
         "Theme", Theme::fallbackTheme.name);
