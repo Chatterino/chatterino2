@@ -213,7 +213,7 @@ void Theme::initialize(Settings &settings, Paths &paths)
 {
     this->themeName.connect(
         [this](auto themeName) {
-            qCDebug(chatterinoTheme) << "Theme updated to" << themeName;
+            qCInfo(chatterinoTheme) << "Theme updated to" << themeName;
             this->update();
         },
         false);
