@@ -8,6 +8,7 @@
 #include <QColor>
 #include <QJsonObject>
 #include <QPixmap>
+#include <QVariant>
 
 #include <map>
 #include <optional>
@@ -17,17 +18,22 @@ namespace chatterino {
 class WindowManager;
 
 struct ThemeDescriptor {
+    QString key;
+
     // Path to the theme on disk
     // Can be a Qt resource path
     QString path;
 
-    bool custom;
+    // Name of the theme
+    QString name;
+
+    bool custom{};
 };
 
 class Theme final : public Singleton
 {
 public:
-    static const std::map<QString, ThemeDescriptor> builtInThemes;
+    static const std::vector<ThemeDescriptor> builtInThemes;
 
     // The built in theme that will be used if some theme parsing fails
     static const ThemeDescriptor fallbackTheme;
@@ -133,10 +139,8 @@ public:
 
     /**
      * Return a list of available themes
-     *
-     * Custom themes are prefixed with "Custom: "
      **/
-    QStringList availableThemeNames() const;
+    std::vector<std::pair<QString, QVariant>> availableThemes() const;
 
     pajlada::Signals::NoArgSignal updated;
 
@@ -145,7 +149,7 @@ public:
 private:
     bool isLight_ = false;
 
-    std::map<QString, ThemeDescriptor> availableThemes_;
+    std::vector<ThemeDescriptor> availableThemes_;
 
     /**
      * Figure out which themes are available in the Themes directory
@@ -153,6 +157,8 @@ private:
      * NOTE: This is currently not built to be reloadable
      **/
     void loadAvailableThemes();
+
+    std::optional<ThemeDescriptor> findThemeByKey(const QString &key);
 
     void parseFrom(const QJsonObject &root);
 

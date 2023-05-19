@@ -115,25 +115,17 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addTitle("Interface");
 
-    // NOTE: Available theme names are only initialized on startup here
-    QStringList availableThemeNames = getApp()->themes->availableThemeNames();
-
     layout.addDropdown<QString>(
-        "Theme", availableThemeNames, getApp()->themes->themeName,
-        [](auto val) {
-            if (!Theme::builtInThemes.contains(val))
-            {
-                return QString("Custom: %1").arg(val);
-            }
-
-            return val;
+        "Theme", getApp()->themes->availableThemes(),
+        getApp()->themes->themeName,
+        [](ComboBox *combo,
+           const QString &themeKey) -> boost::variant<int, QString> {
+            return combo->findData(themeKey, Qt::UserRole);
         },
-        [](const DropdownArgs &args) {
-            // Remove "Custom: " prefix from the dropdown
-            // XXX: This should be a regex or "trim prefix"
-            QString value = args.value;
-            return value.replace("Custom: ", "");
-        });
+        [](const DropdownArgs &args) -> QString {
+            return args.combobox->itemData(args.index, Qt::UserRole).toString();
+        },
+        "Theme", Theme::fallbackTheme.name);
 
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},

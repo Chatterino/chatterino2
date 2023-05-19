@@ -178,14 +178,31 @@ std::optional<QJsonObject> loadTheme(const ThemeDescriptor &theme)
 
 namespace chatterino {
 
-const std::map<QString, ThemeDescriptor> Theme::builtInThemes{
-    {"White", {":/themes/White.json", false}},
-    {"Light", {":/themes/Light.json", false}},
-    {"Dark", {":/themes/Dark.json", false}},
-    {"Black", {":/themes/Black.json", false}},
+const std::vector<ThemeDescriptor> Theme::builtInThemes{
+    {
+        .key = "White",
+        .path = ":/themes/White.json",
+        .name = "White",
+    },
+    {
+        .key = "Light",
+        .path = ":/themes/Light.json",
+        .name = "Light",
+    },
+    {
+        .key = "Dark",
+        .path = ":/themes/Dark.json",
+        .name = "Dark",
+    },
+    {
+        .key = "Black",
+        .path = ":/themes/Black.json",
+        .name = "Black",
+    },
 };
 
-const ThemeDescriptor Theme::fallbackTheme = Theme::builtInThemes.at("Dark");
+// Dark is our default & fallback theme
+const ThemeDescriptor Theme::fallbackTheme = Theme::builtInThemes.at(2);
 
 bool Theme::isLightTheme() const
 {
@@ -208,11 +225,10 @@ void Theme::initialize(Settings &settings, Paths &paths)
 
 void Theme::update()
 {
-    auto theme = this->availableThemes_.find(this->themeName);
+    auto oTheme = this->findThemeByKey(this->themeName);
 
     std::optional<QJsonObject> themeJSON;
-
-    if (theme == this->availableThemes_.end())
+    if (!oTheme)
     {
         qCWarning(chatterinoTheme)
             << "Theme" << this->themeName
@@ -222,7 +238,9 @@ void Theme::update()
     }
     else
     {
-        themeJSON = loadTheme(theme->second);
+        const auto &theme = *oTheme;
+
+        themeJSON = loadTheme(theme);
 
         if (!themeJSON)
         {
@@ -247,24 +265,28 @@ void Theme::update()
     this->updated.invoke();
 }
 
-QStringList Theme::availableThemeNames() const
+std::vector<std::pair<QString, QVariant>> Theme::availableThemes() const
 {
-    QStringList themeNames;
+    std::vector<std::pair<QString, QVariant>> packagedThemes;
 
-    for (const auto &[name, theme] : this->availableThemes_)
+    for (const auto &theme : this->availableThemes_)
     {
-        // NOTE: This check could also use `Theme::builtInThemes.contains(name)` instead
         if (theme.custom)
         {
-            themeNames.append(QString("Custom: %1").arg(name));
+            auto p = std::make_pair(
+                QStringLiteral("Custom: %1").arg(theme.name), theme.key);
+
+            packagedThemes.emplace_back(p);
         }
         else
         {
-            themeNames.append(name);
+            auto p = std::make_pair(theme.name, theme.key);
+
+            packagedThemes.emplace_back(p);
         }
     }
 
-    return themeNames;
+    return packagedThemes;
 }
 
 void Theme::loadAvailableThemes()
@@ -285,7 +307,10 @@ void Theme::loadAvailableThemes()
             continue;
         }
 
-        auto themeDescriptor = ThemeDescriptor{info.absoluteFilePath(), true};
+        auto themeName = info.baseName();
+
+        auto themeDescriptor = ThemeDescriptor{
+            info.fileName(), info.absoluteFilePath(), themeName, true};
 
         auto theme = loadTheme(themeDescriptor);
         if (!theme)
@@ -294,10 +319,21 @@ void Theme::loadAvailableThemes()
             continue;
         }
 
-        auto themeName = info.baseName();
-
-        this->availableThemes_.emplace(themeName, themeDescriptor);
+        this->availableThemes_.emplace_back(std::move(themeDescriptor));
     }
+}
+
+std::optional<ThemeDescriptor> Theme::findThemeByKey(const QString &key)
+{
+    for (const auto &theme : this->availableThemes_)
+    {
+        if (theme.key == key)
+        {
+            return theme;
+        }
+    }
+
+    return std::nullopt;
 }
 
 void Theme::parseFrom(const QJsonObject &root)
