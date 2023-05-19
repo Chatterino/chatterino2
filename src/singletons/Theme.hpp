@@ -8,6 +8,7 @@
 #include <QColor>
 #include <QJsonObject>
 #include <QPixmap>
+#include <QString>
 #include <QVariant>
 
 #include <optional>
