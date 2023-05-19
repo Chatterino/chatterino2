@@ -1,11 +1,11 @@
 #include "Application.hpp"
-#include "singletons/Settings.hpp"
 #include "common/Channel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/Message.hpp"
 #include "messages/SharedMessageBuilder.hpp"
+#include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 
 #include <benchmark/benchmark.h>
@@ -88,7 +88,7 @@ public:
     {
         return &this->highlights;
     }
-    TwitchIrcServer *getTwitch() override
+    ITwitchIrcServer *getTwitch() override
     {
         return nullptr;
     }

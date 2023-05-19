@@ -67,7 +67,7 @@ public:
     {
         return &this->highlights;
     }
-    TwitchIrcServer *getTwitch() override
+    ITwitchIrcServer *getTwitch() override
     {
         return nullptr;
     }

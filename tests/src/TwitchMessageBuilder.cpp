@@ -62,7 +62,7 @@ public:
     {
         return nullptr;
     }
-    TwitchIrcServer *getTwitch() override
+    ITwitchIrcServer *getTwitch() override
     {
         return nullptr;
     }
