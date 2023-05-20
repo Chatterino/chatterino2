@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Minor: Added `/shoutout <username>` commands to shoutout specified user.
+- Minor: Added `/shoutout <username>` commands to shoutout specified user. (#4638)
 
 ## 2.4.4
 
