@@ -260,7 +260,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 
 std::vector<QString> CompletionModel::allItems() const
 {
-    std::unique_lock lock(this->itemsMutex_);
+    std::shared_lock lock(this->itemsMutex_);
 
     std::vector<QString> results;
     results.reserve(this->items_.size());
