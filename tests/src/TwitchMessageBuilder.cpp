@@ -19,7 +19,7 @@ using namespace chatterino;
 
 namespace {
 
-class MockApplication : EmptyApplication
+class MockApplication : mock::EmptyApplication
 {
 public:
     IEmotes *getEmotes() override

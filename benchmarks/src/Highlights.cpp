@@ -5,6 +5,7 @@
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/Message.hpp"
 #include "messages/SharedMessageBuilder.hpp"
+#include "mocks/EmptyApplication.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 
@@ -45,64 +46,16 @@ public:
     }
 };
 
-class MockApplication : IApplication
+class MockApplication : mock::EmptyApplication
 {
 public:
-    Theme *getThemes() override
-    {
-        return nullptr;
-    }
-    Fonts *getFonts() override
-    {
-        return nullptr;
-    }
-    IEmotes *getEmotes() override
-    {
-        return nullptr;
-    }
     AccountController *getAccounts() override
     {
         return &this->accounts;
     }
-    HotkeyController *getHotkeys() override
-    {
-        return nullptr;
-    }
-    WindowManager *getWindows() override
-    {
-        return nullptr;
-    }
-    Toasts *getToasts() override
-    {
-        return nullptr;
-    }
-    CommandController *getCommands() override
-    {
-        return nullptr;
-    }
-    NotificationController *getNotifications() override
-    {
-        return nullptr;
-    }
     HighlightController *getHighlights() override
     {
         return &this->highlights;
-    }
-    ITwitchIrcServer *getTwitch() override
-    {
-        return nullptr;
-    }
-    ChatterinoBadges *getChatterinoBadges() override
-    {
-        return nullptr;
-    }
-    FfzBadges *getFfzBadges() override
-    {
-        return nullptr;
-    }
-    IUserDataController *getUserData() override
-    {
-        return nullptr;
     }
 
     AccountController accounts;

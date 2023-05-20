@@ -4,6 +4,7 @@
 
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
 - Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
+- Dev: Added test cases for emote and tab completion. (#4644)
 
 ## 2.4.4
 
@@ -19,7 +20,6 @@
 - Bugfix: Fixed Ctrl+Backspace not working after Select All in chat search popup. (#4461)
 - Bugfix: Fixed crash when scrolling up really fast. (#4621)
 - Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
-- Dev: Added test cases for emote and tab completion. (#4644)
 
 ## 2.4.3
 

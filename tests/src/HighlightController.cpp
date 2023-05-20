@@ -25,7 +25,7 @@ using ::testing::Exactly;
 
 namespace {
 
-class MockApplication : EmptyApplication
+class MockApplication : mock::EmptyApplication
 {
 public:
     AccountController *getAccounts() override
@@ -186,7 +186,7 @@ protected:
         ASSERT_TRUE(settingsFile.flush());
         settingsFile.close();
 
-        this->mockHelix = new MockHelix;
+        this->mockHelix = new mock::Helix;
 
         initializeHelix(this->mockHelix);
 
@@ -222,7 +222,7 @@ protected:
 
     std::unique_ptr<HighlightController> controller;
 
-    MockHelix *mockHelix;
+    mock::Helix *mockHelix;
 };
 
 TEST_F(HighlightControllerTest, A)
