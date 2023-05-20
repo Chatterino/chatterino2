@@ -48,93 +48,91 @@ void addEmojis(std::vector<CompletionEmote> &out, const EmojiMap &map,
 
 }  // namespace
 
-namespace chatterino {
+namespace chatterino::detail {
 
-namespace detail {
-
-    std::vector<CompletionEmote> buildCompletionEmoteList(const QString &text,
-                                                          ChannelPtr channel)
+std::vector<CompletionEmote> buildCompletionEmoteList(const QString &text,
+                                                      ChannelPtr channel)
+{
+    std::vector<CompletionEmote> emotes;
+    auto *app = getIApp();
+    auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+    // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
+    if (channel->isTwitchChannel())
     {
-        std::vector<CompletionEmote> emotes;
-        auto *app = getIApp();
-        auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-        // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
-        if (channel->isTwitchChannel())
+        if (auto user = app->getAccounts()->twitch.getCurrent())
         {
-            if (auto user = app->getAccounts()->twitch.getCurrent())
-            {
-                // Twitch Emotes available globally
-                auto emoteData = user->accessEmotes();
-                addEmotes(emotes, emoteData->emotes, text, "Twitch Emote");
+            // Twitch Emotes available globally
+            auto emoteData = user->accessEmotes();
+            addEmotes(emotes, emoteData->emotes, text, "Twitch Emote");
 
-                // Twitch Emotes available locally
-                auto localEmoteData = user->accessLocalEmotes();
-                if (tc &&
-                    localEmoteData->find(tc->roomId()) != localEmoteData->end())
-                {
-                    if (const auto *localEmotes =
-                            &localEmoteData->at(tc->roomId()))
-                    {
-                        addEmotes(emotes, *localEmotes, text,
-                                  "Local Twitch Emotes");
-                    }
-                }
-            }
-
-            if (tc)
+            // Twitch Emotes available locally
+            auto localEmoteData = user->accessLocalEmotes();
+            if (tc &&
+                localEmoteData->find(tc->roomId()) != localEmoteData->end())
             {
-                // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
-                if (auto bttv = tc->bttvEmotes())
+                if (const auto *localEmotes = &localEmoteData->at(tc->roomId()))
                 {
-                    addEmotes(emotes, *bttv, text, "Channel BetterTTV");
+                    addEmotes(emotes, *localEmotes, text,
+                              "Local Twitch Emotes");
                 }
-                if (auto ffz = tc->ffzEmotes())
-                {
-                    addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
-                }
-                if (auto seventv = tc->seventvEmotes())
-                {
-                    addEmotes(emotes, *seventv, text, "Channel 7TV");
-                }
-            }
-
-            if (auto bttvG = app->getTwitch()->getBttvEmotes().emotes())
-            {
-                addEmotes(emotes, *bttvG, text, "Global BetterTTV");
-            }
-            if (auto ffzG = app->getTwitch()->getFfzEmotes().emotes())
-            {
-                addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
-            }
-            if (auto seventvG =
-                    app->getTwitch()->getSeventvEmotes().globalEmotes())
-            {
-                addEmotes(emotes, *seventvG, text, "Global 7TV");
             }
         }
 
-        addEmojis(emotes, app->getEmotes()->getEmojis()->getEmojis(), text);
-
-        // if there is an exact match, put that emote first
-        for (size_t i = 1; i < emotes.size(); i++)
+        if (tc)
         {
-            auto emoteText = emotes.at(i).displayName;
-
-            // test for match or match with colon at start for emotes like ":)"
-            if (emoteText.compare(text, Qt::CaseInsensitive) == 0 ||
-                emoteText.compare(":" + text, Qt::CaseInsensitive) == 0)
+            // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
+            if (auto bttv = tc->bttvEmotes())
             {
-                auto emote = emotes[i];
-                emotes.erase(emotes.begin() + int(i));
-                emotes.insert(emotes.begin(), emote);
-                break;
+                addEmotes(emotes, *bttv, text, "Channel BetterTTV");
+            }
+            if (auto ffz = tc->ffzEmotes())
+            {
+                addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
+            }
+            if (auto seventv = tc->seventvEmotes())
+            {
+                addEmotes(emotes, *seventv, text, "Channel 7TV");
             }
         }
 
-        return emotes;
+        if (auto bttvG = app->getTwitch()->getBttvEmotes().emotes())
+        {
+            addEmotes(emotes, *bttvG, text, "Global BetterTTV");
+        }
+        if (auto ffzG = app->getTwitch()->getFfzEmotes().emotes())
+        {
+            addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
+        }
+        if (auto seventvG = app->getTwitch()->getSeventvEmotes().globalEmotes())
+        {
+            addEmotes(emotes, *seventvG, text, "Global 7TV");
+        }
     }
 
-}  // namespace detail
+    addEmojis(emotes, app->getEmotes()->getEmojis()->getEmojis(), text);
+
+    // if there is an exact match, put that emote first
+    for (size_t i = 1; i < emotes.size(); i++)
+    {
+        auto emoteText = emotes.at(i).displayName;
+
+        // test for match or match with colon at start for emotes like ":)"
+        if (emoteText.compare(text, Qt::CaseInsensitive) == 0 ||
+            emoteText.compare(":" + text, Qt::CaseInsensitive) == 0)
+        {
+            auto emote = emotes[i];
+            emotes.erase(emotes.begin() + int(i));
+            emotes.insert(emotes.begin(), emote);
+            break;
+        }
+    }
+
+    return emotes;
+}
+
+}  // namespace chatterino::detail
+
+namespace chatterino {
 
 InputCompletionPopup::InputCompletionPopup(QWidget *parent)
     : BasePopup({BasePopup::EnableCustomFrame, BasePopup::Frameless,
