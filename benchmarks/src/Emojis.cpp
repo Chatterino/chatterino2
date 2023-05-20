@@ -1,5 +1,7 @@
 #include "providers/emoji/Emojis.hpp"
 
+#include "singletons/Settings.hpp"
+
 #include <benchmark/benchmark.h>
 #include <QDebug>
 #include <QString>
@@ -8,6 +10,8 @@ using namespace chatterino;
 
 static void BM_ShortcodeParsing(benchmark::State &state)
 {
+    chatterino::Settings settings("/tmp/c2-mock");
+
     Emojis emojis;
 
     emojis.load();
