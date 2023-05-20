@@ -647,9 +647,6 @@ enum class HelixSendShoutOutError {
     UserMissingScope,
 
     Ratelimited,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
 };
 
 struct HelixStartCommercialResponse {
