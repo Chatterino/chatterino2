@@ -106,4 +106,5 @@ QString sendShoutout(const CommandContext &ctx)
 
     return "";
 }
+
 }  // namespace chatterino::commands
