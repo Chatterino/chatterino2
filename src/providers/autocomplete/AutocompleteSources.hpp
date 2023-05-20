@@ -49,12 +49,6 @@ public:
                            bool isFirstWord = false) const override;
 
 private:
-    std::unique_ptr<GenericListItem> mapListItem(
-        const CompletionEmote &emote) const;
-
-    QString mapTabStringItem(const CompletionEmote &emote,
-                             bool isFirstWord) const;
-
     void initializeFromChannel(const Channel *channel);
 
     std::unique_ptr<AutocompleteEmoteStrategy> strategy_;
@@ -93,12 +87,6 @@ public:
                            bool isFirstWord = false) const override;
 
 private:
-    std::unique_ptr<GenericListItem> mapListItem(
-        const UsersAutocompleteItem &user) const;
-
-    QString mapTabStringItem(const UsersAutocompleteItem &user,
-                             bool isFirstWord) const;
-
     void initializeFromChannel(const Channel *channel);
 
     std::unique_ptr<AutocompleteUsersStrategy> strategy_;
@@ -136,11 +124,6 @@ public:
                            bool isFirstWord = false) const override;
 
 private:
-    std::unique_ptr<GenericListItem> mapListItem(
-        const CompletionCommand &command) const;
-
-    QString mapTabStringItem(const CompletionCommand &command) const;
-
     void initializeItems();
 
     std::unique_ptr<AutocompleteCommandStrategy> strategy_;
