@@ -58,12 +58,14 @@ std::unique_ptr<AutocompleteSource> InputCompletionPopup::getSource() const
     {
         case CompletionKind::Emote:
             return std::make_unique<AutocompleteEmoteSource>(
-                *this->currentChannel_, this->callback_,
-                std::make_unique<ClassicAutocompleteEmoteStrategy>());
+                *this->currentChannel_,
+                std::make_unique<ClassicAutocompleteEmoteStrategy>(),
+                this->callback_);
         case CompletionKind::User:
             return std::make_unique<AutocompleteUsersSource>(
-                *this->currentChannel_, this->callback_,
-                std::make_unique<ClassicAutocompleteUserStrategy>());
+                *this->currentChannel_,
+                std::make_unique<ClassicAutocompleteUserStrategy>(),
+                this->callback_);
         default:
             return nullptr;
     }

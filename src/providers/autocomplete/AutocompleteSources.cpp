@@ -45,7 +45,7 @@ namespace {
         });
     }
 
-    void addCommand(const QString &command, std::vector<CompleteCommand> &out)
+    void addCommand(const QString &command, std::vector<CompletionCommand> &out)
     {
         if (command.startsWith('/') || command.startsWith('.'))
         {
@@ -62,12 +62,55 @@ namespace {
 //// AutocompleteEmoteSource
 
 AutocompleteEmoteSource::AutocompleteEmoteSource(
-    const Channel &channel, ActionCallback callback,
-    std::unique_ptr<AutocompleteEmoteStrategy> strategy)
-    : AutocompleteGenericSource({}, std::move(strategy))  // begin with no items
+    const Channel &channel, std::unique_ptr<AutocompleteEmoteStrategy> strategy,
+    ActionCallback callback)
+    : strategy_(std::move(strategy))
     , callback_(std::move(callback))
 {
     this->initializeFromChannel(&channel);
+}
+
+void AutocompleteEmoteSource::update(const QString &query)
+{
+    this->output_.clear();
+    if (this->strategy_)
+    {
+        this->strategy_->apply(this->items_, this->output_, query);
+    }
+}
+
+void AutocompleteEmoteSource::copyToListModel(GenericListModel &model,
+                                              size_t maxCount) const
+{
+    size_t count = maxCount == 0 ? this->output_.size()
+                                 : std::min(this->output_.size(), maxCount);
+
+    model.clear();
+    model.reserve(count);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        model.addItem(this->mapListItem(this->output_[i]));
+    }
+}
+
+void AutocompleteEmoteSource::copyToStringModel(QStringListModel &model,
+                                                size_t maxCount,
+                                                bool isFirstWord) const
+{
+    size_t count = maxCount == 0 ? this->output_.size()
+                                 : std::min(this->output_.size(), maxCount);
+
+    QStringList newData;
+    newData.reserve(count);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        newData.push_back(
+            this->mapTabStringItem(this->output_[i], isFirstWord));
+    }
+
+    model.setStringList(newData);
 }
 
 void AutocompleteEmoteSource::initializeFromChannel(const Channel *channel)
@@ -130,7 +173,7 @@ void AutocompleteEmoteSource::initializeFromChannel(const Channel *channel)
 
     addEmojis(emotes, app->getEmotes()->getEmojis()->getEmojis());
 
-    this->setItems(std::move(emotes));
+    this->items_ = std::move(emotes);
 }
 
 std::unique_ptr<GenericListItem> AutocompleteEmoteSource::mapListItem(
@@ -150,12 +193,55 @@ QString AutocompleteEmoteSource::mapTabStringItem(const CompletionEmote &emote,
 //// AutocompleteUsersSource
 
 AutocompleteUsersSource::AutocompleteUsersSource(
-    const Channel &channel, ActionCallback callback,
-    std::unique_ptr<AutocompleteUsersStrategy> strategy)
-    : AutocompleteGenericSource({}, std::move(strategy))  // begin with no items
+    const Channel &channel, std::unique_ptr<AutocompleteUsersStrategy> strategy,
+    ActionCallback callback)
+    : strategy_(std::move(strategy))
     , callback_(std::move(callback))
 {
     this->initializeFromChannel(&channel);
+}
+
+void AutocompleteUsersSource::update(const QString &query)
+{
+    this->output_.clear();
+    if (this->strategy_)
+    {
+        this->strategy_->apply(this->items_, this->output_, query);
+    }
+}
+
+void AutocompleteUsersSource::copyToListModel(GenericListModel &model,
+                                              size_t maxCount) const
+{
+    size_t count = maxCount == 0 ? this->output_.size()
+                                 : std::min(this->output_.size(), maxCount);
+
+    model.clear();
+    model.reserve(count);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        model.addItem(this->mapListItem(this->output_[i]));
+    }
+}
+
+void AutocompleteUsersSource::copyToStringModel(QStringListModel &model,
+                                                size_t maxCount,
+                                                bool isFirstWord) const
+{
+    size_t count = maxCount == 0 ? this->output_.size()
+                                 : std::min(this->output_.size(), maxCount);
+
+    QStringList newData;
+    newData.reserve(count);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        newData.push_back(
+            this->mapTabStringItem(this->output_[i], isFirstWord));
+    }
+
+    model.setStringList(newData);
 }
 
 void AutocompleteUsersSource::initializeFromChannel(const Channel *channel)
@@ -166,7 +252,7 @@ void AutocompleteUsersSource::initializeFromChannel(const Channel *channel)
         return;
     }
 
-    this->setItems(tc->accessChatters()->all());
+    this->items_ = tc->accessChatters()->all();
 }
 
 std::unique_ptr<GenericListItem> AutocompleteUsersSource::mapListItem(
@@ -187,17 +273,59 @@ QString AutocompleteUsersSource::mapTabStringItem(
 //// AutocompleteCommandsSource
 
 AutocompleteCommandsSource::AutocompleteCommandsSource(
-    ActionCallback callback,
-    std::unique_ptr<AutocompleteCommandStrategy> strategy)
-    : AutocompleteGenericSource({}, std::move(strategy))  // begin with no items
+    std::unique_ptr<AutocompleteCommandStrategy> strategy,
+    ActionCallback callback)
+    : strategy_(std::move(strategy))
     , callback_(std::move(callback))
 {
     this->initializeItems();
 }
 
+void AutocompleteCommandsSource::update(const QString &query)
+{
+    this->output_.clear();
+    if (this->strategy_)
+    {
+        this->strategy_->apply(this->items_, this->output_, query);
+    }
+}
+
+void AutocompleteCommandsSource::copyToListModel(GenericListModel &model,
+                                                 size_t maxCount) const
+{
+    size_t count = maxCount == 0 ? this->output_.size()
+                                 : std::min(this->output_.size(), maxCount);
+
+    model.clear();
+    model.reserve(count);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        model.addItem(this->mapListItem(this->output_[i]));
+    }
+}
+
+void AutocompleteCommandsSource::copyToStringModel(QStringListModel &model,
+                                                   size_t maxCount,
+                                                   bool /* isFirstWord */) const
+{
+    size_t count = maxCount == 0 ? this->output_.size()
+                                 : std::min(this->output_.size(), maxCount);
+
+    QStringList newData;
+    newData.reserve(count);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        newData.push_back(this->mapTabStringItem(this->output_[i]));
+    }
+
+    model.setStringList(newData);
+}
+
 void AutocompleteCommandsSource::initializeItems()
 {
-    std::vector<CompleteCommand> commands;
+    std::vector<CompletionCommand> commands;
 
 #ifdef CHATTERINO_HAVE_PLUGINS
     for (const auto &command : getApp()->commands->pluginCommands())
@@ -225,18 +353,18 @@ void AutocompleteCommandsSource::initializeItems()
         addCommand(command, commands);
     }
 
-    this->setItems(std::move(commands));
+    this->items_ = std::move(commands);
 }
 
 std::unique_ptr<GenericListItem> AutocompleteCommandsSource::mapListItem(
-    const CompleteCommand &command) const
+    const CompletionCommand &command) const
 {
     return std::make_unique<InputCompletionItem>(nullptr, command.name,
                                                  this->callback_);
 }
 
 QString AutocompleteCommandsSource::mapTabStringItem(
-    const CompleteCommand &command, bool /* isFirstWord */) const
+    const CompletionCommand &command) const
 {
     return command.prefix + command.name + " ";
 }

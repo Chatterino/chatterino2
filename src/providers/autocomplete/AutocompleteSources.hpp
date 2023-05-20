@@ -27,8 +27,7 @@ struct CompletionEmote {
     QString providerName{};
 };
 
-class AutocompleteEmoteSource
-    : public AutocompleteGenericSource<CompletionEmote>
+class AutocompleteEmoteSource : public AutocompleteSource
 {
 public:
     using ActionCallback = std::function<void(const QString &)>;
@@ -36,32 +35,40 @@ public:
 
     /// @brief Initializes a source for CompletionEmotes from the given channel
     /// @param channel Channel to initialize emotes from
+    /// @param strategy AutocompleteStrategy to apply
     /// @param callback ActionCallback to invoke upon InputCompletionItem selection.
     /// See InputCompletionItem::action(). Can be nullptr.
-    /// @param strategy AutocompleteStrategy to apply
-    AutocompleteEmoteSource(
-        const Channel &channel, ActionCallback callback,
-        std::unique_ptr<AutocompleteEmoteStrategy> strategy);
+    AutocompleteEmoteSource(const Channel &channel,
+                            std::unique_ptr<AutocompleteEmoteStrategy> strategy,
+                            ActionCallback callback = nullptr);
 
-protected:
-    std::unique_ptr<GenericListItem> mapListItem(
-        const CompletionEmote &emote) const override;
-
-    QString mapTabStringItem(const CompletionEmote &emote,
-                             bool isFirstWord) const override;
+    void update(const QString &query) override;
+    void copyToListModel(GenericListModel &model,
+                         size_t maxCount = 0) const override;
+    void copyToStringModel(QStringListModel &model, size_t maxCount = 0,
+                           bool isFirstWord = false) const override;
 
 private:
+    std::unique_ptr<GenericListItem> mapListItem(
+        const CompletionEmote &emote) const;
+
+    QString mapTabStringItem(const CompletionEmote &emote,
+                             bool isFirstWord) const;
+
     void initializeFromChannel(const Channel *channel);
 
+    std::unique_ptr<AutocompleteEmoteStrategy> strategy_;
     ActionCallback callback_;
+
+    std::vector<CompletionEmote> items_{};
+    std::vector<CompletionEmote> output_{};
 };
 
 //// AutocompleteUsersSource
 
 using UsersAutocompleteItem = std::pair<QString, QString>;
 
-class AutocompleteUsersSource
-    : public AutocompleteGenericSource<UsersAutocompleteItem>
+class AutocompleteUsersSource : public AutocompleteSource
 {
 public:
     using ActionCallback = std::function<void(const QString &)>;
@@ -72,59 +79,75 @@ public:
     /// channel.
     /// @param channel Channel to initialize emotes from. Must be a TwitchChannel
     /// or completion is a no-op.
+    /// @param strategy AutocompleteStrategy to apply
     /// @param callback ActionCallback to invoke upon InputCompletionItem selection.
     /// See InputCompletionItem::action(). Can be nullptr.
-    /// @param strategy AutocompleteStrategy to apply
-    AutocompleteUsersSource(
-        const Channel &channel, ActionCallback callback,
-        std::unique_ptr<AutocompleteUsersStrategy> strategy);
+    AutocompleteUsersSource(const Channel &channel,
+                            std::unique_ptr<AutocompleteUsersStrategy> strategy,
+                            ActionCallback callback = nullptr);
 
-protected:
-    std::unique_ptr<GenericListItem> mapListItem(
-        const UsersAutocompleteItem &user) const override;
-
-    QString mapTabStringItem(const UsersAutocompleteItem &user,
-                             bool isFirstWord) const override;
+    void update(const QString &query) override;
+    void copyToListModel(GenericListModel &model,
+                         size_t maxCount = 0) const override;
+    void copyToStringModel(QStringListModel &model, size_t maxCount = 0,
+                           bool isFirstWord = false) const override;
 
 private:
+    std::unique_ptr<GenericListItem> mapListItem(
+        const UsersAutocompleteItem &user) const;
+
+    QString mapTabStringItem(const UsersAutocompleteItem &user,
+                             bool isFirstWord) const;
+
     void initializeFromChannel(const Channel *channel);
 
+    std::unique_ptr<AutocompleteUsersStrategy> strategy_;
     ActionCallback callback_;
+
+    std::vector<UsersAutocompleteItem> items_{};
+    std::vector<UsersAutocompleteItem> output_{};
 };
 
 //// AutocompleteCommandsSource
 
-struct CompleteCommand {
+struct CompletionCommand {
     QString name{};
     QChar prefix{};
 };
 
-class AutocompleteCommandsSource
-    : public AutocompleteGenericSource<CompleteCommand>
+class AutocompleteCommandsSource : public AutocompleteSource
 {
 public:
     using ActionCallback = std::function<void(const QString &)>;
-    using AutocompleteCommandStrategy = AutocompleteStrategy<CompleteCommand>;
+    using AutocompleteCommandStrategy = AutocompleteStrategy<CompletionCommand>;
 
     /// @brief Initializes a source for CompleteCommands.
+    /// @param strategy AutocompleteStrategy to apply
     /// @param callback ActionCallback to invoke upon InputCompletionItem selection.
     /// See InputCompletionItem::action(). Can be nullptr.
-    /// @param strategy AutocompleteStrategy to apply
     AutocompleteCommandsSource(
-        ActionCallback callback,
-        std::unique_ptr<AutocompleteCommandStrategy> strategy);
+        std::unique_ptr<AutocompleteCommandStrategy> strategy,
+        ActionCallback callback = nullptr);
 
-protected:
-    std::unique_ptr<GenericListItem> mapListItem(
-        const CompleteCommand &command) const override;
-
-    QString mapTabStringItem(const CompleteCommand &command,
-                             bool isFirstWord) const override;
+    void update(const QString &query) override;
+    void copyToListModel(GenericListModel &model,
+                         size_t maxCount = 0) const override;
+    void copyToStringModel(QStringListModel &model, size_t maxCount = 0,
+                           bool isFirstWord = false) const override;
 
 private:
+    std::unique_ptr<GenericListItem> mapListItem(
+        const CompletionCommand &command) const;
+
+    QString mapTabStringItem(const CompletionCommand &command) const;
+
     void initializeItems();
 
+    std::unique_ptr<AutocompleteCommandStrategy> strategy_;
     ActionCallback callback_;
+
+    std::vector<CompletionCommand> items_{};
+    std::vector<CompletionCommand> output_{};
 };
 
 }  // namespace chatterino

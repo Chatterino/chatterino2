@@ -35,13 +35,14 @@ class ClassicAutocompleteUserStrategy
 
 //// Command strategies
 
-class AutocompleteCommandStrategy : public AutocompleteStrategy<CompleteCommand>
+class AutocompleteCommandStrategy
+    : public AutocompleteStrategy<CompletionCommand>
 {
 public:
     AutocompleteCommandStrategy(bool startsWithOnly);
 
-    void apply(const std::vector<CompleteCommand> &items,
-               std::vector<CompleteCommand> &output,
+    void apply(const std::vector<CompletionCommand> &items,
+               std::vector<CompletionCommand> &output,
                const QString &query) const override;
 
 private:

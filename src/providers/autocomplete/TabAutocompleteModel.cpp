@@ -76,15 +76,15 @@ std::unique_ptr<AutocompleteSource> TabAutocompleteModel::buildSource(
     {
         case SourceKind::Emote:
             return std::make_unique<AutocompleteEmoteSource>(
-                this->channel_, nullptr,
+                this->channel_,
                 std::make_unique<ClassicTabAutocompleteEmoteStrategy>());
         case SourceKind::User:
             return std::make_unique<AutocompleteUsersSource>(
-                this->channel_, nullptr,
+                this->channel_,
                 std::make_unique<ClassicAutocompleteUserStrategy>());
         case SourceKind::Command:
             return std::make_unique<AutocompleteCommandsSource>(
-                nullptr, std::make_unique<AutocompleteCommandStrategy>(true));
+                std::make_unique<AutocompleteCommandStrategy>(true));
         default:
             return nullptr;
     }

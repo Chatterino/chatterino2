@@ -101,8 +101,8 @@ AutocompleteCommandStrategy::AutocompleteCommandStrategy(bool startsWithOnly)
 }
 
 void AutocompleteCommandStrategy::apply(
-    const std::vector<CompleteCommand> &items,
-    std::vector<CompleteCommand> &output, const QString &query) const
+    const std::vector<CompletionCommand> &items,
+    std::vector<CompletionCommand> &output, const QString &query) const
 {
     QString normalizedQuery = query;
     if (normalizedQuery.startsWith('/') || normalizedQuery.startsWith('.'))
@@ -114,7 +114,7 @@ void AutocompleteCommandStrategy::apply(
     {
         std::copy_if(items.begin(), items.end(),
                      std::back_insert_iterator(output),
-                     [&normalizedQuery](const CompleteCommand &item) {
+                     [&normalizedQuery](const CompletionCommand &item) {
                          return item.name.startsWith(normalizedQuery,
                                                      Qt::CaseInsensitive);
                      });
@@ -123,7 +123,7 @@ void AutocompleteCommandStrategy::apply(
     {
         std::copy_if(
             items.begin(), items.end(), std::back_insert_iterator(output),
-            [&normalizedQuery](const CompleteCommand &item) {
+            [&normalizedQuery](const CompletionCommand &item) {
                 return item.name.contains(normalizedQuery, Qt::CaseInsensitive);
             });
     }
