@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     ::benchmark::Initialize(&argc, argv);
 
     // Ensure settings are initialized before any tests are run
-    chatterino::Settings settings("/tmp/c2-empty-test");
+    chatterino::Settings settings("/tmp/c2-empty-mock");
 
     QtConcurrent::run([&app] {
         ::benchmark::RunSpecifiedBenchmarks();
