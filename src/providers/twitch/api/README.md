@@ -176,7 +176,7 @@ URL: https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
 
 Used in:
 
-- `controllers/commands/CommandController.cpp` to send twitch native shoutout using "/shoutout <username>"
+- `controllers/commands/CommandController.cpp` to send Twitch native shoutout using "/shoutout <username>"
 
 ## PubSub
 
