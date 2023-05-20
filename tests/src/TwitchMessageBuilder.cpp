@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "mocks/EmptyApplication.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
@@ -19,60 +20,12 @@ using namespace chatterino;
 
 namespace {
 
-class MockApplication : IApplication
+class MockApplication : mock::EmptyApplication
 {
 public:
-    Theme *getThemes() override
-    {
-        return nullptr;
-    }
-    Fonts *getFonts() override
-    {
-        return nullptr;
-    }
     IEmotes *getEmotes() override
     {
         return &this->emotes;
-    }
-    AccountController *getAccounts() override
-    {
-        return nullptr;
-    }
-    HotkeyController *getHotkeys() override
-    {
-        return nullptr;
-    }
-    WindowManager *getWindows() override
-    {
-        return nullptr;
-    }
-    Toasts *getToasts() override
-    {
-        return nullptr;
-    }
-    CommandController *getCommands() override
-    {
-        return nullptr;
-    }
-    NotificationController *getNotifications() override
-    {
-        return nullptr;
-    }
-    HighlightController *getHighlights() override
-    {
-        return nullptr;
-    }
-    TwitchIrcServer *getTwitch() override
-    {
-        return nullptr;
-    }
-    ChatterinoBadges *getChatterinoBadges() override
-    {
-        return nullptr;
-    }
-    FfzBadges *getFfzBadges() override
-    {
-        return nullptr;
     }
     IUserDataController *getUserData() override
     {
