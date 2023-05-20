@@ -2708,9 +2708,7 @@ void Helix::sendShoutout(
                 case 500: {
                     if (message.isEmpty())
                     {
-                        failureCallback(
-                            Error::Unknown,
-                            "No error details received from twitch. X_X");
+                        failureCallback(Error::Unknown, "Empty message");
                     }
                     else
                     {
