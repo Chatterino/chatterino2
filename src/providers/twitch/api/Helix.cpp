@@ -2682,8 +2682,9 @@ void Helix::sendShoutout(
                     {
                         failureCallback(Error::UserNotAuthorized, message);
                     }
-                    break;
                 }
+                break;
+
                 case 401: {
                     if (message.startsWith("Missing scope",
                                            Qt::CaseInsensitive))
@@ -2694,18 +2695,21 @@ void Helix::sendShoutout(
                     {
                         failureCallback(Error::UserNotAuthorized, message);
                     }
-                    break;
                 }
+                break;
+
                 case 403: {
                     failureCallback(Error::UserNotAuthorized, message);
-                    break;
                 }
+                break;
+
                 case 429: {
                     failureCallback(Error::Ratelimited, message);
-                    break;
                 }
-                    // Helix returns 500 when user is not mod
+                break;
+
                 case 500: {
+                    // Helix returns 500 when user is not mod,
                     if (message.isEmpty())
                     {
                         failureCallback(Error::Unknown, "Empty message");
@@ -2714,8 +2718,9 @@ void Helix::sendShoutout(
                     {
                         failureCallback(Error::Unknown, message);
                     }
-                    break;
                 }
+                break;
+
                 default: {
                     qCWarning(chatterinoTwitch)
                         << "Helix send shoutout, unhandled error data:"
