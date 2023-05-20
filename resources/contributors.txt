@@ -62,7 +62,7 @@ ScrubN | https://github.com/ScrubN | | Contributor
 Cyclone | https://github.com/PsycloneTM | :/avatars/cyclone.png | Contributor
 2547techno | https://github.com/2547techno | :/avatars/techno.png | Contributor
 ZonianMidian | https://github.com/ZonianMidian | :/avatars/zonianmidian.png | Contributor
-olafyang | https://github.com/olafyang | Contributor
+olafyang | https://github.com/olafyang | | Contributor
 
 # If you are a contributor add yourself above this line
 
