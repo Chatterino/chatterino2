@@ -41,7 +41,7 @@ QString sendShoutout(const CommandContext &ctx)
 
     const auto target = words->at(1);
 
-    using Error = HelixSendShoutOutError;
+    using Error = HelixSendShoutoutError;
 
     getHelix()->getUserByName(
         target,

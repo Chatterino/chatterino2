@@ -637,7 +637,7 @@ enum class HelixListVIPsError {  // /vips
     Forwarded,
 };  // /vips
 
-enum class HelixSendShoutOutError {
+enum class HelixSendShoutoutError {
     Unknown,
     // 400
     UserIsBroadcaster,
@@ -1029,7 +1029,7 @@ public:
     virtual void sendShoutout(
         QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
         ResultCallback<> successCallback,
-        FailureCallback<HelixSendShoutOutError, QString> failureCallback) = 0;
+        FailureCallback<HelixSendShoutoutError, QString> failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 
@@ -1340,7 +1340,7 @@ public:
     void sendShoutout(
         QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
         ResultCallback<> successCallback,
-        FailureCallback<HelixSendShoutOutError, QString> failureCallback) final;
+        FailureCallback<HelixSendShoutoutError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

@@ -2635,9 +2635,9 @@ void Helix::updateShieldMode(
 void Helix::sendShoutout(
     QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
     ResultCallback<> successCallback,
-    FailureCallback<HelixSendShoutOutError, QString> failureCallback)
+    FailureCallback<HelixSendShoutoutError, QString> failureCallback)
 {
-    using Error = HelixSendShoutOutError;
+    using Error = HelixSendShoutoutError;
 
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("from_broadcaster_id", fromBroadcasterID);
