@@ -2610,8 +2610,7 @@ void Helix::sendShoutout(
     urlQuery.addQueryItem("to_broadcaster_id", toBroadcasterID);
     urlQuery.addQueryItem("moderator_id", moderatorID);
 
-    this->makeRequest("chat/shoutouts", urlQuery)
-        .type(NetworkRequestType::Post)
+    this->makePost("chat/shoutouts", urlQuery)
         .header("Content-Type", "application/json")
         .onSuccess([successCallback](NetworkResult result) -> Outcome {
             if (result.status() != 204)
