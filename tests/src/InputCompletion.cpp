@@ -47,7 +47,7 @@ public:
     SeventvEmotes seventv;
 };
 
-class MockApplication : EmptyApplication
+class MockApplication : mock::EmptyApplication
 {
 public:
     AccountController *getAccounts() override
@@ -131,7 +131,7 @@ protected:
         settingsFile.close();
 
         // Initialize helix client
-        this->mockHelix = std::make_unique<MockHelix>();
+        this->mockHelix = std::make_unique<mock::Helix>();
         initializeHelix(this->mockHelix.get());
         EXPECT_CALL(*this->mockHelix, loadBlocks).Times(Exactly(1));
         EXPECT_CALL(*this->mockHelix, update).Times(Exactly(1));
@@ -165,7 +165,7 @@ protected:
     std::unique_ptr<MockApplication> mockApplication;
     std::unique_ptr<Settings> settings;
     std::unique_ptr<Paths> paths;
-    std::unique_ptr<MockHelix> mockHelix;
+    std::unique_ptr<mock::Helix> mockHelix;
 
     ChannelPtr channelPtr;
     std::unique_ptr<CompletionModel> completionModel;
