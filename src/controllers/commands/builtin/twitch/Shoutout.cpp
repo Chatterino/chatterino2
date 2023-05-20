@@ -28,6 +28,7 @@ QString sendShoutout(const CommandContext &ctx)
     {
         channel->addMessage(
             makeSystemMessage("You must be logged in to send shoutout"));
+        return "";
     }
 
     if (words->size() < 2)
@@ -35,6 +36,7 @@ QString sendShoutout(const CommandContext &ctx)
         channel->addMessage(
             makeSystemMessage("Usage: \"/shoutout <username>\" - Sends a "
                               "shoutout to the specified twitch user"));
+        return "";
     }
 
     const auto target = words->at(1);
