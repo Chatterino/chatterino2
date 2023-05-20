@@ -275,7 +275,7 @@ void SeventvEmotes::loadGlobalEmotes()
 {
     if (!Settings::instance().enableSevenTVGlobalEmotes)
     {
-        this->setEmotes(EMPTY_EMOTE_MAP);
+        this->setGlobalEmotes(EMPTY_EMOTE_MAP);
         return;
     }
 
@@ -289,7 +289,8 @@ void SeventvEmotes::loadGlobalEmotes()
             auto emoteMap = parseEmotes(parsedEmotes, true);
             qCDebug(chatterinoSeventv)
                 << "Loaded" << emoteMap.size() << "7TV Global Emotes";
-            this->setEmotes(std::make_shared<EmoteMap>(std::move(emoteMap)));
+            this->setGlobalEmotes(
+                std::make_shared<EmoteMap>(std::move(emoteMap)));
 
             return Success;
         })
@@ -300,7 +301,7 @@ void SeventvEmotes::loadGlobalEmotes()
         .execute();
 }
 
-void SeventvEmotes::setEmotes(std::shared_ptr<const EmoteMap> emotes)
+void SeventvEmotes::setGlobalEmotes(std::shared_ptr<const EmoteMap> emotes)
 {
     this->global_.set(std::move(emotes));
 }

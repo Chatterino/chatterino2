@@ -195,7 +195,7 @@ private:
         auto seventvEmotes = std::make_shared<EmoteMap>();
         addEmote(*seventvEmotes, "Clap");
         addEmote(*seventvEmotes, "Clap2");
-        this->mockApplication->twitch.seventv.setEmotes(
+        this->mockApplication->twitch.seventv.setGlobalEmotes(
             std::move(seventvEmotes));
     }
 

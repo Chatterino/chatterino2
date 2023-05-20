@@ -75,7 +75,7 @@ public:
     std::shared_ptr<const EmoteMap> globalEmotes() const;
     boost::optional<EmotePtr> globalEmote(const EmoteName &name) const;
     void loadGlobalEmotes();
-    void setEmotes(std::shared_ptr<const EmoteMap> emotes);
+    void setGlobalEmotes(std::shared_ptr<const EmoteMap> emotes);
     static void loadChannelEmotes(
         const std::weak_ptr<Channel> &channel, const QString &channelId,
         std::function<void(EmoteMap &&, ChannelInfo)> callback,
