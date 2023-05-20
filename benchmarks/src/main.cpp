@@ -1,12 +1,19 @@
+#include "singletons/Settings.hpp"
+
 #include <benchmark/benchmark.h>
 #include <QApplication>
 #include <QtConcurrent>
+
+using namespace chatterino;
 
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
     ::benchmark::Initialize(&argc, argv);
+
+    // Ensure settings are initialized before any tests are run
+    chatterino::Settings settings("/tmp/c2-empty-test");
 
     QtConcurrent::run([&app] {
         ::benchmark::RunSpecifiedBenchmarks();
