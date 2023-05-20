@@ -2677,7 +2677,8 @@ void Helix::sendShoutout(
                     // Helix returns 500 when user is not mod,
                     if (message.isEmpty())
                     {
-                        failureCallback(Error::Unknown, "Empty message");
+                        failureCallback(Error::Unknown,
+                                        "Twitch internal server error");
                     }
                     else
                     {
