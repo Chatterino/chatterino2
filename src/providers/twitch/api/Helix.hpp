@@ -1385,7 +1385,13 @@ protected:
         FailureCallback<HelixGetModeratorsError, QString> failureCallback);
 
 private:
-    NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
+    NetworkRequest makeRequest(const QString &url, const QUrlQuery &urlQuery,
+                               NetworkRequestType type);
+    NetworkRequest makeGet(const QString &url, const QUrlQuery &urlQuery);
+    NetworkRequest makeDelete(const QString &url, const QUrlQuery &urlQuery);
+    NetworkRequest makePost(const QString &url, const QUrlQuery &urlQuery);
+    NetworkRequest makePut(const QString &url, const QUrlQuery &urlQuery);
+    NetworkRequest makePatch(const QString &url, const QUrlQuery &urlQuery);
 
     QString clientId;
     QString oauthToken;
