@@ -10,6 +10,7 @@
 namespace chatterino {
 
 class TwitchIrcServer;
+class ITwitchIrcServer;
 class PubSub;
 
 class CommandController;
@@ -58,7 +59,7 @@ public:
     virtual CommandController *getCommands() = 0;
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
-    virtual TwitchIrcServer *getTwitch() = 0;
+    virtual ITwitchIrcServer *getTwitch() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
@@ -146,10 +147,7 @@ public:
     {
         return this->highlights;
     }
-    TwitchIrcServer *getTwitch() override
-    {
-        return this->twitch;
-    }
+    ITwitchIrcServer *getTwitch() override;
     ChatterinoBadges *getChatterinoBadges() override
     {
         return this->chatterinoBadges;

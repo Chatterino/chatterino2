@@ -188,7 +188,7 @@ void FfzEmotes::loadEmotes()
 {
     if (!Settings::instance().enableFFZGlobalEmotes)
     {
-        this->global_.set(EMPTY_EMOTE_MAP);
+        this->setEmotes(EMPTY_EMOTE_MAP);
         return;
     }
 
@@ -199,11 +199,16 @@ void FfzEmotes::loadEmotes()
         .timeout(30000)
         .onSuccess([this](auto result) -> Outcome {
             auto parsedSet = parseGlobalEmotes(result.parseJson());
-            this->global_.set(std::make_shared<EmoteMap>(std::move(parsedSet)));
+            this->setEmotes(std::make_shared<EmoteMap>(std::move(parsedSet)));
 
             return Success;
         })
         .execute();
+}
+
+void FfzEmotes::setEmotes(std::shared_ptr<const EmoteMap> emotes)
+{
+    this->global_.set(std::move(emotes));
 }
 
 void FfzEmotes::loadChannel(

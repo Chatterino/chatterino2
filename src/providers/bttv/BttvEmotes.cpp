@@ -193,7 +193,7 @@ void BttvEmotes::loadEmotes()
 {
     if (!Settings::instance().enableBTTVGlobalEmotes)
     {
-        this->global_.set(EMPTY_EMOTE_MAP);
+        this->setEmotes(EMPTY_EMOTE_MAP);
         return;
     }
 
@@ -203,11 +203,16 @@ void BttvEmotes::loadEmotes()
             auto emotes = this->global_.get();
             auto pair = parseGlobalEmotes(result.parseJsonArray(), *emotes);
             if (pair.first)
-                this->global_.set(
+                this->setEmotes(
                     std::make_shared<EmoteMap>(std::move(pair.second)));
             return pair.first;
         })
         .execute();
+}
+
+void BttvEmotes::setEmotes(std::shared_ptr<const EmoteMap> emotes)
+{
+    this->global_.set(std::move(emotes));
 }
 
 void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,

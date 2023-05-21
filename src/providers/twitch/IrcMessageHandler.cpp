@@ -1145,9 +1145,12 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
         return;
     }
 
-    if (message->nick() !=
-            getApp()->accounts->twitch.getCurrent()->getUserName() &&
-        getSettings()->showJoins.getValue())
+    if (message->nick() ==
+        getApp()->accounts->twitch.getCurrent()->getUserName())
+    {
+        twitchChannel->addMessage(makeSystemMessage("joined channel"));
+    }
+    else if (getSettings()->showJoins.getValue())
     {
         twitchChannel->addJoinedUser(message->nick());
     }

@@ -174,6 +174,10 @@ include(cmake/resources/generate_resources.cmake)
 
 add_subdirectory(src)
 
+if (BUILD_TESTS OR BUILD_BENCHMARKS)
+    add_subdirectory(mocks)
+endif ()
+
 if (BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)

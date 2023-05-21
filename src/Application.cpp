@@ -249,6 +249,11 @@ IUserDataController *Application::getUserData()
     return this->userData;
 }
 
+ITwitchIrcServer *Application::getTwitch()
+{
+    return this->twitch;
+}
+
 void Application::save()
 {
     for (auto &singleton : this->singletons_)
