@@ -42,7 +42,7 @@ void SeventvBadges::loadSeventvBadges()
     url.setQuery(urlQuery);
 
     NetworkRequest(url)
-        .onSuccess([this](NetworkResult result) -> Outcome {
+        .onSuccess([this](const NetworkResult &result) -> Outcome {
             auto root = result.parseJson();
 
             std::unique_lock lock(this->mutex_);
