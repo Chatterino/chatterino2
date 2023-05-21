@@ -1,6 +1,5 @@
 #include "controllers/highlights/HighlightController.hpp"
 
-#include "Application.hpp"
 #include "BaseSettings.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"

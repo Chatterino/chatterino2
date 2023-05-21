@@ -1,6 +1,5 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 
-#include "Application.hpp"
 #include "common/Channel.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "mocks/EmptyApplication.hpp"
@@ -27,6 +26,7 @@ public:
     {
         return &this->emotes;
     }
+
     IUserDataController *getUserData() override
     {
         return &this->userData;
