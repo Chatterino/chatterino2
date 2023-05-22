@@ -48,6 +48,8 @@ public:
     void copyToStringModel(QStringListModel &model, size_t maxCount = 0,
                            bool isFirstWord = false) const override;
 
+    const std::vector<CompletionEmote> &output() const;
+
 private:
     void initializeFromChannel(const Channel *channel);
 
@@ -86,6 +88,8 @@ public:
     void copyToStringModel(QStringListModel &model, size_t maxCount = 0,
                            bool isFirstWord = false) const override;
 
+    const std::vector<UsersAutocompleteItem> &output() const;
+
 private:
     void initializeFromChannel(const Channel *channel);
 
@@ -122,6 +126,8 @@ public:
                          size_t maxCount = 0) const override;
     void copyToStringModel(QStringListModel &model, size_t maxCount = 0,
                            bool isFirstWord = false) const override;
+
+    const std::vector<CompletionCommand> &output() const;
 
 private:
     void initializeItems();

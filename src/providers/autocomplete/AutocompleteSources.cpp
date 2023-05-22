@@ -198,6 +198,11 @@ void AutocompleteEmoteSource::initializeFromChannel(const Channel *channel)
     this->items_ = std::move(emotes);
 }
 
+const std::vector<CompletionEmote> &AutocompleteEmoteSource::output() const
+{
+    return this->output_;
+}
+
 //// AutocompleteUsersSource
 
 AutocompleteUsersSource::AutocompleteUsersSource(
@@ -251,6 +256,12 @@ void AutocompleteUsersSource::initializeFromChannel(const Channel *channel)
     }
 
     this->items_ = tc->accessChatters()->all();
+}
+
+const std::vector<UsersAutocompleteItem> &AutocompleteUsersSource::output()
+    const
+{
+    return this->output_;
 }
 
 //// AutocompleteCommandsSource
@@ -324,6 +335,11 @@ void AutocompleteCommandsSource::initializeItems()
     }
 
     this->items_ = std::move(commands);
+}
+
+const std::vector<CompletionCommand> &AutocompleteCommandsSource::output() const
+{
+    return this->output_;
 }
 
 }  // namespace chatterino
