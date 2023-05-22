@@ -64,6 +64,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/ChatSettings.hpp
         controllers/commands/builtin/twitch/ShieldMode.cpp
         controllers/commands/builtin/twitch/ShieldMode.hpp
+        controllers/commands/builtin/twitch/Shoutout.cpp
+        controllers/commands/builtin/twitch/Shoutout.hpp
         controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp

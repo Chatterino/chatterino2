@@ -107,7 +107,7 @@ jobs:
 
       - name: Install Qt5
         if: startsWith(matrix.qt-version, '5.')
-        uses: jurplel/install-qt-action@v3.2.0
+        uses: jurplel/install-qt-action@v3.2.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -115,7 +115,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v3.2.0
+        uses: jurplel/install-qt-action@v3.2.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -278,10 +278,25 @@ jobs:
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'
         uses: ZedThree/clang-tidy-review@v0.13.0
         with:
-          build_dir: build
+          build_dir: build-clang-tidy
           config_file: ".clang-tidy"
           split_workflow: true
           exclude: "tests/*,lib/*"
+          cmake_command: >-
+            cmake -S. -Bbuild-clang-tidy 
+            -DCMAKE_BUILD_TYPE=Release 
+            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On 
+            -DUSE_PRECOMPILED_HEADERS=OFF 
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=On 
+            -DCHATTERINO_LTO=Off 
+            -DCHATTERINO_PLUGINS=On 
+            -DBUILD_WITH_QT6=Off
+          apt_packages: >-
+            qttools5-dev, qt5-image-formats-plugins, libqt5svg5-dev, 
+            libsecret-1-dev,
+            libboost-dev, libboost-system-dev, libboost-filesystem-dev,
+            libssl-dev,
+            rapidjson-dev
 
       - name: clang-tidy-review upload
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'

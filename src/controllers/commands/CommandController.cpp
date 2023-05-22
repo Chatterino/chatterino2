@@ -10,6 +10,7 @@
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 #include "controllers/commands/builtin/twitch/ChatSettings.hpp"
 #include "controllers/commands/builtin/twitch/ShieldMode.hpp"
+#include "controllers/commands/builtin/twitch/Shoutout.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
@@ -3212,6 +3213,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/shield", &commands::shieldModeOn);
     this->registerCommand("/shieldoff", &commands::shieldModeOff);
+
+    this->registerCommand("/shoutout", &commands::sendShoutout);
 
     this->registerCommand("/c2-set-logging-rules", &commands::setLoggingRules);
 }

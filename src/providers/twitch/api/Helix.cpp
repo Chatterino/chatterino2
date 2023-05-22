@@ -2597,6 +2597,107 @@ void Helix::updateShieldMode(
         .execute();
 }
 
+// https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+void Helix::sendShoutout(
+    QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
+    ResultCallback<> successCallback,
+    FailureCallback<HelixSendShoutoutError, QString> failureCallback)
+{
+    using Error = HelixSendShoutoutError;
+
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("from_broadcaster_id", fromBroadcasterID);
+    urlQuery.addQueryItem("to_broadcaster_id", toBroadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    this->makePost("chat/shoutouts", urlQuery)
+        .header("Content-Type", "application/json")
+        .onSuccess([successCallback](NetworkResult result) -> Outcome {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for sending shoutout was "
+                    << result.status() << "but we expected it to be 204";
+            }
+
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) -> void {
+            const auto obj = result.parseJson();
+            auto message = obj["message"].toString();
+
+            switch (result.status())
+            {
+                case 400: {
+                    if (message.startsWith("The broadcaster may not give "
+                                           "themselves a Shoutout.",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserIsBroadcaster, message);
+                    }
+                    else if (message.startsWith(
+                                 "The broadcaster is not streaming live or "
+                                 "does not have one or more viewers.",
+                                 Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::BroadcasterNotLive, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                }
+                break;
+
+                case 403: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                case 500: {
+                    // Helix returns 500 when user is not mod,
+                    if (message.isEmpty())
+                    {
+                        failureCallback(Error::Unknown,
+                                        "Twitch internal server error");
+                    }
+                    else
+                    {
+                        failureCallback(Error::Unknown, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCWarning(chatterinoTwitch)
+                        << "Helix send shoutout, unhandled error data:"
+                        << result.status() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(const QString &url, const QUrlQuery &urlQuery,
                                   NetworkRequestType type)
 {
