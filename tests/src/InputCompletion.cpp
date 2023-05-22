@@ -18,6 +18,7 @@
 #include <QFile>
 #include <QModelIndex>
 #include <QString>
+#include <QTemporaryDir>
 
 namespace {
 
@@ -122,9 +123,9 @@ protected:
     void SetUp() override
     {
         // Write default settings to the mock settings json file
-        ASSERT_TRUE(QDir().mkpath("/tmp/c2-tests"));
+        this->settingsDir_ = std::make_unique<QTemporaryDir>();
 
-        QFile settingsFile("/tmp/c2-tests/settings.json");
+        QFile settingsFile(this->settingsDir_->filePath("settings.json"));
         ASSERT_TRUE(settingsFile.open(QIODevice::WriteOnly | QIODevice::Text));
         ASSERT_GT(settingsFile.write(DEFAULT_SETTINGS.toUtf8()), 0);
         ASSERT_TRUE(settingsFile.flush());
@@ -137,7 +138,7 @@ protected:
         EXPECT_CALL(*this->mockHelix, update).Times(Exactly(1));
 
         this->mockApplication = std::make_unique<MockApplication>();
-        this->settings = std::make_unique<Settings>("/tmp/c2-tests");
+        this->settings = std::make_unique<Settings>(this->settingsDir_->path());
         this->paths = std::make_unique<Paths>();
 
         this->mockApplication->accounts.initialize(*this->settings,
@@ -153,14 +154,17 @@ protected:
 
     void TearDown() override
     {
-        ASSERT_TRUE(QDir("/tmp/c2-tests").removeRecursively());
         this->mockApplication.reset();
         this->settings.reset();
         this->paths.reset();
         this->mockHelix.reset();
         this->completionModel.reset();
         this->channelPtr.reset();
+
+        this->settingsDir_.reset();
     }
+
+    std::unique_ptr<QTemporaryDir> settingsDir_;
 
     std::unique_ptr<MockApplication> mockApplication;
     std::unique_ptr<Settings> settings;
