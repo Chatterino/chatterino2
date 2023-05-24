@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     QtConcurrent::run([&app] {
         ::benchmark::RunSpecifiedBenchmarks();
 
-        app.exit(0 * 1);
+        app.exit(0);
     });
 
     return app.exec();

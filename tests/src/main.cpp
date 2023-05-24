@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 
         chatterino::NetworkManager::deinit();
 
-        app.exit(res * 1);
+        app.exit(res);
     });
 
     return app.exec();
