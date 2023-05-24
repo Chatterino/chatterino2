@@ -226,25 +226,22 @@ protected:
 
 TEST_F(InputCompletionTest, EmoteNameFiltering)
 {
-    // The completion doesn't guarantee an ordering,
-    // execpt for exact matches.
-    const auto cmpCompletion = [](const auto &a, const auto &b) {
-        return a.displayName < b.displayName;
-    };
+    // The completion doesn't guarantee an ordering for a specific category of emotes.
+    // This tests a specific implementation of the underlying std::unordered_map,
+    // so depending on the standard library used when compiling, this might yield
+    // different results.
 
     auto completion = queryEmoteCompletion(":feels");
     ASSERT_EQ(completion.size(), 3);
     // all these matches are BTTV global emotes
-    std::sort(completion.begin(), completion.end(), cmpCompletion);
-    ASSERT_EQ(completion[0].displayName, "FeelsBadMan");
-    ASSERT_EQ(completion[1].displayName, "FeelsBirthdayMan");
+    ASSERT_EQ(completion[0].displayName, "FeelsBirthdayMan");
+    ASSERT_EQ(completion[1].displayName, "FeelsBadMan");
     ASSERT_EQ(completion[2].displayName, "FeelsGoodMan");
 
     completion = queryEmoteCompletion(":)");
     ASSERT_EQ(completion.size(), 3);
     ASSERT_EQ(completion[0].displayName, ":)");  // Exact match with : prefix
     // all these matches are Twitch global emotes
-    std::sort(completion.begin() + 1, completion.end(), cmpCompletion);
     ASSERT_EQ(completion[1].displayName, ":-)");
     ASSERT_EQ(completion[2].displayName, "B-)");
 
