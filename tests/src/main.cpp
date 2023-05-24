@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     qDebug() << "Settings directory:" << settingsDir.path();
     chatterino::Settings settings(settingsDir.path());
 
-    QtConcurrent::run([&app, settingsDir = std::move(settingsDir)]() mutable {
+    QtConcurrent::run([&app, &settingsDir]() mutable {
         auto res = RUN_ALL_TESTS();
 
         chatterino::NetworkManager::deinit();

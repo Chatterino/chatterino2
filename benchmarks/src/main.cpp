@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     settingsDir.setAutoRemove(false);  // we'll remove it manually
     chatterino::Settings settings(settingsDir.path());
 
-    QtConcurrent::run([&app, settingsDir = std::move(settingsDir)]() mutable {
+    QtConcurrent::run([&app, &settingsDir]() mutable {
         ::benchmark::RunSpecifiedBenchmarks();
 
         settingsDir.remove();
