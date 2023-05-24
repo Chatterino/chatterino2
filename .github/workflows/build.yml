@@ -281,7 +281,7 @@ jobs:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
           split_workflow: true
-          exclude: "tests/*,lib/*"
+          exclude: "lib/*"
           cmake_command: >-
             cmake -S. -Bbuild-clang-tidy 
             -DCMAKE_BUILD_TYPE=Release 
@@ -291,12 +291,15 @@ jobs:
             -DCHATTERINO_LTO=Off 
             -DCHATTERINO_PLUGINS=On 
             -DBUILD_WITH_QT6=Off
+            -DBUILD_TESTS=On
+            -DBUILD_BENCHMARKS=On
           apt_packages: >-
             qttools5-dev, qt5-image-formats-plugins, libqt5svg5-dev, 
             libsecret-1-dev,
             libboost-dev, libboost-system-dev, libboost-filesystem-dev,
             libssl-dev,
-            rapidjson-dev
+            rapidjson-dev,
+            libbenchmark-dev
 
       - name: clang-tidy-review upload
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'
