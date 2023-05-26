@@ -179,8 +179,8 @@ private:
     {
         auto bttvEmotes = std::make_shared<EmoteMap>();
         addEmote(*bttvEmotes, "FeelsGoodMan");
-        addEmote(*bttvEmotes, "FeelsBirthdayMan");
         addEmote(*bttvEmotes, "FeelsBadMan");
+        addEmote(*bttvEmotes, "FeelsBirthdayMan");
         addEmote(*bttvEmotes, "Aware");
         addEmote(*bttvEmotes, "Clueless");
         addEmote(*bttvEmotes, "SaltyCorn");
