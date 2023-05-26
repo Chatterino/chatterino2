@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Major: Added support for low-trust-users messages. They now highlight in the chat if the user is restricted. (#4642)
+
 ## 2.4.4
 
 - Minor: Added a Send button in the input box so you can click to send a message. This is disabled by default and can be enabled with the "Show send message button" setting. (#4607)
