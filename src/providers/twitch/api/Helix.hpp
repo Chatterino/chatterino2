@@ -637,6 +637,18 @@ enum class HelixListVIPsError {  // /vips
     Forwarded,
 };  // /vips
 
+enum class HelixSendShoutoutError {
+    Unknown,
+    // 400
+    UserIsBroadcaster,
+    BroadcasterNotLive,
+    // 401
+    UserNotAuthorized,
+    UserMissingScope,
+
+    Ratelimited,
+};
+
 struct HelixStartCommercialResponse {
     // Length of the triggered commercial
     int length;
@@ -1013,6 +1025,12 @@ public:
         FailureCallback<HelixUpdateShieldModeError, QString>
             failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+    virtual void sendShoutout(
+        QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixSendShoutoutError, QString> failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1318,6 +1336,12 @@ public:
                           FailureCallback<HelixUpdateShieldModeError, QString>
                               failureCallback) final;
 
+    // https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+    void sendShoutout(
+        QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixSendShoutoutError, QString> failureCallback) final;
+
     void update(QString clientId, QString oauthToken) final;
 
     static void initialize();
@@ -1361,7 +1385,13 @@ protected:
         FailureCallback<HelixGetModeratorsError, QString> failureCallback);
 
 private:
-    NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
+    NetworkRequest makeRequest(const QString &url, const QUrlQuery &urlQuery,
+                               NetworkRequestType type);
+    NetworkRequest makeGet(const QString &url, const QUrlQuery &urlQuery);
+    NetworkRequest makeDelete(const QString &url, const QUrlQuery &urlQuery);
+    NetworkRequest makePost(const QString &url, const QUrlQuery &urlQuery);
+    NetworkRequest makePut(const QString &url, const QUrlQuery &urlQuery);
+    NetworkRequest makePatch(const QString &url, const QUrlQuery &urlQuery);
 
     QString clientId;
     QString oauthToken;
