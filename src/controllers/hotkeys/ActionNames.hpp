@@ -7,17 +7,17 @@
 #include <map>
 #include <vector>
 
-inline const std::vector<std::pair<std::vector<QString>, QString>>
+inline const std::vector<std::pair<QString, std::vector<QString>>>
     HOTKEY_ARG_ON_OFF_TOGGLE = {
-        {{}, "Toggle"},
-        {{"on"}, "Set to on"},
-        {{"off"}, "Set to off"},
+        {"Toggle", {}},
+        {"Set to on", {"on"}},
+        {"Set to off", {"off"}},
 };
 
-inline const std::vector<std::pair<std::vector<QString>, QString>>
+inline const std::vector<std::pair<QString, std::vector<QString>>>
     HOTKEY_ARG_WITH_OR_WITHOUT_SELECTION = {
-        {{"withoutSelection"}, "No"},
-        {{"withSelection"}, "Yes"},
+        {"No", {"withoutSelection"}},
+        {"Yes", {"withSelection"}},
 };
 
 namespace chatterino {
@@ -40,9 +40,10 @@ struct ActionDefinition {
     uint8_t maxCountArguments = minCountArguments;
 
     // possibleArguments is empty or contains all possible argument values,
-    // left string from the pair is the thing the action will see,
-    // right one is what the user sees
-    std::vector<std::pair<std::vector<QString>, QString>> possibleArguments =
+    // it is an ordered mapping from option name (what the user sees) to
+    // arguments (what the action code will see).
+    // As std::map<K, V> does not guarantee order this is a std::vector<...>
+    std::vector<std::pair<QString, std::vector<QString>>> possibleArguments =
         {};
 
     // When possibleArguments are present this should be a string like
@@ -74,8 +75,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments{
-                  {{"up"}, "Up"},
-                  {{"down"}, "Down"},
+                  {"Up", {"up"}},
+                  {"Down", {"down"}},
               },
               .argumentsPrompt = "Direction:",
           }},
@@ -98,10 +99,10 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments{
-                  {{"up"}, "Up"},
-                  {{"down"}, "Down"},
-                  {{"left"}, "Left"},
-                  {{"right"}, "Right"},
+                  {"Up", {"up"}},
+                  {"Down", {"down"}},
+                  {"Left", {"left"}},
+                  {"Right", {"right"}},
               },
               .argumentsPrompt = "Direction:",
               .argumentsPromptHover =
@@ -123,9 +124,9 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments{
-                  {{}, "All emotes"},
-                  {{"channel"}, "Channel emotes only"},
-                  {{"subscriber"}, "Subscriber emotes only"},
+                  {"All emotes", {}},
+                  {"Channel emotes only", {"channel"}},
+                  {"Subscriber emotes only", {"subscriber"}},
               },
               .argumentsPrompt = "Emote type:",
               .argumentsPromptHover = "Which emotes should Chatterino reload",
@@ -143,8 +144,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments{
-                  {{"up"}, "Up"},
-                  {{"down"}, "Down"},
+                  {"Up", {"up"}},
+                  {"Down", {"down"}},
               },
               .argumentsPrompt = "Direction:",
               .argumentsPromptHover =
@@ -189,9 +190,9 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
                   "<source of text: auto, split or splitInput>",
               .minCountArguments = 1,
               .possibleArguments{
-                  {{"auto"}, "Automatic"},
-                  {{"split"}, "Split"},
-                  {{"splitInput"}, "Split Input"},
+                  {"Automatic", {"auto"}},
+                  {"Split", {"split"}},
+                  {"Split Input", {"splitInput"}},
               },
               .argumentsPrompt = "Source of text:",
           }},
@@ -233,8 +234,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments{
-                  {{}, "Default behavior"},
-                  {{"keepInput"}, "Keep message in input after sending it"},
+                  {"Default behavior", {}},
+                  {"Keep message in input after sending it", {"keepInput"}},
               },
               .argumentsPrompt = "Behavior:",
           }},
@@ -276,8 +277,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .minCountArguments = 1,
               .maxCountArguments = 1,
               .possibleArguments{
-                  {{"split"}, "Focused Split"},
-                  {{"window"}, "Entire Tab"},
+                  {"Focused Split", {"split"}},
+                  {"Entire Tab", {"window"}},
               },
               .argumentsPrompt = "What should be copied",
           }},
@@ -293,10 +294,10 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .maxCountArguments = 1,
               .possibleArguments =
                   {
-                      {{}, "Toggle on/off"},
-                      {{"on"}, "Set to on"},
-                      {{"off"}, "Set to off"},
-                      {{"auto"}, "Set to automatic"},
+                      {"Toggle on/off", {}},
+                      {"Set to on", {"on"}},
+                      {"Set to off", {"off"}},
+                      {"Set to automatic", {"auto"}},
                   },
               .argumentsPrompt = "New value:",
               .argumentsPromptHover =
@@ -312,9 +313,9 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .maxCountArguments = 1,
               .possibleArguments =
                   {
-                      {{"in"}, "Zoom in"},
-                      {{"out"}, "Zoom out"},
-                      {{"reset"}, "Reset zoom"},
+                      {"Zoom in", {"in"}},
+                      {"Zoom out", {"out"}},
+                      {"Reset zoom", {"reset"}},
                   },
           }},
          {"setTabVisibility",

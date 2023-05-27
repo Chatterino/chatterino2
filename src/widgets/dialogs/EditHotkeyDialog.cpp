@@ -83,7 +83,7 @@ void EditHotkeyDialog::setFromHotkey(std::shared_ptr<Hotkey> hotkey)
         int matchIdx = -1;
         for (int i = 0; i < def->possibleArguments.size(); i++)
         {
-            const auto &[argData, displayText] = def->possibleArguments.at(i);
+            const auto &[displayText, argData] = def->possibleArguments.at(i);
             this->ui_->easyArgsPicker->addItem(displayText);
 
             // check if matches
@@ -229,7 +229,7 @@ void EditHotkeyDialog::afterEdit()
     {
         arguments =
             def->possibleArguments.at(this->ui_->easyArgsPicker->currentIndex())
-                .first;
+                .second;
     }
 
     auto hotkey = std::make_shared<Hotkey>(
@@ -400,7 +400,7 @@ void EditHotkeyDialog::updateArgumentsInput()
         this->ui_->argumentsDescription->setVisible(false);
 
         this->ui_->easyArgsPicker->clear();
-        for (const auto &[_, displayText] : def.possibleArguments)
+        for (const auto &[displayText, _] : def.possibleArguments)
         {
             this->ui_->easyArgsPicker->addItem(displayText);
         }
