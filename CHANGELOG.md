@@ -8,6 +8,7 @@
 - Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
 - Dev: Added test cases for emote and tab completion. (#4644)
 - Dev: Fixed `clang-tidy-review` action not picking up dependencies. (#4648)
+- Dev: Expanded upon `$$$` test channels. (#4654)
 
 ## 2.4.4
 
