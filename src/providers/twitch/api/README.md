@@ -12,7 +12,7 @@ If you're adding support for a new endpoint, these are the things you should kno
 
 1. Add a virtual function in the `IHelix` class. Naming should reflect the API name as best as possible.
 1. Override the virtual function in the `Helix` class.
-1. Mock the function in the `MockHelix` class in the `tests/src/HighlightController.cpp` file.
+1. Mock the function in the `mock::Helix` class in the `mocks/include/mocks/Helix.hpp` file.
 1. (Optional) Make a new error enum for the failure callback.
 
 For a simple example, see the `updateUserChatColor` function and its error enum `HelixUpdateUserChatColorError`.
@@ -169,6 +169,14 @@ Not used anywhere at the moment.
 URL: https://dev.twitch.tv/docs/api/reference/#get-chatters
 
 Used for the viewer list for moderators/broadcasters.
+
+### Send Shoutout
+
+URL: https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+
+Used in:
+
+- `controllers/commands/CommandController.cpp` to send Twitch native shoutout using "/shoutout <username>"
 
 ## PubSub
 
