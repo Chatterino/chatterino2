@@ -9,6 +9,7 @@
 - Dev: Added test cases for emote and tab completion. (#4644)
 - Dev: Fixed `clang-tidy-review` action not picking up dependencies. (#4648)
 - Dev: Expanded upon `$$$` test channels. (#4655)
+- Dev: Added tools to help debug image GC. (#4578)
 
 ## 2.4.4
 
@@ -24,7 +25,6 @@
 - Bugfix: Fixed Ctrl+Backspace not working after Select All in chat search popup. (#4461)
 - Bugfix: Fixed crash when scrolling up really fast. (#4621)
 - Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
-- Dev: Added tools to help debug image GC. (#4578)
 
 ## 2.4.3
 
