@@ -8,8 +8,6 @@
 #include "controllers/hotkeys/HotkeyHelpers.hpp"
 #include "ui_EditHotkeyDialog.h"
 
-#include <qloggingcategory.h>
-
 namespace chatterino {
 
 EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
