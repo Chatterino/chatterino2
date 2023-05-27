@@ -3214,7 +3214,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand(
         "/debug-force-image-gc",
         [](const QStringList & /*words*/, auto /*channel*/) -> QString {
-            postToThread([]() {
+            runInGuiThread([] {
                 using namespace chatterino::detail;
                 auto &iep = ImageExpirationPool::instance();
                 iep.freeOld();
@@ -3225,7 +3225,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand(
         "/debug-force-image-unload",
         [](const QStringList & /*words*/, auto /*channel*/) -> QString {
-            postToThread([]() {
+            runInGuiThread([] {
                 using namespace chatterino::detail;
                 auto &iep = ImageExpirationPool::instance();
                 iep.freeAll();
