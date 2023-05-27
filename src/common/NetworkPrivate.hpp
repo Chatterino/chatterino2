@@ -68,6 +68,6 @@ private:
     QString hash_;
 };
 
-void load(const std::shared_ptr<NetworkData> &data);
+void load(std::shared_ptr<NetworkData> &&data);
 
 }  // namespace chatterino

@@ -12,8 +12,11 @@ using namespace chatterino;
 
 namespace {
 
-// Change to http://httpbin.org if you don't want to run the docker image yourself to test this
+#ifdef CHATTERINO_TEST_USE_PUBLIC_HTTPBIN
+const char *const HTTPBIN_BASE_URL = "http://httpbin.org";
+#else
 const char *const HTTPBIN_BASE_URL = "http://127.0.0.1:9051";
+#endif
 
 QString getStatusURL(int code)
 {

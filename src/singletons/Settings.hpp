@@ -2,13 +2,13 @@
 
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
+#include "common/enums/MessageOverflow.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/logging/ChannelLog.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/splits/SplitInput.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
@@ -508,6 +508,8 @@ public:
     // Purely QOL settings are here (like last item in a list).
     IntSetting lastSelectChannelTab = {"/ui/lastSelectChannelTab", 0};
     IntSetting lastSelectIrcConn = {"/ui/lastSelectIrcConn", 0};
+
+    BoolSetting showSendButton = {"/ui/showSendButton", false};
 
     // Similarity
     BoolSetting similarityEnabled = {"/similarity/similarityEnabled", false};
