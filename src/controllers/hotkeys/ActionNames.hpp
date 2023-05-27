@@ -280,7 +280,9 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
                   {"Focused Split", {"split"}},
                   {"Entire Tab", {"window"}},
               },
-              .argumentsPrompt = "What should be copied",
+              .argumentsPrompt = "Include:",
+              .argumentsPromptHover =
+                  "What should be included in the new popup",
           }},
          {"quit", ActionDefinition{"Quit Chatterino"}},
          {"removeTab", ActionDefinition{"Remove current tab"}},
@@ -317,6 +319,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
                       {"Zoom out", {"out"}},
                       {"Reset zoom", {"reset"}},
                   },
+              .argumentsPrompt = "Option:",
           }},
          {"setTabVisibility",
           ActionDefinition{
