@@ -71,6 +71,7 @@ bool isInStreamerMode()
                 p.exitStatus() == QProcess::NormalExit)
             {
                 cache = (p.exitCode() == 0);
+                getApp()->streamerModeChanged.invoke();
                 return (p.exitCode() == 0);
             }
 
@@ -89,6 +90,7 @@ bool isInStreamerMode()
             qCWarning(chatterinoStreamerMode) << "pgrep execution timed out!";
 
             cache = false;
+            getApp()->streamerModeChanged.invoke();
             return false;
 #endif
 
@@ -122,6 +124,7 @@ bool isInStreamerMode()
                     if (broadcastingBinaries().contains(processName))
                     {
                         cache = true;
+                        getApp()->streamerModeChanged.invoke();
                         return true;
                     }
                 }
@@ -133,6 +136,7 @@ bool isInStreamerMode()
             }
 
             cache = false;
+            getApp()->streamerModeChanged.invoke();
 #endif
             return false;
     }

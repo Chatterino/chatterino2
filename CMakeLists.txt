@@ -8,7 +8,7 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
-project(chatterino VERSION 2.4.3)
+project(chatterino VERSION 2.4.4)
 
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
@@ -173,6 +173,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(cmake/resources/generate_resources.cmake)
 
 add_subdirectory(src)
+
+if (BUILD_TESTS OR BUILD_BENCHMARKS)
+    add_subdirectory(mocks)
+endif ()
 
 if (BUILD_TESTS)
     enable_testing()

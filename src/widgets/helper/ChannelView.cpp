@@ -1362,7 +1362,8 @@ void ChannelView::wheelEvent(QWheelEvent *event)
     {
         float mouseMultiplier = getSettings()->mouseScrollMultiplier;
 
-        qreal desired = this->scrollBar_->getDesiredValue();
+        // This ensures snapshot won't be indexed out of bounds when scrolling really fast
+        qreal desired = std::max<qreal>(0, this->scrollBar_->getDesiredValue());
         qreal delta = event->angleDelta().y() * qreal(1.5) * mouseMultiplier;
 
         auto &snapshot = this->getMessagesSnapshot();

@@ -126,6 +126,9 @@ AboutPage::AboutPage()
                        "https://github.com/getsentry/crashpad",
                        ":/licenses/crashpad.txt");
 #endif
+            addLicense(form.getElement(), "Fluent icons",
+                       "https://github.com/microsoft/fluentui-system-icons",
+                       ":/licenses/fluenticons.txt");
         }
 
         // Attributions
