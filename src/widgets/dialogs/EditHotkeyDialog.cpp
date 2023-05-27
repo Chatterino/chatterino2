@@ -67,7 +67,7 @@ void EditHotkeyDialog::setFromHotkey(std::shared_ptr<Hotkey> hotkey)
     if (def.has_value() && !def->possibleArguments.empty())
     {
         qCDebug(chatterinoHotkeys) << "Enabled easy picker and arg edit "
-                                      "because we arguments from hotkey";
+                                      "because we have arguments from hotkey";
         this->ui_->easyArgsLabel->setVisible(true);
         this->ui_->easyArgsPicker->setVisible(true);
 
