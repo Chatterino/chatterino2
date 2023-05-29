@@ -22,7 +22,10 @@ void AutocompleteModel::updateResults(const QString &query, size_t maxCount)
     if (this->source_)
     {
         this->source_->update(query);
-        this->source_->copyToListModel(*this, maxCount);
+
+        // Copy results to this model
+        this->clear();
+        this->source_->addToListModel(*this, maxCount);
     }
 }
 

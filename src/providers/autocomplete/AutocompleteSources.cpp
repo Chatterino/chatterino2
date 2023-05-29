@@ -17,15 +17,21 @@ namespace chatterino {
 
 namespace {
 
+    size_t sizeWithinLimit(size_t size, size_t limit)
+    {
+        if (limit == 0)
+        {
+            return size;
+        }
+        return std::min(size, limit);
+    }
+
     template <typename T, typename Mapper>
-    void mapVecToListModel(const std::vector<T> &input, GenericListModel &model,
+    void addVecToListModel(const std::vector<T> &input, GenericListModel &model,
                            size_t maxCount, Mapper mapper)
     {
-        size_t count =
-            maxCount == 0 ? input.size() : std::min(input.size(), maxCount);
-
-        model.clear();
-        model.reserve(count);
+        size_t count = sizeWithinLimit(input.size(), maxCount);
+        model.reserve(model.rowCount() + count);
 
         for (size_t i = 0; i < count; ++i)
         {
@@ -34,22 +40,16 @@ namespace {
     }
 
     template <typename T, typename Mapper>
-    void mapVecToStringModel(const std::vector<T> &input,
-                             QStringListModel &model, size_t maxCount,
-                             Mapper mapper)
+    void addVecToStringList(const std::vector<T> &input, QStringList &list,
+                            size_t maxCount, Mapper mapper)
     {
-        size_t count =
-            maxCount == 0 ? input.size() : std::min(input.size(), maxCount);
-
-        QStringList newData;
-        newData.reserve(count);
+        size_t count = sizeWithinLimit(input.size(), maxCount);
+        list.reserve(list.count() + count);
 
         for (size_t i = 0; i < count; ++i)
         {
-            newData.push_back(mapper(input[i]));
+            list.push_back(mapper(input[i]));
         }
-
-        model.setStringList(newData);
     }
 
     void addEmotes(std::vector<CompletionEmote> &out, const EmoteMap &map,
@@ -116,10 +116,10 @@ void AutocompleteEmoteSource::update(const QString &query)
     }
 }
 
-void AutocompleteEmoteSource::copyToListModel(GenericListModel &model,
-                                              size_t maxCount) const
+void AutocompleteEmoteSource::addToListModel(GenericListModel &model,
+                                             size_t maxCount) const
 {
-    mapVecToListModel(this->output_, model, maxCount,
+    addVecToListModel(this->output_, model, maxCount,
                       [this](const CompletionEmote &e) {
                           return std::make_unique<InputCompletionItem>(
                               e.emote, e.displayName + " - " + e.providerName,
@@ -127,14 +127,14 @@ void AutocompleteEmoteSource::copyToListModel(GenericListModel &model,
                       });
 }
 
-void AutocompleteEmoteSource::copyToStringModel(QStringListModel &model,
-                                                size_t maxCount,
-                                                bool /* isFirstWord */) const
+void AutocompleteEmoteSource::addToStringList(QStringList &list,
+                                              size_t maxCount,
+                                              bool /* isFirstWord */) const
 {
-    mapVecToStringModel(this->output_, model, maxCount,
-                        [](const CompletionEmote &e) {
-                            return e.tabCompletionName + " ";
-                        });
+    addVecToStringList(this->output_, list, maxCount,
+                       [](const CompletionEmote &e) {
+                           return e.tabCompletionName + " ";
+                       });
 }
 
 void AutocompleteEmoteSource::initializeFromChannel(const Channel *channel)
@@ -225,23 +225,23 @@ void AutocompleteUsersSource::update(const QString &query)
     }
 }
 
-void AutocompleteUsersSource::copyToListModel(GenericListModel &model,
-                                              size_t maxCount) const
+void AutocompleteUsersSource::addToListModel(GenericListModel &model,
+                                             size_t maxCount) const
 {
-    mapVecToListModel(this->output_, model, maxCount,
+    addVecToListModel(this->output_, model, maxCount,
                       [this](const UsersAutocompleteItem &user) {
                           return std::make_unique<InputCompletionItem>(
                               nullptr, user.second, this->callback_);
                       });
 }
 
-void AutocompleteUsersSource::copyToStringModel(QStringListModel &model,
-                                                size_t maxCount,
-                                                bool isFirstWord) const
+void AutocompleteUsersSource::addToStringList(QStringList &list,
+                                              size_t maxCount,
+                                              bool isFirstWord) const
 {
     bool mentionComma = getSettings()->mentionUsersWithComma;
-    mapVecToStringModel(
-        this->output_, model, maxCount,
+    addVecToStringList(
+        this->output_, list, maxCount,
         [isFirstWord, mentionComma](const UsersAutocompleteItem &user) {
             const auto userMention =
                 formatUserMention(user.second, isFirstWord, mentionComma);
@@ -286,24 +286,24 @@ void AutocompleteCommandsSource::update(const QString &query)
     }
 }
 
-void AutocompleteCommandsSource::copyToListModel(GenericListModel &model,
-                                                 size_t maxCount) const
+void AutocompleteCommandsSource::addToListModel(GenericListModel &model,
+                                                size_t maxCount) const
 {
-    mapVecToListModel(this->output_, model, maxCount,
+    addVecToListModel(this->output_, model, maxCount,
                       [this](const CompletionCommand &command) {
                           return std::make_unique<InputCompletionItem>(
                               nullptr, command.name, this->callback_);
                       });
 }
 
-void AutocompleteCommandsSource::copyToStringModel(QStringListModel &model,
-                                                   size_t maxCount,
-                                                   bool /* isFirstWord */) const
+void AutocompleteCommandsSource::addToStringList(QStringList &list,
+                                                 size_t maxCount,
+                                                 bool /* isFirstWord */) const
 {
-    mapVecToStringModel(this->output_, model, maxCount,
-                        [](const CompletionCommand &command) {
-                            return command.prefix + command.name + " ";
-                        });
+    addVecToStringList(this->output_, list, maxCount,
+                       [](const CompletionCommand &command) {
+                           return command.prefix + command.name + " ";
+                       });
 }
 
 void AutocompleteCommandsSource::initializeItems()

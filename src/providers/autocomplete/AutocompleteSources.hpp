@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <utility>
+#include <variant>
 
 namespace chatterino {
 
@@ -45,10 +46,10 @@ public:
                             ActionCallback callback = nullptr);
 
     void update(const QString &query) override;
-    void copyToListModel(GenericListModel &model,
-                         size_t maxCount = 0) const override;
-    void copyToStringModel(QStringListModel &model, size_t maxCount = 0,
-                           bool isFirstWord = false) const override;
+    void addToListModel(GenericListModel &model,
+                        size_t maxCount = 0) const override;
+    void addToStringList(QStringList &list, size_t maxCount = 0,
+                         bool isFirstWord = false) const override;
 
     const std::vector<CompletionEmote> &output() const;
 
@@ -85,10 +86,10 @@ public:
                             ActionCallback callback = nullptr);
 
     void update(const QString &query) override;
-    void copyToListModel(GenericListModel &model,
-                         size_t maxCount = 0) const override;
-    void copyToStringModel(QStringListModel &model, size_t maxCount = 0,
-                           bool isFirstWord = false) const override;
+    void addToListModel(GenericListModel &model,
+                        size_t maxCount = 0) const override;
+    void addToStringList(QStringList &list, size_t maxCount = 0,
+                         bool isFirstWord = false) const override;
 
     const std::vector<UsersAutocompleteItem> &output() const;
 
@@ -124,10 +125,10 @@ public:
         ActionCallback callback = nullptr);
 
     void update(const QString &query) override;
-    void copyToListModel(GenericListModel &model,
-                         size_t maxCount = 0) const override;
-    void copyToStringModel(QStringListModel &model, size_t maxCount = 0,
-                           bool isFirstWord = false) const override;
+    void addToListModel(GenericListModel &model,
+                        size_t maxCount = 0) const override;
+    void addToStringList(QStringList &list, size_t maxCount = 0,
+                         bool isFirstWord = false) const override;
 
     const std::vector<CompletionCommand> &output() const;
 

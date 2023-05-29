@@ -19,7 +19,11 @@ void TabAutocompleteModel::updateResults(const QString &query, bool isFirstWord)
     if (this->source_)
     {
         this->source_->update(query);
-        this->source_->copyToStringModel(*this, 0, isFirstWord);
+
+        // Copy results to this model
+        QStringList results;
+        this->source_->addToStringList(results, 0, isFirstWord);
+        this->setStringList(results);
     }
 }
 

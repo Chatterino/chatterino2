@@ -219,9 +219,9 @@ protected:
             std::make_unique<ClassicTabAutocompleteEmoteStrategy>());
         source.update(fullQuery);
 
-        QStringListModel m;
-        source.copyToStringModel(m, 0, isFirstWord);
-        return m.stringList();
+        QStringList m;
+        source.addToStringList(m, 0, isFirstWord);
+        return m;
     }
 };
 
