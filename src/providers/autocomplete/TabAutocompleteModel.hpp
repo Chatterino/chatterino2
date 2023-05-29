@@ -29,7 +29,7 @@ public:
     void updateResults(const QString &query, bool isFirstWord = false);
 
 private:
-    enum class SourceKind { Emote, User, Command };
+    enum class SourceKind { Emote, User, Command, EmoteAndUser };
 
     /// @brief Updates the internal AutocompleteSource based on the current query.
     /// The AutocompleteSource will only change if the deduced completion kind

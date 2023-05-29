@@ -3,6 +3,7 @@
 #include "common/Channel.hpp"
 #include "providers/autocomplete/AutocompleteSources.hpp"
 #include "providers/autocomplete/AutocompleteStrategies.hpp"
+#include "singletons/Settings.hpp"
 
 namespace chatterino {
 
@@ -56,6 +57,8 @@ boost::optional<TabAutocompleteModel::SourceKind>
         return boost::none;
     }
 
+    // Check for cases where we can definitively say what kind of completion is taking place.
+
     if (query.startsWith('@'))
     {
         return SourceKind::User;
@@ -69,8 +72,17 @@ boost::optional<TabAutocompleteModel::SourceKind>
         return SourceKind::Command;
     }
 
-    // Emotes can be autocompleted without using a :
-    return SourceKind::Emote;
+    // At this point, we note that emotes can be autocompleted without using a :
+    // Therefore, we must also consider that the user could be completing an emote
+    // OR a mention depending on their completion settings.
+
+    if (getSettings()->userCompletionOnlyWithAt)
+    {
+        return SourceKind::Emote;
+    }
+
+    // Either is possible, use unified source
+    return SourceKind::EmoteAndUser;
 }
 
 std::unique_ptr<AutocompleteSource> TabAutocompleteModel::buildSource(
@@ -89,6 +101,11 @@ std::unique_ptr<AutocompleteSource> TabAutocompleteModel::buildSource(
         case SourceKind::Command:
             return std::make_unique<AutocompleteCommandsSource>(
                 std::make_unique<AutocompleteCommandStrategy>(true));
+        case SourceKind::EmoteAndUser:
+            return std::make_unique<AutocompleteUnifiedSource>(
+                this->channel_,
+                std::make_unique<ClassicTabAutocompleteEmoteStrategy>(),
+                std::make_unique<ClassicAutocompleteUserStrategy>());
         default:
             return nullptr;
     }

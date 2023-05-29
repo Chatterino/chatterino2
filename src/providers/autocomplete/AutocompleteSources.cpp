@@ -209,9 +209,10 @@ const std::vector<CompletionEmote> &AutocompleteEmoteSource::output() const
 
 AutocompleteUsersSource::AutocompleteUsersSource(
     const Channel &channel, std::unique_ptr<AutocompleteUsersStrategy> strategy,
-    ActionCallback callback)
+    ActionCallback callback, bool prependAt)
     : strategy_(std::move(strategy))
     , callback_(std::move(callback))
+    , prependAt_(prependAt)
 {
     this->initializeFromChannel(&channel);
 }
@@ -242,10 +243,12 @@ void AutocompleteUsersSource::addToStringList(QStringList &list,
     bool mentionComma = getSettings()->mentionUsersWithComma;
     addVecToStringList(
         this->output_, list, maxCount,
-        [isFirstWord, mentionComma](const UsersAutocompleteItem &user) {
+        [this, isFirstWord, mentionComma](const UsersAutocompleteItem &user) {
             const auto userMention =
                 formatUserMention(user.second, isFirstWord, mentionComma);
-            return "@" + userMention + " ";
+            QString strTemplate = this->prependAt_ ? QStringLiteral("@%1 ")
+                                                   : QStringLiteral("%1 ");
+            return strTemplate.arg(userMention);
         });
 }
 
@@ -342,6 +345,86 @@ void AutocompleteCommandsSource::initializeItems()
 const std::vector<CompletionCommand> &AutocompleteCommandsSource::output() const
 {
     return this->output_;
+}
+
+//// AutocompleteUnifiedSource
+
+AutocompleteUnifiedSource::AutocompleteUnifiedSource(
+    const Channel &channel,
+    std::unique_ptr<AutocompleteEmoteSource::AutocompleteEmoteStrategy>
+        emoteStrategy,
+    std::unique_ptr<AutocompleteUsersSource::AutocompleteUsersStrategy>
+        userStrategy,
+    ActionCallback callback)
+    : emoteSource_(channel, std::move(emoteStrategy), callback)
+    , usersSource_(channel, std::move(userStrategy), callback,
+                   false)  // disable adding @ to front
+{
+}
+
+void AutocompleteUnifiedSource::update(const QString &query)
+{
+    this->emoteSource_.update(query);
+    this->usersSource_.update(query);
+}
+
+void AutocompleteUnifiedSource::addToListModel(GenericListModel &model,
+                                               size_t maxCount) const
+{
+    if (maxCount == 0)
+    {
+        this->emoteSource_.addToListModel(model, 0);
+        this->usersSource_.addToListModel(model, 0);
+        return;
+    }
+
+    // Otherwise, make sure to only add maxCount elements in total. We prioritize
+    // accepting results from the emote source before the users source (arbitrarily).
+
+    int startingSize = model.rowCount();
+
+    // Add up to maxCount elements
+    this->emoteSource_.addToListModel(model, maxCount);
+
+    int used = model.rowCount() - startingSize;
+    if (used >= maxCount)
+    {
+        // Used up our limit on emotes
+        return;
+    }
+
+    // Only add maxCount - used to ensure the total added doesn't exceed maxCount
+    this->usersSource_.addToListModel(model, maxCount - used);
+}
+
+void AutocompleteUnifiedSource::addToStringList(QStringList &list,
+                                                size_t maxCount,
+                                                bool isFirstWord) const
+{
+    if (maxCount == 0)
+    {
+        this->emoteSource_.addToStringList(list, 0, isFirstWord);
+        this->usersSource_.addToStringList(list, 0, isFirstWord);
+        return;
+    }
+
+    // Otherwise, make sure to only add maxCount elements in total. We prioritize
+    // accepting results from the emote source before the users source (arbitrarily).
+
+    int startingSize = list.size();
+
+    // Add up to maxCount elements
+    this->emoteSource_.addToStringList(list, maxCount, isFirstWord);
+
+    int used = list.size() - startingSize;
+    if (used >= maxCount)
+    {
+        // Used up our limit on emotes
+        return;
+    }
+
+    // Only add maxCount - used to ensure the total added doesn't exceed maxCount
+    this->usersSource_.addToStringList(list, maxCount - used, isFirstWord);
 }
 
 }  // namespace chatterino

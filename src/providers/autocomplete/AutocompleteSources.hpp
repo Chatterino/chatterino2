@@ -76,14 +76,16 @@ public:
 
     /// @brief Initializes a source for UsersAutocompleteItems from the given
     /// channel.
-    /// @param channel Channel to initialize emotes from. Must be a TwitchChannel
+    /// @param channel Channel to initialize users from. Must be a TwitchChannel
     /// or completion is a no-op.
     /// @param strategy AutocompleteStrategy to apply
     /// @param callback ActionCallback to invoke upon InputCompletionItem selection.
     /// See InputCompletionItem::action(). Can be nullptr.
+    /// @param prependAt Whether to prepend @ to string autocomplete suggestions.
     AutocompleteUsersSource(const Channel &channel,
                             std::unique_ptr<AutocompleteUsersStrategy> strategy,
-                            ActionCallback callback = nullptr);
+                            ActionCallback callback = nullptr,
+                            bool prependAt = true);
 
     void update(const QString &query) override;
     void addToListModel(GenericListModel &model,
@@ -98,6 +100,7 @@ private:
 
     std::unique_ptr<AutocompleteUsersStrategy> strategy_;
     ActionCallback callback_;
+    bool prependAt_;
 
     std::vector<UsersAutocompleteItem> items_{};
     std::vector<UsersAutocompleteItem> output_{};
@@ -140,6 +143,40 @@ private:
 
     std::vector<CompletionCommand> items_{};
     std::vector<CompletionCommand> output_{};
+};
+
+//// AutocompleteUnifiedSource
+
+class AutocompleteUnifiedSource : public AutocompleteSource
+{
+public:
+    using ActionCallback = std::function<void(const QString &)>;
+
+    /// @brief Initializes a unified autocomplete source for the given channel.
+    /// Resolves both emotes and usernames for autocompletion.
+    /// @param channel Channel to initialize emotes and users from. Must be a
+    /// TwitchChannel or completion is a no-op.
+    /// @param emoteStrategy Strategy for selecting emotes
+    /// @param userStrategy Strategy for selecting users
+    /// @param callback ActionCallback to invoke upon InputCompletionItem selection.
+    /// See InputCompletionItem::action(). Can be nullptr.
+    AutocompleteUnifiedSource(
+        const Channel &channel,
+        std::unique_ptr<AutocompleteEmoteSource::AutocompleteEmoteStrategy>
+            emoteStrategy,
+        std::unique_ptr<AutocompleteUsersSource::AutocompleteUsersStrategy>
+            userStrategy,
+        ActionCallback callback = nullptr);
+
+    void update(const QString &query) override;
+    void addToListModel(GenericListModel &model,
+                        size_t maxCount = 0) const override;
+    void addToStringList(QStringList &list, size_t maxCount = 0,
+                         bool isFirstWord = false) const override;
+
+private:
+    AutocompleteEmoteSource emoteSource_;
+    AutocompleteUsersSource usersSource_;
 };
 
 }  // namespace chatterino
