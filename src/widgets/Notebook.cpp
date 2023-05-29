@@ -404,6 +404,12 @@ QWidget *Notebook::tabAt(QPoint point, int &index, int maxWidth)
 
     for (auto &item : this->items_)
     {
+        if (!item.tab->isVisible())
+        {
+            i++;
+            continue;
+        }
+
         auto rect = item.tab->getDesiredRect();
         rect.setHeight(int(this->scale() * 24));
 
