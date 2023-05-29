@@ -6,6 +6,7 @@
 #include <QObject>
 
 #include <memory>
+#include <vector>
 
 namespace chatterino {
 
