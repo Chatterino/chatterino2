@@ -30,7 +30,7 @@ namespace {
     void addVecToListModel(const std::vector<T> &input, GenericListModel &model,
                            size_t maxCount, Mapper mapper)
     {
-        size_t count = sizeWithinLimit(input.size(), maxCount);
+        const size_t count = sizeWithinLimit(input.size(), maxCount);
         model.reserve(model.rowCount() + count);
 
         for (size_t i = 0; i < count; ++i)
@@ -43,7 +43,7 @@ namespace {
     void addVecToStringList(const std::vector<T> &input, QStringList &list,
                             size_t maxCount, Mapper mapper)
     {
-        size_t count = sizeWithinLimit(input.size(), maxCount);
+        const size_t count = sizeWithinLimit(input.size(), maxCount);
         list.reserve(list.count() + count);
 
         for (size_t i = 0; i < count; ++i)
@@ -154,7 +154,7 @@ void AutocompleteEmoteSource::initializeFromChannel(const Channel *channel)
 
             // Twitch Emotes available locally
             auto localEmoteData = user->accessLocalEmotes();
-            if (tc &&
+            if ((tc != nullptr) &&
                 localEmoteData->find(tc->roomId()) != localEmoteData->end())
             {
                 if (const auto *localEmotes = &localEmoteData->at(tc->roomId()))

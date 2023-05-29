@@ -145,8 +145,10 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             return;
         }
 
+        // always expected to be TabAutocompleteModel
         auto *completionModel =
-            static_cast<TabAutocompleteModel *>(this->completer_->model());
+            dynamic_cast<TabAutocompleteModel *>(this->completer_->model());
+        assert(completionModel != nullptr);
 
         if (!this->completionInProgress_)
         {
