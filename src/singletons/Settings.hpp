@@ -2,13 +2,13 @@
 
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
+#include "common/enums/MessageOverflow.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/logging/ChannelLog.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/splits/SplitInput.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
@@ -72,6 +72,14 @@ enum HelixTimegateOverride : int {
 
     // Ignore timegating and always force use the Helix API
     AlwaysUseHelix = 3,
+};
+
+enum ThumbnailPreviewMode : int {
+    DontShow = 0,
+
+    AlwaysShow = 1,
+
+    ShowOnShift = 2,
 };
 
 /// Settings which are availlable for reading and writing on the gui thread.
@@ -215,10 +223,10 @@ public:
                                            false};
     BoolSetting enableEmoteImages = {"/emotes/enableEmoteImages", true};
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
+    BoolSetting enableZeroWidthEmotes = {"/emotes/enableZeroWidthEmotes", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
     BoolSetting showUnlistedSevenTVEmotes = {
         "/emotes/showUnlistedSevenTVEmotes", false};
-
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
@@ -479,9 +487,12 @@ public:
         HelixTimegateOverride::Timegate,
     };
 
-    IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 1};
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
+    EnumSetting<ThumbnailPreviewMode> emotesTooltipPreview = {
+        "/misc/emotesTooltipPreview",
+        ThumbnailPreviewMode::AlwaysShow,
+    };
     QStringSetting cachePath = {"/cache/path", ""};
     BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
     BoolSetting attachExtensionToAnyProcess = {
@@ -499,6 +510,8 @@ public:
     // Purely QOL settings are here (like last item in a list).
     IntSetting lastSelectChannelTab = {"/ui/lastSelectChannelTab", 0};
     IntSetting lastSelectIrcConn = {"/ui/lastSelectIrcConn", 0};
+
+    BoolSetting showSendButton = {"/ui/showSendButton", false};
 
     // Similarity
     BoolSetting similarityEnabled = {"/similarity/similarityEnabled", false};
@@ -528,6 +541,10 @@ public:
          {"h", 1},
          {"d", 1},
          {"w", 1}}};
+
+    BoolSetting pluginsEnabled = {"/plugins/supportEnabled", false};
+    ChatterinoSetting<std::vector<QString>> enabledPlugins = {
+        "/plugins/enabledPlugins", {}};
 
 private:
     void updateModerationActions();

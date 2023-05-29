@@ -1,13 +1,10 @@
 #include "common/NetworkManager.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
-#include "common/QLogging.hpp"
-#include "providers/twitch/api/Helix.hpp"
+#include "singletons/Settings.hpp"
 
 #include <gtest/gtest.h>
 #include <QApplication>
 #include <QJsonArray>
+#include <QLoggingCategory>
 #include <QtConcurrent>
 #include <QTimer>
 
@@ -24,14 +21,23 @@ int main(int argc, char **argv)
 
 #ifdef SUPPORT_QT_NETWORK_TESTS
     QApplication app(argc, argv);
+    // make sure to always debug-log
+    QLoggingCategory::setFilterRules("*.debug=true");
 
     chatterino::NetworkManager::init();
 
-    QtConcurrent::run([&app] {
+    // Ensure settings are initialized before any tests are run
+    QTemporaryDir settingsDir;
+    settingsDir.setAutoRemove(false);  // we'll remove it manually
+    qDebug() << "Settings directory:" << settingsDir.path();
+    chatterino::Settings settings(settingsDir.path());
+
+    QtConcurrent::run([&app, &settingsDir]() mutable {
         auto res = RUN_ALL_TESTS();
 
         chatterino::NetworkManager::deinit();
 
+        settingsDir.remove();
         app.exit(res);
     });
 

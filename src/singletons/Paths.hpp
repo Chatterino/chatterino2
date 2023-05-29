@@ -34,6 +34,12 @@ public:
     // Profile avatars for Twitch <appDataDirectory>/cache/twitch
     QString twitchProfileAvatars;
 
+    // Plugin files live here. <appDataDirectory>/Plugins
+    QString pluginsDirectory;
+
+    // Custom themes live here. <appDataDirectory>/Themes
+    QString themesDirectory;
+
     bool createFolder(const QString &folderPath);
     bool isPortable();
 

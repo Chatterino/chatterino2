@@ -14,6 +14,8 @@
 #include <QSpinBox>
 #include <QVBoxLayout>
 
+#include <utility>
+
 class QScrollArea;
 
 namespace chatterino {
@@ -192,6 +194,59 @@ public:
 
         return combo;
     }
+
+    template <typename T>
+    ComboBox *addDropdown(
+        const QString &text,
+        const std::vector<std::pair<QString, QVariant>> &items,
+        pajlada::Settings::Setting<T> &setting,
+        std::function<boost::variant<int, QString>(ComboBox *, T)> getValue,
+        std::function<T(DropdownArgs)> setValue, QString toolTipText = {},
+        const QString &defaultValueText = {})
+    {
+        auto *combo = this->addDropdown(text, {}, std::move(toolTipText));
+
+        for (const auto &[text, userData] : items)
+        {
+            combo->addItem(text, userData);
+        }
+
+        if (!defaultValueText.isEmpty())
+        {
+            combo->setCurrentText(defaultValueText);
+        }
+
+        setting.connect(
+            [getValue = std::move(getValue), combo](const T &value, auto) {
+                auto var = getValue(combo, value);
+                if (var.which() == 0)
+                {
+                    const auto index = boost::get<int>(var);
+                    if (index >= 0)
+                    {
+                        combo->setCurrentIndex(index);
+                    }
+                }
+                else
+                {
+                    combo->setCurrentText(boost::get<QString>(var));
+                    combo->setEditText(boost::get<QString>(var));
+                }
+            },
+            this->managedConnections_);
+
+        QObject::connect(
+            combo, QOverload<const int>::of(&QComboBox::currentIndexChanged),
+            [combo, &setting,
+             setValue = std::move(setValue)](const int newIndex) {
+                setting = setValue(DropdownArgs{combo->itemText(newIndex),
+                                                combo->currentIndex(), combo});
+                getApp()->windows->forceLayoutChannelViews();
+            });
+
+        return combo;
+    }
+
     DescriptionLabel *addDescription(const QString &text);
 
     void addSeperator();

@@ -2,15 +2,21 @@
 
 #include "Application.hpp"
 #include "common/Env.hpp"
+#include "common/LinkParser.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/builtin/chatterino/Debugging.hpp"
 #include "controllers/commands/builtin/twitch/ChatSettings.hpp"
+#include "controllers/commands/builtin/twitch/ShieldMode.hpp"
+#include "controllers/commands/builtin/twitch/Shoutout.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
+#include "controllers/plugins/PluginController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
+#include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
@@ -33,6 +39,7 @@
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/PostToThread.hpp"
 #include "util/Qt.hpp"
 #include "util/StreamerMode.hpp"
 #include "util/StreamLink.hpp"
@@ -147,15 +154,15 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                     void operator()(const QString &string,
                                     MessageBuilder &b) const
                     {
-                        auto linkString = b.matchLink(string);
-                        if (linkString.isEmpty())
+                        LinkParser parser(string);
+                        if (parser.result())
                         {
-                            b.emplace<TextElement>(string,
-                                                   MessageElementFlag::Text);
+                            b.addLink(*parser.result());
                         }
                         else
                         {
-                            b.addLink(string, linkString);
+                            b.emplace<TextElement>(string,
+                                                   MessageElementFlag::Text);
                         }
                     }
                 } visitor;
@@ -951,6 +958,36 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
+    this->registerCommand("/lowtrust", [](const QStringList &words,
+                                          ChannelPtr channel) {
+        QString target(words.value(1));
+
+        if (target.isEmpty())
+        {
+            if (channel->getType() == Channel::Type::Twitch &&
+                !channel->isEmpty())
+            {
+                target = channel->getName();
+            }
+            else
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /lowtrust [channel]. You can also use the command "
+                    "without arguments in any Twitch channel to open its "
+                    "suspicious user activity feed. Only the broadcaster and "
+                    "moderators have permission to view this feed."));
+                return "";
+            }
+        }
+
+        stripChannelName(target);
+        QDesktopServices::openUrl(QUrl(
+            QString("https://www.twitch.tv/popout/moderator/%1/low-trust-users")
+                .arg(target)));
+
+        return "";
+    });
+
     auto formatChattersError = [](HelixGetChattersError error,
                                   QString message) {
         using Error = HelixGetChattersError;
@@ -1130,6 +1167,13 @@ void CommandController::initialize(Settings &, Paths &paths)
             getHelix()->getModerators(
                 twitchChannel->roomId(), 500,
                 [channel, twitchChannel](auto result) {
+                    if (result.empty())
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            "This channel does not have any moderators."));
+                        return;
+                    }
+
                     // TODO: sort results?
 
                     MessageBuilder builder;
@@ -2632,7 +2676,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     auto formatBanTimeoutError =
         [](const char *operation, HelixBanUserError error,
-           const QString &message, const QString &userDisplayName) -> QString {
+           const QString &message, const QString &userTarget) -> QString {
         using Error = HelixBanUserError;
 
         QString errorMessage = QString("Failed to %1 user - ").arg(operation);
@@ -2659,7 +2703,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             case Error::TargetBanned: {
                 // Equivalent IRC error
                 errorMessage += QString("%1 is already banned in this channel.")
-                                    .arg(userDisplayName);
+                                    .arg(userTarget);
             }
             break;
 
@@ -2669,8 +2713,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                 // The messages from IRC are formatted like this:
                 // "You cannot {op} moderator {mod} unless you are the owner of this channel."
                 // "You cannot {op} the broadcaster."
-                errorMessage += QString("You cannot %1 %2.")
-                                    .arg(operation, userDisplayName);
+                errorMessage +=
+                    QString("You cannot %1 %2.").arg(operation, userTarget);
             }
             break;
 
@@ -2824,6 +2868,53 @@ void CommandController::initialize(Settings &, Paths &paths)
                 // Equivalent error from IRC
                 channel->addMessage(makeSystemMessage(
                     QString("Invalid username: %1").arg(target)));
+            });
+
+        return "";
+    });
+
+    this->registerCommand("/banid", [formatBanTimeoutError](
+                                        const QStringList &words,
+                                        auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("The /banid command only works in Twitch channels")));
+            return "";
+        }
+
+        const auto *usageStr =
+            "Usage: \"/banid <userID> [reason]\" - Permanently prevent a user "
+            "from chatting via their user ID. Reason is optional and will be "
+            "shown to the target user and other moderators.";
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(usageStr));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to ban someone!"));
+            return "";
+        }
+
+        auto target = words.at(1);
+        auto reason = words.mid(2).join(' ');
+
+        getHelix()->banUser(
+            twitchChannel->roomId(), currentUser->getUserId(), target,
+            boost::none, reason,
+            [] {
+                // No response for bans, they're emitted over pubsub/IRC instead
+            },
+            [channel, target, formatBanTimeoutError](auto error, auto message) {
+                auto errorMessage =
+                    formatBanTimeoutError("ban", error, message, "#" + target);
+                channel->addMessage(makeSystemMessage(errorMessage));
             });
 
         return "";
@@ -3105,13 +3196,15 @@ void CommandController::initialize(Settings &, Paths &paths)
                                   "works in Twitch channels"));
             return "";
         }
-        auto userID = ctx.words.at(1);
         if (ctx.words.size() < 2)
         {
             ctx.channel->addMessage(
                 makeSystemMessage(QString("Usage: %1 <TwitchUserID> [color]")
                                       .arg(ctx.words.at(0))));
+            return "";
         }
+
+        auto userID = ctx.words.at(1);
 
         auto color = ctx.words.value(2);
 
@@ -3119,6 +3212,35 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+
+    this->registerCommand(
+        "/debug-force-image-gc",
+        [](const QStringList & /*words*/, auto /*channel*/) -> QString {
+            runInGuiThread([] {
+                using namespace chatterino::detail;
+                auto &iep = ImageExpirationPool::instance();
+                iep.freeOld();
+            });
+            return "";
+        });
+
+    this->registerCommand(
+        "/debug-force-image-unload",
+        [](const QStringList & /*words*/, auto /*channel*/) -> QString {
+            runInGuiThread([] {
+                using namespace chatterino::detail;
+                auto &iep = ImageExpirationPool::instance();
+                iep.freeAll();
+            });
+            return "";
+        });
+
+    this->registerCommand("/shield", &commands::shieldModeOn);
+    this->registerCommand("/shieldoff", &commands::shieldModeOff);
+
+    this->registerCommand("/shoutout", &commands::sendShoutout);
+
+    this->registerCommand("/c2-set-logging-rules", &commands::setLoggingRules);
 }
 
 void CommandController::save()
@@ -3213,6 +3335,32 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     return text;
 }
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+bool CommandController::registerPluginCommand(const QString &commandName)
+{
+    if (this->commands_.contains(commandName))
+    {
+        return false;
+    }
+
+    this->commands_[commandName] = [commandName](const CommandContext &ctx) {
+        return getApp()->plugins->tryExecPluginCommand(commandName, ctx);
+    };
+    this->pluginCommands_.append(commandName);
+    return true;
+}
+
+bool CommandController::unregisterPluginCommand(const QString &commandName)
+{
+    if (!this->pluginCommands_.contains(commandName))
+    {
+        return false;
+    }
+    this->pluginCommands_.removeAll(commandName);
+    return this->commands_.erase(commandName) != 0;
+}
+#endif
 
 void CommandController::registerCommand(const QString &commandName,
                                         CommandFunctionVariants commandFunction)

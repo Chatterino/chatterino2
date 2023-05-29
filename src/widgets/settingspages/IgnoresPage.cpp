@@ -1,8 +1,7 @@
-#include "IgnoresPage.hpp"
+#include "widgets/settingspages/IgnoresPage.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnoreModel.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -39,6 +38,7 @@ IgnoresPage::IgnoresPage()
     addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Messages"));
     addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"),
                 this->userListModel_);
+    this->onShow();
 }
 
 void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
@@ -115,12 +115,13 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
 
 void IgnoresPage::onShow()
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     auto user = app->accounts->twitch.getCurrent();
 
     if (user->isAnon())
     {
+        this->userListModel_.setStringList({});
         return;
     }
 

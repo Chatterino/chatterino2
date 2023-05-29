@@ -23,6 +23,8 @@ class TextElement;
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
+struct ParsedLink;
+
 struct SystemMessageTag {
 };
 struct TimeoutMessageTag {
@@ -94,8 +96,7 @@ public:
     std::weak_ptr<Message> weakOf();
 
     void append(std::unique_ptr<MessageElement> element);
-    QString matchLink(const QString &string);
-    void addLink(const QString &origLink, const QString &matchedLink);
+    void addLink(const ParsedLink &parsedLink);
 
     /**
      * Adds the text, applies irc colors, adds links,
@@ -122,6 +123,10 @@ public:
 protected:
     virtual void addTextOrEmoji(EmotePtr emote);
     virtual void addTextOrEmoji(const QString &value);
+
+    bool isEmpty() const;
+    MessageElement &back();
+    std::unique_ptr<MessageElement> releaseBack();
 
     MessageColor textColor_ = MessageColor::Text;
 

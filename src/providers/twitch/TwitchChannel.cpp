@@ -575,7 +575,7 @@ void TwitchChannel::setRoomModes(const RoomModes &_roomModes)
 
 bool TwitchChannel::isLive() const
 {
-    return this->streamStatus_.access()->live;
+    return this->streamStatus_.accessConst()->live;
 }
 
 SharedAccessGuard<const TwitchChannel::StreamStatus>
@@ -911,88 +911,85 @@ int TwitchChannel::chatterCount()
 
 void TwitchChannel::setLive(bool newLiveStatus)
 {
-    bool gotNewLiveStatus = false;
     {
         auto guard = this->streamStatus_.access();
-        if (guard->live != newLiveStatus)
+        if (guard->live == newLiveStatus)
         {
-            gotNewLiveStatus = true;
-            if (newLiveStatus)
+            return;
+        }
+        guard->live = newLiveStatus;
+    }
+
+    if (newLiveStatus)
+    {
+        if (getApp()->notifications->isChannelNotified(this->getName(),
+                                                       Platform::Twitch))
+        {
+            if (Toasts::isEnabled())
             {
-                if (getApp()->notifications->isChannelNotified(
-                        this->getName(), Platform::Twitch))
-                {
-                    if (Toasts::isEnabled())
-                    {
-                        getApp()->toasts->sendChannelNotification(
-                            this->getName(), guard->title, Platform::Twitch);
-                    }
-                    if (getSettings()->notificationPlaySound)
-                    {
-                        getApp()->notifications->playSound();
-                    }
-                    if (getSettings()->notificationFlashTaskbar)
-                    {
-                        getApp()->windows->sendAlert();
-                    }
-                }
-                // Channel live message
-                MessageBuilder builder;
-                TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
-                                                        &builder);
-                this->addMessage(builder.release());
-
-                // Message in /live channel
-                MessageBuilder builder2;
-                TwitchMessageBuilder::liveMessage(this->getDisplayName(),
-                                                  &builder2);
-                getApp()->twitch->liveChannel->addMessage(builder2.release());
-
-                // Notify on all channels with a ping sound
-                if (getSettings()->notificationOnAnyChannel &&
-                    !(isInStreamerMode() &&
-                      getSettings()->streamerModeSuppressLiveNotifications))
-                {
-                    getApp()->notifications->playSound();
-                }
+                getApp()->toasts->sendChannelNotification(
+                    this->getName(), this->accessStreamStatus()->title,
+                    Platform::Twitch);
             }
-            else
+            if (getSettings()->notificationPlaySound)
             {
-                // Channel offline message
-                MessageBuilder builder;
-                TwitchMessageBuilder::offlineSystemMessage(
-                    this->getDisplayName(), &builder);
-                this->addMessage(builder.release());
-
-                // "delete" old 'CHANNEL is live' message
-                LimitedQueueSnapshot<MessagePtr> snapshot =
-                    getApp()->twitch->liveChannel->getMessageSnapshot();
-                int snapshotLength = snapshot.size();
-
-                // MSVC hates this code if the parens are not there
-                int end = (std::max)(0, snapshotLength - 200);
-                auto liveMessageSearchText =
-                    QString("%1 is live!").arg(this->getDisplayName());
-
-                for (int i = snapshotLength - 1; i >= end; --i)
-                {
-                    auto &s = snapshot[i];
-
-                    if (s->messageText == liveMessageSearchText)
-                    {
-                        s->flags.set(MessageFlag::Disabled);
-                        break;
-                    }
-                }
+                getApp()->notifications->playSound();
             }
-            guard->live = newLiveStatus;
+            if (getSettings()->notificationFlashTaskbar)
+            {
+                getApp()->windows->sendAlert();
+            }
+        }
+        // Channel live message
+        MessageBuilder builder;
+        TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
+                                                &builder);
+        this->addMessage(builder.release());
+
+        // Message in /live channel
+        MessageBuilder builder2;
+        TwitchMessageBuilder::liveMessage(this->getDisplayName(), &builder2);
+        getApp()->twitch->liveChannel->addMessage(builder2.release());
+
+        // Notify on all channels with a ping sound
+        if (getSettings()->notificationOnAnyChannel &&
+            !(isInStreamerMode() &&
+              getSettings()->streamerModeSuppressLiveNotifications))
+        {
+            getApp()->notifications->playSound();
+        }
+    }
+    else
+    {
+        // Channel offline message
+        MessageBuilder builder;
+        TwitchMessageBuilder::offlineSystemMessage(this->getDisplayName(),
+                                                   &builder);
+        this->addMessage(builder.release());
+
+        // "delete" old 'CHANNEL is live' message
+        LimitedQueueSnapshot<MessagePtr> snapshot =
+            getApp()->twitch->liveChannel->getMessageSnapshot();
+        int snapshotLength = snapshot.size();
+
+        // MSVC hates this code if the parens are not there
+        int end = (std::max)(0, snapshotLength - 200);
+        auto liveMessageSearchText =
+            QString("%1 is live!").arg(this->getDisplayName());
+
+        for (int i = snapshotLength - 1; i >= end; --i)
+        {
+            auto &s = snapshot[i];
+
+            if (s->messageText == liveMessageSearchText)
+            {
+                s->flags.set(MessageFlag::Disabled);
+                break;
+            }
         }
     }
 
-    if (gotNewLiveStatus)
-    {
-        this->liveStatusChanged.invoke();
-    }
+    this->liveStatusChanged.invoke();
 }
 
 void TwitchChannel::refreshTitle()
@@ -1285,50 +1282,71 @@ void TwitchChannel::cleanUpReplyThreads()
 
 void TwitchChannel::refreshBadges()
 {
-    auto url = Url{"https://badges.twitch.tv/v1/badges/channels/" +
-                   this->roomId() + "/display?language=en"};
-    NetworkRequest(url.string)
+    if (this->roomId().isEmpty())
+    {
+        return;
+    }
 
-        .onSuccess([this,
-                    weak = weakOf<Channel>(this)](auto result) -> Outcome {
+    getHelix()->getChannelBadges(
+        this->roomId(),
+        // successCallback
+        [this, weak = weakOf<Channel>(this)](auto channelBadges) {
             auto shared = weak.lock();
             if (!shared)
-                return Failure;
+            {
+                // The channel has been closed inbetween us making the request and the request finishing
+                return;
+            }
 
             auto badgeSets = this->badgeSets_.access();
 
-            auto jsonRoot = result.parseJson();
-
-            auto _ = jsonRoot["badge_sets"].toObject();
-            for (auto jsonBadgeSet = _.begin(); jsonBadgeSet != _.end();
-                 jsonBadgeSet++)
+            for (const auto &badgeSet : channelBadges.badgeSets)
             {
-                auto &versions = (*badgeSets)[jsonBadgeSet.key()];
-
-                auto _set = jsonBadgeSet->toObject()["versions"].toObject();
-                for (auto jsonVersion_ = _set.begin();
-                     jsonVersion_ != _set.end(); jsonVersion_++)
+                const auto &setID = badgeSet.setID;
+                for (const auto &version : badgeSet.versions)
                 {
-                    auto jsonVersion = jsonVersion_->toObject();
-                    auto emote = std::make_shared<Emote>(Emote{
+                    auto emote = Emote{
                         EmoteName{},
                         ImageSet{
-                            Image::fromUrl(
-                                {jsonVersion["image_url_1x"].toString()}, 1),
-                            Image::fromUrl(
-                                {jsonVersion["image_url_2x"].toString()}, .5),
-                            Image::fromUrl(
-                                {jsonVersion["image_url_4x"].toString()}, .25)},
-                        Tooltip{jsonVersion["description"].toString()},
-                        Url{jsonVersion["clickURL"].toString()}});
-
-                    versions.emplace(jsonVersion_.key(), emote);
-                };
+                            Image::fromUrl(version.imageURL1x, 1),
+                            Image::fromUrl(version.imageURL2x, .5),
+                            Image::fromUrl(version.imageURL4x, .25),
+                        },
+                        Tooltip{version.title},
+                        version.clickURL,
+                    };
+                    (*badgeSets)[setID][version.id] =
+                        std::make_shared<Emote>(emote);
+                }
+            }
+        },
+        // failureCallback
+        [this, weak = weakOf<Channel>(this)](auto error, auto message) {
+            auto shared = weak.lock();
+            if (!shared)
+            {
+                // The channel has been closed inbetween us making the request and the request finishing
+                return;
             }
 
-            return Success;
-        })
-        .execute();
+            QString errorMessage("Failed to load channel badges - ");
+
+            switch (error)
+            {
+                case HelixGetChannelBadgesError::Forwarded: {
+                    errorMessage += message;
+                }
+                break;
+
+                // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                case HelixGetChannelBadgesError::Unknown: {
+                    errorMessage += "An unknown error has occurred.";
+                }
+                break;
+            }
+
+            this->addMessage(makeSystemMessage(errorMessage));
+        });
 }
 
 void TwitchChannel::refreshCheerEmotes()

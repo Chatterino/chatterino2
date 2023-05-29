@@ -16,6 +16,7 @@ public:
     virtual ~IEmotes() = default;
 
     virtual ITwitchEmotes *getTwitchEmotes() = 0;
+    virtual IEmojis *getEmojis() = 0;
 };
 
 class Emotes final : public IEmotes, public Singleton
@@ -30,6 +31,11 @@ public:
     ITwitchEmotes *getTwitchEmotes() final
     {
         return &this->twitch;
+    }
+
+    IEmojis *getEmojis() final
+    {
+        return &this->emojis;
     }
 
     TwitchEmotes twitch;

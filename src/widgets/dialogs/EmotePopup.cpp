@@ -493,7 +493,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
     if (!seventvGlobalEmotes.empty())
     {
-        addEmotes(*searchChannel, seventvGlobalEmotes, "SevenTV (Global)",
+        addEmotes(*searchChannel, seventvGlobalEmotes, "7TV (Global)",
                   MessageElementFlag::SevenTVEmote);
     }
 
@@ -522,7 +522,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
     if (!seventvChannelEmotes.empty())
     {
-        addEmotes(*searchChannel, seventvChannelEmotes, "SevenTV (Channel)",
+        addEmotes(*searchChannel, seventvChannelEmotes, "7TV (Channel)",
                   MessageElementFlag::SevenTVEmote);
     }
 }

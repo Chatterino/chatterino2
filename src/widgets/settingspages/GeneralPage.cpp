@@ -114,8 +114,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     auto &s = *getSettings();
 
     layout.addTitle("Interface");
-    layout.addDropdown("Theme", {"White", "Light", "Dark", "Black"},
-                       getApp()->themes->themeName);
+
+    layout.addDropdown<QString>(
+        "Theme", getApp()->themes->availableThemes(),
+        getApp()->themes->themeName,
+        [](const auto *combo, const auto &themeKey) {
+            return combo->findData(themeKey, Qt::UserRole);
+        },
+        [](const auto &args) {
+            return args.combobox->itemData(args.index, Qt::UserRole).toString();
+        },
+        {}, Theme::fallbackTheme.name);
+
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},
         getApp()->fonts->chatFontFamily,
@@ -398,6 +408,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Animate", s.animateEmotes);
     layout.addCheckbox("Animate only when Chatterino is focused",
                        s.animationsWhenFocused);
+    layout.addCheckbox(
+        "Enable zero-width emotes", s.enableZeroWidthEmotes, false,
+        "When disabled, emotes that overlap other emotes, such as BTTV's "
+        "cvMask and 7TV's RainTime, will appear as normal emotes.");
     layout.addCheckbox("Enable emote auto-completion by typing :",
                        s.emoteCompletionWithColon);
     layout.addDropdown<float>(
@@ -436,16 +450,30 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                 });
         },
         false);
-    layout.addDropdown<int>(
-        "Show info on hover", {"Don't show", "Always show", "Hold shift"},
+    layout.addDropdown<std::underlying_type<ThumbnailPreviewMode>::type>(
+        "Show emote & badge thumbnail on hover",
+        {
+            "Don't show",
+            "Always show",
+            "Hold shift",
+        },
         s.emotesTooltipPreview,
-        [](int index) {
-            return index;
+        [](auto val) {
+            switch (val)
+            {
+                case ThumbnailPreviewMode::DontShow:
+                    return "Don't show";
+                case ThumbnailPreviewMode::AlwaysShow:
+                    return "Always show";
+                case ThumbnailPreviewMode::ShowOnShift:
+                    return "Hold shift";
+            }
+            return "";
         },
         [](auto args) {
             return args.index;
         },
-        false, "Show emote name, provider, and author on hover.");
+        false);
     layout.addDropdown("Emoji style",
                        {
                            "Twitter",
@@ -1019,6 +1047,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             false);
     helixTimegateModerators->setMinimumWidth(
         helixTimegateModerators->minimumSizeHint().width());
+
+    layout.addCheckbox(
+        "Show send message button", s.showSendButton, false,
+        "Show a Send button next to each split input that can be "
+        "clicked to send the message");
 
     layout.addStretch();
 

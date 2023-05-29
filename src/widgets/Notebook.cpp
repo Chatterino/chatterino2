@@ -4,10 +4,12 @@
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
+#include "util/StreamerMode.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookButton.hpp"
@@ -470,7 +472,7 @@ void Notebook::setShowTabs(bool value)
 void Notebook::showTabVisibilityInfoPopup()
 {
     auto unhideSeq = getApp()->hotkeys->getDisplaySequence(
-        HotkeyCategory::Window, "setTabVisibility", {{}});
+        HotkeyCategory::Window, "setTabVisibility", {std::vector<QString>()});
     if (unhideSeq.isEmpty())
     {
         unhideSeq = getApp()->hotkeys->getDisplaySequence(
@@ -526,7 +528,7 @@ void Notebook::updateTabVisibility()
 void Notebook::updateTabVisibilityMenuAction()
 {
     auto toggleSeq = getApp()->hotkeys->getDisplaySequence(
-        HotkeyCategory::Window, "setTabVisibility", {{}});
+        HotkeyCategory::Window, "setTabVisibility", {std::vector<QString>()});
     if (toggleSeq.isEmpty())
     {
         toggleSeq = getApp()->hotkeys->getDisplaySequence(
@@ -1300,6 +1302,45 @@ void SplitNotebook::addCustomButtons()
     auto updateBtn = this->addCustomButton();
 
     initUpdateButton(*updateBtn, this->signalHolder_);
+
+    // streamer mode
+    this->streamerModeIcon_ = this->addCustomButton();
+    QObject::connect(this->streamerModeIcon_, &NotebookButton::leftClicked,
+                     [this] {
+                         getApp()->windows->showSettingsDialog(
+                             this, SettingsDialogPreference::StreamerMode);
+                     });
+    this->signalHolder_.managedConnect(getApp()->streamerModeChanged, [this]() {
+        this->updateStreamerModeIcon();
+    });
+    this->updateStreamerModeIcon();
+}
+
+void SplitNotebook::updateStreamerModeIcon()
+{
+    if (this->streamerModeIcon_ == nullptr)
+    {
+        return;
+    }
+    // A duplicate of this code is in Window class
+    // That copy handles the TitleBar icon in Window (main window on Windows)
+    // This one is the one near splits (on linux and mac or non-main windows on Windows)
+    if (getTheme()->isLightTheme())
+    {
+        this->streamerModeIcon_->setPixmap(
+            getResources().buttons.streamerModeEnabledLight);
+    }
+    else
+    {
+        this->streamerModeIcon_->setPixmap(
+            getResources().buttons.streamerModeEnabledDark);
+    }
+    this->streamerModeIcon_->setVisible(isInStreamerMode());
+}
+
+void SplitNotebook::themeChangedEvent()
+{
+    this->updateStreamerModeIcon();
 }
 
 SplitContainer *SplitNotebook::addPage(bool select)

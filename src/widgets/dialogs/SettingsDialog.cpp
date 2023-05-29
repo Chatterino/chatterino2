@@ -20,6 +20,7 @@
 #include "widgets/settingspages/ModerationPage.hpp"
 #include "widgets/settingspages/NicknamesPage.hpp"
 #include "widgets/settingspages/NotificationPage.hpp"
+#include "widgets/settingspages/PluginsPage.hpp"
 
 #include <QDialogButtonBox>
 #include <QFile>
@@ -194,6 +195,11 @@ void SettingsDialog::filterElements(const QString &text)
     }
 }
 
+void SettingsDialog::setElementFilter(const QString &query)
+{
+    this->ui_.search->setText(query);
+}
+
 void SettingsDialog::addTabs()
 {
     this->ui_.tabContainer->setSpacing(0);
@@ -202,7 +208,7 @@ void SettingsDialog::addTabs()
     // Constructors are wrapped in std::function to remove some strain from first time loading.
 
     // clang-format off
-    this->addTab([]{return new GeneralPage;},          "General",        ":/settings/about.svg");
+    this->addTab([]{return new GeneralPage;},          "General",        ":/settings/about.svg", SettingsTabId::General);
     this->ui_.tabContainer->addSpacing(16);
     this->addTab([]{return new AccountsPage;},         "Accounts",       ":/settings/accounts.svg", SettingsTabId::Accounts);
     this->addTab([]{return new NicknamesPage;},        "Nicknames",      ":/settings/accounts.svg");
@@ -216,6 +222,9 @@ void SettingsDialog::addTabs()
     this->addTab([]{return new ModerationPage;},       "Moderation",     ":/settings/moderation.svg", SettingsTabId::Moderation);
     this->addTab([]{return new NotificationPage;},     "Live Notifications",  ":/settings/notification2.svg");
     this->addTab([]{return new ExternalToolsPage;},    "External tools", ":/settings/externaltools.svg");
+#ifdef CHATTERINO_HAVE_PLUGINS
+    this->addTab([]{return new PluginsPage;},          "Plugins",        ":/settings/plugins.svg");
+#endif
     this->ui_.tabContainer->addStretch(1);
     this->addTab([]{return new AboutPage;},            "About",          ":/settings/about.svg", SettingsTabId(), Qt::AlignBottom);
     // clang-format on
@@ -312,10 +321,20 @@ void SettingsDialog::showDialog(QWidget *parent,
             }
             break;
 
+        case SettingsDialogPreference::StreamerMode: {
+            instance->selectTab(SettingsTabId::General);
+        }
+        break;
+
         default:;
     }
 
     instance->show();
+    if (preferredTab == SettingsDialogPreference::StreamerMode)
+    {
+        // this is needed because each time the settings are opened, the query is reset
+        instance->setElementFilter("Streamer Mode");
+    }
     instance->activateWindow();
     instance->raise();
     instance->setFocus();

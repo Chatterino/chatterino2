@@ -19,14 +19,6 @@
 #include <memory>
 #include <mutex>
 
-#ifdef CHATTERINO_TEST
-// When running tests, the ImageExpirationPool destructor can be called before
-// all images are deleted, leading to a use-after-free of its mutex. This
-// happens despite the lifetime of the ImageExpirationPool being (apparently)
-// static. Therefore, just disable it during testing.
-#    define DISABLE_IMAGE_EXPIRATION_POOL
-#endif
-
 namespace chatterino {
 namespace detail {
     template <typename Image>
@@ -49,6 +41,7 @@ namespace detail {
         boost::optional<QPixmap> first() const;
 
     private:
+        int64_t memoryUsage() const;
         void processOffset();
         QVector<Frame<QPixmap>> items_;
         int index_{0};
@@ -119,6 +112,7 @@ class ImageExpirationPool
 {
 private:
     friend class Image;
+    friend class CommandController;
 
     ImageExpirationPool();
     static ImageExpirationPool &instance();
@@ -134,9 +128,15 @@ private:
      */
     void freeOld();
 
+    /*
+     * Debug function that unloads all images in the pool. This is intended to
+     * test for possible memory leaks from tracked images.
+     */
+    void freeAll();
+
 private:
     // Timer to periodically run freeOld()
-    QTimer freeTimer_;
+    QTimer *freeTimer_;
     std::map<Image *, std::weak_ptr<Image>> allImages_;
     std::mutex mutex_;
 };

@@ -53,6 +53,7 @@ public:
     TwitchChannel *twitchChannel;
 
     [[nodiscard]] bool isIgnored() const override;
+    bool isIgnoredReply() const;
     void triggerHighlights() override;
     MessagePtr build() override;
 
