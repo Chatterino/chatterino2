@@ -617,8 +617,7 @@ void Notebook::performLayout(bool animated)
     }
     else
     {
-        std::copy(this->items_.begin(), this->items_.end(),
-                  std::back_inserter(filteredItems));
+        filteredItems.assign(this->items_.begin(), this->items_.end());
     }
 
     if (this->tabLocation_ == NotebookTabLocation::Top)
