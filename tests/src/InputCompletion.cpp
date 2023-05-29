@@ -19,6 +19,7 @@
 #include <QFile>
 #include <QModelIndex>
 #include <QString>
+#include <QTemporaryDir>
 
 namespace {
 
@@ -123,9 +124,9 @@ protected:
     void SetUp() override
     {
         // Write default settings to the mock settings json file
-        ASSERT_TRUE(QDir().mkpath("/tmp/c2-tests"));
+        this->settingsDir_ = std::make_unique<QTemporaryDir>();
 
-        QFile settingsFile("/tmp/c2-tests/settings.json");
+        QFile settingsFile(this->settingsDir_->filePath("settings.json"));
         ASSERT_TRUE(settingsFile.open(QIODevice::WriteOnly | QIODevice::Text));
         ASSERT_GT(settingsFile.write(DEFAULT_SETTINGS.toUtf8()), 0);
         ASSERT_TRUE(settingsFile.flush());
@@ -138,7 +139,7 @@ protected:
         EXPECT_CALL(*this->mockHelix, update).Times(Exactly(1));
 
         this->mockApplication = std::make_unique<MockApplication>();
-        this->settings = std::make_unique<Settings>("/tmp/c2-tests");
+        this->settings = std::make_unique<Settings>(this->settingsDir_->path());
         this->paths = std::make_unique<Paths>();
 
         this->mockApplication->accounts.initialize(*this->settings,
@@ -152,13 +153,16 @@ protected:
 
     void TearDown() override
     {
-        ASSERT_TRUE(QDir("/tmp/c2-tests").removeRecursively());
         this->mockApplication.reset();
         this->settings.reset();
         this->paths.reset();
         this->mockHelix.reset();
         this->channelPtr.reset();
+
+        this->settingsDir_.reset();
     }
+
+    std::unique_ptr<QTemporaryDir> settingsDir_;
 
     std::unique_ptr<MockApplication> mockApplication;
     std::unique_ptr<Settings> settings;
@@ -223,8 +227,14 @@ protected:
 
 TEST_F(InputCompletionTest, ClassicEmoteNameFiltering)
 {
+    // The completion doesn't guarantee an ordering for a specific category of emotes.
+    // This tests a specific implementation of the underlying std::unordered_map,
+    // so depending on the standard library used when compiling, this might yield
+    // different results.
+
     auto completion = queryClassicEmoteCompletion(":feels");
     ASSERT_EQ(completion.size(), 3);
+    // all these matches are BTTV global emotes
     ASSERT_EQ(completion[0].displayName, "FeelsBirthdayMan");
     ASSERT_EQ(completion[1].displayName, "FeelsBadMan");
     ASSERT_EQ(completion[2].displayName, "FeelsGoodMan");
@@ -232,6 +242,7 @@ TEST_F(InputCompletionTest, ClassicEmoteNameFiltering)
     completion = queryClassicEmoteCompletion(":)");
     ASSERT_EQ(completion.size(), 3);
     ASSERT_EQ(completion[0].displayName, ":)");  // Exact match with : prefix
+    // all these matches are Twitch global emotes
     ASSERT_EQ(completion[1].displayName, ":-)");
     ASSERT_EQ(completion[2].displayName, "B-)");
 

@@ -48,7 +48,7 @@ TEST(TwitchPubSubClient, ServerRespondsToPings)
 
     pubSub->listenToTopic("test");
 
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(150ms);
 
     ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
     ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
@@ -211,7 +211,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimitSingleStep)
         pubSub->listenToTopic("test");
     }
 
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(150ms);
 
     ASSERT_EQ(pubSub->diag.connectionsOpened, 2);
     ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
@@ -242,7 +242,7 @@ TEST(TwitchPubSubClient, ReceivedWhisper)
 
     pubSub->listenToTopic("whispers.123456");
 
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(150ms);
 
     ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
     ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
@@ -324,7 +324,7 @@ TEST(TwitchPubSubClient, MissingToken)
 
     pubSub->listenToTopic("chat_moderator_actions.123456.123456");
 
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(150ms);
 
     ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
     ASSERT_EQ(pubSub->diag.connectionsClosed, 0);

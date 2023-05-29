@@ -2,11 +2,15 @@
 
 ## Unversioned
 
+- Minor: Add an icon showing when streamer mode is enabled (#4410)
 - Minor: Added `/shoutout <username>` commands to shoutout specified user. (#4638)
+- Minor: Improved editing hotkeys. (#4628)
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
 - Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
 - Dev: Added test cases for emote and tab completion. (#4644)
 - Dev: Fixed `clang-tidy-review` action not picking up dependencies. (#4648)
+- Dev: Expanded upon `$$$` test channels. (#4655)
+- Dev: Added tools to help debug image GC. (#4578)
 
 ## 2.4.4
 

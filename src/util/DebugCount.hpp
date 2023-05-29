@@ -27,6 +27,22 @@ public:
             reinterpret_cast<int64_t &>(it.value())++;
         }
     }
+
+    static void set(const QString &name, const int64_t &amount)
+    {
+        auto counts = counts_.access();
+
+        auto it = counts->find(name);
+        if (it == counts->end())
+        {
+            counts->insert(name, amount);
+        }
+        else
+        {
+            reinterpret_cast<int64_t &>(it.value()) = amount;
+        }
+    }
+
     static void increase(const QString &name, const int64_t &amount)
     {
         auto counts = counts_.access();
