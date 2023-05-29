@@ -7,5 +7,5 @@
 #include "providers/twitch/pubsubmessages/Listen.hpp"
 #include "providers/twitch/pubsubmessages/Message.hpp"
 #include "providers/twitch/pubsubmessages/Unlisten.hpp"
-#include "providers/twitch/pubsubmessages/LowTrustUser.hpp"
+#include "providers/twitch/pubsubmessages/LowTrustUsers.hpp"
 #include "providers/twitch/pubsubmessages/Whisper.hpp"

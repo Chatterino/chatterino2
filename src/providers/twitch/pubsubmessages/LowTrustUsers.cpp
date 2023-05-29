@@ -1,4 +1,4 @@
-#include "providers/twitch/pubsubmessages/LowTrustUser.hpp"
+#include "providers/twitch/pubsubmessages/LowTrustUsers.hpp"
 
 namespace chatterino {
 
