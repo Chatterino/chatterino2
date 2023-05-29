@@ -619,68 +619,33 @@ void Window::addShortcuts()
          }},
         {"setTabVisibility",
          [this](std::vector<QString> arguments) -> QString {
-             auto mode = 2;
-             if (arguments.size() != 0)
-             {
-                 auto arg = arguments.at(0);
-                 if (arg == "off")
-                 {
-                     mode = 0;
-                 }
-                 else if (arg == "on")
-                 {
-                     mode = 1;
-                 }
-                 else if (arg == "toggle")
-                 {
-                     mode = 2;
-                 }
-                 else if (arg == "liveOnly")
-                 {
-                     mode = 3;
-                 }
-                 else if (arg == "toggleLiveOnly")
-                 {
-                     mode = 4;
-                 }
-                 else
-                 {
-                     qCWarning(chatterinoHotkeys)
-                         << "Invalid argument for setStreamerMode hotkey: "
-                         << arg;
-                     return QString("Invalid argument for setTabVisibility "
-                                    "hotkey: %1. Use \"on\", \"off\", "
-                                    "\"toggle\", \"liveOnly\", or "
-                                    "\"toggleLiveOnly\".")
-                         .arg(arg);
-                 }
-             }
+             QString arg = arguments.empty() ? "toggle" : arguments.front();
 
-             if (mode == 0)
+             if (arg == "off")
              {
                  this->notebook_->setShowTabs(false);
                  getSettings()->tabVisibility.setValue(
                      NotebookTabVisibility::Default);
              }
-             else if (mode == 1)
+             else if (arg == "on")
              {
                  this->notebook_->setShowTabs(true);
                  getSettings()->tabVisibility.setValue(
                      NotebookTabVisibility::Default);
              }
-             else if (mode == 2)
+             else if (arg == "toggle")
              {
                  this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
                  getSettings()->tabVisibility.setValue(
                      NotebookTabVisibility::Default);
              }
-             else if (mode == 3)
+             else if (arg == "liveOnly")
              {
                  this->notebook_->setShowTabs(true);
                  getSettings()->tabVisibility.setValue(
                      NotebookTabVisibility::LiveOnly);
              }
-             else if (mode == 4)
+             else if (arg == "toggleLiveOnly")
              {
                  if (!this->notebook_->getShowTabs())
                  {
@@ -699,6 +664,16 @@ void Window::addShortcuts()
                              : NotebookTabVisibility::LiveOnly);
                  }
              }
+             else
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid argument for setTabVisibility hotkey: " << arg;
+                 return QString("Invalid argument for setTabVisibility hotkey: "
+                                "%1. Use \"on\", \"off\", \"toggle\", "
+                                "\"liveOnly\", or \"toggleLiveOnly\".")
+                     .arg(arg);
+             }
+
              return "";
          }},
     };
