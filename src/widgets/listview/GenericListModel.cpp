@@ -7,7 +7,7 @@ GenericListModel::GenericListModel(QObject *parent)
 {
 }
 
-int GenericListModel::rowCount(const QModelIndex &parent) const
+int GenericListModel::rowCount(const QModelIndex & /*parent*/) const
 {
     return this->items_.size();
 }
