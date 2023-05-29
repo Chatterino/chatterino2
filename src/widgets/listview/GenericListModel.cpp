@@ -48,4 +48,9 @@ void GenericListModel::clear()
     this->endRemoveRows();
 }
 
+void GenericListModel::reserve(size_t capacity)
+{
+    this->items_.reserve(capacity);
+}
+
 }  // namespace chatterino
