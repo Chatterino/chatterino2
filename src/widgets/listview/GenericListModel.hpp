@@ -3,7 +3,7 @@
 #include "widgets/listview/GenericListItem.hpp"
 
 #include <QAbstractListModel>
-#include <QWidget>
+#include <QObject>
 
 #include <memory>
 
@@ -12,7 +12,7 @@ namespace chatterino {
 class GenericListModel : public QAbstractListModel
 {
 public:
-    GenericListModel(QWidget *parent = nullptr);
+    GenericListModel(QObject *parent = nullptr);
 
     /**
      * @brief   Reimplements QAbstractItemModel::rowCount.

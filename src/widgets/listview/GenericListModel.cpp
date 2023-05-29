@@ -2,7 +2,7 @@
 
 namespace chatterino {
 
-GenericListModel::GenericListModel(QWidget *parent)
+GenericListModel::GenericListModel(QObject *parent)
     : QAbstractListModel(parent)
 {
 }
