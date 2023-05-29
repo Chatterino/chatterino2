@@ -670,7 +670,7 @@ void PubSub::listenToAutomod(const QString &channelID)
     this->listenToTopic(topic);
 }
 
-void PubSub::listenToLowTrustUser(const QString &channelID)
+void PubSub::listenToLowTrustUsers(const QString &channelID)
 {
     if (this->userID_.isEmpty())
     {

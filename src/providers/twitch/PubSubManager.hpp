@@ -139,7 +139,7 @@ public:
     void listenToChannelModerationActions(const QString &channelID);
     void listenToAutomod(const QString &channelID);
 
-    void listenToLowTrustUser(const QString &channelID);
+    void listenToLowTrustUsers(const QString &channelID);
     void listenToChannelPointRewards(const QString &channelID);
 
     std::vector<QString> requests;
