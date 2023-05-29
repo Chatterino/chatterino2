@@ -1201,15 +1201,15 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
             return;
         }
 
-        auto lowTrustUserMessage = *oInnerMessage;
+        auto lowTrustUsersMessage = *oInnerMessage;
 
         auto topicParts = topic.split(".");
         assert(topicParts.length() == 3);
 
         auto channelID = topicParts[2];
 
-        this->signals_.moderation.lowTrustUserMessage.invoke(
-            lowTrustUserMessage, channelID);
+        this->signals_.moderation.lowTrustUsersMessage.invoke(
+            lowTrustUsersMessage, channelID);
     }
     else
     {

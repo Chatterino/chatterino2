@@ -546,7 +546,7 @@ void Application::initPubSub()
             });
         });
 
-    this->twitch->pubsub->signals_.moderation.lowTrustUserMessage.connect(
+    this->twitch->pubsub->signals_.moderation.lowTrustUsersMessage.connect(
         [&](const auto &msg, const QString &channelID) {
             auto chan = this->twitch->getChannelOrEmptyByID(channelID);
             if (chan->isEmpty())

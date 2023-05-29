@@ -116,7 +116,7 @@ public:
 
             // Low Trust User message
             pajlada::Signals::Signal<const PubSubLowTrustUserMessage &, QString>
-                lowTrustUserMessage;
+                lowTrustUsersMessage;
         } moderation;
 
         struct {
