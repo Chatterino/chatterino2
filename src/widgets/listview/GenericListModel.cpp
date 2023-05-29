@@ -16,12 +16,12 @@ QVariant GenericListModel::data(const QModelIndex &index, int /* role */) const
 {
     if (!index.isValid())
     {
-        return QVariant();
+        return {};
     }
 
     if (index.row() >= this->items_.size())
     {
-        return QVariant();
+        return {};
     }
 
     auto *item = this->items_[index.row()].get();
