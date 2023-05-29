@@ -24,7 +24,7 @@ QVariant GenericListModel::data(const QModelIndex &index, int /* role */) const
         return QVariant();
     }
 
-    auto item = this->items_[index.row()].get();
+    auto *item = this->items_[index.row()].get();
     // See https://stackoverflow.com/a/44503822 .
     return QVariant::fromValue(static_cast<void *>(item));
 }
