@@ -635,17 +635,13 @@ void Window::addShortcuts()
                  {
                      mode = 2;
                  }
-                 else if (arg == "default")
+                 else if (arg == "liveOnly")
                  {
                      mode = 3;
                  }
-                 else if (arg == "liveOnly")
-                 {
-                     mode = 4;
-                 }
                  else if (arg == "toggleLiveOnly")
                  {
-                     mode = 5;
+                     mode = 4;
                  }
                  else
                  {
@@ -654,7 +650,7 @@ void Window::addShortcuts()
                          << arg;
                      return QString("Invalid argument for setTabVisibility "
                                     "hotkey: %1. Use \"on\", \"off\", "
-                                    "\"toggle\", \"default\", \"liveOnly\", or "
+                                    "\"toggle\", \"liveOnly\", or "
                                     "\"toggleLiveOnly\".")
                          .arg(arg);
                  }
