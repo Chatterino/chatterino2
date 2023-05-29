@@ -26,13 +26,13 @@ struct PubSubLowTrustUserMessage {
     QString lowTrustID;
     QString channelID;
 
-    QString updater_userID;
-    QString updater_login;
-    QString updater_displayName;
+    QString updaterUserID;
+    QString updaterLogin;
+    QString updaterDisplayName;
 
     // Treatment Update
-    QString target_userID;
-    QString target_username;
+    QString targetUserID;
+    QString targetUsername;
 
     // New message
     QString senderUserID;

@@ -34,9 +34,9 @@ PubSubLowTrustUserMessage::PubSubLowTrustUserMessage(const QJsonObject &root)
 
 
         auto objUpdatedBy = obj_LowTrustUser.value("updated_by").toObject();
-        this->updater_userID = objUpdatedBy.value("id").toString();
-        this->updater_login = objUpdatedBy.value("login").toString();
-        this->updater_displayName = objUpdatedBy.value("display_name").toString();
+        this->updaterUserID = objUpdatedBy.value("id").toString();
+        this->updaterLogin = objUpdatedBy.value("login").toString();
+        this->updaterDisplayName = objUpdatedBy.value("display_name").toString();
     }
     else if (this->type == Type::TreatmentUpdate)
     {
@@ -47,12 +47,12 @@ PubSubLowTrustUserMessage::PubSubLowTrustUserMessage(const QJsonObject &root)
         this->types = data.value("types").toObject();
         
         auto objUpdatedBy = data.value("updated_by").toObject();
-        this->updater_userID = objUpdatedBy.value("id").toString();
-        this->updater_login = objUpdatedBy.value("login").toString();
-        this->updater_displayName = objUpdatedBy.value("display_name").toString();
+        this->updaterUserID = objUpdatedBy.value("id").toString();
+        this->updaterLogin = objUpdatedBy.value("login").toString();
+        this->updaterDisplayName = objUpdatedBy.value("display_name").toString();
 
-        this->target_userID = data.value("target_user_id").toString();
-        this->target_username = data.value("target_user").toString();
+        this->targetUserID = data.value("target_user_id").toString();
+        this->targetUsername = data.value("target_user").toString();
         */
     }
 }
