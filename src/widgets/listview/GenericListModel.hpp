@@ -17,7 +17,7 @@ public:
     /**
      * @brief   Reimplements QAbstractItemModel::rowCount.
      *
-     * @return  number of items currrently present in this model
+     * @return  number of items currently present in this model
      */
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
