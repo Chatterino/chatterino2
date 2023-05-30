@@ -645,8 +645,8 @@ void Notebook::performLayout(bool animated)
         {
             // layout tabs
             /// Notebook tabs need to know if they are in the last row.
-            auto firstInBottomRow =
-                filteredItems.size() ? &filteredItems.front() : nullptr;
+            auto *firstInBottomRow =
+                filteredItems.empty() ? nullptr : &filteredItems.front();
 
             for (auto &item : filteredItems)
             {
@@ -954,8 +954,8 @@ void Notebook::performLayout(bool animated)
 
             // layout tabs
             /// Notebook tabs need to know if they are in the last row.
-            auto firstInBottomRow =
-                filteredItems.size() ? &filteredItems.front() : nullptr;
+            auto *firstInBottomRow =
+                filteredItems.empty() ? nullptr : &filteredItems.front();
 
             for (auto &item : filteredItems)
             {
