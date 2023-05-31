@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Nicknames are now taken into consideration when searching for messages. (#4663)
 - Minor: Add an icon showing when streamer mode is enabled (#4410)
 - Minor: Added `/shoutout <username>` commands to shoutout specified user. (#4638)
 - Minor: Improved editing hotkeys. (#4628)
