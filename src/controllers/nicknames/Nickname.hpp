@@ -58,7 +58,8 @@ public:
         return this->isCaseSensitive_;
     }
 
-    [[nodiscard]] boost::optional<QString> match(const QString &usernameText) const
+    [[nodiscard]] boost::optional<QString> match(
+        const QString &usernameText) const
     {
         if (this->isRegex())
         {

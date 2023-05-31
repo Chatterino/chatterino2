@@ -81,7 +81,9 @@ bool ConcurrentSettings::isMutedChannel(const QString &channelName)
     return false;
 }
 
-boost::optional<QString> ConcurrentSettings::matchNickname(const QString &usernameText) {
+boost::optional<QString> ConcurrentSettings::matchNickname(
+    const QString &usernameText)
+{
     auto nicknames = getCSettings().nicknames.readOnly();
 
     for (const auto &nickname : *nicknames)

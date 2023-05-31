@@ -63,10 +63,12 @@ MessagePtr IrcMessageBuilder::build()
 
     // message
     this->addIrcMessageText(this->originalMessage_);
-    
-    QString stylizedUsername = this->stylizeUsername(this->userName, this->message());
 
-    this->message().searchText = stylizedUsername + " " + this->message().localizedName + " " +
+    QString stylizedUsername =
+        this->stylizeUsername(this->userName, this->message());
+
+    this->message().searchText = stylizedUsername + " " +
+                                 this->message().localizedName + " " +
                                  this->userName + ": " + this->originalMessage_;
 
     // highlights
