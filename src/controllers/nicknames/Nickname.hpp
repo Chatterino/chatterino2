@@ -3,6 +3,7 @@
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
+#include <boost/optional.hpp>
 #include <pajlada/serialize.hpp>
 #include <QRegularExpression>
 #include <QString>
