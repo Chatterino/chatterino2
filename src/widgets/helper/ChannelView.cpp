@@ -774,7 +774,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
 
     auto snapshot = underlyingChannel->getMessageSnapshot();
 
-    this->scrollBar_->setMaximum(snapshot.size());
+    this->scrollBar_->setMaximum(qreal(snapshot.size()));
 
     for (const auto &msg : snapshot)
     {
@@ -960,13 +960,13 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
 
     /// Add the messages at the start
     auto addedMessages = this->messages_.pushFront(messageRefs);
-    if (addedMessages.size() > 0)
+    if (!addedMessages.empty())
     {
         if (this->scrollBar_->isAtBottom())
             this->scrollBar_->scrollToBottom();
         else
             this->scrollBar_->offset(qreal(addedMessages.size()));
-        this->scrollBar_->offsetMaximum(addedMessages.size());
+        this->scrollBar_->offsetMaximum(qreal(addedMessages.size()));
     }
 
     if (this->showScrollbarHighlights())
@@ -1030,7 +1030,7 @@ void ChannelView::messagesUpdated()
     this->messages_.clear();
     this->scrollBar_->clearHighlights();
     this->scrollBar_->resetMaximum();
-    this->scrollBar_->setMaximum(snapshot.size());
+    this->scrollBar_->setMaximum(qreal(snapshot.size()));
     this->scrollBar_->setMinimum(0);
     this->lastMessageHasAlternateBackground_ = false;
     this->lastMessageHasAlternateBackgroundReverse_ = true;
@@ -1266,7 +1266,7 @@ void ChannelView::drawMessages(QPainter &painter)
 {
     auto &messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start = size_t(this->scrollBar_->getRelativeCurrentValue());
+    const auto start = size_t(this->scrollBar_->getRelativeCurrentValue());
 
     if (start >= messagesSnapshot.size())
     {
@@ -2788,7 +2788,7 @@ bool ChannelView::tryGetMessageAt(QPoint p,
 {
     auto &messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start = this->scrollBar_->getRelativeCurrentValue();
+    const auto start = size_t(this->scrollBar_->getRelativeCurrentValue());
 
     if (start >= messagesSnapshot.size())
     {
