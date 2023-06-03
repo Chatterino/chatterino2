@@ -523,7 +523,7 @@ void ChannelView::updateScrollbar(
 
     if (!showScrollbar && !causedByScrollbar)
     {
-        this->scrollBar_->setDesiredValue(0);
+        this->scrollBar_->scrollToTop();
     }
     this->showScrollBar_ = showScrollbar;
 
@@ -1208,7 +1208,8 @@ void ChannelView::scrollToMessageLayout(MessageLayout *layout,
 
     if (this->showScrollBar_)
     {
-        this->getScrollBar().setDesiredValue(messageIdx);
+        this->getScrollBar().setDesiredValue(this->scrollBar_->getMinimum() +
+                                             messageIdx);
     }
 }
 

@@ -80,7 +80,7 @@ void Scrollbar::scrollToBottom(bool animate)
 
 void Scrollbar::scrollToTop(bool animate)
 {
-    this->setDesiredValue(this->minimum_ - this->getLargeChange(), animate);
+    this->setDesiredValue(this->minimum_, animate);
 }
 
 bool Scrollbar::isAtBottom() const
