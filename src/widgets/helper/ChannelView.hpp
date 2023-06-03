@@ -260,7 +260,6 @@ private:
 
     QTimer updateTimer_;
     bool updateQueued_ = false;
-    bool messageWasAdded_ = false;
     bool lastMessageHasAlternateBackground_ = false;
     bool lastMessageHasAlternateBackgroundReverse_ = true;
 

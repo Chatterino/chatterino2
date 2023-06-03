@@ -530,12 +530,10 @@ void ChannelView::updateScrollbar(
     // If we were showing the latest messages and the scrollbar now wants to be
     // rendered, scroll to bottom
     if (this->enableScrollingToBottom_ && this->showingLatestMessages_ &&
-        showScrollbar)
+        showScrollbar && !causedByScrollbar)
     {
         this->scrollBar_->scrollToBottom(
-            // this->messageWasAdded &&
             getSettings()->enableSmoothScrollingNewMessages.getValue());
-        this->messageWasAdded_ = false;
     }
 }
 
@@ -753,12 +751,6 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
             this->messageAddedAtStart(messages);
         });
 
-    // on message removed
-    this->channelConnections_.managedConnect(
-        this->channel_->messageRemovedFromStart, [this](MessagePtr &message) {
-            this->messageRemoveFromStart(message);
-        });
-
     // on message replaced
     this->channelConnections_.managedConnect(
         this->channel_->messageReplaced,
@@ -900,15 +892,12 @@ void ChannelView::messageAppended(MessagePtr &message,
         if (this->paused())
         {
             this->pauseScrollMinimumOffset_++;
+            this->pauseSelectionOffset_++;
         }
         else
         {
             this->scrollBar_->offsetMinimum(1);
-
-            if (this->scrollBar_->isAtBottom())
-            {
-                this->scrollBar_->scrollToBottom();
-            }
+            this->selection_.shiftMessageIndex(1);
         }
     }
 
@@ -934,7 +923,6 @@ void ChannelView::messageAppended(MessagePtr &message,
         this->scrollBar_->addHighlight(message->getScrollBarHighlight());
     }
 
-    this->messageWasAdded_ = true;
     this->queueLayout();
 }
 
@@ -979,21 +967,6 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
         }
 
         this->scrollBar_->addHighlightsAtStart(highlights);
-    }
-
-    this->messageWasAdded_ = true;
-    this->queueLayout();
-}
-
-void ChannelView::messageRemoveFromStart(MessagePtr &message)
-{
-    if (this->paused())
-    {
-        this->pauseSelectionOffset_ += 1;
-    }
-    else
-    {
-        this->selection_.shiftMessageIndex(1);
     }
 
     this->queueLayout();
