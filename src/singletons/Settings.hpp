@@ -47,6 +47,7 @@ public:
     bool isBlacklistedUser(const QString &username);
     bool isMutedChannel(const QString &channelName);
     bool toggleMutedChannel(const QString &channelName);
+    boost::optional<QString> matchNickname(const QString &username);
 
 private:
     void mute(const QString &channelName);
