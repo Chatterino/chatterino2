@@ -11,7 +11,6 @@
 #include "providers/twitch/TwitchIrcServer.hpp"  // NOTE: Included to access the mentions channel
 #include "singletons/Settings.hpp"
 #include "util/IrcHelpers.hpp"
-#include "util/QObjectRef.hpp"
 
 #include <QMetaEnum>
 
@@ -151,7 +150,7 @@ void IrcServer::initializeConnection(IrcConnection *connection,
                 [[fallthrough]];
             case IrcAuthType::Pass:
                 this->data_->getPassword(
-                    this, [conn = new QObjectRef(connection) /* can't copy */,
+                    this, [conn = new QPointer(connection) /* can't copy */,
                            this](const QString &password) mutable {
                         if (*conn)
                         {

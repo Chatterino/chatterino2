@@ -174,7 +174,7 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
         }
 
         auto handleReply = [data, reply]() mutable {
-            if (data->hasCaller_ && !data->caller_.get())
+            if (data->hasCaller_ && !data->caller_.data())
             {
                 return;
             }
@@ -350,7 +350,7 @@ void loadCached(std::shared_ptr<NetworkData> &&data)
             // XXX: If outcome is Failure, we should invalidate the cache file
             // somehow/somewhere
             /*auto outcome =*/
-            if (data->hasCaller_ && !data->caller_.get())
+            if (data->hasCaller_ && !data->caller_.data())
             {
                 return;
             }
@@ -359,7 +359,7 @@ void loadCached(std::shared_ptr<NetworkData> &&data)
         else
         {
             postToThread([data, result]() {
-                if (data->hasCaller_ && !data->caller_.get())
+                if (data->hasCaller_ && !data->caller_.data())
                 {
                     return;
                 }
@@ -373,7 +373,7 @@ void loadCached(std::shared_ptr<NetworkData> &&data)
     {
         if (data->executeConcurrently_ || isGuiThread())
         {
-            if (data->hasCaller_ && !data->caller_.get())
+            if (data->hasCaller_ && !data->caller_.data())
             {
                 return;
             }
@@ -383,7 +383,7 @@ void loadCached(std::shared_ptr<NetworkData> &&data)
         else
         {
             postToThread([data]() {
-                if (data->hasCaller_ && !data->caller_.get())
+                if (data->hasCaller_ && !data->caller_.data())
                 {
                     return;
                 }
