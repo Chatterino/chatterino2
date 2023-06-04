@@ -12,6 +12,7 @@
 - Dev: Fixed `clang-tidy-review` action not picking up dependencies. (#4648)
 - Dev: Expanded upon `$$$` test channels. (#4655)
 - Dev: Added tools to help debug image GC. (#4578)
+- Dev: Removed duplicate license when having plugins enabled. (#4665)
 
 ## 2.4.4
 
