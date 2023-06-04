@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPaintEvent>
+#include <QPointer>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>

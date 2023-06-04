@@ -13,6 +13,7 @@
 #include "util/IrcHelpers.hpp"
 
 #include <QMetaEnum>
+#include <QPointer>
 
 #include <cassert>
 #include <cstdlib>

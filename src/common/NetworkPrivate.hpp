@@ -4,6 +4,7 @@
 
 #include <QHttpMultiPart>
 #include <QNetworkRequest>
+#include <QPointer>
 #include <QTimer>
 
 #include <functional>
