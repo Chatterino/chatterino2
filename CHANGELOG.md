@@ -13,6 +13,7 @@
 - Dev: Expanded upon `$$$` test channels. (#4655)
 - Dev: Added tools to help debug image GC. (#4578)
 - Dev: Removed duplicate license when having plugins enabled. (#4665)
+- Dev: Replace our QObjectRef class with Qt's QPointer class. (#4666)
 
 ## 2.4.4
 
