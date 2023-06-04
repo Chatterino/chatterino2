@@ -764,7 +764,7 @@ void SplitInput::updateCompletionPopup()
 
 void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
 {
-    if (!this->inputCompletionPopup_.data())
+    if (this->inputCompletionPopup_.isNull())
     {
         this->inputCompletionPopup_ = new InputCompletionPopup(this);
         this->inputCompletionPopup_->setInputAction(
