@@ -250,15 +250,12 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
                 if (attach || attachFullscreen)
                 {
 #ifdef USEWINSDK
-                    //                    if (args.height != -1) {
                     auto *window =
                         AttachedWindow::get(::GetForegroundWindow(), args);
                     if (!name.isEmpty())
                     {
                         window->setChannel(app->twitch->getOrAddChannel(name));
                     }
-//                    }
-//                    window->show();
 #endif
                 }
             });
