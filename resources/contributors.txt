@@ -63,6 +63,8 @@ Cyclone | https://github.com/PsycloneTM | :/avatars/cyclone.png | Contributor
 2547techno | https://github.com/2547techno | :/avatars/techno.png | Contributor
 ZonianMidian | https://github.com/ZonianMidian | :/avatars/zonianmidian.png | Contributor
 olafyang | https://github.com/olafyang | | Contributor
+chrrs | https://github.com/chrrs | | Contributor
+4rneee | https://github.com/4rneee | | Contributor
 
 # If you are a contributor add yourself above this line
 
