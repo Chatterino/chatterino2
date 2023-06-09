@@ -276,6 +276,11 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
     // 2 - in LTR mode, the previous word should be RTL (i.e. reversed)
     for (int i = startIndex; i <= endIndex; i++)
     {
+        bool neutral = isNeutral(this->elements_[i]->getText()) ||
+                       this->elements_[i]->getFlags().hasAny(
+                           {MessageElementFlag::BoldUsername,
+                            MessageElementFlag::NonBoldUsername});
+
         if (isNeutral(this->elements_[i]->getText()) &&
             ((this->first == FirstWord::RTL && !this->wasPrevReversed_) ||
              (this->first == FirstWord::LTR && this->wasPrevReversed_)))
@@ -284,9 +289,8 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
         }
         if (((this->elements_[i]->getText().isRightToLeft() !=
               (this->first == FirstWord::RTL)) &&
-             !isNeutral(this->elements_[i]->getText())) ||
-            (isNeutral(this->elements_[i]->getText()) &&
-             this->wasPrevReversed_))
+             !neutral) ||
+            (neutral && this->wasPrevReversed_))
         {
             swappedSequence.push(i);
             this->wasPrevReversed_ = true;
