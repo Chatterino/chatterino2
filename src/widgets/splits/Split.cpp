@@ -1124,7 +1124,7 @@ void Split::showViewerList()
     viewerDock->move(0, this->header_->height());
 
     auto multiWidget = new QWidget(viewerDock);
-    auto dockVbox = new QVBoxLayout();
+    auto *dockVbox = new QVBoxLayout();
     auto searchBar = new QLineEdit(viewerDock);
 
     auto chattersList = new QListWidget();
