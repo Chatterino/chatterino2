@@ -138,26 +138,25 @@ void ReplyThreadPopup::addMessagesFromThread()
     this->setWindowTitle(TEXT_TITLE.arg(this->thread_->root()->loginName,
                                         sourceChannel->getName()));
 
-    ChannelPtr virtualChannel;
     if (sourceChannel->isTwitchChannel())
     {
-        virtualChannel =
+        this->virtualChannel_ =
             std::make_shared<TwitchChannel>(sourceChannel->getName());
     }
     else
     {
-        virtualChannel = std::make_shared<Channel>(sourceChannel->getName(),
-                                                   Channel::Type::None);
+        this->virtualChannel_ = std::make_shared<Channel>(
+            sourceChannel->getName(), Channel::Type::None);
     }
 
-    this->ui_.threadView->setChannel(virtualChannel);
+    this->ui_.threadView->setChannel(this->virtualChannel_);
     this->ui_.threadView->setSourceChannel(sourceChannel);
 
     auto overrideFlags =
         boost::optional<MessageFlags>(this->thread_->root()->flags);
     overrideFlags->set(MessageFlag::DoNotLog);
 
-    virtualChannel->addMessage(this->thread_->root(), overrideFlags);
+    this->virtualChannel_->addMessage(this->thread_->root(), overrideFlags);
     for (const auto &msgRef : this->thread_->replies())
     {
         if (auto msg = msgRef.lock())
@@ -165,24 +164,24 @@ void ReplyThreadPopup::addMessagesFromThread()
             auto overrideFlags = boost::optional<MessageFlags>(msg->flags);
             overrideFlags->set(MessageFlag::DoNotLog);
 
-            virtualChannel->addMessage(msg, overrideFlags);
+            this->virtualChannel_->addMessage(msg, overrideFlags);
         }
     }
 
     this->messageConnection_ =
         std::make_unique<pajlada::Signals::ScopedConnection>(
-            sourceChannel->messageAppended.connect(
-                [this, virtualChannel](MessagePtr &message, auto) {
-                    if (message->replyThread == this->thread_)
-                    {
-                        auto overrideFlags =
-                            boost::optional<MessageFlags>(message->flags);
-                        overrideFlags->set(MessageFlag::DoNotLog);
+            sourceChannel->messageAppended.connect([this](MessagePtr &message,
+                                                          auto) {
+                if (message->replyThread == this->thread_)
+                {
+                    auto overrideFlags =
+                        boost::optional<MessageFlags>(message->flags);
+                    overrideFlags->set(MessageFlag::DoNotLog);
 
-                        // same reply thread, add message
-                        virtualChannel->addMessage(message, overrideFlags);
-                    }
-                }));
+                    // same reply thread, add message
+                    this->virtualChannel_->addMessage(message, overrideFlags);
+                }
+            }));
 }
 
 void ReplyThreadPopup::updateInputUI()
