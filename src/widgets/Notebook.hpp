@@ -30,6 +30,8 @@ enum NotebookTabVisibility : int {
     LiveOnly = 1,
 };
 
+using TabVisibilityFilter = std::function<bool(const NotebookTab *)>;
+
 class Notebook : public BaseWidget
 {
     Q_OBJECT
@@ -105,7 +107,7 @@ protected:
      *
      * Tabs will be redrawn after this function is called.
      **/
-    void setTabFilter(std::function<bool(const NotebookTab *)> filter);
+    void setTabVisibilityFilter(TabVisibilityFilter filter);
 
     /**
      * @brief shouldShowTab has the final say whether a tab should be visible right now.
@@ -154,7 +156,7 @@ private:
 
     // This filter, if set, is used to figure out the visibility of
     // the tabs in this notebook.
-    std::function<bool(const NotebookTab *)> tabFilter_;
+    TabVisibilityFilter tabVisibilityFilter_;
 };
 
 class SplitNotebook : public Notebook

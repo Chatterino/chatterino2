@@ -263,7 +263,7 @@ void Notebook::selectIndex(int index, bool focusPage)
 
 void Notebook::selectVisibleIndex(int index, bool focusPage)
 {
-    if (!this->tabFilter_)
+    if (!this->tabVisibilityFilter_)
     {
         this->selectIndex(index, focusPage);
         return;
@@ -272,7 +272,7 @@ void Notebook::selectVisibleIndex(int index, bool focusPage)
     int i = 0;
     for (auto &item : this->items_)
     {
-        if (this->tabFilter_(item.tab))
+        if (this->tabVisibilityFilter_(item.tab))
         {
             if (i == index)
             {
@@ -289,7 +289,7 @@ void Notebook::selectNextTab(bool focusPage)
 {
     const int size = this->items_.size();
 
-    if (!this->tabFilter_)
+    if (!this->tabVisibilityFilter_)
     {
         if (size <= 1)
         {
@@ -307,7 +307,7 @@ void Notebook::selectNextTab(bool focusPage)
     auto index = (startIndex + 1) % size;
     while (index != startIndex)
     {
-        if (this->tabFilter_(this->items_[index].tab))
+        if (this->tabVisibilityFilter_(this->items_[index].tab))
         {
             this->select(this->items_[index].page, focusPage);
             return;
@@ -320,7 +320,7 @@ void Notebook::selectPreviousTab(bool focusPage)
 {
     const int size = this->items_.size();
 
-    if (!this->tabFilter_)
+    if (!this->tabVisibilityFilter_)
     {
         if (size <= 1)
         {
@@ -343,7 +343,7 @@ void Notebook::selectPreviousTab(bool focusPage)
     auto index = startIndex == 0 ? size - 1 : startIndex - 1;
     while (index != startIndex)
     {
-        if (this->tabFilter_(this->items_[index].tab))
+        if (this->tabVisibilityFilter_(this->items_[index].tab))
         {
             this->select(this->items_[index].page, focusPage);
             return;
@@ -355,7 +355,7 @@ void Notebook::selectPreviousTab(bool focusPage)
 
 void Notebook::selectLastTab(bool focusPage)
 {
-    if (!this->tabFilter_)
+    if (!this->tabVisibilityFilter_)
     {
         const auto size = this->items_.size();
         if (size <= 1)
@@ -370,7 +370,7 @@ void Notebook::selectLastTab(bool focusPage)
     // find first tab permitted by filter starting from the end
     for (auto it = this->items_.rbegin(); it != this->items_.rend(); ++it)
     {
-        if (this->tabFilter_(it->tab))
+        if (this->tabVisibilityFilter_(it->tab))
         {
             this->select(it->page, focusPage);
             return;
@@ -607,12 +607,12 @@ void Notebook::performLayout(bool animated)
 
     std::vector<Item> filteredItems;
     filteredItems.reserve(this->items_.size());
-    if (this->tabFilter_)
+    if (this->tabVisibilityFilter_)
     {
         std::copy_if(this->items_.begin(), this->items_.end(),
                      std::back_inserter(filteredItems),
                      [this](const auto &item) {
-                         return this->tabFilter_(item.tab);
+                         return this->tabVisibilityFilter_(item.tab);
                      });
     }
     else
@@ -1160,9 +1160,9 @@ size_t Notebook::visibleButtonCount() const
     return i;
 }
 
-void Notebook::setTabFilter(std::function<bool(const NotebookTab *)> filter)
+void Notebook::setTabVisibilityFilter(TabVisibilityFilter filter)
 {
-    this->tabFilter_ = std::move(filter);
+    this->tabVisibilityFilter_ = std::move(filter);
     this->performLayout();
     this->updateTabVisibility();
 }
@@ -1174,9 +1174,9 @@ bool Notebook::shouldShowTab(const NotebookTab *tab) const
         return false;
     }
 
-    if (this->tabFilter_)
+    if (this->tabVisibilityFilter_)
     {
-        return this->tabFilter_(tab);
+        return this->tabVisibilityFilter_(tab);
     }
 
     return true;
@@ -1203,13 +1203,13 @@ SplitNotebook::SplitNotebook(Window *parent)
             switch (visibility)
             {
                 case NotebookTabVisibility::LiveOnly:
-                    this->setTabFilter([](const NotebookTab *tab) {
+                    this->setTabVisibilityFilter([](const NotebookTab *tab) {
                         return tab->isLive() || tab->isSelected();
                     });
                     break;
                 case NotebookTabVisibility::Default:
                 default:
-                    this->setTabFilter(nullptr);
+                    this->setTabVisibilityFilter(nullptr);
                     break;
             }
         },
