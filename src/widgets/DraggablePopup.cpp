@@ -97,42 +97,25 @@ void DraggablePopup::mouseMoveEvent(QMouseEvent *event)
 Button *DraggablePopup::createPinButton()
 {
     auto *button = new Button(this);
-
-    struct Functor {
-        DraggablePopup *popup = nullptr;
-        Button *button = nullptr;
-        bool pinned = false;
-
-        void operator()()
-        {
-            this->pinned = !this->pinned;
-            this->updateStatus();
-        }
-
-        void updateStatus() const
-        {
-            if (this->pinned)
-            {
-                this->popup->setActionOnFocusLoss(BaseWindow::Nothing);
-                this->button->setPixmap(getResources().buttons.pinEnabled);
-            }
-            else
-            {
-                this->popup->setActionOnFocusLoss(BaseWindow::Delete);
-                this->button->setPixmap(getTheme()->buttons.pin);
-            }
-        }
-    };
-
     button->setPixmap(getTheme()->buttons.pin);
     button->setScaleIndependantSize(18, 18);
     button->setToolTip("Pin Window");
 
-    QObject::connect(button, &Button::leftClicked,
-                     Functor{
-                         .popup = this,
-                         .button = button,
-                     });
+    bool pinned = false;
+    QObject::connect(
+        button, &Button::leftClicked, [this, button, pinned]() mutable {
+            pinned = !pinned;
+            if (pinned)
+            {
+                this->setActionOnFocusLoss(BaseWindow::Nothing);
+                button->setPixmap(getResources().buttons.pinEnabled);
+            }
+            else
+            {
+                this->setActionOnFocusLoss(BaseWindow::Delete);
+                button->setPixmap(getTheme()->buttons.pin);
+            }
+        });
     return button;
 }
 

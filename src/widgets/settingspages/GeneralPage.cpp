@@ -916,6 +916,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Highlight received inline whispers", s.highlightInlineWhispers, false,
         "Highlight the whispers shown in all splits.\nIf \"Show Twitch "
         "whispers inline\" is disabled, this setting will do nothing.");
+    layout.addCheckbox(
+        "Subscribe to participated reply threads", s.subToParticipatedThreads,
+        false,
+        "When enabled, reply threads you participated in will be highlighted.");
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
     // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history

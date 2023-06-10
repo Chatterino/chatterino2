@@ -210,7 +210,7 @@ void HighlightModel::afterInit()
     std::vector<QStandardItem *> threadMessageRow = this->createRow();
     setBoolItem(threadMessageRow[Column::Pattern],
                 getSettings()->enableThreadHighlight.getValue(), true, false);
-    threadMessageRow[Column::Pattern]->setData("Participated Reply Threads",
+    threadMessageRow[Column::Pattern]->setData("Subscribed Reply Threads",
                                                Qt::DisplayRole);
     setBoolItem(threadMessageRow[Column::ShowInMentions],
                 getSettings()->showThreadHighlightInMentions.getValue(), true,
