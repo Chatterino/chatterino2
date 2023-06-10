@@ -26,6 +26,8 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
+    Button *createPinButton();
+
     // lifetimeHack_ is used to check that the window hasn't been destroyed yet
     std::shared_ptr<bool> lifetimeHack_;
 
