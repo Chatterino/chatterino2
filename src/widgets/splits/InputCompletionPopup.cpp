@@ -142,6 +142,7 @@ InputCompletionPopup::InputCompletionPopup(QWidget *parent)
     , model_(this)
 {
     this->initLayout();
+    this->themeChangedEvent();
 
     QObject::connect(&this->redrawTimer_, &QTimer::timeout, this, [this] {
         if (this->isVisible())

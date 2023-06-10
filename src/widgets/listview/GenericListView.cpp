@@ -21,8 +21,6 @@ GenericListView::GenericListView()
 
             this->requestClose();
         });
-
-    this->refreshTheme(*getTheme());
 }
 
 void GenericListView::setModel(QAbstractItemModel *model)
