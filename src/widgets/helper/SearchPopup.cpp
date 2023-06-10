@@ -280,7 +280,7 @@ void SearchPopup::initLayout()
 
         // HBOX
         {
-            auto *layout2 = new QHBoxLayout(this);
+            auto *layout2 = new QHBoxLayout();
             layout2->setContentsMargins(8, 8, 8, 8);
             layout2->setSpacing(8);
 
