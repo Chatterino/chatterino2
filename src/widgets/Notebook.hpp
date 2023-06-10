@@ -115,6 +115,9 @@ protected:
 private:
     void performLayout(bool animate = false);
 
+    /**
+     * @brief Show a popup informing the user of some big tab visibility changes
+     **/
     void showTabVisibilityInfoPopup();
 
     /**
