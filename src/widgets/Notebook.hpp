@@ -134,6 +134,8 @@ private:
     QAction *lockNotebookLayoutAction_;
     QAction *showTabsAction_;
 
+    // This filter, if set, is used to figure out the visibility of
+    // the tabs in this notebook.
     std::function<bool(const NotebookTab *)> tabFilter_;
 };
 
