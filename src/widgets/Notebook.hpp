@@ -98,6 +98,13 @@ protected:
         return items_;
     }
 
+    /**
+     * @brief Apply the given tab visibility filter
+     *
+     * An empty function can be provided to denote that no filter will be applied
+     *
+     * Tabs will be redrawn after this function is called.
+     **/
     void setTabFilter(std::function<bool(const NotebookTab *)> filter);
 
     /**
