@@ -455,7 +455,7 @@ void ChannelView::performLayout(bool causedByScrollbar)
 void ChannelView::layoutVisibleMessages(
     const LimitedQueueSnapshot<MessageLayoutPtr> &messages)
 {
-    const auto start = size_t(this->scrollBar_->getCurrentValue());
+    const auto start = size_t(this->scrollBar_->getRelativeCurrentValue());
     const auto layoutWidth = this->getLayoutWidth();
     const auto flags = this->getFlags();
     auto redrawRequired = false;
@@ -463,7 +463,7 @@ void ChannelView::layoutVisibleMessages(
     if (messages.size() > start)
     {
         auto y = int(-(messages[start]->getHeight() *
-                       (fmod(this->scrollBar_->getCurrentValue(), 1))));
+                       (fmod(this->scrollBar_->getRelativeCurrentValue(), 1))));
 
         for (auto i = start; i < messages.size() && y <= this->height(); i++)
         {
@@ -1209,7 +1209,7 @@ void ChannelView::scrollToMessageLayout(MessageLayout *layout,
     if (this->showScrollBar_)
     {
         this->getScrollBar().setDesiredValue(this->scrollBar_->getMinimum() +
-                                             messageIdx);
+                                             qreal(messageIdx));
     }
 }
 
