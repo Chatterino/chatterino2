@@ -327,13 +327,16 @@ void NotebookTab::setTabLocation(NotebookTabLocation location)
     }
 }
 
-void NotebookTab::setLive(bool isLive)
+bool NotebookTab::setLive(bool isLive)
 {
     if (this->isLive_ != isLive)
     {
         this->isLive_ = isLive;
         this->update();
+        return true;
     }
+
+    return false;
 }
 
 bool NotebookTab::isLive() const
