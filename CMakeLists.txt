@@ -49,7 +49,7 @@ elseif (CCACHE_PROGRAM)
     set(_compiler_launcher ${CCACHE_PROGRAM})
 endif ()
 
-if (_compiler_launcher AND !CMAKE_CXX_COMPILER_LAUNCHER)
+if (_compiler_launcher)
     set(CMAKE_CXX_COMPILER_LAUNCHER "${_compiler_launcher}" CACHE STRING "CXX compiler launcher")
     message(STATUS "Using ${_compiler_launcher} for speeding up build")
 
