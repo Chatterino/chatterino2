@@ -6,6 +6,7 @@
 - Minor: Add an icon showing when streamer mode is enabled (#4410)
 - Minor: Added `/shoutout <username>` commands to shoutout specified user. (#4638)
 - Minor: Improved editing hotkeys. (#4628)
+- Minor: The input completion and quick switcher are now styled to match your theme. (#4671)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
 - Bugfix: Fixed a crash when opening and closing a reply thread and switching the user. (#4675)
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
