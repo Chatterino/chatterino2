@@ -134,7 +134,7 @@ private:
     QAction *lockNotebookLayoutAction_;
     QAction *showTabsAction_;
 
-    std::function<bool(const NotebookTab *)> tabFilter_ = nullptr;
+    std::function<bool(const NotebookTab *)> tabFilter_;
 };
 
 class SplitNotebook : public Notebook
