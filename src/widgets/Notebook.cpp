@@ -1207,7 +1207,7 @@ SplitNotebook::SplitNotebook(Window *parent)
                         return tab->isLive() || tab->isSelected();
                     });
                     break;
-                case NotebookTabVisibility::Default:
+                case NotebookTabVisibility::AllTabs:
                 default:
                     this->setTabVisibilityFilter(nullptr);
                     break;

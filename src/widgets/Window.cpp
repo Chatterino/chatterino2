@@ -625,19 +625,19 @@ void Window::addShortcuts()
              {
                  this->notebook_->setShowTabs(false);
                  getSettings()->tabVisibility.setValue(
-                     NotebookTabVisibility::Default);
+                     NotebookTabVisibility::AllTabs);
              }
              else if (arg == "on")
              {
                  this->notebook_->setShowTabs(true);
                  getSettings()->tabVisibility.setValue(
-                     NotebookTabVisibility::Default);
+                     NotebookTabVisibility::AllTabs);
              }
              else if (arg == "toggle")
              {
                  this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
                  getSettings()->tabVisibility.setValue(
-                     NotebookTabVisibility::Default);
+                     NotebookTabVisibility::AllTabs);
              }
              else if (arg == "liveOnly")
              {
@@ -660,7 +660,7 @@ void Window::addShortcuts()
                      getSettings()->tabVisibility.setValue(
                          getSettings()->tabVisibility.getEnum() ==
                                  NotebookTabVisibility::LiveOnly
-                             ? NotebookTabVisibility::Default
+                             ? NotebookTabVisibility::AllTabs
                              : NotebookTabVisibility::LiveOnly);
                  }
              }

@@ -206,7 +206,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             {
                 case NotebookTabVisibility::LiveOnly:
                     return "Only live tabs";
-                case NotebookTabVisibility::Default:
+                case NotebookTabVisibility::AllTabs:
                 default:
                     return "All tabs";
             }
@@ -218,7 +218,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             }
             else
             {
-                return NotebookTabVisibility::Default;
+                return NotebookTabVisibility::AllTabs;
             }
         },
         false, "Choose which tabs are visible in the notebook");

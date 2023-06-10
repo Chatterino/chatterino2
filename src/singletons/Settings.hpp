@@ -128,7 +128,7 @@ public:
                                                      NotebookTabLocation::Top};
     EnumSetting<NotebookTabVisibility> tabVisibility = {
         "/appearance/tabVisibility",
-        NotebookTabVisibility::Default,
+        NotebookTabVisibility::AllTabs,
     };
 
     //    BoolSetting collapseLongMessages =
