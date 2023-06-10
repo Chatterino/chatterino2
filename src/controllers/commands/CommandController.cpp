@@ -29,6 +29,7 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "providers/ChattersApi.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -1165,23 +1166,48 @@ void CommandController::initialize(Settings &, Paths &paths)
                 break;
             }
 
+            auto displayMods = [=](auto modList, auto channel,
+                auto twitchChannel) {
+                if (modList.empty())
+                {
+                    channel->addMessage(makeSystemMessage(
+                        "This channel does not have any moderators."));
+                    return;
+                }
+
+                // TODO: sort results?
+
+                MessageBuilder builder;
+                TwitchMessageBuilder::listOfUsersSystemMessage(
+                    "The moderators of this channel are", modList,
+                    twitchChannel, &builder);
+                channel->addMessage(builder.release());
+            };
+
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (currentUser->isAnon())
+            {
+                ChattersApi::loadModerators(twitchChannel,
+                [displayMods, channel, twitchChannel](auto modList) {
+                    displayMods(modList, channel, twitchChannel);
+                },
+                [channel](auto error) {
+                    QString message =
+                        QString("Failed to load mods from third party Chatters API: %1. "
+                        ". Due to Twitch restrictions, "
+                        "this command can only be used by the broadcaster. "
+                        "To see the list of mods you must use the "
+                        "Twitch website.").arg(error);
+                    channel->addMessage(makeSystemMessage(message));
+                });
+
+                return "";
+            }
+
             getHelix()->getModerators(
                 twitchChannel->roomId(), 500,
-                [channel, twitchChannel](auto result) {
-                    if (result.empty())
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "This channel does not have any moderators."));
-                        return;
-                    }
-
-                    // TODO: sort results?
-
-                    MessageBuilder builder;
-                    TwitchMessageBuilder::listOfUsersSystemMessage(
-                        "The moderators of this channel are", result,
-                        twitchChannel, &builder);
-                    channel->addMessage(builder.release());
+                [displayMods, channel, twitchChannel](auto result) {
+                    displayMods(result, channel, twitchChannel);
                 },
                 [channel, formatModsError](auto error, auto message) {
                     auto errorMessage = formatModsError(error, message);
@@ -3068,36 +3094,51 @@ void CommandController::initialize(Settings &, Paths &paths)
                 }
                 break;
             }
+            auto displayVips = [=](auto vipList, auto channel,
+                auto twitchChannel) {
+                if (vipList.empty())
+                {
+                    channel->addMessage(makeSystemMessage(
+                        "This channel does not have any VIPs."));
+                    return;
+                }
+
+                auto messagePrefix =
+                    QString("The VIPs of this channel are");
+
+                // TODO: sort results?
+                MessageBuilder builder;
+                TwitchMessageBuilder::listOfUsersSystemMessage(
+                    messagePrefix, vipList, twitchChannel, &builder);
+
+                channel->addMessage(builder.release());
+            };
+
             auto currentUser = getApp()->accounts->twitch.getCurrent();
             if (currentUser->isAnon())
             {
-                channel->addMessage(makeSystemMessage(
-                    "Due to Twitch restrictions, "  //
-                    "this command can only be used by the broadcaster. "
-                    "To see the list of VIPs you must use the "
-                    "Twitch website."));
+                ChattersApi::loadVips(twitchChannel,
+                [displayVips, channel, twitchChannel](auto vipList) {
+                    displayVips(vipList, channel, twitchChannel);
+                },
+                [channel](auto error) {
+                    QString message =
+                        QString("Failed to load VIPs from third party Chatters API: %1. "
+                        "Due to Twitch restrictions, "
+                        "this command can only be used by the broadcaster. "
+                        "To see the list of VIPs you must use the "
+                        "Twitch website.").arg(error);
+                    channel->addMessage(makeSystemMessage(message));
+                });
+
                 return "";
             }
 
             getHelix()->getChannelVIPs(
                 twitchChannel->roomId(),
-                [channel, twitchChannel](const std::vector<HelixVip> &vipList) {
-                    if (vipList.empty())
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "This channel does not have any VIPs."));
-                        return;
-                    }
-
-                    auto messagePrefix =
-                        QString("The VIPs of this channel are");
-
-                    // TODO: sort results?
-                    MessageBuilder builder;
-                    TwitchMessageBuilder::listOfUsersSystemMessage(
-                        messagePrefix, vipList, twitchChannel, &builder);
-
-                    channel->addMessage(builder.release());
+                [displayVips, channel, twitchChannel]
+                    (const std::vector<HelixVip> &vipList) {
+                    displayVips(vipList, channel, twitchChannel);
                 },
                 [channel, formatVIPListError](auto error, auto message) {
                     auto errorMessage = formatVIPListError(error, message);

@@ -26,6 +26,28 @@ public:
                              ResultCallback<QString, QStringList,
                                  QStringList, QStringList> onLoaded,
                              ErrorCallback onError);
+
+    /**
+     * @brief Loads moderators for a Twitch channel using Chatters API
+     *
+     * @param channel Twitch channel to load moderators for
+     * @param onLoaded Callback for successful requests
+     * @param onError Callback for failed requests
+     */
+    static void loadModerators(TwitchChannel *channel,
+                               ResultCallback<QStringList> onLoaded,
+                               ErrorCallback onError);
+
+    /**
+     * @brief Loads vips for a Twitch channel using Chatters API
+     *
+     * @param channel Twitch channel to load vips for
+     * @param onLoaded Callback for successful requests
+     * @param onError Callback for failed requests
+     */
+    static void loadVips(TwitchChannel *channel,
+                         ResultCallback<QStringList> onLoaded,
+                         ErrorCallback onError);
 };
 
 }  // namespace chatterino

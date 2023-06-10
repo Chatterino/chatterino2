@@ -100,4 +100,62 @@ void ChattersApi::loadChatters(TwitchChannel *channel,
         .execute();
 }
 
+void ChattersApi::loadModerators(TwitchChannel *channel,
+                                 ResultCallback<QStringList> onLoaded,
+                                 ErrorCallback onError)
+{
+    qCDebug(chatterinoChattersApi)
+        << "Loading moderators for" << channel->getName();
+
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("channelId", channel->roomId());
+    makeRequest("roles/moderators", urlQuery)
+        .onSuccess([channel, onLoaded](NetworkResult result) -> Outcome {
+            qCDebug(chatterinoChattersApi)
+                << "Successfully loaded moderators for"
+                << channel->getName();
+
+            QJsonArray mods = result.parseJsonArray();
+            QStringList modList = userListFromJsonArray(mods);
+            onLoaded(modList);
+
+            return Success;
+        })
+        .onError([channel, onError](NetworkResult result) {
+            qCDebug(chatterinoChattersApi)
+                << "Failed to load moderators for" << channel->getName();
+            forwardErrorMessage(result, onError);
+        })
+        .execute();
+}
+
+void ChattersApi::loadVips(TwitchChannel *channel,
+                           ResultCallback<QStringList> onLoaded,
+                           ErrorCallback onError)
+{
+    qCDebug(chatterinoChattersApi)
+        << "Loading vips for" << channel->getName();
+
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("channelId", channel->roomId());
+    makeRequest("roles/vips", urlQuery)
+        .onSuccess([channel, onLoaded](NetworkResult result) -> Outcome {
+            qCDebug(chatterinoChattersApi)
+                << "Successfully loaded vips for"
+                << channel->getName();
+
+            QJsonArray vips = result.parseJsonArray();
+            QStringList vipList = userListFromJsonArray(vips);
+            onLoaded(vipList);
+
+            return Success;
+        })
+        .onError([channel, onError](NetworkResult result) {
+            qCDebug(chatterinoChattersApi)
+                << "Failed to load chatters list for" << channel->getName();
+            forwardErrorMessage(result, onError);
+        })
+        .execute();
+}
+
 }  // namespace chatterino
