@@ -22,14 +22,14 @@ Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
     , currentValueAnimation_(this, "currentValue_")
     , highlights_(messagesLimit)
 {
-    resize(int(16 * this->scale()), 100);
+    this->resize(int(16 * this->scale()), 100);
     this->currentValueAnimation_.setDuration(150);
     this->currentValueAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::OutCubic));
     connect(&this->currentValueAnimation_, &QAbstractAnimation::finished, this,
             &Scrollbar::resetMaximum);
 
-    setMouseTracking(true);
+    this->setMouseTracking(true);
 }
 
 void Scrollbar::addHighlight(ScrollbarHighlight highlight)
@@ -75,7 +75,7 @@ LimitedQueueSnapshot<ScrollbarHighlight> &Scrollbar::getHighlightSnapshot()
 
 void Scrollbar::scrollToBottom(bool animate)
 {
-    this->setDesiredValue(this->maximum_ - this->getLargeChange(), animate);
+    this->setDesiredValue(this->getBottom(), animate);
 }
 
 void Scrollbar::scrollToTop(bool animate)
@@ -92,14 +92,14 @@ void Scrollbar::setMaximum(qreal value)
 {
     this->maximum_ = value;
 
-    updateScroll();
+    this->updateScroll();
 }
 
 void Scrollbar::offsetMaximum(qreal value)
 {
     this->maximum_ += value;
 
-    updateScroll();
+    this->updateScroll();
 }
 
 void Scrollbar::resetMaximum()
@@ -117,7 +117,7 @@ void Scrollbar::setMinimum(qreal value)
 {
     this->minimum_ = value;
 
-    updateScroll();
+    this->updateScroll();
 }
 
 void Scrollbar::offsetMinimum(qreal value)
@@ -129,74 +129,57 @@ void Scrollbar::offsetMinimum(qreal value)
         this->scrollToTop();
     }
 
-    updateScroll();
+    this->updateScroll();
 }
 
 void Scrollbar::setLargeChange(qreal value)
 {
     this->largeChange_ = value;
 
-    updateScroll();
+    this->updateScroll();
 }
 
 void Scrollbar::setSmallChange(qreal value)
 {
     this->smallChange_ = value;
 
-    updateScroll();
+    this->updateScroll();
 }
 
 void Scrollbar::setDesiredValue(qreal value, bool animated)
 {
-    animated &= getSettings()->enableSmoothScrolling;
-    value = std::max(this->minimum_,
-                     std::min(this->maximum_ - this->largeChange_, value));
+    value = std::max(this->minimum_, std::min(this->getBottom(), value));
 
-    bool noAnimation = false;
-
-    if (std::abs(this->currentValue_ - value) > 0.0001)
+    if (std::abs(this->currentValue_ - value) <= 0.0001)
     {
-        if (animated)
-        {
-            this->currentValueAnimation_.stop();
-            this->currentValueAnimation_.setStartValue(this->currentValue_);
-
-            //            if (((this->getMaximum() - this->getLargeChange()) -
-            //            value) <= 0.01) {
-            //                value += 1;
-            //            }
-
-            this->currentValueAnimation_.setEndValue(value);
-            this->atBottom_ = ((this->getMaximum() - this->getLargeChange()) -
-                               value) <= 0.0001;
-            this->currentValueAnimation_.start();
-        }
-        else
-        {
-            if (this->currentValueAnimation_.state() ==
-                QPropertyAnimation::Running)
-            {
-                this->currentValueAnimation_.setEndValue(value);
-            }
-            else
-            {
-                this->desiredValue_ = value;
-                this->currentValueAnimation_.stop();
-                this->atBottom_ =
-                    ((this->getMaximum() - this->getLargeChange()) - value) <=
-                    0.0001;
-                setCurrentValue(value);
-                noAnimation = true;
-            }
-        }
+        return;
     }
 
     this->desiredValue_ = value;
+
     this->desiredValueChanged_.invoke();
 
-    if (noAnimation)
+    this->atBottom_ = (this->getBottom() - value) <= 0.0001;
+
+    if (animated & getSettings()->enableSmoothScrolling)
     {
-        this->resetMaximum();
+        // stop() does not emit QAbstractAnimation::finished().
+        this->currentValueAnimation_.stop();
+        this->currentValueAnimation_.setStartValue(this->currentValue_);
+        this->currentValueAnimation_.setEndValue(value);
+        this->currentValueAnimation_.start();
+    }
+    else
+    {
+        if (this->currentValueAnimation_.state() != QPropertyAnimation::Stopped)
+        {
+            this->currentValueAnimation_.setEndValue(value);
+        }
+        else
+        {
+            this->setCurrentValue(value);
+            this->resetMaximum();
+        }
     }
 }
 
@@ -213,6 +196,11 @@ qreal Scrollbar::getMinimum() const
 qreal Scrollbar::getLargeChange() const
 {
     return this->largeChange_;
+}
+
+qreal Scrollbar::getBottom() const
+{
+    return this->maximum_ - this->largeChange_;
 }
 
 qreal Scrollbar::getSmallChange() const
@@ -255,18 +243,17 @@ pajlada::Signals::NoArgSignal &Scrollbar::getDesiredValueChanged()
 
 void Scrollbar::setCurrentValue(qreal value)
 {
-    value = std::max(this->minimum_,
-                     std::min(this->maximum_ - this->largeChange_, value));
+    value = std::max(this->minimum_, std::min(this->getBottom(), value));
 
-    if (std::abs(this->currentValue_ - value) > 0.0001)
+    if (std::abs(this->currentValue_ - value) <= 0.0001)
     {
-        this->currentValue_ = value;
-
-        this->updateScroll();
-        this->currentValueChanged_.invoke();
-
-        this->update();
+        return;
     }
+
+    this->currentValue_ = value;
+
+    this->updateScroll();
+    this->currentValueChanged_.invoke();
 }
 
 void Scrollbar::printCurrentState(const QString &prefix) const
@@ -411,14 +398,14 @@ void Scrollbar::mouseMoveEvent(QMouseEvent *event)
 
         if (oldIndex != this->mouseOverIndex_)
         {
-            update();
+            this->update();
         }
     }
     else if (this->mouseDownIndex_ == 2)
     {
         int delta = event->pos().y() - this->lastMousePosition_.y();
 
-        setDesiredValue(
+        this->setDesiredValue(
             this->desiredValue_ +
             (qreal(delta) / std::max<qreal>(0.00000002, this->trackHeight_)) *
                 this->maximum_);
@@ -461,14 +448,16 @@ void Scrollbar::mouseReleaseEvent(QMouseEvent *event)
     {
         if (this->mouseDownIndex_ == 0)
         {
-            setDesiredValue(this->desiredValue_ - this->smallChange_, true);
+            this->setDesiredValue(this->desiredValue_ - this->smallChange_,
+                                  true);
         }
     }
     else if (y < this->thumbRect_.y())
     {
         if (this->mouseDownIndex_ == 1)
         {
-            setDesiredValue(this->desiredValue_ - this->smallChange_, true);
+            this->setDesiredValue(this->desiredValue_ - this->smallChange_,
+                                  true);
         }
     }
     else if (this->thumbRect_.contains(2, y))
@@ -479,26 +468,29 @@ void Scrollbar::mouseReleaseEvent(QMouseEvent *event)
     {
         if (this->mouseDownIndex_ == 3)
         {
-            setDesiredValue(this->desiredValue_ + this->smallChange_, true);
+            this->setDesiredValue(this->desiredValue_ + this->smallChange_,
+                                  true);
         }
     }
     else
     {
         if (this->mouseDownIndex_ == 4)
         {
-            setDesiredValue(this->desiredValue_ + this->smallChange_, true);
+            this->setDesiredValue(this->desiredValue_ + this->smallChange_,
+                                  true);
         }
     }
 
     this->mouseDownIndex_ = -1;
-    update();
+
+    this->update();
 }
 
 void Scrollbar::leaveEvent(QEvent *)
 {
     this->mouseOverIndex_ = -1;
 
-    update();
+    this->update();
 }
 
 void Scrollbar::updateScroll()

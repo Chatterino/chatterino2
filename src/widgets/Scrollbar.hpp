@@ -44,6 +44,7 @@ public:
     qreal getMaximum() const;
     qreal getMinimum() const;
     qreal getLargeChange() const;
+    qreal getBottom() const;
     qreal getSmallChange() const;
     qreal getDesiredValue() const;
     qreal getCurrentValue() const;
