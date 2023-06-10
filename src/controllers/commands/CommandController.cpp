@@ -787,6 +787,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         QStringList debugMessages{
             "recentMessagesApiUrl: " + env.recentMessagesApiUrl,
+            "chattersApiBaseUrl: " + env.chattersApiBaseUrl,
             "linkResolverUrl: " + env.linkResolverUrl,
             "twitchServerHost: " + env.twitchServerHost,
             "twitchServerPort: " + QString::number(env.twitchServerPort),

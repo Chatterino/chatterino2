@@ -10,6 +10,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/MessageThread.hpp"
+#include "providers/ChattersApi.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -1200,12 +1201,50 @@ void Split::showViewerList()
         resultList->show();
     };
 
+    auto displayChatters = [=](auto broadcaster, auto modList, auto vipList,
+        auto chatterList, bool isBroadcaster) {
+        modList.sort();
+        vipList.sort();
+        chatterList.sort();
+
+        if (!broadcaster.isNull())
+        {
+            addLabel("Broadcaster");
+            chattersList->addItem(broadcaster);
+            chattersList->addItem(new QListWidgetItem());
+        }
+
+        if (isBroadcaster)
+        {
+            addUserList(modList, QString("Moderators"));
+            addUserList(vipList, QString("VIPs"));
+        }
+        else
+        {
+            addLabel("Moderators");
+            chattersList->addItem(
+                "Moderators cannot check who is a moderator");
+            chattersList->addItem(new QListWidgetItem());
+
+            addLabel("VIPs");
+            chattersList->addItem(
+                "Moderators cannot check who is a VIP");
+            chattersList->addItem(new QListWidgetItem());
+        }
+
+        addUserList(chatterList, QString("Chatters"));
+
+        loadingLabel->hide();
+        performListSearch();
+    };
+
     auto loadChatters = [=](auto modList, auto vipList, bool isBroadcaster) {
         getHelix()->getChatters(
             twitchChannel->roomId(),
             getApp()->accounts->twitch.getCurrent()->getUserId(), 50000,
             [=](auto chatters) {
                 auto broadcaster = channel->getName().toLower();
+                QString broadcasterChatter;
                 QStringList chatterList;
                 QStringList modChatters;
                 QStringList vipChatters;
@@ -1218,9 +1257,7 @@ void Split::showViewerList()
                     if (!addedBroadcaster && chatter == broadcaster)
                     {
                         addedBroadcaster = true;
-                        addLabel("Broadcaster");
-                        chattersList->addItem(broadcaster);
-                        chattersList->addItem(new QListWidgetItem());
+                        broadcasterChatter = chatter;
                         continue;
                     }
 
@@ -1239,32 +1276,8 @@ void Split::showViewerList()
                     chatterList.append(chatter);
                 }
 
-                modChatters.sort();
-                vipChatters.sort();
-                chatterList.sort();
-
-                if (isBroadcaster)
-                {
-                    addUserList(modChatters, QString("Moderators"));
-                    addUserList(vipChatters, QString("VIPs"));
-                }
-                else
-                {
-                    addLabel("Moderators");
-                    chattersList->addItem(
-                        "Moderators cannot check who is a moderator");
-                    chattersList->addItem(new QListWidgetItem());
-
-                    addLabel("VIPs");
-                    chattersList->addItem(
-                        "Moderators cannot check who is a VIP");
-                    chattersList->addItem(new QListWidgetItem());
-                }
-
-                addUserList(chatterList, QString("Chatters"));
-
-                loadingLabel->hide();
-                performListSearch();
+                displayChatters(broadcasterChatter, modChatters, vipChatters,
+                    chatterList, isBroadcaster);
             },
             [chattersList, formatListItemText](auto error, auto message) {
                 auto errorMessage = formatChattersError(error, message);
@@ -1312,21 +1325,36 @@ void Split::showViewerList()
                 chattersList->addItem(formatListItemText(errorMessage));
             });
     }
-    else if (channel->hasModRights())
-    {
-        QSet<QString> modList;
-        QSet<QString> vipList;
-        loadChatters(modList, vipList, false);
-    }
     else
     {
-        chattersList->addItem(
-            formatListItemText("Due to Twitch restrictions, this feature is "
-                               "only \navailable for moderators."));
-        chattersList->addItem(
-            formatListItemText("If you would like to see the Viewer list, you "
-                               "must \nuse the Twitch website."));
-        loadingLabel->hide();
+        auto loadChattersRestricted = [=](auto error) {
+            if (channel->hasModRights())
+            {
+                QSet<QString> modList;
+                QSet<QString> vipList;
+                loadChatters(modList, vipList, false);
+            }
+            else
+            {
+                chattersList->addItem(
+                    formatListItemText("Error using third party chatters API: \n" + error));
+                chattersList->addItem(
+                    formatListItemText("Due to Twitch restrictions, this feature is "
+                                       "only \navailable for moderators."));
+                chattersList->addItem(
+                     formatListItemText("If you would like to see the Viewer list, \n"
+                                        "you must use the Twitch website."));
+                loadingLabel->hide();
+            }
+        };
+
+        ChattersApi::loadChatters(
+            twitchChannel,
+            [displayChatters](auto broadcaster, auto modList, auto vipList,
+                auto viewers) {
+                displayChatters(broadcaster, modList, vipList, viewers, true);
+            },
+            loadChattersRestricted);
     }
 
     QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {

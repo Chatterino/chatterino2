@@ -37,6 +37,8 @@ Q_LOGGING_CATEGORY(chatterinoNuulsuploader, "chatterino.nuulsuploader",
 Q_LOGGING_CATEGORY(chatterinoPubSub, "chatterino.pubsub", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoRecentMessages, "chatterino.recentmessages",
                    logThreshold);
+Q_LOGGING_CATEGORY(chatterinoChattersApi, "chatterino.chattersapi",
+                   logThreshold);
 Q_LOGGING_CATEGORY(chatterinoSettings, "chatterino.settings", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoSeventv, "chatterino.seventv", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoSeventvEventAPI, "chatterino.seventv.eventapi",

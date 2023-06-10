@@ -93,6 +93,9 @@ Env::Env()
           readStringEnv("CHATTERINO2_RECENT_MESSAGES_URL",
                         "https://recent-messages.robotty.de/api/v2/"
                         "recent-messages/%1"))
+    , chattersApiBaseUrl(readStringEnv(
+          "CHATTERINO2_CHATTERS_API_BASE_URL",
+          "https://chatters.verotek.net/api/"))
     , linkResolverUrl(readStringEnv(
           "CHATTERINO2_LINK_RESOLVER_URL",
           "https://braize.pajlada.com/chatterino/link_resolver/%1"))

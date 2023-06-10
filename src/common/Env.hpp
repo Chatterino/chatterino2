@@ -13,6 +13,7 @@ public:
     static const Env &get();
 
     const QString recentMessagesApiUrl;
+    const QString chattersApiBaseUrl;
     const QString linkResolverUrl;
     const QString twitchServerHost;
     const uint16_t twitchServerPort;

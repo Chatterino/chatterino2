@@ -231,6 +231,8 @@ set(SOURCE_FILES
         providers/NetworkConfigurationProvider.hpp
         providers/RecentMessagesApi.cpp
         providers/RecentMessagesApi.hpp
+        providers/ChattersApi.cpp
+        providers/ChattersApi.hpp
 
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp
