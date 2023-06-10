@@ -99,6 +99,10 @@ protected:
     }
 
     void setTabFilter(std::function<bool(const NotebookTab *)> filter);
+
+    /**
+     * @brief shouldShowTab has the final say whether a tab should be visible right now.
+     **/
     bool shouldShowTab(const NotebookTab *tab) const;
 
 private:

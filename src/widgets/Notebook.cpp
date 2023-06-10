@@ -1169,13 +1169,17 @@ void Notebook::setTabFilter(std::function<bool(const NotebookTab *)> filter)
 
 bool Notebook::shouldShowTab(const NotebookTab *tab) const
 {
-    // If tabs are hidden or there is no filter, use normal behavior
-    if (!this->showTabs_ || !this->tabFilter_)
+    if (!this->showTabs_)
     {
-        return this->showTabs_;
+        return false;
     }
 
-    return this->tabFilter_(tab);
+    if (this->tabFilter_)
+    {
+        return this->tabFilter_(tab);
+    }
+
+    return true;
 }
 
 SplitNotebook::SplitNotebook(Window *parent)
