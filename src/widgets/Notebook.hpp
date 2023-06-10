@@ -116,6 +116,10 @@ private:
     void performLayout(bool animate = false);
 
     void showTabVisibilityInfoPopup();
+
+    /**
+     * @brief Updates the visibility state of all tabs
+     **/
     void updateTabVisibility();
     void updateTabVisibilityMenuAction();
     void resizeAddButton();
