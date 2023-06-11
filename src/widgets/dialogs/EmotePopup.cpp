@@ -310,7 +310,7 @@ void EmotePopup::addShortcuts()
                  int result = target.toInt(&ok);
                  if (ok)
                  {
-                     this->notebook_->selectIndex(result, false);
+                     this->notebook_->selectVisibleIndex(result, false);
                  }
                  else
                  {
