@@ -161,7 +161,7 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
 
     this->atBottom_ = (this->getBottom() - value) <= 0.0001;
 
-    if (animated & getSettings()->enableSmoothScrolling)
+    if (animated && getSettings()->enableSmoothScrolling)
     {
         // stop() does not emit QAbstractAnimation::finished().
         this->currentValueAnimation_.stop();
