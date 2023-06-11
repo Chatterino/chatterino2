@@ -6,8 +6,11 @@
 - Minor: Add an icon showing when streamer mode is enabled (#4410)
 - Minor: Added `/shoutout <username>` commands to shoutout specified user. (#4638)
 - Minor: Improved editing hotkeys. (#4628)
+- Minor: The input completion and quick switcher are now styled to match your theme. (#4671)
 - Minor: Added setting to only show tabs with live channels (default toggle hotkey: Ctrl+Shift+L). (#4358)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
+- Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
+- Bugfix: Fixed a crash when opening and closing a reply thread and switching the user. (#4675)
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
 - Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
 - Dev: Added test cases for emote and tab completion. (#4644)
@@ -16,6 +19,8 @@
 - Dev: Added tools to help debug image GC. (#4578)
 - Dev: Removed duplicate license when having plugins enabled. (#4665)
 - Dev: Replace our QObjectRef class with Qt's QPointer class. (#4666)
+- Dev: Fixed warnings about QWidgets already having a QLayout. (#4672)
+- Dev: Fixed undefined behavior when loading non-existant credentials. (#4673)
 
 ## 2.4.4
 

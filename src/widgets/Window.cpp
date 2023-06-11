@@ -152,7 +152,7 @@ void Window::closeEvent(QCloseEvent *)
 
 void Window::addLayout()
 {
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    auto *layout = new QVBoxLayout();
 
     layout->addWidget(this->notebook_);
     this->getLayoutContainer()->setLayout(layout);
