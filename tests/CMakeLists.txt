@@ -50,6 +50,8 @@ set_target_properties(${PROJECT_NAME}
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
     )
 
+chatterino_define_build_constants(${PROJECT_NAME})
+
 if(CHATTERINO_ENABLE_LTO)
     message(STATUS "Enabling LTO for ${PROJECT_NAME}")
     set_property(TARGET ${PROJECT_NAME}

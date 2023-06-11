@@ -716,6 +716,8 @@ if (BUILD_APP)
 
     target_link_libraries(${EXECUTABLE_PROJECT} PUBLIC ${LIBRARY_PROJECT})
 
+    chatterino_define_build_constants(${EXECUTABLE_PROJECT})
+
     set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
     if (WIN32)
@@ -794,34 +796,13 @@ set_target_properties(${LIBRARY_PROJECT}
     AUTOUIC ON
     )
 
-# Used to provide a date of build in the About page (for nightly builds). Getting the actual time of
-# compilation in CMake is a more involved, as documented in https://stackoverflow.com/q/24292898.
-# For CI runs, however, the date of build file generation should be consistent with the date of
-# compilation so this approximation is "good enough" for our purpose.
-if (DEFINED ENV{CHATTERINO_SKIP_DATE_GEN})
-    set(cmake_gen_date "1970-01-01")
-else ()
-    string(TIMESTAMP cmake_gen_date "%Y-%m-%d")
-endif ()
-
 target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO
     UNICODE
     AB_CUSTOM_SETTINGS
     IRC_STATIC
     IRC_NAMESPACE=Communi
-
-    CHATTERINO_GIT_HASH=\"${GIT_HASH}\"
-    CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
-    CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
-
-    CHATTERINO_CMAKE_GEN_DATE=\"${cmake_gen_date}\"
     )
-if (GIT_MODIFIED)
-    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
-        CHATTERINO_GIT_MODIFIED
-        )
-endif ()
 if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CMAKE_BUILD

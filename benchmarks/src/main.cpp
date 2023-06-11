@@ -1,9 +1,12 @@
+#include "common/Version.hpp"
 #include "singletons/Settings.hpp"
 
 #include <benchmark/benchmark.h>
 #include <QApplication>
 #include <QtConcurrent>
 #include <QTemporaryDir>
+
+CHATTERINO_DECLARE_BUILD_CONSTANTS()
 
 using namespace chatterino;
 

@@ -185,6 +185,35 @@ if (BUILD_WITH_CRASHPAD)
     add_subdirectory("${CMAKE_SOURCE_DIR}/lib/crashpad" EXCLUDE_FROM_ALL)
 endif()
 
+# Used to provide a date of build in the About page (for nightly builds). Getting the actual time of
+# compilation in CMake is a more involved, as documented in https://stackoverflow.com/q/24292898.
+# For CI runs, however, the date of build file generation should be consistent with the date of
+# compilation so this approximation is "good enough" for our purpose.
+if (DEFINED ENV{CHATTERINO_SKIP_DATE_GEN})
+    set(cmake_gen_date "1970-01-01")
+else ()
+    string(TIMESTAMP cmake_gen_date "%Y-%m-%d")
+endif ()
+
+# This function adds the definitions used by the
+# CHATTERINO_DECLARE_BUILD_CONSTANTS() macro.
+# It should only be used on executables.
+function(chatterino_define_build_constants _target)
+    target_compile_definitions(${_target} PRIVATE
+        CHATTERINO_GIT_HASH=\"${GIT_HASH}\"
+        CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
+        CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
+
+        CHATTERINO_CMAKE_GEN_DATE=\"${cmake_gen_date}\"
+    )
+
+    if (GIT_MODIFIED)
+        target_compile_definitions(${_target} PRIVATE CHATTERINO_GIT_MODIFIED=1)
+    else()
+        target_compile_definitions(${_target} PRIVATE CHATTERINO_GIT_MODIFIED=0)
+    endif ()
+endfunction()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

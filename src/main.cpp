@@ -22,6 +22,8 @@
 
 using namespace chatterino;
 
+CHATTERINO_DECLARE_BUILD_CONSTANTS()
+
 int main(int argc, char **argv)
 {
     QApplication a(argc, argv);
