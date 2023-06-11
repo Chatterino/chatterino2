@@ -34,6 +34,8 @@ private:
     std::shared_ptr<MessageThread> thread_;
     // The channel that the reply thread is in
     ChannelPtr channel_;
+    // The channel for the `threadView`
+    ChannelPtr virtualChannel_;
     Split *split_;
 
     struct {

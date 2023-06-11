@@ -42,10 +42,29 @@ else()
 endif()
 
 find_program(CCACHE_PROGRAM ccache)
-if (CCACHE_PROGRAM)
-    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
-    message("Using ${CCACHE_PROGRAM} for speeding up build")
+find_program(SCCACHE_PROGRAM sccache)
+if (SCCACHE_PROGRAM)
+    set(_compiler_launcher ${SCCACHE_PROGRAM})
+elseif (CCACHE_PROGRAM)
+    set(_compiler_launcher ${CCACHE_PROGRAM})
 endif ()
+
+if (_compiler_launcher)
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${_compiler_launcher}" CACHE STRING "CXX compiler launcher")
+    message(STATUS "Using ${_compiler_launcher} for speeding up build")
+
+    if (MSVC)
+        # /Zi can't be used with (s)ccache
+        # Use /Z7 instead (debug info in object files)
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+        elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+            string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+        elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+            string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+        endif()
+    endif()
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/GIT.cmake)
 

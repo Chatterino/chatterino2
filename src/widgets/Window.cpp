@@ -152,7 +152,7 @@ void Window::closeEvent(QCloseEvent *)
 
 void Window::addLayout()
 {
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    auto *layout = new QVBoxLayout();
 
     layout->addWidget(this->notebook_);
     this->getLayoutContainer()->setLayout(layout);
@@ -354,7 +354,7 @@ void Window::addShortcuts()
                  int result = target.toInt(&ok);
                  if (ok)
                  {
-                     this->notebook_->selectIndex(result);
+                     this->notebook_->selectVisibleIndex(result);
                  }
                  else
                  {
@@ -619,46 +619,61 @@ void Window::addShortcuts()
          }},
         {"setTabVisibility",
          [this](std::vector<QString> arguments) -> QString {
-             auto mode = 2;
-             if (arguments.size() != 0)
+             QString arg = arguments.empty() ? "toggle" : arguments.front();
+
+             if (arg == "off")
              {
-                 auto arg = arguments.at(0);
-                 if (arg == "off")
+                 this->notebook_->setShowTabs(false);
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::AllTabs);
+             }
+             else if (arg == "on")
+             {
+                 this->notebook_->setShowTabs(true);
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::AllTabs);
+             }
+             else if (arg == "toggle")
+             {
+                 this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::AllTabs);
+             }
+             else if (arg == "liveOnly")
+             {
+                 this->notebook_->setShowTabs(true);
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::LiveOnly);
+             }
+             else if (arg == "toggleLiveOnly")
+             {
+                 if (!this->notebook_->getShowTabs())
                  {
-                     mode = 0;
-                 }
-                 else if (arg == "on")
-                 {
-                     mode = 1;
-                 }
-                 else if (arg == "toggle")
-                 {
-                     mode = 2;
+                     // Tabs are currently hidden, so the intention is to show
+                     // tabs again before enabling the live only setting
+                     this->notebook_->setShowTabs(true);
+                     getSettings()->tabVisibility.setValue(
+                         NotebookTabVisibility::LiveOnly);
                  }
                  else
                  {
-                     qCWarning(chatterinoHotkeys)
-                         << "Invalid argument for setStreamerMode hotkey: "
-                         << arg;
-                     return QString("Invalid argument for setTabVisibility "
-                                    "hotkey: %1. Use \"on\", \"off\" or "
-                                    "\"toggle\".")
-                         .arg(arg);
+                     getSettings()->tabVisibility.setValue(
+                         getSettings()->tabVisibility.getEnum() ==
+                                 NotebookTabVisibility::LiveOnly
+                             ? NotebookTabVisibility::AllTabs
+                             : NotebookTabVisibility::LiveOnly);
                  }
              }
+             else
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid argument for setTabVisibility hotkey: " << arg;
+                 return QString("Invalid argument for setTabVisibility hotkey: "
+                                "%1. Use \"on\", \"off\", \"toggle\", "
+                                "\"liveOnly\", or \"toggleLiveOnly\".")
+                     .arg(arg);
+             }
 
-             if (mode == 0)
-             {
-                 this->notebook_->setShowTabs(false);
-             }
-             else if (mode == 1)
-             {
-                 this->notebook_->setShowTabs(true);
-             }
-             else if (mode == 2)
-             {
-                 this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
-             }
              return "";
          }},
     };

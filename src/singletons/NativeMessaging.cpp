@@ -189,7 +189,6 @@ void NativeMessagingServer::ReceiverThread::run()
 void NativeMessagingServer::ReceiverThread::handleMessage(
     const QJsonObject &root)
 {
-    auto app = getApp();
     QString action = root.value("action").toString();
 
     if (action.isNull())
@@ -237,6 +236,8 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         if (_type == "twitch")
         {
             postToThread([=] {
+                auto *app = getApp();
+
                 if (!name.isEmpty())
                 {
                     auto channel = app->twitch->getOrAddChannel(name);
@@ -249,15 +250,12 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
                 if (attach || attachFullscreen)
                 {
 #ifdef USEWINSDK
-                    //                    if (args.height != -1) {
                     auto *window =
                         AttachedWindow::get(::GetForegroundWindow(), args);
                     if (!name.isEmpty())
                     {
                         window->setChannel(app->twitch->getOrAddChannel(name));
                     }
-//                    }
-//                    window->show();
 #endif
                 }
             });

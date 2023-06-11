@@ -500,6 +500,10 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
                             QKeySequence("Ctrl+U"), "setTabVisibility",
                             {"toggle"}, "toggle tab visibility");
+
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
+                            QKeySequence("Ctrl+Shift+L"), "setTabVisibility",
+                            {"toggleLiveOnly"}, "toggle live tabs only");
     }
 }
 
