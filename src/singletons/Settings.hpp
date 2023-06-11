@@ -126,6 +126,10 @@ public:
 
     EnumSetting<NotebookTabLocation> tabDirection = {"/appearance/tabDirection",
                                                      NotebookTabLocation::Top};
+    EnumSetting<NotebookTabVisibility> tabVisibility = {
+        "/appearance/tabVisibility",
+        NotebookTabVisibility::AllTabs,
+    };
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};

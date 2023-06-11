@@ -7,6 +7,7 @@
 - Minor: Added `/shoutout <username>` commands to shoutout specified user. (#4638)
 - Minor: Improved editing hotkeys. (#4628)
 - Minor: The input completion and quick switcher are now styled to match your theme. (#4671)
+- Minor: Added setting to only show tabs with live channels (default toggle hotkey: Ctrl+Shift+L). (#4358)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
 - Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
 - Bugfix: Fixed a crash when opening and closing a reply thread and switching the user. (#4675)

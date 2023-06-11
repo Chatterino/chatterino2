@@ -199,6 +199,30 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     tabDirectionDropdown->setMinimumWidth(
         tabDirectionDropdown->minimumSizeHint().width());
 
+    layout.addDropdown<std::underlying_type<NotebookTabVisibility>::type>(
+        "Tab visibility", {"All tabs", "Only live tabs"}, s.tabVisibility,
+        [](auto val) {
+            switch (val)
+            {
+                case NotebookTabVisibility::LiveOnly:
+                    return "Only live tabs";
+                case NotebookTabVisibility::AllTabs:
+                default:
+                    return "All tabs";
+            }
+        },
+        [](auto args) {
+            if (args.value == "Only live tabs")
+            {
+                return NotebookTabVisibility::LiveOnly;
+            }
+            else
+            {
+                return NotebookTabVisibility::AllTabs;
+            }
+        },
+        false, "Choose which tabs are visible in the notebook");
+
     layout.addCheckbox(
         "Show message reply context", s.hideReplyContext, true,
         "This setting will only affect how messages are shown. You can reply "
