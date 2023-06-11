@@ -21,6 +21,8 @@
 - Dev: Replace our QObjectRef class with Qt's QPointer class. (#4666)
 - Dev: Fixed warnings about QWidgets already having a QLayout. (#4672)
 - Dev: Fixed undefined behavior when loading non-existant credentials. (#4673)
+- Dev: Added support for compiling with `sccache`. (#4678)
+- Dev: Added `sccache` in Windows CI. (#4678)
 
 ## 2.4.4
 
