@@ -16,6 +16,7 @@
 #include "controllers/commands/CommandModel.hpp"
 #include "controllers/plugins/PluginController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
+#include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
@@ -38,6 +39,7 @@
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/PostToThread.hpp"
 #include "util/Qt.hpp"
 #include "util/StreamerMode.hpp"
 #include "util/StreamLink.hpp"
@@ -3210,6 +3212,28 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+
+    this->registerCommand(
+        "/debug-force-image-gc",
+        [](const QStringList & /*words*/, auto /*channel*/) -> QString {
+            runInGuiThread([] {
+                using namespace chatterino::detail;
+                auto &iep = ImageExpirationPool::instance();
+                iep.freeOld();
+            });
+            return "";
+        });
+
+    this->registerCommand(
+        "/debug-force-image-unload",
+        [](const QStringList & /*words*/, auto /*channel*/) -> QString {
+            runInGuiThread([] {
+                using namespace chatterino::detail;
+                auto &iep = ImageExpirationPool::instance();
+                iep.freeAll();
+            });
+            return "";
+        });
 
     this->registerCommand("/shield", &commands::shieldModeOn);
     this->registerCommand("/shieldoff", &commands::shieldModeOff);

@@ -270,14 +270,9 @@ QString SharedMessageBuilder::stylizeUsername(const QString &username,
         break;
     }
 
-    auto nicknames = getCSettings().nicknames.readOnly();
-
-    for (const auto &nickname : *nicknames)
+    if (auto nicknameText = getCSettings().matchNickname(usernameText))
     {
-        if (nickname.match(usernameText))
-        {
-            break;
-        }
+        usernameText = *nicknameText;
     }
 
     return usernameText;

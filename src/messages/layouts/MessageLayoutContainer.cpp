@@ -276,17 +276,24 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
     // 2 - in LTR mode, the previous word should be RTL (i.e. reversed)
     for (int i = startIndex; i <= endIndex; i++)
     {
-        if (isNeutral(this->elements_[i]->getText()) &&
+        auto &element = this->elements_[i];
+
+        const auto neutral = isNeutral(element->getText());
+        const auto neutralOrUsername =
+            neutral ||
+            element->getFlags().hasAny({MessageElementFlag::BoldUsername,
+                                        MessageElementFlag::NonBoldUsername});
+
+        if (neutral &&
             ((this->first == FirstWord::RTL && !this->wasPrevReversed_) ||
              (this->first == FirstWord::LTR && this->wasPrevReversed_)))
         {
-            this->elements_[i]->reversedNeutral = true;
+            element->reversedNeutral = true;
         }
-        if (((this->elements_[i]->getText().isRightToLeft() !=
+        if (((element->getText().isRightToLeft() !=
               (this->first == FirstWord::RTL)) &&
-             !isNeutral(this->elements_[i]->getText())) ||
-            (isNeutral(this->elements_[i]->getText()) &&
-             this->wasPrevReversed_))
+             !neutralOrUsername) ||
+            (neutralOrUsername && this->wasPrevReversed_))
         {
             swappedSequence.push(i);
             this->wasPrevReversed_ = true;
