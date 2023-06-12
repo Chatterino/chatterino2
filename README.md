@@ -8,7 +8,7 @@ Chatterino7 is a fork of Chatterino 2. This fork mainly contains features that a
 
 - 7TV Name Paints
 
-- 7TV Personal Emotes (_currently_: nightly only)
+- 7TV Personal Emotes
 
 - 7TV Animated Profile Avatars
 
