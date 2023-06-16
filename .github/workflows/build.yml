@@ -294,12 +294,26 @@ jobs:
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'
         uses: ZedThree/clang-tidy-review/upload@v0.13.0
 
+      - name: Package - AppImage (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu-22.04') && !matrix.skip-artifact
+        run: |
+          cd build
+          sh ./../.CI/CreateAppImage.sh
+        shell: bash
+
       - name: Package - .deb (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu') && !matrix.skip-artifact
         run: |
           cd build
           sh ./../.CI/CreateUbuntuDeb.sh
         shell: bash
+
+      - name: Upload artifact - AppImage (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu-22.04') && !matrix.skip-artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
+          path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu') && !matrix.skip-artifact
@@ -389,6 +403,12 @@ jobs:
         name: Windows Qt5.15 symbols
         with:
           name: chatterino-windows-x86-64-Qt-5.15.2-symbols.pdb.7z
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        name: Linux Qt5.15.2 AppImage
+        with:
+          name: Chatterino-x86_64-5.15.2.AppImage
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
