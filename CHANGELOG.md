@@ -24,6 +24,7 @@
 - Dev: Fixed undefined behavior when loading non-existant credentials. (#4673)
 - Dev: Added support for compiling with `sccache`. (#4678)
 - Dev: Added `sccache` in Windows CI. (#4678)
+- Dev: Moved preprocessor Git and date definitions to executables only. (#4681)
 
 ## 2.4.4
 
