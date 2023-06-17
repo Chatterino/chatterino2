@@ -2,13 +2,13 @@
 
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
+#include "common/enums/MessageOverflow.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/logging/ChannelLog.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/splits/SplitInput.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
@@ -47,6 +47,7 @@ public:
     bool isBlacklistedUser(const QString &username);
     bool isMutedChannel(const QString &channelName);
     bool toggleMutedChannel(const QString &channelName);
+    boost::optional<QString> matchNickname(const QString &username);
 
 private:
     void mute(const QString &channelName);
@@ -125,6 +126,10 @@ public:
 
     EnumSetting<NotebookTabLocation> tabDirection = {"/appearance/tabDirection",
                                                      NotebookTabLocation::Top};
+    EnumSetting<NotebookTabVisibility> tabVisibility = {
+        "/appearance/tabVisibility",
+        NotebookTabVisibility::AllTabs,
+    };
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
@@ -508,6 +513,8 @@ public:
     // Purely QOL settings are here (like last item in a list).
     IntSetting lastSelectChannelTab = {"/ui/lastSelectChannelTab", 0};
     IntSetting lastSelectIrcConn = {"/ui/lastSelectIrcConn", 0};
+
+    BoolSetting showSendButton = {"/ui/showSendButton", false};
 
     // Similarity
     BoolSetting similarityEnabled = {"/similarity/similarityEnabled", false};

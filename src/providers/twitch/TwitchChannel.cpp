@@ -1282,50 +1282,71 @@ void TwitchChannel::cleanUpReplyThreads()
 
 void TwitchChannel::refreshBadges()
 {
-    auto url = Url{"https://badges.twitch.tv/v1/badges/channels/" +
-                   this->roomId() + "/display?language=en"};
-    NetworkRequest(url.string)
+    if (this->roomId().isEmpty())
+    {
+        return;
+    }
 
-        .onSuccess([this,
-                    weak = weakOf<Channel>(this)](auto result) -> Outcome {
+    getHelix()->getChannelBadges(
+        this->roomId(),
+        // successCallback
+        [this, weak = weakOf<Channel>(this)](auto channelBadges) {
             auto shared = weak.lock();
             if (!shared)
-                return Failure;
+            {
+                // The channel has been closed inbetween us making the request and the request finishing
+                return;
+            }
 
             auto badgeSets = this->badgeSets_.access();
 
-            auto jsonRoot = result.parseJson();
-
-            auto _ = jsonRoot["badge_sets"].toObject();
-            for (auto jsonBadgeSet = _.begin(); jsonBadgeSet != _.end();
-                 jsonBadgeSet++)
+            for (const auto &badgeSet : channelBadges.badgeSets)
             {
-                auto &versions = (*badgeSets)[jsonBadgeSet.key()];
-
-                auto _set = jsonBadgeSet->toObject()["versions"].toObject();
-                for (auto jsonVersion_ = _set.begin();
-                     jsonVersion_ != _set.end(); jsonVersion_++)
+                const auto &setID = badgeSet.setID;
+                for (const auto &version : badgeSet.versions)
                 {
-                    auto jsonVersion = jsonVersion_->toObject();
-                    auto emote = std::make_shared<Emote>(Emote{
+                    auto emote = Emote{
                         EmoteName{},
                         ImageSet{
-                            Image::fromUrl(
-                                {jsonVersion["image_url_1x"].toString()}, 1),
-                            Image::fromUrl(
-                                {jsonVersion["image_url_2x"].toString()}, .5),
-                            Image::fromUrl(
-                                {jsonVersion["image_url_4x"].toString()}, .25)},
-                        Tooltip{jsonVersion["description"].toString()},
-                        Url{jsonVersion["clickURL"].toString()}});
-
-                    versions.emplace(jsonVersion_.key(), emote);
-                };
+                            Image::fromUrl(version.imageURL1x, 1),
+                            Image::fromUrl(version.imageURL2x, .5),
+                            Image::fromUrl(version.imageURL4x, .25),
+                        },
+                        Tooltip{version.title},
+                        version.clickURL,
+                    };
+                    (*badgeSets)[setID][version.id] =
+                        std::make_shared<Emote>(emote);
+                }
+            }
+        },
+        // failureCallback
+        [this, weak = weakOf<Channel>(this)](auto error, auto message) {
+            auto shared = weak.lock();
+            if (!shared)
+            {
+                // The channel has been closed inbetween us making the request and the request finishing
+                return;
             }
 
-            return Success;
-        })
-        .execute();
+            QString errorMessage("Failed to load channel badges - ");
+
+            switch (error)
+            {
+                case HelixGetChannelBadgesError::Forwarded: {
+                    errorMessage += message;
+                }
+                break;
+
+                // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                case HelixGetChannelBadgesError::Unknown: {
+                    errorMessage += "An unknown error has occurred.";
+                }
+                break;
+            }
+
+            this->addMessage(makeSystemMessage(errorMessage));
+        });
 }
 
 void TwitchChannel::refreshCheerEmotes()

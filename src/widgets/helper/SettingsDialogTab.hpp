@@ -15,6 +15,7 @@ class SettingsDialog;
 
 enum class SettingsTabId {
     None,
+    General,
     Accounts,
     Moderation,
 };

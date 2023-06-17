@@ -114,8 +114,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     auto &s = *getSettings();
 
     layout.addTitle("Interface");
-    layout.addDropdown("Theme", {"White", "Light", "Dark", "Black"},
-                       getApp()->themes->themeName);
+
+    layout.addDropdown<QString>(
+        "Theme", getApp()->themes->availableThemes(),
+        getApp()->themes->themeName,
+        [](const auto *combo, const auto &themeKey) {
+            return combo->findData(themeKey, Qt::UserRole);
+        },
+        [](const auto &args) {
+            return args.combobox->itemData(args.index, Qt::UserRole).toString();
+        },
+        {}, Theme::fallbackTheme.name);
+
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},
         getApp()->fonts->chatFontFamily,
@@ -188,6 +198,30 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             false);
     tabDirectionDropdown->setMinimumWidth(
         tabDirectionDropdown->minimumSizeHint().width());
+
+    layout.addDropdown<std::underlying_type<NotebookTabVisibility>::type>(
+        "Tab visibility", {"All tabs", "Only live tabs"}, s.tabVisibility,
+        [](auto val) {
+            switch (val)
+            {
+                case NotebookTabVisibility::LiveOnly:
+                    return "Only live tabs";
+                case NotebookTabVisibility::AllTabs:
+                default:
+                    return "All tabs";
+            }
+        },
+        [](auto args) {
+            if (args.value == "Only live tabs")
+            {
+                return NotebookTabVisibility::LiveOnly;
+            }
+            else
+            {
+                return NotebookTabVisibility::AllTabs;
+            }
+        },
+        false, "Choose which tabs are visible in the notebook");
 
     layout.addCheckbox(
         "Show message reply context", s.hideReplyContext, true,
@@ -1013,6 +1047,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             false);
     helixTimegateModerators->setMinimumWidth(
         helixTimegateModerators->minimumSizeHint().width());
+
+    layout.addCheckbox(
+        "Show send message button", s.showSendButton, false,
+        "Show a Send button next to each split input that can be "
+        "clicked to send the message");
 
     layout.addStretch();
 
