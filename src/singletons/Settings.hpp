@@ -194,6 +194,10 @@ public:
     BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", true};
     BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
                                         false};
+    BoolSetting autoSubToParticipatedThreads = {
+        "/behaviour/autoSubToParticipatedThreads",
+        true,
+    };
     // BoolSetting twitchSeperateWriteConnection =
     // {"/behaviour/twitchSeperateWriteConnection", false};
 

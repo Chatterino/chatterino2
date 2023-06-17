@@ -7,15 +7,17 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageThread.hpp"
-#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
+#include "widgets/helper/Button.hpp"
 #include "widgets/helper/ChannelView.hpp"
-#include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitInput.hpp"
+
+#include <QCheckBox>
 
 const QString TEXT_TITLE("Reply Thread - @%1 in #%2");
 
@@ -72,9 +74,6 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 
-    auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
-                      .setLayoutType<QVBoxLayout>();
-
     // initialize UI
     this->ui_.threadView =
         new ChannelView(this, this->split_, ChannelView::Context::ReplyThread);
@@ -110,10 +109,57 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
         }
     });
 
+    auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
+                      .setLayoutType<QVBoxLayout>();
+
     layout->setSpacing(0);
     // provide draggable margin if frameless
     auto marginPx = closeAutomatically ? 15 : 1;
     layout->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
+
+    // Top Row
+    bool addCheckbox = getSettings()->enableThreadHighlight;
+    if (addCheckbox || closeAutomatically)
+    {
+        auto *hbox = new QHBoxLayout();
+
+        if (addCheckbox)
+        {
+            this->ui_.notificationCheckbox =
+                new QCheckBox("Subscribe to thread", this);
+            QObject::connect(this->ui_.notificationCheckbox,
+                             &QCheckBox::toggled, [this](bool checked) {
+                                 if (!this->thread_ ||
+                                     this->thread_->subscribed() == checked)
+                                 {
+                                     return;
+                                 }
+
+                                 if (checked)
+                                 {
+                                     this->thread_->markSubscribed();
+                                 }
+                                 else
+                                 {
+                                     this->thread_->markUnsubscribed();
+                                 }
+                             });
+            hbox->addWidget(this->ui_.notificationCheckbox, 1);
+        }
+
+        if (closeAutomatically)
+        {
+            hbox->addWidget(this->createPinButton(), 0, Qt::AlignRight);
+            hbox->setContentsMargins(0, 0, 0, 5);
+        }
+        else
+        {
+            hbox->setContentsMargins(10, 0, 0, 4);
+        }
+
+        layout->addLayout(hbox, 1);
+    }
+
     layout->addWidget(this->ui_.threadView, 1);
     layout->addWidget(this->ui_.replyInput);
 }
@@ -124,6 +170,24 @@ void ReplyThreadPopup::setThread(std::shared_ptr<MessageThread> thread)
     this->ui_.replyInput->setReply(this->thread_);
     this->addMessagesFromThread();
     this->updateInputUI();
+
+    if (!this->thread_) [[unlikely]]
+    {
+        this->replySubscriptionSignal_ = boost::signals2::scoped_connection{};
+        return;
+    }
+
+    auto updateCheckbox = [this]() {
+        if (this->ui_.notificationCheckbox)
+        {
+            this->ui_.notificationCheckbox->setChecked(
+                this->thread_->subscribed());
+        }
+    };
+    updateCheckbox();
+
+    this->replySubscriptionSignal_ =
+        this->thread_->subscriptionUpdated.connect(updateCheckbox);
 }
 
 void ReplyThreadPopup::addMessagesFromThread()
