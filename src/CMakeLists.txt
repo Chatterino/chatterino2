@@ -709,7 +709,12 @@ if (BUILD_APP)
     else()
         add_executable(${EXECUTABLE_PROJECT} main.cpp)
     endif()
-    add_sanitizers(${EXECUTABLE_PROJECT})
+
+    if(COMMAND add_sanitizers)
+        add_sanitizers(${EXECUTABLE_PROJECT})
+    else()
+        message(WARNING "Sanitizers support is disabled")
+    endif()
 
     target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
 
