@@ -131,7 +131,7 @@ void updateReplyParticipatedStatus(const QVariantMap &tags,
         return;
     }
 
-    if (getSettings()->subToParticipatedThreads)
+    if (getSettings()->autoSubToParticipatedThreads)
     {
         if (isNew)
         {
