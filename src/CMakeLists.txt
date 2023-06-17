@@ -802,7 +802,7 @@ set_target_properties(${LIBRARY_PROJECT}
 # To avoid recompilations because of changing preprocessor definitions,
 # this is its own project.
 set(VERSION_SOURCE_FILES common/Version.cpp common/Version.hpp)
-add_library(${VERSION_PROJECT} OBJECT ${VERSION_SOURCE_FILES})
+add_library(${VERSION_PROJECT} STATIC ${VERSION_SOURCE_FILES})
 
 # source group for IDEs
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${VERSION_SOURCE_FILES})
