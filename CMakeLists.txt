@@ -195,25 +195,6 @@ else ()
     string(TIMESTAMP cmake_gen_date "%Y-%m-%d")
 endif ()
 
-# This function adds the definitions used by the
-# CHATTERINO_DECLARE_BUILD_CONSTANTS() macro.
-# It should only be used on executables.
-function(chatterino_define_build_constants _target)
-    target_compile_definitions(${_target} PRIVATE
-        CHATTERINO_GIT_HASH=\"${GIT_HASH}\"
-        CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
-        CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
-
-        CHATTERINO_CMAKE_GEN_DATE=\"${cmake_gen_date}\"
-    )
-
-    if (GIT_MODIFIED)
-        target_compile_definitions(${_target} PRIVATE CHATTERINO_GIT_MODIFIED=1)
-    else()
-        target_compile_definitions(${_target} PRIVATE CHATTERINO_GIT_MODIFIED=0)
-    endif ()
-endfunction()
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

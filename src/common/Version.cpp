@@ -5,13 +5,12 @@
 #include <QFileInfo>
 
 namespace chatterino {
-using namespace detail;
 
 Version::Version()
     : version_(CHATTERINO_VERSION)
-    , commitHash_(version::gitHash())
-    , isModified_(version::gitModified())
-    , dateOfBuild_(version::cmakeGenDate())
+    , commitHash_(QStringLiteral(CHATTERINO_GIT_HASH))
+    , isModified_(CHATTERINO_GIT_MODIFIED == 1)
+    , dateOfBuild_(QStringLiteral(CHATTERINO_CMAKE_GEN_DATE))
 {
     this->fullVersion_ = "Chatterino ";
     if (Modes::instance().isNightly)

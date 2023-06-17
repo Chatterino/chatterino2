@@ -1,4 +1,5 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
+set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
@@ -46,8 +47,6 @@ set(SOURCE_FILES
         common/NetworkResult.hpp
         common/QLogging.cpp
         common/QLogging.hpp
-        common/Version.cpp
-        common/Version.hpp
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
 
@@ -716,8 +715,6 @@ if (BUILD_APP)
 
     target_link_libraries(${EXECUTABLE_PROJECT} PUBLIC ${LIBRARY_PROJECT})
 
-    chatterino_define_build_constants(${EXECUTABLE_PROJECT})
-
     set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
     if (WIN32)
@@ -795,6 +792,27 @@ set_target_properties(${LIBRARY_PROJECT}
     AUTORCC ON
     AUTOUIC ON
     )
+
+# The version project has definitions about the build.
+# To avoid recompilations because of changing preprocessor definitions,
+# this is its own project.
+set(VERSION_SOURCE_FILES common/Version.cpp common/Version.hpp)
+add_library(${VERSION_PROJECT} OBJECT ${VERSION_SOURCE_FILES})
+
+# source group for IDEs
+source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${VERSION_SOURCE_FILES})
+target_include_directories(${VERSION_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(${VERSION_PROJECT} PRIVATE Qt::Core)
+target_compile_definitions(${VERSION_PROJECT} PRIVATE
+    CHATTERINO_GIT_HASH=\"${GIT_HASH}\"
+    CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
+    CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
+    CHATTERINO_GIT_MODIFIED=${GIT_MODIFIED}
+
+    CHATTERINO_CMAKE_GEN_DATE=\"${cmake_gen_date}\"
+)
+
+target_link_libraries(${EXECUTABLE_PROJECT} PRIVATE ${VERSION_PROJECT})
 
 target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO

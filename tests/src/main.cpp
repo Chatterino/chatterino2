@@ -1,5 +1,4 @@
 #include "common/NetworkManager.hpp"
-#include "common/Version.hpp"
 #include "singletons/Settings.hpp"
 
 #include <gtest/gtest.h>
@@ -13,8 +12,6 @@
 #include <thread>
 
 using namespace chatterino;
-
-CHATTERINO_DECLARE_BUILD_CONSTANTS()
 
 #define SUPPORT_QT_NETWORK_TESTS
 
