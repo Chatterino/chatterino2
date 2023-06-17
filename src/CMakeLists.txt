@@ -807,7 +807,7 @@ add_library(${VERSION_PROJECT} OBJECT ${VERSION_SOURCE_FILES})
 # source group for IDEs
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${VERSION_SOURCE_FILES})
 target_include_directories(${VERSION_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(${VERSION_PROJECT} PRIVATE Qt::Core)
+target_link_libraries(${VERSION_PROJECT} PRIVATE Qt${MAJOR_QT_VERSION}::Core)
 target_compile_definitions(${VERSION_PROJECT} PRIVATE
     CHATTERINO_GIT_HASH=\"${GIT_HASH}\"
     CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
