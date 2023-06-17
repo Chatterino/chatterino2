@@ -126,30 +126,33 @@ void updateReplyParticipatedStatus(const QVariantMap &tags,
         return;
     }
 
-    if (thread->unsubscribed() || !getSettings()->subToParticipatedThreads)
+    if (thread->unsubscribed())
     {
         return;
     }
 
-    if (isNew)
+    if (getSettings()->subToParticipatedThreads)
     {
-        if (const auto it = tags.find("reply-parent-user-login");
-            it != tags.end())
+        if (isNew)
         {
-            auto name = it.value().toString();
-            if (name == currentLogin)
+            if (const auto it = tags.find("reply-parent-user-login");
+                it != tags.end())
             {
-                thread->markSubscribed();
-                builder.message().flags.set(MessageFlag::SubscribedThread);
-                return;  // already marked as participated
+                auto name = it.value().toString();
+                if (name == currentLogin)
+                {
+                    thread->markSubscribed();
+                    builder.message().flags.set(MessageFlag::SubscribedThread);
+                    return;  // already marked as participated
+                }
             }
         }
-    }
 
-    if (senderLogin == currentLogin)
-    {
-        thread->markSubscribed();
-        // don't set the highlight here
+        if (senderLogin == currentLogin)
+        {
+            thread->markSubscribed();
+            // don't set the highlight here
+        }
     }
 }
 
