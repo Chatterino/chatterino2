@@ -163,7 +163,7 @@ void rebuildReplyThreadHighlight(Settings &settings,
                 const auto & /*senderName*/, const auto & /*originalMessage*/,
                 const auto &flags,
                 const auto self) -> boost::optional<HighlightResult> {
-                if (flags.has(MessageFlag::ParticipatedThread) && !self)
+                if (flags.has(MessageFlag::SubscribedThread) && !self)
                 {
                     return HighlightResult{
                         highlightAlert,

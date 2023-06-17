@@ -3,6 +3,8 @@
 #include "common/Singleton.hpp"
 #include "singletons/NativeMessaging.hpp"
 
+#include <pajlada/signals.hpp>
+#include <pajlada/signals/signal.hpp>
 #include <QApplication>
 
 #include <memory>
@@ -157,6 +159,8 @@ public:
         return this->ffzBadges;
     }
     IUserDataController *getUserData() override;
+
+    pajlada::Signals::NoArgSignal streamerModeChanged;
 
 private:
     void addSingleton(Singleton *singleton);

@@ -210,7 +210,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->setStayInScreenRect(true);
     this->moveTo(this, getApp()->windows->emotePopupPos(), false);
 
-    auto *layout = new QVBoxLayout(this);
+    auto *layout = new QVBoxLayout();
     this->getLayoutContainer()->setLayout(layout);
 
     QRegularExpression searchRegex("\\S*");
@@ -219,7 +219,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
-    auto *layout2 = new QHBoxLayout(this);
+    auto *layout2 = new QHBoxLayout();
     layout2->setContentsMargins(8, 8, 8, 8);
     layout2->setSpacing(8);
 
@@ -311,7 +311,7 @@ void EmotePopup::addShortcuts()
                  int result = target.toInt(&ok);
                  if (ok)
                  {
-                     this->notebook_->selectIndex(result, false);
+                     this->notebook_->selectVisibleIndex(result, false);
                  }
                  else
                  {

@@ -155,7 +155,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
            "split being nullptr causes lots of bugs down the road");
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
-    this->updateFocusLoss();
 
     HotkeyController::HotkeyMap actions{
         {"delete",
@@ -380,17 +379,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                 // button to pin the window (only if we close automatically)
                 if (this->closeAutomatically_)
                 {
-                    this->ui_.pinButton = box.emplace<Button>().getElement();
-                    this->ui_.pinButton->setPixmap(
-                        getApp()->themes->buttons.pin);
-                    this->ui_.pinButton->setScaleIndependantSize(18, 18);
-                    this->ui_.pinButton->setToolTip("Pin Window");
-                    QObject::connect(this->ui_.pinButton, &Button::leftClicked,
-                                     [this]() {
-                                         this->closeAutomatically_ =
-                                             !this->closeAutomatically_;
-                                         this->updateFocusLoss();
-                                     });
+                    box->addWidget(this->createPinButton());
                 }
             }
 
@@ -937,26 +926,6 @@ void UserInfoPopup::updateUserData()
 
     this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
-}
-
-void UserInfoPopup::updateFocusLoss()
-{
-    if (this->closeAutomatically_)
-    {
-        this->setActionOnFocusLoss(BaseWindow::Delete);
-        if (this->ui_.pinButton != nullptr)
-        {
-            this->ui_.pinButton->setPixmap(getApp()->themes->buttons.pin);
-        }
-    }
-    else
-    {
-        this->setActionOnFocusLoss(BaseWindow::Nothing);
-        if (this->ui_.pinButton != nullptr)
-        {
-            this->ui_.pinButton->setPixmap(getResources().buttons.pinEnabled);
-        }
-    }
 }
 
 void UserInfoPopup::loadAvatar(const HelixUser &user)

@@ -47,6 +47,7 @@ public:
     bool isBlacklistedUser(const QString &username);
     bool isMutedChannel(const QString &channelName);
     bool toggleMutedChannel(const QString &channelName);
+    boost::optional<QString> matchNickname(const QString &username);
 
 private:
     void mute(const QString &channelName);
@@ -125,6 +126,10 @@ public:
 
     EnumSetting<NotebookTabLocation> tabDirection = {"/appearance/tabDirection",
                                                      NotebookTabLocation::Top};
+    EnumSetting<NotebookTabVisibility> tabVisibility = {
+        "/appearance/tabVisibility",
+        NotebookTabVisibility::AllTabs,
+    };
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
@@ -190,6 +195,10 @@ public:
     BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", true};
     BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
                                         false};
+    BoolSetting autoSubToParticipatedThreads = {
+        "/behaviour/autoSubToParticipatedThreads",
+        true,
+    };
     // BoolSetting twitchSeperateWriteConnection =
     // {"/behaviour/twitchSeperateWriteConnection", false};
 

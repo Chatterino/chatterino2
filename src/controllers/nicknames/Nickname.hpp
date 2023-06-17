@@ -3,6 +3,7 @@
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
+#include <boost/optional.hpp>
 #include <pajlada/serialize.hpp>
 #include <QRegularExpression>
 #include <QString>
@@ -58,25 +59,25 @@ public:
         return this->isCaseSensitive_;
     }
 
-    [[nodiscard]] bool match(QString &usernameText) const
+    [[nodiscard]] boost::optional<QString> match(
+        const QString &usernameText) const
     {
         if (this->isRegex())
         {
             if (!this->regex_.isValid())
             {
-                return false;
+                return boost::none;
             }
             if (this->name().isEmpty())
             {
-                return false;
+                return boost::none;
             }
 
             auto workingCopy = usernameText;
             workingCopy.replace(this->regex_, this->replace());
             if (workingCopy != usernameText)
             {
-                usernameText = workingCopy;
-                return true;
+                return workingCopy;
             }
         }
         else
@@ -85,12 +86,11 @@ public:
                 this->name().compare(usernameText, this->caseSensitivity());
             if (res == 0)
             {
-                usernameText = this->replace();
-                return true;
+                return this->replace();
             }
         }
 
-        return false;
+        return boost::none;
     }
 
 private:

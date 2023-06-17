@@ -1,5 +1,7 @@
 project(chatterino-test)
 
+option(CHATTERINO_TEST_USE_PUBLIC_HTTPBIN "Use public httpbin for testing network requests" OFF)
+
 set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChannelChatters.cpp
@@ -52,6 +54,10 @@ if(CHATTERINO_ENABLE_LTO)
     message(STATUS "Enabling LTO for ${PROJECT_NAME}")
     set_property(TARGET ${PROJECT_NAME}
         PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
+if(CHATTERINO_TEST_USE_PUBLIC_HTTPBIN)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO_TEST_USE_PUBLIC_HTTPBIN)
 endif()
 
 # gtest_add_tests manages to discover the tests because it looks through the source files

@@ -1,5 +1,6 @@
 #include "singletons/Settings.hpp"
 
+#include "Application.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
@@ -80,6 +81,22 @@ bool ConcurrentSettings::isMutedChannel(const QString &channelName)
     return false;
 }
 
+boost::optional<QString> ConcurrentSettings::matchNickname(
+    const QString &usernameText)
+{
+    auto nicknames = getCSettings().nicknames.readOnly();
+
+    for (const auto &nickname : *nicknames)
+    {
+        if (auto nicknameText = nickname.match(usernameText))
+        {
+            return nicknameText;
+        }
+    }
+
+    return boost::none;
+}
+
 void ConcurrentSettings::mute(const QString &channelName)
 {
     mutedChannels.append(channelName);
@@ -144,6 +161,11 @@ Settings::Settings(const QString &settingsDirectory)
         // reset to default, so it doesn't appear in the config
         this->showUnlistedEmotesDontUse.remove();
     }
+    this->enableStreamerMode.connect(
+        []() {
+            getApp()->streamerModeChanged.invoke();
+        },
+        false);
 }
 
 Settings &Settings::instance()

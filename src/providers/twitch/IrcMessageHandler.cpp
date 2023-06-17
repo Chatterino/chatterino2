@@ -119,31 +119,40 @@ void updateReplyParticipatedStatus(const QVariantMap &tags,
 {
     const auto &currentLogin =
         getApp()->accounts->twitch.getCurrent()->getUserName();
-    if (thread->participated())
+
+    if (thread->subscribed())
     {
-        builder.message().flags.set(MessageFlag::ParticipatedThread);
+        builder.message().flags.set(MessageFlag::SubscribedThread);
         return;
     }
 
-    if (isNew)
+    if (thread->unsubscribed())
     {
-        if (const auto it = tags.find("reply-parent-user-login");
-            it != tags.end())
-        {
-            auto name = it.value().toString();
-            if (name == currentLogin)
-            {
-                thread->markParticipated();
-                builder.message().flags.set(MessageFlag::ParticipatedThread);
-                return;  // already marked as participated
-            }
-        }
+        return;
     }
 
-    if (senderLogin == currentLogin)
+    if (getSettings()->autoSubToParticipatedThreads)
     {
-        thread->markParticipated();
-        // don't set the highlight here
+        if (isNew)
+        {
+            if (const auto it = tags.find("reply-parent-user-login");
+                it != tags.end())
+            {
+                auto name = it.value().toString();
+                if (name == currentLogin)
+                {
+                    thread->markSubscribed();
+                    builder.message().flags.set(MessageFlag::SubscribedThread);
+                    return;  // already marked as participated
+                }
+            }
+        }
+
+        if (senderLogin == currentLogin)
+        {
+            thread->markSubscribed();
+            // don't set the highlight here
+        }
     }
 }
 

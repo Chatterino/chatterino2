@@ -41,6 +41,7 @@ namespace detail {
         boost::optional<QPixmap> first() const;
 
     private:
+        int64_t memoryUsage() const;
         void processOffset();
         QVector<Frame<QPixmap>> items_;
         int index_{0};
@@ -111,6 +112,7 @@ class ImageExpirationPool
 {
 private:
     friend class Image;
+    friend class CommandController;
 
     ImageExpirationPool();
     static ImageExpirationPool &instance();
@@ -125,6 +127,12 @@ private:
      * Must be ran in the GUI thread.
      */
     void freeOld();
+
+    /*
+     * Debug function that unloads all images in the pool. This is intended to
+     * test for possible memory leaks from tracked images.
+     */
+    void freeAll();
 
 private:
     // Timer to periodically run freeOld()
