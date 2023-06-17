@@ -817,7 +817,7 @@ target_compile_definitions(${VERSION_PROJECT} PRIVATE
     CHATTERINO_CMAKE_GEN_DATE=\"${cmake_gen_date}\"
 )
 
-target_link_libraries(${EXECUTABLE_PROJECT} PRIVATE ${VERSION_PROJECT})
+target_link_libraries(${LIBRARY_PROJECT} PRIVATE ${VERSION_PROJECT})
 
 target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO
