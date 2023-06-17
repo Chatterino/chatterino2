@@ -91,7 +91,7 @@ if (WIN32)
     find_package(WinToast REQUIRED)
 endif ()
 
-find_package(Sanitizers)
+find_package(Sanitizers QUIET)
 
 # Find boost on the system
 # `OPTIONAL_COMPONENTS random` is required for vcpkg builds to link.
