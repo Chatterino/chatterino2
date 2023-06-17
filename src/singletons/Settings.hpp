@@ -195,7 +195,9 @@ public:
     BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
                                         false};
     BoolSetting subToParticipatedThreads = {
-        "/appearance/subToParticipatedThreads", true};
+        "/appearance/subToParticipatedThreads",
+        true,
+    };
     // BoolSetting twitchSeperateWriteConnection =
     // {"/behaviour/twitchSeperateWriteConnection", false};
 
