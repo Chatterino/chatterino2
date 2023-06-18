@@ -8,6 +8,7 @@
 - Minor: Improved editing hotkeys. (#4628)
 - Minor: The input completion and quick switcher are now styled to match your theme. (#4671)
 - Minor: Added setting to only show tabs with live channels (default toggle hotkey: Ctrl+Shift+L). (#4358)
+- Minor: Added option to subscribe to and unsubscribe from reply threads. (#4680)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
 - Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
 - Bugfix: Fixed a crash when opening and closing a reply thread and switching the user. (#4675)
@@ -23,6 +24,7 @@
 - Dev: Fixed undefined behavior when loading non-existant credentials. (#4673)
 - Dev: Added support for compiling with `sccache`. (#4678)
 - Dev: Added `sccache` in Windows CI. (#4678)
+- Dev: Moved preprocessor Git and date definitions to executables only. (#4681)
 
 ## 2.4.4
 

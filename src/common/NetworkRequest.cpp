@@ -184,8 +184,9 @@ void NetworkRequest::execute()
 
 void NetworkRequest::initializeDefaultValues()
 {
-    const auto userAgent = QString("chatterino/%1 (%2)")
-                               .arg(CHATTERINO_VERSION, CHATTERINO_GIT_HASH)
+    const auto userAgent = QStringLiteral("chatterino/%1 (%2)")
+                               .arg(Version::instance().version(),
+                                    Version::instance().commitHash())
                                .toUtf8();
 
     this->data->request_.setRawHeader("User-Agent", userAgent);

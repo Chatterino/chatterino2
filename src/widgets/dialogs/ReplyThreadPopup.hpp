@@ -7,6 +7,8 @@
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
 
+class QCheckBox;
+
 namespace chatterino {
 
 class MessageThread;
@@ -41,10 +43,13 @@ private:
     struct {
         ChannelView *threadView = nullptr;
         SplitInput *replyInput = nullptr;
+
+        QCheckBox *notificationCheckbox = nullptr;
     } ui_;
 
     std::unique_ptr<pajlada::Signals::ScopedConnection> messageConnection_;
     std::vector<boost::signals2::scoped_connection> bSignals_;
+    boost::signals2::scoped_connection replySubscriptionSignal_;
 };
 
 }  // namespace chatterino
