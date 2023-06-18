@@ -34,18 +34,21 @@ public:
     bool isAtBottom() const;
 
     void setMaximum(qreal value);
+    void offsetMaximum(qreal value);
+    void resetMaximum();
     void setMinimum(qreal value);
+    void offsetMinimum(qreal value);
     void setLargeChange(qreal value);
     void setSmallChange(qreal value);
     void setDesiredValue(qreal value, bool animated = false);
     qreal getMaximum() const;
     qreal getMinimum() const;
     qreal getLargeChange() const;
+    qreal getBottom() const;
     qreal getSmallChange() const;
     qreal getDesiredValue() const;
     qreal getCurrentValue() const;
-
-    const QPropertyAnimation &getCurrentValueAnimation() const;
+    qreal getRelativeCurrentValue() const;
 
     // offset the desired value without breaking smooth scolling
     void offset(qreal value);
@@ -96,7 +99,6 @@ private:
     qreal smallChange_ = 5;
     qreal desiredValue_ = 0;
     qreal currentValue_ = 0;
-    qreal smoothScrollingOffset_ = 0;
 
     pajlada::Signals::NoArgSignal currentValueChanged_;
     pajlada::Signals::NoArgSignal desiredValueChanged_;
