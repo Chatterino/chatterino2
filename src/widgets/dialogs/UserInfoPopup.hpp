@@ -59,9 +59,9 @@ private:
     std::unique_ptr<pajlada::Signals::ScopedConnection> refreshConnection_;
 
     // If we should close the dialog automatically if the user clicks out
-    // Initially set based on the "Automatically close usercard when it loses focus" setting
-    // If that setting is enabled, this can be toggled on and off using the pin in the top-right corner
-    bool closeAutomatically_;
+    // Set based on the "Automatically close usercard when it loses focus" setting
+    // Pinned status is tracked in DraggablePopup::isPinned_.
+    const bool closeAutomatically_;
 
     struct {
         Button *avatarButton = nullptr;

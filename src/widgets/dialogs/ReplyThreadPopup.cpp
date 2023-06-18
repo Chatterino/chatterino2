@@ -62,6 +62,11 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
              }
              return "";
          }},
+        {"pin",
+         [this](std::vector<QString> /*arguments*/) -> QString {
+             this->togglePinned();
+             return "";
+         }},
 
         // these actions make no sense in the context of a reply thread, so they aren't implemented
         {"execModeratorAction", nullptr},

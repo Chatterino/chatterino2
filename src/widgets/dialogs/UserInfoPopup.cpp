@@ -230,6 +230,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
              this->underlyingChannel_->sendMessage(msg);
              return "";
          }},
+        {"pin",
+         [this](std::vector<QString> /*arguments*/) -> QString {
+             this->togglePinned();
+             return "";
+         }},
 
         // these actions make no sense in the context of a usercard, so they aren't implemented
         {"reject", nullptr},
