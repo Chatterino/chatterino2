@@ -14,7 +14,7 @@
 - Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
 - Bugfix: Fixed a crash when opening and closing a reply thread and switching the user. (#4675)
 - Bugfix: Fix visual glitches with smooth scrolling. (#4501)
-- Bugfix: Fix anonymous users being pinged by "username" justinfan64537 (#4698)
+- Bugfix: Fixed pings firing for the "Your username" highlight when not signed in. (#4698)
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
 - Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
 - Dev: Added test cases for emote and tab completion. (#4644)
