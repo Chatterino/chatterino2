@@ -52,7 +52,7 @@ public:
 
 }  // namespace
 
-static QString DEFAULT_SETTINGS = R"!(
+static QString SETTINGS_DEFAULT = R"!(
 {
     "accounts": {
         "uid117166826": {
@@ -157,6 +157,10 @@ static QString DEFAULT_SETTINGS = R"!(
     }
 })!";
 
+static QString SETTINGS_ANON_EMPTY = R"!(
+{
+})!";
+
 struct TestCase {
     // TODO: create one of these from a raw irc message? hmm xD
     struct {
@@ -176,14 +180,14 @@ struct TestCase {
 class HighlightControllerTest : public ::testing::Test
 {
 protected:
-    void SetUp() override
+    void configure(const QString &settings, bool isAnon)
     {
         // Write default settings to the mock settings json file
         this->settingsDir_ = std::make_unique<QTemporaryDir>();
 
         QFile settingsFile(this->settingsDir_->filePath("settings.json"));
         ASSERT_TRUE(settingsFile.open(QIODevice::WriteOnly | QIODevice::Text));
-        ASSERT_GT(settingsFile.write(DEFAULT_SETTINGS.toUtf8()), 0);
+        ASSERT_GT(settingsFile.write(settings.toUtf8()), 0);
         ASSERT_TRUE(settingsFile.flush());
         settingsFile.close();
 
@@ -192,7 +196,7 @@ protected:
         initializeHelix(this->mockHelix);
 
         EXPECT_CALL(*this->mockHelix, loadBlocks).Times(Exactly(1));
-        EXPECT_CALL(*this->mockHelix, update).Times(Exactly(1));
+        EXPECT_CALL(*this->mockHelix, update).Times(Exactly(isAnon ? 0 : 1));
 
         this->mockApplication = std::make_unique<MockApplication>();
         this->settings = std::make_unique<Settings>(this->settingsDir_->path());
@@ -203,6 +207,23 @@ protected:
         this->mockApplication->accounts.initialize(*this->settings,
                                                    *this->paths);
         this->controller->initialize(*this->settings, *this->paths);
+    }
+
+    void runTests(const std::vector<TestCase> &tests)
+    {
+        for (const auto &[input, expected] : tests)
+        {
+            auto [isMatch, matchResult] = this->controller->check(
+                input.args, input.badges, input.senderName,
+                input.originalMessage, input.flags);
+
+            EXPECT_EQ(isMatch, expected.state)
+                << qUtf8Printable(input.senderName) << ": "
+                << qUtf8Printable(input.originalMessage);
+            EXPECT_EQ(matchResult, expected.result)
+                << qUtf8Printable(input.senderName) << ": "
+                << qUtf8Printable(input.originalMessage);
+        }
     }
 
     void TearDown() override
@@ -229,10 +250,10 @@ protected:
     mock::Helix *mockHelix;
 };
 
-TEST_F(HighlightControllerTest, A)
+TEST_F(HighlightControllerTest, LoggedInAndConfigured)
 {
-    auto currentUser =
-        this->mockApplication->getAccounts()->twitch.getCurrent();
+    configure(SETTINGS_DEFAULT, false);
+
     std::vector<TestCase> tests{
         {
             {
@@ -458,17 +479,43 @@ TEST_F(HighlightControllerTest, A)
         },
     };
 
-    for (const auto &[input, expected] : tests)
-    {
-        auto [isMatch, matchResult] =
-            this->controller->check(input.args, input.badges, input.senderName,
-                                    input.originalMessage, input.flags);
+    this->runTests(tests);
+}
 
-        EXPECT_EQ(isMatch, expected.state)
-            << qUtf8Printable(input.senderName) << ": "
-            << qUtf8Printable(input.originalMessage);
-        EXPECT_EQ(matchResult, expected.result)
-            << qUtf8Printable(input.senderName) << ": "
-            << qUtf8Printable(input.originalMessage);
-    }
+TEST_F(HighlightControllerTest, AnonEmpty)
+{
+    configure(SETTINGS_ANON_EMPTY, true);
+
+    std::vector<TestCase> tests{
+        {
+            {
+                // input
+                MessageParseArgs{},  // no special args
+                {},                  // no badges
+                "pajlada2",          // sender name
+                "hello!",            // original message
+            },
+            {
+                // expected
+                false,                           // state
+                HighlightResult::emptyResult(),  // result
+            },
+        },
+        {
+            // anonymous default username
+            {
+                MessageParseArgs{},  // no special args
+                {},                  // no badges
+                "pajlada2",          // sender name
+                "justinfan64537",    // original message
+            },
+            {
+                // expected
+                false,                           // state
+                HighlightResult::emptyResult(),  // result
+            },
+        },
+    };
+
+    this->runTests(tests);
 }
