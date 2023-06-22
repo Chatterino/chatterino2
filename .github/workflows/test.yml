@@ -7,6 +7,7 @@ on:
 
 env:
   TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.6
+  QT_QPA_PLATFORM: minimal
 
 concurrency:
   group: test-${{ github.ref }}
@@ -85,6 +86,6 @@ jobs:
           docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
           docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
           docker run -p 9051:80 --detach kennethreitz/httpbin
-          ./bin/chatterino-test --platform minimal || ./bin/chatterino-test --platform minimal || ./bin/chatterino-test --platform minimal
+          ./bin/chatterino-test || ./bin/chatterino-test || ./bin/chatterino-test
         working-directory: build-test
         shell: bash
