@@ -138,6 +138,7 @@ find_package(RapidJSON REQUIRED)
 find_package(Websocketpp REQUIRED)
 
 if (BUILD_TESTS)
+    include(GoogleTest)
     # For MSVC: Prevent overriding the parent project's compiler/linker settings
     # See https://github.com/google/googletest/blob/main/googletest/README.md#visual-studio-dynamic-vs-static-runtimes
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)

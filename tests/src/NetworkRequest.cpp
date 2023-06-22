@@ -3,19 +3,24 @@
 #include "common/NetworkManager.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
-#include "common/QLogging.hpp"
-#include "providers/twitch/api/Helix.hpp"
 
 #include <gtest/gtest.h>
+// Using this over <QTest> to avoid depending on the Test component of Qt
+// We're only interested in QTest::qWaitFor.
+#include <QtCore/qtestsupport_core.h>
 
 using namespace chatterino;
 
 namespace {
 
 #ifdef CHATTERINO_TEST_USE_PUBLIC_HTTPBIN
-const char *const HTTPBIN_BASE_URL = "http://httpbin.org";
+// Not using httpbin.org, since it can be really slow and cause timeouts.
+// postman-echo has the same API. They only differ for the 402 response.
+const char *const HTTPBIN_BASE_URL = "https://postman-echo.com";
+constexpr const bool CUSTOM_402_RESPONSE = false;
 #else
 const char *const HTTPBIN_BASE_URL = "http://127.0.0.1:9051";
+constexpr const bool CUSTOM_402_RESPONSE = true;
 #endif
 
 QString getStatusURL(int code)
@@ -39,39 +44,28 @@ TEST(NetworkRequest, Success)
     for (const auto code : codes)
     {
         auto url = getStatusURL(code);
-        std::mutex mut;
         bool requestDone = false;
-        std::condition_variable requestDoneCondition;
 
         NetworkRequest(url)
-            .onSuccess([code, &mut, &requestDone, &requestDoneCondition,
-                        url](NetworkResult result) -> Outcome {
+            .onSuccess([code, &requestDone,
+                        url](const NetworkResult &result) -> Outcome {
                 EXPECT_EQ(result.status(), code);
 
-                {
-                    std::unique_lock lck(mut);
-                    requestDone = true;
-                }
-                requestDoneCondition.notify_one();
+                requestDone = true;
                 return Success;
             })
-            .onError([&](NetworkResult result) {
+            .onError([&](const NetworkResult & /*result*/) {
                 // The codes should *not* throw an error
                 EXPECT_TRUE(false);
 
-                {
-                    std::unique_lock lck(mut);
-                    requestDone = true;
-                }
-                requestDoneCondition.notify_one();
+                requestDone = true;
             })
             .execute();
 
         // Wait for the request to finish
-        std::unique_lock lck(mut);
-        requestDoneCondition.wait(lck, [&requestDone] {
+        EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
             return requestDone;
-        });
+        }));
     }
 
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
@@ -86,30 +80,21 @@ TEST(NetworkRequest, FinallyCallbackOnSuccess)
     for (const auto code : codes)
     {
         auto url = getStatusURL(code);
-        std::mutex mut;
         bool requestDone = false;
-        std::condition_variable requestDoneCondition;
 
         bool finallyCalled = false;
 
         NetworkRequest(url)
-            .finally(
-                [&mut, &requestDone, &requestDoneCondition, &finallyCalled] {
-                    finallyCalled = true;
-
-                    {
-                        std::unique_lock lck(mut);
-                        requestDone = true;
-                    }
-                    requestDoneCondition.notify_one();
-                })
+            .finally([&requestDone, &finallyCalled] {
+                finallyCalled = true;
+                requestDone = true;
+            })
             .execute();
 
         // Wait for the request to finish
-        std::unique_lock lck(mut);
-        requestDoneCondition.wait(lck, [&requestDone] {
+        EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
             return requestDone;
-        });
+        }));
 
         EXPECT_TRUE(finallyCalled);
     }
@@ -127,45 +112,41 @@ TEST(NetworkRequest, Error)
     for (const auto code : codes)
     {
         auto url = getStatusURL(code);
-        std::mutex mut;
         bool requestDone = false;
-        std::condition_variable requestDoneCondition;
 
         NetworkRequest(url)
-            .onSuccess([code, &mut, &requestDone, &requestDoneCondition,
-                        url](NetworkResult result) -> Outcome {
+            .onSuccess([&requestDone,
+                        url](const NetworkResult & /*result*/) -> Outcome {
                 // The codes should throw an error
                 EXPECT_TRUE(false);
 
-                {
-                    std::unique_lock lck(mut);
-                    requestDone = true;
-                }
-                requestDoneCondition.notify_one();
+                requestDone = true;
                 return Success;
             })
-            .onError([code, &mut, &requestDone, &requestDoneCondition,
-                      url](NetworkResult result) {
+            .onError([code, &requestDone, url](const NetworkResult &result) {
                 EXPECT_EQ(result.status(), code);
                 if (code == 402)
                 {
-                    EXPECT_EQ(result.getData(),
-                              QString("Fuck you, pay me!").toUtf8());
+                    if (CUSTOM_402_RESPONSE)
+                    {
+                        EXPECT_EQ(result.getData(),
+                                  QByteArrayLiteral("Fuck you, pay me!"));
+                    }
+                    else
+                    {
+                        EXPECT_EQ(result.getData(),
+                                  QByteArrayLiteral("{\n  \"status\": 402\n}"));
+                    }
                 }
 
-                {
-                    std::unique_lock lck(mut);
-                    requestDone = true;
-                }
-                requestDoneCondition.notify_one();
+                requestDone = true;
             })
             .execute();
 
         // Wait for the request to finish
-        std::unique_lock lck(mut);
-        requestDoneCondition.wait(lck, [&requestDone] {
+        EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
             return requestDone;
-        });
+        }));
     }
 
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
@@ -183,30 +164,21 @@ TEST(NetworkRequest, FinallyCallbackOnError)
     for (const auto code : codes)
     {
         auto url = getStatusURL(code);
-        std::mutex mut;
         bool requestDone = false;
-        std::condition_variable requestDoneCondition;
 
         bool finallyCalled = false;
 
         NetworkRequest(url)
-            .finally(
-                [&mut, &requestDone, &requestDoneCondition, &finallyCalled] {
-                    finallyCalled = true;
-
-                    {
-                        std::unique_lock lck(mut);
-                        requestDone = true;
-                    }
-                    requestDoneCondition.notify_one();
-                })
+            .finally([&requestDone, &finallyCalled] {
+                finallyCalled = true;
+                requestDone = true;
+            })
             .execute();
 
         // Wait for the request to finish
-        std::unique_lock lck(mut);
-        requestDoneCondition.wait(lck, [&requestDone] {
+        EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
             return requestDone;
-        });
+        }));
 
         EXPECT_TRUE(finallyCalled);
     }
@@ -217,44 +189,29 @@ TEST(NetworkRequest, TimeoutTimingOut)
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
 
     auto url = getDelayURL(5);
-
-    std::mutex mut;
     bool requestDone = false;
-    std::condition_variable requestDoneCondition;
 
     NetworkRequest(url)
         .timeout(1000)
-        .onSuccess([&mut, &requestDone, &requestDoneCondition,
-                    url](NetworkResult result) -> Outcome {
+        .onSuccess([&requestDone](const NetworkResult & /*result*/) -> Outcome {
             // The timeout should throw an error
             EXPECT_TRUE(false);
-
-            {
-                std::unique_lock lck(mut);
-                requestDone = true;
-            }
-            requestDoneCondition.notify_one();
+            requestDone = true;
             return Success;
         })
-        .onError([&mut, &requestDone, &requestDoneCondition,
-                  url](NetworkResult result) {
+        .onError([&requestDone, url](const NetworkResult &result) {
             qDebug() << QTime::currentTime().toString()
                      << "timeout request finish error";
             EXPECT_EQ(result.status(), NetworkResult::timedoutStatus);
 
-            {
-                std::unique_lock lck(mut);
-                requestDone = true;
-            }
-            requestDoneCondition.notify_one();
+            requestDone = true;
         })
         .execute();
 
     // Wait for the request to finish
-    std::unique_lock lck(mut);
-    requestDoneCondition.wait(lck, [&requestDone] {
+    EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
         return requestDone;
-    });
+    }));
 
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
 }
@@ -265,41 +222,27 @@ TEST(NetworkRequest, TimeoutNotTimingOut)
 
     auto url = getDelayURL(1);
 
-    std::mutex mut;
     bool requestDone = false;
-    std::condition_variable requestDoneCondition;
 
     NetworkRequest(url)
         .timeout(2000)
-        .onSuccess([&mut, &requestDone, &requestDoneCondition,
-                    url](NetworkResult result) -> Outcome {
+        .onSuccess([&requestDone, url](const NetworkResult &result) -> Outcome {
             EXPECT_EQ(result.status(), 200);
 
-            {
-                std::unique_lock lck(mut);
-                requestDone = true;
-            }
-            requestDoneCondition.notify_one();
+            requestDone = true;
             return Success;
         })
-        .onError([&mut, &requestDone, &requestDoneCondition,
-                  url](NetworkResult result) {
+        .onError([&requestDone, url](const NetworkResult & /*result*/) {
             // The timeout should *not* throw an error
             EXPECT_TRUE(false);
-
-            {
-                std::unique_lock lck(mut);
-                requestDone = true;
-            }
-            requestDoneCondition.notify_one();
+            requestDone = true;
         })
         .execute();
 
     // Wait for the request to finish
-    std::unique_lock lck(mut);
-    requestDoneCondition.wait(lck, [&requestDone] {
+    EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
         return requestDone;
-    });
+    }));
 
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
 }
@@ -310,39 +253,31 @@ TEST(NetworkRequest, FinallyCallbackOnTimeout)
 
     auto url = getDelayURL(5);
 
-    std::mutex mut;
     bool requestDone = false;
-    std::condition_variable requestDoneCondition;
     bool finallyCalled = false;
     bool onSuccessCalled = false;
     bool onErrorCalled = false;
 
     NetworkRequest(url)
         .timeout(1000)
-        .onSuccess([&](NetworkResult result) -> Outcome {
+        .onSuccess([&](const NetworkResult & /*result*/) -> Outcome {
             onSuccessCalled = true;
             return Success;
         })
-        .onError([&](NetworkResult result) {
+        .onError([&](const NetworkResult &result) {
             onErrorCalled = true;
             EXPECT_EQ(result.status(), NetworkResult::timedoutStatus);
         })
         .finally([&] {
             finallyCalled = true;
-
-            {
-                std::unique_lock lck(mut);
-                requestDone = true;
-            }
-            requestDoneCondition.notify_one();
+            requestDone = true;
         })
         .execute();
 
     // Wait for the request to finish
-    std::unique_lock lck(mut);
-    requestDoneCondition.wait(lck, [&requestDone] {
+    EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
         return requestDone;
-    });
+    }));
 
     EXPECT_TRUE(finallyCalled);
     EXPECT_TRUE(onErrorCalled);
