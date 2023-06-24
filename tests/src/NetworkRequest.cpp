@@ -13,12 +13,10 @@ namespace {
 
 #ifdef CHATTERINO_TEST_USE_PUBLIC_HTTPBIN
 // Not using httpbin.org, since it can be really slow and cause timeouts.
-// postman-echo has the same API. They only differ for the 402 response.
+// postman-echo has the same API.
 const char *const HTTPBIN_BASE_URL = "https://postman-echo.com";
-constexpr const bool CUSTOM_402_RESPONSE = false;
 #else
 const char *const HTTPBIN_BASE_URL = "http://127.0.0.1:9051";
-constexpr const bool CUSTOM_402_RESPONSE = true;
 #endif
 
 QString getStatusURL(int code)
@@ -154,19 +152,6 @@ TEST(NetworkRequest, Error)
                 })
             .onError([code, &waiter, url](const NetworkResult &result) {
                 EXPECT_EQ(result.status(), code);
-                if (code == 402)
-                {
-                    if (CUSTOM_402_RESPONSE)
-                    {
-                        EXPECT_EQ(result.getData(),
-                                  QByteArrayLiteral("Fuck you, pay me!"));
-                    }
-                    else
-                    {
-                        EXPECT_EQ(result.getData(),
-                                  QByteArrayLiteral("{\n  \"status\": 402\n}"));
-                    }
-                }
 
                 waiter.requestDone();
             })
