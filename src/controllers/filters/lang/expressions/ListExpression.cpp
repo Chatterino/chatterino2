@@ -12,7 +12,7 @@ QVariant ListExpression::execute(const ContextMap &context) const
     for (const auto &exp : this->list_)
     {
         auto res = exp->execute(context);
-        if (allStrings && variantIsNot(res.type(), QMetaType::QString))
+        if (allStrings && variantIsNot(res, QMetaType::QString))
         {
             allStrings = false;
         }
