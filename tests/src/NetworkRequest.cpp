@@ -5,9 +5,7 @@
 #include "common/Outcome.hpp"
 
 #include <gtest/gtest.h>
-// Using this over <QTest> to avoid depending on the Test component of Qt
-// We're only interested in QTest::qWaitFor.
-#include <QtCore/qtestsupport_core.h>
+#include <QCoreApplication>
 
 using namespace chatterino;
 
@@ -33,6 +31,46 @@ QString getDelayURL(int delay)
     return QString("%1/delay/%2").arg(HTTPBIN_BASE_URL).arg(delay);
 }
 
+class RequestWaiter
+{
+public:
+    void requestDone()
+    {
+        {
+            std::unique_lock lck(this->mutex_);
+            ASSERT_FALSE(this->requestDone_);
+            this->requestDone_ = true;
+        }
+        this->condition_.notify_one();
+    }
+
+    void waitForRequest()
+    {
+        using namespace std::chrono_literals;
+
+        while (true)
+        {
+            {
+                std::unique_lock lck(this->mutex_);
+                bool done = this->condition_.wait_for(lck, 10ms, [this] {
+                    return this->requestDone_;
+                });
+                if (done)
+                {
+                    break;
+                }
+            }
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+        }
+    }
+
+private:
+    std::mutex mutex_;
+    std::condition_variable condition_;
+    bool requestDone_ = false;
+};
+
 }  // namespace
 
 TEST(NetworkRequest, Success)
@@ -44,28 +82,23 @@ TEST(NetworkRequest, Success)
     for (const auto code : codes)
     {
         auto url = getStatusURL(code);
-        bool requestDone = false;
+        RequestWaiter waiter;
 
         NetworkRequest(url)
-            .onSuccess([code, &requestDone,
-                        url](const NetworkResult &result) -> Outcome {
-                EXPECT_EQ(result.status(), code);
-
-                requestDone = true;
-                return Success;
-            })
+            .onSuccess(
+                [code, &waiter, url](const NetworkResult &result) -> Outcome {
+                    EXPECT_EQ(result.status(), code);
+                    waiter.requestDone();
+                    return Success;
+                })
             .onError([&](const NetworkResult & /*result*/) {
                 // The codes should *not* throw an error
                 EXPECT_TRUE(false);
-
-                requestDone = true;
+                waiter.requestDone();
             })
             .execute();
 
-        // Wait for the request to finish
-        EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
-            return requestDone;
-        }));
+        waiter.waitForRequest();
     }
 
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
@@ -80,21 +113,18 @@ TEST(NetworkRequest, FinallyCallbackOnSuccess)
     for (const auto code : codes)
     {
         auto url = getStatusURL(code);
-        bool requestDone = false;
+        RequestWaiter waiter;
 
         bool finallyCalled = false;
 
         NetworkRequest(url)
-            .finally([&requestDone, &finallyCalled] {
+            .finally([&waiter, &finallyCalled] {
                 finallyCalled = true;
-                requestDone = true;
+                waiter.requestDone();
             })
             .execute();
 
-        // Wait for the request to finish
-        EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
-            return requestDone;
-        }));
+        waiter.waitForRequest();
 
         EXPECT_TRUE(finallyCalled);
     }
@@ -112,18 +142,17 @@ TEST(NetworkRequest, Error)
     for (const auto code : codes)
     {
         auto url = getStatusURL(code);
-        bool requestDone = false;
+        RequestWaiter waiter;
 
         NetworkRequest(url)
-            .onSuccess([&requestDone,
-                        url](const NetworkResult & /*result*/) -> Outcome {
-                // The codes should throw an error
-                EXPECT_TRUE(false);
-
-                requestDone = true;
-                return Success;
-            })
-            .onError([code, &requestDone, url](const NetworkResult &result) {
+            .onSuccess(
+                [&waiter, url](const NetworkResult & /*result*/) -> Outcome {
+                    // The codes should throw an error
+                    EXPECT_TRUE(false);
+                    waiter.requestDone();
+                    return Success;
+                })
+            .onError([code, &waiter, url](const NetworkResult &result) {
                 EXPECT_EQ(result.status(), code);
                 if (code == 402)
                 {
@@ -139,14 +168,11 @@ TEST(NetworkRequest, Error)
                     }
                 }
 
-                requestDone = true;
+                waiter.requestDone();
             })
             .execute();
 
-        // Wait for the request to finish
-        EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
-            return requestDone;
-        }));
+        waiter.waitForRequest();
     }
 
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
@@ -164,21 +190,18 @@ TEST(NetworkRequest, FinallyCallbackOnError)
     for (const auto code : codes)
     {
         auto url = getStatusURL(code);
-        bool requestDone = false;
+        RequestWaiter waiter;
 
         bool finallyCalled = false;
 
         NetworkRequest(url)
-            .finally([&requestDone, &finallyCalled] {
+            .finally([&waiter, &finallyCalled] {
                 finallyCalled = true;
-                requestDone = true;
+                waiter.requestDone();
             })
             .execute();
 
-        // Wait for the request to finish
-        EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
-            return requestDone;
-        }));
+        waiter.waitForRequest();
 
         EXPECT_TRUE(finallyCalled);
     }
@@ -189,29 +212,26 @@ TEST(NetworkRequest, TimeoutTimingOut)
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
 
     auto url = getDelayURL(5);
-    bool requestDone = false;
+    RequestWaiter waiter;
 
     NetworkRequest(url)
         .timeout(1000)
-        .onSuccess([&requestDone](const NetworkResult & /*result*/) -> Outcome {
+        .onSuccess([&waiter](const NetworkResult & /*result*/) -> Outcome {
             // The timeout should throw an error
             EXPECT_TRUE(false);
-            requestDone = true;
+            waiter.requestDone();
             return Success;
         })
-        .onError([&requestDone, url](const NetworkResult &result) {
+        .onError([&waiter, url](const NetworkResult &result) {
             qDebug() << QTime::currentTime().toString()
                      << "timeout request finish error";
             EXPECT_EQ(result.status(), NetworkResult::timedoutStatus);
 
-            requestDone = true;
+            waiter.requestDone();
         })
         .execute();
 
-    // Wait for the request to finish
-    EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
-        return requestDone;
-    }));
+    waiter.waitForRequest();
 
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
 }
@@ -221,28 +241,24 @@ TEST(NetworkRequest, TimeoutNotTimingOut)
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
 
     auto url = getDelayURL(1);
-
-    bool requestDone = false;
+    RequestWaiter waiter;
 
     NetworkRequest(url)
         .timeout(2000)
-        .onSuccess([&requestDone, url](const NetworkResult &result) -> Outcome {
+        .onSuccess([&waiter, url](const NetworkResult &result) -> Outcome {
             EXPECT_EQ(result.status(), 200);
 
-            requestDone = true;
+            waiter.requestDone();
             return Success;
         })
-        .onError([&requestDone, url](const NetworkResult & /*result*/) {
+        .onError([&waiter, url](const NetworkResult & /*result*/) {
             // The timeout should *not* throw an error
             EXPECT_TRUE(false);
-            requestDone = true;
+            waiter.requestDone();
         })
         .execute();
 
-    // Wait for the request to finish
-    EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
-        return requestDone;
-    }));
+    waiter.waitForRequest();
 
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
 }
@@ -253,7 +269,7 @@ TEST(NetworkRequest, FinallyCallbackOnTimeout)
 
     auto url = getDelayURL(5);
 
-    bool requestDone = false;
+    RequestWaiter waiter;
     bool finallyCalled = false;
     bool onSuccessCalled = false;
     bool onErrorCalled = false;
@@ -270,14 +286,11 @@ TEST(NetworkRequest, FinallyCallbackOnTimeout)
         })
         .finally([&] {
             finallyCalled = true;
-            requestDone = true;
+            waiter.requestDone();
         })
         .execute();
 
-    // Wait for the request to finish
-    EXPECT_TRUE(QTest::qWaitFor([&requestDone] {
-        return requestDone;
-    }));
+    waiter.waitForRequest();
 
     EXPECT_TRUE(finallyCalled);
     EXPECT_TRUE(onErrorCalled);
