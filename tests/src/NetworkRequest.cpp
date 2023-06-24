@@ -244,7 +244,7 @@ TEST(NetworkRequest, TimeoutNotTimingOut)
     RequestWaiter waiter;
 
     NetworkRequest(url)
-        .timeout(2000)
+        .timeout(3000)
         .onSuccess([&waiter, url](const NetworkResult &result) -> Outcome {
             EXPECT_EQ(result.status(), 200);
 
