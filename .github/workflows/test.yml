@@ -18,8 +18,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
-        qt-version: [5.15.2]
+        include:
+          - os: "ubuntu-20.04"
+            qt-version: "5.15.2"
+          - os: "ubuntu-20.04"
+            qt-version: "5.12.12"
+          - os: "ubuntu-22.04"
+            qt-version: "6.2.4"
       fail-fast: false
 
     steps:
