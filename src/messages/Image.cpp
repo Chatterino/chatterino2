@@ -32,46 +32,6 @@ const auto IMAGE_POOL_CLEANUP_INTERVAL = std::chrono::minutes(1);
 const auto IMAGE_POOL_IMAGE_LIFETIME = std::chrono::minutes(10);
 
 namespace chatterino {
-
-class InternalImage
-{
-public:
-    static Image *newEmptyImage()
-    {
-        return new Image;
-    }
-};
-
-class LazyExpirationPool
-{
-public:
-    boost::optional<ImageExpirationPool> pool;
-
-    ImageExpirationPool &operator()()
-    {
-        if (!this->pool) [[unlikely]]  // this will happen at most once
-        {
-            this->pool.emplace();
-        }
-        return *this->pool;
-    }
-};
-
-}  // namespace chatterino
-
-namespace {
-using namespace chatterino;
-
-// These need to be in this order to ensure the empty image gets deleted before the expiration pool is deleted.
-//
-// NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
-LazyExpirationPool globalImageExpirationPool;
-ImagePtr globalEmptyImage{InternalImage::newEmptyImage()};
-// NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
-
-}  // namespace
-
-namespace chatterino {
 namespace detail {
     // Frames
     Frames::Frames()
@@ -402,7 +362,8 @@ ImagePtr Image::fromResourcePixmap(const QPixmap &pixmap, qreal scale)
 
 ImagePtr Image::getEmpty()
 {
-    return globalEmptyImage;
+    static auto empty = ImagePtr(new Image);
+    return empty;
 }
 
 ImagePtr getEmptyImagePtr()
@@ -634,7 +595,8 @@ ImageExpirationPool::ImageExpirationPool()
 
 ImageExpirationPool &ImageExpirationPool::instance()
 {
-    return globalImageExpirationPool();
+    static auto *instance = new ImageExpirationPool;
+    return *instance;
 }
 
 void ImageExpirationPool::addImagePtr(ImagePtr imgPtr)

@@ -101,7 +101,6 @@ private:
     std::unique_ptr<detail::Frames> frames_{};
 
     friend class ImageExpirationPool;
-    friend class InternalImage;
 };
 
 // forward-declarable function that calls Image::getEmpty() under the hood.
@@ -114,7 +113,6 @@ class ImageExpirationPool
 private:
     friend class Image;
     friend class CommandController;
-    friend class ::boost::optional_detail::optional_base<ImageExpirationPool>;
 
     ImageExpirationPool();
     static ImageExpirationPool &instance();
