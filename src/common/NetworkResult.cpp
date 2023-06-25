@@ -3,15 +3,21 @@
 #include "common/QLogging.hpp"
 
 #include <QJsonDocument>
+#include <QMetaEnum>
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 
 namespace chatterino {
 
-NetworkResult::NetworkResult(const QByteArray &data, int status)
-    : data_(data)
-    , status_(status)
+NetworkResult::NetworkResult(Error error, const QVariant &httpStatusCode,
+                             QByteArray data)
+    : data_(std::move(data))
+    , error_(error)
 {
+    if (httpStatusCode.isValid())
+    {
+        this->status_ = static_cast<uint16_t>(httpStatusCode.toInt());
+    }
 }
 
 QJsonObject NetworkResult::parseJson() const
@@ -59,9 +65,21 @@ const QByteArray &NetworkResult::getData() const
     return this->data_;
 }
 
-int NetworkResult::status() const
+QString NetworkResult::formatError() const
 {
-    return this->status_;
+    if (this->status_)
+    {
+        return QString::number(*this->status_);
+    }
+
+    const auto *name =
+        QMetaEnum::fromType<QNetworkReply::NetworkError>().valueToKey(
+            this->error_);
+    if (name == nullptr)
+    {
+        return QStringLiteral("unknown error (%1)").arg(this->error_);
+    }
+    return name;
 }
 
 }  // namespace chatterino

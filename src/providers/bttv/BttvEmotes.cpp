@@ -259,23 +259,17 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                     shared->addMessage(
                         makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
             }
-            else if (result.status() == NetworkResult::timedoutStatus)
-            {
-                // TODO: Auto retry in case of a timeout, with a delay
-                qCWarning(chatterinoBttv)
-                    << "Fetching BTTV emotes for channel" << channelId
-                    << "failed due to timeout";
-                shared->addMessage(makeSystemMessage(
-                    "Failed to fetch BetterTTV channel emotes. (timed out)"));
-            }
             else
             {
+                // TODO: Auto retry in case of a timeout, with a delay
+                auto errorString = result.formatError();
                 qCWarning(chatterinoBttv)
                     << "Error fetching BTTV emotes for channel" << channelId
-                    << ", error" << result.status();
-                shared->addMessage(
-                    makeSystemMessage("Failed to fetch BetterTTV channel "
-                                      "emotes. (unknown error)"));
+                    << ", error" << errorString;
+                shared->addMessage(makeSystemMessage(
+                    QStringLiteral("Failed to fetch BetterTTV channel "
+                                   "emotes. (%1)")
+                        .arg(errorString)));
             }
         })
         .execute();

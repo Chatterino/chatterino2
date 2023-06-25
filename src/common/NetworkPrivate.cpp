@@ -155,7 +155,7 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
                     {
                         postToThread([data] {
                             data->onError_(NetworkResult(
-                                {}, NetworkResult::timedoutStatus));
+                                NetworkResult::Error::TimeoutError, {}, {}));
                         });
                     }
 
@@ -218,8 +218,9 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
                                         QString(data->payload_));
                     }
                     // TODO: Should this always be run on the GUI thread?
-                    postToThread([data, code = status.toInt(), reply] {
-                        data->onError_(NetworkResult(reply->readAll(), code));
+                    postToThread([data, status, reply] {
+                        data->onError_(NetworkResult(reply->error(), status,
+                                                     reply->readAll()));
                     });
                 }
 
@@ -238,7 +239,7 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
             auto status =
                 reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
 
-            NetworkResult result(bytes, status.toInt());
+            NetworkResult result(reply->error(), status, bytes);
 
             DebugCount::increase("http request success");
             // log("starting {}", data->request_.url().toString());
@@ -337,7 +338,7 @@ void loadCached(std::shared_ptr<NetworkData> &&data)
 
     // XXX: check if bytes is empty?
     QByteArray bytes = cachedFile.readAll();
-    NetworkResult result(bytes, 200);
+    NetworkResult result(NetworkResult::Error::NoError, QVariant(200), bytes);
 
     qCDebug(chatterinoHTTP)
         << QString("%1 [CACHED] 200 %2")

@@ -390,7 +390,7 @@ void Helix::createClip(QString channelId,
             return Success;
         })
         .onError([failureCallback](auto result) {
-            switch (result.status())
+            switch (result.status().value_or(0))
             {
                 case 503: {
                     // Channel has disabled clip-creation, or channel has made cliops only creatable by followers and the user is not a follower (or subscriber)
@@ -406,7 +406,7 @@ void Helix::createClip(QString channelId,
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Failed to create a clip: " << result.status()
+                        << "Failed to create a clip: " << result.formatError()
                         << result.getData();
                     failureCallback(HelixClipError::Unknown);
                 }
@@ -477,7 +477,7 @@ void Helix::createStreamMarker(
             return Success;
         })
         .onError([failureCallback](NetworkResult result) {
-            switch (result.status())
+            switch (result.status().value_or(0))
             {
                 case 403: {
                     // User isn't a Channel Editor, so he can't create markers
@@ -495,7 +495,7 @@ void Helix::createStreamMarker(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Failed to create a stream marker: "
-                        << result.status() << result.getData();
+                        << result.formatError() << result.getData();
                     failureCallback(HelixStreamMarkerError::Unknown);
                 }
                 break;
@@ -636,7 +636,7 @@ void Helix::manageAutoModMessages(
             return Success;
         })
         .onError([failureCallback, msgID, action](NetworkResult result) {
-            switch (result.status())
+            switch (result.status().value_or(0))
             {
                 case 400: {
                     // Message was already processed
@@ -668,7 +668,7 @@ void Helix::manageAutoModMessages(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Failed to manage automod message: " << action
-                        << msgID << result.status() << result.getData();
+                        << msgID << result.formatError() << result.getData();
                     failureCallback(HelixAutoModMessageError::Unknown);
                 }
                 break;
@@ -710,7 +710,7 @@ void Helix::getCheermotes(
         .onError([broadcasterId, failureCallback](NetworkResult result) {
             qCDebug(chatterinoTwitch)
                 << "Failed to get cheermotes(broadcaster_id=" << broadcasterId
-                << "): " << result.status() << result.getData();
+                << "): " << result.formatError() << result.getData();
             failureCallback();
         })
         .execute();
@@ -804,17 +804,24 @@ void Helix::updateUserChatColor(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for updating chat color was"
-                    << result.status() << "but we only expected it to be 204";
+                    << result.formatError()
+                    << "but we only expected it to be 204";
             }
 
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     if (message.startsWith("invalid color",
@@ -847,7 +854,7 @@ void Helix::updateUserChatColor(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error changing user color:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -880,17 +887,24 @@ void Helix::deleteChatMessages(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for deleting chat messages was"
-                    << result.status() << "but we only expected it to be 204";
+                    << result.formatError()
+                    << "but we only expected it to be 204";
             }
 
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 404: {
                     // A 404 on this endpoint means message id is invalid or unable to be deleted.
@@ -932,7 +946,7 @@ void Helix::deleteChatMessages(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error deleting chat messages:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -958,17 +972,24 @@ void Helix::addChannelModerator(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for adding a moderator was"
-                    << result.status() << "but we only expected it to be 204";
+                    << result.formatError()
+                    << "but we only expected it to be 204";
             }
 
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 401: {
                     if (message.startsWith("Missing scope",
@@ -1020,7 +1041,7 @@ void Helix::addChannelModerator(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error adding channel moderator:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -1046,17 +1067,24 @@ void Helix::removeChannelModerator(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for unmodding user was"
-                    << result.status() << "but we only expected it to be 204";
+                    << result.formatError()
+                    << "but we only expected it to be 204";
             }
 
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     if (message.compare("user is not a mod",
@@ -1098,8 +1126,8 @@ void Helix::removeChannelModerator(
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Unhandled error unmodding user:" << result.status()
-                        << result.getData() << obj;
+                        << "Unhandled error unmodding user:"
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -1133,17 +1161,24 @@ void Helix::sendChatAnnouncement(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for sending an announcement was"
-                    << result.status() << "but we only expected it to be 204";
+                    << result.formatError()
+                    << "but we only expected it to be 204";
             }
 
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     // These errors are generally well formatted, so we just forward them.
@@ -1176,7 +1211,7 @@ void Helix::sendChatAnnouncement(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error sending an announcement:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -1202,17 +1237,24 @@ void Helix::addChannelVIP(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for adding channel VIP was"
-                    << result.status() << "but we only expected it to be 204";
+                    << result.formatError()
+                    << "but we only expected it to be 204";
             }
 
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400:
                 case 409:
@@ -1254,7 +1296,7 @@ void Helix::addChannelVIP(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error adding channel VIP:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -1280,17 +1322,24 @@ void Helix::removeChannelVIP(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for removing channel VIP was"
-                    << result.status() << "but we only expected it to be 204";
+                    << result.formatError()
+                    << "but we only expected it to be 204";
             }
 
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400:
                 case 409:
@@ -1331,7 +1380,7 @@ void Helix::removeChannelVIP(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error removing channel VIP:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -1369,17 +1418,24 @@ void Helix::unbanUser(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for unbanning user was"
-                    << result.status() << "but we only expected it to be 204";
+                    << result.formatError()
+                    << "but we only expected it to be 204";
             }
 
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     if (message.startsWith("The user in the user_id query "
@@ -1435,8 +1491,8 @@ void Helix::unbanUser(
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Unhandled error unbanning user:" << result.status()
-                        << result.getData() << obj;
+                        << "Unhandled error unbanning user:"
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -1474,11 +1530,17 @@ void Helix::startRaid(
                 successCallback();
                 return Success;
             })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     if (message.compare("The IDs in from_broadcaster_id and "
@@ -1529,7 +1591,7 @@ void Helix::startRaid(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error while starting a raid:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -1554,17 +1616,24 @@ void Helix::cancelRaid(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for canceling the raid was"
-                    << result.status() << "but we only expected it to be 204";
+                    << result.formatError()
+                    << "but we only expected it to be 204";
             }
 
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 401: {
                     if (message.startsWith("Missing scope",
@@ -1601,7 +1670,7 @@ void Helix::cancelRaid(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error while canceling the raid:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -1715,18 +1784,24 @@ void Helix::updateChatSettings(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for updating chat settings was"
-                    << result.status() << "but we expected it to be 200";
+                    << result.formatError() << "but we expected it to be 200";
             }
             auto response = result.parseJson();
             successCallback(HelixChatSettings(
                 response.value("data").toArray().first().toObject()));
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     if (message.contains("must be in the range"))
@@ -1773,7 +1848,7 @@ void Helix::updateChatSettings(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error updating chat settings:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -1838,18 +1913,24 @@ void Helix::fetchChatters(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for getting chatters was "
-                    << result.status() << "but we expected it to be 200";
+                    << result.formatError() << "but we expected it to be 200";
             }
 
             auto response = result.parseJson();
             successCallback(HelixChatters(response));
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     failureCallback(Error::Forwarded, message);
@@ -1880,7 +1961,7 @@ void Helix::fetchChatters(
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Unhandled error data:" << result.status()
+                        << "Unhandled error data:" << result.formatError()
                         << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
@@ -1947,18 +2028,24 @@ void Helix::fetchModerators(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for getting moderators was "
-                    << result.status() << "but we expected it to be 200";
+                    << result.formatError() << "but we expected it to be 200";
             }
 
             auto response = result.parseJson();
             successCallback(HelixModerators(response));
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     failureCallback(Error::Forwarded, message);
@@ -1989,7 +2076,7 @@ void Helix::fetchModerators(
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Unhandled error data:" << result.status()
+                        << "Unhandled error data:" << result.formatError()
                         << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
@@ -2033,17 +2120,23 @@ void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for banning a user was"
-                    << result.status() << "but we expected it to be 200";
+                    << result.formatError() << "but we expected it to be 200";
             }
             // we don't care about the response
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     if (message.startsWith("The user specified in the user_id "
@@ -2097,8 +2190,8 @@ void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Unhandled error banning user:" << result.status()
-                        << result.getData() << obj;
+                        << "Unhandled error banning user:"
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -2130,17 +2223,23 @@ void Helix::sendWhisper(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for sending a whisper was"
-                    << result.status() << "but we expected it to be 204";
+                    << result.formatError() << "but we expected it to be 204";
             }
             // we don't care about the response
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     if (message.startsWith("A user cannot whisper themself",
@@ -2201,8 +2300,8 @@ void Helix::sendWhisper(
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Unhandled error banning user:" << result.status()
-                        << result.getData() << obj;
+                        << "Unhandled error banning user:"
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -2272,8 +2371,8 @@ void Helix::getChannelVIPs(
             if (result.status() != 200)
             {
                 qCWarning(chatterinoTwitch)
-                    << "Success result for getting VIPs was" << result.status()
-                    << "but we expected it to be 200";
+                    << "Success result for getting VIPs was"
+                    << result.formatError() << "but we expected it to be 200";
             }
 
             auto response = result.parseJson();
@@ -2287,11 +2386,17 @@ void Helix::getChannelVIPs(
             successCallback(channelVips);
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     failureCallback(Error::Forwarded, message);
@@ -2331,8 +2436,8 @@ void Helix::getChannelVIPs(
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Unhandled error listing VIPs:" << result.status()
-                        << result.getData() << obj;
+                        << "Unhandled error listing VIPs:"
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -2368,11 +2473,17 @@ void Helix::startCommercial(
             successCallback(HelixStartCommercialResponse(obj));
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     if (message.startsWith("Missing scope",
@@ -2427,7 +2538,7 @@ void Helix::startCommercial(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error starting commercial:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -2450,18 +2561,24 @@ void Helix::getGlobalBadges(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for getting global badges was "
-                    << result.status() << "but we expected it to be 200";
+                    << result.formatError() << "but we expected it to be 200";
             }
 
             auto response = result.parseJson();
             successCallback(HelixGlobalBadges(response));
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 401: {
                     failureCallback(Error::Forwarded, message);
@@ -2471,7 +2588,7 @@ void Helix::getGlobalBadges(
                 default: {
                     qCWarning(chatterinoTwitch)
                         << "Helix global badges, unhandled error data:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -2497,18 +2614,24 @@ void Helix::getChannelBadges(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for getting badges was "
-                    << result.status() << "but we expected it to be 200";
+                    << result.formatError() << "but we expected it to be 200";
             }
 
             auto response = result.parseJson();
             successCallback(HelixChannelBadges(response));
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400:
                 case 401: {
@@ -2519,7 +2642,7 @@ void Helix::getChannelBadges(
                 default: {
                     qCWarning(chatterinoTwitch)
                         << "Helix channel badges, unhandled error data:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -2550,7 +2673,7 @@ void Helix::updateShieldMode(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for updating shield mode was "
-                    << result.status() << "but we expected it to be 200";
+                    << result.formatError() << "but we expected it to be 200";
             }
 
             const auto response = result.parseJson();
@@ -2558,11 +2681,17 @@ void Helix::updateShieldMode(
                 HelixShieldModeStatus(response["data"][0].toObject()));
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             const auto obj = result.parseJson();
             auto message = obj["message"].toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     if (message.startsWith("Missing scope",
@@ -2588,7 +2717,7 @@ void Helix::updateShieldMode(
                 default: {
                     qCWarning(chatterinoTwitch)
                         << "Helix shield mode, unhandled error data:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
@@ -2617,17 +2746,23 @@ void Helix::sendShoutout(
             {
                 qCWarning(chatterinoTwitch)
                     << "Success result for sending shoutout was "
-                    << result.status() << "but we expected it to be 204";
+                    << result.formatError() << "but we expected it to be 204";
             }
 
             successCallback();
             return Success;
         })
-        .onError([failureCallback](NetworkResult result) -> void {
+        .onError([failureCallback](const NetworkResult &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
             const auto obj = result.parseJson();
             auto message = obj["message"].toString();
 
-            switch (result.status())
+            switch (*result.status())
             {
                 case 400: {
                     if (message.startsWith("The broadcaster may not give "
@@ -2690,7 +2825,7 @@ void Helix::sendShoutout(
                 default: {
                     qCWarning(chatterinoTwitch)
                         << "Helix send shoutout, unhandled error data:"
-                        << result.status() << result.getData() << obj;
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
             }
