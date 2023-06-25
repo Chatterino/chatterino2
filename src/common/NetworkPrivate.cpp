@@ -155,7 +155,8 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
                     {
                         postToThread([data] {
                             data->onError_(NetworkResult(
-                                NetworkResult::Error::TimeoutError, {}, {}));
+                                NetworkResult::NetworkError::TimeoutError, {},
+                                {}));
                         });
                     }
 
@@ -338,7 +339,8 @@ void loadCached(std::shared_ptr<NetworkData> &&data)
 
     // XXX: check if bytes is empty?
     QByteArray bytes = cachedFile.readAll();
-    NetworkResult result(NetworkResult::Error::NoError, QVariant(200), bytes);
+    NetworkResult result(NetworkResult::NetworkError::NoError, QVariant(200),
+                         bytes);
 
     qCDebug(chatterinoHTTP)
         << QString("%1 [CACHED] 200 %2")

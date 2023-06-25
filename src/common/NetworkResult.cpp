@@ -9,7 +9,7 @@
 
 namespace chatterino {
 
-NetworkResult::NetworkResult(Error error, const QVariant &httpStatusCode,
+NetworkResult::NetworkResult(NetworkError error, const QVariant &httpStatusCode,
                              QByteArray data)
     : data_(std::move(data))
     , error_(error)

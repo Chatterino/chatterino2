@@ -4,7 +4,7 @@
 
 using namespace chatterino;
 
-using Error = NetworkResult::Error;
+using Error = NetworkResult::NetworkError;
 
 namespace {
 

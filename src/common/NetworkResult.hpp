@@ -12,9 +12,10 @@ namespace chatterino {
 class NetworkResult
 {
 public:
-    using Error = QNetworkReply::NetworkError;
+    using NetworkError = QNetworkReply::NetworkError;
 
-    NetworkResult(Error error, const QVariant &httpStatusCode, QByteArray data);
+    NetworkResult(NetworkError error, const QVariant &httpStatusCode,
+                  QByteArray data);
 
     /// Parses the result as json and returns the root as an object.
     /// Returns empty object if parsing failed.
@@ -28,26 +29,25 @@ public:
 
     /// The error code of the reply.
     /// In case of a successful reply, this will be NoError (0)
-    Error error() const
+    NetworkError error() const
     {
         return this->error_;
     }
 
-    /// The HTTP status code if a request was made.
+    /// The HTTP status code if a response was received.
     std::optional<int> status() const
     {
         return this->status_;
     }
 
-    /// Formats the error:
-    /// without HTTP status: [Name]
-    /// with HTTP status: [HTTP status]
+    /// Formats the error.
+    /// If a reply is received, returns the HTTP status otherwise, the network error.
     QString formatError() const;
 
 private:
     QByteArray data_;
 
-    Error error_;
+    NetworkError error_;
     std::optional<int> status_;
 };
 
