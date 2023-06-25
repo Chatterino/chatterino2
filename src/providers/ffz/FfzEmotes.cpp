@@ -282,7 +282,7 @@ void FfzEmotes::loadChannel(
                     << ", error" << errorString;
                 shared->addMessage(makeSystemMessage(
                     QStringLiteral("Failed to fetch FrankerFaceZ channel "
-                                   "emotes. (%1)")
+                                   "emotes. (Error: %1)")
                         .arg(errorString)));
             }
         })

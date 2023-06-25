@@ -268,7 +268,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                     << ", error" << errorString;
                 shared->addMessage(makeSystemMessage(
                     QStringLiteral("Failed to fetch BetterTTV channel "
-                                   "emotes. (%1)")
+                                   "emotes. (Error: %1)")
                         .arg(errorString)));
             }
         })

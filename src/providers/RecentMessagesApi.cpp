@@ -228,7 +228,8 @@ void RecentMessagesApi::loadRecentMessages(const QString &channelName,
                 << "Failed to load recent messages for" << shared->getName();
 
             shared->addMessage(makeSystemMessage(
-                QStringLiteral("Message history service unavailable (%1)")
+                QStringLiteral(
+                    "Message history service unavailable (Error: %1)")
                     .arg(result.formatError())));
 
             onError();

@@ -395,7 +395,7 @@ void SeventvEmotes::loadChannelEmotes(
                         << ", error" << errorString;
                     shared->addMessage(makeSystemMessage(
                         QStringLiteral("Failed to fetch 7TV channel "
-                                       "emotes. (%1)")
+                                       "emotes. (Error: %1)")
                             .arg(errorString)));
                 }
             })
