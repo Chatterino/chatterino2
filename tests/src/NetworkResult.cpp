@@ -9,7 +9,7 @@ using Error = NetworkResult::Error;
 namespace {
 
 void checkResult(const NetworkResult &res, Error error,
-                 std::optional<uint16_t> status, const QString &formatted)
+                 std::optional<int> status, const QString &formatted)
 {
     ASSERT_EQ(res.error(), error);
     ASSERT_EQ(res.status(), status);

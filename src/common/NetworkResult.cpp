@@ -16,7 +16,7 @@ NetworkResult::NetworkResult(Error error, const QVariant &httpStatusCode,
 {
     if (httpStatusCode.isValid())
     {
-        this->status_ = static_cast<uint16_t>(httpStatusCode.toInt());
+        this->status_ = httpStatusCode.toInt();
     }
 }
 

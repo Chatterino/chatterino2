@@ -34,7 +34,7 @@ public:
     }
 
     /// The HTTP status code if a request was made.
-    std::optional<uint16_t> status() const
+    std::optional<int> status() const
     {
         return this->status_;
     }
@@ -48,7 +48,7 @@ private:
     QByteArray data_;
 
     Error error_;
-    std::optional<uint16_t> status_;
+    std::optional<int> status_;
 };
 
 }  // namespace chatterino
