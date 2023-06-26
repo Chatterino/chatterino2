@@ -50,8 +50,6 @@ namespace detail {
         {
         }
 
-        constexpr auto operator<=>(const LiteralResolver &) const = default;
-
         const char16_t utf16Text[N]{};
         const char latin1Text[N]{};
         size_t length = N;
