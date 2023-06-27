@@ -2,6 +2,37 @@
 
 ## Unversioned
 
+- Minor: Nicknames are now taken into consideration when searching for messages. (#4663)
+- Minor: Add an icon showing when streamer mode is enabled (#4410, #4690)
+- Minor: Added `/shoutout <username>` commands to shoutout specified user. (#4638)
+- Minor: Improved editing hotkeys. (#4628)
+- Minor: The input completion and quick switcher are now styled to match your theme. (#4671)
+- Minor: Added setting to only show tabs with live channels (default toggle hotkey: Ctrl+Shift+L). (#4358)
+- Minor: Added option to subscribe to and unsubscribe from reply threads. (#4680)
+- Minor: Added a message for when Chatterino joins a channel (#4616)
+- Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
+- Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
+- Bugfix: Fixed a crash when opening and closing a reply thread and switching the user. (#4675)
+- Bugfix: Fix visual glitches with smooth scrolling. (#4501)
+- Bugfix: Fixed pings firing for the "Your username" highlight when not signed in. (#4698)
+- Bugfix: Fixed partially broken filters on Qt 6 builds. (#4702)
+- Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
+- Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
+- Dev: Added test cases for emote and tab completion. (#4644)
+- Dev: Fixed `clang-tidy-review` action not picking up dependencies. (#4648)
+- Dev: Expanded upon `$$$` test channels. (#4655)
+- Dev: Added tools to help debug image GC. (#4578)
+- Dev: Removed duplicate license when having plugins enabled. (#4665)
+- Dev: Replace our QObjectRef class with Qt's QPointer class. (#4666)
+- Dev: Fixed warnings about QWidgets already having a QLayout. (#4672)
+- Dev: Fixed undefined behavior when loading non-existant credentials. (#4673)
+- Dev: Added support for compiling with `sccache`. (#4678)
+- Dev: Added `sccache` in Windows CI. (#4678)
+- Dev: Moved preprocessor Git and date definitions to executables only. (#4681)
+- Dev: Refactored tests to be able to use `ctest` and run in debug builds. (#4700)
+
+## 2.4.4
+
 - Minor: Added a Send button in the input box so you can click to send a message. This is disabled by default and can be enabled with the "Show send message button" setting. (#4607)
 - Minor: Improved error messages when the updater fails a download. (#4594)
 - Minor: Added `/shield` and `/shieldoff` commands to toggle shield mode. (#4580)
@@ -9,8 +40,10 @@
 - Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
 - Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
 - Bugfix: Domains starting with `http` are now parsed as links again. (#4598)
+- Bugfix: Reduced the size of the update prompt to prevent it from going off the users screen. (#4626)
 - Bugfix: Fixed click effects on buttons not being antialiased. (#4473)
 - Bugfix: Fixed Ctrl+Backspace not working after Select All in chat search popup. (#4461)
+- Bugfix: Fixed crash when scrolling up really fast. (#4621)
 - Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
 
 ## 2.4.3

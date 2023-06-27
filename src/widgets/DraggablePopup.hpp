@@ -26,6 +26,11 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
+    /// Creates a pin button that is scoped to this window.
+    /// When clicked, the user can toggle whether the window is pinned.
+    /// The window is considered unpinned at the start.
+    Button *createPinButton();
+
     // lifetimeHack_ is used to check that the window hasn't been destroyed yet
     std::shared_ptr<bool> lifetimeHack_;
 

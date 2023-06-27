@@ -114,8 +114,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     auto &s = *getSettings();
 
     layout.addTitle("Interface");
-    layout.addDropdown("Theme", {"White", "Light", "Dark", "Black"},
-                       getApp()->themes->themeName);
+
+    layout.addDropdown<QString>(
+        "Theme", getApp()->themes->availableThemes(),
+        getApp()->themes->themeName,
+        [](const auto *combo, const auto &themeKey) {
+            return combo->findData(themeKey, Qt::UserRole);
+        },
+        [](const auto &args) {
+            return args.combobox->itemData(args.index, Qt::UserRole).toString();
+        },
+        {}, Theme::fallbackTheme.name);
+
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},
         getApp()->fonts->chatFontFamily,
@@ -188,6 +198,30 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             false);
     tabDirectionDropdown->setMinimumWidth(
         tabDirectionDropdown->minimumSizeHint().width());
+
+    layout.addDropdown<std::underlying_type<NotebookTabVisibility>::type>(
+        "Tab visibility", {"All tabs", "Only live tabs"}, s.tabVisibility,
+        [](auto val) {
+            switch (val)
+            {
+                case NotebookTabVisibility::LiveOnly:
+                    return "Only live tabs";
+                case NotebookTabVisibility::AllTabs:
+                default:
+                    return "All tabs";
+            }
+        },
+        [](auto args) {
+            if (args.value == "Only live tabs")
+            {
+                return NotebookTabVisibility::LiveOnly;
+            }
+            else
+            {
+                return NotebookTabVisibility::AllTabs;
+            }
+        },
+        false, "Choose which tabs are visible in the notebook");
 
     layout.addCheckbox(
         "Show message reply context", s.hideReplyContext, true,
@@ -903,6 +937,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Highlight received inline whispers", s.highlightInlineWhispers, false,
         "Highlight the whispers shown in all splits.\nIf \"Show Twitch "
         "whispers inline\" is disabled, this setting will do nothing.");
+    layout.addCheckbox(
+        "Automatically subscribe to participated reply threads",
+        s.autoSubToParticipatedThreads, false,
+        "When enabled, you will automatically subscribe to reply threads you "
+        "participate in.\n"
+        "This means reply threads you participate in will use your "
+        "\"Subscribed Reply Threads\" highlight settings.");
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
     // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history

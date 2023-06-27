@@ -24,7 +24,7 @@
  *  - 2.4.0-alpha.2
  *  - 2.4.0-alpha
  **/
-#define CHATTERINO_VERSION "2.4.3"
+#define CHATTERINO_VERSION "2.4.4"
 
 #if defined(Q_OS_WIN)
 #    define CHATTERINO_OS "win"
@@ -38,7 +38,41 @@
 #    define CHATTERINO_OS "unknown"
 #endif
 
+#define CHATTERINO_DECLARE_BUILD_CONSTANTS()              \
+    namespace chatterino::detail::version {               \
+    QString gitHash()                                     \
+    {                                                     \
+        return QStringLiteral(CHATTERINO_GIT_HASH);       \
+    }                                                     \
+    QString gitRelease()                                  \
+    {                                                     \
+        return QStringLiteral(CHATTERINO_GIT_RELEASE);    \
+    }                                                     \
+    QString gitCommit()                                   \
+    {                                                     \
+        return QStringLiteral(CHATTERINO_GIT_COMMIT);     \
+    }                                                     \
+    bool gitModified()                                    \
+    {                                                     \
+        return CHATTERINO_GIT_MODIFIED == 1;              \
+    }                                                     \
+    QString cmakeGenDate()                                \
+    {                                                     \
+        return QStringLiteral(CHATTERINO_CMAKE_GEN_DATE); \
+    }                                                     \
+    }  // namespace chatterino::detail::version
+
 namespace chatterino {
+
+namespace detail::version {
+
+    extern QString gitHash();
+    extern QString gitRelease();
+    extern QString gitCommit();
+    extern bool gitModified();
+    extern QString cmakeGenDate();
+
+}  // namespace detail::version
 
 class Version
 {

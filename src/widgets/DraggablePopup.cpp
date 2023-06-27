@@ -1,4 +1,8 @@
-#include "DraggablePopup.hpp"
+#include "widgets/DraggablePopup.hpp"
+
+#include "singletons/Resources.hpp"
+#include "singletons/Theme.hpp"
+#include "widgets/helper/Button.hpp"
 
 #include <QMouseEvent>
 
@@ -88,6 +92,31 @@ void DraggablePopup::mouseMoveEvent(QMouseEvent *event)
             (event->screenPos() - this->movingRelativePos).toPoint();
         this->isMoving_ = true;
     }
+}
+
+Button *DraggablePopup::createPinButton()
+{
+    auto *button = new Button(this);
+    button->setPixmap(getTheme()->buttons.pin);
+    button->setScaleIndependantSize(18, 18);
+    button->setToolTip("Pin Window");
+
+    bool pinned = false;
+    QObject::connect(
+        button, &Button::leftClicked, [this, button, pinned]() mutable {
+            pinned = !pinned;
+            if (pinned)
+            {
+                this->setActionOnFocusLoss(BaseWindow::Nothing);
+                button->setPixmap(getResources().buttons.pinEnabled);
+            }
+            else
+            {
+                this->setActionOnFocusLoss(BaseWindow::Delete);
+                button->setPixmap(getTheme()->buttons.pin);
+            }
+        });
+    return button;
 }
 
 }  // namespace chatterino

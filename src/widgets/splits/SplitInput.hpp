@@ -1,12 +1,12 @@
 #pragma once
 
-#include "util/QObjectRef.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPaintEvent>
+#include <QPointer>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -113,8 +113,8 @@ protected:
 
     Split *const split_;
     ChannelView *const channelView_;
-    QObjectRef<EmotePopup> emotePopup_;
-    QObjectRef<InputCompletionPopup> inputCompletionPopup_;
+    QPointer<EmotePopup> emotePopup_;
+    QPointer<InputCompletionPopup> inputCompletionPopup_;
 
     struct {
         ResizingTextEdit *textEdit;

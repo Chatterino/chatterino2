@@ -107,7 +107,7 @@ jobs:
 
       - name: Install Qt5
         if: startsWith(matrix.qt-version, '5.')
-        uses: jurplel/install-qt-action@v3.2.0
+        uses: jurplel/install-qt-action@v3.2.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -115,7 +115,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v3.2.0
+        uses: jurplel/install-qt-action@v3.2.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -133,6 +133,16 @@ jobs:
           "C2_USE_OPENSSL3=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "True" } else { "False" })" >> "$Env:GITHUB_ENV"
           "C2_CONAN_CACHE_SUFFIX=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "-QT6" } else { "`" })" >> "$Env:GITHUB_ENV"
         shell: powershell
+
+      - name: Setup sccache (Windows)
+        # sccache v0.5.3
+        uses: nerixyz/ccache-action@9a7e8d00116ede600ee7717350c6594b8af6aaa5
+        if: startsWith(matrix.os, 'windows')
+        with:
+          variant: sccache
+          key: sccache-build-${{ matrix.os }}-${{ matrix.qt-version }}-${{ matrix.skip-crashpad }}
+          restore-keys: |
+            sccache-build-${{ matrix.os }}-${{ matrix.qt-version }}
 
       - name: Cache conan packages (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -276,16 +286,34 @@ jobs:
 
       - name: clang-tidy review
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'
-        uses: ZedThree/clang-tidy-review@v0.13.0
+        uses: ZedThree/clang-tidy-review@v0.13.1
         with:
-          build_dir: build
+          build_dir: build-clang-tidy
           config_file: ".clang-tidy"
           split_workflow: true
-          exclude: "tests/*,lib/*"
+          exclude: "lib/*"
+          cmake_command: >-
+            cmake -S. -Bbuild-clang-tidy 
+            -DCMAKE_BUILD_TYPE=Release 
+            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On 
+            -DUSE_PRECOMPILED_HEADERS=OFF 
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=On 
+            -DCHATTERINO_LTO=Off 
+            -DCHATTERINO_PLUGINS=On 
+            -DBUILD_WITH_QT6=Off
+            -DBUILD_TESTS=On
+            -DBUILD_BENCHMARKS=On
+          apt_packages: >-
+            qttools5-dev, qt5-image-formats-plugins, libqt5svg5-dev, 
+            libsecret-1-dev,
+            libboost-dev, libboost-system-dev, libboost-filesystem-dev,
+            libssl-dev,
+            rapidjson-dev,
+            libbenchmark-dev
 
       - name: clang-tidy-review upload
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'
-        uses: ZedThree/clang-tidy-review/upload@v0.13.0
+        uses: ZedThree/clang-tidy-review/upload@v0.13.1
 
       - name: Package - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu-20.04') && !matrix.skip-artifact
