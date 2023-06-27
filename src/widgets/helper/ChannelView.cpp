@@ -71,11 +71,11 @@ namespace {
     void addEmoteContextMenuItems(const Emote &emote,
                                   MessageElementFlags creatorFlags, QMenu &menu)
     {
-        auto openAction = menu.addAction("&Open");
+        auto *openAction = menu.addAction("&Open");
         auto openMenu = new QMenu;
         openAction->setMenu(openMenu);
 
-        auto copyAction = menu.addAction("&Copy");
+        auto *copyAction = menu.addAction("&Copy");
         auto copyMenu = new QMenu;
         copyAction->setMenu(copyMenu);
 
@@ -2452,7 +2452,7 @@ void ChannelView::addCommandExecutionContextMenuItems(
     }
 
     menu.addSeparator();
-    auto executeAction = menu.addAction("&Execute command");
+    auto *executeAction = menu.addAction("&Execute command");
     auto cmdMenu = new QMenu;
     executeAction->setMenu(cmdMenu);
 
