@@ -84,10 +84,9 @@ enum ThumbnailPreviewMode : int {
 };
 
 enum UsernameRightClickBehavior : int {
-    ReplyWithModifier = 0,
-    MentionWithModifier = 1,
-    AlwaysMention = 2,
-    AlwaysReply = 3,
+    Reply = 0,
+    Mention = 1,
+    Ignore = 2,
 };
 
 /// Settings which are availlable for reading and writing on the gui thread.
@@ -204,7 +203,10 @@ public:
 
     EnumSetting<UsernameRightClickBehavior> usernameRightClickBehavior = {
         "/behaviour/usernameRightClickBehavior",
-        UsernameRightClickBehavior::ReplyWithModifier};
+        UsernameRightClickBehavior::Mention};
+    EnumSetting<UsernameRightClickBehavior> usernameRightClickModifierBehavior =
+        {"/behaviour/usernameRightClickBehaviorWithModifier",
+         UsernameRightClickBehavior::Reply};
     EnumSetting<Qt::KeyboardModifier> usernameRightClickModifier = {
         "/behaviour/usernameRightClickModifier",
         Qt::KeyboardModifier::ShiftModifier};
