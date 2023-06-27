@@ -2090,6 +2090,20 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                             event->modifiers() ==
                             QFlags<Qt::KeyboardModifier>(
                                 getSettings()->usernameRightClickModifier);
+                        if (Qt::KeyboardModifier(
+                                getSettings()
+                                    ->usernameRightClickModifier.getValue()) ==
+                            Qt::KeyboardModifier::NoModifier)
+                        {
+                            // something's insane, bail
+
+                            qCCritical(chatterinoCommon)
+                                << "sanity check failed: "
+                                   "invalid settings detected "
+                                   "Settings::usernameRightClickModifier is "
+                                   "NoModifier, which should never happen";
+                            return;
+                        }
 
                         UsernameRightClickBehavior action{};
                         if (isModifierHeld)
@@ -2119,10 +2133,6 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                                        "UsernameRightClickBehavior value in "
                                        "ChannelView::handleMouseClick: "
                                     << action;
-                                assert(
-                                    false &&
-                                    "unhandled UsernameRightClickBehavior "
-                                    "value in ChannelView::handleMouseClick");
                                 return;  // unreachable
                         }
                     }
