@@ -8,6 +8,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/AccessGuard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkCommon.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkRequest.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/NetworkResult.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChatterSet.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightPhrase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp

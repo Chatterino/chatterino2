@@ -16,6 +16,7 @@
 - Bugfix: Fix visual glitches with smooth scrolling. (#4501)
 - Bugfix: Fixed pings firing for the "Your username" highlight when not signed in. (#4698)
 - Bugfix: Fixed partially broken filters on Qt 6 builds. (#4702)
+- Bugfix: Fixed some network errors having `0` as their HTTP status. (#4704)
 - Bugfix: Fixed crash that could occurr when closing the usercard too quickly after blocking or unblocking a user. (#4711)
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
 - Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
