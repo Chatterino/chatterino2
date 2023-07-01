@@ -18,12 +18,12 @@ int main(int argc, char **argv)
     settingsDir.setAutoRemove(false);  // we'll remove it manually
     chatterino::Settings settings(settingsDir.path());
 
-    QtConcurrent::run([&app, &settingsDir]() mutable {
+    QTimer::singleShot(0, [&]() {
         ::benchmark::RunSpecifiedBenchmarks();
 
         settingsDir.remove();
-        app.exit(0);
+        QApplication::exit(0);
     });
 
-    return app.exec();
+    return QApplication::exec();
 }

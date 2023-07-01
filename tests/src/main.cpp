@@ -32,16 +32,16 @@ int main(int argc, char **argv)
     qDebug() << "Settings directory:" << settingsDir.path();
     chatterino::Settings settings(settingsDir.path());
 
-    QtConcurrent::run([&app, &settingsDir]() mutable {
+    QTimer::singleShot(0, [&]() {
         auto res = RUN_ALL_TESTS();
 
         chatterino::NetworkManager::deinit();
 
         settingsDir.remove();
-        app.exit(res);
+        QApplication::exit(res);
     });
 
-    return app.exec();
+    return QApplication::exec();
 #else
     return RUN_ALL_TESTS();
 #endif

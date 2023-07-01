@@ -208,7 +208,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
         .onError([channel](NetworkResult result) -> bool {
             auto errorMessage =
                 QString("An error happened while uploading your image: %1")
-                    .arg(result.status());
+                    .arg(result.formatError());
 
             // Try to read more information from the result body
             auto obj = result.parseJson();

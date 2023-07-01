@@ -186,7 +186,8 @@ void rebuildMessageHighlights(Settings &settings,
     auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     QString currentUsername = currentUser->getUserName();
 
-    if (settings.enableSelfHighlight && !currentUsername.isEmpty())
+    if (settings.enableSelfHighlight && !currentUsername.isEmpty() &&
+        !currentUser->isAnon())
     {
         HighlightPhrase highlight(
             currentUsername, settings.showSelfHighlightInMentions,

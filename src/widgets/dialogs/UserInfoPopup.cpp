@@ -36,6 +36,7 @@
 #include <QDesktopServices>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QPointer>
 
 const QString TEXT_FOLLOWERS("Followers: %1");
 const QString TEXT_CREATED("Created: %1");
@@ -598,7 +599,7 @@ void UserInfoPopup::installEvents()
                     this->ui_.block->setEnabled(false);
 
                     getApp()->accounts->twitch.getCurrent()->unblockUser(
-                        this->userId_,
+                        this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
                             this->channel_->addMessage(makeSystemMessage(
                                 QString("You successfully unblocked user %1")
@@ -625,7 +626,7 @@ void UserInfoPopup::installEvents()
                     this->ui_.block->setEnabled(false);
 
                     getApp()->accounts->twitch.getCurrent()->blockUser(
-                        this->userId_,
+                        this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
                             this->channel_->addMessage(makeSystemMessage(
                                 QString("You successfully blocked user %1")
