@@ -210,7 +210,9 @@ TEST(NetworkRequest, TimeoutTimingOut)
         .onError([&waiter, url](const NetworkResult &result) {
             qDebug() << QTime::currentTime().toString()
                      << "timeout request finish error";
-            EXPECT_EQ(result.status(), NetworkResult::timedoutStatus);
+            EXPECT_EQ(result.error(),
+                      NetworkResult::NetworkError::TimeoutError);
+            EXPECT_EQ(result.status(), std::nullopt);
 
             waiter.requestDone();
         })
@@ -267,7 +269,9 @@ TEST(NetworkRequest, FinallyCallbackOnTimeout)
         })
         .onError([&](const NetworkResult &result) {
             onErrorCalled = true;
-            EXPECT_EQ(result.status(), NetworkResult::timedoutStatus);
+            EXPECT_EQ(result.error(),
+                      NetworkResult::NetworkError::TimeoutError);
+            EXPECT_EQ(result.status(), std::nullopt);
         })
         .finally([&] {
             finallyCalled = true;
