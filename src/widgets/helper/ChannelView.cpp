@@ -2086,17 +2086,12 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                     if (hoveredElement->getFlags().has(
                             MessageElementFlag::Username))
                     {
-                        auto isModifierHeld =
-                            event->modifiers() ==
-                            QFlags<Qt::KeyboardModifier>(
-                                getSettings()->usernameRightClickModifier);
-                        if (Qt::KeyboardModifier(
-                                getSettings()
-                                    ->usernameRightClickModifier.getValue()) ==
+                        Qt::KeyboardModifier userSpecifiedModifier =
+                            getSettings()->usernameRightClickModifier;
+
+                        if (userSpecifiedModifier ==
                             Qt::KeyboardModifier::NoModifier)
                         {
-                            // something's insane, bail
-
                             qCWarning(chatterinoCommon)
                                 << "sanity check failed: "
                                    "invalid settings detected "
@@ -2104,6 +2099,9 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                                    "NoModifier, which should never happen";
                             return;
                         }
+
+                        Qt::KeyboardModifiers modifiers{userSpecifiedModifier};
+                        auto isModifierHeld = event->modifiers() == modifiers;
 
                         UsernameRightClickBehavior action{};
                         if (isModifierHeld)
@@ -2118,33 +2116,42 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 
                         switch (action)
                         {
-                            case UsernameRightClickBehavior::Mention:
-                                // fall through to the code below flag check if
-                                break;
-                            case UsernameRightClickBehavior::Reply:
+                            case UsernameRightClickBehavior::Mention: {
+                                if (split == nullptr)
+                                {
+                                    return;
+                                }
+
+                                // Insert @username into split input
+                                const bool commaMention =
+                                    getSettings()->mentionUsersWithComma;
+                                const bool isFirstWord =
+                                    split->getInput().isEditFirstWord();
+                                auto userMention = formatUserMention(
+                                    link.value, isFirstWord, commaMention);
+                                insertText("@" + userMention + " ");
+                            }
+                            break;
+
+                            case UsernameRightClickBehavior::Reply: {
                                 // Start a new reply if matching user's settings
                                 this->setInputReply(layout->getMessagePtr());
-                                return;
+                            }
+                            break;
+
                             case UsernameRightClickBehavior::Ignore:
-                                return;
-                            default:
+                                break;
+
+                            default: {
                                 qCWarning(chatterinoCommon)
                                     << "unhandled or corrupted "
                                        "UsernameRightClickBehavior value in "
-                                       "ChannelView::handleMouseClick: "
+                                       "ChannelView::handleMouseClick:"
                                     << action;
-                                return;  // unreachable
+                            }
+                            break;  // unreachable
                         }
                     }
-
-                    // Insert @username into split input
-                    const bool commaMention =
-                        getSettings()->mentionUsersWithComma;
-                    const bool isFirstWord =
-                        split && split->getInput().isEditFirstWord();
-                    auto userMention = formatUserMention(
-                        link.value, isFirstWord, commaMention);
-                    insertText("@" + userMention + " ");
 
                     return;
                 }
