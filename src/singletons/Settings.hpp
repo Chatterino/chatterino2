@@ -203,10 +203,13 @@ public:
 
     EnumSetting<UsernameRightClickBehavior> usernameRightClickBehavior = {
         "/behaviour/usernameRightClickBehavior",
-        UsernameRightClickBehavior::Mention};
+        UsernameRightClickBehavior::Mention,
+    };
     EnumSetting<UsernameRightClickBehavior> usernameRightClickModifierBehavior =
-        {"/behaviour/usernameRightClickBehaviorWithModifier",
-         UsernameRightClickBehavior::Reply};
+        {
+            "/behaviour/usernameRightClickBehaviorWithModifier",
+            UsernameRightClickBehavior::Reply,
+        };
     EnumSetting<Qt::KeyboardModifier> usernameRightClickModifier = {
         "/behaviour/usernameRightClickModifier",
         Qt::KeyboardModifier::ShiftModifier};
