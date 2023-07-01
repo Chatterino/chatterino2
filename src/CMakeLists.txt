@@ -33,6 +33,7 @@ set(SOURCE_FILES
         common/Env.hpp
         common/LinkParser.cpp
         common/LinkParser.hpp
+        common/Literals.hpp
         common/Modes.cpp
         common/Modes.hpp
         common/NetworkCommon.cpp
