@@ -8,6 +8,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/twitch/LiveController.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/Link.hpp"
@@ -106,6 +107,8 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->refreshBTTVChannelEmotes(false);
         this->refreshSevenTVChannelEmotes(false);
         this->joinBttvChannel();
+        getIApp()->getTwitchLiveController()->add(
+            std::dynamic_pointer_cast<TwitchChannel>(shared_from_this()));
     });
 
     this->connected.connect([this]() {
@@ -338,6 +341,20 @@ boost::optional<ChannelPointReward> TwitchChannel::channelPointReward(
     if (it == rewards->end())
         return boost::none;
     return it->second;
+}
+
+void TwitchChannel::updateLiveStatus(
+    const std::optional<HelixStream> &helixStream)
+{
+    qDebug() << "XXX: Update live status for " << this->getName();
+    if (helixStream)
+    {
+        qDebug() << "XXX: stream is live";
+    }
+    else
+    {
+        qDebug() << "XXX: stream is not live";
+    }
 }
 
 void TwitchChannel::showLoginMessage()

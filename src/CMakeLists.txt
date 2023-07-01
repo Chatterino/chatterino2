@@ -171,6 +171,9 @@ set(SOURCE_FILES
         controllers/userdata/UserDataController.hpp
         controllers/userdata/UserData.hpp
 
+        controllers/twitch/LiveController.cpp
+        controllers/twitch/LiveController.hpp
+
         controllers/sound/SoundController.cpp
         controllers/sound/SoundController.hpp
 

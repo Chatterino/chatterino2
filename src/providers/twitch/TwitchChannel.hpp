@@ -205,6 +205,9 @@ public:
     boost::optional<ChannelPointReward> channelPointReward(
         const QString &rewardId) const;
 
+    // Live status
+    void updateLiveStatus(const std::optional<HelixStream> &helixStream);
+
 private:
     struct NameOptions {
         QString displayName;
