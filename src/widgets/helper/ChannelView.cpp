@@ -2097,7 +2097,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                         {
                             // something's insane, bail
 
-                            qCCritical(chatterinoCommon)
+                            qCWarning(chatterinoCommon)
                                 << "sanity check failed: "
                                    "invalid settings detected "
                                    "Settings::usernameRightClickModifier is "
@@ -2128,7 +2128,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                             case UsernameRightClickBehavior::Ignore:
                                 return;
                             default:
-                                qCCritical(chatterinoCommon)
+                                qCWarning(chatterinoCommon)
                                     << "unhandled or corrupted "
                                        "UsernameRightClickBehavior value in "
                                        "ChannelView::handleMouseClick: "
