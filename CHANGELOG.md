@@ -17,6 +17,7 @@
 - Bugfix: Fixed pings firing for the "Your username" highlight when not signed in. (#4698)
 - Bugfix: Fixed partially broken filters on Qt 6 builds. (#4702)
 - Bugfix: Fixed some network errors having `0` as their HTTP status. (#4704)
+- Bugfix: Fixed crash that could occurr when closing the usercard too quickly after blocking or unblocking a user. (#4711)
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
 - Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
 - Dev: Added test cases for emote and tab completion. (#4644)
@@ -31,12 +32,14 @@
 - Dev: Added `sccache` in Windows CI. (#4678)
 - Dev: Moved preprocessor Git and date definitions to executables only. (#4681)
 - Dev: Refactored tests to be able to use `ctest` and run in debug builds. (#4700)
+- Dev: Added the ability to use an alternate linker using the `-DUSE_ALTERNATE_LINKER=...` CMake parameter. (#4711)
 
 ## 2.4.4
 
 - Minor: Added a Send button in the input box so you can click to send a message. This is disabled by default and can be enabled with the "Show send message button" setting. (#4607)
 - Minor: Improved error messages when the updater fails a download. (#4594)
 - Minor: Added `/shield` and `/shieldoff` commands to toggle shield mode. (#4580)
+- Minor: Allow for customizing the behavior of `Right Click`ing of usernames. (#4622)
 - Bugfix: Fixed the menu warping on macOS on Qt6. (#4595)
 - Bugfix: Fixed link tooltips not showing unless the thumbnail setting was enabled. (#4597)
 - Bugfix: Domains starting with `http` are now parsed as links again. (#4598)

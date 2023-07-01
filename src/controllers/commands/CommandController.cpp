@@ -650,7 +650,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             target,
             [currentUser, channel, target](const HelixUser &targetUser) {
                 getApp()->accounts->twitch.getCurrent()->blockUser(
-                    targetUser.id,
+                    targetUser.id, nullptr,
                     [channel, target, targetUser] {
                         channel->addMessage(makeSystemMessage(
                             QString("You successfully blocked user %1")
@@ -703,7 +703,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             target,
             [currentUser, channel, target](const auto &targetUser) {
                 getApp()->accounts->twitch.getCurrent()->unblockUser(
-                    targetUser.id,
+                    targetUser.id, nullptr,
                     [channel, target, targetUser] {
                         channel->addMessage(makeSystemMessage(
                             QString("You successfully unblocked user %1")

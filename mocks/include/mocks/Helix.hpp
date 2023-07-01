@@ -105,12 +105,14 @@ public:
                 (override));
 
     MOCK_METHOD(void, blockUser,
-                (QString targetUserId, std::function<void()> successCallback,
+                (QString targetUserId, const QObject *caller,
+                 std::function<void()> successCallback,
                  HelixFailureCallback failureCallback),
                 (override));
 
     MOCK_METHOD(void, unblockUser,
-                (QString targetUserId, std::function<void()> successCallback,
+                (QString targetUserId, const QObject *caller,
+                 std::function<void()> successCallback,
                  HelixFailureCallback failureCallback),
                 (override));
 

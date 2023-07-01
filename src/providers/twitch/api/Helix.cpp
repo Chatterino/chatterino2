@@ -541,7 +541,7 @@ void Helix::loadBlocks(QString userId,
         .execute();
 }
 
-void Helix::blockUser(QString targetUserId,
+void Helix::blockUser(QString targetUserId, const QObject *caller,
                       std::function<void()> successCallback,
                       HelixFailureCallback failureCallback)
 {
@@ -549,6 +549,7 @@ void Helix::blockUser(QString targetUserId,
     urlQuery.addQueryItem("target_user_id", targetUserId);
 
     this->makePut("users/blocks", urlQuery)
+        .caller(caller)
         .onSuccess([successCallback](auto /*result*/) -> Outcome {
             successCallback();
             return Success;
@@ -560,7 +561,7 @@ void Helix::blockUser(QString targetUserId,
         .execute();
 }
 
-void Helix::unblockUser(QString targetUserId,
+void Helix::unblockUser(QString targetUserId, const QObject *caller,
                         std::function<void()> successCallback,
                         HelixFailureCallback failureCallback)
 {
@@ -568,6 +569,7 @@ void Helix::unblockUser(QString targetUserId,
     urlQuery.addQueryItem("target_user_id", targetUserId);
 
     this->makeDelete("users/blocks", urlQuery)
+        .caller(caller)
         .onSuccess([successCallback](auto /*result*/) -> Outcome {
             successCallback();
             return Success;
