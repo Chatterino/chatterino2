@@ -94,29 +94,30 @@ void DraggablePopup::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
+void DraggablePopup::togglePinned()
+{
+    this->isPinned_ = !isPinned_;
+    if (isPinned_)
+    {
+        this->setActionOnFocusLoss(BaseWindow::Nothing);
+        this->pinButton_->setPixmap(getResources().buttons.pinEnabled);
+    }
+    else
+    {
+        this->setActionOnFocusLoss(BaseWindow::Delete);
+        this->pinButton_->setPixmap(getTheme()->buttons.pin);
+    }
+}
 Button *DraggablePopup::createPinButton()
 {
-    auto *button = new Button(this);
-    button->setPixmap(getTheme()->buttons.pin);
-    button->setScaleIndependantSize(18, 18);
-    button->setToolTip("Pin Window");
+    this->pinButton_ = new Button(this);
+    this->pinButton_->setPixmap(getTheme()->buttons.pin);
+    this->pinButton_->setScaleIndependantSize(18, 18);
+    this->pinButton_->setToolTip("Pin Window");
 
-    bool pinned = false;
-    QObject::connect(
-        button, &Button::leftClicked, [this, button, pinned]() mutable {
-            pinned = !pinned;
-            if (pinned)
-            {
-                this->setActionOnFocusLoss(BaseWindow::Nothing);
-                button->setPixmap(getResources().buttons.pinEnabled);
-            }
-            else
-            {
-                this->setActionOnFocusLoss(BaseWindow::Delete);
-                button->setPixmap(getTheme()->buttons.pin);
-            }
-        });
-    return button;
+    QObject::connect(this->pinButton_, &Button::leftClicked, this,
+                     &DraggablePopup::togglePinned);
+    return this->pinButton_;
 }
 
 }  // namespace chatterino
