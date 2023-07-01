@@ -31,6 +31,7 @@
 - Dev: Added `sccache` in Windows CI. (#4678)
 - Dev: Moved preprocessor Git and date definitions to executables only. (#4681)
 - Dev: Refactored tests to be able to use `ctest` and run in debug builds. (#4700)
+- Dev: Added the ability to use an alternate linker using the `-DUSE_ALTERNATE_LINKER=...` CMake parameter. (#4711)
 
 ## 2.4.4
 
