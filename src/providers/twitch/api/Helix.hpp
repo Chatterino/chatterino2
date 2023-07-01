@@ -805,12 +805,12 @@ public:
         HelixFailureCallback failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#block-user
-    virtual void blockUser(QString targetUserId,
+    virtual void blockUser(QString targetUserId, const QObject *caller,
                            std::function<void()> successCallback,
                            HelixFailureCallback failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#unblock-user
-    virtual void unblockUser(QString targetUserId,
+    virtual void unblockUser(QString targetUserId, const QObject *caller,
                              std::function<void()> successCallback,
                              HelixFailureCallback failureCallback) = 0;
 
@@ -1118,11 +1118,12 @@ public:
                     HelixFailureCallback failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#block-user
-    void blockUser(QString targetUserId, std::function<void()> successCallback,
+    void blockUser(QString targetUserId, const QObject *caller,
+                   std::function<void()> successCallback,
                    HelixFailureCallback failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#unblock-user
-    void unblockUser(QString targetUserId,
+    void unblockUser(QString targetUserId, const QObject *caller,
                      std::function<void()> successCallback,
                      HelixFailureCallback failureCallback) final;
 
