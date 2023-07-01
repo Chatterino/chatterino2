@@ -331,6 +331,74 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         false,
         "Specify how Chatterino will handle messages that exceed Twitch "
         "message limits");
+    layout.addDropdown<std::underlying_type<UsernameRightClickBehavior>::type>(
+        "Username right-click behavior",
+        {
+            "Reply",
+            "Mention",
+            "Ignore",
+        },
+        s.usernameRightClickBehavior,
+        [](auto index) {
+            return index;
+        },
+        [](auto args) {
+            return static_cast<UsernameRightClickBehavior>(args.index);
+        },
+        false,
+        "Specify how Chatterino will handle right-clicking a username in "
+        "chat when not holding the modifier.");
+    layout.addDropdown<std::underlying_type<UsernameRightClickBehavior>::type>(
+        "Username right-click with modifier behavior",
+        {
+            "Reply",
+            "Mention",
+            "Ignore",
+        },
+        s.usernameRightClickModifierBehavior,
+        [](auto index) {
+            return index;
+        },
+        [](auto args) {
+            return static_cast<UsernameRightClickBehavior>(args.index);
+        },
+        false,
+        "Specify how Chatterino will handle right-clicking a username in "
+        "chat when holding down the modifier.");
+    layout.addDropdown<std::underlying_type<Qt::KeyboardModifier>::type>(
+        "Modifier for alternate right-click action",
+        {"Shift", "Control", "Alt", META_KEY}, s.usernameRightClickModifier,
+        [](int index) {
+            switch (index)
+            {
+                case Qt::ShiftModifier:
+                    return 0;
+                case Qt::ControlModifier:
+                    return 1;
+                case Qt::AltModifier:
+                    return 2;
+                case Qt::MetaModifier:
+                    return 3;
+                default:
+                    return 0;
+            }
+        },
+        [](DropdownArgs args) {
+            switch (args.index)
+            {
+                case 0:
+                    return Qt::ShiftModifier;
+                case 1:
+                    return Qt::ControlModifier;
+                case 2:
+                    return Qt::AltModifier;
+                case 3:
+                    return Qt::MetaModifier;
+                default:
+                    return Qt::NoModifier;
+            }
+        },
+        false);
 
     layout.addTitle("Messages");
     layout.addCheckbox(
