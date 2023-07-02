@@ -226,6 +226,10 @@ private:
     void showLoginMessage();
     /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
     void joinBttvChannel() const;
+    /**
+     * Indicates an activity to 7TV in this channel for this user.
+     * This is done at most once every 60s.
+     */
     void updateSevenTVActivity();
     void listenSevenTVCosmetics();
 
