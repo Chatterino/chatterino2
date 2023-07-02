@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <optional>
 #include <unordered_map>
 
 namespace chatterino {
