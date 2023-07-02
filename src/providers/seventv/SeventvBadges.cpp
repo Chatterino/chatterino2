@@ -11,7 +11,6 @@
 
 #include <map>
 
-
 namespace chatterino {
 
 void SeventvBadges::initialize(Settings & /*settings*/, Paths & /*paths*/)
@@ -34,7 +33,7 @@ boost::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id) const
 void SeventvBadges::assignBadgeToUser(const QString &badgeID,
                                       const UserId &userID)
 {
-    std::unique_lock lock(this->mutex_);
+    const std::unique_lock lock(this->mutex_);
 
     const auto badgeIt = this->knownBadges_.find(badgeID);
     if (badgeIt != this->knownBadges_.end())
@@ -46,7 +45,7 @@ void SeventvBadges::assignBadgeToUser(const QString &badgeID,
 void SeventvBadges::clearBadgeFromUser(const QString &badgeID,
                                        const UserId &userID)
 {
-    std::unique_lock lock(this->mutex_);
+    const std::unique_lock lock(this->mutex_);
 
     const auto it = this->badgeMap_.find(userID.string);
     if (it != this->badgeMap_.end() && it->second->id.string == badgeID)
@@ -59,7 +58,7 @@ void SeventvBadges::addBadge(const QJsonObject &badgeJson)
 {
     const auto badgeID = badgeJson["id"].toString();
 
-    std::unique_lock lock(this->mutex_);
+    const std::unique_lock lock(this->mutex_);
 
     if (this->knownBadges_.find(badgeID) != this->knownBadges_.end())
     {
