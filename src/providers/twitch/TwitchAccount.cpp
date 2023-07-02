@@ -11,7 +11,7 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
-#include "providers/seventv/SeventvApi.hpp"
+#include "providers/seventv/SeventvAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchUser.hpp"
@@ -461,7 +461,7 @@ void TwitchAccount::loadSeventvUserID()
         return;
     }
 
-    getSeventvApi().getUserByTwitchID(
+    getSeventvAPI().getUserByTwitchID(
         this->getUserId(),
         [this](const auto &json) {
             const auto id = json["user"]["id"].toString();

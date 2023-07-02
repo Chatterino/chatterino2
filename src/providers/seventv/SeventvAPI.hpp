@@ -9,7 +9,7 @@ namespace chatterino {
 
 class NetworkResult;
 
-class SeventvApi
+class SeventvAPI
 {
     using ErrorCallback = std::function<void(const NetworkResult &)>;
     template <typename... T>
@@ -30,6 +30,6 @@ public:
                         SuccessCallback<> &&onSuccess, ErrorCallback &&onError);
 };
 
-SeventvApi &getSeventvApi();
+SeventvAPI &getSeventvAPI();
 
 }  // namespace chatterino

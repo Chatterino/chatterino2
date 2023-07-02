@@ -1,4 +1,4 @@
-#include "providers/seventv/SeventvApi.hpp"
+#include "providers/seventv/SeventvAPI.hpp"
 
 #include "common/Literals.hpp"
 #include "common/NetworkRequest.hpp"
@@ -21,7 +21,7 @@ const QString API_URL_COSMETICS =
 // NOLINTBEGIN(readability-convert-member-functions-to-static)
 namespace chatterino {
 
-void SeventvApi::getUserByTwitchID(
+void SeventvAPI::getUserByTwitchID(
     const QString &twitchID, SuccessCallback<const QJsonObject &> &&onSuccess,
     ErrorCallback &&onError)
 {
@@ -39,7 +39,7 @@ void SeventvApi::getUserByTwitchID(
         .execute();
 }
 
-void SeventvApi::getEmoteSet(const QString &emoteSet,
+void SeventvAPI::getEmoteSet(const QString &emoteSet,
                              SuccessCallback<const QJsonObject &> &&onSuccess,
                              ErrorCallback &&onError)
 {
@@ -57,7 +57,7 @@ void SeventvApi::getEmoteSet(const QString &emoteSet,
         .execute();
 }
 
-void SeventvApi::getCosmetics(SuccessCallback<const QJsonObject &> &&onSuccess,
+void SeventvAPI::getCosmetics(SuccessCallback<const QJsonObject &> &&onSuccess,
                               ErrorCallback &&onError)
 {
     NetworkRequest(API_URL_COSMETICS)
@@ -74,7 +74,7 @@ void SeventvApi::getCosmetics(SuccessCallback<const QJsonObject &> &&onSuccess,
         .execute();
 }
 
-void SeventvApi::updatePresence(const QString &twitchChannelID,
+void SeventvAPI::updatePresence(const QString &twitchChannelID,
                                 const QString &seventvUserID,
                                 SuccessCallback<> &&onSuccess,
                                 ErrorCallback &&onError)
@@ -102,9 +102,9 @@ void SeventvApi::updatePresence(const QString &twitchChannelID,
         .execute();
 }
 
-SeventvApi &getSeventvApi()
+SeventvAPI &getSeventvAPI()
 {
-    static SeventvApi instance;
+    static SeventvAPI instance;
     return instance;
 }
 

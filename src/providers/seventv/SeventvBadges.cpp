@@ -2,7 +2,7 @@
 
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
-#include "providers/seventv/SeventvApi.hpp"
+#include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 
 #include <QJsonArray>
@@ -85,7 +85,7 @@ void SeventvBadges::addBadge(const QJsonObject &badgeJson)
 void SeventvBadges::loadSeventvBadges()
 {
     // This endpoint is used as a backup for badges
-    getSeventvApi().getCosmetics(
+    getSeventvAPI().getCosmetics(
         [this](const auto &json) -> void {
             std::unique_lock lock(this->mutex_);
 

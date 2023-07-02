@@ -19,7 +19,7 @@
 #include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
 #include "providers/RecentMessagesApi.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
-#include "providers/seventv/SeventvApi.hpp"
+#include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -1632,7 +1632,7 @@ void TwitchChannel::updateSevenTVActivity()
 
     qCDebug(chatterinoSeventv) << "Sending activity in" << this->getName();
 
-    getSeventvApi().updatePresence(
+    getSeventvAPI().updatePresence(
         this->roomId(), currentSeventvUserID,
         [chan = weakOf<Channel>(this)]() {
             const auto self =
