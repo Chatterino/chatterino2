@@ -6,6 +6,7 @@
 #include "common/Outcome.hpp"
 
 namespace {
+
 using namespace chatterino::literals;
 
 const QString API_URL_USER = u"https://7tv.io/v3/users/twitch/%1"_s;
