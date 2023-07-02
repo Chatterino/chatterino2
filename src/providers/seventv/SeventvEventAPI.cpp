@@ -43,12 +43,18 @@ void SeventvEventAPI::subscribeTwitchChannel(const QString &id)
 {
     if (this->subscribedTwitchChannels_.insert(id).second)
     {
-        this->subscribe(
-            {ChannelCondition{id}, SubscriptionType::CreateCosmetic});
-        this->subscribe(
-            {ChannelCondition{id}, SubscriptionType::CreateEntitlement});
-        this->subscribe(
-            {ChannelCondition{id}, SubscriptionType::DeleteEntitlement});
+        this->subscribe({
+            ChannelCondition{id},
+            SubscriptionType::CreateCosmetic,
+        });
+        this->subscribe({
+            ChannelCondition{id},
+            SubscriptionType::CreateEntitlement,
+        });
+        this->subscribe({
+            ChannelCondition{id},
+            SubscriptionType::DeleteEntitlement,
+        });
     }
 }
 
@@ -74,12 +80,18 @@ void SeventvEventAPI::unsubscribeTwitchChannel(const QString &id)
 {
     if (this->subscribedTwitchChannels_.erase(id) > 0)
     {
-        this->unsubscribe(
-            {ChannelCondition{id}, SubscriptionType::CreateCosmetic});
-        this->unsubscribe(
-            {ChannelCondition{id}, SubscriptionType::CreateEntitlement});
-        this->unsubscribe(
-            {ChannelCondition{id}, SubscriptionType::DeleteEntitlement});
+        this->unsubscribe({
+            ChannelCondition{id},
+            SubscriptionType::CreateCosmetic,
+        });
+        this->unsubscribe({
+            ChannelCondition{id},
+            SubscriptionType::CreateEntitlement,
+        });
+        this->unsubscribe({
+            ChannelCondition{id},
+            SubscriptionType::DeleteEntitlement,
+        });
     }
 }
 
@@ -333,15 +345,15 @@ void SeventvEventAPI::onUserUpdate(const Dispatch &dispatch)
 
 // NOLINTBEGIN(readability-convert-member-functions-to-static)
 
-// We're using `Application::instance`, because we're not in the GUI thread.
-// `seventvBadges` does its own locking.
-
 void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 {
+    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
+    // `seventvBadges` does its own locking.
+    auto *badges = Application::instance->seventvBadges;
     switch (cosmetic.kind)
     {
         case CosmeticKind::Badge: {
-            Application::instance->seventvBadges->addBadge(cosmetic.data);
+            badges->addBadge(cosmetic.data);
         }
         break;
         default:
@@ -352,11 +364,14 @@ void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 void SeventvEventAPI::onEntitlementCreate(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
+    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
+    // `seventvBadges` does its own locking.
+    auto *badges = Application::instance->seventvBadges;
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {
-            Application::instance->seventvBadges->assignBadgeToUser(
-                entitlement.refID, UserId{entitlement.userID});
+            badges->assignBadgeToUser(entitlement.refID,
+                                      UserId{entitlement.userID});
         }
         break;
         default:
@@ -367,11 +382,14 @@ void SeventvEventAPI::onEntitlementCreate(
 void SeventvEventAPI::onEntitlementDelete(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
+    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
+    // `seventvBadges` does its own locking.
+    auto *badges = Application::instance->seventvBadges;
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {
-            Application::instance->seventvBadges->clearBadgeFromUser(
-                entitlement.refID, UserId{entitlement.userID});
+            badges->clearBadgeFromUser(entitlement.refID,
+                                       UserId{entitlement.userID});
         }
         break;
         default:

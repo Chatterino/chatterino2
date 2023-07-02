@@ -452,7 +452,11 @@ const QString &TwitchAccount::getSeventvUserID() const
 
 void TwitchAccount::loadSeventvUserID()
 {
-    if (!this->seventvUserID_.isEmpty() || this->isAnon())
+    if (this->isAnon())
+    {
+        return;
+    }
+    if (!this->seventvUserID_.isEmpty())
     {
         return;
     }
@@ -472,7 +476,6 @@ void TwitchAccount::loadSeventvUserID()
             }
             return Success;
         })
-        .concurrent()
         .execute();
 }
 

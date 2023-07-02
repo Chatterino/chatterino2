@@ -110,7 +110,6 @@ EntitlementCreateDeleteDispatch::EntitlementCreateDeleteDispatch(
     const Dispatch &dispatch)
 {
     const auto obj = dispatch.body["object"].toObject();
-    this->userID = QString();
     this->refID = obj["ref_id"].toString();
     this->kind = magic_enum::enum_cast<CosmeticKind>(
                      obj["kind"].toString().toStdString())

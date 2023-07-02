@@ -1261,8 +1261,8 @@ void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)
     this->threads_[thread->rootId()] = thread;
 }
 
-const std::unordered_map<QString, std::weak_ptr<MessageThread>>
-    &TwitchChannel::threads() const
+const std::unordered_map<QString, std::weak_ptr<MessageThread>> &
+    TwitchChannel::threads() const
 {
     return this->threads_;
 }
@@ -1651,12 +1651,10 @@ void TwitchChannel::updateSevenTVActivity()
             {
                 return Success;
             }
-            const auto json = response.parseJson();
             self->nextSeventvActivity_ =
                 QDateTime::currentDateTimeUtc().addSecs(10);
             return Success;
         })
-        .concurrent()
         .execute();
 }
 
