@@ -1642,7 +1642,7 @@ void TwitchChannel::updateSevenTVActivity()
                 return Success;
             }
             self->nextSeventvActivity_ =
-                QDateTime::currentDateTimeUtc().addSecs(10);
+                QDateTime::currentDateTimeUtc().addSecs(60);
             return Success;
         },
         [](const auto &result) {
