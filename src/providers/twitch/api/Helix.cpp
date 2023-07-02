@@ -417,6 +417,45 @@ void Helix::createClip(QString channelId,
         .execute();
 }
 
+void Helix::fetchChannels(
+    QStringList userIDs,
+    ResultCallback<std::vector<HelixChannel>> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    for (const auto &userID : userIDs)
+    {
+        urlQuery.addQueryItem("broadcaster_id", userID);
+    }
+
+    this->makeGet("channels", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixChannel> channels;
+
+            for (const auto &unparsedChannel : data.toArray())
+            {
+                channels.emplace_back(unparsedChannel.toObject());
+            }
+
+            successCallback(channels);
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
+            failureCallback();
+        })
+        .execute();
+}
+
 void Helix::getChannel(QString broadcasterId,
                        ResultCallback<HelixChannel> successCallback,
                        HelixFailureCallback failureCallback)

@@ -800,7 +800,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
     if (auto tc = dynamic_cast<TwitchChannel *>(underlyingChannel.get()))
     {
         this->channelConnections_.managedConnect(
-            tc->liveStatusChanged, [this]() {
+            tc->streamStatusChanged, [this]() {
                 this->liveStatusChanged.invoke();
             });
     }

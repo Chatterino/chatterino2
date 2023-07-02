@@ -789,6 +789,12 @@ public:
                             std::function<void()> finallyCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#get-channel-information
+    virtual void fetchChannels(
+        QStringList userIDs,
+        ResultCallback<std::vector<HelixChannel>> successCallback,
+        HelixFailureCallback failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#get-channel-information
     virtual void getChannel(QString broadcasterId,
                             ResultCallback<HelixChannel> successCallback,
                             HelixFailureCallback failureCallback) = 0;
@@ -1100,6 +1106,12 @@ public:
                     ResultCallback<HelixClip> successCallback,
                     std::function<void(HelixClipError)> failureCallback,
                     std::function<void()> finallyCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#get-channel-information
+    void fetchChannels(
+        QStringList userIDs,
+        ResultCallback<std::vector<HelixChannel>> successCallback,
+        HelixFailureCallback failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#get-channel-information
     void getChannel(QString broadcasterId,
