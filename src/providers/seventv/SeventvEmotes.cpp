@@ -1,6 +1,6 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 
-#include "common/NetworkRequest.hpp"
+#include "common/Literals.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
@@ -8,6 +8,7 @@
 #include "messages/ImageSet.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
+#include "providers/seventv/SeventvApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 
@@ -182,6 +183,7 @@ EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
 namespace chatterino {
 
 using namespace seventv::eventapi;
+using namespace literals;
 
 SeventvEmotes::SeventvEmotes()
     : global_(std::make_shared<EmoteMap>())
@@ -216,24 +218,21 @@ void SeventvEmotes::loadGlobalEmotes()
 
     qCDebug(chatterinoSeventv) << "Loading 7TV Global Emotes";
 
-    NetworkRequest(API_URL_GLOBAL_EMOTE_SET, NetworkRequestType::Get)
-        .timeout(30000)
-        .onSuccess([this](const NetworkResult &result) -> Outcome {
-            QJsonArray parsedEmotes = result.parseJson()["emotes"].toArray();
+    getSeventvApi().getEmoteSet(
+        u"global"_s,
+        [this](const auto &json) {
+            QJsonArray parsedEmotes = json["emotes"].toArray();
 
             auto emoteMap = parseEmotes(parsedEmotes, true);
             qCDebug(chatterinoSeventv)
                 << "Loaded" << emoteMap.size() << "7TV Global Emotes";
             this->setGlobalEmotes(
                 std::make_shared<EmoteMap>(std::move(emoteMap)));
-
-            return Success;
-        })
-        .onError([](const NetworkResult &result) {
+        },
+        [](const auto &result) {
             qCWarning(chatterinoSeventv)
                 << "Couldn't load 7TV global emotes" << result.getData();
-        })
-        .execute();
+        });
 }
 
 void SeventvEmotes::setGlobalEmotes(std::shared_ptr<const EmoteMap> emotes)
@@ -248,13 +247,12 @@ void SeventvEmotes::loadChannelEmotes(
     qCDebug(chatterinoSeventv)
         << "Reloading 7TV Channel Emotes" << channelId << manualRefresh;
 
-    NetworkRequest(API_URL_USER.arg(channelId), NetworkRequestType::Get)
-        .timeout(20000)
-        .onSuccess([callback = std::move(callback), channel, channelId,
-                    manualRefresh](const NetworkResult &result) -> Outcome {
-            auto json = result.parseJson();
-            auto emoteSet = json["emote_set"].toObject();
-            auto parsedEmotes = emoteSet["emotes"].toArray();
+    getSeventvApi().getUserByTwitchID(
+        channelId,
+        [callback = std::move(callback), channel, channelId,
+         manualRefresh](const auto &json) {
+            const auto emoteSet = json["emote_set"].toObject();
+            const auto parsedEmotes = emoteSet["emotes"].toArray();
 
             auto emoteMap = parseEmotes(parsedEmotes, false);
             bool hasEmotes = !emoteMap.empty();
@@ -285,7 +283,7 @@ void SeventvEmotes::loadChannelEmotes(
             auto shared = channel.lock();
             if (!shared)
             {
-                return Success;
+                return;
             }
 
             if (manualRefresh)
@@ -301,40 +299,37 @@ void SeventvEmotes::loadChannelEmotes(
                         makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
                 }
             }
-            return Success;
-        })
-        .onError(
-            [channelId, channel, manualRefresh](const NetworkResult &result) {
-                auto shared = channel.lock();
-                if (!shared)
+        },
+        [channelId, channel, manualRefresh](const auto &result) {
+            auto shared = channel.lock();
+            if (!shared)
+            {
+                return;
+            }
+            if (result.status() == 404)
+            {
+                qCWarning(chatterinoSeventv)
+                    << "Error occurred fetching 7TV emotes: "
+                    << result.parseJson();
+                if (manualRefresh)
                 {
-                    return;
+                    shared->addMessage(
+                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
                 }
-                if (result.status() == 404)
-                {
-                    qCWarning(chatterinoSeventv)
-                        << "Error occurred fetching 7TV emotes: "
-                        << result.parseJson();
-                    if (manualRefresh)
-                    {
-                        shared->addMessage(
-                            makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
-                    }
-                }
-                else
-                {
-                    // TODO: Auto retry in case of a timeout, with a delay
-                    auto errorString = result.formatError();
-                    qCWarning(chatterinoSeventv)
-                        << "Error fetching 7TV emotes for channel" << channelId
-                        << ", error" << errorString;
-                    shared->addMessage(makeSystemMessage(
-                        QStringLiteral("Failed to fetch 7TV channel "
-                                       "emotes. (Error: %1)")
-                            .arg(errorString)));
-                }
-            })
-        .execute();
+            }
+            else
+            {
+                // TODO: Auto retry in case of a timeout, with a delay
+                auto errorString = result.formatError();
+                qCWarning(chatterinoSeventv)
+                    << "Error fetching 7TV emotes for channel" << channelId
+                    << ", error" << errorString;
+                shared->addMessage(makeSystemMessage(
+                    QStringLiteral("Failed to fetch 7TV channel "
+                                   "emotes. (Error: %1)")
+                        .arg(errorString)));
+            }
+        });
 }
 
 boost::optional<EmotePtr> SeventvEmotes::addEmote(
@@ -414,11 +409,9 @@ void SeventvEmotes::getEmoteSet(
 {
     qCDebug(chatterinoSeventv) << "Loading 7TV Emote Set" << emoteSetId;
 
-    NetworkRequest(API_URL_EMOTE_SET.arg(emoteSetId), NetworkRequestType::Get)
-        .timeout(20000)
-        .onSuccess([callback = std::move(successCallback),
-                    emoteSetId](const NetworkResult &result) -> Outcome {
-            auto json = result.parseJson();
+    getSeventvApi().getEmoteSet(
+        emoteSetId,
+        [callback = std::move(successCallback), emoteSetId](const auto &json) {
             auto parsedEmotes = json["emotes"].toArray();
 
             auto emoteMap = parseEmotes(parsedEmotes, false);
@@ -427,13 +420,10 @@ void SeventvEmotes::getEmoteSet(
                                        << "7TV Emotes from" << emoteSetId;
 
             callback(std::move(emoteMap), json["name"].toString());
-            return Success;
-        })
-        .onError([emoteSetId, callback = std::move(errorCallback)](
-                     const NetworkResult &result) {
+        },
+        [emoteSetId, callback = std::move(errorCallback)](const auto &result) {
             callback(result.formatError());
-        })
-        .execute();
+        });
 }
 
 ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)

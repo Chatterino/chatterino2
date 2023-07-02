@@ -19,6 +19,7 @@
 #include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
 #include "providers/RecentMessagesApi.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
+#include "providers/seventv/SeventvApi.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -1631,20 +1632,9 @@ void TwitchChannel::updateSevenTVActivity()
 
     qCDebug(chatterinoSeventv) << "Sending activity in" << this->getName();
 
-    QJsonObject payload;
-    payload["kind"] = 1;  // UserPresenceKindChannel
-
-    QJsonObject data;
-    data["id"] = this->roomId();
-    data["platform"] = "TWITCH";
-
-    payload["data"] = data;
-
-    NetworkRequest(seventvActivityUrl.arg(currentSeventvUserID),
-                   NetworkRequestType::Post)
-        .header("Content-Type", "application/json")
-        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
-        .onSuccess([chan = weakOf<Channel>(this)](const auto &response) {
+    getSeventvApi().updatePresence(
+        this->roomId(), currentSeventvUserID,
+        [chan = weakOf<Channel>(this)]() {
             const auto self =
                 std::dynamic_pointer_cast<TwitchChannel>(chan.lock());
             if (!self)
@@ -1654,8 +1644,11 @@ void TwitchChannel::updateSevenTVActivity()
             self->nextSeventvActivity_ =
                 QDateTime::currentDateTimeUtc().addSecs(10);
             return Success;
-        })
-        .execute();
+        },
+        [](const auto &result) {
+            qCDebug(chatterinoSeventv)
+                << "Failed to update 7TV activity:" << result.formatError();
+        });
 }
 
 void TwitchChannel::listenSevenTVCosmetics()

@@ -280,6 +280,8 @@ set(SOURCE_FILES
         providers/liveupdates/BasicPubSubManager.hpp
         providers/liveupdates/BasicPubSubWebsocket.hpp
 
+        providers/seventv/SeventvApi.cpp
+        providers/seventv/SeventvApi.hpp
         providers/seventv/SeventvBadges.cpp
         providers/seventv/SeventvBadges.hpp
         providers/seventv/SeventvCosmetics.hpp

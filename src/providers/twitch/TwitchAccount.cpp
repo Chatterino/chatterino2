@@ -3,7 +3,6 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
-#include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
@@ -12,6 +11,7 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
+#include "providers/seventv/SeventvApi.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchUser.hpp"
@@ -461,22 +461,20 @@ void TwitchAccount::loadSeventvUserID()
         return;
     }
 
-    static const QString seventvUserInfoUrl =
-        QStringLiteral("https://7tv.io/v3/users/twitch/%1");
-
-    NetworkRequest(seventvUserInfoUrl.arg(this->getUserId()),
-                   NetworkRequestType::Get)
-        .timeout(20000)
-        .onSuccess([this](const auto &response) {
-            const auto json = response.parseJson();
+    getSeventvApi().getUserByTwitchID(
+        this->getUserId(),
+        [this](const auto &json) {
             const auto id = json["user"]["id"].toString();
             if (!id.isEmpty())
             {
                 this->seventvUserID_ = id;
             }
             return Success;
-        })
-        .execute();
+        },
+        [](const auto &result) {
+            qCDebug(chatterinoSeventv)
+                << "Failed to load 7TV user-id:" << result.formatError();
+        });
 }
 
 }  // namespace chatterino

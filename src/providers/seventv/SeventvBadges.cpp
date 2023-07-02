@@ -1,16 +1,16 @@
 #include "providers/seventv/SeventvBadges.hpp"
 
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
+#include "providers/seventv/SeventvApi.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 
+#include <QJsonArray>
 #include <QUrl>
 #include <QUrlQuery>
 
 #include <map>
+
 
 namespace chatterino {
 
@@ -86,21 +86,11 @@ void SeventvBadges::addBadge(const QJsonObject &badgeJson)
 void SeventvBadges::loadSeventvBadges()
 {
     // This endpoint is used as a backup for badges
-    static QUrl url("https://7tv.io/v2/cosmetics");
-
-    static QUrlQuery urlQuery;
-    // valid user_identifier values: "object_id", "twitch_id", "login"
-    urlQuery.addQueryItem("user_identifier", "twitch_id");
-
-    url.setQuery(urlQuery);
-
-    NetworkRequest(url)
-        .onSuccess([this](const NetworkResult &result) -> Outcome {
-            auto root = result.parseJson();
-
+    getSeventvApi().getCosmetics(
+        [this](const auto &json) -> void {
             std::unique_lock lock(this->mutex_);
 
-            for (const auto &jsonBadge : root.value("badges").toArray())
+            for (const auto &jsonBadge : json.value("badges").toArray())
             {
                 const auto badge = jsonBadge.toObject();
                 auto badgeID = badge["id"].toString();
@@ -123,10 +113,8 @@ void SeventvBadges::loadSeventvBadges()
                     this->badgeMap_[user.toString()] = emotePtr;
                 }
             }
-
-            return Success;
-        })
-        .execute();
+        },
+        [](const auto &) -> void { /* ignored */ });
 }
 
 }  // namespace chatterino
