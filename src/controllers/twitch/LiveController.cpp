@@ -99,7 +99,6 @@ void TwitchLiveController::request(std::optional<QStringList> optChannelIDs)
         getHelix()->fetchStreams(
             batch, {},
             [this, batch{batch}](const auto &streams) {
-                // on success
                 std::unordered_map<QString, std::optional<HelixStream>> results;
 
                 for (const auto &channelID : batch)
