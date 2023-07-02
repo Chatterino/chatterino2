@@ -49,7 +49,7 @@ public:
      */
     void subscribeUser(const QString &userID, const QString &emoteSetID);
     /**
-     * Subscribes to cosmetics and entitlements in a twitch channel
+     * Subscribes to cosmetics and entitlements in a Twitch channel
      * if not already subscribed.
      *
      * @param id Twitch channel id
