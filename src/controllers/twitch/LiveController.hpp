@@ -40,7 +40,7 @@ public:
      *
      * Should not be more than 100
      **/
-    static constexpr int BATCH_SIZE{3};
+    static constexpr int BATCH_SIZE{100};
 
     TwitchLiveController();
 
