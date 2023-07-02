@@ -30,7 +30,7 @@ class TwitchLiveController : public ITwitchLiveController, public Singleton
 {
 public:
     // Controls how often all channels have their stream status refreshed
-    static constexpr std::chrono::seconds REFRESH_INTERVAL{60};
+    static constexpr std::chrono::seconds REFRESH_INTERVAL{30};
 
     // Controls how quickly new channels have their stream status loaded
     static constexpr std::chrono::seconds IMMEDIATE_REQUEST_INTERVAL{1};
