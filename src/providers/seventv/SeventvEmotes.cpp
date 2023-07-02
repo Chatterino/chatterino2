@@ -210,7 +210,7 @@ void SeventvEmotes::loadGlobalEmotes()
 {
     if (!Settings::instance().enableSevenTVGlobalEmotes)
     {
-        this->global_.set(EMPTY_EMOTE_MAP);
+        this->setGlobalEmotes(EMPTY_EMOTE_MAP);
         return;
     }
 
@@ -224,7 +224,8 @@ void SeventvEmotes::loadGlobalEmotes()
             auto emoteMap = parseEmotes(parsedEmotes, true);
             qCDebug(chatterinoSeventv)
                 << "Loaded" << emoteMap.size() << "7TV Global Emotes";
-            this->global_.set(std::make_shared<EmoteMap>(std::move(emoteMap)));
+            this->setGlobalEmotes(
+                std::make_shared<EmoteMap>(std::move(emoteMap)));
 
             return Success;
         })
@@ -233,6 +234,11 @@ void SeventvEmotes::loadGlobalEmotes()
                 << "Couldn't load 7TV global emotes" << result.getData();
         })
         .execute();
+}
+
+void SeventvEmotes::setGlobalEmotes(std::shared_ptr<const EmoteMap> emotes)
+{
+    this->global_.set(std::move(emotes));
 }
 
 void SeventvEmotes::loadChannelEmotes(
@@ -315,23 +321,17 @@ void SeventvEmotes::loadChannelEmotes(
                             makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
                     }
                 }
-                else if (result.status() == NetworkResult::timedoutStatus)
-                {
-                    // TODO: Auto retry in case of a timeout, with a delay
-                    qCWarning(chatterinoSeventv)
-                        << "Fetching 7TV emotes for channel" << channelId
-                        << "failed due to timeout";
-                    shared->addMessage(makeSystemMessage(
-                        "Failed to fetch 7TV channel emotes. (timed out)"));
-                }
                 else
                 {
+                    // TODO: Auto retry in case of a timeout, with a delay
+                    auto errorString = result.formatError();
                     qCWarning(chatterinoSeventv)
                         << "Error fetching 7TV emotes for channel" << channelId
-                        << ", error" << result.status();
-                    shared->addMessage(
-                        makeSystemMessage("Failed to fetch 7TV channel "
-                                          "emotes. (unknown error)"));
+                        << ", error" << errorString;
+                    shared->addMessage(makeSystemMessage(
+                        QStringLiteral("Failed to fetch 7TV channel "
+                                       "emotes. (Error: %1)")
+                            .arg(errorString)));
                 }
             })
         .execute();
@@ -431,14 +431,7 @@ void SeventvEmotes::getEmoteSet(
         })
         .onError([emoteSetId, callback = std::move(errorCallback)](
                      const NetworkResult &result) {
-            if (result.status() == NetworkResult::timedoutStatus)
-            {
-                callback("timed out");
-            }
-            else
-            {
-                callback(QString("status: %1").arg(result.status()));
-            }
+            callback(result.formatError());
         })
         .execute();
 }

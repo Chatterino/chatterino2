@@ -15,12 +15,9 @@ add_executable(${PROJECT_NAME} ${benchmark_SOURCES})
 add_sanitizers(${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-mocks)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE benchmark::benchmark)
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-    CHATTERINO_TEST
-    )
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES

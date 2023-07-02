@@ -274,24 +274,102 @@ std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
         return this->liveChannel;
     }
 
-    if (channelName == "$$$")
-    {
-        static auto channel =
-            std::make_shared<Channel>("$$$", chatterino::Channel::Type::Misc);
-        static auto getTimer = [&] {
+    static auto getTimer = [](ChannelPtr channel, int msBetweenMessages,
+                              bool addInitialMessages) {
+        if (addInitialMessages)
+        {
             for (auto i = 0; i < 1000; i++)
             {
                 channel->addMessage(makeSystemMessage(QString::number(i + 1)));
             }
+        }
 
-            auto timer = new QTimer;
-            QObject::connect(timer, &QTimer::timeout, [] {
-                channel->addMessage(
-                    makeSystemMessage(QTime::currentTime().toString()));
-            });
-            timer->start(500);
-            return timer;
-        }();
+        auto *timer = new QTimer;
+        QObject::connect(timer, &QTimer::timeout, [channel] {
+            channel->addMessage(
+                makeSystemMessage(QTime::currentTime().toString()));
+        });
+        timer->start(msBetweenMessages);
+        return timer;
+    };
+
+    if (channelName == "$$$")
+    {
+        static auto channel = std::make_shared<Channel>(
+            channelName, chatterino::Channel::Type::Misc);
+        getTimer(channel, 500, true);
+
+        return channel;
+    }
+    if (channelName == "$$$:e")
+    {
+        static auto channel = std::make_shared<Channel>(
+            channelName, chatterino::Channel::Type::Misc);
+        getTimer(channel, 500, false);
+
+        return channel;
+    }
+    if (channelName == "$$$$")
+    {
+        static auto channel = std::make_shared<Channel>(
+            channelName, chatterino::Channel::Type::Misc);
+        getTimer(channel, 250, true);
+
+        return channel;
+    }
+    if (channelName == "$$$$:e")
+    {
+        static auto channel = std::make_shared<Channel>(
+            channelName, chatterino::Channel::Type::Misc);
+        getTimer(channel, 250, false);
+
+        return channel;
+    }
+    if (channelName == "$$$$$")
+    {
+        static auto channel = std::make_shared<Channel>(
+            channelName, chatterino::Channel::Type::Misc);
+        getTimer(channel, 100, true);
+
+        return channel;
+    }
+    if (channelName == "$$$$$:e")
+    {
+        static auto channel = std::make_shared<Channel>(
+            channelName, chatterino::Channel::Type::Misc);
+        getTimer(channel, 100, false);
+
+        return channel;
+    }
+    if (channelName == "$$$$$$")
+    {
+        static auto channel = std::make_shared<Channel>(
+            channelName, chatterino::Channel::Type::Misc);
+        getTimer(channel, 50, true);
+
+        return channel;
+    }
+    if (channelName == "$$$$$$:e")
+    {
+        static auto channel = std::make_shared<Channel>(
+            channelName, chatterino::Channel::Type::Misc);
+        getTimer(channel, 50, false);
+
+        return channel;
+    }
+    if (channelName == "$$$$$$$")
+    {
+        static auto channel = std::make_shared<Channel>(
+            channelName, chatterino::Channel::Type::Misc);
+        getTimer(channel, 25, true);
+
+        return channel;
+    }
+    if (channelName == "$$$$$$$:e")
+    {
+        static auto channel = std::make_shared<Channel>(
+            channelName, chatterino::Channel::Type::Misc);
+        getTimer(channel, 25, false);
 
         return channel;
     }

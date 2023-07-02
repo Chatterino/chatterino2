@@ -1,6 +1,6 @@
-#include "ChannelFilterEditorDialog.hpp"
+#include "widgets/dialogs/ChannelFilterEditorDialog.hpp"
 
-#include "controllers/filters/parser/FilterParser.hpp"
+#include "controllers/filters/lang/Tokenizer.hpp"
 
 #include <QLabel>
 #include <QPushButton>
@@ -99,7 +99,8 @@ ChannelFilterEditorDialog::ValueSpecifier::ValueSpecifier()
 
     this->typeCombo_->insertItems(
         0, {"Constant Text", "Constant Number", "Variable"});
-    this->varCombo_->insertItems(0, filterparser::validIdentifiersMap.values());
+
+    this->varCombo_->insertItems(0, filters::validIdentifiersMap.values());
 
     this->layout_->addWidget(this->typeCombo_);
     this->layout_->addWidget(this->varCombo_, 1);
@@ -141,7 +142,7 @@ void ChannelFilterEditorDialog::ValueSpecifier::setValue(const QString &value)
     if (this->typeCombo_->currentIndex() == 2)
     {
         this->varCombo_->setCurrentText(
-            filterparser::validIdentifiersMap.value(value));
+            filters::validIdentifiersMap.value(value));
     }
     else
     {
@@ -164,7 +165,7 @@ QString ChannelFilterEditorDialog::ValueSpecifier::expressionText()
         case 1:  // number
             return this->valueInput_->text();
         case 2:  // variable
-            return filterparser::validIdentifiersMap.key(
+            return filters::validIdentifiersMap.key(
                 this->varCombo_->currentText());
         default:
             return "";
@@ -221,7 +222,7 @@ QString ChannelFilterEditorDialog::BinaryOperationSpecifier::expressionText()
         return this->left_->expressionText();
     }
 
-    return QString("(%1) %2 (%3)")
+    return QString("(%1 %2 %3)")
         .arg(this->left_->expressionText())
         .arg(opText)
         .arg(this->right_->expressionText());

@@ -328,8 +328,10 @@ void ChannelView::updatePauses()
         this->pauseEnd_ = boost::none;
         this->pauseTimer_.stop();
 
-        this->scrollBar_->offset(this->pauseScrollOffset_);
-        this->pauseScrollOffset_ = 0;
+        this->scrollBar_->offsetMaximum(this->pauseScrollMaximumOffset_);
+        this->scrollBar_->offsetMinimum(this->pauseScrollMinimumOffset_);
+        this->pauseScrollMinimumOffset_ = 0;
+        this->pauseScrollMaximumOffset_ = 0;
 
         this->queueLayout();
     }
@@ -453,7 +455,7 @@ void ChannelView::performLayout(bool causedByScrollbar)
 void ChannelView::layoutVisibleMessages(
     const LimitedQueueSnapshot<MessageLayoutPtr> &messages)
 {
-    const auto start = size_t(this->scrollBar_->getCurrentValue());
+    const auto start = size_t(this->scrollBar_->getRelativeCurrentValue());
     const auto layoutWidth = this->getLayoutWidth();
     const auto flags = this->getFlags();
     auto redrawRequired = false;
@@ -461,7 +463,7 @@ void ChannelView::layoutVisibleMessages(
     if (messages.size() > start)
     {
         auto y = int(-(messages[start]->getHeight() *
-                       (fmod(this->scrollBar_->getCurrentValue(), 1))));
+                       (fmod(this->scrollBar_->getRelativeCurrentValue(), 1))));
 
         for (auto i = start; i < messages.size() && y <= this->height(); i++)
         {
@@ -521,21 +523,17 @@ void ChannelView::updateScrollbar(
 
     if (!showScrollbar && !causedByScrollbar)
     {
-        this->scrollBar_->setDesiredValue(0);
+        this->scrollBar_->scrollToTop();
     }
     this->showScrollBar_ = showScrollbar;
-
-    this->scrollBar_->setMaximum(messages.size());
 
     // If we were showing the latest messages and the scrollbar now wants to be
     // rendered, scroll to bottom
     if (this->enableScrollingToBottom_ && this->showingLatestMessages_ &&
-        showScrollbar)
+        showScrollbar && !causedByScrollbar)
     {
         this->scrollBar_->scrollToBottom(
-            // this->messageWasAdded &&
             getSettings()->enableSmoothScrollingNewMessages.getValue());
-        this->messageWasAdded_ = false;
     }
 }
 
@@ -544,6 +542,9 @@ void ChannelView::clearMessages()
     // Clear all stored messages in this chat widget
     this->messages_.clear();
     this->scrollBar_->clearHighlights();
+    this->scrollBar_->resetMaximum();
+    this->scrollBar_->setMaximum(0);
+    this->scrollBar_->setMinimum(0);
     this->queueLayout();
 
     this->lastMessageHasAlternateBackground_ = false;
@@ -750,12 +751,6 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
             this->messageAddedAtStart(messages);
         });
 
-    // on message removed
-    this->channelConnections_.managedConnect(
-        this->channel_->messageRemovedFromStart, [this](MessagePtr &message) {
-            this->messageRemoveFromStart(message);
-        });
-
     // on message replaced
     this->channelConnections_.managedConnect(
         this->channel_->messageReplaced,
@@ -770,6 +765,8 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                                              });
 
     auto snapshot = underlyingChannel->getMessageSnapshot();
+
+    this->scrollBar_->setMaximum(qreal(snapshot.size()));
 
     for (const auto &msg : snapshot)
     {
@@ -838,7 +835,7 @@ bool ChannelView::shouldIncludeMessage(const MessagePtr &m) const
                 m->loginName, Qt::CaseInsensitive) == 0)
             return true;
 
-        return this->channelFilters_->filter(m, this->channel_);
+        return this->channelFilters_->filter(m, this->underlyingChannel_);
     }
 
     return true;
@@ -881,31 +878,26 @@ void ChannelView::messageAppended(MessagePtr &message,
     this->lastMessageHasAlternateBackground_ =
         !this->lastMessageHasAlternateBackground_;
 
-    if (!this->scrollBar_->isAtBottom() &&
-        this->scrollBar_->getCurrentValueAnimation().state() ==
-            QPropertyAnimation::Running)
+    if (this->paused())
     {
-        QEventLoop loop;
-
-        connect(&this->scrollBar_->getCurrentValueAnimation(),
-                &QAbstractAnimation::stateChanged, &loop, &QEventLoop::quit);
-
-        loop.exec();
+        this->pauseScrollMaximumOffset_++;
+    }
+    else
+    {
+        this->scrollBar_->offsetMaximum(1);
     }
 
     if (this->messages_.pushBack(messageRef))
     {
         if (this->paused())
         {
-            if (!this->scrollBar_->isAtBottom())
-                this->pauseScrollOffset_--;
+            this->pauseScrollMinimumOffset_++;
+            this->pauseSelectionOffset_++;
         }
         else
         {
-            if (this->scrollBar_->isAtBottom())
-                this->scrollBar_->scrollToBottom();
-            else
-                this->scrollBar_->offset(-1);
+            this->scrollBar_->offsetMinimum(1);
+            this->selection_.shiftMessageIndex(1);
         }
     }
 
@@ -931,7 +923,6 @@ void ChannelView::messageAppended(MessagePtr &message,
         this->scrollBar_->addHighlight(message->getScrollBarHighlight());
     }
 
-    this->messageWasAdded_ = true;
     this->queueLayout();
 }
 
@@ -956,12 +947,14 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     }
 
     /// Add the messages at the start
-    if (this->messages_.pushFront(messageRefs).size() > 0)
+    auto addedMessages = this->messages_.pushFront(messageRefs);
+    if (!addedMessages.empty())
     {
         if (this->scrollBar_->isAtBottom())
             this->scrollBar_->scrollToBottom();
         else
-            this->scrollBar_->offset(qreal(messages.size()));
+            this->scrollBar_->offset(qreal(addedMessages.size()));
+        this->scrollBar_->offsetMaximum(qreal(addedMessages.size()));
     }
 
     if (this->showScrollbarHighlights())
@@ -974,21 +967,6 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
         }
 
         this->scrollBar_->addHighlightsAtStart(highlights);
-    }
-
-    this->messageWasAdded_ = true;
-    this->queueLayout();
-}
-
-void ChannelView::messageRemoveFromStart(MessagePtr &message)
-{
-    if (this->paused())
-    {
-        this->pauseSelectionOffset_ += 1;
-    }
-    else
-    {
-        this->selection_.shiftMessageIndex(1);
     }
 
     this->queueLayout();
@@ -1024,6 +1002,9 @@ void ChannelView::messagesUpdated()
 
     this->messages_.clear();
     this->scrollBar_->clearHighlights();
+    this->scrollBar_->resetMaximum();
+    this->scrollBar_->setMaximum(qreal(snapshot.size()));
+    this->scrollBar_->setMinimum(0);
     this->lastMessageHasAlternateBackground_ = false;
     this->lastMessageHasAlternateBackgroundReverse_ = true;
 
@@ -1227,7 +1208,8 @@ void ChannelView::scrollToMessageLayout(MessageLayout *layout,
 
     if (this->showScrollBar_)
     {
-        this->getScrollBar().setDesiredValue(messageIdx);
+        this->getScrollBar().setDesiredValue(this->scrollBar_->getMinimum() +
+                                             qreal(messageIdx));
     }
 }
 
@@ -1258,7 +1240,7 @@ void ChannelView::drawMessages(QPainter &painter)
 {
     auto &messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start = size_t(this->scrollBar_->getCurrentValue());
+    const auto start = size_t(this->scrollBar_->getRelativeCurrentValue());
 
     if (start >= messagesSnapshot.size())
     {
@@ -1266,7 +1248,7 @@ void ChannelView::drawMessages(QPainter &painter)
     }
 
     int y = int(-(messagesSnapshot[start].get()->getHeight() *
-                  (fmod(this->scrollBar_->getCurrentValue(), 1))));
+                  (fmod(this->scrollBar_->getRelativeCurrentValue(), 1))));
 
     MessageLayout *end = nullptr;
     bool windowFocused = this->window() == QApplication::activeWindow();
@@ -1362,12 +1344,14 @@ void ChannelView::wheelEvent(QWheelEvent *event)
     {
         float mouseMultiplier = getSettings()->mouseScrollMultiplier;
 
-        qreal desired = this->scrollBar_->getDesiredValue();
+        // This ensures snapshot won't be indexed out of bounds when scrolling really fast
+        qreal desired = std::max<qreal>(0, this->scrollBar_->getDesiredValue());
         qreal delta = event->angleDelta().y() * qreal(1.5) * mouseMultiplier;
 
         auto &snapshot = this->getMessagesSnapshot();
         int snapshotLength = int(snapshot.size());
-        int i = std::min<int>(int(desired), snapshotLength);
+        int i = std::min<int>(int(desired - this->scrollBar_->getMinimum()),
+                              snapshotLength - 1);
 
         if (delta > 0)
         {
@@ -1672,81 +1656,88 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     {
         auto badgeElement = dynamic_cast<const BadgeElement *>(element);
 
-        if ((badgeElement || emoteElement || layeredEmoteElement) &&
-            getSettings()->emotesTooltipPreview.getValue())
+        if (badgeElement || emoteElement || layeredEmoteElement)
         {
-            if (event->modifiers() == Qt::ShiftModifier ||
-                getSettings()->emotesTooltipPreview.getValue() == 1)
+            auto showThumbnailSetting =
+                getSettings()->emotesTooltipPreview.getValue();
+
+            bool showThumbnail =
+                showThumbnailSetting == ThumbnailPreviewMode::AlwaysShow ||
+                (showThumbnailSetting == ThumbnailPreviewMode::ShowOnShift &&
+                 event->modifiers() == Qt::ShiftModifier);
+
+            if (emoteElement)
             {
-                if (emoteElement)
+                tooltipWidget->setOne({
+                    showThumbnail
+                        ? emoteElement->getEmote()->images.getImage(3.0)
+                        : nullptr,
+                    element->getTooltip(),
+                });
+            }
+            else if (layeredEmoteElement)
+            {
+                auto &layeredEmotes = layeredEmoteElement->getEmotes();
+                // Should never be empty but ensure it
+                if (!layeredEmotes.empty())
                 {
-                    tooltipWidget->setOne({
-                        emoteElement->getEmote()->images.getImage(3.0),
-                        element->getTooltip(),
-                    });
-                }
-                else if (layeredEmoteElement)
-                {
-                    auto &layeredEmotes = layeredEmoteElement->getEmotes();
-                    // Should never be empty but ensure it
-                    if (!layeredEmotes.empty())
+                    std::vector<TooltipEntry> entries;
+                    entries.reserve(layeredEmotes.size());
+
+                    auto &emoteTooltips =
+                        layeredEmoteElement->getEmoteTooltips();
+
+                    // Someone performing some tomfoolery could put an emote with tens,
+                    // if not hundreds of zero-width emotes on a single emote. If the
+                    // tooltip may take up more than three rows, truncate everything else.
+                    bool truncating = false;
+                    size_t upperLimit = layeredEmotes.size();
+                    if (layeredEmotes.size() > TOOLTIP_EMOTE_ENTRIES_LIMIT)
                     {
-                        std::vector<TooltipEntry> entries;
-                        entries.reserve(layeredEmotes.size());
-
-                        auto &emoteTooltips =
-                            layeredEmoteElement->getEmoteTooltips();
-
-                        // Someone performing some tomfoolery could put an emote with tens,
-                        // if not hundreds of zero-width emotes on a single emote. If the
-                        // tooltip may take up more than three rows, truncate everything else.
-                        bool truncating = false;
-                        size_t upperLimit = layeredEmotes.size();
-                        if (layeredEmotes.size() > TOOLTIP_EMOTE_ENTRIES_LIMIT)
-                        {
-                            upperLimit = TOOLTIP_EMOTE_ENTRIES_LIMIT - 1;
-                            truncating = true;
-                        }
-
-                        for (size_t i = 0; i < upperLimit; ++i)
-                        {
-                            const auto &emote = layeredEmotes[i].ptr;
-                            if (i == 0)
-                            {
-                                // First entry gets a large image and full description
-                                entries.push_back({emote->images.getImage(3.0),
-                                                   emoteTooltips[i]});
-                            }
-                            else
-                            {
-                                // Every other entry gets a small image and just the emote name
-                                entries.push_back({emote->images.getImage(1.0),
-                                                   emote->name.string});
-                            }
-                        }
-
-                        if (truncating)
-                        {
-                            entries.push_back({nullptr, "..."});
-                        }
-
-                        auto style = layeredEmotes.size() > 2
-                                         ? TooltipStyle::Grid
-                                         : TooltipStyle::Vertical;
-                        tooltipWidget->set(entries, style);
+                        upperLimit = TOOLTIP_EMOTE_ENTRIES_LIMIT - 1;
+                        truncating = true;
                     }
-                }
-                else if (badgeElement)
-                {
-                    tooltipWidget->setOne({
-                        badgeElement->getEmote()->images.getImage(3.0),
-                        element->getTooltip(),
-                    });
+
+                    for (size_t i = 0; i < upperLimit; ++i)
+                    {
+                        const auto &emote = layeredEmotes[i].ptr;
+                        if (i == 0)
+                        {
+                            // First entry gets a large image and full description
+                            entries.push_back({showThumbnail
+                                                   ? emote->images.getImage(3.0)
+                                                   : nullptr,
+                                               emoteTooltips[i]});
+                        }
+                        else
+                        {
+                            // Every other entry gets a small image and just the emote name
+                            entries.push_back({showThumbnail
+                                                   ? emote->images.getImage(1.0)
+                                                   : nullptr,
+                                               emote->name.string});
+                        }
+                    }
+
+                    if (truncating)
+                    {
+                        entries.push_back({nullptr, "..."});
+                    }
+
+                    auto style = layeredEmotes.size() > 2
+                                     ? TooltipStyle::Grid
+                                     : TooltipStyle::Vertical;
+                    tooltipWidget->set(entries, style);
                 }
             }
-            else
+            else if (badgeElement)
             {
-                tooltipWidget->clearEntries();
+                tooltipWidget->setOne({
+                    showThumbnail
+                        ? badgeElement->getEmote()->images.getImage(3.0)
+                        : nullptr,
+                    element->getTooltip(),
+                });
             }
         }
         else
@@ -1767,9 +1758,10 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     });
             }
             auto thumbnailSize = getSettings()->thumbnailSize;
-            if (!thumbnailSize)
+            if (thumbnailSize == 0)
             {
-                tooltipWidget->clearEntries();
+                // "Show thumbnails" is set to "Off", show text only
+                tooltipWidget->setOne({nullptr, element->getTooltip()});
             }
             else
             {
@@ -2092,22 +2084,73 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                 if (link.type == Link::UserInfo)
                 {
                     if (hoveredElement->getFlags().has(
-                            MessageElementFlag::Username) &&
-                        event->modifiers() == Qt::ShiftModifier)
+                            MessageElementFlag::Username))
                     {
-                        // Start a new reply if Shift+Right-clicking the message username
-                        this->setInputReply(layout->getMessagePtr());
-                    }
-                    else
-                    {
-                        // Insert @username into split input
-                        const bool commaMention =
-                            getSettings()->mentionUsersWithComma;
-                        const bool isFirstWord =
-                            split && split->getInput().isEditFirstWord();
-                        auto userMention = formatUserMention(
-                            link.value, isFirstWord, commaMention);
-                        insertText("@" + userMention + " ");
+                        Qt::KeyboardModifier userSpecifiedModifier =
+                            getSettings()->usernameRightClickModifier;
+
+                        if (userSpecifiedModifier ==
+                            Qt::KeyboardModifier::NoModifier)
+                        {
+                            qCWarning(chatterinoCommon)
+                                << "sanity check failed: "
+                                   "invalid settings detected "
+                                   "Settings::usernameRightClickModifier is "
+                                   "NoModifier, which should never happen";
+                            return;
+                        }
+
+                        Qt::KeyboardModifiers modifiers{userSpecifiedModifier};
+                        auto isModifierHeld = event->modifiers() == modifiers;
+
+                        UsernameRightClickBehavior action{};
+                        if (isModifierHeld)
+                        {
+                            action = getSettings()
+                                         ->usernameRightClickModifierBehavior;
+                        }
+                        else
+                        {
+                            action = getSettings()->usernameRightClickBehavior;
+                        }
+
+                        switch (action)
+                        {
+                            case UsernameRightClickBehavior::Mention: {
+                                if (split == nullptr)
+                                {
+                                    return;
+                                }
+
+                                // Insert @username into split input
+                                const bool commaMention =
+                                    getSettings()->mentionUsersWithComma;
+                                const bool isFirstWord =
+                                    split->getInput().isEditFirstWord();
+                                auto userMention = formatUserMention(
+                                    link.value, isFirstWord, commaMention);
+                                insertText("@" + userMention + " ");
+                            }
+                            break;
+
+                            case UsernameRightClickBehavior::Reply: {
+                                // Start a new reply if matching user's settings
+                                this->setInputReply(layout->getMessagePtr());
+                            }
+                            break;
+
+                            case UsernameRightClickBehavior::Ignore:
+                                break;
+
+                            default: {
+                                qCWarning(chatterinoCommon)
+                                    << "unhandled or corrupted "
+                                       "UsernameRightClickBehavior value in "
+                                       "ChannelView::handleMouseClick:"
+                                    << action;
+                            }
+                            break;  // unreachable
+                        }
                     }
 
                     return;
@@ -2770,7 +2813,7 @@ bool ChannelView::tryGetMessageAt(QPoint p,
 {
     auto &messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start = this->scrollBar_->getCurrentValue();
+    const auto start = size_t(this->scrollBar_->getRelativeCurrentValue());
 
     if (start >= messagesSnapshot.size())
     {
@@ -2778,7 +2821,7 @@ bool ChannelView::tryGetMessageAt(QPoint p,
     }
 
     int y = -(messagesSnapshot[start]->getHeight() *
-              (fmod(this->scrollBar_->getCurrentValue(), 1)));
+              (fmod(this->scrollBar_->getRelativeCurrentValue(), 1)));
 
     for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {

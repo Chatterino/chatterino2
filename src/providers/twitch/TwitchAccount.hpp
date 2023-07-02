@@ -9,12 +9,14 @@
 
 #include <QColor>
 #include <QElapsedTimer>
+#include <QObject>
 #include <QString>
 #include <rapidjson/document.h>
 
 #include <functional>
 #include <mutex>
 #include <set>
+#include <vector>
 
 namespace chatterino {
 
@@ -76,9 +78,11 @@ public:
     bool isAnon() const;
 
     void loadBlocks();
-    void blockUser(QString userId, std::function<void()> onSuccess,
+    void blockUser(QString userId, const QObject *caller,
+                   std::function<void()> onSuccess,
                    std::function<void()> onFailure);
-    void unblockUser(QString userId, std::function<void()> onSuccess,
+    void unblockUser(QString userId, const QObject *caller,
+                     std::function<void()> onSuccess,
                      std::function<void()> onFailure);
 
     SharedAccessGuard<const std::set<QString>> accessBlockedUserIds() const;

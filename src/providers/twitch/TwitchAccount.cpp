@@ -122,11 +122,12 @@ void TwitchAccount::loadBlocks()
         });
 }
 
-void TwitchAccount::blockUser(QString userId, std::function<void()> onSuccess,
+void TwitchAccount::blockUser(QString userId, const QObject *caller,
+                              std::function<void()> onSuccess,
                               std::function<void()> onFailure)
 {
     getHelix()->blockUser(
-        userId,
+        userId, caller,
         [this, userId, onSuccess] {
             TwitchUser blockedUser;
             blockedUser.id = userId;
@@ -142,11 +143,12 @@ void TwitchAccount::blockUser(QString userId, std::function<void()> onSuccess,
         std::move(onFailure));
 }
 
-void TwitchAccount::unblockUser(QString userId, std::function<void()> onSuccess,
+void TwitchAccount::unblockUser(QString userId, const QObject *caller,
+                                std::function<void()> onSuccess,
                                 std::function<void()> onFailure)
 {
     getHelix()->unblockUser(
-        userId,
+        userId, caller,
         [this, userId, onSuccess] {
             TwitchUser ignoredUser;
             ignoredUser.id = userId;

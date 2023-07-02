@@ -10,6 +10,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
+#include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/listview/GenericListView.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
@@ -17,12 +18,7 @@
 namespace {
 
 using namespace chatterino;
-
-struct CompletionEmote {
-    EmotePtr emote;
-    QString displayName;
-    QString providerName;
-};
+using namespace chatterino::detail;
 
 void addEmotes(std::vector<CompletionEmote> &out, const EmoteMap &map,
                const QString &text, const QString &providerName)
@@ -53,33 +49,18 @@ void addEmojis(std::vector<CompletionEmote> &out, const EmojiMap &map,
 
 }  // namespace
 
-namespace chatterino {
+namespace chatterino::detail {
 
-InputCompletionPopup::InputCompletionPopup(QWidget *parent)
-    : BasePopup({BasePopup::EnableCustomFrame, BasePopup::Frameless,
-                 BasePopup::DontFocus, BaseWindow::DisableLayoutSave},
-                parent)
-    , model_(this)
-{
-    this->initLayout();
-
-    QObject::connect(&this->redrawTimer_, &QTimer::timeout, this, [this] {
-        if (this->isVisible())
-        {
-            this->ui_.listView->doItemsLayout();
-        }
-    });
-    this->redrawTimer_.setInterval(33);
-}
-
-void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
+std::vector<CompletionEmote> buildCompletionEmoteList(const QString &text,
+                                                      ChannelPtr channel)
 {
     std::vector<CompletionEmote> emotes;
+    auto *app = getIApp();
     auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
     // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
     if (channel->isTwitchChannel())
     {
-        if (auto user = getApp()->accounts->twitch.getCurrent())
+        if (auto user = app->getAccounts()->twitch.getCurrent())
         {
             // Twitch Emotes available globally
             auto emoteData = user->accessEmotes();
@@ -115,21 +96,21 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
             }
         }
 
-        if (auto bttvG = getApp()->twitch->getBttvEmotes().emotes())
+        if (auto bttvG = app->getTwitch()->getBttvEmotes().emotes())
         {
             addEmotes(emotes, *bttvG, text, "Global BetterTTV");
         }
-        if (auto ffzG = getApp()->twitch->getFfzEmotes().emotes())
+        if (auto ffzG = app->getTwitch()->getFfzEmotes().emotes())
         {
             addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
         }
-        if (auto seventvG = getApp()->twitch->getSeventvEmotes().globalEmotes())
+        if (auto seventvG = app->getTwitch()->getSeventvEmotes().globalEmotes())
         {
             addEmotes(emotes, *seventvG, text, "Global 7TV");
         }
     }
 
-    addEmojis(emotes, getApp()->emotes->emojis.emojis, text);
+    addEmojis(emotes, app->getEmotes()->getEmojis()->getEmojis(), text);
 
     // if there is an exact match, put that emote first
     for (size_t i = 1; i < emotes.size(); i++)
@@ -146,6 +127,35 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
             break;
         }
     }
+
+    return emotes;
+}
+
+}  // namespace chatterino::detail
+
+namespace chatterino {
+
+InputCompletionPopup::InputCompletionPopup(QWidget *parent)
+    : BasePopup({BasePopup::EnableCustomFrame, BasePopup::Frameless,
+                 BasePopup::DontFocus, BaseWindow::DisableLayoutSave},
+                parent)
+    , model_(this)
+{
+    this->initLayout();
+    this->themeChangedEvent();
+
+    QObject::connect(&this->redrawTimer_, &QTimer::timeout, this, [this] {
+        if (this->isVisible())
+        {
+            this->ui_.listView->doItemsLayout();
+        }
+    });
+    this->redrawTimer_.setInterval(33);
+}
+
+void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
+{
+    auto emotes = detail::buildCompletionEmoteList(text, std::move(channel));
 
     this->model_.clear();
 
@@ -217,6 +227,13 @@ void InputCompletionPopup::showEvent(QShowEvent * /*event*/)
 void InputCompletionPopup::hideEvent(QHideEvent * /*event*/)
 {
     this->redrawTimer_.stop();
+}
+
+void InputCompletionPopup::themeChangedEvent()
+{
+    BasePopup::themeChangedEvent();
+
+    this->ui_.listView->refreshTheme(*getTheme());
 }
 
 void InputCompletionPopup::initLayout()
