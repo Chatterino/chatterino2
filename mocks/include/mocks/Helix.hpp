@@ -86,6 +86,12 @@ public:
                  std::function<void()> finallyCallback),
                 (override));
 
+    MOCK_METHOD(void, fetchChannels,
+                (QStringList userIDs,
+                 ResultCallback<std::vector<HelixChannel>> successCallback,
+                 HelixFailureCallback failureCallback),
+                (override));
+
     MOCK_METHOD(void, getChannel,
                 (QString broadcasterId,
                  ResultCallback<HelixChannel> successCallback,

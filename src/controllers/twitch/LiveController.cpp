@@ -1,12 +1,18 @@
 #include "controllers/twitch/LiveController.hpp"
 
+#include "common/QLogging.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "singletons/Paths.hpp"
-#include "util/CombinePath.hpp"
 #include "util/Helpers.hpp"
 
 #include <QDebug>
+
+namespace {
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoTwitchLiveController;
+
+}  // namespace
 
 namespace chatterino {
 
@@ -15,7 +21,7 @@ TwitchLiveController::TwitchLiveController()
     QObject::connect(&this->refreshTimer, &QTimer::timeout, [this] {
         this->request();
     });
-    this->refreshTimer.start(60 * 1000);
+    this->refreshTimer.start(TwitchLiveController::REFRESH_INTERVAL);
 
     QObject::connect(&this->immediateRequestTimer, &QTimer::timeout, [this] {
         QStringList channelIDs;
@@ -30,11 +36,15 @@ TwitchLiveController::TwitchLiveController()
             this->immediateRequests.clear();
         }
 
+        if (channelIDs.isEmpty())
+        {
+            return;
+        }
+
         this->request(channelIDs);
     });
-    this->immediateRequestTimer.start(1 * 1000);
-
-    qDebug() << "XD";
+    this->immediateRequestTimer.start(
+        TwitchLiveController::IMMEDIATE_REQUEST_INTERVAL);
 }
 
 void TwitchLiveController::add(std::shared_ptr<TwitchChannel> newChannel)
@@ -44,39 +54,14 @@ void TwitchLiveController::add(std::shared_ptr<TwitchChannel> newChannel)
     const auto channelID = newChannel->roomId();
     assert(!channelID.isEmpty());
 
-    qDebug() << "XXX: Add" << channelID;
+    {
+        std::unique_lock lock(this->channelsMutex);
+        this->channels[channelID] = newChannel;
+    }
 
-    std::unique_lock lock(this->channelsMutex);
-    auto &channelList = this->channels[channelID];
-
-    if (channelList.empty())
     {
         std::unique_lock immediateRequestsLock(this->immediateRequestsMutex);
         this->immediateRequests.emplace(channelID);
-    }
-
-    channelList.emplace_back(newChannel);
-}
-
-void TwitchLiveController::remove(std::shared_ptr<TwitchChannel> channel)
-{
-    const auto channelID = channel->roomId();
-    assert(!channelID.isEmpty());
-
-    qDebug() << "XXX: Remove" << channelID;
-
-    std::unique_lock lock(this->channelsMutex);
-    auto &channelList = this->channels[channelID];
-
-    channelList.erase(std::remove_if(channelList.begin(), channelList.end(),
-                                     [](const auto &c) {
-                                         return c.expired();
-                                     }),
-                      channelList.end());
-
-    if (channelList.empty())
-    {
-        this->channels.erase(channelID);
     }
 }
 
@@ -86,7 +71,6 @@ void TwitchLiveController::request(std::optional<QStringList> optChannelIDs)
 
     if (optChannelIDs)
     {
-        qDebug() << "XXX Load requests from channels map" << channelIDs;
         channelIDs = *optChannelIDs;
     }
     else
@@ -101,22 +85,21 @@ void TwitchLiveController::request(std::optional<QStringList> optChannelIDs)
 
     if (channelIDs.isEmpty())
     {
-        qDebug() << "XXX: eraly out, no requests";
         return;
     }
 
-    auto batches = splitListIntoBatches(channelIDs, 3);
+    auto batches =
+        splitListIntoBatches(channelIDs, TwitchLiveController::BATCH_SIZE);
+
+    qCDebug(LOG) << "Make" << batches.size() << "requests";
 
     for (const auto &batch : batches)
     {
-        qDebug() << "XXX MAKE REQUEST" << batch;
-
-        // TODO: make concurrent
+        // TODO: Explore making this concurrent
         getHelix()->fetchStreams(
             batch, {},
             [this, batch{batch}](const auto &streams) {
                 // on success
-                qDebug() << "XXX: success xd";
                 std::unordered_map<QString, std::optional<HelixStream>> results;
 
                 for (const auto &channelID : batch)
@@ -127,39 +110,32 @@ void TwitchLiveController::request(std::optional<QStringList> optChannelIDs)
                 for (const auto &stream : streams)
                 {
                     results[stream.userId] = stream;
-                    qDebug() << "XXX: stream" << stream.userLogin;
                 }
 
+                QStringList deadChannels;
+
                 {
-                    std::unique_lock lock(this->channelsMutex);
-                    QStringList deadChannels;
+                    std::shared_lock lock(this->channelsMutex);
                     for (const auto &result : results)
                     {
                         auto it = this->channels.find(result.first);
                         if (it != channels.end())
                         {
-                            const auto &weakChannelList = it->second;
-                            for (const auto &weakChannel : weakChannelList)
+                            if (auto channel = it->second.lock(); channel)
                             {
-                                auto channel = weakChannel.lock();
-                                if (channel)
-                                {
-                                    qDebug() << "XXX: channel is alive"
-                                             << channel->getName();
-                                    channel->updateLiveStatus(result.second);
-                                    // POST LIVE STATUS
-                                }
-                                else
-                                {
-                                    qDebug() << "XXX: channel is dead"
-                                             << result.first;
-                                    // channel is dead, mark as dead
-                                    deadChannels.append(result.first);
-                                }
+                                channel->updateStreamStatus(result.second);
+                            }
+                            else
+                            {
+                                deadChannels.append(result.first);
                             }
                         }
                     }
+                }
 
+                if (!deadChannels.isEmpty())
+                {
+                    std::unique_lock lock(this->channelsMutex);
                     for (const auto &deadChannel : deadChannels)
                     {
                         this->channels.erase(deadChannel);
@@ -167,11 +143,47 @@ void TwitchLiveController::request(std::optional<QStringList> optChannelIDs)
                 }
             },
             [] {
-                qDebug() << "XXX: failed xd";
-                // on failure
+                qCWarning(LOG) << "Failed stream check request";
+            },
+            [] {});
+
+        // TODO: Explore making this concurrent
+        getHelix()->fetchChannels(
+            batch,
+            [this, batch{batch}](const auto &helixChannels) {
+                QStringList deadChannels;
+
+                {
+                    std::shared_lock lock(this->channelsMutex);
+                    for (const auto &helixChannel : helixChannels)
+                    {
+                        auto it = this->channels.find(helixChannel.userId);
+                        if (it != this->channels.end())
+                        {
+                            if (auto channel = it->second.lock(); channel)
+                            {
+                                channel->updateStreamTitle(helixChannel.title);
+                                channel->updateDisplayName(helixChannel.name);
+                            }
+                            else
+                            {
+                                deadChannels.append(helixChannel.userId);
+                            }
+                        }
+                    }
+                }
+
+                if (!deadChannels.isEmpty())
+                {
+                    std::unique_lock lock(this->channelsMutex);
+                    for (const auto &deadChannel : deadChannels)
+                    {
+                        this->channels.erase(deadChannel);
+                    }
+                }
             },
             [] {
-                // finally
+                qCWarning(LOG) << "Failed stream check request";
             });
     }
 }

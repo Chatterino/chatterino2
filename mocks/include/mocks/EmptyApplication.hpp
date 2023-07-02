@@ -76,6 +76,11 @@ public:
     {
         return nullptr;
     }
+
+    ITwitchLiveController *getTwitchLiveController() override
+    {
+        return nullptr;
+    }
 };
 
 }  // namespace chatterino::mock

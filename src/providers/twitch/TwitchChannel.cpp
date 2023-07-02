@@ -99,8 +99,6 @@ TwitchChannel::TwitchChannel(const QString &name)
     // room id loaded -> refresh live status
     this->roomIdChanged.connect([this]() {
         this->refreshPubSub();
-        this->refreshTitle();
-        this->refreshLiveStatus();
         this->refreshBadges();
         this->refreshCheerEmotes();
         this->refreshFFZChannelEmotes(false);
@@ -154,6 +152,85 @@ TwitchChannel::TwitchChannel(const QString &name)
     });
     this->threadClearTimer_.start(5 * 60 * 1000);
 
+    auto onLiveStatusChanged = [this](auto isLive) {
+        if (isLive)
+        {
+            qCDebug(chatterinoTwitch)
+                << "[TwitchChannel" << this->getName() << "] Online";
+            if (getApp()->notifications->isChannelNotified(this->getName(),
+                                                           Platform::Twitch))
+            {
+                if (Toasts::isEnabled())
+                {
+                    getApp()->toasts->sendChannelNotification(
+                        this->getName(), this->accessStreamStatus()->title,
+                        Platform::Twitch);
+                }
+                if (getSettings()->notificationPlaySound)
+                {
+                    getApp()->notifications->playSound();
+                }
+                if (getSettings()->notificationFlashTaskbar)
+                {
+                    getApp()->windows->sendAlert();
+                }
+            }
+            // Channel live message
+            MessageBuilder builder;
+            TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
+                                                    &builder);
+            this->addMessage(builder.release());
+
+            // Message in /live channel
+            MessageBuilder builder2;
+            TwitchMessageBuilder::liveMessage(this->getDisplayName(),
+                                              &builder2);
+            getApp()->twitch->liveChannel->addMessage(builder2.release());
+
+            // Notify on all channels with a ping sound
+            if (getSettings()->notificationOnAnyChannel &&
+                !(isInStreamerMode() &&
+                  getSettings()->streamerModeSuppressLiveNotifications))
+            {
+                getApp()->notifications->playSound();
+            }
+        }
+        else
+        {
+            qCDebug(chatterinoTwitch)
+                << "[TwitchChannel" << this->getName() << "] Offline";
+            // Channel offline message
+            MessageBuilder builder;
+            TwitchMessageBuilder::offlineSystemMessage(this->getDisplayName(),
+                                                       &builder);
+            this->addMessage(builder.release());
+
+            // "delete" old 'CHANNEL is live' message
+            LimitedQueueSnapshot<MessagePtr> snapshot =
+                getApp()->twitch->liveChannel->getMessageSnapshot();
+            int snapshotLength = snapshot.size();
+
+            // MSVC hates this code if the parens are not there
+            int end = (std::max)(0, snapshotLength - 200);
+            auto liveMessageSearchText =
+                QString("%1 is live!").arg(this->getDisplayName());
+
+            for (int i = snapshotLength - 1; i >= end; --i)
+            {
+                const auto &s = snapshot[i];
+
+                if (s->messageText == liveMessageSearchText)
+                {
+                    s->flags.set(MessageFlag::Disabled);
+                    break;
+                }
+            }
+        }
+    };
+
+    this->signalHolder_.managedConnect(this->liveStatusChanged,
+                                       onLiveStatusChanged);
+
     // debugging
 #if 0
     for (int i = 0; i < 1000; i++) {
@@ -175,7 +252,6 @@ TwitchChannel::~TwitchChannel()
 
 void TwitchChannel::initialize()
 {
-    this->fetchDisplayName();
     this->refreshChatters();
     this->refreshBadges();
 }
@@ -343,18 +419,87 @@ boost::optional<ChannelPointReward> TwitchChannel::channelPointReward(
     return it->second;
 }
 
-void TwitchChannel::updateLiveStatus(
+void TwitchChannel::updateStreamStatus(
     const std::optional<HelixStream> &helixStream)
 {
-    qDebug() << "XXX: Update live status for " << this->getName();
     if (helixStream)
     {
-        qDebug() << "XXX: stream is live";
+        auto stream = *helixStream;
+        {
+            auto status = this->streamStatus_.access();
+            status->viewerCount = stream.viewerCount;
+            status->gameId = stream.gameId;
+            status->game = stream.gameName;
+            status->title = stream.title;
+            QDateTime since =
+                QDateTime::fromString(stream.startedAt, Qt::ISODate);
+            auto diff = since.secsTo(QDateTime::currentDateTime());
+            status->uptime = QString::number(diff / 3600) + "h " +
+                             QString::number(diff % 3600 / 60) + "m";
+
+            status->rerun = false;
+            status->streamType = stream.type;
+        }
+        if (this->setLive(true))
+        {
+            this->liveStatusChanged.invoke(true);
+        }
+        this->streamStatusChanged.invoke();
     }
     else
     {
-        qDebug() << "XXX: stream is not live";
+        if (this->setLive(false))
+        {
+            this->liveStatusChanged.invoke(false);
+            this->streamStatusChanged.invoke();
+        }
     }
+}
+
+void TwitchChannel::updateStreamTitle(const QString &title)
+{
+    {
+        auto status = this->streamStatus_.access();
+        if (status->title == title)
+        {
+            // Title has not changed
+            return;
+        }
+        status->title = title;
+    }
+    this->streamStatusChanged.invoke();
+}
+
+void TwitchChannel::updateDisplayName(const QString &displayName)
+{
+    if (displayName == this->getDisplayName())
+    {
+        // Display name has not changed
+        return;
+    }
+
+    // Display name has changed
+
+    if (QString::compare(displayName, this->getName(), Qt::CaseInsensitive) ==
+        0)
+    {
+        // Display name is only a case variation of the login name
+        this->setDisplayName(displayName);
+
+        this->setLocalizedName(displayName);
+    }
+    else
+    {
+        // Display name contains Chinese, Japanese, or Korean characters
+        this->setDisplayName(this->getName());
+
+        this->setLocalizedName(
+            QString("%1(%2)").arg(this->getName()).arg(displayName));
+    }
+
+    this->addRecentChatter(this->getDisplayName());
+
+    this->displayNameChanged.invoke();
 }
 
 void TwitchChannel::showLoginMessage()
@@ -926,183 +1071,16 @@ int TwitchChannel::chatterCount()
     return this->chatterCount_;
 }
 
-void TwitchChannel::setLive(bool newLiveStatus)
+bool TwitchChannel::setLive(bool newLiveStatus)
 {
+    auto guard = this->streamStatus_.access();
+    if (guard->live == newLiveStatus)
     {
-        auto guard = this->streamStatus_.access();
-        if (guard->live == newLiveStatus)
-        {
-            return;
-        }
-        guard->live = newLiveStatus;
+        return false;
     }
+    guard->live = newLiveStatus;
 
-    if (newLiveStatus)
-    {
-        if (getApp()->notifications->isChannelNotified(this->getName(),
-                                                       Platform::Twitch))
-        {
-            if (Toasts::isEnabled())
-            {
-                getApp()->toasts->sendChannelNotification(
-                    this->getName(), this->accessStreamStatus()->title,
-                    Platform::Twitch);
-            }
-            if (getSettings()->notificationPlaySound)
-            {
-                getApp()->notifications->playSound();
-            }
-            if (getSettings()->notificationFlashTaskbar)
-            {
-                getApp()->windows->sendAlert();
-            }
-        }
-        // Channel live message
-        MessageBuilder builder;
-        TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
-                                                &builder);
-        this->addMessage(builder.release());
-
-        // Message in /live channel
-        MessageBuilder builder2;
-        TwitchMessageBuilder::liveMessage(this->getDisplayName(), &builder2);
-        getApp()->twitch->liveChannel->addMessage(builder2.release());
-
-        // Notify on all channels with a ping sound
-        if (getSettings()->notificationOnAnyChannel &&
-            !(isInStreamerMode() &&
-              getSettings()->streamerModeSuppressLiveNotifications))
-        {
-            getApp()->notifications->playSound();
-        }
-    }
-    else
-    {
-        // Channel offline message
-        MessageBuilder builder;
-        TwitchMessageBuilder::offlineSystemMessage(this->getDisplayName(),
-                                                   &builder);
-        this->addMessage(builder.release());
-
-        // "delete" old 'CHANNEL is live' message
-        LimitedQueueSnapshot<MessagePtr> snapshot =
-            getApp()->twitch->liveChannel->getMessageSnapshot();
-        int snapshotLength = snapshot.size();
-
-        // MSVC hates this code if the parens are not there
-        int end = (std::max)(0, snapshotLength - 200);
-        auto liveMessageSearchText =
-            QString("%1 is live!").arg(this->getDisplayName());
-
-        for (int i = snapshotLength - 1; i >= end; --i)
-        {
-            auto &s = snapshot[i];
-
-            if (s->messageText == liveMessageSearchText)
-            {
-                s->flags.set(MessageFlag::Disabled);
-                break;
-            }
-        }
-    }
-
-    this->liveStatusChanged.invoke();
-}
-
-void TwitchChannel::refreshTitle()
-{
-    // timer has never started, proceed and start it
-    if (!this->titleRefreshedTimer_.isValid())
-    {
-        this->titleRefreshedTimer_.start();
-    }
-    else if (this->roomId().isEmpty() ||
-             this->titleRefreshedTimer_.elapsed() < TITLE_REFRESH_PERIOD)
-    {
-        return;
-    }
-    this->titleRefreshedTimer_.restart();
-
-    getHelix()->getChannel(
-        this->roomId(),
-        [this, weak = weakOf<Channel>(this)](HelixChannel channel) {
-            ChannelPtr shared = weak.lock();
-
-            if (!shared)
-            {
-                return;
-            }
-
-            {
-                auto status = this->streamStatus_.access();
-                status->title = channel.title;
-            }
-
-            this->liveStatusChanged.invoke();
-        },
-        [] {
-            // failure
-        });
-}
-
-void TwitchChannel::refreshLiveStatus()
-{
-    auto roomID = this->roomId();
-
-    if (roomID.isEmpty())
-    {
-        qCDebug(chatterinoTwitch) << "[TwitchChannel" << this->getName()
-                                  << "] Refreshing live status (Missing ID)";
-        this->setLive(false);
-        return;
-    }
-
-    getHelix()->getStreamById(
-        roomID,
-        [this, weak = weakOf<Channel>(this)](bool live, const auto &stream) {
-            ChannelPtr shared = weak.lock();
-            if (!shared)
-            {
-                return;
-            }
-
-            this->parseLiveStatus(live, stream);
-        },
-        [] {
-            // failure
-        },
-        [] {
-            // finally
-        });
-}
-
-void TwitchChannel::parseLiveStatus(bool live, const HelixStream &stream)
-{
-    if (!live)
-    {
-        this->setLive(false);
-        return;
-    }
-
-    {
-        auto status = this->streamStatus_.access();
-        status->viewerCount = stream.viewerCount;
-        status->gameId = stream.gameId;
-        status->game = stream.gameName;
-        status->title = stream.title;
-        QDateTime since = QDateTime::fromString(stream.startedAt, Qt::ISODate);
-        auto diff = since.secsTo(QDateTime::currentDateTime());
-        status->uptime = QString::number(diff / 3600) + "h " +
-                         QString::number(diff % 3600 / 60) + "m";
-
-        status->rerun = false;
-        status->streamType = stream.type;
-    }
-
-    this->setLive(true);
-
-    // Signal all listeners that the stream status has been updated
-    this->liveStatusChanged.invoke();
+    return true;
 }
 
 void TwitchChannel::loadRecentMessages()
@@ -1235,33 +1213,6 @@ void TwitchChannel::refreshChatters()
         },
         // Refresh chatters should only be used when failing silently is an option
         [](auto error, auto message) {});
-}
-
-void TwitchChannel::fetchDisplayName()
-{
-    getHelix()->getUserByName(
-        this->getName(),
-        [weak = weakOf<Channel>(this)](const auto &user) {
-            auto shared = weak.lock();
-            if (!shared)
-                return;
-            auto channel = static_cast<TwitchChannel *>(shared.get());
-            if (QString::compare(user.displayName, channel->getName(),
-                                 Qt::CaseInsensitive) == 0)
-            {
-                channel->setDisplayName(user.displayName);
-                channel->setLocalizedName(user.displayName);
-            }
-            else
-            {
-                channel->setLocalizedName(QString("%1(%2)")
-                                              .arg(channel->getName())
-                                              .arg(user.displayName));
-            }
-            channel->addRecentChatter(channel->getDisplayName());
-            channel->displayNameChanged.invoke();
-        },
-        [] {});
 }
 
 void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)

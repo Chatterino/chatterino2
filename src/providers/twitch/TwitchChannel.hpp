@@ -120,7 +120,6 @@ public:
     virtual bool hasHighRateLimit() const override;
     virtual bool canReconnect() const override;
     virtual void reconnect() override;
-    void refreshTitle();
     void createClip();
 
     // Data
@@ -194,7 +193,23 @@ public:
     // Signals
     pajlada::Signals::NoArgSignal roomIdChanged;
     pajlada::Signals::NoArgSignal userStateChanged;
-    pajlada::Signals::NoArgSignal liveStatusChanged;
+
+    /**
+     * This signals fires whenever the live status is changed
+     *
+     * Streams are counted as offline by default, so if a stream does not go online
+     * this signal will never fire
+     **/
+    pajlada::Signals::Signal<bool> liveStatusChanged;
+
+    /**
+     * This signal fires whenever the stream status is changed
+     *
+     * This includes when the stream goes from offline to online,
+     * or the viewer count changes, or the title has been updated
+     **/
+    pajlada::Signals::NoArgSignal streamStatusChanged;
+
     pajlada::Signals::NoArgSignal roomModesChanged;
 
     // Channel point rewards
@@ -206,7 +221,10 @@ public:
         const QString &rewardId) const;
 
     // Live status
-    void updateLiveStatus(const std::optional<HelixStream> &helixStream);
+    void updateStreamStatus(const std::optional<HelixStream> &helixStream);
+    void updateStreamTitle(const QString &title);
+
+    void updateDisplayName(const QString &displayName);
 
 private:
     struct NameOptions {
@@ -216,21 +234,23 @@ private:
 
 private:
     // Methods
-    void refreshLiveStatus();
-    void parseLiveStatus(bool live, const HelixStream &stream);
     void refreshPubSub();
     void refreshChatters();
     void refreshBadges();
     void refreshCheerEmotes();
     void loadRecentMessages();
     void loadRecentMessagesReconnect();
-    void fetchDisplayName();
     void cleanUpReplyThreads();
     void showLoginMessage();
     /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
     void joinBttvChannel() const;
 
-    void setLive(bool newLiveStatus);
+    /**
+     * @brief Sets the live status of this Twitch channel
+     *
+     * Returns true if the live status changed with this call
+     **/
+    bool setLive(bool newLiveStatus);
     void setMod(bool value);
     void setVIP(bool value);
     void setStaff(bool value);
@@ -239,7 +259,16 @@ private:
     void setDisplayName(const QString &name);
     void setLocalizedName(const QString &name);
 
+    /**
+     * Returns the display name of the user
+     *
+     * If the display name contained chinese, japenese, or korean characters, the user's login name is returned instead
+     **/
     const QString &getDisplayName() const override;
+
+    /**
+     * Returns the localized name of the user
+     **/
     const QString &getLocalizedName() const override;
 
     QString prepareMessage(const QString &message) const;
