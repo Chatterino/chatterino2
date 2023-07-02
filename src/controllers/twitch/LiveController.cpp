@@ -47,7 +47,7 @@ TwitchLiveController::TwitchLiveController()
         TwitchLiveController::IMMEDIATE_REQUEST_INTERVAL);
 }
 
-void TwitchLiveController::add(std::shared_ptr<TwitchChannel> newChannel)
+void TwitchLiveController::add(const std::shared_ptr<TwitchChannel> &newChannel)
 {
     assert(newChannel != nullptr);
 

@@ -23,7 +23,7 @@ class ITwitchLiveController
 public:
     virtual ~ITwitchLiveController() = default;
 
-    virtual void add(std::shared_ptr<TwitchChannel> newChannel) = 0;
+    virtual void add(const std::shared_ptr<TwitchChannel> &newChannel) = 0;
 };
 
 class TwitchLiveController : public ITwitchLiveController, public Singleton
@@ -46,7 +46,7 @@ public:
 
     // Add a Twitch channel to be queried for live status
     // A request is made within a few seconds if this is the first time this channel is added
-    void add(std::shared_ptr<TwitchChannel> newChannel) override;
+    void add(const std::shared_ptr<TwitchChannel> &newChannel) override;
 
 private:
     void request(std::optional<QStringList> optChannelIDs = std::nullopt);
