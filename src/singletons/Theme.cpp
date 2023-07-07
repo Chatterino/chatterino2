@@ -347,13 +347,18 @@ void Theme::parseFrom(const QJsonObject &root)
     this->isLight_ =
         root["metadata"_L1]["iconTheme"_L1].toString() == u"dark"_s;
 
-    this->splits.input.styleSheet =
-        "background:" + this->splits.input.background.name() + ";" +
-        "border:" + this->tabs.selected.backgrounds.regular.name() + ";" +
-        "color:" + this->messages.textColors.regular.name() + ";" +
-        "selection-background-color:" +
-        (this->isLightTheme() ? "#68B1FF"
-                              : this->tabs.selected.backgrounds.regular.name());
+    this->splits.input.styleSheet = uR"(
+        background: %1;
+        border: %2;
+        color: %3;
+        selection-background-color: %4;
+    )"_s.arg(
+        this->splits.input.background.name(QColor::HexArgb),
+        this->tabs.selected.backgrounds.regular.name(QColor::HexArgb),
+        this->messages.textColors.regular.name(QColor::HexArgb),
+        this->isLightTheme()
+            ? u"#68B1FF"_s
+            : this->tabs.selected.backgrounds.regular.name(QColor::HexArgb));
 
     // Usercard buttons
     if (this->isLightTheme())
