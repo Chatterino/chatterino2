@@ -2,6 +2,7 @@
 #include "singletons/Theme.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
@@ -17,8 +18,9 @@
 namespace {
 
 using namespace chatterino;
+using namespace literals;
 
-void parseInto(const QJsonObject &obj, const QLatin1String &key, QColor &color)
+void parseInto(const QJsonObject &obj, QLatin1String key, QColor &color)
 {
     const auto &jsonValue = obj[key];
     if (!jsonValue.isString()) [[unlikely]]
@@ -40,8 +42,9 @@ void parseInto(const QJsonObject &obj, const QLatin1String &key, QColor &color)
 }
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define _c2StringLit(s, ty) s##ty
 #define parseColor(to, from, key) \
-    parseInto(from, QLatin1String(#key), (to).from.key)
+    parseInto(from, _c2StringLit(#key, _L1), (to).from.key)
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
 void parseWindow(const QJsonObject &window, chatterino::Theme &theme)
@@ -52,32 +55,32 @@ void parseWindow(const QJsonObject &window, chatterino::Theme &theme)
 
 void parseTabs(const QJsonObject &tabs, chatterino::Theme &theme)
 {
-    const auto parseTabColors = [](auto json, auto &tab) {
-        parseInto(json, QLatin1String("text"), tab.text);
+    const auto parseTabColors = [](const auto &json, auto &tab) {
+        parseInto(json, "text"_L1, tab.text);
         {
-            const auto backgrounds = json["backgrounds"].toObject();
+            const auto backgrounds = json["backgrounds"_L1].toObject();
             parseColor(tab, backgrounds, regular);
             parseColor(tab, backgrounds, hover);
             parseColor(tab, backgrounds, unfocused);
         }
         {
-            const auto line = json["line"].toObject();
+            const auto line = json["line"_L1].toObject();
             parseColor(tab, line, regular);
             parseColor(tab, line, hover);
             parseColor(tab, line, unfocused);
         }
     };
     parseColor(theme, tabs, dividerLine);
-    parseTabColors(tabs["regular"].toObject(), theme.tabs.regular);
-    parseTabColors(tabs["newMessage"].toObject(), theme.tabs.newMessage);
-    parseTabColors(tabs["highlighted"].toObject(), theme.tabs.highlighted);
-    parseTabColors(tabs["selected"].toObject(), theme.tabs.selected);
+    parseTabColors(tabs["regular"_L1].toObject(), theme.tabs.regular);
+    parseTabColors(tabs["newMessage"_L1].toObject(), theme.tabs.newMessage);
+    parseTabColors(tabs["highlighted"_L1].toObject(), theme.tabs.highlighted);
+    parseTabColors(tabs["selected"_L1].toObject(), theme.tabs.selected);
 }
 
 void parseMessages(const QJsonObject &messages, chatterino::Theme &theme)
 {
     {
-        const auto textColors = messages["textColors"].toObject();
+        const auto textColors = messages["textColors"_L1].toObject();
         parseColor(theme.messages, textColors, regular);
         parseColor(theme.messages, textColors, caret);
         parseColor(theme.messages, textColors, link);
@@ -85,7 +88,7 @@ void parseMessages(const QJsonObject &messages, chatterino::Theme &theme)
         parseColor(theme.messages, textColors, chatPlaceholder);
     }
     {
-        const auto backgrounds = messages["backgrounds"].toObject();
+        const auto backgrounds = messages["backgrounds"_L1].toObject();
         parseColor(theme.messages, backgrounds, regular);
         parseColor(theme.messages, backgrounds, alternate);
     }
@@ -114,7 +117,7 @@ void parseSplits(const QJsonObject &splits, chatterino::Theme &theme)
     parseColor(theme, splits, resizeHandleBackground);
 
     {
-        const auto header = splits["header"].toObject();
+        const auto header = splits["header"_L1].toObject();
         parseColor(theme.splits, header, border);
         parseColor(theme.splits, header, focusedBorder);
         parseColor(theme.splits, header, background);
@@ -123,7 +126,7 @@ void parseSplits(const QJsonObject &splits, chatterino::Theme &theme)
         parseColor(theme.splits, header, focusedText);
     }
     {
-        const auto input = splits["input"].toObject();
+        const auto input = splits["input"_L1].toObject();
         parseColor(theme.splits, input, background);
         parseColor(theme.splits, input, text);
     }
@@ -131,17 +134,18 @@ void parseSplits(const QJsonObject &splits, chatterino::Theme &theme)
 
 void parseColors(const QJsonObject &root, chatterino::Theme &theme)
 {
-    const auto colors = root["colors"].toObject();
+    const auto colors = root["colors"_L1].toObject();
 
-    parseInto(colors, QLatin1String("accent"), theme.accent);
+    parseInto(colors, "accent"_L1, theme.accent);
 
-    parseWindow(colors["window"].toObject(), theme);
-    parseTabs(colors["tabs"].toObject(), theme);
-    parseMessages(colors["messages"].toObject(), theme);
-    parseScrollbars(colors["scrollbars"].toObject(), theme);
-    parseSplits(colors["splits"].toObject(), theme);
+    parseWindow(colors["window"_L1].toObject(), theme);
+    parseTabs(colors["tabs"_L1].toObject(), theme);
+    parseMessages(colors["messages"_L1].toObject(), theme);
+    parseScrollbars(colors["scrollbars"_L1].toObject(), theme);
+    parseSplits(colors["splits"_L1].toObject(), theme);
 }
 #undef parseColor
+#undef _c2StringLit
 
 /**
  * Load the given theme descriptor from its path
@@ -341,7 +345,7 @@ void Theme::parseFrom(const QJsonObject &root)
     parseColors(root, *this);
 
     this->isLight_ =
-        root["metadata"]["iconTheme"].toString() == QStringLiteral("dark");
+        root["metadata"_L1]["iconTheme"_L1].toString() == u"dark"_s;
 
     this->splits.input.styleSheet =
         "background:" + this->splits.input.background.name() + ";" +
