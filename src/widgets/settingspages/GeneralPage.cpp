@@ -1002,6 +1002,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addIntInput("Usercard scrollback limit (requires restart)",
                        s.scrollbackUsercardLimit, 100, 100000, 100);
 
+    layout.addSessionCheckbox(
+        "Automatically reload custom theme (session only)",
+        getTheme()->isAutoReloading(),
+        [](bool on) {
+            getTheme()->setAutoReload(on);
+        },
+        "Automatically reloads the theme when the custom theme file is "
+        "updated. This only applies to the current session to save resources.");
+
     layout.addCheckbox("Enable experimental IRC support (requires restart)",
                        s.enableExperimentalIrc, false,
                        "When enabled, attempting to join a channel will "

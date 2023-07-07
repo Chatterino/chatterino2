@@ -6,11 +6,13 @@
 
 #include <pajlada/settings/setting.hpp>
 #include <QColor>
+#include <QFileSystemWatcher>
 #include <QJsonObject>
 #include <QPixmap>
 #include <QString>
 #include <QVariant>
 
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -138,6 +140,9 @@ public:
     void normalizeColor(QColor &color) const;
     void update();
 
+    bool isAutoReloading() const;
+    void setAutoReload(bool autoReload);
+
     /**
      * Return a list of available themes
      **/
@@ -151,6 +156,11 @@ private:
     bool isLight_ = false;
 
     std::vector<ThemeDescriptor> availableThemes_;
+
+    QString currentThemePath_;
+    std::unique_ptr<QFileSystemWatcher> themeWatcher_;
+    void watchedFileChanged(const QString &path);
+    void updateCurrentWatchPath();
 
     /**
      * Figure out which themes are available in the Themes directory

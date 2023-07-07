@@ -9,6 +9,7 @@
 
 #include <QColor>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QJsonDocument>
 #include <QSet>
@@ -147,20 +148,13 @@ void parseColors(const QJsonObject &root, chatterino::Theme &theme)
 #undef parseColor
 #undef _c2StringLit
 
-/**
- * Load the given theme descriptor from its path
- *
- * Returns a JSON object containing theme data if the theme is valid, otherwise nullopt
- *
- * NOTE: No theme validation is done by this function
- **/
-std::optional<QJsonObject> loadTheme(const ThemeDescriptor &theme)
+std::optional<QJsonObject> loadThemeFromPath(const QString &path)
 {
-    QFile file(theme.path);
+    QFile file(path);
     if (!file.open(QFile::ReadOnly))
     {
         qCWarning(chatterinoTheme)
-            << "Failed to open" << file.fileName() << "at" << theme.path;
+            << "Failed to open" << file.fileName() << "at" << path;
         return std::nullopt;
     }
 
@@ -176,6 +170,18 @@ std::optional<QJsonObject> loadTheme(const ThemeDescriptor &theme)
     // TODO: Validate JSON schema?
 
     return json.object();
+}
+
+/**
+ * Load the given theme descriptor from its path
+ *
+ * Returns a JSON object containing theme data if the theme is valid, otherwise nullopt
+ *
+ * NOTE: No theme validation is done by this function
+ **/
+std::optional<QJsonObject> loadTheme(const ThemeDescriptor &theme)
+{
+    return loadThemeFromPath(theme.path);
 }
 
 }  // namespace
@@ -232,6 +238,7 @@ void Theme::update()
     auto oTheme = this->findThemeByKey(this->themeName);
 
     std::optional<QJsonObject> themeJSON;
+    QString themePath;
     if (!oTheme)
     {
         qCWarning(chatterinoTheme)
@@ -239,12 +246,14 @@ void Theme::update()
             << "not found, falling back to the fallback theme";
 
         themeJSON = loadTheme(fallbackTheme);
+        themePath = fallbackTheme.path;
     }
     else
     {
         const auto &theme = *oTheme;
 
         themeJSON = loadTheme(theme);
+        themePath = theme.path;
 
         if (!themeJSON)
         {
@@ -254,6 +263,7 @@ void Theme::update()
 
             // Parsing the theme failed, fall back
             themeJSON = loadTheme(fallbackTheme);
+            themePath = fallbackTheme.path;
         }
     }
 
@@ -265,8 +275,10 @@ void Theme::update()
     }
 
     this->parseFrom(*themeJSON);
+    this->currentThemePath_ = themePath;
 
     this->updated.invoke();
+    this->updateCurrentWatchPath();
 }
 
 std::vector<std::pair<QString, QVariant>> Theme::availableThemes() const
@@ -371,6 +383,104 @@ void Theme::parseFrom(const QJsonObject &root)
         this->buttons.copy = getResources().buttons.copyLight;
         this->buttons.pin = getResources().buttons.pinDisabledLight;
     }
+}
+
+bool Theme::isAutoReloading() const
+{
+    return this->themeWatcher_ != nullptr;
+}
+
+void Theme::setAutoReload(bool autoReload)
+{
+    // autoReload <=> themeWatcher != nullptr
+    if (autoReload == this->isAutoReloading())
+    {
+        return;
+    }
+
+    if (!autoReload)
+    {
+        this->themeWatcher_.reset();
+        return;
+    }
+
+    this->themeWatcher_ = std::make_unique<QFileSystemWatcher>();
+
+    QObject::connect(this->themeWatcher_.get(),
+                     &QFileSystemWatcher::fileChanged,
+                     [this](const auto &path) {
+                         this->watchedFileChanged(path);
+                     });
+    this->updateCurrentWatchPath();
+    qCDebug(chatterinoTheme) << "Enabled theme watcher";
+}
+
+void Theme::updateCurrentWatchPath()
+{
+    if (this->themeWatcher_ == nullptr)
+    {
+        return;
+    }
+    auto files = this->themeWatcher_->files();
+
+    if (files.empty())
+    {
+        this->themeWatcher_->addPath(this->currentThemePath_);
+        return;
+    }
+
+    if (files.length() == 1)
+    {
+        auto watched = files[0];
+        if (watched == this->currentThemePath_)
+        {
+            return;
+        }
+        this->themeWatcher_->addPath(this->currentThemePath_);
+        this->themeWatcher_->removePath(watched);
+        return;
+    }
+
+    this->themeWatcher_->removePaths(files);
+    this->themeWatcher_->addPath(this->currentThemePath_);
+}
+
+void Theme::watchedFileChanged(const QString &path)
+{
+    QFile target(path);
+    if (!target.exists())
+    {
+        return;
+    }
+    if (target.size() < 2)
+    {
+        return;
+    }
+
+    constexpr const double nsToMs = 1.0 / 1000000.0;
+    QElapsedTimer timer;
+    timer.start();
+
+    auto json = loadThemeFromPath(path);
+    auto loadTs = double(timer.nsecsElapsed()) * nsToMs;
+
+    if (!json)
+    {
+        qCWarning(chatterinoTheme) << "Failed to load theme JSON from" << path;
+        return;
+    }
+    this->parseFrom(*json);
+    auto parseTs = double(timer.nsecsElapsed()) * nsToMs;
+
+    this->updated.invoke();
+    auto updateTs = double(timer.nsecsElapsed()) * nsToMs;
+
+    qCDebug(chatterinoTheme).nospace().noquote()
+        << "Reloaded theme in " << QString::number(updateTs, 'f', 2)
+        << "ms (load: " << QString::number(loadTs, 'f', 2)
+        << "ms, parse: " << QString::number(parseTs - loadTs, 'f', 2)
+        << "ms, update: " << QString::number(updateTs - parseTs, 'f', 2)
+        << "ms)";
 }
 
 void Theme::normalizeColor(QColor &color) const
