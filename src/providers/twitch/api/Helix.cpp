@@ -1,9 +1,11 @@
 #include "providers/twitch/api/Helix.hpp"
 
+#include "common/Literals.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
+#include "util/CancellationToken.hpp"
 
 #include <magic_enum.hpp>
 #include <QJsonDocument>
@@ -19,6 +21,8 @@ static constexpr auto NUM_CHATTERS_TO_FETCH = 1000;
 }  // namespace
 
 namespace chatterino {
+
+using namespace literals;
 
 static IHelix *instance = nullptr;
 
@@ -544,40 +548,30 @@ void Helix::createStreamMarker(
 };
 
 void Helix::loadBlocks(QString userId,
-                       ResultCallback<std::vector<HelixBlock>> successCallback,
-                       HelixFailureCallback failureCallback)
+                       ResultCallback<std::vector<HelixBlock>> pageCallback,
+                       FailureCallback<QString> failureCallback,
+                       CancellationToken &&token)
 {
-    QUrlQuery urlQuery;
-    urlQuery.addQueryItem("broadcaster_id", userId);
-    urlQuery.addQueryItem("first", "100");
-
-    this->makeGet("users/blocks", urlQuery)
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
-            auto root = result.parseJson();
-            auto data = root.value("data");
-
-            if (!data.isArray())
-            {
-                failureCallback();
-                return Failure;
-            }
+    this->paginate(
+        u"users/blocks"_s,
+        {{u"broadcaster_id"_s, userId}, {u"first"_s, u"100"_s}},
+        [pageCallback](const QJsonObject &json) {
+            const auto data = json["data"_L1].toArray();
 
             std::vector<HelixBlock> ignores;
+            ignores.reserve(data.count());
 
-            for (const auto &jsonStream : data.toArray())
+            for (const auto &ignore : data)
             {
-                ignores.emplace_back(jsonStream.toObject());
+                ignores.emplace_back(ignore.toObject());
             }
 
-            successCallback(ignores);
-
-            return Success;
-        })
-        .onError([failureCallback](auto /*result*/) {
-            // TODO: make better xd
-            failureCallback();
-        })
-        .execute();
+            pageCallback(ignores);
+        },
+        [failureCallback](const NetworkResult &result) {
+            failureCallback(result.formatError());
+        },
+        std::move(token));
 }
 
 void Helix::blockUser(QString targetUserId, const QObject *caller,

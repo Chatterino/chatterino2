@@ -15,6 +15,7 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 #include "singletons/Emotes.hpp"
+#include "util/CancellationToken.hpp"
 #include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -100,12 +101,14 @@ bool TwitchAccount::isAnon() const
 
 void TwitchAccount::loadBlocks()
 {
+    auto token = CancellationToken(false);
+    this->blockToken_ = token;
+    this->ignores_.clear();
+    this->ignoresUserIds_.clear();
+
     getHelix()->loadBlocks(
         getIApp()->getAccounts()->twitch.getCurrent()->userId_,
         [this](const std::vector<HelixBlock> &blocks) {
-            this->ignores_.clear();
-            this->ignoresUserIds_.clear();
-
             for (const HelixBlock &block : blocks)
             {
                 TwitchUser blockedUser;
@@ -114,9 +117,11 @@ void TwitchAccount::loadBlocks()
                 this->ignoresUserIds_.insert(blockedUser.id);
             }
         },
-        [] {
-            qCWarning(chatterinoTwitch) << "Fetching blocks failed!";
-        });
+        [](auto error) {
+            qCWarning(chatterinoTwitch).noquote()
+                << "Fetching blocks failed:" << error;
+        },
+        std::move(token));
 }
 
 void TwitchAccount::blockUser(const QString &userId, const QObject *caller,

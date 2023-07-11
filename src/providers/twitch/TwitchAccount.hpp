@@ -5,6 +5,7 @@
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
+#include "util/CancellationToken.hpp"
 #include "util/QStringHash.hpp"
 
 #include <QColor>
@@ -108,6 +109,7 @@ private:
 
     QStringList userstateEmoteSets_;
 
+    ScopedCancellationToken blockToken_;
     QSet<TwitchUser> ignores_;
     QSet<QString> ignoresUserIds_;
 

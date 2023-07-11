@@ -24,6 +24,8 @@ using HelixFailureCallback = std::function<void()>;
 template <typename... T>
 using ResultCallback = std::function<void(T...)>;
 
+class CancellationToken;
+
 struct HelixUser {
     QString id;
     QString login;
@@ -807,8 +809,9 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference#get-user-block-list
     virtual void loadBlocks(
-        QString userId, ResultCallback<std::vector<HelixBlock>> successCallback,
-        HelixFailureCallback failureCallback) = 0;
+        QString userId, ResultCallback<std::vector<HelixBlock>> pageCallback,
+        FailureCallback<QString> failureCallback,
+        CancellationToken &&token) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#block-user
     virtual void blockUser(QString targetUserId, const QObject *caller,
@@ -1126,8 +1129,9 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference#get-user-block-list
     void loadBlocks(QString userId,
-                    ResultCallback<std::vector<HelixBlock>> successCallback,
-                    HelixFailureCallback failureCallback) final;
+                    ResultCallback<std::vector<HelixBlock>> pageCallback,
+                    FailureCallback<QString> failureCallback,
+                    CancellationToken &&token) final;
 
     // https://dev.twitch.tv/docs/api/reference#block-user
     void blockUser(QString targetUserId, const QObject *caller,
