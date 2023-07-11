@@ -11,6 +11,12 @@
 
 namespace chatterino {
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#    define QHashValue uint
+#else
+#    define QHashValue size_t
+#endif
+
 struct HelixBlock;
 
 struct TwitchUser {
@@ -42,7 +48,17 @@ struct TwitchUser {
     {
         return !(*this == rhs);
     }
+
+    friend QHashValue qHash(const TwitchUser &user, QHashValue seed) noexcept;
 };
+
+inline QHashValue qHash(const chatterino::TwitchUser &user,
+                        QHashValue seed = 0) noexcept
+{
+    return qHash(user.id, seed);
+}
+
+#undef QHashValue
 
 }  // namespace chatterino
 
@@ -86,11 +102,3 @@ struct Deserialize<chatterino::TwitchUser> {
 };
 
 }  // namespace pajlada
-
-template <>
-struct std::hash<chatterino::TwitchUser> {
-    size_t operator()(const chatterino::TwitchUser &user, size_t seed = 0) const
-    {
-        return qHash(user.id, seed);
-    }
-};
