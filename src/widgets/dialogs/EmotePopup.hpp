@@ -26,10 +26,12 @@ public:
     pajlada::Signals::Signal<Link> linkClicked;
 
 private:
-    ChannelView *globalEmotesView_{};
-    ChannelView *channelEmotesView_{};
     ChannelView *subEmotesView_{};
-    ChannelView *viewEmojis_{};
+    ChannelView *viewEmojisView_{};
+    ChannelView *bttvEmotesView_{};
+    ChannelView *SevenTVEmotesView_{};
+    ChannelView *FFZEmotesView_{};
+
     /**
      * @brief Visible only when the user has specified a search query into the `search_` input.
      * Otherwise the `notebook_` and all other views are visible.

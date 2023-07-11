@@ -242,8 +242,8 @@ EmotePopup::EmotePopup(QWidget *parent)
         auto *view = new ChannelView();
 
         view->setOverrideFlags(MessageElementFlags{
-            MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
-            MessageElementFlag::EmoteImages});
+                                                   MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
+                                                   MessageElementFlag::EmoteImages});
         view->setEnableScrollingToBottom(false);
         view->linkClicked.connect(clicked);
 
@@ -263,11 +263,14 @@ EmotePopup::EmotePopup(QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
 
     this->subEmotesView_ = makeView("Subs");
-    this->channelEmotesView_ = makeView("Channel");
-    this->globalEmotesView_ = makeView("Global");
-    this->viewEmojis_ = makeView("Emojis");
 
-    loadEmojis(*this->viewEmojis_, getApp()->emotes->emojis.emojis);
+    this->bttvEmotesView_ = makeView("BTTV");
+    this->SevenTVEmotesView_ = makeView("7TV");
+    this->FFZEmotesView_ = makeView("FFZ");
+
+    this->viewEmojisView_ = makeView("Emojis");
+
+    loadEmojis(*this->viewEmojisView_, getApp()->emotes->emojis.emojis);
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
                                        [this]() {
@@ -389,6 +392,10 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     auto globalChannel = std::make_shared<Channel>("", Channel::Type::None);
     auto channelChannel = std::make_shared<Channel>("", Channel::Type::None);
 
+    auto seventvChannel = std::make_shared<Channel>("", Channel::Type::None);
+    auto bttvChannel = std::make_shared<Channel>("", Channel::Type::None);
+    auto ffzChannel = std::make_shared<Channel>("", Channel::Type::None);
+
     // twitch
     addTwitchEmoteSets(
         getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets,
@@ -397,41 +404,41 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     // global
     if (Settings::instance().enableBTTVGlobalEmotes)
     {
-        addEmotes(*globalChannel, *getApp()->twitch->getBttvEmotes().emotes(),
-                  "BetterTTV", MessageElementFlag::BttvEmote);
+        addEmotes(*bttvChannel, *getApp()->twitch->getBttvEmotes().emotes(),
+                  "Global", MessageElementFlag::BttvEmote);
     }
     if (Settings::instance().enableFFZGlobalEmotes)
     {
-        addEmotes(*globalChannel, *getApp()->twitch->getFfzEmotes().emotes(),
-                  "FrankerFaceZ", MessageElementFlag::FfzEmote);
+        addEmotes(*ffzChannel, *getApp()->twitch->getFfzEmotes().emotes(),
+                  "Global", MessageElementFlag::FfzEmote);
     }
     if (Settings::instance().enableSevenTVGlobalEmotes)
     {
-        addEmotes(*globalChannel,
-                  *getApp()->twitch->getSeventvEmotes().globalEmotes(), "7TV",
+        addEmotes(*seventvChannel,
+                  *getApp()->twitch->getSeventvEmotes().globalEmotes(), "Global",
                   MessageElementFlag::SevenTVEmote);
     }
 
     // channel
     if (Settings::instance().enableBTTVChannelEmotes)
     {
-        addEmotes(*channelChannel, *this->twitchChannel_->bttvEmotes(),
-                  "BetterTTV", MessageElementFlag::BttvEmote);
+        addEmotes(*bttvChannel, *this->twitchChannel_->bttvEmotes(), "Channel", MessageElementFlag::BttvEmote);
     }
     if (Settings::instance().enableFFZChannelEmotes)
     {
-        addEmotes(*channelChannel, *this->twitchChannel_->ffzEmotes(),
-                  "FrankerFaceZ", MessageElementFlag::FfzEmote);
+        addEmotes(*ffzChannel, *this->twitchChannel_->ffzEmotes(),
+                  "Channel", MessageElementFlag::FfzEmote);
     }
     if (Settings::instance().enableSevenTVChannelEmotes)
     {
-        addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
-                  "7TV", MessageElementFlag::SevenTVEmote);
+        addEmotes(*seventvChannel, *this->twitchChannel_->seventvEmotes(), "Channel", MessageElementFlag::SevenTVEmote);
     }
 
-    this->globalEmotesView_->setChannel(globalChannel);
     this->subEmotesView_->setChannel(subChannel);
-    this->channelEmotesView_->setChannel(channelChannel);
+
+    this->bttvEmotesView_->setChannel(bttvChannel);
+    this->SevenTVEmotesView_->setChannel(seventvChannel);
+    this->FFZEmotesView_->setChannel(ffzChannel);
 
     if (subChannel->getMessageSnapshot().size() == 0)
     {
