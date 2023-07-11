@@ -1406,6 +1406,11 @@ private:
     NetworkRequest makePut(const QString &url, const QUrlQuery &urlQuery);
     NetworkRequest makePatch(const QString &url, const QUrlQuery &urlQuery);
 
+    void paginate(const QString &url, const QUrlQuery &baseQuery,
+                  std::function<void(const QJsonObject &)> onPage,
+                  std::function<void(NetworkResult)> onError,
+                  CancellationToken &&token);
+
     QString clientId;
     QString oauthToken;
 };

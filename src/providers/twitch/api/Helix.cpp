@@ -2931,6 +2931,47 @@ NetworkRequest Helix::makePatch(const QString &url, const QUrlQuery &urlQuery)
     return this->makeRequest(url, urlQuery, NetworkRequestType::Patch);
 }
 
+void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
+                     std::function<void(const QJsonObject &)> onPage,
+                     std::function<void(NetworkResult)> onError,
+                     CancellationToken &&cancellationToken)
+{
+    auto onSuccess =
+        std::make_shared<std::function<Outcome(NetworkResult)>>(nullptr);
+    *onSuccess = [this, onPage, onError, onSuccess, url = QString(url),
+                  query = QUrlQuery(baseQuery),
+                  cancellationToken = std::move(cancellationToken)](
+                     const NetworkResult &res) mutable -> Outcome {
+        if (cancellationToken.isCanceled())
+        {
+            return Success;
+        }
+
+        const auto json = res.parseJson();
+        onPage(json);
+
+        const auto pagination = json["pagination"_L1].toObject();
+        if (pagination.empty() || !pagination.contains("cursor"_L1))
+        {
+            return Success;
+        }
+        query.removeAllQueryItems(u"after"_s);
+        query.addQueryItem(u"after"_s, pagination["cursor"_L1].toString());
+
+        this->makeGet(url, query)
+            .onSuccess(*onSuccess)
+            .onError(onError)
+            .execute();
+
+        return Success;
+    };
+
+    this->makeGet(url, baseQuery)
+        .onSuccess(*onSuccess)
+        .onError(onError)
+        .execute();
+}
+
 void Helix::update(QString clientId, QString oauthToken)
 {
     this->clientId = std::move(clientId);
