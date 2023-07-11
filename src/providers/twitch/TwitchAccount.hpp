@@ -10,6 +10,7 @@
 #include <QColor>
 #include <QElapsedTimer>
 #include <QObject>
+#include <QSet>
 #include <QString>
 #include <rapidjson/document.h>
 
@@ -72,15 +73,15 @@ public:
     bool isAnon() const;
 
     void loadBlocks();
-    void blockUser(QString userId, const QObject *caller,
+    void blockUser(const QString &userId, const QObject *caller,
                    std::function<void()> onSuccess,
                    std::function<void()> onFailure);
-    void unblockUser(QString userId, const QObject *caller,
+    void unblockUser(const QString &userId, const QObject *caller,
                      std::function<void()> onSuccess,
                      std::function<void()> onFailure);
 
-    SharedAccessGuard<const std::set<QString>> accessBlockedUserIds() const;
-    SharedAccessGuard<const std::set<TwitchUser>> accessBlocks() const;
+    [[nodiscard]] const QSet<TwitchUser> &blocks() const;
+    [[nodiscard]] const QSet<QString> &blockedUserIds() const;
 
     void loadEmotes(std::weak_ptr<Channel> weakChannel = {});
     // loadUserstateEmotes loads emote sets that are part of the USERSTATE emote-sets key
@@ -105,10 +106,10 @@ private:
     const bool isAnon_;
     Atomic<QColor> color_;
 
-    mutable std::mutex ignoresMutex_;
     QStringList userstateEmoteSets_;
-    UniqueAccess<std::set<TwitchUser>> ignores_;
-    UniqueAccess<std::set<QString>> ignoresUserIds_;
+
+    QSet<TwitchUser> ignores_;
+    QSet<QString> ignoresUserIds_;
 
     //    std::map<UserId, TwitchAccountEmoteData> emotes;
     UniqueAccess<TwitchAccountEmoteData> emotes_;

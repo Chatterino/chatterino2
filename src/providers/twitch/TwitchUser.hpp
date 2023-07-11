@@ -3,6 +3,7 @@
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize.hpp>
+#include <QHashFunctions>
 #include <QString>
 #include <rapidjson/document.h>
 
@@ -30,6 +31,16 @@ struct TwitchUser {
     bool operator<(const TwitchUser &rhs) const
     {
         return this->id < rhs.id;
+    }
+
+    bool operator==(const TwitchUser &rhs) const
+    {
+        return this->id == rhs.id;
+    }
+
+    bool operator!=(const TwitchUser &rhs) const
+    {
+        return !(*this == rhs);
     }
 };
 
@@ -75,3 +86,11 @@ struct Deserialize<chatterino::TwitchUser> {
 };
 
 }  // namespace pajlada
+
+template <>
+struct std::hash<chatterino::TwitchUser> {
+    size_t operator()(const chatterino::TwitchUser &user, size_t seed = 0) const
+    {
+        return qHash(user.id, seed);
+    }
+};
