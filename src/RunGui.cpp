@@ -86,6 +86,10 @@ namespace {
         QApplication::setWindowIcon(QIcon(":/icon.ico"));
 #endif
 
+        // On Mac/Cocoa platform specifically this attribute is enabled by default
+        QApplication::setAttribute(Qt::AA_DontShowShortcutsInContextMenus,
+                                   false);
+
         installCustomPalette();
     }
 
