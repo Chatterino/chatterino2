@@ -52,12 +52,9 @@ public:
 
 protected:
     std::shared_ptr<BasicPubSubClient<seventv::eventapi::Subscription>>
-        createClient(liveupdates::WebsocketClient &client,
-                     websocketpp::connection_hdl hdl) override;
-    void onMessage(
-        websocketpp::connection_hdl hdl,
-        BasicPubSubManager<seventv::eventapi::Subscription>::WebsocketMessagePtr
-            msg) override;
+        createClient(ws::Client *client, const ws::Connection &conn) override;
+    void onTextMessage(const ws::Connection &conn,
+                       const QLatin1String &data) override;
 
 private:
     void handleDispatch(const seventv::eventapi::Dispatch &dispatch);

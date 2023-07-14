@@ -44,10 +44,8 @@ public:
     void partChannel(const QString &id);
 
 protected:
-    void onMessage(
-        websocketpp::connection_hdl hdl,
-        BasicPubSubManager<BttvLiveUpdateSubscription>::WebsocketMessagePtr msg)
-        override;
+    void onTextMessage(const ws::Connection &conn,
+                       const QLatin1String &data) override;
 
 private:
     // Contains all joined Twitch channel-ids

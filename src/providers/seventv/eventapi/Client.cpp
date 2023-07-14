@@ -1,16 +1,14 @@
 #include "providers/seventv/eventapi/Client.hpp"
 
 #include "providers/seventv/eventapi/Subscription.hpp"
-#include "providers/twitch/PubSubHelpers.hpp"
 
 #include <utility>
 
 namespace chatterino::seventv::eventapi {
 
-Client::Client(liveupdates::WebsocketClient &websocketClient,
-               liveupdates::WebsocketHandle handle,
+Client::Client(ws::Client *client, const ws::Connection &conn,
                std::chrono::milliseconds heartbeatInterval)
-    : BasicPubSubClient<Subscription>(websocketClient, std::move(handle))
+    : BasicPubSubClient<Subscription>(client, conn)
     , lastHeartbeat_(std::chrono::steady_clock::now())
     , heartbeatInterval_(heartbeatInterval)
 {
@@ -54,14 +52,13 @@ void Client::checkHeartbeat()
 
     auto self = std::dynamic_pointer_cast<Client>(this->shared_from_this());
 
-    runAfter(this->websocketClient_.get_io_service(), this->heartbeatInterval_,
-             [self](auto) {
-                 if (!self->isStarted())
-                 {
-                     return;
-                 }
-                 self->checkHeartbeat();
-             });
+    this->client_->runAfter(this->heartbeatInterval_, [self]() {
+        if (!self->isStarted())
+        {
+            return;
+        }
+        self->checkHeartbeat();
+    });
 }
 
 }  // namespace chatterino::seventv::eventapi

@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include <QString>
 
+#include <thread>
+
 using namespace chatterino;
 using namespace chatterino::seventv::eventapi;
 using namespace std::chrono_literals;

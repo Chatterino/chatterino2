@@ -10,6 +10,7 @@
 
 namespace chatterino {
 
+using namespace seventv;
 using namespace seventv::eventapi;
 
 SeventvEventAPI::SeventvEventAPI(
@@ -54,19 +55,18 @@ void SeventvEventAPI::unsubscribeUser(const QString &id)
 }
 
 std::shared_ptr<BasicPubSubClient<Subscription>> SeventvEventAPI::createClient(
-    liveupdates::WebsocketClient &client, websocketpp::connection_hdl hdl)
+    ws::Client *client, const ws::Connection &conn)
 {
-    auto shared =
-        std::make_shared<Client>(client, hdl, this->heartbeatInterval_);
+    auto shared = std::make_shared<eventapi::Client>(client, conn,
+                                                     this->heartbeatInterval_);
     return std::static_pointer_cast<BasicPubSubClient<Subscription>>(
         std::move(shared));
 }
 
-void SeventvEventAPI::onMessage(
-    websocketpp::connection_hdl hdl,
-    BasicPubSubManager<Subscription>::WebsocketMessagePtr msg)
+void SeventvEventAPI::onTextMessage(const ws::Connection &conn,
+                                    const QLatin1String &data)
 {
-    const auto &payload = QString::fromStdString(msg->get_payload());
+    const auto &payload = QByteArray(data.data(), data.size());
 
     auto pMessage = parseBaseMessage(payload);
 
@@ -80,9 +80,10 @@ void SeventvEventAPI::onMessage(
     switch (message.op)
     {
         case Opcode::Hello: {
-            if (auto client = this->findClient(hdl))
+            if (auto client = this->findClient(conn))
             {
-                if (auto *stvClient = dynamic_cast<Client *>(client.get()))
+                if (auto *stvClient =
+                        dynamic_cast<eventapi::Client *>(client.get()))
                 {
                     stvClient->setHeartbeatInterval(
                         message.data["heartbeat_interval"].toInt());
@@ -91,9 +92,10 @@ void SeventvEventAPI::onMessage(
         }
         break;
         case Opcode::Heartbeat: {
-            if (auto client = this->findClient(hdl))
+            if (auto client = this->findClient(conn))
             {
-                if (auto *stvClient = dynamic_cast<Client *>(client.get()))
+                if (auto *stvClient =
+                        dynamic_cast<eventapi::Client *>(client.get()))
                 {
                     stvClient->handleHeartbeat();
                 }
@@ -112,9 +114,10 @@ void SeventvEventAPI::onMessage(
         }
         break;
         case Opcode::Reconnect: {
-            if (auto client = this->findClient(hdl))
+            if (auto client = this->findClient(conn))
             {
-                if (auto *stvClient = dynamic_cast<Client *>(client.get()))
+                if (auto *stvClient =
+                        dynamic_cast<eventapi::Client *>(client.get()))
                 {
                     stvClient->close("Reconnecting");
                 }

@@ -30,12 +30,10 @@ void BttvLiveUpdates::partChannel(const QString &id)
     }
 }
 
-void BttvLiveUpdates::onMessage(
-    websocketpp::connection_hdl /*hdl*/,
-    BasicPubSubManager<BttvLiveUpdateSubscription>::WebsocketMessagePtr msg)
+void BttvLiveUpdates::onTextMessage(const ws::Connection & /*conn*/,
+                                    const QLatin1String &data)
 {
-    const auto &payload = QString::fromStdString(msg->get_payload());
-    QJsonDocument jsonDoc(QJsonDocument::fromJson(payload.toUtf8()));
+    QJsonDocument jsonDoc(QJsonDocument::fromJson({data.data(), data.size()}));
 
     if (jsonDoc.isNull())
     {

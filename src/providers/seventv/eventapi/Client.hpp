@@ -15,8 +15,7 @@ namespace chatterino::seventv::eventapi {
 class Client : public BasicPubSubClient<Subscription>
 {
 public:
-    Client(liveupdates::WebsocketClient &websocketClient,
-           liveupdates::WebsocketHandle handle,
+    Client(ws::Client *client, const ws::Connection &conn,
            std::chrono::milliseconds heartbeatInterval);
 
     void setHeartbeatInterval(int intervalMs);

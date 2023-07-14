@@ -1,4 +1,3 @@
-#include "providers/liveupdates/BasicPubSubClient.hpp"
 #include "providers/liveupdates/BasicPubSubManager.hpp"
 
 #include <gtest/gtest.h>
@@ -10,6 +9,7 @@
 #include <deque>
 #include <mutex>
 #include <optional>
+#include <thread>
 
 using namespace chatterino;
 using namespace std::chrono_literals;
@@ -98,14 +98,12 @@ public:
     }
 
 protected:
-    void onMessage(
-        websocketpp::connection_hdl /*hdl*/,
-        BasicPubSubManager<DummySubscription>::WebsocketMessagePtr msg) override
+    void onTextMessage(const ws::Connection &conn,
+                       const QLatin1String &data) override
     {
         std::lock_guard<std::mutex> guard(this->messageMtx_);
         this->messagesReceived.fetch_add(1, std::memory_order_acq_rel);
-        this->messageQueue_.emplace_back(
-            QString::fromStdString(msg->get_payload()));
+        this->messageQueue_.emplace_back(data);
     }
 
 private:

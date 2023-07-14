@@ -1,16 +1,15 @@
 #pragma once
 
 #include "common/QLogging.hpp"
-#include "providers/liveupdates/BasicPubSubWebsocket.hpp"
-#include "singletons/Settings.hpp"
+#include "providers/ws/Client.hpp"
 #include "util/DebugCount.hpp"
-#include "util/Helpers.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
 #include <atomic>
 #include <chrono>
 #include <unordered_set>
+#include <utility>
 
 namespace chatterino {
 
@@ -33,12 +32,11 @@ public:
     // The maximum amount of subscriptions this connections can handle
     const size_t maxSubscriptions;
 
-    BasicPubSubClient(liveupdates::WebsocketClient &websocketClient,
-                      liveupdates::WebsocketHandle handle,
+    BasicPubSubClient(ws::Client *client, ws::Connection conn,
                       size_t maxSubscriptions = 100)
         : maxSubscriptions(maxSubscriptions)
-        , websocketClient_(websocketClient)
-        , handle_(std::move(handle))
+        , client_(client)
+        , connection_(std::move(conn))
     {
     }
 
@@ -52,22 +50,6 @@ public:
 protected:
     virtual void onConnectionEstablished()
     {
-    }
-
-    bool send(const char *payload)
-    {
-        liveupdates::WebsocketErrorCode ec;
-        this->websocketClient_.send(this->handle_, payload,
-                                    websocketpp::frame::opcode::text, ec);
-
-        if (ec)
-        {
-            qCDebug(chatterinoLiveupdates) << "Error sending message" << payload
-                                           << ":" << ec.message().c_str();
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -97,7 +79,7 @@ protected:
         DebugCount::increase("LiveUpdates subscriptions");
 
         QByteArray encoded = subscription.encodeSubscribe();
-        this->send(encoded);
+        this->client_->sendText(this->connection_, encoded);
 
         return true;
     }
@@ -117,32 +99,15 @@ protected:
         DebugCount::decrease("LiveUpdates subscriptions");
 
         QByteArray encoded = subscription.encodeUnsubscribe();
-        this->send(encoded);
+        this->client_->sendText(this->connection_, encoded);
 
         return true;
     }
 
-    void close(const std::string &reason,
-               websocketpp::close::status::value code =
-                   websocketpp::close::status::normal)
+    void close(const QString &reason,
+               ws::Client::CloseCode code = ws::Client::CloseCode::Normal)
     {
-        liveupdates::WebsocketErrorCode ec;
-
-        auto conn = this->websocketClient_.get_con_from_hdl(this->handle_, ec);
-        if (ec)
-        {
-            qCDebug(chatterinoLiveupdates)
-                << "Error getting connection:" << ec.message().c_str();
-            return;
-        }
-
-        conn->close(code, reason, ec);
-        if (ec)
-        {
-            qCDebug(chatterinoLiveupdates)
-                << "Error closing:" << ec.message().c_str();
-            return;
-        }
+        this->client_->close(this->connection_, reason, code);
     }
 
     bool isStarted() const
@@ -150,7 +115,7 @@ protected:
         return this->started_.load(std::memory_order_acquire);
     }
 
-    liveupdates::WebsocketClient &websocketClient_;
+    ws::Client *client_;
 
 private:
     void start()
@@ -166,7 +131,7 @@ private:
         this->started_.store(false, std::memory_order_release);
     }
 
-    liveupdates::WebsocketHandle handle_;
+    ws::Connection connection_;
     std::unordered_set<Subscription> subscriptions_;
 
     std::atomic<bool> started_{false};
