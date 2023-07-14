@@ -353,6 +353,9 @@ set(SOURCE_FILES
         providers/twitch/api/Helix.cpp
         providers/twitch/api/Helix.hpp
 
+        providers/ws/Client.cpp
+        providers/ws/Client.hpp
+
         singletons/Badges.cpp
         singletons/Badges.hpp
         singletons/Emotes.cpp
