@@ -1,13 +1,10 @@
 #include "providers/twitch/PubSubClient.hpp"
 
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
-#include "providers/twitch/PubSubActions.hpp"
-#include "providers/twitch/PubSubHelpers.hpp"
-#include "providers/twitch/PubSubMessages.hpp"
+#include "providers/twitch/pubsubmessages/Listen.hpp"
 #include "providers/twitch/pubsubmessages/Unlisten.hpp"
-#include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
-#include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <exception>
@@ -15,13 +12,14 @@
 
 namespace chatterino {
 
-static const char *PING_PAYLOAD = R"({"type":"PING"})";
+using namespace literals;
 
-PubSubClient::PubSubClient(WebsocketClient &websocketClient,
-                           WebsocketHandle handle,
+constexpr const QLatin1String PING_PAYLOAD = R"({"type":"PING"})"_L1;
+
+PubSubClient::PubSubClient(ws::Client *client, ws::Connection conn,
                            const PubSubClientOptions &clientOptions)
-    : websocketClient_(websocketClient)
-    , handle_(handle)
+    : client_(client)
+    , connection_(std::move(conn))
     , clientOptions_(clientOptions)
 {
 }
@@ -42,25 +40,9 @@ void PubSubClient::stop()
     this->started_ = false;
 }
 
-void PubSubClient::close(const std::string &reason,
-                         websocketpp::close::status::value code)
+void PubSubClient::close(const QString &reason)
 {
-    WebsocketErrorCode ec;
-
-    auto conn = this->websocketClient_.get_con_from_hdl(this->handle_, ec);
-    if (ec)
-    {
-        qCDebug(chatterinoPubSub)
-            << "Error getting con:" << ec.message().c_str();
-        return;
-    }
-
-    conn->close(code, reason, ec);
-    if (ec)
-    {
-        qCDebug(chatterinoPubSub) << "Error closing:" << ec.message().c_str();
-        return;
-    }
+    this->client_->close(this->connection_, reason);
 }
 
 bool PubSubClient::listen(PubSubListenMessage msg)
@@ -83,7 +65,7 @@ bool PubSubClient::listen(PubSubListenMessage msg)
     qCDebug(chatterinoPubSub)
         << "Subscribing to" << numRequestedListens << "topics";
 
-    this->send(msg.toJson());
+    this->client_->sendText(this->connection_, msg.toJson());
 
     return true;
 }
@@ -120,7 +102,7 @@ PubSubClient::UnlistenPrefixResponse PubSubClient::unlistenPrefix(
 
     PubSubUnlistenMessage message(topics);
 
-    this->send(message.toJson());
+    this->client_->sendText(this->connection_, message.toJson());
 
     return {message.topics, message.nonce};
 }
@@ -170,7 +152,7 @@ void PubSubClient::ping()
         return;
     }
 
-    if (!this->send(PING_PAYLOAD))
+    if (!this->client_->sendText(this->connection_, PING_PAYLOAD))
     {
         return;
     }
@@ -179,34 +161,14 @@ void PubSubClient::ping()
 
     auto self = this->shared_from_this();
 
-    runAfter(this->websocketClient_.get_io_service(),
-             this->clientOptions_.pingInterval_, [self](auto timer) {
-                 if (!self->started_)
-                 {
-                     return;
-                 }
+    this->client_->runAfter(this->clientOptions_.pingInterval_, [self]() {
+        if (!self->started_)
+        {
+            return;
+        }
 
-                 self->ping();
-             });
-}
-
-bool PubSubClient::send(const char *payload)
-{
-    WebsocketErrorCode ec;
-    this->websocketClient_.send(this->handle_, payload,
-                                websocketpp::frame::opcode::text, ec);
-
-    if (ec)
-    {
-        qCDebug(chatterinoPubSub) << "Error sending message" << payload << ":"
-                                  << ec.message().c_str();
-        // TODO(pajlada): Check which error code happened and maybe
-        // gracefully handle it
-
-        return false;
-    }
-
-    return true;
+        self->ping();
+    });
 }
 
 }  // namespace chatterino

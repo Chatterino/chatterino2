@@ -8,6 +8,7 @@
 #include <QString>
 
 #include <chrono>
+#include <thread>
 
 using namespace chatterino;
 using namespace std::chrono_literals;

@@ -1,12 +1,11 @@
 #include "providers/twitch/PubSubManager.hpp"
 
 #include "common/QLogging.hpp"
-#include "providers/NetworkConfigurationProvider.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubClient.hpp"
-#include "providers/twitch/PubSubHelpers.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
+#include "providers/ws/Client.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -17,10 +16,6 @@
 #include <exception>
 #include <iostream>
 #include <thread>
-
-using websocketpp::lib::bind;
-using websocketpp::lib::placeholders::_1;
-using websocketpp::lib::placeholders::_2;
 
 namespace chatterino {
 
@@ -459,26 +454,11 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
             // This message got approved by a moderator
             // qCDebug(chatterinoPubSub) << rj::stringify(data);
         };
+}
 
-    this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
-    this->websocketClient.clear_access_channels(
-        websocketpp::log::alevel::frame_payload |
-        websocketpp::log::alevel::frame_header);
-
-    this->websocketClient.init_asio();
-
-    // SSL Handshake
-    this->websocketClient.set_tls_init_handler(
-        bind(&PubSub::onTLSInit, this, ::_1));
-
-    this->websocketClient.set_message_handler(
-        bind(&PubSub::onMessage, this, ::_1, ::_2));
-    this->websocketClient.set_open_handler(
-        bind(&PubSub::onConnectionOpen, this, ::_1));
-    this->websocketClient.set_close_handler(
-        bind(&PubSub::onConnectionClose, this, ::_1));
-    this->websocketClient.set_fail_handler(
-        bind(&PubSub::onConnectionFail, this, ::_1));
+PubSub::~PubSub()
+{
+    this->stop();
 }
 
 void PubSub::setAccount(std::shared_ptr<TwitchAccount> account)
@@ -504,28 +484,7 @@ void PubSub::addClient()
 
     this->addingClient = true;
 
-    websocketpp::lib::error_code ec;
-    auto con =
-        this->websocketClient.get_connection(this->host_.toStdString(), ec);
-
-    if (ec)
-    {
-        qCDebug(chatterinoPubSub)
-            << "Unable to establish connection:" << ec.message().c_str();
-        return;
-    }
-
-    NetworkConfigurationProvider::applyToWebSocket(con);
-
-    this->websocketClient.connect(con);
-}
-
-void PubSub::start()
-{
-    this->work = std::make_shared<boost::asio::io_service::work>(
-        this->websocketClient.get_io_service());
-    this->mainThread.reset(
-        new std::thread(std::bind(&PubSub::runThread, this)));
+    this->addConnection(this->host_);
 }
 
 void PubSub::stop()
@@ -537,12 +496,7 @@ void PubSub::stop()
         client.second->close("Shutting down");
     }
 
-    this->work.reset();
-
-    if (this->mainThread->joinable())
-    {
-        this->mainThread->join();
-    }
+    ws::Client::stop();
 
     assert(this->clients.empty());
 }
@@ -753,20 +707,17 @@ bool PubSub::isListeningToTopic(const QString &topic)
     return false;
 }
 
-void PubSub::onMessage(websocketpp::connection_hdl hdl,
-                       WebsocketMessagePtr websocketMessage)
+void PubSub::onTextMessage(const ws::Connection &conn,
+                           const QLatin1String &data)
 {
     this->diag.messagesReceived += 1;
 
-    const auto &payload =
-        QString::fromStdString(websocketMessage->get_payload());
-
-    auto oMessage = parsePubSubBaseMessage(payload);
+    auto oMessage = parsePubSubBaseMessage({data.data(), data.size()});
 
     if (!oMessage)
     {
         qCDebug(chatterinoPubSub)
-            << "Unable to parse incoming pubsub message" << payload;
+            << "Unable to parse incoming pubsub message" << data;
         this->diag.messagesFailedToParse += 1;
         return;
     }
@@ -776,7 +727,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
     switch (message.type)
     {
         case PubSubMessage::Type::Pong: {
-            auto clientIt = this->clients.find(hdl);
+            auto clientIt = this->clients.find(conn);
 
             // If this assert goes off, there's something wrong with the connection
             // creation/preserving code KKona
@@ -797,7 +748,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
             auto oMessageMessage = message.toInner<PubSubMessageMessage>();
             if (!oMessageMessage)
             {
-                qCDebug(chatterinoPubSub) << "Malformed MESSAGE:" << payload;
+                qCDebug(chatterinoPubSub) << "Malformed MESSAGE:" << data;
                 return;
             }
 
@@ -814,7 +765,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
     }
 }
 
-void PubSub::onConnectionOpen(WebsocketHandle hdl)
+void PubSub::onConnectionOpen(const ws::Connection &conn)
 {
     this->diag.connectionsOpened += 1;
 
@@ -823,14 +774,14 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
 
     this->connectBackoff.reset();
 
-    auto client = std::make_shared<PubSubClient>(this->websocketClient, hdl,
-                                                 this->clientOptions_);
+    auto client =
+        std::make_shared<PubSubClient>(this, conn, this->clientOptions_);
 
     // We separate the starting from the constructor because we will want to use
     // shared_from_this
     client->start();
 
-    this->clients.emplace(hdl, client);
+    this->clients.emplace(conn, client);
 
     qCDebug(chatterinoPubSub) << "PubSub connection opened!";
 
@@ -868,40 +819,30 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
     }
 }
 
-void PubSub::onConnectionFail(WebsocketHandle hdl)
+void PubSub::onConnectionFailed(QLatin1String reason)
 {
     this->diag.connectionsFailed += 1;
 
     DebugCount::increase("PubSub failed connections");
-    if (auto conn = this->websocketClient.get_con_from_hdl(std::move(hdl)))
-    {
-        qCDebug(chatterinoPubSub) << "PubSub connection attempt failed (error: "
-                                  << conn->get_ec().message().c_str() << ")";
-    }
-    else
-    {
-        qCDebug(chatterinoPubSub)
-            << "PubSub connection attempt failed but we can't "
-               "get the connection from a handle.";
-    }
+    qCDebug(chatterinoPubSub)
+        << "PubSub connection attempt failed (error: " << reason << ")";
 
     this->addingClient = false;
     if (!this->requests.empty())
     {
-        runAfter(this->websocketClient.get_io_service(),
-                 this->connectBackoff.next(), [this](auto timer) {
-                     this->addClient();  //
-                 });
+        this->runAfter(this->connectBackoff.next(), [this]() {
+            this->addClient();
+        });
     }
 }
 
-void PubSub::onConnectionClose(WebsocketHandle hdl)
+void PubSub::onConnectionClosed(const ws::Connection &conn)
 {
     qCDebug(chatterinoPubSub) << "Connection closed";
     this->diag.connectionsClosed += 1;
 
     DebugCount::decrease("PubSub connections");
-    auto clientIt = this->clients.find(hdl);
+    auto clientIt = this->clients.find(conn);
 
     // If this assert goes off, there's something wrong with the connection
     // creation/preserving code KKona
@@ -921,26 +862,6 @@ void PubSub::onConnectionClose(WebsocketHandle hdl)
             this->listenToTopic(listener.topic);
         }
     }
-}
-
-PubSub::WebsocketContextPtr PubSub::onTLSInit(websocketpp::connection_hdl hdl)
-{
-    WebsocketContextPtr ctx(
-        new boost::asio::ssl::context(boost::asio::ssl::context::tlsv12));
-
-    try
-    {
-        ctx->set_options(boost::asio::ssl::context::default_workarounds |
-                         boost::asio::ssl::context::no_sslv2 |
-                         boost::asio::ssl::context::single_dh_use);
-    }
-    catch (const std::exception &e)
-    {
-        qCDebug(chatterinoPubSub)
-            << "Exception caught in OnTLSInit:" << e.what();
-    }
-
-    return ctx;
 }
 
 void PubSub::handleResponse(const PubSubMessage &message)
@@ -1174,13 +1095,6 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
         qCDebug(chatterinoPubSub) << "Unknown topic:" << topic;
         return;
     }
-}
-
-void PubSub::runThread()
-{
-    qCDebug(chatterinoPubSub) << "Start pubsub manager thread";
-    this->websocketClient.run();
-    qCDebug(chatterinoPubSub) << "Done with pubsub manager thread";
 }
 
 void PubSub::listenToTopic(const QString &topic)

@@ -45,9 +45,9 @@ boost::optional<InnerClass> PubSubMessage::toInner()
 }
 
 static boost::optional<PubSubMessage> parsePubSubBaseMessage(
-    const QString &blob)
+    const QByteArray &blob)
 {
-    QJsonDocument jsonDoc(QJsonDocument::fromJson(blob.toUtf8()));
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(blob));
 
     if (jsonDoc.isNull())
     {

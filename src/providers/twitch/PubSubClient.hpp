@@ -1,7 +1,7 @@
 #pragma once
 
 #include "providers/twitch/PubSubClientOptions.hpp"
-#include "providers/twitch/PubSubWebsocket.hpp"
+#include "providers/ws/Client.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QString>
@@ -35,15 +35,13 @@ public:
     // The max amount of topics we may listen to with a single connection
     static constexpr std::vector<QString>::size_type MAX_LISTENS = 50;
 
-    PubSubClient(WebsocketClient &_websocketClient, WebsocketHandle _handle,
+    PubSubClient(ws::Client *client, ws::Connection conn,
                  const PubSubClientOptions &clientOptions);
 
     void start();
     void stop();
 
-    void close(const std::string &reason,
-               websocketpp::close::status::value code =
-                   websocketpp::close::status::normal);
+    void close(const QString &reason);
 
     bool listen(PubSubListenMessage msg);
     UnlistenPrefixResponse unlistenPrefix(const QString &prefix);
@@ -59,10 +57,9 @@ public:
 
 private:
     void ping();
-    bool send(const char *payload);
 
-    WebsocketClient &websocketClient_;
-    WebsocketHandle handle_;
+    ws::Client *client_;
+    ws::Connection connection_;
     uint16_t numListens_ = 0;
 
     std::vector<Listener> listeners_;

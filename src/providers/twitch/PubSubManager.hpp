@@ -1,7 +1,7 @@
 #pragma once
 
 #include "providers/twitch/PubSubClientOptions.hpp"
-#include "providers/twitch/PubSubWebsocket.hpp"
+#include "providers/ws/Client.hpp"
 #include "util/ExponentialBackoff.hpp"
 #include "util/QStringHash.hpp"
 
@@ -9,13 +9,11 @@
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
 #include <QString>
-#include <websocketpp/client.hpp>
 
 #include <atomic>
 #include <chrono>
 #include <map>
 #include <memory>
-#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -40,13 +38,8 @@ struct PubSubListenMessage;
 struct PubSubMessage;
 struct PubSubMessageMessage;
 
-class PubSub
+class PubSub : public ws::Client
 {
-    using WebsocketMessagePtr =
-        websocketpp::config::asio_tls_client::message_type::ptr;
-    using WebsocketContextPtr =
-        websocketpp::lib::shared_ptr<boost::asio::ssl::context>;
-
     template <typename T>
     using Signal =
         pajlada::Signals::Signal<T>;  // type-id is vector<T, Alloc<T>>
@@ -57,9 +50,6 @@ class PubSub
         std::vector<QString> topics;
         std::vector<QString>::size_type topicCount;
     };
-
-    WebsocketClient websocketClient;
-    std::unique_ptr<std::thread> mainThread;
 
     // Account credentials
     // Set from setAccount or setAccountData
@@ -77,14 +67,13 @@ public:
 
     void setAccountData(QString token, QString userID);
 
-    ~PubSub() = delete;
+    ~PubSub() override;
 
     enum class State {
         Connected,
         Disconnected,
     };
 
-    void start();
     void stop();
 
     bool isConnected() const
@@ -151,6 +140,13 @@ public:
 
     void listenToTopic(const QString &topic);
 
+protected:
+    void onConnectionClosed(const ws::Connection &conn) override;
+    void onConnectionFailed(QLatin1String reason) override;
+    void onConnectionOpen(const ws::Connection &conn) override;
+    void onTextMessage(const ws::Connection &conn,
+                       const QLatin1String &data) override;
+
 private:
     void listen(PubSubListenMessage msg);
     bool tryListen(PubSubListenMessage msg);
@@ -163,9 +159,7 @@ private:
 
     State state = State::Connected;
 
-    std::map<WebsocketHandle, std::shared_ptr<PubSubClient>,
-             std::owner_less<WebsocketHandle>>
-        clients;
+    std::map<ws::Connection, std::shared_ptr<PubSubClient>> clients;
 
     std::unordered_map<
         QString, std::function<void(const QJsonObject &, const QString &)>>
@@ -174,12 +168,6 @@ private:
     std::unordered_map<
         QString, std::function<void(const QJsonObject &, const QString &)>>
         channelTermsActionHandlers;
-
-    void onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr msg);
-    void onConnectionOpen(websocketpp::connection_hdl hdl);
-    void onConnectionFail(websocketpp::connection_hdl hdl);
-    void onConnectionClose(websocketpp::connection_hdl hdl);
-    WebsocketContextPtr onTLSInit(websocketpp::connection_hdl hdl);
 
     void handleResponse(const PubSubMessage &message);
     void handleListenResponse(const NonceInfo &info, bool failed);
@@ -193,10 +181,6 @@ private:
     boost::optional<NonceInfo> findNonceInfo(QString nonce);
 
     std::unordered_map<QString, NonceInfo> nonces_;
-
-    void runThread();
-
-    std::shared_ptr<boost::asio::io_service::work> work{nullptr};
 
     const QString host_;
     const PubSubClientOptions clientOptions_;

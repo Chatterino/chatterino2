@@ -270,8 +270,8 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         static bool alt = true;
         if (alt)
         {
-            auto oMessage =
-                parsePubSubBaseMessage(getSampleChannelRewardMessage());
+            auto oMessage = parsePubSubBaseMessage(
+                getSampleChannelRewardMessage().toUtf8());
             auto oInnerMessage =
                 oMessage->toInner<PubSubMessageMessage>()
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
@@ -283,8 +283,8 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         }
         else
         {
-            auto oMessage =
-                parsePubSubBaseMessage(getSampleChannelRewardMessage2());
+            auto oMessage = parsePubSubBaseMessage(
+                getSampleChannelRewardMessage2().toUtf8());
             auto oInnerMessage =
                 oMessage->toInner<PubSubMessageMessage>()
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
