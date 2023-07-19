@@ -140,6 +140,8 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
+          # only save on on the default (master) branch
+          save: ${{ github.event_name == 'push' }}
           key: sccache-build-${{ matrix.os }}-${{ matrix.qt-version }}-${{ matrix.skip-crashpad }}
           restore-keys: |
             sccache-build-${{ matrix.os }}-${{ matrix.qt-version }}
