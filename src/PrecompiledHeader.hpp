@@ -3,6 +3,7 @@
 #    include <boost/foreach.hpp>
 #    include <boost/noncopyable.hpp>
 #    include <boost/optional.hpp>
+#    include <boost/signals2.hpp>
 #    include <IrcCommand>
 #    include <IrcConnection>
 #    include <IrcMessage>
