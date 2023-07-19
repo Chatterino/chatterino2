@@ -32,7 +32,6 @@ jobs:
         plugins: [false]
         skip-artifact: [false]
         skip-crashpad: [false]
-        skip-pch: [false]
         clang-tidy-review: [false]
         include:
           # Ubuntu 20.04, Qt 5.12
@@ -42,7 +41,6 @@ jobs:
             plugins: false
             skip-artifact: false
             skip-crashpad: false
-            skip-pch: true
             clang-tidy-review: false
           # Ubuntu 22.04, Qt 5.15
           - os: ubuntu-22.04
@@ -51,7 +49,6 @@ jobs:
             plugins: false
             skip-artifact: false
             skip-crashpad: false
-            skip-pch: true
             clang-tidy-review: true
           # Ubuntu 22.04, Qt 6.2.4 - tests LTO & plugins
           - os: ubuntu-22.04
@@ -60,7 +57,6 @@ jobs:
             plugins: true
             skip-artifact: false
             skip-crashpad: false
-            skip-pch: true
             clang-tidy-review: false
           # Test for disabling crashpad on Windows
           - os: windows-latest
@@ -69,7 +65,6 @@ jobs:
             plugins: false
             skip-artifact: true
             skip-crashpad: true
-            skip-pch: true
             clang-tidy-review: false
 
       fail-fast: false
@@ -189,7 +184,8 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         shell: pwsh
         env:
-          C2_USE_PCH: ${{ matrix.skip-pch && 'OFF' || 'ON' }}
+          # Enable PCH when crashpad is enabled
+          C2_USE_PCH: ${{ matrix.skip-crashpad && 'OFF' || 'ON' }}
         run: |
           cd build
           cmake `
