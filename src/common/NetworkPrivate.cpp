@@ -1,10 +1,13 @@
 #include "common/NetworkPrivate.hpp"
 
+#include "Application.hpp"
 #include "common/NetworkManager.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
+#include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
@@ -315,6 +318,25 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
                             cb();
                             delete worker;
                         });
+                }
+            });
+
+        QObject::connect(
+            reply, &QNetworkReply::sslErrors, worker,
+            [](const auto &sslErrors) {
+                if (!sslErrors.isEmpty())
+                {
+                    QString text;
+                    for (const auto &error : sslErrors)
+                    {
+                        text.append(
+                            QString("Error: %1 (%2)")
+                                .arg(error.errorString(), error.error()));
+                    }
+                    auto msg = makeSystemMessage(text);
+                    getApp()->twitch->forEachChannel([msg](ChannelPtr channel) {
+                        channel->addMessage(msg);
+                    });
                 }
             });
     };
