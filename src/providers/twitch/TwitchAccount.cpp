@@ -7,13 +7,13 @@
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
-#include "providers/twitch/TwitchUser.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/CancellationToken.hpp"
 #include "util/Helpers.hpp"
@@ -149,19 +149,19 @@ void TwitchAccount::unblockUser(const QString &userId, const QObject *caller,
         [this, userId, onSuccess = std::move(onSuccess)] {
             TwitchUser ignoredUser;
             ignoredUser.id = userId;
-            this->ignores_.remove(ignoredUser);
-            this->ignoresUserIds_.remove(ignoredUser.id);
+            this->ignores_.erase(ignoredUser);
+            this->ignoresUserIds_.erase(ignoredUser.id);
             onSuccess();
         },
         std::move(onFailure));
 }
 
-const QSet<TwitchUser> &TwitchAccount::blocks() const
+const std::unordered_set<TwitchUser> &TwitchAccount::blocks() const
 {
     return this->ignores_;
 }
 
-const QSet<QString> &TwitchAccount::blockedUserIds() const
+const std::unordered_set<QString> &TwitchAccount::blockedUserIds() const
 {
     return this->ignoresUserIds_;
 }

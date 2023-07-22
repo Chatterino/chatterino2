@@ -5,24 +5,23 @@
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
+#include "providers/twitch/TwitchUser.hpp"
 #include "util/CancellationToken.hpp"
 #include "util/QStringHash.hpp"
 
 #include <QColor>
 #include <QElapsedTimer>
 #include <QObject>
-#include <QSet>
 #include <QString>
 #include <rapidjson/document.h>
 
 #include <functional>
 #include <mutex>
-#include <set>
+#include <unordered_set>
 #include <vector>
 
 namespace chatterino {
 
-struct TwitchUser;
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 
@@ -81,8 +80,8 @@ public:
                      std::function<void()> onSuccess,
                      std::function<void()> onFailure);
 
-    [[nodiscard]] const QSet<TwitchUser> &blocks() const;
-    [[nodiscard]] const QSet<QString> &blockedUserIds() const;
+    [[nodiscard]] const std::unordered_set<TwitchUser> &blocks() const;
+    [[nodiscard]] const std::unordered_set<QString> &blockedUserIds() const;
 
     void loadEmotes(std::weak_ptr<Channel> weakChannel = {});
     // loadUserstateEmotes loads emote sets that are part of the USERSTATE emote-sets key
@@ -110,8 +109,8 @@ private:
     QStringList userstateEmoteSets_;
 
     ScopedCancellationToken blockToken_;
-    QSet<TwitchUser> ignores_;
-    QSet<QString> ignoresUserIds_;
+    std::unordered_set<TwitchUser> ignores_;
+    std::unordered_set<QString> ignoresUserIds_;
 
     //    std::map<UserId, TwitchAccountEmoteData> emotes;
     UniqueAccess<TwitchAccountEmoteData> emotes_;
