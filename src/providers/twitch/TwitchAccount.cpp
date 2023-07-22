@@ -131,6 +131,8 @@ void TwitchAccount::blockUser(const QString &userId, const QObject *caller,
     getHelix()->blockUser(
         userId, caller,
         [this, userId, onSuccess = std::move(onSuccess)] {
+            assertInGuiThread();
+
             TwitchUser blockedUser;
             blockedUser.id = userId;
             this->ignores_.insert(blockedUser);
@@ -147,6 +149,8 @@ void TwitchAccount::unblockUser(const QString &userId, const QObject *caller,
     getHelix()->unblockUser(
         userId, caller,
         [this, userId, onSuccess = std::move(onSuccess)] {
+            assertInGuiThread();
+
             TwitchUser ignoredUser;
             ignoredUser.id = userId;
             this->ignores_.erase(ignoredUser);
@@ -158,11 +162,13 @@ void TwitchAccount::unblockUser(const QString &userId, const QObject *caller,
 
 const std::unordered_set<TwitchUser> &TwitchAccount::blocks() const
 {
+    assertInGuiThread();
     return this->ignores_;
 }
 
 const std::unordered_set<QString> &TwitchAccount::blockedUserIds() const
 {
+    assertInGuiThread();
     return this->ignoresUserIds_;
 }
 
