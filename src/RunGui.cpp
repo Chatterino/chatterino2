@@ -86,6 +86,13 @@ namespace {
         QApplication::setWindowIcon(QIcon(":/icon.ico"));
 #endif
 
+#ifdef Q_OS_MAC
+        // On the Mac/Cocoa platform this attribute is enabled by default
+        // We override it to ensure shortcuts show in context menus on that platform
+        QApplication::setAttribute(Qt::AA_DontShowShortcutsInContextMenus,
+                                   false);
+#endif
+
         installCustomPalette();
     }
 

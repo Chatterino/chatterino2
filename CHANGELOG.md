@@ -22,6 +22,7 @@
 - Bugfix: Fixed some network errors having `0` as their HTTP status. (#4704)
 - Bugfix: Fixed crash that could occurr when closing the usercard too quickly after blocking or unblocking a user. (#4711)
 - Bugfix: Fixed highlights sometimes not working after changing sound device, or switching users in your operating system. (#4729)
+- Bugfix: Fixed key bindings not showing in context menus on Mac. (#4722)
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
 - Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
 - Dev: Added test cases for emote and tab completion. (#4644)
