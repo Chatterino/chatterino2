@@ -13,11 +13,6 @@
 
 namespace chatterino {
 
-void SeventvBadges::initialize(Settings & /*settings*/, Paths & /*paths*/)
-{
-    this->loadSeventvBadges();
-}
-
 boost::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id) const
 {
     std::shared_lock lock(this->mutex_);
@@ -80,40 +75,6 @@ void SeventvBadges::addBadge(const QJsonObject &badgeJson)
 
     this->knownBadges_[badgeID] =
         std::make_shared<const Emote>(std::move(emote));
-}
-
-void SeventvBadges::loadSeventvBadges()
-{
-    // This endpoint is used as a backup for badges
-    getSeventvAPI().getCosmetics(
-        [this](const auto &json) -> void {
-            std::unique_lock lock(this->mutex_);
-
-            for (const auto &jsonBadge : json.value("badges").toArray())
-            {
-                const auto badge = jsonBadge.toObject();
-                auto badgeID = badge["id"].toString();
-                auto urls = badge["urls"].toArray();
-                auto emote = Emote{
-                    .name = EmoteName{},
-                    .images = ImageSet{Url{urls[0].toArray()[1].toString()},
-                                       Url{urls[1].toArray()[1].toString()},
-                                       Url{urls[2].toArray()[1].toString()}},
-                    .tooltip = Tooltip{badge["tooltip"].toString()},
-                    .homePage = Url{},
-                    .id = EmoteId{badgeID},
-                };
-
-                auto emotePtr = std::make_shared<const Emote>(std::move(emote));
-                this->knownBadges_[badgeID] = emotePtr;
-
-                for (const auto &user : badge["users"].toArray())
-                {
-                    this->badgeMap_[user.toString()] = emotePtr;
-                }
-            }
-        },
-        [](const auto &) -> void { /* ignored */ });
 }
 
 }  // namespace chatterino

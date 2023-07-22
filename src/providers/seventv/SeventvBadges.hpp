@@ -20,8 +20,6 @@ using EmotePtr = std::shared_ptr<const Emote>;
 class SeventvBadges : public Singleton
 {
 public:
-    void initialize(Settings &settings, Paths &paths) override;
-
     boost::optional<EmotePtr> getBadge(const UserId &id) const;
 
     void addBadge(const QJsonObject &badgeJson);
@@ -29,8 +27,6 @@ public:
     void clearBadgeFromUser(const QString &badgeID, const UserId &userID);
 
 private:
-    void loadSeventvBadges();
-
     // Mutex for both `badgeMap_` and `knownBadges_`
     mutable std::shared_mutex mutex_;
 
