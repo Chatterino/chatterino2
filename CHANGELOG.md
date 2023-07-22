@@ -10,6 +10,7 @@
 - Minor: Added setting to only show tabs with live channels (default toggle hotkey: Ctrl+Shift+L). (#4358)
 - Minor: Added option to subscribe to and unsubscribe from reply threads. (#4680)
 - Minor: Added a message for when Chatterino joins a channel (#4616)
+- Minor: Add accelerators to the right click menu for messages (#4705)
 - Minor: Add pin action to usercards and reply threads. (#4692)
 - Minor: Stream status requests are now batched. (#4713)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
