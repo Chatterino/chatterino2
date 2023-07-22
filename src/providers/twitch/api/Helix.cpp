@@ -2932,7 +2932,7 @@ void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
 {
     auto onSuccess =
         std::make_shared<std::function<Outcome(NetworkResult)>>(nullptr);
-    *onSuccess = [this, onPage, onError, onSuccess, url = QString(url),
+    *onSuccess = [this, onPage = std::move(onPage), onError, onSuccess, url = QString(url),
                   query = QUrlQuery(baseQuery),
                   cancellationToken = std::move(cancellationToken)](
                      const NetworkResult &res) mutable -> Outcome {
@@ -2962,7 +2962,7 @@ void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
 
     this->makeGet(url, baseQuery)
         .onSuccess(*onSuccess)
-        .onError(onError)
+        .onError(std::move(onError))
         .execute();
 }
 
