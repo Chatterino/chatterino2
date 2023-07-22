@@ -554,10 +554,14 @@ void Helix::loadBlocks(QString userId,
 {
     constexpr const size_t blockLimit = 1024;
 
+    // TODO(Qt 5.13): use initializer list
+    QUrlQuery query;
+    query.addQueryItem(u"broadcaster_id"_s, userId);
+    query.addQueryItem(u"first"_s, u"100"_s);
+
     size_t receivedItems = 0;
     this->paginate(
-        u"users/blocks"_s,
-        {{u"broadcaster_id"_s, userId}, {u"first"_s, u"100"_s}},
+        u"users/blocks"_s, query,
         [pageCallback, receivedItems](const QJsonObject &json) mutable {
             const auto data = json["data"_L1].toArray();
 
