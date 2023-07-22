@@ -38,7 +38,9 @@ int main(int argc, char **argv)
         chatterino::NetworkManager::deinit();
 
         settingsDir.remove();
-        QApplication::exit(res);
+        // This should be QApplication::exit(res);
+        // but using this will deadlock in ~QHostInfoLookupManager (if the twitch account was changed)
+        _exit(res);
     });
 
     return QApplication::exec();

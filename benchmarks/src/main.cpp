@@ -22,7 +22,9 @@ int main(int argc, char **argv)
         ::benchmark::RunSpecifiedBenchmarks();
 
         settingsDir.remove();
-        QApplication::exit(0);
+        // This should be QApplication::exit(0);
+        // but using this will deadlock in ~QHostInfoLookupManager (if the twitch account was changed)
+        _exit(0);
     });
 
     return QApplication::exec();
