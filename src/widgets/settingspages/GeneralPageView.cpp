@@ -125,28 +125,6 @@ QCheckBox *GeneralPageView::addCheckbox(const QString &text,
     return check;
 }
 
-QCheckBox *GeneralPageView::addSessionCheckbox(
-    const QString &text, bool initialValue, std::function<void(bool)> onUpdated,
-    QString toolTipText)
-{
-    auto *check = new QCheckBox(text);
-    this->addToolTip(*check, std::move(toolTipText));
-    check->setChecked(initialValue);
-
-    // update setting on toggle
-    QObject::connect(check, &QCheckBox::toggled, this,
-                     [onUpdated = std::move(onUpdated)](bool state) {
-                         onUpdated(state);
-                     });
-
-    this->addWidget(check);
-
-    // groups
-    this->groups_.back().widgets.push_back({check, {text}});
-
-    return check;
-}
-
 ComboBox *GeneralPageView::addDropdown(const QString &text,
                                        const QStringList &list,
                                        QString toolTipText)

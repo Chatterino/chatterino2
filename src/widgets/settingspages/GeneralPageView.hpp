@@ -103,10 +103,6 @@ public:
     /// @param inverse Inverses true to false and vice versa
     QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
                            bool inverse = false, QString toolTipText = {});
-    /// Adds a checkbox that only keeps its state for the current session
-    QCheckBox *addSessionCheckbox(const QString &text, bool initialValue,
-                                  std::function<void(bool)> onUpdated,
-                                  QString toolTipText = {});
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           QString toolTipText = {});
     ComboBox *addDropdown(const QString &text, const QStringList &items,
