@@ -2932,8 +2932,14 @@ void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
 {
     auto onSuccess =
         std::make_shared<std::function<Outcome(NetworkResult)>>(nullptr);
-    *onSuccess = [this, onPage = std::move(onPage), onError, onSuccess, url = QString(url),
-                  query = QUrlQuery(baseQuery),
+    // This is the actual callback passed to NetworkRequest.
+    // It wraps the shared-ptr.
+    auto onSuccessCb = [onSuccess](const auto &res) -> Outcome {
+        return (*onSuccess)(res);
+    };
+
+    *onSuccess = [this, onPage = std::move(onPage), onError, onSuccessCb,
+                  url = QString(url), query = QUrlQuery(baseQuery),
                   cancellationToken = std::move(cancellationToken)](
                      const NetworkResult &res) mutable -> Outcome {
         if (cancellationToken.isCanceled())
@@ -2953,7 +2959,7 @@ void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
         query.addQueryItem(u"after"_s, cursor);
 
         this->makeGet(url, query)
-            .onSuccess(*onSuccess)
+            .onSuccess(onSuccessCb)
             .onError(onError)
             .execute();
 
@@ -2961,7 +2967,7 @@ void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
     };
 
     this->makeGet(url, baseQuery)
-        .onSuccess(*onSuccess)
+        .onSuccess(std::move(onSuccessCb))
         .onError(std::move(onError))
         .execute();
 }
