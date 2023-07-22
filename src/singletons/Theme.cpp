@@ -237,6 +237,10 @@ void Theme::update()
 {
     auto oTheme = this->findThemeByKey(this->themeName);
 
+    constexpr const double nsToMs = 1.0 / 1000000.0;
+    QElapsedTimer timer;
+    timer.start();
+
     std::optional<QJsonObject> themeJSON;
     QString themePath;
     if (!oTheme)
@@ -266,6 +270,7 @@ void Theme::update()
             themePath = fallbackTheme.path;
         }
     }
+    auto loadTs = double(timer.nsecsElapsed()) * nsToMs;
 
     if (!themeJSON)
     {
@@ -274,11 +279,29 @@ void Theme::update()
         return;
     }
 
+    if (this->isAutoReloading() && this->currentThemeJson_ == *themeJSON)
+    {
+        return;
+    }
+
     this->parseFrom(*themeJSON);
     this->currentThemePath_ = themePath;
 
+    auto parseTs = double(timer.nsecsElapsed()) * nsToMs;
+
     this->updated.invoke();
-    this->updateCurrentWatchPath();
+    auto updateTs = double(timer.nsecsElapsed()) * nsToMs;
+    qCDebug(chatterinoTheme).nospace().noquote()
+        << "Updated theme in " << QString::number(updateTs, 'f', 2)
+        << "ms (load: " << QString::number(loadTs, 'f', 2)
+        << "ms, parse: " << QString::number(parseTs - loadTs, 'f', 2)
+        << "ms, update: " << QString::number(updateTs - parseTs, 'f', 2)
+        << "ms)";
+
+    if (this->isAutoReloading())
+    {
+        this->currentThemeJson_ = *themeJSON;
+    }
 }
 
 std::vector<std::pair<QString, QVariant>> Theme::availableThemes() const
@@ -387,12 +410,11 @@ void Theme::parseFrom(const QJsonObject &root)
 
 bool Theme::isAutoReloading() const
 {
-    return this->themeWatcher_ != nullptr;
+    return this->themeReloadTimer_ != nullptr;
 }
 
 void Theme::setAutoReload(bool autoReload)
 {
-    // autoReload <=> themeWatcher != nullptr
     if (autoReload == this->isAutoReloading())
     {
         return;
@@ -400,87 +422,19 @@ void Theme::setAutoReload(bool autoReload)
 
     if (!autoReload)
     {
-        this->themeWatcher_.reset();
+        this->themeReloadTimer_.reset();
+        this->currentThemeJson_ = {};
         return;
     }
 
-    this->themeWatcher_ = std::make_unique<QFileSystemWatcher>();
+    this->themeReloadTimer_ = std::make_unique<QTimer>();
+    QObject::connect(this->themeReloadTimer_.get(), &QTimer::timeout, [this]() {
+        this->update();
+    });
+    this->themeReloadTimer_->setInterval(Theme::AUTO_RELOAD_INTERVAL_MS);
+    this->themeReloadTimer_->start();
 
-    QObject::connect(this->themeWatcher_.get(),
-                     &QFileSystemWatcher::fileChanged,
-                     [this](const auto &path) {
-                         this->watchedFileChanged(path);
-                     });
-    this->updateCurrentWatchPath();
     qCDebug(chatterinoTheme) << "Enabled theme watcher";
-}
-
-void Theme::updateCurrentWatchPath()
-{
-    if (this->themeWatcher_ == nullptr)
-    {
-        return;
-    }
-    auto files = this->themeWatcher_->files();
-
-    if (files.empty())
-    {
-        this->themeWatcher_->addPath(this->currentThemePath_);
-        return;
-    }
-
-    if (files.length() == 1)
-    {
-        auto watched = files[0];
-        if (watched == this->currentThemePath_)
-        {
-            return;
-        }
-        this->themeWatcher_->addPath(this->currentThemePath_);
-        this->themeWatcher_->removePath(watched);
-        return;
-    }
-
-    this->themeWatcher_->removePaths(files);
-    this->themeWatcher_->addPath(this->currentThemePath_);
-}
-
-void Theme::watchedFileChanged(const QString &path)
-{
-    QFile target(path);
-    if (!target.exists())
-    {
-        return;
-    }
-    if (target.size() < 2)
-    {
-        return;
-    }
-
-    constexpr const double nsToMs = 1.0 / 1000000.0;
-    QElapsedTimer timer;
-    timer.start();
-
-    auto json = loadThemeFromPath(path);
-    auto loadTs = double(timer.nsecsElapsed()) * nsToMs;
-
-    if (!json)
-    {
-        qCWarning(chatterinoTheme) << "Failed to load theme JSON from" << path;
-        return;
-    }
-    this->parseFrom(*json);
-    auto parseTs = double(timer.nsecsElapsed()) * nsToMs;
-
-    this->updated.invoke();
-    auto updateTs = double(timer.nsecsElapsed()) * nsToMs;
-
-    qCDebug(chatterinoTheme).nospace().noquote()
-        << "Reloaded theme in " << QString::number(updateTs, 'f', 2)
-        << "ms (load: " << QString::number(loadTs, 'f', 2)
-        << "ms, parse: " << QString::number(parseTs - loadTs, 'f', 2)
-        << "ms, update: " << QString::number(updateTs - parseTs, 'f', 2)
-        << "ms)";
 }
 
 void Theme::normalizeColor(QColor &color) const

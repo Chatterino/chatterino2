@@ -6,10 +6,10 @@
 
 #include <pajlada/settings/setting.hpp>
 #include <QColor>
-#include <QFileSystemWatcher>
 #include <QJsonObject>
 #include <QPixmap>
 #include <QString>
+#include <QTimer>
 #include <QVariant>
 
 #include <memory>
@@ -40,6 +40,8 @@ public:
 
     // The built in theme that will be used if some theme parsing fails
     static const ThemeDescriptor fallbackTheme;
+
+    static const int AUTO_RELOAD_INTERVAL_MS = 500;
 
     void initialize(Settings &settings, Paths &paths) final;
 
@@ -158,9 +160,9 @@ private:
     std::vector<ThemeDescriptor> availableThemes_;
 
     QString currentThemePath_;
-    std::unique_ptr<QFileSystemWatcher> themeWatcher_;
-    void watchedFileChanged(const QString &path);
-    void updateCurrentWatchPath();
+    std::unique_ptr<QTimer> themeReloadTimer_;
+    // This will only be populated when auto-reloading themes
+    QJsonObject currentThemeJson_;
 
     /**
      * Figure out which themes are available in the Themes directory
