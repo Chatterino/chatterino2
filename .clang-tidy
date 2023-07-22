@@ -49,6 +49,8 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.GlobalConstantCase
     value: UPPER_CASE
+  - key: readability-identifier-naming.GlobalVariableCase
+    value: UPPER_CASE
   - key: readability-identifier-naming.VariableCase
     value: camelBack
   - key: readability-implicit-bool-conversion.AllowPointerConditions
