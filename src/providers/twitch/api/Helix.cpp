@@ -552,11 +552,19 @@ void Helix::loadBlocks(QString userId,
                        FailureCallback<QString> failureCallback,
                        CancellationToken &&token)
 {
+    constexpr const size_t blockLimit = 1024;
+
+    size_t receivedItems = 0;
     this->paginate(
         u"users/blocks"_s,
         {{u"broadcaster_id"_s, userId}, {u"first"_s, u"100"_s}},
-        [pageCallback](const QJsonObject &json) {
+        [pageCallback, receivedItems](const QJsonObject &json) mutable {
             const auto data = json["data"_L1].toArray();
+
+            if (data.isEmpty())
+            {
+                return false;
+            }
 
             std::vector<HelixBlock> ignores;
             ignores.reserve(data.count());
@@ -567,6 +575,9 @@ void Helix::loadBlocks(QString userId,
             }
 
             pageCallback(ignores);
+
+            receivedItems += data.count();
+            return receivedItems < blockLimit;
         },
         [failureCallback](const NetworkResult &result) {
             failureCallback(result.formatError());
@@ -2926,7 +2937,7 @@ NetworkRequest Helix::makePatch(const QString &url, const QUrlQuery &urlQuery)
 }
 
 void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
-                     std::function<void(const QJsonObject &)> onPage,
+                     std::function<bool(const QJsonObject &)> onPage,
                      std::function<void(NetworkResult)> onError,
                      CancellationToken &&cancellationToken)
 {
@@ -2948,7 +2959,11 @@ void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
         }
 
         const auto json = res.parseJson();
-        onPage(json);
+        if (!onPage(json))
+        {
+            // The consumer doesn't want any more pages
+            return Success;
+        }
 
         auto cursor = json["pagination"_L1]["cursor"_L1].toString();
         if (cursor.isEmpty())

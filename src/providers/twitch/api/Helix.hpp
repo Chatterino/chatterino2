@@ -1410,8 +1410,10 @@ private:
     NetworkRequest makePut(const QString &url, const QUrlQuery &urlQuery);
     NetworkRequest makePatch(const QString &url, const QUrlQuery &urlQuery);
 
+    /// Paginate the `url` endpoint and use `baseQuery` as the starting point for pagination.
+    /// @param onPage returns true while a new page is expected. Once false is returned, pagination will stop.
     void paginate(const QString &url, const QUrlQuery &baseQuery,
-                  std::function<void(const QJsonObject &)> onPage,
+                  std::function<bool(const QJsonObject &)> onPage,
                   std::function<void(NetworkResult)> onError,
                   CancellationToken &&token);
 
