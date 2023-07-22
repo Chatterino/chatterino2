@@ -2953,7 +2953,7 @@ void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
                   url = QString(url), query = QUrlQuery(baseQuery),
                   cancellationToken = std::move(cancellationToken)](
                      const NetworkResult &res) mutable -> Outcome {
-        if (cancellationToken.isCanceled())
+        if (cancellationToken.isCancelled())
         {
             return Success;
         }

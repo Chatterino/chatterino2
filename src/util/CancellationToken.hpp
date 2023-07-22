@@ -5,44 +5,47 @@
 
 namespace chatterino {
 
+/// The CancellationToken is a thread-safe way for worker(s)
+/// to know if the task they want to continue doing should be cancelled.
 class CancellationToken
 {
 public:
     CancellationToken() = default;
-    explicit CancellationToken(bool isCanceled)
-        : isCanceled_(new std::atomic<bool>(isCanceled))
+    explicit CancellationToken(bool isCancelled)
+        : isCancelled_(new std::atomic<bool>(isCancelled))
     {
     }
 
     CancellationToken(const CancellationToken &) = default;
     CancellationToken(CancellationToken &&other)
-        : isCanceled_(std::move(other.isCanceled_)){};
+        : isCancelled_(std::move(other.isCancelled_)){};
 
     CancellationToken &operator=(CancellationToken &&other)
     {
-        this->isCanceled_ = std::move(other.isCanceled_);
+        this->isCancelled_ = std::move(other.isCancelled_);
         return *this;
     }
     CancellationToken &operator=(const CancellationToken &) = default;
 
     void cancel()
     {
-        if (this->isCanceled_ != nullptr)
+        if (this->isCancelled_ != nullptr)
         {
-            this->isCanceled_->store(true, std::memory_order_release);
+            this->isCancelled_->store(true, std::memory_order_release);
         }
     }
 
-    bool isCanceled() const
+    bool isCancelled() const
     {
-        return this->isCanceled_ == nullptr ||
-               this->isCanceled_->load(std::memory_order_acquire);
+        return this->isCancelled_ == nullptr ||
+               this->isCancelled_->load(std::memory_order_acquire);
     }
 
 private:
-    std::shared_ptr<std::atomic<bool>> isCanceled_;
+    std::shared_ptr<std::atomic<bool>> isCancelled_;
 };
 
+/// The ScopedCancellationToken is a way to automatically cancel a CancellationToken when it goes out of scope
 class ScopedCancellationToken
 {
 public:
