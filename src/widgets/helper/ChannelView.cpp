@@ -800,7 +800,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
     if (auto tc = dynamic_cast<TwitchChannel *>(underlyingChannel.get()))
     {
         this->channelConnections_.managedConnect(
-            tc->liveStatusChanged, [this]() {
+            tc->streamStatusChanged, [this]() {
                 this->liveStatusChanged.invoke();
             });
     }
@@ -2084,22 +2084,73 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                 if (link.type == Link::UserInfo)
                 {
                     if (hoveredElement->getFlags().has(
-                            MessageElementFlag::Username) &&
-                        event->modifiers() == Qt::ShiftModifier)
+                            MessageElementFlag::Username))
                     {
-                        // Start a new reply if Shift+Right-clicking the message username
-                        this->setInputReply(layout->getMessagePtr());
-                    }
-                    else
-                    {
-                        // Insert @username into split input
-                        const bool commaMention =
-                            getSettings()->mentionUsersWithComma;
-                        const bool isFirstWord =
-                            split && split->getInput().isEditFirstWord();
-                        auto userMention = formatUserMention(
-                            link.value, isFirstWord, commaMention);
-                        insertText("@" + userMention + " ");
+                        Qt::KeyboardModifier userSpecifiedModifier =
+                            getSettings()->usernameRightClickModifier;
+
+                        if (userSpecifiedModifier ==
+                            Qt::KeyboardModifier::NoModifier)
+                        {
+                            qCWarning(chatterinoCommon)
+                                << "sanity check failed: "
+                                   "invalid settings detected "
+                                   "Settings::usernameRightClickModifier is "
+                                   "NoModifier, which should never happen";
+                            return;
+                        }
+
+                        Qt::KeyboardModifiers modifiers{userSpecifiedModifier};
+                        auto isModifierHeld = event->modifiers() == modifiers;
+
+                        UsernameRightClickBehavior action{};
+                        if (isModifierHeld)
+                        {
+                            action = getSettings()
+                                         ->usernameRightClickModifierBehavior;
+                        }
+                        else
+                        {
+                            action = getSettings()->usernameRightClickBehavior;
+                        }
+
+                        switch (action)
+                        {
+                            case UsernameRightClickBehavior::Mention: {
+                                if (split == nullptr)
+                                {
+                                    return;
+                                }
+
+                                // Insert @username into split input
+                                const bool commaMention =
+                                    getSettings()->mentionUsersWithComma;
+                                const bool isFirstWord =
+                                    split->getInput().isEditFirstWord();
+                                auto userMention = formatUserMention(
+                                    link.value, isFirstWord, commaMention);
+                                insertText("@" + userMention + " ");
+                            }
+                            break;
+
+                            case UsernameRightClickBehavior::Reply: {
+                                // Start a new reply if matching user's settings
+                                this->setInputReply(layout->getMessagePtr());
+                            }
+                            break;
+
+                            case UsernameRightClickBehavior::Ignore:
+                                break;
+
+                            default: {
+                                qCWarning(chatterinoCommon)
+                                    << "unhandled or corrupted "
+                                       "UsernameRightClickBehavior value in "
+                                       "ChannelView::handleMouseClick:"
+                                    << action;
+                            }
+                            break;  // unreachable
+                        }
                     }
 
                     return;

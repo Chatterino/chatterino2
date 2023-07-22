@@ -789,6 +789,12 @@ public:
                             std::function<void()> finallyCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#get-channel-information
+    virtual void fetchChannels(
+        QStringList userIDs,
+        ResultCallback<std::vector<HelixChannel>> successCallback,
+        HelixFailureCallback failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#get-channel-information
     virtual void getChannel(QString broadcasterId,
                             ResultCallback<HelixChannel> successCallback,
                             HelixFailureCallback failureCallback) = 0;
@@ -805,12 +811,12 @@ public:
         HelixFailureCallback failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#block-user
-    virtual void blockUser(QString targetUserId,
+    virtual void blockUser(QString targetUserId, const QObject *caller,
                            std::function<void()> successCallback,
                            HelixFailureCallback failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#unblock-user
-    virtual void unblockUser(QString targetUserId,
+    virtual void unblockUser(QString targetUserId, const QObject *caller,
                              std::function<void()> successCallback,
                              HelixFailureCallback failureCallback) = 0;
 
@@ -1102,6 +1108,12 @@ public:
                     std::function<void()> finallyCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#get-channel-information
+    void fetchChannels(
+        QStringList userIDs,
+        ResultCallback<std::vector<HelixChannel>> successCallback,
+        HelixFailureCallback failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#get-channel-information
     void getChannel(QString broadcasterId,
                     ResultCallback<HelixChannel> successCallback,
                     HelixFailureCallback failureCallback) final;
@@ -1118,11 +1130,12 @@ public:
                     HelixFailureCallback failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#block-user
-    void blockUser(QString targetUserId, std::function<void()> successCallback,
+    void blockUser(QString targetUserId, const QObject *caller,
+                   std::function<void()> successCallback,
                    HelixFailureCallback failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#unblock-user
-    void unblockUser(QString targetUserId,
+    void unblockUser(QString targetUserId, const QObject *caller,
                      std::function<void()> successCallback,
                      HelixFailureCallback failureCallback) final;
 

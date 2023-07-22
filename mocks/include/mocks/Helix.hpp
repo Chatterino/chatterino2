@@ -86,6 +86,12 @@ public:
                  std::function<void()> finallyCallback),
                 (override));
 
+    MOCK_METHOD(void, fetchChannels,
+                (QStringList userIDs,
+                 ResultCallback<std::vector<HelixChannel>> successCallback,
+                 HelixFailureCallback failureCallback),
+                (override));
+
     MOCK_METHOD(void, getChannel,
                 (QString broadcasterId,
                  ResultCallback<HelixChannel> successCallback,
@@ -105,12 +111,14 @@ public:
                 (override));
 
     MOCK_METHOD(void, blockUser,
-                (QString targetUserId, std::function<void()> successCallback,
+                (QString targetUserId, const QObject *caller,
+                 std::function<void()> successCallback,
                  HelixFailureCallback failureCallback),
                 (override));
 
     MOCK_METHOD(void, unblockUser,
-                (QString targetUserId, std::function<void()> successCallback,
+                (QString targetUserId, const QObject *caller,
+                 std::function<void()> successCallback,
                  HelixFailureCallback failureCallback),
                 (override));
 

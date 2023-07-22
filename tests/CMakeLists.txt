@@ -8,6 +8,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/AccessGuard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkCommon.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkRequest.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/NetworkResult.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChatterSet.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightPhrase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
@@ -29,6 +30,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/Filters.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/LinkParser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/InputCompletion.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Literals.cpp
     # Add your new file above this line!
     )
 
