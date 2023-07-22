@@ -22,8 +22,6 @@ public:
     void getEmoteSet(const QString &emoteSet,
                      SuccessCallback<const QJsonObject &> &&onSuccess,
                      ErrorCallback &&onError);
-    void getCosmetics(SuccessCallback<const QJsonObject &> &&onSuccess,
-                      ErrorCallback &&onError);
 
     void updatePresence(const QString &twitchChannelID,
                         const QString &seventvUserID,

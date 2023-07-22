@@ -13,10 +13,6 @@ const QString API_URL_USER = u"https://7tv.io/v3/users/twitch/%1"_s;
 const QString API_URL_EMOTE_SET = u"https://7tv.io/v3/emote-sets/%1"_s;
 const QString API_URL_PRESENCES = u"https://7tv.io/v3/users/%1/presences"_s;
 
-// V2
-const QString API_URL_COSMETICS =
-    u"https://7tv.io/v2/cosmetics?user_identifier=twitch_id"_s;
-
 }  // namespace
 
 // NOLINTBEGIN(readability-convert-member-functions-to-static)
@@ -46,23 +42,6 @@ void SeventvAPI::getEmoteSet(const QString &emoteSet,
 {
     NetworkRequest(API_URL_EMOTE_SET.arg(emoteSet), NetworkRequestType::Get)
         .timeout(25000)
-        .onSuccess([callback = std::move(onSuccess)](
-                       const NetworkResult &result) -> Outcome {
-            auto json = result.parseJson();
-            callback(json);
-            return Success;
-        })
-        .onError([callback = std::move(onError)](const NetworkResult &result) {
-            callback(result);
-        })
-        .execute();
-}
-
-void SeventvAPI::getCosmetics(SuccessCallback<const QJsonObject &> &&onSuccess,
-                              ErrorCallback &&onError)
-{
-    NetworkRequest(API_URL_COSMETICS)
-        .timeout(20000)
         .onSuccess([callback = std::move(onSuccess)](
                        const NetworkResult &result) -> Outcome {
             auto json = result.parseJson();
