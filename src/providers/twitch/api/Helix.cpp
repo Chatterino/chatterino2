@@ -2944,13 +2944,13 @@ void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
         const auto json = res.parseJson();
         onPage(json);
 
-        const auto pagination = json["pagination"_L1].toObject();
-        if (pagination.empty() || !pagination.contains("cursor"_L1))
+        auto cursor = json["pagination"_L1]["cursor"_L1].toString();
+        if (cursor.isEmpty())
         {
             return Success;
         }
         query.removeAllQueryItems(u"after"_s);
-        query.addQueryItem(u"after"_s, pagination["cursor"_L1].toString());
+        query.addQueryItem(u"after"_s, cursor);
 
         this->makeGet(url, query)
             .onSuccess(*onSuccess)
