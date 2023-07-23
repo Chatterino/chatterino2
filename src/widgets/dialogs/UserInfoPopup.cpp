@@ -836,13 +836,7 @@ void UserInfoPopup::updateUserData()
             });
 
         // get ignore state
-        bool isIgnoring = false;
-
-        if (auto blocks = currentUser->accessBlockedUserIds();
-            blocks->find(user.id) != blocks->end())
-        {
-            isIgnoring = true;
-        }
+        bool isIgnoring = currentUser->blockedUserIds().contains(user.id);
 
         // get ignoreHighlights state
         bool isIgnoringHighlights = false;

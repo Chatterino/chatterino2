@@ -1,6 +1,7 @@
 #pragma once
 
 #include "providers/twitch/api/Helix.hpp"
+#include "util/CancellationToken.hpp"
 
 #include <gmock/gmock.h>
 #include <QString>
@@ -107,7 +108,8 @@ public:
     MOCK_METHOD(void, loadBlocks,
                 (QString userId,
                  ResultCallback<std::vector<HelixBlock>> successCallback,
-                 HelixFailureCallback failureCallback),
+                 FailureCallback<QString> failureCallback,
+                 CancellationToken &&token),
                 (override));
 
     MOCK_METHOD(void, blockUser,
