@@ -19,12 +19,17 @@ using EmotePtr = std::shared_ptr<const Emote>;
 class SeventvBadges : public Singleton
 {
 public:
+    // Return the badge, if any, that is assigned to the user
     boost::optional<EmotePtr> getBadge(const UserId &id) const;
 
+    // Assign the given badge to the user
     void assignBadgeToUser(const QString &badgeID, const UserId &userID);
 
+    // Remove the given badge from the user
     void clearBadgeFromUser(const QString &badgeID, const UserId &userID);
 
+    // Register a new badge
+    // The json object will contain all information about the badge, like its ID & its images
     void addBadge(const QJsonObject &badgeJson);
 
 private:
