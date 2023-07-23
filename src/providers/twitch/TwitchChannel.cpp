@@ -472,13 +472,15 @@ void TwitchChannel::updateStreamTitle(const QString &title)
 
 void TwitchChannel::updateDisplayName(const QString &displayName)
 {
-    if (displayName == this->getDisplayName())
+    if (displayName == this->nameOptions.actualDisplayName)
     {
         // Display name has not changed
         return;
     }
 
     // Display name has changed
+
+    this->nameOptions.actualDisplayName = displayName;
 
     if (QString::compare(displayName, this->getName(), Qt::CaseInsensitive) ==
         0)
