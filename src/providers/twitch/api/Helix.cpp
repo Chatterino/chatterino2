@@ -581,7 +581,15 @@ void Helix::loadBlocks(QString userId,
             pageCallback(ignores);
 
             receivedItems += data.count();
-            return receivedItems < blockLimit;
+
+            if (receivedItems >= blockLimit)
+            {
+                qCInfo(chatterinoTwitch) << "Reached the limit of" << blockLimit
+                                         << "Twitch blocks fetched";
+                return false;
+            }
+
+            return true;
         },
         [failureCallback](const NetworkResult &result) {
             failureCallback(result.formatError());
