@@ -13,7 +13,7 @@
 - Minor: Add accelerators to the right click menu for messages (#4705)
 - Minor: Add pin action to usercards and reply threads. (#4692)
 - Minor: Stream status requests are now batched. (#4713)
-- Bugfix: Increased amount of blocked users loaded. (#4721)
+- Bugfix: Increased amount of blocked users loaded from 100 to 1,000. (#4721)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
 - Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
 - Bugfix: Fixed a crash when opening and closing a reply thread and switching the user. (#4675)
