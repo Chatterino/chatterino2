@@ -14,6 +14,7 @@
 #    include "controllers/plugins/PluginController.hpp"
 #endif
 #include "controllers/sound/SoundController.hpp"
+#include "controllers/twitch/LiveController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
@@ -92,6 +93,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , seventvPersonalEmotes(&this->emplace<SeventvPersonalEmotes>())
     , userData(&this->emplace<UserDataController>())
     , sound(&this->emplace<SoundController>())
+    , twitchLiveController(&this->emplace<TwitchLiveController>())
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace<PluginController>())
 #endif
@@ -247,6 +249,11 @@ IEmotes *Application::getEmotes()
 IUserDataController *Application::getUserData()
 {
     return this->userData;
+}
+
+ITwitchLiveController *Application::getTwitchLiveController()
+{
+    return this->twitchLiveController;
 }
 
 ITwitchIrcServer *Application::getTwitch()

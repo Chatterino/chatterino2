@@ -1,13 +1,17 @@
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 
 #include "common/Channel.hpp"
+#include "common/Literals.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "singletons/Theme.hpp"
 
 #include <QLoggingCategory>
 #include <QString>
 
 namespace chatterino::commands {
+
+using namespace literals;
 
 QString setLoggingRules(const CommandContext &ctx)
 {
@@ -39,6 +43,23 @@ QString setLoggingRules(const CommandContext &ctx)
     }
 
     ctx.channel->addMessage(makeSystemMessage(message));
+    return {};
+}
+
+QString toggleThemeReload(const CommandContext &ctx)
+{
+    if (getTheme()->isAutoReloading())
+    {
+        getTheme()->setAutoReload(false);
+        ctx.channel->addMessage(
+            makeSystemMessage(u"Disabled theme auto reloading."_s));
+        return {};
+    }
+
+    getTheme()->setAutoReload(true);
+    ctx.channel->addMessage(
+        makeSystemMessage(u"Auto reloading theme every %1 ms."_s.arg(
+            Theme::AUTO_RELOAD_INTERVAL_MS)));
     return {};
 }
 

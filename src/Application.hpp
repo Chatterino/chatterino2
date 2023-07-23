@@ -23,6 +23,8 @@ class HotkeyController;
 class IUserDataController;
 class UserDataController;
 class SoundController;
+class ITwitchLiveController;
+class TwitchLiveController;
 #ifdef CHATTERINO_HAVE_PLUGINS
 class PluginController;
 #endif
@@ -65,6 +67,7 @@ public:
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
+    virtual ITwitchLiveController *getTwitchLiveController() = 0;
 };
 
 class Application : public IApplication
@@ -106,6 +109,10 @@ public:
     UserDataController *const userData{};
     SoundController *const sound{};
 
+private:
+    TwitchLiveController *const twitchLiveController{};
+
+public:
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *const plugins{};
 #endif
@@ -159,6 +166,7 @@ public:
         return this->ffzBadges;
     }
     IUserDataController *getUserData() override;
+    ITwitchLiveController *getTwitchLiveController() override;
 
     pajlada::Signals::NoArgSignal streamerModeChanged;
 

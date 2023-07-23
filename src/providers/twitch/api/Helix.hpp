@@ -24,6 +24,8 @@ using HelixFailureCallback = std::function<void()>;
 template <typename... T>
 using ResultCallback = std::function<void(T...)>;
 
+class CancellationToken;
+
 struct HelixUser {
     QString id;
     QString login;
@@ -789,6 +791,12 @@ public:
                             std::function<void()> finallyCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#get-channel-information
+    virtual void fetchChannels(
+        QStringList userIDs,
+        ResultCallback<std::vector<HelixChannel>> successCallback,
+        HelixFailureCallback failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#get-channel-information
     virtual void getChannel(QString broadcasterId,
                             ResultCallback<HelixChannel> successCallback,
                             HelixFailureCallback failureCallback) = 0;
@@ -801,16 +809,17 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference#get-user-block-list
     virtual void loadBlocks(
-        QString userId, ResultCallback<std::vector<HelixBlock>> successCallback,
-        HelixFailureCallback failureCallback) = 0;
+        QString userId, ResultCallback<std::vector<HelixBlock>> pageCallback,
+        FailureCallback<QString> failureCallback,
+        CancellationToken &&token) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#block-user
-    virtual void blockUser(QString targetUserId,
+    virtual void blockUser(QString targetUserId, const QObject *caller,
                            std::function<void()> successCallback,
                            HelixFailureCallback failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#unblock-user
-    virtual void unblockUser(QString targetUserId,
+    virtual void unblockUser(QString targetUserId, const QObject *caller,
                              std::function<void()> successCallback,
                              HelixFailureCallback failureCallback) = 0;
 
@@ -1102,6 +1111,12 @@ public:
                     std::function<void()> finallyCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#get-channel-information
+    void fetchChannels(
+        QStringList userIDs,
+        ResultCallback<std::vector<HelixChannel>> successCallback,
+        HelixFailureCallback failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#get-channel-information
     void getChannel(QString broadcasterId,
                     ResultCallback<HelixChannel> successCallback,
                     HelixFailureCallback failureCallback) final;
@@ -1114,15 +1129,17 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference#get-user-block-list
     void loadBlocks(QString userId,
-                    ResultCallback<std::vector<HelixBlock>> successCallback,
-                    HelixFailureCallback failureCallback) final;
+                    ResultCallback<std::vector<HelixBlock>> pageCallback,
+                    FailureCallback<QString> failureCallback,
+                    CancellationToken &&token) final;
 
     // https://dev.twitch.tv/docs/api/reference#block-user
-    void blockUser(QString targetUserId, std::function<void()> successCallback,
+    void blockUser(QString targetUserId, const QObject *caller,
+                   std::function<void()> successCallback,
                    HelixFailureCallback failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#unblock-user
-    void unblockUser(QString targetUserId,
+    void unblockUser(QString targetUserId, const QObject *caller,
                      std::function<void()> successCallback,
                      HelixFailureCallback failureCallback) final;
 
@@ -1392,6 +1409,13 @@ private:
     NetworkRequest makePost(const QString &url, const QUrlQuery &urlQuery);
     NetworkRequest makePut(const QString &url, const QUrlQuery &urlQuery);
     NetworkRequest makePatch(const QString &url, const QUrlQuery &urlQuery);
+
+    /// Paginate the `url` endpoint and use `baseQuery` as the starting point for pagination.
+    /// @param onPage returns true while a new page is expected. Once false is returned, pagination will stop.
+    void paginate(const QString &url, const QUrlQuery &baseQuery,
+                  std::function<bool(const QJsonObject &)> onPage,
+                  std::function<void(NetworkResult)> onError,
+                  CancellationToken &&token);
 
     QString clientId;
     QString oauthToken;

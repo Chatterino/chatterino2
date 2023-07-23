@@ -740,7 +740,7 @@ void SplitHeader::handleChannelChanged()
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         this->channelConnections_.managedConnect(
-            twitchChannel->liveStatusChanged, [this]() {
+            twitchChannel->streamStatusChanged, [this]() {
                 this->updateChannelText();
             });
     }
@@ -956,10 +956,6 @@ void SplitHeader::enterEvent(QEvent *event)
     if (!this->tooltipText_.isEmpty())
     {
         auto *channel = this->split_->getChannel().get();
-        if (channel->getType() == Channel::Type::Twitch)
-        {
-            dynamic_cast<TwitchChannel *>(channel)->refreshTitle();
-        }
 
         auto *tooltip = TooltipWidget::instance();
         tooltip->setOne({nullptr, this->tooltipText_});

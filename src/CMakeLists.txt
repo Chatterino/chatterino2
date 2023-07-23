@@ -33,6 +33,7 @@ set(SOURCE_FILES
         common/Env.hpp
         common/LinkParser.cpp
         common/LinkParser.hpp
+        common/Literals.hpp
         common/Modes.cpp
         common/Modes.hpp
         common/NetworkCommon.cpp
@@ -166,12 +167,15 @@ set(SOURCE_FILES
         controllers/plugins/LuaUtilities.cpp
         controllers/plugins/LuaUtilities.hpp
 
+        controllers/sound/SoundController.cpp
+        controllers/sound/SoundController.hpp
+
+        controllers/twitch/LiveController.cpp
+        controllers/twitch/LiveController.hpp
+
         controllers/userdata/UserDataController.cpp
         controllers/userdata/UserDataController.hpp
         controllers/userdata/UserData.hpp
-
-        controllers/sound/SoundController.cpp
-        controllers/sound/SoundController.hpp
 
         debug/Benchmark.cpp
         debug/Benchmark.hpp
@@ -401,6 +405,7 @@ set(SOURCE_FILES
 
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
+        util/CancellationToken.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
         util/ConcurrentMap.hpp

@@ -129,8 +129,8 @@ void Updates::installUpdates()
                     auto *box = new QMessageBox(
                         QMessageBox::Information, "Chatterino Update",
                         QStringLiteral("The update couldn't be downloaded "
-                                       "(HTTP status %1).")
-                            .arg(result.status()));
+                                       "(Error: %1).")
+                            .arg(result.formatError()));
                     box->setAttribute(Qt::WA_DeleteOnClose);
                     box->exec();
                     return Failure;
@@ -191,8 +191,8 @@ void Updates::installUpdates()
                     auto *box = new QMessageBox(
                         QMessageBox::Information, "Chatterino Update",
                         QStringLiteral("The update couldn't be downloaded "
-                                       "(HTTP status %1).")
-                            .arg(result.status()));
+                                       "(Error: %1).")
+                            .arg(result.formatError()));
                     box->setAttribute(Qt::WA_DeleteOnClose);
                     box->exec();
                     return Failure;

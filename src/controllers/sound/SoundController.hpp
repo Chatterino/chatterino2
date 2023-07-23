@@ -45,7 +45,7 @@ private:
     // Used for storing & reusing sounds to be played
     std::unique_ptr<ma_resource_manager> resourceManager;
     // The sound device we're playing sound into
-    std::unique_ptr<ma_device> device;
+    std::unique_ptr<ma_device> device{nullptr};
     // The engine is a high-level API for playing sounds from paths in a simple & efficient-enough manner
     std::unique_ptr<ma_engine> engine;
 
@@ -63,6 +63,13 @@ private:
     ThreadGuard tgPlay;
 
     bool initialized{false};
+
+    // Recreates the sound device
+    // This is used during initialization, and can also be used if the device
+    // needs to be recreated during playback
+    //
+    // Returns false on failure
+    bool recreateDevice();
 
     friend class Application;
 };

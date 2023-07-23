@@ -197,6 +197,9 @@ void Window::addCustomTitlebarButtons()
     this->signalHolder_.managedConnect(getApp()->streamerModeChanged, [this]() {
         this->updateStreamerModeIcon();
     });
+
+    // Update initial state
+    this->updateStreamerModeIcon();
 }
 
 void Window::updateStreamerModeIcon()
