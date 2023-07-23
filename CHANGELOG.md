@@ -13,7 +13,7 @@
 - Minor: Add accelerators to the right click menu for messages (#4705)
 - Minor: Add pin action to usercards and reply threads. (#4692)
 - Minor: Stream status requests are now batched. (#4713)
-- Minor: Added `/c2-theme-autoreload` command to automatically reload a custom theme. (#4718)
+- Minor: Added `/c2-theme-autoreload` command to automatically reload a custom theme. This is useful for when you're developing your own theme. (#4718)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
 - Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
 - Bugfix: Fixed a crash when opening and closing a reply thread and switching the user. (#4675)
