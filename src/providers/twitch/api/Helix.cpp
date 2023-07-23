@@ -552,7 +552,7 @@ void Helix::loadBlocks(QString userId,
                        FailureCallback<QString> failureCallback,
                        CancellationToken &&token)
 {
-    constexpr const size_t blockLimit = 1024;
+    constexpr const size_t blockLimit = 1000;
 
     // TODO(Qt 5.13): use initializer list
     QUrlQuery query;
