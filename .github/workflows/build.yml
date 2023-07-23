@@ -176,8 +176,8 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         shell: pwsh
         env:
-          # Enable PCH on Windows when crashpad is enabled
-          C2_WINDOWS_USE_PCH: ${{ matrix.skip-crashpad && 'OFF' || 'ON' }}
+          # Always enable PCH on Windows
+          C2_WINDOWS_USE_PCH: "ON"
         run: |
           cd build
           cmake `
