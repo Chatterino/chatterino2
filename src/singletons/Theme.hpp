@@ -9,8 +9,10 @@
 #include <QJsonObject>
 #include <QPixmap>
 #include <QString>
+#include <QTimer>
 #include <QVariant>
 
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -38,6 +40,8 @@ public:
 
     // The built in theme that will be used if some theme parsing fails
     static const ThemeDescriptor fallbackTheme;
+
+    static const int AUTO_RELOAD_INTERVAL_MS = 500;
 
     void initialize(Settings &settings, Paths &paths) final;
 
@@ -138,6 +142,9 @@ public:
     void normalizeColor(QColor &color) const;
     void update();
 
+    bool isAutoReloading() const;
+    void setAutoReload(bool autoReload);
+
     /**
      * Return a list of available themes
      **/
@@ -151,6 +158,11 @@ private:
     bool isLight_ = false;
 
     std::vector<ThemeDescriptor> availableThemes_;
+
+    QString currentThemePath_;
+    std::unique_ptr<QTimer> themeReloadTimer_;
+    // This will only be populated when auto-reloading themes
+    QJsonObject currentThemeJson_;
 
     /**
      * Figure out which themes are available in the Themes directory
