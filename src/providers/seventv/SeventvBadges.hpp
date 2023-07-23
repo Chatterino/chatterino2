@@ -22,9 +22,11 @@ class SeventvBadges : public Singleton
 public:
     boost::optional<EmotePtr> getBadge(const UserId &id) const;
 
-    void addBadge(const QJsonObject &badgeJson);
     void assignBadgeToUser(const QString &badgeID, const UserId &userID);
+
     void clearBadgeFromUser(const QString &badgeID, const UserId &userID);
+
+    void addBadge(const QJsonObject &badgeJson);
 
 private:
     // Mutex for both `badgeMap_` and `knownBadges_`
