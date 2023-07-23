@@ -101,6 +101,8 @@ bool TwitchAccount::isAnon() const
 
 void TwitchAccount::loadBlocks()
 {
+    assertInGuiThread();
+
     auto token = CancellationToken(false);
     this->blockToken_ = token;
     this->ignores_.clear();
@@ -109,6 +111,8 @@ void TwitchAccount::loadBlocks()
     getHelix()->loadBlocks(
         getIApp()->getAccounts()->twitch.getCurrent()->userId_,
         [this](const std::vector<HelixBlock> &blocks) {
+            assertInGuiThread();
+
             for (const HelixBlock &block : blocks)
             {
                 TwitchUser blockedUser;
