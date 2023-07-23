@@ -163,6 +163,10 @@ private:
     pajlada::Signals::Connection roomModeChangedConnection_;
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
+
+    // This signal-holder is cleared whenever this split changes the underlying channel
+    pajlada::Signals::SignalHolder channelSignalHolder_;
+
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;
 

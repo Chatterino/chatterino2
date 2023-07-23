@@ -16,6 +16,7 @@
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
 - Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
 - Bugfix: Fixed a crash when opening and closing a reply thread and switching the user. (#4675)
+- Bugfix: Fixed a crash that could happen when closing splits before their display name was updated. This was especially noticeable after the live controller changes. (#4731)
 - Bugfix: Fix visual glitches with smooth scrolling. (#4501)
 - Bugfix: Fixed pings firing for the "Your username" highlight when not signed in. (#4698)
 - Bugfix: Fixed partially broken filters on Qt 6 builds. (#4702)
