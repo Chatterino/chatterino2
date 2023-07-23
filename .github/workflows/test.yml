@@ -28,27 +28,19 @@ jobs:
       fail-fast: false
     env:
       C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
+      QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
 
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Install Qt5
-        if: startsWith(matrix.qt-version, '5.')
+      - name: Install Qt
         uses: jurplel/install-qt-action@v3.2.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          version: ${{ matrix.qt-version }}
-
-      - name: Install Qt6
-        if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v3.2.1
-        with:
-          cache: true
-          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          modules: qt5compat qtimageformats
+          modules: ${{ env.QT_MODULES }}
           version: ${{ matrix.qt-version }}
 
       # LINUX
