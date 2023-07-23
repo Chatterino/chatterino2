@@ -28,9 +28,9 @@ public:
     // Remove the given badge from the user
     void clearBadgeFromUser(const QString &badgeID, const UserId &userID);
 
-    // Register a new badge
+    // Register a new known badge
     // The json object will contain all information about the badge, like its ID & its images
-    void addBadge(const QJsonObject &badgeJson);
+    void registerBadge(const QJsonObject &badgeJson);
 
 private:
     // Mutex for both `badgeMap_` and `knownBadges_`

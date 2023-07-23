@@ -353,7 +353,7 @@ void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
     switch (cosmetic.kind)
     {
         case CosmeticKind::Badge: {
-            badges->addBadge(cosmetic.data);
+            badges->registerBadge(cosmetic.data);
         }
         break;
         default:

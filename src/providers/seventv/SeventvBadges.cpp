@@ -49,7 +49,7 @@ void SeventvBadges::clearBadgeFromUser(const QString &badgeID,
     }
 }
 
-void SeventvBadges::addBadge(const QJsonObject &badgeJson)
+void SeventvBadges::registerBadge(const QJsonObject &badgeJson)
 {
     const auto badgeID = badgeJson["id"].toString();
 
