@@ -2954,9 +2954,9 @@ void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
     };
 
     *onSuccess = [this, onPage = std::move(onPage), onError, onSuccessCb,
-                  url = QString(url), query = QUrlQuery(baseQuery),
+                  url{url}, baseQuery{baseQuery},
                   cancellationToken = std::move(cancellationToken)](
-                     const NetworkResult &res) mutable -> Outcome {
+                     const NetworkResult &res) -> Outcome {
         if (cancellationToken.isCancelled())
         {
             return Success;
@@ -2974,6 +2974,8 @@ void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
         {
             return Success;
         }
+
+        auto query = baseQuery;
         query.removeAllQueryItems(u"after"_s);
         query.addQueryItem(u"after"_s, cursor);
 
