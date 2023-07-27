@@ -66,6 +66,21 @@ private:
      */
     bool completionInProgress_ = false;
 
+    /**
+     * This is set whenever the tab completion is triggered.
+     * When this variable is set, moving the cursor will not reset tab completion.
+     *
+     * For example:
+     *
+     * input: "pog"
+     *  - type Tab to complete to "PogBones"
+     *    - updatingText_ is set to true,
+     *    - text is updated, cursor is moved after the new word
+     *    - updatingText_ is set to false,
+     *  - moving the cursor now would result in completionInProgress_ being set to false
+     */
+    bool updatingText_ = false;
+
     bool eventFilter(QObject *obj, QEvent *event) override;
 
 private slots:

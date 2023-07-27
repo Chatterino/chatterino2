@@ -2,6 +2,7 @@
 
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QMimeData>
@@ -19,6 +20,15 @@ ResizingTextEdit::ResizingTextEdit()
 
     QObject::connect(this, &QTextEdit::textChanged, this,
                      &QWidget::updateGeometry);
+    QObject::connect(this, &QTextEdit::cursorPositionChanged, [this]() {
+        if (this->updatingText_ || !this->completionInProgress_)
+        {
+            return;
+        }
+        qCDebug(chatterinoCommon)
+            << "Finishing completion because cursor moved";
+        this->completionInProgress_ = false;
+    });
 
     // Whenever the setting for emote completion changes, force a
     // refresh on the completion model the next time "Tab" is pressed
@@ -144,6 +154,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         {
             return;
         }
+        this->updatingText_ = true;
 
         auto *completionModel =
             static_cast<CompletionModel *>(this->completer_->model());
@@ -158,6 +169,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             this->completionInProgress_ = true;
             this->completer_->setCompletionPrefix(currentCompletionPrefix);
             this->completer_->complete();
+            this->updatingText_ = false;
             return;
         }
 
@@ -183,6 +195,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         }
 
         this->completer_->complete();
+        this->updatingText_ = false;
         return;
     }
 
