@@ -109,20 +109,26 @@ std::string &getNmQueueName(Paths &paths)
 
 // CLIENT
 
-void NativeMessagingClient::sendMessage(const QByteArray &array)
-{
-    ipc::sendMessage("chatterino_gui", array);
-}
+namespace nm_client {
 
-void NativeMessagingClient::writeToCout(const QByteArray &array)
-{
-    auto *data = array.data();
-    auto size = uint32_t(array.size());
+    void sendMessage(const QByteArray &array)
+    {
+        ipc::sendMessage("chatterino_gui", array);
+    }
 
-    std::cout.write(reinterpret_cast<char *>(&size), 4);
-    std::cout.write(data, size);
-    std::cout.flush();
-}
+    void writeToCout(const QByteArray &array)
+    {
+        const auto *data = array.data();
+        auto size = uint32_t(array.size());
+
+        // We're writing the raw bytes to cout.
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+        std::cout.write(reinterpret_cast<char *>(&size), 4);
+        std::cout.write(data, size);
+        std::cout.flush();
+    }
+
+}  // namespace nm_client
 
 // SERVER
 
