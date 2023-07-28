@@ -185,19 +185,16 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         QString name = root["name"_L1].toString();
 
 #ifdef USEWINSDK
-        AttachedWindow::GetArgs args;
-        args.winId = root["winId"_L1].toString();
-        args.yOffset = root["yOffset"_L1].toInt(-1);
-
-        {
-            const auto sizeObject = root["size"_L1].toObject();
-            args.x = sizeObject["x"_L1].toDouble(-1.0);
-            args.pixelRatio = sizeObject["pixelRatio"_L1].toDouble(-1.0);
-            args.width = sizeObject["width"_L1].toInt(-1);
-            args.height = sizeObject["height"_L1].toInt(-1);
-        }
-
-        args.fullscreen = attachFullscreen;
+        const auto sizeObject = root["size"_L1].toObject();
+        AttachedWindow::GetArgs args = {
+            .winId = root["winId"_L1].toString(),
+            .yOffset = root["yOffset"_L1].toInt(-1),
+            .x = sizeObject["x"_L1].toDouble(-1.0),
+            .pixelRatio = sizeObject["pixelRatio"_L1].toDouble(-1.0),
+            .width = sizeObject["width"_L1].toInt(-1),
+            .height = sizeObject["height"_L1].toInt(-1),
+            .fullscreen = attachFullscreen,
+        };
 
         qCDebug(chatterinoNativeMessage)
             << args.x << args.pixelRatio << args.width << args.height
