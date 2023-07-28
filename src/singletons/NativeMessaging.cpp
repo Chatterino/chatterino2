@@ -14,16 +14,11 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QSettings>
 
 #ifdef Q_OS_WIN
-// clang-format off
-#    include <QSettings>
-// clang-format on
-#    include "singletons/WindowManager.hpp"
 #    include "widgets/AttachedWindow.hpp"
 #endif
-
-#include <iostream>
 
 #define EXTENSION_ID "glknmaideaikkmemifbfkhnomoknepka"
 #define MESSAGE_SIZE 1024
