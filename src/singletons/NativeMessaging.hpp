@@ -33,6 +33,11 @@ private:
     {
     public:
         void run() override;
+
+    private:
+        void handleMessage(const QJsonObject &root);
+        void handleSelect(const QJsonObject &root);
+        void handleDetach(const QJsonObject &root);
     };
 
     ReceiverThread thread;

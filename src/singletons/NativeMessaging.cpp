@@ -22,107 +22,10 @@
 
 namespace {
 
-using namespace chatterino;
-using namespace literals;
+using namespace chatterino::literals;
 
 const QString EXTENSION_ID = u"glknmaideaikkmemifbfkhnomoknepka"_s;
 constexpr const size_t MESSAGE_SIZE = 1024;
-
-void handleSelect(const QJsonObject &root)
-{
-    QString type = root["type"_L1].toString();
-    bool attach = root["attach"_L1].toBool();
-    bool attachFullscreen = root["attach_fullscreen"_L1].toBool();
-    QString name = root["name"_L1].toString();
-
-#ifdef USEWINSDK
-    const auto sizeObject = root["size"_L1].toObject();
-    AttachedWindow::GetArgs args = {
-        .winId = root["winId"_L1].toString(),
-        .yOffset = root["yOffset"_L1].toInt(-1),
-        .x = sizeObject["x"_L1].toDouble(-1.0),
-        .pixelRatio = sizeObject["pixelRatio"_L1].toDouble(-1.0),
-        .width = sizeObject["width"_L1].toInt(-1),
-        .height = sizeObject["height"_L1].toInt(-1),
-        .fullscreen = attachFullscreen,
-    };
-
-    qCDebug(chatterinoNativeMessage)
-        << args.x << args.pixelRatio << args.width << args.height << args.winId;
-
-    if (args.winId.isNull())
-    {
-        qCDebug(chatterinoNativeMessage) << "winId in select is missing";
-        return;
-    }
-#endif
-
-    if (type != u"twtich"_s)
-    {
-        qCDebug(chatterinoNativeMessage) << "NM unknown channel type";
-        return;
-    }
-
-    postToThread([=] {
-        auto *app = getApp();
-
-        if (!name.isEmpty())
-        {
-            auto channel = app->twitch->getOrAddChannel(name);
-            if (app->twitch->watchingChannel.get() != channel)
-            {
-                app->twitch->watchingChannel.reset(channel);
-            }
-        }
-
-        if (attach || attachFullscreen)
-        {
-#ifdef USEWINSDK
-            auto *window = AttachedWindow::getForeground(args);
-            if (!name.isEmpty())
-            {
-                window->setChannel(app->twitch->getOrAddChannel(name));
-            }
-#endif
-        }
-    });
-}
-
-void handleDetach(const QJsonObject &root)
-{
-    QString winId = root["winId"_L1].toString();
-
-    if (winId.isNull())
-    {
-        qCDebug(chatterinoNativeMessage) << "NM winId missing";
-        return;
-    }
-
-#ifdef USEWINSDK
-    postToThread([winId] {
-        qCDebug(chatterinoNativeMessage) << "NW detach";
-        AttachedWindow::detach(winId);
-    });
-#endif
-}
-
-void handleMessage(const QJsonObject &root)
-{
-    QString action = root["action"_L1].toString();
-
-    if (action == "select")
-    {
-        handleSelect(root);
-        return;
-    }
-    if (action == "detach")
-    {
-        handleDetach(root);
-        return;
-    }
-
-    qCDebug(chatterinoNativeMessage) << "NM unknown action" << action;
-}
 
 }  // namespace
 
@@ -255,9 +158,110 @@ void NativeMessagingServer::ReceiverThread::run()
         }
         auto document = QJsonDocument::fromJson(buf);
 
-        handleMessage(document.object());
+        this->handleMessage(document.object());
     }
 }
+
+void NativeMessagingServer::ReceiverThread::handleMessage(
+    const QJsonObject &root)
+{
+    QString action = root["action"_L1].toString();
+
+    if (action == "select")
+    {
+        this->handleSelect(root);
+        return;
+    }
+    if (action == "detach")
+    {
+        this->handleDetach(root);
+        return;
+    }
+
+    qCDebug(chatterinoNativeMessage) << "NM unknown action" << action;
+}
+
+// NOLINTBEGIN(readability-convert-member-functions-to-static)
+void NativeMessagingServer::ReceiverThread::handleSelect(
+    const QJsonObject &root)
+{
+    QString type = root["type"_L1].toString();
+    bool attach = root["attach"_L1].toBool();
+    bool attachFullscreen = root["attach_fullscreen"_L1].toBool();
+    QString name = root["name"_L1].toString();
+
+#ifdef USEWINSDK
+    const auto sizeObject = root["size"_L1].toObject();
+    AttachedWindow::GetArgs args = {
+        .winId = root["winId"_L1].toString(),
+        .yOffset = root["yOffset"_L1].toInt(-1),
+        .x = sizeObject["x"_L1].toDouble(-1.0),
+        .pixelRatio = sizeObject["pixelRatio"_L1].toDouble(-1.0),
+        .width = sizeObject["width"_L1].toInt(-1),
+        .height = sizeObject["height"_L1].toInt(-1),
+        .fullscreen = attachFullscreen,
+    };
+
+    qCDebug(chatterinoNativeMessage)
+        << args.x << args.pixelRatio << args.width << args.height << args.winId;
+
+    if (args.winId.isNull())
+    {
+        qCDebug(chatterinoNativeMessage) << "winId in select is missing";
+        return;
+    }
+#endif
+
+    if (type != u"twtich"_s)
+    {
+        qCDebug(chatterinoNativeMessage) << "NM unknown channel type";
+        return;
+    }
+
+    postToThread([=] {
+        auto *app = getApp();
+
+        if (!name.isEmpty())
+        {
+            auto channel = app->twitch->getOrAddChannel(name);
+            if (app->twitch->watchingChannel.get() != channel)
+            {
+                app->twitch->watchingChannel.reset(channel);
+            }
+        }
+
+        if (attach || attachFullscreen)
+        {
+#ifdef USEWINSDK
+            auto *window = AttachedWindow::getForeground(args);
+            if (!name.isEmpty())
+            {
+                window->setChannel(app->twitch->getOrAddChannel(name));
+            }
+#endif
+        }
+    });
+}
+
+void NativeMessagingServer::ReceiverThread::handleDetach(
+    const QJsonObject &root)
+{
+    QString winId = root["winId"_L1].toString();
+
+    if (winId.isNull())
+    {
+        qCDebug(chatterinoNativeMessage) << "NM winId missing";
+        return;
+    }
+
+#ifdef USEWINSDK
+    postToThread([winId] {
+        qCDebug(chatterinoNativeMessage) << "NW detach";
+        AttachedWindow::detach(winId);
+    });
+#endif
+}
+// NOLINTEND(readability-convert-member-functions-to-static)
 
 Atomic<boost::optional<QString>> &nmIpcError()
 {
