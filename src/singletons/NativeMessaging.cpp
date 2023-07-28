@@ -50,45 +50,42 @@ void handleSelect(const QJsonObject &root)
     qCDebug(chatterinoNativeMessage)
         << args.x << args.pixelRatio << args.width << args.height << args.winId;
 
-    if (type.isNull() || args.winId.isNull())
+    if (args.winId.isNull())
     {
-        qCDebug(chatterinoNativeMessage) << "NM type, name or winId missing";
-        attach = false;
-        attachFullscreen = false;
+        qCDebug(chatterinoNativeMessage) << "winId in select is missing";
         return;
     }
 #endif
 
-    if (type == "twitch")
-    {
-        postToThread([=] {
-            auto *app = getApp();
-
-            if (!name.isEmpty())
-            {
-                auto channel = app->twitch->getOrAddChannel(name);
-                if (app->twitch->watchingChannel.get() != channel)
-                {
-                    app->twitch->watchingChannel.reset(channel);
-                }
-            }
-
-            if (attach || attachFullscreen)
-            {
-#ifdef USEWINSDK
-                auto *window = AttachedWindow::getForeground(args);
-                if (!name.isEmpty())
-                {
-                    window->setChannel(app->twitch->getOrAddChannel(name));
-                }
-#endif
-            }
-        });
-    }
-    else
+    if (type != u"twtich"_s)
     {
         qCDebug(chatterinoNativeMessage) << "NM unknown channel type";
+        return;
     }
+
+    postToThread([=] {
+        auto *app = getApp();
+
+        if (!name.isEmpty())
+        {
+            auto channel = app->twitch->getOrAddChannel(name);
+            if (app->twitch->watchingChannel.get() != channel)
+            {
+                app->twitch->watchingChannel.reset(channel);
+            }
+        }
+
+        if (attach || attachFullscreen)
+        {
+#ifdef USEWINSDK
+            auto *window = AttachedWindow::getForeground(args);
+            if (!name.isEmpty())
+            {
+                window->setChannel(app->twitch->getOrAddChannel(name));
+            }
+#endif
+        }
+    });
 }
 
 void handleDetach(const QJsonObject &root)
