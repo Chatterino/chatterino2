@@ -20,13 +20,13 @@
 #    include "widgets/AttachedWindow.hpp"
 #endif
 
-#define EXTENSION_ID "glknmaideaikkmemifbfkhnomoknepka"
-#define MESSAGE_SIZE 1024
-
 namespace {
 
 using namespace chatterino;
 using namespace literals;
+
+const QString EXTENSION_ID = u"glknmaideaikkmemifbfkhnomoknepka"_s;
+constexpr const size_t MESSAGE_SIZE = 1024;
 
 void handleSelect(const QJsonObject &root)
 {
@@ -137,7 +137,9 @@ void registerNmManifest(Paths &paths, const QString &manifestFilename,
 void registerNmHost(Paths &paths)
 {
     if (paths.isPortable())
+    {
         return;
+    }
 
     auto getBaseDocument = [&] {
         QJsonObject obj;
@@ -154,9 +156,9 @@ void registerNmHost(Paths &paths)
         QJsonDocument document;
 
         auto obj = getBaseDocument();
-        QJsonArray allowed_origins_arr = {"chrome-extension://" EXTENSION_ID
-                                          "/"};
-        obj.insert("allowed_origins", allowed_origins_arr);
+        QJsonArray allowedOriginsArr = {
+            u"chrome-extension://%1/"_s.arg(EXTENSION_ID)};
+        obj.insert("allowed_origins", allowedOriginsArr);
         document.setObject(obj);
 
         registerNmManifest(paths, "/native-messaging-manifest-chrome.json",
@@ -170,8 +172,8 @@ void registerNmHost(Paths &paths)
         QJsonDocument document;
 
         auto obj = getBaseDocument();
-        QJsonArray allowed_extensions = {"chatterino_native@chatterino.com"};
-        obj.insert("allowed_extensions", allowed_extensions);
+        QJsonArray allowedExtensions = {"chatterino_native@chatterino.com"};
+        obj.insert("allowed_extensions", allowedExtensions);
         document.setObject(obj);
 
         registerNmManifest(paths, "/native-messaging-manifest-firefox.json",
