@@ -141,45 +141,38 @@ void registerNmHost(Paths &paths)
         return;
     }
 
-    auto getBaseDocument = [&] {
-        QJsonObject obj;
-        obj.insert("name", "com.chatterino.chatterino");
-        obj.insert("description", "Browser interaction with chatterino.");
-        obj.insert("path", QCoreApplication::applicationFilePath());
-        obj.insert("type", "stdio");
-
-        return obj;
+    auto getBaseDocument = [] {
+        return QJsonObject{
+            {u"name"_s, "com.chatterino.chatterino"_L1},
+            {u"description"_s, "Browser interaction with chatterino."_L1},
+            {u"path"_s, QCoreApplication::applicationFilePath()},
+            {u"type"_s, "stdio"_L1},
+        };
     };
 
     // chrome
     {
-        QJsonDocument document;
-
         auto obj = getBaseDocument();
         QJsonArray allowedOriginsArr = {
             u"chrome-extension://%1/"_s.arg(EXTENSION_ID)};
         obj.insert("allowed_origins", allowedOriginsArr);
-        document.setObject(obj);
 
         registerNmManifest(paths, "/native-messaging-manifest-chrome.json",
                            "HKCU\\Software\\Google\\Chrome\\NativeMessagingHost"
                            "s\\com.chatterino.chatterino",
-                           document);
+                           QJsonDocument(obj));
     }
 
     // firefox
     {
-        QJsonDocument document;
-
         auto obj = getBaseDocument();
         QJsonArray allowedExtensions = {"chatterino_native@chatterino.com"};
         obj.insert("allowed_extensions", allowedExtensions);
-        document.setObject(obj);
 
         registerNmManifest(paths, "/native-messaging-manifest-firefox.json",
                            "HKCU\\Software\\Mozilla\\NativeMessagingHosts\\com."
                            "chatterino.chatterino",
-                           document);
+                           QJsonDocument(obj));
     }
 }
 
