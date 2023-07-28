@@ -1,13 +1,13 @@
 #include "singletons/NativeMessaging.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
 #include "util/IpcQueue.hpp"
 #include "util/PostToThread.hpp"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <QCoreApplication>
 #include <QFile>
 #include <QJsonArray>
@@ -29,6 +29,8 @@
 #define MESSAGE_SIZE 1024
 
 namespace chatterino {
+
+using namespace literals;
 
 void registerNmManifest(Paths &paths, const QString &manifestFilename,
                         const QString &registryKeyName,
@@ -167,7 +169,7 @@ void NativeMessagingServer::ReceiverThread::run()
 void NativeMessagingServer::ReceiverThread::handleMessage(
     const QJsonObject &root)
 {
-    QString action = root.value("action").toString();
+    QString action = root["action"_L1].toString();
 
     if (action.isNull())
     {
@@ -177,22 +179,22 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
 
     if (action == "select")
     {
-        QString _type = root.value("type").toString();
-        bool attach = root.value("attach").toBool();
-        bool attachFullscreen = root.value("attach_fullscreen").toBool();
-        QString name = root.value("name").toString();
+        QString type = root["type"_L1].toString();
+        bool attach = root["attach"_L1].toBool();
+        bool attachFullscreen = root["attach_fullscreen"_L1].toBool();
+        QString name = root["name"_L1].toString();
 
 #ifdef USEWINSDK
         AttachedWindow::GetArgs args;
-        args.winId = root.value("winId").toString();
-        args.yOffset = root.value("yOffset").toInt(-1);
+        args.winId = root["winId"_L1].toString();
+        args.yOffset = root["yOffset"_L1].toInt(-1);
 
         {
-            const auto sizeObject = root.value("size").toObject();
-            args.x = sizeObject.value("x").toDouble(-1.0);
-            args.pixelRatio = sizeObject.value("pixelRatio").toDouble(-1.0);
-            args.width = sizeObject.value("width").toInt(-1);
-            args.height = sizeObject.value("height").toInt(-1);
+            const auto sizeObject = root["size"_L1].toObject();
+            args.x = sizeObject["x"_L1].toDouble(-1.0);
+            args.pixelRatio = sizeObject["pixelRatio"_L1].toDouble(-1.0);
+            args.width = sizeObject["width"_L1].toInt(-1);
+            args.height = sizeObject["height"_L1].toInt(-1);
         }
 
         args.fullscreen = attachFullscreen;
@@ -201,7 +203,7 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
             << args.x << args.pixelRatio << args.width << args.height
             << args.winId;
 
-        if (_type.isNull() || args.winId.isNull())
+        if (type.isNull() || args.winId.isNull())
         {
             qCDebug(chatterinoNativeMessage)
                 << "NM type, name or winId missing";
@@ -211,7 +213,7 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         }
 #endif
 
-        if (_type == "twitch")
+        if (type == "twitch")
         {
             postToThread([=] {
                 auto *app = getApp();
@@ -244,7 +246,7 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
     }
     else if (action == "detach")
     {
-        QString winId = root.value("winId").toString();
+        QString winId = root["winId"_L1].toString();
 
         if (winId.isNull())
         {
