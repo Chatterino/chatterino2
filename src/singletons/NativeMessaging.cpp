@@ -18,7 +18,6 @@
 #ifdef Q_OS_WIN
 // clang-format off
 #    include <QSettings>
-#    include <Windows.h>
 // clang-format on
 #    include "singletons/WindowManager.hpp"
 #    include "widgets/AttachedWindow.hpp"
@@ -223,8 +222,7 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
                 if (attach || attachFullscreen)
                 {
 #ifdef USEWINSDK
-                    auto *window =
-                        AttachedWindow::get(::GetForegroundWindow(), args);
+                    auto *window = AttachedWindow::getForeground(args);
                     if (!name.isEmpty())
                     {
                         window->setChannel(app->twitch->getOrAddChannel(name));
