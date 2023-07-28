@@ -4,18 +4,16 @@
 #include "common/QLogging.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
+#include "util/IpcQueue.hpp"
 #include "util/PostToThread.hpp"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/interprocess/ipc/message_queue.hpp>
 #include <QCoreApplication>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
-
-namespace ipc = boost::interprocess;
 
 #ifdef Q_OS_WIN
 // clang-format off
@@ -114,19 +112,7 @@ std::string &getNmQueueName(Paths &paths)
 
 void NativeMessagingClient::sendMessage(const QByteArray &array)
 {
-    try
-    {
-        ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
-
-        messageQueue.try_send(array.data(), size_t(array.size()), 1);
-        //        messageQueue.timed_send(array.data(), size_t(array.size()), 1,
-        //                                boost::posix_time::second_clock::local_time() +
-        //                                    boost::posix_time::seconds(10));
-    }
-    catch (ipc::interprocess_exception &ex)
-    {
-        qCDebug(chatterinoNativeMessage) << "send to gui process:" << ex.what();
-    }
+    ipc::sendMessage("chatterino_gui", array);
 }
 
 void NativeMessagingClient::writeToCout(const QByteArray &array)
@@ -148,41 +134,28 @@ void NativeMessagingServer::start()
 
 void NativeMessagingServer::ReceiverThread::run()
 {
-    try
-    {
-        ipc::message_queue::remove("chatterino_gui");
-        ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui",
-                                        100, MESSAGE_SIZE);
-
-        while (true)
-        {
-            try
-            {
-                auto buf = std::make_unique<char[]>(MESSAGE_SIZE);
-                auto retSize = ipc::message_queue::size_type();
-                auto priority = static_cast<unsigned int>(0);
-
-                messageQueue.receive(buf.get(), MESSAGE_SIZE, retSize,
-                                     priority);
-
-                auto document = QJsonDocument::fromJson(
-                    QByteArray::fromRawData(buf.get(), retSize));
-
-                this->handleMessage(document.object());
-            }
-            catch (ipc::interprocess_exception &ex)
-            {
-                qCDebug(chatterinoNativeMessage)
-                    << "received from gui process:" << ex.what();
-            }
-        }
-    }
-    catch (ipc::interprocess_exception &ex)
+    ipc::IpcQueue messageQueue;
+    auto error =
+        messageQueue.tryReplaceOrCreate("chatterino_gui", 100, MESSAGE_SIZE);
+    if (error)
     {
         qCDebug(chatterinoNativeMessage)
-            << "run ipc message queue:" << ex.what();
+            << "Failed to create message queue:" << *error;
 
-        nmIpcError().set(QString::fromLatin1(ex.what()));
+        nmIpcError().set(*error);
+        return;
+    }
+
+    while (true)
+    {
+        auto buf = messageQueue.receive();
+        if (buf.isEmpty())
+        {
+            continue;
+        }
+        auto document = QJsonDocument::fromJson(buf);
+
+        this->handleMessage(document.object());
     }
 }
 
