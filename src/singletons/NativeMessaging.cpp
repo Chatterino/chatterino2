@@ -28,101 +28,103 @@ namespace {
 using namespace chatterino;
 using namespace literals;
 
+void handleSelect(const QJsonObject &root)
+{
+    QString type = root["type"_L1].toString();
+    bool attach = root["attach"_L1].toBool();
+    bool attachFullscreen = root["attach_fullscreen"_L1].toBool();
+    QString name = root["name"_L1].toString();
+
+#ifdef USEWINSDK
+    const auto sizeObject = root["size"_L1].toObject();
+    AttachedWindow::GetArgs args = {
+        .winId = root["winId"_L1].toString(),
+        .yOffset = root["yOffset"_L1].toInt(-1),
+        .x = sizeObject["x"_L1].toDouble(-1.0),
+        .pixelRatio = sizeObject["pixelRatio"_L1].toDouble(-1.0),
+        .width = sizeObject["width"_L1].toInt(-1),
+        .height = sizeObject["height"_L1].toInt(-1),
+        .fullscreen = attachFullscreen,
+    };
+
+    qCDebug(chatterinoNativeMessage)
+        << args.x << args.pixelRatio << args.width << args.height << args.winId;
+
+    if (type.isNull() || args.winId.isNull())
+    {
+        qCDebug(chatterinoNativeMessage) << "NM type, name or winId missing";
+        attach = false;
+        attachFullscreen = false;
+        return;
+    }
+#endif
+
+    if (type == "twitch")
+    {
+        postToThread([=] {
+            auto *app = getApp();
+
+            if (!name.isEmpty())
+            {
+                auto channel = app->twitch->getOrAddChannel(name);
+                if (app->twitch->watchingChannel.get() != channel)
+                {
+                    app->twitch->watchingChannel.reset(channel);
+                }
+            }
+
+            if (attach || attachFullscreen)
+            {
+#ifdef USEWINSDK
+                auto *window = AttachedWindow::getForeground(args);
+                if (!name.isEmpty())
+                {
+                    window->setChannel(app->twitch->getOrAddChannel(name));
+                }
+#endif
+            }
+        });
+    }
+    else
+    {
+        qCDebug(chatterinoNativeMessage) << "NM unknown channel type";
+    }
+}
+
+void handleDetach(const QJsonObject &root)
+{
+    QString winId = root["winId"_L1].toString();
+
+    if (winId.isNull())
+    {
+        qCDebug(chatterinoNativeMessage) << "NM winId missing";
+        return;
+    }
+
+#ifdef USEWINSDK
+    postToThread([winId] {
+        qCDebug(chatterinoNativeMessage) << "NW detach";
+        AttachedWindow::detach(winId);
+    });
+#endif
+}
+
 void handleMessage(const QJsonObject &root)
 {
     QString action = root["action"_L1].toString();
 
-    if (action.isNull())
+    if (action == "select")
     {
-        qCDebug(chatterinoNativeMessage) << "NM action was null";
+        handleSelect(root);
+        return;
+    }
+    if (action == "detach")
+    {
+        handleDetach(root);
         return;
     }
 
-    if (action == "select")
-    {
-        QString type = root["type"_L1].toString();
-        bool attach = root["attach"_L1].toBool();
-        bool attachFullscreen = root["attach_fullscreen"_L1].toBool();
-        QString name = root["name"_L1].toString();
-
-#ifdef USEWINSDK
-        const auto sizeObject = root["size"_L1].toObject();
-        AttachedWindow::GetArgs args = {
-            .winId = root["winId"_L1].toString(),
-            .yOffset = root["yOffset"_L1].toInt(-1),
-            .x = sizeObject["x"_L1].toDouble(-1.0),
-            .pixelRatio = sizeObject["pixelRatio"_L1].toDouble(-1.0),
-            .width = sizeObject["width"_L1].toInt(-1),
-            .height = sizeObject["height"_L1].toInt(-1),
-            .fullscreen = attachFullscreen,
-        };
-
-        qCDebug(chatterinoNativeMessage)
-            << args.x << args.pixelRatio << args.width << args.height
-            << args.winId;
-
-        if (type.isNull() || args.winId.isNull())
-        {
-            qCDebug(chatterinoNativeMessage)
-                << "NM type, name or winId missing";
-            attach = false;
-            attachFullscreen = false;
-            return;
-        }
-#endif
-
-        if (type == "twitch")
-        {
-            postToThread([=] {
-                auto *app = getApp();
-
-                if (!name.isEmpty())
-                {
-                    auto channel = app->twitch->getOrAddChannel(name);
-                    if (app->twitch->watchingChannel.get() != channel)
-                    {
-                        app->twitch->watchingChannel.reset(channel);
-                    }
-                }
-
-                if (attach || attachFullscreen)
-                {
-#ifdef USEWINSDK
-                    auto *window = AttachedWindow::getForeground(args);
-                    if (!name.isEmpty())
-                    {
-                        window->setChannel(app->twitch->getOrAddChannel(name));
-                    }
-#endif
-                }
-            });
-        }
-        else
-        {
-            qCDebug(chatterinoNativeMessage) << "NM unknown channel type";
-        }
-    }
-    else if (action == "detach")
-    {
-        QString winId = root["winId"_L1].toString();
-
-        if (winId.isNull())
-        {
-            qCDebug(chatterinoNativeMessage) << "NM winId missing";
-            return;
-        }
-
-#ifdef USEWINSDK
-        postToThread([winId] {
-            qCDebug(chatterinoNativeMessage) << "NW detach";
-            AttachedWindow::detach(winId);
-        });
-#endif
-    }
-    else
-    {
-        qCDebug(chatterinoNativeMessage) << "NM unknown action " + action;
-    }
+    qCDebug(chatterinoNativeMessage) << "NM unknown action" << action;
 }
 
 }  // namespace
