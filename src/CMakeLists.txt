@@ -4,7 +4,7 @@ set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 # registers the native messageing host
-option(DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
+option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
 
 set(SOURCE_FILES
         Application.cpp
@@ -849,7 +849,7 @@ if (WIN32)
         set_target_properties(${EXECUTABLE_PROJECT} PROPERTIES WIN32_EXECUTABLE TRUE)
     endif ()
 endif ()
-if (DEBUG_NATIVE_MESSAGES)
+if (CHATTERINO_DEBUG_NATIVE_MESSAGES)
     target_compile_definitions(${LIBRARY_PROJECT} PRIVATE CHATTERINO_DEBUG_NM)
 endif ()
 
