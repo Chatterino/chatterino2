@@ -283,8 +283,11 @@ set(SOURCE_FILES
         providers/liveupdates/BasicPubSubManager.hpp
         providers/liveupdates/BasicPubSubWebsocket.hpp
 
+        providers/seventv/SeventvAPI.cpp
+        providers/seventv/SeventvAPI.hpp
         providers/seventv/SeventvBadges.cpp
         providers/seventv/SeventvBadges.hpp
+        providers/seventv/SeventvCosmetics.hpp
         providers/seventv/SeventvEmotes.cpp
         providers/seventv/SeventvEmotes.hpp
         providers/seventv/SeventvEventAPI.cpp

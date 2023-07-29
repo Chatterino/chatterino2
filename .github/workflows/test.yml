@@ -4,6 +4,7 @@ name: Test
 on:
   pull_request:
   workflow_dispatch:
+  merge_group:
 
 env:
   TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.6
@@ -26,33 +27,21 @@ jobs:
           - os: "ubuntu-22.04"
             qt-version: "6.2.4"
       fail-fast: false
+    env:
+      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
+      QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
 
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Set BUILD_WITH_QT6
-        if: startsWith(matrix.qt-version, '6.')
-        run: |
-          echo "C2_BUILD_WITH_QT6=ON" >> "$GITHUB_ENV"
-        shell: bash
-
-      - name: Install Qt5
-        if: startsWith(matrix.qt-version, '5.')
+      - name: Install Qt
         uses: jurplel/install-qt-action@v3.2.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          version: ${{ matrix.qt-version }}
-
-      - name: Install Qt6
-        if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v3.2.1
-        with:
-          cache: true
-          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          modules: qt5compat qtimageformats
+          modules: ${{ env.QT_MODULES }}
           version: ${{ matrix.qt-version }}
 
       # LINUX
@@ -98,6 +87,7 @@ jobs:
 
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
+        timeout-minutes: 30
         run: |
           docker pull kennethreitz/httpbin
           docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
