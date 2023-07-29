@@ -1,13 +1,12 @@
 #pragma once
 
-#include <QScopedPointer>
-#include <QtGlobal>
-
 #include <chrono>
 #include <functional>
 #include <memory>
 
 class QLatin1String;
+class QByteArray;
+class QString;
 
 namespace chatterino::ws {
 
@@ -88,8 +87,9 @@ protected:
                                const QLatin1String &data) = 0;
 
 private:
-    QScopedPointer<ClientPrivate> d_ptr;
-    Q_DECLARE_PRIVATE(Client)
+    std::unique_ptr<ClientPrivate> private_;
+
+    friend class ClientPrivate;
 };
 
 /// An opaque handle to a connection.

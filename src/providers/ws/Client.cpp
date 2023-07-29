@@ -48,34 +48,35 @@ using namespace literals;
 
 class ClientPrivate
 {
+public:
     ClientPrivate(Client *owner)
-        : q_ptr(owner)
+        : owner_(owner)
     {
-        this->websocketClient_.set_access_channels(
+        this->websocketClient.set_access_channels(
             websocketpp::log::alevel::all);
-        this->websocketClient_.clear_access_channels(
+        this->websocketClient.clear_access_channels(
             websocketpp::log::alevel::frame_payload |
             websocketpp::log::alevel::frame_header);
 
-        this->websocketClient_.init_asio();
+        this->websocketClient.init_asio();
 
-        this->websocketClient_.set_tls_init_handler([](auto) {
+        this->websocketClient.set_tls_init_handler([](auto) {
             return ClientPrivate::onTLSInit();
         });
 
-        this->websocketClient_.set_message_handler([this](auto hdl, auto msg) {
+        this->websocketClient.set_message_handler([this](auto hdl, auto msg) {
             this->onMessage(std::move(hdl), msg);
         });
-        this->websocketClient_.set_open_handler([this](auto hdl) {
+        this->websocketClient.set_open_handler([this](auto hdl) {
             this->onConnectionOpen(std::move(hdl));
         });
-        this->websocketClient_.set_close_handler([this](auto hdl) {
+        this->websocketClient.set_close_handler([this](auto hdl) {
             this->onConnectionClose(std::move(hdl));
         });
-        this->websocketClient_.set_fail_handler([this](auto hdl) {
+        this->websocketClient.set_fail_handler([this](auto hdl) {
             this->onConnectionFail(std::move(hdl));
         });
-        this->websocketClient_.set_user_agent(
+        this->websocketClient.set_user_agent(
             u"Chatterino/%1 (%2)"_s
                 .arg(Version::instance().version(),
                      Version::instance().commitHash())
@@ -90,13 +91,13 @@ class ClientPrivate
 
     void runThread();
 
-    Client *q_ptr;
-    Q_DECLARE_PUBLIC(Client)
+    std::shared_ptr<boost::asio::io_service::work> work{nullptr};
 
-    std::shared_ptr<boost::asio::io_service::work> work_{nullptr};
+    WebsocketppClient websocketClient;
+    std::unique_ptr<std::thread> asioThread;
 
-    WebsocketppClient websocketClient_;
-    std::unique_ptr<std::thread> asioThread_;
+private:
+    Client *owner_;
 };
 
 WebsocketppContextPtr ClientPrivate::onTLSInit()
@@ -122,10 +123,8 @@ WebsocketppContextPtr ClientPrivate::onTLSInit()
 void ClientPrivate::onMessage(WebsocketppHandle &&hdl,
                               const WebsocketppMessagePtr &msg)
 {
-    Q_Q(Client);
-
     // TODO(Qt6): this should be a QByteArrayView
-    q->onTextMessage(
+    this->owner_->onTextMessage(
         std::move(hdl),
         QLatin1String(msg->get_payload().c_str(),
                       static_cast<qsizetype>(msg->get_payload().size())));
@@ -133,46 +132,40 @@ void ClientPrivate::onMessage(WebsocketppHandle &&hdl,
 
 void ClientPrivate::onConnectionOpen(WebsocketppHandle &&hdl)
 {
-    Q_Q(Client);
-
-    q->onConnectionOpen(std::move(hdl));
+    this->owner_->onConnectionOpen(std::move(hdl));
 }
 
 void ClientPrivate::onConnectionClose(WebsocketppHandle &&hdl)
 {
-    Q_Q(Client);
-
-    q->onConnectionClosed(std::move(hdl));
+    this->owner_->onConnectionClosed(std::move(hdl));
 }
 
 void ClientPrivate::onConnectionFail(WebsocketppHandle &&hdl)
 {
-    Q_Q(Client);
-
     websocketpp::lib::error_code ec;
-    auto conn = this->websocketClient_.get_con_from_hdl(std::move(hdl));
+    auto conn = this->websocketClient.get_con_from_hdl(std::move(hdl));
     if (ec)
     {
-        q->onConnectionFailed("<failed to get connection back>"_L1);
+        this->owner_->onConnectionFailed("<failed to get connection back>"_L1);
         return;
     }
 
     auto msg = conn->get_ec().message();
-    q->onConnectionFailed(
+    this->owner_->onConnectionFailed(
         QLatin1String(msg.c_str(), static_cast<qsizetype>(msg.size())));
 }
 
 void ClientPrivate::runThread()
 {
     qCDebug(chatterinoWebsocket) << "Start WebSocket manager thread";
-    this->websocketClient_.run();
+    this->websocketClient.run();
     qCDebug(chatterinoWebsocket) << "Done with WebSocket manager thread";
 }
 
 // ====== Client ======
 
 Client::Client()
-    : d_ptr(new ClientPrivate(this))
+    : private_(new ClientPrivate(this))
 {
 }
 
@@ -180,33 +173,33 @@ Client::~Client() = default;
 
 void Client::start()
 {
-    Q_D(Client);
+    auto *d = this->private_.get();
 
-    d->work_ = std::make_shared<boost::asio::io_service::work>(
-        d->websocketClient_.get_io_service());
-    d->asioThread_ = std::make_unique<std::thread>([d] {
+    d->work = std::make_shared<boost::asio::io_service::work>(
+        d->websocketClient.get_io_service());
+    d->asioThread = std::make_unique<std::thread>([d] {
         d->runThread();
     });
 }
 
 void Client::stop()
 {
-    Q_D(Client);
+    auto *d = this->private_.get();
 
-    d->work_.reset();
+    d->work.reset();
 
-    if (d->asioThread_->joinable())
+    if (d->asioThread->joinable())
     {
-        d->asioThread_->join();
+        d->asioThread->join();
     }
 }
 
 void Client::addConnection(const QString &host)
 {
-    Q_D(Client);
+    auto *d = this->private_.get();
 
     websocketpp::lib::error_code ec;
-    auto con = d->websocketClient_.get_connection(host.toStdString(), ec);
+    auto con = d->websocketClient.get_connection(host.toStdString(), ec);
 
     if (ec)
     {
@@ -217,16 +210,16 @@ void Client::addConnection(const QString &host)
 
     NetworkConfigurationProvider::applyToWebSocket(con);
 
-    d->websocketClient_.connect(con);
+    d->websocketClient.connect(con);
 }
 
 bool Client::sendText(const Connection &conn, const char *str, size_t len)
 {
-    Q_D(Client);
+    auto *d = this->private_.get();
 
     WebsocketppErrorCode ec;
-    d->websocketClient_.send(conn.hdl_, str, len,
-                             websocketpp::frame::opcode::text, ec);
+    d->websocketClient.send(conn.hdl_, str, len,
+                            websocketpp::frame::opcode::text, ec);
 
     if (ec)
     {
@@ -253,11 +246,11 @@ bool Client::sendText(const Connection &conn, const QLatin1String &str)
 void Client::close(const Connection &weakConn, const QString &reason,
                    CloseCode code)
 {
-    Q_D(Client);
+    auto *d = this->private_.get();
 
     WebsocketppErrorCode ec;
 
-    auto conn = d->websocketClient_.get_con_from_hdl(weakConn.hdl_, ec);
+    auto conn = d->websocketClient.get_con_from_hdl(weakConn.hdl_, ec);
     if (ec)
     {
         qCDebug(chatterinoLiveupdates)
@@ -277,10 +270,10 @@ void Client::close(const Connection &weakConn, const QString &reason,
 void Client::runAfter(std::chrono::milliseconds duration,
                       const std::function<void()> &fn)
 {
-    Q_D(Client);
+    auto *d = this->private_.get();
 
     auto timer = std::make_shared<boost::asio::steady_timer>(
-        d->websocketClient_.get_io_service());
+        d->websocketClient.get_io_service());
     timer->expires_from_now(duration);
 
     timer->async_wait([timer, fn](const boost::system::error_code &ec) {
