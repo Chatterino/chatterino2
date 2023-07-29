@@ -42,6 +42,9 @@ public:
     /// Stops the websocket client and event-loop and waits for it to exit.
     /// This must be called at most once per client.
     void stop();
+    /// Stops the underlying event-loop without waiting for any exit/close.
+    /// This must be called at most once per client.
+    void forceStop();
 
     /// Adds a connection to `host`.
     /// Once the connection is open, `onConnectionOpen` will be called.

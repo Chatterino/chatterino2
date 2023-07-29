@@ -458,7 +458,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
 
 PubSub::~PubSub()
 {
-    this->stop();
+    this->forceStop();
 }
 
 void PubSub::setAccount(std::shared_ptr<TwitchAccount> account)

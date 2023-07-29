@@ -59,7 +59,7 @@ public:
 
     ~BasicPubSubManager() override
     {
-        this->stop();
+        this->forceStop();
     };
 
     BasicPubSubManager(const BasicPubSubManager &) = delete;

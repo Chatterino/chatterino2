@@ -177,7 +177,10 @@ Client::Client()
 {
 }
 
-Client::~Client() = default;
+Client::~Client()
+{
+    this->forceStop();
+};
 
 void Client::start()
 {
@@ -192,6 +195,22 @@ void Client::stop()
 {
     auto *d = this->private_.get();
 
+    if (d->work)
+    {
+        d->work->reset();
+    }
+
+    if (d->asioThread->joinable())
+    {
+        d->asioThread->join();
+    }
+}
+
+void Client::forceStop()
+{
+    auto *d = this->private_.get();
+
+    d->websocketClient.get_io_service().stop();
     if (d->work)
     {
         d->work->reset();
