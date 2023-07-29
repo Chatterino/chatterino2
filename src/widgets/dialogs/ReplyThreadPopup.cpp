@@ -150,6 +150,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
                                  }
                              });
             hbox->addWidget(this->ui_.notificationCheckbox, 1);
+            this->ui_.notificationCheckbox->setFocusPolicy(Qt::ClickFocus);
         }
 
         if (closeAutomatically)
