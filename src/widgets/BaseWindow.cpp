@@ -10,6 +10,7 @@
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/Window.hpp"
 
 #include <QApplication>
 #include <QFont>
@@ -242,14 +243,10 @@ void BaseWindow::init()
 
 void BaseWindow::setStayInScreenRect(bool value)
 {
-    this->stayInScreenRect_ = value;
+    qDebug() << "XXX: setStayInScreenRect called";
+    // this->stayInScreenRect_ = value;
 
-    this->moveIntoDesktopRect(this->pos());
-}
-
-bool BaseWindow::getStayInScreenRect() const
-{
-    return this->stayInScreenRect_;
+    // this->moveIntoDesktopRect(this->pos(), QCursor::pos());
 }
 
 void BaseWindow::setActionOnFocusLoss(ActionOnFocusLoss value)
@@ -514,15 +511,36 @@ void BaseWindow::leaveEvent(QEvent *)
     TooltipWidget::instance()->hide();
 }
 
-void BaseWindow::moveTo(QWidget *parent, QPoint point, bool offset)
+void BaseWindow::moveTo(QPoint point, bool offset, BoundsChecker boundsChecker)
 {
+    qDebug() << "XXX: BaseWindow::moveTo called" << point;
+
     if (offset)
     {
         point.rx() += 16;
         point.ry() += 16;
     }
 
-    this->moveIntoDesktopRect(point);
+    switch (boundsChecker)
+    {
+        case BoundsChecker::Off: {
+            // The bounds checker is off, *just* move the window
+            this->move(point);
+        }
+        break;
+
+        case BoundsChecker::CursorPosition: {
+            // The bounds checker is on, use the cursor position as the origin
+            this->moveWithinScreen(point, QCursor::pos());
+        }
+        break;
+
+        case BoundsChecker::DesiredPosition: {
+            // The bounds checker is on, use the desired position as the origin
+            this->moveWithinScreen(point, point);
+        }
+        break;
+    }
 }
 
 void BaseWindow::resizeEvent(QResizeEvent *)
@@ -558,6 +576,7 @@ void BaseWindow::resizeEvent(QResizeEvent *)
 
 void BaseWindow::moveEvent(QMoveEvent *event)
 {
+    qDebug() << "move event from " << event->oldPos() << "to" << event->pos();
     // Queue up save because: Window position changed
 #ifdef CHATTERINO
     if (!flags_.has(DisableLayoutSave))
@@ -576,24 +595,13 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
-    this->moveIntoDesktopRect(this->pos());
-    if (this->frameless_)
-    {
-        QTimer::singleShot(30, this, [this] {
-            this->moveIntoDesktopRect(this->pos());
-        });
-    }
 }
 
-void BaseWindow::moveIntoDesktopRect(QPoint point)
+void BaseWindow::moveWithinScreen(QPoint point, QPoint origin)
 {
-    if (!this->stayInScreenRect_)
-    {
-        return;
-    }
-
     // move the widget into the screen geometry if it's not already in there
-    auto *screen = QApplication::screenAt(point);
+    auto *screen = QApplication::screenAt(origin);
+
     if (screen == nullptr)
     {
         screen = QApplication::primaryScreen();
@@ -628,6 +636,7 @@ void BaseWindow::moveIntoDesktopRect(QPoint point)
         point.setY(globalCursorPos.y() - this->height() - 16);
     }
 
+    qDebug() << "XXX: moving to final point" << point;
     this->move(point);
 }
 
