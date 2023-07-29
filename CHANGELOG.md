@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Message input is now focused when clicking on emotes. (#4719)
 - Minor: Changed viewer list to chatter list to more match Twitch's terminology. (#4732)
 - Minor: Nicknames are now taken into consideration when searching for messages. (#4663)
 - Minor: Add an icon showing when streamer mode is enabled (#4410, #4690)
