@@ -5,6 +5,8 @@
 #include "providers/NetworkConfigurationProvider.hpp"
 #include "providers/twitch/ChatterinoWebSocketppLogger.hpp"
 
+#include <boost/asio/executor.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 #include <websocketpp/client.hpp>
 #include <websocketpp/common/connection_hdl.hpp>
 #include <websocketpp/config/asio_client.hpp>
@@ -12,6 +14,7 @@
 #include <websocketpp/logger/basic.hpp>
 
 #include <memory>
+#include <optional>
 #include <utility>
 
 namespace {
@@ -81,6 +84,9 @@ public:
                 .arg(Version::instance().version(),
                      Version::instance().commitHash())
                 .toStdString());
+
+        this->work.emplace(boost::asio::make_work_guard(
+            this->websocketClient.get_io_service()));
     }
 
     static WebsocketppContextPtr onTLSInit();
@@ -91,10 +97,12 @@ public:
 
     void runThread();
 
-    std::shared_ptr<boost::asio::io_service::work> work{nullptr};
-
     WebsocketppClient websocketClient;
     std::unique_ptr<std::thread> asioThread;
+
+    std::optional<boost::asio::executor_work_guard<
+        boost::asio::io_context::executor_type>>
+        work;
 
 private:
     Client *owner_;
@@ -175,8 +183,6 @@ void Client::start()
 {
     auto *d = this->private_.get();
 
-    d->work = std::make_shared<boost::asio::io_service::work>(
-        d->websocketClient.get_io_service());
     d->asioThread = std::make_unique<std::thread>([d] {
         d->runThread();
     });
@@ -186,7 +192,10 @@ void Client::stop()
 {
     auto *d = this->private_.get();
 
-    d->work.reset();
+    if (d->work)
+    {
+        d->work->reset();
+    }
 
     if (d->asioThread->joinable())
     {
