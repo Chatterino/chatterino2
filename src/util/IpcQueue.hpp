@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <optional>
+#include <variant>
 
 class QByteArray;
 class QString;
@@ -14,21 +14,20 @@ class IpcQueuePrivate;
 class IpcQueue
 {
 public:
-    IpcQueue();
+    IpcQueue(IpcQueue &&other);
     ~IpcQueue();
 
-    /// This must only be called at most once and before any call to `receive`.
-    std::optional<QString> tryReplaceOrCreate(const char *name,
-                                              size_t maxMessages,
-                                              size_t maxMessageSize);
+    static std::variant<IpcQueue, QString> tryReplaceOrCreate(
+        const char *name, size_t maxMessages, size_t maxMessageSize);
 
     // TODO: use std::expected
     /// Try to receive a message.
-    /// `tryReplaceOrCreate` must have been called before.
     /// In the case of an error, the buffer is empty.
     QByteArray receive();
 
 private:
+    IpcQueue(IpcQueuePrivate *priv);
+
     std::unique_ptr<IpcQueuePrivate> private_;
 
     friend class IpcQueuePrivate;

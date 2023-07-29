@@ -137,18 +137,20 @@ void NativeMessagingServer::start()
 
 void NativeMessagingServer::ReceiverThread::run()
 {
-    ipc::IpcQueue messageQueue;
-    auto error =
-        messageQueue.tryReplaceOrCreate("chatterino_gui", 100, MESSAGE_SIZE);
-    if (error)
-    {
-        qCDebug(chatterinoNativeMessage)
-            << "Failed to create message queue:" << *error;
+    auto result =
+        ipc::IpcQueue::tryReplaceOrCreate("chatterino_gui", 100, MESSAGE_SIZE);
 
-        nmIpcError().set(*error);
+    if (std::holds_alternative<QString>(result))
+    {
+        auto error = std::get<QString>(result);
+        qCDebug(chatterinoNativeMessage)
+            << "Failed to create message queue:" << error;
+
+        nmIpcError().set(error);
         return;
     }
 
+    auto messageQueue = std::move(std::get<ipc::IpcQueue>(result));
     while (true)
     {
         auto buf = messageQueue.receive();

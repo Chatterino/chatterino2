@@ -37,22 +37,18 @@ public:
     boost_ipc::message_queue queue;
 };
 
-IpcQueue::IpcQueue() = default;
+IpcQueue::IpcQueue(IpcQueuePrivate *priv)
+    : private_(priv){};
+IpcQueue::IpcQueue(IpcQueue &&) = default;
 IpcQueue::~IpcQueue() = default;
 
-std::optional<QString> IpcQueue::tryReplaceOrCreate(const char *name,
-                                                    size_t maxMessages,
-                                                    size_t maxMessageSize)
+std::variant<IpcQueue, QString> IpcQueue::tryReplaceOrCreate(
+    const char *name, size_t maxMessages, size_t maxMessageSize)
 {
     try
     {
-        Q_ASSERT_X(this->private_ == nullptr, "IpcQueue::tryReplaceOrCreate",
-                   "The function can be called at most once.");
-
         boost_ipc::message_queue::remove(name);
-        this->private_ = std::make_unique<IpcQueuePrivate>(name, maxMessages,
-                                                           maxMessageSize);
-        return std::nullopt;
+        return IpcQueue(new IpcQueuePrivate(name, maxMessages, maxMessageSize));
     }
     catch (boost_ipc::interprocess_exception &ex)
     {
