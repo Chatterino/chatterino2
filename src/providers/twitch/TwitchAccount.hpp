@@ -59,6 +59,12 @@ public:
     const QString &getOAuthClient() const;
     const QString &getUserId() const;
 
+    /**
+     * The Seventv user-id of the current user. 
+     * Empty if there's no associated Seventv user with this twitch user.
+     */
+    const QString &getSeventvUserID() const;
+
     QColor color();
     void setColor(QColor color);
 
@@ -98,6 +104,8 @@ public:
     void autoModAllow(const QString msgID, ChannelPtr channel);
     void autoModDeny(const QString msgID, ChannelPtr channel);
 
+    void loadSeventvUserID();
+
 private:
     QString oauthClient_;
     QString oauthToken_;
@@ -115,6 +123,8 @@ private:
     //    std::map<UserId, TwitchAccountEmoteData> emotes;
     UniqueAccess<TwitchAccountEmoteData> emotes_;
     UniqueAccess<std::unordered_map<QString, EmoteMap>> localEmotes_;
+
+    QString seventvUserID_;
 };
 
 }  // namespace chatterino

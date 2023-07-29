@@ -12,6 +12,7 @@
 - Minor: Added a message for when Chatterino joins a channel (#4616)
 - Minor: Add accelerators to the right click menu for messages (#4705)
 - Minor: Add pin action to usercards and reply threads. (#4692)
+- Minor: 7TV badges now automatically update upon changing. (#4512)
 - Minor: Stream status requests are now batched. (#4713)
 - Minor: Added `/c2-theme-autoreload` command to automatically reload a custom theme. This is useful for when you're developing your own theme. (#4718)
 - Bugfix: Increased amount of blocked users loaded from 100 to 1,000. (#4721)

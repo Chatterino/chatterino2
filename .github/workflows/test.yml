@@ -87,6 +87,7 @@ jobs:
 
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
+        timeout-minutes: 30
         run: |
           docker pull kennethreitz/httpbin
           docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
