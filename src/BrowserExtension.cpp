@@ -73,7 +73,7 @@ namespace {
 
             received_message->store(true);
 
-            nm_client::sendMessage(data);
+            nm::client::sendMessage(data);
         }
         _Exit(0);
     }

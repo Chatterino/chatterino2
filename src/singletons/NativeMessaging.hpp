@@ -16,12 +16,12 @@ std::string &getNmQueueName(Paths &paths);
 
 Atomic<boost::optional<QString>> &nmIpcError();
 
-namespace nm_client {
+namespace nm::client {
 
     void sendMessage(const QByteArray &array);
     void writeToCout(const QByteArray &array);
 
-}  // namespace nm_client
+}  // namespace nm::client
 
 class NativeMessagingServer final
 {

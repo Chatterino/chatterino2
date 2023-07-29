@@ -107,7 +107,7 @@ std::string &getNmQueueName(Paths &paths)
 
 // CLIENT
 
-namespace nm_client {
+namespace nm::client {
 
     void sendMessage(const QByteArray &array)
     {
@@ -126,7 +126,7 @@ namespace nm_client {
         std::cout.flush();
     }
 
-}  // namespace nm_client
+}  // namespace nm::client
 
 // SERVER
 
