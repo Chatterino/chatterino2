@@ -1,9 +1,10 @@
 #pragma once
 
-#include <QScopedPointer>
-#include <QtGlobal>
-
+#include <memory>
 #include <optional>
+
+class QByteArray;
+class QString;
 
 namespace chatterino::ipc {
 
@@ -28,8 +29,9 @@ public:
     QByteArray receive();
 
 private:
-    QScopedPointer<IpcQueuePrivate> d_ptr;
-    Q_DECLARE_PRIVATE(IpcQueue)
+    std::unique_ptr<IpcQueuePrivate> private_;
+
+    friend class IpcQueuePrivate;
 };
 
 }  // namespace chatterino::ipc

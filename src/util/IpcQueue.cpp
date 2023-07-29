@@ -28,17 +28,13 @@ void sendMessage(const char *name, const QByteArray &data)
 
 class IpcQueuePrivate
 {
-    IpcQueuePrivate(IpcQueue *q_ptr, const char *name, size_t maxMessages,
-                    size_t maxMessageSize)
-        : q_ptr(q_ptr)
-        , queue_(boost_ipc::open_or_create, name, maxMessages, maxMessageSize)
+public:
+    IpcQueuePrivate(const char *name, size_t maxMessages, size_t maxMessageSize)
+        : queue(boost_ipc::open_or_create, name, maxMessages, maxMessageSize)
     {
     }
 
-    Q_DECLARE_PUBLIC(IpcQueue)
-    IpcQueue *q_ptr;
-
-    boost_ipc::message_queue queue_;
+    boost_ipc::message_queue queue;
 };
 
 IpcQueue::IpcQueue() = default;
@@ -50,12 +46,12 @@ std::optional<QString> IpcQueue::tryReplaceOrCreate(const char *name,
 {
     try
     {
-        Q_ASSERT_X(this->d_ptr.isNull(), "IpcQueue::tryReplaceOrCreate",
+        Q_ASSERT_X(this->private_ == nullptr, "IpcQueue::tryReplaceOrCreate",
                    "The function can be called at most once.");
 
         boost_ipc::message_queue::remove(name);
-        this->d_ptr.reset(
-            new IpcQueuePrivate(this, name, maxMessages, maxMessageSize));
+        this->private_ = std::make_unique<IpcQueuePrivate>(name, maxMessages,
+                                                           maxMessageSize);
         return std::nullopt;
     }
     catch (boost_ipc::interprocess_exception &ex)
@@ -68,19 +64,17 @@ QByteArray IpcQueue::receive()
 {
     try
     {
-        Q_D(IpcQueue);
+        auto *d = this->private_.get();
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-        QByteArray buf(static_cast<qsizetype>(d->queue_.get_max_msg_size()),
-                       Qt::Uninitialized);
-#else
         QByteArray buf;
-        buf.resize(static_cast<qsizetype>(d->queue_.get_max_msg_size()));
-#endif
+        // The new storage is uninitialized
+        buf.resize(static_cast<qsizetype>(d->queue.get_max_msg_size()));
+
         size_t messageSize = 0;
         unsigned int priority = 0;
-        d->queue_.receive(buf.data(), buf.size(), messageSize, priority);
+        d->queue.receive(buf.data(), buf.size(), messageSize, priority);
 
+        // truncate to the initialized storage
         buf.truncate(static_cast<qsizetype>(messageSize));
         return buf;
     }
