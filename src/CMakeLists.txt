@@ -850,7 +850,7 @@ if (WIN32)
     endif ()
 endif ()
 if (DEBUG_NATIVE_MESSAGES)
-    target_compile_definitions(${LIBRARY_PROJECT} PRIVATE C_DEBUG_NM)
+    target_compile_definitions(${LIBRARY_PROJECT} PRIVATE CHATTERINO_DEBUG_NM)
 endif ()
 
 if (MSVC)
