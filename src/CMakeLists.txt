@@ -388,6 +388,7 @@ set(SOURCE_FILES
 
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
+        util/CancellationToken.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
         util/ConcurrentMap.hpp

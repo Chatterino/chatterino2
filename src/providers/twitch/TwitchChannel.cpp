@@ -75,7 +75,7 @@ namespace {
 TwitchChannel::TwitchChannel(const QString &name)
     : Channel(name, Channel::Type::Twitch)
     , ChannelChatters(*static_cast<Channel *>(this))
-    , nameOptions{name, name}
+    , nameOptions{name, name, name}
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
@@ -481,13 +481,15 @@ void TwitchChannel::updateStreamTitle(const QString &title)
 
 void TwitchChannel::updateDisplayName(const QString &displayName)
 {
-    if (displayName == this->getDisplayName())
+    if (displayName == this->nameOptions.actualDisplayName)
     {
         // Display name has not changed
         return;
     }
 
     // Display name has changed
+
+    this->nameOptions.actualDisplayName = displayName;
 
     if (QString::compare(displayName, this->getName(), Qt::CaseInsensitive) ==
         0)

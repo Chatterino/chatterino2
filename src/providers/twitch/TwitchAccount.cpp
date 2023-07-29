@@ -7,6 +7,7 @@
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
@@ -14,8 +15,8 @@
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
-#include "providers/twitch/TwitchUser.hpp"
 #include "singletons/Emotes.hpp"
+#include "util/CancellationToken.hpp"
 #include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -101,79 +102,79 @@ bool TwitchAccount::isAnon() const
 
 void TwitchAccount::loadBlocks()
 {
+    assertInGuiThread();
+
+    auto token = CancellationToken(false);
+    this->blockToken_ = token;
+    this->ignores_.clear();
+    this->ignoresUserIds_.clear();
+
     getHelix()->loadBlocks(
         getIApp()->getAccounts()->twitch.getCurrent()->userId_,
-        [this](std::vector<HelixBlock> blocks) {
-            auto ignores = this->ignores_.access();
-            auto userIds = this->ignoresUserIds_.access();
-            ignores->clear();
-            userIds->clear();
+        [this](const std::vector<HelixBlock> &blocks) {
+            assertInGuiThread();
 
             for (const HelixBlock &block : blocks)
             {
                 TwitchUser blockedUser;
                 blockedUser.fromHelixBlock(block);
-                ignores->insert(blockedUser);
-                userIds->insert(blockedUser.id);
+                this->ignores_.insert(blockedUser);
+                this->ignoresUserIds_.insert(blockedUser.id);
             }
         },
-        [] {
-            qCWarning(chatterinoTwitch) << "Fetching blocks failed!";
-        });
+        [](auto error) {
+            qCWarning(chatterinoTwitch).noquote()
+                << "Fetching blocks failed:" << error;
+        },
+        std::move(token));
 }
 
-void TwitchAccount::blockUser(QString userId, const QObject *caller,
+void TwitchAccount::blockUser(const QString &userId, const QObject *caller,
                               std::function<void()> onSuccess,
                               std::function<void()> onFailure)
 {
     getHelix()->blockUser(
         userId, caller,
-        [this, userId, onSuccess] {
+        [this, userId, onSuccess = std::move(onSuccess)] {
+            assertInGuiThread();
+
             TwitchUser blockedUser;
             blockedUser.id = userId;
-            {
-                auto ignores = this->ignores_.access();
-                auto userIds = this->ignoresUserIds_.access();
-
-                ignores->insert(blockedUser);
-                userIds->insert(blockedUser.id);
-            }
+            this->ignores_.insert(blockedUser);
+            this->ignoresUserIds_.insert(blockedUser.id);
             onSuccess();
         },
         std::move(onFailure));
 }
 
-void TwitchAccount::unblockUser(QString userId, const QObject *caller,
+void TwitchAccount::unblockUser(const QString &userId, const QObject *caller,
                                 std::function<void()> onSuccess,
                                 std::function<void()> onFailure)
 {
     getHelix()->unblockUser(
         userId, caller,
-        [this, userId, onSuccess] {
+        [this, userId, onSuccess = std::move(onSuccess)] {
+            assertInGuiThread();
+
             TwitchUser ignoredUser;
             ignoredUser.id = userId;
-            {
-                auto ignores = this->ignores_.access();
-                auto userIds = this->ignoresUserIds_.access();
-
-                ignores->erase(ignoredUser);
-                userIds->erase(ignoredUser.id);
-            }
+            this->ignores_.erase(ignoredUser);
+            this->ignoresUserIds_.erase(ignoredUser.id);
             onSuccess();
         },
         std::move(onFailure));
 }
 
-SharedAccessGuard<const std::set<TwitchUser>> TwitchAccount::accessBlocks()
-    const
+const std::unordered_set<TwitchUser> &TwitchAccount::blocks() const
 {
-    return this->ignores_.accessConst();
+    assertInGuiThread();
+    return this->ignores_;
 }
 
-SharedAccessGuard<const std::set<QString>> TwitchAccount::accessBlockedUserIds()
-    const
+const std::unordered_set<QString> &TwitchAccount::blockedUserIds() const
 {
-    return this->ignoresUserIds_.accessConst();
+    assertInGuiThread();
+    return this->ignoresUserIds_;
 }
 
 void TwitchAccount::loadEmotes(std::weak_ptr<Channel> weakChannel)
