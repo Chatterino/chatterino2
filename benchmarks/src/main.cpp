@@ -22,6 +22,15 @@ int main(int argc, char **argv)
         ::benchmark::RunSpecifiedBenchmarks();
 
         settingsDir.remove();
+
+        // Pick up the last events from the eventloop
+        // Using a loop to catch events queueing other events (e.g. deletions)
+        for (size_t i = 0; i < 32; i++)
+        {
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+        }
+
         QApplication::exit(0);
     });
 

@@ -319,7 +319,7 @@ void SplitHeader::initializeLayout()
                     }
                 });
         }),
-        // viewer list
+        // chatter list
         this->viewersButton_ = makeWidget<Button>([&](auto w) {
             QObject::connect(w, &Button::leftClicked, this, [this]() {
                 this->split_->showViewerList();
@@ -516,7 +516,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     if (twitchChannel)
     {
         moreMenu->addAction(
-            "Show viewer list", this->split_, &Split::showViewerList,
+            "Show chatter list", this->split_, &Split::showViewerList,
             h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"));
 
         moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);

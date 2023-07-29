@@ -3241,6 +3241,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/shoutout", &commands::sendShoutout);
 
     this->registerCommand("/c2-set-logging-rules", &commands::setLoggingRules);
+    this->registerCommand("/c2-theme-autoreload", &commands::toggleThemeReload);
 }
 
 void CommandController::save()

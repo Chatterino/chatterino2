@@ -5,6 +5,8 @@
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
+#include "providers/twitch/TwitchUser.hpp"
+#include "util/CancellationToken.hpp"
 #include "util/QStringHash.hpp"
 
 #include <QColor>
@@ -15,12 +17,11 @@
 
 #include <functional>
 #include <mutex>
-#include <set>
+#include <unordered_set>
 #include <vector>
 
 namespace chatterino {
 
-struct TwitchUser;
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 
@@ -58,6 +59,12 @@ public:
     const QString &getOAuthClient() const;
     const QString &getUserId() const;
 
+    /**
+     * The Seventv user-id of the current user. 
+     * Empty if there's no associated Seventv user with this twitch user.
+     */
+    const QString &getSeventvUserID() const;
+
     QColor color();
     void setColor(QColor color);
 
@@ -72,15 +79,15 @@ public:
     bool isAnon() const;
 
     void loadBlocks();
-    void blockUser(QString userId, const QObject *caller,
+    void blockUser(const QString &userId, const QObject *caller,
                    std::function<void()> onSuccess,
                    std::function<void()> onFailure);
-    void unblockUser(QString userId, const QObject *caller,
+    void unblockUser(const QString &userId, const QObject *caller,
                      std::function<void()> onSuccess,
                      std::function<void()> onFailure);
 
-    SharedAccessGuard<const std::set<QString>> accessBlockedUserIds() const;
-    SharedAccessGuard<const std::set<TwitchUser>> accessBlocks() const;
+    [[nodiscard]] const std::unordered_set<TwitchUser> &blocks() const;
+    [[nodiscard]] const std::unordered_set<QString> &blockedUserIds() const;
 
     void loadEmotes(std::weak_ptr<Channel> weakChannel = {});
     // loadUserstateEmotes loads emote sets that are part of the USERSTATE emote-sets key
@@ -97,6 +104,8 @@ public:
     void autoModAllow(const QString msgID, ChannelPtr channel);
     void autoModDeny(const QString msgID, ChannelPtr channel);
 
+    void loadSeventvUserID();
+
 private:
     QString oauthClient_;
     QString oauthToken_;
@@ -105,14 +114,17 @@ private:
     const bool isAnon_;
     Atomic<QColor> color_;
 
-    mutable std::mutex ignoresMutex_;
     QStringList userstateEmoteSets_;
-    UniqueAccess<std::set<TwitchUser>> ignores_;
-    UniqueAccess<std::set<QString>> ignoresUserIds_;
+
+    ScopedCancellationToken blockToken_;
+    std::unordered_set<TwitchUser> ignores_;
+    std::unordered_set<QString> ignoresUserIds_;
 
     //    std::map<UserId, TwitchAccountEmoteData> emotes;
     UniqueAccess<TwitchAccountEmoteData> emotes_;
     UniqueAccess<std::unordered_map<QString, EmoteMap>> localEmotes_;
+
+    QString seventvUserID_;
 };
 
 }  // namespace chatterino

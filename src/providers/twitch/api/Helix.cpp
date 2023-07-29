@@ -1,9 +1,11 @@
 #include "providers/twitch/api/Helix.hpp"
 
+#include "common/Literals.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
+#include "util/CancellationToken.hpp"
 
 #include <magic_enum.hpp>
 #include <QJsonDocument>
@@ -19,6 +21,8 @@ static constexpr auto NUM_CHATTERS_TO_FETCH = 1000;
 }  // namespace
 
 namespace chatterino {
+
+using namespace literals;
 
 static IHelix *instance = nullptr;
 
@@ -544,40 +548,53 @@ void Helix::createStreamMarker(
 };
 
 void Helix::loadBlocks(QString userId,
-                       ResultCallback<std::vector<HelixBlock>> successCallback,
-                       HelixFailureCallback failureCallback)
+                       ResultCallback<std::vector<HelixBlock>> pageCallback,
+                       FailureCallback<QString> failureCallback,
+                       CancellationToken &&token)
 {
-    QUrlQuery urlQuery;
-    urlQuery.addQueryItem("broadcaster_id", userId);
-    urlQuery.addQueryItem("first", "100");
+    constexpr const size_t blockLimit = 1000;
 
-    this->makeGet("users/blocks", urlQuery)
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
-            auto root = result.parseJson();
-            auto data = root.value("data");
+    // TODO(Qt 5.13): use initializer list
+    QUrlQuery query;
+    query.addQueryItem(u"broadcaster_id"_s, userId);
+    query.addQueryItem(u"first"_s, u"100"_s);
 
-            if (!data.isArray())
+    size_t receivedItems = 0;
+    this->paginate(
+        u"users/blocks"_s, query,
+        [pageCallback, receivedItems](const QJsonObject &json) mutable {
+            const auto data = json["data"_L1].toArray();
+
+            if (data.isEmpty())
             {
-                failureCallback();
-                return Failure;
+                return false;
             }
 
             std::vector<HelixBlock> ignores;
+            ignores.reserve(data.count());
 
-            for (const auto &jsonStream : data.toArray())
+            for (const auto &ignore : data)
             {
-                ignores.emplace_back(jsonStream.toObject());
+                ignores.emplace_back(ignore.toObject());
             }
 
-            successCallback(ignores);
+            pageCallback(ignores);
 
-            return Success;
-        })
-        .onError([failureCallback](auto /*result*/) {
-            // TODO: make better xd
-            failureCallback();
-        })
-        .execute();
+            receivedItems += data.count();
+
+            if (receivedItems >= blockLimit)
+            {
+                qCInfo(chatterinoTwitch) << "Reached the limit of" << blockLimit
+                                         << "Twitch blocks fetched";
+                return false;
+            }
+
+            return true;
+        },
+        [failureCallback](const NetworkResult &result) {
+            failureCallback(result.formatError());
+        },
+        std::move(token));
 }
 
 void Helix::blockUser(QString targetUserId, const QObject *caller,
@@ -2929,6 +2946,59 @@ NetworkRequest Helix::makePut(const QString &url, const QUrlQuery &urlQuery)
 NetworkRequest Helix::makePatch(const QString &url, const QUrlQuery &urlQuery)
 {
     return this->makeRequest(url, urlQuery, NetworkRequestType::Patch);
+}
+
+void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
+                     std::function<bool(const QJsonObject &)> onPage,
+                     std::function<void(NetworkResult)> onError,
+                     CancellationToken &&cancellationToken)
+{
+    auto onSuccess =
+        std::make_shared<std::function<Outcome(NetworkResult)>>(nullptr);
+    // This is the actual callback passed to NetworkRequest.
+    // It wraps the shared-ptr.
+    auto onSuccessCb = [onSuccess](const auto &res) -> Outcome {
+        return (*onSuccess)(res);
+    };
+
+    *onSuccess = [this, onPage = std::move(onPage), onError, onSuccessCb,
+                  url{url}, baseQuery{baseQuery},
+                  cancellationToken = std::move(cancellationToken)](
+                     const NetworkResult &res) -> Outcome {
+        if (cancellationToken.isCancelled())
+        {
+            return Success;
+        }
+
+        const auto json = res.parseJson();
+        if (!onPage(json))
+        {
+            // The consumer doesn't want any more pages
+            return Success;
+        }
+
+        auto cursor = json["pagination"_L1]["cursor"_L1].toString();
+        if (cursor.isEmpty())
+        {
+            return Success;
+        }
+
+        auto query = baseQuery;
+        query.removeAllQueryItems(u"after"_s);
+        query.addQueryItem(u"after"_s, cursor);
+
+        this->makeGet(url, query)
+            .onSuccess(onSuccessCb)
+            .onError(onError)
+            .execute();
+
+        return Success;
+    };
+
+    this->makeGet(url, baseQuery)
+        .onSuccess(std::move(onSuccessCb))
+        .onError(std::move(onError))
+        .execute();
 }
 
 void Helix::update(QString clientId, QString oauthToken)

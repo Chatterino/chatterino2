@@ -282,8 +282,11 @@ set(SOURCE_FILES
         providers/liveupdates/BasicPubSubClient.hpp
         providers/liveupdates/BasicPubSubManager.hpp
 
+        providers/seventv/SeventvAPI.cpp
+        providers/seventv/SeventvAPI.hpp
         providers/seventv/SeventvBadges.cpp
         providers/seventv/SeventvBadges.hpp
+        providers/seventv/SeventvCosmetics.hpp
         providers/seventv/SeventvEmotes.cpp
         providers/seventv/SeventvEmotes.hpp
         providers/seventv/SeventvEventAPI.cpp
@@ -385,6 +388,7 @@ set(SOURCE_FILES
 
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
+        util/CancellationToken.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
         util/ConcurrentMap.hpp

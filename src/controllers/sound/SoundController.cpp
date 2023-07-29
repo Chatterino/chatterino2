@@ -20,7 +20,6 @@ constexpr const auto NUM_SOUNDS = 4;
 SoundController::SoundController()
     : context(std::make_unique<ma_context>())
     , resourceManager(std::make_unique<ma_resource_manager>())
-    , device(std::make_unique<ma_device>())
     , engine(std::make_unique<ma_engine>())
 {
 }
@@ -66,27 +65,9 @@ void SoundController::initialize(Settings &settings, Paths &paths)
     this->defaultPingData = defaultPingFile.readAll();
 
     /// Initialize a sound device
-    auto deviceConfig = ma_device_config_init(ma_device_type_playback);
-    deviceConfig.playback.pDeviceID = nullptr;
-    deviceConfig.playback.format = this->resourceManager->config.decodedFormat;
-    deviceConfig.playback.channels = 0;
-    deviceConfig.pulse.pStreamNamePlayback = "Chatterino MA";
-    deviceConfig.sampleRate = this->resourceManager->config.decodedSampleRate;
-    deviceConfig.dataCallback = ma_engine_data_callback_internal;
-    deviceConfig.pUserData = this->engine.get();
-
-    result =
-        ma_device_init(this->context.get(), &deviceConfig, this->device.get());
-    if (result != MA_SUCCESS)
+    if (!this->recreateDevice())
     {
-        qCWarning(chatterinoSound) << "Error initializing device:" << result;
-        return;
-    }
-
-    result = ma_device_start(this->device.get());
-    if (result != MA_SUCCESS)
-    {
-        qCWarning(chatterinoSound) << "Error starting device:" << result;
+        qCWarning(chatterinoSound) << "Failed to create the initial device";
         return;
     }
 
@@ -172,7 +153,11 @@ SoundController::~SoundController()
     }
 
     ma_engine_uninit(this->engine.get());
-    ma_device_uninit(this->device.get());
+    if (this->device)
+    {
+        ma_device_uninit(this->device.get());
+        this->device.reset();
+    }
     ma_resource_manager_uninit(this->resourceManager.get());
     ma_context_uninit(this->context.get());
 }
@@ -204,7 +189,12 @@ void SoundController::play(const QUrl &sound)
         {
             qCWarning(chatterinoSound)
                 << "Failed to start the sound device" << result;
-            return;
+
+            if (!this->recreateDevice())
+            {
+                qCWarning(chatterinoSound) << "Failed to recreate device";
+                return;
+            }
         }
 
         qCInfo(chatterinoSound) << "Successfully restarted the sound device";
@@ -232,6 +222,46 @@ void SoundController::play(const QUrl &sound)
     {
         qCWarning(chatterinoSound) << "Failed to play default ping" << result;
     }
+}
+
+bool SoundController::recreateDevice()
+{
+    ma_result result{};
+
+    if (this->device)
+    {
+        // Release the previous device first
+        qCDebug(chatterinoSound) << "Uniniting previously created device";
+        ma_device_uninit(this->device.get());
+    }
+
+    this->device = std::make_unique<ma_device>();
+
+    auto deviceConfig = ma_device_config_init(ma_device_type_playback);
+    deviceConfig.playback.pDeviceID = nullptr;
+    deviceConfig.playback.format = this->resourceManager->config.decodedFormat;
+    deviceConfig.playback.channels = 0;
+    deviceConfig.pulse.pStreamNamePlayback = "Chatterino MA";
+    deviceConfig.sampleRate = this->resourceManager->config.decodedSampleRate;
+    deviceConfig.dataCallback = ma_engine_data_callback_internal;
+    deviceConfig.pUserData = this->engine.get();
+
+    result =
+        ma_device_init(this->context.get(), &deviceConfig, this->device.get());
+    if (result != MA_SUCCESS)
+    {
+        qCWarning(chatterinoSound) << "Error initializing device:" << result;
+        return false;
+    }
+
+    result = ma_device_start(this->device.get());
+    if (result != MA_SUCCESS)
+    {
+        qCWarning(chatterinoSound) << "Error starting device:" << result;
+        return false;
+    }
+
+    return true;
 }
 
 }  // namespace chatterino
