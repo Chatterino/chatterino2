@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
-#include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -12,6 +12,7 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
+#include "providers/seventv/SeventvAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Emotes.hpp"
@@ -442,6 +443,38 @@ void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
             }
 
             channel->addMessage(makeSystemMessage(errorMessage));
+        });
+}
+
+const QString &TwitchAccount::getSeventvUserID() const
+{
+    return this->seventvUserID_;
+}
+
+void TwitchAccount::loadSeventvUserID()
+{
+    if (this->isAnon())
+    {
+        return;
+    }
+    if (!this->seventvUserID_.isEmpty())
+    {
+        return;
+    }
+
+    getSeventvAPI().getUserByTwitchID(
+        this->getUserId(),
+        [this](const auto &json) {
+            const auto id = json["user"]["id"].toString();
+            if (!id.isEmpty())
+            {
+                this->seventvUserID_ = id;
+            }
+            return Success;
+        },
+        [](const auto &result) {
+            qCDebug(chatterinoSeventv)
+                << "Failed to load 7TV user-id:" << result.formatError();
         });
 }
 

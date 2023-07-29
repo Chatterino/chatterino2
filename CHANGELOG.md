@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Minor: Message input is now focused when clicking on emotes. (#4719)
+- Minor: Changed viewer list to chatter list to more match Twitch's terminology. (#4732)
 - Minor: Nicknames are now taken into consideration when searching for messages. (#4663)
 - Minor: Add an icon showing when streamer mode is enabled (#4410, #4690)
 - Minor: Added `/shoutout <username>` commands to shoutout specified user. (#4638)
@@ -13,6 +14,7 @@
 - Minor: Added a message for when Chatterino joins a channel (#4616)
 - Minor: Add accelerators to the right click menu for messages (#4705)
 - Minor: Add pin action to usercards and reply threads. (#4692)
+- Minor: 7TV badges now automatically update upon changing. (#4512)
 - Minor: Stream status requests are now batched. (#4713)
 - Minor: Added `/c2-theme-autoreload` command to automatically reload a custom theme. This is useful for when you're developing your own theme. (#4718)
 - Bugfix: Increased amount of blocked users loaded from 100 to 1,000. (#4721)
