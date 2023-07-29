@@ -212,7 +212,7 @@ void NativeMessagingServer::ReceiverThread::handleSelect(
     }
 #endif
 
-    if (type != u"twtich"_s)
+    if (type != u"twitch"_s)
     {
         qCDebug(chatterinoNativeMessage) << "NM unknown channel type";
         return;
