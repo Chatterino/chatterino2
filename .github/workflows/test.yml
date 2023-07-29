@@ -4,6 +4,7 @@ name: Test
 on:
   pull_request:
   workflow_dispatch:
+  merge_group:
 
 env:
   TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.6
