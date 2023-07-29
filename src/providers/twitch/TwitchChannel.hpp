@@ -229,8 +229,17 @@ public:
 
 private:
     struct NameOptions {
+        // displayName is the non-CJK-display name for this user
+        // This will always be the same as their `name_`, but potentially with different casing
         QString displayName;
+
+        // localizedName is their display name that *may* contain CJK characters
+        // If the display name does not contain any CJK characters, this will be
+        // the same as `displayName`
         QString localizedName;
+
+        // actualDisplayName is the raw display name string received from Twitch
+        QString actualDisplayName;
     } nameOptions;
 
 private:
