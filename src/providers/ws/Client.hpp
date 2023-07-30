@@ -85,7 +85,7 @@ protected:
     /// A text message was received.
     ///
     /// @param conn The connection the message was received on.
-    /// @param data The text of the received message. This becomes invalid after the function call.
+    /// @param data The text of the received message.
     virtual void onTextMessage(const Connection &conn,
                                const QByteArray &data) = 0;
 
