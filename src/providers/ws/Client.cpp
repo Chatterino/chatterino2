@@ -54,42 +54,7 @@ using namespace literals;
 class ClientPrivate
 {
 public:
-    ClientPrivate(Client *owner)
-        : owner_(owner)
-    {
-        this->websocketClient.set_access_channels(
-            websocketpp::log::alevel::all);
-        this->websocketClient.clear_access_channels(
-            websocketpp::log::alevel::frame_payload |
-            websocketpp::log::alevel::frame_header);
-
-        this->websocketClient.init_asio();
-
-        this->websocketClient.set_tls_init_handler([](auto) {
-            return ClientPrivate::onTLSInit();
-        });
-
-        this->websocketClient.set_message_handler([this](auto hdl, auto msg) {
-            this->onMessage(std::move(hdl), msg);
-        });
-        this->websocketClient.set_open_handler([this](auto hdl) {
-            this->onConnectionOpen(std::move(hdl));
-        });
-        this->websocketClient.set_close_handler([this](auto hdl) {
-            this->onConnectionClose(std::move(hdl));
-        });
-        this->websocketClient.set_fail_handler([this](auto hdl) {
-            this->onConnectionFail(std::move(hdl));
-        });
-        this->websocketClient.set_user_agent(
-            u"Chatterino/%1 (%2)"_s
-                .arg(Version::instance().version(),
-                     Version::instance().commitHash())
-                .toStdString());
-
-        this->work.emplace(boost::asio::make_work_guard(
-            this->websocketClient.get_io_service()));
-    }
+    ClientPrivate(Client *owner);
 
     static WebsocketppContextPtr onTLSInit();
     void onMessage(WebsocketppHandle &&hdl, const WebsocketppMessagePtr &msg);
@@ -109,6 +74,42 @@ public:
 private:
     Client *owner_;
 };
+
+ClientPrivate::ClientPrivate(Client *owner)
+    : owner_(owner)
+{
+    this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
+    this->websocketClient.clear_access_channels(
+        websocketpp::log::alevel::frame_payload |
+        websocketpp::log::alevel::frame_header);
+
+    this->websocketClient.init_asio();
+
+    this->websocketClient.set_tls_init_handler([](auto) {
+        return ClientPrivate::onTLSInit();
+    });
+
+    this->websocketClient.set_message_handler([this](auto hdl, auto msg) {
+        this->onMessage(std::move(hdl), msg);
+    });
+    this->websocketClient.set_open_handler([this](auto hdl) {
+        this->onConnectionOpen(std::move(hdl));
+    });
+    this->websocketClient.set_close_handler([this](auto hdl) {
+        this->onConnectionClose(std::move(hdl));
+    });
+    this->websocketClient.set_fail_handler([this](auto hdl) {
+        this->onConnectionFail(std::move(hdl));
+    });
+    this->websocketClient.set_user_agent(
+        u"Chatterino/%1 (%2)"_s
+            .arg(Version::instance().version(),
+                 Version::instance().commitHash())
+            .toStdString());
+
+    this->work.emplace(
+        boost::asio::make_work_guard(this->websocketClient.get_io_service()));
+}
 
 WebsocketppContextPtr ClientPrivate::onTLSInit()
 {
