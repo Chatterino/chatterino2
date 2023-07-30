@@ -10,6 +10,7 @@
 - Minor: Improved editing hotkeys. (#4628)
 - Minor: The input completion and quick switcher are now styled to match your theme. (#4671)
 - Minor: Added setting to only show tabs with live channels (default toggle hotkey: Ctrl+Shift+L). (#4358)
+- Minor: Added better support for Twitch's Hype Chat feature. (#4715)
 - Minor: Added option to subscribe to and unsubscribe from reply threads. (#4680, #4739)
 - Minor: Added a message for when Chatterino joins a channel (#4616)
 - Minor: Add accelerators to the right click menu for messages (#4705)
