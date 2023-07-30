@@ -12,7 +12,7 @@ namespace chatterino {
 class ColorProvider;
 class Theme;
 class Settings;
-class Selection;
+struct Selection;
 
 struct MessageColors {
     QColor regular;
