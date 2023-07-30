@@ -46,7 +46,6 @@ struct MessagePreferences {
                          pajlada::Signals::SignalHolder &holder);
 };
 
-// NOLINTBEGIN(cppcoreguidelines-avoid-const-or-ref-data-members)
 struct MessagePaintContext {
     QPainter &painter;
     const Selection &selection;
@@ -61,6 +60,5 @@ struct MessagePaintContext {
     bool isWindowFocused{};
     bool isMentions{};
 };
-// NOLINTEND(cppcoreguidelines-avoid-const-or-ref-data-members)
 
 }  // namespace chatterino
