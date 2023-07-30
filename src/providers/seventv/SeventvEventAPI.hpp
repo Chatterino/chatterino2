@@ -67,7 +67,7 @@ protected:
     std::shared_ptr<BasicPubSubClient<seventv::eventapi::Subscription>>
         createClient(ws::Client *client, const ws::Connection &conn) override;
     void onTextMessage(const ws::Connection &conn,
-                       const QLatin1String &data) override;
+                       const QByteArray &data) override;
 
 private:
     void handleDispatch(const seventv::eventapi::Dispatch &dispatch);

@@ -105,16 +105,14 @@ std::shared_ptr<BasicPubSubClient<Subscription>> SeventvEventAPI::createClient(
 }
 
 void SeventvEventAPI::onTextMessage(const ws::Connection &conn,
-                                    const QLatin1String &data)
+                                    const QByteArray &data)
 {
-    const auto &payload = QByteArray(data.data(), data.size());
-
-    auto pMessage = parseBaseMessage(payload);
+    auto pMessage = parseBaseMessage(data);
 
     if (!pMessage)
     {
         qCDebug(chatterinoSeventvEventAPI)
-            << "Unable to parse incoming event-api message: " << payload;
+            << "Unable to parse incoming event-api message: " << data;
         return;
     }
     auto message = *pMessage;
@@ -148,7 +146,7 @@ void SeventvEventAPI::onTextMessage(const ws::Connection &conn,
             if (!dispatch)
             {
                 qCDebug(chatterinoSeventvEventAPI)
-                    << "Malformed dispatch" << payload;
+                    << "Malformed dispatch" << data;
                 return;
             }
             this->handleDispatch(*dispatch);
@@ -170,7 +168,7 @@ void SeventvEventAPI::onTextMessage(const ws::Connection &conn,
         }
         break;
         default: {
-            qCDebug(chatterinoSeventvEventAPI) << "Unhandled op:" << payload;
+            qCDebug(chatterinoSeventvEventAPI) << "Unhandled op:" << data;
         }
         break;
     }

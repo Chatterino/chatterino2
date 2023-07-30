@@ -31,9 +31,9 @@ void BttvLiveUpdates::partChannel(const QString &id)
 }
 
 void BttvLiveUpdates::onTextMessage(const ws::Connection & /*conn*/,
-                                    const QLatin1String &data)
+                                    const QByteArray &data)
 {
-    QJsonDocument jsonDoc(QJsonDocument::fromJson({data.data(), data.size()}));
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
 
     if (jsonDoc.isNull())
     {

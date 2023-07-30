@@ -707,12 +707,11 @@ bool PubSub::isListeningToTopic(const QString &topic)
     return false;
 }
 
-void PubSub::onTextMessage(const ws::Connection &conn,
-                           const QLatin1String &data)
+void PubSub::onTextMessage(const ws::Connection &conn, const QByteArray &data)
 {
     this->diag.messagesReceived += 1;
 
-    auto oMessage = parsePubSubBaseMessage({data.data(), data.size()});
+    auto oMessage = parsePubSubBaseMessage(data);
 
     if (!oMessage)
     {

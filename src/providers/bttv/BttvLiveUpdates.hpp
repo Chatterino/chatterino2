@@ -45,7 +45,7 @@ public:
 
 protected:
     void onTextMessage(const ws::Connection &conn,
-                       const QLatin1String &data) override;
+                       const QByteArray &data) override;
 
 private:
     // Contains all joined Twitch channel-ids

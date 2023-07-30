@@ -134,8 +134,8 @@ void ClientPrivate::onMessage(WebsocketppHandle &&hdl,
     // TODO(Qt6): this should be a QByteArrayView
     this->owner_->onTextMessage(
         std::move(hdl),
-        QLatin1String(msg->get_payload().c_str(),
-                      static_cast<qsizetype>(msg->get_payload().size())));
+        QByteArray(msg->get_payload().c_str(),
+                   static_cast<qsizetype>(msg->get_payload().size())));
 }
 
 void ClientPrivate::onConnectionOpen(WebsocketppHandle &&hdl)

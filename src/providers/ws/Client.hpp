@@ -87,7 +87,7 @@ protected:
     /// @param conn The connection the message was received on.
     /// @param data The text of the received message. This becomes invalid after the function call.
     virtual void onTextMessage(const Connection &conn,
-                               const QLatin1String &data) = 0;
+                               const QByteArray &data) = 0;
 
 private:
     std::unique_ptr<ClientPrivate> private_;

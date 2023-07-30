@@ -145,7 +145,7 @@ protected:
     void onConnectionFailed(QLatin1String reason) override;
     void onConnectionOpen(const ws::Connection &conn) override;
     void onTextMessage(const ws::Connection &conn,
-                       const QLatin1String &data) override;
+                       const QByteArray &data) override;
 
 private:
     void listen(PubSubListenMessage msg);
