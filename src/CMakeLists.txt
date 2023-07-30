@@ -3,6 +3,9 @@ set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
+# registers the native messageing host
+option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
+
 set(SOURCE_FILES
         Application.cpp
         Application.hpp
@@ -408,6 +411,8 @@ set(SOURCE_FILES
         util/IncognitoBrowser.hpp
         util/InitUpdateButton.cpp
         util/InitUpdateButton.hpp
+        util/IpcQueue.cpp
+        util/IpcQueue.hpp
         util/LayoutHelper.cpp
         util/LayoutHelper.hpp
         util/NuulsUploader.cpp
@@ -846,6 +851,9 @@ if (WIN32)
     if (BUILD_APP)
         set_target_properties(${EXECUTABLE_PROJECT} PROPERTIES WIN32_EXECUTABLE TRUE)
     endif ()
+endif ()
+if (CHATTERINO_DEBUG_NATIVE_MESSAGES)
+    target_compile_definitions(${LIBRARY_PROJECT} PRIVATE CHATTERINO_DEBUG_NM)
 endif ()
 
 if (MSVC)

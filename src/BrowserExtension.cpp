@@ -30,7 +30,7 @@ namespace {
 #endif
     }
 
-    void runLoop(NativeMessagingClient &client)
+    void runLoop()
     {
         auto received_message = std::make_shared<std::atomic_bool>(true);
 
@@ -73,7 +73,7 @@ namespace {
 
             received_message->store(true);
 
-            client.sendMessage(data);
+            nm::client::sendMessage(data);
         }
         _Exit(0);
     }
@@ -83,9 +83,7 @@ void runBrowserExtensionHost()
 {
     initFileMode();
 
-    NativeMessagingClient client;
-
-    runLoop(client);
+    runLoop();
 }
 
 }  // namespace chatterino
