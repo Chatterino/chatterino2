@@ -187,6 +187,7 @@ void Client::start()
 {
     auto *d = this->private_.get();
 
+    assert(d->asioThread == nullptr);
     d->asioThread = std::make_unique<std::thread>([d] {
         d->runThread();
     });
@@ -201,6 +202,7 @@ void Client::stop()
         d->work->reset();
     }
 
+    assert(d->asioThread != nullptr);
     if (d->asioThread->joinable())
     {
         d->asioThread->join();
@@ -217,6 +219,7 @@ void Client::forceStop()
         d->work->reset();
     }
 
+    assert(d->asioThread != nullptr);
     if (d->asioThread->joinable())
     {
         d->asioThread->join();
