@@ -24,7 +24,6 @@ namespace chatterino::literals {
 namespace detail {
     // NOLINTBEGIN(modernize-avoid-c-arrays)
     // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays)
-    // NOLINTBEGIN(cppcoreguidelines-avoid-const-or-ref-data-members)
 
     template <size_t N>
     struct LiteralResolver {
@@ -95,7 +94,6 @@ namespace detail {
         }
     };
 
-    // NOLINTEND(cppcoreguidelines-avoid-const-or-ref-data-members)
     // NOLINTEND(cppcoreguidelines-avoid-c-arrays)
     // NOLINTEND(modernize-avoid-c-arrays)
 

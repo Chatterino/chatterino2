@@ -1,6 +1,7 @@
 #include "MessageLayoutContainer.hpp"
 
 #include "Application.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
@@ -151,7 +152,7 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     }
 
     // top margin
-    if (this->elements_.size() == 0)
+    if (this->elements_.empty())
     {
         this->currentY_ = int(this->margin.top * this->scale_);
     }
@@ -386,7 +387,7 @@ void MessageLayoutContainer::breakLine()
                    element->getRect().y() + this->lineHeight_ + yExtra));
     }
 
-    if (this->lines_.size() != 0)
+    if (!this->lines_.empty())
     {
         this->lines_.back().endIndex = this->lineStart_;
         this->lines_.back().endCharIndex = this->charIndex_;
@@ -395,7 +396,7 @@ void MessageLayoutContainer::breakLine()
         {(int)lineStart_, 0, this->charIndex_, 0,
          QRect(-100000, this->currentY_, 200000, lineHeight_)});
 
-    for (int i = this->lineStart_; i < this->elements_.size(); i++)
+    for (auto i = this->lineStart_; i < this->elements_.size(); i++)
     {
         this->charIndex_ += this->elements_[i]->getSelectionIndexCount();
     }
@@ -465,7 +466,7 @@ void MessageLayoutContainer::end()
 
     this->height_ += this->lineHeight_;
 
-    if (this->lines_.size() != 0)
+    if (!this->lines_.empty())
     {
         this->lines_[0].rect.setTop(-100000);
         this->lines_.back().rect.setBottom(100000);
@@ -480,7 +481,7 @@ bool MessageLayoutContainer::canCollapse()
            this->flags_.has(MessageFlag::Collapsed);
 }
 
-bool MessageLayoutContainer::isCollapsed()
+bool MessageLayoutContainer::isCollapsed() const
 {
     return this->isCollapsed_;
 }
@@ -499,7 +500,8 @@ MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point)
 }
 
 // painting
-void MessageLayoutContainer::paintElements(QPainter &painter)
+void MessageLayoutContainer::paintElements(QPainter &painter,
+                                           const MessagePaintContext &ctx)
 {
     for (const std::unique_ptr<MessageLayoutElement> &element : this->elements_)
     {
@@ -508,7 +510,7 @@ void MessageLayoutContainer::paintElements(QPainter &painter)
         painter.drawRect(element->getRect());
 #endif
 
-        element->paint(painter);
+        element->paint(painter, ctx.messageColors);
     }
 }
 
@@ -521,10 +523,12 @@ void MessageLayoutContainer::paintAnimatedElements(QPainter &painter,
     }
 }
 
-void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
-                                            Selection &selection, int yOffset)
+void MessageLayoutContainer::paintSelection(QPainter &painter,
+                                            size_t messageIndex,
+                                            const Selection &selection,
+                                            int yOffset)
 {
-    auto app = getApp();
+    auto *app = getApp();
     QColor selectionColor = app->themes->messages.selection;
 
     // don't draw anything
@@ -713,7 +717,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
 // selection
 int MessageLayoutContainer::getSelectionIndex(QPoint point)
 {
-    if (this->elements_.size() == 0)
+    if (this->elements_.empty())
     {
         return 0;
     }
@@ -774,7 +778,7 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
 // fourtf: no idea if this is acurate LOL
 int MessageLayoutContainer::getLastCharacterIndex() const
 {
-    if (this->lines_.size() == 0)
+    if (this->lines_.empty())
     {
         return 0;
     }
@@ -791,7 +795,7 @@ int MessageLayoutContainer::getFirstMessageCharacterIndex() const
 
     // Get the index of the first character of the real message
     int index = 0;
-    for (auto &element : this->elements_)
+    for (const auto &element : this->elements_)
     {
         if (element->getFlags().hasAny(skippedFlags))
         {
@@ -853,10 +857,8 @@ void MessageLayoutContainer::addSelectionText(QString &str, uint32_t from,
                 element->addCopyTextToString(str, 0, to - index);
                 break;
             }
-            else
-            {
-                element->addCopyTextToString(str);
-            }
+
+            element->addCopyTextToString(str);
         }
 
         index += indexCount;
