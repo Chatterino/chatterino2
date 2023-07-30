@@ -30,14 +30,11 @@
 #include <QLocale>
 #include <QStringBuilder>
 
-#include <chrono>
 #include <memory>
 #include <unordered_set>
 
 namespace {
 using namespace chatterino;
-using namespace chatterino::literals;
-using namespace std::chrono_literals;
 
 // Message types below are the ones that might contain special user's message on USERNOTICE
 static const QSet<QString> specialMessageTypes{
@@ -47,19 +44,6 @@ static const QSet<QString> specialMessageTypes{
     "bitsbadgetier",  // bits badge upgrade
     "ritual",         // new viewer ritual
     "announcement",   // new mod announcement thing
-};
-
-struct PinnedChatPaidLevel {
-    std::chrono::duration<uint32_t> duration;
-    uint8_t numeric;
-};
-
-const QHash<QString, PinnedChatPaidLevel> PINNED_CHAT_PAID_LEVEL = {
-    {u"ONE"_s, {30s, 1}},    {u"TWO"_s, {2min + 30s, 2}},
-    {u"THREE"_s, {5min, 3}}, {u"FOUR"_s, {10min, 4}},
-    {u"FIVE"_s, {30min, 5}}, {u"SIX"_s, {1h, 6}},
-    {u"SEVEN"_s, {2h, 7}},   {u"EIGHT"_s, {3h, 8}},
-    {u"NINE"_s, {4h, 9}},    {u"TEN"_s, {5h, 10}},
 };
 
 MessagePtr generateBannedMessage(bool confirmedBan)
@@ -185,43 +169,6 @@ ChannelPtr channelOrEmptyByTarget(const QString &target,
     }
 
     return server.getChannelOrEmpty(channelName);
-}
-
-MessagePtr parsePinnedChat(Communi::IrcPrivateMessage *message)
-{
-    auto level = message->tag(u"pinned-chat-paid-level"_s).toString();
-    auto currency = message->tag(u"pinned-chat-paid-currency"_s).toString();
-    bool okAmount = false;
-    auto amount = message->tag(u"pinned-chat-paid-amount"_s).toInt(&okAmount);
-    bool okExponent = false;
-    auto exponent =
-        message->tag(u"pinned-chat-paid-exponent"_s).toInt(&okExponent);
-    if (!okAmount || !okExponent || currency.isEmpty())
-    {
-        return {};
-    }
-    // additionally, there's `pinned-chat-paid-is-system-message` which isn't used by Chatterino.
-
-    QString subtitle;
-    auto levelIt = PINNED_CHAT_PAID_LEVEL.find(level);
-    if (levelIt != PINNED_CHAT_PAID_LEVEL.end())
-    {
-        subtitle = u"Level %1 Hype Chat ("_s.arg(levelIt->numeric) %
-                   formatTime(int(levelIt->duration.count())) % (") ");
-    }
-    else
-    {
-        subtitle = u"Hype Chat "_s;
-    }
-
-    // actualAmount = amount * 10^(-exponent)
-    double actualAmount = std::pow(10.0, double(-exponent)) * double(amount);
-    subtitle += QLocale::system().toCurrencyString(actualAmount, currency);
-
-    MessageBuilder builder(systemMessage, parseTagString(subtitle),
-                           calculateMessageTime(message).time());
-    builder->flags.set(MessageFlag::ElevatedMessage);
-    return builder.release();
 }
 
 }  // namespace
@@ -387,7 +334,7 @@ std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
-        auto ptr = parsePinnedChat(message);
+        auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
         if (ptr)
         {
             builtMessages.emplace_back(std::move(ptr));
@@ -419,7 +366,7 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
-        auto ptr = parsePinnedChat(message);
+        auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
         if (ptr)
         {
             chan->addMessage(ptr);
