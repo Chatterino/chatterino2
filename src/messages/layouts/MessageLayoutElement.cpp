@@ -540,7 +540,7 @@ int TextIconLayoutElement::getSelectionIndexCount() const
 void TextIconLayoutElement::paint(QPainter &painter,
                                   const MessageColors &messageColors)
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     QFont font = app->fonts->getFont(FontStyle::Tiny, this->scale);
 
