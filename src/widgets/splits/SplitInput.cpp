@@ -307,6 +307,7 @@ void SplitInput::openEmotePopup()
                     textToInsert = " " + textToInsert;
                 }
                 this->insertText(textToInsert);
+                this->ui_.textEdit->activateWindow();
             }
         });
     }

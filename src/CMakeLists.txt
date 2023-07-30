@@ -3,6 +3,9 @@ set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
+# registers the native messageing host
+option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
+
 set(SOURCE_FILES
         Application.cpp
         Application.hpp
@@ -283,8 +286,11 @@ set(SOURCE_FILES
         providers/liveupdates/BasicPubSubManager.hpp
         providers/liveupdates/BasicPubSubWebsocket.hpp
 
+        providers/seventv/SeventvAPI.cpp
+        providers/seventv/SeventvAPI.hpp
         providers/seventv/SeventvBadges.cpp
         providers/seventv/SeventvBadges.hpp
+        providers/seventv/SeventvCosmetics.hpp
         providers/seventv/SeventvEmotes.cpp
         providers/seventv/SeventvEmotes.hpp
         providers/seventv/SeventvEventAPI.cpp
@@ -385,6 +391,7 @@ set(SOURCE_FILES
 
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
+        util/CancellationToken.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
         util/ConcurrentMap.hpp
@@ -404,6 +411,8 @@ set(SOURCE_FILES
         util/IncognitoBrowser.hpp
         util/InitUpdateButton.cpp
         util/InitUpdateButton.hpp
+        util/IpcQueue.cpp
+        util/IpcQueue.hpp
         util/LayoutHelper.cpp
         util/LayoutHelper.hpp
         util/NuulsUploader.cpp
@@ -842,6 +851,9 @@ if (WIN32)
     if (BUILD_APP)
         set_target_properties(${EXECUTABLE_PROJECT} PROPERTIES WIN32_EXECUTABLE TRUE)
     endif ()
+endif ()
+if (CHATTERINO_DEBUG_NATIVE_MESSAGES)
+    target_compile_definitions(${LIBRARY_PROJECT} PRIVATE CHATTERINO_DEBUG_NM)
 endif ()
 
 if (MSVC)
