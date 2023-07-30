@@ -198,7 +198,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 // Painting
 void MessageLayout::paint(const MessagePaintContext &ctx)
 {
-    QPixmap *pixmap = this->ensureBuffer(ctx.painter, ctx.width);
+    QPixmap *pixmap = this->ensureBuffer(ctx.painter, ctx.canvasWidth);
 
     if (!this->bufferValid_ || !ctx.selection.isEmpty())
     {

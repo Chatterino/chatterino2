@@ -63,7 +63,6 @@
 #include <functional>
 #include <memory>
 
-#define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
 #define CHAT_HOVER_PAUSE_DURATION 1000
 #define TOOLTIP_EMOTE_ENTRIES_LIMIT 7
@@ -1263,25 +1262,31 @@ void ChannelView::drawMessages(QPainter &painter)
         .messageColors = this->messageColors_,
         .preferences = this->messagePreferences_,
 
-        .width = DRAW_WIDTH,
-        .y = int(-(messagesSnapshot[start]->getHeight() *
-                   (fmod(this->scrollBar_->getRelativeCurrentValue(), 1)))),
+        .canvasWidth = this->width(),
         .isWindowFocused = this->window() == QApplication::activeWindow(),
         .isMentions =
             this->underlyingChannel_ == getApp()->twitch->mentionsChannel,
+
+        .y = int(-(messagesSnapshot[start]->getHeight() *
+                   (fmod(this->scrollBar_->getRelativeCurrentValue(), 1)))),
+        .messageIndex = start,
+        .isLastReadMessage = false,
+
     };
     bool showLastMessageIndicator = getSettings()->showLastMessageIndicator;
 
-    for (size_t i = start; i < messagesSnapshot.size(); ++i)
+    for (; ctx.messageIndex < messagesSnapshot.size(); ++ctx.messageIndex)
     {
-        MessageLayout *layout = messagesSnapshot[i].get();
+        MessageLayout *layout = messagesSnapshot[ctx.messageIndex].get();
 
-        ctx.isLastReadMessage = false;
         if (showLastMessageIndicator)
         {
             ctx.isLastReadMessage = this->lastReadMessage_.get() == layout;
         }
-        ctx.messageIndex = int(i);
+        else
+        {
+            ctx.isLastReadMessage = false;
+        }
 
         layout->paint(ctx);
 

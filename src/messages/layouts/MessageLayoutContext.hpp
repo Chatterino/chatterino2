@@ -49,15 +49,24 @@ struct MessagePaintContext {
     QPainter &painter;
     const Selection &selection;
     const ColorProvider &colorProvider;
-    MessageColors messageColors;
-    MessagePreferences preferences;
+    const MessageColors &messageColors;
+    const MessagePreferences &preferences;
 
-    int width{};
+    // width of the area we have to draw on
+    const int canvasWidth{};
+    // whether the painting should be treated as if this view's window is focused
+    const bool isWindowFocused{};
+    // whether the painting should be treated as if this view is the special mentions view
+    const bool isMentions{};
+
+    // y coordinate we're currently painting at
     int y{};
-    int messageIndex{};
+
+    // Index of the message that is currently being painted
+    // This index refers to the snapshot being used in the painting
+    size_t messageIndex{};
+
     bool isLastReadMessage{};
-    bool isWindowFocused{};
-    bool isMentions{};
 };
 
 }  // namespace chatterino
