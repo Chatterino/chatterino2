@@ -202,7 +202,7 @@ TEST(FormatTime, chrono)
         const auto actual = formatTime(input);
 
         EXPECT_EQ(actual, expected)
-            << qUtf8Printable(actual) << " (" << input
-            << ") did not match expected value " << qUtf8Printable(expected);
+            << qUtf8Printable(actual) << " did not match expected value "
+            << qUtf8Printable(expected);
     }
 }
