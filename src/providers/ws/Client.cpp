@@ -19,6 +19,8 @@
 
 namespace {
 
+const auto LOG = chatterinoWebsocket;
+
 struct WebsocketConfig : public websocketpp::config::asio_tls_client {
     using elog_type =
         websocketpp::log::chatterinowebsocketpplogger<concurrency_type,
@@ -121,8 +123,7 @@ WebsocketppContextPtr ClientPrivate::onTLSInit()
     }
     catch (const std::exception &e)
     {
-        qCDebug(chatterinoWebsocket)
-            << "Exception caught in onTLSInit:" << e.what();
+        qCDebug(LOG) << "Exception caught in onTLSInit:" << e.what();
     }
 
     return ctx;
@@ -165,9 +166,9 @@ void ClientPrivate::onConnectionFail(WebsocketppHandle &&hdl)
 
 void ClientPrivate::runThread()
 {
-    qCDebug(chatterinoWebsocket) << "Start WebSocket manager thread";
+    qCDebug(LOG) << "Start WebSocket manager thread";
     this->websocketClient.run();
-    qCDebug(chatterinoWebsocket) << "Done with WebSocket manager thread";
+    qCDebug(LOG) << "Done with WebSocket manager thread";
 }
 
 // ====== Client ======
@@ -231,8 +232,8 @@ void Client::addConnection(const QString &host)
 
     if (ec)
     {
-        qCDebug(chatterinoWebsocket)
-            << "Unable to establish connection:" << ec.message().c_str();
+        qCDebug(LOG) << "Unable to establish connection:"
+                     << ec.message().c_str();
         return;
     }
 
@@ -251,10 +252,9 @@ bool Client::sendText(const Connection &conn, const char *str, size_t len)
 
     if (ec)
     {
-        qCDebug(chatterinoLiveupdates)
-            << "Error sending message"
-            << QLatin1String(str, static_cast<qsizetype>(len)) << ":"
-            << ec.message().c_str();
+        qCDebug(LOG) << "Error sending message"
+                     << QLatin1String(str, static_cast<qsizetype>(len)) << ":"
+                     << ec.message().c_str();
         return false;
     }
 
@@ -281,16 +281,14 @@ void Client::close(const Connection &weakConn, const QString &reason,
     auto conn = d->websocketClient.get_con_from_hdl(weakConn.hdl_, ec);
     if (ec)
     {
-        qCDebug(chatterinoLiveupdates)
-            << "Error getting connection:" << ec.message().c_str();
+        qCDebug(LOG) << "Error getting connection:" << ec.message().c_str();
         return;
     }
 
     conn->close(static_cast<uint16_t>(code), reason.toStdString(), ec);
     if (ec)
     {
-        qCDebug(chatterinoLiveupdates)
-            << "Error closing:" << ec.message().c_str();
+        qCDebug(LOG) << "Error closing:" << ec.message().c_str();
         return;
     }
 }
@@ -307,8 +305,7 @@ void Client::runAfter(std::chrono::milliseconds duration,
     timer->async_wait([timer, fn](const boost::system::error_code &ec) {
         if (ec)
         {
-            qCDebug(chatterinoWebsocket)
-                << "Error in runAfter:" << ec.message().c_str();
+            qCDebug(LOG) << "Error in runAfter:" << ec.message().c_str();
             return;
         }
 
