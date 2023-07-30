@@ -14,6 +14,7 @@ class Theme;
 class Settings;
 struct Selection;
 
+// TODO: Figure out if this could be a subset of Theme instead (e.g. Theme::MessageColors)
 struct MessageColors {
     QColor regular;
     QColor alternate;
@@ -29,6 +30,7 @@ struct MessageColors {
     void applyTheme(Theme *theme);
 };
 
+// TODO: Explore if we can let settings own this
 struct MessagePreferences {
     QColor lastMessageColor;
     Qt::BrushStyle lastMessagePattern{};
