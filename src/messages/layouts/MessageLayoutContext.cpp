@@ -61,7 +61,14 @@ void MessagePreferences::connectSettings(Settings *settings,
 
     settings->lastMessageColor.connect(
         [this](const auto &newValue) {
-            this->lastMessageColor = newValue;
+            if (newValue.isEmpty())
+            {
+                this->lastMessageColor = QColor();
+            }
+            else
+            {
+                this->lastMessageColor = QColor(newValue);
+            }
         },
         holder);
 
