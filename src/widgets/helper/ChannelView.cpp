@@ -206,7 +206,7 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
 
     this->messageColors_.applyTheme(getTheme());
     this->messagePreferences_.connectSettings(getSettings(),
-                                              this->channelConnections_);
+                                              this->signalHolder_);
 }
 
 void ChannelView::initializeLayout()
