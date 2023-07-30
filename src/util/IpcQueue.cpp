@@ -39,7 +39,6 @@ public:
 
 IpcQueue::IpcQueue(IpcQueuePrivate *priv)
     : private_(priv){};
-IpcQueue::IpcQueue(IpcQueue &&) = default;
 IpcQueue::~IpcQueue() = default;
 
 std::variant<IpcQueue, QString> IpcQueue::tryReplaceOrCreate(

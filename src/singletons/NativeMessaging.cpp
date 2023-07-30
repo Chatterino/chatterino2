@@ -150,7 +150,7 @@ void NativeMessagingServer::ReceiverThread::run()
         return;
     }
 
-    auto messageQueue = std::move(std::get<ipc::IpcQueue>(result));
+    auto &messageQueue = std::get<ipc::IpcQueue>(result);
     while (true)
     {
         auto buf = messageQueue.receive();

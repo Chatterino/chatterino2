@@ -14,7 +14,6 @@ class IpcQueuePrivate;
 class IpcQueue
 {
 public:
-    IpcQueue(IpcQueue &&other);
     ~IpcQueue();
 
     static std::variant<IpcQueue, QString> tryReplaceOrCreate(
