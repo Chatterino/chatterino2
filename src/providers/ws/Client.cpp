@@ -153,7 +153,7 @@ void ClientPrivate::onConnectionClose(WebsocketppHandle &&hdl)
 void ClientPrivate::onConnectionFail(WebsocketppHandle &&hdl)
 {
     websocketpp::lib::error_code ec;
-    auto conn = this->websocketClient.get_con_from_hdl(std::move(hdl));
+    auto conn = this->websocketClient.get_con_from_hdl(std::move(hdl), ec);
     if (ec)
     {
         this->owner_->onConnectionFailed("<failed to get connection back>"_L1);
