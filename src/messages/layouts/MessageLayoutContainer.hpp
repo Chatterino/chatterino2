@@ -86,7 +86,7 @@ struct MessageLayoutContainer {
     void addSelectionText(QString &str, uint32_t from, uint32_t to,
                           CopyMode copymode);
 
-    bool isCollapsed();
+    bool isCollapsed() const;
 
 private:
     struct Line {
