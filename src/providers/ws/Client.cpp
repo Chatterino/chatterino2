@@ -147,7 +147,7 @@ void ClientPrivate::onConnectionOpen(WebsocketppHandle &&hdl)
 
 void ClientPrivate::onConnectionClose(WebsocketppHandle &&hdl)
 {
-    this->owner_->onConnectionClosed(std::move(hdl));
+    this->owner_->onConnectionClose(std::move(hdl));
 }
 
 void ClientPrivate::onConnectionFail(WebsocketppHandle &&hdl)
@@ -156,12 +156,12 @@ void ClientPrivate::onConnectionFail(WebsocketppHandle &&hdl)
     auto conn = this->websocketClient.get_con_from_hdl(std::move(hdl), ec);
     if (ec)
     {
-        this->owner_->onConnectionFailed("<failed to get connection back>"_L1);
+        this->owner_->onConnectionFail("<failed to get connection back>"_L1);
         return;
     }
 
     auto msg = conn->get_ec().message();
-    this->owner_->onConnectionFailed(
+    this->owner_->onConnectionFail(
         QLatin1String(msg.c_str(), static_cast<qsizetype>(msg.size())));
 }
 

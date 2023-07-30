@@ -818,7 +818,7 @@ void PubSub::onConnectionOpen(const ws::Connection &conn)
     }
 }
 
-void PubSub::onConnectionFailed(QLatin1String reason)
+void PubSub::onConnectionFail(QLatin1String reason)
 {
     this->diag.connectionsFailed += 1;
 
@@ -835,7 +835,7 @@ void PubSub::onConnectionFailed(QLatin1String reason)
     }
 }
 
-void PubSub::onConnectionClosed(const ws::Connection &conn)
+void PubSub::onConnectionClose(const ws::Connection &conn)
 {
     qCDebug(chatterinoPubSub) << "Connection closed";
     this->diag.connectionsClosed += 1;

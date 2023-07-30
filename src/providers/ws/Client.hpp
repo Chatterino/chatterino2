@@ -76,11 +76,11 @@ protected:
     /// @see #addConnection
     virtual void onConnectionOpen(const Connection &conn) = 0;
     /// A connection was closed.
-    virtual void onConnectionClosed(const Connection &conn) = 0;
+    virtual void onConnectionClose(const Connection &conn) = 0;
     /// A connection attempt failed
     ///
     /// @see #addConnection
-    virtual void onConnectionFailed(QLatin1String reason) = 0;
+    virtual void onConnectionFail(QLatin1String reason) = 0;
 
     /// A text message was received.
     ///

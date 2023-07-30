@@ -180,7 +180,7 @@ private:
         }
     }
 
-    void onConnectionFailed(QLatin1String reason) override
+    void onConnectionFail(QLatin1String reason) override
     {
         DebugCount::increase("LiveUpdates failed connections");
         this->diag.connectionsFailed.fetch_add(1, std::memory_order_acq_rel);
@@ -198,7 +198,7 @@ private:
         }
     }
 
-    void onConnectionClosed(const ws::Connection &conn) override
+    void onConnectionClose(const ws::Connection &conn) override
     {
         qCDebug(chatterinoLiveupdates) << "Connection closed";
         DebugCount::decrease("LiveUpdates connections");

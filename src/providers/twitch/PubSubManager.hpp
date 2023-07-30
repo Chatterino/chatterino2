@@ -141,8 +141,8 @@ public:
     void listenToTopic(const QString &topic);
 
 protected:
-    void onConnectionClosed(const ws::Connection &conn) override;
-    void onConnectionFailed(QLatin1String reason) override;
+    void onConnectionClose(const ws::Connection &conn) override;
+    void onConnectionFail(QLatin1String reason) override;
     void onConnectionOpen(const ws::Connection &conn) override;
     void onTextMessage(const ws::Connection &conn,
                        const QByteArray &data) override;
