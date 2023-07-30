@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <variant>
+#include <utility>
 
 class QByteArray;
 class QString;
@@ -16,7 +16,7 @@ class IpcQueue
 public:
     ~IpcQueue();
 
-    static std::variant<IpcQueue, QString> tryReplaceOrCreate(
+    static std::pair<std::unique_ptr<IpcQueue>, QString> tryReplaceOrCreate(
         const char *name, size_t maxMessages, size_t maxMessageSize);
 
     // TODO: use std::expected

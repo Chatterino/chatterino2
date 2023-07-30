@@ -41,17 +41,20 @@ IpcQueue::IpcQueue(IpcQueuePrivate *priv)
     : private_(priv){};
 IpcQueue::~IpcQueue() = default;
 
-std::variant<IpcQueue, QString> IpcQueue::tryReplaceOrCreate(
+std::pair<std::unique_ptr<IpcQueue>, QString> IpcQueue::tryReplaceOrCreate(
     const char *name, size_t maxMessages, size_t maxMessageSize)
 {
     try
     {
         boost_ipc::message_queue::remove(name);
-        return IpcQueue(new IpcQueuePrivate(name, maxMessages, maxMessageSize));
+        return std::make_pair(
+            std::unique_ptr<IpcQueue>(new IpcQueue(
+                new IpcQueuePrivate(name, maxMessages, maxMessageSize))),
+            QString());
     }
     catch (boost_ipc::interprocess_exception &ex)
     {
-        return QString::fromLatin1(ex.what());
+        return {nullptr, QString::fromLatin1(ex.what())};
     }
 }
 
