@@ -523,7 +523,8 @@ void MessageLayoutContainer::paintAnimatedElements(QPainter &painter,
     }
 }
 
-void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
+void MessageLayoutContainer::paintSelection(QPainter &painter,
+                                            size_t messageIndex,
                                             const Selection &selection,
                                             int yOffset)
 {
