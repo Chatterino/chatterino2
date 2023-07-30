@@ -20,41 +20,56 @@ void MessageColors::applyTheme(Theme *theme)
     this->unfocusedLastMessageLine = theme->tabs.selected.backgrounds.unfocused;
 }
 
-void MessagePreferences::applySettings(Settings *settings)
-{
-    this->enableRedeemedHighlight = settings->enableRedeemedHighlight;
-    this->enableElevatedMessageHighlight =
-        settings->enableElevatedMessageHighlight;
-    this->enableFirstMessageHighlight = settings->enableFirstMessageHighlight;
-    this->enableSubHighlight = settings->enableSubHighlight;
-
-    this->alternateMessages = settings->alternateMessages;
-    this->separateMessages = settings->separateMessages;
-
-    this->lastMessageColor = settings->lastMessageColor.getValue().isEmpty()
-                                 ? QColor()
-                                 : QColor(settings->lastMessageColor);
-    this->lastMessagePattern =
-        static_cast<Qt::BrushStyle>(settings->lastMessagePattern);
-}
-
 void MessagePreferences::connectSettings(Settings *settings,
                                          pajlada::Signals::SignalHolder &holder)
 {
-    const auto apply = [this, settings]() {
-        this->applySettings(settings);
-    };
-    const auto connect = [&](auto &setting) {
-        setting.connect(apply, holder, false);
-    };
-    connect(settings->enableRedeemedHighlight);
-    connect(settings->enableElevatedMessageHighlight);
-    connect(settings->enableFirstMessageHighlight);
-    connect(settings->enableSubHighlight);
-    connect(settings->alternateMessages);
-    connect(settings->separateMessages);
-    connect(settings->lastMessageColor);
-    connect(settings->lastMessagePattern);
+    settings->enableRedeemedHighlight.connect(
+        [this](const auto &newValue) {
+            this->enableRedeemedHighlight = newValue;
+        },
+        holder);
+
+    settings->enableElevatedMessageHighlight.connect(
+        [this](const auto &newValue) {
+            this->enableElevatedMessageHighlight = newValue;
+        },
+        holder);
+
+    settings->enableFirstMessageHighlight.connect(
+        [this](const auto &newValue) {
+            this->enableFirstMessageHighlight = newValue;
+        },
+        holder);
+
+    settings->enableSubHighlight.connect(
+        [this](const auto &newValue) {
+            this->enableSubHighlight = newValue;
+        },
+        holder);
+
+    settings->alternateMessages.connect(
+        [this](const auto &newValue) {
+            this->alternateMessages = newValue;
+        },
+        holder);
+
+    settings->separateMessages.connect(
+        [this](const auto &newValue) {
+            this->separateMessages = newValue;
+        },
+        holder);
+
+    settings->lastMessageColor.connect(
+        [this](const auto &newValue) {
+            this->lastMessageColor = newValue;
+        },
+        holder);
+
+    settings->lastMessagePattern.connect(
+        [this](const auto &newValue) {
+            this->lastMessagePattern = static_cast<Qt::BrushStyle>(newValue);
+        },
+        holder);
 }
 
 }  // namespace chatterino

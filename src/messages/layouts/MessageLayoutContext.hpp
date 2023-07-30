@@ -41,7 +41,6 @@ struct MessagePreferences {
     bool alternateMessages{};
     bool separateMessages{};
 
-    void applySettings(Settings *settings);
     void connectSettings(Settings *settings,
                          pajlada::Signals::SignalHolder &holder);
 };
