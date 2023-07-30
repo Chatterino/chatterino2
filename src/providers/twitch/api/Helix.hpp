@@ -6,6 +6,7 @@
 #include "util/QStringHash.hpp"
 
 #include <boost/optional.hpp>
+#include <QDateTime>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QString>
@@ -22,6 +23,8 @@ namespace chatterino {
 using HelixFailureCallback = std::function<void()>;
 template <typename... T>
 using ResultCallback = std::function<void(T...)>;
+
+class CancellationToken;
 
 struct HelixUser {
     QString id;
@@ -384,6 +387,55 @@ struct HelixModerators {
     }
 };
 
+struct HelixBadgeVersion {
+    QString id;
+    Url imageURL1x;
+    Url imageURL2x;
+    Url imageURL4x;
+    QString title;
+    Url clickURL;
+
+    explicit HelixBadgeVersion(const QJsonObject &jsonObject)
+        : id(jsonObject.value("id").toString())
+        , imageURL1x(Url{jsonObject.value("image_url_1x").toString()})
+        , imageURL2x(Url{jsonObject.value("image_url_2x").toString()})
+        , imageURL4x(Url{jsonObject.value("image_url_4x").toString()})
+        , title(jsonObject.value("title").toString())
+        , clickURL(Url{jsonObject.value("click_url").toString()})
+    {
+    }
+};
+
+struct HelixBadgeSet {
+    QString setID;
+    std::vector<HelixBadgeVersion> versions;
+
+    explicit HelixBadgeSet(const QJsonObject &json)
+        : setID(json.value("set_id").toString())
+    {
+        const auto jsonVersions = json.value("versions").toArray();
+        for (const auto &version : jsonVersions)
+        {
+            versions.emplace_back(version.toObject());
+        }
+    }
+};
+
+struct HelixGlobalBadges {
+    std::vector<HelixBadgeSet> badgeSets;
+
+    explicit HelixGlobalBadges(const QJsonObject &jsonObject)
+    {
+        const auto &data = jsonObject.value("data").toArray();
+        for (const auto &set : data)
+        {
+            this->badgeSets.emplace_back(set.toObject());
+        }
+    }
+};
+
+using HelixChannelBadges = HelixGlobalBadges;
+
 enum class HelixAnnouncementColor {
     Blue,
     Green,
@@ -587,6 +639,18 @@ enum class HelixListVIPsError {  // /vips
     Forwarded,
 };  // /vips
 
+enum class HelixSendShoutoutError {
+    Unknown,
+    // 400
+    UserIsBroadcaster,
+    BroadcasterNotLive,
+    // 401
+    UserNotAuthorized,
+    UserMissingScope,
+
+    Ratelimited,
+};
+
 struct HelixStartCommercialResponse {
     // Length of the triggered commercial
     int length;
@@ -604,6 +668,39 @@ struct HelixStartCommercialResponse {
     }
 };
 
+struct HelixShieldModeStatus {
+    /// A Boolean value that determines whether Shield Mode is active. Is `true` if Shield Mode is active; otherwise, `false`.
+    bool isActive;
+    /// An ID that identifies the moderator that last activated Shield Mode.
+    QString moderatorID;
+    /// The moderator's login name.
+    QString moderatorLogin;
+    /// The moderator's display name.
+    QString moderatorName;
+    /// The UTC timestamp of when Shield Mode was last activated.
+    QDateTime lastActivatedAt;
+
+    explicit HelixShieldModeStatus(const QJsonObject &json)
+        : isActive(json["is_active"].toBool())
+        , moderatorID(json["moderator_id"].toString())
+        , moderatorLogin(json["moderator_login"].toString())
+        , moderatorName(json["moderator_name"].toString())
+        , lastActivatedAt(QDateTime::fromString(
+              json["last_activated_at"].toString(), Qt::ISODate))
+    {
+        this->lastActivatedAt.setTimeSpec(Qt::UTC);
+    }
+};
+
+enum class HelixUpdateShieldModeError {
+    Unknown,
+    UserMissingScope,
+    MissingPermission,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 enum class HelixStartCommercialError {
     Unknown,
     TokenMustMatchBroadcaster,
@@ -615,6 +712,15 @@ enum class HelixStartCommercialError {
     // The error message is forwarded directly from the Twitch API
     Forwarded,
 };
+
+enum class HelixGetGlobalBadgesError {
+    Unknown,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+using HelixGetChannelBadgesError = HelixGetGlobalBadgesError;
 
 class IHelix
 {
@@ -685,6 +791,12 @@ public:
                             std::function<void()> finallyCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#get-channel-information
+    virtual void fetchChannels(
+        QStringList userIDs,
+        ResultCallback<std::vector<HelixChannel>> successCallback,
+        HelixFailureCallback failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference#get-channel-information
     virtual void getChannel(QString broadcasterId,
                             ResultCallback<HelixChannel> successCallback,
                             HelixFailureCallback failureCallback) = 0;
@@ -697,16 +809,17 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference#get-user-block-list
     virtual void loadBlocks(
-        QString userId, ResultCallback<std::vector<HelixBlock>> successCallback,
-        HelixFailureCallback failureCallback) = 0;
+        QString userId, ResultCallback<std::vector<HelixBlock>> pageCallback,
+        FailureCallback<QString> failureCallback,
+        CancellationToken &&token) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#block-user
-    virtual void blockUser(QString targetUserId,
+    virtual void blockUser(QString targetUserId, const QObject *caller,
                            std::function<void()> successCallback,
                            HelixFailureCallback failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#unblock-user
-    virtual void unblockUser(QString targetUserId,
+    virtual void unblockUser(QString targetUserId, const QObject *caller,
                              std::function<void()> successCallback,
                              HelixFailureCallback failureCallback) = 0;
 
@@ -899,6 +1012,34 @@ public:
         FailureCallback<HelixStartCommercialError, QString>
             failureCallback) = 0;
 
+    // Get global Twitch badges
+    // https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
+    virtual void getGlobalBadges(
+        ResultCallback<HelixGlobalBadges> successCallback,
+        FailureCallback<HelixGetGlobalBadgesError, QString>
+            failureCallback) = 0;
+
+    // Get badges for the `broadcasterID` channel
+    // https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
+    virtual void getChannelBadges(
+        QString broadcasterID,
+        ResultCallback<HelixChannelBadges> successCallback,
+        FailureCallback<HelixGetChannelBadgesError, QString>
+            failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#update-shield-mode-status
+    virtual void updateShieldMode(
+        QString broadcasterID, QString moderatorID, bool isActive,
+        ResultCallback<HelixShieldModeStatus> successCallback,
+        FailureCallback<HelixUpdateShieldModeError, QString>
+            failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+    virtual void sendShoutout(
+        QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixSendShoutoutError, QString> failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -970,6 +1111,12 @@ public:
                     std::function<void()> finallyCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#get-channel-information
+    void fetchChannels(
+        QStringList userIDs,
+        ResultCallback<std::vector<HelixChannel>> successCallback,
+        HelixFailureCallback failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference#get-channel-information
     void getChannel(QString broadcasterId,
                     ResultCallback<HelixChannel> successCallback,
                     HelixFailureCallback failureCallback) final;
@@ -982,15 +1129,17 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference#get-user-block-list
     void loadBlocks(QString userId,
-                    ResultCallback<std::vector<HelixBlock>> successCallback,
-                    HelixFailureCallback failureCallback) final;
+                    ResultCallback<std::vector<HelixBlock>> pageCallback,
+                    FailureCallback<QString> failureCallback,
+                    CancellationToken &&token) final;
 
     // https://dev.twitch.tv/docs/api/reference#block-user
-    void blockUser(QString targetUserId, std::function<void()> successCallback,
+    void blockUser(QString targetUserId, const QObject *caller,
+                   std::function<void()> successCallback,
                    HelixFailureCallback failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#unblock-user
-    void unblockUser(QString targetUserId,
+    void unblockUser(QString targetUserId, const QObject *caller,
                      std::function<void()> successCallback,
                      HelixFailureCallback failureCallback) final;
 
@@ -1184,6 +1333,32 @@ public:
         FailureCallback<HelixStartCommercialError, QString> failureCallback)
         final;
 
+    // Get global Twitch badges
+    // https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
+    void getGlobalBadges(ResultCallback<HelixGlobalBadges> successCallback,
+                         FailureCallback<HelixGetGlobalBadgesError, QString>
+                             failureCallback) final;
+
+    // Get badges for the `broadcasterID` channel
+    // https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
+    void getChannelBadges(QString broadcasterID,
+                          ResultCallback<HelixChannelBadges> successCallback,
+                          FailureCallback<HelixGetChannelBadgesError, QString>
+                              failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#update-shield-mode-status
+    void updateShieldMode(QString broadcasterID, QString moderatorID,
+                          bool isActive,
+                          ResultCallback<HelixShieldModeStatus> successCallback,
+                          FailureCallback<HelixUpdateShieldModeError, QString>
+                              failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+    void sendShoutout(
+        QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixSendShoutoutError, QString> failureCallback) final;
+
     void update(QString clientId, QString oauthToken) final;
 
     static void initialize();
@@ -1227,7 +1402,20 @@ protected:
         FailureCallback<HelixGetModeratorsError, QString> failureCallback);
 
 private:
-    NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
+    NetworkRequest makeRequest(const QString &url, const QUrlQuery &urlQuery,
+                               NetworkRequestType type);
+    NetworkRequest makeGet(const QString &url, const QUrlQuery &urlQuery);
+    NetworkRequest makeDelete(const QString &url, const QUrlQuery &urlQuery);
+    NetworkRequest makePost(const QString &url, const QUrlQuery &urlQuery);
+    NetworkRequest makePut(const QString &url, const QUrlQuery &urlQuery);
+    NetworkRequest makePatch(const QString &url, const QUrlQuery &urlQuery);
+
+    /// Paginate the `url` endpoint and use `baseQuery` as the starting point for pagination.
+    /// @param onPage returns true while a new page is expected. Once false is returned, pagination will stop.
+    void paginate(const QString &url, const QUrlQuery &baseQuery,
+                  std::function<bool(const QJsonObject &)> onPage,
+                  std::function<void(NetworkResult)> onError,
+                  CancellationToken &&token);
 
     QString clientId;
     QString oauthToken;

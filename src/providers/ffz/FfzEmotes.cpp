@@ -188,7 +188,7 @@ void FfzEmotes::loadEmotes()
 {
     if (!Settings::instance().enableFFZGlobalEmotes)
     {
-        this->global_.set(EMPTY_EMOTE_MAP);
+        this->setEmotes(EMPTY_EMOTE_MAP);
         return;
     }
 
@@ -199,11 +199,16 @@ void FfzEmotes::loadEmotes()
         .timeout(30000)
         .onSuccess([this](auto result) -> Outcome {
             auto parsedSet = parseGlobalEmotes(result.parseJson());
-            this->global_.set(std::make_shared<EmoteMap>(std::move(parsedSet)));
+            this->setEmotes(std::make_shared<EmoteMap>(std::move(parsedSet)));
 
             return Success;
         })
         .execute();
+}
+
+void FfzEmotes::setEmotes(std::shared_ptr<const EmoteMap> emotes)
+{
+    this->global_.set(std::move(emotes));
 }
 
 void FfzEmotes::loadChannel(
@@ -268,24 +273,17 @@ void FfzEmotes::loadChannel(
                         makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
                 }
             }
-            else if (result.status() == NetworkResult::timedoutStatus)
-            {
-                // TODO: Auto retry in case of a timeout, with a delay
-                qCWarning(chatterinoFfzemotes)
-                    << "Fetching FFZ emotes for channel" << channelID
-                    << "failed due to timeout";
-                shared->addMessage(
-                    makeSystemMessage("Failed to fetch FrankerFaceZ channel "
-                                      "emotes. (timed out)"));
-            }
             else
             {
+                // TODO: Auto retry in case of a timeout, with a delay
+                auto errorString = result.formatError();
                 qCWarning(chatterinoFfzemotes)
                     << "Error fetching FFZ emotes for channel" << channelID
-                    << ", error" << result.status();
-                shared->addMessage(
-                    makeSystemMessage("Failed to fetch FrankerFaceZ channel "
-                                      "emotes. (unknown error)"));
+                    << ", error" << errorString;
+                shared->addMessage(makeSystemMessage(
+                    QStringLiteral("Failed to fetch FrankerFaceZ channel "
+                                   "emotes. (Error: %1)")
+                        .arg(errorString)));
             }
         })
         .execute();

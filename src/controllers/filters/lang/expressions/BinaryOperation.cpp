@@ -2,6 +2,43 @@
 
 #include <QRegularExpression>
 
+namespace {
+
+/// Loosely compares `lhs` with `rhs`.
+/// This attempts to convert both variants to a common type if they're not equal.
+bool looselyCompareVariants(QVariant &lhs, QVariant &rhs)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    // Qt 6 and later don't convert types as much as Qt 5 did when comparing.
+    //
+    // Based on QVariant::cmp from Qt 5.15
+    // https://github.com/qt/qtbase/blob/29400a683f96867133b28299c0d0bd6bcf40df35/src/corelib/kernel/qvariant.cpp#L4039-L4071
+    if (lhs.metaType() != rhs.metaType())
+    {
+        if (rhs.canConvert(lhs.metaType()))
+        {
+            if (!rhs.convert(lhs.metaType()))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            // try the opposite conversion, it might work
+            qSwap(lhs, rhs);
+            if (!rhs.convert(lhs.metaType()))
+            {
+                return false;
+            }
+        }
+    }
+#endif
+
+    return lhs == rhs;
+}
+
+}  // namespace
+
 namespace chatterino::filters {
 
 BinaryOperation::BinaryOperation(TokenType op, ExpressionPtr left,
@@ -60,14 +97,14 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                 return left.toString().compare(right.toString(),
                                                Qt::CaseInsensitive) == 0;
             }
-            return left == right;
+            return looselyCompareVariants(left, right);
         case NEQ:
             if (variantTypesMatch(left, right, QMetaType::QString))
             {
                 return left.toString().compare(right.toString(),
                                                Qt::CaseInsensitive) != 0;
             }
-            return left != right;
+            return !looselyCompareVariants(left, right);
         case LT:
             if (convertVariantTypes(left, right, QMetaType::Int))
                 return left.toInt() < right.toInt();
@@ -92,13 +129,13 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                                                     Qt::CaseInsensitive);
             }
 
-            if (variantIs(left.type(), QMetaType::QVariantMap) &&
+            if (variantIs(left, QMetaType::QVariantMap) &&
                 right.canConvert(QMetaType::QString))
             {
                 return left.toMap().contains(right.toString());
             }
 
-            if (variantIs(left.type(), QMetaType::QVariantList))
+            if (variantIs(left, QMetaType::QVariantList))
             {
                 return left.toList().contains(right);
             }
@@ -112,7 +149,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
 
             return false;
         case STARTS_WITH:
-            if (variantIs(left.type(), QMetaType::QStringList) &&
+            if (variantIs(left, QMetaType::QStringList) &&
                 right.canConvert(QMetaType::QString))
             {
                 auto list = left.toStringList();
@@ -121,7 +158,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                                             Qt::CaseInsensitive) == 0;
             }
 
-            if (variantIs(left.type(), QMetaType::QVariantList))
+            if (variantIs(left, QMetaType::QVariantList))
             {
                 return left.toList().startsWith(right);
             }
@@ -136,7 +173,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
             return false;
 
         case ENDS_WITH:
-            if (variantIs(left.type(), QMetaType::QStringList) &&
+            if (variantIs(left, QMetaType::QStringList) &&
                 right.canConvert(QMetaType::QString))
             {
                 auto list = left.toStringList();
@@ -145,7 +182,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                                            Qt::CaseInsensitive) == 0;
             }
 
-            if (variantIs(left.type(), QMetaType::QVariantList))
+            if (variantIs(left, QMetaType::QVariantList))
             {
                 return left.toList().endsWith(right);
             }

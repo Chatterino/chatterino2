@@ -319,7 +319,7 @@ void SplitHeader::initializeLayout()
                     }
                 });
         }),
-        // viewer list
+        // chatter list
         this->viewersButton_ = makeWidget<Button>([&](auto w) {
             QObject::connect(w, &Button::leftClicked, this, [this]() {
                 this->split_->showViewerList();
@@ -516,7 +516,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     if (twitchChannel)
     {
         moreMenu->addAction(
-            "Show viewer list", this->split_, &Split::showViewerList,
+            "Show chatter list", this->split_, &Split::showViewerList,
             h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"));
 
         moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
@@ -740,7 +740,7 @@ void SplitHeader::handleChannelChanged()
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         this->channelConnections_.managedConnect(
-            twitchChannel->liveStatusChanged, [this]() {
+            twitchChannel->streamStatusChanged, [this]() {
                 this->updateChannelText();
             });
     }
@@ -956,10 +956,6 @@ void SplitHeader::enterEvent(QEvent *event)
     if (!this->tooltipText_.isEmpty())
     {
         auto *channel = this->split_->getChannel().get();
-        if (channel->getType() == Channel::Type::Twitch)
-        {
-            dynamic_cast<TwitchChannel *>(channel)->refreshTitle();
-        }
 
         auto *tooltip = TooltipWidget::instance();
         tooltip->setOne({nullptr, this->tooltipText_});

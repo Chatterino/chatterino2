@@ -75,6 +75,7 @@ namespace {
 
             client.sendMessage(data);
         }
+        _Exit(0);
     }
 }  // namespace
 

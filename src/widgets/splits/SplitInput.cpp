@@ -1,6 +1,7 @@
 #include "widgets/splits/SplitInput.hpp"
 
 #include "Application.hpp"
+#include "common/enums/MessageOverflow.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -113,6 +114,28 @@ void SplitInput::initLayout()
         hboxLayout.emplace<ResizingTextEdit>().assign(&this->ui_.textEdit);
     connect(textEdit.getElement(), &ResizingTextEdit::textChanged, this,
             &SplitInput::editTextChanged);
+
+    hboxLayout.emplace<EffectLabel>().assign(&this->ui_.sendButton);
+    this->ui_.sendButton->getLabel().setText("SEND");
+    this->ui_.sendButton->hide();
+
+    QObject::connect(this->ui_.sendButton, &EffectLabel::leftClicked, [this] {
+        std::vector<QString> arguments;
+        this->handleSendMessage(arguments);
+    });
+
+    getSettings()->showSendButton.connect(
+        [this](const bool value, auto) {
+            if (value)
+            {
+                this->ui_.sendButton->show();
+            }
+            else
+            {
+                this->ui_.sendButton->hide();
+            }
+        },
+        this->managedConnections_);
 
     // right box
     auto box = hboxLayout.emplace<QVBoxLayout>().withoutMargin();
@@ -284,6 +307,7 @@ void SplitInput::openEmotePopup()
                     textToInsert = " " + textToInsert;
                 }
                 this->insertText(textToInsert);
+                this->ui_.textEdit->activateWindow();
             }
         });
     }
@@ -607,7 +631,7 @@ bool SplitInput::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::ShortcutOverride ||
         event->type() == QEvent::Shortcut)
     {
-        if (auto popup = this->inputCompletionPopup_.get())
+        if (auto popup = this->inputCompletionPopup_.data())
         {
             if (popup->isVisible())
             {
@@ -627,7 +651,7 @@ void SplitInput::installKeyPressedEvent()
 {
     this->ui_.textEdit->keyPressed.disconnectAll();
     this->ui_.textEdit->keyPressed.connect([this](QKeyEvent *event) {
-        if (auto *popup = this->inputCompletionPopup_.get())
+        if (auto *popup = this->inputCompletionPopup_.data())
         {
             if (popup->isVisible())
             {
@@ -741,12 +765,12 @@ void SplitInput::updateCompletionPopup()
 
 void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
 {
-    if (!this->inputCompletionPopup_.get())
+    if (this->inputCompletionPopup_.isNull())
     {
         this->inputCompletionPopup_ = new InputCompletionPopup(this);
         this->inputCompletionPopup_->setInputAction(
-            [that = QObjectRef(this)](const QString &text) mutable {
-                if (auto *this2 = that.get())
+            [that = QPointer(this)](const QString &text) mutable {
+                if (auto *this2 = that.data())
                 {
                     this2->insertCompletionText(text);
                     this2->hideCompletionPopup();
@@ -754,7 +778,7 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
             });
     }
 
-    auto *popup = this->inputCompletionPopup_.get();
+    auto *popup = this->inputCompletionPopup_.data();
     assert(popup);
 
     if (emoteCompletion)
@@ -775,7 +799,7 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
 
 void SplitInput::hideCompletionPopup()
 {
-    if (auto *popup = this->inputCompletionPopup_.get())
+    if (auto *popup = this->inputCompletionPopup_.data())
     {
         popup->hide();
     }
