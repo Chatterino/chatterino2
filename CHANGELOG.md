@@ -17,6 +17,7 @@
 - Minor: 7TV badges now automatically update upon changing. (#4512)
 - Minor: Stream status requests are now batched. (#4713)
 - Minor: Added `/c2-theme-autoreload` command to automatically reload a custom theme. This is useful for when you're developing your own theme. (#4718)
+- Minor: All channels opened in browser tabs are synced when using the extension for quicker switching between tabs. (#4741)
 - Bugfix: Increased amount of blocked users loaded from 100 to 1,000. (#4721)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
 - Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
