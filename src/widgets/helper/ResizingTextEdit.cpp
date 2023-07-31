@@ -7,6 +7,7 @@
 
 #include <QMimeData>
 #include <QMimeDatabase>
+#include <QObject>
 
 namespace chatterino {
 
@@ -20,8 +21,12 @@ ResizingTextEdit::ResizingTextEdit()
 
     QObject::connect(this, &QTextEdit::textChanged, this,
                      &QWidget::updateGeometry);
+
     QObject::connect(this, &QTextEdit::cursorPositionChanged, [this]() {
-        if (this->updatingText_ || !this->completionInProgress_)
+        // If tab was pressed and we're completing/replacing the current word,
+        // this code will not even be called, see ResizingTextEdit::keyPressEvent
+
+        if (!this->completionInProgress_)
         {
             return;
         }
@@ -154,7 +159,6 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         {
             return;
         }
-        this->updatingText_ = true;
 
         auto *completionModel =
             static_cast<CompletionModel *>(this->completer_->model());
@@ -167,9 +171,12 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             completionModel->refresh(currentCompletionPrefix,
                                      this->isFirstWord());
             this->completionInProgress_ = true;
-            this->completer_->setCompletionPrefix(currentCompletionPrefix);
-            this->completer_->complete();
-            this->updatingText_ = false;
+            {
+                // this blocks cursor movement events from resetting tab completion
+                QSignalBlocker dontTriggerCursorMovement(this);
+                this->completer_->setCompletionPrefix(currentCompletionPrefix);
+                this->completer_->complete();
+            }
             return;
         }
 
@@ -194,8 +201,11 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             }
         }
 
-        this->completer_->complete();
-        this->updatingText_ = false;
+        {
+            // this blocks cursor movement events from resetting tab completion
+            QSignalBlocker dontTriggerCursorMovement(this);
+            this->completer_->complete();
+        }
         return;
     }
 
