@@ -202,7 +202,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         }
 
         {
-            // this blocks cursor movement events from resetting tab completion
+            // this blocks cursor movement events from updating tab completion
             QSignalBlocker dontTriggerCursorMovement(this);
             this->completer_->complete();
         }
