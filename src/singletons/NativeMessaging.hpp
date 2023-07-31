@@ -6,10 +6,15 @@
 #include <QString>
 #include <QThread>
 
+#include <vector>
+
 namespace chatterino {
 
 class Application;
 class Paths;
+class Channel;
+
+using ChannelPtr = std::shared_ptr<Channel>;
 
 void registerNmHost(Paths &paths);
 std::string &getNmQueueName(Paths &paths);
@@ -26,21 +31,38 @@ namespace nm::client {
 class NativeMessagingServer final
 {
 public:
+    NativeMessagingServer();
+    NativeMessagingServer(const NativeMessagingServer &) = delete;
+    NativeMessagingServer(NativeMessagingServer &&) = delete;
+    NativeMessagingServer &operator=(const NativeMessagingServer &) = delete;
+    NativeMessagingServer &operator=(NativeMessagingServer &&) = delete;
+
     void start();
 
 private:
     class ReceiverThread : public QThread
     {
     public:
+        ReceiverThread(NativeMessagingServer &parent);
+
         void run() override;
 
     private:
         void handleMessage(const QJsonObject &root);
         void handleSelect(const QJsonObject &root);
         void handleDetach(const QJsonObject &root);
+        void handleSync(const QJsonObject &root);
+
+        NativeMessagingServer &parent_;
     };
 
+    void syncChannels(const QJsonArray &twitchChannels);
+
     ReceiverThread thread;
+
+    std::vector<ChannelPtr> channelWarmer_;
+
+    friend ReceiverThread;
 };
 
 }  // namespace chatterino
