@@ -32,16 +32,25 @@ int main(int argc, char **argv)
     qDebug() << "Settings directory:" << settingsDir.path();
     chatterino::Settings settings(settingsDir.path());
 
-    QtConcurrent::run([&app, &settingsDir]() mutable {
+    QTimer::singleShot(0, [&]() {
         auto res = RUN_ALL_TESTS();
 
         chatterino::NetworkManager::deinit();
 
         settingsDir.remove();
-        app.exit(res);
+
+        // Pick up the last events from the eventloop
+        // Using a loop to catch events queueing other events (e.g. deletions)
+        for (size_t i = 0; i < 32; i++)
+        {
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+        }
+
+        QApplication::exit(res);
     });
 
-    return app.exec();
+    return QApplication::exec();
 #else
     return RUN_ALL_TESTS();
 #endif

@@ -7,6 +7,7 @@ on:
       - master
   pull_request:
   workflow_dispatch:
+  merge_group:
 
 concurrency:
   group: build-${{ github.ref }}
@@ -134,6 +135,18 @@ jobs:
           "C2_CONAN_CACHE_SUFFIX=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "-QT6" } else { "`" })" >> "$Env:GITHUB_ENV"
         shell: powershell
 
+      - name: Setup sccache (Windows)
+        # sccache v0.5.3
+        uses: nerixyz/ccache-action@9a7e8d00116ede600ee7717350c6594b8af6aaa5
+        if: startsWith(matrix.os, 'windows')
+        with:
+          variant: sccache
+          # only save on on the default (master) branch
+          save: ${{ github.event_name == 'push' }}
+          key: sccache-build-${{ matrix.os }}-${{ matrix.qt-version }}-${{ matrix.skip-crashpad }}
+          restore-keys: |
+            sccache-build-${{ matrix.os }}-${{ matrix.qt-version }}
+
       - name: Cache conan packages (Windows)
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v3
@@ -171,13 +184,16 @@ jobs:
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
         shell: pwsh
+        env:
+          # Enable PCH on Windows when crashpad is enabled
+          C2_WINDOWS_USE_PCH: ${{ matrix.skip-crashpad && 'OFF' || 'ON' }}
         run: |
           cd build
           cmake `
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
-              -DUSE_PRECOMPILED_HEADERS=OFF `
+              -DUSE_PRECOMPILED_HEADERS=${{ env.C2_WINDOWS_USE_PCH }} `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `

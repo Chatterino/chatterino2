@@ -595,8 +595,8 @@ ImageExpirationPool::ImageExpirationPool()
 
 ImageExpirationPool &ImageExpirationPool::instance()
 {
-    static ImageExpirationPool instance;
-    return instance;
+    static auto *instance = new ImageExpirationPool;
+    return *instance;
 }
 
 void ImageExpirationPool::addImagePtr(ImagePtr imgPtr)

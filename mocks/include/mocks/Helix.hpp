@@ -1,6 +1,7 @@
 #pragma once
 
 #include "providers/twitch/api/Helix.hpp"
+#include "util/CancellationToken.hpp"
 
 #include <gmock/gmock.h>
 #include <QString>
@@ -86,6 +87,12 @@ public:
                  std::function<void()> finallyCallback),
                 (override));
 
+    MOCK_METHOD(void, fetchChannels,
+                (QStringList userIDs,
+                 ResultCallback<std::vector<HelixChannel>> successCallback,
+                 HelixFailureCallback failureCallback),
+                (override));
+
     MOCK_METHOD(void, getChannel,
                 (QString broadcasterId,
                  ResultCallback<HelixChannel> successCallback,
@@ -101,16 +108,19 @@ public:
     MOCK_METHOD(void, loadBlocks,
                 (QString userId,
                  ResultCallback<std::vector<HelixBlock>> successCallback,
-                 HelixFailureCallback failureCallback),
+                 FailureCallback<QString> failureCallback,
+                 CancellationToken &&token),
                 (override));
 
     MOCK_METHOD(void, blockUser,
-                (QString targetUserId, std::function<void()> successCallback,
+                (QString targetUserId, const QObject *caller,
+                 std::function<void()> successCallback,
                  HelixFailureCallback failureCallback),
                 (override));
 
     MOCK_METHOD(void, unblockUser,
-                (QString targetUserId, std::function<void()> successCallback,
+                (QString targetUserId, const QObject *caller,
+                 std::function<void()> successCallback,
                  HelixFailureCallback failureCallback),
                 (override));
 

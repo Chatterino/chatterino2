@@ -85,6 +85,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           ActionDefinition{
               "Usercard: execute moderation action",
               "<ban, unban or number of the timeout button to use>", 1}},
+         {"pin", ActionDefinition{"Usercard, reply thread: pin window"}},
      }},
     {HotkeyCategory::Split,
      {
@@ -113,7 +114,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           ActionDefinition{"Open stream in custom player"}},
          {"openInStreamlink", ActionDefinition{"Open stream in streamlink"}},
          {"openModView", ActionDefinition{"Open mod view in browser"}},
-         {"openViewerList", ActionDefinition{"Open viewer list"}},
+         {"openViewerList", ActionDefinition{"Open chatter list"}},
          {"pickFilters", ActionDefinition{"Pick filters"}},
          {"reconnect", ActionDefinition{"Reconnect to chat"}},
          {"reloadEmotes",
@@ -324,13 +325,18 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"setTabVisibility",
           ActionDefinition{
               .displayName = "Set tab visibility",
-              .argumentDescription = "[on, off, or toggle. default: toggle]",
+              .argumentDescription = "[on, off, toggle, liveOnly, or "
+                                     "toggleLiveOnly. default: toggle]",
               .minCountArguments = 0,
               .maxCountArguments = 1,
-              .possibleArguments = HOTKEY_ARG_ON_OFF_TOGGLE,
+              .possibleArguments{{"Toggle", {}},
+                                 {"Set to on", {"on"}},
+                                 {"Set to off", {"off"}},
+                                 {"Live only on", {"liveOnly"}},
+                                 {"Live only toggle", {"toggleLiveOnly"}}},
               .argumentsPrompt = "New value:",
-              .argumentsPromptHover =
-                  "Should the tabs be enabled, disabled or toggled.",
+              .argumentsPromptHover = "Should the tabs be enabled, disabled, "
+                                      "toggled, or live-only.",
           }},
      }},
 };

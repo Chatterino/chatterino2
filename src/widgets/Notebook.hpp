@@ -9,6 +9,8 @@
 #include <QMessageBox>
 #include <QWidget>
 
+#include <functional>
+
 namespace chatterino {
 
 class Window;
@@ -18,6 +20,17 @@ class NotebookTab;
 class SplitContainer;
 
 enum NotebookTabLocation { Top = 0, Left = 1, Right = 2, Bottom = 3 };
+
+// Controls the visibility of tabs in this notebook
+enum NotebookTabVisibility : int {
+    // Show all tabs
+    AllTabs = 0,
+
+    // Only show tabs containing splits that are live
+    LiveOnly = 1,
+};
+
+using TabVisibilityFilter = std::function<bool(const NotebookTab *)>;
 
 class Notebook : public BaseWidget
 {
@@ -35,6 +48,7 @@ public:
     int indexOf(QWidget *page) const;
     virtual void select(QWidget *page, bool focusPage = true);
     void selectIndex(int index, bool focusPage = true);
+    void selectVisibleIndex(int index, bool focusPage = true);
     void selectNextTab(bool focusPage = true);
     void selectPreviousTab(bool focusPage = true);
     void selectLastTab(bool focusPage = true);
@@ -56,14 +70,15 @@ public:
     bool getShowAddButton() const;
     void setShowAddButton(bool value);
 
-    void performLayout(bool animate = false);
-
     void setTabLocation(NotebookTabLocation location);
 
     bool isNotebookLayoutLocked() const;
     void setLockNotebookLayout(bool value);
 
     void addNotebookActionsToMenu(QMenu *menu);
+
+    // Update layout and tab visibility
+    void refresh();
 
 protected:
     virtual void scaleChangedEvent(float scale_) override;
@@ -85,7 +100,32 @@ protected:
         return items_;
     }
 
+    /**
+     * @brief Apply the given tab visibility filter
+     *
+     * An empty function can be provided to denote that no filter will be applied
+     *
+     * Tabs will be redrawn after this function is called.
+     **/
+    void setTabVisibilityFilter(TabVisibilityFilter filter);
+
+    /**
+     * @brief shouldShowTab has the final say whether a tab should be visible right now.
+     **/
+    bool shouldShowTab(const NotebookTab *tab) const;
+
 private:
+    void performLayout(bool animate = false);
+
+    /**
+     * @brief Show a popup informing the user of some big tab visibility changes
+     **/
+    void showTabVisibilityInfoPopup();
+
+    /**
+     * @brief Updates the visibility state of all tabs
+     **/
+    void updateTabVisibility();
     void updateTabVisibilityMenuAction();
     void resizeAddButton();
 
@@ -113,6 +153,10 @@ private:
     NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
     QAction *lockNotebookLayoutAction_;
     QAction *showTabsAction_;
+
+    // This filter, if set, is used to figure out the visibility of
+    // the tabs in this notebook.
+    TabVisibilityFilter tabVisibilityFilter_;
 };
 
 class SplitNotebook : public Notebook

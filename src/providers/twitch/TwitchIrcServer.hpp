@@ -49,8 +49,6 @@ public:
 
     std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
 
-    void bulkRefreshLiveStatus();
-
     void reloadBTTVGlobalEmotes();
     void reloadAllBTTVChannelEmotes();
     void reloadFFZGlobalEmotes();
@@ -124,7 +122,6 @@ private:
     BttvEmotes bttv;
     FfzEmotes ffz;
     SeventvEmotes seventv_;
-    QTimer bulkLiveStatusTimer_;
 
     pajlada::Signals::SignalHolder signalHolder_;
 };

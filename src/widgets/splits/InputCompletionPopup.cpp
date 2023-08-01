@@ -2,6 +2,7 @@
 
 #include "providers/autocomplete/AutocompleteSources.hpp"
 #include "providers/autocomplete/AutocompleteStrategies.hpp"
+#include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
 
@@ -14,6 +15,7 @@ InputCompletionPopup::InputCompletionPopup(QWidget *parent)
     , model_(this)
 {
     this->initLayout();
+    this->themeChangedEvent();
 
     QObject::connect(&this->redrawTimer_, &QTimer::timeout, this, [this] {
         if (this->isVisible())
@@ -105,6 +107,13 @@ void InputCompletionPopup::hideEvent(QHideEvent * /*event*/)
 {
     this->redrawTimer_.stop();
     this->endCompletion();
+}
+
+void InputCompletionPopup::themeChangedEvent()
+{
+    BasePopup::themeChangedEvent();
+
+    this->ui_.listView->refreshTheme(*getTheme());
 }
 
 void InputCompletionPopup::initLayout()

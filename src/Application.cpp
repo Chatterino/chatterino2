@@ -14,6 +14,7 @@
 #    include "controllers/plugins/PluginController.hpp"
 #endif
 #include "controllers/sound/SoundController.hpp"
+#include "controllers/twitch/LiveController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
@@ -88,6 +89,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , seventvBadges(&this->emplace<SeventvBadges>())
     , userData(&this->emplace<UserDataController>())
     , sound(&this->emplace<SoundController>())
+    , twitchLiveController(&this->emplace<TwitchLiveController>())
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace<PluginController>())
 #endif
@@ -245,6 +247,11 @@ IUserDataController *Application::getUserData()
     return this->userData;
 }
 
+ITwitchLiveController *Application::getTwitchLiveController()
+{
+    return this->twitchLiveController;
+}
+
 ITwitchIrcServer *Application::getTwitch()
 {
     return this->twitch;
@@ -263,7 +270,7 @@ void Application::initNm(Paths &paths)
     (void)paths;
 
 #ifdef Q_OS_WIN
-#    if defined QT_NO_DEBUG || defined C_DEBUG_NM
+#    if defined QT_NO_DEBUG || defined CHATTERINO_DEBUG_NM
     registerNmHost(paths);
     this->nmServer.start();
 #    endif

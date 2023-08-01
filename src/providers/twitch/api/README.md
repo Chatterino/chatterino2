@@ -43,7 +43,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-streams
 
 Used in:
 
-- `TwitchChannel` to get live status, game, title, and viewer count of a channel
+- `LiveController` to get live status, game, title, and viewer count of a channel
 - `NotificationController` to provide notifications for channels you might not have open in Chatterino, but are still interested in getting notifications for
 
 ### Create Clip
@@ -61,7 +61,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
 
 Used in:
 
-- `TwitchChannel` to refresh stream title
+- `LiveController` to refresh stream title & display name
 
 ### Update Channel
 
