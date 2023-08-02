@@ -9,6 +9,8 @@
 #include <QGridLayout>
 #include <QSizeGrip>
 
+#include <array>
+
 namespace {
 
 class Grippy : public QSizeGrip
