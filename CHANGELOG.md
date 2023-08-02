@@ -18,6 +18,8 @@
 - Minor: 7TV badges now automatically update upon changing. (#4512)
 - Minor: Stream status requests are now batched. (#4713)
 - Minor: Added `/c2-theme-autoreload` command to automatically reload a custom theme. This is useful for when you're developing your own theme. (#4718)
+- Minor: Added support for opening incognito links in firefox-esr. (#4745)
+- Minor: Added support for opening incognito links under Linux/BSD using XDG. (#4745)
 - Bugfix: Increased amount of blocked users loaded from 100 to 1,000. (#4721)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
 - Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
@@ -47,6 +49,7 @@
 - Dev: Refactored tests to be able to use `ctest` and run in debug builds. (#4700)
 - Dev: Added the ability to use an alternate linker using the `-DUSE_ALTERNATE_LINKER=...` CMake parameter. (#4711)
 - Dev: Removed `getApp` and `getSettings` calls from message rendering. (#4535)
+- Dev: Get the default browser executable instead of the entire command line when opening incognito links. (#4745)
 
 ## 2.4.4
 
