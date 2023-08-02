@@ -198,8 +198,8 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 // Painting
 void MessageLayout::paint(const MessagePaintContext &ctx)
 {
-    QPixmap *pixmap =
-        this->ensureBuffer(ctx.canvasWidth, ctx.messageColors.hasTransparency);
+    QPixmap *pixmap = this->ensureBuffer(ctx.painter, ctx.canvasWidth,
+                                         ctx.messageColors.hasTransparency);
 
     if (!this->bufferValid_ || !ctx.selection.isEmpty())
     {
@@ -277,7 +277,7 @@ void MessageLayout::paint(const MessagePaintContext &ctx)
     this->bufferValid_ = true;
 }
 
-QPixmap *MessageLayout::ensureBuffer(int width, bool clear)
+QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width, bool clear)
 {
     if (this->buffer_ != nullptr)
     {
@@ -292,6 +292,7 @@ QPixmap *MessageLayout::ensureBuffer(int width, bool clear)
             painter.device()->devicePixelRatioF()));
     this->buffer_->setDevicePixelRatio(painter.device()->devicePixelRatioF());
 #else
+    Q_UNUSED(painter);
     this->buffer_ = std::make_unique<QPixmap>(
         width, std::max(16, this->container_.getHeight()));
 #endif
