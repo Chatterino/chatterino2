@@ -5,9 +5,8 @@
 #include "util/XDGDesktopFile.hpp"
 #include "util/XDGDirectory.hpp"
 
-#include <qnamespace.h>
 #include <QProcess>
-#include <qregularexpression.h>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QStringLiteral>
 #include <QTextCodec>

@@ -1,6 +1,7 @@
 #include "util/XDGDirectory.hpp"
 
 #include "util/CombinePath.hpp"
+#include "util/Qt.hpp"
 
 #if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 
