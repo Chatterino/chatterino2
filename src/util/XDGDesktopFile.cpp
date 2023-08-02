@@ -71,13 +71,18 @@ XDGDesktopFile::XDGDesktopFile(char const *filename)
                 // line is not a group header or a key value pair, ignore
                 continue;
             }
-            auto key = line.leftRef(equals).trimmed().toString();
-            auto value = line.midRef(equals + 1);
+
+            auto key = QStringView(line).left(equals).trimmed().toString();
+            // QStringView.mid() does not do bounds checking before qt 5.15, so
+            // we have to do it ourselves
+            auto value =
+                equals < line.size()
+                    ? QStringView(line).mid(equals + 1).trimmed().toString()
+                    : QString("");
 
             // existing keys are against spec, so we can overwrite them with
             // wild abandon
-            currentGroup.value().get()[key] =
-                value.isNull() ? QString("") : value.trimmed().toString();
+            currentGroup.value().get()[key] = value;
         }
     }
 }

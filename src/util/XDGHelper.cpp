@@ -1,9 +1,11 @@
 #include "util/XDGHelper.hpp"
 
 #include "util/CombinePath.hpp"
+#include "util/Qt.hpp"
 #include "util/XDGDesktopFile.hpp"
 #include "util/XDGDirectory.hpp"
 
+#include <qnamespace.h>
 #include <QProcess>
 #include <qregularexpression.h>
 #include <QSettings>
@@ -32,10 +34,10 @@ std::optional<XDGDesktopFile> processMimeAppsList(
     if (defaultApps != defaultGroup.cend())
     {
         // for each desktop ID in the list:
-        auto desktopIds = defaultApps->second.splitRef(';', Qt::SkipEmptyParts);
+        auto desktopIds = defaultApps->second.split(';', Qt::SkipEmptyParts);
         for (auto const &entry : desktopIds)
         {
-            auto desktopId = entry.trimmed().toString();
+            auto desktopId = entry.trimmed();
 
             // if a valid desktop file is found, verify that it is associated
             // with the type. being in the default list gives it an implicit
@@ -61,10 +63,10 @@ std::optional<XDGDesktopFile> processMimeAppsList(
     auto removedApps = removedGroup.find(mimetype);
     if (removedApps != removedGroup.end())
     {
-        auto desktopIds = removedApps->second.splitRef(';', Qt::SkipEmptyParts);
+        auto desktopIds = removedApps->second.split(';', Qt::SkipEmptyParts);
         for (auto const &entry : desktopIds)
         {
-            denyList.insert(entry.trimmed().toString());
+            denyList.insert(entry.trimmed());
         }
     }
 
@@ -73,10 +75,10 @@ std::optional<XDGDesktopFile> processMimeAppsList(
     auto addedApps = addedGroup.find(mimetype);
     if (addedApps != addedGroup.end())
     {
-        auto desktopIds = addedApps->second.splitRef(';', Qt::SkipEmptyParts);
+        auto desktopIds = addedApps->second.split(';', Qt::SkipEmptyParts);
         for (auto const &entry : desktopIds)
         {
-            associations.push_back(entry.trimmed().toString());
+            associations.push_back(entry.trimmed());
         }
     }
 
