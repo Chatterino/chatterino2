@@ -16,7 +16,9 @@
 #if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 
 namespace {
+
 using namespace chatterino;
+
 std::optional<XDGDesktopFile> processMimeAppsList(
     QString const &fileName, QStringList &associations,
     std::unordered_set<QString> &denyList)

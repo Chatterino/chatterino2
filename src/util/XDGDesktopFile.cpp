@@ -10,10 +10,13 @@
 #if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 
 namespace {
+
 chatterino::XDGDesktopFile::Group const EMPTY_GROUP;
+
 }  // namespace
 
 namespace chatterino {
+
 XDGDesktopFile::XDGDesktopFile(char const *filename)
 {
     QFile file(filename);
@@ -21,7 +24,7 @@ XDGDesktopFile::XDGDesktopFile(char const *filename)
     {
         return;
     }
-    _exists = true;
+    this->_exists = true;
 
     std::optional<std::reference_wrapper<Group>> currentGroup;
 
@@ -51,7 +54,7 @@ XDGDesktopFile::XDGDesktopFile(char const *filename)
             // parsing behavior for that case is not specified. operator[] will
             // result in duplicate groups being merged, which makes the most
             // sense for a read-only parser
-            currentGroup = groups[groupName];
+            currentGroup = this->_groups[groupName];
         }
         else
         {
@@ -88,8 +91,8 @@ XDGDesktopFile::XDGDesktopFile(QString const &filename)
 XDGDesktopFile::Group const &XDGDesktopFile::operator[](
     QString const &key) const
 {
-    auto group = groups.find(key);
-    if (group != groups.end())
+    auto group = this->_groups.find(key);
+    if (group != this->_groups.end())
     {
         return group->second;
     }

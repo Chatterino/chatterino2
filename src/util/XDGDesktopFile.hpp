@@ -30,7 +30,7 @@ public:
 
 private:
     bool _exists = false;
-    std::unordered_map<QString, Group> groups;
+    std::unordered_map<QString, Group> _groups;
 };
 
 }  // namespace chatterino

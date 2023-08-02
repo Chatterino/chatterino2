@@ -10,6 +10,7 @@ enum class XDGDirectory { Config, Data };
 
 QStringList splitEnvironmentVariable(const char *name);
 QStringList getXDGDirectories(XDGDirectory directory);
+
 }  // namespace chatterino
 
 #endif
