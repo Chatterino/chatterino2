@@ -61,6 +61,19 @@ public:
         } line;
     };
 
+    struct TextColors {
+        QColor regular;
+        QColor caret;
+        QColor link;
+        QColor system;
+        QColor chatPlaceholder;
+    };
+
+    struct MessageBackgrounds {
+        QColor regular;
+        QColor alternate;
+    };
+
     QColor accent{"#00aeef"};
 
     /// WINDOW
@@ -80,18 +93,8 @@ public:
 
     /// MESSAGES
     struct {
-        struct {
-            QColor regular;
-            QColor caret;
-            QColor link;
-            QColor system;
-            QColor chatPlaceholder;
-        } textColors;
-
-        struct {
-            QColor regular;
-            QColor alternate;
-        } backgrounds;
+        TextColors textColors;
+        MessageBackgrounds backgrounds;
 
         QColor disabled;
         QColor selection;
@@ -99,6 +102,15 @@ public:
         QColor highlightAnimationStart;
         QColor highlightAnimationEnd;
     } messages;
+
+    struct {
+        TextColors textColors;
+        MessageBackgrounds backgrounds;
+
+        QColor disabled;
+        QColor selection;
+        QColor background;
+    } overlayMessages;
 
     /// SCROLLBAR
     struct {

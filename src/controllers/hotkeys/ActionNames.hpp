@@ -258,7 +258,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"moveTab",
           ActionDefinition{
               "Move tab",
-              "<where to move the tab: next, previous, or new index of tab>",
+              "<where to move the tab: next, previous, or new index of "
+              "tab>",
               1,
           }},
          {"newSplit", ActionDefinition{"Create a new split"}},
@@ -285,6 +286,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .argumentsPromptHover =
                   "What should be included in the new popup",
           }},
+         {"popupOverlay", ActionDefinition{"New overlay popup"}},
          {"quit", ActionDefinition{"Quit Chatterino"}},
          {"removeTab", ActionDefinition{"Remove current tab"}},
          {"reopenSplit", ActionDefinition{"Reopen closed split"}},

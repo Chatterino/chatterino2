@@ -22,6 +22,22 @@
         "system": "#8c7f7f"
       }
     },
+    "overlayMessages": {
+      "backgrounds": {
+        "alternate": "#32ffffff",
+        "regular": "transparent"
+      },
+      "disabled": "#64ffffff",
+      "selection": "#40ffffff",
+      "textColors": {
+        "caret": "#000000",
+        "chatPlaceholder": "#af9f9f",
+        "link": "#4286f4",
+        "regular": "#000000",
+        "system": "#8c7f7f"
+      },
+      "background": "#32ffffff"
+    },
     "scrollbars": {
       "background": "#00000000",
       "thumb": "#a8a8a8",

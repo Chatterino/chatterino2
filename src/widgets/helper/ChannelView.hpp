@@ -151,6 +151,9 @@ public:
      */
     bool mayContainMessage(const MessagePtr &message);
 
+    void setColorVisitor(
+        const std::function<void(MessageColors &, Theme *)> &visitor);
+
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
@@ -346,6 +349,8 @@ private:
 
     MessageColors messageColors_;
     MessagePreferences messagePreferences_;
+
+    std::function<void(MessageColors &, Theme *)> colorVisitor_;
 
     static constexpr int leftPadding = 8;
     static constexpr int scrollbarPadding = 8;

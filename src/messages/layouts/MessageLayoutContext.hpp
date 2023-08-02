@@ -16,6 +16,11 @@ struct Selection;
 
 // TODO: Figure out if this could be a subset of Theme instead (e.g. Theme::MessageColors)
 struct MessageColors {
+    QColor channelBackground;
+
+    // true if any of the background colors have transparency
+    bool hasTransparency = false;
+
     QColor regular;
     QColor alternate;
     QColor disabled;
@@ -28,6 +33,7 @@ struct MessageColors {
     QColor unfocusedLastMessageLine;
 
     void applyTheme(Theme *theme);
+    void applyOverlay(Theme *theme);
 };
 
 // TODO: Explore if we can let settings own this

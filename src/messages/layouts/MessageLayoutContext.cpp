@@ -7,6 +7,8 @@ namespace chatterino {
 
 void MessageColors::applyTheme(Theme *theme)
 {
+    this->channelBackground = theme->splits.background;
+
     this->regular = theme->messages.backgrounds.regular;
     this->alternate = theme->messages.backgrounds.alternate;
 
@@ -18,6 +20,24 @@ void MessageColors::applyTheme(Theme *theme)
 
     this->focusedLastMessageLine = theme->tabs.selected.backgrounds.regular;
     this->unfocusedLastMessageLine = theme->tabs.selected.backgrounds.unfocused;
+
+    this->hasTransparency =
+        this->regular.alpha() != 255 || this->alternate.alpha() != 255;
+}
+
+void MessageColors::applyOverlay(Theme *theme)
+{
+    this->channelBackground = theme->overlayMessages.background;
+
+    this->regular = theme->overlayMessages.backgrounds.regular;
+    this->alternate = theme->overlayMessages.backgrounds.alternate;
+
+    this->disabled = theme->overlayMessages.disabled;
+    this->selection = theme->overlayMessages.selection;
+    this->system = theme->overlayMessages.textColors.system;
+
+    this->hasTransparency =
+        this->regular.alpha() != 255 || this->alternate.alpha() != 255;
 }
 
 void MessagePreferences::connectSettings(Settings *settings,

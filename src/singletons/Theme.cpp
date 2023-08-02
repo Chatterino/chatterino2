@@ -78,25 +78,42 @@ void parseTabs(const QJsonObject &tabs, chatterino::Theme &theme)
     parseTabColors(tabs["selected"_L1].toObject(), theme.tabs.selected);
 }
 
+void parseTextColors(const QJsonObject &textColors, auto &messages)
+{
+    parseColor(messages, textColors, regular);
+    parseColor(messages, textColors, caret);
+    parseColor(messages, textColors, link);
+    parseColor(messages, textColors, system);
+    parseColor(messages, textColors, chatPlaceholder);
+}
+
+void parseMessageBackgrounds(const QJsonObject &backgrounds, auto &messages)
+{
+    parseColor(messages, backgrounds, regular);
+    parseColor(messages, backgrounds, alternate);
+}
+
 void parseMessages(const QJsonObject &messages, chatterino::Theme &theme)
 {
-    {
-        const auto textColors = messages["textColors"_L1].toObject();
-        parseColor(theme.messages, textColors, regular);
-        parseColor(theme.messages, textColors, caret);
-        parseColor(theme.messages, textColors, link);
-        parseColor(theme.messages, textColors, system);
-        parseColor(theme.messages, textColors, chatPlaceholder);
-    }
-    {
-        const auto backgrounds = messages["backgrounds"_L1].toObject();
-        parseColor(theme.messages, backgrounds, regular);
-        parseColor(theme.messages, backgrounds, alternate);
-    }
+    parseTextColors(messages["textColors"_L1].toObject(), theme.messages);
+    parseMessageBackgrounds(messages["backgrounds"_L1].toObject(),
+                            theme.messages);
     parseColor(theme, messages, disabled);
     parseColor(theme, messages, selection);
     parseColor(theme, messages, highlightAnimationStart);
     parseColor(theme, messages, highlightAnimationEnd);
+}
+
+void parseOverlayMessages(const QJsonObject &overlayMessages,
+                          chatterino::Theme &theme)
+{
+    parseTextColors(overlayMessages["textColors"_L1].toObject(),
+                    theme.overlayMessages);
+    parseMessageBackgrounds(overlayMessages["backgrounds"_L1].toObject(),
+                            theme.overlayMessages);
+    parseColor(theme, overlayMessages, disabled);
+    parseColor(theme, overlayMessages, selection);
+    parseColor(theme, overlayMessages, background);
 }
 
 void parseScrollbars(const QJsonObject &scrollbars, chatterino::Theme &theme)
@@ -142,6 +159,7 @@ void parseColors(const QJsonObject &root, chatterino::Theme &theme)
     parseWindow(colors["window"_L1].toObject(), theme);
     parseTabs(colors["tabs"_L1].toObject(), theme);
     parseMessages(colors["messages"_L1].toObject(), theme);
+    parseOverlayMessages(colors["overlayMessages"_L1].toObject(), theme);
     parseScrollbars(colors["scrollbars"_L1].toObject(), theme);
     parseSplits(colors["splits"_L1].toObject(), theme);
 }

@@ -461,6 +461,8 @@ set(SOURCE_FILES
         widgets/Label.hpp
         widgets/Notebook.cpp
         widgets/Notebook.hpp
+        widgets/OverlayWindow.cpp
+        widgets/OverlayWindow.hpp
         widgets/Scrollbar.cpp
         widgets/Scrollbar.hpp
         widgets/StreamView.cpp

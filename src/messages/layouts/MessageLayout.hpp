@@ -74,7 +74,7 @@ private:
     void updateBuffer(QPixmap *buffer, const MessagePaintContext &ctx);
 
     // Create new buffer if required, returning the buffer
-    QPixmap *ensureBuffer(QPainter &painter, int width);
+    QPixmap *ensureBuffer(int width, bool clear);
 
     // variables
     MessagePtr message_;

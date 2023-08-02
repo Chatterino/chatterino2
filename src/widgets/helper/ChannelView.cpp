@@ -384,6 +384,18 @@ void ChannelView::themeChangedEvent()
     this->setupHighlightAnimationColors();
     this->queueLayout();
     this->messageColors_.applyTheme(getTheme());
+    if (this->colorVisitor_)
+    {
+        this->colorVisitor_(this->messageColors_, getTheme());
+    }
+}
+
+void ChannelView::setColorVisitor(
+    const std::function<void(MessageColors &, Theme *)> &visitor)
+{
+    Q_ASSERT_X(this->colorVisitor_ == nullptr, "ChannelView::setColorVisitor",
+               "The color visitor should only be set once.");
+    this->colorVisitor_ = visitor;
 }
 
 void ChannelView::setupHighlightAnimationColors()
@@ -1225,7 +1237,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->theme->splits.background);
+    painter.fillRect(rect(), this->messageColors_.channelBackground);
 
     // draw messages
     this->drawMessages(painter);
