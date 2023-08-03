@@ -6,6 +6,7 @@ on:
     branches:
       - chatterino7
   pull_request:
+  merge_group:
 
 concurrency:
   group: check-formatting-${{ github.ref }}

@@ -94,11 +94,9 @@ bool UserConnectionUpdateDispatch::validate() const
 }
 
 CosmeticCreateDispatch::CosmeticCreateDispatch(const Dispatch &dispatch)
-    : data(dispatch.body["object"].toObject()["data"].toObject())
-    , kind(magic_enum::enum_cast<CosmeticKind>(dispatch.body["object"]
-                                                   .toObject()["kind"]
-                                                   .toString()
-                                                   .toStdString())
+    : data(dispatch.body["object"]["data"].toObject())
+    , kind(magic_enum::enum_cast<CosmeticKind>(
+               dispatch.body["object"]["kind"].toString().toStdString())
                .value_or(CosmeticKind::INVALID))
 {
 }
@@ -112,14 +110,12 @@ EntitlementCreateDeleteDispatch::EntitlementCreateDeleteDispatch(
     const Dispatch &dispatch)
 {
     const auto obj = dispatch.body["object"].toObject();
-    this->userID = QString();
     this->refID = obj["ref_id"].toString();
     this->kind = magic_enum::enum_cast<CosmeticKind>(
                      obj["kind"].toString().toStdString())
                      .value_or(CosmeticKind::INVALID);
 
-    const auto userConnections =
-        obj["user"].toObject()["connections"].toArray();
+    const auto userConnections = obj["user"]["connections"].toArray();
     for (const auto &connectionJson : userConnections)
     {
         const auto connection = connectionJson.toObject();

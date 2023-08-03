@@ -15,7 +15,6 @@
 #include <utility>
 
 namespace chatterino {
-
 using namespace seventv;
 using namespace seventv::eventapi;
 
@@ -46,13 +45,22 @@ void SeventvEventAPI::subscribeTwitchChannel(const QString &id)
 {
     if (this->subscribedTwitchChannels_.insert(id).second)
     {
-        this->subscribe(
-            {ChannelCondition{id}, SubscriptionType::CreateCosmetic});
-        this->subscribe(
-            {ChannelCondition{id}, SubscriptionType::CreateEntitlement});
-        this->subscribe(
-            {ChannelCondition{id}, SubscriptionType::DeleteEntitlement});
-        this->subscribe({ChannelCondition{id}, SubscriptionType::AnyEmoteSet});
+        this->subscribe({
+            ChannelCondition{id},
+            SubscriptionType::CreateCosmetic,
+        });
+        this->subscribe({
+            ChannelCondition{id},
+            SubscriptionType::CreateEntitlement,
+        });
+        this->subscribe({
+            ChannelCondition{id},
+            SubscriptionType::DeleteEntitlement,
+        });
+        this->subscribe({
+            ChannelCondition{id},
+            SubscriptionType::AnyEmoteSet,
+        });
     }
 }
 
@@ -78,14 +86,22 @@ void SeventvEventAPI::unsubscribeTwitchChannel(const QString &id)
 {
     if (this->subscribedTwitchChannels_.erase(id) > 0)
     {
-        this->unsubscribe(
-            {ChannelCondition{id}, SubscriptionType::CreateCosmetic});
-        this->unsubscribe(
-            {ChannelCondition{id}, SubscriptionType::CreateEntitlement});
-        this->unsubscribe(
-            {ChannelCondition{id}, SubscriptionType::DeleteEntitlement});
-        this->unsubscribe(
-            {ChannelCondition{id}, SubscriptionType::AnyEmoteSet});
+        this->unsubscribe({
+            ChannelCondition{id},
+            SubscriptionType::CreateCosmetic,
+        });
+        this->unsubscribe({
+            ChannelCondition{id},
+            SubscriptionType::CreateEntitlement,
+        });
+        this->unsubscribe({
+            ChannelCondition{id},
+            SubscriptionType::DeleteEntitlement,
+        });
+        this->unsubscribe({
+            ChannelCondition{id},
+            SubscriptionType::AnyEmoteSet,
+        });
     }
 }
 
@@ -344,12 +360,12 @@ void SeventvEventAPI::onUserUpdate(const Dispatch &dispatch)
 // NOLINTBEGIN(readability-convert-member-functions-to-static)
 void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 {
-    // We're using Application::instance, because we're not in the GUI thread.
+    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
     // `seventvBadges` and `seventvPaints` do their own locking.
     switch (cosmetic.kind)
     {
         case CosmeticKind::Badge: {
-            Application::instance->seventvBadges->addBadge(cosmetic.data);
+            Application::instance->seventvBadges->registerBadge(cosmetic.data);
         }
         break;
         case CosmeticKind::Paint: {
@@ -364,7 +380,7 @@ void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 void SeventvEventAPI::onEntitlementCreate(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    // We're using Application::instance, because we're not in the GUI thread.
+    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
     // `seventvBadges` and `seventvPaints` do their own locking.
     switch (entitlement.kind)
     {
@@ -396,7 +412,7 @@ void SeventvEventAPI::onEntitlementCreate(
 void SeventvEventAPI::onEntitlementDelete(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    // We're using Application::instance, because we're not in the GUI thread.
+    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
     // `seventvBadges` and `seventvPaints` do their own locking.
     switch (entitlement.kind)
     {
@@ -417,7 +433,7 @@ void SeventvEventAPI::onEntitlementDelete(
 
 void SeventvEventAPI::onEmoteSetCreate(const Dispatch &dispatch)
 {
-    // We're using Application::instance, because we're not in the GUI thread.
+    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
     // `seventvBadges` and `seventvPaints` do their own locking.
     EmoteSetCreateDispatch createDispatch(dispatch.body["object"].toObject());
     if (!createDispatch.validate())

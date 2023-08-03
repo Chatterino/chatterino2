@@ -274,7 +274,7 @@ void Application::initNm(Paths &paths)
     (void)paths;
 
 #ifdef Q_OS_WIN
-#    if defined QT_NO_DEBUG || defined C_DEBUG_NM
+#    if defined QT_NO_DEBUG || defined CHATTERINO_DEBUG_NM
     registerNmHost(paths);
     this->nmServer.start();
 #    endif

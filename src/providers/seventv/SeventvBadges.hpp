@@ -10,7 +10,6 @@
 #include <memory>
 #include <shared_mutex>
 #include <unordered_map>
-#include <vector>
 
 namespace chatterino {
 
@@ -20,17 +19,20 @@ using EmotePtr = std::shared_ptr<const Emote>;
 class SeventvBadges : public Singleton
 {
 public:
-    void initialize(Settings &settings, Paths &paths) override;
-
+    // Return the badge, if any, that is assigned to the user
     boost::optional<EmotePtr> getBadge(const UserId &id) const;
 
-    void addBadge(const QJsonObject &badgeJson);
+    // Assign the given badge to the user
     void assignBadgeToUser(const QString &badgeID, const UserId &userID);
+
+    // Remove the given badge from the user
     void clearBadgeFromUser(const QString &badgeID, const UserId &userID);
 
-private:
-    void loadSeventvBadges();
+    // Register a new known badge
+    // The json object will contain all information about the badge, like its ID & its images
+    void registerBadge(const QJsonObject &badgeJson);
 
+private:
     // Mutex for both `badgeMap_` and `knownBadges_`
     mutable std::shared_mutex mutex_;
 

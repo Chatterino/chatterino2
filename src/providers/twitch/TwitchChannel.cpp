@@ -21,6 +21,7 @@
 #include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
 #include "providers/RecentMessagesApi.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
+#include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -1234,8 +1235,8 @@ void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)
     this->threads_[thread->rootId()] = thread;
 }
 
-const std::unordered_map<QString, std::weak_ptr<MessageThread>>
-    &TwitchChannel::threads() const
+const std::unordered_map<QString, std::weak_ptr<MessageThread>> &
+    TwitchChannel::threads() const
 {
     return this->threads_;
 }
@@ -1588,7 +1589,8 @@ void TwitchChannel::updateSevenTVActivity()
         return;
     }
 
-    if (!getSettings()->enableSevenTVEventAPI)
+    if (!getSettings()->enableSevenTVEventAPI ||
+        !getSettings()->sendSevenTVActivity)
     {
         return;
     }
@@ -1603,33 +1605,23 @@ void TwitchChannel::updateSevenTVActivity()
 
     qCDebug(chatterinoSeventv) << "Sending activity in" << this->getName();
 
-    QJsonObject payload;
-    payload["kind"] = 1;
-
-    QJsonObject data;
-    data["id"] = this->roomId();
-    data["platform"] = "TWITCH";
-
-    payload["data"] = data;
-
-    NetworkRequest(seventvActivityUrl.arg(currentSeventvUserID),
-                   NetworkRequestType::Post)
-        .header("Content-Type", "application/json")
-        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
-        .onSuccess([chan = weakOf<Channel>(this)](const auto &response) {
+    getSeventvAPI().updatePresence(
+        this->roomId(), currentSeventvUserID,
+        [chan = weakOf<Channel>(this)]() {
             const auto self =
                 std::dynamic_pointer_cast<TwitchChannel>(chan.lock());
             if (!self)
             {
                 return Success;
             }
-            const auto json = response.parseJson();
             self->nextSeventvActivity_ =
-                QDateTime::currentDateTimeUtc().addSecs(10);
+                QDateTime::currentDateTimeUtc().addSecs(60);
             return Success;
-        })
-        .concurrent()
-        .execute();
+        },
+        [](const auto &result) {
+            qCDebug(chatterinoSeventv)
+                << "Failed to update 7TV activity:" << result.formatError();
+        });
 }
 
 void TwitchChannel::listenSevenTVCosmetics()

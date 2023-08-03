@@ -11,12 +11,14 @@
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/layouts/MessageLayout.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
+#include "providers/colors/ColorProvider.hpp"
 #include "providers/LinkResolver.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -61,7 +63,6 @@
 #include <functional>
 #include <memory>
 
-#define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
 #define CHAT_HOVER_PAUSE_DURATION 1000
 #define TOOLTIP_EMOTE_ENTRIES_LIMIT 7
@@ -202,6 +203,10 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
     auto curve = QEasingCurve();
     curve.setCustomType(highlightEasingFunction);
     this->highlightAnimation_.setEasingCurve(curve);
+
+    this->messageColors_.applyTheme(getTheme());
+    this->messagePreferences_.connectSettings(getSettings(),
+                                              this->signalHolder_);
 }
 
 void ChannelView::initializeLayout()
@@ -379,6 +384,7 @@ void ChannelView::themeChangedEvent()
 
     this->setupHighlightAnimationColors();
     this->queueLayout();
+    this->messageColors_.applyTheme(getTheme());
 }
 
 void ChannelView::setupHighlightAnimationColors()
@@ -1248,32 +1254,47 @@ void ChannelView::drawMessages(QPainter &painter)
         return;
     }
 
-    int y = int(-(messagesSnapshot[start].get()->getHeight() *
-                  (fmod(this->scrollBar_->getRelativeCurrentValue(), 1))));
-
     MessageLayout *end = nullptr;
-    bool windowFocused = this->window() == QApplication::activeWindow();
 
-    auto app = getApp();
-    bool isMentions = this->underlyingChannel_ == app->twitch->mentionsChannel;
+    MessagePaintContext ctx = {
+        .painter = painter,
+        .selection = this->selection_,
+        .colorProvider = ColorProvider::instance(),
+        .messageColors = this->messageColors_,
+        .preferences = this->messagePreferences_,
 
-    for (size_t i = start; i < messagesSnapshot.size(); ++i)
+        .canvasWidth = this->width(),
+        .isWindowFocused = this->window() == QApplication::activeWindow(),
+        .isMentions =
+            this->underlyingChannel_ == getApp()->twitch->mentionsChannel,
+
+        .y = int(-(messagesSnapshot[start]->getHeight() *
+                   (fmod(this->scrollBar_->getRelativeCurrentValue(), 1)))),
+        .messageIndex = start,
+        .isLastReadMessage = false,
+
+    };
+    bool showLastMessageIndicator = getSettings()->showLastMessageIndicator;
+
+    for (; ctx.messageIndex < messagesSnapshot.size(); ++ctx.messageIndex)
     {
-        MessageLayout *layout = messagesSnapshot[i].get();
+        MessageLayout *layout = messagesSnapshot[ctx.messageIndex].get();
 
-        bool isLastMessage = false;
-        if (getSettings()->showLastMessageIndicator)
+        if (showLastMessageIndicator)
         {
-            isLastMessage = this->lastReadMessage_.get() == layout;
+            ctx.isLastReadMessage = this->lastReadMessage_.get() == layout;
+        }
+        else
+        {
+            ctx.isLastReadMessage = false;
         }
 
-        layout->paint(painter, DRAW_WIDTH, y, i, this->selection_,
-                      isLastMessage, windowFocused, isMentions);
+        layout->paint(ctx);
 
         if (this->highlightedMessage_ == layout)
         {
             painter.fillRect(
-                0, y, layout->getWidth(), layout->getHeight(),
+                0, ctx.y, layout->getWidth(), layout->getHeight(),
                 this->highlightAnimation_.currentValue().value<QColor>());
             if (this->highlightAnimation_.state() == QVariantAnimation::Stopped)
             {
@@ -1281,10 +1302,10 @@ void ChannelView::drawMessages(QPainter &painter)
             }
         }
 
-        y += layout->getHeight();
+        ctx.y += layout->getHeight();
 
         end = layout;
-        if (y > this->height())
+        if (ctx.y > this->height())
         {
             break;
         }

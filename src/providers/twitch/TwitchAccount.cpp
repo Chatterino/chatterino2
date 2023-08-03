@@ -3,7 +3,6 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
-#include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
@@ -13,6 +12,7 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
+#include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvPersonalEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -455,14 +455,14 @@ const QString &TwitchAccount::getSeventvUserID() const
 
 void TwitchAccount::loadSeventvUserID()
 {
+    if (this->isAnon())
+    {
+        return;
+    }
     if (!this->seventvUserID_.isEmpty())
     {
         return;
     }
-
-    // TODO: this is duplicate functionality
-    static const QString seventvUserInfoUrl =
-        QStringLiteral("https://7tv.io/v3/users/twitch/%1");
 
     const auto loadPersonalEmotes = [](const QString &twitchUserID,
                                        const QString &emoteSetID) {
@@ -483,18 +483,15 @@ void TwitchAccount::loadSeventvUserID()
             });
     };
 
-    NetworkRequest(seventvUserInfoUrl.arg(this->getUserId()),
-                   NetworkRequestType::Get)
-        .timeout(20000)
-        .onSuccess([this, loadPersonalEmotes](const auto &response) {
-            const auto json = response.parseJson();
+    getSeventvAPI().getUserByTwitchID(
+        this->getUserId(),
+        [this, loadPersonalEmotes](const auto &json) {
             const auto user = json["user"].toObject();
             const auto id = user["id"].toString();
             if (id.isEmpty())
             {
                 return Success;
             }
-
             this->seventvUserID_ = id;
 
             for (const auto &emoteSetJson : user["emote_sets"].toArray())
@@ -509,10 +506,13 @@ void TwitchAccount::loadSeventvUserID()
                     break;
                 }
             }
+
             return Success;
-        })
-        .concurrent()
-        .execute();
+        },
+        [](const auto &result) {
+            qCDebug(chatterinoSeventv)
+                << "Failed to load 7TV user-id:" << result.formatError();
+        });
 }
 
 }  // namespace chatterino

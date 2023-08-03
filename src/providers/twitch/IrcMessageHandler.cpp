@@ -1,6 +1,7 @@
 #include "IrcMessageHandler.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/LimitedQueue.hpp"
@@ -26,6 +27,8 @@
 #include "util/StreamerMode.hpp"
 
 #include <IrcMessage>
+#include <QLocale>
+#include <QStringBuilder>
 
 #include <memory>
 #include <unordered_set>
@@ -156,8 +159,22 @@ void updateReplyParticipatedStatus(const QVariantMap &tags,
     }
 }
 
+ChannelPtr channelOrEmptyByTarget(const QString &target,
+                                  TwitchIrcServer &server)
+{
+    QString channelName;
+    if (!trimChannelName(target, channelName))
+    {
+        return Channel::getEmpty();
+    }
+
+    return server.getChannelOrEmpty(channelName);
+}
+
 }  // namespace
 namespace chatterino {
+
+using namespace literals;
 
 static float relativeSimilarity(const QString &str1, const QString &str2)
 {
@@ -314,6 +331,16 @@ std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
         builtMessages.emplace_back(builder.build());
         builder.triggerHighlights();
     }
+
+    if (message->tags().contains(u"pinned-chat-paid-amount"_s))
+    {
+        auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
+        if (ptr)
+        {
+            builtMessages.emplace_back(std::move(ptr));
+        }
+    }
+
     return builtMessages;
 }
 
@@ -330,6 +357,21 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
         message, message->target(),
         message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
         false, message->isAction());
+
+    auto chan = channelOrEmptyByTarget(message->target(), server);
+    if (chan->isEmpty())
+    {
+        return;
+    }
+
+    if (message->tags().contains(u"pinned-chat-paid-amount"_s))
+    {
+        auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
+        if (ptr)
+        {
+            chan->addMessage(ptr);
+        }
+    }
 }
 
 std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
@@ -442,13 +484,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                                    TwitchIrcServer &server, bool isSub,
                                    bool isAction)
 {
-    QString channelName;
-    if (!trimChannelName(target, channelName))
-    {
-        return;
-    }
-
-    auto chan = server.getChannelOrEmpty(channelName);
+    auto chan = channelOrEmptyByTarget(target, server);
 
     if (chan->isEmpty())
     {
