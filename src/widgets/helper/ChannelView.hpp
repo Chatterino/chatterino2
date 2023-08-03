@@ -11,6 +11,7 @@
 #include <pajlada/signals/signal.hpp>
 #include <QMenu>
 #include <QPaintEvent>
+#include <QPointer>
 #include <QScroller>
 #include <QTimer>
 #include <QVariantAnimation>
@@ -19,6 +20,7 @@
 
 #include <unordered_map>
 #include <unordered_set>
+
 
 namespace chatterino {
 enum class HighlightState;
