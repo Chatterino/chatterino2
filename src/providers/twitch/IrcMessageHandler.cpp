@@ -4,6 +4,7 @@
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/ignores/IgnoreController.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Link.hpp"
 #include "messages/Message.hpp"
@@ -892,6 +893,16 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
         content = parameters[1];
     }
 
+    if (isIgnoredMessage({
+            /*.message = */ content,
+            /*.twitchUserID = */ tags.value("user-id").toString(),
+            /*.isMod = */ channel->isMod(),
+            /*.isBroadcaster = */ channel->isBroadcaster(),
+        }))
+    {
+        return {};
+    }
+
     if (specialMessageTypes.contains(msgType))
     {
         // Messages are not required, so they might be empty
@@ -951,6 +962,17 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
     if (parameters.size() >= 2)
     {
         content = parameters[1];
+    }
+
+    auto chn = server.getChannelOrEmpty(target);
+    if (isIgnoredMessage({
+            /*.message = */ content,
+            /*.twitchUserID = */ tags.value("user-id").toString(),
+            /*.isMod = */ chn->isMod(),
+            /*.isBroadcaster = */ chn->isBroadcaster(),
+        }))
+    {
+        return;
     }
 
     if (specialMessageTypes.contains(msgType))
