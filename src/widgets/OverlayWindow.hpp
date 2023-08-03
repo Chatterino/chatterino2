@@ -6,6 +6,8 @@
 
 #include <QPropertyAnimation>
 #include <QWidget>
+#include <pajlada/signals/scoped-connection.hpp>
+#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 
@@ -13,7 +15,7 @@ class OverlayWindow : public QWidget
 {
     Q_OBJECT
 public:
-    OverlayWindow(ChannelPtr channel, Split *split);
+    OverlayWindow(IndirectChannel channel, Split *split);
 
 protected:
     bool eventFilter(QObject *object, QEvent *event) override;
@@ -31,7 +33,8 @@ private:
     void startInteraction();
     void endInteraction();
 
-    ChannelPtr channel_;
+    IndirectChannel channel_;
+    pajlada::Signals::SignalHolder holder_;
     ChannelView channelView_;
 
     bool moving_ = false;

@@ -31,7 +31,7 @@ protected:
 
 namespace chatterino {
 
-OverlayWindow::OverlayWindow(ChannelPtr channel, Split *split)
+OverlayWindow::OverlayWindow(IndirectChannel channel, Split *split)
     : QWidget(nullptr,
               Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)
     , channel_(std::move(channel))
@@ -52,11 +52,14 @@ OverlayWindow::OverlayWindow(ChannelPtr channel, Split *split)
     });
 
     this->channelView_.installEventFilter(this);
-    this->channelView_.setChannel(this->channel_);
+    this->channelView_.setChannel(this->channel_.get());
     this->channelView_.setColorVisitor([](MessageColors &colors, Theme *theme) {
         colors.applyOverlay(theme);
     });
     this->channelView_.setAttribute(Qt::WA_TranslucentBackground);
+    this->holder_.managedConnect(this->channel_.getChannelChanged(), [this]() {
+        this->channelView_.setChannel(this->channel_.get());
+    });
 
     this->setAutoFillBackground(false);
     this->resize(300, 500);
