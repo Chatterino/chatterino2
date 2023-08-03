@@ -145,10 +145,10 @@ namespace {
     }
 }  // namespace
 
-ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
-                         size_t messagesLimit)
+ChannelView::ChannelView(BaseWidget *parent, QPointer<Split> split,
+                         Context context, size_t messagesLimit)
     : BaseWidget(parent)
-    , split_(split)
+    , split_(std::move(split))
     , scrollBar_(new Scrollbar(messagesLimit, this))
     , highlightAnimation_(this)
     , context_(context)
@@ -1172,7 +1172,10 @@ bool ChannelView::scrollToMessage(const MessagePtr &message)
     }
 
     this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
-    getApp()->windows->select(this->split_);
+    if (!this->split_.isNull())
+    {
+        getApp()->windows->select(this->split_);
+    }
     return true;
 }
 
@@ -1201,7 +1204,10 @@ bool ChannelView::scrollToMessageId(const QString &messageId)
     }
 
     this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
-    getApp()->windows->select(this->split_);
+    if (!this->split_.isNull())
+    {
+        getApp()->windows->select(this->split_);
+    }
     return true;
 }
 
@@ -2376,7 +2382,7 @@ void ChannelView::addMessageContextMenuItems(
     bool isSearch = this->context_ == Context::Search;
     bool isReplyOrUserCard = (this->context_ == Context::ReplyThread ||
                               this->context_ == Context::UserCard) &&
-                             this->split_;
+                             !this->split_.isNull();
     bool isMentions =
         this->channel()->getType() == Channel::Type::TwitchMentions;
     if (isSearch || isMentions || isReplyOrUserCard)
@@ -2947,7 +2953,7 @@ void ChannelView::scrollUpdateRequested()
 
 void ChannelView::setInputReply(const MessagePtr &message)
 {
-    if (message == nullptr)
+    if (message == nullptr || this->split_.isNull())
     {
         return;
     }
@@ -3004,8 +3010,9 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
 
     auto popupParent =
         static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
-    auto popup = new ReplyThreadPopup(getSettings()->autoCloseThreadPopup,
-                                      popupParent, this->split_);
+    auto popup =
+        new ReplyThreadPopup(getSettings()->autoCloseThreadPopup, popupParent,
+                             this->underlyingChannel_, this->split_);
 
     popup->setThread(message->replyThread);
 

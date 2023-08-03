@@ -4,6 +4,7 @@
 
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
+#include <QPointer>
 
 #include <chrono>
 
@@ -23,7 +24,7 @@ class UserInfoPopup final : public DraggablePopup
 
 public:
     UserInfoPopup(bool closeAutomatically, QWidget *parent,
-                  Split *split = nullptr);
+                  QPointer<Split> split = {});
 
     void setData(const QString &name, const ChannelPtr &channel);
     void setData(const QString &name, const ChannelPtr &contextChannel,
@@ -42,7 +43,7 @@ private:
     bool isMod_;
     bool isBroadcaster_;
 
-    Split *split_;
+    QPointer<Split> split_;
 
     QString userName_;
     QString userId_;
