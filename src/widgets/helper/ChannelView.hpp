@@ -74,7 +74,8 @@ public:
         Search,
     };
 
-    explicit ChannelView(BaseWidget *parent = nullptr, Split *split = nullptr,
+    explicit ChannelView(BaseWidget *parent = nullptr,
+                         QPointer<Split> split = {},
                          Context context = Context::None,
                          size_t messagesLimit = 1000);
 
@@ -286,7 +287,7 @@ private:
     ChannelPtr channel_ = nullptr;
     ChannelPtr underlyingChannel_ = nullptr;
     ChannelPtr sourceChannel_ = nullptr;
-    Split *split_ = nullptr;
+    QPointer<Split> split_;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;

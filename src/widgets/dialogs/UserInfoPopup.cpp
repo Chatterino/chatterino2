@@ -134,13 +134,11 @@ namespace {
 }  // namespace
 
 UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
-                             Split *split)
+                             QPointer<Split> split)
     : DraggablePopup(closeAutomatically, parent)
-    , split_(split)
+    , split_(std::move(split))
     , closeAutomatically_(closeAutomatically)
 {
-    assert(split != nullptr &&
-           "split being nullptr causes lots of bugs down the road");
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
 

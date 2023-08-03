@@ -6,6 +6,7 @@
 #include <boost/signals2.hpp>
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
+#include <QPointer>
 
 class QCheckBox;
 
@@ -20,7 +21,8 @@ class ReplyThreadPopup final : public DraggablePopup
     Q_OBJECT
 
 public:
-    ReplyThreadPopup(bool closeAutomatically, QWidget *parent, Split *split);
+    ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
+                     ChannelPtr channel_, QPointer<Split> split);
 
     void setThread(std::shared_ptr<MessageThread> thread);
     void giveFocus(Qt::FocusReason reason);
@@ -38,7 +40,7 @@ private:
     ChannelPtr channel_;
     // The channel for the `threadView`
     ChannelPtr virtualChannel_;
-    Split *split_;
+    QPointer<Split> split_;
 
     struct {
         ChannelView *threadView = nullptr;
