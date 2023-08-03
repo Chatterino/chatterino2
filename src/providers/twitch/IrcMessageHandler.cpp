@@ -894,10 +894,10 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
     }
 
     if (isIgnoredMessage({
-            /*.message = */ content,
-            /*.twitchUserID = */ tags.value("user-id").toString(),
-            /*.isMod = */ channel->isMod(),
-            /*.isBroadcaster = */ channel->isBroadcaster(),
+            .message = content,
+            .twitchUserID = tags.value("user-id").toString(),
+            .isMod = channel->isMod(),
+            .isBroadcaster = channel->isBroadcaster(),
         }))
     {
         return {};
@@ -966,10 +966,10 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
 
     auto chn = server.getChannelOrEmpty(target);
     if (isIgnoredMessage({
-            /*.message = */ content,
-            /*.twitchUserID = */ tags.value("user-id").toString(),
-            /*.isMod = */ chn->isMod(),
-            /*.isBroadcaster = */ chn->isBroadcaster(),
+            .message = content,
+            .twitchUserID = tags.value("user-id").toString(),
+            .isMod = chn->isMod(),
+            .isBroadcaster = chn->isBroadcaster(),
         }))
     {
         return;
