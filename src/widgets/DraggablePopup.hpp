@@ -26,8 +26,17 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
+    /// Creates a pin button that is scoped to this window.
+    /// When clicked, the user can toggle whether the window is pinned.
+    /// The window is considered unpinned at the start.
+    Button *createPinButton();
+
     // lifetimeHack_ is used to check that the window hasn't been destroyed yet
     std::shared_ptr<bool> lifetimeHack_;
+
+    // Toggles pin status updates action on focus loss, isPinned_ and the pin
+    // button pixmap
+    void togglePinned();
 
 private:
     // isMoving_ is set to true if the user is holding the left mouse button down and has moved the mouse a small amount away from the original click point (startPosDrag_)
@@ -42,6 +51,9 @@ private:
 
     // dragTimer_ is called ~60 times per second once the user has initiated dragging
     QTimer dragTimer_;
+
+    Button *pinButton_ = nullptr;
+    bool isPinned_ = false;
 };
 
 }  // namespace chatterino

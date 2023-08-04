@@ -2,12 +2,12 @@
 
 namespace chatterino {
 
-GenericListModel::GenericListModel(QWidget *parent)
+GenericListModel::GenericListModel(QObject *parent)
     : QAbstractListModel(parent)
 {
 }
 
-int GenericListModel::rowCount(const QModelIndex &parent) const
+int GenericListModel::rowCount(const QModelIndex & /*parent*/) const
 {
     return this->items_.size();
 }
@@ -15,12 +15,16 @@ int GenericListModel::rowCount(const QModelIndex &parent) const
 QVariant GenericListModel::data(const QModelIndex &index, int /* role */) const
 {
     if (!index.isValid())
-        return QVariant();
+    {
+        return {};
+    }
 
     if (index.row() >= this->items_.size())
-        return QVariant();
+    {
+        return {};
+    }
 
-    auto item = this->items_[index.row()].get();
+    auto *item = this->items_[index.row()].get();
     // See https://stackoverflow.com/a/44503822 .
     return QVariant::fromValue(static_cast<void *>(item));
 }
@@ -37,7 +41,9 @@ void GenericListModel::addItem(std::unique_ptr<GenericListItem> item)
 void GenericListModel::clear()
 {
     if (this->items_.empty())
+    {
         return;
+    }
 
     // {begin,end}RemoveRows needs to be called to notify attached views
     this->beginRemoveRows(QModelIndex(), 0, this->items_.size() - 1);
@@ -46,6 +52,11 @@ void GenericListModel::clear()
     this->items_.clear();
 
     this->endRemoveRows();
+}
+
+void GenericListModel::reserve(size_t capacity)
+{
+    this->items_.reserve(capacity);
 }
 
 }  // namespace chatterino

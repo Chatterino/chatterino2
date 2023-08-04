@@ -7,6 +7,7 @@ on:
       - master
   pull_request:
   workflow_dispatch:
+  merge_group:
 
 concurrency:
   group: build-${{ github.ref }}
@@ -22,65 +23,68 @@ env:
 
 jobs:
   build:
-    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (PCH:${{ matrix.pch }}, LTO:${{ matrix.force-lto }})"
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ matrix.skip-crashpad && 'off' || 'on' }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
         qt-version: [5.15.2, 6.5.0]
-        pch: [true]
         force-lto: [false]
         plugins: [false]
-        skip_artifact: ["no"]
-        crashpad: [true]
+        skip-artifact: [false]
+        skip-crashpad: [false]
+        clang-tidy-review: [false]
         include:
           # Ubuntu 20.04, Qt 5.12
           - os: ubuntu-20.04
             qt-version: 5.12.12
-            pch: true
             force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
           # Ubuntu 22.04, Qt 5.15
           - os: ubuntu-22.04
             qt-version: 5.15.2
-            pch: true
             force-lto: false
-          # Ubuntu 22.04, Qt 6.2.4
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: true
+          # Ubuntu 22.04, Qt 6.2.4 - tests LTO & plugins
           - os: ubuntu-22.04
             qt-version: 6.2.4
-            pch: false
-            force-lto: false
-          # Test for disabling Precompiled Headers & enabling link-time optimization and plugins
-          - os: ubuntu-22.04
-            qt-version: 5.15.2
-            pch: false
             force-lto: true
-            skip_artifact: "yes"
             plugins: true
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
           # Test for disabling crashpad on Windows
           - os: windows-latest
             qt-version: 5.15.2
-            pch: false
-            force-lto: true
-            skip_artifact: "yes"
-            crashpad: false
+            force-lto: false
+            plugins: false
+            skip-artifact: true
+            skip-crashpad: true
+            clang-tidy-review: false
 
       fail-fast: false
 
     steps:
       - name: Force LTO
-        if: matrix.force-lto == true
+        if: matrix.force-lto
         run: |
           echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Enable plugin support
-        if: matrix.plugins == true
+        if: matrix.plugins
         run: |
           echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Set Crashpad
-        if: matrix.crashpad == true
+        if: matrix.skip-crashpad == false
         run: |
           echo "C2_ENABLE_CRASHPAD=ON" >> "$GITHUB_ENV"
         shell: bash
@@ -104,7 +108,7 @@ jobs:
 
       - name: Install Qt5
         if: startsWith(matrix.qt-version, '5.')
-        uses: jurplel/install-qt-action@v3.1.0
+        uses: jurplel/install-qt-action@v3.2.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -112,7 +116,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v3.1.0
+        uses: jurplel/install-qt-action@v3.2.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -130,6 +134,18 @@ jobs:
           "C2_USE_OPENSSL3=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "True" } else { "False" })" >> "$Env:GITHUB_ENV"
           "C2_CONAN_CACHE_SUFFIX=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "-QT6" } else { "`" })" >> "$Env:GITHUB_ENV"
         shell: powershell
+
+      - name: Setup sccache (Windows)
+        # sccache v0.5.3
+        uses: nerixyz/ccache-action@9a7e8d00116ede600ee7717350c6594b8af6aaa5
+        if: startsWith(matrix.os, 'windows')
+        with:
+          variant: sccache
+          # only save on on the default (master) branch
+          save: ${{ github.event_name == 'push' }}
+          key: sccache-build-${{ matrix.os }}-${{ matrix.qt-version }}-${{ matrix.skip-crashpad }}
+          restore-keys: |
+            sccache-build-${{ matrix.os }}-${{ matrix.qt-version }}
 
       - name: Cache conan packages (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -167,13 +183,17 @@ jobs:
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
+        shell: pwsh
+        env:
+          # Enable PCH on Windows when crashpad is enabled
+          C2_WINDOWS_USE_PCH: ${{ matrix.skip-crashpad && 'OFF' || 'ON' }}
         run: |
           cd build
           cmake `
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
-              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} `
+              -DUSE_PRECOMPILED_HEADERS=${{ env.C2_WINDOWS_USE_PCH }} `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
@@ -183,7 +203,8 @@ jobs:
           nmake /S /NOLOGO
 
       - name: Build crashpad (Windows)
-        if: startsWith(matrix.os, 'windows') && matrix.crashpad
+        if: startsWith(matrix.os, 'windows') && !matrix.skip-crashpad
+        shell: pwsh
         run: |
           cd build
           set cl=/MP
@@ -202,14 +223,14 @@ jobs:
           7z a chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip Chatterino2/
 
       - name: Upload artifact (Windows - binary)
-        if: startsWith(matrix.os, 'windows') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'windows') && !matrix.skip-artifact
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
           path: build/chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
 
       - name: Upload artifact (Windows - symbols)
-        if: startsWith(matrix.os, 'windows') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'windows') && !matrix.skip-artifact
         uses: actions/upload-artifact@v3
         with:
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}-symbols.pdb.7z
@@ -260,7 +281,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
             -DCMAKE_BUILD_TYPE=Release \
             -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
-            -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
+            -DUSE_PRECOMPILED_HEADERS=OFF \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
             -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
@@ -270,41 +291,59 @@ jobs:
         shell: bash
 
       - name: clang-tidy review
-        if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        uses: ZedThree/clang-tidy-review@v0.12.2
+        if: matrix.clang-tidy-review && github.event_name == 'pull_request'
+        uses: ZedThree/clang-tidy-review@v0.13.2
         with:
-          build_dir: build
+          build_dir: build-clang-tidy
           config_file: ".clang-tidy"
           split_workflow: true
-          exclude: "tests/*,lib/*"
+          exclude: "lib/*"
+          cmake_command: >-
+            cmake -S. -Bbuild-clang-tidy 
+            -DCMAKE_BUILD_TYPE=Release 
+            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On 
+            -DUSE_PRECOMPILED_HEADERS=OFF 
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=On 
+            -DCHATTERINO_LTO=Off 
+            -DCHATTERINO_PLUGINS=On 
+            -DBUILD_WITH_QT6=Off
+            -DBUILD_TESTS=On
+            -DBUILD_BENCHMARKS=On
+          apt_packages: >-
+            qttools5-dev, qt5-image-formats-plugins, libqt5svg5-dev, 
+            libsecret-1-dev,
+            libboost-dev, libboost-system-dev, libboost-filesystem-dev,
+            libssl-dev,
+            rapidjson-dev,
+            libbenchmark-dev
 
       - name: clang-tidy-review upload
-        if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        uses: ZedThree/clang-tidy-review/upload@v0.12.2
+        if: matrix.clang-tidy-review && github.event_name == 'pull_request'
+        uses: ZedThree/clang-tidy-review/upload@v0.13.2
 
       - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu-20.04') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu-20.04') && !matrix.skip-artifact
         run: |
           cd build
           sh ./../.CI/CreateAppImage.sh
         shell: bash
 
       - name: Package - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu') && !matrix.skip-artifact
         run: |
           cd build
           sh ./../.CI/CreateUbuntuDeb.sh
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu-20.04') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu-20.04') && !matrix.skip-artifact
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.skip_artifact != 'yes'
+        if: startsWith(matrix.os, 'ubuntu') && !matrix.skip-artifact
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
@@ -326,7 +365,7 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
               -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
+              -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
@@ -336,12 +375,15 @@ jobs:
 
       - name: Package (MacOS)
         if: startsWith(matrix.os, 'macos')
+        env:
+          OUTPUT_DMG_PATH: chatterino-macos-Qt-${{ matrix.qt-version}}.dmg
         run: |
           ls -la
           pwd
           ls -la build || true
           cd build
-          sh ./../.CI/CreateDMG.sh ${{ matrix.qt-version }}
+          ./../.CI/MacDeploy.sh
+          ./../.CI/CreateDMG.sh
         shell: bash
 
       - name: Upload artifact (MacOS)
@@ -361,12 +403,6 @@ jobs:
           fetch-depth: 0 # allows for tags access
 
       - uses: actions/download-artifact@v3
-        name: macOS x86_64 Qt6.5.0 dmg
-        with:
-          name: chatterino-macos-Qt-6.5.0.dmg
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v3
         name: Ubuntu 22.04 Qt6.2.4 deb
         with:
           name: Chatterino-ubuntu-22.04-Qt-6.2.4.deb
@@ -383,17 +419,6 @@ jobs:
         with:
           name: chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z
           path: release-artifacts/
-
-      - name: Mark experimental
-        run: |
-          ls -l
-          # Mark all Qt6 builds as EXPERIMENTAL
-          mv chatterino-macos-Qt-6.5.0.dmg EXPERIMENTAL-chatterino-macos-Qt-6.5.0-dmg
-          mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
-          mv chatterino-windows-x86-64-Qt-6.5.0.zip EXPERIMENTAL-chatterino-windows-x86-64-Qt-6.5.0.zip
-          mv chatterino-Qt-6.5.0.pdb.7z EXPERIMENTAL-chatterino-Qt-6.5.0.pdb.7z
-        working-directory: release-artifacts
-        shell: bash
 
       - uses: actions/download-artifact@v3
         name: Windows Qt5.15.2
@@ -436,10 +461,23 @@ jobs:
           cp .CI/chatterino-nightly.flatpakref release-artifacts/
         shell: bash
 
+      - name: Rename artifacts
+        run: |
+          ls -l
+          # Rename the macos build to indicate that it's for macOS 10.15 users
+          mv chatterino-macos-Qt-5.15.2.dmg Chatterino-macOS-10.15.dmg
+
+          # Mark all Qt6 builds as EXPERIMENTAL
+          mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
+          mv chatterino-windows-x86-64-Qt-6.5.0.zip EXPERIMENTAL-chatterino-windows-x86-64-Qt-6.5.0.zip
+          mv chatterino-Qt-6.5.0.pdb.7z EXPERIMENTAL-chatterino-Qt-6.5.0.pdb.7z
+        working-directory: release-artifacts
+        shell: bash
+
       - name: Create release
         uses: ncipollo/release-action@v1.12.0
         with:
-          removeArtifacts: true
+          replacesArtifacts: true
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: "release-artifacts/*"

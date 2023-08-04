@@ -15,8 +15,10 @@ bool LinkPredicate::appliesToImpl(const Message &message)
 {
     for (const auto &word : message.messageText.split(' ', Qt::SkipEmptyParts))
     {
-        if (LinkParser(word).hasMatch())
+        if (LinkParser(word).result())
+        {
             return true;
+        }
     }
 
     return false;

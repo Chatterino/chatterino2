@@ -4,9 +4,11 @@ name: Test
 on:
   pull_request:
   workflow_dispatch:
+  merge_group:
 
 env:
   TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.6
+  QT_QPA_PLATFORM: minimal
 
 concurrency:
   group: test-${{ github.ref }}
@@ -17,29 +19,30 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
-        qt-version: [5.15.2]
+        include:
+          - os: "ubuntu-20.04"
+            qt-version: "5.15.2"
+          - os: "ubuntu-20.04"
+            qt-version: "5.12.12"
+          - os: "ubuntu-22.04"
+            qt-version: "6.2.4"
       fail-fast: false
+    env:
+      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
+      QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
 
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v3
-        with:
-          path: "${{ github.workspace }}/qt/"
-          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
-
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3.1.0
+        uses: jurplel/install-qt-action@v3.2.1
         with:
           cache: true
-          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
+          modules: ${{ env.QT_MODULES }}
           version: ${{ matrix.qt-version }}
-          dir: "${{ github.workspace }}/qt/"
 
       # LINUX
       - name: Install dependencies (Ubuntu)
@@ -73,18 +76,23 @@ jobs:
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-          cmake -DBUILD_TESTS=On -DBUILD_APP=OFF ..
-          cmake --build . --config Release
+          cmake \
+            -DBUILD_TESTS=On \
+            -DBUILD_APP=OFF \
+            -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
+            ..
+          cmake --build .
         working-directory: build-test
         shell: bash
 
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
+        timeout-minutes: 30
         run: |
           docker pull kennethreitz/httpbin
           docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
           docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
           docker run -p 9051:80 --detach kennethreitz/httpbin
-          ./bin/chatterino-test --platform minimal || ./bin/chatterino-test --platform minimal || ./bin/chatterino-test --platform minimal
+          ./bin/chatterino-test || ./bin/chatterino-test || ./bin/chatterino-test
         working-directory: build-test
         shell: bash

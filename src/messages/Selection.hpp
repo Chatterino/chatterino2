@@ -78,6 +78,7 @@ struct Selection {
         if (offset > this->selectionMin.messageIndex)
         {
             this->selectionMin.messageIndex = 0;
+            this->selectionMin.charIndex = 0;
         }
         else
         {
@@ -87,6 +88,7 @@ struct Selection {
         if (offset > this->selectionMax.messageIndex)
         {
             this->selectionMax.messageIndex = 0;
+            this->selectionMax.charIndex = 0;
         }
         else
         {
@@ -96,6 +98,7 @@ struct Selection {
         if (offset > this->start.messageIndex)
         {
             this->start.messageIndex = 0;
+            this->start.charIndex = 0;
         }
         else
         {
@@ -105,6 +108,7 @@ struct Selection {
         if (offset > this->end.messageIndex)
         {
             this->end.messageIndex = 0;
+            this->end.charIndex = 0;
         }
         else
         {

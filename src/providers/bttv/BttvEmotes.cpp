@@ -193,7 +193,7 @@ void BttvEmotes::loadEmotes()
 {
     if (!Settings::instance().enableBTTVGlobalEmotes)
     {
-        this->global_.set(EMPTY_EMOTE_MAP);
+        this->setEmotes(EMPTY_EMOTE_MAP);
         return;
     }
 
@@ -203,11 +203,16 @@ void BttvEmotes::loadEmotes()
             auto emotes = this->global_.get();
             auto pair = parseGlobalEmotes(result.parseJsonArray(), *emotes);
             if (pair.first)
-                this->global_.set(
+                this->setEmotes(
                     std::make_shared<EmoteMap>(std::move(pair.second)));
             return pair.first;
         })
         .execute();
+}
+
+void BttvEmotes::setEmotes(std::shared_ptr<const EmoteMap> emotes)
+{
+    this->global_.set(std::move(emotes));
 }
 
 void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
@@ -254,23 +259,17 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                     shared->addMessage(
                         makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
             }
-            else if (result.status() == NetworkResult::timedoutStatus)
-            {
-                // TODO: Auto retry in case of a timeout, with a delay
-                qCWarning(chatterinoBttv)
-                    << "Fetching BTTV emotes for channel" << channelId
-                    << "failed due to timeout";
-                shared->addMessage(makeSystemMessage(
-                    "Failed to fetch BetterTTV channel emotes. (timed out)"));
-            }
             else
             {
+                // TODO: Auto retry in case of a timeout, with a delay
+                auto errorString = result.formatError();
                 qCWarning(chatterinoBttv)
                     << "Error fetching BTTV emotes for channel" << channelId
-                    << ", error" << result.status();
-                shared->addMessage(
-                    makeSystemMessage("Failed to fetch BetterTTV channel "
-                                      "emotes. (unknown error)"));
+                    << ", error" << errorString;
+                shared->addMessage(makeSystemMessage(
+                    QStringLiteral("Failed to fetch BetterTTV channel "
+                                   "emotes. (Error: %1)")
+                        .arg(errorString)));
             }
         })
         .execute();

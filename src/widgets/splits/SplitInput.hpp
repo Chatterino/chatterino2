@@ -1,12 +1,12 @@
 #pragma once
 
-#include "util/QObjectRef.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPaintEvent>
+#include <QPointer>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -22,19 +22,6 @@ class EffectLabel;
 class MessageThread;
 class ResizingTextEdit;
 class ChannelView;
-
-// MessageOverflow is used for controlling how to guide the user into not
-// sending a message that will be discarded by Twitch
-enum MessageOverflow {
-    // Allow overflowing characters to be inserted into the input box, but highlight them in red
-    Highlight,
-
-    // Prevent more characters from being inserted into the input box
-    Prevent,
-
-    // Do nothing
-    Allow,
-};
 
 class SplitInput : public BaseWidget
 {
@@ -126,12 +113,13 @@ protected:
 
     Split *const split_;
     ChannelView *const channelView_;
-    QObjectRef<EmotePopup> emotePopup_;
-    QObjectRef<InputCompletionPopup> inputCompletionPopup_;
+    QPointer<EmotePopup> emotePopup_;
+    QPointer<InputCompletionPopup> inputCompletionPopup_;
 
     struct {
         ResizingTextEdit *textEdit;
         QLabel *textEditLength;
+        EffectLabel *sendButton;
         EffectLabel *emoteButton;
 
         QHBoxLayout *hbox;

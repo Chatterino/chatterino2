@@ -18,6 +18,7 @@ using MessagePtr = std::shared_ptr<const Message>;
 struct Selection;
 struct MessageLayoutContainer;
 class MessageLayoutElement;
+struct MessagePaintContext;
 
 enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
@@ -49,9 +50,7 @@ public:
     bool layout(int width, float scale_, MessageElementFlags flags);
 
     // Painting
-    void paint(QPainter &painter, int width, int y, int messageIndex,
-               Selection &selection, bool isLastReadMessage,
-               bool isWindowFocused, bool isMentions);
+    void paint(const MessagePaintContext &ctx);
     void invalidateBuffer();
     void deleteBuffer();
     void deleteCache();
@@ -72,7 +71,7 @@ public:
 private:
     // methods
     void actuallyLayout(int width, MessageElementFlags flags);
-    void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection);
+    void updateBuffer(QPixmap *buffer, const MessagePaintContext &ctx);
 
     // Create new buffer if required, returning the buffer
     QPixmap *ensureBuffer(QPainter &painter, int width);

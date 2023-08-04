@@ -76,6 +76,8 @@ namespace detail {
                 60000);
         }
         this->processOffset();
+        DebugCount::increase("image bytes", this->memoryUsage());
+        DebugCount::increase("image bytes (ever loaded)", this->memoryUsage());
     }
 
     Frames::~Frames()
@@ -91,8 +93,25 @@ namespace detail {
         {
             DebugCount::decrease("animated images");
         }
+        DebugCount::decrease("image bytes", this->memoryUsage());
+        DebugCount::increase("image bytes (ever unloaded)",
+                             this->memoryUsage());
 
         this->gifTimerConnection_.disconnect();
+    }
+
+    int64_t Frames::memoryUsage() const
+    {
+        int64_t usage = 0;
+        for (const auto &frame : this->items_)
+        {
+            auto sz = frame.image.size();
+            auto area = sz.width() * sz.height();
+            auto memory = area * frame.image.depth();
+
+            usage += memory;
+        }
+        return usage;
     }
 
     void Frames::advance()
@@ -131,6 +150,9 @@ namespace detail {
         {
             DebugCount::decrease("loaded images");
         }
+        DebugCount::decrease("image bytes", this->memoryUsage());
+        DebugCount::increase("image bytes (ever unloaded)",
+                             this->memoryUsage());
 
         this->items_.clear();
         this->index_ = 0;
@@ -573,8 +595,8 @@ ImageExpirationPool::ImageExpirationPool()
 
 ImageExpirationPool &ImageExpirationPool::instance()
 {
-    static ImageExpirationPool instance;
-    return instance;
+    static auto *instance = new ImageExpirationPool;
+    return *instance;
 }
 
 void ImageExpirationPool::addImagePtr(ImagePtr imgPtr)
@@ -589,14 +611,26 @@ void ImageExpirationPool::removeImagePtr(Image *rawPtr)
     this->allImages_.erase(rawPtr);
 }
 
+void ImageExpirationPool::freeAll()
+{
+    {
+        std::lock_guard<std::mutex> lock(this->mutex_);
+        for (auto it = this->allImages_.begin(); it != this->allImages_.end();)
+        {
+            auto img = it->second.lock();
+            img->expireFrames();
+            it = this->allImages_.erase(it);
+        }
+    }
+    this->freeOld();
+}
+
 void ImageExpirationPool::freeOld()
 {
     std::lock_guard<std::mutex> lock(this->mutex_);
 
-#    ifndef NDEBUG
     size_t numExpired = 0;
     size_t eligible = 0;
-#    endif
 
     auto now = std::chrono::steady_clock::now();
     for (auto it = this->allImages_.begin(); it != this->allImages_.end();)
@@ -617,17 +651,13 @@ void ImageExpirationPool::freeOld()
             continue;
         }
 
-#    ifndef NDEBUG
         ++eligible;
-#    endif
 
         // Check if image has expired and, if so, expire its frame data
         auto diff = now - img->lastUsed_;
         if (diff > IMAGE_POOL_IMAGE_LIFETIME)
         {
-#    ifndef NDEBUG
             ++numExpired;
-#    endif
             img->expireFrames();
             // erase without mutex locking issue
             it = this->allImages_.erase(it);
@@ -641,6 +671,9 @@ void ImageExpirationPool::freeOld()
     qCDebug(chatterinoImage) << "freed frame data for" << numExpired << "/"
                              << eligible << "eligible images";
 #    endif
+    DebugCount::set("last image gc: expired", numExpired);
+    DebugCount::set("last image gc: eligible", eligible);
+    DebugCount::set("last image gc: left after gc", this->allImages_.size());
 }
 
 #endif

@@ -2,13 +2,13 @@
 
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
+#include "common/enums/MessageOverflow.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/logging/ChannelLog.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/splits/SplitInput.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
@@ -47,6 +47,7 @@ public:
     bool isBlacklistedUser(const QString &username);
     bool isMutedChannel(const QString &channelName);
     bool toggleMutedChannel(const QString &channelName);
+    boost::optional<QString> matchNickname(const QString &username);
 
 private:
     void mute(const QString &channelName);
@@ -80,6 +81,12 @@ enum ThumbnailPreviewMode : int {
     AlwaysShow = 1,
 
     ShowOnShift = 2,
+};
+
+enum UsernameRightClickBehavior : int {
+    Reply = 0,
+    Mention = 1,
+    Ignore = 2,
 };
 
 /// Settings which are availlable for reading and writing on the gui thread.
@@ -125,6 +132,10 @@ public:
 
     EnumSetting<NotebookTabLocation> tabDirection = {"/appearance/tabDirection",
                                                      NotebookTabLocation::Top};
+    EnumSetting<NotebookTabVisibility> tabVisibility = {
+        "/appearance/tabVisibility",
+        NotebookTabVisibility::AllTabs,
+    };
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
@@ -189,6 +200,24 @@ public:
     BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", true};
     BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
                                         false};
+
+    EnumSetting<UsernameRightClickBehavior> usernameRightClickBehavior = {
+        "/behaviour/usernameRightClickBehavior",
+        UsernameRightClickBehavior::Mention,
+    };
+    EnumSetting<UsernameRightClickBehavior> usernameRightClickModifierBehavior =
+        {
+            "/behaviour/usernameRightClickBehaviorWithModifier",
+            UsernameRightClickBehavior::Reply,
+        };
+    EnumSetting<Qt::KeyboardModifier> usernameRightClickModifier = {
+        "/behaviour/usernameRightClickModifier",
+        Qt::KeyboardModifier::ShiftModifier};
+
+    BoolSetting autoSubToParticipatedThreads = {
+        "/behaviour/autoSubToParticipatedThreads",
+        true,
+    };
     // BoolSetting twitchSeperateWriteConnection =
     // {"/behaviour/twitchSeperateWriteConnection", false};
 
@@ -239,6 +268,7 @@ public:
     BoolSetting enableSevenTVGlobalEmotes = {"/emotes/seventv/global", true};
     BoolSetting enableSevenTVChannelEmotes = {"/emotes/seventv/channel", true};
     BoolSetting enableSevenTVEventAPI = {"/emotes/seventv/eventapi", true};
+    BoolSetting sendSevenTVActivity = {"/emotes/seventv/sendActivity", true};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
@@ -508,6 +538,8 @@ public:
     // Purely QOL settings are here (like last item in a list).
     IntSetting lastSelectChannelTab = {"/ui/lastSelectChannelTab", 0};
     IntSetting lastSelectIrcConn = {"/ui/lastSelectIrcConn", 0};
+
+    BoolSetting showSendButton = {"/ui/showSendButton", false};
 
     // Similarity
     BoolSetting similarityEnabled = {"/similarity/similarityEnabled", false};

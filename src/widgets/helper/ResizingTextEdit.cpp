@@ -2,10 +2,12 @@
 
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QMimeData>
 #include <QMimeDatabase>
+#include <QObject>
 
 namespace chatterino {
 
@@ -19,6 +21,19 @@ ResizingTextEdit::ResizingTextEdit()
 
     QObject::connect(this, &QTextEdit::textChanged, this,
                      &QWidget::updateGeometry);
+
+    QObject::connect(this, &QTextEdit::cursorPositionChanged, [this]() {
+        // If tab was pressed and we're completing/replacing the current word,
+        // this code will not even be called, see ResizingTextEdit::keyPressEvent
+
+        if (!this->completionInProgress_)
+        {
+            return;
+        }
+        qCDebug(chatterinoCommon)
+            << "Finishing completion because cursor moved";
+        this->completionInProgress_ = false;
+    });
 
     // Whenever the setting for emote completion changes, force a
     // refresh on the completion model the next time "Tab" is pressed
@@ -156,8 +171,12 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             completionModel->refresh(currentCompletionPrefix,
                                      this->isFirstWord());
             this->completionInProgress_ = true;
-            this->completer_->setCompletionPrefix(currentCompletionPrefix);
-            this->completer_->complete();
+            {
+                // this blocks cursor movement events from resetting tab completion
+                QSignalBlocker dontTriggerCursorMovement(this);
+                this->completer_->setCompletionPrefix(currentCompletionPrefix);
+                this->completer_->complete();
+            }
             return;
         }
 
@@ -182,7 +201,11 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             }
         }
 
-        this->completer_->complete();
+        {
+            // this blocks cursor movement events from updating tab completion
+            QSignalBlocker dontTriggerCursorMovement(this);
+            this->completer_->complete();
+        }
         return;
     }
 

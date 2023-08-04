@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Selection.hpp"
@@ -260,7 +261,6 @@ private:
 
     QTimer updateTimer_;
     bool updateQueued_ = false;
-    bool messageWasAdded_ = false;
     bool lastMessageHasAlternateBackground_ = false;
     bool lastMessageHasAlternateBackgroundReverse_ = true;
 
@@ -269,7 +269,8 @@ private:
     std::unordered_map<PauseReason, boost::optional<SteadyClock::time_point>>
         pauses_;
     boost::optional<SteadyClock::time_point> pauseEnd_;
-    int pauseScrollOffset_ = 0;
+    int pauseScrollMinimumOffset_ = 0;
+    int pauseScrollMaximumOffset_ = 0;
     // Keeps track how many message indices we need to offset the selection when we resume scrolling
     uint32_t pauseSelectionOffset_ = 0;
 
@@ -342,6 +343,9 @@ private:
     pajlada::Signals::SignalHolder channelConnections_;
 
     std::unordered_set<std::shared_ptr<MessageLayout>> messagesOnScreen_;
+
+    MessageColors messageColors_;
+    MessagePreferences messagePreferences_;
 
     static constexpr int leftPadding = 8;
     static constexpr int scrollbarPadding = 8;
