@@ -18,6 +18,7 @@
 - Minor: 7TV badges now automatically update upon changing. (#4512)
 - Minor: Stream status requests are now batched. (#4713)
 - Minor: Added `/c2-theme-autoreload` command to automatically reload a custom theme. This is useful for when you're developing your own theme. (#4718)
+- Minor: Show channel point redemptions without messages in usercard. (#4557)
 - Minor: Added support for opening incognito links in firefox-esr. (#4745)
 - Minor: Added support for opening incognito links under Linux/BSD using XDG. (#4745)
 - Bugfix: Increased amount of blocked users loaded from 100 to 1,000. (#4721)
