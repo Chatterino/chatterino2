@@ -75,9 +75,10 @@ XDGDesktopFile::XDGDesktopFile(char const *filename)
             auto key = QStringView(line).left(equals).trimmed().toString();
             // QStringView.mid() does not do bounds checking before qt 5.15, so
             // we have to do it ourselves
+            auto valueStart = equals + 1;
             auto value =
-                equals < line.size()
-                    ? QStringView(line).mid(equals + 1).trimmed().toString()
+                valueStart < line.size()
+                    ? QStringView(line).mid(valueStart).trimmed().toString()
                     : QString("");
 
             // existing keys are against spec, so we can overwrite them with
