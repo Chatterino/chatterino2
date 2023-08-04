@@ -1,207 +1,239 @@
+#define QT_NO_CAST_FROM_ASCII  // avoids unexpected implicit casts
 #include "common/LinkParser.hpp"
 
 #include <QFile>
-#include <QMap>
-#include <QRegularExpression>
 #include <QSet>
 #include <QString>
-#include <QStringRef>
+#include <QStringView>
 #include <QTextStream>
 
-namespace chatterino {
 namespace {
-    QSet<QString> &tlds()
-    {
-        static QSet<QString> tlds = [] {
-            QFile file(":/tlds.txt");
-            file.open(QFile::ReadOnly);
-            QTextStream stream(&file);
+
+QSet<QString> &tlds()
+{
+    static QSet<QString> tlds = [] {
+        QFile file(QStringLiteral(":/tlds.txt"));
+        file.open(QFile::ReadOnly);
+        QTextStream stream(&file);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-            // Default encoding of QTextStream is already UTF-8, at least in Qt6
+        // Default encoding of QTextStream is already UTF-8, at least in Qt6
 #else
-            stream.setCodec("UTF-8");
+        stream.setCodec("UTF-8");
 #endif
-            int safetyMax = 20000;
+        int safetyMax = 20000;
 
-            QSet<QString> set;
+        QSet<QString> set;
 
-            while (!stream.atEnd())
+        while (!stream.atEnd())
+        {
+            auto line = stream.readLine();
+            set.insert(line);
+
+            if (safetyMax-- == 0)
             {
-                auto line = stream.readLine();
-                set.insert(line);
-
-                if (safetyMax-- == 0)
-                    break;
+                break;
             }
+        }
 
-            return set;
-        }();
-        return tlds;
-    }
+        return set;
+    }();
+    return tlds;
+}
 
-    bool isValidHostname(QStringRef &host)
+bool isValidTld(QStringView tld)
+{
+    return tlds().contains(tld.toString().toLower());
+}
+
+bool isValidIpv4(QStringView host)
+{
+    // We don't care about the actual value,
+    // we only want to verify the ip.
+
+    char16_t sectionValue = 0;  // 0..256
+    uint8_t octetNumber = 0;    // 0..4
+    uint8_t sectionDigits = 0;  // 0..3
+    bool lastWasDot = true;
+
+    for (auto c : host)
     {
-        int index = host.lastIndexOf('.');
+        char16_t current = c.unicode();
+        if (current == '.')
+        {
+            if (lastWasDot || octetNumber == 3)
+            {
+                return false;
+            }
+            lastWasDot = true;
+            octetNumber++;
+            sectionValue = 0;
+            sectionDigits = 0;
+            continue;
+        }
+        lastWasDot = false;
 
-        return index != -1 &&
-               tlds().contains(host.mid(index + 1).toString().toLower());
+        if (current > u'9' || current < u'0')
+        {
+            return false;
+        }
+
+        sectionValue = sectionValue * 10 + (current - u'0');
+        sectionDigits++;
+        if (sectionValue >= 256 || sectionDigits > 3)
+        {
+            return false;
+        }
     }
 
-    bool isValidIpv4(QStringRef &host)
+    return octetNumber == 3 && !lastWasDot;
+}
+
+/**
+ * @brief Checks if the string starts with a port number.
+ * 
+ * The value of the port number isn't checked. A port in this implementation
+ * can be in the range 0..100'000.
+ */
+bool startsWithPort(QStringView string)
+{
+    for (qsizetype i = 0; i < std::min<qsizetype>(5, string.length()); i++)
     {
-        static auto exp = QRegularExpression("^\\d{1,3}(?:\\.\\d{1,3}){3}$");
+        char16_t c = string[i].unicode();
+        if (i >= 1 && (c == u'/' || c == u'?' || c == u'#'))
+        {
+            return true;
+        }
 
-        return exp.match(host).hasMatch();
+        if (!string[i].isDigit())
+        {
+            return false;
+        }
     }
+    return true;
+}
 
-#ifdef C_MATCH_IPV6_LINK
-    bool isValidIpv6(QStringRef &host)
-    {
-        static auto exp = QRegularExpression("^\\[[a-fA-F0-9:%]+\\]$");
-
-        return exp.match(host).hasMatch();
-    }
-#endif
 }  // namespace
+
+namespace chatterino {
 
 LinkParser::LinkParser(const QString &unparsedString)
 {
-    this->match_ = unparsedString;
-
+    ParsedLink result;
     // This is not implemented with a regex to increase performance.
-    // We keep removing parts of the url until there's either nothing left or we fail.
-    QStringRef l(&unparsedString);
+    QStringView remaining(unparsedString);
+    QStringView protocol(remaining);
 
-    bool hasHttp = false;
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+    QStringView wholeString(unparsedString);
+    const auto refFromView = [&](QStringView view) {
+        return QStringRef(&unparsedString,
+                          static_cast<int>(view.begin() - wholeString.begin()),
+                          static_cast<int>(view.size()));
+    };
+#endif
 
-    // Protocol `https?://`
-    if (l.startsWith("https://", Qt::CaseInsensitive))
+    // Check protocol for https?://
+    if (remaining.startsWith(QStringLiteral("http"), Qt::CaseInsensitive) &&
+        remaining.length() >= 4 + 3 + 1)  // 'http' + '://' + [any]
     {
-        hasHttp = true;
-        l = l.mid(8);
-    }
-    else if (l.startsWith("http://", Qt::CaseInsensitive))
-    {
-        hasHttp = true;
-        l = l.mid(7);
+        // optimistic view assuming there's a protocol (http or https)
+        auto withProto = remaining.mid(4);  // 'http'
+
+        if (withProto[0] == QChar(u's') || withProto[0] == QChar(u'S'))
+        {
+            withProto = withProto.mid(1);
+        }
+
+        if (withProto.startsWith(QStringLiteral("://")))
+        {
+            // there's really a protocol => consume it
+            remaining = withProto.mid(3);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+            result.protocol = {protocol.begin(), remaining.begin()};
+#else
+            result.protocol =
+                refFromView({protocol.begin(), remaining.begin()});
+#endif
+        }
     }
 
-    // Http basic auth `user:password`.
-    // Not supported for security reasons (misleading links)
+    // Http basic auth `user:password` isn't supported for security reasons (misleading links)
 
     // Host `a.b.c.com`
-    QStringRef host = l;
+    QStringView host = remaining;
+    QStringView rest;
     bool lastWasDot = true;
-    bool inIpv6 = false;
+    int lastDotPos = -1;
+    int nDots = 0;
 
-    for (int i = 0; i < l.size(); i++)
+    // Extract the host
+    for (int i = 0; i < remaining.size(); i++)
     {
-        if (l[i] == '.')
+        char16_t currentChar = remaining[i].unicode();
+        if (currentChar == u'.')
         {
-            if (lastWasDot == true)  // no double dots ..
-                goto error;
+            if (lastWasDot)  // no double dots ..
+            {
+                return;
+            }
+            lastDotPos = i;
             lastWasDot = true;
+            nDots++;
         }
         else
         {
             lastWasDot = false;
         }
 
-        if (l[i] == ':' && !inIpv6)
+        // found a port
+        if (currentChar == u':')
         {
-            host = l.mid(0, i);
-            l = l.mid(i + 1);
-            goto parsePort;
-        }
-        else if (l[i] == '/')
-        {
-            host = l.mid(0, i);
-            l = l.mid(i + 1);
-            goto parsePath;
-        }
-        else if (l[i] == '?')
-        {
-            host = l.mid(0, i);
-            l = l.mid(i + 1);
-            goto parseQuery;
-        }
-        else if (l[i] == '#')
-        {
-            host = l.mid(0, i);
-            l = l.mid(i + 1);
-            goto parseAnchor;
+            host = remaining.mid(0, i);
+            rest = remaining.mid(i);
+            remaining = remaining.mid(i + 1);
+
+            if (!startsWithPort(remaining))
+            {
+                return;
+            }
+
+            break;
         }
 
-        // ipv6
-        if (l[i] == '[')
+        // we accept everything in the path/query/anchor
+        if (currentChar == u'/' || currentChar == u'?' || currentChar == u'#')
         {
-            if (i == 0)
-                inIpv6 = true;
-            else
-                goto error;
-        }
-        else if (l[i] == ']')
-        {
-            inIpv6 = false;
+            host = remaining.mid(0, i);
+            rest = remaining.mid(i);
+            break;
         }
     }
 
-    if (lastWasDot)
-        goto error;
-    else
-        goto done;
-
-parsePort:
-    // Port `:12345`
-    for (int i = 0; i < std::min<int>(5, l.size()); i++)
+    if (lastWasDot || lastDotPos <= 0)
     {
-        if (l[i] == '/')
-            goto parsePath;
-        else if (l[i] == '?')
-            goto parseQuery;
-        else if (l[i] == '#')
-            goto parseAnchor;
-
-        if (!l[i].isDigit())
-            goto error;
+        return;
     }
 
-    goto done;
-
-parsePath:
-parseQuery:
-parseAnchor:
-    // we accept everything in the path/query/anchor
-
-done:
-    // check host
-    this->hasMatch_ = isValidHostname(host) || isValidIpv4(host)
-#ifdef C_MATCH_IPV6_LINK
-
-                      || (hasHttp && isValidIpv6(host))
+    // check host/tld
+    if ((nDots == 3 && isValidIpv4(host)) ||
+        isValidTld(host.mid(lastDotPos + 1)))
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        result.host = host;
+        result.rest = rest;
+#else
+        result.host = refFromView(host);
+        result.rest = refFromView(rest);
 #endif
-        ;
-
-    if (this->hasMatch_)
-    {
-        this->match_ = unparsedString;
+        result.source = unparsedString;
+        this->result_ = std::move(result);
     }
-
-    return;
-
-error:
-    hasMatch_ = false;
 }
 
-bool LinkParser::hasMatch() const
+const std::optional<ParsedLink> &LinkParser::result() const
 {
-    return this->hasMatch_;
-}
-
-QString LinkParser::getCaptured() const
-{
-    return this->match_;
+    return this->result_;
 }
 
 }  // namespace chatterino

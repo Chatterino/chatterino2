@@ -265,7 +265,7 @@ void Emojis::loadEmojiSet()
 }
 
 std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
-    const QString &text)
+    const QString &text) const
 {
     auto result = std::vector<boost::variant<EmotePtr, QString>>();
     int lastParsedEmojiEndIndex = 0;
@@ -359,7 +359,7 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
     return result;
 }
 
-QString Emojis::replaceShortCodes(const QString &text)
+QString Emojis::replaceShortCodes(const QString &text) const
 {
     QString ret(text);
     auto it = this->findShortCodesRegex_.globalMatch(text);
@@ -391,6 +391,16 @@ QString Emojis::replaceShortCodes(const QString &text)
     }
 
     return ret;
+}
+
+const EmojiMap &Emojis::getEmojis() const
+{
+    return this->emojis;
+}
+
+const std::vector<QString> &Emojis::getShortCodes() const
+{
+    return this->shortCodes;
 }
 
 }  // namespace chatterino

@@ -86,6 +86,8 @@ public:
         QString prefix, const std::vector<HelixModerator> &users,
         Channel *channel, MessageBuilder *builder);
 
+    static MessagePtr buildHypeChatMessage(Communi::IrcPrivateMessage *message);
+
     // Shares some common logic from SharedMessageBuilder::parseBadgeTag
     static std::unordered_map<QString, QString> parseBadgeInfoTag(
         const QVariantMap &tags);

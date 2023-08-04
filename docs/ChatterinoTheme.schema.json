@@ -30,7 +30,7 @@
         },
         {
           "title": "SVG Color",
-          "description": "This is stricter than Qt. You could theoretically put tabs an spaces between characters in a named color and capitalize the color.",
+          "description": "This enum is stricter than Qt. You could theoretically put tabs and spaces between characters in a named color and capitalize the color.",
           "$comment": "https://www.w3.org/TR/SVG11/types.html#ColorKeywords",
           "enum": [
             "aliceblue",
