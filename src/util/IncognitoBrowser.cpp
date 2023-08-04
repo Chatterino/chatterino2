@@ -21,7 +21,7 @@ QString getPrivateSwitch(QString const &browserExecutable)
         {"chrome", "-incognito"},           {"vivaldi", "-incognito"},
         {"opera", "-newprivatetab"},        {"opera\\launcher", "--private"},
         {"iexplore", "-private"},           {"msedge", "-inprivate"},
-        {"firefox-esr", "-private-window"},
+        {"firefox-esr", "-private-window"}, {"chromium", "-incognito"},
     };
 
     // compare case-insensitively
