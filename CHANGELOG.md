@@ -28,6 +28,7 @@
 - Bugfix: Fix visual glitches with smooth scrolling. (#4501)
 - Bugfix: Fixed pings firing for the "Your username" highlight when not signed in. (#4698)
 - Bugfix: Fixed partially broken filters on Qt 6 builds. (#4702)
+- Bugfix: Fixed tooltips & popups sometimes showing up on the wrong monitor. (#4740)
 - Bugfix: Fixed some network errors having `0` as their HTTP status. (#4704)
 - Bugfix: Fixed crash that could occurr when closing the usercard too quickly after blocking or unblocking a user. (#4711)
 - Bugfix: Fixed highlights sometimes not working after changing sound device, or switching users in your operating system. (#4729)

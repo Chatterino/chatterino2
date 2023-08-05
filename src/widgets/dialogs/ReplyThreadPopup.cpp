@@ -29,7 +29,6 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     , split_(split)
 {
     this->setWindowTitle(QStringLiteral("Reply Thread"));
-    this->setStayInScreenRect(true);
 
     HotkeyController::HotkeyMap actions{
         {"delete",

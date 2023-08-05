@@ -1810,7 +1810,8 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
         }
 
-        tooltipWidget->moveTo(this, event->globalPos());
+        tooltipWidget->moveTo(event->globalPos(), true,
+                              BaseWindow::BoundsChecker::CursorPosition);
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->show();
     }
@@ -2663,8 +2664,9 @@ void ChannelView::showUserInfoPopup(const QString &userName,
                                                    : this->underlyingChannel_;
     userPopup->setData(userName, contextChannel, openingChannel);
 
-    QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
-    userPopup->move(QCursor::pos() - offset);
+    QPoint offset(userPopup->width() / 3, userPopup->height() / 5);
+    userPopup->moveTo(QCursor::pos() - offset, false,
+                      BaseWindow::BoundsChecker::CursorPosition);
     userPopup->show();
 }
 
