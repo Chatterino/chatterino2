@@ -241,13 +241,6 @@ void BaseWindow::init()
 #endif
 }
 
-void BaseWindow::setStayInScreenRect(bool value)
-{
-    // this->stayInScreenRect_ = value;
-
-    // this->moveIntoDesktopRect(this->pos(), QCursor::pos());
-}
-
 void BaseWindow::setActionOnFocusLoss(ActionOnFocusLoss value)
 {
     this->actionOnFocusLoss_ = value;

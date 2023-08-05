@@ -62,9 +62,6 @@ public:
                                       std::function<void()> onClicked);
     EffectLabel *addTitleBarLabel(std::function<void()> onClicked);
 
-    void setStayInScreenRect(bool value);
-    // bool getStayInScreenRect() const;
-
     void setActionOnFocusLoss(ActionOnFocusLoss value);
     ActionOnFocusLoss getActionOnFocusLoss() const;
 
