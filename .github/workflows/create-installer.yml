@@ -53,17 +53,3 @@ jobs:
         with:
           path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.exe
           name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.exe
-
-      - name: Create nightly release
-        if: ${{ contains(steps.build-installer.outputs.C2_INSTALLER_BASE_NAME, 'Nightly') }}
-        uses: ncipollo/release-action@v1.12.0
-        with:
-          replacesArtifacts: true
-          allowUpdates: true
-          omitBodyDuringUpdate: true
-          omitNameDuringUpdate: true
-          artifactErrorsFailBuild: true
-          artifacts: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.exe
-          prerelease: true
-          name: Nightly Release
-          tag: nightly-build
