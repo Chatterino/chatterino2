@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
 #include "util/IpcQueue.hpp"
@@ -129,10 +130,20 @@ namespace nm::client {
 }  // namespace nm::client
 
 // SERVER
+NativeMessagingServer::NativeMessagingServer()
+    : thread(*this)
+{
+}
 
 void NativeMessagingServer::start()
 {
     this->thread.start();
+}
+
+NativeMessagingServer::ReceiverThread::ReceiverThread(
+    NativeMessagingServer &parent)
+    : parent_(parent)
+{
 }
 
 void NativeMessagingServer::ReceiverThread::run()
@@ -175,6 +186,11 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
     if (action == "detach")
     {
         this->handleDetach(root);
+        return;
+    }
+    if (action == "sync")
+    {
+        this->handleSync(root);
         return;
     }
 
@@ -262,6 +278,39 @@ void NativeMessagingServer::ReceiverThread::handleDetach(
 #endif
 }
 // NOLINTEND(readability-convert-member-functions-to-static)
+
+void NativeMessagingServer::ReceiverThread::handleSync(const QJsonObject &root)
+{
+    // Structure:
+    // { action: 'sync', twitchChannels?: string[] }
+    postToThread([&parent = this->parent_,
+                  twitch = root["twitchChannels"_L1].toArray()] {
+        parent.syncChannels(twitch);
+    });
+}
+
+void NativeMessagingServer::syncChannels(const QJsonArray &twitchChannels)
+{
+    assertInGuiThread();
+
+    auto *app = getApp();
+
+    std::vector<ChannelPtr> updated;
+    updated.reserve(twitchChannels.size());
+    for (const auto &value : twitchChannels)
+    {
+        auto name = value.toString();
+        if (name.isEmpty())
+        {
+            continue;
+        }
+        // the deduping is done on the extension side
+        updated.emplace_back(app->twitch->getOrAddChannel(name));
+    }
+
+    // This will destroy channels that aren't used anymore.
+    this->channelWarmer_ = std::move(updated);
+}
 
 Atomic<boost::optional<QString>> &nmIpcError()
 {

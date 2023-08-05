@@ -10,6 +10,7 @@
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/Window.hpp"
 
 #include <QApplication>
 #include <QFont>
@@ -238,18 +239,6 @@ void BaseWindow::init()
             this->connections_);
     }
 #endif
-}
-
-void BaseWindow::setStayInScreenRect(bool value)
-{
-    this->stayInScreenRect_ = value;
-
-    this->moveIntoDesktopRect(this->pos());
-}
-
-bool BaseWindow::getStayInScreenRect() const
-{
-    return this->stayInScreenRect_;
 }
 
 void BaseWindow::setActionOnFocusLoss(ActionOnFocusLoss value)
@@ -514,7 +503,7 @@ void BaseWindow::leaveEvent(QEvent *)
     TooltipWidget::instance()->hide();
 }
 
-void BaseWindow::moveTo(QWidget *parent, QPoint point, bool offset)
+void BaseWindow::moveTo(QPoint point, bool offset, BoundsChecker boundsChecker)
 {
     if (offset)
     {
@@ -522,7 +511,26 @@ void BaseWindow::moveTo(QWidget *parent, QPoint point, bool offset)
         point.ry() += 16;
     }
 
-    this->moveIntoDesktopRect(point);
+    switch (boundsChecker)
+    {
+        case BoundsChecker::Off: {
+            // The bounds checker is off, *just* move the window
+            this->move(point);
+        }
+        break;
+
+        case BoundsChecker::CursorPosition: {
+            // The bounds checker is on, use the cursor position as the origin
+            this->moveWithinScreen(point, QCursor::pos());
+        }
+        break;
+
+        case BoundsChecker::DesiredPosition: {
+            // The bounds checker is on, use the desired position as the origin
+            this->moveWithinScreen(point, point);
+        }
+        break;
+    }
 }
 
 void BaseWindow::resizeEvent(QResizeEvent *)
@@ -576,24 +584,13 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
-    this->moveIntoDesktopRect(this->pos());
-    if (this->frameless_)
-    {
-        QTimer::singleShot(30, this, [this] {
-            this->moveIntoDesktopRect(this->pos());
-        });
-    }
 }
 
-void BaseWindow::moveIntoDesktopRect(QPoint point)
+void BaseWindow::moveWithinScreen(QPoint point, QPoint origin)
 {
-    if (!this->stayInScreenRect_)
-    {
-        return;
-    }
-
     // move the widget into the screen geometry if it's not already in there
-    auto *screen = QApplication::screenAt(point);
+    auto *screen = QApplication::screenAt(origin);
+
     if (screen == nullptr)
     {
         screen = QApplication::primaryScreen();
@@ -603,6 +600,9 @@ void BaseWindow::moveIntoDesktopRect(QPoint point)
     bool stickRight = false;
     bool stickBottom = false;
 
+    const auto w = this->frameGeometry().width();
+    const auto h = this->frameGeometry().height();
+
     if (point.x() < bounds.left())
     {
         point.setX(bounds.left());
@@ -611,15 +611,15 @@ void BaseWindow::moveIntoDesktopRect(QPoint point)
     {
         point.setY(bounds.top());
     }
-    if (point.x() + this->width() > bounds.right())
+    if (point.x() + w > bounds.right())
     {
         stickRight = true;
-        point.setX(bounds.right() - this->width());
+        point.setX(bounds.right() - w);
     }
-    if (point.y() + this->height() > bounds.bottom())
+    if (point.y() + h > bounds.bottom())
     {
         stickBottom = true;
-        point.setY(bounds.bottom() - this->height());
+        point.setY(bounds.bottom() - h);
     }
 
     if (stickRight && stickBottom)
