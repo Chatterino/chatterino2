@@ -10,6 +10,7 @@
 - Minor: Improved editing hotkeys. (#4628)
 - Minor: The input completion and quick switcher are now styled to match your theme. (#4671)
 - Minor: Added setting to only show tabs with live channels (default toggle hotkey: Ctrl+Shift+L). (#4358)
+- Minor: Added better support for Twitch's Hype Chat feature. (#4715)
 - Minor: Added option to subscribe to and unsubscribe from reply threads. (#4680, #4739)
 - Minor: Added a message for when Chatterino joins a channel (#4616)
 - Minor: Add accelerators to the right click menu for messages (#4705)
@@ -17,6 +18,7 @@
 - Minor: 7TV badges now automatically update upon changing. (#4512)
 - Minor: Stream status requests are now batched. (#4713)
 - Minor: Added `/c2-theme-autoreload` command to automatically reload a custom theme. This is useful for when you're developing your own theme. (#4718)
+- Minor: Show channel point redemptions without messages in usercard. (#4557)
 - Bugfix: Increased amount of blocked users loaded from 100 to 1,000. (#4721)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
 - Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
@@ -30,6 +32,7 @@
 - Bugfix: Fixed crash that could occurr when closing the usercard too quickly after blocking or unblocking a user. (#4711)
 - Bugfix: Fixed highlights sometimes not working after changing sound device, or switching users in your operating system. (#4729)
 - Bugfix: Fixed key bindings not showing in context menus on Mac. (#4722)
+- Bugfix: Fixed tab completion rarely completing the wrong word. (#4735)
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
 - Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
 - Dev: Added test cases for emote and tab completion. (#4644)
@@ -45,6 +48,7 @@
 - Dev: Moved preprocessor Git and date definitions to executables only. (#4681)
 - Dev: Refactored tests to be able to use `ctest` and run in debug builds. (#4700)
 - Dev: Added the ability to use an alternate linker using the `-DUSE_ALTERNATE_LINKER=...` CMake parameter. (#4711)
+- Dev: Removed `getApp` and `getSettings` calls from message rendering. (#4535)
 
 ## 2.4.4
 
