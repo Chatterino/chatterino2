@@ -608,6 +608,9 @@ void BaseWindow::moveWithinScreen(QPoint point, QPoint origin)
     bool stickRight = false;
     bool stickBottom = false;
 
+    const auto w = this->frameGeometry().width();
+    const auto h = this->frameGeometry().height();
+
     if (point.x() < bounds.left())
     {
         point.setX(bounds.left());
@@ -616,15 +619,15 @@ void BaseWindow::moveWithinScreen(QPoint point, QPoint origin)
     {
         point.setY(bounds.top());
     }
-    if (point.x() + this->width() > bounds.right())
+    if (point.x() + w > bounds.right())
     {
         stickRight = true;
-        point.setX(bounds.right() - this->width());
+        point.setX(bounds.right() - w);
     }
-    if (point.y() + this->height() > bounds.bottom())
+    if (point.y() + h > bounds.bottom())
     {
         stickBottom = true;
-        point.setY(bounds.bottom() - this->height());
+        point.setY(bounds.bottom() - h);
     }
 
     if (stickRight && stickBottom)
