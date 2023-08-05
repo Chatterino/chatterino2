@@ -47,6 +47,7 @@
 - Dev: Refactored tests to be able to use `ctest` and run in debug builds. (#4700)
 - Dev: Added the ability to use an alternate linker using the `-DUSE_ALTERNATE_LINKER=...` CMake parameter. (#4711)
 - Dev: Removed `getApp` and `getSettings` calls from message rendering. (#4535)
+- Dev: Laid the groundwork for advanced input completion strategies. (#4639)
 
 ## 2.4.4
 
@@ -62,7 +63,6 @@
 - Bugfix: Fixed Ctrl+Backspace not working after Select All in chat search popup. (#4461)
 - Bugfix: Fixed crash when scrolling up really fast. (#4621)
 - Dev: Added the ability to control the `followRedirect` mode for requests. (#4594)
-- Dev: Laid the groundwork for advanced input completion strategies. (#4639)
 
 ## 2.4.3
 
