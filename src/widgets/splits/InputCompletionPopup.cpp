@@ -83,7 +83,7 @@ void InputCompletionPopup::beginCompletion(CompletionKind kind,
 
 void InputCompletionPopup::endCompletion()
 {
-    this->currentKind_ = boost::none;
+    this->currentKind_ = std::nullopt;
     this->currentChannel_ = nullptr;
     this->model_.setSource(nullptr);
 }

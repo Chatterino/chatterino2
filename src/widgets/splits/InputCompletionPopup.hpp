@@ -4,10 +4,9 @@
 #include "widgets/BasePopup.hpp"
 #include "widgets/listview/GenericListView.hpp"
 
-#include <boost/optional.hpp>
-
 #include <functional>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace chatterino {
@@ -54,7 +53,7 @@ private:
     ActionCallback callback_;
     QTimer redrawTimer_;
 
-    boost::optional<CompletionKind> currentKind_{};
+    std::optional<CompletionKind> currentKind_{};
     ChannelPtr currentChannel_{};
 };
 
