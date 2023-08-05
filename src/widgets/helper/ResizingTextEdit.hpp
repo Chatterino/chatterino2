@@ -61,7 +61,7 @@ private:
      * `Tab` pressed again:
      *   - complete ["pog"] to "PogChamp"
      *
-     * [other key] pressed - updating the input text:
+     * [other key] pressed or cursor moved - updating the input text:
      *   - set `completionInProgress_ = false`
      */
     bool completionInProgress_ = false;

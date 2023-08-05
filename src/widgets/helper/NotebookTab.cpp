@@ -234,7 +234,7 @@ void NotebookTab::updateSize()
     if (this->width() != width || this->height() != height)
     {
         this->resize(width, height);
-        this->notebook_->performLayout();
+        this->notebook_->refresh();
     }
 }
 
@@ -290,7 +290,7 @@ void NotebookTab::titleUpdated()
 {
     // Queue up save because: Tab title changed
     getApp()->windows->queueSave();
-    this->notebook_->performLayout();
+    this->notebook_->refresh();
     this->updateSize();
     this->update();
 }
@@ -327,13 +327,21 @@ void NotebookTab::setTabLocation(NotebookTabLocation location)
     }
 }
 
-void NotebookTab::setLive(bool isLive)
+bool NotebookTab::setLive(bool isLive)
 {
     if (this->isLive_ != isLive)
     {
         this->isLive_ = isLive;
         this->update();
+        return true;
     }
+
+    return false;
+}
+
+bool NotebookTab::isLive() const
+{
+    return this->isLive_;
 }
 
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle)

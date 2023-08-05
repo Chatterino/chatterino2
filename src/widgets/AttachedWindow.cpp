@@ -136,6 +136,13 @@ AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
     return window;
 }
 
+#ifdef USEWINSDK
+AttachedWindow *AttachedWindow::getForeground(const GetArgs &args)
+{
+    return AttachedWindow::get(::GetForegroundWindow(), args);
+}
+#endif
+
 void AttachedWindow::detach(const QString &winId)
 {
     for (Item &item : items)

@@ -17,6 +17,7 @@ TwitchAccountManager::TwitchAccountManager()
     this->currentUserChanged.connect([this] {
         auto currentUser = this->getCurrent();
         currentUser->loadBlocks();
+        currentUser->loadSeventvUserID();
     });
 
     this->accounts.itemRemoved.connect([this](const auto &acc) {

@@ -217,17 +217,20 @@ void RecentMessagesApi::loadRecentMessages(const QString &channelName,
 
             return Success;
         })
-        .onError([channelPtr, onError](NetworkResult result) {
+        .onError([channelPtr, onError](const NetworkResult &result) {
             auto shared = channelPtr.lock();
             if (!shared)
+            {
                 return;
+            }
 
             qCDebug(chatterinoRecentMessages)
                 << "Failed to load recent messages for" << shared->getName();
 
             shared->addMessage(makeSystemMessage(
-                QString("Message history service unavailable (Error %1)")
-                    .arg(result.status())));
+                QStringLiteral(
+                    "Message history service unavailable (Error: %1)")
+                    .arg(result.formatError())));
 
             onError();
         })

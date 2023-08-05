@@ -7,13 +7,16 @@
 #include "common/QLogging.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/builtin/chatterino/Debugging.hpp"
 #include "controllers/commands/builtin/twitch/ChatSettings.hpp"
 #include "controllers/commands/builtin/twitch/ShieldMode.hpp"
+#include "controllers/commands/builtin/twitch/Shoutout.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
 #include "controllers/plugins/PluginController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
+#include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
@@ -36,6 +39,7 @@
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/PostToThread.hpp"
 #include "util/Qt.hpp"
 #include "util/StreamerMode.hpp"
 #include "util/StreamLink.hpp"
@@ -646,7 +650,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             target,
             [currentUser, channel, target](const HelixUser &targetUser) {
                 getApp()->accounts->twitch.getCurrent()->blockUser(
-                    targetUser.id,
+                    targetUser.id, nullptr,
                     [channel, target, targetUser] {
                         channel->addMessage(makeSystemMessage(
                             QString("You successfully blocked user %1")
@@ -699,7 +703,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             target,
             [currentUser, channel, target](const auto &targetUser) {
                 getApp()->accounts->twitch.getCurrent()->unblockUser(
-                    targetUser.id,
+                    targetUser.id, nullptr,
                     [channel, target, targetUser] {
                         channel->addMessage(makeSystemMessage(
                             QString("You successfully unblocked user %1")
@@ -3209,8 +3213,35 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
+    this->registerCommand(
+        "/debug-force-image-gc",
+        [](const QStringList & /*words*/, auto /*channel*/) -> QString {
+            runInGuiThread([] {
+                using namespace chatterino::detail;
+                auto &iep = ImageExpirationPool::instance();
+                iep.freeOld();
+            });
+            return "";
+        });
+
+    this->registerCommand(
+        "/debug-force-image-unload",
+        [](const QStringList & /*words*/, auto /*channel*/) -> QString {
+            runInGuiThread([] {
+                using namespace chatterino::detail;
+                auto &iep = ImageExpirationPool::instance();
+                iep.freeAll();
+            });
+            return "";
+        });
+
     this->registerCommand("/shield", &commands::shieldModeOn);
     this->registerCommand("/shieldoff", &commands::shieldModeOff);
+
+    this->registerCommand("/shoutout", &commands::sendShoutout);
+
+    this->registerCommand("/c2-set-logging-rules", &commands::setLoggingRules);
+    this->registerCommand("/c2-theme-autoreload", &commands::toggleThemeReload);
 }
 
 void CommandController::save()
