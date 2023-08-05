@@ -72,7 +72,7 @@ QString getDefaultBrowserExecutable()
     auto desktopFile = getDefaultBrowserDesktopFile();
     if (desktopFile.has_value())
     {
-        auto entry = (*desktopFile)["Desktop Entry"];
+        auto entry = desktopFile->getEntries("Desktop Entry");
         auto exec = entry.find("Exec");
         if (exec != entry.end())
         {

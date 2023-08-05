@@ -9,6 +9,9 @@
 
 namespace chatterino {
 
+// See https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#group-header
+using XDGEntries = std::unordered_map<QString, QString>;
+
 class XDGDesktopFile
 {
 public:
@@ -16,8 +19,8 @@ public:
     XDGDesktopFile(XDGDesktopFile &&other) = default;
     ~XDGDesktopFile() = default;
 
-    using Group = std::unordered_map<QString, QString>;
-    Group const &operator[](QString const &key) const;
+    /// Returns a map of entries for the given group header
+    XDGEntries getEntries(const QString &groupHeader) const;
 
     bool exists() const
     {
@@ -29,7 +32,7 @@ public:
 
 private:
     bool _exists = false;
-    std::unordered_map<QString, Group> _groups;
+    std::unordered_map<QString, XDGEntries> _groups;
 };
 
 }  // namespace chatterino

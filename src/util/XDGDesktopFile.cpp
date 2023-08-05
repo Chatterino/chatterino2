@@ -9,12 +9,6 @@
 
 #if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 
-namespace {
-
-chatterino::XDGDesktopFile::Group const EMPTY_GROUP;
-
-}  // namespace
-
 namespace chatterino {
 
 XDGDesktopFile::XDGDesktopFile(const QString &filename)
@@ -26,17 +20,18 @@ XDGDesktopFile::XDGDesktopFile(const QString &filename)
     }
     this->_exists = true;
 
-    std::optional<std::reference_wrapper<Group>> currentGroup;
+    std::optional<std::reference_wrapper<XDGEntries>> entries;
 
     while (!file.atEnd())
     {
         auto lineBytes = file.readLine().trimmed();
-        // comments are not guaranteed to be valid UTF-8, so check before
-        // decoding the line
+
+        // Ignore comments & empty lines
         if (lineBytes.startsWith('#') || lineBytes.size() == 0)
         {
             continue;
         }
+
         auto line = QString::fromUtf8(lineBytes);
 
         if (line.startsWith('['))
@@ -54,49 +49,51 @@ XDGDesktopFile::XDGDesktopFile(const QString &filename)
             // parsing behavior for that case is not specified. operator[] will
             // result in duplicate groups being merged, which makes the most
             // sense for a read-only parser
-            currentGroup = this->_groups[groupName];
+            entries = this->_groups[groupName];
+
+            continue;
         }
-        else
+
+        // group entry
+        if (!entries.has_value())
         {
-            if (!currentGroup.has_value())
-            {
-                // no group header yet, any other data is against spec and
-                // should be ignored
-                continue;
-            }
-
-            auto equals = line.indexOf('=');
-            if (equals == -1)
-            {
-                // line is not a group header or a key value pair, ignore
-                continue;
-            }
-
-            auto key = QStringView(line).left(equals).trimmed().toString();
-            // QStringView.mid() does not do bounds checking before qt 5.15, so
-            // we have to do it ourselves
-            auto valueStart = equals + 1;
-            auto value =
-                valueStart < line.size()
-                    ? QStringView(line).mid(valueStart).trimmed().toString()
-                    : QString("");
-
-            // existing keys are against spec, so we can overwrite them with
-            // wild abandon
-            currentGroup.value().get()[key] = value;
+            // no group header yet, entry before a group header is against spec
+            // and should be ignored
+            continue;
         }
+
+        auto delimiter = line.indexOf('=');
+        if (delimiter == -1)
+        {
+            // line is not a group header or a key value pair, ignore it
+            continue;
+        }
+
+        auto key = QStringView(line).left(delimiter).trimmed().toString();
+        // QStringView.mid() does not do bounds checking before qt 5.15, so
+        // we have to do it ourselves
+        auto valueStart = delimiter + 1;
+        QString value;
+        if (valueStart < line.size())
+        {
+            value = QStringView(line).mid(valueStart).trimmed().toString();
+        }
+
+        // existing keys are against spec, so we can overwrite them with
+        // wild abandon
+        entries->get().emplace(key, value);
     }
 }
 
-XDGDesktopFile::Group const &XDGDesktopFile::operator[](
-    QString const &key) const
+XDGEntries XDGDesktopFile::getEntries(const QString &groupHeader) const
 {
-    auto group = this->_groups.find(key);
+    auto group = this->_groups.find(groupHeader);
     if (group != this->_groups.end())
     {
         return group->second;
     }
-    return EMPTY_GROUP;
+
+    return {};
 }
 
 std::optional<XDGDesktopFile> XDGDesktopFile::findDesktopId(

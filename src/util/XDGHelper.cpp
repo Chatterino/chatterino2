@@ -28,7 +28,7 @@ std::optional<XDGDesktopFile> processMimeAppsList(
     XDGDesktopFile mimeappsList(fileName);
     // get the list of desktop ids for the given mimetype under the "Default
     // Applications" group in the mimeapps.list file
-    auto defaultGroup = mimeappsList[QStringLiteral("Default Applications")];
+    auto defaultGroup = mimeappsList.getEntries("Default Applications");
     auto defaultApps = defaultGroup.find(mimetype);
     if (defaultApps != defaultGroup.cend())
     {
@@ -58,7 +58,7 @@ std::optional<XDGDesktopFile> processMimeAppsList(
     // associations, then return empty
 
     // load any removed associations into the denylist
-    auto removedGroup = mimeappsList[QStringLiteral("Removed Associations")];
+    auto removedGroup = mimeappsList.getEntries("Removed Associations");
     auto removedApps = removedGroup.find(mimetype);
     if (removedApps != removedGroup.end())
     {
@@ -70,7 +70,7 @@ std::optional<XDGDesktopFile> processMimeAppsList(
     }
 
     // append any created associations to the associations list
-    auto addedGroup = mimeappsList[QStringLiteral("Added Associations")];
+    auto addedGroup = mimeappsList.getEntries("Added Associations");
     auto addedApps = addedGroup.find(mimetype);
     if (addedApps != addedGroup.end())
     {
