@@ -6,7 +6,7 @@ if (-not (Test-Path -PathType Container Chatterino2)) {
 # Check if we're on a tag
 $OldErrorActionPref = $ErrorActionPreference;
 $ErrorActionPreference = 'Continue';
-git describe --exact-match *> $null;
+git describe --exact-match --match 'v*' *> $null;
 $isTagged = $?;
 $ErrorActionPreference = $OldErrorActionPref;
 
