@@ -2,7 +2,7 @@
 
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
-#include "providers/autocomplete/TabAutocompleteModel.hpp"
+#include "controllers/completion/TabCompletionModel.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QMimeData>
@@ -160,9 +160,9 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             return;
         }
 
-        // always expected to be TabAutocompleteModel
+        // always expected to be TabCompletionModel
         auto *completionModel =
-            dynamic_cast<TabAutocompleteModel *>(this->completer_->model());
+            dynamic_cast<TabCompletionModel *>(this->completer_->model());
         assert(completionModel != nullptr);
 
         if (!this->completionInProgress_)

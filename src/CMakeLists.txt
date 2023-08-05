@@ -77,6 +77,28 @@ set(SOURCE_FILES
         controllers/commands/CommandModel.cpp
         controllers/commands/CommandModel.hpp
 
+        controllers/completion/CompletionModel.cpp
+        controllers/completion/CompletionModel.hpp
+        controllers/completion/sources/Source.hpp
+        controllers/completion/sources/CommandSource.cpp
+        controllers/completion/sources/CommandSource.hpp
+        controllers/completion/sources/EmoteSource.cpp
+        controllers/completion/sources/EmoteSource.hpp
+        controllers/completion/sources/Helpers.hpp
+        controllers/completion/sources/UnifiedSource.cpp
+        controllers/completion/sources/UnifiedSource.hpp
+        controllers/completion/sources/UserSource.cpp
+        controllers/completion/sources/UserSource.hpp
+        controllers/completion/strategies/Strategy.hpp
+        controllers/completion/strategies/ClassicEmoteStrategy.cpp
+        controllers/completion/strategies/ClassicEmoteStrategy.hpp
+        controllers/completion/strategies/ClassicUserStrategy.cpp
+        controllers/completion/strategies/ClassicUserStrategy.hpp
+        controllers/completion/strategies/CommandStrategy.cpp
+        controllers/completion/strategies/CommandStrategy.hpp
+        controllers/completion/TabCompletionModel.cpp
+        controllers/completion/TabCompletionModel.hpp
+
         controllers/filters/FilterModel.cpp
         controllers/filters/FilterModel.hpp
         controllers/filters/FilterRecord.cpp
@@ -238,17 +260,6 @@ set(SOURCE_FILES
         providers/NetworkConfigurationProvider.hpp
         providers/RecentMessagesApi.cpp
         providers/RecentMessagesApi.hpp
-
-        providers/autocomplete/AutocompleteModel.cpp
-        providers/autocomplete/AutocompleteModel.hpp
-        providers/autocomplete/AutocompleteSource.hpp
-        providers/autocomplete/AutocompleteSources.cpp
-        providers/autocomplete/AutocompleteSources.hpp
-        providers/autocomplete/AutocompleteStrategies.cpp
-        providers/autocomplete/AutocompleteStrategies.hpp
-        providers/autocomplete/AutocompleteStrategy.hpp
-        providers/autocomplete/TabAutocompleteModel.cpp
-        providers/autocomplete/TabAutocompleteModel.hpp
 
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp

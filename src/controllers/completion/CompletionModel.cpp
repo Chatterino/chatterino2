@@ -1,23 +1,25 @@
-#include "providers/autocomplete/AutocompleteModel.hpp"
+#include "controllers/completion/CompletionModel.hpp"
+
+#include "controllers/completion/sources/Source.hpp"
 
 namespace chatterino {
 
-AutocompleteModel::AutocompleteModel(QObject *parent)
+CompletionModel::CompletionModel(QObject *parent)
     : GenericListModel(parent)
 {
 }
 
-void AutocompleteModel::setSource(std::unique_ptr<AutocompleteSource> source)
+void CompletionModel::setSource(std::unique_ptr<completion::Source> source)
 {
     this->source_ = std::move(source);
 }
 
-bool AutocompleteModel::hasSource() const
+bool CompletionModel::hasSource() const
 {
     return this->source_ != nullptr;
 }
 
-void AutocompleteModel::updateResults(const QString &query, size_t maxCount)
+void CompletionModel::updateResults(const QString &query, size_t maxCount)
 {
     if (this->source_)
     {

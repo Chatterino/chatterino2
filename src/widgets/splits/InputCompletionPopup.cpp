@@ -1,7 +1,8 @@
 #include "widgets/splits/InputCompletionPopup.hpp"
 
-#include "providers/autocomplete/AutocompleteSources.hpp"
-#include "providers/autocomplete/AutocompleteStrategies.hpp"
+#include "controllers/completion/sources/UserSource.hpp"
+#include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
+#include "controllers/completion/strategies/ClassicUserStrategy.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
@@ -46,7 +47,7 @@ void InputCompletionPopup::updateCompletion(const QString &text,
     }
 }
 
-std::unique_ptr<AutocompleteSource> InputCompletionPopup::getSource() const
+std::unique_ptr<completion::Source> InputCompletionPopup::getSource() const
 {
     assert(this->currentChannel_ != nullptr);
 
@@ -59,14 +60,14 @@ std::unique_ptr<AutocompleteSource> InputCompletionPopup::getSource() const
     switch (*this->currentKind_)
     {
         case CompletionKind::Emote:
-            return std::make_unique<AutocompleteEmoteSource>(
+            return std::make_unique<completion::EmoteSource>(
                 *this->currentChannel_,
-                std::make_unique<ClassicAutocompleteEmoteStrategy>(),
+                std::make_unique<completion::ClassicEmoteStrategy>(),
                 this->callback_);
         case CompletionKind::User:
-            return std::make_unique<AutocompleteUsersSource>(
+            return std::make_unique<completion::UserSource>(
                 *this->currentChannel_,
-                std::make_unique<ClassicAutocompleteUserStrategy>(),
+                std::make_unique<completion::ClassicUserStrategy>(),
                 this->callback_);
         default:
             return nullptr;

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "providers/autocomplete/AutocompleteModel.hpp"
+#include "controllers/completion/CompletionModel.hpp"
+#include "controllers/completion/sources/Source.hpp"
 #include "widgets/BasePopup.hpp"
 #include "widgets/listview/GenericListView.hpp"
 
@@ -43,13 +44,13 @@ private:
     void beginCompletion(CompletionKind kind, ChannelPtr channel);
     void endCompletion();
 
-    std::unique_ptr<AutocompleteSource> getSource() const;
+    std::unique_ptr<completion::Source> getSource() const;
 
     struct {
         GenericListView *listView;
     } ui_;
 
-    AutocompleteModel model_;
+    CompletionModel model_;
     ActionCallback callback_;
     QTimer redrawTimer_;
 

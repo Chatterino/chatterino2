@@ -1,19 +1,24 @@
-#include "providers/autocomplete/TabAutocompleteModel.hpp"
+#include "controllers/completion/TabCompletionModel.hpp"
 
 #include "common/Channel.hpp"
-#include "providers/autocomplete/AutocompleteSources.hpp"
-#include "providers/autocomplete/AutocompleteStrategies.hpp"
+#include "controllers/completion/sources/CommandSource.hpp"
+#include "controllers/completion/sources/EmoteSource.hpp"
+#include "controllers/completion/sources/UnifiedSource.hpp"
+#include "controllers/completion/sources/UserSource.hpp"
+#include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
+#include "controllers/completion/strategies/ClassicUserStrategy.hpp"
+#include "controllers/completion/strategies/CommandStrategy.hpp"
 #include "singletons/Settings.hpp"
 
 namespace chatterino {
 
-TabAutocompleteModel::TabAutocompleteModel(Channel &channel, QObject *parent)
+TabCompletionModel::TabCompletionModel(Channel &channel, QObject *parent)
     : QStringListModel(parent)
     , channel_(channel)
 {
 }
 
-void TabAutocompleteModel::updateResults(const QString &query, bool isFirstWord)
+void TabCompletionModel::updateResults(const QString &query, bool isFirstWord)
 {
     this->updateSourceFromQuery(query);
 
@@ -28,12 +33,12 @@ void TabAutocompleteModel::updateResults(const QString &query, bool isFirstWord)
     }
 }
 
-void TabAutocompleteModel::updateSourceFromQuery(const QString &query)
+void TabCompletionModel::updateSourceFromQuery(const QString &query)
 {
     auto deducedKind = this->deduceSourceKind(query);
     if (!deducedKind)
     {
-        // unable to determine what kind of autocomplete is occurring
+        // unable to determine what kind of completion is occurring
         this->sourceKind_ = boost::none;
         this->source_ = nullptr;
         return;
@@ -49,8 +54,8 @@ void TabAutocompleteModel::updateSourceFromQuery(const QString &query)
     this->source_ = this->buildSource(*deducedKind);
 }
 
-boost::optional<TabAutocompleteModel::SourceKind>
-    TabAutocompleteModel::deduceSourceKind(const QString &query) const
+boost::optional<TabCompletionModel::SourceKind>
+    TabCompletionModel::deduceSourceKind(const QString &query) const
 {
     if (query.length() < 2 || !this->channel_.isTwitchChannel())
     {
@@ -72,7 +77,7 @@ boost::optional<TabAutocompleteModel::SourceKind>
         return SourceKind::Command;
     }
 
-    // At this point, we note that emotes can be autocompleted without using a :
+    // At this point, we note that emotes can be completed without using a :
     // Therefore, we must also consider that the user could be completing an emote
     // OR a mention depending on their completion settings.
 
@@ -85,27 +90,27 @@ boost::optional<TabAutocompleteModel::SourceKind>
     return SourceKind::EmoteAndUser;
 }
 
-std::unique_ptr<AutocompleteSource> TabAutocompleteModel::buildSource(
+std::unique_ptr<completion::Source> TabCompletionModel::buildSource(
     SourceKind kind) const
 {
     switch (kind)
     {
         case SourceKind::Emote:
-            return std::make_unique<AutocompleteEmoteSource>(
+            return std::make_unique<completion::EmoteSource>(
                 this->channel_,
-                std::make_unique<ClassicTabAutocompleteEmoteStrategy>());
+                std::make_unique<completion::ClassicTabEmoteStrategy>());
         case SourceKind::User:
-            return std::make_unique<AutocompleteUsersSource>(
+            return std::make_unique<completion::UserSource>(
                 this->channel_,
-                std::make_unique<ClassicAutocompleteUserStrategy>());
+                std::make_unique<completion::ClassicUserStrategy>());
         case SourceKind::Command:
-            return std::make_unique<AutocompleteCommandsSource>(
-                std::make_unique<AutocompleteCommandStrategy>(true));
+            return std::make_unique<completion::CommandSource>(
+                std::make_unique<completion::CommandStrategy>(true));
         case SourceKind::EmoteAndUser:
-            return std::make_unique<AutocompleteUnifiedSource>(
+            return std::make_unique<completion::UnifiedSource>(
                 this->channel_,
-                std::make_unique<ClassicTabAutocompleteEmoteStrategy>(),
-                std::make_unique<ClassicAutocompleteUserStrategy>());
+                std::make_unique<completion::ClassicTabEmoteStrategy>(),
+                std::make_unique<completion::ClassicUserStrategy>());
         default:
             return nullptr;
     }

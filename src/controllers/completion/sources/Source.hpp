@@ -1,6 +1,5 @@
 #pragma once
 
-#include "providers/autocomplete/AutocompleteStrategy.hpp"
 #include "widgets/listview/GenericListModel.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
 
@@ -10,22 +9,22 @@
 #include <utility>
 #include <vector>
 
-namespace chatterino {
+namespace chatterino::completion {
 
-/// @brief An AutocompleteSource represents a source for generating autocomplete suggestions.
+/// @brief A Source represents a source for generating completion suggestions.
 ///
 /// The source can be queried to update its suggestions and then write the completion
 /// suggestions to a GenericListModel or QStringList depending on the consumer's
 /// requirements.
 ///
-/// For example, consider providing emotes for autocomplete. The AutocompleteSource
-/// instance is initialized with every available emote in the channel (including
-/// global emotes). As the user updates their query by typing, the suggestions are
+/// For example, consider providing emotes for completion. The Source instance
+/// initialized with every available emote in the channel (including  global
+/// emotes). As the user updates their query by typing, the suggestions are
 /// refined and the output model is updated.
-class AutocompleteSource
+class Source
 {
 public:
-    virtual ~AutocompleteSource() = default;
+    virtual ~Source() = default;
 
     /// @brief Updates the internal completion suggestions for the given query
     /// @param query Query to complete against
@@ -45,4 +44,4 @@ public:
                                  bool isFirstWord = false) const = 0;
 };
 
-};  // namespace chatterino
+};  // namespace chatterino::completion

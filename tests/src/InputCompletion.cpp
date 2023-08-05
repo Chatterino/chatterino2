@@ -2,11 +2,12 @@
 #include "BaseSettings.hpp"
 #include "common/Aliases.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
+#include "controllers/completion/strategies/ClassicUserStrategy.hpp"
+#include "controllers/completion/strategies/Strategy.hpp"
 #include "messages/Emote.hpp"
 #include "mocks/EmptyApplication.hpp"
 #include "mocks/Helix.hpp"
-#include "providers/autocomplete/AutocompleteSources.hpp"
-#include "providers/autocomplete/AutocompleteStrategies.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
@@ -24,6 +25,7 @@
 namespace {
 
 using namespace chatterino;
+using namespace chatterino::completion;
 using ::testing::Exactly;
 
 class MockTwitchIrcServer : public ITwitchIrcServer
@@ -203,20 +205,18 @@ private:
 protected:
     auto queryClassicEmoteCompletion(const QString &fullQuery)
     {
-        AutocompleteEmoteSource source(
-            *this->channelPtr,
-            std::make_unique<ClassicAutocompleteEmoteStrategy>());
+        EmoteSource source(*this->channelPtr,
+                           std::make_unique<ClassicEmoteStrategy>());
         source.update(fullQuery);
 
-        std::vector<CompletionEmote> out(source.output());
+        std::vector<EmoteItem> out(source.output());
         return out;
     }
 
     auto queryClassicTabCompletion(const QString &fullQuery, bool isFirstWord)
     {
-        AutocompleteEmoteSource source(
-            *this->channelPtr,
-            std::make_unique<ClassicTabAutocompleteEmoteStrategy>());
+        EmoteSource source(*this->channelPtr,
+                           std::make_unique<ClassicTabEmoteStrategy>());
         source.update(fullQuery);
 
         QStringList m;
