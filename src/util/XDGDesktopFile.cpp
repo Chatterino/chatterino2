@@ -18,7 +18,7 @@ XDGDesktopFile::XDGDesktopFile(const QString &filename)
     {
         return;
     }
-    this->_exists = true;
+    this->valid = true;
 
     std::optional<std::reference_wrapper<XDGEntries>> entries;
 
@@ -49,7 +49,7 @@ XDGDesktopFile::XDGDesktopFile(const QString &filename)
             // parsing behavior for that case is not specified. operator[] will
             // result in duplicate groups being merged, which makes the most
             // sense for a read-only parser
-            entries = this->_groups[groupName];
+            entries = this->groups[groupName];
 
             continue;
         }
@@ -87,8 +87,8 @@ XDGDesktopFile::XDGDesktopFile(const QString &filename)
 
 XDGEntries XDGDesktopFile::getEntries(const QString &groupHeader) const
 {
-    auto group = this->_groups.find(groupHeader);
-    if (group != this->_groups.end())
+    auto group = this->groups.find(groupHeader);
+    if (group != this->groups.end())
     {
         return group->second;
     }
@@ -96,16 +96,16 @@ XDGEntries XDGDesktopFile::getEntries(const QString &groupHeader) const
     return {};
 }
 
-std::optional<XDGDesktopFile> XDGDesktopFile::findDesktopId(
-    const QString &desktopId)
+std::optional<XDGDesktopFile> XDGDesktopFile::findDesktopFile(
+    const QString &desktopFileID)
 {
     for (const auto &dataDir : getXDGDirectories(XDGDirectoryType::Data))
     {
         auto fileName =
             QDir::cleanPath(dataDir + QDir::separator() + "applications" +
-                            QDir::separator() + desktopId);
+                            QDir::separator() + desktopFileID);
         XDGDesktopFile desktopFile(fileName);
-        if (desktopFile.exists())
+        if (desktopFile.isValid())
         {
             return desktopFile;
         }

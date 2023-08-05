@@ -43,7 +43,7 @@ std::optional<XDGDesktopFile> processMimeAppsList(
             // association, so just check that it's not in the denylist
             if (!denyList.contains(desktopId))
             {
-                auto desktopFile = XDGDesktopFile::findDesktopId(desktopId);
+                auto desktopFile = XDGDesktopFile::findDesktopFile(desktopId);
                 // if a valid association is found, we have found the default
                 // application
                 if (desktopFile.has_value())
@@ -132,7 +132,7 @@ std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile()
         xdgSettings.error() == QProcess::UnknownError &&
         xdgSettings.exitCode() == 0)
     {
-        return XDGDesktopFile::findDesktopId(
+        return XDGDesktopFile::findDesktopFile(
             xdgSettings.readAllStandardOutput().trimmed());
     }
 
@@ -169,7 +169,7 @@ std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile()
     {
         for (const auto &desktopId : associations)
         {
-            auto desktopFile = XDGDesktopFile::findDesktopId(desktopId);
+            auto desktopFile = XDGDesktopFile::findDesktopFile(desktopId);
             if (desktopFile.has_value())
             {
                 return desktopFile;
