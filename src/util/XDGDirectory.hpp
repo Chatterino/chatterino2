@@ -11,7 +11,6 @@ enum class XDGDirectory {
     Data,
 };
 
-QStringList splitEnvironmentVariable(const char *name);
 QStringList getXDGDirectories(XDGDirectory directory);
 
 #endif

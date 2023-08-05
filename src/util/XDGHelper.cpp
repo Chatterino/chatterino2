@@ -88,7 +88,8 @@ std::optional<XDGDesktopFile> searchMimeAppsListsInDirectory(
     QString const &directory, QStringList &associations,
     std::unordered_set<QString> &denyList)
 {
-    static auto desktopNames = splitEnvironmentVariable("XDG_CURRENT_DESKTOP");
+    static auto desktopNames = qEnvironmentVariable("XDG_CURRENT_DESKTOP")
+                                   .split(':', Qt::SkipEmptyParts);
     static QString const desktopFilename = QStringLiteral("%1-mimeapps.list");
     static QString const nonDesktopFilename = QStringLiteral("mimeapps.list");
 

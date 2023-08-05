@@ -7,11 +7,6 @@ namespace chatterino {
 
 #if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 
-QStringList splitEnvironmentVariable(const char *name)
-{
-    return qEnvironmentVariable(name).split(':', Qt::SkipEmptyParts);
-}
-
 QStringList getXDGDirectories(XDGDirectory directory)
 {
     static std::unordered_map<XDGDirectory, std::pair<const char *, QString>>
@@ -34,7 +29,8 @@ QStringList getXDGDirectories(XDGDirectory directory)
              {"XDG_DATA_DIRS", {"/usr/local/share/", "/usr/share/"}}}};
 
     const auto &[baseEnvVar, baseDefaultValue] = baseDirectories.at(directory);
-    auto baseEnvPaths = splitEnvironmentVariable(baseEnvVar);
+    auto baseEnvPaths =
+        qEnvironmentVariable(baseEnvVar).split(':', Qt::SkipEmptyParts);
     paths << (baseEnvPaths.isEmpty() ? baseDefaultValue : baseEnvPaths);
 
     return paths;
