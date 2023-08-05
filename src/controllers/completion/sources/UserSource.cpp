@@ -7,14 +7,14 @@
 
 namespace chatterino::completion {
 
-UserSource::UserSource(const Channel &channel,
+UserSource::UserSource(const Channel *channel,
                        std::unique_ptr<UserStrategy> strategy,
                        ActionCallback callback, bool prependAt)
     : strategy_(std::move(strategy))
     , callback_(std::move(callback))
     , prependAt_(prependAt)
 {
-    this->initializeFromChannel(&channel);
+    this->initializeFromChannel(channel);
 }
 
 void UserSource::update(const QString &query)

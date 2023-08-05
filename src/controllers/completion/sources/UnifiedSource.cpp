@@ -3,7 +3,7 @@
 namespace chatterino::completion {
 
 UnifiedSource::UnifiedSource(
-    const Channel &channel,
+    const Channel *channel,
     std::unique_ptr<EmoteSource::EmoteStrategy> emoteStrategy,
     std::unique_ptr<UserSource::UserStrategy> userStrategy,
     ActionCallback callback)

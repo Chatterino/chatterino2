@@ -39,7 +39,7 @@ public:
     /// @param strategy Strategy to apply
     /// @param callback ActionCallback to invoke upon InputCompletionItem selection.
     /// See InputCompletionItem::action(). Can be nullptr.
-    EmoteSource(const Channel &channel, std::unique_ptr<EmoteStrategy> strategy,
+    EmoteSource(const Channel *channel, std::unique_ptr<EmoteStrategy> strategy,
                 ActionCallback callback = nullptr);
 
     void update(const QString &query) override;

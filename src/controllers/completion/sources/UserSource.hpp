@@ -28,7 +28,7 @@ public:
     /// @param callback ActionCallback to invoke upon InputCompletionItem selection.
     /// See InputCompletionItem::action(). Can be nullptr.
     /// @param prependAt Whether to prepend @ to string completion suggestions.
-    UserSource(const Channel &channel, std::unique_ptr<UserStrategy> strategy,
+    UserSource(const Channel *channel, std::unique_ptr<UserStrategy> strategy,
                ActionCallback callback = nullptr, bool prependAt = true);
 
     void update(const QString &query) override;

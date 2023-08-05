@@ -45,13 +45,13 @@ namespace {
 
 }  // namespace
 
-EmoteSource::EmoteSource(const Channel &channel,
+EmoteSource::EmoteSource(const Channel *channel,
                          std::unique_ptr<EmoteStrategy> strategy,
                          ActionCallback callback)
     : strategy_(std::move(strategy))
     , callback_(std::move(callback))
 {
-    this->initializeFromChannel(&channel);
+    this->initializeFromChannel(channel);
 }
 
 void EmoteSource::update(const QString &query)

@@ -23,7 +23,7 @@ public:
     /// @param userStrategy Strategy for selecting users
     /// @param callback ActionCallback to invoke upon InputCompletionItem selection.
     /// See InputCompletionItem::action(). Can be nullptr.
-    UnifiedSource(const Channel &channel,
+    UnifiedSource(const Channel *channel,
                   std::unique_ptr<EmoteSource::EmoteStrategy> emoteStrategy,
                   std::unique_ptr<UserSource::UserStrategy> userStrategy,
                   ActionCallback callback = nullptr);

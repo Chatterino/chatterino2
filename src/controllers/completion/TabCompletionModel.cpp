@@ -97,18 +97,18 @@ std::unique_ptr<completion::Source> TabCompletionModel::buildSource(
     {
         case SourceKind::Emote:
             return std::make_unique<completion::EmoteSource>(
-                this->channel_,
+                &this->channel_,
                 std::make_unique<completion::ClassicTabEmoteStrategy>());
         case SourceKind::User:
             return std::make_unique<completion::UserSource>(
-                this->channel_,
+                &this->channel_,
                 std::make_unique<completion::ClassicUserStrategy>());
         case SourceKind::Command:
             return std::make_unique<completion::CommandSource>(
                 std::make_unique<completion::CommandStrategy>(true));
         case SourceKind::EmoteAndUser:
             return std::make_unique<completion::UnifiedSource>(
-                this->channel_,
+                &this->channel_,
                 std::make_unique<completion::ClassicTabEmoteStrategy>(),
                 std::make_unique<completion::ClassicUserStrategy>());
         default:
