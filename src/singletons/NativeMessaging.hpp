@@ -60,6 +60,8 @@ private:
 
     ReceiverThread thread;
 
+    /// This vector contains all channels that are open the user's browser.
+    /// These channels are joined to be able to switch channels more quickly.
     std::vector<ChannelPtr> channelWarmer_;
 
     friend ReceiverThread;
