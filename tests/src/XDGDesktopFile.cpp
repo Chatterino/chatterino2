@@ -14,4 +14,6 @@ TEST(XDGDesktopFile, String)
 
     ASSERT_EQ(entries["lol"], "");
     ASSERT_EQ(entries["x-scheme-handler/http"], QString("firefox.desktop"));
+
+    ASSERT_EQ(desktopFile.getEntries("test").size(), 2);
 }

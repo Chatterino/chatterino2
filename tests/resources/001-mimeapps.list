@@ -1,5 +1,11 @@
 thisshould=beignored
 # this is a comment
+
+[test]
+foo=bar
+# cool comment 😂 
+zoo=zar
+
 [Default Applications]
 lol=
 x-scheme-handler/http=firefox.desktop
