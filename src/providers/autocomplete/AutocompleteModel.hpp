@@ -17,7 +17,7 @@ enum class CompletionKind {
 /// @brief AutocompleteModel is a GenericListModel intended to provide completion
 /// suggestions to an InputCompletionPopup. The popup can determine the appropriate
 /// source based on the current input and the user's preferences.
-class AutocompleteModel : public GenericListModel
+class AutocompleteModel final : public GenericListModel
 {
 public:
     AutocompleteModel(QObject *parent = nullptr);
