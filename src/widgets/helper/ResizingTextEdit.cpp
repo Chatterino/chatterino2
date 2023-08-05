@@ -348,9 +348,4 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
     insertPlainText(source->text());
 }
 
-QCompleter *ResizingTextEdit::getCompleter() const
-{
-    return this->completer_;
-}
-
 }  // namespace chatterino
