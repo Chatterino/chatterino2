@@ -39,7 +39,7 @@ void TabCompletionModel::updateSourceFromQuery(const QString &query)
     if (!deducedKind)
     {
         // unable to determine what kind of completion is occurring
-        this->sourceKind_ = boost::none;
+        this->sourceKind_ = std::nullopt;
         this->source_ = nullptr;
         return;
     }
@@ -54,12 +54,12 @@ void TabCompletionModel::updateSourceFromQuery(const QString &query)
     this->source_ = this->buildSource(*deducedKind);
 }
 
-boost::optional<TabCompletionModel::SourceKind>
+std::optional<TabCompletionModel::SourceKind>
     TabCompletionModel::deduceSourceKind(const QString &query) const
 {
     if (query.length() < 2 || !this->channel_.isTwitchChannel())
     {
-        return boost::none;
+        return std::nullopt;
     }
 
     // Check for cases where we can definitively say what kind of completion is taking place.
