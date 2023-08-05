@@ -1,10 +1,11 @@
 #include "providers/seventv/SeventvBadges.hpp"
 
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
+#include "providers/seventv/SeventvAPI.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 
+#include <QJsonArray>
 #include <QUrl>
 #include <QUrlQuery>
 
@@ -12,66 +13,68 @@
 
 namespace chatterino {
 
-void SeventvBadges::initialize(Settings & /*settings*/, Paths & /*paths*/)
-{
-    this->loadSeventvBadges();
-}
-
-boost::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id)
+boost::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id) const
 {
     std::shared_lock lock(this->mutex_);
 
     auto it = this->badgeMap_.find(id.string);
     if (it != this->badgeMap_.end())
     {
-        return this->emotes_[it->second];
+        return it->second;
     }
     return boost::none;
 }
 
-void SeventvBadges::loadSeventvBadges()
+void SeventvBadges::assignBadgeToUser(const QString &badgeID,
+                                      const UserId &userID)
 {
-    // Cosmetics will work differently in v3, until this is ready
-    // we'll use this endpoint.
-    static QUrl url("https://7tv.io/v2/cosmetics");
+    const std::unique_lock lock(this->mutex_);
 
-    static QUrlQuery urlQuery;
-    // valid user_identifier values: "object_id", "twitch_id", "login"
-    urlQuery.addQueryItem("user_identifier", "twitch_id");
+    const auto badgeIt = this->knownBadges_.find(badgeID);
+    if (badgeIt != this->knownBadges_.end())
+    {
+        this->badgeMap_[userID.string] = badgeIt->second;
+    }
+}
 
-    url.setQuery(urlQuery);
+void SeventvBadges::clearBadgeFromUser(const QString &badgeID,
+                                       const UserId &userID)
+{
+    const std::unique_lock lock(this->mutex_);
 
-    NetworkRequest(url)
-        .onSuccess([this](const NetworkResult &result) -> Outcome {
-            auto root = result.parseJson();
+    const auto it = this->badgeMap_.find(userID.string);
+    if (it != this->badgeMap_.end() && it->second->id.string == badgeID)
+    {
+        this->badgeMap_.erase(userID.string);
+    }
+}
 
-            std::unique_lock lock(this->mutex_);
+void SeventvBadges::registerBadge(const QJsonObject &badgeJson)
+{
+    const auto badgeID = badgeJson["id"].toString();
 
-            int index = 0;
-            for (const auto &jsonBadge : root.value("badges").toArray())
-            {
-                auto badge = jsonBadge.toObject();
-                auto urls = badge.value("urls").toArray();
-                auto emote =
-                    Emote{EmoteName{},
-                          ImageSet{Url{urls.at(0).toArray().at(1).toString()},
-                                   Url{urls.at(1).toArray().at(1).toString()},
-                                   Url{urls.at(2).toArray().at(1).toString()}},
-                          Tooltip{badge.value("tooltip").toString()}, Url{}};
+    const std::unique_lock lock(this->mutex_);
 
-                this->emotes_.push_back(
-                    std::make_shared<const Emote>(std::move(emote)));
+    if (this->knownBadges_.find(badgeID) != this->knownBadges_.end())
+    {
+        return;
+    }
 
-                for (const auto &user : badge.value("users").toArray())
-                {
-                    this->badgeMap_[user.toString()] = index;
-                }
-                ++index;
-            }
+    auto emote = Emote{
+        .name = EmoteName{},
+        .images = SeventvEmotes::createImageSet(badgeJson),
+        .tooltip = Tooltip{badgeJson["tooltip"].toString()},
+        .homePage = Url{},
+        .id = EmoteId{badgeID},
+    };
 
-            return Success;
-        })
-        .execute();
+    if (emote.images.getImage1()->isEmpty())
+    {
+        return;  // Bad images
+    }
+
+    this->knownBadges_[badgeID] =
+        std::make_shared<const Emote>(std::move(emote));
 }
 
 }  // namespace chatterino

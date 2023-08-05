@@ -254,6 +254,12 @@ private:
     void showLoginMessage();
     /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
     void joinBttvChannel() const;
+    /**
+     * Indicates an activity to 7TV in this channel for this user.
+     * This is done at most once every 60s.
+     */
+    void updateSevenTVActivity();
+    void listenSevenTVCosmetics();
 
     /**
      * @brief Sets the live status of this Twitch channel
@@ -371,6 +377,12 @@ private:
      * 7TV's user representation.
      */
     size_t seventvUserTwitchConnectionIndex_;
+
+    /**
+     * The next moment in time to signal activity in this channel to 7TV.
+     * Or: Up until this moment we don't need to send activity.
+     */
+    QDateTime nextSeventvActivity_;
 
     /** The platform of the last live emote update ("7TV", "BTTV", "FFZ"). */
     QString lastLiveUpdateEmotePlatform_;

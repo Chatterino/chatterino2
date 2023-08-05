@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Selection.hpp"
@@ -342,6 +343,9 @@ private:
     pajlada::Signals::SignalHolder channelConnections_;
 
     std::unordered_set<std::shared_ptr<MessageLayout>> messagesOnScreen_;
+
+    MessageColors messageColors_;
+    MessagePreferences messagePreferences_;
 
     static constexpr int leftPadding = 8;
     static constexpr int scrollbarPadding = 8;
