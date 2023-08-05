@@ -128,15 +128,12 @@ std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile()
     xdgSettings.start("xdg-settings", {"get", "default-web-browser"},
                       QIODevice::ReadOnly);
     xdgSettings.waitForFinished(1000);
-    if (xdgSettings.error() == QProcess::UnknownError &&
+    if (xdgSettings.exitStatus() == QProcess::ExitStatus::NormalExit &&
+        xdgSettings.error() == QProcess::UnknownError &&
         xdgSettings.exitCode() == 0)
     {
-        auto desktopFile = XDGDesktopFile::findDesktopId(
+        return XDGDesktopFile::findDesktopId(
             xdgSettings.readAllStandardOutput().trimmed());
-        if (desktopFile.has_value())
-        {
-            return desktopFile;
-        }
     }
 
     // no xdg-utils, find it manually by searching mimeapps.list files
