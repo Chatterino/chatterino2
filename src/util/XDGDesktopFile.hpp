@@ -1,6 +1,6 @@
 #pragma once
 
-#include "QStringHash.hpp"
+#include "util/QStringHash.hpp"
 
 #include <optional>
 #include <unordered_map>
