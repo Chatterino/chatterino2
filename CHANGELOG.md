@@ -21,7 +21,7 @@
 - Minor: All channels opened in browser tabs are synced when using the extension for quicker switching between tabs. (#4741)
 - Minor: Show channel point redemptions without messages in usercard. (#4557)
 - Minor: Allow for customizing the behavior of `Right Click`ing of usernames. (#4622, #4751)
-- Minor: Added support for opening incognito links in firefox-esr. (#4745)
+- Minor: Added support for opening incognito links in firefox-esr and chromium. (#4745)
 - Minor: Added support for opening incognito links under Linux/BSD using XDG. (#4745)
 - Bugfix: Increased amount of blocked users loaded from 100 to 1,000. (#4721)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
