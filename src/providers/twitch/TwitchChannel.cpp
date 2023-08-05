@@ -1135,7 +1135,7 @@ void TwitchChannel::loadRecentMessages()
                 }
             }
 
-            getApp()->getTwitch()->mentionsChannel->fillInMissingMessages(msgs);
+            getApp()->twitch->mentionsChannel->fillInMissingMessages(msgs);
         },
         [weak]() {
             auto shared = weak.lock();
