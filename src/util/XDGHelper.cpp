@@ -144,7 +144,7 @@ std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile()
     std::unordered_set<QString> denyList;
 
     // config dirs first
-    for (const auto &configDir : getXDGDirectories(XDGDirectory::Config))
+    for (const auto &configDir : getXDGDirectories(XDGDirectoryType::Config))
     {
         auto defaultApp =
             searchMimeAppsListsInDirectory(configDir, associations, denyList);
@@ -155,7 +155,7 @@ std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile()
     }
 
     // data dirs for backwards compatibility
-    for (const auto &dataDir : getXDGDirectories(XDGDirectory::Data))
+    for (const auto &dataDir : getXDGDirectories(XDGDirectoryType::Data))
     {
         auto appsDir = combinePath(dataDir, "applications");
         auto defaultApp =

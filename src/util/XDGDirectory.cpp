@@ -7,13 +7,14 @@ namespace chatterino {
 
 #if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 
-QStringList getXDGDirectories(XDGDirectory directory)
+QStringList getXDGDirectories(XDGDirectoryType directory)
 {
-    static std::unordered_map<XDGDirectory, std::pair<const char *, QString>>
+    static std::unordered_map<XDGDirectoryType,
+                              std::pair<const char *, QString>>
         userDirectories = {
-            {XDGDirectory::Config,
+            {XDGDirectoryType::Config,
              {"XDG_CONFIG_HOME", combinePath(QDir::homePath(), ".config/")}},
-            {XDGDirectory::Data,
+            {XDGDirectoryType::Data,
              {"XDG_DATA_HOME",
               combinePath(QDir::homePath(), ".local/share/")}}};
 
@@ -21,11 +22,11 @@ QStringList getXDGDirectories(XDGDirectory directory)
     auto userEnvPath = qEnvironmentVariable(userEnvVar);
     QStringList paths{userEnvPath.isEmpty() ? userDefaultValue : userEnvPath};
 
-    static std::unordered_map<XDGDirectory,
+    static std::unordered_map<XDGDirectoryType,
                               std::pair<const char *, QStringList>>
         baseDirectories = {
-            {XDGDirectory::Config, {"XDG_CONFIG_DIRS", {"/etc/xdg"}}},
-            {XDGDirectory::Data,
+            {XDGDirectoryType::Config, {"XDG_CONFIG_DIRS", {"/etc/xdg"}}},
+            {XDGDirectoryType::Data,
              {"XDG_DATA_DIRS", {"/usr/local/share/", "/usr/share/"}}}};
 
     const auto &[baseEnvVar, baseDefaultValue] = baseDirectories.at(directory);

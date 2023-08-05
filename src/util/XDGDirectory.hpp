@@ -6,12 +6,12 @@ namespace chatterino {
 
 #if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 
-enum class XDGDirectory {
+enum class XDGDirectoryType {
     Config,
     Data,
 };
 
-QStringList getXDGDirectories(XDGDirectory directory);
+QStringList getXDGDirectories(XDGDirectoryType directory);
 
 #endif
 

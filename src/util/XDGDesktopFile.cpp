@@ -108,7 +108,7 @@ XDGDesktopFile::Group const &XDGDesktopFile::operator[](
 std::optional<XDGDesktopFile> XDGDesktopFile::findDesktopId(
     const QString &desktopId)
 {
-    for (const auto &dataDir : getXDGDirectories(XDGDirectory::Data))
+    for (const auto &dataDir : getXDGDirectories(XDGDirectoryType::Data))
     {
         auto fileName =
             QDir::cleanPath(dataDir + QDir::separator() + "applications" +
