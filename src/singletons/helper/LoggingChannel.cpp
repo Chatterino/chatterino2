@@ -114,8 +114,15 @@ void LoggingChannel::addMessage(MessagePtr message)
     }
     else
     {
-        messageText = message->localizedName + " " + message->loginName + ": " +
-                      message->messageText;
+        if (message->localizedName.isEmpty())
+        {
+            messageText = message->loginName + ": " + message->messageText;
+        }
+        else
+        {
+            messageText = message->localizedName + " " + message->loginName +
+                          ": " + message->messageText;
+        }
     }
 
     if ((message->flags.has(MessageFlag::ReplyMessage) &&
