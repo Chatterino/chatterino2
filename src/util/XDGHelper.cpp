@@ -123,7 +123,7 @@ namespace chatterino {
 
 std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile()
 {
-    // use xdg-utils if installed
+    // use xdg-settings if installed
     QProcess xdgSettings;
     xdgSettings.start("xdg-settings", {"get", "default-web-browser"},
                       QIODevice::ReadOnly);
