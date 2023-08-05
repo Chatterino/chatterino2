@@ -4,7 +4,7 @@
 
 - Minor: Message input is now focused when clicking on emotes. (#4719)
 - Minor: Changed viewer list to chatter list to more match Twitch's terminology. (#4732)
-- Minor: Nicknames are now taken into consideration when searching for messages. (#4663)
+- Minor: Nicknames are now taken into consideration when searching for messages. (#4663, #4742)
 - Minor: Add an icon showing when streamer mode is enabled (#4410, #4690)
 - Minor: Added `/shoutout <username>` commands to shoutout specified user. (#4638)
 - Minor: Improved editing hotkeys. (#4628)
@@ -31,7 +31,6 @@
 - Bugfix: Fixed highlights sometimes not working after changing sound device, or switching users in your operating system. (#4729)
 - Bugfix: Fixed key bindings not showing in context menus on Mac. (#4722)
 - Bugfix: Fixed tab completion rarely completing the wrong word. (#4735)
-- Bugfix: Fixed duplicate username in logs (#4742)
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
 - Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
 - Dev: Added test cases for emote and tab completion. (#4644)
