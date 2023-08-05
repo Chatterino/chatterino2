@@ -37,7 +37,7 @@ if ($null -eq $Env:VCToolsRedistDir) {
 Copy-Item "$Env:VCToolsRedistDir\vc_redist.x64.exe" .;
 
 # Build the installer
-&"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" `
+ISCC `
     /DWORKING_DIR="$($pwd.Path)\" `
     /DINSTALLER_BASE_NAME="$installerBaseName" `
     $defines `
