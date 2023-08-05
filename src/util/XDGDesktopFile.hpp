@@ -28,7 +28,7 @@ public:
     }
 
     static std::optional<XDGDesktopFile> findDesktopId(
-        QString const &desktopId);
+        const QString &desktopId);
 
 private:
     bool _exists = false;

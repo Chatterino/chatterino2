@@ -21,7 +21,7 @@ namespace {
 using namespace chatterino;
 
 std::optional<XDGDesktopFile> processMimeAppsList(
-    QString const &fileName, QStringList &associations,
+    const QString &fileName, QStringList &associations,
     std::unordered_set<QString> &denyList)
 {
     static const QString mimetype = QStringLiteral("x-scheme-handler/https");
@@ -34,7 +34,7 @@ std::optional<XDGDesktopFile> processMimeAppsList(
     {
         // for each desktop ID in the list:
         auto desktopIds = defaultApps->second.split(';', Qt::SkipEmptyParts);
-        for (auto const &entry : desktopIds)
+        for (const auto &entry : desktopIds)
         {
             auto desktopId = entry.trimmed();
 
@@ -63,7 +63,7 @@ std::optional<XDGDesktopFile> processMimeAppsList(
     if (removedApps != removedGroup.end())
     {
         auto desktopIds = removedApps->second.split(';', Qt::SkipEmptyParts);
-        for (auto const &entry : desktopIds)
+        for (const auto &entry : desktopIds)
         {
             denyList.insert(entry.trimmed());
         }
@@ -75,7 +75,7 @@ std::optional<XDGDesktopFile> processMimeAppsList(
     if (addedApps != addedGroup.end())
     {
         auto desktopIds = addedApps->second.split(';', Qt::SkipEmptyParts);
-        for (auto const &entry : desktopIds)
+        for (const auto &entry : desktopIds)
         {
             associations.push_back(entry.trimmed());
         }
@@ -85,13 +85,13 @@ std::optional<XDGDesktopFile> processMimeAppsList(
 }
 
 std::optional<XDGDesktopFile> searchMimeAppsListsInDirectory(
-    QString const &directory, QStringList &associations,
+    const QString &directory, QStringList &associations,
     std::unordered_set<QString> &denyList)
 {
     static auto desktopNames = qEnvironmentVariable("XDG_CURRENT_DESKTOP")
                                    .split(':', Qt::SkipEmptyParts);
-    static QString const desktopFilename = QStringLiteral("%1-mimeapps.list");
-    static QString const nonDesktopFilename = QStringLiteral("mimeapps.list");
+    static const QString desktopFilename = QStringLiteral("%1-mimeapps.list");
+    static const QString nonDesktopFilename = QStringLiteral("mimeapps.list");
 
     // try desktop specific mimeapps.list files first
     for (const auto &desktopName : desktopNames)

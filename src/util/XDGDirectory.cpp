@@ -53,7 +53,7 @@ QStringList getXDGDirectories(XDGDirectoryType directory)
 
     QStringList paths;
 
-    auto const &[userEnvVar, userDefaultValue] = userDirectories.at(directory);
+    const auto &[userEnvVar, userDefaultValue] = userDirectories.at(directory);
     auto userEnvPath = qEnvironmentVariable(userEnvVar, userDefaultValue);
     paths.push_back(userEnvPath);
 

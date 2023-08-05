@@ -12,7 +12,7 @@ namespace {
 
 using namespace chatterino;
 
-QString getPrivateSwitch(QString const &browserExecutable)
+QString getPrivateSwitch(const QString &browserExecutable)
 {
     // list of command line switches to turn on private browsing in browsers
     static auto switches = std::vector<std::pair<QString, QString>>{
