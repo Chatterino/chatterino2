@@ -4,7 +4,8 @@ on:
   workflow_run:
     workflows: ["Build"]
     types: [completed]
-    #branches: [master]
+    # make sure this only runs on the default branch
+    branches: [master]
   workflow_dispatch:
 
 jobs:
