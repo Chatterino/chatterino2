@@ -17,7 +17,7 @@ chatterino::XDGDesktopFile::Group const EMPTY_GROUP;
 
 namespace chatterino {
 
-XDGDesktopFile::XDGDesktopFile(char const *filename)
+XDGDesktopFile::XDGDesktopFile(const QString &filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly))
@@ -86,12 +86,6 @@ XDGDesktopFile::XDGDesktopFile(char const *filename)
             currentGroup.value().get()[key] = value;
         }
     }
-}
-
-XDGDesktopFile::XDGDesktopFile(QString const &filename)
-    : XDGDesktopFile(filename.isNull() ? ""
-                                       : filename.toLocal8Bit().constData())
-{
 }
 
 XDGDesktopFile::Group const &XDGDesktopFile::operator[](

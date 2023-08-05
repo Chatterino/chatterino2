@@ -12,8 +12,7 @@ namespace chatterino {
 class XDGDesktopFile
 {
 public:
-    explicit XDGDesktopFile(QString const &filename);
-    explicit XDGDesktopFile(char const *filename);
+    explicit XDGDesktopFile(const QString &filename);
     XDGDesktopFile(XDGDesktopFile &&other) = default;
     ~XDGDesktopFile() = default;
 
