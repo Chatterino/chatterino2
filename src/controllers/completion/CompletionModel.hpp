@@ -23,7 +23,7 @@ enum class CompletionKind {
 class CompletionModel final : public GenericListModel
 {
 public:
-    CompletionModel(QObject *parent = nullptr);
+    explicit CompletionModel(QObject *parent);
 
     /// @brief Sets the Source for subsequent queries
     /// @param source Source to use

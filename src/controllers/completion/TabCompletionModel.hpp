@@ -21,7 +21,7 @@ public:
     /// The reference to the Channel must live as long as the TabCompletionModel.
     /// @param channel Channel reference
     /// @param parent Model parent
-    TabCompletionModel(Channel &channel, QObject *parent = nullptr);
+    explicit TabCompletionModel(Channel &channel, QObject *parent);
 
     /// @brief Updates the model based on the completion query
     /// @param query Completion query
