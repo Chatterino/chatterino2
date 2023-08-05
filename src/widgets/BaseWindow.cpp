@@ -566,7 +566,6 @@ void BaseWindow::resizeEvent(QResizeEvent *)
 
 void BaseWindow::moveEvent(QMoveEvent *event)
 {
-    qDebug() << "move event from " << event->oldPos() << "to" << event->pos();
     // Queue up save because: Window position changed
 #ifdef CHATTERINO
     if (!flags_.has(DisableLayoutSave))
