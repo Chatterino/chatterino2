@@ -2,9 +2,9 @@
 
 #include <QStringList>
 
-#if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
-
 namespace chatterino {
+
+#if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 
 enum class XDGDirectory {
     Config,
@@ -14,6 +14,6 @@ enum class XDGDirectory {
 QStringList splitEnvironmentVariable(const char *name);
 QStringList getXDGDirectories(XDGDirectory directory);
 
-}  // namespace chatterino
-
 #endif
+
+}  // namespace chatterino
