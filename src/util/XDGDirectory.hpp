@@ -11,6 +11,9 @@ enum class XDGDirectoryType {
     Data,
 };
 
+/// getXDGDirectories returns a list of directories given a directory type
+///
+/// This will attempt to read the relevant environment variable (e.g. XDG_CONFIG_HOME and XDG_CONFIG_DIRS) and merge them, with sane defaults
 QStringList getXDGDirectories(XDGDirectoryType directory);
 
 #endif
