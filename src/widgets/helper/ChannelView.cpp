@@ -2104,8 +2104,15 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 
                 if (link.type == Link::UserInfo)
                 {
-                    if (hoveredElement->getFlags().has(
-                            MessageElementFlag::Username))
+                    // This is terrible because it FPs on messages where the
+                    // user mentions themselves
+                    bool canReply =
+                        QString::compare(link.value,
+                                         layout->getMessage()->loginName,
+                                         Qt::CaseInsensitive) == 0;
+                    UsernameRightClickBehavior action =
+                        UsernameRightClickBehavior::Mention;
+                    if (canReply)
                     {
                         Qt::KeyboardModifier userSpecifiedModifier =
                             getSettings()->usernameRightClickModifier;
@@ -2124,7 +2131,6 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                         Qt::KeyboardModifiers modifiers{userSpecifiedModifier};
                         auto isModifierHeld = event->modifiers() == modifiers;
 
-                        UsernameRightClickBehavior action{};
                         if (isModifierHeld)
                         {
                             action = getSettings()
@@ -2134,44 +2140,43 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                         {
                             action = getSettings()->usernameRightClickBehavior;
                         }
-
-                        switch (action)
-                        {
-                            case UsernameRightClickBehavior::Mention: {
-                                if (split == nullptr)
-                                {
-                                    return;
-                                }
-
-                                // Insert @username into split input
-                                const bool commaMention =
-                                    getSettings()->mentionUsersWithComma;
-                                const bool isFirstWord =
-                                    split->getInput().isEditFirstWord();
-                                auto userMention = formatUserMention(
-                                    link.value, isFirstWord, commaMention);
-                                insertText("@" + userMention + " ");
+                    }
+                    switch (action)
+                    {
+                        case UsernameRightClickBehavior::Mention: {
+                            if (split == nullptr)
+                            {
+                                return;
                             }
-                            break;
 
-                            case UsernameRightClickBehavior::Reply: {
-                                // Start a new reply if matching user's settings
-                                this->setInputReply(layout->getMessagePtr());
-                            }
-                            break;
-
-                            case UsernameRightClickBehavior::Ignore:
-                                break;
-
-                            default: {
-                                qCWarning(chatterinoCommon)
-                                    << "unhandled or corrupted "
-                                       "UsernameRightClickBehavior value in "
-                                       "ChannelView::handleMouseClick:"
-                                    << action;
-                            }
-                            break;  // unreachable
+                            // Insert @username into split input
+                            const bool commaMention =
+                                getSettings()->mentionUsersWithComma;
+                            const bool isFirstWord =
+                                split->getInput().isEditFirstWord();
+                            auto userMention = formatUserMention(
+                                link.value, isFirstWord, commaMention);
+                            insertText("@" + userMention + " ");
                         }
+                        break;
+
+                        case UsernameRightClickBehavior::Reply: {
+                            // Start a new reply if matching user's settings
+                            this->setInputReply(layout->getMessagePtr());
+                        }
+                        break;
+
+                        case UsernameRightClickBehavior::Ignore:
+                            break;
+
+                        default: {
+                            qCWarning(chatterinoCommon)
+                                << "unhandled or corrupted "
+                                   "UsernameRightClickBehavior value in "
+                                   "ChannelView::handleMouseClick:"
+                                << action;
+                        }
+                        break;  // unreachable
                     }
 
                     return;
