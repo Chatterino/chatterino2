@@ -282,11 +282,11 @@ void NativeMessagingServer::ReceiverThread::handleDetach(
 void NativeMessagingServer::ReceiverThread::handleSync(const QJsonObject &root)
 {
     // Structure:
-    // { action: 'sync', twitch?: string[] }
-    postToThread(
-        [&parent = this->parent_, twitch = root["twitch"_L1].toArray()] {
-            parent.syncChannels(twitch);
-        });
+    // { action: 'sync', twitchChannels?: string[] }
+    postToThread([&parent = this->parent_,
+                  twitch = root["twitchChannels"_L1].toArray()] {
+        parent.syncChannels(twitch);
+    });
 }
 
 void NativeMessagingServer::syncChannels(const QJsonArray &twitchChannels)
