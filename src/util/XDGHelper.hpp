@@ -4,14 +4,14 @@
 
 #include <QString>
 
-#if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
-
 namespace chatterino {
+
+#if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 
 std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile();
 
 QString parseExeFromDesktopExecKey(QString execKey);
 
-}  // namespace chatterino
-
 #endif
+
+}  // namespace chatterino
