@@ -127,7 +127,7 @@ std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile()
     QProcess xdgSettings;
     xdgSettings.start("xdg-settings", {"get", "default-web-browser"},
                       QIODevice::ReadOnly);
-    xdgSettings.waitForFinished();
+    xdgSettings.waitForFinished(1000);
     if (xdgSettings.error() == QProcess::UnknownError &&
         xdgSettings.exitCode() == 0)
     {
