@@ -243,7 +243,6 @@ void BaseWindow::init()
 
 void BaseWindow::setStayInScreenRect(bool value)
 {
-    qDebug() << "XXX: setStayInScreenRect called";
     // this->stayInScreenRect_ = value;
 
     // this->moveIntoDesktopRect(this->pos(), QCursor::pos());
@@ -513,8 +512,6 @@ void BaseWindow::leaveEvent(QEvent *)
 
 void BaseWindow::moveTo(QPoint point, bool offset, BoundsChecker boundsChecker)
 {
-    qDebug() << "XXX: BaseWindow::moveTo called" << point;
-
     if (offset)
     {
         point.rx() += 16;
@@ -636,7 +633,6 @@ void BaseWindow::moveWithinScreen(QPoint point, QPoint origin)
         point.setY(globalCursorPos.y() - this->height() - 16);
     }
 
-    qDebug() << "XXX: moving to final point" << point;
     this->move(point);
 }
 
