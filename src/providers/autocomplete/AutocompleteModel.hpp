@@ -9,7 +9,10 @@
 namespace chatterino {
 
 /// @brief Represents the kind of completion occurring
-enum class CompletionKind { Emote, User };
+enum class CompletionKind {
+    Emote,
+    User,
+};
 
 /// @brief AutocompleteModel is a GenericListModel intended to provide completion
 /// suggestions to an InputCompletionPopup. The popup can determine the appropriate
