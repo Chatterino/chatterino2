@@ -5,7 +5,7 @@
 
 using namespace chatterino;
 
-TEST(XDGHelper, String)
+TEST(XDGHelper, ParseDesktopExecProgram)
 {
     struct TestCase {
         QString input;

@@ -30,14 +30,25 @@ using namespace chatterino;
 
 const auto HTTPS_MIMETYPE = u"x-scheme-handler/https"_s;
 
+/// Read the given mimeapps file and try to find an association for the HTTPS_MIMETYPE
+///
+/// If the mimeapps file is invalid (i.e. wasn't read), return nullopt
+/// If the file is valid, look for the default Desktop File ID handler for the HTTPS_MIMETYPE
+/// If no default Desktop File ID handler is found, populate `associations`
+///   and `denyList` with Desktop File IDs from "Added Associations" and "Removed Associations" respectively
 std::optional<XDGDesktopFile> processMimeAppsList(
-    const QString &fileName, QStringList &associations,
+    const QString &mimeappsPath, QStringList &associations,
     std::unordered_set<QString> &denyList)
 {
-    XDGDesktopFile mimeappsList(fileName);
+    XDGDesktopFile mimeappsFile(mimeappsPath);
+    if (!mimeappsFile.isValid())
+    {
+        return {};
+    }
+
     // get the list of Desktop File IDs for the given mimetype under the "Default
     // Applications" group in the mimeapps.list file
-    auto defaultGroup = mimeappsList.getEntries("Default Applications");
+    auto defaultGroup = mimeappsFile.getEntries("Default Applications");
     auto defaultApps = defaultGroup.find(HTTPS_MIMETYPE);
     if (defaultApps != defaultGroup.cend())
     {
@@ -67,7 +78,7 @@ std::optional<XDGDesktopFile> processMimeAppsList(
     // associations, then return empty
 
     // load any removed associations into the denylist
-    auto removedGroup = mimeappsList.getEntries("Removed Associations");
+    auto removedGroup = mimeappsFile.getEntries("Removed Associations");
     auto removedApps = removedGroup.find(HTTPS_MIMETYPE);
     if (removedApps != removedGroup.end())
     {
@@ -79,7 +90,7 @@ std::optional<XDGDesktopFile> processMimeAppsList(
     }
 
     // append any created associations to the associations list
-    auto addedGroup = mimeappsList.getEntries("Added Associations");
+    auto addedGroup = mimeappsFile.getEntries("Added Associations");
     auto addedApps = addedGroup.find(HTTPS_MIMETYPE);
     if (addedApps != addedGroup.end())
     {
@@ -130,6 +141,11 @@ std::optional<XDGDesktopFile> searchMimeAppsListsInDirectory(
 
 namespace chatterino {
 
+/// Try to figure out the most reasonably default web browser to use
+///
+/// If the `xdg-settings` program is available, use that
+/// If not, read through all possible mimapps files in the order specified here: https://specifications.freedesktop.org/mime-apps-spec/mime-apps-spec-1.0.1.html#file
+/// If no mimeapps file has a default, try to use the Added Associations in those files
 std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile()
 {
     // use xdg-settings if installed
