@@ -10,7 +10,12 @@ namespace chatterino {
 
 std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile();
 
-QString parseExeFromDesktopExecKey(QString execKey);
+/// Parses the given `execKey` and returns the resulting program name, ignoring all arguments
+///
+/// Parsing is done in accordance to https://specifications.freedesktop.org/desktop-entry-spec/latest/ar01s07.html
+///
+/// Note: We do *NOT* support field codes
+QString parseDesktopExecProgram(const QString &execKey);
 
 #endif
 

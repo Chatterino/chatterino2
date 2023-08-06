@@ -76,7 +76,7 @@ QString getDefaultBrowserExecutable()
         auto exec = entry.find("Exec");
         if (exec != entry.end())
         {
-            return parseExeFromDesktopExecKey(exec->second.trimmed());
+            return parseDesktopExecProgram(exec->second.trimmed());
         }
     }
     return {};

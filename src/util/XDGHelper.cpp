@@ -1,10 +1,13 @@
 #include "util/XDGHelper.hpp"
 
+#include "common/Literals.hpp"
+#include "common/QLogging.hpp"
 #include "util/CombinePath.hpp"
 #include "util/Qt.hpp"
 #include "util/XDGDesktopFile.hpp"
 #include "util/XDGDirectory.hpp"
 
+#include <QDebug>
 #include <QProcess>
 #include <QRegularExpression>
 #include <QSettings>
@@ -16,20 +19,26 @@
 
 #if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 
+using namespace chatterino::literals;
+
 namespace {
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoXDG;
+
 using namespace chatterino;
+
+const auto HTTPS_MIMETYPE = u"x-scheme-handler/https"_s;
 
 std::optional<XDGDesktopFile> processMimeAppsList(
     const QString &fileName, QStringList &associations,
     std::unordered_set<QString> &denyList)
 {
-    static const QString mimetype = QStringLiteral("x-scheme-handler/https");
     XDGDesktopFile mimeappsList(fileName);
-    // get the list of desktop ids for the given mimetype under the "Default
+    // get the list of Desktop File IDs for the given mimetype under the "Default
     // Applications" group in the mimeapps.list file
     auto defaultGroup = mimeappsList.getEntries("Default Applications");
-    auto defaultApps = defaultGroup.find(mimetype);
+    auto defaultApps = defaultGroup.find(HTTPS_MIMETYPE);
     if (defaultApps != defaultGroup.cend())
     {
         // for each desktop ID in the list:
@@ -59,7 +68,7 @@ std::optional<XDGDesktopFile> processMimeAppsList(
 
     // load any removed associations into the denylist
     auto removedGroup = mimeappsList.getEntries("Removed Associations");
-    auto removedApps = removedGroup.find(mimetype);
+    auto removedApps = removedGroup.find(HTTPS_MIMETYPE);
     if (removedApps != removedGroup.end())
     {
         auto desktopIds = removedApps->second.split(';', Qt::SkipEmptyParts);
@@ -71,7 +80,7 @@ std::optional<XDGDesktopFile> processMimeAppsList(
 
     // append any created associations to the associations list
     auto addedGroup = mimeappsList.getEntries("Added Associations");
-    auto addedApps = addedGroup.find(mimetype);
+    auto addedApps = addedGroup.find(HTTPS_MIMETYPE);
     if (addedApps != addedGroup.end())
     {
         auto desktopIds = addedApps->second.split(';', Qt::SkipEmptyParts);
@@ -180,34 +189,53 @@ std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile()
     return {};
 }
 
-QString parseExeFromDesktopExecKey(QString execKey)
+QString parseDesktopExecProgram(const QString &execKey)
 {
+    static const QRegularExpression unescapeReservedCharacters(
+        R"(\\(["`$\\]))");
+
+    QString program = execKey;
+
     // string values in desktop files escape all backslashes. This is an
     // independent escaping scheme that must be processed first
-    execKey.replace(QStringLiteral("\\\\"), QStringLiteral("\\"));
+    program.replace(u"\\\\"_s, u"\\"_s);
 
-    if (!execKey.startsWith('"'))
+    if (!program.startsWith('"'))
     {
-        // not quoted, find the first space
-        auto end = execKey.indexOf(' ');
+        // not quoted, trim after the first space (if any)
+        auto end = program.indexOf(' ');
         if (end != -1)
         {
-            execKey = execKey.left(end);
+            program = program.left(end);
         }
     }
     else
     {
-        // quoted. find the end quote (if there is none, this just chops off
-        // the beginning quote)
-        execKey = execKey.mid(1, execKey.indexOf('"', 1));
+        // quoted
+        auto endQuote = program.indexOf('"', 1);
+        if (endQuote == -1)
+        {
+            // No end quote found, the returned program might be malformed
+            program = program.mid(1);
+            qCWarning(LOG).noquote().nospace()
+                << "Malformed desktop entry key " << program << ", originally "
+                << execKey << ", you might run into issues";
+        }
+        else
+        {
+            // End quote found
+            program = program.mid(1, endQuote - 1);
+        }
     }
 
-    // execKey now contains the first token of the command line, which is the
-    // executable name. now, there is a second escaping scheme specific to the
+    // program now contains the first token of the command line.
+    // this is either the program name with an absolute path, or just the program name
+    // denoting it's a relative path. Either will be handled by QProcess cleanly
+    // now, there is a second escaping scheme specific to the
     // exec key that must be applied.
-    execKey.replace(QRegularExpression(R"(\\(["`$\\]))"), "\\1");
+    program.replace(unescapeReservedCharacters, "\\1");
 
-    return execKey;
+    return program;
 }
 
 }  // namespace chatterino
