@@ -1,5 +1,6 @@
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 
+#include "common/Version.hpp"
 #include "providers/colors/ColorProvider.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
@@ -281,7 +282,7 @@ void ColorPickerDialog::initDefaultColors(LayoutCreator<QWidget> &creator)
 
 void ColorPickerDialog::initColorPicker(LayoutCreator<QWidget> &creator)
 {
-    this->setWindowTitle("Chatterino - color picker");
+    this->setWindowTitle(Version::instance().fullVersion() + " - color picker");
     auto cpPanel = creator.setLayoutType<QHBoxLayout>();
 
     /*
