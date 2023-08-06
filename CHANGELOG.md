@@ -23,6 +23,8 @@
 - Minor: All channels opened in browser tabs are synced when using the extension for quicker switching between tabs. (#4741)
 - Minor: Show channel point redemptions without messages in usercard. (#4557)
 - Minor: Allow for customizing the behavior of `Right Click`ing of usernames. (#4622, #4751)
+- Minor: Added support for opening incognito links in firefox-esr and chromium. (#4745)
+- Minor: Added support for opening incognito links under Linux/BSD using XDG. (#4745)
 - Bugfix: Increased amount of blocked users loaded from 100 to 1,000. (#4721)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
 - Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
@@ -55,6 +57,7 @@
 - Dev: Added the ability to use an alternate linker using the `-DUSE_ALTERNATE_LINKER=...` CMake parameter. (#4711)
 - Dev: The Windows installer is now built in CI. (#4408)
 - Dev: Removed `getApp` and `getSettings` calls from message rendering. (#4535)
+- Dev: Get the default browser executable instead of the entire command line when opening incognito links. (#4745)
 
 ## 2.4.4
 
