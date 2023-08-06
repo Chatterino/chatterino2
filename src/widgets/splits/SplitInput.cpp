@@ -307,6 +307,7 @@ void SplitInput::openEmotePopup()
                     textToInsert = " " + textToInsert;
                 }
                 this->insertText(textToInsert);
+                this->ui_.textEdit->activateWindow();
             }
         });
     }
@@ -630,7 +631,7 @@ bool SplitInput::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::ShortcutOverride ||
         event->type() == QEvent::Shortcut)
     {
-        if (auto popup = this->inputCompletionPopup_.get())
+        if (auto popup = this->inputCompletionPopup_.data())
         {
             if (popup->isVisible())
             {
@@ -650,7 +651,7 @@ void SplitInput::installKeyPressedEvent()
 {
     this->ui_.textEdit->keyPressed.disconnectAll();
     this->ui_.textEdit->keyPressed.connect([this](QKeyEvent *event) {
-        if (auto *popup = this->inputCompletionPopup_.get())
+        if (auto *popup = this->inputCompletionPopup_.data())
         {
             if (popup->isVisible())
             {
@@ -764,12 +765,12 @@ void SplitInput::updateCompletionPopup()
 
 void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
 {
-    if (!this->inputCompletionPopup_.get())
+    if (this->inputCompletionPopup_.isNull())
     {
         this->inputCompletionPopup_ = new InputCompletionPopup(this);
         this->inputCompletionPopup_->setInputAction(
-            [that = QObjectRef(this)](const QString &text) mutable {
-                if (auto *this2 = that.get())
+            [that = QPointer(this)](const QString &text) mutable {
+                if (auto *this2 = that.data())
                 {
                     this2->insertCompletionText(text);
                     this2->hideCompletionPopup();
@@ -777,7 +778,7 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
             });
     }
 
-    auto *popup = this->inputCompletionPopup_.get();
+    auto *popup = this->inputCompletionPopup_.data();
     assert(popup);
 
     if (emoteCompletion)
@@ -798,7 +799,7 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
 
 void SplitInput::hideCompletionPopup()
 {
-    if (auto *popup = this->inputCompletionPopup_.get())
+    if (auto *popup = this->inputCompletionPopup_.data())
     {
         popup->hide();
     }

@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/LinkParser.hpp"
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
@@ -28,8 +29,10 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
+#include "util/QStringHash.hpp"
 #include "util/Qt.hpp"
 #include "widgets/Window.hpp"
 
@@ -38,7 +41,14 @@
 #include <QDebug>
 #include <QStringRef>
 
+#include <chrono>
+#include <unordered_set>
+
+using namespace chatterino::literals;
+
 namespace {
+
+using namespace std::chrono_literals;
 
 const QString regexHelpString("(\\w+)[.,!?;:]*?$");
 
@@ -51,6 +61,19 @@ const QRegularExpression allUsernamesMentionRegex("^" + regexHelpString);
 const QSet<QString> zeroWidthEmotes{
     "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
     "ReinDeer", "CandyCane", "cvMask",   "cvHazmat",
+};
+
+struct HypeChatPaidLevel {
+    std::chrono::seconds duration;
+    uint8_t numeric;
+};
+
+const std::unordered_map<QString, HypeChatPaidLevel> HYPE_CHAT_PAID_LEVEL{
+    {u"ONE"_s, {30s, 1}},    {u"TWO"_s, {2min + 30s, 2}},
+    {u"THREE"_s, {5min, 3}}, {u"FOUR"_s, {10min, 4}},
+    {u"FIVE"_s, {30min, 5}}, {u"SIX"_s, {1h, 6}},
+    {u"SEVEN"_s, {2h, 7}},   {u"EIGHT"_s, {3h, 8}},
+    {u"NINE"_s, {4h, 9}},    {u"TEN"_s, {5h, 10}},
 };
 
 }  // namespace
@@ -294,8 +317,12 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->addWords(splits, twitchEmotes);
 
+    QString stylizedUsername =
+        this->stylizeUsername(this->userName, this->message());
+
     this->message().messageText = this->originalMessage_;
-    this->message().searchText = this->message().localizedName + " " +
+    this->message().searchText = stylizedUsername + " " +
+                                 this->message().localizedName + " " +
                                  this->userName + ": " + this->originalMessage_;
 
     // highlights
@@ -1463,6 +1490,7 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     textList.append({redeemed, reward.title, QString::number(reward.cost)});
     builder->message().messageText = textList.join(" ");
     builder->message().searchText = textList.join(" ");
+    builder->message().loginName = reward.user.login;
 }
 
 void TwitchMessageBuilder::liveMessage(const QString &channelName,
@@ -1733,6 +1761,45 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(
 
     builder->message().messageText = text;
     builder->message().searchText = text;
+}
+
+MessagePtr TwitchMessageBuilder::buildHypeChatMessage(
+    Communi::IrcPrivateMessage *message)
+{
+    auto level = message->tag(u"pinned-chat-paid-level"_s).toString();
+    auto currency = message->tag(u"pinned-chat-paid-currency"_s).toString();
+    bool okAmount = false;
+    auto amount = message->tag(u"pinned-chat-paid-amount"_s).toInt(&okAmount);
+    bool okExponent = false;
+    auto exponent =
+        message->tag(u"pinned-chat-paid-exponent"_s).toInt(&okExponent);
+    if (!okAmount || !okExponent || currency.isEmpty())
+    {
+        return {};
+    }
+    // additionally, there's `pinned-chat-paid-is-system-message` which isn't used by Chatterino.
+
+    QString subtitle;
+    auto levelIt = HYPE_CHAT_PAID_LEVEL.find(level);
+    if (levelIt != HYPE_CHAT_PAID_LEVEL.end())
+    {
+        const auto &level = levelIt->second;
+        subtitle = u"Level %1 Hype Chat (%2) "_s.arg(level.numeric)
+                       .arg(formatTime(level.duration));
+    }
+    else
+    {
+        subtitle = u"Hype Chat "_s;
+    }
+
+    // actualAmount = amount * 10^(-exponent)
+    double actualAmount = std::pow(10.0, double(-exponent)) * double(amount);
+    subtitle += QLocale::system().toCurrencyString(actualAmount, currency);
+
+    MessageBuilder builder(systemMessage, parseTagString(subtitle),
+                           calculateMessageTime(message).time());
+    builder->flags.set(MessageFlag::ElevatedMessage);
+    return builder.release();
 }
 
 void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)

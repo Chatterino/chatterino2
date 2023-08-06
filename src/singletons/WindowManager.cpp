@@ -634,6 +634,10 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             }
         }
         break;
+        case Channel::Type::Misc: {
+            obj.insert("type", "misc");
+            obj.insert("name", channel.get()->getName());
+        }
     }
 }
 
@@ -678,6 +682,10 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     {
         return Irc::instance().getOrAddChannel(descriptor.server_,
                                                descriptor.channelName_);
+    }
+    else if (descriptor.type_ == "misc")
+    {
+        return app->twitch->getChannelOrEmpty(descriptor.channelName_);
     }
 
     return Channel::getEmpty();

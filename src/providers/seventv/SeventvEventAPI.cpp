@@ -1,8 +1,11 @@
 #include "providers/seventv/SeventvEventAPI.hpp"
 
+#include "Application.hpp"
 #include "providers/seventv/eventapi/Client.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/eventapi/Message.hpp"
+#include "providers/seventv/SeventvBadges.hpp"
+#include "providers/seventv/SeventvCosmetics.hpp"
 
 #include <QJsonArray>
 
@@ -10,6 +13,7 @@
 
 namespace chatterino {
 
+using namespace seventv;
 using namespace seventv::eventapi;
 
 SeventvEventAPI::SeventvEventAPI(
@@ -35,6 +39,25 @@ void SeventvEventAPI::subscribeUser(const QString &userID,
     }
 }
 
+void SeventvEventAPI::subscribeTwitchChannel(const QString &id)
+{
+    if (this->subscribedTwitchChannels_.insert(id).second)
+    {
+        this->subscribe({
+            ChannelCondition{id},
+            SubscriptionType::CreateCosmetic,
+        });
+        this->subscribe({
+            ChannelCondition{id},
+            SubscriptionType::CreateEntitlement,
+        });
+        this->subscribe({
+            ChannelCondition{id},
+            SubscriptionType::DeleteEntitlement,
+        });
+    }
+}
+
 void SeventvEventAPI::unsubscribeEmoteSet(const QString &id)
 {
     if (this->subscribedEmoteSets_.erase(id) > 0)
@@ -50,6 +73,25 @@ void SeventvEventAPI::unsubscribeUser(const QString &id)
     {
         this->unsubscribe(
             {ObjectIDCondition{id}, SubscriptionType::UpdateUser});
+    }
+}
+
+void SeventvEventAPI::unsubscribeTwitchChannel(const QString &id)
+{
+    if (this->subscribedTwitchChannels_.erase(id) > 0)
+    {
+        this->unsubscribe({
+            ChannelCondition{id},
+            SubscriptionType::CreateCosmetic,
+        });
+        this->unsubscribe({
+            ChannelCondition{id},
+            SubscriptionType::CreateEntitlement,
+        });
+        this->unsubscribe({
+            ChannelCondition{id},
+            SubscriptionType::DeleteEntitlement,
+        });
     }
 }
 
@@ -144,9 +186,49 @@ void SeventvEventAPI::handleDispatch(const Dispatch &dispatch)
             this->onUserUpdate(dispatch);
         }
         break;
+        case SubscriptionType::CreateCosmetic: {
+            const CosmeticCreateDispatch cosmetic(dispatch);
+            if (cosmetic.validate())
+            {
+                this->onCosmeticCreate(cosmetic);
+            }
+            else
+            {
+                qCDebug(chatterinoSeventvEventAPI)
+                    << "Invalid cosmetic dispatch" << dispatch.body;
+            }
+        }
+        break;
+        case SubscriptionType::CreateEntitlement: {
+            const EntitlementCreateDeleteDispatch entitlement(dispatch);
+            if (entitlement.validate())
+            {
+                this->onEntitlementCreate(entitlement);
+            }
+            else
+            {
+                qCDebug(chatterinoSeventvEventAPI)
+                    << "Invalid entitlement create dispatch" << dispatch.body;
+            }
+        }
+        break;
+        case SubscriptionType::DeleteEntitlement: {
+            const EntitlementCreateDeleteDispatch entitlement(dispatch);
+            if (entitlement.validate())
+            {
+                this->onEntitlementDelete(entitlement);
+            }
+            else
+            {
+                qCDebug(chatterinoSeventvEventAPI)
+                    << "Invalid entitlement delete dispatch" << dispatch.body;
+            }
+        }
+        break;
         default: {
             qCDebug(chatterinoSeventvEventAPI)
-                << "Unknown subscription type:" << (int)dispatch.type
+                << "Unknown subscription type:"
+                << magic_enum::enum_name(dispatch.type).data()
                 << "body:" << dispatch.body;
         }
         break;
@@ -260,5 +342,60 @@ void SeventvEventAPI::onUserUpdate(const Dispatch &dispatch)
         }
     }
 }
+
+// NOLINTBEGIN(readability-convert-member-functions-to-static)
+
+void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
+{
+    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
+    // `seventvBadges` does its own locking.
+    auto *badges = Application::instance->seventvBadges;
+    switch (cosmetic.kind)
+    {
+        case CosmeticKind::Badge: {
+            badges->registerBadge(cosmetic.data);
+        }
+        break;
+        default:
+            break;
+    }
+}
+
+void SeventvEventAPI::onEntitlementCreate(
+    const EntitlementCreateDeleteDispatch &entitlement)
+{
+    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
+    // `seventvBadges` does its own locking.
+    auto *badges = Application::instance->seventvBadges;
+    switch (entitlement.kind)
+    {
+        case CosmeticKind::Badge: {
+            badges->assignBadgeToUser(entitlement.refID,
+                                      UserId{entitlement.userID});
+        }
+        break;
+        default:
+            break;
+    }
+}
+
+void SeventvEventAPI::onEntitlementDelete(
+    const EntitlementCreateDeleteDispatch &entitlement)
+{
+    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
+    // `seventvBadges` does its own locking.
+    auto *badges = Application::instance->seventvBadges;
+    switch (entitlement.kind)
+    {
+        case CosmeticKind::Badge: {
+            badges->clearBadgeFromUser(entitlement.refID,
+                                       UserId{entitlement.userID});
+        }
+        break;
+        default:
+            break;
+    }
+}
+// NOLINTEND(readability-convert-member-functions-to-static)
 
 }  // namespace chatterino

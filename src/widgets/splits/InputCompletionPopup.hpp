@@ -5,11 +5,28 @@
 
 #include <functional>
 #include <memory>
+#include <vector>
 
 namespace chatterino {
 
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
+
+namespace detail {
+
+    struct CompletionEmote {
+        EmotePtr emote;
+        QString displayName;
+        QString providerName;
+    };
+
+    std::vector<CompletionEmote> buildCompletionEmoteList(const QString &text,
+                                                          ChannelPtr channel);
+
+}  // namespace detail
 
 class GenericListView;
 
@@ -32,6 +49,8 @@ public:
 protected:
     void showEvent(QShowEvent *event) override;
     void hideEvent(QHideEvent *event) override;
+
+    void themeChangedEvent() override;
 
 private:
     void initLayout();

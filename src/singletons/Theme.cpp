@@ -2,19 +2,26 @@
 #include "singletons/Theme.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
+#include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 
 #include <QColor>
+#include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QJsonDocument>
-#include <QJsonObject>
 #include <QSet>
 
 #include <cmath>
 
 namespace {
-void parseInto(const QJsonObject &obj, const QLatin1String &key, QColor &color)
+
+using namespace chatterino;
+using namespace literals;
+
+void parseInto(const QJsonObject &obj, QLatin1String key, QColor &color)
 {
     const auto &jsonValue = obj[key];
     if (!jsonValue.isString()) [[unlikely]]
@@ -36,8 +43,9 @@ void parseInto(const QJsonObject &obj, const QLatin1String &key, QColor &color)
 }
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define _c2StringLit(s, ty) s##ty
 #define parseColor(to, from, key) \
-    parseInto(from, QLatin1String(#key), (to).from.key)
+    parseInto(from, _c2StringLit(#key, _L1), (to).from.key)
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
 void parseWindow(const QJsonObject &window, chatterino::Theme &theme)
@@ -48,32 +56,32 @@ void parseWindow(const QJsonObject &window, chatterino::Theme &theme)
 
 void parseTabs(const QJsonObject &tabs, chatterino::Theme &theme)
 {
-    const auto parseTabColors = [](auto json, auto &tab) {
-        parseInto(json, QLatin1String("text"), tab.text);
+    const auto parseTabColors = [](const auto &json, auto &tab) {
+        parseInto(json, "text"_L1, tab.text);
         {
-            const auto backgrounds = json["backgrounds"].toObject();
+            const auto backgrounds = json["backgrounds"_L1].toObject();
             parseColor(tab, backgrounds, regular);
             parseColor(tab, backgrounds, hover);
             parseColor(tab, backgrounds, unfocused);
         }
         {
-            const auto line = json["line"].toObject();
+            const auto line = json["line"_L1].toObject();
             parseColor(tab, line, regular);
             parseColor(tab, line, hover);
             parseColor(tab, line, unfocused);
         }
     };
     parseColor(theme, tabs, dividerLine);
-    parseTabColors(tabs["regular"].toObject(), theme.tabs.regular);
-    parseTabColors(tabs["newMessage"].toObject(), theme.tabs.newMessage);
-    parseTabColors(tabs["highlighted"].toObject(), theme.tabs.highlighted);
-    parseTabColors(tabs["selected"].toObject(), theme.tabs.selected);
+    parseTabColors(tabs["regular"_L1].toObject(), theme.tabs.regular);
+    parseTabColors(tabs["newMessage"_L1].toObject(), theme.tabs.newMessage);
+    parseTabColors(tabs["highlighted"_L1].toObject(), theme.tabs.highlighted);
+    parseTabColors(tabs["selected"_L1].toObject(), theme.tabs.selected);
 }
 
 void parseMessages(const QJsonObject &messages, chatterino::Theme &theme)
 {
     {
-        const auto textColors = messages["textColors"].toObject();
+        const auto textColors = messages["textColors"_L1].toObject();
         parseColor(theme.messages, textColors, regular);
         parseColor(theme.messages, textColors, caret);
         parseColor(theme.messages, textColors, link);
@@ -81,7 +89,7 @@ void parseMessages(const QJsonObject &messages, chatterino::Theme &theme)
         parseColor(theme.messages, textColors, chatPlaceholder);
     }
     {
-        const auto backgrounds = messages["backgrounds"].toObject();
+        const auto backgrounds = messages["backgrounds"_L1].toObject();
         parseColor(theme.messages, backgrounds, regular);
         parseColor(theme.messages, backgrounds, alternate);
     }
@@ -110,7 +118,7 @@ void parseSplits(const QJsonObject &splits, chatterino::Theme &theme)
     parseColor(theme, splits, resizeHandleBackground);
 
     {
-        const auto header = splits["header"].toObject();
+        const auto header = splits["header"_L1].toObject();
         parseColor(theme.splits, header, border);
         parseColor(theme.splits, header, focusedBorder);
         parseColor(theme.splits, header, background);
@@ -119,7 +127,7 @@ void parseSplits(const QJsonObject &splits, chatterino::Theme &theme)
         parseColor(theme.splits, header, focusedText);
     }
     {
-        const auto input = splits["input"].toObject();
+        const auto input = splits["input"_L1].toObject();
         parseColor(theme.splits, input, background);
         parseColor(theme.splits, input, text);
     }
@@ -127,74 +135,244 @@ void parseSplits(const QJsonObject &splits, chatterino::Theme &theme)
 
 void parseColors(const QJsonObject &root, chatterino::Theme &theme)
 {
-    const auto colors = root["colors"].toObject();
+    const auto colors = root["colors"_L1].toObject();
 
-    parseInto(colors, QLatin1String("accent"), theme.accent);
+    parseInto(colors, "accent"_L1, theme.accent);
 
-    parseWindow(colors["window"].toObject(), theme);
-    parseTabs(colors["tabs"].toObject(), theme);
-    parseMessages(colors["messages"].toObject(), theme);
-    parseScrollbars(colors["scrollbars"].toObject(), theme);
-    parseSplits(colors["splits"].toObject(), theme);
+    parseWindow(colors["window"_L1].toObject(), theme);
+    parseTabs(colors["tabs"_L1].toObject(), theme);
+    parseMessages(colors["messages"_L1].toObject(), theme);
+    parseScrollbars(colors["scrollbars"_L1].toObject(), theme);
+    parseSplits(colors["splits"_L1].toObject(), theme);
 }
 #undef parseColor
+#undef _c2StringLit
 
-QString getThemePath(const QString &name)
+std::optional<QJsonObject> loadThemeFromPath(const QString &path)
 {
-    static QSet<QString> knownThemes = {"White", "Light", "Dark", "Black"};
-
-    if (knownThemes.contains(name))
+    QFile file(path);
+    if (!file.open(QFile::ReadOnly))
     {
-        return QStringLiteral(":/themes/%1.json").arg(name);
+        qCWarning(chatterinoTheme)
+            << "Failed to open" << file.fileName() << "at" << path;
+        return std::nullopt;
     }
-    return name;
+
+    QJsonParseError error{};
+    auto json = QJsonDocument::fromJson(file.readAll(), &error);
+    if (!json.isObject())
+    {
+        qCWarning(chatterinoTheme) << "Failed to parse" << file.fileName()
+                                   << "error:" << error.errorString();
+        return std::nullopt;
+    }
+
+    // TODO: Validate JSON schema?
+
+    return json.object();
+}
+
+/**
+ * Load the given theme descriptor from its path
+ *
+ * Returns a JSON object containing theme data if the theme is valid, otherwise nullopt
+ *
+ * NOTE: No theme validation is done by this function
+ **/
+std::optional<QJsonObject> loadTheme(const ThemeDescriptor &theme)
+{
+    return loadThemeFromPath(theme.path);
 }
 
 }  // namespace
 
 namespace chatterino {
 
+const std::vector<ThemeDescriptor> Theme::builtInThemes{
+    {
+        .key = "White",
+        .path = ":/themes/White.json",
+        .name = "White",
+    },
+    {
+        .key = "Light",
+        .path = ":/themes/Light.json",
+        .name = "Light",
+    },
+    {
+        .key = "Dark",
+        .path = ":/themes/Dark.json",
+        .name = "Dark",
+    },
+    {
+        .key = "Black",
+        .path = ":/themes/Black.json",
+        .name = "Black",
+    },
+};
+
+// Dark is our default & fallback theme
+const ThemeDescriptor Theme::fallbackTheme = Theme::builtInThemes.at(2);
+
 bool Theme::isLightTheme() const
 {
     return this->isLight_;
 }
 
-Theme::Theme()
+void Theme::initialize(Settings &settings, Paths &paths)
 {
-    this->update();
-
-    this->themeName.connectSimple(
-        [this](auto) {
+    this->themeName.connect(
+        [this](auto themeName) {
+            qCInfo(chatterinoTheme) << "Theme updated to" << themeName;
             this->update();
         },
         false);
+
+    this->loadAvailableThemes();
+
+    this->update();
 }
 
 void Theme::update()
 {
-    this->parse();
+    auto oTheme = this->findThemeByKey(this->themeName);
+
+    constexpr const double nsToMs = 1.0 / 1000000.0;
+    QElapsedTimer timer;
+    timer.start();
+
+    std::optional<QJsonObject> themeJSON;
+    QString themePath;
+    if (!oTheme)
+    {
+        qCWarning(chatterinoTheme)
+            << "Theme" << this->themeName
+            << "not found, falling back to the fallback theme";
+
+        themeJSON = loadTheme(fallbackTheme);
+        themePath = fallbackTheme.path;
+    }
+    else
+    {
+        const auto &theme = *oTheme;
+
+        themeJSON = loadTheme(theme);
+        themePath = theme.path;
+
+        if (!themeJSON)
+        {
+            qCWarning(chatterinoTheme)
+                << "Theme" << this->themeName
+                << "not valid, falling back to the fallback theme";
+
+            // Parsing the theme failed, fall back
+            themeJSON = loadTheme(fallbackTheme);
+            themePath = fallbackTheme.path;
+        }
+    }
+    auto loadTs = double(timer.nsecsElapsed()) * nsToMs;
+
+    if (!themeJSON)
+    {
+        qCWarning(chatterinoTheme)
+            << "Failed to load" << this->themeName << "or the fallback theme";
+        return;
+    }
+
+    if (this->isAutoReloading() && this->currentThemeJson_ == *themeJSON)
+    {
+        return;
+    }
+
+    this->parseFrom(*themeJSON);
+    this->currentThemePath_ = themePath;
+
+    auto parseTs = double(timer.nsecsElapsed()) * nsToMs;
+
     this->updated.invoke();
+    auto updateTs = double(timer.nsecsElapsed()) * nsToMs;
+    qCDebug(chatterinoTheme).nospace().noquote()
+        << "Updated theme in " << QString::number(updateTs, 'f', 2)
+        << "ms (load: " << QString::number(loadTs, 'f', 2)
+        << "ms, parse: " << QString::number(parseTs - loadTs, 'f', 2)
+        << "ms, update: " << QString::number(updateTs - parseTs, 'f', 2)
+        << "ms)";
+
+    if (this->isAutoReloading())
+    {
+        this->currentThemeJson_ = *themeJSON;
+    }
 }
 
-void Theme::parse()
+std::vector<std::pair<QString, QVariant>> Theme::availableThemes() const
 {
-    QFile file(getThemePath(this->themeName));
-    if (!file.open(QFile::ReadOnly))
+    std::vector<std::pair<QString, QVariant>> packagedThemes;
+
+    for (const auto &theme : this->availableThemes_)
     {
-        qCWarning(chatterinoTheme) << "Failed to open" << file.fileName();
-        return;
+        if (theme.custom)
+        {
+            auto p = std::make_pair(
+                QStringLiteral("Custom: %1").arg(theme.name), theme.key);
+
+            packagedThemes.emplace_back(p);
+        }
+        else
+        {
+            auto p = std::make_pair(theme.name, theme.key);
+
+            packagedThemes.emplace_back(p);
+        }
     }
 
-    QJsonParseError error{};
-    auto json = QJsonDocument::fromJson(file.readAll(), &error);
-    if (json.isNull())
+    return packagedThemes;
+}
+
+void Theme::loadAvailableThemes()
+{
+    this->availableThemes_ = Theme::builtInThemes;
+
+    auto dir = QDir(getPaths()->themesDirectory);
+    for (const auto &info :
+         dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Name))
     {
-        qCWarning(chatterinoTheme) << "Failed to parse" << file.fileName()
-                                   << "error:" << error.errorString();
-        return;
+        if (!info.isFile())
+        {
+            continue;
+        }
+
+        if (!info.fileName().endsWith(".json"))
+        {
+            continue;
+        }
+
+        auto themeName = info.baseName();
+
+        auto themeDescriptor = ThemeDescriptor{
+            info.fileName(), info.absoluteFilePath(), themeName, true};
+
+        auto theme = loadTheme(themeDescriptor);
+        if (!theme)
+        {
+            qCWarning(chatterinoTheme) << "Failed to parse theme at" << info;
+            continue;
+        }
+
+        this->availableThemes_.emplace_back(std::move(themeDescriptor));
+    }
+}
+
+std::optional<ThemeDescriptor> Theme::findThemeByKey(const QString &key)
+{
+    for (const auto &theme : this->availableThemes_)
+    {
+        if (theme.key == key)
+        {
+            return theme;
+        }
     }
 
-    this->parseFrom(json.object());
+    return std::nullopt;
 }
 
 void Theme::parseFrom(const QJsonObject &root)
@@ -202,15 +380,20 @@ void Theme::parseFrom(const QJsonObject &root)
     parseColors(root, *this);
 
     this->isLight_ =
-        root["metadata"]["iconTheme"].toString() == QStringLiteral("dark");
+        root["metadata"_L1]["iconTheme"_L1].toString() == u"dark"_s;
 
-    this->splits.input.styleSheet =
-        "background:" + this->splits.input.background.name() + ";" +
-        "border:" + this->tabs.selected.backgrounds.regular.name() + ";" +
-        "color:" + this->messages.textColors.regular.name() + ";" +
-        "selection-background-color:" +
-        (this->isLightTheme() ? "#68B1FF"
-                              : this->tabs.selected.backgrounds.regular.name());
+    this->splits.input.styleSheet = uR"(
+        background: %1;
+        border: %2;
+        color: %3;
+        selection-background-color: %4;
+    )"_s.arg(
+        this->splits.input.background.name(QColor::HexArgb),
+        this->tabs.selected.backgrounds.regular.name(QColor::HexArgb),
+        this->messages.textColors.regular.name(QColor::HexArgb),
+        this->isLightTheme()
+            ? u"#68B1FF"_s
+            : this->tabs.selected.backgrounds.regular.name(QColor::HexArgb));
 
     // Usercard buttons
     if (this->isLightTheme())
@@ -223,6 +406,35 @@ void Theme::parseFrom(const QJsonObject &root)
         this->buttons.copy = getResources().buttons.copyLight;
         this->buttons.pin = getResources().buttons.pinDisabledLight;
     }
+}
+
+bool Theme::isAutoReloading() const
+{
+    return this->themeReloadTimer_ != nullptr;
+}
+
+void Theme::setAutoReload(bool autoReload)
+{
+    if (autoReload == this->isAutoReloading())
+    {
+        return;
+    }
+
+    if (!autoReload)
+    {
+        this->themeReloadTimer_.reset();
+        this->currentThemeJson_ = {};
+        return;
+    }
+
+    this->themeReloadTimer_ = std::make_unique<QTimer>();
+    QObject::connect(this->themeReloadTimer_.get(), &QTimer::timeout, [this]() {
+        this->update();
+    });
+    this->themeReloadTimer_->setInterval(Theme::AUTO_RELOAD_INTERVAL_MS);
+    this->themeReloadTimer_->start();
+
+    qCDebug(chatterinoTheme) << "Enabled theme watcher";
 }
 
 void Theme::normalizeColor(QColor &color) const

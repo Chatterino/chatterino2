@@ -36,6 +36,17 @@ public:
         DisableLayoutSave = 128,
     };
 
+    enum class BoundsChecker {
+        // Don't attempt to do any "stay in screen" stuff, just move me!
+        Off,
+
+        // Attempt to keep the window within bounds of the screen the cursor is on
+        CursorPosition,
+
+        // Attempt to keep the window within bounds of the screen the desired position is on
+        DesiredPosition,
+    };
+
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
 
     explicit BaseWindow(FlagsEnum<Flags> flags_ = None,
@@ -51,15 +62,12 @@ public:
                                       std::function<void()> onClicked);
     EffectLabel *addTitleBarLabel(std::function<void()> onClicked);
 
-    void setStayInScreenRect(bool value);
-    bool getStayInScreenRect() const;
-
     void setActionOnFocusLoss(ActionOnFocusLoss value);
     ActionOnFocusLoss getActionOnFocusLoss() const;
 
-    void moveTo(QWidget *widget, QPoint point, bool offset = true);
+    void moveTo(QPoint point, bool offset, BoundsChecker boundsChecker);
 
-    virtual float scale() const override;
+    float scale() const override;
     float qtFontScale() const;
 
     pajlada::Signals::NoArgSignal closing;
@@ -101,7 +109,12 @@ protected:
 
 private:
     void init();
-    void moveIntoDesktopRect(QPoint point);
+
+    /**
+     *
+     **/
+    void moveWithinScreen(QPoint point, QPoint origin);
+
     void calcButtonsSizes();
     void drawCustomWindowFrame(QPainter &painter);
     void onFocusLost();
@@ -121,7 +134,6 @@ private:
     bool enableCustomFrame_;
     ActionOnFocusLoss actionOnFocusLoss_ = Nothing;
     bool frameless_;
-    bool stayInScreenRect_ = false;
     bool shown_ = false;
     FlagsEnum<Flags> flags_;
     float nativeScale_ = 1;

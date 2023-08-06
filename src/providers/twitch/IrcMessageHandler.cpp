@@ -1,8 +1,10 @@
 #include "IrcMessageHandler.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/ignores/IgnoreController.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Link.hpp"
 #include "messages/Message.hpp"
@@ -26,6 +28,8 @@
 #include "util/StreamerMode.hpp"
 
 #include <IrcMessage>
+#include <QLocale>
+#include <QStringBuilder>
 
 #include <memory>
 #include <unordered_set>
@@ -119,36 +123,59 @@ void updateReplyParticipatedStatus(const QVariantMap &tags,
 {
     const auto &currentLogin =
         getApp()->accounts->twitch.getCurrent()->getUserName();
-    if (thread->participated())
+
+    if (thread->subscribed())
     {
-        builder.message().flags.set(MessageFlag::ParticipatedThread);
+        builder.message().flags.set(MessageFlag::SubscribedThread);
         return;
     }
 
-    if (isNew)
+    if (thread->unsubscribed())
     {
-        if (const auto it = tags.find("reply-parent-user-login");
-            it != tags.end())
-        {
-            auto name = it.value().toString();
-            if (name == currentLogin)
-            {
-                thread->markParticipated();
-                builder.message().flags.set(MessageFlag::ParticipatedThread);
-                return;  // already marked as participated
-            }
-        }
+        return;
     }
 
-    if (senderLogin == currentLogin)
+    if (getSettings()->autoSubToParticipatedThreads)
     {
-        thread->markParticipated();
-        // don't set the highlight here
+        if (isNew)
+        {
+            if (const auto it = tags.find("reply-parent-user-login");
+                it != tags.end())
+            {
+                auto name = it.value().toString();
+                if (name == currentLogin)
+                {
+                    thread->markSubscribed();
+                    builder.message().flags.set(MessageFlag::SubscribedThread);
+                    return;  // already marked as participated
+                }
+            }
+        }
+
+        if (senderLogin == currentLogin)
+        {
+            thread->markSubscribed();
+            // don't set the highlight here
+        }
     }
+}
+
+ChannelPtr channelOrEmptyByTarget(const QString &target,
+                                  TwitchIrcServer &server)
+{
+    QString channelName;
+    if (!trimChannelName(target, channelName))
+    {
+        return Channel::getEmpty();
+    }
+
+    return server.getChannelOrEmpty(channelName);
 }
 
 }  // namespace
 namespace chatterino {
+
+using namespace literals;
 
 static float relativeSimilarity(const QString &str1, const QString &str2)
 {
@@ -305,6 +332,16 @@ std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
         builtMessages.emplace_back(builder.build());
         builder.triggerHighlights();
     }
+
+    if (message->tags().contains(u"pinned-chat-paid-amount"_s))
+    {
+        auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
+        if (ptr)
+        {
+            builtMessages.emplace_back(std::move(ptr));
+        }
+    }
+
     return builtMessages;
 }
 
@@ -321,6 +358,21 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
         message, message->target(),
         message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
         false, message->isAction());
+
+    auto chan = channelOrEmptyByTarget(message->target(), server);
+    if (chan->isEmpty())
+    {
+        return;
+    }
+
+    if (message->tags().contains(u"pinned-chat-paid-amount"_s))
+    {
+        auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
+        if (ptr)
+        {
+            chan->addMessage(ptr);
+        }
+    }
 }
 
 std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
@@ -433,13 +485,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                                    TwitchIrcServer &server, bool isSub,
                                    bool isAction)
 {
-    QString channelName;
-    if (!trimChannelName(target, channelName))
-    {
-        return;
-    }
-
-    auto chan = server.getChannelOrEmpty(channelName);
+    auto chan = channelOrEmptyByTarget(target, server);
 
     if (chan->isEmpty())
     {
@@ -847,6 +893,16 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
         content = parameters[1];
     }
 
+    if (isIgnoredMessage({
+            .message = content,
+            .twitchUserID = tags.value("user-id").toString(),
+            .isMod = channel->isMod(),
+            .isBroadcaster = channel->isBroadcaster(),
+        }))
+    {
+        return {};
+    }
+
     if (specialMessageTypes.contains(msgType))
     {
         // Messages are not required, so they might be empty
@@ -906,6 +962,17 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
     if (parameters.size() >= 2)
     {
         content = parameters[1];
+    }
+
+    auto chn = server.getChannelOrEmpty(target);
+    if (isIgnoredMessage({
+            .message = content,
+            .twitchUserID = tags.value("user-id").toString(),
+            .isMod = chn->isMod(),
+            .isBroadcaster = chn->isBroadcaster(),
+        }))
+    {
+        return;
     }
 
     if (specialMessageTypes.contains(msgType))
@@ -1145,9 +1212,12 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
         return;
     }
 
-    if (message->nick() !=
-            getApp()->accounts->twitch.getCurrent()->getUserName() &&
-        getSettings()->showJoins.getValue())
+    if (message->nick() ==
+        getApp()->accounts->twitch.getCurrent()->getUserName())
+    {
+        twitchChannel->addMessage(makeSystemMessage("joined channel"));
+    }
+    else if (getSettings()->showJoins.getValue())
     {
         twitchChannel->addJoinedUser(message->nick());
     }

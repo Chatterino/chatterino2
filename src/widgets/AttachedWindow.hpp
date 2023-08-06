@@ -31,6 +31,9 @@ public:
     virtual ~AttachedWindow() override;
 
     static AttachedWindow *get(void *target_, const GetArgs &args);
+#ifdef USEWINSDK
+    static AttachedWindow *getForeground(const GetArgs &args);
+#endif
     static void detach(const QString &winId);
 
     void setChannel(ChannelPtr channel);

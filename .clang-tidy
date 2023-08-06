@@ -18,6 +18,7 @@ Checks: "-*,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
   -cppcoreguidelines-owning-memory,
   -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-avoid-const-or-ref-data-members,
   -readability-magic-numbers,
   -performance-noexcept-move-constructor,
   -misc-non-private-member-variables-in-classes,
@@ -48,6 +49,8 @@ CheckOptions:
   - key: readability-identifier-naming.UnionCase
     value: CamelCase
   - key: readability-identifier-naming.GlobalConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.GlobalVariableCase
     value: UPPER_CASE
   - key: readability-identifier-naming.VariableCase
     value: camelBack
