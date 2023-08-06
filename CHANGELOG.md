@@ -18,6 +18,8 @@
 - Minor: 7TV badges now automatically update upon changing. (#4512)
 - Minor: Stream status requests are now batched. (#4713)
 - Minor: Added `/c2-theme-autoreload` command to automatically reload a custom theme. This is useful for when you're developing your own theme. (#4718)
+- Minor: Remove restriction on Go To Message on system messages from search. (#4614)
+- Minor: Highlights loaded from message history will now correctly appear in the /mentions tab. (#4475)
 - Minor: All channels opened in browser tabs are synced when using the extension for quicker switching between tabs. (#4741)
 - Minor: Show channel point redemptions without messages in usercard. (#4557)
 - Minor: Allow for customizing the behavior of `Right Click`ing of usernames. (#4622, #4751)
