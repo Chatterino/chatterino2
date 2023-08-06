@@ -69,17 +69,21 @@ QString getDefaultBrowserExecutable()
 
     return command;
 #elif defined(Q_OS_UNIX) && !defined(Q_OS_DARWIN)
-    auto desktopFile = getDefaultBrowserDesktopFile();
-    if (desktopFile.has_value())
-    {
-        auto entry = desktopFile->getEntries("Desktop Entry");
-        auto exec = entry.find("Exec");
-        if (exec != entry.end())
+    static QString defaultBrowser = []() -> QString {
+        auto desktopFile = getDefaultBrowserDesktopFile();
+        if (desktopFile.has_value())
         {
-            return parseDesktopExecProgram(exec->second.trimmed());
+            auto entry = desktopFile->getEntries("Desktop Entry");
+            auto exec = entry.find("Exec");
+            if (exec != entry.end())
+            {
+                return parseDesktopExecProgram(exec->second.trimmed());
+            }
         }
-    }
-    return {};
+        return {};
+    }();
+
+    return defaultBrowser;
 #else
     return {};
 #endif

@@ -148,19 +148,6 @@ namespace chatterino {
 /// If no mimeapps file has a default, try to use the Added Associations in those files
 std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile()
 {
-    // use xdg-settings if installed
-    QProcess xdgSettings;
-    xdgSettings.start("xdg-settings", {"get", "default-web-browser"},
-                      QIODevice::ReadOnly);
-    xdgSettings.waitForFinished(1000);
-    if (xdgSettings.exitStatus() == QProcess::ExitStatus::NormalExit &&
-        xdgSettings.error() == QProcess::UnknownError &&
-        xdgSettings.exitCode() == 0)
-    {
-        return XDGDesktopFile::findDesktopFile(
-            xdgSettings.readAllStandardOutput().trimmed());
-    }
-
     // no xdg-utils, find it manually by searching mimeapps.list files
     QStringList associations;
     std::unordered_set<QString> denyList;
@@ -200,6 +187,19 @@ std::optional<XDGDesktopFile> getDefaultBrowserDesktopFile()
                 return desktopFile;
             }
         }
+    }
+
+    // use xdg-settings if installed
+    QProcess xdgSettings;
+    xdgSettings.start("xdg-settings", {"get", "default-web-browser"},
+                      QIODevice::ReadOnly);
+    xdgSettings.waitForFinished(1000);
+    if (xdgSettings.exitStatus() == QProcess::ExitStatus::NormalExit &&
+        xdgSettings.error() == QProcess::UnknownError &&
+        xdgSettings.exitCode() == 0)
+    {
+        return XDGDesktopFile::findDesktopFile(
+            xdgSettings.readAllStandardOutput().trimmed());
     }
 
     return {};
