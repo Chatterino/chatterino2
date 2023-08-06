@@ -1,5 +1,6 @@
 #include "LastRunCrashDialog.hpp"
 
+#include "common/Version.hpp"
 #include "singletons/Updates.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
@@ -14,7 +15,7 @@ namespace chatterino {
 LastRunCrashDialog::LastRunCrashDialog()
 {
     this->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
-    this->setWindowTitle("Chatterino");
+    this->setWindowTitle(Version::instance().fullVersion());
 
     auto layout =
         LayoutCreator<LastRunCrashDialog>(this).setLayoutType<QVBoxLayout>();

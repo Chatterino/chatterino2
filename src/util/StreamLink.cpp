@@ -57,7 +57,8 @@ namespace {
     void showStreamlinkNotFoundError()
     {
         static QErrorMessage *msg = new QErrorMessage;
-        msg->setWindowTitle("Chatterino - streamlink not found");
+        msg->setWindowTitle(Version::instance().fullVersion() +
+                            " - streamlink not found");
 
         if (getSettings()->streamlinkUseCustomPath)
         {
