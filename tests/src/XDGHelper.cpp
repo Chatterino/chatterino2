@@ -38,6 +38,16 @@ TEST(XDGHelper, ParseDesktopExecProgram)
             "\"/usr/lib/firefox/firefox",
             "/usr/lib/firefox/firefox",
         },
+        {
+            // Quoted executable name with space
+            "\"/usr/bin/my cool browser\"",
+            "/usr/bin/my cool browser",
+        },
+        {
+            // Executable name with reserved character
+            "/usr/bin/\\$hadowwizardmoneybrowser",
+            "/usr/bin/$hadowwizardmoneybrowser",
+        },
     };
 
     for (const auto &test : testCases)
