@@ -37,10 +37,6 @@
 
 #include <cmath>
 
-#ifdef USEWEBENGINE
-#    include "widgets/StreamView.hpp"
-#endif
-
 namespace {
 
 using namespace chatterino;
@@ -383,11 +379,6 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         "Set filters", this->split_, &Split::setFiltersDialog,
         h->getDisplaySequence(HotkeyCategory::Split, "pickFilters"));
     menu->addSeparator();
-#ifdef USEWEBENGINE
-    this->dropdownMenu.addAction(
-        "Start watching", this->split_, &Split::startWatching;
-        h->getDisplaySequence(HotkeyCategory::Split, "startWatching"));
-#endif
 
     auto *twitchChannel =
         dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
@@ -397,10 +388,8 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         menu->addAction(
             OPEN_IN_BROWSER, this->split_, &Split::openInBrowser,
             h->getDisplaySequence(HotkeyCategory::Split, "openInBrowser"));
-#ifndef USEWEBENGINE
         menu->addAction(OPEN_PLAYER_IN_BROWSER, this->split_,
                         &Split::openBrowserPlayer);
-#endif
         menu->addAction(
             OPEN_IN_STREAMLINK, this->split_, &Split::openInStreamlink,
             h->getDisplaySequence(HotkeyCategory::Split, "openInStreamlink"));
