@@ -26,6 +26,7 @@
 - Minor: Added support for opening incognito links in firefox-esr and chromium. (#4745)
 - Minor: Added support for opening incognito links under Linux/BSD using XDG. (#4745)
 - Minor: Add missing hotkey Action for Open Player in Browser. (#4756)
+- Minor: AutoMod term management messages are now hidden in Streamer Mode. (#4758)
 - Bugfix: Increased amount of blocked users loaded from 100 to 1,000. (#4721)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
 - Bugfix: Fix spacing issue with mentions inside RTL text. (#4677)
