@@ -110,6 +110,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
                   "Which direction to look for a split to focus?",
           }},
          {"openInBrowser", ActionDefinition{"Open channel in browser"}},
+         {"openPlayerInBrowser",
+          ActionDefinition{"Open stream in browser player"}},
          {"openInCustomPlayer",
           ActionDefinition{"Open stream in custom player"}},
          {"openInStreamlink", ActionDefinition{"Open stream in streamlink"}},
