@@ -469,8 +469,6 @@ set(SOURCE_FILES
         widgets/Notebook.hpp
         widgets/Scrollbar.cpp
         widgets/Scrollbar.hpp
-        widgets/StreamView.cpp
-        widgets/StreamView.hpp
         widgets/TooltipEntryWidget.cpp
         widgets/TooltipEntryWidget.hpp
         widgets/TooltipWidget.cpp

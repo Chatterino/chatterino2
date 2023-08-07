@@ -180,7 +180,6 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           }},
          {"showSearch", ActionDefinition{"Search current channel"}},
          {"showGlobalSearch", ActionDefinition{"Search all channels"}},
-         {"startWatching", ActionDefinition{"Start watching"}},
          {"debug", ActionDefinition{"Show debug popup"}},
      }},
     {HotkeyCategory::SplitInput,
