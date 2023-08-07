@@ -552,6 +552,11 @@ void Split::addShortcuts()
              this->openWithCustomScheme();
              return "";
          }},
+        {"openPlayerInBrowser",
+         [this](std::vector<QString>) -> QString {
+             this->openBrowserPlayer();
+             return "";
+         }},
         {"openModView",
          [this](std::vector<QString>) -> QString {
              this->openModViewInBrowser();

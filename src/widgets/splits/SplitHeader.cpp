@@ -399,7 +399,9 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
             h->getDisplaySequence(HotkeyCategory::Split, "openInBrowser"));
 #ifndef USEWEBENGINE
         menu->addAction(OPEN_PLAYER_IN_BROWSER, this->split_,
-                        &Split::openBrowserPlayer);
+                        &Split::openBrowserPlayer,
+                        h->getDisplaySequence(HotkeyCategory::Split,
+                                              "openPlayerInBrowser"));
 #endif
         menu->addAction(
             OPEN_IN_STREAMLINK, this->split_, &Split::openInStreamlink,
