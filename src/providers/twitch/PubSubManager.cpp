@@ -343,10 +343,6 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
     this->channelTermsActionHandlers["add_permitted_term"] =
         [this](const auto &data, const auto &roomID) {
             // This term got a pass through automod
-            if (isInStreamerMode())
-            {
-                return;
-            }
             AutomodUserAction action(data, roomID);
             action.source.id = data.value("created_by_user_id").toString();
             action.source.login = data.value("created_by").toString();
@@ -361,10 +357,6 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
     this->channelTermsActionHandlers["add_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
             // A term has been added
-            if (isInStreamerMode())
-            {
-                return;
-            }
             AutomodUserAction action(data, roomID);
             action.source.id = data.value("created_by_user_id").toString();
             action.source.login = data.value("created_by").toString();
@@ -379,10 +371,6 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
     this->moderationActionHandlers["delete_permitted_term"] =
         [this](const auto &data, const auto &roomID) {
             // This term got deleted
-            if (isInStreamerMode())
-            {
-                return;
-            }
             AutomodUserAction action(data, roomID);
             action.source.id = data.value("created_by_user_id").toString();
             action.source.login = data.value("created_by").toString();
@@ -403,10 +391,6 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
     this->channelTermsActionHandlers["delete_permitted_term"] =
         [this](const auto &data, const auto &roomID) {
             // This term got deleted
-            if (isInStreamerMode())
-            {
-                return;
-            }
             AutomodUserAction action(data, roomID);
             action.source.id = data.value("created_by_user_id").toString();
             action.source.login = data.value("created_by").toString();
@@ -421,10 +405,6 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
     this->moderationActionHandlers["delete_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
             // This term got deleted
-            if (isInStreamerMode())
-            {
-                return;
-            }
             AutomodUserAction action(data, roomID);
 
             action.source.id = data.value("created_by_user_id").toString();
@@ -445,10 +425,6 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
     this->channelTermsActionHandlers["delete_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
             // This term got deleted
-            if (isInStreamerMode())
-            {
-                return;
-            }
             AutomodUserAction action(data, roomID);
 
             action.source.id = data.value("created_by_user_id").toString();

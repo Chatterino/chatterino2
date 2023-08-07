@@ -523,6 +523,10 @@ void Application::initPubSub()
 
     this->twitch->pubsub->signals_.moderation.automodUserMessage.connect(
         [&](const auto &action) {
+            if (isInStreamerMode())
+            {
+                return;
+            }
             auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty())
