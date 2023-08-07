@@ -31,7 +31,6 @@ Notes:
 2. Unfold the top most tree element (latest stable Qt version, e.g. `Qt 5.15.2`)
 3. Under this version, select the following entries:
    - `MSVC 2019 64-bit` (or alternative version if you are using that)
-   - `Qt WebEngine` (optional)
 4. Under the "Tools" tree element (at the bottom), ensure that `Qt Creator X.X.X` and `Debugging Tools for Windows` are selected. (they should be checked by default)
 5. Continue through the installer and let the installer finish installing Qt.
 
