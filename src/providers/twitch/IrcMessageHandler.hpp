@@ -4,6 +4,7 @@
 
 #include <IrcMessage>
 
+#include <optional>
 #include <vector>
 
 namespace chatterino {
