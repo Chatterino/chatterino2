@@ -20,52 +20,6 @@ const auto &LOG = chatterinoRecentMessages;
 
 namespace chatterino::recentmessages::detail {
 
-// convertClearchatToNotice takes a Communi::IrcMessage that is a CLEARCHAT
-// command and converts it to a readable NOTICE message. This has
-// historically been done in the Recent Messages API, but this functionality
-// has been moved to Chatterino instead.
-Communi::IrcMessage *convertClearchatToNotice(Communi::IrcMessage *message)
-{
-    auto channelName = message->parameter(0);
-    QString noticeMessage{};
-    if (message->tags().contains("target-user-id"))
-    {
-        auto target = message->parameter(1);
-
-        if (message->tags().contains("ban-duration"))
-        {
-            // User was timed out
-            noticeMessage =
-                QString("%1 has been timed out for %2.")
-                    .arg(target)
-                    .arg(formatTime(message->tag("ban-duration").toString()));
-        }
-        else
-        {
-            // User was permanently banned
-            noticeMessage =
-                QString("%1 has been permanently banned.").arg(target);
-        }
-    }
-    else
-    {
-        // Chat was cleared
-        noticeMessage = "Chat has been cleared by a moderator.";
-    }
-
-    // rebuild the raw IRC message so we can convert it back to an ircmessage again!
-    // this could probably be done in a smarter way
-
-    auto s = QString(":tmi.twitch.tv NOTICE %1 :%2")
-                 .arg(channelName)
-                 .arg(noticeMessage);
-
-    auto *newMessage = Communi::IrcMessage::fromData(s.toUtf8(), nullptr);
-    newMessage->setTags(message->tags());
-
-    return newMessage;
-}
-
 // Parse the IRC messages returned in JSON form into Communi messages
 std::vector<Communi::IrcMessage *> parseRecentMessages(
     const QJsonObject &jsonRoot)
@@ -88,11 +42,6 @@ std::vector<Communi::IrcMessage *> parseRecentMessages(
 
         auto *message =
             Communi::IrcMessage::fromData(content.toUtf8(), nullptr);
-
-        if (message->command() == "CLEARCHAT")
-        {
-            message = convertClearchatToNotice(message);
-        }
 
         messages.emplace_back(message);
     }

@@ -13,12 +13,6 @@
 
 namespace chatterino::recentmessages::detail {
 
-// convertClearchatToNotice takes a Communi::IrcMessage that is a CLEARCHAT
-// command and converts it to a readable NOTICE message. This has
-// historically been done in the Recent Messages API, but this functionality
-// has been moved to Chatterino instead.
-Communi::IrcMessage *convertClearchatToNotice(Communi::IrcMessage *message);
-
 // Parse the IRC messages returned in JSON form into Communi messages
 std::vector<Communi::IrcMessage *> parseRecentMessages(
     const QJsonObject &jsonRoot);
