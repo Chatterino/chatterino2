@@ -97,16 +97,19 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
     }
 
     // disable the messages from the user
-    for (size_t i = 0; i < snapshotLength && disableUserMessages; i++)
+    if (disableUserMessages)
     {
-        auto &s = buffer[i];
-        if (s->loginName == message->timeoutUser &&
-            s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout,
-                              MessageFlag::Whisper}))
+        for (size_t i = 0; i < snapshotLength; i++)
         {
-            // FOURTF: disabled for now
-            // PAJLADA: Shitty solution described in Message.hpp
-            s->flags.set(MessageFlag::Disabled);
+            auto &s = buffer[i];
+            if (s->loginName == message->timeoutUser &&
+                s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout,
+                                  MessageFlag::Whisper}))
+            {
+                // FOURTF: disabled for now
+                // PAJLADA: Shitty solution described in Message.hpp
+                s->flags.set(MessageFlag::Disabled);
+            }
         }
     }
 
