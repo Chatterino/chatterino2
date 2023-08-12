@@ -433,6 +433,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
         {
             addOrReplaceChannelTimeout(
                 otherLoaded, std::move(clearChat.message),
+                calculateMessageTime(message).time(),
                 [&](auto idx, auto /*msg*/, auto &&replacement) {
                     replacement->flags.set(MessageFlag::RecentMessage);
                     otherLoaded[idx] = replacement;

@@ -16,8 +16,8 @@ namespace chatterino {
 /// @param disableUserMessages If set, disables all message by the timed out user.
 template <typename Buf, typename Replace, typename Add>
 void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
-                                Replace replaceMessage, Add addMessage,
-                                bool disableUserMessages)
+                                QTime now, Replace replaceMessage,
+                                Add addMessage, bool disableUserMessages)
 {
     // NOTE: This function uses the CURRENT time & the messages PARSE time to figure out whether they should be replaced
     // This works as expected for incoming messages, but not for historic messages.
@@ -31,7 +31,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
 
     bool shouldAddMessage = true;
 
-    QTime minimumTime = QTime::currentTime().addSecs(-5);
+    QTime minimumTime = now.addSecs(-5);
 
     auto timeoutStackStyle = static_cast<TimeoutStackStyle>(
         getSettings()->timeoutStackStyle.getValue());

@@ -115,7 +115,7 @@ void Channel::addMessage(MessagePtr message,
 void Channel::addOrReplaceTimeout(MessagePtr message)
 {
     addOrReplaceChannelTimeout(
-        this->getMessageSnapshot(), std::move(message),
+        this->getMessageSnapshot(), std::move(message), QTime::currentTime(),
         [this](auto /*idx*/, auto msg, auto replacement) {
             this->replaceMessage(msg, replacement);
         },
