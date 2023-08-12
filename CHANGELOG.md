@@ -39,6 +39,7 @@
 - Bugfix: Fixed crash that could occurr when closing the usercard too quickly after blocking or unblocking a user. (#4711)
 - Bugfix: Fixed highlights sometimes not working after changing sound device, or switching users in your operating system. (#4729)
 - Bugfix: Fixed key bindings not showing in context menus on Mac. (#4722)
+- Bugfix: Fixed timeouts from history messages not behaving consistently. (#4760)
 - Bugfix: Fixed tab completion rarely completing the wrong word. (#4735)
 - Bugfix: Fixed an issue where Subscriptions & Announcements that contained ignored phrases would still appear if the Block option was enabled. (#4748)
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
