@@ -3,6 +3,7 @@
 #include "common/Channel.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "singletons/Settings.hpp"
 
 namespace chatterino {
 
