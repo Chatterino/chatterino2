@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: AutoMod term management messages (e.g. testaccount added "noob" as a blocked term on AutoMod.) are now hidden in Streamer Mode if you have the "Hide moderation actions" setting enabled. (#4758)
 - Minor: Message input is now focused when clicking on emotes. (#4719)
 - Minor: Changed viewer list to chatter list to more match Twitch's terminology. (#4732)
 - Minor: Nicknames are now taken into consideration when searching for messages. (#4663, #4742)
