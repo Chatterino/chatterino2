@@ -19,15 +19,14 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
                                 QTime now, Replace replaceMessage,
                                 Add addMessage, bool disableUserMessages)
 {
-    // NOTE: This function uses the CURRENT time & the messages PARSE time to figure out whether they should be replaced
+    // NOTE: This function uses the messages PARSE time to figure out whether they should be replaced
     // This works as expected for incoming messages, but not for historic messages.
     // This has never worked before, but would be nice in the future.
     // For this to work, we need to make sure *all* messages have a "server received time".
-    // The currently do not.
 
-    size_t snapshotLength = buffer.size();
+    auto snapshotLength = static_cast<qsizetype>(buffer.size());
 
-    size_t end = std::max<size_t>(0, snapshotLength - 20);
+    auto end = std::max<qsizetype>(0, snapshotLength - 20);
 
     bool shouldAddMessage = true;
 
@@ -36,7 +35,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
     auto timeoutStackStyle = static_cast<TimeoutStackStyle>(
         getSettings()->timeoutStackStyle.getValue());
 
-    for (size_t i = snapshotLength - 1; i >= end; --i)
+    for (auto i = snapshotLength - 1; i >= end; --i)
     {
         const MessagePtr &s = buffer[i];
 
@@ -99,7 +98,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
     // disable the messages from the user
     if (disableUserMessages)
     {
-        for (size_t i = 0; i < snapshotLength; i++)
+        for (qsizetype i = 0; i < snapshotLength; i++)
         {
             auto &s = buffer[i];
             if (s->loginName == message->timeoutUser &&
