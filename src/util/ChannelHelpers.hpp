@@ -19,6 +19,12 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
                                 Replace replaceMessage, Add addMessage,
                                 bool disableUserMessages)
 {
+    // NOTE: This function uses the CURRENT time & the messages PARSE time to figure out whether they should be replaced
+    // This works as expected for incoming messages, but not for historic messages.
+    // This has never worked before, but would be nice in the future.
+    // For this to work, we need to make sure *all* messages have a "server received time".
+    // The currently do not.
+
     size_t snapshotLength = buffer.size();
 
     size_t end = std::max<size_t>(0, snapshotLength - 20);
