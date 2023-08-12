@@ -16,12 +16,12 @@ if ($isTagged) {
     # Make sure, any existing `modes` file is overwritten for the user,
     # for example when updating from nightly to stable.
     Write-Output "" > Chatterino2/modes;
-    $installerBaseName = "Chatterino.Installer";
+    $installerBaseName = "Chatterino7.Installer";
 }
 else {
     Write-Output nightly > Chatterino2/modes;
     $defines = "/DIS_NIGHTLY=1";
-    $installerBaseName = "Chatterino.Nightly.Installer";
+    $installerBaseName = "Chatterino7.Nightly.Installer";
 }
 
 if ($Env:GITHUB_OUTPUT) {

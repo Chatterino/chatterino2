@@ -5,8 +5,13 @@ on:
     workflows: ["Build"]
     types: [completed]
     # make sure this only runs on the default branch
-    branches: [master]
+    branches: [chatterino7]
   workflow_dispatch:
+
+env:
+  C2_PORTABLE_INSTALLER_VERSION: "v0.1.3"
+  C2_PORTABLE_INSTALLER_SHA256: "1226165a328e9b1ce96ccc1b3a641fe9020708b5e2f88a486e226e2b4f259aa8"
+  RELEASE_NIGHTLY_INSTALLER: "OFF"
 
 jobs:
   create-installer:
@@ -49,8 +54,136 @@ jobs:
         run: ..\.CI\build-installer.ps1
         shell: powershell
 
+      - name: Bundle portable
+        id: bundle-portable
+        working-directory: build
+        run: ..\.CI\bundle-portable.ps1
+        shell: powershell
+
       - name: Upload installer
         uses: actions/upload-artifact@v3
         with:
           path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.exe
           name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.exe
+
+      - name: Upload portable
+        uses: actions/upload-artifact@v3
+        with:
+          path: build/${{ steps.bundle-portable.outputs.C2_PORTABLE_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.zip
+          name: ${{ steps.bundle-portable.outputs.C2_PORTABLE_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.zip
+
+      - name: Create nightly release
+        if: ${{ contains(steps.build-installer.outputs.C2_INSTALLER_BASE_NAME, 'Nightly') && env.RELEASE_NIGHTLY_INSTALLER == 'ON' }}
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          replacesArtifacts: true
+          allowUpdates: true
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          artifactErrorsFailBuild: true
+          artifacts: |
+            build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.exe
+            build/${{ steps.bundle-portable.outputs.C2_PORTABLE_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.zip
+          prerelease: true
+          name: Nightly Release
+          tag: nightly-build
+
+  check-release:
+    runs-on: ubuntu-latest
+    needs: create-installer
+    outputs:
+      IS_TAGGED: ${{ steps.is-rel.outputs.IS_TAGGED }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # allows for tags access
+      - name: Check Release
+        id: is-rel
+        run: |
+          set +e;
+          git describe --exact-match --match 'v*' &> /dev/null;
+          echo "IS_TAGGED=$?" >> "$GITHUB_OUTPUT";
+        shell: bash
+
+  draft-release:
+    runs-on: ubuntu-latest
+    needs: [create-installer, check-release]
+    if: ${{ needs.check-release.outputs.IS_TAGGED == '0' }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # allows for tags access
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: Chatterino7.Installer.exe
+          path: build/
+      - uses: actions/download-artifact@v3
+        with:
+          name: Chatterino7.Portable.zip
+          path: build/
+      - uses: actions/download-artifact@v3
+        with:
+          name: Chatterino7.Installer.EXPERIMENTAL-Qt6.exe
+          path: build/
+      - uses: actions/download-artifact@v3
+        with:
+          name: Chatterino7.Portable.EXPERIMENTAL-Qt6.zip
+          path: build/
+
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: build.yml
+          name_is_regexp: true
+          name: '((^[Cc]hatterino)-[^wW].+$)|(^.+\.7z$)'
+          path: build/
+
+      - name: Fix Directories
+        working-directory: build
+        run: |
+          for file in */ ; do 
+            mv "$file$(find "$file" -type f -printf '%f')" ".tmp.${file%/}";
+            rm -rf "$file";
+            mv ".tmp.${file%/}" "${file%/}";
+          done
+        shell: bash
+
+      - name: Fix paths
+        working-directory: build
+        run: |
+          ls -l
+          mv Chatterino-ubuntu-22.04-Qt-5.15.2.deb Chatterino-Ubuntu-22.04.deb
+          mv Chatterino-ubuntu-22.04-Qt-6.2.4.deb EXPERIMENTAL-Chatterino-Ubuntu-22.04-Qt6.deb
+
+          mv Chatterino-x86_64-5.15.2.AppImage Chatterino-x86_64.AppImage
+          mv Chatterino-x86_64-6.2.4.AppImage EXPERIMENTAL-Chatterino-x86_64-Qt6.AppImage
+
+          mv Chatterino7.Installer.EXPERIMENTAL-Qt6.exe EXPERIMENTAL-Chatterino7.Qt6.Installer.exe
+          mv Chatterino7.Portable.EXPERIMENTAL-Qt6.zip EXPERIMENTAL-Chatterino7.Qt6.Portable.zip
+          mv chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z EXPERIMENTAL-Chatterino-Windows-Qt6-debug-symbols.pdb.7z
+          mv chatterino-windows-x86-64-Qt-5.15.2-symbols.pdb.7z Chatterino-Windows-debug-symbols.pdb.7z
+
+          mv chatterino-macos-Qt-5.15.2.dmg Chatterino.dmg
+          mv chatterino-macos-Qt-6.5.0.dmg EXPERIMENTAL-Chatterino.Qt6.dmg
+
+      - name: Hash files
+        working-directory: build
+        run: |
+          sha256sum * > sha256-checksums.txt
+
+      - name: Get Tag
+        id: get-tag
+        run: echo "VALUE=$(git describe --exact-match --match 'v*')" >> "$GITHUB_OUTPUT"
+      - name: Create release
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          replacesArtifacts: true
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          draft: true
+          artifacts: "build/*"
+          name: ${{ steps.get-tag.outputs.VALUE }}
+          tag: ${{ steps.get-tag.outputs.VALUE }}
