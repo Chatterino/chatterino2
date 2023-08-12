@@ -598,7 +598,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.streamerModeHideViewerCountAndDuration);
     layout.addCheckbox(
         "Hide moderation actions", s.streamerModeHideModActions, false,
-        "Hide bans, timeouts and automod messages from appearing in chat.");
+        "Hide bans, timeouts, and automod messages from appearing in chat.");
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions, false,
                        "Mute your ping sound from playing.");
     layout.addCheckbox(
