@@ -1499,6 +1499,7 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     textList.append({redeemed, reward.title, QString::number(reward.cost)});
     builder->message().messageText = textList.join(" ");
     builder->message().searchText = textList.join(" ");
+    builder->message().loginName = reward.user.login;
 }
 
 void TwitchMessageBuilder::liveMessage(const QString &channelName,

@@ -105,20 +105,39 @@ void LoggingChannel::addMessage(MessagePtr message)
     str.append(now.toString("HH:mm:ss"));
     str.append("] ");
 
-    QString messageSearchText = message->searchText;
+    QString messageText;
+    if (message->loginName.isEmpty())
+    {
+        // This accounts for any messages not explicitly sent by a user, like
+        // system messages, parts of announcements, subs etc.
+        messageText = message->messageText;
+    }
+    else
+    {
+        if (message->localizedName.isEmpty())
+        {
+            messageText = message->loginName + ": " + message->messageText;
+        }
+        else
+        {
+            messageText = message->localizedName + " " + message->loginName +
+                          ": " + message->messageText;
+        }
+    }
+
     if ((message->flags.has(MessageFlag::ReplyMessage) &&
          getSettings()->stripReplyMention) &&
         !getSettings()->hideReplyContext)
     {
-        qsizetype colonIndex = messageSearchText.indexOf(':');
+        qsizetype colonIndex = messageText.indexOf(':');
         if (colonIndex != -1)
         {
             QString rootMessageChatter =
                 message->replyThread->root()->loginName;
-            messageSearchText.insert(colonIndex + 1, " @" + rootMessageChatter);
+            messageText.insert(colonIndex + 1, " @" + rootMessageChatter);
         }
     }
-    str.append(messageSearchText);
+    str.append(messageText);
     str.append(endline);
 
     this->appendLine(str);

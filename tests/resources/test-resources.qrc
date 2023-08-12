@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/">
+    <file>001-mimeapps.list</file>
+  </qresource>
+</RCC>
