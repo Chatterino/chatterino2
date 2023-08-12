@@ -23,7 +23,7 @@ void load(const QString &channelName, std::weak_ptr<Channel> channelPtr,
 {
     qCDebug(LOG) << "Loading recent messages for" << channelName;
 
-    QUrl url = constructRecentMessagesUrl(channelName);
+    const auto url = constructRecentMessagesUrl(channelName);
 
     NetworkRequest(url)
         .onSuccess([channelPtr, onLoaded](const auto &result) -> Outcome {
@@ -48,8 +48,8 @@ void load(const QString &channelName, std::weak_ptr<Channel> channelPtr,
                           onLoaded]() mutable {
                 // Notify user about a possible gap in logs if it returned some messages
                 // but isn't currently joined to a channel
-                if (QString errorCode = root.value("error_code").toString();
-                    !errorCode.isEmpty())
+                const auto errorCode = root.value("error_code").toString();
+                if (!errorCode.isEmpty())
                 {
                     qCDebug(LOG)
                         << QString("Got error from API: error_code=%1, "

@@ -70,7 +70,7 @@ Communi::IrcMessage *convertClearchatToNotice(Communi::IrcMessage *message)
 std::vector<Communi::IrcMessage *> parseRecentMessages(
     const QJsonObject &jsonRoot)
 {
-    QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
+    const auto jsonMessages = jsonRoot.value("messages").toArray();
     std::vector<Communi::IrcMessage *> messages;
 
     if (jsonMessages.empty())
@@ -112,7 +112,7 @@ std::vector<MessagePtr> buildRecentMessages(
     {
         if (message->tags().contains("rm-received-ts"))
         {
-            QDate msgDate =
+            const auto msgDate =
                 QDateTime::fromMSecsSinceEpoch(
                     message->tags().value("rm-received-ts").toLongLong())
                     .date();
