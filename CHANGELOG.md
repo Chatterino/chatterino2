@@ -51,6 +51,7 @@
 - Dev: Replace our QObjectRef class with Qt's QPointer class. (#4666)
 - Dev: Fixed warnings about QWidgets already having a QLayout. (#4672)
 - Dev: Fixed undefined behavior when loading non-existant credentials. (#4673)
+- Dev: Small refactor of the recent-messages API, splitting its internal API and its internal implementation up into separate files. (#4763)
 - Dev: Added support for compiling with `sccache`. (#4678)
 - Dev: Added `sccache` in Windows CI. (#4678)
 - Dev: Moved preprocessor Git and date definitions to executables only. (#4681)
