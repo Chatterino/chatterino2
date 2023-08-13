@@ -178,7 +178,7 @@ void HighlightModel::afterInit()
     this->insertCustomRow(firstMessageRow,
                           HighlightRowIndexes::FirstMessageRow);
 
-    // Highlight settings for elevated messages
+    // Highlight settings for hype chats
     std::vector<QStandardItem *> elevatedMessageRow = this->createRow();
     setBoolItem(elevatedMessageRow[Column::Pattern],
                 getSettings()->enableElevatedMessageHighlight.getValue(), true,
