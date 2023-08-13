@@ -8,7 +8,7 @@
 - Minor: Added an option to subscribe to and unsubscribe from reply threads. (#4680, #4739)
 - Minor: Added the ability to pin Reply threads to stay open while using the setting "Automatically close reply thread popup when it loses focus". (#4680)
 - Minor: Highlights loaded from message history will now correctly appear in the /mentions tab. (#4475)
-- Minor: Added a pin action to usercards and reply threads. (#4692)
+- Minor: Added hotkey Action for pinning usercards and reply threads. (#4692)
 - Minor: Added an icon showing when streamer mode is enabled (#4410, #4690)
 - Minor: Message input is now focused when clicking on emotes. (#4719)
 - Minor: Changed viewer list to chatter list to more match Twitch's terminology. (#4732)
