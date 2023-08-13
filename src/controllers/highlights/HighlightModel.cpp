@@ -183,8 +183,7 @@ void HighlightModel::afterInit()
     setBoolItem(elevatedMessageRow[Column::Pattern],
                 getSettings()->enableElevatedMessageHighlight.getValue(), true,
                 false);
-    elevatedMessageRow[Column::Pattern]->setData("Elevated Messages",
-                                                 Qt::DisplayRole);
+    elevatedMessageRow[Column::Pattern]->setData("Hype Chats", Qt::DisplayRole);
     elevatedMessageRow[Column::ShowInMentions]->setFlags({});
     //    setBoolItem(elevatedMessageRow[Column::FlashTaskbar],
     //                getSettings()->enableElevatedMessageHighlightTaskbar.getValue(),
