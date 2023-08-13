@@ -96,6 +96,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
          m->flags.has(MessageFlag::RedeemedChannelPointReward)},
         {"flags.first_message", m->flags.has(MessageFlag::FirstMessage)},
         {"flags.elevated_message", m->flags.has(MessageFlag::ElevatedMessage)},
+        {"flags.hype_chat", m->flags.has(MessageFlag::ElevatedMessage)},
         {"flags.cheer_message", m->flags.has(MessageFlag::CheerMessage)},
         {"flags.whisper", m->flags.has(MessageFlag::Whisper)},
         {"flags.reply", m->flags.has(MessageFlag::ReplyMessage)},
