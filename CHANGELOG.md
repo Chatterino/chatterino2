@@ -18,7 +18,7 @@
 - Minor: 7TV badges now automatically update upon changing. (#4512)
 - Minor: Removed restriction on Go To Message on system messages from search. (#4614)
 - Minor: Channel point redemptions without custom text are now shown in the usercard. (#4557)
-- Minor: Allow for customizing the behavior of `Right Click`ing of usernames. (#4622, #4751)
+- Minor: Added settings for customizing the behavior of `Right Click`ing a usernames. (#4622, #4751)
 - Minor: The input completion and quick switcher are now styled to match your theme. (#4671)
 - Minor: All channels opened in browser tabs are synced when using the extension for quicker switching between tabs. (#4741)
 - Minor: Added support for opening incognito links in firefox-esr and chromium. (#4745)
