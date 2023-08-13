@@ -6,6 +6,7 @@
 - Minor: Added `/shoutout <username>` command to shoutout a specified user. Note: This is only the /command, we are still unable to display when a shoutout happens. (#4638)
 - Minor: Added a setting to only show tabs with live channels (default toggle hotkey: Ctrl+Shift+L). (#4358)
 - Minor: Added an option to subscribe to and unsubscribe from reply threads. (#4680, #4739)
+- Minor: Added the ability to pin Reply threads to stay open while using the setting "Automatically close reply thread popup when it loses focus". (#4680)
 - Minor: Highlights loaded from message history will now correctly appear in the /mentions tab. (#4475)
 - Minor: Added a pin action to usercards and reply threads. (#4692)
 - Minor: Added an icon showing when streamer mode is enabled (#4410, #4690)
