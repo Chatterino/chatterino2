@@ -256,6 +256,13 @@
         "selection",
         "textColors"
       ]
+    },
+    "qpointf": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 2,
+      "maxItems": 2,
+      "additionalItems": false
     }
   },
   "type": "object",
@@ -294,14 +301,25 @@
             "disabled": { "$ref": "#/definitions/qt-color" },
             "selection": { "$ref": "#/definitions/qt-color" },
             "textColors": { "$ref": "#/definitions/text-colors" },
-            "background": { "$ref": "#/definitions/qt-color" }
+            "background": { "$ref": "#/definitions/qt-color" },
+            "shadow": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "color": { "$ref": "#/definitions/qt-color" },
+                "offset": { "$ref": "#/definitions/qpointf" },
+                "blurRadius": { "type": "number", "minimum": 0 }
+              },
+              "required": ["color", "offset", "blurRadius"]
+            }
           },
           "required": [
             "backgrounds",
             "disabled",
             "selection",
             "textColors",
-            "background"
+            "background",
+            "shadow"
           ]
         },
         "scrollbars": {

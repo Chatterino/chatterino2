@@ -11,6 +11,7 @@
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QSet>
 
@@ -40,6 +41,38 @@ void parseInto(const QJsonObject &obj, QLatin1String key, QColor &color)
         return;
     }
     color = parsed;
+}
+
+void parseInto(const QJsonObject &obj, QLatin1String key, QPointF &point)
+{
+    const auto &jsonValue = obj[key];
+    if (!jsonValue.isArray()) [[unlikely]]
+    {
+        qCWarning(chatterinoTheme) << key
+                                   << "was expected but not found in the "
+                                      "current theme - using previous value.";
+        return;
+    }
+    auto arr = jsonValue.toArray();
+    if (arr.size() != 2) [[unlikely]]
+    {
+        qCWarning(chatterinoTheme) << key << "must be an array of two numbers.";
+        return;
+    }
+    point = {arr[0].toDouble(), arr[1].toDouble()};
+}
+
+void parseInto(const QJsonObject &obj, QLatin1String key, double &target)
+{
+    const auto &jsonValue = obj[key];
+    if (!jsonValue.isDouble()) [[unlikely]]
+    {
+        qCWarning(chatterinoTheme) << key
+                                   << "was expected but not found in the "
+                                      "current theme - using previous value.";
+        return;
+    }
+    target = jsonValue.toDouble();
 }
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
@@ -114,6 +147,13 @@ void parseOverlayMessages(const QJsonObject &overlayMessages,
     parseColor(theme, overlayMessages, disabled);
     parseColor(theme, overlayMessages, selection);
     parseColor(theme, overlayMessages, background);
+
+    {
+        const auto shadow = overlayMessages["shadow"_L1].toObject();
+        parseColor(theme.overlayMessages, shadow, color);
+        parseColor(theme.overlayMessages, shadow, offset);
+        parseColor(theme.overlayMessages, shadow, blurRadius);
+    }
 }
 
 void parseScrollbars(const QJsonObject &scrollbars, chatterino::Theme &theme)

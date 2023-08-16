@@ -4,10 +4,11 @@
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
 
-#include <QPropertyAnimation>
-#include <QWidget>
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <QGraphicsEffect>
+#include <QPropertyAnimation>
+#include <QWidget>
 
 namespace chatterino {
 
@@ -36,6 +37,7 @@ private:
     IndirectChannel channel_;
     pajlada::Signals::SignalHolder holder_;
     ChannelView channelView_;
+    QGraphicsDropShadowEffect dropShadow_;
 
     bool moving_ = false;
     QPoint moveOrigin_;

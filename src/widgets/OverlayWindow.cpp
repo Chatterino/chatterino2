@@ -1,5 +1,6 @@
 #include "widgets/OverlayWindow.hpp"
 
+#include "singletons/Theme.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
@@ -7,6 +8,7 @@
 
 #include <QBoxLayout>
 #include <QCursor>
+#include <QGraphicsEffect>
 #include <QGridLayout>
 #include <QSizeGrip>
 
@@ -61,6 +63,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel, Split *split)
     this->holder_.managedConnect(this->channel_.getChannelChanged(), [this]() {
         this->channelView_.setChannel(this->channel_.get());
     });
+    this->channelView_.setGraphicsEffect(&this->dropShadow_);
 
     this->setAutoFillBackground(false);
     this->resize(300, 500);
@@ -71,6 +74,16 @@ OverlayWindow::OverlayWindow(IndirectChannel channel, Split *split)
     this->interactAnimation_.setStartValue(0.0);
     this->interactAnimation_.setEndValue(1.0);
     this->interactAnimation_.setDuration(150);
+
+    auto applyTheme = [this]() {
+        auto *theme = getTheme();
+        this->dropShadow_.setColor(theme->overlayMessages.shadow.color);
+        this->dropShadow_.setOffset(theme->overlayMessages.shadow.offset);
+        this->dropShadow_.setBlurRadius(
+            theme->overlayMessages.shadow.blurRadius);
+    };
+    applyTheme();
+    this->holder_.managedConnect(getTheme()->updated, applyTheme);
 }
 
 bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)

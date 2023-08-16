@@ -110,6 +110,12 @@ public:
         QColor disabled;
         QColor selection;
         QColor background;
+
+        struct {
+            QColor color;
+            QPointF offset;
+            double blurRadius = 8.0;
+        } shadow;
     } overlayMessages;
 
     /// SCROLLBAR
