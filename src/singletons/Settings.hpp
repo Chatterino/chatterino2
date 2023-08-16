@@ -171,6 +171,8 @@ public:
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
 
+    BoolSetting enableOverlayShadow = {"/appearance/overlay/shadow", true};
+
     // Badges
     BoolSetting showBadgesGlobalAuthority = {
         "/appearance/badges/GlobalAuthority", true};

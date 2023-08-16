@@ -862,6 +862,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Use custom FrankerFaceZ VIP badges",
                        s.useCustomFfzVipBadges);
 
+    layout.addSubtitle("Overlay");
+    layout.addCheckbox("Enable Shadow", s.enableOverlayShadow, false,
+                       "Enables a drop shadow on the overlay. This will use "
+                       "more processing power.");
+
     layout.addSubtitle("Miscellaneous");
 
     if (supportsIncognitoLinks())

@@ -1,5 +1,7 @@
 #include "widgets/OverlayWindow.hpp"
 
+#include "BaseSettings.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -8,11 +10,13 @@
 
 #include <QBoxLayout>
 #include <QCursor>
+#include <qgraphicseffect.h>
 #include <QGraphicsEffect>
 #include <QGridLayout>
 #include <QSizeGrip>
 
 #include <array>
+
 
 namespace {
 
@@ -63,7 +67,6 @@ OverlayWindow::OverlayWindow(IndirectChannel channel, Split *split)
     this->holder_.managedConnect(this->channel_.getChannelChanged(), [this]() {
         this->channelView_.setChannel(this->channel_.get());
     });
-    this->channelView_.setGraphicsEffect(&this->dropShadow_);
 
     this->setAutoFillBackground(false);
     this->resize(300, 500);
@@ -75,15 +78,30 @@ OverlayWindow::OverlayWindow(IndirectChannel channel, Split *split)
     this->interactAnimation_.setEndValue(1.0);
     this->interactAnimation_.setDuration(150);
 
-    auto applyTheme = [this]() {
+    auto applyDropShadowTheme = [this]() {
         auto *theme = getTheme();
-        this->dropShadow_.setColor(theme->overlayMessages.shadow.color);
-        this->dropShadow_.setOffset(theme->overlayMessages.shadow.offset);
-        this->dropShadow_.setBlurRadius(
+        this->dropShadow_->setColor(theme->overlayMessages.shadow.color);
+        this->dropShadow_->setOffset(theme->overlayMessages.shadow.offset);
+        this->dropShadow_->setBlurRadius(
             theme->overlayMessages.shadow.blurRadius);
     };
-    applyTheme();
-    this->holder_.managedConnect(getTheme()->updated, applyTheme);
+    getSettings()->enableOverlayShadow.connect(
+        [this, applyDropShadowTheme](bool value) {
+            if (value)
+            {
+                this->dropShadow_ = new QGraphicsDropShadowEffect;
+                applyDropShadowTheme();
+                this->channelView_.setGraphicsEffect(this->dropShadow_);
+            }
+            else
+            {
+                this->channelView_.setGraphicsEffect(nullptr);
+            }
+        },
+        this->holder_);
+
+    applyDropShadowTheme();
+    this->holder_.managedConnect(getTheme()->updated, applyDropShadowTheme);
 }
 
 bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
