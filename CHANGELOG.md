@@ -45,6 +45,7 @@
 - Bugfix: Fixed some network errors having `0` as their HTTP status. (#4704)
 - Bugfix: Fixed tab completion rarely completing the wrong word. (#4735)
 - Bugfix: Fixed generation of crashdumps by the browser-extension process when the browser was closed. (#4667)
+- Bugfix: Fixed selection of tabs after closing a tab when using "Live Tabs Only". (#4770)
 - Dev: Stream status requests are now batched. (#4713)
 - Dev: Added command to set Qt's logging filter/rules at runtime (`/c2-set-logging-rules`). (#4637)
 - Dev: Added the ability to see & load custom themes from the Themes directory. No stable promises are made of this feature, changes might be made that breaks custom themes without notice. (#4570)
