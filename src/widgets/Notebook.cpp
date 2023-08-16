@@ -110,7 +110,7 @@ void Notebook::removePage(QWidget *page)
         // the best tab to select before we remove this one. We follow a strategy used
         // by many web browsers: select the next tab. If there is no next tab, select
         // the previous tab.
-        int countVisible = this->countVisible();
+        int countVisible = this->getVisibleTabCount();
         int visibleIndex = this->visibleIndexOf(page);
         assert(visibleIndex != -1);  // A selected page should always be visible
 
@@ -190,7 +190,7 @@ int Notebook::visibleIndexOf(QWidget *page) const
     return -1;
 }
 
-int Notebook::countVisible() const
+int Notebook::getVisibleTabCount() const
 {
     if (!this->tabVisibilityFilter_)
     {
