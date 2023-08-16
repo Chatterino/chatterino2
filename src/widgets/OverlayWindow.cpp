@@ -3,6 +3,7 @@
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QBoxLayout>
 #include <QCursor>
