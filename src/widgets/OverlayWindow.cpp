@@ -17,7 +17,6 @@
 
 #include <array>
 
-
 namespace {
 
 class Grippy : public QSizeGrip
@@ -172,15 +171,25 @@ void OverlayWindow::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     QColor highlightColor(255, 255, 255,
                           int(255.0 * this->interactionProgress()));
+
     painter.setPen({highlightColor, 2});
-    painter.drawRect(this->rect());
+    // outline
+    auto bounds = this->rect();
+    painter.drawRect(bounds);
 
     painter.setBrush(highlightColor);
     painter.setPen(Qt::transparent);
-    auto br = this->rect().bottomRight();
-    std::array<QPoint, 3> triangle = {br - QPoint{10, 0}, br,
-                                      br - QPoint{0, 10}};
+
+    // bottom resize triangle
+    auto br = bounds.bottomRight();
+    std::array<QPoint, 3> triangle = {br - QPoint{20, 0}, br,
+                                      br - QPoint{0, 20}};
     painter.drawPolygon(triangle.data(), triangle.size());
+
+    // close button
+    auto buttonSize = this->closeButton_.size();
+    painter.drawRect(
+        QRect{bounds.topRight() - QPoint{buttonSize.width(), 0}, buttonSize});
 
     painter.end();
 
