@@ -46,6 +46,8 @@ public:
     void removeCurrentPage();
 
     int indexOf(QWidget *page) const;
+    int visibleIndexOf(QWidget *page) const;
+    int countVisible() const;
     virtual void select(QWidget *page, bool focusPage = true);
     void selectIndex(int index, bool focusPage = true);
     void selectVisibleIndex(int index, bool focusPage = true);
