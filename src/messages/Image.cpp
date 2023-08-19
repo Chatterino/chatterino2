@@ -497,13 +497,16 @@ int Image::height() const
 
 void Image::actuallyLoad()
 {
+    auto weak = weakOf(this);
     NetworkRequest(this->url().string)
         .concurrent()
         .cache()
-        .onSuccess([weak = weakOf(this)](auto result) -> Outcome {
+        .onSuccess([weak](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
+            {
                 return Failure;
+            }
 
             auto data = result.getData();
 
@@ -550,20 +553,23 @@ void Image::actuallyLoad()
 
             auto parsed = detail::readFrames(reader, shared->url());
 
-            postToThread(makeConvertCallback(parsed, [weak](auto &&frames) {
-                if (auto shared = weak.lock())
-                {
-                    shared->frames_ =
-                        std::make_unique<detail::Frames>(std::move(frames));
-                }
-            }));
+            postToThread(makeConvertCallback(
+                parsed, [weak = std::weak_ptr<Image>(shared)](auto &&frames) {
+                    if (auto shared = weak.lock())
+                    {
+                        shared->frames_ = std::make_unique<detail::Frames>(
+                            std::forward<decltype(frames)>(frames));
+                    }
+                }));
 
             return Success;
         })
-        .onError([weak = weakOf(this)](auto /*result*/) {
+        .onError([weak](auto /*result*/) {
             auto shared = weak.lock();
             if (!shared)
+            {
                 return false;
+            }
 
             // fourtf: is this the right thing to do?
             shared->empty_ = true;
