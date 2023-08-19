@@ -9,7 +9,7 @@ namespace chatterino {
 
 namespace completion {
     class Source;
-}
+}  // namespace completion
 
 /// @brief Represents the kind of completion occurring
 enum class CompletionKind {
