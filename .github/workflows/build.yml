@@ -108,7 +108,7 @@ jobs:
 
       - name: Install Qt5
         if: startsWith(matrix.qt-version, '5.')
-        uses: jurplel/install-qt-action@v3.2.1
+        uses: jurplel/install-qt-action@v3.3.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -116,7 +116,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v3.2.1
+        uses: jurplel/install-qt-action@v3.3.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -292,7 +292,7 @@ jobs:
 
       - name: clang-tidy review
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'
-        uses: ZedThree/clang-tidy-review@v0.13.1
+        uses: ZedThree/clang-tidy-review@v0.13.3
         with:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
@@ -319,7 +319,7 @@ jobs:
 
       - name: clang-tidy-review upload
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'
-        uses: ZedThree/clang-tidy-review/upload@v0.13.1
+        uses: ZedThree/clang-tidy-review/upload@v0.13.3
 
       - name: Package - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu-20.04') && !matrix.skip-artifact

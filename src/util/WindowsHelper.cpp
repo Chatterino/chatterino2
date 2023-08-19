@@ -88,7 +88,7 @@ void setRegisteredForStartup(bool isRegistered)
     }
 }
 
-QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
+QString getAssociatedExecutable(AssociationQueryType queryType, LPCWSTR query)
 {
     static HINSTANCE shlwapi = LoadLibrary(L"shlwapi");
     if (shlwapi == nullptr)
@@ -122,7 +122,7 @@ QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
     }
 
     DWORD resultSize = 0;
-    if (FAILED(assocQueryString(flags, ASSOCSTR_COMMAND, query, nullptr,
+    if (FAILED(assocQueryString(flags, ASSOCSTR_EXECUTABLE, query, nullptr,
                                 nullptr, &resultSize)))
     {
         return QString();
@@ -137,8 +137,8 @@ QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
 
     QString result;
     auto buf = new wchar_t[resultSize];
-    if (SUCCEEDED(assocQueryString(flags, ASSOCSTR_COMMAND, query, nullptr, buf,
-                                   &resultSize)))
+    if (SUCCEEDED(assocQueryString(flags, ASSOCSTR_EXECUTABLE, query, nullptr,
+                                   buf, &resultSize)))
     {
         // QString::fromWCharArray expects the length in characters *not
         // including* the null terminator, but AssocQueryStringW calculates

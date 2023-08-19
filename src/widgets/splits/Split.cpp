@@ -524,11 +524,6 @@ void Split::addShortcuts()
              this->setFiltersDialog();
              return "";
          }},
-        {"startWatching",
-         [this](std::vector<QString>) -> QString {
-             this->startWatching();
-             return "";
-         }},
         {"openInBrowser",
          [this](std::vector<QString>) -> QString {
              if (this->getChannel()->getType() == Channel::Type::TwitchWhispers)
@@ -550,6 +545,11 @@ void Split::addShortcuts()
         {"openInCustomPlayer",
          [this](std::vector<QString>) -> QString {
              this->openWithCustomScheme();
+             return "";
+         }},
+        {"openPlayerInBrowser",
+         [this](std::vector<QString>) -> QString {
+             this->openBrowserPlayer();
              return "";
          }},
         {"openModView",
@@ -1396,22 +1396,6 @@ void Split::openSubPage()
     }
 }
 
-void Split::startWatching()
-{
-#ifdef USEWEBENGINE
-    ChannelPtr _channel = this->getChannel();
-    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_channel.get());
-
-    if (tc != nullptr)
-    {
-        StreamView *view = new StreamView(
-            _channel,
-            "https://player.twitch.tv/?parent=twitch.tv&channel=" + tc->name);
-        view->setAttribute(Qt::WA_DeleteOnClose, true);
-        view->show();
-    }
-#endif
-}
 void Split::setFiltersDialog()
 {
     SelectChannelFiltersDialog d(this->getFilters(), this);

@@ -18,7 +18,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
-#include "providers/RecentMessagesApi.hpp"
+#include "providers/recentmessages/Api.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
@@ -1108,7 +1108,7 @@ void TwitchChannel::loadRecentMessages()
     }
 
     auto weak = weakOf<Channel>(this);
-    RecentMessagesApi::loadRecentMessages(
+    recentmessages::load(
         this->getName(), weak,
         [weak](const auto &messages) {
             auto shared = weak.lock();
@@ -1121,6 +1121,21 @@ void TwitchChannel::loadRecentMessages()
 
             tc->addMessagesAtStart(messages);
             tc->loadingRecentMessages_.clear();
+
+            std::vector<MessagePtr> msgs;
+            for (MessagePtr msg : messages)
+            {
+                const auto highlighted =
+                    msg->flags.has(MessageFlag::Highlighted);
+                const auto showInMentions =
+                    msg->flags.has(MessageFlag::ShowInMentions);
+                if (highlighted && showInMentions)
+                {
+                    msgs.push_back(msg);
+                }
+            }
+
+            getApp()->twitch->mentionsChannel->fillInMissingMessages(msgs);
         },
         [weak]() {
             auto shared = weak.lock();
@@ -1148,7 +1163,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
     }
 
     auto weak = weakOf<Channel>(this);
-    RecentMessagesApi::loadRecentMessages(
+    recentmessages::load(
         this->getName(), weak,
         [weak](const auto &messages) {
             auto shared = weak.lock();

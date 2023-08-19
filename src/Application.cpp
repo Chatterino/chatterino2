@@ -523,6 +523,12 @@ void Application::initPubSub()
 
     this->twitch->pubsub->signals_.moderation.automodUserMessage.connect(
         [&](const auto &action) {
+            // This condition has been set up to execute isInStreamerMode() as the last thing
+            // as it could end up being expensive.
+            if (getSettings()->streamerModeHideModActions && isInStreamerMode())
+            {
+                return;
+            }
             auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
             if (chan->isEmpty())

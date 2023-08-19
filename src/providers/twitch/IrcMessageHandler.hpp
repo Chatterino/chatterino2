@@ -4,6 +4,7 @@
 
 #include <IrcMessage>
 
+#include <optional>
 #include <vector>
 
 namespace chatterino {
@@ -15,6 +16,11 @@ struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 class TwitchChannel;
 class TwitchMessageBuilder;
+
+struct ClearChatMessage {
+    MessagePtr message;
+    bool disableAllMessages;
+};
 
 class IrcMessageHandler
 {
@@ -29,7 +35,7 @@ public:
 
     std::vector<MessagePtr> parseMessageWithReply(
         Channel *channel, Communi::IrcMessage *message,
-        const std::vector<MessagePtr> &otherLoaded);
+        std::vector<MessagePtr> &otherLoaded);
 
     // parsePrivMessage arses a single IRC PRIVMSG into 0-1 Chatterino messages
     std::vector<MessagePtr> parsePrivMessage(
@@ -38,6 +44,8 @@ public:
                            TwitchIrcServer &server);
 
     void handleRoomStateMessage(Communi::IrcMessage *message);
+    std::optional<ClearChatMessage> parseClearChatMessage(
+        Communi::IrcMessage *message);
     void handleClearChatMessage(Communi::IrcMessage *message);
     void handleClearMessageMessage(Communi::IrcMessage *message);
     void handleUserStateMessage(Communi::IrcMessage *message);
