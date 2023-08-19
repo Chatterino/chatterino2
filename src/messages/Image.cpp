@@ -172,7 +172,7 @@ namespace detail {
 
     std::optional<QPixmap> Frames::current() const
     {
-        if (this->items_.size() == 0)
+        if (this->items_.empty())
         {
             return std::nullopt;
         }
@@ -182,7 +182,7 @@ namespace detail {
 
     std::optional<QPixmap> Frames::first() const
     {
-        if (this->items_.size() == 0)
+        if (this->items_.empty())
         {
             return std::nullopt;
         }
@@ -214,7 +214,7 @@ namespace detail {
             }
         }
 
-        if (frames.size() == 0)
+        if (frames.empty())
         {
             qCDebug(chatterinoImage)
                 << "Error while reading image" << url.string << ": '"
