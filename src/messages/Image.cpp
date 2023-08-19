@@ -350,10 +350,8 @@ ImagePtr Image::fromResourcePixmap(const QPixmap &pixmap, qreal scale)
         {
             return shared;
         }
-        else
-        {
-            cache.erase(it);
-        }
+
+        cache.erase(it);
     }
 
     auto newImage = ImagePtr(new Image(scale));
@@ -489,9 +487,12 @@ int Image::height() const
     assertInGuiThread();
 
     if (auto pixmap = this->frames_->first())
+    {
         return int(pixmap->height() * this->scale_);
-    else
-        return 16;
+    }
+
+    // No frames loaded, use our default magic height 16
+    return 16;
 }
 
 void Image::actuallyLoad()
