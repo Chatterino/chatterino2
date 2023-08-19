@@ -170,17 +170,23 @@ namespace detail {
         return this->items_.size() > 1;
     }
 
-    boost::optional<QPixmap> Frames::current() const
+    std::optional<QPixmap> Frames::current() const
     {
         if (this->items_.size() == 0)
-            return boost::none;
+        {
+            return std::nullopt;
+        }
+
         return this->items_[this->index_].image;
     }
 
-    boost::optional<QPixmap> Frames::first() const
+    std::optional<QPixmap> Frames::first() const
     {
         if (this->items_.size() == 0)
-            return boost::none;
+        {
+            return std::nullopt;
+        }
+
         return this->items_.front().image;
     }
 
@@ -416,10 +422,10 @@ bool Image::loaded() const
 {
     assertInGuiThread();
 
-    return bool(this->frames_->current());
+    return this->frames_->current().has_value();
 }
 
-boost::optional<QPixmap> Image::pixmapOrLoad() const
+std::optional<QPixmap> Image::pixmapOrLoad() const
 {
     assertInGuiThread();
 
@@ -470,9 +476,12 @@ int Image::width() const
     assertInGuiThread();
 
     if (auto pixmap = this->frames_->first())
+    {
         return int(pixmap->width() * this->scale_);
-    else
-        return 16;
+    }
+
+    // No frames loaded, use our default magic width 16
+    return 16;
 }
 
 int Image::height() const
