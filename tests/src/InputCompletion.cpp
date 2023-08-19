@@ -205,7 +205,7 @@ private:
 protected:
     auto queryClassicEmoteCompletion(const QString &fullQuery)
     {
-        EmoteSource source(*this->channelPtr,
+        EmoteSource source(this->channelPtr.get(),
                            std::make_unique<ClassicEmoteStrategy>());
         source.update(fullQuery);
 
@@ -215,7 +215,7 @@ protected:
 
     auto queryClassicTabCompletion(const QString &fullQuery, bool isFirstWord)
     {
-        EmoteSource source(*this->channelPtr,
+        EmoteSource source(this->channelPtr.get(),
                            std::make_unique<ClassicTabEmoteStrategy>());
         source.update(fullQuery);
 
