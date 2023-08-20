@@ -116,7 +116,7 @@ bool startsWithPort(QStringView string)
 // Simple sanitization method to strip characters that are not recognized by RFC 3986
 QString sanitizeUrl(const QString &unparsedString)
 {
-    const QString allowedSpecialCharacters = "!#&+/:=?@-_.";
+    const QString allowedSpecialCharacters = QString("!#&+/:=?@-_.");
 
     QString sanitizedUrl;
     for (const QChar &c : unparsedString)
