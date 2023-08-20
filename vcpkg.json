@@ -13,6 +13,7 @@
     "boost-signals2",
     "boost-variant",
     "gtest",
+    "libavif",
     "openssl",
     "qt5-tools"
   ],

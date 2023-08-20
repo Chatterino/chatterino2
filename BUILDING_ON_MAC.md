@@ -10,7 +10,7 @@ Local dev machines for testing are available on Apple Silicon on macOS 13.
 1. Install [Homebrew](https://brew.sh/#install)  
    We use this for dependency management on macOS
 1. Install all dependencies:  
-   `brew install boost openssl@1.1 rapidjson cmake qt@5`
+   `brew install boost openssl@1.1 rapidjson cmake qt@5 libavif`
 
 ## Building
 

@@ -750,6 +750,7 @@ if (BUILD_APP)
     else()
         add_executable(${EXECUTABLE_PROJECT} main.cpp)
     endif()
+    target_link_libraries(${EXECUTABLE_PROJECT} PRIVATE chatterino-qt-plugins)
 
     if(COMMAND add_sanitizers)
         add_sanitizers(${EXECUTABLE_PROJECT})

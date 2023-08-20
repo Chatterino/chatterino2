@@ -126,6 +126,9 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Fluent icons",
                        "https://github.com/microsoft/fluentui-system-icons",
                        ":/licenses/fluenticons.txt");
+            addLicense(form.getElement(), "KImageFormats",
+                       "https://invent.kde.org/frameworks/kimageformats",
+                       ":/licenses/kimageformats.txt");
         }
 
         // Attributions

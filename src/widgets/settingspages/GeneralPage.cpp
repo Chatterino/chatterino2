@@ -893,6 +893,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show 7TV Animated Profile Picture",
                        s.displaySevenTVAnimatedProfile);
     layout.addCheckbox(
+        "Load AVIF images", s.allowAvifImages, false,
+        "When enabled and an AVIF decoder is found, AVIF images will be "
+        "preferred over WEBP on 7TV. This saves bandwidth.");
+    layout.addCheckbox(
         "Show moderation messages", s.hideModerationActions, true,
         "Show messages for timeouts, bans, and other moderator actions.");
     layout.addCheckbox("Show deletions of single messages",

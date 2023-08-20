@@ -5,7 +5,7 @@ from os import path
 
 class Chatterino(ConanFile):
     name = "Chatterino"
-    requires = "boost/1.81.0"
+    requires = "boost/1.81.0", "libavif/0.11.1"
     settings = "os", "compiler", "build_type", "arch"
     default_options = {
         "with_benchmark": False,

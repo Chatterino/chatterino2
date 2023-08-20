@@ -12,6 +12,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 
+#include <QImageReader>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QThread>
@@ -36,6 +37,24 @@ using namespace seventv::eventapi;
 // These declarations won't throw an exception.
 const QString CHANNEL_HAS_NO_EMOTES("This channel has no 7TV channel emotes.");
 const QString EMOTE_LINK_FORMAT("https://7tv.app/emotes/%1");
+
+// This is non-const, but only used on the GUI thread
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+auto ALLOW_AVIF_IMAGES = []() {
+    static bool allow = true;
+    static bool registered = false;
+    if (!registered)
+    {
+        // We can't register this in the SeventvEmotes constructor,
+        // so we register the handler on demand.
+        getSettings()->allowAvifImages.connect([](bool setting) {
+            allow = setting && QImageReader::supportedImageFormats().contains(
+                                   QByteArrayLiteral("avif"));
+        });
+        registered = true;
+    }
+    return allow;
+};
 
 struct CreateEmoteResult {
     Emote emote;
@@ -460,14 +479,35 @@ void SeventvEmotes::getEmoteSet(
 
 ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)
 {
-    auto host = emoteData["host"].toObject();
+    const auto host = emoteData["host"].toObject();
     // "//cdn.7tv[...]"
     auto baseUrl = host["url"].toString();
-    auto files = host["files"].toArray();
+    const auto files = host["files"].toArray();
 
     std::array<ImagePtr, 4> sizes;
     double baseWidth = 0.0;
-    int nextSize = 0;
+    size_t nextSize = 0;
+
+    auto targetFormat = [&] {
+        if (!ALLOW_AVIF_IMAGES() || files.empty())
+        {
+            return u"WEBP"_s;
+        }
+        // Look at the first two images and guess the target format.
+        auto first = files[0]["format"_L1].toString();
+        if (files.size() < 2)
+        {
+            return first;
+        }
+        auto second = files[1]["format"_L1].toString();
+        if (first == u"AVIF"_s || second == u"AVIF"_s)
+        {
+            // prefer avif
+            return u"AVIF"_s;
+        }
+        // fallback
+        return u"WEBP"_s;
+    }();
 
     for (auto fileItem : files)
     {
@@ -477,9 +517,9 @@ ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)
         }
 
         auto file = fileItem.toObject();
-        if (file["format"].toString() != "WEBP")
+        if (file["format"].toString() != targetFormat)
         {
-            continue;  // We only use webp
+            continue;  // TODO: support fallbacks
         }
 
         double width = file["width"].toDouble();

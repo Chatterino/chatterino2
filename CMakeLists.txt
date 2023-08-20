@@ -223,6 +223,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Generate resource files
 include(cmake/resources/generate_resources.cmake)
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib/qt-plugins)
+
 add_subdirectory(src)
 
 if (BUILD_TESTS OR BUILD_BENCHMARKS)

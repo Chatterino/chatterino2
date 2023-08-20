@@ -41,3 +41,6 @@
 [submodule "lib/crashpad"]
 	path = lib/crashpad
 	url = https://github.com/getsentry/crashpad
+[submodule "lib/kimageformats"]
+	path = lib/kimageformats
+	url = https://github.com/KDE/kimageformats
