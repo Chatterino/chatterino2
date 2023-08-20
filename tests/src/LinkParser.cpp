@@ -25,8 +25,27 @@ struct Case {
     }
 };
 
+
+struct SanitizeCheck
+{
+    QString testValue{};
+    QString expectedValue{};
+};
+
 TEST(LinkParser, parseDomainLinks)
 {
+    const QList<SanitizeCheck> sanitizeCases = {
+        { "(twitch.tv)", "twitch.tv"}
+    };
+
+    for (auto &c : sanitizeCases)
+    {
+        LinkParser p(c.testValue);
+         ASSERT_TRUE(p.result().has_value()) << c.testValue.toStdString();
+        const auto &r = *p.result();
+        ASSERT_EQ(c.expectedValue, r.host);
+    }
+
     const QList<Case> cases = {
         {"https://", "chatterino.com"},
         {"http://", "chatterino.com"},
@@ -165,6 +184,8 @@ TEST(LinkParser, doesntParseInvalidLinks)
         "http:/cat.com",
         "http:/cat.com",
         "https:/cat.com",
+        "%%%%.com",
+        "*.com"
     };
 
     for (const auto &input : inputs)

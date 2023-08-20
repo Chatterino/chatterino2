@@ -113,6 +113,30 @@ bool startsWithPort(QStringView string)
     return true;
 }
 
+// Simple sanitization method to strip characters that are not recognized by RFC 3986
+QString sanitizeUrl(const QString &unparsedString)
+{
+    const QString allowedSpecialCharacters = "!#&+/:=?@-_.";
+
+    QString sanitizedUrl;
+    for (const QChar& c : unparsedString) {
+        if (c.isLetterOrNumber())
+        {
+            sanitizedUrl.append(c);
+            continue;
+        }
+        for (const QChar sc : allowedSpecialCharacters)
+        {
+            if (sc == c)
+            {
+                sanitizedUrl.append(c);
+                break;
+            }
+        }
+    }
+    return sanitizedUrl;
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -121,13 +145,14 @@ LinkParser::LinkParser(const QString &unparsedString)
 {
     ParsedLink result;
     // This is not implemented with a regex to increase performance.
-    QStringView remaining(unparsedString);
+    QString sanitizedString = sanitizeUrl(unparsedString);
+    QStringView remaining(sanitizedString);
     QStringView protocol(remaining);
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    QStringView wholeString(unparsedString);
+    QStringView wholeString(sanitizedString);
     const auto refFromView = [&](QStringView view) {
-        return QStringRef(&unparsedString,
+        return QStringRef(&sanitizedString,
                           static_cast<int>(view.begin() - wholeString.begin()),
                           static_cast<int>(view.size()));
     };
