@@ -9,6 +9,8 @@
 
 namespace {
 
+const QString urlAllowedSpecialCharacters = QStringLiteral("!#&+/:=?@-_.");
+
 QSet<QString> &tlds()
 {
     static QSet<QString> tlds = [] {
@@ -116,8 +118,6 @@ bool startsWithPort(QStringView string)
 // Simple sanitization method to strip characters that are not recognized by RFC 3986
 QString sanitizeUrl(const QString &unparsedString)
 {
-    const QString allowedSpecialCharacters = QString("!#&+/:=?@-_.");
-
     QString sanitizedUrl;
     for (const QChar &c : unparsedString)
     {
@@ -126,7 +126,7 @@ QString sanitizeUrl(const QString &unparsedString)
             sanitizedUrl.append(c);
             continue;
         }
-        for (const QChar sc : allowedSpecialCharacters)
+        for (const QChar sc : urlAllowedSpecialCharacters)
         {
             if (sc == c)
             {

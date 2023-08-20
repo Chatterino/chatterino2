@@ -27,19 +27,22 @@ struct Case {
 
 struct SanitizeCheck {
     QString testValue{};
-    QString expectedValue{};
+    QString expectedHost{};
+    QString expectedRest{};
 };
 
 TEST(LinkParser, parseDomainLinks)
 {
-    const QList<SanitizeCheck> sanitizeCases = {{"(twitch.tv)", "twitch.tv"}};
+    const QList<SanitizeCheck> sanitizeCases = {
+        {"(twitch.tv/foo)", "twitch.tv", "foo"}};
 
     for (auto &c : sanitizeCases)
     {
         LinkParser p(c.testValue);
         ASSERT_TRUE(p.result().has_value()) << c.testValue.toStdString();
         const auto &r = *p.result();
-        ASSERT_EQ(c.expectedValue, r.host);
+        ASSERT_EQ(c.expectedHost, r.host) << r.host.toStdString();
+        ASSERT_EQ(c.expectedRest, r.rest) << r.rest.toStdString();
     }
 
     const QList<Case> cases = {
