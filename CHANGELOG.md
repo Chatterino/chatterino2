@@ -28,6 +28,7 @@
 - Minor: Added support for opening incognito links under Linux/BSD using XDG. (#4745)
 - Minor: Added accelerators to the right click menu for messages (#4705)
 - Minor: Improved editing hotkeys. (#4628)
+- Minor: Sanitize URLs to not include not recoginized characters (#4778)
 - Minor: Added `/c2-theme-autoreload` command to automatically reload a custom theme. This is useful for when you're developing your own theme. (#4718)
 - Bugfix: Fixed an issue where Subscriptions & Announcements that contained ignored phrases would still appear if the Block option was enabled. (#4748)
 - Bugfix: Increased amount of blocked users loaded from 100 to 1,000. (#4721)
