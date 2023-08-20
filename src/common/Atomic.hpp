@@ -1,23 +1,25 @@
 #pragma once
 
-#include <boost/noncopyable.hpp>
-
 #include <mutex>
 
 namespace chatterino {
 
 template <typename T>
-class Atomic : boost::noncopyable
+class Atomic
 {
 public:
-    Atomic()
-    {
-    }
+    Atomic() = default;
 
     Atomic(T &&val)
         : value_(val)
     {
     }
+
+    Atomic(const Atomic &) = delete;
+    Atomic &operator=(const Atomic &) = delete;
+
+    Atomic(Atomic &&) = delete;
+    Atomic &operator=(Atomic &&) = delete;
 
     T get() const
     {
