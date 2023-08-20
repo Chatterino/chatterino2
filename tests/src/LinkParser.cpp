@@ -25,23 +25,19 @@ struct Case {
     }
 };
 
-
-struct SanitizeCheck
-{
+struct SanitizeCheck {
     QString testValue{};
     QString expectedValue{};
 };
 
 TEST(LinkParser, parseDomainLinks)
 {
-    const QList<SanitizeCheck> sanitizeCases = {
-        { "(twitch.tv)", "twitch.tv"}
-    };
+    const QList<SanitizeCheck> sanitizeCases = {{"(twitch.tv)", "twitch.tv"}};
 
     for (auto &c : sanitizeCases)
     {
         LinkParser p(c.testValue);
-         ASSERT_TRUE(p.result().has_value()) << c.testValue.toStdString();
+        ASSERT_TRUE(p.result().has_value()) << c.testValue.toStdString();
         const auto &r = *p.result();
         ASSERT_EQ(c.expectedValue, r.host);
     }
@@ -151,42 +147,40 @@ TEST(LinkParser, doesntParseInvalidIpv4Links)
 
 TEST(LinkParser, doesntParseInvalidLinks)
 {
-    const QStringList inputs = {
-        "h://foo.com",
-        "spotify:1234",
-        "ftp://chatterino.com",
-        "ftps://chatterino.com",
-        "spotify://chatterino.com",
-        "httpsx://chatterino.com",
-        "https:chatterino.com",
-        "https:/chatterino.com",
-        "http:/chatterino.com",
-        "htp://chatterino.com",
-        "/chatterino.com",
-        "word",
-        ".",
-        "/",
-        "#",
-        ":",
-        "?",
-        "a",
-        "://chatterino.com",
-        "//chatterino.com",
-        "http://pn.",
-        "http://pn./",
-        "https://pn./",
-        "pn./",
-        "pn.",
-        "http/chatterino.com",
-        "http/wiki.chatterino.com",
-        "http:cat.com",
-        "https:cat.com",
-        "http:/cat.com",
-        "http:/cat.com",
-        "https:/cat.com",
-        "%%%%.com",
-        "*.com"
-    };
+    const QStringList inputs = {"h://foo.com",
+                                "spotify:1234",
+                                "ftp://chatterino.com",
+                                "ftps://chatterino.com",
+                                "spotify://chatterino.com",
+                                "httpsx://chatterino.com",
+                                "https:chatterino.com",
+                                "https:/chatterino.com",
+                                "http:/chatterino.com",
+                                "htp://chatterino.com",
+                                "/chatterino.com",
+                                "word",
+                                ".",
+                                "/",
+                                "#",
+                                ":",
+                                "?",
+                                "a",
+                                "://chatterino.com",
+                                "//chatterino.com",
+                                "http://pn.",
+                                "http://pn./",
+                                "https://pn./",
+                                "pn./",
+                                "pn.",
+                                "http/chatterino.com",
+                                "http/wiki.chatterino.com",
+                                "http:cat.com",
+                                "https:cat.com",
+                                "http:/cat.com",
+                                "http:/cat.com",
+                                "https:/cat.com",
+                                "%%%%.com",
+                                "*.com"};
 
     for (const auto &input : inputs)
     {

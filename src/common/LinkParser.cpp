@@ -119,7 +119,8 @@ QString sanitizeUrl(const QString &unparsedString)
     const QString allowedSpecialCharacters = "!#&+/:=?@-_.";
 
     QString sanitizedUrl;
-    for (const QChar& c : unparsedString) {
+    for (const QChar &c : unparsedString)
+    {
         if (c.isLetterOrNumber())
         {
             sanitizedUrl.append(c);
