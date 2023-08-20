@@ -115,7 +115,7 @@ endif ()
 find_package(Sanitizers QUIET)
 
 # Find boost on the system
-find_package(Boost REQUIRED COMPONENTS headers)
+find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
