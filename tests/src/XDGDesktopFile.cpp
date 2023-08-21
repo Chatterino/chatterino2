@@ -5,6 +5,8 @@
 
 using namespace chatterino;
 
+#if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
+
 TEST(XDGDesktopFile, String)
 {
     auto desktopFile = XDGDesktopFile(":/001-mimeapps.list");
@@ -17,3 +19,5 @@ TEST(XDGDesktopFile, String)
 
     ASSERT_EQ(desktopFile.getEntries("test").size(), 2);
 }
+
+#endif

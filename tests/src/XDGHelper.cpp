@@ -5,6 +5,8 @@
 
 using namespace chatterino;
 
+#if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
+
 TEST(XDGHelper, ParseDesktopExecProgram)
 {
     struct TestCase {
@@ -60,3 +62,5 @@ TEST(XDGHelper, ParseDesktopExecProgram)
             << output.toStdString() << "'";
     }
 }
+
+#endif
