@@ -7,9 +7,9 @@
 
 #include <functional>
 
-#if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
-
 namespace chatterino {
+
+#if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 
 XDGDesktopFile::XDGDesktopFile(const QString &filename)
 {
@@ -113,6 +113,6 @@ std::optional<XDGDesktopFile> XDGDesktopFile::findDesktopFile(
     return {};
 }
 
-}  // namespace chatterino
-
 #endif
+
+}  // namespace chatterino
