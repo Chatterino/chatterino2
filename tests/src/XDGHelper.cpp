@@ -3,9 +3,9 @@
 #include <gtest/gtest.h>
 #include <QDebug>
 
-using namespace chatterino;
-
 #if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
+
+using namespace chatterino;
 
 TEST(XDGHelper, ParseDesktopExecProgram)
 {
