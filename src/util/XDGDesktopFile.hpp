@@ -5,9 +5,9 @@
 #include <optional>
 #include <unordered_map>
 
-#if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
-
 namespace chatterino {
+
+#if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 
 // See https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#group-header
 using XDGEntries = std::unordered_map<QString, QString>;
@@ -44,6 +44,6 @@ private:
     std::unordered_map<QString, XDGEntries> groups;
 };
 
-}  // namespace chatterino
-
 #endif
+
+}  // namespace chatterino

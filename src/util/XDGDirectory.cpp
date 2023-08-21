@@ -3,9 +3,9 @@
 #include "util/CombinePath.hpp"
 #include "util/Qt.hpp"
 
-namespace chatterino {
-
 #if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
+
+namespace chatterino {
 
 QStringList getXDGDirectories(XDGDirectoryType directory)
 {
@@ -72,6 +72,6 @@ QStringList getXDGDirectories(XDGDirectoryType directory)
     return paths;
 }
 
-#endif
-
 }  // namespace chatterino
+
+#endif
