@@ -22,8 +22,6 @@ jobs:
         include:
           - os: "ubuntu-20.04"
             qt-version: "5.15.2"
-          - os: "ubuntu-20.04"
-            qt-version: "5.12.12"
           - os: "ubuntu-22.04"
             qt-version: "6.2.4"
       fail-fast: false
@@ -65,7 +63,8 @@ jobs:
               libxcb-image0 \
               libxcb-keysyms1 \
               libxcb-render-util0 \
-              libxcb-xinerama0
+              libxcb-xinerama0 \
+              libavif-dev
 
       - name: Create build directory (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
