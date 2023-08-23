@@ -3,6 +3,8 @@
 #include <gtest/gtest.h>
 #include <QDebug>
 
+#if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
+
 using namespace chatterino;
 
 TEST(XDGDesktopFile, String)
@@ -17,3 +19,5 @@ TEST(XDGDesktopFile, String)
 
     ASSERT_EQ(desktopFile.getEntries("test").size(), 2);
 }
+
+#endif

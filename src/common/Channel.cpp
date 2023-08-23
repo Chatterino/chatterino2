@@ -10,6 +10,7 @@
 #include "singletons/Logging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/ChannelHelpers.hpp"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -113,95 +114,15 @@ void Channel::addMessage(MessagePtr message,
 
 void Channel::addOrReplaceTimeout(MessagePtr message)
 {
-    LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
-    int snapshotLength = snapshot.size();
-
-    int end = std::max(0, snapshotLength - 20);
-
-    bool addMessage = true;
-
-    QTime minimumTime = QTime::currentTime().addSecs(-5);
-
-    auto timeoutStackStyle = static_cast<TimeoutStackStyle>(
-        getSettings()->timeoutStackStyle.getValue());
-
-    for (int i = snapshotLength - 1; i >= end; --i)
-    {
-        auto &s = snapshot[i];
-
-        if (s->parseTime < minimumTime)
-        {
-            break;
-        }
-
-        if (s->flags.has(MessageFlag::Untimeout) &&
-            s->timeoutUser == message->timeoutUser)
-        {
-            break;
-        }
-
-        if (timeoutStackStyle == TimeoutStackStyle::DontStackBeyondUserMessage)
-        {
-            if (s->loginName == message->timeoutUser &&
-                s->flags.hasNone({MessageFlag::Disabled, MessageFlag::Timeout,
-                                  MessageFlag::Untimeout}))
-            {
-                break;
-            }
-        }
-
-        if (s->flags.has(MessageFlag::Timeout) &&
-            s->timeoutUser == message->timeoutUser)
-        {
-            if (message->flags.has(MessageFlag::PubSub) &&
-                !s->flags.has(MessageFlag::PubSub))
-            {
-                this->replaceMessage(s, message);
-                addMessage = false;
-                break;
-            }
-            if (!message->flags.has(MessageFlag::PubSub) &&
-                s->flags.has(MessageFlag::PubSub))
-            {
-                addMessage = timeoutStackStyle == TimeoutStackStyle::DontStack;
-                break;
-            }
-
-            int count = s->count + 1;
-
-            MessageBuilder replacement(timeoutMessage, message->timeoutUser,
-                                       message->loginName, message->searchText,
-                                       count);
-
-            replacement->timeoutUser = message->timeoutUser;
-            replacement->count = count;
-            replacement->flags = message->flags;
-
-            this->replaceMessage(s, replacement.release());
-
-            addMessage = false;
-            break;
-        }
-    }
-
-    // disable the messages from the user
-    for (int i = 0; i < snapshotLength; i++)
-    {
-        auto &s = snapshot[i];
-        if (s->loginName == message->timeoutUser &&
-            s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout,
-                              MessageFlag::Whisper}))
-        {
-            // FOURTF: disabled for now
-            // PAJLADA: Shitty solution described in Message.hpp
-            s->flags.set(MessageFlag::Disabled);
-        }
-    }
-
-    if (addMessage)
-    {
-        this->addMessage(message);
-    }
+    addOrReplaceChannelTimeout(
+        this->getMessageSnapshot(), std::move(message), QTime::currentTime(),
+        [this](auto /*idx*/, auto msg, auto replacement) {
+            this->replaceMessage(msg, replacement);
+        },
+        [this](auto msg) {
+            this->addMessage(msg);
+        },
+        true);
 
     // XXX: Might need the following line
     // WindowManager::instance().repaintVisibleChatWidgets(this);
