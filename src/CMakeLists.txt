@@ -122,6 +122,9 @@ set(SOURCE_FILES
         controllers/highlights/UserHighlightModel.hpp
 
         controllers/hotkeys/ActionNames.hpp
+        controllers/hotkeys/GlobalShortcut.cpp
+        controllers/hotkeys/GlobalShortcut.hpp
+        controllers/hotkeys/GlobalShortcutFwd.hpp
         controllers/hotkeys/Hotkey.cpp
         controllers/hotkeys/Hotkey.hpp
         controllers/hotkeys/HotkeyCategory.hpp
@@ -229,6 +232,8 @@ set(SOURCE_FILES
         messages/search/SubstringPredicate.hpp
         messages/search/SubtierPredicate.cpp
         messages/search/SubtierPredicate.hpp
+
+        platform/GlobalShortcutPrivate.hpp
 
         providers/Crashpad.cpp
         providers/Crashpad.hpp
@@ -624,6 +629,11 @@ if (WIN32)
     if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         list(APPEND SOURCE_FILES "${CMAKE_SOURCE_DIR}/resources/windows.rc")
     endif ()
+
+    # Platform specific implementations
+    list(APPEND SOURCE_FILES
+        platform/windows/GlobalShortcutPrivate.cpp
+    )
 
 elseif (APPLE)
     set(MACOS_BUNDLE_ICON_FILE "${CMAKE_SOURCE_DIR}/resources/chatterino.icns")
