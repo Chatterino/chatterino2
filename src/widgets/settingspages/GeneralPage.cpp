@@ -866,6 +866,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Enable Shadow", s.enableOverlayShadow, false,
                        "Enables a drop shadow on the overlay. This will use "
                        "more processing power.");
+#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
+    layout.addGlobalShortcut("Clickthrough Hotkey", s.overlayInertShortcut,
+                             "Toggles the inertia of the overlay.");
+#endif
 
     layout.addSubtitle("Miscellaneous");
 

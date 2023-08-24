@@ -4,6 +4,7 @@
 #include "common/Channel.hpp"
 #include "common/enums/MessageOverflow.hpp"
 #include "common/SignalVector.hpp"
+#include "controllers/hotkeys/GlobalShortcutFwd.hpp"
 #include "controllers/logging/ChannelLog.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
@@ -172,6 +173,10 @@ public:
     // false};
 
     BoolSetting enableOverlayShadow = {"/appearance/overlay/shadow", true};
+#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
+    QStringSetting overlayInertShortcut = {"/behaviour/overlay/inert",
+                                           "Ctrl+Alt+Shift+U"};
+#endif
 
     // Badges
     BoolSetting showBadgesGlobalAuthority = {

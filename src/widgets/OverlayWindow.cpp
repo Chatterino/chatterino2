@@ -1,6 +1,7 @@
 #include "widgets/OverlayWindow.hpp"
 
 #include "BaseSettings.hpp"
+#include "controllers/hotkeys/GlobalShortcut.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/BaseWidget.hpp"
@@ -13,6 +14,7 @@
 #include <qgraphicseffect.h>
 #include <QGraphicsEffect>
 #include <QGridLayout>
+#include <QKeySequence>
 #include <QSizeGrip>
 
 #include <array>
@@ -101,7 +103,31 @@ OverlayWindow::OverlayWindow(IndirectChannel channel, Split *split)
 
     applyDropShadowTheme();
     this->holder_.managedConnect(getTheme()->updated, applyDropShadowTheme);
+
+#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
+    getSettings()->overlayInertShortcut.connect(
+        [this](const auto &value) {
+            this->shortcut_ = std::make_unique<GlobalShortcut>(
+                QKeySequence::fromString(value, QKeySequence::PortableText),
+                this);
+            QObject::connect(this->shortcut_.get(), &GlobalShortcut::activated,
+                             this, [this] {
+                                 qDebug() << "!!!!!!!";
+                                 this->inert_ = !this->inert_;
+                                 this->setWindowFlag(
+                                     Qt::WindowTransparentForInput,
+                                     this->inert_);
+                                 if (this->isHidden())
+                                 {
+                                     this->show();
+                                 }
+                             });
+        },
+        this->holder_);
+#endif
 }
+
+OverlayWindow::~OverlayWindow() = default;
 
 bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
 {

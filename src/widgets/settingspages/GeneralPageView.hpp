@@ -113,6 +113,9 @@ public:
                                 QString toolTipText = {});
     QSpinBox *addIntInput(const QString &text, IntSetting &setting, int min,
                           int max, int step, QString toolTipText = {});
+    QPushButton *addGlobalShortcut(const QString &text,
+                                   pajlada::Settings::Setting<QString> &setting,
+                                   QString toolTipText = {});
     void addNavigationSpacing();
 
     template <typename OnClick>

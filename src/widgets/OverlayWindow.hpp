@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/Channel.hpp"
+#include "controllers/hotkeys/GlobalShortcutFwd.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
 
@@ -18,6 +19,7 @@ class OverlayWindow : public QWidget
     Q_OBJECT
 public:
     OverlayWindow(IndirectChannel channel, Split *split);
+    ~OverlayWindow() override;
 
 protected:
     bool eventFilter(QObject *object, QEvent *event) override;
@@ -47,6 +49,11 @@ private:
     QPropertyAnimation interactAnimation_;
 
     TitleBarButton closeButton_;
+
+#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
+    std::unique_ptr<GlobalShortcut> shortcut_;
+    bool inert_ = false;
+#endif
 };
 
 }  // namespace chatterino

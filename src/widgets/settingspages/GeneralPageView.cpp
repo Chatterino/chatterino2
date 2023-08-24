@@ -1,15 +1,24 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "util/LayoutHelper.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 #include "widgets/helper/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
 
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QKeySequence>
+#include <QKeySequenceEdit>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QRegularExpression>
 #include <QScrollArea>
 #include <QScrollBar>
+
+#include <utility>
 
 namespace {
 
@@ -21,6 +30,8 @@ const QRegularExpression MAX_TOOLTIP_LINE_LENGTH_REGEX(
 }  // namespace
 
 namespace chatterino {
+
+using namespace literals;
 
 GeneralPageView::GeneralPageView(QWidget *parent)
     : QWidget(parent)
@@ -247,6 +258,65 @@ QSpinBox *GeneralPageView::addIntInput(const QString &text, IntSetting &setting,
     this->groups_.back().widgets.push_back({label, {text}});
 
     return input;
+}
+
+QPushButton *GeneralPageView::addGlobalShortcut(
+    const QString &text, pajlada::Settings::Setting<QString> &setting,
+    QString toolTipText)
+{
+    auto *button = new QPushButton(setting);
+    auto *layout = new QHBoxLayout();
+    auto *label = new QLabel(text + ':');
+
+    layout->addWidget(label);
+    layout->addStretch(1);
+    layout->addWidget(button);
+
+    this->addToolTip(*label, std::move(toolTipText));
+    this->addLayout(layout);
+
+    QObject::connect(button, &QPushButton::clicked, [this, &setting, button] {
+        auto *dialog = new QDialog(this);
+        auto *layout = new QVBoxLayout(dialog);
+        auto *edit = new QKeySequenceEdit(
+            QKeySequence::fromString(setting, QKeySequence::PortableText));
+        layout->addWidget(edit, 1);
+
+        auto *btn = new QDialogButtonBox(QDialogButtonBox::Cancel |
+                                         QDialogButtonBox::Ok);
+        layout->addWidget(btn, 0, Qt::AlignRight | Qt::AlignBottom);
+        QObject::connect(btn, &QDialogButtonBox::accepted, dialog,
+                         &QDialog::accept);
+        QObject::connect(btn, &QDialogButtonBox::rejected, dialog,
+                         &QDialog::reject);
+
+        dialog->resize(300, 200);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        dialog->setWindowTitle("Edit Hotkey");
+        dialog->show();
+
+        QObject::connect(
+            dialog, &QDialog::accepted, [this, &setting, edit, button] {
+                if (edit->keySequence().isEmpty() ||
+                    edit->keySequence().count() > 1)
+                {
+                    QMessageBox::warning(
+                        this, u"Key Editor"_s,
+                        u"There must be exactly one key pressed (with optional modifiers)."_s,
+                        QMessageBox::Ok);
+                    return;
+                }
+                auto text =
+                    edit->keySequence().toString(QKeySequence::PortableText);
+                setting.setValue(text);
+                button->setText(text);
+            });
+    });
+
+    this->groups_.back().widgets.push_back({label, {text}});
+    this->groups_.back().widgets.push_back({button, {text}});
+
+    return button;
 }
 
 void GeneralPageView::addNavigationSpacing()
