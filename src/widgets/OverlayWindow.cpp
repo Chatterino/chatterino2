@@ -112,7 +112,6 @@ OverlayWindow::OverlayWindow(IndirectChannel channel, Split *split)
                 this);
             QObject::connect(this->shortcut_.get(), &GlobalShortcut::activated,
                              this, [this] {
-                                 qDebug() << "!!!!!!!";
                                  this->inert_ = !this->inert_;
                                  this->setWindowFlag(
                                      Qt::WindowTransparentForInput,
