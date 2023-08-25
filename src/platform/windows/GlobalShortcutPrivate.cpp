@@ -31,7 +31,8 @@ bool GlobalShortcutPrivate::nativeEventFilter(const QByteArray & /*eventType*/,
     {
         const quint32 keycode = HIWORD(msg->lParam);
         const quint32 modifiers = LOWORD(msg->lParam);
-        activateShortcut(keycode, modifiers);
+        GlobalShortcutPrivate::activateShortcut(
+            {.key = keycode, .modifiers = modifiers});
     }
 
     return false;
@@ -229,19 +230,17 @@ quint32 GlobalShortcutPrivate::nativeKeycode(Qt::Key key)
     }
 }
 
-GlobalShortcutResult GlobalShortcutPrivate::registerShortcut(quint32 nativeKey,
-                                                             quint32 nativeMods)
+GlobalShortcutResult GlobalShortcutPrivate::registerShortcut(Native native)
 {
-    return wrapWinError(
-        RegisterHotKey(nullptr, std::bit_cast<int>(nativeMods) ^ nativeKey,
-                       nativeMods, nativeKey));
+    return wrapWinError(RegisterHotKey(
+        nullptr, std::bit_cast<int>(native.key) ^ native.modifiers,
+        native.modifiers, native.key));
 }
 
-GlobalShortcutResult GlobalShortcutPrivate::unregisterShortcut(
-    quint32 nativeKey, quint32 nativeMods)
+GlobalShortcutResult GlobalShortcutPrivate::unregisterShortcut(Native native)
 {
-    return wrapWinError(
-        UnregisterHotKey(nullptr, std::bit_cast<int>(nativeMods) ^ nativeKey));
+    return wrapWinError(UnregisterHotKey(
+        nullptr, std::bit_cast<int>(native.key) ^ native.modifiers));
 }
 
 }  // namespace chatterino

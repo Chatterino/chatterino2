@@ -2,7 +2,6 @@
 
 #ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
 
-#    include "common/Literals.hpp"
 #    include "common/QLogging.hpp"
 #    include "platform/GlobalShortcutPrivate.hpp"
 
@@ -11,8 +10,6 @@
 #    include <QtDebug>
 
 namespace chatterino {
-
-using namespace literals;
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 #    ifndef Q_OS_MAC
@@ -23,8 +20,7 @@ decltype(GlobalShortcutPrivate::SHORTCUTS) GlobalShortcutPrivate::SHORTCUTS;
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
 GlobalShortcutPrivate::GlobalShortcutPrivate(GlobalShortcut *owner)
-    : enabled(true)
-    , key(Qt::Key(0))
+    : key(Qt::Key(0))
     , mods(Qt::NoModifier)
     , owner_(owner)
 {
@@ -55,72 +51,112 @@ GlobalShortcutPrivate::~GlobalShortcutPrivate()
 
 bool GlobalShortcutPrivate::setShortcut(const QKeySequence &shortcut)
 {
+    // our caller already unset the shortcut
+
+    if (shortcut.isEmpty())
+    {
+        // same as unsetShortcut
+        return false;
+    }
+
     if (shortcut.count() > 1)
     {
         qCWarning(chatterinoHotkeys)
-            << u"Global shortcuts must be composed of exactly one key with optional modifiers."_s;
+            << "Global shortcuts must be composed of exactly one key with "
+               "optional modifiers.";
+        return false;
     }
 
-    auto allMods = Qt::ShiftModifier | Qt::ControlModifier | Qt::AltModifier |
-                   Qt::MetaModifier;
-    this->key = shortcut.isEmpty()
-                    ? Qt::Key(0)
-                    : Qt::Key((shortcut[0] ^ allMods) & shortcut[0]);
-    this->mods = shortcut.isEmpty()
-                     ? Qt::KeyboardModifiers(0)
-                     : Qt::KeyboardModifiers(shortcut[0] & allMods);
+#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    this->key = shortcut[0].key();
+    this->mods = shortcut[0].keyboardModifiers();
+#    else
+    this->key = Qt::Key(shortcut[0] & ~Qt::KeyboardModifierMask);
+    this->mods = Qt::KeyboardModifiers(shortcut[0] & Qt::KeyboardModifierMask);
+#    endif
 
-    quint32 nativeKey = nativeKeycode(this->key);
-    quint32 nativeMods = nativeModifiers(this->mods);
-    auto res = registerShortcut(nativeKey, nativeMods);
-    if (res.ok)
+    auto native = this->native();
+    auto it = SHORTCUTS.find(native);
+    if (it != SHORTCUTS.end())
     {
-        SHORTCUTS.emplace(std::make_pair(nativeKey, nativeMods), this->owner_);
-
+        // tap into the curren shortcut
+        it->second.emplace_back(this->owner_);
         return true;
     }
 
-    qCWarning(chatterinoHotkeys)
-        << "GlobalShortcut failed to register:" << QKeySequence(key + mods)
-        << "(native) error:" << res.error;
+    // no previous shortcut registered
+    auto res = registerShortcut(native);
+    if (!res.ok)
+    {
+        qCWarning(chatterinoHotkeys) << "GlobalShortcut failed to register:"
+                                     << QKeySequence(this->key | this->mods)
+                                     << "(native) error:" << res.error;
+        return false;
+    }
+    SHORTCUTS.emplace(native, std::vector<GlobalShortcut *>{this->owner_});
 
-    return false;
+    return true;
 }
 
 bool GlobalShortcutPrivate::unsetShortcut()
 {
-    const quint32 nativeKey = nativeKeycode(key);
-    const quint32 nativeMods = nativeModifiers(mods);
-    auto it = SHORTCUTS.find(qMakePair(nativeKey, nativeMods));
-    if (it != SHORTCUTS.end())
+    auto native = this->native();
+    auto shortcut = SHORTCUTS.find(native);
+    if (shortcut == SHORTCUTS.end())
     {
-        auto res = unregisterShortcut(nativeKey, nativeMods);
-        if (res.ok)
-        {
-            SHORTCUTS.erase(it);
-        }
-        else
-        {
-            qWarning() << "GlobalShortcut failed to unregister:"
-                       << QKeySequence(key + mods)
-                       << "(native) error:" << res.error;
-        }
-        key = Qt::Key(0);
-        mods = Qt::KeyboardModifiers(0);
-        return res.ok;
+        return false;
     }
 
-    return false;
+    auto it = std::find(shortcut->second.begin(), shortcut->second.end(),
+                        this->owner_);
+    if (it == shortcut->second.end())
+    {
+        return false;
+    }
+
+    shortcut->second.erase(it);
+    if (!shortcut->second.empty())
+    {
+        return true;
+    }
+
+    // No remaining shortcut -> unregister
+    auto res = GlobalShortcutPrivate::unregisterShortcut(native);
+    if (res.ok)
+    {
+        SHORTCUTS.erase(shortcut);
+    }
+    else
+    {
+        qWarning() << "GlobalShortcut failed to unregister:"
+                   << QKeySequence(this->key | this->mods)
+                   << "(native) error:" << res.error;
+    }
+    this->key = Qt::Key(0);
+    this->mods = Qt::NoModifier;
+    return res.ok;
 }
 
-void GlobalShortcutPrivate::activateShortcut(quint32 nativeKey,
-                                             quint32 nativeMods)
+void GlobalShortcutPrivate::activateShortcut(Native native)
 {
-    auto it = SHORTCUTS.find(std::make_pair(nativeKey, nativeMods));
-    if (it != SHORTCUTS.end() && it->second->isEnabled())
+    auto it = SHORTCUTS.find(native);
+    if (it != SHORTCUTS.end())
     {
-        emit it->second->activated();
+        bool singleConsumer = it->second.size() == 1;
+        for (size_t i = 0; auto *consumer : it->second)
+        {
+            emit consumer->activated(i, singleConsumer);
+            i++;
+        }
     }
+}
+
+GlobalShortcutPrivate::Native GlobalShortcutPrivate::native() const
+{
+    return {
+        .key = GlobalShortcutPrivate::nativeKeycode(this->key),
+        .modifiers = GlobalShortcutPrivate::nativeModifiers(this->mods),
+    };
 }
 
 GlobalShortcut::GlobalShortcut(QObject *parent)
@@ -156,21 +192,6 @@ bool GlobalShortcut::setShortcut(const QKeySequence &shortcut)
         this->private_->unsetShortcut();
     }
     return this->private_->setShortcut(shortcut);
-}
-
-bool GlobalShortcut::isEnabled() const
-{
-    return this->private_->enabled;
-}
-
-void GlobalShortcut::setEnabled(bool enabled)
-{
-    this->private_->enabled = enabled;
-}
-
-void GlobalShortcut::setDisabled(bool disabled)
-{
-    this->private_->enabled = !disabled;
 }
 
 }  // namespace chatterino
