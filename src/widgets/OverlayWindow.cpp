@@ -121,6 +121,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel, Split *split)
                                  {
                                      this->show();
                                  }
+                                 this->endInteraction();
                              });
         },
         this->holder_);
@@ -186,22 +187,26 @@ void OverlayWindow::keyReleaseEvent(QKeyEvent *event)
     }
 }
 
-void OverlayWindow::paintEvent(QPaintEvent *event)
+void OverlayWindow::paintEvent(QPaintEvent * /*event*/)
 {
-    if (this->interactionProgress() <= 0.0)
+    if (this->inert_)
     {
-        QWidget::paintEvent(event);
         return;
     }
 
     QPainter painter(this);
-    QColor highlightColor(255, 255, 255,
-                          int(255.0 * this->interactionProgress()));
+    QColor highlightColor(
+        255, 255, 255, std::max(int(255.0 * this->interactionProgress()), 50));
 
     painter.setPen({highlightColor, 2});
     // outline
     auto bounds = this->rect();
     painter.drawRect(bounds);
+
+    if (this->interactionProgress() <= 0.0)
+    {
+        return;
+    }
 
     painter.setBrush(highlightColor);
     painter.setPen(Qt::transparent);
@@ -216,10 +221,6 @@ void OverlayWindow::paintEvent(QPaintEvent *event)
     auto buttonSize = this->closeButton_.size();
     painter.drawRect(
         QRect{bounds.topRight() - QPoint{buttonSize.width(), 0}, buttonSize});
-
-    painter.end();
-
-    QWidget::paintEvent(event);
 }
 
 double OverlayWindow::interactionProgress() const
@@ -234,6 +235,11 @@ void OverlayWindow::setInteractionProgress(double progress)
 
 void OverlayWindow::startInteraction()
 {
+    if (this->inert_)
+    {
+        return;
+    }
+
     if (this->interactAnimation_.state() != QPropertyAnimation::Stopped)
     {
         this->interactAnimation_.stop();
