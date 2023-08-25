@@ -140,6 +140,7 @@ bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
             {
                 this->moving_ = true;
                 this->moveOrigin_ = evt->globalPos();
+                this->startInteraction();
                 return true;
             }
             return false;
@@ -235,11 +236,12 @@ void OverlayWindow::setInteractionProgress(double progress)
 
 void OverlayWindow::startInteraction()
 {
-    if (this->inert_)
+    if (this->inert_ || this->interacting_)
     {
         return;
     }
 
+    this->interacting_ = true;
     if (this->interactAnimation_.state() != QPropertyAnimation::Stopped)
     {
         this->interactAnimation_.stop();
@@ -252,6 +254,12 @@ void OverlayWindow::startInteraction()
 
 void OverlayWindow::endInteraction()
 {
+    if (!this->interacting_)
+    {
+        return;
+    }
+
+    this->interacting_ = false;
     if (this->interactAnimation_.state() != QPropertyAnimation::Stopped)
     {
         this->interactAnimation_.stop();

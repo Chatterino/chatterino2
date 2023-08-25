@@ -42,6 +42,7 @@ private:
     ChannelView channelView_;
     QGraphicsDropShadowEffect *dropShadow_;
 
+    bool interacting_ = false;
     bool moving_ = false;
     QPoint moveOrigin_;
 
