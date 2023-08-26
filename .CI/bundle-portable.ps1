@@ -26,7 +26,7 @@ git describe --exact-match --match 'v*' *> $null;
 $isTagged = $?;
 $ErrorActionPreference = $OldErrorActionPref;
 
-Write-Output portable > Chatterino2/modes;
+Write-Output portable | Out-File Chatterino2/modes -Encoding ASCII;
 if ($isTagged) {
     # This is a release.
     # Make sure, any existing `modes` file is overwritten for the user,
@@ -34,7 +34,7 @@ if ($isTagged) {
     $bundleBaseName = "Chatterino7.Portable";
 }
 else {
-    Write-Output nightly >> Chatterino2/modes;
+    Write-Output nightly | Out-File Chatterino2/modes -Append -Encoding ASCII;
     $bundleBaseName = "Chatterino7.Nightly.Portable";
 }
 
