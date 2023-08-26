@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Bugfix: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
+- Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 
 ## 2.4.5
 
