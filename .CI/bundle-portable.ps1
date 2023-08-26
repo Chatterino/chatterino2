@@ -23,6 +23,7 @@ function Remove-IfExists {
 $OldErrorActionPref = $ErrorActionPreference;
 $ErrorActionPreference = 'Continue';
 git describe --exact-match --match 'v*' *> $null;
+$isTagged = $?;
 $ErrorActionPreference = $OldErrorActionPref;
 
 Write-Output portable > Chatterino2/modes;
