@@ -24,7 +24,8 @@ void initUpdateButton(Button &button,
             globalPoint.setX(0);
         }
 
-        dialog->move(globalPoint);
+        dialog->moveTo(globalPoint, false,
+                       BaseWindow::BoundsChecker::DesiredPosition);
         dialog->show();
         dialog->raise();
 

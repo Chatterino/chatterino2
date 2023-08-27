@@ -3019,8 +3019,9 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
     popup->setThread(message->replyThread);
 
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
-    popup->move(QCursor::pos() - offset);
     popup->show();
+    popup->moveTo(QCursor::pos() - offset, false,
+                  BaseWindow::BoundsChecker::CursorPosition);
     popup->giveFocus(Qt::MouseFocusReason);
 }
 
