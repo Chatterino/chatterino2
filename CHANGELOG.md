@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
+
 ## 2.4.5
 
 - Major: AutoMod term management messages (e.g. testaccount added "noob" as a blocked term on AutoMod.) are now hidden in Streamer Mode if you have the "Hide moderation actions" setting enabled. (#4758)
