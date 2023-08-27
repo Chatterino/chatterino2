@@ -3,6 +3,8 @@
 #include <gtest/gtest.h>
 #include <QDebug>
 
+#if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
+
 using namespace chatterino;
 
 TEST(XDGHelper, ParseDesktopExecProgram)
@@ -60,3 +62,5 @@ TEST(XDGHelper, ParseDesktopExecProgram)
             << output.toStdString() << "'";
     }
 }
+
+#endif
