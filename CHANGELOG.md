@@ -2,6 +2,11 @@
 
 ## Unversioned
 
+- Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
+- Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
+
+## 2.4.5
+
 - Major: AutoMod term management messages (e.g. testaccount added "noob" as a blocked term on AutoMod.) are now hidden in Streamer Mode if you have the "Hide moderation actions" setting enabled. (#4758)
 - Minor: Added `/shoutout <username>` command to shoutout a specified user. Note: This is only the /command, we are still unable to display when a shoutout happens. (#4638)
 - Minor: Added a setting to only show tabs with live channels (default toggle hotkey: Ctrl+Shift+L). (#4358)

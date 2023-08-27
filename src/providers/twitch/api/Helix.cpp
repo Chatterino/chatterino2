@@ -2867,7 +2867,6 @@ void Helix::sendShoutout(
                 break;
 
                 case 500: {
-                    // Helix returns 500 when user is not mod,
                     if (message.isEmpty())
                     {
                         failureCallback(Error::Unknown,
