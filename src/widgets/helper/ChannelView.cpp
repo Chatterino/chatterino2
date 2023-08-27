@@ -1810,8 +1810,8 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
         }
 
-        tooltipWidget->moveTo(event->globalPos(), true,
-                              BaseWindow::BoundsChecker::CursorPosition);
+        tooltipWidget->moveTo(event->globalPos() + QPoint(16, 16),
+                              BoundsChecking::CursorPosition);
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->show();
     }
@@ -2665,8 +2665,7 @@ void ChannelView::showUserInfoPopup(const QString &userName,
     userPopup->setData(userName, contextChannel, openingChannel);
 
     QPoint offset(userPopup->width() / 3, userPopup->height() / 5);
-    userPopup->moveTo(QCursor::pos() - offset, false,
-                      BaseWindow::BoundsChecker::CursorPosition);
+    userPopup->moveTo(QCursor::pos() - offset, BoundsChecking::CursorPosition);
     userPopup->show();
 }
 
@@ -3020,8 +3019,7 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
 
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     popup->show();
-    popup->moveTo(QCursor::pos() - offset, false,
-                  BaseWindow::BoundsChecker::CursorPosition);
+    popup->moveTo(QCursor::pos() - offset, BoundsChecking::CursorPosition);
     popup->giveFocus(Qt::MouseFocusReason);
 }
 

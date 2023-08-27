@@ -87,8 +87,7 @@ void WindowManager::showAccountSelectPopup(QPoint point)
 
     w->refresh();
 
-    w->moveTo(point - QPoint(30, 0), false,
-              BaseWindow::BoundsChecker::CursorPosition);
+    w->moveTo(point - QPoint(30, 0), BoundsChecking::CursorPosition);
     w->show();
     w->setFocus();
 }

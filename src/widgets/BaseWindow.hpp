@@ -19,6 +19,17 @@ class EffectLabel;
 class TitleBarButton;
 enum class TitleBarButtonStyle;
 
+enum class BoundsChecking {
+    // Attempt to keep the window within bounds of the screen the cursor is on
+    CursorPosition,
+
+    // Attempt to keep the window within bounds of the screen the desired position is on
+    DesiredPosition,
+};
+
+/// Move the `window` to `point` and do bounds-checking to ensure that it stays on exactly one screen.
+void moveWindowTo(QWidget *window, QPoint point, BoundsChecking mode);
+
 class BaseWindow : public BaseWidget
 {
     Q_OBJECT
@@ -34,17 +45,6 @@ public:
         DontFocus = 32,
         Dialog = 64,
         DisableLayoutSave = 128,
-    };
-
-    enum class BoundsChecker {
-        // Don't attempt to do any "stay in screen" stuff, just move me!
-        Off,
-
-        // Attempt to keep the window within bounds of the screen the cursor is on
-        CursorPosition,
-
-        // Attempt to keep the window within bounds of the screen the desired position is on
-        DesiredPosition,
     };
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
@@ -65,7 +65,8 @@ public:
     void setActionOnFocusLoss(ActionOnFocusLoss value);
     ActionOnFocusLoss getActionOnFocusLoss() const;
 
-    void moveTo(QPoint point, bool offset, BoundsChecker boundsChecker);
+    /// Move this window to `point` and do bounds-checking to ensure that it stays on the current screen.
+    void moveTo(QPoint point, BoundsChecking mode);
 
     float scale() const override;
     float qtFontScale() const;
@@ -109,11 +110,6 @@ protected:
 
 private:
     void init();
-
-    /**
-     *
-     **/
-    void moveWithinScreen(QPoint point, QPoint origin);
 
     void calcButtonsSizes();
     void drawCustomWindowFrame(QPainter &painter);
