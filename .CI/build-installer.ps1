@@ -15,11 +15,11 @@ if ($isTagged) {
     # This is a release.
     # Make sure, any existing `modes` file is overwritten for the user,
     # for example when updating from nightly to stable.
-    Write-Output "" > Chatterino2/modes;
+    Write-Output "" | Out-File Chatterino2/modes -Encoding ASCII;
     $installerBaseName = "Chatterino.Installer";
 }
 else {
-    Write-Output nightly > Chatterino2/modes;
+    Write-Output nightly | Out-File Chatterino2/modes -Encoding ASCII;
     $defines = "/DIS_NIGHTLY=1";
     $installerBaseName = "Chatterino.Nightly.Installer";
 }
