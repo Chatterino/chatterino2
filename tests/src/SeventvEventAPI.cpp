@@ -19,34 +19,34 @@ const QString TARGET_USER_ID = "60b39e943e203cc169dfc106";
 TEST(SeventvEventAPI, AllEvents)
 {
     const QString host("wss://127.0.0.1:9050/liveupdates/seventv/all-events");
-    auto *eventAPI = new SeventvEventAPI(host, std::chrono::milliseconds(1000));
-    eventAPI->start();
+    SeventvEventAPI eventAPI(host, std::chrono::milliseconds(1000));
+    eventAPI.start();
 
     boost::optional<EmoteAddDispatch> addDispatch;
     boost::optional<EmoteUpdateDispatch> updateDispatch;
     boost::optional<EmoteRemoveDispatch> removeDispatch;
     boost::optional<UserConnectionUpdateDispatch> userDispatch;
 
-    eventAPI->signals_.emoteAdded.connect([&](const auto &d) {
+    eventAPI.signals_.emoteAdded.connect([&](const auto &d) {
         addDispatch = d;
     });
-    eventAPI->signals_.emoteUpdated.connect([&](const auto &d) {
+    eventAPI.signals_.emoteUpdated.connect([&](const auto &d) {
         updateDispatch = d;
     });
-    eventAPI->signals_.emoteRemoved.connect([&](const auto &d) {
+    eventAPI.signals_.emoteRemoved.connect([&](const auto &d) {
         removeDispatch = d;
     });
-    eventAPI->signals_.userUpdated.connect([&](const auto &d) {
+    eventAPI.signals_.userUpdated.connect([&](const auto &d) {
         userDispatch = d;
     });
 
     std::this_thread::sleep_for(50ms);
-    eventAPI->subscribeUser("", EMOTE_SET_A);
+    eventAPI.subscribeUser("", EMOTE_SET_A);
     std::this_thread::sleep_for(500ms);
 
-    ASSERT_EQ(eventAPI->diag.connectionsOpened, 1);
-    ASSERT_EQ(eventAPI->diag.connectionsClosed, 0);
-    ASSERT_EQ(eventAPI->diag.connectionsFailed, 0);
+    ASSERT_EQ(eventAPI.diag.connectionsOpened, 1);
+    ASSERT_EQ(eventAPI.diag.connectionsClosed, 0);
+    ASSERT_EQ(eventAPI.diag.connectionsFailed, 0);
 
     auto add = *addDispatch;
     ASSERT_EQ(add.emoteSetID, EMOTE_SET_A);
@@ -71,7 +71,7 @@ TEST(SeventvEventAPI, AllEvents)
     updateDispatch = boost::none;
     removeDispatch = boost::none;
 
-    eventAPI->subscribeUser(TARGET_USER_ID, "");
+    eventAPI.subscribeUser(TARGET_USER_ID, "");
     std::this_thread::sleep_for(50ms);
 
     ASSERT_EQ(addDispatch.has_value(), false);
@@ -85,24 +85,24 @@ TEST(SeventvEventAPI, AllEvents)
     ASSERT_EQ(user.emoteSetID, EMOTE_SET_B);
     ASSERT_EQ(user.connectionIndex, 0);
 
-    eventAPI->stop();
-    ASSERT_EQ(eventAPI->diag.connectionsOpened, 1);
-    ASSERT_EQ(eventAPI->diag.connectionsClosed, 1);
-    ASSERT_EQ(eventAPI->diag.connectionsFailed, 0);
+    eventAPI.stop();
+    ASSERT_EQ(eventAPI.diag.connectionsOpened, 1);
+    ASSERT_EQ(eventAPI.diag.connectionsClosed, 1);
+    ASSERT_EQ(eventAPI.diag.connectionsFailed, 0);
 }
 
 TEST(SeventvEventAPI, NoHeartbeat)
 {
     const QString host("wss://127.0.0.1:9050/liveupdates/seventv/no-heartbeat");
-    auto *eventApi = new SeventvEventAPI(host, std::chrono::milliseconds(1000));
-    eventApi->start();
+    SeventvEventAPI eventApi(host, std::chrono::milliseconds(1000));
+    eventApi.start();
 
     std::this_thread::sleep_for(50ms);
-    eventApi->subscribeUser("", EMOTE_SET_A);
+    eventApi.subscribeUser("", EMOTE_SET_A);
     std::this_thread::sleep_for(1250ms);
-    ASSERT_EQ(eventApi->diag.connectionsOpened, 2);
-    ASSERT_EQ(eventApi->diag.connectionsClosed, 1);
-    ASSERT_EQ(eventApi->diag.connectionsFailed, 0);
+    ASSERT_EQ(eventApi.diag.connectionsOpened, 2);
+    ASSERT_EQ(eventApi.diag.connectionsClosed, 1);
+    ASSERT_EQ(eventApi.diag.connectionsFailed, 0);
 
-    eventApi->stop();
+    eventApi.stop();
 }

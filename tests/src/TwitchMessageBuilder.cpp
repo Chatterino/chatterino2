@@ -154,7 +154,7 @@ TEST(TwitchMessageBuilder, BadgeInfoParsing)
 
     for (const auto &test : testCases)
     {
-        auto privmsg =
+        auto *privmsg =
             Communi::IrcPrivateMessage::fromData(test.input, nullptr);
 
         auto outputBadgeInfo =
@@ -166,6 +166,8 @@ TEST(TwitchMessageBuilder, BadgeInfoParsing)
             SharedMessageBuilder::parseBadgeTag(privmsg->tags());
         EXPECT_EQ(outputBadges, test.expectedBadges)
             << "Input for badges " << test.input.toStdString() << " failed";
+
+        delete privmsg;
     }
 }
 
@@ -343,5 +345,7 @@ TEST_F(TestTwitchMessageBuilder, ParseTwitchEmotes)
         EXPECT_EQ(actualTwitchEmotes, test.expectedTwitchEmotes)
             << "Input for twitch emotes " << test.input.toStdString()
             << " failed";
+
+        delete privmsg;
     }
 }
