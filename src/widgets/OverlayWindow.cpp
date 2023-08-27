@@ -1,6 +1,7 @@
 #include "widgets/OverlayWindow.hpp"
 
 #include "BaseSettings.hpp"
+#include "common/Literals.hpp"
 #include "controllers/hotkeys/GlobalShortcut.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -20,6 +21,15 @@
 
 namespace {
 
+using namespace chatterino;
+using namespace literals;
+
+enum class Knowledge : std::int32_t {
+    None = 0,
+    // User opened the overlay at least once
+    Activation = 1 << 0,
+};
+
 class Grippy : public QSizeGrip
 {
 public:
@@ -33,6 +43,47 @@ protected:
     {
     }
 };
+
+bool hasKnowledge(Knowledge knowledge)
+{
+    QFlags current(std::bit_cast<Knowledge>(
+        getSettings()->overlayKnowledgeLevel.getValue()));
+    return current.testFlag(knowledge);
+}
+
+void acquireKnowledge(Knowledge knowledge)
+{
+    QFlags current(std::bit_cast<Knowledge>(
+        getSettings()->overlayKnowledgeLevel.getValue()));
+    current.setFlag(knowledge);
+    getSettings()->overlayKnowledgeLevel = current;
+}
+
+void triggerFirstActivation(QWidget *parent)
+{
+    if (hasKnowledge(Knowledge::Activation))
+    {
+        return;
+    }
+    acquireKnowledge(Knowledge::Activation);
+
+    auto welcomeText =
+        u"Hey! It looks like this is the first time you're using the overlay. You can move the overlay holding SHIFT and dragging it with your mouse. To resize the window, drag on the bottom right corner."_s;
+#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
+    auto actualShortcut =
+        QKeySequence::fromString(getSettings()->overlayInertShortcut,
+                                 QKeySequence::PortableText)
+            .toString(QKeySequence::PortableText);
+    welcomeText +=
+        u"By default the overlay is interactive. To click through the overlay, press %1 (customizable in the settings)."_s
+            .arg(actualShortcut);
+#endif
+
+    auto *box =
+        new QMessageBox(QMessageBox::Information, u"Chatterino - Overlay"_s,
+                        welcomeText, QMessageBox::Ok, parent);
+    box->open();
+}
 
 }  // namespace
 
@@ -124,6 +175,8 @@ OverlayWindow::OverlayWindow(IndirectChannel channel, Split *split)
         },
         this->holder_);
 #endif
+
+    triggerFirstActivation(this);
 }
 
 OverlayWindow::~OverlayWindow() = default;
