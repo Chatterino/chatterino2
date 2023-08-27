@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
+
 ## 2.4.5
 
 - Major: AutoMod term management messages (e.g. testaccount added "noob" as a blocked term on AutoMod.) are now hidden in Streamer Mode if you have the "Hide moderation actions" setting enabled. (#4758)
