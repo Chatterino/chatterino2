@@ -28,7 +28,8 @@ struct PubSubWhisperMessage {
     QString fromUserDisplayName;
     QColor fromUserColor;
 
-    PubSubWhisperMessage(const QJsonObject &root);
+    PubSubWhisperMessage() = default;
+    explicit PubSubWhisperMessage(const QJsonObject &root);
 };
 
 }  // namespace chatterino
