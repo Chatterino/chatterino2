@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Bugfix: Fixed a data race when disconnecting from Twitch PubSub. (#4771)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 - Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
