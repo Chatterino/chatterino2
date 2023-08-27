@@ -46,7 +46,6 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
 
     this->initWidgets();
 
-    this->setStayInScreenRect(true);
     const QRect geom = parent->geometry();
     // This places the popup in the middle of the parent widget
     this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,

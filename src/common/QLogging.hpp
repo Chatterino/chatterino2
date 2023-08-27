@@ -42,3 +42,4 @@ Q_DECLARE_LOGGING_CATEGORY(chatterinoUpdate);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoWebsocket);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoWidget);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoWindowmanager);
+Q_DECLARE_LOGGING_CATEGORY(chatterinoXDG);

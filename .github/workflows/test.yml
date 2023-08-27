@@ -20,9 +20,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: "ubuntu-20.04"
+          - os: "ubuntu-22.04"
             qt-version: "5.15.2"
-          - os: "ubuntu-20.04"
+          - os: "ubuntu-22.04"
             qt-version: "5.12.12"
           - os: "ubuntu-22.04"
             qt-version: "6.2.4"
@@ -37,12 +37,18 @@ jobs:
           submodules: recursive
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3.2.1
+        uses: jurplel/install-qt-action@v3.3.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
           modules: ${{ env.QT_MODULES }}
           version: ${{ matrix.qt-version }}
+
+      - name: Apply Qt patches (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.qt-version, '5.')
+        run: |
+          patch "$Qt5_DIR/include/QtConcurrent/qtconcurrentthreadengine.h" .patches/qt5-on-newer-gcc.patch
+        shell: bash
 
       # LINUX
       - name: Install dependencies (Ubuntu)

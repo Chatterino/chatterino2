@@ -16,7 +16,7 @@ void flushClipboard();
 bool isRegisteredForStartup();
 void setRegisteredForStartup(bool isRegistered);
 
-QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query);
+QString getAssociatedExecutable(AssociationQueryType queryType, LPCWSTR query);
 
 }  // namespace chatterino
 

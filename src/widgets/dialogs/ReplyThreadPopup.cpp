@@ -35,7 +35,6 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
                "A reply thread popup must have a source channel");
 
     this->setWindowTitle(QStringLiteral("Reply Thread"));
-    this->setStayInScreenRect(true);
 
     HotkeyController::HotkeyMap actions{
         {"delete",

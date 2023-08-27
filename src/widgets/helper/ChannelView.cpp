@@ -1828,7 +1828,8 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
         }
 
-        tooltipWidget->moveTo(this, event->globalPos());
+        tooltipWidget->moveTo(event->globalPos(), true,
+                              BaseWindow::BoundsChecker::CursorPosition);
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->show();
     }
@@ -2122,8 +2123,15 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 
                 if (link.type == Link::UserInfo)
                 {
-                    if (hoveredElement->getFlags().has(
-                            MessageElementFlag::Username))
+                    // This is terrible because it FPs on messages where the
+                    // user mentions themselves
+                    bool canReply =
+                        QString::compare(link.value,
+                                         layout->getMessage()->loginName,
+                                         Qt::CaseInsensitive) == 0;
+                    UsernameRightClickBehavior action =
+                        UsernameRightClickBehavior::Mention;
+                    if (canReply)
                     {
                         Qt::KeyboardModifier userSpecifiedModifier =
                             getSettings()->usernameRightClickModifier;
@@ -2142,7 +2150,6 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                         Qt::KeyboardModifiers modifiers{userSpecifiedModifier};
                         auto isModifierHeld = event->modifiers() == modifiers;
 
-                        UsernameRightClickBehavior action{};
                         if (isModifierHeld)
                         {
                             action = getSettings()
@@ -2152,44 +2159,43 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                         {
                             action = getSettings()->usernameRightClickBehavior;
                         }
-
-                        switch (action)
-                        {
-                            case UsernameRightClickBehavior::Mention: {
-                                if (split == nullptr)
-                                {
-                                    return;
-                                }
-
-                                // Insert @username into split input
-                                const bool commaMention =
-                                    getSettings()->mentionUsersWithComma;
-                                const bool isFirstWord =
-                                    split->getInput().isEditFirstWord();
-                                auto userMention = formatUserMention(
-                                    link.value, isFirstWord, commaMention);
-                                insertText("@" + userMention + " ");
+                    }
+                    switch (action)
+                    {
+                        case UsernameRightClickBehavior::Mention: {
+                            if (split == nullptr)
+                            {
+                                return;
                             }
-                            break;
 
-                            case UsernameRightClickBehavior::Reply: {
-                                // Start a new reply if matching user's settings
-                                this->setInputReply(layout->getMessagePtr());
-                            }
-                            break;
-
-                            case UsernameRightClickBehavior::Ignore:
-                                break;
-
-                            default: {
-                                qCWarning(chatterinoCommon)
-                                    << "unhandled or corrupted "
-                                       "UsernameRightClickBehavior value in "
-                                       "ChannelView::handleMouseClick:"
-                                    << action;
-                            }
-                            break;  // unreachable
+                            // Insert @username into split input
+                            const bool commaMention =
+                                getSettings()->mentionUsersWithComma;
+                            const bool isFirstWord =
+                                split->getInput().isEditFirstWord();
+                            auto userMention = formatUserMention(
+                                link.value, isFirstWord, commaMention);
+                            insertText("@" + userMention + " ");
                         }
+                        break;
+
+                        case UsernameRightClickBehavior::Reply: {
+                            // Start a new reply if matching user's settings
+                            this->setInputReply(layout->getMessagePtr());
+                        }
+                        break;
+
+                        case UsernameRightClickBehavior::Ignore:
+                            break;
+
+                        default: {
+                            qCWarning(chatterinoCommon)
+                                << "unhandled or corrupted "
+                                   "UsernameRightClickBehavior value in "
+                                   "ChannelView::handleMouseClick:"
+                                << action;
+                        }
+                        break;  // unreachable
                     }
 
                     return;
@@ -2676,8 +2682,9 @@ void ChannelView::showUserInfoPopup(const QString &userName,
                                                    : this->underlyingChannel_;
     userPopup->setData(userName, contextChannel, openingChannel);
 
-    QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
-    userPopup->move(QCursor::pos() - offset);
+    QPoint offset(userPopup->width() / 3, userPopup->height() / 5);
+    userPopup->moveTo(QCursor::pos() - offset, false,
+                      BaseWindow::BoundsChecker::CursorPosition);
     userPopup->show();
 }
 
@@ -2689,7 +2696,9 @@ bool ChannelView::mayContainMessage(const MessagePtr &message)
         case Channel::Type::Twitch:
         case Channel::Type::TwitchWatching:
         case Channel::Type::Irc:
-            return this->channel()->getName() == message->channelName;
+            // XXX: system messages may not have the channel set
+            return message->flags.has(MessageFlag::System) ||
+                   this->channel()->getName() == message->channelName;
         case Channel::Type::TwitchWhispers:
             return message->flags.has(MessageFlag::Whisper);
         case Channel::Type::TwitchMentions:
