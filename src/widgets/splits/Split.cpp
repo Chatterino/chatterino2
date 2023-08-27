@@ -1122,7 +1122,8 @@ void Split::showViewerList()
     viewerDock->resize(
         0.5 * this->width(),
         this->height() - this->header_->height() - this->input_->height());
-    viewerDock->move(0, this->header_->height());
+    moveWindowTo(viewerDock, {0, this->header_->height()},
+                 BoundsChecking::DesiredPosition);
 
     auto multiWidget = new QWidget(viewerDock);
     auto *dockVbox = new QVBoxLayout();
