@@ -96,6 +96,8 @@ OverlayWindow::OverlayWindow(IndirectChannel channel, Split *split)
     , channelView_(nullptr, split)
     , interactAnimation_(this, "interactionProgress"_ba)
 {
+    this->setWindowTitle(u"Chatterino - Overlay"_s);
+
     auto *grid = new QGridLayout(this);
     grid->addWidget(&this->channelView_, 0, 0);
     grid->addWidget(new Grippy(this), 0, 0, Qt::AlignBottom | Qt::AlignRight);
