@@ -75,7 +75,7 @@ void triggerFirstActivation(QWidget *parent)
                                  QKeySequence::PortableText)
             .toString(QKeySequence::PortableText);
     welcomeText +=
-        u"By default the overlay is interactive. To click through the overlay, press %1 (customizable in the settings)."_s
+        u"By default the overlay is interactive. To toggle the click-through mode, press %1 (customizable in the settings)."_s
             .arg(actualShortcut);
 #endif
 
