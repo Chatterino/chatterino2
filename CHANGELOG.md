@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
+- Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 
 ## 2.4.5
 
