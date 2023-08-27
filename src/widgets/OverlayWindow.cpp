@@ -94,7 +94,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel, Split *split)
               Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)
     , channel_(std::move(channel))
     , channelView_(nullptr, split)
-    , interactAnimation_(this, QByteArrayLiteral("interactionProgress"))
+    , interactAnimation_(this, "interactionProgress"_ba)
 {
     auto *grid = new QGridLayout(this);
     grid->addWidget(&this->channelView_, 0, 0);
