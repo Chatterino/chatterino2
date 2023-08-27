@@ -33,6 +33,7 @@ inline QDebug operator<<(QDebug dbg, const ActionUser &user)
 }
 
 struct PubSubAction {
+    PubSubAction() = default;
     PubSubAction(const QJsonObject &data, const QString &_roomID);
     ActionUser source;
 

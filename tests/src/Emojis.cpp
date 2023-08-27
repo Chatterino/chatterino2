@@ -17,7 +17,7 @@ TEST(Emojis, ShortcodeParsing)
         QString expectedOutput;
     };
 
-    std::vector<TestCase> tests{
+    const std::vector<TestCase> tests{
         {
             // input
             "foo :penguin: bar",
