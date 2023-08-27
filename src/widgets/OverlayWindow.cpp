@@ -11,7 +11,6 @@
 
 #include <QBoxLayout>
 #include <QCursor>
-#include <qgraphicseffect.h>
 #include <QGraphicsEffect>
 #include <QGridLayout>
 #include <QKeySequence>
