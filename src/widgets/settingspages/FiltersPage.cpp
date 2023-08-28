@@ -44,9 +44,8 @@ FiltersPage::FiltersPage()
         view->getTableView()->setColumnWidth(2, 125);
     });
 
-    view->addButtonPressed.connect([] {
-        ChannelFilterEditorDialog d(
-            static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
+    view->addButtonPressed.connect([this] {
+        ChannelFilterEditorDialog d(this->window());
         if (d.exec() == QDialog::Accepted)
         {
             getSettings()->filterRecords.append(
