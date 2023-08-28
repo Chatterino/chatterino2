@@ -6,6 +6,7 @@
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 - Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
+- Dev: Do a pretty major refactor of the Settings classes. List settings (e.g. highlights) are most heavily modified, and should have an extra eye kept on them. (#4775)
 
 ## 2.4.5
 
