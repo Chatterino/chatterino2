@@ -503,14 +503,8 @@ void BaseWindow::leaveEvent(QEvent *)
     TooltipWidget::instance()->hide();
 }
 
-void BaseWindow::moveTo(QPoint point, bool offset, BoundsChecker boundsChecker)
+void BaseWindow::moveTo(QPoint point, BoundsChecker boundsChecker)
 {
-    if (offset)
-    {
-        point.rx() += 16;
-        point.ry() += 16;
-    }
-
     switch (boundsChecker)
     {
         case BoundsChecker::Off: {

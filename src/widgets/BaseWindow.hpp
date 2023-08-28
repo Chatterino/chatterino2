@@ -65,7 +65,7 @@ public:
     void setActionOnFocusLoss(ActionOnFocusLoss value);
     ActionOnFocusLoss getActionOnFocusLoss() const;
 
-    void moveTo(QPoint point, bool offset, BoundsChecker boundsChecker);
+    void moveTo(QPoint point, BoundsChecker boundsChecker);
 
     float scale() const override;
     float qtFontScale() const;

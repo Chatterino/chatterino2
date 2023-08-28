@@ -955,7 +955,7 @@ void SplitHeader::enterEvent(QEvent *event)
         auto pos = this->mapToGlobal(this->rect().bottomLeft()) +
                    QPoint((this->width() - tooltip->width()) / 2, 1);
 
-        tooltip->moveTo(pos, false, BaseWindow::BoundsChecker::CursorPosition);
+        tooltip->moveTo(pos, BaseWindow::BoundsChecker::CursorPosition);
         tooltip->show();
     }
 
