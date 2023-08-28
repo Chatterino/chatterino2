@@ -1,5 +1,4 @@
 #include "Application.hpp"
-#include "BaseSettings.hpp"
 #include "common/Aliases.hpp"
 #include "common/CompletionModel.hpp"
 #include "controllers/accounts/AccountController.hpp"

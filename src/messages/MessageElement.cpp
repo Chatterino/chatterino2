@@ -806,7 +806,7 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     {
         QSize size(int(container.getScale() * 16),
                    int(container.getScale() * 16));
-        auto actions = getCSettings().moderationActions.readOnly();
+        auto actions = getSettings()->moderationActions.readOnly();
         for (const auto &action : *actions)
         {
             if (auto image = action.getImage())
