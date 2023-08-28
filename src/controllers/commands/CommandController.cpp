@@ -923,7 +923,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             static_cast<QWidget *>(&(getApp()->windows->getMainWindow())),
             currentSplit);
         userPopup->setData(userName, channel);
-        userPopup->moveTo(QCursor::pos(), false,
+        userPopup->moveTo(QCursor::pos(),
                           BaseWindow::BoundsChecker::CursorPosition);
         userPopup->show();
         return "";
