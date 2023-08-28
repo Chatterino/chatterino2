@@ -37,14 +37,15 @@ class BaseWindow : public BaseWidget
 public:
     enum Flags {
         None = 0,
-        EnableCustomFrame = 1,
-        Frameless = 2,
-        TopMost = 4,
-        DisableCustomScaling = 8,
-        FramelessDraggable = 16,
-        DontFocus = 32,
-        Dialog = 64,
-        DisableLayoutSave = 128,
+        EnableCustomFrame = 1 << 0,
+        Frameless = 1 << 1,
+        TopMost = 1 << 2,
+        DisableCustomScaling = 1 << 3,
+        FramelessDraggable = 1 << 4,
+        DontFocus = 1 << 5,
+        Dialog = 1 << 6,
+        DisableLayoutSave = 1 << 7,
+        BoundsCheckOnShow = 1 << 8,
     };
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };

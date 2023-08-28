@@ -608,6 +608,10 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
+    if (this->flags_.has(BoundsCheckOnShow))
+    {
+        this->moveTo(this->pos(), BoundsChecking::CursorPosition);
+    }
 }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
