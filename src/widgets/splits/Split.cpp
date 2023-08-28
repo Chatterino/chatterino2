@@ -1126,8 +1126,6 @@ void Split::showViewerList()
     viewerDock->resize(
         0.5 * this->width(),
         this->height() - this->header_->height() - this->input_->height());
-    moveWindowTo(viewerDock, {0, this->header_->height()},
-                 BoundsChecking::DesiredPosition);
 
     auto multiWidget = new QWidget(viewerDock);
     auto *dockVbox = new QVBoxLayout();
@@ -1389,6 +1387,9 @@ void Split::showViewerList()
     viewerDock->setFloating(true);
     viewerDock->show();
     viewerDock->activateWindow();
+    moveWindowTo(viewerDock,
+                 this->mapToGlobal(QPoint{0, this->header_->height()}),
+                 BoundsChecking::CursorPosition);
 }
 
 void Split::openSubPage()
