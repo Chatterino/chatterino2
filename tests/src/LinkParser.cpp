@@ -34,6 +34,7 @@ struct SanitizeCheck {
 TEST(LinkParser, parseDomainLinks)
 {
     const QList<SanitizeCheck> sanitizeCases = {
+        { "TW❘TCH.tv", "TW❘TCH.tv" "" }, // contains dingbat
         {"(twitch.tv/foo)", "twitch.tv", "/foo" },
         {"t🤪w🤪i🤪t🤪c🤪h🤪.tv/foo", "t🤪w🤪i🤪t🤪c🤪h🤪.tv", "/foo" },
         { "https://🏹.to/bar", "🏹.to", "/bar" },
@@ -193,7 +194,9 @@ TEST(LinkParser, doesntParseInvalidLinks)
                                 "https:/cat.com",
                                 "%%%%.com",
                                 "*.com",
-                                "t🤪w🤪i🤪t🤪c🤪h🤪.🤪t🤪v/foo"};
+                                "t🤪w🤪i🤪t🤪c🤪h🤪.🤪t🤪v/foo", // Invalid tld
+                                "https։⧸⧸TW❘TCH.tv/a⧸b" // misleading characters: "⧸" and "։"
+                                };
 
     for (const auto &input : inputs)
     {

@@ -9,8 +9,6 @@
 
 namespace {
 
-const QString urlAllowedSpecialCharacters = QStringLiteral("!#&+/:=?@-_.");
-
 QSet<QString> &tlds()
 {
     static QSet<QString> tlds = [] {
@@ -115,7 +113,7 @@ bool startsWithPort(QStringView string)
     return true;
 }
 
-// For emoji ranges see: https://unicode.org/charts/
+// For unicode ranges see: https://unicode.org/charts/
 using UnicodeRange = std::pair<ushort, ushort>;
 std::vector<UnicodeRange> emojiRanges = {
     {U'\U00002700', U'\U000027BF' }, // Dingbats
@@ -125,9 +123,15 @@ std::vector<UnicodeRange> emojiRanges = {
     {U'\U00001F90', U'\U0001F9FF' }, // Supplemental Symbols and Pictographs
 };
 
-bool isEmoji(const QChar& ch) {
+std::vector<UnicodeRange> alphaNumeric = {
+    { U'\u0041', U'\u005A' }, // Upper alphabet
+    { U'\u0061', U'\u007A' }, //Lower alphabet
+    { U'\u0030', U'\u0039' }, // Numbers
+};
+
+bool isInUnicodeRange(const QChar& ch, std::vector<UnicodeRange> ranges) {
     ushort unicodeValue = ch.unicode();
-    for (const auto& range : emojiRanges) {
+    for (const auto& range : ranges) {
         if (unicodeValue >= range.first && unicodeValue <= range.second) {
             return true;
         }
@@ -135,14 +139,15 @@ bool isEmoji(const QChar& ch) {
     return false;
 }
 
-
 // Simple sanitization method to strip characters that are not recognized by RFC 3986
 QString sanitizeUrl(const QString &unparsedString)
 {
+    const QString urlAllowedSpecialCharacters = QStringLiteral("!#&+/:=?@-_.");
+
     QString sanitizedUrl;
     for (const QChar &c : unparsedString)
     {
-        if (c.isLetterOrNumber() || isEmoji(c))
+        if (isInUnicodeRange(c, alphaNumeric) || isInUnicodeRange(c, emojiRanges))
         {
             sanitizedUrl.append(c);
             continue;
