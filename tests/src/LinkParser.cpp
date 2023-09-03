@@ -34,14 +34,16 @@ struct SanitizeCheck {
 TEST(LinkParser, parseDomainLinks)
 {
     const QList<SanitizeCheck> sanitizeCases = {
-        { "TW❘TCH.tv", "TW❘TCH.tv" "" }, // contains dingbat
-        {"(twitch.tv/foo)", "twitch.tv", "/foo" },
-        {"t🤪w🤪i🤪t🤪c🤪h🤪.tv/foo", "t🤪w🤪i🤪t🤪c🤪h🤪.tv", "/foo" },
-        { "https://🏹.to/bar", "🏹.to", "/bar" },
-        { "😀.com/baz", "😀.com", "/baz" }, // Emoticon
-        { "❀.com/baz", "❀.com", "/baz" }, // Dingbat
-        { "⛑.com/baz", "⛑.com", "/baz" }, // Misc Symbol
-        { "🍀.com/baz", "🍀.com", "/baz" }, // Pictograph
+        {"TW❘TCH.tv", "TW❘TCH.tv"
+                      ""},  // contains dingbat
+        {"(twitch.tv/foo)", "twitch.tv", "/foo"},
+        {"t🤪w🤪i🤪t🤪c🤪h🤪.tv/foo",
+         "t🤪w🤪i🤪t🤪c🤪h🤪.tv", "/foo"},
+        {"https://🏹.to/bar", "🏹.to", "/bar"},
+        {"😀.com/baz", "😀.com", "/baz"},  // Emoticon
+        {"❀.com/baz", "❀.com", "/baz"},  // Dingbat
+        {"⛑.com/baz", "⛑.com", "/baz"},  // Misc Symbol
+        {"🍀.com/baz", "🍀.com", "/baz"},  // Pictograph
     };
 
     for (auto &c : sanitizeCases)
@@ -50,7 +52,8 @@ TEST(LinkParser, parseDomainLinks)
         ASSERT_TRUE(p.result().has_value()) << c.testValue.toStdString();
         const auto &r = *p.result();
         std::ostringstream ss;
-        ss << "Expected: " << c.expectedHost.toStdString() << "\nResult: " << r.host.toString().toStdString();
+        ss << "Expected: " << c.expectedHost.toStdString()
+           << "\nResult: " << r.host.toString().toStdString();
         ASSERT_EQ(c.expectedHost, r.host) << ss.str();
         ASSERT_EQ(c.expectedRest, r.rest) << c.expectedRest.toStdString();
     }
@@ -160,43 +163,44 @@ TEST(LinkParser, doesntParseInvalidIpv4Links)
 
 TEST(LinkParser, doesntParseInvalidLinks)
 {
-    const QStringList inputs = {"h://foo.com",
-                                "spotify:1234",
-                                "ftp://chatterino.com",
-                                "ftps://chatterino.com",
-                                "spotify://chatterino.com",
-                                "httpsx://chatterino.com",
-                                "https:chatterino.com",
-                                "https:/chatterino.com",
-                                "http:/chatterino.com",
-                                "htp://chatterino.com",
-                                "/chatterino.com",
-                                "word",
-                                ".",
-                                "/",
-                                "#",
-                                ":",
-                                "?",
-                                "a",
-                                "://chatterino.com",
-                                "//chatterino.com",
-                                "http://pn.",
-                                "http://pn./",
-                                "https://pn./",
-                                "pn./",
-                                "pn.",
-                                "http/chatterino.com",
-                                "http/wiki.chatterino.com",
-                                "http:cat.com",
-                                "https:cat.com",
-                                "http:/cat.com",
-                                "http:/cat.com",
-                                "https:/cat.com",
-                                "%%%%.com",
-                                "*.com",
-                                "t🤪w🤪i🤪t🤪c🤪h🤪.🤪t🤪v/foo", // Invalid tld
-                                "https։⧸⧸TW❘TCH.tv/a⧸b" // misleading characters: "⧸" and "։"
-                                };
+    const QStringList inputs = {
+        "h://foo.com",
+        "spotify:1234",
+        "ftp://chatterino.com",
+        "ftps://chatterino.com",
+        "spotify://chatterino.com",
+        "httpsx://chatterino.com",
+        "https:chatterino.com",
+        "https:/chatterino.com",
+        "http:/chatterino.com",
+        "htp://chatterino.com",
+        "/chatterino.com",
+        "word",
+        ".",
+        "/",
+        "#",
+        ":",
+        "?",
+        "a",
+        "://chatterino.com",
+        "//chatterino.com",
+        "http://pn.",
+        "http://pn./",
+        "https://pn./",
+        "pn./",
+        "pn.",
+        "http/chatterino.com",
+        "http/wiki.chatterino.com",
+        "http:cat.com",
+        "https:cat.com",
+        "http:/cat.com",
+        "http:/cat.com",
+        "https:/cat.com",
+        "%%%%.com",
+        "*.com",
+        "t🤪w🤪i🤪t🤪c🤪h🤪.🤪t🤪v/foo",  // Invalid tld
+        "https։⧸⧸TW❘TCH.tv/a⧸b"  // misleading characters: "⧸" and "։"
+    };
 
     for (const auto &input : inputs)
     {

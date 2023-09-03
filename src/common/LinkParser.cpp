@@ -116,23 +116,26 @@ bool startsWithPort(QStringView string)
 // For unicode ranges see: https://unicode.org/charts/
 using UnicodeRange = std::pair<ushort, ushort>;
 std::vector<UnicodeRange> emojiRanges = {
-    {U'\U00002700', U'\U000027BF' }, // Dingbats
-    {U'\U00001F60', U'\U0001F64F' }, // Emoticons
-    {U'\U00002600', U'\U000026FF' }, // Miscellaneous Symbols
-    {U'\U00001F30', U'\U0001F5FF' }, // Miscellaneous Symbols and Pictographs
-    {U'\U00001F90', U'\U0001F9FF' }, // Supplemental Symbols and Pictographs
+    {U'\U00002700', U'\U000027BF'},  // Dingbats
+    {U'\U00001F60', U'\U0001F64F'},  // Emoticons
+    {U'\U00002600', U'\U000026FF'},  // Miscellaneous Symbols
+    {U'\U00001F30', U'\U0001F5FF'},  // Miscellaneous Symbols and Pictographs
+    {U'\U00001F90', U'\U0001F9FF'},  // Supplemental Symbols and Pictographs
 };
 
 std::vector<UnicodeRange> alphaNumeric = {
-    { U'\u0041', U'\u005A' }, // Upper alphabet
-    { U'\u0061', U'\u007A' }, //Lower alphabet
-    { U'\u0030', U'\u0039' }, // Numbers
+    {U'\u0041', U'\u005A'},  // Upper alphabet
+    {U'\u0061', U'\u007A'},  //Lower alphabet
+    {U'\u0030', U'\u0039'},  // Numbers
 };
 
-bool isInUnicodeRange(const QChar& ch, std::vector<UnicodeRange> ranges) {
+bool isInUnicodeRange(const QChar &ch, std::vector<UnicodeRange> ranges)
+{
     ushort unicodeValue = ch.unicode();
-    for (const auto& range : ranges) {
-        if (unicodeValue >= range.first && unicodeValue <= range.second) {
+    for (const auto &range : ranges)
+    {
+        if (unicodeValue >= range.first && unicodeValue <= range.second)
+        {
             return true;
         }
     }
@@ -147,7 +150,8 @@ QString sanitizeUrl(const QString &unparsedString)
     QString sanitizedUrl;
     for (const QChar &c : unparsedString)
     {
-        if (isInUnicodeRange(c, alphaNumeric) || isInUnicodeRange(c, emojiRanges))
+        if (isInUnicodeRange(c, alphaNumeric) ||
+            isInUnicodeRange(c, emojiRanges))
         {
             sanitizedUrl.append(c);
             continue;
