@@ -115,13 +115,34 @@ bool startsWithPort(QStringView string)
     return true;
 }
 
+// For emoji ranges see: https://unicode.org/charts/
+using UnicodeRange = std::pair<ushort, ushort>;
+std::vector<UnicodeRange> emojiRanges = {
+    {U'\U00002700', U'\U000027BF' }, // Dingbats
+    {U'\U00001F60', U'\U0001F64F' }, // Emoticons
+    {U'\U00002600', U'\U000026FF' }, // Miscellaneous Symbols
+    {U'\U00001F30', U'\U0001F5FF' }, // Miscellaneous Symbols and Pictographs
+    {U'\U00001F90', U'\U0001F9FF' }, // Supplemental Symbols and Pictographs
+};
+
+bool isEmoji(const QChar& ch) {
+    ushort unicodeValue = ch.unicode();
+    for (const auto& range : emojiRanges) {
+        if (unicodeValue >= range.first && unicodeValue <= range.second) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 // Simple sanitization method to strip characters that are not recognized by RFC 3986
 QString sanitizeUrl(const QString &unparsedString)
 {
     QString sanitizedUrl;
     for (const QChar &c : unparsedString)
     {
-        if (c.isLetterOrNumber())
+        if (c.isLetterOrNumber() || isEmoji(c))
         {
             sanitizedUrl.append(c);
             continue;

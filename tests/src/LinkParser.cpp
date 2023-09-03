@@ -34,14 +34,19 @@ struct SanitizeCheck {
 TEST(LinkParser, parseDomainLinks)
 {
     const QList<SanitizeCheck> sanitizeCases = {
-        {"(twitch.tv/foo)", "twitch.tv", "/foo"}};
+        {"(twitch.tv/foo)", "twitch.tv", "/foo" },
+        {"t🤪w🤪i🤪t🤪c🤪h🤪.tv/foo", "t🤪w🤪i🤪t🤪c🤪h🤪.tv", "/foo" },
+        { "https://🏹.to/bar", "🏹.to", "/bar" }
+    };
 
     for (auto &c : sanitizeCases)
     {
         LinkParser p(c.testValue);
         ASSERT_TRUE(p.result().has_value()) << c.testValue.toStdString();
         const auto &r = *p.result();
-        ASSERT_EQ(c.expectedHost, r.host) << c.expectedHost.toStdString();
+        std::ostringstream ss;
+        ss << "Expected: " << c.expectedHost.toStdString() << "\nResult: " << r.host.toString().toStdString();
+        ASSERT_EQ(c.expectedHost, r.host) << ss.str();
         ASSERT_EQ(c.expectedRest, r.rest) << c.expectedRest.toStdString();
     }
 
@@ -183,7 +188,8 @@ TEST(LinkParser, doesntParseInvalidLinks)
                                 "http:/cat.com",
                                 "https:/cat.com",
                                 "%%%%.com",
-                                "*.com"};
+                                "*.com",
+                                "t🤪w🤪i🤪t🤪c🤪h🤪.🤪t🤪v/foo"};
 
     for (const auto &input : inputs)
     {
