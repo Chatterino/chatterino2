@@ -36,7 +36,11 @@ TEST(LinkParser, parseDomainLinks)
     const QList<SanitizeCheck> sanitizeCases = {
         {"(twitch.tv/foo)", "twitch.tv", "/foo" },
         {"t🤪w🤪i🤪t🤪c🤪h🤪.tv/foo", "t🤪w🤪i🤪t🤪c🤪h🤪.tv", "/foo" },
-        { "https://🏹.to/bar", "🏹.to", "/bar" }
+        { "https://🏹.to/bar", "🏹.to", "/bar" },
+        { "😀.com/baz", "😀.com", "/baz" }, // Emoticon
+        { "❀.com/baz", "❀.com", "/baz" }, // Dingbat
+        { "⛑.com/baz", "⛑.com", "/baz" }, // Misc Symbol
+        { "🍀.com/baz", "🍀.com", "/baz" }, // Pictograph
     };
 
     for (auto &c : sanitizeCases)
