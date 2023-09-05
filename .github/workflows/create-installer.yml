@@ -19,7 +19,7 @@ jobs:
     env:
       VARIANT_SUFFIX: ${{ startsWith(matrix.qt-version, '6.') && '.EXPERIMENTAL-Qt6' || '' }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # allows for tags access
 
