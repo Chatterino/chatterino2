@@ -835,7 +835,7 @@ void TwitchMessageBuilder::appendUsername()
 void TwitchMessageBuilder::runIgnoreReplaces(
     std::vector<TwitchEmoteOccurrence> &twitchEmotes)
 {
-    auto phrases = getCSettings().ignoredMessages.readOnly();
+    auto phrases = getSettings()->ignoredMessages.readOnly();
     auto removeEmotesInRange = [](int pos, int len,
                                   auto &twitchEmotes) mutable {
         auto it = std::partition(

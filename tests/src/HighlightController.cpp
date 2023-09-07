@@ -1,6 +1,5 @@
 #include "controllers/highlights/HighlightController.hpp"
 
-#include "BaseSettings.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs

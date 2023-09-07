@@ -2,6 +2,13 @@
 
 ## Unversioned
 
+- Bugfix: Fixed a data race when disconnecting from Twitch PubSub. (#4771)
+- Bugfix: Fixed `/shoutout` command not working with usernames starting with @'s (e.g. `/shoutout @forsen`). (#4800)
+- Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
+- Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
+- Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
+- Dev: Do a pretty major refactor of the Settings classes. List settings (e.g. highlights) are most heavily modified, and should have an extra eye kept on them. (#4775)
+
 ## 2.4.5
 
 - Major: AutoMod term management messages (e.g. testaccount added "noob" as a blocked term on AutoMod.) are now hidden in Streamer Mode if you have the "Hide moderation actions" setting enabled. (#4758)
