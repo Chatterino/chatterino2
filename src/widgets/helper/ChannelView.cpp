@@ -229,8 +229,15 @@ void ChannelView::initializeLayout()
 void ChannelView::initializeScrollbar()
 {
     this->scrollBar_->getCurrentValueChanged().connect([this] {
-        this->performLayout(true);
-        this->queueUpdate();
+        if (this->isVisible() || !getSettings()->lazyChannelLayout)
+        {
+            this->performLayout(true);
+            this->queueUpdate();
+        }
+        else
+        {
+            this->layoutQueued_ = true;
+        }
     });
 }
 
@@ -922,6 +929,11 @@ void ChannelView::messageAppended(MessagePtr &message,
         else
         {
             this->scrollBar_->offsetMinimum(1);
+            if (this->showingLatestMessages_ && !this->isVisible() &&
+                getSettings()->lazyChannelLayout)
+            {
+                this->scrollBar_->scrollToBottom(false);
+            }
             this->selection_.shiftMessageIndex(1);
         }
     }
