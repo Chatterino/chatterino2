@@ -171,6 +171,8 @@ public:
     BoolSetting useCustomFfzVipBadges = {
         "/appearance/badges/useCustomFfzVipBadges", true};
     BoolSetting showBadgesSevenTV = {"/appearance/badges/seventv", true};
+    BoolSetting lazyChannelLayout = {"/appearance/x-7tv/lazyChannelLayout",
+                                     false};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",

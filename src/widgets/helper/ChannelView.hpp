@@ -181,6 +181,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 
     void hideEvent(QHideEvent *) override;
+    void showEvent(QShowEvent *event) override;
 
     void handleLinkClick(QMouseEvent *event, const Link &link,
                          MessageLayout *layout);
@@ -200,11 +201,12 @@ private:
     void messageReplaced(size_t index, MessagePtr &replacement);
     void messagesUpdated();
 
-    void performLayout(bool causedByScrollbar = false);
+    void performLayout(bool causedByScrollbar = false,
+                       bool causedByShow = false);
     void layoutVisibleMessages(
         const LimitedQueueSnapshot<MessageLayoutPtr> &messages);
     void updateScrollbar(const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
-                         bool causedByScrollbar);
+                         bool causedByScrollbar, bool causedByShow);
 
     void drawMessages(QPainter &painter);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
