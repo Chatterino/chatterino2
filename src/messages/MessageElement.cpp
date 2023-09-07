@@ -674,8 +674,17 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
             auto &parsedWord = parsedWords[0];
             if (parsedWord.type() == typeid(QString))
             {
-                currentText += metrics.elidedText(word.text, Qt::ElideRight,
-                                                  container.remainingWidth());
+                if (!currentText.isEmpty())
+                {
+                    currentText += ' ';
+                }
+                currentText += word.text;
+                currentText = metrics.elidedText(currentText, Qt::ElideRight,
+                                                 container.remainingWidth());
+                if (currentText.endsWith(QStringLiteral("...")))
+                {
+                    break;
+                }
             }
             else if (parsedWord.type() == typeid(EmotePtr))
             {
