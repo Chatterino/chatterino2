@@ -679,9 +679,10 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                     currentText += ' ';
                 }
                 currentText += word.text;
+                QString prev = currentText;  // only increments the ref-count
                 currentText = metrics.elidedText(currentText, Qt::ElideRight,
                                                  container.remainingWidth());
-                if (currentText.endsWith(QStringLiteral("...")))
+                if (currentText != prev)
                 {
                     break;
                 }
