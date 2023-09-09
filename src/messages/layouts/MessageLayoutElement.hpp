@@ -3,7 +3,6 @@
 #include "common/FlagsEnum.hpp"
 #include "messages/Link.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QPen>
 #include <QPoint>
@@ -23,11 +22,17 @@ enum class FontStyle : uint8_t;
 enum class MessageElementFlag : int64_t;
 struct MessageColors;
 
-class MessageLayoutElement : boost::noncopyable
+class MessageLayoutElement
 {
 public:
     MessageLayoutElement(MessageElement &creator_, const QSize &size);
     virtual ~MessageLayoutElement();
+
+    MessageLayoutElement(const MessageLayoutElement &) = delete;
+    MessageLayoutElement &operator=(const MessageLayoutElement &) = delete;
+
+    MessageLayoutElement(MessageLayoutElement &&) = delete;
+    MessageLayoutElement &operator=(MessageLayoutElement &&) = delete;
 
     bool reversedNeutral = false;
 

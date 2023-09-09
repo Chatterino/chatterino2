@@ -503,14 +503,8 @@ void BaseWindow::leaveEvent(QEvent *)
     TooltipWidget::instance()->hide();
 }
 
-void BaseWindow::moveTo(QPoint point, bool offset, BoundsChecker boundsChecker)
+void BaseWindow::moveTo(QPoint point, BoundsChecker boundsChecker)
 {
-    if (offset)
-    {
-        point.rx() += 16;
-        point.ry() += 16;
-    }
-
     switch (boundsChecker)
     {
         case BoundsChecker::Off: {
@@ -710,7 +704,7 @@ void BaseWindow::updateScale()
     auto scale =
         this->nativeScale_ * (this->flags_.has(DisableCustomScaling)
                                   ? 1
-                                  : getABSettings()->getClampedUiScale());
+                                  : getSettings()->getClampedUiScale());
 
     this->setScale(scale);
 

@@ -17,8 +17,8 @@ public:
 
 private:
     QNetworkAccessManager *manager_;
-    QNetworkReply *reply_;
-    QFile *file_;
+    QNetworkReply *reply_{};
+    QFile *file_{};
 
 private slots:
     void onDownloadProgress(qint64, qint64);

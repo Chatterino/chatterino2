@@ -121,7 +121,7 @@ public:
 
         Type type_;
         Split *split_;
-        Node *preferedFocusTarget_;
+        Node *preferedFocusTarget_{};
         Node *parent_;
         QRectF geometry_;
         qreal flexH_ = 1;
@@ -158,7 +158,7 @@ private:
     {
     public:
         SplitContainer *parent;
-        Node *node;
+        Node *node{};
 
         void setVertical(bool isVertical);
         ResizeHandle(SplitContainer *_parent = nullptr);
@@ -173,7 +173,7 @@ private:
     private:
         void resetFlex();
 
-        bool vertical_;
+        bool vertical_{};
         bool isMouseDown_ = false;
     };
 
