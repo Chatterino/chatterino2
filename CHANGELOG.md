@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Bugfix: Fixed a performance issue when displaying replies to certain messages. (#4807)
 - Bugfix: Fixed a data race when disconnecting from Twitch PubSub. (#4771)
 - Bugfix: Fixed `/shoutout` command not working with usernames starting with @'s (e.g. `/shoutout @forsen`). (#4800)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
