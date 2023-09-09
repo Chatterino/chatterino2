@@ -126,50 +126,41 @@ void Helix::getUserById(QString userId,
         failureCallback);
 }
 
-void Helix::fetchUsersFollows(
-    QString fromId, QString toId,
-    ResultCallback<HelixUsersFollowsResponse> successCallback,
-    HelixFailureCallback failureCallback)
+void Helix::getChannelFollowers(
+    QString broadcasterID,
+    ResultCallback<HelixGetChannelFollowersResponse> successCallback,
+    std::function<void(QString)> failureCallback)
 {
-    assert(!fromId.isEmpty() || !toId.isEmpty());
+    assert(!broadcasterID.isEmpty());
 
     QUrlQuery urlQuery;
-
-    if (!fromId.isEmpty())
-    {
-        urlQuery.addQueryItem("from_id", fromId);
-    }
-
-    if (!toId.isEmpty())
-    {
-        urlQuery.addQueryItem("to_id", toId);
-    }
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
 
     // TODO: set on success and on error
-    this->makeGet("users/follows", urlQuery)
+    this->makeGet("channels/followers", urlQuery)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             auto root = result.parseJson();
             if (root.empty())
             {
-                failureCallback();
+                failureCallback("Bad JSON response");
                 return Failure;
             }
-            successCallback(HelixUsersFollowsResponse(root));
+            successCallback(HelixGetChannelFollowersResponse(root));
             return Success;
         })
-        .onError([failureCallback](auto /*result*/) {
-            // TODO: make better xd
-            failureCallback();
+        .onError([failureCallback](auto result) {
+            auto root = result.parseJson();
+            if (root.empty())
+            {
+                failureCallback("Unknown error");
+                return;
+            }
+
+            // Forward "message" from Twitch
+            HelixError error(root);
+            failureCallback(error.message);
         })
         .execute();
-}
-
-void Helix::getUserFollowers(
-    QString userId, ResultCallback<HelixUsersFollowsResponse> successCallback,
-    HelixFailureCallback failureCallback)
-{
-    this->fetchUsersFollows("", std::move(userId), std::move(successCallback),
-                            std::move(failureCallback));
 }
 
 void Helix::fetchStreams(
