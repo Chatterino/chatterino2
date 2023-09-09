@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/noncopyable.hpp>
 #include <QDateTime>
 #include <QFile>
 #include <QString>
@@ -13,13 +12,20 @@ class Logging;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 
-class LoggingChannel : boost::noncopyable
+class LoggingChannel
 {
     explicit LoggingChannel(const QString &_channelName,
                             const QString &platform);
 
 public:
     ~LoggingChannel();
+
+    LoggingChannel(const LoggingChannel &) = delete;
+    LoggingChannel &operator=(const LoggingChannel &) = delete;
+
+    LoggingChannel(LoggingChannel &&) = delete;
+    LoggingChannel &operator=(LoggingChannel &&) = delete;
+
     void addMessage(MessagePtr message);
 
 private:
