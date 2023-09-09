@@ -9,6 +9,7 @@
 - Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
 - Dev: Do a pretty major refactor of the Settings classes. List settings (e.g. highlights) are most heavily modified, and should have an extra eye kept on them. (#4775)
 - Dev: Remove `boost::noncopyable` use & `boost_random` dependency. (#4776)
+- Dev: Fix clang-tidy `cppcoreguidelines-pro-type-member-init` warnings. (#4426)
 
 ## 2.4.5
 
