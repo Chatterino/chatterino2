@@ -178,13 +178,12 @@ void HighlightModel::afterInit()
     this->insertCustomRow(firstMessageRow,
                           HighlightRowIndexes::FirstMessageRow);
 
-    // Highlight settings for elevated messages
+    // Highlight settings for hype chats
     std::vector<QStandardItem *> elevatedMessageRow = this->createRow();
     setBoolItem(elevatedMessageRow[Column::Pattern],
                 getSettings()->enableElevatedMessageHighlight.getValue(), true,
                 false);
-    elevatedMessageRow[Column::Pattern]->setData("Elevated Messages",
-                                                 Qt::DisplayRole);
+    elevatedMessageRow[Column::Pattern]->setData("Hype Chats", Qt::DisplayRole);
     elevatedMessageRow[Column::ShowInMentions]->setFlags({});
     //    setBoolItem(elevatedMessageRow[Column::FlashTaskbar],
     //                getSettings()->enableElevatedMessageHighlightTaskbar.getValue(),
@@ -210,7 +209,7 @@ void HighlightModel::afterInit()
     std::vector<QStandardItem *> threadMessageRow = this->createRow();
     setBoolItem(threadMessageRow[Column::Pattern],
                 getSettings()->enableThreadHighlight.getValue(), true, false);
-    threadMessageRow[Column::Pattern]->setData("Participated Reply Threads",
+    threadMessageRow[Column::Pattern]->setData("Subscribed Reply Threads",
                                                Qt::DisplayRole);
     setBoolItem(threadMessageRow[Column::ShowInMentions],
                 getSettings()->showThreadHighlightInMentions.getValue(), true,

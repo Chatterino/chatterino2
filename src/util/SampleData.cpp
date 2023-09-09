@@ -107,8 +107,14 @@ const QStringList &getSampleMiscMessages()
         // mod announcement
         R"(@badge-info=subscriber/47;badges=broadcaster/1,subscriber/3012,twitchconAmsterdam2020/1;color=#FF0000;display-name=Supinic;emotes=;flags=;id=8c26e1ab-b50c-4d9d-bc11-3fd57a941d90;login=supinic;mod=0;msg-id=announcement;msg-param-color=PRIMARY;room-id=31400525;subscriber=1;system-msg=;tmi-sent-ts=1648762219962;user-id=31400525;user-type= :tmi.twitch.tv USERNOTICE #supinic :mm test lol)",
 
-        // Elevated Message (Paid option for keeping a message in chat longer)
+        // Hype Chat (Paid option for keeping a message in chat longer)
+        // no level
         R"(@badge-info=subscriber/3;badges=subscriber/0,bits-charity/1;color=#0000FF;display-name=SnoopyTheBot;emotes=;first-msg=0;flags=;id=8779a9e5-cf1b-47b3-b9fe-67a5b1b605f6;mod=0;pinned-chat-paid-amount=500;pinned-chat-paid-canonical-amount=5;pinned-chat-paid-currency=USD;pinned-chat-paid-exponent=2;returning-chatter=0;room-id=36340781;subscriber=1;tmi-sent-ts=1664505974154;turbo=0;user-id=136881249;user-type= :snoopythebot!snoopythebot@snoopythebot.tmi.twitch.tv PRIVMSG #pajlada :-$5)",
+        // level 1
+        R"(@pinned-chat-paid-level=ONE;mod=0;flags=;pinned-chat-paid-amount=1400;pinned-chat-paid-exponent=2;tmi-sent-ts=1687970631828;subscriber=1;user-type=;color=#9DA364;emotes=;badges=predictions/blue-1,subscriber/60,twitchconAmsterdam2020/1;pinned-chat-paid-canonical-amount=1400;turbo=0;user-id=26753388;id=e6681ba0-cdc6-4482-93a3-515b74361e8b;room-id=36340781;first-msg=0;returning-chatter=0;pinned-chat-paid-currency=NOK;pinned-chat-paid-is-system-message=0;badge-info=predictions/Day\s53/53\sforsenSmug,subscriber/67;display-name=matrHS :matrhs!matrhs@matrhs.tmi.twitch.tv PRIVMSG #pajlada :Title: Beating the record. but who is recordingLOL)",
+        R"(@flags=;pinned-chat-paid-amount=8761;turbo=0;user-id=35669184;pinned-chat-paid-level=ONE;user-type=;pinned-chat-paid-canonical-amount=8761;badge-info=subscriber/2;badges=subscriber/2,sub-gifter/1;emotes=;pinned-chat-paid-exponent=2;subscriber=1;mod=0;room-id=36340781;returning-chatter=0;id=289b614d-1837-4cff-ac22-ce33a9735323;first-msg=0;tmi-sent-ts=1687631719188;color=#00FF7F;pinned-chat-paid-currency=RUB;display-name=Danis;pinned-chat-paid-is-system-message=0 :danis!danis@danis.tmi.twitch.tv PRIVMSG #pajlada :-1 lulw)",
+        // level 2
+        R"(@room-id=36340781;tmi-sent-ts=1687970634371;flags=;id=39a80a3d-c16e-420f-9bbb-faba4976a3bb;badges=subscriber/6,premium/1;emotes=;display-name=rickharrisoncoc;pinned-chat-paid-level=TWO;turbo=0;pinned-chat-paid-amount=500;pinned-chat-paid-is-system-message=0;color=#FF69B4;subscriber=1;user-type=;first-msg=0;pinned-chat-paid-currency=USD;pinned-chat-paid-canonical-amount=500;user-id=518404689;badge-info=subscriber/10;pinned-chat-paid-exponent=2;returning-chatter=0;mod=0 :rickharrisoncoc!rickharrisoncoc@rickharrisoncoc.tmi.twitch.tv PRIVMSG #pajlada :forsen please read my super chat. Please.)",
     };
     return list;
 }

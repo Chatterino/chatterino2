@@ -27,8 +27,6 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     this->setAttribute(Qt::WA_TranslucentBackground);
     this->setWindowFlag(Qt::WindowStaysOnTopHint, true);
 
-    this->setStayInScreenRect(true);
-
     // Default to using vertical layout
     this->initializeVLayout();
     this->setLayout(this->vLayout_);

@@ -37,10 +37,6 @@
 
 #include <cmath>
 
-#ifdef USEWEBENGINE
-#    include "widgets/StreamView.hpp"
-#endif
-
 namespace {
 
 using namespace chatterino;
@@ -319,7 +315,7 @@ void SplitHeader::initializeLayout()
                     }
                 });
         }),
-        // viewer list
+        // chatter list
         this->viewersButton_ = makeWidget<Button>([&](auto w) {
             QObject::connect(w, &Button::leftClicked, this, [this]() {
                 this->split_->showViewerList();
@@ -383,11 +379,6 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         "Set filters", this->split_, &Split::setFiltersDialog,
         h->getDisplaySequence(HotkeyCategory::Split, "pickFilters"));
     menu->addSeparator();
-#ifdef USEWEBENGINE
-    this->dropdownMenu.addAction(
-        "Start watching", this->split_, &Split::startWatching;
-        h->getDisplaySequence(HotkeyCategory::Split, "startWatching"));
-#endif
 
     auto *twitchChannel =
         dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
@@ -397,10 +388,10 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         menu->addAction(
             OPEN_IN_BROWSER, this->split_, &Split::openInBrowser,
             h->getDisplaySequence(HotkeyCategory::Split, "openInBrowser"));
-#ifndef USEWEBENGINE
         menu->addAction(OPEN_PLAYER_IN_BROWSER, this->split_,
-                        &Split::openBrowserPlayer);
-#endif
+                        &Split::openBrowserPlayer,
+                        h->getDisplaySequence(HotkeyCategory::Split,
+                                              "openPlayerInBrowser"));
         menu->addAction(
             OPEN_IN_STREAMLINK, this->split_, &Split::openInStreamlink,
             h->getDisplaySequence(HotkeyCategory::Split, "openInStreamlink"));
@@ -516,7 +507,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     if (twitchChannel)
     {
         moreMenu->addAction(
-            "Show viewer list", this->split_, &Split::showViewerList,
+            "Show chatter list", this->split_, &Split::showViewerList,
             h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"));
 
         moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
@@ -740,7 +731,7 @@ void SplitHeader::handleChannelChanged()
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         this->channelConnections_.managedConnect(
-            twitchChannel->liveStatusChanged, [this]() {
+            twitchChannel->streamStatusChanged, [this]() {
                 this->updateChannelText();
             });
     }
@@ -956,10 +947,6 @@ void SplitHeader::enterEvent(QEvent *event)
     if (!this->tooltipText_.isEmpty())
     {
         auto *channel = this->split_->getChannel().get();
-        if (channel->getType() == Channel::Type::Twitch)
-        {
-            dynamic_cast<TwitchChannel *>(channel)->refreshTitle();
-        }
 
         auto *tooltip = TooltipWidget::instance();
         tooltip->setOne({nullptr, this->tooltipText_});
@@ -968,7 +955,7 @@ void SplitHeader::enterEvent(QEvent *event)
         auto pos = this->mapToGlobal(this->rect().bottomLeft()) +
                    QPoint((this->width() - tooltip->width()) / 2, 1);
 
-        tooltip->moveTo(this, pos, false);
+        tooltip->moveTo(pos, BaseWindow::BoundsChecker::CursorPosition);
         tooltip->show();
     }
 

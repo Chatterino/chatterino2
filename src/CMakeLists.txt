@@ -1,12 +1,14 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
+set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
+
+# registers the native messageing host
+option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
 
 set(SOURCE_FILES
         Application.cpp
         Application.hpp
-        BaseSettings.cpp
-        BaseSettings.hpp
         BrowserExtension.cpp
         BrowserExtension.hpp
         RunGui.cpp
@@ -32,6 +34,7 @@ set(SOURCE_FILES
         common/Env.hpp
         common/LinkParser.cpp
         common/LinkParser.hpp
+        common/Literals.hpp
         common/Modes.cpp
         common/Modes.hpp
         common/NetworkCommon.cpp
@@ -46,8 +49,6 @@ set(SOURCE_FILES
         common/NetworkResult.hpp
         common/QLogging.cpp
         common/QLogging.hpp
-        common/Version.cpp
-        common/Version.hpp
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
 
@@ -60,10 +61,14 @@ set(SOURCE_FILES
         controllers/accounts/AccountModel.cpp
         controllers/accounts/AccountModel.hpp
 
+        controllers/commands/builtin/chatterino/Debugging.cpp
+        controllers/commands/builtin/chatterino/Debugging.hpp
         controllers/commands/builtin/twitch/ChatSettings.cpp
         controllers/commands/builtin/twitch/ChatSettings.hpp
         controllers/commands/builtin/twitch/ShieldMode.cpp
         controllers/commands/builtin/twitch/ShieldMode.hpp
+        controllers/commands/builtin/twitch/Shoutout.cpp
+        controllers/commands/builtin/twitch/Shoutout.hpp
         controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
@@ -163,12 +168,15 @@ set(SOURCE_FILES
         controllers/plugins/LuaUtilities.cpp
         controllers/plugins/LuaUtilities.hpp
 
+        controllers/sound/SoundController.cpp
+        controllers/sound/SoundController.hpp
+
+        controllers/twitch/LiveController.cpp
+        controllers/twitch/LiveController.hpp
+
         controllers/userdata/UserDataController.cpp
         controllers/userdata/UserDataController.hpp
         controllers/userdata/UserData.hpp
-
-        controllers/sound/SoundController.cpp
-        controllers/sound/SoundController.hpp
 
         debug/Benchmark.cpp
         debug/Benchmark.hpp
@@ -199,6 +207,8 @@ set(SOURCE_FILES
         messages/layouts/MessageLayout.hpp
         messages/layouts/MessageLayoutContainer.cpp
         messages/layouts/MessageLayoutContainer.hpp
+        messages/layouts/MessageLayoutContext.cpp
+        messages/layouts/MessageLayoutContext.hpp
         messages/layouts/MessageLayoutElement.cpp
         messages/layouts/MessageLayoutElement.hpp
         messages/search/AuthorPredicate.cpp
@@ -226,8 +236,6 @@ set(SOURCE_FILES
         providers/LinkResolver.hpp
         providers/NetworkConfigurationProvider.cpp
         providers/NetworkConfigurationProvider.hpp
-        providers/RecentMessagesApi.cpp
-        providers/RecentMessagesApi.hpp
 
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp
@@ -276,8 +284,16 @@ set(SOURCE_FILES
         providers/liveupdates/BasicPubSubManager.hpp
         providers/liveupdates/BasicPubSubWebsocket.hpp
 
+        providers/recentmessages/Api.cpp
+        providers/recentmessages/Api.hpp
+        providers/recentmessages/Impl.cpp
+        providers/recentmessages/Impl.hpp
+
+        providers/seventv/SeventvAPI.cpp
+        providers/seventv/SeventvAPI.hpp
         providers/seventv/SeventvBadges.cpp
         providers/seventv/SeventvBadges.hpp
+        providers/seventv/SeventvCosmetics.hpp
         providers/seventv/SeventvEmotes.cpp
         providers/seventv/SeventvEmotes.hpp
         providers/seventv/SeventvEventAPI.cpp
@@ -378,6 +394,8 @@ set(SOURCE_FILES
 
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
+        util/CancellationToken.hpp
+        util/ChannelHelpers.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
         util/ConcurrentMap.hpp
@@ -397,6 +415,8 @@ set(SOURCE_FILES
         util/IncognitoBrowser.hpp
         util/InitUpdateButton.cpp
         util/InitUpdateButton.hpp
+        util/IpcQueue.cpp
+        util/IpcQueue.hpp
         util/LayoutHelper.cpp
         util/LayoutHelper.hpp
         util/NuulsUploader.cpp
@@ -420,6 +440,12 @@ set(SOURCE_FILES
         util/TypeName.hpp
         util/WindowsHelper.cpp
         util/WindowsHelper.hpp
+        util/XDGDesktopFile.cpp
+        util/XDGDesktopFile.hpp
+        util/XDGDirectory.cpp
+        util/XDGDirectory.hpp
+        util/XDGHelper.cpp
+        util/XDGHelper.hpp
 
         util/serialize/Container.hpp
 
@@ -445,8 +471,6 @@ set(SOURCE_FILES
         widgets/Notebook.hpp
         widgets/Scrollbar.cpp
         widgets/Scrollbar.hpp
-        widgets/StreamView.cpp
-        widgets/StreamView.hpp
         widgets/TooltipEntryWidget.cpp
         widgets/TooltipEntryWidget.hpp
         widgets/TooltipWidget.cpp
@@ -706,7 +730,12 @@ if (BUILD_APP)
     else()
         add_executable(${EXECUTABLE_PROJECT} main.cpp)
     endif()
-    add_sanitizers(${EXECUTABLE_PROJECT})
+
+    if(COMMAND add_sanitizers)
+        add_sanitizers(${EXECUTABLE_PROJECT})
+    else()
+        message(WARNING "Sanitizers support is disabled")
+    endif()
 
     target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
 
@@ -790,15 +819,26 @@ set_target_properties(${LIBRARY_PROJECT}
     AUTOUIC ON
     )
 
-# Used to provide a date of build in the About page (for nightly builds). Getting the actual time of
-# compilation in CMake is a more involved, as documented in https://stackoverflow.com/q/24292898.
-# For CI runs, however, the date of build file generation should be consistent with the date of
-# compilation so this approximation is "good enough" for our purpose.
-if (DEFINED ENV{CHATTERINO_SKIP_DATE_GEN})
-    set(cmake_gen_date "1970-01-01")
-else ()
-    string(TIMESTAMP cmake_gen_date "%Y-%m-%d")
-endif ()
+# The version project has definitions about the build.
+# To avoid recompilations because of changing preprocessor definitions,
+# this is its own project.
+set(VERSION_SOURCE_FILES common/Version.cpp common/Version.hpp)
+add_library(${VERSION_PROJECT} STATIC ${VERSION_SOURCE_FILES})
+
+# source group for IDEs
+source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${VERSION_SOURCE_FILES})
+target_include_directories(${VERSION_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(${VERSION_PROJECT} PRIVATE Qt${MAJOR_QT_VERSION}::Core)
+target_compile_definitions(${VERSION_PROJECT} PRIVATE
+    CHATTERINO_GIT_HASH=\"${GIT_HASH}\"
+    CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
+    CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
+    CHATTERINO_GIT_MODIFIED=${GIT_MODIFIED}
+
+    CHATTERINO_CMAKE_GEN_DATE=\"${cmake_gen_date}\"
+)
+
+target_link_libraries(${LIBRARY_PROJECT} PRIVATE ${VERSION_PROJECT})
 
 target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO
@@ -806,18 +846,7 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     AB_CUSTOM_SETTINGS
     IRC_STATIC
     IRC_NAMESPACE=Communi
-
-    CHATTERINO_GIT_HASH=\"${GIT_HASH}\"
-    CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
-    CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
-
-    CHATTERINO_CMAKE_GEN_DATE=\"${cmake_gen_date}\"
     )
-if (GIT_MODIFIED)
-    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
-        CHATTERINO_GIT_MODIFIED
-        )
-endif ()
 if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CMAKE_BUILD
@@ -830,6 +859,9 @@ if (WIN32)
     if (BUILD_APP)
         set_target_properties(${EXECUTABLE_PROJECT} PROPERTIES WIN32_EXECUTABLE TRUE)
     endif ()
+endif ()
+if (CHATTERINO_DEBUG_NATIVE_MESSAGES)
+    target_compile_definitions(${LIBRARY_PROJECT} PRIVATE CHATTERINO_DEBUG_NM)
 endif ()
 
 if (MSVC)

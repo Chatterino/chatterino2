@@ -10,6 +10,7 @@
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
+#include "util/StreamerMode.hpp"
 
 #include <QJsonArray>
 

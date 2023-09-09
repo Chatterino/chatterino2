@@ -1,5 +1,6 @@
 #include "singletons/Settings.hpp"
 
+#include "Application.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
@@ -7,40 +8,46 @@
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/nicknames/Nickname.hpp"
+#include "util/Clamp.hpp"
 #include "util/PersistSignalVector.hpp"
 #include "util/WindowsHelper.hpp"
 
-namespace chatterino {
+#include <pajlada/signals/scoped-connection.hpp>
 
-ConcurrentSettings *concurrentInstance_{};
+namespace {
 
-ConcurrentSettings::ConcurrentSettings()
-    // NOTE: these do not get deleted
-    : highlightedMessages(*new SignalVector<HighlightPhrase>())
-    , highlightedUsers(*new SignalVector<HighlightPhrase>())
-    , highlightedBadges(*new SignalVector<HighlightBadge>())
-    , blacklistedUsers(*new SignalVector<HighlightBlacklistUser>())
-    , ignoredMessages(*new SignalVector<IgnorePhrase>())
-    , mutedChannels(*new SignalVector<QString>())
-    , filterRecords(*new SignalVector<FilterRecordPtr>())
-    , nicknames(*new SignalVector<Nickname>())
-    , moderationActions(*new SignalVector<ModerationAction>)
-    , loggedChannels(*new SignalVector<ChannelLog>)
+using namespace chatterino;
+
+template <typename T>
+void initializeSignalVector(pajlada::Signals::SignalHolder &signalHolder,
+                            ChatterinoSetting<std::vector<T>> &setting,
+                            SignalVector<T> &vec)
 {
-    persist(this->highlightedMessages, "/highlighting/highlights");
-    persist(this->blacklistedUsers, "/highlighting/blacklist");
-    persist(this->highlightedBadges, "/highlighting/badges");
-    persist(this->highlightedUsers, "/highlighting/users");
-    persist(this->ignoredMessages, "/ignore/phrases");
-    persist(this->mutedChannels, "/pings/muted");
-    persist(this->filterRecords, "/filtering/filters");
-    persist(this->nicknames, "/nicknames");
-    // tagged users?
-    persist(this->moderationActions, "/moderation/actions");
-    persist(this->loggedChannels, "/logging/channels");
+    // Fill the SignalVector up with initial values
+    for (auto &&item : setting.getValue())
+    {
+        vec.append(item);
+    }
+
+    // Set up a signal to
+    signalHolder.managedConnect(vec.delayedItemsChanged, [&] {
+        setting.setValue(vec.raw());
+    });
 }
 
-bool ConcurrentSettings::isHighlightedUser(const QString &username)
+}  // namespace
+
+namespace chatterino {
+
+std::vector<std::weak_ptr<pajlada::Settings::SettingData>> _settings;
+
+void _actuallyRegisterSetting(
+    std::weak_ptr<pajlada::Settings::SettingData> setting)
+{
+    _settings.push_back(std::move(setting));
+}
+
+bool Settings::isHighlightedUser(const QString &username)
 {
     auto items = this->highlightedUsers.readOnly();
 
@@ -53,7 +60,7 @@ bool ConcurrentSettings::isHighlightedUser(const QString &username)
     return false;
 }
 
-bool ConcurrentSettings::isBlacklistedUser(const QString &username)
+bool Settings::isBlacklistedUser(const QString &username)
 {
     auto items = this->blacklistedUsers.readOnly();
 
@@ -66,7 +73,7 @@ bool ConcurrentSettings::isBlacklistedUser(const QString &username)
     return false;
 }
 
-bool ConcurrentSettings::isMutedChannel(const QString &channelName)
+bool Settings::isMutedChannel(const QString &channelName)
 {
     auto items = this->mutedChannels.readOnly();
 
@@ -80,12 +87,27 @@ bool ConcurrentSettings::isMutedChannel(const QString &channelName)
     return false;
 }
 
-void ConcurrentSettings::mute(const QString &channelName)
+boost::optional<QString> Settings::matchNickname(const QString &usernameText)
+{
+    auto nicknames = this->nicknames.readOnly();
+
+    for (const auto &nickname : *nicknames)
+    {
+        if (auto nicknameText = nickname.match(usernameText))
+        {
+            return nicknameText;
+        }
+    }
+
+    return boost::none;
+}
+
+void Settings::mute(const QString &channelName)
 {
     mutedChannels.append(channelName);
 }
 
-void ConcurrentSettings::unmute(const QString &channelName)
+void Settings::unmute(const QString &channelName)
 {
     for (std::vector<int>::size_type i = 0; i != mutedChannels.raw().size();
          i++)
@@ -98,7 +120,7 @@ void ConcurrentSettings::unmute(const QString &channelName)
     }
 }
 
-bool ConcurrentSettings::toggleMutedChannel(const QString &channelName)
+bool Settings::toggleMutedChannel(const QString &channelName)
 {
     if (this->isMutedChannel(channelName))
     {
@@ -112,21 +134,44 @@ bool ConcurrentSettings::toggleMutedChannel(const QString &channelName)
     }
 }
 
-ConcurrentSettings &getCSettings()
-{
-    // `concurrentInstance_` gets assigned in Settings ctor.
-    assert(concurrentInstance_);
-
-    return *concurrentInstance_;
-}
-
 Settings *Settings::instance_ = nullptr;
 
 Settings::Settings(const QString &settingsDirectory)
-    : ABSettings(settingsDirectory)
 {
+    QString settingsPath = settingsDirectory + "/settings.json";
+
+    // get global instance of the settings library
+    auto settingsInstance = pajlada::Settings::SettingManager::getInstance();
+
+    settingsInstance->load(qPrintable(settingsPath));
+
+    settingsInstance->setBackupEnabled(true);
+    settingsInstance->setBackupSlots(9);
+    settingsInstance->saveMethod =
+        pajlada::Settings::SettingManager::SaveMethod::SaveOnExit;
+
+    initializeSignalVector(this->signalHolder, this->highlightedMessagesSetting,
+                           this->highlightedMessages);
+    initializeSignalVector(this->signalHolder, this->highlightedUsersSetting,
+                           this->highlightedUsers);
+    initializeSignalVector(this->signalHolder, this->highlightedBadgesSetting,
+                           this->highlightedBadges);
+    initializeSignalVector(this->signalHolder, this->blacklistedUsersSetting,
+                           this->blacklistedUsers);
+    initializeSignalVector(this->signalHolder, this->ignoredMessagesSetting,
+                           this->ignoredMessages);
+    initializeSignalVector(this->signalHolder, this->mutedChannelsSetting,
+                           this->mutedChannels);
+    initializeSignalVector(this->signalHolder, this->filterRecordsSetting,
+                           this->filterRecords);
+    initializeSignalVector(this->signalHolder, this->nicknamesSetting,
+                           this->nicknames);
+    initializeSignalVector(this->signalHolder, this->moderationActionsSetting,
+                           this->moderationActions);
+    initializeSignalVector(this->signalHolder, this->loggedChannelsSetting,
+                           this->loggedChannels);
+
     instance_ = this;
-    concurrentInstance_ = this;
 
 #ifdef USEWINSDK
     this->autorun = isRegisteredForStartup();
@@ -136,6 +181,86 @@ Settings::Settings(const QString &settingsDirectory)
         },
         false);
 #endif
+    this->enableStreamerMode.connect(
+        []() {
+            getApp()->streamerModeChanged.invoke();
+        },
+        false);
+}
+
+Settings::~Settings() = default;
+
+void Settings::saveSnapshot()
+{
+    rapidjson::Document *d = new rapidjson::Document(rapidjson::kObjectType);
+    rapidjson::Document::AllocatorType &a = d->GetAllocator();
+
+    for (const auto &weakSetting : _settings)
+    {
+        auto setting = weakSetting.lock();
+        if (!setting)
+        {
+            continue;
+        }
+
+        rapidjson::Value key(setting->getPath().c_str(), a);
+        auto curVal = setting->unmarshalJSON();
+        if (curVal == nullptr)
+        {
+            continue;
+        }
+
+        rapidjson::Value val;
+        val.CopyFrom(*curVal, a);
+        d->AddMember(key.Move(), val.Move(), a);
+    }
+
+    // log("Snapshot state: {}", rj::stringify(*d));
+
+    this->snapshot_.reset(d);
+}
+
+void Settings::restoreSnapshot()
+{
+    if (!this->snapshot_)
+    {
+        return;
+    }
+
+    const auto &snapshot = *(this->snapshot_.get());
+
+    if (!snapshot.IsObject())
+    {
+        return;
+    }
+
+    for (const auto &weakSetting : _settings)
+    {
+        auto setting = weakSetting.lock();
+        if (!setting)
+        {
+            continue;
+        }
+
+        const char *path = setting->getPath().c_str();
+
+        if (!snapshot.HasMember(path))
+        {
+            continue;
+        }
+
+        setting->marshalJSON(snapshot[path]);
+    }
+}
+
+float Settings::getClampedUiScale() const
+{
+    return clamp<float>(this->uiScale.getValue(), 0.2f, 10);
+}
+
+void Settings::setClampedUiScale(float value)
+{
+    this->uiScale.setValue(clamp<float>(value, 0.2f, 10));
 }
 
 Settings &Settings::instance()
