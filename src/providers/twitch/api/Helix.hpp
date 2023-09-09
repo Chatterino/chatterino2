@@ -323,7 +323,7 @@ struct HelixVip {
 
 struct HelixChatters {
     std::unordered_set<QString> chatters;
-    int total;
+    int total{};
     QString cursor;
 
     HelixChatters() = default;

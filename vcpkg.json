@@ -9,7 +9,6 @@
     "boost-circular-buffer",
     "boost-foreach",
     "boost-interprocess",
-    "boost-random",
     "boost-signals2",
     "boost-variant",
     "gtest",
