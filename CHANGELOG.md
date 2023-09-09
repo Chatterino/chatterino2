@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 
 ## 2.4.5
