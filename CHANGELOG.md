@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Bugfix: Fixed a performance issue when displaying replies to certain messages. (#4807)
 - Bugfix: Fixed a data race when disconnecting from Twitch PubSub. (#4771)
 - Bugfix: Fixed `/shoutout` command not working with usernames starting with @'s (e.g. `/shoutout @forsen`). (#4800)

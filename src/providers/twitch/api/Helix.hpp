@@ -45,44 +45,12 @@ struct HelixUser {
     }
 };
 
-struct HelixUsersFollowsRecord {
-    QString fromId;
-    QString fromName;
-    QString toId;
-    QString toName;
-    QString followedAt;  // date time object
-
-    HelixUsersFollowsRecord()
-        : fromId("")
-        , fromName("")
-        , toId("")
-        , toName("")
-        , followedAt("")
-    {
-    }
-
-    explicit HelixUsersFollowsRecord(QJsonObject jsonObject)
-        : fromId(jsonObject.value("from_id").toString())
-        , fromName(jsonObject.value("from_name").toString())
-        , toId(jsonObject.value("to_id").toString())
-        , toName(jsonObject.value("to_name").toString())
-        , followedAt(jsonObject.value("followed_at").toString())
-    {
-    }
-};
-
-struct HelixUsersFollowsResponse {
+struct HelixGetChannelFollowersResponse {
     int total;
-    std::vector<HelixUsersFollowsRecord> data;
-    explicit HelixUsersFollowsResponse(QJsonObject jsonObject)
+
+    explicit HelixGetChannelFollowersResponse(const QJsonObject &jsonObject)
         : total(jsonObject.value("total").toInt())
     {
-        const auto &jsonData = jsonObject.value("data").toArray();
-        std::transform(jsonData.begin(), jsonData.end(),
-                       std::back_inserter(this->data),
-                       [](const QJsonValue &record) {
-                           return HelixUsersFollowsRecord(record.toObject());
-                       });
     }
 };
 
@@ -720,6 +688,22 @@ enum class HelixGetGlobalBadgesError {
     Forwarded,
 };
 
+struct HelixError {
+    /// Text version of the HTTP error that happened (e.g. Bad Request)
+    QString error;
+    /// Number version of the HTTP error that happened (e.g. 400)
+    int status;
+    /// The error message string
+    QString message;
+
+    explicit HelixError(const QJsonObject &json)
+        : error(json["error"].toString())
+        , status(json["status"].toInt())
+        , message(json["message"].toString())
+    {
+    }
+};
+
 using HelixGetChannelBadgesError = HelixGetGlobalBadgesError;
 
 class IHelix
@@ -740,16 +724,11 @@ public:
                              ResultCallback<HelixUser> successCallback,
                              HelixFailureCallback failureCallback) = 0;
 
-    // https://dev.twitch.tv/docs/api/reference#get-users-follows
-    virtual void fetchUsersFollows(
-        QString fromId, QString toId,
-        ResultCallback<HelixUsersFollowsResponse> successCallback,
-        HelixFailureCallback failureCallback) = 0;
-
-    virtual void getUserFollowers(
-        QString userId,
-        ResultCallback<HelixUsersFollowsResponse> successCallback,
-        HelixFailureCallback failureCallback) = 0;
+    // https://dev.twitch.tv/docs/api/reference/#get-channel-followers
+    virtual void getChannelFollowers(
+        QString broadcasterID,
+        ResultCallback<HelixGetChannelFollowersResponse> successCallback,
+        std::function<void(QString)> failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#get-streams
     virtual void fetchStreams(
@@ -1064,16 +1043,11 @@ public:
     void getUserById(QString userId, ResultCallback<HelixUser> successCallback,
                      HelixFailureCallback failureCallback) final;
 
-    // https://dev.twitch.tv/docs/api/reference#get-users-follows
-    void fetchUsersFollows(
-        QString fromId, QString toId,
-        ResultCallback<HelixUsersFollowsResponse> successCallback,
-        HelixFailureCallback failureCallback) final;
-
-    void getUserFollowers(
-        QString userId,
-        ResultCallback<HelixUsersFollowsResponse> successCallback,
-        HelixFailureCallback failureCallback) final;
+    // https://dev.twitch.tv/docs/api/reference/#get-channel-followers
+    void getChannelFollowers(
+        QString broadcasterID,
+        ResultCallback<HelixGetChannelFollowersResponse> successCallback,
+        std::function<void(QString)> failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#get-streams
     void fetchStreams(QStringList userIds, QStringList userLogins,
