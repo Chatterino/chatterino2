@@ -127,7 +127,7 @@ private:
     QString roomID_;
     bool hasBits_ = false;
     QString bits;
-    int bitsLeft;
+    int bitsLeft{};
     bool bitsStacked = false;
     bool historicalMessage_ = false;
     std::shared_ptr<MessageThread> thread_;
