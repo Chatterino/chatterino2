@@ -24,7 +24,7 @@ public:
 
     void updateSize();
 
-    QWidget *page;
+    QWidget *page{};
 
     void setCustomTitle(const QString &title);
     void resetCustomTitle();

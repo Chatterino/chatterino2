@@ -71,7 +71,7 @@ private:
         struct {
             QLabel *label;
             ColorButton *color;
-        } selected;
+        } selected{};
 
         struct {
             QColorPicker *colorPicker;
@@ -82,7 +82,7 @@ private:
 
             QLabel *htmlLabel;
             QLineEdit *htmlEdit;
-        } picker;
+        } picker{};
     } ui_;
 
     enum SpinBox : size_t { RED = 0, GREEN = 1, BLUE = 2, ALPHA = 3, END };

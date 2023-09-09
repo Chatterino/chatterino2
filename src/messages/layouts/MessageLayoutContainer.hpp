@@ -90,10 +90,10 @@ struct MessageLayoutContainer {
 
 private:
     struct Line {
-        int startIndex;
-        int endIndex;
-        int startCharIndex;
-        int endCharIndex;
+        int startIndex{};
+        int endIndex{};
+        int startCharIndex{};
+        int endCharIndex{};
         QRect rect;
     };
 
