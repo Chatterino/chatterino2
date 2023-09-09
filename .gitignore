@@ -84,6 +84,7 @@ Thumbs.db
 dependencies
 .cache
 .editorconfig
+vim.log
 
 ### CMake ###
 CMakeLists.txt.user

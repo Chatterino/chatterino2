@@ -3,7 +3,6 @@
 #include "common/Aliases.hpp"
 #include "common/Common.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -26,12 +25,18 @@ namespace detail {
         Image image;
         int duration;
     };
-    class Frames : boost::noncopyable
+    class Frames
     {
     public:
         Frames();
         Frames(QVector<Frame<QPixmap>> &&frames);
         ~Frames();
+
+        Frames(const Frames &) = delete;
+        Frames &operator=(const Frames &) = delete;
+
+        Frames(Frames &&) = delete;
+        Frames &operator=(Frames &&) = delete;
 
         void clear();
         bool empty() const;
@@ -54,13 +59,19 @@ class Image;
 using ImagePtr = std::shared_ptr<Image>;
 
 /// This class is thread safe.
-class Image : public std::enable_shared_from_this<Image>, boost::noncopyable
+class Image : public std::enable_shared_from_this<Image>
 {
 public:
     // Maximum amount of RAM used by the image in bytes.
     static constexpr int maxBytesRam = 20 * 1024 * 1024;
 
     ~Image();
+
+    Image(const Image &) = delete;
+    Image &operator=(const Image &) = delete;
+
+    Image(Image &&) = delete;
+    Image &operator=(Image &&) = delete;
 
     static ImagePtr fromUrl(const Url &url, qreal scale = 1);
     static ImagePtr fromResourcePixmap(const QPixmap &pixmap, qreal scale = 1);

@@ -2,7 +2,6 @@
 
 #include "debug/AssertInGuiThread.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QStandardItemModel>
 #include <QTimer>
@@ -19,7 +18,7 @@ struct SignalVectorItemEvent {
 };
 
 template <typename T>
-class SignalVector : boost::noncopyable
+class SignalVector
 {
 public:
     pajlada::Signals::Signal<SignalVectorItemEvent<T>> itemInserted;
@@ -41,6 +40,12 @@ public:
     {
         this->itemCompare_ = std::move(compare);
     }
+
+    SignalVector(const SignalVector &) = delete;
+    SignalVector &operator=(const SignalVector &) = delete;
+
+    SignalVector(SignalVector &&) = delete;
+    SignalVector &operator=(SignalVector &&) = delete;
 
     bool isSorted() const
     {
