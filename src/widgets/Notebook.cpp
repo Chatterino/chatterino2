@@ -174,7 +174,7 @@ int Notebook::visibleIndexOf(QWidget *page) const
     }
 
     int i = 0;
-    for (auto &item : this->items_)
+    for (const auto &item : this->items_)
     {
         if (item.page == page)
         {
@@ -198,7 +198,7 @@ int Notebook::getVisibleTabCount() const
     }
 
     int i = 0;
-    for (auto &item : this->items_)
+    for (const auto &item : this->items_)
     {
         if (this->tabVisibilityFilter_(item.tab))
         {
