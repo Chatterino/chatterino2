@@ -256,8 +256,8 @@ private:
     void showReplyThreadPopup(const MessagePtr &message);
     bool canReplyToMessages() const;
 
-    QTimer *layoutCooldown_;
-    bool layoutQueued_;
+    QTimer *layoutCooldown_{};
+    bool layoutQueued_{};
 
     QTimer updateTimer_;
     bool updateQueued_ = false;
@@ -286,7 +286,7 @@ private:
     Split *split_ = nullptr;
 
     Scrollbar *scrollBar_;
-    EffectLabel *goToBottom_;
+    EffectLabel *goToBottom_{};
     bool showScrollBar_ = false;
 
     FilterSetPtr channelFilters_;

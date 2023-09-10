@@ -424,11 +424,16 @@ bool MessageLayoutContainer::atStartOfLine()
 
 bool MessageLayoutContainer::fitsInLine(int _width)
 {
-    return this->currentX_ + _width <=
-           (this->width_ - int(this->margin.left * this->scale_) -
+    return _width <= this->remainingWidth();
+}
+
+int MessageLayoutContainer::remainingWidth() const
+{
+    return (this->width_ - int(this->margin.left * this->scale_) -
             int(this->margin.right * this->scale_) -
             (this->line_ + 1 == MAX_UNCOLLAPSED_LINES ? this->dotdotdotWidth_
-                                                      : 0));
+                                                      : 0)) -
+           this->currentX_;
 }
 
 void MessageLayoutContainer::end()

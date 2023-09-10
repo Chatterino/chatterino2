@@ -27,7 +27,7 @@ protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
-    TitleBarButtonStyle style_;
+    TitleBarButtonStyle style_{};
 };
 
 }  // namespace chatterino

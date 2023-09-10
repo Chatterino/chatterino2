@@ -25,7 +25,7 @@ private:
         QVBoxLayout *vbox;
         QComboBox *selector;
         QDialogButtonBox *buttonBox;
-    } ui_;
+    } ui_{};
 
     QString channelURL_;
 };

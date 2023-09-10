@@ -66,6 +66,7 @@ struct MessageLayoutContainer {
     void breakLine();
     bool atStartOfLine();
     bool fitsInLine(int width_);
+    int remainingWidth() const;
     // this method is called when a message has an RTL word
     // we need to reorder the words to be shown properly
     // however we don't we to reorder non-text elements like badges, timestamps, username
@@ -90,10 +91,10 @@ struct MessageLayoutContainer {
 
 private:
     struct Line {
-        int startIndex;
-        int endIndex;
-        int startCharIndex;
-        int endCharIndex;
+        int startIndex{};
+        int endIndex{};
+        int startCharIndex{};
+        int endCharIndex{};
         QRect rect;
     };
 
