@@ -134,8 +134,10 @@ namespace {
 }  // namespace
 
 #ifdef Q_OS_LINUX
-FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::Dialog,
-                                                BaseWindow::EnableCustomFrame};
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{
+    BaseWindow::Dialog,
+    BaseWindow::EnableCustomFrame,
+};
 FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
     BaseWindow::Dialog, BaseWindow::EnableCustomFrame};
 #else
