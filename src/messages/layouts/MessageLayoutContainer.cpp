@@ -478,6 +478,11 @@ void MessageLayoutContainer::end()
         this->lines_.back().endIndex = this->elements_.size();
         this->lines_.back().endCharIndex = this->charIndex_;
     }
+
+    if (!this->elements_.empty())
+    {
+        this->elements_.back()->setTrailingSpace(false);
+    }
 }
 
 bool MessageLayoutContainer::canCollapse()
@@ -849,7 +854,7 @@ void MessageLayoutContainer::addSelectionText(QString &str, uint32_t from,
                 element->addCopyTextToString(str, from - index, to - index);
                 first = false;
 
-                if (index + indexCount > to)
+                if (index + indexCount >= to)
                 {
                     break;
                 }
@@ -857,7 +862,7 @@ void MessageLayoutContainer::addSelectionText(QString &str, uint32_t from,
         }
         else
         {
-            if (index + indexCount > to)
+            if (index + indexCount >= to)
             {
                 element->addCopyTextToString(str, 0, to - index);
                 break;
