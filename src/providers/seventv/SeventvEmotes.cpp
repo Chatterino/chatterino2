@@ -41,7 +41,7 @@ struct CreateEmoteResult {
     Emote emote;
     EmoteId id;
     EmoteName name;
-    bool hasImages;
+    bool hasImages{};
 };
 
 EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)

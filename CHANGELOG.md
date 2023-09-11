@@ -2,13 +2,19 @@
 
 ## Unversioned
 
+- Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
+- Bugfix: Fixed a performance issue when displaying replies to certain messages. (#4807)
 - Bugfix: Fixed a data race when disconnecting from Twitch PubSub. (#4771)
 - Bugfix: Fixed `/shoutout` command not working with usernames starting with @'s (e.g. `/shoutout @forsen`). (#4800)
 - Bugfix: Fixed Usercard popup not floating when "Automatically close user popup when it loses focus" setting is enabled. (#3511)
+- Bugfix: Fixed selection of tabs after closing a tab when using "Live Tabs Only". (#4770)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 - Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
 - Dev: Do a pretty major refactor of the Settings classes. List settings (e.g. highlights) are most heavily modified, and should have an extra eye kept on them. (#4775)
+- Dev: Remove `boost::noncopyable` use & `boost_random` dependency. (#4776)
+- Dev: Fix clang-tidy `cppcoreguidelines-pro-type-member-init` warnings. (#4426)
+- Dev: Immediate layout for invisible `ChannelView`s is skipped. (#4811)
 
 ## 2.4.5
 

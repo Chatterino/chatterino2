@@ -674,42 +674,16 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
             auto &parsedWord = parsedWords[0];
             if (parsedWord.type() == typeid(QString))
             {
-                int nextWidth =
-                    metrics.horizontalAdvance(currentText + word.text);
-
-                // see if the text fits in the current line
-                if (container.fitsInLine(nextWidth))
+                if (!currentText.isEmpty())
                 {
-                    currentText += (word.text + " ");
+                    currentText += ' ';
                 }
-                else
+                currentText += word.text;
+                QString prev = currentText;  // only increments the ref-count
+                currentText = metrics.elidedText(currentText, Qt::ElideRight,
+                                                 container.remainingWidth());
+                if (currentText != prev)
                 {
-                    // word overflows, try minimum truncation
-                    bool cutSuccess = false;
-                    for (size_t cut = 1; cut < word.text.length(); ++cut)
-                    {
-                        // Cut off n characters and append the ellipsis.
-                        // Try removing characters one by one until the word fits.
-                        QString truncatedWord =
-                            word.text.chopped(cut) + ellipsis;
-                        int newSize = metrics.horizontalAdvance(currentText +
-                                                                truncatedWord);
-                        if (container.fitsInLine(newSize))
-                        {
-                            currentText += (truncatedWord);
-
-                            cutSuccess = true;
-                            break;
-                        }
-                    }
-
-                    if (!cutSuccess)
-                    {
-                        // We weren't able to show any part of the current word, so
-                        // just append the ellipsis.
-                        currentText += ellipsis;
-                    }
-
                     break;
                 }
             }
