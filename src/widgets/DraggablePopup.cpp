@@ -22,10 +22,14 @@ namespace {
         BaseWindow::EnableCustomFrame,
     };
 #else
-    FlagsEnum<BaseWindow::Flags> popupFlags{BaseWindow::EnableCustomFrame};
+    FlagsEnum<BaseWindow::Flags> popupFlags{
+        BaseWindow::EnableCustomFrame,
+    };
     FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
-        BaseWindow::EnableCustomFrame, BaseWindow::Frameless,
-        BaseWindow::FramelessDraggable};
+        BaseWindow::EnableCustomFrame,
+        BaseWindow::Frameless,
+        BaseWindow::FramelessDraggable,
+    };
 #endif
 
 }  // namespace
