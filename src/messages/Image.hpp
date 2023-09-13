@@ -3,7 +3,6 @@
 #include "common/Aliases.hpp"
 #include "common/Common.hpp"
 
-#include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QPixmap>
