@@ -15,6 +15,7 @@
 - Dev: Remove `boost::noncopyable` use & `boost_random` dependency. (#4776)
 - Dev: Fix clang-tidy `cppcoreguidelines-pro-type-member-init` warnings. (#4426)
 - Dev: Immediate layout for invisible `ChannelView`s is skipped. (#4811)
+- Dev: Refactor `Image` & Image's `Frames`. (#4773)
 
 ## 2.4.5
 

@@ -3,7 +3,6 @@
 #include "common/Aliases.hpp"
 #include "common/Common.hpp"
 
-#include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QPixmap>
@@ -17,6 +16,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 namespace chatterino {
 namespace detail {
@@ -42,8 +42,8 @@ namespace detail {
         bool empty() const;
         bool animated() const;
         void advance();
-        boost::optional<QPixmap> current() const;
-        boost::optional<QPixmap> first() const;
+        std::optional<QPixmap> current() const;
+        std::optional<QPixmap> first() const;
 
     private:
         int64_t memoryUsage() const;
@@ -80,7 +80,7 @@ public:
     const Url &url() const;
     bool loaded() const;
     // either returns the current pixmap, or triggers loading it (lazy loading)
-    boost::optional<QPixmap> pixmapOrLoad() const;
+    std::optional<QPixmap> pixmapOrLoad() const;
     void load() const;
     qreal scale() const;
     bool isEmpty() const;
