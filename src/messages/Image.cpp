@@ -170,17 +170,23 @@ namespace detail {
         return this->items_.size() > 1;
     }
 
-    boost::optional<QPixmap> Frames::current() const
+    std::optional<QPixmap> Frames::current() const
     {
-        if (this->items_.size() == 0)
-            return boost::none;
+        if (this->items_.empty())
+        {
+            return std::nullopt;
+        }
+
         return this->items_[this->index_].image;
     }
 
-    boost::optional<QPixmap> Frames::first() const
+    std::optional<QPixmap> Frames::first() const
     {
-        if (this->items_.size() == 0)
-            return boost::none;
+        if (this->items_.empty())
+        {
+            return std::nullopt;
+        }
+
         return this->items_.front().image;
     }
 
@@ -208,7 +214,7 @@ namespace detail {
             }
         }
 
-        if (frames.size() == 0)
+        if (frames.empty())
         {
             qCDebug(chatterinoImage)
                 << "Error while reading image" << url.string << ": '"
@@ -344,10 +350,8 @@ ImagePtr Image::fromResourcePixmap(const QPixmap &pixmap, qreal scale)
         {
             return shared;
         }
-        else
-        {
-            cache.erase(it);
-        }
+
+        cache.erase(it);
     }
 
     auto newImage = ImagePtr(new Image(scale));
@@ -416,10 +420,10 @@ bool Image::loaded() const
 {
     assertInGuiThread();
 
-    return bool(this->frames_->current());
+    return this->frames_->current().has_value();
 }
 
-boost::optional<QPixmap> Image::pixmapOrLoad() const
+std::optional<QPixmap> Image::pixmapOrLoad() const
 {
     assertInGuiThread();
 
@@ -470,9 +474,12 @@ int Image::width() const
     assertInGuiThread();
 
     if (auto pixmap = this->frames_->first())
+    {
         return int(pixmap->width() * this->scale_);
-    else
-        return 16;
+    }
+
+    // No frames loaded, use our default magic width 16
+    return 16;
 }
 
 int Image::height() const
@@ -480,20 +487,26 @@ int Image::height() const
     assertInGuiThread();
 
     if (auto pixmap = this->frames_->first())
+    {
         return int(pixmap->height() * this->scale_);
-    else
-        return 16;
+    }
+
+    // No frames loaded, use our default magic height 16
+    return 16;
 }
 
 void Image::actuallyLoad()
 {
+    auto weak = weakOf(this);
     NetworkRequest(this->url().string)
         .concurrent()
         .cache()
-        .onSuccess([weak = weakOf(this)](auto result) -> Outcome {
+        .onSuccess([weak](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
+            {
                 return Failure;
+            }
 
             auto data = result.getData();
 
@@ -540,20 +553,23 @@ void Image::actuallyLoad()
 
             auto parsed = detail::readFrames(reader, shared->url());
 
-            postToThread(makeConvertCallback(parsed, [weak](auto &&frames) {
-                if (auto shared = weak.lock())
-                {
-                    shared->frames_ =
-                        std::make_unique<detail::Frames>(std::move(frames));
-                }
-            }));
+            postToThread(makeConvertCallback(
+                parsed, [weak = std::weak_ptr<Image>(shared)](auto &&frames) {
+                    if (auto shared = weak.lock())
+                    {
+                        shared->frames_ = std::make_unique<detail::Frames>(
+                            std::forward<decltype(frames)>(frames));
+                    }
+                }));
 
             return Success;
         })
-        .onError([weak = weakOf(this)](auto /*result*/) {
+        .onError([weak](auto /*result*/) {
             auto shared = weak.lock();
             if (!shared)
+            {
                 return false;
+            }
 
             // fourtf: is this the right thing to do?
             shared->empty_ = true;
