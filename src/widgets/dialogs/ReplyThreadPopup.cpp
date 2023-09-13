@@ -1,4 +1,4 @@
-#include "ReplyThreadPopup.hpp"
+#include "widgets/dialogs/ReplyThreadPopup.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
