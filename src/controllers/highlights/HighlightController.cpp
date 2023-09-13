@@ -441,7 +441,7 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
     });
 
     this->signalHolder_.managedConnect(
-        getCSettings().highlightedBadges.delayedItemsChanged,
+        getSettings()->highlightedBadges.delayedItemsChanged,
         [this, &settings] {
             qCDebug(chatterinoHighlights)
                 << "Rebuild checks because highlight badges changed";
@@ -449,14 +449,14 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
         });
 
     this->signalHolder_.managedConnect(
-        getCSettings().highlightedUsers.delayedItemsChanged, [this, &settings] {
+        getSettings()->highlightedUsers.delayedItemsChanged, [this, &settings] {
             qCDebug(chatterinoHighlights)
                 << "Rebuild checks because highlight users changed";
             this->rebuildChecks(settings);
         });
 
     this->signalHolder_.managedConnect(
-        getCSettings().highlightedMessages.delayedItemsChanged,
+        getSettings()->highlightedMessages.delayedItemsChanged,
         [this, &settings] {
             qCDebug(chatterinoHighlights)
                 << "Rebuild checks because highlight messages changed";

@@ -8,7 +8,7 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
-project(chatterino VERSION 2.4.4)
+project(chatterino VERSION 2.4.5)
 
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
@@ -115,9 +115,7 @@ endif ()
 find_package(Sanitizers QUIET)
 
 # Find boost on the system
-# `OPTIONAL_COMPONENTS random` is required for vcpkg builds to link.
-# `OPTIONAL` is required, because conan doesn't set `boost_random_FOUND`.
-find_package(Boost REQUIRED OPTIONAL_COMPONENTS random)
+find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)

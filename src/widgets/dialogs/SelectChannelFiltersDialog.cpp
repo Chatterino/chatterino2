@@ -49,7 +49,7 @@ SelectChannelFiltersDialog::SelectChannelFiltersDialog(
         (this->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
         Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
-    auto availableFilters = getCSettings().filterRecords.readOnly();
+    auto availableFilters = getSettings()->filterRecords.readOnly();
 
     if (availableFilters->size() == 0)
     {

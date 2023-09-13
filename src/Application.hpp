@@ -70,8 +70,8 @@ public:
 class Application : public IApplication
 {
     std::vector<std::unique_ptr<Singleton>> singletons_;
-    int argc_;
-    char **argv_;
+    int argc_{};
+    char **argv_{};
 
 public:
     static Application *instance;
