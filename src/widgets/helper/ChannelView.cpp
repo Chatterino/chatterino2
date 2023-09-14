@@ -434,6 +434,10 @@ void ChannelView::queueLayout()
     {
         this->layoutQueued_ = true;
     }
+}
+
+void ChannelView::showEvent(QShowEvent * /*event*/)
+{
     if (this->layoutQueued_)
     {
         this->performLayout(false, true);
