@@ -5,6 +5,7 @@ target_link_libraries(chatterino-qt-plugins PRIVATE Qt${MAJOR_QT_VERSION}::Core 
 target_compile_definitions(chatterino-qt-plugins PRIVATE QT_STATICPLUGIN)
 
 if (libavif_FOUND)
+    message(STATUS "Adding AVIF plugin")
     target_compile_definitions(chatterino-qt-plugins PRIVATE WITH_AVIF)
     target_link_libraries(chatterino-qt-plugins PRIVATE kimageformats)
 endif()
