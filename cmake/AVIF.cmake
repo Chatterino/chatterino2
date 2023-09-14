@@ -10,6 +10,8 @@ if (libavif_FOUND)
     if (WIN32)
         target_link_libraries(kimageformats PRIVATE avif)
     else()
+        get_target_property(_avif_dir avif INTERFACE_INCLUDE_DIRECTORIES)
+        target_include_directories(kimageformats PRIVATE ${_avif_dir})
         # See https://github.com/desktop-app/cmake_helpers/blob/491a7fdbae6629dd06a53fc17ac06e6827f4b295/target_link_static_libraries.cmake#L16
         target_link_libraries(kimageformats PRIVATE "-Wl,--push-state,-Bstatic,-lavif,--pop-state")
     endif()
