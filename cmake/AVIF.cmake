@@ -1,6 +1,6 @@
 find_package(libavif)
 
-if (libavif_FOUND)
+if (libavif_FOUND AND NOT APPLE)
     set(kimageformats_SRC ${CMAKE_SOURCE_DIR}/lib/kimageformats/src/imageformats)
 
     add_library(kimageformats STATIC ${kimageformats_SRC}/avif.cpp)
