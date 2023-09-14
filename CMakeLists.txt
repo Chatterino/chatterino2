@@ -69,7 +69,7 @@ endmacro()
 
 set(_platform_linker "")
 if(APPLE)
-    set(_platform_linker "mold")
+    set(_platform_linker "lld")
 endif()
 
 set(USE_ALTERNATE_LINKER ${_platform_linker} CACHE STRING "Use alternate linker. Leave empty for system default; alternatives are 'gold', 'lld', 'bfd', 'mold'")
