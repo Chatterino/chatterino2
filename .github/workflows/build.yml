@@ -346,17 +346,8 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install boost openssl rapidjson p7zip create-dmg cmake tree libavif
-          ls -l /usr/local/opt/libavif
-          ls -l /usr/local/opt/libavif/lib
+          brew install boost openssl rapidjson p7zip create-dmg cmake tree
         shell: bash
-
-      - name: Fix libavif (MacOS)
-        if: startsWith(matrix.os, 'macos')
-        run: |
-          ar rcs libavif.a libavif.dylib
-        shell: bash
-        working-directory: /usr/local/opt/libavif/lib
 
       - name: Build (MacOS)
         if: startsWith(matrix.os, 'macos')
