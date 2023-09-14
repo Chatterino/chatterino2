@@ -65,7 +65,13 @@ macro(set_alternate_linker linker)
   endif()
 endmacro()
 
-set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default; alternatives are 'gold', 'lld', 'bfd', 'mold'")
+set(_platform_linker "")
+if(APPLE)
+    set(_platform_linker "mold")
+endif()
+
+set(USE_ALTERNATE_LINKER ${_platform_linker} CACHE STRING "Use alternate linker. Leave empty for system default; alternatives are 'gold', 'lld', 'bfd', 'mold'")
+
 if(NOT "${USE_ALTERNATE_LINKER}" STREQUAL "")
   set_alternate_linker(${USE_ALTERNATE_LINKER})
 endif()
