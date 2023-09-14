@@ -347,6 +347,9 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: |
           brew install boost openssl rapidjson p7zip create-dmg cmake tree libavif mold
+          brew info mold
+          echo "/usr/local/opt/mold/bin" >> "$GITHUB_PATH"
+          which mold
         shell: bash
 
       - name: Build (MacOS)
