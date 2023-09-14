@@ -46,7 +46,7 @@ protected:
 private:
     struct {
         Split *split;
-    } ui_;
+    } ui_{};
 
     struct Item {
         void *hwnd;
@@ -61,7 +61,7 @@ private:
 
     void *target_;
     int yOffset_;
-    int currentYOffset_;
+    int currentYOffset_{};
     double x_ = -1;
     double pixelRatio_ = -1;
     int width_ = 360;

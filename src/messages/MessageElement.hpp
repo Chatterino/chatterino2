@@ -6,7 +6,6 @@
 #include "messages/MessageColor.hpp"
 #include "singletons/Fonts.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QRect>
 #include <QString>
@@ -158,7 +157,7 @@ enum class MessageElementFlag : int64_t {
 };
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
-class MessageElement : boost::noncopyable
+class MessageElement
 {
 public:
     enum UpdateFlags : char {
@@ -172,6 +171,12 @@ public:
     };
 
     virtual ~MessageElement();
+
+    MessageElement(const MessageElement &) = delete;
+    MessageElement &operator=(const MessageElement &) = delete;
+
+    MessageElement(MessageElement &&) = delete;
+    MessageElement &operator=(MessageElement &&) = delete;
 
     MessageElement *setLink(const Link &link);
     MessageElement *setText(const QString &text);
@@ -209,7 +214,7 @@ private:
     Link link_;
     QString tooltip_;
     ImagePtr thumbnail_;
-    ThumbnailType thumbnailType_;
+    ThumbnailType thumbnailType_{};
     MessageElementFlags flags_;
 };
 

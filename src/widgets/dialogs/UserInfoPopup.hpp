@@ -50,12 +50,12 @@ private:
     void loadSevenTVAvatar(const HelixUser &user);
     void setSevenTVAvatar(const QString &filename);
 
-    bool avatarDestroyed;
+    bool avatarDestroyed{};
 
     void saveCacheAvatar(const QByteArray &avatar, const QString &filename);
 
-    bool isMod_;
-    bool isBroadcaster_;
+    bool isMod_{};
+    bool isBroadcaster_{};
 
     Split *split_;
 

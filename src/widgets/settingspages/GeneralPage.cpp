@@ -1147,11 +1147,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Show a Send button next to each split input that can be "
         "clicked to send the message");
 
-    layout.addCheckbox("Lazy channel layout (beta)", s.lazyChannelLayout, false,
-                       "When enabled, channels in the background won't get "
-                       "laid out until shown. This reduces CPU usage but can "
-                       "decrease performance when switching channels.");
-
     layout.addStretch();
 
     // invisible element for width

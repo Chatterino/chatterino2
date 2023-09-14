@@ -229,7 +229,7 @@ void ChannelView::initializeLayout()
 void ChannelView::initializeScrollbar()
 {
     this->scrollBar_->getCurrentValueChanged().connect([this] {
-        if (this->isVisible() || !getSettings()->lazyChannelLayout)
+        if (this->isVisible())
         {
             this->performLayout(true);
             this->queueUpdate();
@@ -421,22 +421,12 @@ void ChannelView::scaleChangedEvent(float scale)
 
 void ChannelView::queueUpdate()
 {
-    //    if (this->updateTimer.isActive()) {
-    //        this->updateQueued = true;
-    //        return;
-    //    }
-
-    //    this->repaint();
-
     this->update();
-
-    //    this->updateTimer.start();
 }
 
 void ChannelView::queueLayout()
 {
-    //    if (!this->layoutCooldown->isActive()) {
-    if (this->isVisible() || !getSettings()->lazyChannelLayout)
+    if (this->isVisible())
     {
         this->performLayout();
     }
@@ -444,16 +434,7 @@ void ChannelView::queueLayout()
     {
         this->layoutQueued_ = true;
     }
-
-    //        this->layoutCooldown->start();
-    //    } else {
-    //        this->layoutQueued = true;
-    //    }
-}
-
-void ChannelView::showEvent(QShowEvent * /*event*/)
-{
-    if (this->layoutQueued_ && getSettings()->lazyChannelLayout)
+    if (this->layoutQueued_)
     {
         this->performLayout(false, true);
     }
@@ -825,7 +806,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
 
     this->underlyingChannel_ = underlyingChannel;
 
-    this->queueLayout();
+    this->performLayout();
     this->queueUpdate();
 
     // Notifications
@@ -929,8 +910,7 @@ void ChannelView::messageAppended(MessagePtr &message,
         else
         {
             this->scrollBar_->offsetMinimum(1);
-            if (this->showingLatestMessages_ && !this->isVisible() &&
-                getSettings()->lazyChannelLayout)
+            if (this->showingLatestMessages_ && !this->isVisible())
             {
                 this->scrollBar_->scrollToBottom(false);
             }
