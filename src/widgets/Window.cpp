@@ -103,8 +103,10 @@ bool Window::event(QEvent *event)
 {
     switch (event->type())
     {
-        case QEvent::WindowActivate:
+        case QEvent::WindowActivate: {
+            getApp()->windows->selectedWindow_ = this;
             break;
+        }
 
         case QEvent::WindowDeactivate: {
             auto page = this->notebook_->getOrAddSelectedPage();

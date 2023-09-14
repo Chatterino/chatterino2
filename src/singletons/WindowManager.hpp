@@ -65,7 +65,12 @@ public:
     void repaintGifEmotes();
 
     Window &getMainWindow();
-    Window &getSelectedWindow();
+
+    // Returns a pointer to the last selected window.
+    // This may be null if the application was not focused since the start.
+    // This does not account for the window being unfocused.
+    Window *getLastSelectedWindow() const;
+
     Window &createWindow(WindowType type, bool show = true,
                          QWidget *parent = nullptr);
 
@@ -153,6 +158,8 @@ private:
 
     QTimer *saveTimer;
     QTimer miscUpdateTimer_;
+
+    friend class Window;  // this is for selectedWindow_
 };
 
 }  // namespace chatterino
