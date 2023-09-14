@@ -346,14 +346,7 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install boost openssl rapidjson p7zip create-dmg cmake tree libavif llvm
-          echo "$(brew --prefix)/opt/llvm/bin" >> "$GITHUB_PATH"
-        shell: bash
-
-      - name: Check for lld (MacOS)
-        if: startsWith(matrix.os, 'macos')
-        run: |
-          which lld
+          brew install boost openssl rapidjson p7zip create-dmg cmake tree libavif
         shell: bash
 
       - name: Build (MacOS)

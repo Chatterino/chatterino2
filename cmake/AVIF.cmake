@@ -10,10 +10,13 @@ if (libavif_FOUND)
     if (WIN32)
         target_link_libraries(kimageformats PRIVATE avif)
     else()
-        get_target_property(_avif_dir avif INTERFACE_INCLUDE_DIRECTORIES)
+        # See https://github.com/desktop-app/cmake_helpers/blob/af968dc8eab6bde381ad62ef6a516bdfccb7d038/target_link_static_libraries.cmake
+        find_library(static_lib_avif libavif.a)
+        if (${static_lib_avif} STREQUAL static_lib_avif-NOTFOUND)
+            message(FATAL_ERROR "Could not find static library libavif.a")
+        endif()
         target_include_directories(kimageformats PRIVATE ${_avif_dir})
-        # See https://github.com/desktop-app/cmake_helpers/blob/491a7fdbae6629dd06a53fc17ac06e6827f4b295/target_link_static_libraries.cmake#L16
-        target_link_libraries(kimageformats PRIVATE "-Wl,--push-state,-Bstatic,-lavif,--pop-state")
+        target_link_libraries(kimageformats PRIVATE ${static_lib_avif})
     endif()
 
     target_compile_definitions(kimageformats PRIVATE QT_STATICPLUGIN)
