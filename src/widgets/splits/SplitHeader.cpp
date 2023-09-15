@@ -231,13 +231,16 @@ SplitHeader::SplitHeader(Split *split)
     this->handleChannelChanged();
     this->updateModerationModeIcon();
 
-    this->split_->focused.connect([this]() {
+    // The lifetime of these signals are tied to the lifetime of the Split.
+    // Since the SplitHeader is owned by the Split, they will always be destroyed
+    // at the same time.
+    std::ignore = this->split_->focused.connect([this]() {
         this->themeChangedEvent();
     });
-    this->split_->focusLost.connect([this]() {
+    std::ignore = this->split_->focusLost.connect([this]() {
         this->themeChangedEvent();
     });
-    this->split_->channelChanged.connect([this]() {
+    std::ignore = this->split_->channelChanged.connect([this]() {
         this->handleChannelChanged();
     });
 
