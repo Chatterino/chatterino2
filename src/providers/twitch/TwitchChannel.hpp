@@ -191,10 +191,6 @@ public:
     const std::unordered_map<QString, std::weak_ptr<MessageThread>> &threads()
         const;
 
-private:
-    pajlada::Signals::NoArgSignal roomIdChanged;
-
-public:
     // Only TwitchChannel may invoke this signal
     pajlada::Signals::NoArgSignal userStateChanged;
 
@@ -245,8 +241,6 @@ private:
         QString actualDisplayName;
     } nameOptions;
 
-private:
-    // Methods
     void refreshPubSub();
     void refreshChatters();
     void refreshBadges();
@@ -255,6 +249,11 @@ private:
     void loadRecentMessagesReconnect();
     void cleanUpReplyThreads();
     void showLoginMessage();
+
+    /// roomIdChanged is called whenever this channel's ID has been changed
+    /// This should only happen once per channel, whenever the ID goes from unset to set
+    void roomIdChanged();
+
     /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
     void joinBttvChannel() const;
     /**

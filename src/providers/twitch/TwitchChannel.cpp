@@ -100,22 +100,6 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->refreshPubSub();
     });
 
-    // room id loaded -> refresh live status
-    // We can safely ignore this signal connection this has no external dependencies - once the signal
-    // is destroyed, it will no longer be able to fire
-    std::ignore = this->roomIdChanged.connect([this]() {
-        this->refreshPubSub();
-        this->refreshBadges();
-        this->refreshCheerEmotes();
-        this->refreshFFZChannelEmotes(false);
-        this->refreshBTTVChannelEmotes(false);
-        this->refreshSevenTVChannelEmotes(false);
-        this->joinBttvChannel();
-        this->listenSevenTVCosmetics();
-        getIApp()->getTwitchLiveController()->add(
-            std::dynamic_pointer_cast<TwitchChannel>(shared_from_this()));
-    });
-
     // We can safely ignore this signal connection this has no external dependencies - once the signal
     // is destroyed, it will no longer be able to fire
     std::ignore = this->connected.connect([this]() {
@@ -533,6 +517,20 @@ void TwitchChannel::showLoginMessage()
     this->addMessage(builder.release());
 }
 
+void TwitchChannel::roomIdChanged()
+{
+    this->refreshPubSub();
+    this->refreshBadges();
+    this->refreshCheerEmotes();
+    this->refreshFFZChannelEmotes(false);
+    this->refreshBTTVChannelEmotes(false);
+    this->refreshSevenTVChannelEmotes(false);
+    this->joinBttvChannel();
+    this->listenSevenTVCosmetics();
+    getIApp()->getTwitchLiveController()->add(
+        std::dynamic_pointer_cast<TwitchChannel>(shared_from_this()));
+}
+
 QString TwitchChannel::prepareMessage(const QString &message) const
 {
     auto app = getApp();
@@ -724,7 +722,7 @@ void TwitchChannel::setRoomId(const QString &id)
     if (*this->roomID_.accessConst() != id)
     {
         *this->roomID_.access() = id;
-        this->roomIdChanged.invoke();
+        this->roomIdChanged();
         this->loadRecentMessages();
     }
 }
