@@ -88,7 +88,9 @@ void IrcServerData::setPassword(const QString &password)
 
 Irc::Irc()
 {
-    this->connections.itemInserted.connect([this](auto &&args) {
+    // We can safely ignore this signal connection since `connections` will always
+    // be destroyed before the Irc object
+    std::ignore = this->connections.itemInserted.connect([this](auto &&args) {
         // make sure only one id can only exist for one server
         assert(this->servers_.find(args.item.id) == this->servers_.end());
 
@@ -117,7 +119,9 @@ Irc::Irc()
         }
     });
 
-    this->connections.itemRemoved.connect([this](auto &&args) {
+    // We can safely ignore this signal connection since `connections` will always
+    // be destroyed before the Irc object
+    std::ignore = this->connections.itemRemoved.connect([this](auto &&args) {
         // restore
         if (auto server = this->servers_.find(args.item.id);
             server != this->servers_.end())
@@ -141,7 +145,9 @@ Irc::Irc()
         }
     });
 
-    this->connections.delayedItemsChanged.connect([this] {
+    // We can safely ignore this signal connection since `connections` will always
+    // be destroyed before the Irc object
+    std::ignore = this->connections.delayedItemsChanged.connect([this] {
         this->save();
     });
 }
