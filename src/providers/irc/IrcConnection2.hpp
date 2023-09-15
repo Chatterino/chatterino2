@@ -20,7 +20,8 @@ public:
     pajlada::Signals::Signal<bool> connectionLost;
 
     // Request a reconnect with a minimum interval between attempts.
-    pajlada::Signals::NoArgSignal smartReconnect;
+    // This won't violate RECONNECT_MIN_INTERVAL
+    void smartReconnect();
 
     virtual void open();
     virtual void close();
