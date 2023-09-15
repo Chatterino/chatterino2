@@ -94,12 +94,16 @@ TwitchChannel::TwitchChannel(const QString &name)
         }));
 
     this->refreshPubSub();
-    this->userStateChanged.connect([this] {
+    // We can safely ignore this signal connection since it's a private signal, meaning
+    // it will only ever be invoked by TwitchChannel itself
+    std::ignore = this->userStateChanged.connect([this] {
         this->refreshPubSub();
     });
 
     // room id loaded -> refresh live status
-    this->roomIdChanged.connect([this]() {
+    // We can safely ignore this signal connection this has no external dependencies - once the signal
+    // is destroyed, it will no longer be able to fire
+    std::ignore = this->roomIdChanged.connect([this]() {
         this->refreshPubSub();
         this->refreshBadges();
         this->refreshCheerEmotes();
@@ -112,7 +116,9 @@ TwitchChannel::TwitchChannel(const QString &name)
             std::dynamic_pointer_cast<TwitchChannel>(shared_from_this()));
     });
 
-    this->connected.connect([this]() {
+    // We can safely ignore this signal connection this has no external dependencies - once the signal
+    // is destroyed, it will no longer be able to fire
+    std::ignore = this->connected.connect([this]() {
         if (this->roomId().isEmpty())
         {
             // If we get a reconnected event when the room id is not set, we

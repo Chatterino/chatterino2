@@ -191,8 +191,11 @@ public:
     const std::unordered_map<QString, std::weak_ptr<MessageThread>> &threads()
         const;
 
-    // Signals
+private:
     pajlada::Signals::NoArgSignal roomIdChanged;
+
+public:
+    // Only TwitchChannel may invoke this signal
     pajlada::Signals::NoArgSignal userStateChanged;
 
     /**
