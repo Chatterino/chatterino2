@@ -1,4 +1,4 @@
-#include "InitUpdateButton.hpp"
+#include "util/InitUpdateButton.hpp"
 
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/helper/Button.hpp"
@@ -28,7 +28,11 @@ void initUpdateButton(Button &button,
         dialog->show();
         dialog->raise();
 
-        dialog->buttonClicked.connect([&button](auto buttonType) {
+        // We can safely ignore the signal connection because the dialog will always
+        // be destroyed before the button is destroyed, since it is destroyed on focus loss
+        //
+        // The button is either attached to a Notebook, or a Window frame
+        std::ignore = dialog->buttonClicked.connect([&button](auto buttonType) {
             switch (buttonType)
             {
                 case UpdateDialog::Dismiss: {
