@@ -14,16 +14,21 @@ namespace chatterino {
 
 void Logging::initialize(Settings &settings, Paths & /*paths*/)
 {
-    settings.loggedChannels.delayedItemsChanged.connect([this, &settings]() {
-        this->threadGuard.guard();
+    // We can safely ignore this signal connection since settings are only-ever destroyed
+    // on application exit
+    // NOTE: SETTINGS_LIFETIME
+    std::ignore = settings.loggedChannels.delayedItemsChanged.connect(
+        [this, &settings]() {
+            this->threadGuard.guard();
 
-        this->onlyLogListedChannels.clear();
+            this->onlyLogListedChannels.clear();
 
-        for (const auto &loggedChannel : *settings.loggedChannels.readOnly())
-        {
-            this->onlyLogListedChannels.insert(loggedChannel.channelName());
-        }
-    });
+            for (const auto &loggedChannel :
+                 *settings.loggedChannels.readOnly())
+            {
+                this->onlyLogListedChannels.insert(loggedChannel.channelName());
+            }
+        });
 }
 
 void Logging::addMessage(const QString &channelName, MessagePtr message,
