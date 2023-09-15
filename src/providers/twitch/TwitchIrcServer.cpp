@@ -137,11 +137,15 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
         std::shared_ptr<TwitchChannel>(new TwitchChannel(channelName));
     channel->initialize();
 
-    channel->sendMessageSignal.connect(
+    // We can safely ignore these signal connections since the TwitchIrcServer is only
+    // ever destroyed when the full Application state is about to be destroyed, at which point
+    // no Channel's should live
+    // NOTE: CHANNEL_LIFETIME
+    std::ignore = channel->sendMessageSignal.connect(
         [this, channel = channel.get()](auto &chan, auto &msg, bool &sent) {
             this->onMessageSendRequested(channel, msg, sent);
         });
-    channel->sendReplySignal.connect(
+    std::ignore = channel->sendReplySignal.connect(
         [this, channel = channel.get()](auto &chan, auto &msg, auto &replyId,
                                         bool &sent) {
             this->onReplySendRequested(channel, msg, replyId, sent);
