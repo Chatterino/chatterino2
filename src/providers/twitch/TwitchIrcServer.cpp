@@ -133,8 +133,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
 std::shared_ptr<Channel> TwitchIrcServer::createChannel(
     const QString &channelName)
 {
-    auto channel =
-        std::shared_ptr<TwitchChannel>(new TwitchChannel(channelName));
+    auto channel = std::make_shared<TwitchChannel>(channelName);
     channel->initialize();
 
     // We can safely ignore these signal connections since the TwitchIrcServer is only
@@ -151,7 +150,7 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
             this->onReplySendRequested(channel, msg, replyId, sent);
         });
 
-    return std::shared_ptr<Channel>(channel);
+    return channel;
 }
 
 void TwitchIrcServer::privateMessageReceived(
