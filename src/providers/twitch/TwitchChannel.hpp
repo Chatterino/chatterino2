@@ -338,6 +338,8 @@ private:
     std::unordered_map<QString, std::weak_ptr<MessageThread>> threads_;
 
 protected:
+    void messageRemovedFromStart(const MessagePtr &msg) override;
+
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;

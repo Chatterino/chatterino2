@@ -131,18 +131,7 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->loadRecentMessagesReconnect();
     });
 
-    this->messageRemovedFromStart.connect([this](MessagePtr &msg) {
-        if (msg->replyThread)
-        {
-            if (msg->replyThread->liveCount(msg) == 0)
-            {
-                this->threads_.erase(msg->replyThread->rootId());
-            }
-        }
-    });
-
     // timers
-
     QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [this] {
         this->refreshChatters();
     });
@@ -1067,6 +1056,17 @@ bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
     this->replaceMessage(last, msg);
 
     return true;
+}
+
+void TwitchChannel::messageRemovedFromStart(const MessagePtr &msg)
+{
+    if (msg->replyThread)
+    {
+        if (msg->replyThread->liveCount(msg) == 0)
+        {
+            this->threads_.erase(msg->replyThread->rootId());
+        }
+    }
 }
 
 const QString &TwitchChannel::subscriptionUrl()
