@@ -260,6 +260,8 @@ SplitHeader::SplitHeader(Split *split)
 
 void SplitHeader::initializeLayout()
 {
+    assert(this->layout() == nullptr);
+
     auto *layout = makeLayout<QHBoxLayout>({
         // space
         makeWidget<BaseWidget>([](auto w) {
