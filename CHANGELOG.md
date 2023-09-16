@@ -18,6 +18,7 @@
 - Dev: Fix clang-tidy `cppcoreguidelines-pro-type-member-init` warnings. (#4426)
 - Dev: Immediate layout for invisible `ChannelView`s is skipped. (#4811)
 - Dev: Refactor `Image` & Image's `Frames`. (#4773)
+- Dev: Add `WindowManager::getLastSelectedWindow()` to replace `getMainWindow()`. (#4816)
 - Dev: Clarify signal connection lifetimes where applicable. (#4818)
 
 ## 2.4.5
