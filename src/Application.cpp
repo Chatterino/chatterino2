@@ -193,6 +193,7 @@ int Application::run(QApplication &qtApp)
 
     // We can safely ignore the signal connections since Application will always live longer than
     // everything else, including settings. right?
+    // NOTE: SETTINGS_LIFETIME
     std::ignore =
         getSettings()->moderationActions.delayedItemsChanged.connect([this] {
             this->windows->forceLayoutChannelViews();
