@@ -227,7 +227,9 @@ void ChannelView::initializeLayout()
 
 void ChannelView::initializeScrollbar()
 {
-    this->scrollBar_->getCurrentValueChanged().connect([this] {
+    // We can safely ignore the scroll bar's signal connection since the scroll bar will
+    // always be destroyed before the ChannelView
+    std::ignore = this->scrollBar_->getCurrentValueChanged().connect([this] {
         if (this->isVisible())
         {
             this->performLayout(true);

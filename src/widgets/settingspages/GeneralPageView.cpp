@@ -195,13 +195,17 @@ ColorButton *GeneralPageView::addColorButton(
             auto dialog = new ColorPickerDialog(QColor(setting), this);
             dialog->setAttribute(Qt::WA_DeleteOnClose);
             dialog->show();
-            dialog->closed.connect([&setting, colorButton](QColor selected) {
-                if (selected.isValid())
-                {
-                    setting = selected.name(QColor::HexArgb);
-                    colorButton->setColor(selected);
-                }
-            });
+            // We can safely ignore this signal connection, for now, since the
+            // colorButton & setting are never deleted and the signal is deleted
+            // once the dialog is closed
+            std::ignore = dialog->closed.connect(
+                [&setting, colorButton](QColor selected) {
+                    if (selected.isValid())
+                    {
+                        setting = selected.name(QColor::HexArgb);
+                        colorButton->setColor(selected);
+                    }
+                });
         });
 
     this->groups_.back().widgets.push_back({label, {text}});

@@ -36,7 +36,8 @@ NicknamesPage::NicknamesPage()
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
 
-    view->addButtonPressed.connect([] {
+    // We can safely ignore this signal connection since we own the view
+    std::ignore = view->addButtonPressed.connect([] {
         getSettings()->nicknames.append(
             Nickname{"Username", "Nickname", false, false});
     });

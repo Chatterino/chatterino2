@@ -292,7 +292,7 @@ jobs:
 
       - name: clang-tidy review
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'
-        uses: ZedThree/clang-tidy-review@v0.13.3
+        uses: ZedThree/clang-tidy-review@v0.13.4
         with:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
@@ -319,7 +319,7 @@ jobs:
 
       - name: clang-tidy-review upload
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'
-        uses: ZedThree/clang-tidy-review/upload@v0.13.3
+        uses: ZedThree/clang-tidy-review/upload@v0.13.4
 
       - name: Package - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu-20.04') && !matrix.skip-artifact

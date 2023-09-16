@@ -44,7 +44,8 @@ FiltersPage::FiltersPage()
         view->getTableView()->setColumnWidth(2, 125);
     });
 
-    view->addButtonPressed.connect([] {
+    // We can safely ignore this signal connection since we own the view
+    std::ignore = view->addButtonPressed.connect([] {
         ChannelFilterEditorDialog d(
             static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
         if (d.exec() == QDialog::Accepted)
