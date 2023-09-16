@@ -39,8 +39,8 @@ private:
     void updateLatestMessages();
 
     void loadAvatar(const QUrl &url);
-    bool isMod_;
-    bool isBroadcaster_;
+    bool isMod_{};
+    bool isBroadcaster_{};
 
     Split *split_;
 

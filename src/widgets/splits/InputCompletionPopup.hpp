@@ -48,7 +48,7 @@ private:
 
     struct {
         GenericListView *listView;
-    } ui_;
+    } ui_{};
 
     CompletionModel model_;
     ActionCallback callback_;

@@ -1,5 +1,4 @@
 #include "Application.hpp"
-#include "BaseSettings.hpp"
 #include "common/Aliases.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
@@ -21,6 +20,8 @@
 #include <QModelIndex>
 #include <QString>
 #include <QTemporaryDir>
+
+#include <span>
 
 namespace {
 
@@ -225,6 +226,25 @@ protected:
     }
 };
 
+void containsRoughly(std::span<detail::CompletionEmote> span,
+                     std::set<QString> values)
+{
+    for (const auto &v : values)
+    {
+        bool found = false;
+        for (const auto &actualValue : span)
+        {
+            if (actualValue.displayName == v)
+            {
+                found = true;
+                break;
+            }
+        }
+
+        ASSERT_TRUE(found) << qPrintable(v) << " was not found in the span";
+    }
+}
+
 TEST_F(InputCompletionTest, ClassicEmoteNameFiltering)
 {
     // The completion doesn't guarantee an ordering for a specific category of emotes.
@@ -242,9 +262,7 @@ TEST_F(InputCompletionTest, ClassicEmoteNameFiltering)
     completion = queryClassicEmoteCompletion(":)");
     ASSERT_EQ(completion.size(), 3);
     ASSERT_EQ(completion[0].displayName, ":)");  // Exact match with : prefix
-    // all these matches are Twitch global emotes
-    ASSERT_EQ(completion[1].displayName, ":-)");
-    ASSERT_EQ(completion[2].displayName, "B-)");
+    containsRoughly({completion.begin() + 1, 2}, {":-)", "B-)"});
 
     completion = queryClassicEmoteCompletion(":cat");
     ASSERT_TRUE(completion.size() >= 2);

@@ -52,7 +52,6 @@ public:
     pajlada::Signals::Signal<const QString &, const QString &, const QString &,
                              bool &>
         sendReplySignal;
-    pajlada::Signals::Signal<MessagePtr &> messageRemovedFromStart;
     pajlada::Signals::Signal<MessagePtr &, boost::optional<MessageFlags>>
         messageAppended;
     pajlada::Signals::Signal<std::vector<MessagePtr> &> messagesAddedAtStart;
@@ -114,6 +113,7 @@ public:
 
 protected:
     virtual void onConnected();
+    virtual void messageRemovedFromStart(const MessagePtr &msg);
 
 private:
     const QString name_;

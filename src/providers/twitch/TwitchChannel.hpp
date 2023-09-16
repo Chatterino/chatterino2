@@ -191,8 +191,7 @@ public:
     const std::unordered_map<QString, std::weak_ptr<MessageThread>> &threads()
         const;
 
-    // Signals
-    pajlada::Signals::NoArgSignal roomIdChanged;
+    // Only TwitchChannel may invoke this signal
     pajlada::Signals::NoArgSignal userStateChanged;
 
     /**
@@ -242,8 +241,6 @@ private:
         QString actualDisplayName;
     } nameOptions;
 
-private:
-    // Methods
     void refreshPubSub();
     void refreshChatters();
     void refreshBadges();
@@ -252,6 +249,11 @@ private:
     void loadRecentMessagesReconnect();
     void cleanUpReplyThreads();
     void showLoginMessage();
+
+    /// roomIdChanged is called whenever this channel's ID has been changed
+    /// This should only happen once per channel, whenever the ID goes from unset to set
+    void roomIdChanged();
+
     /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
     void joinBttvChannel() const;
     /**
@@ -328,13 +330,15 @@ private:
     const QString subscriptionUrl_;
     const QString channelUrl_;
     const QString popoutPlayerUrl_;
-    int chatterCount_;
+    int chatterCount_{};
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
     std::atomic_flag loadingRecentMessages_ = ATOMIC_FLAG_INIT;
     std::unordered_map<QString, std::weak_ptr<MessageThread>> threads_;
 
 protected:
+    void messageRemovedFromStart(const MessagePtr &msg) override;
+
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;
@@ -376,7 +380,7 @@ private:
      * The index of the twitch connection in
      * 7TV's user representation.
      */
-    size_t seventvUserTwitchConnectionIndex_;
+    size_t seventvUserTwitchConnectionIndex_{};
 
     /**
      * The next moment in time to signal activity in this channel to 7TV.

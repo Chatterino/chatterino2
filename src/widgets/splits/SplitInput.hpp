@@ -92,6 +92,9 @@ protected:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
+#ifdef DEBUG
+    bool keyPressedEventInstalled{};
+#endif
     void installKeyPressedEvent();
     void onCursorPositionChanged();
     void onTextChanged();
@@ -130,7 +133,7 @@ protected:
         QHBoxLayout *replyHbox;
         QLabel *replyLabel;
         EffectLabel *cancelReplyButton;
-    } ui_;
+    } ui_{};
 
     std::shared_ptr<MessageThread> replyThread_ = nullptr;
     bool enableInlineReplying_;

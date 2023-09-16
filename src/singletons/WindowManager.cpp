@@ -344,9 +344,13 @@ void WindowManager::setEmotePopupPos(QPoint pos)
 
 void WindowManager::initialize(Settings &settings, Paths &paths)
 {
+    (void)paths;
     assertInGuiThread();
 
-    getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
+    // We can safely ignore this signal connection since both Themes and WindowManager
+    // share the Application state lifetime
+    // NOTE: APPLICATION_LIFETIME
+    std::ignore = getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
         this->repaintVisibleChatWidgets();
     });
 
