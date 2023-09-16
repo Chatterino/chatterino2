@@ -10,6 +10,7 @@
 namespace chatterino {
 
 class GenericListView;
+class Window;
 
 class QuickSwitcherPopup : public BasePopup
 {
@@ -17,10 +18,10 @@ public:
     /**
      * @brief   Construct a new QuickSwitcherPopup.
      *
-     * @param   parent  Parent widget of the popup. The popup will be placed
-     *                  in the center of the parent widget.
+     * @param   parent  Parent window of the popup. The popup will be placed
+     *                  in the center of the window.
      */
-    explicit QuickSwitcherPopup(QWidget *parent = nullptr);
+    explicit QuickSwitcherPopup(Window *parent);
 
 protected:
     virtual void themeChangedEvent() override;
@@ -37,6 +38,8 @@ private:
     } ui_;
 
     QuickSwitcherModel switcherModel_;
+
+    Window *window{};
 
     void initWidgets();
 };

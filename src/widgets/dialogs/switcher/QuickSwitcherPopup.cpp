@@ -18,11 +18,11 @@
 namespace chatterino {
 
 namespace {
-    QList<SplitContainer *> openPages()
+    QList<SplitContainer *> openPages(Window *window)
     {
         QList<SplitContainer *> pages;
 
-        auto &nb = getApp()->windows->getMainWindow().getNotebook();
+        auto &nb = window->getNotebook();
         for (int i = 0; i < nb.getPageCount(); ++i)
         {
             pages.append(static_cast<SplitContainer *>(nb.getPageAt(i)));
@@ -34,11 +34,12 @@ namespace {
 
 const QSize QuickSwitcherPopup::MINIMUM_SIZE(500, 300);
 
-QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
+QuickSwitcherPopup::QuickSwitcherPopup(Window *parent)
     : BasePopup({BaseWindow::Flags::Frameless, BaseWindow::Flags::TopMost,
                  BaseWindow::DisableLayoutSave},
                 parent)
     , switcherModel_(this)
+    , window(parent)
 {
     this->setWindowFlag(Qt::Dialog);
     this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
@@ -86,7 +87,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     this->switcherModel_.clear();
 
     // Add items for navigating to different splits
-    for (auto *sc : openPages())
+    for (auto *sc : openPages(this->window))
     {
         const QString &tabTitle = sc->getTab()->getTitle();
         const auto splits = sc->getSplits();
