@@ -18,8 +18,8 @@ namespace chatterino {
 
 using namespace literals;
 
-using GetDpiForMonitor_ = HRESULT CALLBACK (*)(HMONITOR, MONITOR_DPI_TYPE,
-                                               UINT *, UINT *);
+using GetDpiForMonitor_ = HRESULT(CALLBACK *)(HMONITOR, MONITOR_DPI_TYPE,
+                                              UINT *, UINT *);
 
 // TODO: This should be changed to `GetDpiForWindow`.
 boost::optional<UINT> getWindowDpi(HWND hwnd)
