@@ -24,7 +24,7 @@ public:
     explicit QuickSwitcherPopup(Window *parent);
 
 protected:
-    virtual void themeChangedEvent() override;
+    void themeChangedEvent() override;
 
 public slots:
     void updateSuggestions(const QString &text);
