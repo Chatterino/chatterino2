@@ -246,6 +246,10 @@ Window &WindowManager::getMainWindow()
 Window *WindowManager::getLastSelectedWindow() const
 {
     assertInGuiThread();
+    if (this->selectedWindow_ == nullptr)
+    {
+        return this->mainWindow_;
+    }
 
     return this->selectedWindow_;
 }

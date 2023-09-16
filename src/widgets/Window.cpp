@@ -144,6 +144,11 @@ void Window::closeEvent(QCloseEvent *)
         app->windows->closeAll();
     }
 
+    // Ensure selectedWindow_ is never an invalid pointer.
+    // WindowManager will return the main window if no window is pointed to by
+    // `selectedWindow_`.
+    getApp()->windows->selectedWindow_ = nullptr;
+
     this->closed.invoke();
 
     if (this->type_ == WindowType::Main)

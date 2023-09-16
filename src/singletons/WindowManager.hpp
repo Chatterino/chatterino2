@@ -67,8 +67,10 @@ public:
     Window &getMainWindow();
 
     // Returns a pointer to the last selected window.
-    // This may be null if the application was not focused since the start.
-    // This does not account for the window being unfocused.
+    // Edge cases:
+    //  - If the application was not focused since the start, this will return a pointer to the main window.
+    //  - If the window was closed this points to the main window.
+    //  - If the window was unfocused since being selected, this function will still return it.
     Window *getLastSelectedWindow() const;
 
     Window &createWindow(WindowType type, bool show = true,
