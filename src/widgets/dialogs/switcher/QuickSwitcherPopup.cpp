@@ -15,22 +15,26 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
-namespace chatterino {
-
 namespace {
-    QList<SplitContainer *> openPages(Window *window)
+
+using namespace chatterino;
+
+QList<SplitContainer *> openPages(Window *window)
+{
+    QList<SplitContainer *> pages;
+
+    auto &nb = window->getNotebook();
+    for (int i = 0; i < nb.getPageCount(); ++i)
     {
-        QList<SplitContainer *> pages;
-
-        auto &nb = window->getNotebook();
-        for (int i = 0; i < nb.getPageCount(); ++i)
-        {
-            pages.append(static_cast<SplitContainer *>(nb.getPageAt(i)));
-        }
-
-        return pages;
+        pages.append(static_cast<SplitContainer *>(nb.getPageAt(i)));
     }
+
+    return pages;
+}
+
 }  // namespace
+
+namespace chatterino {
 
 const QSize QuickSwitcherPopup::MINIMUM_SIZE(500, 300);
 
