@@ -30,7 +30,7 @@ public slots:
     void updateSuggestions(const QString &text);
 
 private:
-    static const QSize MINIMUM_SIZE;
+    constexpr static const QSize MINIMUM_SIZE{500, 300};
 
     struct {
         QLineEdit *searchEdit{};

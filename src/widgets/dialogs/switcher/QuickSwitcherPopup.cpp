@@ -36,8 +36,6 @@ QList<SplitContainer *> openPages(Window *window)
 
 namespace chatterino {
 
-const QSize QuickSwitcherPopup::MINIMUM_SIZE(500, 300);
-
 QuickSwitcherPopup::QuickSwitcherPopup(Window *parent)
     : BasePopup({BaseWindow::Flags::Frameless, BaseWindow::Flags::TopMost,
                  BaseWindow::DisableLayoutSave},
