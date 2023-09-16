@@ -106,7 +106,7 @@ void Channel::addMessage(MessagePtr message,
 
     if (this->messages_.pushBack(message, deleted))
     {
-        this->messageRemovedFromStart.invoke(deleted);
+        this->messageRemovedFromStart(deleted);
     }
 
     this->messageAppended.invoke(message, overridingFlags);
@@ -350,6 +350,10 @@ std::shared_ptr<Channel> Channel::getEmpty()
 }
 
 void Channel::onConnected()
+{
+}
+
+void Channel::messageRemovedFromStart(const MessagePtr &msg)
 {
 }
 

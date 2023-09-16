@@ -84,9 +84,12 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     this->ui_.threadView->setMinimumSize(400, 100);
     this->ui_.threadView->setSizePolicy(QSizePolicy::Expanding,
                                         QSizePolicy::Expanding);
-    this->ui_.threadView->mouseDown.connect([this](QMouseEvent *) {
-        this->giveFocus(Qt::MouseFocusReason);
-    });
+    // We can safely ignore this signal's connection since threadView will always be deleted before
+    // the ReplyThreadPopup
+    std::ignore =
+        this->ui_.threadView->mouseDown.connect([this](QMouseEvent *) {
+            this->giveFocus(Qt::MouseFocusReason);
+        });
 
     // Create SplitInput with inline replying disabled
     this->ui_.replyInput =
@@ -97,8 +100,10 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
             this->updateInputUI();
         }));
 
-    // clear SplitInput selection when selecting in ChannelView
-    this->ui_.threadView->selectionChanged.connect([this]() {
+    // We can safely ignore this signal's connection since threadView will always be deleted before
+    // the ReplyThreadPopup
+    std::ignore = this->ui_.threadView->selectionChanged.connect([this]() {
+        // clear SplitInput selection when selecting in ChannelView
         if (this->ui_.replyInput->hasSelection())
         {
             this->ui_.replyInput->clearSelection();
@@ -106,7 +111,9 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     });
 
     // clear ChannelView selection when selecting in SplitInput
-    this->ui_.replyInput->selectionChanged.connect([this]() {
+    // We can safely ignore this signal's connection since replyInput will always be deleted before
+    // the ReplyThreadPopup
+    std::ignore = this->ui_.replyInput->selectionChanged.connect([this]() {
         if (this->ui_.threadView->hasSelection())
         {
             this->ui_.threadView->clearSelection();

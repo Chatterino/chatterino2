@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
+- Minor: The account switcher is now styled to match your theme. (#4817)
 - Bugfix: Fixed a performance issue when displaying replies to certain messages. (#4807)
 - Bugfix: Fixed a data race when disconnecting from Twitch PubSub. (#4771)
 - Bugfix: Fixed `/shoutout` command not working with usernames starting with @'s (e.g. `/shoutout @forsen`). (#4800)
@@ -17,6 +18,7 @@
 - Dev: Immediate layout for invisible `ChannelView`s is skipped. (#4811)
 - Dev: Refactor `Image` & Image's `Frames`. (#4773)
 - Dev: Add `WindowManager::getLastSelectedWindow()` to replace `getMainWindow()`. (#4816)
+- Dev: Clarify signal connection lifetimes where applicable. (#4818)
 
 ## 2.4.5
 

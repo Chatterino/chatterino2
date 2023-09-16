@@ -170,7 +170,9 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
             view->getTableView()->horizontalHeader()->setSectionHidden(4, true);
             view->getTableView()->horizontalHeader()->setSectionHidden(5, true);
 
-            view->addButtonPressed.connect([] {
+            // We can safely ignore this signal's connection since the button won't be
+            // accessible after this dialog is closed
+            std::ignore = view->addButtonPressed.connect([] {
                 auto unique = IrcServerData{};
                 unique.id = Irc::instance().uniqueId();
 
