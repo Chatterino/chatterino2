@@ -1,11 +1,13 @@
 #include "WindowsHelper.hpp"
 
-#include <QCoreApplication>
+#include <QApplication>
+#include <QClipboard>
 #include <QFileInfo>
 #include <QSettings>
 
 #ifdef USEWINSDK
 
+#    include <Ole2.h>
 #    include <Shlwapi.h>
 #    include <VersionHelpers.h>
 
@@ -45,18 +47,11 @@ boost::optional<UINT> getWindowDpi(HWND hwnd)
     return boost::none;
 }
 
-typedef HRESULT(CALLBACK *OleFlushClipboard_)();
-
 void flushClipboard()
 {
-    static HINSTANCE ole32 = LoadLibrary(L"Ole32.dll");
-    if (ole32 != nullptr)
+    if (QApplication::clipboard()->ownsClipboard())
     {
-        if (auto oleFlushClipboard =
-                OleFlushClipboard_(GetProcAddress(ole32, "OleFlushClipboard")))
-        {
-            oleFlushClipboard();
-        }
+        OleFlushClipboard();
     }
 }
 
