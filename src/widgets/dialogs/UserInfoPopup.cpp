@@ -273,7 +273,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
             head.emplace<Button>(nullptr).assign(&this->ui_.avatarButton);
 
         this->avatarDestroyed = false;
-        QObject::connect(avatar.getElement(), &QObject::destroyed, [=] {
+        QObject::connect(avatar.getElement(), &QObject::destroyed, [this] {
             this->avatarDestroyed = true;
         });
 
