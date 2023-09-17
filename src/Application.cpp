@@ -747,19 +747,21 @@ void Application::initSeventvEventAPI()
                                                  chan.updateSeventvUser(data);
                                              });
         });
-    this->twitch->seventvEventAPI->signals_.personalEmoteSetAdded.connect(
-        [&](const auto &data) {
-            postToThread([this, data]() {
-                this->twitch->forEachChannelAndSpecialChannels([=](auto chan) {
-                    if (auto *twitchChannel =
-                            dynamic_cast<TwitchChannel *>(chan.get()))
-                    {
-                        twitchChannel->upsertPersonalSeventvEmotes(data.first,
-                                                                   data.second);
-                    }
+    std::ignore =
+        this->twitch->seventvEventAPI->signals_.personalEmoteSetAdded.connect(
+            [&](const auto &data) {
+                postToThread([this, data]() {
+                    this->twitch->forEachChannelAndSpecialChannels(
+                        [=](auto chan) {
+                            if (auto *twitchChannel =
+                                    dynamic_cast<TwitchChannel *>(chan.get()))
+                            {
+                                twitchChannel->upsertPersonalSeventvEmotes(
+                                    data.first, data.second);
+                            }
+                        });
                 });
             });
-        });
 
     this->twitch->seventvEventAPI->start();
 }
