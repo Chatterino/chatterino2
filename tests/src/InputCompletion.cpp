@@ -226,8 +226,7 @@ protected:
     }
 };
 
-void containsRoughly(std::span<detail::CompletionEmote> span,
-                     std::set<QString> values)
+void containsRoughly(std::span<EmoteItem> span, std::set<QString> values)
 {
     for (const auto &v : values)
     {
