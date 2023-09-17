@@ -609,6 +609,11 @@ QString ChannelView::getSelectedText()
                       : layout->getLastCharacterIndex() + 1;
 
         layout->addSelectionText(result, from, to);
+
+        if (msg != indexEnd)
+        {
+            result += '\n';
+        }
     }
 
     return result;
