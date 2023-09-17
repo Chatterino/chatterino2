@@ -207,7 +207,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     , notebook_(new Notebook(this))
 {
     // this->setStayInScreenRect(true);
-    this->moveTo(getApp()->windows->emotePopupPos(), false,
+    this->moveTo(getApp()->windows->emotePopupPos(),
                  BaseWindow::BoundsChecker::DesiredPosition);
 
     auto *layout = new QVBoxLayout();
@@ -246,7 +246,9 @@ EmotePopup::EmotePopup(QWidget *parent)
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
             MessageElementFlag::EmoteImages});
         view->setEnableScrollingToBottom(false);
-        view->linkClicked.connect(clicked);
+        // We can safely ignore this signal connection since the ChannelView is deleted
+        // either when the notebook is deleted, or when our main layout is deleted.
+        std::ignore = view->linkClicked.connect(clicked);
 
         if (addToNotebook)
         {

@@ -9,8 +9,6 @@ option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
 set(SOURCE_FILES
         Application.cpp
         Application.hpp
-        BaseSettings.cpp
-        BaseSettings.hpp
         BrowserExtension.cpp
         BrowserExtension.hpp
         RunGui.cpp

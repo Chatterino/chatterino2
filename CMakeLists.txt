@@ -115,9 +115,7 @@ endif ()
 find_package(Sanitizers QUIET)
 
 # Find boost on the system
-# `OPTIONAL_COMPONENTS random` is required for vcpkg builds to link.
-# `OPTIONAL` is required, because conan doesn't set `boost_random_FOUND`.
-find_package(Boost REQUIRED OPTIONAL_COMPONENTS random)
+find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)

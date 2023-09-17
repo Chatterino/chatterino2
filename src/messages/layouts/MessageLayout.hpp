@@ -4,7 +4,6 @@
 #include "common/FlagsEnum.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <QPixmap>
 
 #include <cinttypes>
@@ -33,11 +32,17 @@ enum class MessageLayoutFlag : uint8_t {
 };
 using MessageLayoutFlags = FlagsEnum<MessageLayoutFlag>;
 
-class MessageLayout : boost::noncopyable
+class MessageLayout
 {
 public:
     MessageLayout(MessagePtr message_);
     ~MessageLayout();
+
+    MessageLayout(const MessageLayout &) = delete;
+    MessageLayout &operator=(const MessageLayout &) = delete;
+
+    MessageLayout(MessageLayout &&) = delete;
+    MessageLayout &operator=(MessageLayout &&) = delete;
 
     const Message *getMessage();
     const MessagePtr &getMessagePtr() const;
