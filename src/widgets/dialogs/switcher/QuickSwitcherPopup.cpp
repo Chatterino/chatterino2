@@ -122,7 +122,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     // Add item for opening a channel in a new tab or new popup
     if (!text.isEmpty())
     {
-        auto newTabItem = std::make_unique<NewTabItem>(text);
+        auto newTabItem = std::make_unique<NewTabItem>(this->window, text);
         this->switcherModel_.addItem(std::move(newTabItem));
 
         auto newPopupItem = std::make_unique<NewPopupItem>(text);
