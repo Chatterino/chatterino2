@@ -20,6 +20,7 @@
 - Dev: Refactor `Image` & Image's `Frames`. (#4773)
 - Dev: Add `WindowManager::getLastSelectedWindow()` to replace `getMainWindow()`. (#4816)
 - Dev: Clarify signal connection lifetimes where applicable. (#4818)
+- Dev: Laid the groundwork for advanced input completion strategies. (#4639)
 
 ## 2.4.5
 
@@ -87,7 +88,6 @@
 - Dev: Removed `getApp` and `getSettings` calls from message rendering. (#4535)
 - Dev: Get the default browser executable instead of the entire command line when opening incognito links. (#4745)
 - Dev: Removed unused code hidden behind the USEWEBENGINE define (#4757)
-- Dev: Laid the groundwork for advanced input completion strategies. (#4639)
 
 ## 2.4.4
 
