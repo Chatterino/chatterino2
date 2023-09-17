@@ -13,6 +13,7 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/Button.hpp"
 #include "widgets/helper/ChannelView.hpp"
+#include "widgets/helper/InvisibleSizeGrip.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitInput.hpp"
@@ -84,9 +85,12 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     this->ui_.threadView->setMinimumSize(400, 100);
     this->ui_.threadView->setSizePolicy(QSizePolicy::Expanding,
                                         QSizePolicy::Expanding);
-    this->ui_.threadView->mouseDown.connect([this](QMouseEvent *) {
-        this->giveFocus(Qt::MouseFocusReason);
-    });
+    // We can safely ignore this signal's connection since threadView will always be deleted before
+    // the ReplyThreadPopup
+    std::ignore =
+        this->ui_.threadView->mouseDown.connect([this](QMouseEvent *) {
+            this->giveFocus(Qt::MouseFocusReason);
+        });
 
     // Create SplitInput with inline replying disabled
     this->ui_.replyInput =
@@ -97,8 +101,10 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
             this->updateInputUI();
         }));
 
-    // clear SplitInput selection when selecting in ChannelView
-    this->ui_.threadView->selectionChanged.connect([this]() {
+    // We can safely ignore this signal's connection since threadView will always be deleted before
+    // the ReplyThreadPopup
+    std::ignore = this->ui_.threadView->selectionChanged.connect([this]() {
+        // clear SplitInput selection when selecting in ChannelView
         if (this->ui_.replyInput->hasSelection())
         {
             this->ui_.replyInput->clearSelection();
@@ -106,15 +112,19 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     });
 
     // clear ChannelView selection when selecting in SplitInput
-    this->ui_.replyInput->selectionChanged.connect([this]() {
+    // We can safely ignore this signal's connection since replyInput will always be deleted before
+    // the ReplyThreadPopup
+    std::ignore = this->ui_.replyInput->selectionChanged.connect([this]() {
         if (this->ui_.threadView->hasSelection())
         {
             this->ui_.threadView->clearSelection();
         }
     });
 
-    auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
-                      .setLayoutType<QVBoxLayout>();
+    auto layers = LayoutCreator<QWidget>(this->getLayoutContainer())
+                      .setLayoutType<QGridLayout>()
+                      .withoutMargin();
+    auto layout = layers.emplace<QVBoxLayout>();
 
     layout->setSpacing(0);
     // provide draggable margin if frameless
@@ -167,6 +177,13 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
 
     layout->addWidget(this->ui_.threadView, 1);
     layout->addWidget(this->ui_.replyInput);
+
+    // size grip
+    if (closeAutomatically)
+    {
+        layers->addWidget(new InvisibleSizeGrip(this), 0, 0,
+                          Qt::AlignRight | Qt::AlignBottom);
+    }
 }
 
 void ReplyThreadPopup::setThread(std::shared_ptr<MessageThread> thread)

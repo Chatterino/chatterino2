@@ -97,25 +97,15 @@ TwitchChannel::TwitchChannel(const QString &name)
         }));
 
     this->refreshPubSub();
-    this->userStateChanged.connect([this] {
+    // We can safely ignore this signal connection since it's a private signal, meaning
+    // it will only ever be invoked by TwitchChannel itself
+    std::ignore = this->userStateChanged.connect([this] {
         this->refreshPubSub();
     });
 
-    // room id loaded -> refresh live status
-    this->roomIdChanged.connect([this]() {
-        this->refreshPubSub();
-        this->refreshBadges();
-        this->refreshCheerEmotes();
-        this->refreshFFZChannelEmotes(false);
-        this->refreshBTTVChannelEmotes(false);
-        this->refreshSevenTVChannelEmotes(false);
-        this->joinBttvChannel();
-        this->listenSevenTVCosmetics();
-        getIApp()->getTwitchLiveController()->add(
-            std::dynamic_pointer_cast<TwitchChannel>(shared_from_this()));
-    });
-
-    this->connected.connect([this]() {
+    // We can safely ignore this signal connection this has no external dependencies - once the signal
+    // is destroyed, it will no longer be able to fire
+    std::ignore = this->connected.connect([this]() {
         if (this->roomId().isEmpty())
         {
             // If we get a reconnected event when the room id is not set, we
@@ -128,18 +118,7 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->loadRecentMessagesReconnect();
     });
 
-    this->messageRemovedFromStart.connect([this](MessagePtr &msg) {
-        if (msg->replyThread)
-        {
-            if (msg->replyThread->liveCount(msg) == 0)
-            {
-                this->threads_.erase(msg->replyThread->rootId());
-            }
-        }
-    });
-
     // timers
-
     QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [this] {
         this->refreshChatters();
     });
@@ -541,6 +520,20 @@ void TwitchChannel::showLoginMessage()
     this->addMessage(builder.release());
 }
 
+void TwitchChannel::roomIdChanged()
+{
+    this->refreshPubSub();
+    this->refreshBadges();
+    this->refreshCheerEmotes();
+    this->refreshFFZChannelEmotes(false);
+    this->refreshBTTVChannelEmotes(false);
+    this->refreshSevenTVChannelEmotes(false);
+    this->joinBttvChannel();
+    this->listenSevenTVCosmetics();
+    getIApp()->getTwitchLiveController()->add(
+        std::dynamic_pointer_cast<TwitchChannel>(shared_from_this()));
+}
+
 QString TwitchChannel::prepareMessage(const QString &message) const
 {
     auto app = getApp();
@@ -732,7 +725,7 @@ void TwitchChannel::setRoomId(const QString &id)
     if (*this->roomID_.accessConst() != id)
     {
         *this->roomID_.access() = id;
-        this->roomIdChanged.invoke();
+        this->roomIdChanged();
         this->loadRecentMessages();
     }
 }
@@ -1064,6 +1057,17 @@ bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
     this->replaceMessage(last, msg);
 
     return true;
+}
+
+void TwitchChannel::messageRemovedFromStart(const MessagePtr &msg)
+{
+    if (msg->replyThread)
+    {
+        if (msg->replyThread->liveCount(msg) == 0)
+        {
+            this->threads_.erase(msg->replyThread->rootId());
+        }
+    }
 }
 
 const QString &TwitchChannel::subscriptionUrl()

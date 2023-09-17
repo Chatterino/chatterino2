@@ -132,9 +132,9 @@ void ImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
     {
         str += emoteElement->getEmote()->getCopyString();
         str = TwitchEmotes::cleanUpEmoteCode(str);
-        if (this->hasTrailingSpace())
+        if (this->hasTrailingSpace() && to >= 2)
         {
-            str += " ";
+            str += ' ';
         }
     }
 }
@@ -224,9 +224,9 @@ void LayeredImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
     {
         // cleaning is taken care in call
         str += layeredEmoteElement->getCleanCopyString();
-        if (this->hasTrailingSpace())
+        if (this->hasTrailingSpace() && to >= 2)
         {
-            str += " ";
+            str += ' ';
         }
     }
 }
@@ -423,9 +423,9 @@ void TextLayoutElement::addCopyTextToString(QString &str, uint32_t from,
 {
     str += this->getText().mid(from, to - from);
 
-    if (this->hasTrailingSpace())
+    if (this->hasTrailingSpace() && to > this->getText().length())
     {
-        str += " ";
+        str += ' ';
     }
 }
 
