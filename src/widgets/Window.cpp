@@ -492,9 +492,8 @@ void Window::addShortcuts()
              return "";
          }},
         {"openQuickSwitcher",
-         [](std::vector<QString>) -> QString {
-             auto quickSwitcher =
-                 new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
+         [this](std::vector<QString>) -> QString {
+             auto *quickSwitcher = new QuickSwitcherPopup(this);
              quickSwitcher->show();
              return "";
          }},
