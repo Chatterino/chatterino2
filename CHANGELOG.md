@@ -4,12 +4,15 @@
 
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Minor: The account switcher is now styled to match your theme. (#4817)
+- Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
 - Bugfix: Fixed a performance issue when displaying replies to certain messages. (#4807)
 - Bugfix: Fixed a data race when disconnecting from Twitch PubSub. (#4771)
 - Bugfix: Fixed `/shoutout` command not working with usernames starting with @'s (e.g. `/shoutout @forsen`). (#4800)
+- Bugfix: Fixed Usercard popup not floating on tiling WMs on Linux when "Automatically close user popup when it loses focus" setting is enabled. (#3511)
 - Bugfix: Fixed selection of tabs after closing a tab when using "Live Tabs Only". (#4770)
 - Bugfix: Fixed input in reply thread popup losing focus when dragging. (#4815)
 - Bugfix: Fixed the Quick Switcher (CTRL+K) from sometimes showing up on the wrong window. (#4819)
+- Bugfix: Fixed too much text being copied when copying chat messages. (#4812)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 - Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
@@ -18,6 +21,7 @@
 - Dev: Fix clang-tidy `cppcoreguidelines-pro-type-member-init` warnings. (#4426)
 - Dev: Immediate layout for invisible `ChannelView`s is skipped. (#4811)
 - Dev: Refactor `Image` & Image's `Frames`. (#4773)
+- Dev: Add `WindowManager::getLastSelectedWindow()` to replace `getMainWindow()`. (#4816)
 - Dev: Clarify signal connection lifetimes where applicable. (#4818)
 
 ## 2.4.5

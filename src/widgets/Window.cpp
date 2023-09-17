@@ -103,8 +103,10 @@ bool Window::event(QEvent *event)
 {
     switch (event->type())
     {
-        case QEvent::WindowActivate:
+        case QEvent::WindowActivate: {
+            getApp()->windows->selectedWindow_ = this;
             break;
+        }
 
         case QEvent::WindowDeactivate: {
             auto page = this->notebook_->getOrAddSelectedPage();
@@ -141,6 +143,11 @@ void Window::closeEvent(QCloseEvent *)
         app->windows->save();
         app->windows->closeAll();
     }
+
+    // Ensure selectedWindow_ is never an invalid pointer.
+    // WindowManager will return the main window if no window is pointed to by
+    // `selectedWindow_`.
+    getApp()->windows->selectedWindow_ = nullptr;
 
     this->closed.invoke();
 
