@@ -18,7 +18,8 @@ NicknamesPage::NicknamesPage()
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
     layout.emplace<QLabel>(
-        "Nicknames do not work with features such as user highlights."
+        "Nicknames do not work with features such as user highlights and "
+        "filters."
         "\nWith those features you will still need to use the user's original "
         "name.");
     EditableModelView *view =
