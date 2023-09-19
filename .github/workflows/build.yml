@@ -307,8 +307,7 @@ jobs:
             libboost-dev, libboost-system-dev, libboost-filesystem-dev,
             libssl-dev,
             rapidjson-dev,
-            libbenchmark-dev,
-            libavif-dev
+            libbenchmark-dev
 
       - name: clang-tidy-review upload
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'

@@ -69,8 +69,7 @@ jobs:
               libxcb-image0 \
               libxcb-keysyms1 \
               libxcb-render-util0 \
-              libxcb-xinerama0 \
-              libavif-dev
+              libxcb-xinerama0
 
       - name: Create build directory (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')

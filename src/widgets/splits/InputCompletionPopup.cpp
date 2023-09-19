@@ -82,11 +82,11 @@ std::vector<CompletionEmote> buildCompletionEmoteList(const QString &text,
 
         if (tc)
         {
-            if (const auto map =
-                    getApp()->seventvPersonalEmotes->getEmoteSetForUser(
-                        getApp()->accounts->twitch.getCurrent()->getUserId()))
+            for (const auto &map :
+                 getApp()->seventvPersonalEmotes->getEmoteSetsForUser(
+                     getApp()->accounts->twitch.getCurrent()->getUserId()))
             {
-                addEmotes(emotes, *map.get(), text, "Personal 7TV");
+                addEmotes(emotes, *map, text, "Personal 7TV");
             }
 
             // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.

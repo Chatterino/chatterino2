@@ -218,10 +218,10 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     }
 
     // 7TV Personal
-    if (const auto map = getApp()->seventvPersonalEmotes->getEmoteSetForUser(
-            getApp()->accounts->twitch.getCurrent()->getUserId()))
+    for (const auto &map : getApp()->seventvPersonalEmotes->getEmoteSetsForUser(
+             getApp()->accounts->twitch.getCurrent()->getUserId()))
     {
-        for (const auto &emote : *map.get())
+        for (const auto &emote : *map)
         {
             addString(emote.first.string,
                       TaggedString::Type::SeventvPersonalEmote);
