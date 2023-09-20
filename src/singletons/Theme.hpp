@@ -6,16 +6,44 @@
 
 #include <pajlada/settings/setting.hpp>
 #include <QColor>
+#include <QJsonObject>
 #include <QPixmap>
+#include <QString>
+#include <QTimer>
+#include <QVariant>
+
+#include <memory>
+#include <optional>
+#include <vector>
 
 namespace chatterino {
 
 class WindowManager;
 
+struct ThemeDescriptor {
+    QString key;
+
+    // Path to the theme on disk
+    // Can be a Qt resource path
+    QString path;
+
+    // Name of the theme
+    QString name;
+
+    bool custom{};
+};
+
 class Theme final : public Singleton
 {
 public:
-    Theme();
+    static const std::vector<ThemeDescriptor> builtInThemes;
+
+    // The built in theme that will be used if some theme parsing fails
+    static const ThemeDescriptor fallbackTheme;
+
+    static const int AUTO_RELOAD_INTERVAL_MS = 500;
+
+    void initialize(Settings &settings, Paths &paths) final;
 
     bool isLightTheme() const;
 
@@ -114,13 +142,38 @@ public:
     void normalizeColor(QColor &color) const;
     void update();
 
+    bool isAutoReloading() const;
+    void setAutoReload(bool autoReload);
+
+    /**
+     * Return a list of available themes
+     **/
+    std::vector<std::pair<QString, QVariant>> availableThemes() const;
+
     pajlada::Signals::NoArgSignal updated;
 
     QStringSetting themeName{"/appearance/theme/name", "Dark"};
 
 private:
     bool isLight_ = false;
-    void actuallyUpdate(double multiplier);
+
+    std::vector<ThemeDescriptor> availableThemes_;
+
+    QString currentThemePath_;
+    std::unique_ptr<QTimer> themeReloadTimer_;
+    // This will only be populated when auto-reloading themes
+    QJsonObject currentThemeJson_;
+
+    /**
+     * Figure out which themes are available in the Themes directory
+     *
+     * NOTE: This is currently not built to be reloadable
+     **/
+    void loadAvailableThemes();
+
+    std::optional<ThemeDescriptor> findThemeByKey(const QString &key);
+
+    void parseFrom(const QJsonObject &root);
 
     pajlada::Signals::NoArgSignal repaintVisibleChatWidgets_;
 

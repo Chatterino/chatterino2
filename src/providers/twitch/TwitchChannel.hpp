@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <optional>
 #include <unordered_map>
 
 namespace chatterino {
@@ -120,7 +121,6 @@ public:
     virtual bool hasHighRateLimit() const override;
     virtual bool canReconnect() const override;
     virtual void reconnect() override;
-    void refreshTitle();
     void createClip();
 
     // Data
@@ -191,10 +191,25 @@ public:
     const std::unordered_map<QString, std::weak_ptr<MessageThread>> &threads()
         const;
 
-    // Signals
-    pajlada::Signals::NoArgSignal roomIdChanged;
+    // Only TwitchChannel may invoke this signal
     pajlada::Signals::NoArgSignal userStateChanged;
-    pajlada::Signals::NoArgSignal liveStatusChanged;
+
+    /**
+     * This signals fires whenever the live status is changed
+     *
+     * Streams are counted as offline by default, so if a stream does not go online
+     * this signal will never fire
+     **/
+    pajlada::Signals::Signal<bool> liveStatusChanged;
+
+    /**
+     * This signal fires whenever the stream status is changed
+     *
+     * This includes when the stream goes from offline to online,
+     * or the viewer count changes, or the title has been updated
+     **/
+    pajlada::Signals::NoArgSignal streamStatusChanged;
+
     pajlada::Signals::NoArgSignal roomModesChanged;
 
     // Channel point rewards
@@ -205,29 +220,55 @@ public:
     boost::optional<ChannelPointReward> channelPointReward(
         const QString &rewardId) const;
 
-private:
-    struct NameOptions {
-        QString displayName;
-        QString localizedName;
-    } nameOptions;
+    // Live status
+    void updateStreamStatus(const std::optional<HelixStream> &helixStream);
+    void updateStreamTitle(const QString &title);
+
+    void updateDisplayName(const QString &displayName);
 
 private:
-    // Methods
-    void refreshLiveStatus();
-    void parseLiveStatus(bool live, const HelixStream &stream);
+    struct NameOptions {
+        // displayName is the non-CJK-display name for this user
+        // This will always be the same as their `name_`, but potentially with different casing
+        QString displayName;
+
+        // localizedName is their display name that *may* contain CJK characters
+        // If the display name does not contain any CJK characters, this will be
+        // the same as `displayName`
+        QString localizedName;
+
+        // actualDisplayName is the raw display name string received from Twitch
+        QString actualDisplayName;
+    } nameOptions;
+
     void refreshPubSub();
     void refreshChatters();
     void refreshBadges();
     void refreshCheerEmotes();
     void loadRecentMessages();
     void loadRecentMessagesReconnect();
-    void fetchDisplayName();
     void cleanUpReplyThreads();
     void showLoginMessage();
+
+    /// roomIdChanged is called whenever this channel's ID has been changed
+    /// This should only happen once per channel, whenever the ID goes from unset to set
+    void roomIdChanged();
+
     /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
     void joinBttvChannel() const;
+    /**
+     * Indicates an activity to 7TV in this channel for this user.
+     * This is done at most once every 60s.
+     */
+    void updateSevenTVActivity();
+    void listenSevenTVCosmetics();
 
-    void setLive(bool newLiveStatus);
+    /**
+     * @brief Sets the live status of this Twitch channel
+     *
+     * Returns true if the live status changed with this call
+     **/
+    bool setLive(bool newLiveStatus);
     void setMod(bool value);
     void setVIP(bool value);
     void setStaff(bool value);
@@ -236,7 +277,16 @@ private:
     void setDisplayName(const QString &name);
     void setLocalizedName(const QString &name);
 
+    /**
+     * Returns the display name of the user
+     *
+     * If the display name contained chinese, japenese, or korean characters, the user's login name is returned instead
+     **/
     const QString &getDisplayName() const override;
+
+    /**
+     * Returns the localized name of the user
+     **/
     const QString &getLocalizedName() const override;
 
     QString prepareMessage(const QString &message) const;
@@ -280,13 +330,15 @@ private:
     const QString subscriptionUrl_;
     const QString channelUrl_;
     const QString popoutPlayerUrl_;
-    int chatterCount_;
+    int chatterCount_{};
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
     std::atomic_flag loadingRecentMessages_ = ATOMIC_FLAG_INIT;
     std::unordered_map<QString, std::weak_ptr<MessageThread>> threads_;
 
 protected:
+    void messageRemovedFromStart(const MessagePtr &msg) override;
+
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;
@@ -328,7 +380,13 @@ private:
      * The index of the twitch connection in
      * 7TV's user representation.
      */
-    size_t seventvUserTwitchConnectionIndex_;
+    size_t seventvUserTwitchConnectionIndex_{};
+
+    /**
+     * The next moment in time to signal activity in this channel to 7TV.
+     * Or: Up until this moment we don't need to send activity.
+     */
+    QDateTime nextSeventvActivity_;
 
     /** The platform of the last live emote update ("7TV", "BTTV", "FFZ"). */
     QString lastLiveUpdateEmotePlatform_;

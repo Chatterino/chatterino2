@@ -3,7 +3,6 @@
 #include "common/FlagsEnum.hpp"
 #include "messages/Link.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QPen>
 #include <QPoint>
@@ -21,12 +20,19 @@ class Image;
 using ImagePtr = std::shared_ptr<Image>;
 enum class FontStyle : uint8_t;
 enum class MessageElementFlag : int64_t;
+struct MessageColors;
 
-class MessageLayoutElement : boost::noncopyable
+class MessageLayoutElement
 {
 public:
     MessageLayoutElement(MessageElement &creator_, const QSize &size);
     virtual ~MessageLayoutElement();
+
+    MessageLayoutElement(const MessageLayoutElement &) = delete;
+    MessageLayoutElement &operator=(const MessageLayoutElement &) = delete;
+
+    MessageLayoutElement(MessageLayoutElement &&) = delete;
+    MessageLayoutElement &operator=(MessageLayoutElement &&) = delete;
 
     bool reversedNeutral = false;
 
@@ -44,7 +50,8 @@ public:
     virtual void addCopyTextToString(QString &str, uint32_t from = 0,
                                      uint32_t to = UINT32_MAX) const = 0;
     virtual int getSelectionIndexCount() const = 0;
-    virtual void paint(QPainter &painter) = 0;
+    virtual void paint(QPainter &painter,
+                       const MessageColors &messageColors) = 0;
     virtual void paintAnimated(QPainter &painter, int yOffset) = 0;
     virtual int getMouseOverIndex(const QPoint &abs) const = 0;
     virtual int getXFromIndex(int index) = 0;
@@ -75,7 +82,7 @@ protected:
     void addCopyTextToString(QString &str, uint32_t from = 0,
                              uint32_t to = UINT32_MAX) const override;
     int getSelectionIndexCount() const override;
-    void paint(QPainter &painter) override;
+    void paint(QPainter &painter, const MessageColors &messageColors) override;
     void paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
@@ -94,7 +101,7 @@ protected:
     void addCopyTextToString(QString &str, uint32_t from = 0,
                              uint32_t to = UINT32_MAX) const override;
     int getSelectionIndexCount() const override;
-    void paint(QPainter &painter) override;
+    void paint(QPainter &painter, const MessageColors &messageColors) override;
     void paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
@@ -110,7 +117,7 @@ public:
                                      const QSize &size, QColor color);
 
 protected:
-    void paint(QPainter &painter) override;
+    void paint(QPainter &painter, const MessageColors &messageColors) override;
 
 private:
     QColor color_;
@@ -125,7 +132,7 @@ public:
                                            int padding);
 
 protected:
-    void paint(QPainter &painter) override;
+    void paint(QPainter &painter, const MessageColors &messageColors) override;
 
 private:
     const QColor color_;
@@ -147,7 +154,7 @@ protected:
     void addCopyTextToString(QString &str, uint32_t from = 0,
                              uint32_t to = UINT32_MAX) const override;
     int getSelectionIndexCount() const override;
-    void paint(QPainter &painter) override;
+    void paint(QPainter &painter, const MessageColors &messageColors) override;
     void paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
@@ -171,7 +178,7 @@ protected:
     void addCopyTextToString(QString &str, uint32_t from = 0,
                              uint32_t to = UINT32_MAX) const override;
     int getSelectionIndexCount() const override;
-    void paint(QPainter &painter) override;
+    void paint(QPainter &painter, const MessageColors &messageColors) override;
     void paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
@@ -189,7 +196,7 @@ public:
                             float radius, float neededMargin);
 
 protected:
-    void paint(QPainter &painter) override;
+    void paint(QPainter &painter, const MessageColors &messageColors) override;
     void paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;

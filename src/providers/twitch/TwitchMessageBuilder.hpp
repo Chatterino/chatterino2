@@ -53,6 +53,7 @@ public:
     TwitchChannel *twitchChannel;
 
     [[nodiscard]] bool isIgnored() const override;
+    bool isIgnoredReply() const;
     void triggerHighlights() override;
     MessagePtr build() override;
 
@@ -84,6 +85,8 @@ public:
     static void listOfUsersSystemMessage(
         QString prefix, const std::vector<HelixModerator> &users,
         Channel *channel, MessageBuilder *builder);
+
+    static MessagePtr buildHypeChatMessage(Communi::IrcPrivateMessage *message);
 
     // Shares some common logic from SharedMessageBuilder::parseBadgeTag
     static std::unordered_map<QString, QString> parseBadgeInfoTag(
@@ -124,7 +127,7 @@ private:
     QString roomID_;
     bool hasBits_ = false;
     QString bits;
-    int bitsLeft;
+    int bitsLeft{};
     bool bitsStacked = false;
     bool historicalMessage_ = false;
     std::shared_ptr<MessageThread> thread_;

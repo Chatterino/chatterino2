@@ -2,11 +2,13 @@
 
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QDebug>
 #include <QMimeData>
 #include <QMimeDatabase>
+#include <QObject>
 
 namespace chatterino {
 
@@ -20,6 +22,19 @@ ResizingTextEdit::ResizingTextEdit()
 
     QObject::connect(this, &QTextEdit::textChanged, this,
                      &QWidget::updateGeometry);
+
+    QObject::connect(this, &QTextEdit::cursorPositionChanged, [this]() {
+        // If tab was pressed and we're completing/replacing the current word,
+        // this code will not even be called, see ResizingTextEdit::keyPressEvent
+
+        if (!this->completionInProgress_)
+        {
+            return;
+        }
+        qCDebug(chatterinoCommon)
+            << "Finishing completion because cursor moved";
+        this->completionInProgress_ = false;
+    });
 
     // Whenever the setting for emote completion changes, force a
     // refresh on the completion model the next time "Tab" is pressed
@@ -158,15 +173,17 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
                 currentCompletionPrefix, this->isFirstWord());
             this->completer_->setModel(completionModel);
             this->completionInProgress_ = true;
-            this->completer_->setCompletionPrefix(currentCompletionPrefix);
-
-            for (int i = 0; this->completer_->setCurrentRow(i); i++)
             {
-                qDebug() << this->completer_->currentCompletion()
-                         << " is match number " << i;
+                // this blocks cursor movement events from resetting tab completion
+                QSignalBlocker dontTriggerCursorMovement(this);
+                this->completer_->setCompletionPrefix(currentCompletionPrefix);
+                for (int i = 0; this->completer_->setCurrentRow(i); i++)
+                {
+                    qDebug() << this->completer_->currentCompletion()
+                             << " is match number " << i;
+                }
+                this->completer_->complete();
             }
-            this->completer_->setCurrentRow(0);
-            this->completer_->complete();
             return;
         }
 
@@ -199,13 +216,18 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             qDebug() << "lmao" << this->completer_->setCurrentRow(0)
                      << this->completer_->completionCount();
         }
-
-        qDebug() << "dun?" << this->completer_->currentRow();
-        this->completer_->complete();
-        qDebug() << "dun?!" << this->completer_->currentRow();
-        for (const auto &e : completionModel->items_)
         {
-            qDebug() << "-" << e.string << e.type;
+            // this blocks cursor movement events from updating tab completion
+            QSignalBlocker dontTriggerCursorMovement(this);
+            qDebug() << "dun?" << this->completer_->currentRow();
+            this->completer_->complete();
+            qDebug() << "dun?!" << this->completer_->currentRow();
+            /*
+            for (const auto &e : completionModel->items_)
+            {
+                qDebug() << "-" << e.string << e.type;
+            }
+            */
         }
         return;
     }

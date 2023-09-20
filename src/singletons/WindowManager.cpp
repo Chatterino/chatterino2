@@ -243,11 +243,15 @@ Window &WindowManager::getMainWindow()
     return *this->mainWindow_;
 }
 
-Window &WindowManager::getSelectedWindow()
+Window *WindowManager::getLastSelectedWindow() const
 {
     assertInGuiThread();
+    if (this->selectedWindow_ == nullptr)
+    {
+        return this->mainWindow_;
+    }
 
-    return *this->selectedWindow_;
+    return this->selectedWindow_;
 }
 
 Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
@@ -344,9 +348,13 @@ void WindowManager::setEmotePopupPos(QPoint pos)
 
 void WindowManager::initialize(Settings &settings, Paths &paths)
 {
+    (void)paths;
     assertInGuiThread();
 
-    getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
+    // We can safely ignore this signal connection since both Themes and WindowManager
+    // share the Application state lifetime
+    // NOTE: APPLICATION_LIFETIME
+    std::ignore = getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
         this->repaintVisibleChatWidgets();
     });
 
@@ -631,6 +639,10 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             }
         }
         break;
+        case Channel::Type::Misc: {
+            obj.insert("type", "misc");
+            obj.insert("name", channel.get()->getName());
+        }
     }
 }
 
@@ -675,6 +687,10 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     {
         return Irc::instance().getOrAddChannel(descriptor.server_,
                                                descriptor.channelName_);
+    }
+    else if (descriptor.type_ == "misc")
+    {
+        return app->twitch->getChannelOrEmpty(descriptor.channelName_);
     }
 
     return Channel::getEmpty();

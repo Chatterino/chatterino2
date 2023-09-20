@@ -1,4 +1,4 @@
-#include "ReplyThreadPopup.hpp"
+#include "widgets/dialogs/ReplyThreadPopup.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
@@ -7,15 +7,18 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageThread.hpp"
-#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
+#include "widgets/helper/Button.hpp"
 #include "widgets/helper/ChannelView.hpp"
-#include "widgets/helper/ResizingTextEdit.hpp"
+#include "widgets/helper/InvisibleSizeGrip.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitInput.hpp"
+
+#include <QCheckBox>
 
 const QString TEXT_TITLE("Reply Thread - @%1 in #%2");
 
@@ -27,7 +30,6 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     , split_(split)
 {
     this->setWindowTitle(QStringLiteral("Reply Thread"));
-    this->setStayInScreenRect(true);
 
     HotkeyController::HotkeyMap actions{
         {"delete",
@@ -60,6 +62,11 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
              }
              return "";
          }},
+        {"pin",
+         [this](std::vector<QString> /*arguments*/) -> QString {
+             this->togglePinned();
+             return "";
+         }},
 
         // these actions make no sense in the context of a reply thread, so they aren't implemented
         {"execModeratorAction", nullptr},
@@ -72,18 +79,18 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 
-    auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
-                      .setLayoutType<QVBoxLayout>();
-
     // initialize UI
     this->ui_.threadView =
         new ChannelView(this, this->split_, ChannelView::Context::ReplyThread);
     this->ui_.threadView->setMinimumSize(400, 100);
     this->ui_.threadView->setSizePolicy(QSizePolicy::Expanding,
                                         QSizePolicy::Expanding);
-    this->ui_.threadView->mouseDown.connect([this](QMouseEvent *) {
-        this->giveFocus(Qt::MouseFocusReason);
-    });
+    // We can safely ignore this signal's connection since threadView will always be deleted before
+    // the ReplyThreadPopup
+    std::ignore =
+        this->ui_.threadView->mouseDown.connect([this](QMouseEvent *) {
+            this->giveFocus(Qt::MouseFocusReason);
+        });
 
     // Create SplitInput with inline replying disabled
     this->ui_.replyInput =
@@ -94,8 +101,10 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
             this->updateInputUI();
         }));
 
-    // clear SplitInput selection when selecting in ChannelView
-    this->ui_.threadView->selectionChanged.connect([this]() {
+    // We can safely ignore this signal's connection since threadView will always be deleted before
+    // the ReplyThreadPopup
+    std::ignore = this->ui_.threadView->selectionChanged.connect([this]() {
+        // clear SplitInput selection when selecting in ChannelView
         if (this->ui_.replyInput->hasSelection())
         {
             this->ui_.replyInput->clearSelection();
@@ -103,19 +112,78 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     });
 
     // clear ChannelView selection when selecting in SplitInput
-    this->ui_.replyInput->selectionChanged.connect([this]() {
+    // We can safely ignore this signal's connection since replyInput will always be deleted before
+    // the ReplyThreadPopup
+    std::ignore = this->ui_.replyInput->selectionChanged.connect([this]() {
         if (this->ui_.threadView->hasSelection())
         {
             this->ui_.threadView->clearSelection();
         }
     });
 
+    auto layers = LayoutCreator<QWidget>(this->getLayoutContainer())
+                      .setLayoutType<QGridLayout>()
+                      .withoutMargin();
+    auto layout = layers.emplace<QVBoxLayout>();
+
     layout->setSpacing(0);
     // provide draggable margin if frameless
     auto marginPx = closeAutomatically ? 15 : 1;
     layout->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
+
+    // Top Row
+    bool addCheckbox = getSettings()->enableThreadHighlight;
+    if (addCheckbox || closeAutomatically)
+    {
+        auto *hbox = new QHBoxLayout();
+
+        if (addCheckbox)
+        {
+            this->ui_.notificationCheckbox =
+                new QCheckBox("Subscribe to thread", this);
+            QObject::connect(this->ui_.notificationCheckbox,
+                             &QCheckBox::toggled, [this](bool checked) {
+                                 if (!this->thread_ ||
+                                     this->thread_->subscribed() == checked)
+                                 {
+                                     return;
+                                 }
+
+                                 if (checked)
+                                 {
+                                     this->thread_->markSubscribed();
+                                 }
+                                 else
+                                 {
+                                     this->thread_->markUnsubscribed();
+                                 }
+                             });
+            hbox->addWidget(this->ui_.notificationCheckbox, 1);
+            this->ui_.notificationCheckbox->setFocusPolicy(Qt::NoFocus);
+        }
+
+        if (closeAutomatically)
+        {
+            hbox->addWidget(this->createPinButton(), 0, Qt::AlignRight);
+            hbox->setContentsMargins(0, 0, 0, 5);
+        }
+        else
+        {
+            hbox->setContentsMargins(10, 0, 0, 4);
+        }
+
+        layout->addLayout(hbox, 1);
+    }
+
     layout->addWidget(this->ui_.threadView, 1);
     layout->addWidget(this->ui_.replyInput);
+
+    // size grip
+    if (closeAutomatically)
+    {
+        layers->addWidget(new InvisibleSizeGrip(this), 0, 0,
+                          Qt::AlignRight | Qt::AlignBottom);
+    }
 }
 
 void ReplyThreadPopup::setThread(std::shared_ptr<MessageThread> thread)
@@ -124,6 +192,24 @@ void ReplyThreadPopup::setThread(std::shared_ptr<MessageThread> thread)
     this->ui_.replyInput->setReply(this->thread_);
     this->addMessagesFromThread();
     this->updateInputUI();
+
+    if (!this->thread_) [[unlikely]]
+    {
+        this->replySubscriptionSignal_ = boost::signals2::scoped_connection{};
+        return;
+    }
+
+    auto updateCheckbox = [this]() {
+        if (this->ui_.notificationCheckbox)
+        {
+            this->ui_.notificationCheckbox->setChecked(
+                this->thread_->subscribed());
+        }
+    };
+    updateCheckbox();
+
+    this->replySubscriptionSignal_ =
+        this->thread_->subscriptionUpdated.connect(updateCheckbox);
 }
 
 void ReplyThreadPopup::addMessagesFromThread()
@@ -138,26 +224,25 @@ void ReplyThreadPopup::addMessagesFromThread()
     this->setWindowTitle(TEXT_TITLE.arg(this->thread_->root()->loginName,
                                         sourceChannel->getName()));
 
-    ChannelPtr virtualChannel;
     if (sourceChannel->isTwitchChannel())
     {
-        virtualChannel =
+        this->virtualChannel_ =
             std::make_shared<TwitchChannel>(sourceChannel->getName());
     }
     else
     {
-        virtualChannel = std::make_shared<Channel>(sourceChannel->getName(),
-                                                   Channel::Type::None);
+        this->virtualChannel_ = std::make_shared<Channel>(
+            sourceChannel->getName(), Channel::Type::None);
     }
 
-    this->ui_.threadView->setChannel(virtualChannel);
+    this->ui_.threadView->setChannel(this->virtualChannel_);
     this->ui_.threadView->setSourceChannel(sourceChannel);
 
     auto overrideFlags =
         boost::optional<MessageFlags>(this->thread_->root()->flags);
     overrideFlags->set(MessageFlag::DoNotLog);
 
-    virtualChannel->addMessage(this->thread_->root(), overrideFlags);
+    this->virtualChannel_->addMessage(this->thread_->root(), overrideFlags);
     for (const auto &msgRef : this->thread_->replies())
     {
         if (auto msg = msgRef.lock())
@@ -165,24 +250,24 @@ void ReplyThreadPopup::addMessagesFromThread()
             auto overrideFlags = boost::optional<MessageFlags>(msg->flags);
             overrideFlags->set(MessageFlag::DoNotLog);
 
-            virtualChannel->addMessage(msg, overrideFlags);
+            this->virtualChannel_->addMessage(msg, overrideFlags);
         }
     }
 
     this->messageConnection_ =
         std::make_unique<pajlada::Signals::ScopedConnection>(
-            sourceChannel->messageAppended.connect(
-                [this, virtualChannel](MessagePtr &message, auto) {
-                    if (message->replyThread == this->thread_)
-                    {
-                        auto overrideFlags =
-                            boost::optional<MessageFlags>(message->flags);
-                        overrideFlags->set(MessageFlag::DoNotLog);
+            sourceChannel->messageAppended.connect([this](MessagePtr &message,
+                                                          auto) {
+                if (message->replyThread == this->thread_)
+                {
+                    auto overrideFlags =
+                        boost::optional<MessageFlags>(message->flags);
+                    overrideFlags->set(MessageFlag::DoNotLog);
 
-                        // same reply thread, add message
-                        virtualChannel->addMessage(message, overrideFlags);
-                    }
-                }));
+                    // same reply thread, add message
+                    this->virtualChannel_->addMessage(message, overrideFlags);
+                }
+            }));
 }
 
 void ReplyThreadPopup::updateInputUI()

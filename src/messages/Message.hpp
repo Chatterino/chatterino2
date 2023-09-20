@@ -3,7 +3,6 @@
 #include "common/FlagsEnum.hpp"
 #include "util/QStringHash.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <QColor>
 #include <QTime>
 
@@ -46,7 +45,7 @@ enum class MessageFlag : int64_t {
     FirstMessage = (1LL << 23),
     ReplyMessage = (1LL << 24),
     ElevatedMessage = (1LL << 25),
-    ParticipatedThread = (1LL << 26),
+    SubscribedThread = (1LL << 26),
     CheerMessage = (1LL << 27),
     LiveUpdatesAdd = (1LL << 28),
     LiveUpdatesRemove = (1LL << 29),
@@ -54,9 +53,15 @@ enum class MessageFlag : int64_t {
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
-struct Message : boost::noncopyable {
+struct Message {
     Message();
     ~Message();
+
+    Message(const Message &) = delete;
+    Message &operator=(const Message &) = delete;
+
+    Message(Message &&) = delete;
+    Message &operator=(Message &&) = delete;
 
     // Making this a mutable means that we can update a messages flags,
     // while still keeping Message constant. This means that a message's flag

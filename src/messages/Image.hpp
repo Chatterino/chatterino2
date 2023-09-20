@@ -3,8 +3,6 @@
 #include "common/Aliases.hpp"
 #include "common/Common.hpp"
 
-#include <boost/noncopyable.hpp>
-#include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QPixmap>
@@ -18,14 +16,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
-
-#ifdef CHATTERINO_TEST
-// When running tests, the ImageExpirationPool destructor can be called before
-// all images are deleted, leading to a use-after-free of its mutex. This
-// happens despite the lifetime of the ImageExpirationPool being (apparently)
-// static. Therefore, just disable it during testing.
-#    define DISABLE_IMAGE_EXPIRATION_POOL
-#endif
+#include <optional>
 
 namespace chatterino {
 namespace detail {
@@ -34,21 +25,28 @@ namespace detail {
         Image image;
         int duration;
     };
-    class Frames : boost::noncopyable
+    class Frames
     {
     public:
         Frames();
         Frames(QVector<Frame<QPixmap>> &&frames);
         ~Frames();
 
+        Frames(const Frames &) = delete;
+        Frames &operator=(const Frames &) = delete;
+
+        Frames(Frames &&) = delete;
+        Frames &operator=(Frames &&) = delete;
+
         void clear();
         bool empty() const;
         bool animated() const;
         void advance();
-        boost::optional<QPixmap> current() const;
-        boost::optional<QPixmap> first() const;
+        std::optional<QPixmap> current() const;
+        std::optional<QPixmap> first() const;
 
     private:
+        int64_t memoryUsage() const;
         void processOffset();
         QVector<Frame<QPixmap>> items_;
         int index_{0};
@@ -61,13 +59,19 @@ class Image;
 using ImagePtr = std::shared_ptr<Image>;
 
 /// This class is thread safe.
-class Image : public std::enable_shared_from_this<Image>, boost::noncopyable
+class Image : public std::enable_shared_from_this<Image>
 {
 public:
     // Maximum amount of RAM used by the image in bytes.
     static constexpr int maxBytesRam = 20 * 1024 * 1024;
 
     ~Image();
+
+    Image(const Image &) = delete;
+    Image &operator=(const Image &) = delete;
+
+    Image(Image &&) = delete;
+    Image &operator=(Image &&) = delete;
 
     static ImagePtr fromUrl(const Url &url, qreal scale = 1);
     static ImagePtr fromResourcePixmap(const QPixmap &pixmap, qreal scale = 1);
@@ -76,7 +80,7 @@ public:
     const Url &url() const;
     bool loaded() const;
     // either returns the current pixmap, or triggers loading it (lazy loading)
-    boost::optional<QPixmap> pixmapOrLoad() const;
+    std::optional<QPixmap> pixmapOrLoad() const;
     void load() const;
     qreal scale() const;
     bool isEmpty() const;
@@ -119,6 +123,7 @@ class ImageExpirationPool
 {
 private:
     friend class Image;
+    friend class CommandController;
 
     ImageExpirationPool();
     static ImageExpirationPool &instance();
@@ -134,9 +139,15 @@ private:
      */
     void freeOld();
 
+    /*
+     * Debug function that unloads all images in the pool. This is intended to
+     * test for possible memory leaks from tracked images.
+     */
+    void freeAll();
+
 private:
     // Timer to periodically run freeOld()
-    QTimer freeTimer_;
+    QTimer *freeTimer_;
     std::map<Image *, std::weak_ptr<Image>> allImages_;
     std::mutex mutex_;
 };

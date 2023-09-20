@@ -2,8 +2,8 @@
 
 #include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
+#include "messages/layouts/MessageLayoutContainer.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <QPixmap>
 
 #include <cinttypes>
@@ -17,6 +17,7 @@ using MessagePtr = std::shared_ptr<const Message>;
 struct Selection;
 struct MessageLayoutContainer;
 class MessageLayoutElement;
+struct MessagePaintContext;
 
 enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
@@ -31,11 +32,17 @@ enum class MessageLayoutFlag : uint8_t {
 };
 using MessageLayoutFlags = FlagsEnum<MessageLayoutFlag>;
 
-class MessageLayout : boost::noncopyable
+class MessageLayout
 {
 public:
     MessageLayout(MessagePtr message_);
     ~MessageLayout();
+
+    MessageLayout(const MessageLayout &) = delete;
+    MessageLayout &operator=(const MessageLayout &) = delete;
+
+    MessageLayout(MessageLayout &&) = delete;
+    MessageLayout &operator=(MessageLayout &&) = delete;
 
     const Message *getMessage();
     const MessagePtr &getMessagePtr() const;
@@ -48,9 +55,7 @@ public:
     bool layout(int width, float scale_, MessageElementFlags flags);
 
     // Painting
-    void paint(QPainter &painter, int width, int y, int messageIndex,
-               Selection &selection, bool isLastReadMessage,
-               bool isWindowFocused, bool isMentions);
+    void paint(const MessagePaintContext &ctx);
     void invalidateBuffer();
     void deleteBuffer();
     void deleteCache();
@@ -69,27 +74,30 @@ public:
     bool isReplyable() const;
 
 private:
+    // methods
+    void actuallyLayout(int width, MessageElementFlags flags);
+    void updateBuffer(QPixmap *buffer, const MessagePaintContext &ctx);
+
+    // Create new buffer if required, returning the buffer
+    QPixmap *ensureBuffer(QPainter &painter, int width);
+
     // variables
     MessagePtr message_;
-    std::shared_ptr<MessageLayoutContainer> container_;
-    std::shared_ptr<QPixmap> buffer_{};
+    MessageLayoutContainer container_;
+    std::unique_ptr<QPixmap> buffer_{};
     bool bufferValid_ = false;
 
     int height_ = 0;
-
     int currentLayoutWidth_ = -1;
     int layoutState_ = -1;
     float scale_ = -1;
-    unsigned int layoutCount_ = 0;
-    unsigned int bufferUpdatedCount_ = 0;
-
     MessageElementFlags currentWordFlags_;
 
-    int collapsedHeight_ = 32;
-
-    // methods
-    void actuallyLayout(int width, MessageElementFlags flags);
-    void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection);
+#ifdef FOURTF
+    // Debug counters
+    unsigned int layoutCount_ = 0;
+    unsigned int bufferUpdatedCount_ = 0;
+#endif
 };
 
 using MessageLayoutPtr = std::shared_ptr<MessageLayout>;

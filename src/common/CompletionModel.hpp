@@ -7,6 +7,8 @@
 #include <set>
 #include <shared_mutex>
 
+class InputCompletionTest;
+
 namespace chatterino {
 
 class Channel;
@@ -62,14 +64,14 @@ public:
 
     static bool compareStrings(const QString &a, const QString &b);
 
-    std::set<TaggedString> items_;
-
 private:
+    std::set<TaggedString> items_;
     mutable std::shared_mutex itemsMutex_;
 
     Channel &channel_;
 
     void addItems(const QString &text, const QString &prefix, bool isFirstWord);
+    friend class ::InputCompletionTest;
 };
 
 }  // namespace chatterino

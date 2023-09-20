@@ -50,7 +50,7 @@ QDebug qdebugStreamForLogLevel(lua::api::LogLevel lvl)
             return base.critical();
         default:
             assert(false && "if this happens magic_enum must have failed us");
-            return {(QString *)nullptr};
+            return QDebug((QString *)nullptr);
     }
 }
 

@@ -11,7 +11,8 @@ enum class TitleBarButtonStyle {
     Unmaximize = 4,
     Close = 8,
     User = 16,
-    Settings = 32
+    Settings = 32,
+    StreamerMode = 64,
 };
 
 class TitleBarButton : public Button
@@ -26,7 +27,7 @@ protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
-    TitleBarButtonStyle style_;
+    TitleBarButtonStyle style_{};
 };
 
 }  // namespace chatterino

@@ -1,11 +1,16 @@
 project(chatterino-test)
 
+option(CHATTERINO_TEST_USE_PUBLIC_HTTPBIN "Use public httpbin for testing network requests" OFF)
+
 set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/resources/test-resources.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/src/TestHelpers.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChannelChatters.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/AccessGuard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkCommon.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkRequest.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/NetworkResult.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChatterSet.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightPhrase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
@@ -24,6 +29,12 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/SeventvEventAPI.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/BttvLiveUpdates.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Updates.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Filters.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/LinkParser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/InputCompletion.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Literals.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/XDGDesktopFile.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/XDGHelper.cpp
     # Add your new file above this line!
     )
 
@@ -31,12 +42,9 @@ add_executable(${PROJECT_NAME} ${test_SOURCES})
 add_sanitizers(${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-mocks)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE gtest gmock)
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-    CHATTERINO_TEST
-    )
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
@@ -54,10 +62,13 @@ if(CHATTERINO_ENABLE_LTO)
         PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-# gtest_add_tests manages to discover the tests because it looks through the source files
-# HOWEVER, it fails to run, because we have some bug that causes the QApplication exit to stall when no network requests have been made.
-# ctest runs each test individually, so for now we require that testers just run the ./bin/chatterino-test binary without any filters applied
-# gtest_add_tests(
-#     TARGET ${PROJECT_NAME}
-#     SOURCES ${test_SOURCES}
-#     )
+if(CHATTERINO_TEST_USE_PUBLIC_HTTPBIN)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO_TEST_USE_PUBLIC_HTTPBIN)
+endif()
+
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+    AUTORCC ON
+    )
+
+gtest_discover_tests(${PROJECT_NAME})

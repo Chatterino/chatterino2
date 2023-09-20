@@ -36,9 +36,13 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
         this->channelMap[Platform::Twitch].append(channelName);
     }
 
-    this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {
-        this->twitchSetting_.setValue(this->channelMap[Platform::Twitch].raw());
-    });
+    // We can safely ignore this signal connection since channelMap will always be destroyed
+    // before the NotificationController
+    std::ignore =
+        this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {
+            this->twitchSetting_.setValue(
+                this->channelMap[Platform::Twitch].raw());
+        });
 
     liveStatusTimer_ = new QTimer();
 

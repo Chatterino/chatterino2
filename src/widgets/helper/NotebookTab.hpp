@@ -24,7 +24,7 @@ public:
 
     void updateSize();
 
-    QWidget *page;
+    QWidget *page{};
 
     void setCustomTitle(const QString &title);
     void resetCustomTitle();
@@ -40,7 +40,18 @@ public:
     void setInLastRow(bool value);
     void setTabLocation(NotebookTabLocation location);
 
-    void setLive(bool isLive);
+    /**
+     * @brief Sets the live status of this tab
+     *
+     * Returns true if the live status was changed, false if nothing changed.
+     **/
+    bool setLive(bool isLive);
+
+    /**
+     * @brief Returns true if any split in this tab is live
+     **/
+    bool isLive() const;
+
     void setHighlightState(HighlightState style);
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;

@@ -26,6 +26,7 @@
 #include "util/StreamerMode.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
+#include "widgets/helper/InvisibleSizeGrip.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -36,6 +37,7 @@
 #include <QDesktopServices>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QPointer>
 
 const QString TEXT_FOLLOWERS("Followers: %1");
 const QString TEXT_CREATED("Created: %1");
@@ -141,8 +143,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
     assert(split != nullptr &&
            "split being nullptr causes lots of bugs down the road");
     this->setWindowTitle("Usercard");
-    this->setStayInScreenRect(true);
-    this->updateFocusLoss();
 
     HotkeyController::HotkeyMap actions{
         {"delete",
@@ -231,6 +231,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
              this->underlyingChannel_->sendMessage(msg);
              return "";
          }},
+        {"pin",
+         [this](std::vector<QString> /*arguments*/) -> QString {
+             this->togglePinned();
+             return "";
+         }},
 
         // these actions make no sense in the context of a usercard, so they aren't implemented
         {"reject", nullptr},
@@ -242,8 +247,10 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
     this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 
-    auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
-                      .setLayoutType<QVBoxLayout>();
+    auto layers = LayoutCreator<QWidget>(this->getLayoutContainer())
+                      .setLayoutType<QGridLayout>()
+                      .withoutMargin();
+    auto layout = layers.emplace<QVBoxLayout>();
 
     // first line
     auto head = layout.emplace<QHBoxLayout>().withoutMargin();
@@ -361,17 +368,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                 // button to pin the window (only if we close automatically)
                 if (this->closeAutomatically_)
                 {
-                    this->ui_.pinButton = box.emplace<Button>().getElement();
-                    this->ui_.pinButton->setPixmap(
-                        getApp()->themes->buttons.pin);
-                    this->ui_.pinButton->setScaleIndependantSize(18, 18);
-                    this->ui_.pinButton->setToolTip("Pin Window");
-                    QObject::connect(this->ui_.pinButton, &Button::leftClicked,
-                                     [this]() {
-                                         this->closeAutomatically_ =
-                                             !this->closeAutomatically_;
-                                         this->updateFocusLoss();
-                                     });
+                    box->addWidget(this->createPinButton());
                 }
             }
 
@@ -444,8 +441,10 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
         });
 
         // userstate
-        this->userStateChanged_.connect([this, mod, unmod, vip,
-                                         unvip]() mutable {
+        // We can safely ignore this signal connection since this is a private signal, and
+        // we only connect once
+        std::ignore = this->userStateChanged_.connect([this, mod, unmod, vip,
+                                                       unvip]() mutable {
             TwitchChannel *twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
 
@@ -475,17 +474,22 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
     {
         auto timeout = moderation.emplace<TimeoutWidget>();
 
-        this->userStateChanged_.connect([this, lineMod, timeout]() mutable {
-            TwitchChannel *twitchChannel =
-                dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
+        // We can safely ignore this signal connection since this is a private signal, and
+        // we only connect once
+        std::ignore =
+            this->userStateChanged_.connect([this, lineMod, timeout]() mutable {
+                TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(
+                    this->underlyingChannel_.get());
 
-            bool hasModRights =
-                twitchChannel ? twitchChannel->hasModRights() : false;
-            lineMod->setVisible(hasModRights);
-            timeout->setVisible(hasModRights);
-        });
+                bool hasModRights =
+                    twitchChannel ? twitchChannel->hasModRights() : false;
+                lineMod->setVisible(hasModRights);
+                timeout->setVisible(hasModRights);
+            });
 
-        timeout->buttonClicked.connect([this](auto item) {
+        // We can safely ignore this signal connection since we own the button, and
+        // the button will always be destroyed before the UserInfoPopup
+        std::ignore = timeout->buttonClicked.connect([this](auto item) {
             TimeoutWidget::Action action;
             int arg;
             std::tie(action, arg) = item;
@@ -551,6 +555,13 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
         logs->setAlignment(this->ui_.noMessagesLabel, Qt::AlignHCenter);
     }
 
+    // size grip
+    if (closeAutomatically)
+    {
+        layers->addWidget(new InvisibleSizeGrip(this), 0, 0,
+                          Qt::AlignRight | Qt::AlignBottom);
+    }
+
     this->installEvents();
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
 }
@@ -604,7 +615,7 @@ void UserInfoPopup::installEvents()
                     this->ui_.block->setEnabled(false);
 
                     getApp()->accounts->twitch.getCurrent()->unblockUser(
-                        this->userId_,
+                        this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
                             this->channel_->addMessage(makeSystemMessage(
                                 QString("You successfully unblocked user %1")
@@ -631,7 +642,7 @@ void UserInfoPopup::installEvents()
                     this->ui_.block->setEnabled(false);
 
                     getApp()->accounts->twitch.getCurrent()->blockUser(
-                        this->userId_,
+                        this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
                             this->channel_->addMessage(makeSystemMessage(
                                 QString("You successfully blocked user %1")
@@ -720,9 +731,6 @@ void UserInfoPopup::setData(const QString &name,
     this->userStateChanged_.invoke();
 
     this->updateLatestMessages();
-    QTimer::singleShot(1, this, [this] {
-        this->setStayInScreenRect(true);
-    });
 }
 
 void UserInfoPopup::updateLatestMessages()
@@ -826,7 +834,7 @@ void UserInfoPopup::updateUserData()
             this->loadAvatar(user.profileImageUrl);
         }
 
-        getHelix()->getUserFollowers(
+        getHelix()->getChannelFollowers(
             user.id,
             [this, hack](const auto &followers) {
                 if (!hack.lock())
@@ -836,18 +844,13 @@ void UserInfoPopup::updateUserData()
                 this->ui_.followerCountLabel->setText(
                     TEXT_FOLLOWERS.arg(localizeNumbers(followers.total)));
             },
-            [] {
-                // on failure
+            [](const auto &errorMessage) {
+                qCWarning(chatterinoTwitch)
+                    << "Error getting followers:" << errorMessage;
             });
 
         // get ignore state
-        bool isIgnoring = false;
-
-        if (auto blocks = currentUser->accessBlockedUserIds();
-            blocks->find(user.id) != blocks->end())
-        {
-            isIgnoring = true;
-        }
+        bool isIgnoring = currentUser->blockedUserIds().contains(user.id);
 
         // get ignoreHighlights state
         bool isIgnoringHighlights = false;
@@ -918,26 +921,6 @@ void UserInfoPopup::updateUserData()
 
     this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
-}
-
-void UserInfoPopup::updateFocusLoss()
-{
-    if (this->closeAutomatically_)
-    {
-        this->setActionOnFocusLoss(BaseWindow::Delete);
-        if (this->ui_.pinButton != nullptr)
-        {
-            this->ui_.pinButton->setPixmap(getApp()->themes->buttons.pin);
-        }
-    }
-    else
-    {
-        this->setActionOnFocusLoss(BaseWindow::Nothing);
-        if (this->ui_.pinButton != nullptr)
-        {
-            this->ui_.pinButton->setPixmap(getResources().buttons.pinEnabled);
-        }
-    }
 }
 
 void UserInfoPopup::loadAvatar(const QUrl &url)

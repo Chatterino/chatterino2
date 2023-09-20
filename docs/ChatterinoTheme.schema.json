@@ -1,0 +1,398 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Chatterino Theme",
+  "description": "Colors and metadata for a Chatterino 2 theme",
+  "definitions": {
+    "qt-color": {
+      "type": "string",
+      "$comment": "https://doc.qt.io/qt-5/qcolor.html#setNamedColor",
+      "anyOf": [
+        {
+          "title": "#RGB",
+          "pattern": "^#[a-fA-F0-9]{3}$"
+        },
+        {
+          "title": "#RRGGBB",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        {
+          "title": "#AARRGGBB",
+          "$comment": "Note that this isn't identical to the CSS Color Moudle Level 4 <hex-color> where the alpha value is at the end.",
+          "pattern": "^#[a-fA-F0-9]{8}$"
+        },
+        {
+          "title": "#RRRGGGBBB",
+          "pattern": "^#[a-fA-F0-9]{9}$"
+        },
+        {
+          "title": "#RRRRGGGGBBBB",
+          "pattern": "^#[a-fA-F0-9]{12}$"
+        },
+        {
+          "title": "SVG Color",
+          "description": "This enum is stricter than Qt. You could theoretically put tabs and spaces between characters in a named color and capitalize the color.",
+          "$comment": "https://www.w3.org/TR/SVG11/types.html#ColorKeywords",
+          "enum": [
+            "aliceblue",
+            "antiquewhite",
+            "aqua",
+            "aquamarine",
+            "azure",
+            "beige",
+            "bisque",
+            "black",
+            "blanchedalmond",
+            "blue",
+            "blueviolet",
+            "brown",
+            "burlywood",
+            "cadetblue",
+            "chartreuse",
+            "chocolate",
+            "coral",
+            "cornflowerblue",
+            "cornsilk",
+            "crimson",
+            "cyan",
+            "darkblue",
+            "darkcyan",
+            "darkgoldenrod",
+            "darkgray",
+            "darkgreen",
+            "darkgrey",
+            "darkkhaki",
+            "darkmagenta",
+            "darkolivegreen",
+            "darkorange",
+            "darkorchid",
+            "darkred",
+            "darksalmon",
+            "darkseagreen",
+            "darkslateblue",
+            "darkslategray",
+            "darkslategrey",
+            "darkturquoise",
+            "darkviolet",
+            "deeppink",
+            "deepskyblue",
+            "dimgray",
+            "dimgrey",
+            "dodgerblue",
+            "firebrick",
+            "floralwhite",
+            "forestgreen",
+            "fuchsia",
+            "gainsboro",
+            "ghostwhite",
+            "gold",
+            "goldenrod",
+            "gray",
+            "grey",
+            "green",
+            "greenyellow",
+            "honeydew",
+            "hotpink",
+            "indianred",
+            "indigo",
+            "ivory",
+            "khaki",
+            "lavender",
+            "lavenderblush",
+            "lawngreen",
+            "lemonchiffon",
+            "lightblue",
+            "lightcoral",
+            "lightcyan",
+            "lightgoldenrodyellow",
+            "lightgray",
+            "lightgreen",
+            "lightgrey",
+            "lightpink",
+            "lightsalmon",
+            "lightseagreen",
+            "lightskyblue",
+            "lightslategray",
+            "lightslategrey",
+            "lightsteelblue",
+            "lightyellow",
+            "lime",
+            "limegreen",
+            "linen",
+            "magenta",
+            "maroon",
+            "mediumaquamarine",
+            "mediumblue",
+            "mediumorchid",
+            "mediumpurple",
+            "mediumseagreen",
+            "mediumslateblue",
+            "mediumspringgreen",
+            "mediumturquoise",
+            "mediumvioletred",
+            "midnightblue",
+            "mintcream",
+            "mistyrose",
+            "moccasin",
+            "navajowhite",
+            "navy",
+            "oldlace",
+            "olive",
+            "olivedrab",
+            "orange",
+            "orangered",
+            "orchid",
+            "palegoldenrod",
+            "palegreen",
+            "paleturquoise",
+            "palevioletred",
+            "papayawhip",
+            "peachpuff",
+            "peru",
+            "pink",
+            "plum",
+            "powderblue",
+            "purple",
+            "red",
+            "rosybrown",
+            "royalblue",
+            "saddlebrown",
+            "salmon",
+            "sandybrown",
+            "seagreen",
+            "seashell",
+            "sienna",
+            "silver",
+            "skyblue",
+            "slateblue",
+            "slategray",
+            "slategrey",
+            "snow",
+            "springgreen",
+            "steelblue",
+            "tan",
+            "teal",
+            "thistle",
+            "tomato",
+            "turquoise",
+            "violet",
+            "wheat",
+            "white",
+            "whitesmoke",
+            "yellow",
+            "yellowgreen"
+          ]
+        },
+        {
+          "title": "transparent",
+          "enum": ["transparent"]
+        }
+      ]
+    },
+    "tab-colors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "backgrounds": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "hover": { "$ref": "#/definitions/qt-color" },
+            "regular": { "$ref": "#/definitions/qt-color" },
+            "unfocused": { "$ref": "#/definitions/qt-color" }
+          },
+          "required": ["hover", "regular", "unfocused"]
+        },
+        "line": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "hover": { "$ref": "#/definitions/qt-color" },
+            "regular": { "$ref": "#/definitions/qt-color" },
+            "unfocused": { "$ref": "#/definitions/qt-color" }
+          },
+          "required": ["hover", "regular", "unfocused"]
+        },
+        "text": { "$ref": "#/definitions/qt-color" }
+      },
+      "required": ["backgrounds", "line", "text"]
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "colors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "accent": { "$ref": "#/definitions/qt-color" },
+        "messages": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "backgrounds": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "alternate": { "$ref": "#/definitions/qt-color" },
+                "regular": { "$ref": "#/definitions/qt-color" }
+              },
+              "required": ["alternate", "regular"]
+            },
+            "disabled": { "$ref": "#/definitions/qt-color" },
+            "highlightAnimationEnd": { "$ref": "#/definitions/qt-color" },
+            "highlightAnimationStart": { "$ref": "#/definitions/qt-color" },
+            "selection": { "$ref": "#/definitions/qt-color" },
+            "textColors": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "caret": { "$ref": "#/definitions/qt-color" },
+                "chatPlaceholder": { "$ref": "#/definitions/qt-color" },
+                "link": { "$ref": "#/definitions/qt-color" },
+                "regular": { "$ref": "#/definitions/qt-color" },
+                "system": { "$ref": "#/definitions/qt-color" }
+              },
+              "required": [
+                "caret",
+                "chatPlaceholder",
+                "link",
+                "regular",
+                "system"
+              ]
+            }
+          },
+          "required": [
+            "backgrounds",
+            "disabled",
+            "highlightAnimationEnd",
+            "highlightAnimationStart",
+            "selection",
+            "textColors"
+          ]
+        },
+        "scrollbars": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "background": { "$ref": "#/definitions/qt-color" },
+            "thumb": { "$ref": "#/definitions/qt-color" },
+            "thumbSelected": { "$ref": "#/definitions/qt-color" }
+          },
+          "required": ["background", "thumb", "thumbSelected"]
+        },
+        "splits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "background": { "$ref": "#/definitions/qt-color" },
+            "dropPreview": { "$ref": "#/definitions/qt-color" },
+            "dropPreviewBorder": { "$ref": "#/definitions/qt-color" },
+            "dropTargetRect": { "$ref": "#/definitions/qt-color" },
+            "dropTargetRectBorder": { "$ref": "#/definitions/qt-color" },
+            "header": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "background": { "$ref": "#/definitions/qt-color" },
+                "border": { "$ref": "#/definitions/qt-color" },
+                "focusedBackground": { "$ref": "#/definitions/qt-color" },
+                "focusedBorder": { "$ref": "#/definitions/qt-color" },
+                "focusedText": { "$ref": "#/definitions/qt-color" },
+                "text": { "$ref": "#/definitions/qt-color" }
+              },
+              "required": [
+                "background",
+                "border",
+                "focusedBackground",
+                "focusedBorder",
+                "focusedText",
+                "text"
+              ]
+            },
+            "input": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "background": { "$ref": "#/definitions/qt-color" },
+                "text": { "$ref": "#/definitions/qt-color" }
+              },
+              "required": ["background", "text"]
+            },
+            "messageSeperator": { "$ref": "#/definitions/qt-color" },
+            "resizeHandle": { "$ref": "#/definitions/qt-color" },
+            "resizeHandleBackground": { "$ref": "#/definitions/qt-color" }
+          },
+          "required": [
+            "background",
+            "dropPreview",
+            "dropPreviewBorder",
+            "dropTargetRect",
+            "dropTargetRectBorder",
+            "header",
+            "input",
+            "messageSeperator",
+            "resizeHandle",
+            "resizeHandleBackground"
+          ]
+        },
+        "tabs": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "dividerLine": { "$ref": "#/definitions/qt-color" },
+            "highlighted": {
+              "$ref": "#/definitions/tab-colors"
+            },
+            "newMessage": {
+              "$ref": "#/definitions/tab-colors"
+            },
+            "regular": {
+              "$ref": "#/definitions/tab-colors"
+            },
+            "selected": {
+              "$ref": "#/definitions/tab-colors"
+            }
+          },
+          "required": [
+            "dividerLine",
+            "highlighted",
+            "newMessage",
+            "regular",
+            "selected"
+          ]
+        },
+        "window": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "background": { "$ref": "#/definitions/qt-color" },
+            "text": { "$ref": "#/definitions/qt-color" }
+          },
+          "required": ["background", "text"]
+        }
+      },
+      "required": [
+        "accent",
+        "messages",
+        "scrollbars",
+        "splits",
+        "tabs",
+        "window"
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "iconTheme": {
+          "$comment": "Determines which icons to use. 'dark' will use dark icons (best for a light theme). 'light' will use light icons.",
+          "enum": ["light", "dark"],
+          "default": "light"
+        }
+      },
+      "required": ["iconTheme"]
+    },
+    "$schema": { "type": "string" }
+  },
+  "required": ["colors", "metadata"]
+}

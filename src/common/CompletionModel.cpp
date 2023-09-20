@@ -127,7 +127,10 @@ void CompletionModel::addItems(const QString &text, const QString &prefix,
         }
     };
 
+    auto *app = getIApp();
+
 #if CHATTERINO_HAVE_PLUGINS
+    // XXX: Tests do not work with plugins
     auto done = getApp()->plugins->addPluginCompletions(text, prefix,
                                                         isFirstWord, addString);
     if (done)
@@ -144,7 +147,7 @@ void CompletionModel::addItems(const QString &text, const QString &prefix,
     // Twitch channel
     auto *tc = dynamic_cast<TwitchChannel *>(&this->channel_);
 
-    if (auto account = getApp()->accounts->twitch.getCurrent())
+    if (auto account = app->getAccounts()->twitch.getCurrent())
     {
         // Twitch Emotes available globally
         for (const auto &emote : account->accessEmotes()->emotes)
@@ -167,18 +170,18 @@ void CompletionModel::addItems(const QString &text, const QString &prefix,
 
     // 7TV Global
     for (const auto &emote :
-         *getApp()->twitch->getSeventvEmotes().globalEmotes())
+         *app->getTwitch()->getSeventvEmotes().globalEmotes())
     {
         addString(emote.first.string, TaggedString::Type::SeventvGlobalEmote);
     }
     // Bttv Global
-    for (const auto &emote : *getApp()->twitch->getBttvEmotes().emotes())
+    for (const auto &emote : *app->getTwitch()->getBttvEmotes().emotes())
     {
         addString(emote.first.string, TaggedString::Type::BTTVChannelEmote);
     }
 
     // Ffz Global
-    for (const auto &emote : *getApp()->twitch->getFfzEmotes().emotes())
+    for (const auto &emote : *app->getTwitch()->getFfzEmotes().emotes())
     {
         addString(emote.first.string, TaggedString::Type::FFZChannelEmote);
     }
@@ -186,7 +189,8 @@ void CompletionModel::addItems(const QString &text, const QString &prefix,
     // Emojis
     if (prefix.startsWith(":"))
     {
-        const auto &emojiShortCodes = getApp()->emotes->emojis.shortCodes;
+        const auto &emojiShortCodes =
+            app->getEmotes()->getEmojis()->getShortCodes();
         for (const auto &m : emojiShortCodes)
         {
             addString(QString(":%1:").arg(m), TaggedString::Type::Emoji);
@@ -245,20 +249,20 @@ void CompletionModel::addItems(const QString &text, const QString &prefix,
         addString(emote.first.string, TaggedString::Type::BTTVGlobalEmote);
     }
 #ifdef CHATTERINO_HAVE_PLUGINS
-    for (const auto &command : getApp()->commands->pluginCommands())
+    for (const auto &command : app->getCommands()->pluginCommands())
     {
         addString(command, TaggedString::PluginCommand);
     }
 #endif
     // Custom Chatterino commands
-    for (const auto &command : getApp()->commands->items)
+    for (const auto &command : app->getCommands()->items)
     {
         addString(command.name, TaggedString::CustomCommand);
     }
 
     // Default Chatterino commands
     for (const auto &command :
-         getApp()->commands->getDefaultChatterinoCommandList())
+         app->getCommands()->getDefaultChatterinoCommandList())
     {
         addString(command, TaggedString::ChatterinoCommand);
     }

@@ -77,8 +77,6 @@ public:
 
     void setAccountData(QString token, QString userID);
 
-    ~PubSub() = delete;
-
     enum class State {
         Connected,
         Disconnected,

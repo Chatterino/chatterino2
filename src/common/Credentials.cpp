@@ -197,9 +197,9 @@ void Credentials::get(const QString &provider, const QString &name_,
     }
     else
     {
-        auto &instance = insecureInstance();
+        const auto &instance = insecureInstance();
 
-        onLoaded(instance.object().find(name).value().toString());
+        onLoaded(instance[name].toString());
     }
 }
 

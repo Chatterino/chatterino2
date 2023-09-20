@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Selection.hpp"
@@ -180,6 +181,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 
     void hideEvent(QHideEvent *) override;
+    void showEvent(QShowEvent *event) override;
 
     void handleLinkClick(QMouseEvent *event, const Link &link,
                          MessageLayout *layout);
@@ -199,11 +201,12 @@ private:
     void messageReplaced(size_t index, MessagePtr &replacement);
     void messagesUpdated();
 
-    void performLayout(bool causedByScrollbar = false);
+    void performLayout(bool causedByScrollbar = false,
+                       bool causedByShow = false);
     void layoutVisibleMessages(
         const LimitedQueueSnapshot<MessageLayoutPtr> &messages);
     void updateScrollbar(const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
-                         bool causedByScrollbar);
+                         bool causedByScrollbar, bool causedByShow);
 
     void drawMessages(QPainter &painter);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
@@ -255,12 +258,8 @@ private:
     void showReplyThreadPopup(const MessagePtr &message);
     bool canReplyToMessages() const;
 
-    QTimer *layoutCooldown_;
-    bool layoutQueued_;
+    bool layoutQueued_ = false;
 
-    QTimer updateTimer_;
-    bool updateQueued_ = false;
-    bool messageWasAdded_ = false;
     bool lastMessageHasAlternateBackground_ = false;
     bool lastMessageHasAlternateBackgroundReverse_ = true;
 
@@ -269,7 +268,8 @@ private:
     std::unordered_map<PauseReason, boost::optional<SteadyClock::time_point>>
         pauses_;
     boost::optional<SteadyClock::time_point> pauseEnd_;
-    int pauseScrollOffset_ = 0;
+    int pauseScrollMinimumOffset_ = 0;
+    int pauseScrollMaximumOffset_ = 0;
     // Keeps track how many message indices we need to offset the selection when we resume scrolling
     uint32_t pauseSelectionOffset_ = 0;
 
@@ -285,7 +285,7 @@ private:
     Split *split_ = nullptr;
 
     Scrollbar *scrollBar_;
-    EffectLabel *goToBottom_;
+    EffectLabel *goToBottom_{};
     bool showScrollBar_ = false;
 
     FilterSetPtr channelFilters_;
@@ -342,6 +342,9 @@ private:
     pajlada::Signals::SignalHolder channelConnections_;
 
     std::unordered_set<std::shared_ptr<MessageLayout>> messagesOnScreen_;
+
+    MessageColors messageColors_;
+    MessagePreferences messagePreferences_;
 
     static constexpr int leftPadding = 8;
     static constexpr int scrollbarPadding = 8;

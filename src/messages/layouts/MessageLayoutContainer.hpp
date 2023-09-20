@@ -18,6 +18,7 @@ enum class FirstWord { Neutral, RTL, LTR };
 using MessageFlags = FlagsEnum<MessageFlag>;
 class MessageLayoutElement;
 struct Selection;
+struct MessagePaintContext;
 
 struct Margin {
     int top;
@@ -65,6 +66,7 @@ struct MessageLayoutContainer {
     void breakLine();
     bool atStartOfLine();
     bool fitsInLine(int width_);
+    int remainingWidth() const;
     // this method is called when a message has an RTL word
     // we need to reorder the words to be shown properly
     // however we don't we to reorder non-text elements like badges, timestamps, username
@@ -73,10 +75,10 @@ struct MessageLayoutContainer {
     MessageLayoutElement *getElementAt(QPoint point);
 
     // painting
-    void paintElements(QPainter &painter);
+    void paintElements(QPainter &painter, const MessagePaintContext &ctx);
     void paintAnimatedElements(QPainter &painter, int yOffset);
-    void paintSelection(QPainter &painter, int messageIndex,
-                        Selection &selection, int yOffset);
+    void paintSelection(QPainter &painter, size_t messageIndex,
+                        const Selection &selection, int yOffset);
 
     // selection
     int getSelectionIndex(QPoint point);
@@ -85,14 +87,14 @@ struct MessageLayoutContainer {
     void addSelectionText(QString &str, uint32_t from, uint32_t to,
                           CopyMode copymode);
 
-    bool isCollapsed();
+    bool isCollapsed() const;
 
 private:
     struct Line {
-        int startIndex;
-        int endIndex;
-        int startCharIndex;
-        int endCharIndex;
+        int startIndex{};
+        int endIndex{};
+        int startCharIndex{};
+        int endCharIndex{};
         QRect rect;
     };
 

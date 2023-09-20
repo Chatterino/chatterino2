@@ -163,7 +163,7 @@ void rebuildReplyThreadHighlight(Settings &settings,
                 const auto & /*senderName*/, const auto & /*originalMessage*/,
                 const auto &flags,
                 const auto self) -> boost::optional<HighlightResult> {
-                if (flags.has(MessageFlag::ParticipatedThread) && !self)
+                if (flags.has(MessageFlag::SubscribedThread) && !self)
                 {
                     return HighlightResult{
                         highlightAlert,
@@ -186,7 +186,8 @@ void rebuildMessageHighlights(Settings &settings,
     auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     QString currentUsername = currentUser->getUserName();
 
-    if (settings.enableSelfHighlight && !currentUsername.isEmpty())
+    if (settings.enableSelfHighlight && !currentUsername.isEmpty() &&
+        !currentUser->isAnon())
     {
         HighlightPhrase highlight(
             currentUsername, settings.showSelfHighlightInMentions,
@@ -440,7 +441,7 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
     });
 
     this->signalHolder_.managedConnect(
-        getCSettings().highlightedBadges.delayedItemsChanged,
+        getSettings()->highlightedBadges.delayedItemsChanged,
         [this, &settings] {
             qCDebug(chatterinoHighlights)
                 << "Rebuild checks because highlight badges changed";
@@ -448,14 +449,14 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
         });
 
     this->signalHolder_.managedConnect(
-        getCSettings().highlightedUsers.delayedItemsChanged, [this, &settings] {
+        getSettings()->highlightedUsers.delayedItemsChanged, [this, &settings] {
             qCDebug(chatterinoHighlights)
                 << "Rebuild checks because highlight users changed";
             this->rebuildChecks(settings);
         });
 
     this->signalHolder_.managedConnect(
-        getCSettings().highlightedMessages.delayedItemsChanged,
+        getSettings()->highlightedMessages.delayedItemsChanged,
         [this, &settings] {
             qCDebug(chatterinoHighlights)
                 << "Rebuild checks because highlight messages changed";

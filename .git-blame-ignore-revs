@@ -1,0 +1,14 @@
+# If a commit modifies a ton of files and doesn't really contribute to the
+# output of git-blame, please add it here
+#
+# Don't add commits from the same PR you are creating. We squash PRs into a
+# single commit, so references to those commits will be lost
+#
+# 2018 - changed to 80 max column
+f71ff08e686ae76c3dd4084d0f05f27ba9b3fdcb
+#
+# 2018 - added brace wrapping after if and for
+e259b9e39f46f3cb0e4838c988d4f320a03dfaa4
+#
+# 2019 - Normalize line endings in already existing files
+b06eb9df835c25154899fbcf43e9b37addcea1b1

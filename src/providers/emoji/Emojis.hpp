@@ -37,16 +37,32 @@ struct EmojiData {
 
 using EmojiMap = ConcurrentMap<QString, std::shared_ptr<EmojiData>>;
 
-class Emojis
+class IEmojis
+{
+public:
+    virtual ~IEmojis() = default;
+
+    virtual std::vector<boost::variant<EmotePtr, QString>> parse(
+        const QString &text) const = 0;
+    virtual const EmojiMap &getEmojis() const = 0;
+    virtual const std::vector<QString> &getShortCodes() const = 0;
+    virtual QString replaceShortCodes(const QString &text) const = 0;
+};
+
+class Emojis : public IEmojis
 {
 public:
     void initialize();
     void load();
-    std::vector<boost::variant<EmotePtr, QString>> parse(const QString &text);
+    std::vector<boost::variant<EmotePtr, QString>> parse(
+        const QString &text) const override;
 
     EmojiMap emojis;
     std::vector<QString> shortCodes;
-    QString replaceShortCodes(const QString &text);
+    QString replaceShortCodes(const QString &text) const override;
+
+    const EmojiMap &getEmojis() const override;
+    const std::vector<QString> &getShortCodes() const override;
 
 private:
     void loadEmojis();

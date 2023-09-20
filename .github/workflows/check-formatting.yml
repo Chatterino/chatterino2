@@ -6,6 +6,7 @@ on:
     branches:
       - master
   pull_request:
+  merge_group:
 
 concurrency:
   group: check-formatting-${{ github.ref }}
@@ -16,7 +17,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: apt-get update
         run: sudo apt-get update

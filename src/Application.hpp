@@ -3,6 +3,8 @@
 #include "common/Singleton.hpp"
 #include "singletons/NativeMessaging.hpp"
 
+#include <pajlada/signals.hpp>
+#include <pajlada/signals/signal.hpp>
 #include <QApplication>
 
 #include <memory>
@@ -10,6 +12,7 @@
 namespace chatterino {
 
 class TwitchIrcServer;
+class ITwitchIrcServer;
 class PubSub;
 
 class CommandController;
@@ -20,6 +23,8 @@ class HotkeyController;
 class IUserDataController;
 class UserDataController;
 class SoundController;
+class ITwitchLiveController;
+class TwitchLiveController;
 #ifdef CHATTERINO_HAVE_PLUGINS
 class PluginController;
 #endif
@@ -55,17 +60,18 @@ public:
     virtual CommandController *getCommands() = 0;
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
-    virtual TwitchIrcServer *getTwitch() = 0;
+    virtual ITwitchIrcServer *getTwitch() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
+    virtual ITwitchLiveController *getTwitchLiveController() = 0;
 };
 
 class Application : public IApplication
 {
     std::vector<std::unique_ptr<Singleton>> singletons_;
-    int argc_;
-    char **argv_;
+    int argc_{};
+    char **argv_{};
 
 public:
     static Application *instance;
@@ -98,6 +104,10 @@ public:
     UserDataController *const userData{};
     SoundController *const sound{};
 
+private:
+    TwitchLiveController *const twitchLiveController{};
+
+public:
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *const plugins{};
 #endif
@@ -141,10 +151,7 @@ public:
     {
         return this->highlights;
     }
-    TwitchIrcServer *getTwitch() override
-    {
-        return this->twitch;
-    }
+    ITwitchIrcServer *getTwitch() override;
     ChatterinoBadges *getChatterinoBadges() override
     {
         return this->chatterinoBadges;
@@ -154,6 +161,9 @@ public:
         return this->ffzBadges;
     }
     IUserDataController *getUserData() override;
+    ITwitchLiveController *getTwitchLiveController() override;
+
+    pajlada::Signals::NoArgSignal streamerModeChanged;
 
 private:
     void addSingleton(Singleton *singleton);

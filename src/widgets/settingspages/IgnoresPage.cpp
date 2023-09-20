@@ -63,7 +63,8 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
         view->getTableView()->setColumnWidth(0, 200);
     });
 
-    view->addButtonPressed.connect([] {
+    // We can safely ignore this signal connection since we own the view
+    std::ignore = view->addButtonPressed.connect([] {
         getSettings()->ignoredMessages.append(
             IgnorePhrase{"my pattern", false, false,
                          getSettings()->ignoredPhraseReplace.getValue(), true});
@@ -126,10 +127,9 @@ void IgnoresPage::onShow()
     }
 
     QStringList users;
+    users.reserve(user->blocks().size());
 
-    auto blocks = app->accounts->twitch.getCurrent()->accessBlocks();
-
-    for (const auto &blockedUser : *blocks)
+    for (const auto &blockedUser : user->blocks())
     {
         users << blockedUser.name;
     }

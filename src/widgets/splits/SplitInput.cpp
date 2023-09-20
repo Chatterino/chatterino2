@@ -1,6 +1,7 @@
 #include "widgets/splits/SplitInput.hpp"
 
 #include "Application.hpp"
+#include "common/enums/MessageOverflow.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -62,7 +63,9 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
     // misc
     this->installKeyPressedEvent();
     this->addShortcuts();
-    this->ui_.textEdit->focusLost.connect([this] {
+    // The textEdit's signal will be destroyed before this SplitInput is
+    // destroyed, so we can safely ignore this signal's connection.
+    std::ignore = this->ui_.textEdit->focusLost.connect([this] {
         this->hideCompletionPopup();
     });
     this->scaleChangedEvent(this->scale());
@@ -113,6 +116,28 @@ void SplitInput::initLayout()
         hboxLayout.emplace<ResizingTextEdit>().assign(&this->ui_.textEdit);
     connect(textEdit.getElement(), &ResizingTextEdit::textChanged, this,
             &SplitInput::editTextChanged);
+
+    hboxLayout.emplace<EffectLabel>().assign(&this->ui_.sendButton);
+    this->ui_.sendButton->getLabel().setText("SEND");
+    this->ui_.sendButton->hide();
+
+    QObject::connect(this->ui_.sendButton, &EffectLabel::leftClicked, [this] {
+        std::vector<QString> arguments;
+        this->handleSendMessage(arguments);
+    });
+
+    getSettings()->showSendButton.connect(
+        [this](const bool value, auto) {
+            if (value)
+            {
+                this->ui_.sendButton->show();
+            }
+            else
+            {
+                this->ui_.sendButton->hide();
+            }
+        },
+        this->managedConnections_);
 
     // right box
     auto box = hboxLayout.emplace<QVBoxLayout>().withoutMargin();
@@ -270,22 +295,25 @@ void SplitInput::openEmotePopup()
         this->emotePopup_ = new EmotePopup(this);
         this->emotePopup_->setAttribute(Qt::WA_DeleteOnClose);
 
-        this->emotePopup_->linkClicked.connect([this](const Link &link) {
-            if (link.type == Link::InsertText)
-            {
-                QTextCursor cursor = this->ui_.textEdit->textCursor();
-                QString textToInsert(link.value + " ");
-
-                // If symbol before cursor isn't space or empty
-                // Then insert space before emote.
-                if (cursor.position() > 0 &&
-                    !this->getInputText()[cursor.position() - 1].isSpace())
+        // The EmotePopup is closed & destroyed when this is destroyed, meaning it's safe to ignore this connection
+        std::ignore =
+            this->emotePopup_->linkClicked.connect([this](const Link &link) {
+                if (link.type == Link::InsertText)
                 {
-                    textToInsert = " " + textToInsert;
+                    QTextCursor cursor = this->ui_.textEdit->textCursor();
+                    QString textToInsert(link.value + " ");
+
+                    // If symbol before cursor isn't space or empty
+                    // Then insert space before emote.
+                    if (cursor.position() > 0 &&
+                        !this->getInputText()[cursor.position() - 1].isSpace())
+                    {
+                        textToInsert = " " + textToInsert;
+                    }
+                    this->insertText(textToInsert);
+                    this->ui_.textEdit->activateWindow();
                 }
-                this->insertText(textToInsert);
-            }
-        });
+            });
     }
 
     this->emotePopup_->resize(int(300 * this->emotePopup_->scale()),
@@ -607,7 +635,7 @@ bool SplitInput::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::ShortcutOverride ||
         event->type() == QEvent::Shortcut)
     {
-        if (auto popup = this->inputCompletionPopup_.get())
+        if (auto popup = this->inputCompletionPopup_.data())
         {
             if (popup->isVisible())
             {
@@ -625,33 +653,40 @@ bool SplitInput::eventFilter(QObject *obj, QEvent *event)
 
 void SplitInput::installKeyPressedEvent()
 {
-    this->ui_.textEdit->keyPressed.disconnectAll();
-    this->ui_.textEdit->keyPressed.connect([this](QKeyEvent *event) {
-        if (auto *popup = this->inputCompletionPopup_.get())
-        {
-            if (popup->isVisible())
+    // We can safely ignore this signal's connection because SplitInput owns
+    // the textEdit object, so it will always be deleted before SplitInput
+    std::ignore =
+        this->ui_.textEdit->keyPressed.connect([this](QKeyEvent *event) {
+            if (auto *popup = this->inputCompletionPopup_.data())
             {
-                if (popup->eventFilter(nullptr, event))
+                if (popup->isVisible())
                 {
-                    event->accept();
-                    return;
+                    if (popup->eventFilter(nullptr, event))
+                    {
+                        event->accept();
+                        return;
+                    }
                 }
             }
-        }
 
-        // One of the last remaining of it's kind, the copy shortcut.
-        // For some bizarre reason Qt doesn't want this key be rebound.
-        // TODO(Mm2PL): Revisit in Qt6, maybe something changed?
-        if ((event->key() == Qt::Key_C || event->key() == Qt::Key_Insert) &&
-            event->modifiers() == Qt::ControlModifier)
-        {
-            if (this->channelView_->hasSelection())
+            // One of the last remaining of it's kind, the copy shortcut.
+            // For some bizarre reason Qt doesn't want this key be rebound.
+            // TODO(Mm2PL): Revisit in Qt6, maybe something changed?
+            if ((event->key() == Qt::Key_C || event->key() == Qt::Key_Insert) &&
+                event->modifiers() == Qt::ControlModifier)
             {
-                this->channelView_->copySelectedText();
-                event->accept();
+                if (this->channelView_->hasSelection())
+                {
+                    this->channelView_->copySelectedText();
+                    event->accept();
+                }
             }
-        }
-    });
+        });
+
+#ifdef DEBUG
+    assert(this->keyPressedEventInstalled == false);
+    this->keyPressedEventInstalled = true;
+#endif
 }
 
 void SplitInput::mousePressEvent(QMouseEvent *event)
@@ -741,12 +776,12 @@ void SplitInput::updateCompletionPopup()
 
 void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
 {
-    if (!this->inputCompletionPopup_.get())
+    if (this->inputCompletionPopup_.isNull())
     {
         this->inputCompletionPopup_ = new InputCompletionPopup(this);
         this->inputCompletionPopup_->setInputAction(
-            [that = QObjectRef(this)](const QString &text) mutable {
-                if (auto *this2 = that.get())
+            [that = QPointer(this)](const QString &text) mutable {
+                if (auto *this2 = that.data())
                 {
                     this2->insertCompletionText(text);
                     this2->hideCompletionPopup();
@@ -754,7 +789,7 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
             });
     }
 
-    auto *popup = this->inputCompletionPopup_.get();
+    auto *popup = this->inputCompletionPopup_.data();
     assert(popup);
 
     if (emoteCompletion)
@@ -775,7 +810,7 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
 
 void SplitInput::hideCompletionPopup()
 {
-    if (auto *popup = this->inputCompletionPopup_.get())
+    if (auto *popup = this->inputCompletionPopup_.data())
     {
         popup->hide();
     }

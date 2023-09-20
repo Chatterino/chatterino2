@@ -34,7 +34,8 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
 
-    view->addButtonPressed.connect([view, model] {
+    // We can safely ignore this signal connection since we own the view
+    std::ignore = view->addButtonPressed.connect([view, model] {
         EditHotkeyDialog dialog(nullptr);
         bool wasAccepted = dialog.exec() == 1;
 

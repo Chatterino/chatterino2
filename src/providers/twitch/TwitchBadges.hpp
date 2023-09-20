@@ -50,9 +50,6 @@ private:
 
     TwitchBadges();
     void loadTwitchBadges();
-    /**
-     * @brief Accepts a JSON blob from https://badges.twitch.tv/v1/badges/global/display and updates our badges with it
-     **/
     void parseTwitchBadges(QJsonObject root);
     void loaded();
     void loadEmoteImage(const QString &name, ImagePtr image,
