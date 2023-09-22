@@ -81,7 +81,7 @@ namespace {
             if (getSettings()->streamlinkUseCustomPath)
             {
 #ifdef _WIN32
-                QString path = getSettings()->streamlinkPath;
+                const QString path = getSettings()->streamlinkPath;
                 return path.trimmed() + "/" + getBinaryName();
 #else
                 return getSettings()->streamlinkPath + "/" + getBinaryName();
