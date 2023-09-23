@@ -40,8 +40,8 @@ public:
     MessageElement &getCreator() const;
     void setPosition(QPoint point);
     bool hasTrailingSpace() const;
-    int getLine() const;
-    void setLine(int line);
+    size_t getLine() const;
+    void setLine(size_t line);
 
     MessageLayoutElement *setTrailingSpace(bool value);
     MessageLayoutElement *setLink(const Link &link_);
@@ -68,7 +68,10 @@ private:
     QRect rect_;
     Link link_;
     MessageElement &creator_;
-    int line_{};
+    /**
+     * The line of the container this element is laid out at
+     */
+    size_t line_{};
 };
 
 // IMAGE

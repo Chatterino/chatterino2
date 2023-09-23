@@ -167,7 +167,12 @@ private:
     float scale_ = 1.f;
     int width_ = 0;
     MessageFlags flags_{};
-    int line_ = 0;
+    /**
+     * line_ is the current line index we are adding
+     * This is not the number of lines this message contains, since this will stop
+     * incrementing if the message is collapsed
+     */
+    size_t line_{};
     int height_ = 0;
     int currentX_ = 0;
     int currentY_ = 0;
@@ -182,6 +187,7 @@ private:
     bool wasPrevReversed_ = false;
 
     std::vector<std::unique_ptr<MessageLayoutElement>> elements_;
+
     /**
      * A list of lines covering this message
      * A message that spans 3 lines in a view will have 3 elements in lines_

@@ -60,12 +60,12 @@ bool MessageLayoutElement::hasTrailingSpace() const
     return this->trailingSpace;
 }
 
-int MessageLayoutElement::getLine() const
+size_t MessageLayoutElement::getLine() const
 {
     return this->line_;
 }
 
-void MessageLayoutElement::setLine(int line)
+void MessageLayoutElement::setLine(size_t line)
 {
     this->line_ = line;
 }

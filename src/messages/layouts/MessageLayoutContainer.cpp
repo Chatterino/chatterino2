@@ -408,7 +408,7 @@ void MessageLayoutContainer::breakLine()
     this->lineStart_ = this->elements_.size();
     //    this->currentX = (int)(this->scale * 8);
 
-    if (this->canCollapse() && line_ + 1 >= MAX_UNCOLLAPSED_LINES)
+    if (this->canCollapse() && this->line_ + 1 >= MAX_UNCOLLAPSED_LINES)
     {
         this->canAddMessages_ = false;
         return;
