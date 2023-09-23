@@ -106,13 +106,13 @@ private:
          * The index of the first message element on this line
          * Points into `elements_`
          */
-        int startIndex{};
+        size_t startIndex{};
 
         /**
          * The index of the last message element on this line
          * Points into `elements_`
          */
-        int endIndex{};
+        size_t endIndex{};
 
         /**
          * In the context of selections, the index of the first character on this line

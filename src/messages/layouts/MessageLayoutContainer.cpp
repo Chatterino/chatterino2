@@ -394,7 +394,7 @@ void MessageLayoutContainer::breakLine()
         this->lines_.back().endCharIndex = this->charIndex_;
     }
     this->lines_.push_back({
-        .startIndex = (int)lineStart_,
+        .startIndex = lineStart_,
         .endIndex = 0,
         .startCharIndex = this->charIndex_,
         .endCharIndex = 0,
