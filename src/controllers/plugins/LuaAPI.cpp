@@ -315,6 +315,19 @@ int g_import(lua_State *L)
 
     auto path = file.path(QUrl::FullyDecoded);
     QFile qf(path);
+    if (!qf.exists())
+    {
+        qf.setFileName(qf.fileName() + ".lua");
+        if (!qf.exists())
+        {
+            lua_pushnil(L);
+            luaL_error(L,
+                       "chatterino g_import: requested file does not exist: %s",
+                       path.toStdString().c_str());
+            return 1;
+        }
+        path += ".lua";
+    }
     qf.open(QIODevice::ReadOnly);
     if (qf.size() > 10'000'000)
     {

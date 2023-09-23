@@ -196,6 +196,7 @@ void PluginController::openLibrariesFor(lua_State *L,
 
         // This function replaces both `dofile` and `require`, see docs/wip-plugins.md for more info
         {"import", lua::api::g_import},
+        {"require", lua::api::g_import},
         {nullptr, nullptr},
     };
     luaL_setfuncs(L, replacementFuncs, 0);
