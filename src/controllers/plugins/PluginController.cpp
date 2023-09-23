@@ -19,6 +19,7 @@
 
 #    include <memory>
 #    include <utility>
+#    include <variant>
 
 namespace chatterino {
 

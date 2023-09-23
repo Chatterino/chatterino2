@@ -2,8 +2,10 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+#    include "common/CompletionModel.hpp"
 #    include "common/QLogging.hpp"
 
+#    include <boost/variant/variant.hpp>
 #    include <lua.h>
 #    include <lualib.h>
 #    include <magic_enum.hpp>
