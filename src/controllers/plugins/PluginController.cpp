@@ -322,41 +322,25 @@ bool PluginController::addPluginCompletions(
         callback)
 {
     bool done{};
-    constexpr auto ARG_COUNT = 3;
     for (const auto &[name, plugin] : this->plugins_)
     {
         auto before = lua_gettop(plugin->state_);
-        lua_getglobal(plugin->state_, "onCompletionsRequested");
-        if (lua_isnil(plugin->state_, -1))
+        auto opt = plugin->getCompletionCallback();
+        if (!opt.has_value())
         {
-            lua_pop(plugin->state_, 1);
             continue;
         }
-        lua::push(plugin->state_, text);
-        lua::push(plugin->state_, prefix);
-        lua::push(plugin->state_, isFirstWord);
-
-        auto res = lua_pcall(plugin->state_, ARG_COUNT, 1, 0);
-        if (res != LUA_OK)
+        auto cb = *opt;
+        auto errOrVal = cb(plugin->state_, text, prefix, isFirstWord);
+        if (std::holds_alternative<int>(errOrVal))
         {
-            qCDebug(chatterinoLua) << "error while calling completion handler"
-                                   << lua::humanErrorText(plugin->state_, res);
+            qCDebug(chatterinoLua)
+                << "error while calling completion handler"
+                << lua::humanErrorText(plugin->state_, std::get<int>(errOrVal));
             continue;
         }
-        //lua::stackDump(plugin->state_, "after pcall");
 
-        std::vector<std::pair<QString, CompletionModel::TaggedString::Type>>
-            out;
-        //lua_isnil(plugin->state_, -1);
-
-        if (!lua::peek(plugin->state_, &out))
-        {
-            qCDebug(chatterinoLua) << "FeelsDonkMan ?";
-            continue;
-        }
-        lua_getfield(plugin->state_, -1, "done");
-
-        lua::peek(plugin->state_, &done);
+        auto out = std::get<lua::api::CompletionList>(errOrVal);
 
         auto after = lua_gettop(plugin->state_);
         if (after < before)
@@ -365,7 +349,7 @@ bool PluginController::addPluginCompletions(
         }
         lua_pop(plugin->state_, after - before);
 
-        for (const auto &[str, tagType] : out)
+        for (const auto &[str, tagType] : out.value)
         {
             callback(str, tagType);
         }
