@@ -23,6 +23,7 @@ struct CommandContext;
 
 namespace chatterino::lua {
 
+constexpr int ERROR_BAD_PEEK = LUA_OK - 1;
 /**
  * @brief Dumps the Lua stack into qCDebug(chatterinoLua)
  *
