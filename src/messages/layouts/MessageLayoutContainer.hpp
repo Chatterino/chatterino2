@@ -27,21 +27,6 @@ struct MessageLayoutContainer {
     FirstWord first = FirstWord::Neutral;
 
     /**
-     * Returns the height of this message
-     */
-    int getHeight() const;
-
-    /**
-     * Returns the width of this message
-     */
-    int getWidth() const;
-
-    /**
-     * Returns the scale of this message
-     */
-    float getScale() const;
-
-    /**
      * Begin the layout process of this message
      *
      * This will reset all line calculations, and will be considered incomplete
@@ -73,6 +58,84 @@ struct MessageLayoutContainer {
     void breakLine();
 
     /**
+     * Paint the elements in this message
+     */
+    void paintElements(QPainter &painter, const MessagePaintContext &ctx) const;
+
+    /**
+     * Paint the animated elements in this message
+     */
+    void paintAnimatedElements(QPainter &painter, int yOffset) const;
+
+    /**
+     * Paint the selection for this container
+     * This container contains one or more message elements
+     *
+     * @param painter The painter we draw everything to
+     * @param messageIndex This container's message index in the context of
+     *                     the layout we're being painted in
+     * @param selection The selection we need to paint
+     * @param yOffset The extra offset added to Y for everything that's painted
+     */
+    void paintSelection(QPainter &painter, size_t messageIndex,
+                        const Selection &selection, int yOffset) const;
+
+    /**
+     * Add text from this message into the `str` parameter
+     *
+     * @param[out] str The string where we append our selected text to
+     * @param from The character index from which we collecting our selected text
+     * @param to The character index where we stop collecting our selected text
+     * @param copymode Decides what from the message gets added to the selected text
+     */
+    void addSelectionText(QString &str, uint32_t from, uint32_t to,
+                          CopyMode copymode) const;
+
+    /**
+     * Returns a raw pointer to the element at the given coordinates
+     *
+     * If no element is found at the given point, this returns a null pointer
+     */
+    MessageLayoutElement *getElementAt(QPoint point) const;
+
+    /**
+     * Get the character index at the given position, in the context of selections
+     */
+    size_t getSelectionIndex(QPoint point) const;
+
+    /**
+     * Get the index of the first visible character in this message
+     * This is not always 0 in case there elements that are skipped
+     */
+    size_t getFirstMessageCharacterIndex() const;
+
+    /**
+     * Get the index of the last character in this message
+     * This is the sum of all the characters in `elements_`
+     */
+    size_t getLastCharacterIndex() const;
+
+    /**
+     * Returns the width of this message
+     */
+    int getWidth() const;
+
+    /**
+     * Returns the height of this message
+     */
+    int getHeight() const;
+
+    /**
+     * Returns the scale of this message
+     */
+    float getScale() const;
+
+    /**
+     * Returns true if this message is collapsed
+     */
+    bool isCollapsed() const;
+
+    /**
      * Return true if we are at the start of a new line
      */
     bool atStartOfLine() const;
@@ -88,69 +151,6 @@ struct MessageLayoutContainer {
      * Returns the remaining width of this line until we will need to start a new line
      */
     int remainingWidth() const;
-
-    /**
-     * Returns a raw pointer to the element at the given coordinates
-     *
-     * If no element is found at the given point, this returns a null pointer
-     */
-    MessageLayoutElement *getElementAt(QPoint point) const;
-
-    /**
-     * Paint the elements in this message
-     */
-    void paintElements(QPainter &painter, const MessagePaintContext &ctx);
-
-    /**
-     * Paint the animated elements in this message
-     */
-    void paintAnimatedElements(QPainter &painter, int yOffset);
-
-    /**
-     * Paint the selection for this container
-     * This container contains one or more message elements
-     *
-     * @param painter The painter we draw everything to
-     * @param messageIndex This container's message index in the context of
-     *                     the layout we're being painted in
-     * @param selection The selection we need to paint
-     * @param yOffset The extra offset added to Y for everything that's painted
-     */
-    void paintSelection(QPainter &painter, size_t messageIndex,
-                        const Selection &selection, int yOffset);
-
-    /**
-     * Get the character index at the given position, in the context of selections
-     */
-    size_t getSelectionIndex(QPoint point) const;
-
-    /**
-     * Get the index of the last character in this message
-     * This is the sum of all the characters in `elements_`
-     */
-    size_t getLastCharacterIndex() const;
-
-    /**
-     * Get the index of the first visible character in this message
-     * This is not always 0 in case there elements that are skipped
-     */
-    size_t getFirstMessageCharacterIndex() const;
-
-    /**
-     * Add text from this message into the `str` parameter
-     *
-     * @param[out] str The string where we append our selected text to
-     * @param from The character index from which we collecting our selected text
-     * @param to The character index where we stop collecting our selected text
-     * @param copymode Decides what from the message gets added to the selected text
-     */
-    void addSelectionText(QString &str, uint32_t from, uint32_t to,
-                          CopyMode copymode) const;
-
-    /**
-     * Returns true if this message is collapsed
-     */
-    bool isCollapsed() const;
 
 private:
     struct Line {
@@ -185,12 +185,6 @@ private:
         QRect rect;
     };
 
-    /**
-     * canAddElements returns true if it's possible to add more elements to this message
-     */
-    bool canAddElements() const;
-
-    // helpers
     /*
     addElement is called at two stages. first stage is the normal one where we want to add message layout elements to the container.
     If we detect an RTL word in the message, reorderRTL will be called, which is the second stage, where we call _addElement
@@ -203,7 +197,6 @@ private:
     */
     void addElement(MessageLayoutElement *element, bool forceAdd,
                     int prevIndex);
-    bool canCollapse();
 
     // this method is called when a message has an RTL word
     // we need to reorder the words to be shown properly
@@ -241,6 +234,18 @@ private:
      */
     void paintSelectionEnd(QPainter &painter, size_t lineIndex,
                            const Selection &selection, int yOffset) const;
+
+    /**
+     * canAddElements returns true if it's possible to add more elements to this message
+     */
+    bool canAddElements() const;
+
+    /**
+     * Return true if this message can collapse
+     *
+     * TODO: comment this better :-)
+     */
+    bool canCollapse() const;
 
     // variables
     float scale_ = 1.F;
