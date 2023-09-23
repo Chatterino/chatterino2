@@ -7,6 +7,7 @@
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/plugins/PluginController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
@@ -323,6 +324,22 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
 void Window::addShortcuts()
 {
     HotkeyController::HotkeyMap actions{
+#ifndef NDEBUG
+        {"reloadPlugins",
+         [this](std::vector<QString>) -> QString {
+             qCDebug(chatterinoLua) << "reloading plugins!";
+             std::set<QString> ids{};
+             for (const auto &[id, _] : getApp()->plugins->plugins())
+             {
+                 ids.insert(id);
+             }
+             for (const auto &id : ids)
+             {
+                 getApp()->plugins->reload(id);
+             }
+             return "";
+         }},
+#endif
         {"openSettings",  // Open settings
          [this](std::vector<QString>) -> QString {
              SettingsDialog::showDialog(this);
