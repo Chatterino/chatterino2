@@ -94,6 +94,37 @@ int c2_register_command(lua_State *L)
     return 1;
 }
 
+int c2_register_callback(lua_State *L)
+{
+    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+    if (pl == nullptr)
+    {
+        luaL_error(L, "internal error: no plugin");
+        return 0;
+    }
+    EventType evtType{};
+    if (!lua::peek(L, &evtType, 1))
+    {
+        luaL_error(L, "cannot get event name (1st arg of register_callback, "
+                      "expected a string)");
+        return 0;
+    }
+    if (lua_isnoneornil(L, 2))
+    {
+        luaL_error(L, "missing argument for register_callback: function "
+                      "\"pointer\"");
+        return 0;
+    }
+
+    auto callbackSavedName = QString("c2cb-%1").arg(
+        magic_enum::enum_name<EventType>(evtType).data());
+    lua_setfield(L, LUA_REGISTRYINDEX, callbackSavedName.toStdString().c_str());
+
+    lua_pop(L, 2);
+
+    return 0;
+}
+
 int c2_send_msg(lua_State *L)
 {
     QString text;

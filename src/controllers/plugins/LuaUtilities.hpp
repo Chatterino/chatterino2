@@ -278,6 +278,41 @@ StackIdx pushEnumTable(lua_State *L)
     return out;
 }
 
+// Represents a Lua function on the stack
+template <typename ReturnType, typename... Args>
+class CallbackFunction
+{
+    StackIdx stackidx;
+
+public:
+    CallbackFunction(StackIdx stackid)
+        : stackidx(stackid)
+    {
+    }
+    std::variant<int, ReturnType> operator()(lua_State *L, Args... arguments)
+    {
+        (  // apparently this calls lua::push() for every Arg
+            [&L, &arguments] {
+                lua::push(L, arguments);
+            }(),
+            ...);
+
+        int res = lua_pcall(L, sizeof...(Args), 1, 0);
+        if (res != LUA_OK)
+        {
+            qCDebug(chatterinoLua) << "error is: " << res;
+            return {res};
+        }
+
+        ReturnType val;
+        if (!lua::pop(L, &val))
+        {
+            return {ERROR_BAD_PEEK};
+        }
+        return {val};
+    }
+};
+
 }  // namespace chatterino::lua
 
 #endif

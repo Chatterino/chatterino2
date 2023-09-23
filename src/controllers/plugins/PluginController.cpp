@@ -148,6 +148,7 @@ void PluginController::openLibrariesFor(lua_State *L,
     static const luaL_Reg c2Lib[] = {
         {"system_msg", lua::api::c2_system_msg},
         {"register_command", lua::api::c2_register_command},
+        {"register_callback", lua::api::c2_register_callback},
         {"send_msg", lua::api::c2_send_msg},
         {"log", lua::api::c2_log},
         {nullptr, nullptr},
@@ -155,8 +156,8 @@ void PluginController::openLibrariesFor(lua_State *L,
     lua_pushglobaltable(L);
     auto global = lua_gettop(L);
 
-    // count of elements in C2LIB + LogLevel + CompletionType
-    auto c2libIdx = lua::pushEmptyTable(L, 6);
+    // count of elements in C2LIB + LogLevel + CompletionType + EventType
+    auto c2libIdx = lua::pushEmptyTable(L, 8);
 
     luaL_setfuncs(L, c2Lib, 0);
 
@@ -165,6 +166,9 @@ void PluginController::openLibrariesFor(lua_State *L,
 
     lua::pushEnumTable<CompletionModel::TaggedString::Type>(L);
     lua_setfield(L, c2libIdx, "CompletionType");
+
+    lua::pushEnumTable<lua::api::EventType>(L);
+    lua_setfield(L, c2libIdx, "EventType");
 
     lua_setfield(L, global, "c2");
 
