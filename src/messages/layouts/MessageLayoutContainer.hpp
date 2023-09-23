@@ -105,7 +105,8 @@ struct MessageLayoutContainer {
 
     /**
      * Get the index of the first visible character in this message
-     * This is not always 0 in case there elements that are skipped
+     *
+     * This can be non-zero if there are elements in this message that are skipped
      */
     size_t getFirstMessageCharacterIndex() const;
 
