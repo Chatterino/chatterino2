@@ -48,8 +48,18 @@ float MessageLayoutContainer::getScale() const
 void MessageLayoutContainer::beginLayout(int width, float scale,
                                          MessageFlags flags)
 {
-    this->clear();
+    this->elements_.clear();
+    this->lines_.clear();
+
+    this->line_ = 0;
+    this->currentX_ = 0;
+    this->currentY_ = 0;
+    this->lineStart_ = 0;
+    this->lineHeight_ = 0;
+    this->charIndex_ = 0;
+
     this->width_ = width;
+    this->height_ = 0;
     this->scale_ = scale;
     this->flags_ = flags;
     auto mediumFontMetrics =
@@ -60,20 +70,6 @@ void MessageLayoutContainer::beginLayout(int width, float scale,
     this->canAddMessages_ = true;
     this->isCollapsed_ = false;
     this->wasPrevReversed_ = false;
-}
-
-void MessageLayoutContainer::clear()
-{
-    this->elements_.clear();
-    this->lines_.clear();
-
-    this->height_ = 0;
-    this->line_ = 0;
-    this->currentX_ = 0;
-    this->currentY_ = 0;
-    this->lineStart_ = 0;
-    this->lineHeight_ = 0;
-    this->charIndex_ = 0;
 }
 
 void MessageLayoutContainer::addElement(MessageLayoutElement *element)

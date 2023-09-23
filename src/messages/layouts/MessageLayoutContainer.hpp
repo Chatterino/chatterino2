@@ -54,7 +54,6 @@ struct MessageLayoutContainer {
      */
     void endLayout();
 
-    void clear();
     bool canAddElements() const;
     void addElement(MessageLayoutElement *element);
     void addElementNoLineBreak(MessageLayoutElement *element);
