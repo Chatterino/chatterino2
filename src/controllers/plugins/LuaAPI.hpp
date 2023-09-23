@@ -9,6 +9,7 @@ namespace chatterino::lua::api {
 // NOLINTBEGIN(readability-identifier-naming)
 // Following functions are exposed in c2 table.
 int c2_register_command(lua_State *L);
+int c2_register_callback(lua_State *L);
 int c2_send_msg(lua_State *L);
 int c2_system_msg(lua_State *L);
 int c2_log(lua_State *L);
@@ -22,6 +23,12 @@ int g_import(lua_State *L);
 // Exposed as c2.LogLevel
 // Represents "calls" to qCDebug, qCInfo ...
 enum class LogLevel { Debug, Info, Warning, Critical };
+
+// Exposed as c2.EventType
+// Represents callbacks c2 can do into lua world
+enum class EventType {
+    CompletionRequested,
+};
 
 }  // namespace chatterino::lua::api
 

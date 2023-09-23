@@ -2,6 +2,8 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+#    include "common/QLogging.hpp"
+
 #    include <lua.h>
 #    include <lualib.h>
 #    include <magic_enum.hpp>
@@ -10,6 +12,7 @@
 #    include <string>
 #    include <string_view>
 #    include <type_traits>
+#    include <variant>
 #    include <vector>
 struct lua_State;
 class QJsonObject;
@@ -18,6 +21,8 @@ struct CommandContext;
 }  // namespace chatterino
 
 namespace chatterino::lua {
+
+constexpr int ERROR_BAD_PEEK = LUA_OK - 1;
 
 /**
  * @brief Dumps the Lua stack into qCDebug(chatterinoLua)
@@ -185,6 +190,41 @@ StackIdx pushEnumTable(lua_State *L)
     }
     return out;
 }
+
+// Represents a Lua function on the stack
+template <typename ReturnType, typename... Args>
+class CallbackFunction
+{
+    StackIdx stackidx;
+
+public:
+    CallbackFunction(StackIdx stackid)
+        : stackidx(stackid)
+    {
+    }
+    std::variant<int, ReturnType> operator()(lua_State *L, Args... arguments)
+    {
+        (  // apparently this calls lua::push() for every Arg
+            [&L, &arguments] {
+                lua::push(L, arguments);
+            }(),
+            ...);
+
+        int res = lua_pcall(L, sizeof...(Args), 1, 0);
+        if (res != LUA_OK)
+        {
+            qCDebug(chatterinoLua) << "error is: " << res;
+            return {res};
+        }
+
+        ReturnType val;
+        if (!lua::pop(L, &val))
+        {
+            return {ERROR_BAD_PEEK};
+        }
+        return {val};
+    }
+};
 
 }  // namespace chatterino::lua
 

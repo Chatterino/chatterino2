@@ -75,6 +75,9 @@ QString humanErrorText(lua_State *L, int errCode)
         case LUA_ERRFILE:
             errName = "(file error)";
             break;
+        case ERROR_BAD_PEEK:
+            errName = "(unable to convert value to c++)";
+            break;
         default:
             errName = "(unknown error type)";
     }
