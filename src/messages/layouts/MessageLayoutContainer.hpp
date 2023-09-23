@@ -77,6 +77,17 @@ struct MessageLayoutContainer {
     // painting
     void paintElements(QPainter &painter, const MessagePaintContext &ctx);
     void paintAnimatedElements(QPainter &painter, int yOffset);
+
+    /**
+     * Paint the selection for this container
+     * This container contains one or more message elements
+     *
+     * @param painter The painter we draw everything to
+     * @param messageIndex This container's message index in the context of
+     *                     the layout we're being painted in
+     * @param selection The selection we need to paint
+     * @param yOffset The extra offset added to Y for everything that's painted
+     */
     void paintSelection(QPainter &painter, size_t messageIndex,
                         const Selection &selection, int yOffset);
 
