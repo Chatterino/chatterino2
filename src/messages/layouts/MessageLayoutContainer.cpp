@@ -392,9 +392,13 @@ void MessageLayoutContainer::breakLine()
         this->lines_.back().endIndex = this->lineStart_;
         this->lines_.back().endCharIndex = this->charIndex_;
     }
-    this->lines_.push_back(
-        {(int)lineStart_, 0, this->charIndex_, 0,
-         QRect(-100000, this->currentY_, 200000, lineHeight_)});
+    this->lines_.push_back({
+        .startIndex = (int)lineStart_,
+        .endIndex = 0,
+        .startCharIndex = this->charIndex_,
+        .endCharIndex = 0,
+        .rect = QRect(-100000, this->currentY_, 200000, lineHeight_),
+    });
 
     for (auto i = this->lineStart_; i < this->elements_.size(); i++)
     {
@@ -563,25 +567,28 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
 
     const auto selectionColor = getTheme()->messages.selection;
 
-    // fully selected
     if (selection.selectionMin.messageIndex < messageIndex &&
         selection.selectionMax.messageIndex > messageIndex)
     {
+        // The selection fully covers this message
+
         for (const Line &line : this->lines_)
         {
+            // Fully paint a selection rectangle over all lines
             auto left = this->elements_[line.startIndex]->getRect().left();
             auto right = this->elements_[line.endIndex - 1]->getRect().right();
             this->paintSelectionRect(painter, line, left, right, yOffset,
                                      selectionColor);
         }
+
         return;
     }
 
     size_t lineIndex = 0;
 
-    // [1] start in this message
     if (selection.selectionMin.messageIndex == messageIndex)
     {
+        // The selection starts in this message
         for (; lineIndex < this->lines_.size(); lineIndex++)
         {
             const Line &line = this->lines_[lineIndex];
@@ -592,9 +599,12 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
                 continue;
             }
 
-            // Selection starts at the trailing newline
             if (selection.selectionMin.charIndex == line.endCharIndex - 1)
             {
+                // Selection starts at the trailing newline
+                // NOTE: Should this be included in the selection? Right now this is
+                // painted since it's included in the copy action, but if it's trimmed we
+                // should stop painting this
                 auto right =
                     this->elements_[line.endIndex - 1]->getRect().right();
                 this->paintSelectionRect(painter, line, right, right, yOffset,

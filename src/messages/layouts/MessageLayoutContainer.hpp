@@ -102,10 +102,34 @@ struct MessageLayoutContainer {
 
 private:
     struct Line {
+        /**
+         * The index of the first message element on this line
+         * Points into `elements_`
+         */
         int startIndex{};
+
+        /**
+         * The index of the last message element on this line
+         * Points into `elements_`
+         */
         int endIndex{};
+
+        /**
+         * In the context of selections, the index of the first character on this line
+         * The first line's startCharIndex will always be 0
+         */
         int startCharIndex{};
+
+        /**
+         * In the context of selections, the index of the last character on this line
+         * The last line's startCharIndex will always be the sum of all characters in this message
+         */
         int endCharIndex{};
+
+        /**
+         * The rectangle that covers all elements on this line
+         * This rectangle will always take up 100% of the view's width
+         */
         QRect rect;
     };
 
@@ -158,6 +182,11 @@ private:
     bool wasPrevReversed_ = false;
 
     std::vector<std::unique_ptr<MessageLayoutElement>> elements_;
+    /**
+     * A list of lines covering this message
+     * A message that spans 3 lines in a view will have 3 elements in lines_
+     * These lines hold no relation to the elements that are in this
+     */
     std::vector<Line> lines_;
 };
 
