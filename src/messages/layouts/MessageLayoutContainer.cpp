@@ -541,10 +541,10 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
     auto *app = getApp();
     QColor selectionColor = app->themes->messages.selection;
 
-    // don't draw anything
     if (selection.selectionMin.messageIndex > messageIndex ||
         selection.selectionMax.messageIndex < messageIndex)
     {
+        // This message is not part of the selection, don't draw anything
         return;
     }
 
