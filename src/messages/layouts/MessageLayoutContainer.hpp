@@ -20,31 +20,6 @@ class MessageLayoutElement;
 struct Selection;
 struct MessagePaintContext;
 
-struct Margin {
-    int top;
-    int right;
-    int bottom;
-    int left;
-
-    Margin()
-        : Margin(0)
-    {
-    }
-
-    Margin(int value)
-        : Margin(value, value, value, value)
-    {
-    }
-
-    Margin(int _top, int _right, int _bottom, int _left)
-        : top(_top)
-        , right(_right)
-        , bottom(_bottom)
-        , left(_left)
-    {
-    }
-};
-
 struct MessageLayoutContainer {
     MessageLayoutContainer() = default;
 
@@ -165,8 +140,6 @@ private:
      **/
     void paintSelectionRect(QPainter &painter, const Line &line, int left,
                             int right, int yOffset, const QColor &color) const;
-
-    const Margin margin = {4, 8, 4, 8};
 
     // variables
     float scale_ = 1.F;

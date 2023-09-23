@@ -12,11 +12,18 @@
 #include "util/Helpers.hpp"
 
 #include <QDebug>
+#include <QMargins>
 #include <QPainter>
 
 #define COMPACT_EMOTES_OFFSET 4
 #define MAX_UNCOLLAPSED_LINES \
     (getSettings()->collpseMessagesMinLines.getValue())
+
+namespace {
+
+constexpr const QMargins MARGIN{4, 8, 4, 8};
+
+}  // namespace
 
 namespace chatterino {
 
@@ -155,7 +162,7 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
     // top margin
     if (this->elements_.empty())
     {
-        this->currentY_ = int(this->margin.top * this->scale_);
+        this->currentY_ = int(MARGIN.top() * this->scale_);
     }
 
     int elementLineHeight = element->getRect().height();
@@ -181,7 +188,7 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
         element->getCreator().getFlags().hasNone(
             {MessageElementFlag::TwitchEmoteImage}))
     {
-        yOffset -= (this->margin.top * this->scale_);
+        yOffset -= (MARGIN.top() * this->scale_);
     }
 
     if (getSettings()->removeSpacesBetweenEmotes &&
@@ -358,8 +365,8 @@ void MessageLayoutContainer::breakLine()
 
     if (this->flags_.has(MessageFlag::Centered) && this->elements_.size() > 0)
     {
-        const int marginOffset = int(this->margin.left * this->scale_) +
-                                 int(this->margin.right * this->scale_);
+        const int marginOffset = int(MARGIN.left() * this->scale_) +
+                                 int(MARGIN.right() * this->scale_);
         xOffset = (width_ - marginOffset -
                    this->elements_.at(this->elements_.size() - 1)
                        ->getRect()
@@ -384,7 +391,7 @@ void MessageLayoutContainer::breakLine()
 
         element->setPosition(
             QPoint(element->getRect().x() + xOffset +
-                       int(this->margin.left * this->scale_),
+                       int(MARGIN.left() * this->scale_),
                    element->getRect().y() + this->lineHeight_ + yExtra));
     }
 
@@ -417,7 +424,7 @@ void MessageLayoutContainer::breakLine()
 
     this->currentX_ = 0;
     this->currentY_ += this->lineHeight_;
-    this->height_ = this->currentY_ + int(this->margin.bottom * this->scale_);
+    this->height_ = this->currentY_ + int(MARGIN.bottom() * this->scale_);
     this->lineHeight_ = 0;
     this->line_++;
 }
@@ -434,8 +441,8 @@ bool MessageLayoutContainer::fitsInLine(int width) const
 
 int MessageLayoutContainer::remainingWidth() const
 {
-    return (this->width_ - int(this->margin.left * this->scale_) -
-            int(this->margin.right * this->scale_) -
+    return (this->width_ - int(MARGIN.left() * this->scale_) -
+            int(MARGIN.right() * this->scale_) -
             (this->line_ + 1 == MAX_UNCOLLAPSED_LINES ? this->dotdotdotWidth_
                                                       : 0)) -
            this->currentX_;
