@@ -98,13 +98,13 @@ private:
          * In the context of selections, the index of the first character on this line
          * The first line's startCharIndex will always be 0
          */
-        int startCharIndex{};
+        size_t startCharIndex{};
 
         /**
          * In the context of selections, the index of the last character on this line
          * The last line's startCharIndex will always be the sum of all characters in this message
          */
-        int endCharIndex{};
+        size_t endCharIndex{};
 
         /**
          * The rectangle that covers all elements on this line
@@ -154,7 +154,11 @@ private:
     int height_ = 0;
     int currentX_ = 0;
     int currentY_ = 0;
-    int charIndex_ = 0;
+    /**
+     * charIndex_ is the selection-contexted index of where we currently are in our message
+     * At the end, this will always be equal to the sum of `elements_` getSelectionIndexCount()
+     */
+    size_t charIndex_ = 0;
     size_t lineStart_ = 0;
     int lineHeight_ = 0;
     int spaceWidth_ = 4;
