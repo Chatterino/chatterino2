@@ -428,7 +428,7 @@ void MessageLayoutContainer::breakLine()
     this->line_++;
 }
 
-bool MessageLayoutContainer::atStartOfLine()
+bool MessageLayoutContainer::atStartOfLine() const
 {
     return this->lineStart_ == this->elements_.size();
 }
@@ -523,9 +523,9 @@ bool MessageLayoutContainer::isCollapsed() const
     return this->isCollapsed_;
 }
 
-MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point)
+MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point) const
 {
-    for (std::unique_ptr<MessageLayoutElement> &element : this->elements_)
+    for (const auto &element : this->elements_)
     {
         if (element->getRect().contains(point))
         {
@@ -727,12 +727,13 @@ size_t MessageLayoutContainer::getFirstMessageCharacterIndex() const
 }
 
 void MessageLayoutContainer::addSelectionText(QString &str, uint32_t from,
-                                              uint32_t to, CopyMode copymode)
+                                              uint32_t to,
+                                              CopyMode copymode) const
 {
     uint32_t index = 0;
     bool first = true;
 
-    for (auto &element : this->elements_)
+    for (const auto &element : this->elements_)
     {
         if (copymode != CopyMode::Everything &&
             element->getCreator().getFlags().has(

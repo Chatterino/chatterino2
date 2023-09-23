@@ -54,26 +54,56 @@ struct MessageLayoutContainer {
      */
     void endLayout();
 
+    /**
+     * Add the given `element` to this message.
+     *
+     * This will also prepend a line break if the element
+     * does not fit in the current line
+     */
     void addElement(MessageLayoutElement *element);
+
+    /**
+     * Add the given `element` to this message
+     */
     void addElementNoLineBreak(MessageLayoutElement *element);
+
+    /**
+     * Break the current line
+     */
     void breakLine();
-    bool atStartOfLine();
+
+    /**
+     * Return true if we are at the start of a new line
+     */
+    bool atStartOfLine() const;
+
     /**
      * Check whether an additional `width` would fit in the current line
      *
      * Returns true if it does fit, false if not
      */
     bool fitsInLine(int width) const;
-    int remainingWidth() const;
-    // this method is called when a message has an RTL word
-    // we need to reorder the words to be shown properly
-    // however we don't we to reorder non-text elements like badges, timestamps, username
-    // firstTextIndex is the index of the first text element that we need to start the reordering from
-    void reorderRTL(int firstTextIndex);
-    MessageLayoutElement *getElementAt(QPoint point);
 
-    // painting
+    /**
+     * Returns the remaining width of this line until we will need to start a new line
+     */
+    int remainingWidth() const;
+
+    /**
+     * Returns a raw pointer to the element at the given coordinates
+     *
+     * If no element is found at the given point, this returns a null pointer
+     */
+    MessageLayoutElement *getElementAt(QPoint point) const;
+
+    /**
+     * Paint the elements in this message
+     */
     void paintElements(QPainter &painter, const MessagePaintContext &ctx);
+
+    /**
+     * Paint the animated elements in this message
+     */
     void paintAnimatedElements(QPainter &painter, int yOffset);
 
     /**
@@ -105,9 +135,21 @@ struct MessageLayoutContainer {
      * This is not always 0 in case there elements that are skipped
      */
     size_t getFirstMessageCharacterIndex() const;
-    void addSelectionText(QString &str, uint32_t from, uint32_t to,
-                          CopyMode copymode);
 
+    /**
+     * Add text from this message into the `str` parameter
+     *
+     * @param[out] str The string where we append our selected text to
+     * @param from The character index from which we collecting our selected text
+     * @param to The character index where we stop collecting our selected text
+     * @param copymode Decides what from the message gets added to the selected text
+     */
+    void addSelectionText(QString &str, uint32_t from, uint32_t to,
+                          CopyMode copymode) const;
+
+    /**
+     * Returns true if this message is collapsed
+     */
     bool isCollapsed() const;
 
 private:
@@ -162,6 +204,12 @@ private:
     void addElement(MessageLayoutElement *element, bool forceAdd,
                     int prevIndex);
     bool canCollapse();
+
+    // this method is called when a message has an RTL word
+    // we need to reorder the words to be shown properly
+    // however we don't we to reorder non-text elements like badges, timestamps, username
+    // firstTextIndex is the index of the first text element that we need to start the reordering from
+    void reorderRTL(int firstTextIndex);
 
     /**
      * Paint a selection rectangle over the given line
