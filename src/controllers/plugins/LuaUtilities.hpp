@@ -40,6 +40,21 @@ QString humanErrorText(lua_State *L, int errCode);
  */
 using StackIdx = int;
 
+// This would be in its own file but c++ seems to get confused about the peek() implementation so it's here.
+// - Mm2PL
+namespace api {
+    /**
+     * This is for custom completion, a registered functions returns this type
+     * however in Lua array part (value) and object part (done) are in the same
+     * table.
+     */
+    struct CompletionList {
+        std::vector<std::pair<QString, CompletionModel::TaggedString::Type>>
+            value;
+        bool done;
+    };
+}  // namespace api
+
 /**
  * @brief Creates a table with countArray array properties on the Lua stack
  * @return stack index of the newly created table
@@ -63,7 +78,7 @@ bool peek(lua_State *L, double *out, StackIdx idx = -1);
 bool peek(lua_State *L, QString *out, StackIdx idx = -1);
 bool peek(lua_State *L, QByteArray *out, StackIdx idx = -1);
 bool peek(lua_State *L, std::string *out, StackIdx idx = -1);
-
+bool peek(lua_State *L, api::CompletionList *out, StackIdx idx = -1);
 /**
  * @brief Converts Lua object at stack index idx to a string.
  */

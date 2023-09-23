@@ -228,6 +228,22 @@ bool peek(lua_State *L, std::string *out, StackIdx idx)
     return true;
 }
 
+bool peek(lua_State *L, api::CompletionList *out, StackIdx idx)
+{
+    int typ = lua_getfield(L, idx, "values");
+    if (typ != LUA_TTABLE)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    if (!lua::pop(L, &out->value, -1))
+    {
+        return false;
+    }
+    lua_getfield(L, idx, "done");
+    return lua::pop(L, &out->done);
+}
+
 QString toString(lua_State *L, StackIdx idx)
 {
     size_t len{};
