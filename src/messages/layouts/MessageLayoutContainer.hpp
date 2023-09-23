@@ -25,7 +25,6 @@ struct MessageLayoutContainer {
     MessageLayoutContainer() = default;
 
     FirstWord first = FirstWord::Neutral;
-    bool containsRTL = false;
 
     int getHeight() const;
     int getWidth() const;
@@ -198,6 +197,12 @@ private:
     bool canAddMessages_ = true;
     bool isCollapsed_ = false;
     bool wasPrevReversed_ = false;
+
+    /**
+     * containsRTL indicates whether or not any of the text in this message
+     * contains any right-to-left characters (e.g. arabic)
+     */
+    bool containsRTL = false;
 
     std::vector<std::unique_ptr<MessageLayoutElement>> elements_;
 
