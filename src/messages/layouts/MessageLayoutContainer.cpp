@@ -533,6 +533,23 @@ MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point)
 void MessageLayoutContainer::paintElements(QPainter &painter,
                                            const MessagePaintContext &ctx)
 {
+#ifdef FOURTF
+    static constexpr std::array<QColor, 5> lineColors{
+        QColor{255, 0, 0, 60},    // RED
+        QColor{0, 255, 0, 60},    // GREEN
+        QColor{0, 0, 255, 60},    // BLUE
+        QColor{255, 0, 255, 60},  // PINk
+        QColor{0, 255, 255, 60},  // CYAN
+    };
+
+    int lineNum = 0;
+    for (const auto &line : this->lines_)
+    {
+        const auto &color = lineColors[lineNum++ % 5];
+        painter.fillRect(line.rect, color);
+    }
+#endif
+
     for (const std::unique_ptr<MessageLayoutElement> &element : this->elements_)
     {
 #ifdef FOURTF
