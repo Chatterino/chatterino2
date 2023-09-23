@@ -7,6 +7,7 @@
 #include <QRect>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 class QPainter;
@@ -140,6 +141,24 @@ private:
      **/
     void paintSelectionRect(QPainter &painter, const Line &line, int left,
                             int right, int yOffset, const QColor &color) const;
+
+    /**
+     * Paint the selection start
+     *
+     * Returns a line index if this message should also paint the selection end
+     */
+    std::optional<size_t> paintSelectionStart(QPainter &painter,
+                                              size_t messageIndex,
+                                              const Selection &selection,
+                                              int yOffset) const;
+
+    /**
+     * Paint the selection end
+     *
+     * @param lineIndex The index of the line to start painting at
+     */
+    void paintSelectionEnd(QPainter &painter, size_t lineIndex,
+                           const Selection &selection, int yOffset) const;
 
     // variables
     float scale_ = 1.F;
