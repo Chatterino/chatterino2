@@ -457,7 +457,7 @@ void MessageLayoutContainer::end()
         if (this->first == FirstWord::RTL)
         {
             // Shift all elements in the next line to the left
-            for (int i = this->lines_.back().startIndex;
+            for (auto i = this->lines_.back().startIndex;
                  i < this->elements_.size(); i++)
             {
                 QPoint prevPos = this->elements_[i]->getRect().topLeft();
@@ -636,7 +636,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
             int r = this->elements_[line.endIndex - 1]->getRect().right();
 
             int index = line.startCharIndex;
-            for (int i = line.startIndex; i < line.endIndex; i++)
+            for (auto i = line.startIndex; i < line.endIndex; i++)
             {
                 int indexCount = this->elements_[i]->getSelectionIndexCount();
                 if (index + indexCount <= selection.selectionMin.charIndex)
@@ -654,7 +654,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
                 {
                     returnAfter = true;
                     index = line.startCharIndex;
-                    for (int elementIdx = line.startIndex;
+                    for (auto elementIdx = line.startIndex;
                          elementIdx < line.endIndex; elementIdx++)
                     {
                         int c = this->elements_[elementIdx]
@@ -734,7 +734,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
         // find the right end of the selection
         int r = this->elements_[line.endIndex - 1]->getRect().right();
 
-        for (int i = line.startIndex; i < line.endIndex; i++)
+        for (auto i = line.startIndex; i < line.endIndex; i++)
         {
             int c = this->elements_[i]->getSelectionIndexCount();
 
@@ -774,18 +774,18 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
         }
     }
 
-    int lineStart = line == this->lines_.end() ? this->lines_.back().startIndex
-                                               : line->startIndex;
+    auto lineStart = line == this->lines_.end() ? this->lines_.back().startIndex
+                                                : line->startIndex;
     if (line != this->lines_.end())
     {
         line++;
     }
-    int lineEnd =
+    auto lineEnd =
         line == this->lines_.end() ? this->elements_.size() : line->startIndex;
 
     int index = 0;
 
-    for (int i = 0; i < lineEnd; i++)
+    for (auto i = 0; i < lineEnd; i++)
     {
         auto &&element = this->elements_[i];
 
