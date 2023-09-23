@@ -54,7 +54,6 @@ struct MessageLayoutContainer {
      */
     void endLayout();
 
-    bool canAddElements() const;
     void addElement(MessageLayoutElement *element);
     void addElementNoLineBreak(MessageLayoutElement *element);
     void breakLine();
@@ -143,6 +142,11 @@ private:
          */
         QRect rect;
     };
+
+    /**
+     * canAddElements returns true if it's possible to add more elements to this message
+     */
+    bool canAddElements() const;
 
     // helpers
     /*
