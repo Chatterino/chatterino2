@@ -429,12 +429,12 @@ size_t MessageLayout::getLastCharacterIndex() const
     return this->container_.getLastCharacterIndex();
 }
 
-int MessageLayout::getFirstMessageCharacterIndex() const
+size_t MessageLayout::getFirstMessageCharacterIndex() const
 {
     return this->container_.getFirstMessageCharacterIndex();
 }
 
-int MessageLayout::getSelectionIndex(QPoint position)
+size_t MessageLayout::getSelectionIndex(QPoint position) const
 {
     return this->container_.getSelectionIndex(position);
 }

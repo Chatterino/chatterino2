@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <tuple>
 #include <utility>
@@ -8,11 +9,11 @@ namespace chatterino {
 
 struct SelectionItem {
     size_t messageIndex{0};
-    int charIndex{0};
+    size_t charIndex{0};
 
     SelectionItem() = default;
 
-    SelectionItem(size_t _messageIndex, int _charIndex)
+    SelectionItem(size_t _messageIndex, size_t _charIndex)
         : messageIndex(_messageIndex)
         , charIndex(_charIndex)
     {

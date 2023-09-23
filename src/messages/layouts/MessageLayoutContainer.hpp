@@ -72,14 +72,22 @@ struct MessageLayoutContainer {
     void paintSelection(QPainter &painter, size_t messageIndex,
                         const Selection &selection, int yOffset);
 
-    // selection
-    int getSelectionIndex(QPoint point);
+    /**
+     * Get the character index at the given position, in the context of selections
+     */
+    size_t getSelectionIndex(QPoint point) const;
+
     /**
      * Get the index of the last character in this message
      * This is the sum of all the characters in `elements_`
      */
     size_t getLastCharacterIndex() const;
-    int getFirstMessageCharacterIndex() const;
+
+    /**
+     * Get the index of the first visible character in this message
+     * This is not always 0 in case there elements that are skipped
+     */
+    size_t getFirstMessageCharacterIndex() const;
     void addSelectionText(QString &str, uint32_t from, uint32_t to,
                           CopyMode copymode);
 

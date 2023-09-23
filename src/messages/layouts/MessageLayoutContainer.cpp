@@ -634,7 +634,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
 }
 
 // selection
-int MessageLayoutContainer::getSelectionIndex(QPoint point)
+size_t MessageLayoutContainer::getSelectionIndex(QPoint point) const
 {
     if (this->elements_.empty())
     {
@@ -660,7 +660,7 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
     auto lineEnd =
         line == this->lines_.end() ? this->elements_.size() : line->startIndex;
 
-    int index = 0;
+    size_t index = 0;
 
     for (auto i = 0; i < lineEnd; i++)
     {
@@ -704,16 +704,17 @@ size_t MessageLayoutContainer::getLastCharacterIndex() const
     return this->lines_.back().endCharIndex;
 }
 
-int MessageLayoutContainer::getFirstMessageCharacterIndex() const
+size_t MessageLayoutContainer::getFirstMessageCharacterIndex() const
 {
-    static FlagsEnum<MessageElementFlag> skippedFlags;
-    skippedFlags.set(MessageElementFlag::RepliedMessage);
-    skippedFlags.set(MessageElementFlag::Timestamp);
-    skippedFlags.set(MessageElementFlag::Badges);
-    skippedFlags.set(MessageElementFlag::Username);
+    static const FlagsEnum<MessageElementFlag> skippedFlags{
+        MessageElementFlag::RepliedMessage,
+        MessageElementFlag::Timestamp,
+        MessageElementFlag::Badges,
+        MessageElementFlag::Username,
+    };
 
     // Get the index of the first character of the real message
-    int index = 0;
+    size_t index = 0;
     for (const auto &element : this->elements_)
     {
         if (element->getFlags().hasAny(skippedFlags))

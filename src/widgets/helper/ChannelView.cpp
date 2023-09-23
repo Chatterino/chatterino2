@@ -1519,7 +1519,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (this->isLeftMouseDown_)
     {
         // this->pause(PauseReason::Selecting, 300);
-        int index = layout->getSelectionIndex(relativePos);
+        auto index = layout->getSelectionIndex(relativePos);
 
         this->setSelection(this->selection_.start,
                            SelectionItem(messageIndex, index));
