@@ -73,13 +73,13 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element)
         this->breakLine();
     }
 
-    this->_addElement(element);
+    this->addElement(element, false, -2);
 }
 
 void MessageLayoutContainer::addElementNoLineBreak(
     MessageLayoutElement *element)
 {
-    this->_addElement(element);
+    this->addElement(element, false, -2);
 }
 
 bool MessageLayoutContainer::canAddElements() const
@@ -87,8 +87,9 @@ bool MessageLayoutContainer::canAddElements() const
     return this->canAddMessages_;
 }
 
-void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
-                                         bool forceAdd, int prevIndex)
+void MessageLayoutContainer::addElement(MessageLayoutElement *element,
+                                        const bool forceAdd,
+                                        const int prevIndex)
 {
     if (!this->canAddElements() && !forceAdd)
     {
@@ -328,13 +329,13 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
     // manually do the first call with -1 as previous index
     if (this->canAddElements())
     {
-        this->_addElement(this->elements_[correctSequence[0]].get(), false, -1);
+        this->addElement(this->elements_[correctSequence[0]].get(), false, -1);
     }
 
     for (int i = 1; i < correctSequence.size() && this->canAddElements(); i++)
     {
-        this->_addElement(this->elements_[correctSequence[i]].get(), false,
-                          correctSequence[i - 1]);
+        this->addElement(this->elements_[correctSequence[i]].get(), false,
+                         correctSequence[i - 1]);
     }
 }
 
@@ -464,7 +465,7 @@ void MessageLayoutContainer::end()
                     QPoint(prevPos.x() + this->dotdotdotWidth_, prevPos.y()));
             }
         }
-        this->_addElement(element, true);
+        this->addElement(element, true, -2);
         this->isCollapsed_ = true;
     }
 

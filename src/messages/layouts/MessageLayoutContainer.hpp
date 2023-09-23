@@ -135,7 +135,7 @@ private:
 
     // helpers
     /*
-    _addElement is called at two stages. first stage is the normal one where we want to add message layout elements to the container.
+    addElement is called at two stages. first stage is the normal one where we want to add message layout elements to the container.
     If we detect an RTL word in the message, reorderRTL will be called, which is the second stage, where we call _addElement
     again for each layout element, but in the correct order this time, without adding the elemnt to the this->element_ vector.
     Due to compact emote logic, we need the previous element to check if we should change the spacing or not.
@@ -144,8 +144,8 @@ private:
     In stage one we don't need that and we pass -2 to indicate stage one (i.e. adding mode)
     In stage two, we pass -1 for the first element, and the index of the oredered privous element for the rest.
     */
-    void _addElement(MessageLayoutElement *element, bool forceAdd = false,
-                     int prevIndex = -2);
+    void addElement(MessageLayoutElement *element, bool forceAdd,
+                    int prevIndex);
     bool canCollapse();
 
     /**
@@ -164,7 +164,7 @@ private:
     const Margin margin = {4, 8, 4, 8};
 
     // variables
-    float scale_ = 1.f;
+    float scale_ = 1.F;
     int width_ = 0;
     MessageFlags flags_{};
     /**
