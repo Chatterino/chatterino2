@@ -92,14 +92,14 @@ struct MessageLayoutContainer {
                           CopyMode copymode) const;
 
     /**
-     * Returns a raw pointer to the element at the given coordinates
+     * Returns a raw pointer to the element at the given point
      *
      * If no element is found at the given point, this returns a null pointer
      */
     MessageLayoutElement *getElementAt(QPoint point) const;
 
     /**
-     * Get the character index at the given position, in the context of selections
+     * Get the character index at the given point, in the context of selections
      */
     size_t getSelectionIndex(QPoint point) const;
 
