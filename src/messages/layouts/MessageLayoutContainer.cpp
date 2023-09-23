@@ -23,7 +23,7 @@
 
 namespace {
 
-constexpr const QMargins MARGIN{4, 8, 4, 8};
+constexpr const QMargins MARGIN{8, 4, 8, 4};
 
 }  // namespace
 
