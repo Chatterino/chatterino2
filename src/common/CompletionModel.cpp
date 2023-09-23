@@ -123,7 +123,15 @@ void CompletionModel::addItems(const QString &text, const QString &prefix,
         if (startsWithOrContains(str, prefix, Qt::CaseInsensitive,
                                  getSettings()->prefixOnlyEmoteCompletion))
         {
-            this->items_.emplace(str + " ", type);
+            // XXX
+            if (type == TaggedString::CustomCompletion)
+            {
+                this->items_.emplace(str, type);
+            }
+            else
+            {
+                this->items_.emplace(str + " ", type);
+            }
         }
     };
 
@@ -280,11 +288,13 @@ void CompletionModel::refresh(const QString &text, const QString &prefix,
     qDebug() << "REFRESH with" << text << ";" << prefix << ";" << isFirstWord;
     std::unique_lock lock(this->itemsMutex_);
 
+    this->addItems(text, prefix, isFirstWord);
     qDebug() << "lmao:";
     for (const auto &e : this->items_)
     {
         qDebug() << "xd" << e.string
-                 << magic_enum::enum_value<TaggedString::Type>(e.type);
+                 << magic_enum::enum_value<TaggedString::Type>(e.type)
+                 << magic_enum::enum_name<TaggedString::Type>(e.type).data();
     }
     qDebug() << "----------------------lmao";
     if (this->items_.empty())
