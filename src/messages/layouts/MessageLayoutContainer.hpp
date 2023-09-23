@@ -26,12 +26,32 @@ struct MessageLayoutContainer {
 
     FirstWord first = FirstWord::Neutral;
 
+    /**
+     * Returns the height of this message
+     */
     int getHeight() const;
+
+    /**
+     * Returns the width of this message
+     */
     int getWidth() const;
+
+    /**
+     * Returns the scale of this message
+     */
     float getScale() const;
 
-    // methods
+    /**
+     * Begin the layout process of this message
+     *
+     * This will reset all line calculations, and will be considered incomplete
+     * until the accompanying end function has been called
+     */
     void begin(int width_, float scale_, MessageFlags flags_);
+
+    /**
+     * Finish the layout process of this message
+     */
     void end();
 
     void clear();
