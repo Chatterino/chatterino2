@@ -427,9 +427,9 @@ bool MessageLayoutContainer::atStartOfLine()
     return this->lineStart_ == this->elements_.size();
 }
 
-bool MessageLayoutContainer::fitsInLine(int _width)
+bool MessageLayoutContainer::fitsInLine(int width) const
 {
-    return _width <= this->remainingWidth();
+    return width <= this->remainingWidth();
 }
 
 int MessageLayoutContainer::remainingWidth() const

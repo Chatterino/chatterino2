@@ -65,7 +65,12 @@ struct MessageLayoutContainer {
     void addElementNoLineBreak(MessageLayoutElement *element);
     void breakLine();
     bool atStartOfLine();
-    bool fitsInLine(int width_);
+    /**
+     * Check whether an additional `width` would fit in the current line
+     *
+     * Returns true if it does fit, false if not
+     */
+    bool fitsInLine(int width) const;
     int remainingWidth() const;
     // this method is called when a message has an RTL word
     // we need to reorder the words to be shown properly
