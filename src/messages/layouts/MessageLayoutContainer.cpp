@@ -491,6 +491,22 @@ bool MessageLayoutContainer::canCollapse()
            this->flags_.has(MessageFlag::Collapsed);
 }
 
+void MessageLayoutContainer::paintSelectionRect(QPainter &painter,
+                                                const Line &line,
+                                                const int left, const int right,
+                                                const int yOffset,
+                                                const QColor &color) const
+{
+    QRect rect = line.rect;
+
+    rect.setTop(std::max(0, rect.top()) + yOffset);
+    rect.setBottom(std::min(this->height_, rect.bottom()) + yOffset);
+    rect.setLeft(left);
+    rect.setRight(right);
+
+    painter.fillRect(rect, color);
+}
+
 bool MessageLayoutContainer::isCollapsed() const
 {
     return this->isCollapsed_;
@@ -545,19 +561,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
         return;
     }
 
-    auto *app = getApp();
-    QColor selectionColor = app->themes->messages.selection;
-
-    const auto paintLineRect = [&](const Line &line, int left, int right) {
-        QRect rect = line.rect;
-
-        rect.setTop(std::max(0, rect.top()) + yOffset);
-        rect.setBottom(std::min(this->height_, rect.bottom()) + yOffset);
-        rect.setLeft(left);
-        rect.setRight(right);
-
-        painter.fillRect(rect, selectionColor);
-    };
+    const auto selectionColor = getTheme()->messages.selection;
 
     // fully selected
     if (selection.selectionMin.messageIndex < messageIndex &&
@@ -565,9 +569,10 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
     {
         for (const Line &line : this->lines_)
         {
-            paintLineRect(
-                line, this->elements_[line.startIndex]->getRect().left(),
-                this->elements_[line.endIndex - 1]->getRect().right());
+            auto left = this->elements_[line.startIndex]->getRect().left();
+            auto right = this->elements_[line.endIndex - 1]->getRect().right();
+            this->paintSelectionRect(painter, line, left, right, yOffset,
+                                     selectionColor);
         }
         return;
     }
@@ -592,7 +597,8 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
             {
                 auto right =
                     this->elements_[line.endIndex - 1]->getRect().right();
-                paintLineRect(line, right, right);
+                this->paintSelectionRect(painter, line, right, right, yOffset,
+                                         selectionColor);
                 return;
             }
 
@@ -645,13 +651,14 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
                          lineIndex2 < this->lines_.size(); lineIndex2++)
                     {
                         Line &line2 = this->lines_[lineIndex2];
+                        auto left =
+                            this->elements_[line2.startIndex]->getRect().left();
+                        auto right = this->elements_[line2.endIndex - 1]
+                                         ->getRect()
+                                         .right();
 
-                        paintLineRect(
-                            line2,
-                            this->elements_[line2.startIndex]->getRect().left(),
-                            this->elements_[line2.endIndex - 1]
-                                ->getRect()
-                                .right());
+                        this->paintSelectionRect(painter, line2, left, right,
+                                                 yOffset, selectionColor);
                     }
                 }
                 else
@@ -665,7 +672,8 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
                 break;
             }
 
-            paintLineRect(line, x, r);
+            this->paintSelectionRect(painter, line, x, r, yOffset,
+                                     selectionColor);
 
             if (returnAfter)
             {
@@ -688,9 +696,10 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
         // the whole line is included
         if (line.endCharIndex < selection.selectionMax.charIndex)
         {
-            paintLineRect(
-                line, this->elements_[line.startIndex]->getRect().left(),
-                this->elements_[line.endIndex - 1]->getRect().right());
+            auto left = this->elements_[line.startIndex]->getRect().left();
+            auto right = this->elements_[line.endIndex - 1]->getRect().right();
+            this->paintSelectionRect(painter, line, left, right, yOffset,
+                                     selectionColor);
             continue;
         }
 
@@ -711,8 +720,9 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
             index += c;
         }
 
-        paintLineRect(line, this->elements_[line.startIndex]->getRect().left(),
-                      r);
+        auto left = this->elements_[line.startIndex]->getRect().left();
+        this->paintSelectionRect(painter, line, left, r, yOffset,
+                                 selectionColor);
 
         break;
     }

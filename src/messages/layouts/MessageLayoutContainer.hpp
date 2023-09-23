@@ -124,6 +124,19 @@ private:
                      int prevIndex = -2);
     bool canCollapse();
 
+    /**
+     * Paint a selection rectangle over the given line
+     *
+     * @param painter The painter we draw everything to
+     * @param line The line whose rect we use as the base top & bottom of the rect to paint
+     * @param left The left coordinates of the rect to paint
+     * @param right The right coordinates of the rect to paint
+     * @param yOffset Extra offset for line's top & bottom
+     * @param color Color of the selection
+     **/
+    void paintSelectionRect(QPainter &painter, const Line &line, int left,
+                            int right, int yOffset, const QColor &color) const;
+
     const Margin margin = {4, 8, 4, 8};
 
     // variables
