@@ -13,7 +13,7 @@
 - Bugfix: Fixed selection of tabs after closing a tab when using "Live Tabs Only". (#4770)
 - Bugfix: Fixed input in reply thread popup losing focus when dragging. (#4815)
 - Bugfix: Fixed the Quick Switcher (CTRL+K) from sometimes showing up on the wrong window. (#4819)
-- Bugfix: Fixed too much text being copied when copying chat messages. (#4812)
+- Bugfix: Fixed too much text being copied when copying chat messages. (#4812, #4830)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 - Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
