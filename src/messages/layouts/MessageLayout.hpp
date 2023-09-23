@@ -62,7 +62,7 @@ public:
 
     // Elements
     const MessageLayoutElement *getElementAt(QPoint point);
-    int getLastCharacterIndex() const;
+    size_t getLastCharacterIndex() const;
     int getFirstMessageCharacterIndex() const;
     int getSelectionIndex(QPoint position);
     void addSelectionText(QString &str, uint32_t from = 0,

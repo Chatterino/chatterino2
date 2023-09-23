@@ -74,7 +74,11 @@ struct MessageLayoutContainer {
 
     // selection
     int getSelectionIndex(QPoint point);
-    int getLastCharacterIndex() const;
+    /**
+     * Get the index of the last character in this message
+     * This is the sum of all the characters in `elements_`
+     */
+    size_t getLastCharacterIndex() const;
     int getFirstMessageCharacterIndex() const;
     void addSelectionText(QString &str, uint32_t from, uint32_t to,
                           CopyMode copymode);

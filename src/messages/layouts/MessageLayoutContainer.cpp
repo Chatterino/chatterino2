@@ -694,13 +694,13 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
     return index;
 }
 
-// fourtf: no idea if this is acurate LOL
-int MessageLayoutContainer::getLastCharacterIndex() const
+size_t MessageLayoutContainer::getLastCharacterIndex() const
 {
     if (this->lines_.empty())
     {
         return 0;
     }
+
     return this->lines_.back().endCharIndex;
 }
 

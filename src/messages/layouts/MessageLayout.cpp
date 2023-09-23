@@ -424,7 +424,7 @@ const MessageLayoutElement *MessageLayout::getElementAt(QPoint point)
     return this->container_.getElementAt(point);
 }
 
-int MessageLayout::getLastCharacterIndex() const
+size_t MessageLayout::getLastCharacterIndex() const
 {
     return this->container_.getLastCharacterIndex();
 }
