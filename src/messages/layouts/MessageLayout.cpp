@@ -143,7 +143,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
     bool hideSimilar = getSettings()->hideSimilar;
     bool hideReplies = !flags.has(MessageElementFlag::RepliedMessage);
 
-    this->container_.begin(width, this->scale_, messageFlags);
+    this->container_.beginLayout(width, this->scale_, messageFlags);
 
     for (const auto &element : this->message_->elements)
     {
@@ -184,7 +184,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         this->deleteBuffer();
     }
 
-    this->container_.end();
+    this->container_.endLayout();
     this->height_ = this->container_.getHeight();
 
     // collapsed state

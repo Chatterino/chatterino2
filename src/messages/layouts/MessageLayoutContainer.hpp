@@ -47,12 +47,12 @@ struct MessageLayoutContainer {
      * This will reset all line calculations, and will be considered incomplete
      * until the accompanying end function has been called
      */
-    void begin(int width_, float scale_, MessageFlags flags_);
+    void beginLayout(int width_, float scale_, MessageFlags flags_);
 
     /**
      * Finish the layout process of this message
      */
-    void end();
+    void endLayout();
 
     void clear();
     bool canAddElements() const;

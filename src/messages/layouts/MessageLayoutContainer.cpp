@@ -45,7 +45,8 @@ float MessageLayoutContainer::getScale() const
 }
 
 // methods
-void MessageLayoutContainer::begin(int width, float scale, MessageFlags flags)
+void MessageLayoutContainer::beginLayout(int width, float scale,
+                                         MessageFlags flags)
 {
     this->clear();
     this->width_ = width;
@@ -450,7 +451,7 @@ int MessageLayoutContainer::remainingWidth() const
            this->currentX_;
 }
 
-void MessageLayoutContainer::end()
+void MessageLayoutContainer::endLayout()
 {
     if (!this->canAddElements())
     {
