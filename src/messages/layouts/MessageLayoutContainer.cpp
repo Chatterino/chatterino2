@@ -538,15 +538,15 @@ void MessageLayoutContainer::paintSelection(QPainter &painter,
                                             const Selection &selection,
                                             const int yOffset)
 {
-    auto *app = getApp();
-    QColor selectionColor = app->themes->messages.selection;
-
     if (selection.selectionMin.messageIndex > messageIndex ||
         selection.selectionMax.messageIndex < messageIndex)
     {
         // This message is not part of the selection, don't draw anything
         return;
     }
+
+    auto *app = getApp();
+    QColor selectionColor = app->themes->messages.selection;
 
     const auto paintLineRect = [&](const Line &line, int left, int right) {
         QRect rect = line.rect;
