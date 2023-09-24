@@ -238,6 +238,8 @@ void Emojis::loadEmojiSet()
     getSettings()->emojiSet.connect([this](const auto &emojiSet) {
         this->emojis.each([=](const auto &name,
                               std::shared_ptr<EmojiData> &emoji) {
+            (void)name;
+
             QString emojiSetToUse = emojiSet;
             // clang-format off
             static std::map<QString, QString> emojiSets = {
