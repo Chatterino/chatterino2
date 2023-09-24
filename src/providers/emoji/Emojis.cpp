@@ -433,7 +433,7 @@ QString Emojis::replaceShortCodes(const QString &text) const
             continue;
         }
 
-        auto emojiData = emojiIt.value();
+        const auto &emojiData = emojiIt.value();
 
         ret.replace(offset + match.capturedStart(), match.capturedLength(),
                     emojiData->value);
