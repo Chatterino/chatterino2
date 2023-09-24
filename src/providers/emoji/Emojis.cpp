@@ -25,7 +25,7 @@ const std::map<QString, QString> TONE_NAMES{
 
 void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
                 const rapidjson::Value &unparsedEmoji,
-                QString shortCode = QString())
+                const QString &shortCode = {})
 {
     std::vector<uint32_t> unicodeBytes{};
 
