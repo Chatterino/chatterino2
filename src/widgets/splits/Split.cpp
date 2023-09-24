@@ -247,7 +247,8 @@ Split::Split(QWidget *parent)
     this->updateInputPlaceholder();
 
     // clear SplitInput selection when selecting in ChannelView
-    this->view_->selectionChanged.connect([this]() {
+    // this connection can be ignored since the ChannelView is owned by this Split
+    std::ignore = this->view_->selectionChanged.connect([this]() {
         if (this->input_->hasSelection())
         {
             this->input_->clearSelection();
@@ -255,55 +256,60 @@ Split::Split(QWidget *parent)
     });
 
     // clear ChannelView selection when selecting in SplitInput
-    this->input_->selectionChanged.connect([this]() {
+    // this connection can be ignored since the SplitInput is owned by this Split
+    std::ignore = this->input_->selectionChanged.connect([this]() {
         if (this->view_->hasSelection())
         {
             this->view_->clearSelection();
         }
     });
 
-    this->view_->openChannelIn.connect([this](
-                                           QString twitchChannel,
-                                           FromTwitchLinkOpenChannelIn openIn) {
-        ChannelPtr channel = getApp()->twitch->getOrAddChannel(twitchChannel);
-        switch (openIn)
-        {
-            case FromTwitchLinkOpenChannelIn::Split:
-                this->openSplitRequested.invoke(channel);
-                break;
-            case FromTwitchLinkOpenChannelIn::Tab:
-                this->joinChannelInNewTab(channel);
-                break;
-            case FromTwitchLinkOpenChannelIn::BrowserPlayer:
-                this->openChannelInBrowserPlayer(channel);
-                break;
-            case FromTwitchLinkOpenChannelIn::Streamlink:
-                this->openChannelInStreamlink(twitchChannel);
-                break;
-            default:
-                qCWarning(chatterinoWidget)
-                    << "Unhandled \"FromTwitchLinkOpenChannelIn\" enum value: "
-                    << static_cast<int>(openIn);
-        }
-    });
+    // this connection can be ignored since the ChannelView is owned by this Split
+    std::ignore = this->view_->openChannelIn.connect(
+        [this](QString twitchChannel, FromTwitchLinkOpenChannelIn openIn) {
+            ChannelPtr channel =
+                getApp()->twitch->getOrAddChannel(twitchChannel);
+            switch (openIn)
+            {
+                case FromTwitchLinkOpenChannelIn::Split:
+                    this->openSplitRequested.invoke(channel);
+                    break;
+                case FromTwitchLinkOpenChannelIn::Tab:
+                    this->joinChannelInNewTab(channel);
+                    break;
+                case FromTwitchLinkOpenChannelIn::BrowserPlayer:
+                    this->openChannelInBrowserPlayer(channel);
+                    break;
+                case FromTwitchLinkOpenChannelIn::Streamlink:
+                    this->openChannelInStreamlink(twitchChannel);
+                    break;
+                default:
+                    qCWarning(chatterinoWidget)
+                        << "Unhandled \"FromTwitchLinkOpenChannelIn\" enum "
+                           "value: "
+                        << static_cast<int>(openIn);
+            }
+        });
 
-    this->input_->textChanged.connect([this](const QString &newText) {
-        if (getSettings()->showEmptyInput)
-        {
-            // We always show the input regardless of the text, so we can early out here
-            return;
-        }
+    // this connection can be ignored since the SplitInput is owned by this Split
+    std::ignore =
+        this->input_->textChanged.connect([this](const QString &newText) {
+            if (getSettings()->showEmptyInput)
+            {
+                // We always show the input regardless of the text, so we can early out here
+                return;
+            }
 
-        if (newText.isEmpty())
-        {
-            this->input_->hide();
-        }
-        else if (this->input_->isHidden())
-        {
-            // Text updated and the input was previously hidden, show it
-            this->input_->show();
-        }
-    });
+            if (newText.isEmpty())
+            {
+                this->input_->hide();
+            }
+            else if (this->input_->isHidden())
+            {
+                // Text updated and the input was previously hidden, show it
+                this->input_->show();
+            }
+        });
 
     getSettings()->showEmptyInput.connect(
         [this](const bool &showEmptyInput, auto) {
@@ -367,7 +373,9 @@ Split::Split(QWidget *parent)
                                            // Forward textEdit's focusLost event
                                            this->focusLost.invoke();
                                        });
-    this->input_->ui_.textEdit->imagePasted.connect(
+
+    // this connection can be ignored since the SplitInput is owned by this Split
+    std::ignore = this->input_->ui_.textEdit->imagePasted.connect(
         [this](const QMimeData *source) {
             if (!getSettings()->imageUploaderEnabled)
                 return;
@@ -896,7 +904,9 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setWindowTitle(dialogTitle);
     dialog->show();
-    dialog->closed.connect([=, this] {
+    // We can safely ignore this signal connection since the dialog will be closed before
+    // this Split is closed
+    std::ignore = dialog->closed.connect([=, this] {
         if (dialog->hasSeletedChannel())
         {
             this->setChannel(dialog->getSelectedChannel());

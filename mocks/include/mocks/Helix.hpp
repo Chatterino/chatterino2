@@ -31,17 +31,12 @@ public:
                  HelixFailureCallback failureCallback),
                 (override));
 
-    MOCK_METHOD(void, fetchUsersFollows,
-                (QString fromId, QString toId,
-                 ResultCallback<HelixUsersFollowsResponse> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, getUserFollowers,
-                (QString userId,
-                 ResultCallback<HelixUsersFollowsResponse> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
+    MOCK_METHOD(
+        void, getChannelFollowers,
+        (QString broadcasterID,
+         ResultCallback<HelixGetChannelFollowersResponse> successCallback,
+         std::function<void(QString)> failureCallback),
+        (override));
 
     MOCK_METHOD(void, fetchStreams,
                 (QStringList userIds, QStringList userLogins,

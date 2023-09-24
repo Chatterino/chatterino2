@@ -587,8 +587,10 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         this->maxSpaces_ = maxSpaces;
     };
-    this->items.itemInserted.connect(addFirstMatchToMap);
-    this->items.itemRemoved.connect(addFirstMatchToMap);
+    // We can safely ignore these signal connections since items will be destroyed
+    // before CommandController
+    std::ignore = this->items.itemInserted.connect(addFirstMatchToMap);
+    std::ignore = this->items.itemRemoved.connect(addFirstMatchToMap);
 
     // Initialize setting manager for commands.json
     auto path = combinePath(paths.settingsDirectory, "commands.json");
@@ -604,7 +606,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     // Update the setting when the vector of commands has been updated (most
     // likely from the settings dialog)
-    this->items.delayedItemsChanged.connect([this] {
+    std::ignore = this->items.delayedItemsChanged.connect([this] {
         this->commandsSetting_->setValue(this->items.raw());
     });
 

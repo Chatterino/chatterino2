@@ -4,6 +4,8 @@
 
 namespace chatterino {
 
+class Window;
+
 class NewTabItem : public AbstractSwitcherItem
 {
 public:
@@ -13,7 +15,7 @@ public:
      *
      * @param   channelName name of channel to open
      */
-    NewTabItem(const QString &channelName);
+    NewTabItem(Window *window_, const QString &channelName);
 
     /**
      * @brief   Open the channel passed in the constructor in a new tab.
@@ -27,6 +29,7 @@ private:
     static constexpr const char *TEXT_FORMAT = "Open channel \"%1\" in new tab";
     QString channelName_;
     QString text_;
+    Window *window{};
 };
 
 }  // namespace chatterino
