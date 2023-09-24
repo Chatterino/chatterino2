@@ -15,30 +15,33 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
-namespace chatterino {
-
 namespace {
-    QList<SplitContainer *> openPages()
+
+using namespace chatterino;
+
+QList<SplitContainer *> openPages(Window *window)
+{
+    QList<SplitContainer *> pages;
+
+    auto &nb = window->getNotebook();
+    for (int i = 0; i < nb.getPageCount(); ++i)
     {
-        QList<SplitContainer *> pages;
-
-        auto &nb = getApp()->windows->getMainWindow().getNotebook();
-        for (int i = 0; i < nb.getPageCount(); ++i)
-        {
-            pages.append(static_cast<SplitContainer *>(nb.getPageAt(i)));
-        }
-
-        return pages;
+        pages.append(static_cast<SplitContainer *>(nb.getPageAt(i)));
     }
+
+    return pages;
+}
+
 }  // namespace
 
-const QSize QuickSwitcherPopup::MINIMUM_SIZE(500, 300);
+namespace chatterino {
 
-QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
+QuickSwitcherPopup::QuickSwitcherPopup(Window *parent)
     : BasePopup({BaseWindow::Flags::Frameless, BaseWindow::Flags::TopMost,
                  BaseWindow::DisableLayoutSave},
                 parent)
     , switcherModel_(this)
+    , window(parent)
 {
     this->setWindowFlag(Qt::Dialog);
     this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
@@ -86,7 +89,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     this->switcherModel_.clear();
 
     // Add items for navigating to different splits
-    for (auto *sc : openPages())
+    for (auto *sc : openPages(this->window))
     {
         const QString &tabTitle = sc->getTab()->getTitle();
         const auto splits = sc->getSplits();
@@ -119,7 +122,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     // Add item for opening a channel in a new tab or new popup
     if (!text.isEmpty())
     {
-        auto newTabItem = std::make_unique<NewTabItem>(text);
+        auto newTabItem = std::make_unique<NewTabItem>(this->window, text);
         this->switcherModel_.addItem(std::move(newTabItem));
 
         auto newPopupItem = std::make_unique<NewPopupItem>(text);

@@ -143,7 +143,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
     bool hideSimilar = getSettings()->hideSimilar;
     bool hideReplies = !flags.has(MessageElementFlag::RepliedMessage);
 
-    this->container_.begin(width, this->scale_, messageFlags);
+    this->container_.beginLayout(width, this->scale_, messageFlags);
 
     for (const auto &element : this->message_->elements)
     {
@@ -184,7 +184,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         this->deleteBuffer();
     }
 
-    this->container_.end();
+    this->container_.endLayout();
     this->height_ = this->container_.getHeight();
 
     // collapsed state
@@ -424,17 +424,17 @@ const MessageLayoutElement *MessageLayout::getElementAt(QPoint point)
     return this->container_.getElementAt(point);
 }
 
-int MessageLayout::getLastCharacterIndex() const
+size_t MessageLayout::getLastCharacterIndex() const
 {
     return this->container_.getLastCharacterIndex();
 }
 
-int MessageLayout::getFirstMessageCharacterIndex() const
+size_t MessageLayout::getFirstMessageCharacterIndex() const
 {
     return this->container_.getFirstMessageCharacterIndex();
 }
 
-int MessageLayout::getSelectionIndex(QPoint position)
+size_t MessageLayout::getSelectionIndex(QPoint position) const
 {
     return this->container_.getSelectionIndex(position);
 }

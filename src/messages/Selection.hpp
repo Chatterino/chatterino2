@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <tuple>
 #include <utility>
@@ -7,12 +8,12 @@
 namespace chatterino {
 
 struct SelectionItem {
-    uint32_t messageIndex{0};
-    uint32_t charIndex{0};
+    size_t messageIndex{0};
+    size_t charIndex{0};
 
     SelectionItem() = default;
 
-    SelectionItem(uint32_t _messageIndex, uint32_t _charIndex)
+    SelectionItem(size_t _messageIndex, size_t _charIndex)
         : messageIndex(_messageIndex)
         , charIndex(_charIndex)
     {
@@ -73,7 +74,7 @@ struct Selection {
     }
 
     // Shift all message selection indices `offset` back
-    void shiftMessageIndex(uint32_t offset)
+    void shiftMessageIndex(size_t offset)
     {
         if (offset > this->selectionMin.messageIndex)
         {
