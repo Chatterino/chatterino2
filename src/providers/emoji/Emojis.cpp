@@ -264,7 +264,7 @@ void Emojis::loadEmojiSet()
             };
             // clang-format on
 
-            if (emoji->capabilities.count(emojiSetToUse) == 0)
+            if (!emoji->capabilities.contains(emojiSetToUse))
             {
                 emojiSetToUse = "Twitter";
             }
