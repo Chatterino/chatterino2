@@ -14,78 +14,97 @@
 
 #include <memory>
 
-namespace chatterino {
 namespace {
 
-    auto toneNames = std::map<QString, QString>{
-        {"1F3FB", "tone1"}, {"1F3FC", "tone2"}, {"1F3FD", "tone3"},
-        {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
-    };
+using namespace chatterino;
 
-    void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
-                    const rapidjson::Value &unparsedEmoji,
-                    QString shortCode = QString())
+auto toneNames = std::map<QString, QString>{
+    {"1F3FB", "tone1"}, {"1F3FC", "tone2"}, {"1F3FD", "tone3"},
+    {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
+};
+
+void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
+                const rapidjson::Value &unparsedEmoji,
+                QString shortCode = QString())
+{
+    std::vector<uint32_t> unicodeBytes{};
+
+    struct {
+        bool apple;
+        bool google;
+        bool twitter;
+        bool facebook;
+    } capabilities{};
+
+    if (!shortCode.isEmpty())
     {
-        std::vector<uint32_t> unicodeBytes{};
-
-        struct {
-            bool apple;
-            bool google;
-            bool twitter;
-            bool facebook;
-        } capabilities{};
-
-        if (!shortCode.isEmpty())
+        emojiData->shortCodes.push_back(shortCode);
+    }
+    else
+    {
+        // Load short codes from the suggested short_names
+        const auto &shortNames = unparsedEmoji["short_names"];
+        for (const auto &shortName : shortNames.GetArray())
         {
-            emojiData->shortCodes.push_back(shortCode);
+            emojiData->shortCodes.emplace_back(shortName.GetString());
         }
-        else
+    }
+
+    rj::getSafe(unparsedEmoji, "non_qualified", emojiData->nonQualifiedCode);
+    rj::getSafe(unparsedEmoji, "unified", emojiData->unifiedCode);
+
+    rj::getSafe(unparsedEmoji, "has_img_apple", capabilities.apple);
+    rj::getSafe(unparsedEmoji, "has_img_google", capabilities.google);
+    rj::getSafe(unparsedEmoji, "has_img_twitter", capabilities.twitter);
+    rj::getSafe(unparsedEmoji, "has_img_facebook", capabilities.facebook);
+
+    if (capabilities.apple)
+    {
+        emojiData->capabilities.insert("Apple");
+    }
+    if (capabilities.google)
+    {
+        emojiData->capabilities.insert("Google");
+    }
+    if (capabilities.twitter)
+    {
+        emojiData->capabilities.insert("Twitter");
+    }
+    if (capabilities.facebook)
+    {
+        emojiData->capabilities.insert("Facebook");
+    }
+
+    QStringList nonQualifiedCharacters =
+        emojiData->nonQualifiedCode.toLower().split('-');
+    QStringList unicodeCharacters = emojiData->unifiedCode.toLower().split('-');
+
+    assert(unicodeCharacters.length() >= 1);
+
+    for (const QString &unicodeCharacter : unicodeCharacters)
+    {
+        bool ok{false};
+        unicodeBytes.push_back(QString(unicodeCharacter).toUInt(&ok, 16));
+        if (!ok)
         {
-            // Load short codes from the suggested short_names
-            const auto &shortNames = unparsedEmoji["short_names"];
-            for (const auto &shortName : shortNames.GetArray())
-            {
-                emojiData->shortCodes.emplace_back(shortName.GetString());
-            }
+            qCWarning(chatterinoEmoji)
+                << "Failed to parse emoji" << emojiData->shortCodes;
+            return;
         }
+    }
 
-        rj::getSafe(unparsedEmoji, "non_qualified",
-                    emojiData->nonQualifiedCode);
-        rj::getSafe(unparsedEmoji, "unified", emojiData->unifiedCode);
+    // We can safely do a narrowing static cast since unicodeBytes will never be a large number
+    emojiData->value = QString::fromUcs4(unicodeBytes.data(),
+                                         static_cast<int>(unicodeBytes.size()));
 
-        rj::getSafe(unparsedEmoji, "has_img_apple", capabilities.apple);
-        rj::getSafe(unparsedEmoji, "has_img_google", capabilities.google);
-        rj::getSafe(unparsedEmoji, "has_img_twitter", capabilities.twitter);
-        rj::getSafe(unparsedEmoji, "has_img_facebook", capabilities.facebook);
-
-        if (capabilities.apple)
-        {
-            emojiData->capabilities.insert("Apple");
-        }
-        if (capabilities.google)
-        {
-            emojiData->capabilities.insert("Google");
-        }
-        if (capabilities.twitter)
-        {
-            emojiData->capabilities.insert("Twitter");
-        }
-        if (capabilities.facebook)
-        {
-            emojiData->capabilities.insert("Facebook");
-        }
-
-        QStringList nonQualifiedCharacters =
-            emojiData->nonQualifiedCode.toLower().split('-');
-        QStringList unicodeCharacters =
-            emojiData->unifiedCode.toLower().split('-');
-
-        assert(unicodeCharacters.length() >= 1);
-
-        for (const QString &unicodeCharacter : unicodeCharacters)
+    if (nonQualifiedCharacters.length() > 0)
+    {
+        std::vector<uint32_t> nonQualifiedBytes{};
+        for (const QString &unicodeCharacter : nonQualifiedCharacters)
         {
             bool ok{false};
-            unicodeBytes.push_back(QString(unicodeCharacter).toUInt(&ok, 16));
+            nonQualifiedBytes.push_back(
+                QString(unicodeCharacter).toUInt(&ok, 16));
             if (!ok)
             {
                 qCWarning(chatterinoEmoji)
@@ -95,58 +114,40 @@ namespace {
         }
 
         // We can safely do a narrowing static cast since unicodeBytes will never be a large number
-        emojiData->value = QString::fromUcs4(
-            unicodeBytes.data(), static_cast<int>(unicodeBytes.size()));
-
-        if (nonQualifiedCharacters.length() > 0)
-        {
-            std::vector<uint32_t> nonQualifiedBytes{};
-            for (const QString &unicodeCharacter : nonQualifiedCharacters)
-            {
-                bool ok{false};
-                nonQualifiedBytes.push_back(
-                    QString(unicodeCharacter).toUInt(&ok, 16));
-                if (!ok)
-                {
-                    qCWarning(chatterinoEmoji)
-                        << "Failed to parse emoji" << emojiData->shortCodes;
-                    return;
-                }
-            }
-
-            // We can safely do a narrowing static cast since unicodeBytes will never be a large number
-            emojiData->nonQualified =
-                QString::fromUcs4(nonQualifiedBytes.data(),
-                                  static_cast<int>(nonQualifiedBytes.size()));
-        }
+        emojiData->nonQualified =
+            QString::fromUcs4(nonQualifiedBytes.data(),
+                              static_cast<int>(nonQualifiedBytes.size()));
     }
+}
 
-    // getToneNames takes a tones and returns their names in the same order
-    // The format of the tones is: "1F3FB-1F3FB" or "1F3FB"
-    // The output of the tone names is: "tone1-tone1" or "tone1"
-    QString getToneNames(const QString &tones)
+// getToneNames takes a tones and returns their names in the same order
+// The format of the tones is: "1F3FB-1F3FB" or "1F3FB"
+// The output of the tone names is: "tone1-tone1" or "tone1"
+QString getToneNames(const QString &tones)
+{
+    auto toneParts = tones.split('-');
+    QStringList toneNameResults;
+    for (const auto &tonePart : toneParts)
     {
-        auto toneParts = tones.split('-');
-        QStringList toneNameResults;
-        for (const auto &tonePart : toneParts)
+        auto toneNameIt = toneNames.find(tonePart);
+        if (toneNameIt == toneNames.end())
         {
-            auto toneNameIt = toneNames.find(tonePart);
-            if (toneNameIt == toneNames.end())
-            {
-                qDebug() << "Tone with key" << tonePart
-                         << "does not exist in tone names map";
-                continue;
-            }
-
-            toneNameResults.append(toneNameIt->second);
+            qDebug() << "Tone with key" << tonePart
+                     << "does not exist in tone names map";
+            continue;
         }
 
-        assert(!toneNameResults.isEmpty());
-
-        return toneNameResults.join('-');
+        toneNameResults.append(toneNameIt->second);
     }
+
+    assert(!toneNameResults.isEmpty());
+
+    return toneNameResults.join('-');
+}
 
 }  // namespace
+
+namespace chatterino {
 
 void Emojis::load()
 {
