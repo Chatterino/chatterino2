@@ -41,10 +41,11 @@ namespace {
         }
         else
         {
-            const auto &shortCodes = unparsedEmoji["short_names"];
-            for (const auto &_shortCode : shortCodes.GetArray())
+            // Load short codes from the suggested short_names
+            const auto &shortNames = unparsedEmoji["short_names"];
+            for (const auto &shortName : shortNames.GetArray())
             {
-                emojiData->shortCodes.emplace_back(_shortCode.GetString());
+                emojiData->shortCodes.emplace_back(shortName.GetString());
             }
         }
 
