@@ -12,6 +12,7 @@
 #include <rapidjson/error/error.h>
 #include <rapidjson/rapidjson.h>
 
+#include <map>
 #include <memory>
 
 namespace {

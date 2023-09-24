@@ -7,7 +7,6 @@
 #include <QRegularExpression>
 #include <QVector>
 
-#include <map>
 #include <set>
 #include <vector>
 
