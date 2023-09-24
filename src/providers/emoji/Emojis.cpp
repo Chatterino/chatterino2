@@ -12,7 +12,6 @@
 #include <rapidjson/error/error.h>
 #include <rapidjson/rapidjson.h>
 
-#include <array>
 #include <memory>
 
 namespace chatterino {
@@ -27,7 +26,7 @@ namespace {
                     const rapidjson::Value &unparsedEmoji,
                     QString shortCode = QString())
     {
-        std::array<uint32_t, 9> unicodeBytes{};
+        std::vector<uint32_t> unicodeBytes{};
 
         struct {
             bool apple;
@@ -75,31 +74,50 @@ namespace {
             emojiData->capabilities.insert("Facebook");
         }
 
-        QStringList unicodeCharacters;
-        if (!emojiData->nonQualifiedCode.isEmpty())
-        {
-            unicodeCharacters =
-                emojiData->nonQualifiedCode.toLower().split('-');
-        }
-        else
-        {
-            unicodeCharacters = emojiData->unifiedCode.toLower().split('-');
-        }
-        if (unicodeCharacters.length() < 1)
-        {
-            return;
-        }
+        QStringList nonQualifiedCharacters =
+            emojiData->nonQualifiedCode.toLower().split('-');
+        QStringList unicodeCharacters =
+            emojiData->unifiedCode.toLower().split('-');
 
-        int numUnicodeBytes = 0;
+        assert(unicodeCharacters.length() >= 1);
 
         for (const QString &unicodeCharacter : unicodeCharacters)
         {
-            unicodeBytes.at(numUnicodeBytes++) =
-                QString(unicodeCharacter).toUInt(nullptr, 16);
+            bool ok{false};
+            unicodeBytes.push_back(QString(unicodeCharacter).toUInt(&ok, 16));
+            if (!ok)
+            {
+                qCWarning(chatterinoEmoji)
+                    << "Failed to parse emoji" << emojiData->shortCodes;
+                return;
+            }
         }
 
-        emojiData->value =
-            QString::fromUcs4(unicodeBytes.data(), numUnicodeBytes);
+        // We can safely do a narrowing static cast since unicodeBytes will never be a large number
+        emojiData->value = QString::fromUcs4(
+            unicodeBytes.data(), static_cast<int>(unicodeBytes.size()));
+
+        if (nonQualifiedCharacters.length() > 0)
+        {
+            std::vector<uint32_t> nonQualifiedBytes{};
+            for (const QString &unicodeCharacter : nonQualifiedCharacters)
+            {
+                bool ok{false};
+                nonQualifiedBytes.push_back(
+                    QString(unicodeCharacter).toUInt(&ok, 16));
+                if (!ok)
+                {
+                    qCWarning(chatterinoEmoji)
+                        << "Failed to parse emoji" << emojiData->shortCodes;
+                    return;
+                }
+            }
+
+            // We can safely do a narrowing static cast since unicodeBytes will never be a large number
+            emojiData->nonQualified =
+                QString::fromUcs4(nonQualifiedBytes.data(),
+                                  static_cast<int>(nonQualifiedBytes.size()));
+        }
     }
 
     // getToneNames takes a tones and returns their names in the same order
@@ -296,31 +314,61 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
 
         for (const std::shared_ptr<EmojiData> &emoji : possibleEmojis)
         {
+            int emojiNonQualifiedExtraCharacters =
+                emoji->nonQualified.length() - 1;
             int emojiExtraCharacters = emoji->value.length() - 1;
-            if (emojiExtraCharacters > remainingCharacters)
+            if (remainingCharacters >= emojiExtraCharacters)
             {
-                // It cannot be this emoji, there's not enough space for it
-                continue;
-            }
+                // look in emoji->value
+                bool match = true;
 
-            bool match = true;
-
-            for (int j = 1; j < emoji->value.length(); ++j)
-            {
-                if (text.at(i + j) != emoji->value.at(j))
+                for (int j = 1; j < emoji->value.length(); ++j)
                 {
-                    match = false;
+                    if (text.at(i + j) != emoji->value.at(j))
+                    {
+                        match = false;
+
+                        break;
+                    }
+                }
+
+                if (match)
+                {
+                    matchedEmoji = emoji;
+                    matchedEmojiLength = emoji->value.length();
 
                     break;
                 }
             }
-
-            if (match)
+            else if (remainingCharacters >= emojiNonQualifiedExtraCharacters)
             {
-                matchedEmoji = emoji;
-                matchedEmojiLength = emoji->value.length();
+                // This checking here relies on the fact that the nonQualified string
+                // always starts with the same byte as value (the unified string)
+                bool match = true;
 
-                break;
+                for (int j = 1; j < emoji->nonQualified.length(); ++j)
+                {
+                    if (text.at(i + j) != emoji->nonQualified.at(j))
+                    {
+                        match = false;
+
+                        break;
+                    }
+                }
+
+                if (match)
+                {
+                    matchedEmoji = emoji;
+                    matchedEmojiLength = emoji->nonQualified.length();
+
+                    break;
+                }
+                // look in emoji->nonQualified
+            }
+            else
+            {
+                // It cannot be this emoji, there's not enough space for it
+                continue;
             }
         }
 

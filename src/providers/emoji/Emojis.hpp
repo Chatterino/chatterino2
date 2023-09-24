@@ -21,6 +21,9 @@ struct EmojiData {
     // :male:)
     QString value;
 
+    // actual byte-representation of the non qualified emoji
+    QString nonQualified;
+
     // i.e. 204e-50a2
     QString unifiedCode;
     QString nonQualifiedCode;
