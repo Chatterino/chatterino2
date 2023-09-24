@@ -1,4 +1,4 @@
-#include "util/WidgetHelper.hpp"
+#include "util/WidgetHelpers.hpp"
 
 #include <QCursor>
 #include <QGuiApplication>

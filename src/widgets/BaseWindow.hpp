@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
-#include "util/WidgetHelper.hpp"
+#include "util/WidgetHelpers.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <pajlada/signals/signalholder.hpp>

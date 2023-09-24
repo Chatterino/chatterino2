@@ -438,8 +438,8 @@ set(SOURCE_FILES
         util/Twitch.cpp
         util/Twitch.hpp
         util/TypeName.hpp
-        util/WidgetHelper.cpp
-        util/WidgetHelper.hpp
+        util/WidgetHelpers.cpp
+        util/WidgetHelpers.hpp
         util/WindowsHelper.cpp
         util/WindowsHelper.hpp
         util/XDGDesktopFile.cpp
