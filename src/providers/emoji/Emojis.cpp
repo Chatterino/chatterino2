@@ -18,7 +18,7 @@ namespace {
 
 using namespace chatterino;
 
-auto toneNames = std::map<QString, QString>{
+const std::map<QString, QString> TONE_NAMES{
     {"1F3FB", "tone1"}, {"1F3FC", "tone2"}, {"1F3FD", "tone3"},
     {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
 };
@@ -129,8 +129,8 @@ QString getToneNames(const QString &tones)
     QStringList toneNameResults;
     for (const auto &tonePart : toneParts)
     {
-        auto toneNameIt = toneNames.find(tonePart);
-        if (toneNameIt == toneNames.end())
+        auto toneNameIt = TONE_NAMES.find(tonePart);
+        if (toneNameIt == TONE_NAMES.end())
         {
             qDebug() << "Tone with key" << tonePart
                      << "does not exist in tone names map";
