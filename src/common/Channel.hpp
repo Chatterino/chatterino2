@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/CompletionModel.hpp"
 #include "common/FlagsEnum.hpp"
+#include "controllers/completion/TabCompletionModel.hpp"
 #include "messages/LimitedQueue.hpp"
 
 #include <boost/optional.hpp>
@@ -108,7 +108,7 @@ public:
 
     static std::shared_ptr<Channel> getEmpty();
 
-    CompletionModel completionModel;
+    TabCompletionModel completionModel;
     QDate lastDate_;
 
 protected:
