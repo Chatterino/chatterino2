@@ -113,7 +113,7 @@ jobs:
               -b missing `
               --output-folder=. `
               -o with_openssl3="$Env:C2_USE_OPENSSL3"
-        shell: pwsh
+        shell: powershell
 
       - name: Build
         if: startsWith(matrix.os, 'windows')
@@ -122,7 +122,14 @@ jobs:
           # Enable PCH on Windows
           C2_WINDOWS_USE_PCH: True
         run: |
-          cmake -G"NMake Makefiles" -DBUILD_TESTS=On -DBUILD_APP=OFF -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" ..
+          cmake `
+              -G"NMake Makefiles" `
+              -DBUILD_TESTS=On `
+              -DBUILD_APP=OFF `
+              -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" `
+              -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
+              -DUSE_PRECOMPILED_HEADERS=${{ env.C2_WINDOWS_USE_PCH }} `
+              ..
           set cl=/MP
           dir
           nmake /S /NOLOGO
