@@ -38,14 +38,14 @@ jobs:
       - name: Set environment variables for windows-latest
         if: matrix.os == 'windows-latest'
         run: |
-          echo "vs_version=2022" >> "$GITHUB_ENV"
-        shell: bash
+          echo "vs_version=2022" >> "$Env:GITHUB_ENV"
+        shell: pwsh
 
       - name: Set BUILD_WITH_QT6
         if: startsWith(matrix.qt-version, '6.')
         run: |
-          echo "C2_BUILD_WITH_QT6=ON" >> "$GITHUB_ENV"
-        shell: bash
+          echo "C2_BUILD_WITH_QT6=ON" >> "$Env:GITHUB_ENV"
+        shell: pwsh
 
       - uses: actions/checkout@v4
         with:
