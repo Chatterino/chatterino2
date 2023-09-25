@@ -23,13 +23,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        include:
-          - os: "windows-latest"
-            qt-version: "5.15.2"
-          - os: "windows-latest"
-            qt-version: "5.12.12"
-          - os: "windows-latest"
-            qt-version: "6.2.4"
+        os: [windows-latest]
+        qt-version: [5.15.2, 6.5.0]
+        force-lto: [false]
+        plugins: [false]
+        skip-artifact: [false]
+        skip-crashpad: [false]
+        clang-tidy-review: [false]
       fail-fast: false
     env:
       C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
