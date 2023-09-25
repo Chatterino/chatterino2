@@ -79,7 +79,7 @@ jobs:
           # only save on the default (master) branch
           save: ${{ github.event_name == 'push' }}
           key: sccache-test-${{ matrix.os }}-${{ matrix.qt-version }}
-          restore_keys: |
+          restore-keys: |
             sccache-test-${{ matrix.os }}-${{ matrix.qt-version }}
 
       - name: Cache conan packages
@@ -102,7 +102,7 @@ jobs:
           conan profile detect -f
 
       - name: Create build directory
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'windows')
         run: |
           mkdir build-test
           cd build-test
