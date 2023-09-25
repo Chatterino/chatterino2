@@ -41,7 +41,7 @@ jobs:
         run: |	
           echo "C2_ENABLE_LTO=ON" >> "$Env:GITHUB_ENV"	
         shell: pwsh
-	
+
       - name: Enable plugin support	
         if: matrix.plugins	
         run: |	
