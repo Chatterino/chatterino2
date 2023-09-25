@@ -101,15 +101,10 @@ jobs:
           conan --version
           conan profile detect -f
 
-      - name: Create build directory
-        if: startsWith(matrix.os, 'windows')
-        run: |
-          mkdir build-test
-        shell: bash
-
       - name: Install dependencies
         if: startsWith(matrix.os, 'windows')
         run: |
+          mkdir build-test
           cd build-test
           conan install .. `
               -s build_type=RelWithDebInfo `
