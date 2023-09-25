@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   test-windows:
+    name: "Test ${{ matrix.os }}, Qt ${{ matrix.qt-version }}"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -34,7 +35,25 @@ jobs:
       C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
       QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
 
-    steps:
+    steps:	
+      - name: Force LTO	
+        if: matrix.force-lto	
+        run: |	
+          echo "C2_ENABLE_LTO=ON" >> "$Env:GITHUB_ENV"	
+        shell: pwsh
+	
+      - name: Enable plugin support	
+        if: matrix.plugins	
+        run: |	
+          echo "C2_PLUGINS=ON" >> "$Env:GITHUB_ENV"	
+        shell: pwsh
+
+      - name: Set Crashpad	
+        if: matrix.skip-crashpad == false	
+        run: |	
+          echo "C2_ENABLE_CRASHPAD=ON" >> "$Env:GITHUB_ENV"	
+        shell: pwsh
+
       - name: Set environment variables for windows-latest
         if: matrix.os == 'windows-latest'
         run: |
@@ -50,6 +69,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0 # allows for tags access
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3.3.0
@@ -78,7 +98,7 @@ jobs:
           variant: sccache
           # only save on the default (master) branch
           save: ${{ github.event_name == 'push' }}
-          key: sccache-test-${{ matrix.os }}-${{ matrix.qt-version }}
+          key: sccache-test-${{ matrix.os }}-${{ matrix.qt-version }}-${{ matrix.skip-crashpad }}
           restore-keys: |
             sccache-test-${{ matrix.os }}-${{ matrix.qt-version }}
 
@@ -119,16 +139,20 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         shell: pwsh
         env:
-          # Enable PCH on Windows
-          C2_WINDOWS_USE_PCH: False
+          # Enable PCH on Windows, later we can have it depend on the run/Qt Version like in the build workflow, I just want to make it work
+          C2_WINDOWS_USE_PCH: True
         run: |
           cmake `
               -G"NMake Makefiles" `
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DBUILD_TESTS=On `
               -DBUILD_APP=OFF `
-              -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
               -DUSE_PRECOMPILED_HEADERS=${{ env.C2_WINDOWS_USE_PCH }} `
+              -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
+              -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
+              -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
+              -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
               ..
           set cl=/MP
           nmake /S /NOLOGO
@@ -144,4 +168,9 @@ jobs:
           docker run -p 9051:80 --detach kennethreitz/httpbin
           ./bin/chatterino-test.exe || ./bin/chatterino-test.exe || ./bin/chatterino-test.exe
         working-directory: build-test
+        shell: pwsh
+
+      - name: Clean Conan cache
+        if: startsWith(matrix.os, 'windows')
+        run: conan cache clean --source --build --download "*"
         shell: pwsh
