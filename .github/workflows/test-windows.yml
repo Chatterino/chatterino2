@@ -120,7 +120,7 @@ jobs:
         shell: pwsh
         env:
           # Enable PCH on Windows
-          C2_WINDOWS_USE_PCH: True
+          C2_WINDOWS_USE_PCH: False
         run: |
           cmake `
               -G"NMake Makefiles" `
