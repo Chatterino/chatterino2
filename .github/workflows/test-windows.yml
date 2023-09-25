@@ -105,12 +105,12 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
           mkdir build-test
-          cd build-test
         shell: bash
 
       - name: Install dependencies
         if: startsWith(matrix.os, 'windows')
         run: |
+          cd build-test
           conan install .. `
               -s build_type=RelWithDebInfo `
               -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" `
