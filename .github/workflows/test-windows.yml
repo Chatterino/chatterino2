@@ -131,7 +131,6 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=${{ env.C2_WINDOWS_USE_PCH }} `
               ..
           set cl=/MP
-          dir
           nmake /S /NOLOGO
         working-directory: build-test
 
