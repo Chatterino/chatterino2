@@ -14,7 +14,7 @@ env:
   CONAN_VERSION: 2.0.2
 
 concurrency:
-  group: test-${{ github.ref }}
+  group: test-windows-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
