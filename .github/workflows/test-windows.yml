@@ -122,6 +122,7 @@ jobs:
         run: |
           cmake -G"NMake Makefiles" -DBUILD_TESTS=On -DBUILD_APP=OFF -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" ..
           set cl=/MP
+          dir
           nmake /S /NOLOGO
         working-directory: build-test
 
