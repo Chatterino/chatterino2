@@ -92,7 +92,7 @@ jobs:
       - name: Install Conan
         if: startsWith(matrix.os, 'windows')
         run: |
-          python3 -c "import site; import sys; print(f'{site.USER_BASE}\\Python{sys.version_info.major}{sys.version_info.minor}\\Scripts')" >> "$GITHUB_PATH"
+          python3 -c "import site; import sys; print(f'{site.USER_BASE}\\Python{sys.version_info.major}{sys.version_info.minor}\\Scripts')" >> "$Env:GITHUB_PATH"
           pip3 install --user "conan==${{ env.CONAN_VERSION }}"
 
       - name: Setup Conan
