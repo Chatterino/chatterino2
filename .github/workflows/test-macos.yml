@@ -65,7 +65,14 @@ jobs:
       - name: Install dependencies
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install boost openssl rapidjson p7zip create-dmg cmake tree
+          brew install boost openssl rapidjson p7zip create-dmg cmake tree docker docker-machine
+          brew cask install virtualbox
+        shell: bash
+
+      - name: Setup Docker
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          docker-machine create --driver virtualbox default
         shell: bash
 
       - name: Build
@@ -89,10 +96,13 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         timeout-minutes: 30
         run: |
+          docker-machine env default
+          eval $(docker-machine env default)
           docker pull kennethreitz/httpbin
           docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
           docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
           docker run -p 9051:80 --detach kennethreitz/httpbin
           ./bin/chatterino-test || ./bin/chatterino-test || ./bin/chatterino-test
+          docker-machine stop default
         working-directory: build-test
         shell: bash
