@@ -100,6 +100,13 @@ jobs:
           docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
           docker run -p 9051:80 --detach kennethreitz/httpbin
           ./bin/chatterino-test || ./bin/chatterino-test || ./bin/chatterino-test
+        working-directory: build-test
+        shell: bash
+
+      - name: Post Setup Colima
+        if: startsWith(matrix.os, 'macos')
+        timeout-minutes: 30
+        run: |
           colima stop
         working-directory: build-test
         shell: bash
