@@ -78,7 +78,7 @@ jobs:
               -DCMAKE_BUILD_TYPE=RelWithDebInfo \
               -DBUILD_TESTS=On \
               -DBUILD_APP=OFF \
-              -DUSE_PRECOMPILED_HEADERS=${{ env.C2_WINDOWS_USE_PCH }} \
+              -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
