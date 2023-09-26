@@ -83,7 +83,7 @@ jobs:
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
               ..
-          make -j"$(sysctl -n hw.logicalcpu)
+          make -j"$(sysctl -n hw.logicalcpu)"
 
       - name: Test
         if: startsWith(matrix.os, 'macos')
