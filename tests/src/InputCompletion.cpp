@@ -261,7 +261,7 @@ TEST_F(InputCompletionTest, ClassicEmoteNameFiltering)
     completion = queryClassicEmoteCompletion(":)");
     ASSERT_EQ(completion.size(), 3);
     ASSERT_EQ(completion[0].displayName, ":)");  // Exact match with : prefix
-    std::vector<EmoteItem> tempVector(completion.begin() + 1, completion.begin() + 3);
+    std::vector<EmoteItem> tempVector(completion.begin() + 1, 2);
     containsRoughly(std::span<EmoteItem>(tempVector), {":-)", "B-)"});
 
     completion = queryClassicEmoteCompletion(":cat");
