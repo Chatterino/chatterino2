@@ -24,7 +24,7 @@ Notes:
 
 Notes:
 
-- Installing the latest **stable** Qt version is advised for new installations, but if you want to use your existing installation please ensure you are running **Qt 5.12 or later**.
+- Installing the latest **stable** Qt version is advised for new installations, but if you want to use your existing installation please ensure you are running **Qt 5.15.2 or later**.
 
 #### Components
 

@@ -1,0 +1,26 @@
+From 15fcf213563718d2378b6b83a1614680a4fa8cec Mon Sep 17 00:00:00 2001
+From: Romain Geissler <romain.geissler@amadeus.com>
+Date: Mon, 9 Mar 2020 16:53:04 +0000
+Subject: [PATCH] Fix using signals2 with gcc 10 and --std=gnu++20: deprecated
+ std::allocator member access.
+
+---
+ include/boost/signals2/detail/auto_buffer.hpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/include/boost/signals2/detail/auto_buffer.hpp b/include/boost/signals2/detail/auto_buffer.hpp
+index 9ee9a5cf..d90563ca 100644
+--- a/include/boost/signals2/detail/auto_buffer.hpp
++++ b/include/boost/signals2/detail/auto_buffer.hpp
+@@ -142,7 +142,11 @@ namespace detail
+         typedef typename Allocator::size_type            size_type;
+         typedef typename Allocator::difference_type      difference_type;
+         typedef T*                                       pointer;
++#ifdef BOOST_NO_CXX11_ALLOCATOR
+         typedef typename Allocator::pointer              allocator_pointer;
++#else
++        typedef typename std::allocator_traits<Allocator>::pointer allocator_pointer;
++#endif
+         typedef const T*                                 const_pointer;
+         typedef T&                                       reference;
+         typedef const T&                                 const_reference;

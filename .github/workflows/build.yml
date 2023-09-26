@@ -30,9 +30,9 @@ jobs:
     strategy:
       matrix:
         include:
-          # Ubuntu 20.04, Qt 5.12
+          # Ubuntu 20.04, Qt 5.15.2
           - os: ubuntu-20.04
-            qt-version: 5.12.12
+            qt-version: 5.15.2
             force-lto: false
             plugins: false
             skip-artifact: false
@@ -299,6 +299,20 @@ jobs:
               libxcb-render-util0 \
               libxcb-xinerama0
 
+      - name: Install GCC 10 (Ubuntu 20.04)
+        if: startsWith(matrix.os, 'ubuntu-20.04')
+        run: |
+          sudo apt-get -y install gcc-10
+          sudo update-alternatives \
+            --install /usr/bin/gcc gcc /usr/bin/gcc-10 60 \
+            --slave /usr/bin/g++ g++ /usr/bin/g++-10
+
+      - name: Apply Qt patches (Ubuntu 20.04)
+        if: startsWith(matrix.os, 'ubuntu-20.04')
+        run: |
+          sudo patch /usr/include/boost/signals2/detail/auto_buffer.hpp .patches/boost-signals2-cpp20.patch
+        shell: bash
+
       - name: Apply Qt patches (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.qt-version, '5.')
         run: |
@@ -331,7 +345,7 @@ jobs:
         shell: bash
 
       - name: Package - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && !matrix.skip-artifact
+        if: startsWith(matrix.os, 'ubuntu-22.04') && !matrix.skip-artifact
         run: |
           cd build
           sh ./../.CI/CreateUbuntuDeb.sh
@@ -345,7 +359,7 @@ jobs:
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && !matrix.skip-artifact
+        if: startsWith(matrix.os, 'ubuntu-22.04') && !matrix.skip-artifact
         uses: actions/upload-artifact@v4
         with:
           name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
@@ -429,15 +443,9 @@ jobs:
           path: release-artifacts/
 
       - uses: actions/download-artifact@v4
-        name: Linux Qt5.12.12 AppImage
+        name: Linux Qt5.15.2 AppImage
         with:
-          name: Chatterino-x86_64-5.12.12.AppImage
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v4
-        name: Ubuntu 20.04 Qt5.12.12 deb
-        with:
-          name: Chatterino-ubuntu-20.04-Qt-5.12.12.deb
+          name: Chatterino-x86_64-5.15.2.AppImage
           path: release-artifacts/
 
       - uses: actions/download-artifact@v4

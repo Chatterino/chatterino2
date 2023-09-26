@@ -8,7 +8,7 @@ RUN mkdir /src/build
 RUN cd /src/build && \
         CXXFLAGS=-fno-sized-deallocation cmake \
         -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
-        -DCMAKE_PREFIX_PATH=/opt/qt512/lib/cmake \
+        -DCMAKE_PREFIX_PATH=/opt/qt515/lib/cmake \
         -DBUILD_WITH_QTKEYCHAIN=OFF \
         ..
 

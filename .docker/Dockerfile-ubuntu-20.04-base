@@ -21,7 +21,12 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
         libxcb-image0 \
         libxcb-keysyms1 \
         libxcb-render-util0 \
-        libxcb-xinerama0
+        libxcb-xinerama0 \
+        gcc-10
+
+RUN update-alternatives \
+        --install /usr/bin/gcc gcc /usr/bin/gcc-10 60 \
+        --slave /usr/bin/g++ g++ /usr/bin/g++-10
 
 RUN apt-get -y install \
         git \
@@ -33,6 +38,6 @@ RUN apt-get -y install \
 
 RUN pip3 install -U pip && \
         pip3 install aqtinstall && \
-        aqt install-qt linux desktop 5.12.12 && \
-        mkdir -p /opt/qt512 && \
-        mv /5.12.12/gcc_64/* /opt/qt512
+        aqt install-qt linux desktop 5.15.2 && \
+        mkdir -p /opt/qt515 && \
+        mv /5.15.2/gcc_64/* /opt/qt515
