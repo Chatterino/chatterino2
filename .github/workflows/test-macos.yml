@@ -104,8 +104,7 @@ jobs:
         shell: bash
 
       - name: Post Setup Colima
-        if: startsWith(matrix.os, 'macos')
-        timeout-minutes: 30
+        if: startsWith(matrix.os, 'macos') && always()
         run: |
           colima stop
         working-directory: build-test
