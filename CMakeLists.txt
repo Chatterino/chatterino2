@@ -26,7 +26,7 @@ option(BUILD_TRANSLATIONS "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
 option(CHATTERINO_PLUGINS "Enable EXPERIMENTAL plugin support in Chatterino" OFF)
-option(CHATTERINO_NO_AVIF_PLUGIN "Disable AVIF plugin" ON)
+option(CHATTERINO_NO_AVIF_PLUGIN "Disable AVIF plugin" OFF)
 
 if(CHATTERINO_LTO)
     include(CheckIPOSupported)
