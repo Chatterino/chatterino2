@@ -35,6 +35,10 @@ If you have issues such as crashes or weird behaviour regarding 7TV features, re
 
 If you don't have a GitHub account and want to report issues or want to join the community you can join the official 7TV Discord using the link here: <https://discord.com/invite/7tv>.
 
+### AVIF Support
+
+When building Chatterino 7, you might not have access to a static build of `libavif`. In that case, you can define `CHATTERINO_NO_AVIF_PLUGIN` in CMake. If you have `qavif.so` from [kimageformats](https://invent.kde.org/frameworks/kimageformats) installed on your system, Chatterino will pick it up and use AVIF images.
+
 ## Original Chatterino 2 Readme
 
 Chatterino 2 is a chat client for [Twitch.tv](https://twitch.tv).
