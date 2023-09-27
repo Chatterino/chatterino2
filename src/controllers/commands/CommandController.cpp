@@ -926,7 +926,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             currentSplit);
         userPopup->setData(userName, channel);
         userPopup->moveTo(QCursor::pos(),
-                          BaseWindow::BoundsChecker::CursorPosition);
+                          widgets::BoundsChecking::CursorPosition);
         userPopup->show();
         return "";
     });

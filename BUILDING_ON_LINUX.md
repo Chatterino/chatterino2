@@ -20,7 +20,7 @@ Alternatively you can use the [chatterino2-git](https://aur.archlinux.org/packag
 
 _Most likely works the same for other Red Hat-like distros. Substitute `dnf` with `yum`._
 
-Install all of the dependencies using `sudo dnf install qt5-qtbase-devel qt5-imageformats qt5-qtsvg-devel qt5-linguist libsecret-devel openssl-devel boost-devel cmake libavif-devel`
+Install all of the dependencies using `sudo dnf install qt5-qtbase-devel qt5-qtimageformats qt5-qtsvg-devel qt5-linguist libsecret-devel openssl-devel boost-devel cmake libavif-devel`
 
 ### NixOS 18.09+
 

@@ -1,145 +1,11 @@
-#include "InputCompletionPopup.hpp"
+#include "widgets/splits/InputCompletionPopup.hpp"
 
-#include "Application.hpp"
-#include "controllers/accounts/AccountController.hpp"
-#include "messages/Emote.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
-#include "providers/seventv/SeventvPersonalEmotes.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Emotes.hpp"
+#include "controllers/completion/sources/UserSource.hpp"
+#include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
+#include "controllers/completion/strategies/ClassicUserStrategy.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/listview/GenericListView.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
-
-namespace {
-
-using namespace chatterino;
-using namespace chatterino::detail;
-
-void addEmotes(std::vector<CompletionEmote> &out, const EmoteMap &map,
-               const QString &text, const QString &providerName)
-{
-    for (auto &&emote : map)
-    {
-        if (emote.first.string.contains(text, Qt::CaseInsensitive))
-        {
-            out.push_back(
-                {emote.second, emote.second->name.string, providerName});
-        }
-    }
-}
-
-void addEmojis(std::vector<CompletionEmote> &out, const EmojiMap &map,
-               const QString &text)
-{
-    map.each([&](const QString &, const std::shared_ptr<EmojiData> &emoji) {
-        for (auto &&shortCode : emoji->shortCodes)
-        {
-            if (shortCode.contains(text, Qt::CaseInsensitive))
-            {
-                out.push_back({emoji->emote, shortCode, "Emoji"});
-            }
-        }
-    });
-}
-
-}  // namespace
-
-namespace chatterino::detail {
-
-std::vector<CompletionEmote> buildCompletionEmoteList(const QString &text,
-                                                      ChannelPtr channel)
-{
-    std::vector<CompletionEmote> emotes;
-    auto *app = getIApp();
-    auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-    // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
-    if (channel->isTwitchChannel())
-    {
-        if (auto user = app->getAccounts()->twitch.getCurrent())
-        {
-            // Twitch Emotes available globally
-            auto emoteData = user->accessEmotes();
-            addEmotes(emotes, emoteData->emotes, text, "Twitch Emote");
-
-            // Twitch Emotes available locally
-            auto localEmoteData = user->accessLocalEmotes();
-            if (tc &&
-                localEmoteData->find(tc->roomId()) != localEmoteData->end())
-            {
-                if (const auto *localEmotes = &localEmoteData->at(tc->roomId()))
-                {
-                    addEmotes(emotes, *localEmotes, text,
-                              "Local Twitch Emotes");
-                }
-            }
-        }
-
-        if (tc)
-        {
-            for (const auto &map :
-                 getApp()->seventvPersonalEmotes->getEmoteSetsForUser(
-                     getApp()->accounts->twitch.getCurrent()->getUserId()))
-            {
-                addEmotes(emotes, *map, text, "Personal 7TV");
-            }
-
-            // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
-            if (auto bttv = tc->bttvEmotes())
-            {
-                addEmotes(emotes, *bttv, text, "Channel BetterTTV");
-            }
-            if (auto ffz = tc->ffzEmotes())
-            {
-                addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
-            }
-            if (auto seventv = tc->seventvEmotes())
-            {
-                addEmotes(emotes, *seventv, text, "Channel 7TV");
-            }
-        }
-
-        if (auto bttvG = app->getTwitch()->getBttvEmotes().emotes())
-        {
-            addEmotes(emotes, *bttvG, text, "Global BetterTTV");
-        }
-        if (auto ffzG = app->getTwitch()->getFfzEmotes().emotes())
-        {
-            addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
-        }
-        if (auto seventvG = app->getTwitch()->getSeventvEmotes().globalEmotes())
-        {
-            addEmotes(emotes, *seventvG, text, "Global 7TV");
-        }
-    }
-
-    addEmojis(emotes, app->getEmotes()->getEmojis()->getEmojis(), text);
-
-    // if there is an exact match, put that emote first
-    for (size_t i = 1; i < emotes.size(); i++)
-    {
-        auto emoteText = emotes.at(i).displayName;
-
-        // test for match or match with colon at start for emotes like ":)"
-        if (emoteText.compare(text, Qt::CaseInsensitive) == 0 ||
-            emoteText.compare(":" + text, Qt::CaseInsensitive) == 0)
-        {
-            auto emote = emotes[i];
-            emotes.erase(emotes.begin() + int(i));
-            emotes.insert(emotes.begin(), emote);
-            break;
-        }
-    }
-
-    return emotes;
-}
-
-}  // namespace chatterino::detail
 
 namespace chatterino {
 
@@ -161,60 +27,66 @@ InputCompletionPopup::InputCompletionPopup(QWidget *parent)
     this->redrawTimer_.setInterval(33);
 }
 
-void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
+void InputCompletionPopup::updateCompletion(const QString &text,
+                                            CompletionKind kind,
+                                            ChannelPtr channel)
 {
-    auto emotes = detail::buildCompletionEmoteList(text, std::move(channel));
-
-    this->model_.clear();
-
-    int count = 0;
-    for (auto &&emote : emotes)
+    if (this->currentKind_ != kind || this->currentChannel_ != channel)
     {
-        this->model_.addItem(std::make_unique<InputCompletionItem>(
-            emote.emote, emote.displayName + " - " + emote.providerName,
-            this->callback_));
-
-        if (count++ == MAX_ENTRY_COUNT)
-        {
-            break;
-        }
+        // New completion context
+        this->beginCompletion(kind, std::move(channel));
     }
 
-    if (!emotes.empty())
+    assert(this->model_.hasSource());
+    this->model_.updateResults(text, MAX_ENTRY_COUNT);
+
+    // Move selection to top row
+    if (this->model_.rowCount() != 0)
     {
         this->ui_.listView->setCurrentIndex(this->model_.index(0));
     }
 }
 
-void InputCompletionPopup::updateUsers(const QString &text, ChannelPtr channel)
+std::unique_ptr<completion::Source> InputCompletionPopup::getSource() const
 {
-    auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-    if (!tc)
+    assert(this->currentChannel_ != nullptr);
+
+    if (!this->currentKind_)
     {
-        return;
+        return nullptr;
     }
 
-    auto chatters = tc->accessChatters()->filterByPrefix(text);
-    this->model_.clear();
-
-    if (chatters.empty())
+    // Currently, strategies are hard coded.
+    switch (*this->currentKind_)
     {
-        return;
+        case CompletionKind::Emote:
+            return std::make_unique<completion::EmoteSource>(
+                this->currentChannel_.get(),
+                std::make_unique<completion::ClassicEmoteStrategy>(),
+                this->callback_);
+        case CompletionKind::User:
+            return std::make_unique<completion::UserSource>(
+                this->currentChannel_.get(),
+                std::make_unique<completion::ClassicUserStrategy>(),
+                this->callback_);
+        default:
+            return nullptr;
     }
+}
 
-    int count = 0;
-    for (const auto &name : chatters)
-    {
-        this->model_.addItem(std::make_unique<InputCompletionItem>(
-            nullptr, name, this->callback_));
+void InputCompletionPopup::beginCompletion(CompletionKind kind,
+                                           ChannelPtr channel)
+{
+    this->currentKind_ = kind;
+    this->currentChannel_ = std::move(channel);
+    this->model_.setSource(this->getSource());
+}
 
-        if (count++ == MAX_ENTRY_COUNT)
-        {
-            break;
-        }
-    }
-
-    this->ui_.listView->setCurrentIndex(this->model_.index(0));
+void InputCompletionPopup::endCompletion()
+{
+    this->currentKind_ = std::nullopt;
+    this->currentChannel_ = nullptr;
+    this->model_.setSource(nullptr);
 }
 
 void InputCompletionPopup::setInputAction(ActionCallback callback)
@@ -235,6 +107,7 @@ void InputCompletionPopup::showEvent(QShowEvent * /*event*/)
 void InputCompletionPopup::hideEvent(QHideEvent * /*event*/)
 {
     this->redrawTimer_.stop();
+    this->endCompletion();
 }
 
 void InputCompletionPopup::themeChangedEvent()

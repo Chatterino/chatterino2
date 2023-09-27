@@ -51,7 +51,7 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
     this->initLayout();
 
     auto completer =
-        new QCompleter(&this->split_->getChannel().get()->completionModel);
+        new QCompleter(&this->split_->getChannel()->completionModel);
     this->ui_.textEdit->setCompleter(completer);
 
     this->signalHolder_.managedConnect(this->split_->channelChanged, [this] {
@@ -746,8 +746,8 @@ void SplitInput::updateCompletionPopup()
         {
             if (i == 0 || text[i - 1].isSpace())
             {
-                this->showCompletionPopup(text.mid(i, position - i + 1).mid(1),
-                                          true);
+                this->showCompletionPopup(text.mid(i, position - i + 1),
+                                          CompletionKind::Emote);
             }
             else
             {
@@ -760,8 +760,8 @@ void SplitInput::updateCompletionPopup()
         {
             if (i == 0 || text[i - 1].isSpace())
             {
-                this->showCompletionPopup(text.mid(i, position - i + 1).mid(1),
-                                          false);
+                this->showCompletionPopup(text.mid(i, position - i + 1),
+                                          CompletionKind::User);
             }
             else
             {
@@ -774,7 +774,7 @@ void SplitInput::updateCompletionPopup()
     this->hideCompletionPopup();
 }
 
-void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
+void SplitInput::showCompletionPopup(const QString &text, CompletionKind kind)
 {
     if (this->inputCompletionPopup_.isNull())
     {
@@ -792,14 +792,7 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
     auto *popup = this->inputCompletionPopup_.data();
     assert(popup);
 
-    if (emoteCompletion)
-    {
-        popup->updateEmotes(text, this->split_->getChannel());
-    }
-    else
-    {
-        popup->updateUsers(text, this->split_->getChannel());
-    }
+    popup->updateCompletion(text, kind, this->split_->getChannel());
 
     auto pos = this->mapToGlobal(QPoint{0, 0}) - QPoint(0, popup->height()) +
                QPoint((this->width() - popup->width()) / 2, 0);

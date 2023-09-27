@@ -67,12 +67,12 @@ bool MessageLayoutElement::hasTrailingSpace() const
     return this->trailingSpace;
 }
 
-int MessageLayoutElement::getLine() const
+size_t MessageLayoutElement::getLine() const
 {
     return this->line_;
 }
 
-void MessageLayoutElement::setLine(int line)
+void MessageLayoutElement::setLine(size_t line)
 {
     this->line_ = line;
 }
@@ -139,7 +139,7 @@ void ImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
     }
 }
 
-int ImageLayoutElement::getSelectionIndexCount() const
+size_t ImageLayoutElement::getSelectionIndexCount() const
 {
     return this->trailingSpace ? 2 : 1;
 }
@@ -183,7 +183,7 @@ int ImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
     return 0;
 }
 
-int ImageLayoutElement::getXFromIndex(int index)
+int ImageLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {
@@ -231,7 +231,7 @@ void LayeredImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
     }
 }
 
-int LayeredImageLayoutElement::getSelectionIndexCount() const
+size_t LayeredImageLayoutElement::getSelectionIndexCount() const
 {
     return this->trailingSpace ? 2 : 1;
 }
@@ -311,7 +311,7 @@ int LayeredImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
     return 0;
 }
 
-int LayeredImageLayoutElement::getXFromIndex(int index)
+int LayeredImageLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {
@@ -429,7 +429,7 @@ void TextLayoutElement::addCopyTextToString(QString &str, uint32_t from,
     }
 }
 
-int TextLayoutElement::getSelectionIndexCount() const
+size_t TextLayoutElement::getSelectionIndexCount() const
 {
     return this->getText().length() + (this->trailingSpace ? 1 : 0);
 }
@@ -546,7 +546,7 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
     return this->getSelectionIndexCount() - (this->hasTrailingSpace() ? 1 : 0);
 }
 
-int TextLayoutElement::getXFromIndex(int index)
+int TextLayoutElement::getXFromIndex(size_t index)
 {
     auto app = getApp();
 
@@ -589,7 +589,7 @@ void TextIconLayoutElement::addCopyTextToString(QString &str, uint32_t from,
 {
 }
 
-int TextIconLayoutElement::getSelectionIndexCount() const
+size_t TextIconLayoutElement::getSelectionIndexCount() const
 {
     return this->trailingSpace ? 2 : 1;
 }
@@ -633,7 +633,7 @@ int TextIconLayoutElement::getMouseOverIndex(const QPoint &abs) const
     return 0;
 }
 
-int TextIconLayoutElement::getXFromIndex(int index)
+int TextIconLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {
@@ -706,7 +706,7 @@ int ReplyCurveLayoutElement::getMouseOverIndex(const QPoint &abs) const
     return 0;
 }
 
-int ReplyCurveLayoutElement::getXFromIndex(int index)
+int ReplyCurveLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {
@@ -721,7 +721,7 @@ void ReplyCurveLayoutElement::addCopyTextToString(QString &str, uint32_t from,
 {
 }
 
-int ReplyCurveLayoutElement::getSelectionIndexCount() const
+size_t ReplyCurveLayoutElement::getSelectionIndexCount() const
 {
     return 1;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "util/WidgetHelpers.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
@@ -36,17 +37,6 @@ public:
         DisableLayoutSave = 128,
     };
 
-    enum class BoundsChecker {
-        // Don't attempt to do any "stay in screen" stuff, just move me!
-        Off,
-
-        // Attempt to keep the window within bounds of the screen the cursor is on
-        CursorPosition,
-
-        // Attempt to keep the window within bounds of the screen the desired position is on
-        DesiredPosition,
-    };
-
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
 
     explicit BaseWindow(FlagsEnum<Flags> flags_ = None,
@@ -65,7 +55,7 @@ public:
     void setActionOnFocusLoss(ActionOnFocusLoss value);
     ActionOnFocusLoss getActionOnFocusLoss() const;
 
-    void moveTo(QPoint point, BoundsChecker boundsChecker);
+    void moveTo(QPoint point, widgets::BoundsChecking mode);
 
     float scale() const override;
     float qtFontScale() const;
@@ -109,11 +99,6 @@ protected:
 
 private:
     void init();
-
-    /**
-     *
-     **/
-    void moveWithinScreen(QPoint point, QPoint origin);
 
     void calcButtonsSizes();
     void drawCustomWindowFrame(QPainter &painter);

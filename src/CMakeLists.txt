@@ -24,8 +24,6 @@ set(SOURCE_FILES
         common/ChatterinoSetting.hpp
         common/ChatterSet.cpp
         common/ChatterSet.hpp
-        common/CompletionModel.cpp
-        common/CompletionModel.hpp
         common/Credentials.cpp
         common/Credentials.hpp
         common/DownloadManager.cpp
@@ -76,6 +74,28 @@ set(SOURCE_FILES
         controllers/commands/Command.hpp
         controllers/commands/CommandModel.cpp
         controllers/commands/CommandModel.hpp
+
+        controllers/completion/CompletionModel.cpp
+        controllers/completion/CompletionModel.hpp
+        controllers/completion/sources/Source.hpp
+        controllers/completion/sources/CommandSource.cpp
+        controllers/completion/sources/CommandSource.hpp
+        controllers/completion/sources/EmoteSource.cpp
+        controllers/completion/sources/EmoteSource.hpp
+        controllers/completion/sources/Helpers.hpp
+        controllers/completion/sources/UnifiedSource.cpp
+        controllers/completion/sources/UnifiedSource.hpp
+        controllers/completion/sources/UserSource.cpp
+        controllers/completion/sources/UserSource.hpp
+        controllers/completion/strategies/Strategy.hpp
+        controllers/completion/strategies/ClassicEmoteStrategy.cpp
+        controllers/completion/strategies/ClassicEmoteStrategy.hpp
+        controllers/completion/strategies/ClassicUserStrategy.cpp
+        controllers/completion/strategies/ClassicUserStrategy.hpp
+        controllers/completion/strategies/CommandStrategy.cpp
+        controllers/completion/strategies/CommandStrategy.hpp
+        controllers/completion/TabCompletionModel.cpp
+        controllers/completion/TabCompletionModel.hpp
 
         controllers/filters/FilterModel.cpp
         controllers/filters/FilterModel.hpp
@@ -457,6 +477,8 @@ set(SOURCE_FILES
         util/Twitch.cpp
         util/Twitch.hpp
         util/TypeName.hpp
+        util/WidgetHelpers.cpp
+        util/WidgetHelpers.hpp
         util/WindowsHelper.cpp
         util/WindowsHelper.hpp
         util/XDGDesktopFile.cpp

@@ -1520,7 +1520,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (this->isLeftMouseDown_)
     {
         // this->pause(PauseReason::Selecting, 300);
-        int index = layout->getSelectionIndex(relativePos);
+        auto index = layout->getSelectionIndex(relativePos);
 
         this->setSelection(this->selection_.start,
                            SelectionItem(messageIndex, index));
@@ -1833,7 +1833,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         }
 
         tooltipWidget->moveTo(event->globalPos() + QPoint(16, 16),
-                              BaseWindow::BoundsChecker::CursorPosition);
+                              widgets::BoundsChecking::CursorPosition);
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->show();
     }
@@ -2688,7 +2688,7 @@ void ChannelView::showUserInfoPopup(const QString &userName,
 
     QPoint offset(userPopup->width() / 3, userPopup->height() / 5);
     userPopup->moveTo(QCursor::pos() - offset,
-                      BaseWindow::BoundsChecker::CursorPosition);
+                      widgets::BoundsChecking::CursorPosition);
     userPopup->show();
 }
 
