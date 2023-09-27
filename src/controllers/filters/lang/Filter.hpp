@@ -26,6 +26,7 @@ static const QMap<QString, Type> MESSAGE_TYPING_CONTEXT = {
     {"author.badges", Type::StringList},
     {"author.color", Type::Color},
     {"author.name", Type::String},
+    {"author.id", Type::String},
     {"author.no_color", Type::Bool},
     {"author.subbed", Type::Bool},
     {"author.sub_length", Type::Int},

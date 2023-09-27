@@ -26,6 +26,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * author.badges
      * author.color
      * author.name
+     * author.id
      * author.no_color
      * author.subbed
      * author.sub_length
@@ -81,6 +82,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
         {"author.badges", std::move(badges)},
         {"author.color", m->usernameColor},
         {"author.name", m->displayName},
+        {"author.id", m->id},
         {"author.no_color", !m->usernameColor.isValid()},
         {"author.subbed", subscribed},
         {"author.sub_length", subLength},

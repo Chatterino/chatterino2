@@ -12,6 +12,7 @@ static const QMap<QString, QString> validIdentifiersMap = {
     {"author.badges", "author badges"},
     {"author.color", "author color"},
     {"author.name", "author name"},
+    {"author.id", "author id"}
     {"author.no_color", "author has no color?"},
     {"author.subbed", "author subscribed?"},
     {"author.sub_length", "author sub length"},
