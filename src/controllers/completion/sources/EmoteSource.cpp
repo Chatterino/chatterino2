@@ -4,6 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/completion/sources/Helpers.hpp"
 #include "providers/emoji/Emojis.hpp"
+#include "providers/seventv/SeventvPersonalEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -110,6 +111,13 @@ void EmoteSource::initializeFromChannel(const Channel *channel)
 
         if (tc)
         {
+            for (const auto &map :
+                 getApp()->seventvPersonalEmotes->getEmoteSetsForUser(
+                     getApp()->accounts->twitch.getCurrent()->getUserId()))
+            {
+                addEmotes(emotes, *map, "Personal 7TV");
+            }
+
             // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
             if (auto bttv = tc->bttvEmotes())
             {
