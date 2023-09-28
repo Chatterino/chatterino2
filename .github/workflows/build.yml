@@ -119,21 +119,21 @@ jobs:
         uses: jurplel/install-qt-action@v3.3.0
         with:
           cache: false
-          dir: ${{ github.workspace }}
+          dir: ${{ github.workspace }}/fix
           modules: qtimageformats
           set-env: false
           version: 6.5.3
           extra: --noarchives
 
       - name: Find Qt 6.5.3 Path
-        if: startsWith(matrix.qt-version, '6.')
-        shell: bash
+        if: startsWith(matrix.qt-version, '6.') && startsWith(matrix.os, 'windows')
+        shell: pwsh
         id: find-good-imageformats
         run: |
-          cd ${{ github.workspace }}/Qt/6.5.3
-          cd $(find *)
+          cd ${{ github.workspace }}/fix/Qt/6.5.3
+          cd (Get-ChildItem)[0].Name
           cd plugins/imageformats
-          echo "PLUGIN_PATH=$(pwd)" >> "$GITHUB_OUTPUT"
+          echo "PLUGIN_PATH=$(pwd)" | Out-File -Path "$Env:GITHUB_OUTPUT" -Encoding ASCII
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
