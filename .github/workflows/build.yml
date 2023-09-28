@@ -412,13 +412,13 @@ jobs:
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
-        name: Windows Qt6.5.0
+        name: Windows Qt6.5.3
         with:
-          name: chatterino-windows-x86-64-Qt-6.5.0.zip
+          name: chatterino-windows-x86-64-Qt-6.5.3.zip
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
-        name: Windows Qt6.5.0 symbols
+        name: Windows Qt6.5.3 symbols
         with:
           name: chatterino-windows-x86-64-Qt-6.5.3-symbols.pdb.7z
           path: release-artifacts/
