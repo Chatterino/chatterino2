@@ -244,7 +244,7 @@ jobs:
       - name: Fix Qt (windows)
         if: startsWith(matrix.qt-version, '6.') && startsWith(matrix.os, 'windows')
         run: |
-          cp ${{ steps.find-good-imageformats.outputs.PLUGIN_PATH }}/qwebp.dll Chatterino2/imageformats/qwebp.dll
+          cp ${{ steps.find-good-imageformats.outputs.PLUGIN_PATH }}/qwebp.dll build/Chatterino2/imageformats/qwebp.dll
 
       - name: Package (windows)
         if: startsWith(matrix.os, 'windows')
