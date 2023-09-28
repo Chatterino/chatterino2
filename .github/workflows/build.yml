@@ -420,7 +420,7 @@ jobs:
       - uses: actions/download-artifact@v3
         name: Windows Qt6.5.0 symbols
         with:
-          name: chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z
+          name: chatterino-windows-x86-64-Qt-6.5.3-symbols.pdb.7z
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
