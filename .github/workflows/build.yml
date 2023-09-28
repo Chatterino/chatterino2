@@ -119,7 +119,6 @@ jobs:
         uses: jurplel/install-qt-action@v3.3.0
         with:
           cache: false
-          dir: ${{ github.workspace }}/fix
           modules: qtimageformats
           set-env: false
           version: 6.5.3
@@ -130,7 +129,7 @@ jobs:
         shell: pwsh
         id: find-good-imageformats
         run: |
-          cd ${{ github.workspace }}/fix/Qt/6.5.3
+          cd "$Env:RUNNER_WORKSPACE/Qt/6.5.3"
           cd (Get-ChildItem)[0].Name
           cd plugins/imageformats
           echo "PLUGIN_PATH=$(pwd)" | Out-File -Path "$Env:GITHUB_OUTPUT" -Encoding ASCII
