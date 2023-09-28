@@ -52,6 +52,7 @@
 - Bugfix: Fixed support for Windows 11 Snap layouts. (#4994)
 - Bugfix: Fixed some windows appearing between screens. (#4797)
 - Bugfix: Fixed a bug on Wayland where tooltips would spawn as separate windows instead of behaving like tooltips. (#4998)
+- Bugfix: Fixed _Restart on crash_ option not working on Windows. (#5012)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)

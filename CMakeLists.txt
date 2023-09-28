@@ -244,4 +244,6 @@ if (BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif ()
 
+add_subdirectory(auxiliary)
+
 feature_summary(WHAT ALL)

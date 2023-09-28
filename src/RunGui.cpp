@@ -5,6 +5,7 @@
 #include "common/Modes.hpp"
 #include "common/NetworkManager.hpp"
 #include "common/QLogging.hpp"
+#include "singletons/Crashpad.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -99,21 +100,10 @@ namespace {
 
     void showLastCrashDialog()
     {
-        //#ifndef C_DISABLE_CRASH_DIALOG
-        //        LastRunCrashDialog dialog;
-
-        //        switch (dialog.exec())
-        //        {
-        //            case QDialog::Accepted:
-        //            {
-        //            };
-        //            break;
-        //            default:
-        //            {
-        //                _exit(0);
-        //            }
-        //        }
-        //#endif
+        auto *dialog = new LastRunCrashDialog;
+        // Use exec() over open() to block the app from being loaded
+        // and to be able to set the safe mode.
+        dialog->exec();
     }
 
     void createRunningFile(const QString &path)
@@ -131,14 +121,14 @@ namespace {
     }
 
     std::chrono::steady_clock::time_point signalsInitTime;
-    bool restartOnSignal = false;
 
     [[noreturn]] void handleSignal(int signum)
     {
         using namespace std::chrono_literals;
 
-        if (restartOnSignal &&
-            std::chrono::steady_clock::now() - signalsInitTime > 30s)
+        if (std::chrono::steady_clock::now() - signalsInitTime > 30s &&
+            getApp()->crashRecovery->recoveryFlags().has(
+                CrashRecovery::Flag::DoCrashRecovery))
         {
             QProcess proc;
 
@@ -240,9 +230,12 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     initResources();
     initSignalHandler();
 
-    settings.restartOnCrash.connect([](const bool &value) {
-        restartOnSignal = value;
-    });
+#ifdef Q_OS_WIN
+    if (getArgs().crashRecovery)
+    {
+        showLastCrashDialog();
+    }
+#endif
 
     auto thread = std::thread([dir = paths.miscDirectory] {
         {
@@ -279,29 +272,10 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     chatterino::NetworkManager::init();
     chatterino::Updates::instance().checkForUpdates();
 
-#ifdef C_USE_BREAKPAD
-    QBreakpadInstance.setDumpPath(getPaths()->settingsFolderPath + "/Crashes");
-#endif
-
-    // Running file
-    auto runningPath =
-        paths.miscDirectory + "/running_" + paths.applicationFilePathHash;
-
-    if (QFile::exists(runningPath))
-    {
-        showLastCrashDialog();
-    }
-    else
-    {
-        createRunningFile(runningPath);
-    }
-
     Application app(settings, paths);
     app.initialize(settings, paths);
     app.run(a);
     app.save();
-
-    removeRunningFile(runningPath);
 
     if (!getArgs().dontSaveSettings)
     {

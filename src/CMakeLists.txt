@@ -289,8 +289,6 @@ set(SOURCE_FILES
         messages/search/SubtierPredicate.cpp
         messages/search/SubtierPredicate.hpp
 
-        providers/Crashpad.cpp
-        providers/Crashpad.hpp
         providers/IvrApi.cpp
         providers/IvrApi.hpp
         providers/LinkResolver.cpp
@@ -425,6 +423,8 @@ set(SOURCE_FILES
 
         singletons/Badges.cpp
         singletons/Badges.hpp
+        singletons/Crashpad.cpp
+        singletons/Crashpad.hpp
         singletons/Emotes.cpp
         singletons/Emotes.hpp
         singletons/Fonts.cpp
@@ -1007,7 +1007,6 @@ endif ()
 if (BUILD_WITH_CRASHPAD)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_CRASHPAD)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC crashpad::client)
-    set_target_directory_hierarchy(crashpad_handler crashpad)
 endif()
 
 # Configure compiler warnings
