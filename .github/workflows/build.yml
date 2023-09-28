@@ -118,8 +118,8 @@ jobs:
         if: startsWith(matrix.qt-version, '6.')
         uses: jurplel/install-qt-action@v3.3.0
         with:
-          cache: true
-          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-.3-v2
+          cache: false
+          dir: ${{ github.workspace }}/Qt
           modules: qtimageformats
           set-env: false
           version: 6.5.3
