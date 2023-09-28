@@ -119,7 +119,7 @@ jobs:
         uses: jurplel/install-qt-action@v3.3.0
         with:
           cache: false
-          dir: ${{ github.workspace }}/Qt
+          dir: ${{ github.workspace }}
           modules: qtimageformats
           set-env: false
           version: 6.5.3
