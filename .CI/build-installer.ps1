@@ -44,4 +44,4 @@ ISCC `
     /O. `
     "$PSScriptRoot\chatterino-installer.iss";
 
-Move-Item "$installerBaseName.exe" "$installerBaseName$($Env:VARIANT_SUFFIX).exe"
+Move-Item "$installerBaseName.exe" "$installerBaseName.exe"

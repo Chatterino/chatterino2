@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - chatterino7
+      - "bugfix-release/**"
   pull_request:
   workflow_dispatch:
   merge_group:
@@ -14,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/chatterino7' }}
+  C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/chatterino7' || startsWith(github.ref, 'refs/heads/bugfix-release') }}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
   C2_BUILD_WITH_QT6: Off
   # Last known good conan version
@@ -27,7 +28,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [macos-latest]
         qt-version: [5.15.2, 6.5.0]
         force-lto: [false]
         plugins: [false]
@@ -35,6 +36,13 @@ jobs:
         skip-crashpad: [false]
         clang-tidy-review: [false]
         include:
+          - os: windows-latest
+            qt-version: 6.5.3
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
           # Ubuntu 22.04, Qt 5.15
           - os: ubuntu-22.04
             qt-version: 5.15.2
@@ -53,7 +61,7 @@ jobs:
             clang-tidy-review: false
           # Test for disabling crashpad on Windows
           - os: windows-latest
-            qt-version: 5.15.2
+            qt-version: 6.5.3
             force-lto: false
             plugins: false
             skip-artifact: true
@@ -416,18 +424,6 @@ jobs:
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
-        name: Windows Qt5.15.2
-        with:
-          name: chatterino-windows-x86-64-Qt-5.15.2.zip
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v3
-        name: Windows Qt5.15 symbols
-        with:
-          name: chatterino-windows-x86-64-Qt-5.15.2-symbols.pdb.7z
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v3
         name: Linux Qt5.15.2 AppImage
         with:
           name: Chatterino-x86_64-5.15.2.AppImage
@@ -453,8 +449,6 @@ jobs:
 
           # Mark all Qt6 builds as EXPERIMENTAL
           mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
-          mv chatterino-windows-x86-64-Qt-6.5.0.zip EXPERIMENTAL-chatterino-windows-x86-64-Qt-6.5.0.zip
-          mv chatterino-Qt-6.5.0.pdb.7z EXPERIMENTAL-chatterino-Qt-6.5.0.pdb.7z
         working-directory: release-artifacts
         shell: bash
 

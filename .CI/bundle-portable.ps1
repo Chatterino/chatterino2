@@ -58,5 +58,5 @@ Move-Item c2-portable-updater.exe "Chatterino2/updater.1/ChatterinoUpdater.exe" 
 7z e -so _portable-installer.zip LICENSE-MIT > "Chatterino2/updater.1/LICENSE";
 Remove-IfExists _portable-installer.zip;
 
-Remove-IfExists "$bundleBaseName$($Env:VARIANT_SUFFIX).zip";
-7z a "$bundleBaseName$($Env:VARIANT_SUFFIX).zip" Chatterino2/;
+Remove-IfExists "$bundleBaseName.zip";
+7z a "$bundleBaseName.zip" Chatterino2/;
