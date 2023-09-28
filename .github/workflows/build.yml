@@ -121,6 +121,7 @@ jobs:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-.3-v2
           modules: qtimageformats
+          set-env: false
           version: 6.5.3
           extra: --noarchives
 
