@@ -37,7 +37,7 @@ jobs:
         clang-tidy-review: [false]
         include:
           - os: windows-latest
-            qt-version: 6.5.3
+            qt-version: 6.5.0
             force-lto: false
             plugins: false
             skip-artifact: false
@@ -61,7 +61,7 @@ jobs:
             clang-tidy-review: false
           # Test for disabling crashpad on Windows
           - os: windows-latest
-            qt-version: 6.5.3
+            qt-version: 6.5.0
             force-lto: false
             plugins: false
             skip-artifact: true
@@ -113,6 +113,26 @@ jobs:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
           version: ${{ matrix.qt-version }}
+
+      - name: Install Qt 6.5.3
+        if: startsWith(matrix.qt-version, '6.')
+        uses: jurplel/install-qt-action@v3.3.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-.3-v2
+          modules: qtimageformats
+          version: 6.5.3
+          extra: --noarchives
+
+      - name: Find Qt 6.5.3 Path
+        if: startsWith(matrix.qt-version, '6.')
+        shell: bash
+        id: find-good-imageformats
+        run: |
+          cd ${{ github.workspace }}/Qt/6.5.3
+          cd $(find *)
+          cd plugins/imageformats
+          echo "PLUGIN_PATH=$(pwd)" >> "$GITHUB_OUTPUT"
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
@@ -220,6 +240,15 @@ jobs:
           windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
           cp bin/chatterino.exe Chatterino2/
           echo nightly > Chatterino2/modes
+
+      - name: Fix Qt (windows)
+        if: startsWith(matrix.qt-version, '6.') && startsWith(matrix.os, 'windows')
+        run: |
+          cp ${{ steps.find-good-imageformats.outputs.PLUGIN_PATH }}/qwebp.dll Chatterino2/imageformats/qwebp.dll
+
+      - name: Package (windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
           7z a chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip Chatterino2/
 
       - name: Upload artifact (Windows - binary)
@@ -412,15 +441,15 @@ jobs:
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
-        name: Windows Qt6.5.3
+        name: Windows Qt6.5.0
         with:
-          name: chatterino-windows-x86-64-Qt-6.5.3.zip
+          name: chatterino-windows-x86-64-Qt-6.5.0.zip
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
-        name: Windows Qt6.5.3 symbols
+        name: Windows Qt6.5.0 symbols
         with:
-          name: chatterino-windows-x86-64-Qt-6.5.3-symbols.pdb.7z
+          name: chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3

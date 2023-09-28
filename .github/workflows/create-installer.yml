@@ -20,7 +20,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
-        qt-version: [6.5.3]
+        qt-version: [6.5.0]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -149,7 +149,7 @@ jobs:
           mv Chatterino-x86_64-5.15.2.AppImage Chatterino-x86_64.AppImage
           mv Chatterino-x86_64-6.2.4.AppImage EXPERIMENTAL-Chatterino-x86_64-Qt6.AppImage
 
-          mv chatterino-windows-x86-64-Qt-6.5.3-symbols.pdb.7z Chatterino-Windows-debug-symbols.pdb.7z
+          mv chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z Chatterino-Windows-debug-symbols.pdb.7z
 
           mv chatterino-macos-Qt-5.15.2.dmg Chatterino.dmg
           mv chatterino-macos-Qt-6.5.0.dmg EXPERIMENTAL-Chatterino.Qt6.dmg
