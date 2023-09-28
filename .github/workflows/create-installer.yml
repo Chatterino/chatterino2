@@ -5,7 +5,9 @@ on:
     workflows: ["Build"]
     types: [completed]
     # make sure this only runs on the default branch
-    branches: [master]
+    branches:
+      - master
+      - "bugfix-release/*"
   workflow_dispatch:
 
 jobs:
@@ -15,9 +17,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
-        qt-version: [5.15.2, 6.5.0]
-    env:
-      VARIANT_SUFFIX: ${{ startsWith(matrix.qt-version, '6.') && '.EXPERIMENTAL-Qt6' || '' }}
+        qt-version: ["6.5.3"]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -52,5 +52,5 @@ jobs:
       - name: Upload installer
         uses: actions/upload-artifact@v3
         with:
-          path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.exe
-          name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.exe
+          path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe
+          name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe

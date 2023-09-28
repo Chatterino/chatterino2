@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - "bugfix-release/*"
   pull_request:
   workflow_dispatch:
   merge_group:
@@ -14,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' }}
+  C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/bugfix-release/') }}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
   C2_BUILD_WITH_QT6: Off
   # Last known good conan version
@@ -27,13 +28,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
-        qt-version: [5.15.2, 6.5.0]
-        force-lto: [false]
-        plugins: [false]
-        skip-artifact: [false]
-        skip-crashpad: [false]
-        clang-tidy-review: [false]
         include:
           # Ubuntu 20.04, Qt 5.12
           - os: ubuntu-20.04
@@ -56,6 +50,22 @@ jobs:
             qt-version: 6.2.4
             force-lto: true
             plugins: true
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
+          # macOS
+          - os: macos-latest
+            qt-version: 6.5.3
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
+          # Windows
+          - os: windows-latest
+            qt-version: 6.5.3
+            force-lto: false
+            plugins: false
             skip-artifact: false
             skip-crashpad: false
             clang-tidy-review: false
@@ -395,7 +405,7 @@ jobs:
   create-release:
     needs: build
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/master'))
 
     steps:
       - uses: actions/checkout@v3
@@ -409,27 +419,15 @@ jobs:
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
-        name: Windows Qt6.5.0
+        name: Windows Qt6.5.3
         with:
-          name: chatterino-windows-x86-64-Qt-6.5.0.zip
+          name: chatterino-windows-x86-64-Qt-6.5.3.zip
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
-        name: Windows Qt6.5.0 symbols
+        name: Windows Qt6.5.3 symbols
         with:
-          name: chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v3
-        name: Windows Qt5.15.2
-        with:
-          name: chatterino-windows-x86-64-Qt-5.15.2.zip
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v3
-        name: Windows Qt5.15 symbols
-        with:
-          name: chatterino-windows-x86-64-Qt-5.15.2-symbols.pdb.7z
+          name: chatterino-windows-x86-64-Qt-6.5.3-symbols.pdb.7z
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
@@ -451,9 +449,9 @@ jobs:
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
-        name: macOS x86_64 Qt5.15.2 dmg
+        name: macOS x86_64 Qt6.5.3 dmg
         with:
-          name: chatterino-macos-Qt-5.15.2.dmg
+          name: chatterino-macos-Qt-6.5.3.dmg
           path: release-artifacts/
 
       - name: Copy flatpakref
@@ -465,12 +463,7 @@ jobs:
         run: |
           ls -l
           # Rename the macos build to indicate that it's for macOS 10.15 users
-          mv chatterino-macos-Qt-5.15.2.dmg Chatterino-macOS-10.15.dmg
-
-          # Mark all Qt6 builds as EXPERIMENTAL
-          mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
-          mv chatterino-windows-x86-64-Qt-6.5.0.zip EXPERIMENTAL-chatterino-windows-x86-64-Qt-6.5.0.zip
-          mv chatterino-Qt-6.5.0.pdb.7z EXPERIMENTAL-chatterino-Qt-6.5.0.pdb.7z
+          mv chatterino-macos-Qt-6.5.3.dmg Chatterino-macOS-10.15.dmg
         working-directory: release-artifacts
         shell: bash
 

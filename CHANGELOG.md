@@ -2,6 +2,10 @@
 
 ## Unversioned
 
+## 2.4.6
+
+- Bugfix: Update Qt version, fixing a security issue with webp loading (see https://www.qt.io/blog/two-qt-security-advisorys-gdi-font-engine-webp-image-format). (#4843)
+
 ## 2.4.5
 
 - Major: AutoMod term management messages (e.g. testaccount added "noob" as a blocked term on AutoMod.) are now hidden in Streamer Mode if you have the "Hide moderation actions" setting enabled. (#4758)
