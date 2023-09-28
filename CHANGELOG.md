@@ -2,7 +2,10 @@
 
 ## Unversioned
 
+## 2.4.6
+
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
+- Bugfix: Update Qt version, fixing a security issue with webp loading (see https://www.qt.io/blog/two-qt-security-advisorys-gdi-font-engine-webp-image-format) (#4843)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 
 ## 2.4.5
