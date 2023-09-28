@@ -235,19 +235,21 @@ jobs:
 
       - name: Package (windows)
         if: startsWith(matrix.os, 'windows')
+        working-directory: build
         run: |
-          cd build
           windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
           cp bin/chatterino.exe Chatterino2/
           echo nightly > Chatterino2/modes
 
       - name: Fix Qt (windows)
         if: startsWith(matrix.qt-version, '6.') && startsWith(matrix.os, 'windows')
+        working-directory: build
         run: |
-          cp ${{ steps.find-good-imageformats.outputs.PLUGIN_PATH }}/qwebp.dll build/Chatterino2/imageformats/qwebp.dll
+          cp ${{ steps.find-good-imageformats.outputs.PLUGIN_PATH }}/qwebp.dll Chatterino2/imageformats/qwebp.dll
 
       - name: Package (windows)
         if: startsWith(matrix.os, 'windows')
+        working-directory: build
         run: |
           7z a chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip Chatterino2/
 
