@@ -24,7 +24,7 @@
 - Dev: Refactor `Image` & Image's `Frames`. (#4773)
 - Dev: Add `WindowManager::getLastSelectedWindow()` to replace `getMainWindow()`. (#4816)
 - Dev: Clarify signal connection lifetimes where applicable. (#4818)
-- Dev: Laid the groundwork for advanced input completion strategies. (#4639)
+- Dev: Laid the groundwork for advanced input completion strategies. (#4639, #4846)
 
 ## 2.4.5
 
