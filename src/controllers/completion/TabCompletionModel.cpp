@@ -83,11 +83,12 @@ std::optional<TabCompletionModel::SourceKind>
 
     if (getSettings()->userCompletionOnlyWithAt)
     {
-        return SourceKind::Emote;
+        // All kinds but user are possible
+        return SourceKind::EmoteCommand;
     }
 
-    // Either is possible, use unified source
-    return SourceKind::EmoteAndUser;
+    // Any kind is possible
+    return SourceKind::EmoteUserCommand;
 }
 
 std::unique_ptr<completion::Source> TabCompletionModel::buildSource(
@@ -95,25 +96,55 @@ std::unique_ptr<completion::Source> TabCompletionModel::buildSource(
 {
     switch (kind)
     {
-        case SourceKind::Emote:
-            return std::make_unique<completion::EmoteSource>(
-                &this->channel_,
-                std::make_unique<completion::ClassicTabEmoteStrategy>());
-        case SourceKind::User:
-            return std::make_unique<completion::UserSource>(
-                &this->channel_,
-                std::make_unique<completion::ClassicUserStrategy>());
-        case SourceKind::Command:
-            return std::make_unique<completion::CommandSource>(
-                std::make_unique<completion::CommandStrategy>(true));
-        case SourceKind::EmoteAndUser:
+        case SourceKind::Emote: {
+            return this->buildEmoteSource();
+        }
+        case SourceKind::User: {
+            return this->buildUserSource();
+        }
+        case SourceKind::Command: {
+            return this->buildCommandSource();
+        }
+        case SourceKind::EmoteCommand: {
+            std::vector<std::unique_ptr<completion::Source>> sources;
+            sources.push_back(this->buildEmoteSource());
+            sources.push_back(this->buildCommandSource());
+
             return std::make_unique<completion::UnifiedSource>(
-                &this->channel_,
-                std::make_unique<completion::ClassicTabEmoteStrategy>(),
-                std::make_unique<completion::ClassicUserStrategy>());
+                std::move(sources));
+        }
+        case SourceKind::EmoteUserCommand: {
+            std::vector<std::unique_ptr<completion::Source>> sources;
+            sources.push_back(this->buildEmoteSource());
+            sources.push_back(this->buildUserSource());
+            sources.push_back(this->buildCommandSource());
+
+            return std::make_unique<completion::UnifiedSource>(
+                std::move(sources));
+        }
         default:
             return nullptr;
     }
+}
+
+std::unique_ptr<completion::Source> TabCompletionModel::buildEmoteSource() const
+{
+    return std::make_unique<completion::EmoteSource>(
+        &this->channel_,
+        std::make_unique<completion::ClassicTabEmoteStrategy>());
+}
+
+std::unique_ptr<completion::Source> TabCompletionModel::buildUserSource() const
+{
+    return std::make_unique<completion::UserSource>(
+        &this->channel_, std::make_unique<completion::ClassicUserStrategy>());
+}
+
+std::unique_ptr<completion::Source> TabCompletionModel::buildCommandSource()
+    const
+{
+    return std::make_unique<completion::CommandSource>(
+        std::make_unique<completion::CommandStrategy>(true));
 }
 
 }  // namespace chatterino
