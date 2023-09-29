@@ -19,7 +19,7 @@
 #endif
 ; Set to the string representation of the VCRT version
 #ifndef SHIPPED_VCRT_VERSION
-#define SHIPPED_VCRT_VERSION '?'
+#define SHIPPED_VCRT_VERSION ?
 #endif
 
 [Setup]
@@ -66,7 +66,7 @@ SetupWindowTitle=Setup - %1 (Nightly)
 
 [Tasks]
 ; Only show this option if the VCRT can be updated.
-Name: "vcredist"; Description: "Install the required Visual C++ 2022 Redistributable ({code:VCRTDescription})"; Check: NeedsNewVCRT();
+Name: "vcredist"; Description: "Install the required {#SHIPPED_VCRT_VERSION} ({code:VCRTDescription})"; Check: NeedsNewVCRT();
 ; GroupDescription: "{cm:AdditionalIcons}"; 
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; Flags: unchecked
 Name: "freshinstall"; Description: "Fresh install (delete old settings/logs)"; Flags: unchecked
@@ -112,14 +112,12 @@ end;
 function VCRTDescription(Param: String): String;
 var
   VCRTVersion: Variant;
-  ShippedVersion: String;
 begin
   VCRTVersion := GetVCRT;
-  ShippedVersion := {#SHIPPED_VCRT_VERSION};
   if VarIsNull(VCRTVersion) then
     Result := 'none is installed'
   else
-    Result := VCRTVersion + ' is installed, but this installer ships v' + ShippedVersion;
+    Result := VCRTVersion + ' is installed';
 end;
 
 // Checks if a new VCRT is needed by comparing the builds.
