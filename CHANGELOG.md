@@ -5,6 +5,7 @@
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
+- Minor: The installer now checks for the VC Runtime version and shows more info when it's outdated. (#4847)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4835)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
 - Bugfix: Fixed a performance issue when displaying replies to certain messages. (#4807)
@@ -25,7 +26,7 @@
 - Dev: Refactor `Image` & Image's `Frames`. (#4773)
 - Dev: Add `WindowManager::getLastSelectedWindow()` to replace `getMainWindow()`. (#4816)
 - Dev: Clarify signal connection lifetimes where applicable. (#4818)
-- Dev: Laid the groundwork for advanced input completion strategies. (#4639)
+- Dev: Laid the groundwork for advanced input completion strategies. (#4639, #4846)
 
 ## 2.4.5
 
