@@ -1440,6 +1440,11 @@ SplitContainer *SplitNotebook::getOrAddSelectedPage()
     return this->addPage();
 }
 
+SplitContainer *SplitNotebook::getSelectedPage()
+{
+    return dynamic_cast<SplitContainer *>(Notebook::getSelectedPage());
+}
+
 void SplitNotebook::select(QWidget *page, bool focusPage)
 {
     // If there's a previously selected page, go through its splits and
