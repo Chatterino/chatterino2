@@ -1,7 +1,6 @@
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
-
 struct lua_State;
 namespace chatterino::lua::api {
 // names in this namespace reflect what's visible inside Lua and follow the lua naming scheme
