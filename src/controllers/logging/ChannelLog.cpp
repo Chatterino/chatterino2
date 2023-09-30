@@ -9,8 +9,7 @@ ChannelLog::ChannelLog(QString channelName)
 
 QString ChannelLog::channelName() const
 {
-    QString lowercaseChannelName = this->channelName_.toLower();
-    return lowercaseChannelName;
+    return this->channelName_.toLower();
 }
 
 QString ChannelLog::toString() const
