@@ -52,12 +52,14 @@ void initUpdateButton(Button &button,
 
     // update image when state changes
     auto updateChange = [&button](auto) {
+#ifndef DISABLE_AUTOMATIC_UPDATES
         button.setVisible(Updates::instance().shouldShowUpdateButton());
 
         auto imageUrl = Updates::instance().isError()
                             ? ":/buttons/updateError.png"
                             : ":/buttons/update.png";
         button.setPixmap(QPixmap(imageUrl));
+#endif
     };
 
     updateChange(Updates::instance().getStatus());
