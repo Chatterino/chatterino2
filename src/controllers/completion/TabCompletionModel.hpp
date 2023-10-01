@@ -29,9 +29,6 @@ public:
     /// @param isFirstWord Whether the completion is the first word in the input
     void updateResults(const QString &query, bool isFirstWord = false);
 
-    /// @brief Invalidates any cached completion state.
-    void invalidate();
-
 private:
     enum class SourceKind {
         Emote,

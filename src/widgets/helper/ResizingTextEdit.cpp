@@ -152,10 +152,10 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             return;
         }
 
-        QString currentCompletionPrefix = this->textUnderCursor();
+        QString currentCompletion = this->textUnderCursor();
 
         // check if there is something to complete
-        if (currentCompletionPrefix.size() <= 1)
+        if (currentCompletion.size() <= 1)
         {
             return;
         }
@@ -170,14 +170,12 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             // First type pressing tab after modifying a message, we refresh our
             // completion model
             this->completer_->setModel(completionModel);
-            completionModel->invalidate();
-            completionModel->updateResults(currentCompletionPrefix,
+            completionModel->updateResults(currentCompletion,
                                            this->isFirstWord());
             this->completionInProgress_ = true;
             {
                 // this blocks cursor movement events from resetting tab completion
                 QSignalBlocker dontTriggerCursorMovement(this);
-                this->completer_->setCompletionPrefix(currentCompletionPrefix);
                 this->completer_->complete();
             }
             return;
