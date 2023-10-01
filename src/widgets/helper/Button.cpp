@@ -133,7 +133,11 @@ void Button::setMenu(std::unique_ptr<QMenu> menu)
 void Button::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
+    this->paintButton(painter);
+}
 
+void Button::paintButton(QPainter &painter)
+{
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     if (!this->pixmap_.isNull())
