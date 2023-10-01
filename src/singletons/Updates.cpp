@@ -252,6 +252,10 @@ void Updates::checkForUpdates()
 {
     auto version = Version::instance();
 
+#ifdef CHATTERINO_DISABLE_UPDATER
+    return;
+#endif
+
     if (!version.isSupportedOS())
     {
         qCDebug(chatterinoUpdate)

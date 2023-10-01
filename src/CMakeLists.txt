@@ -5,7 +5,6 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 # registers the native messageing host
 option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
-option(DISABLE_AUTOMATIC_UPDATES "Disable automatic updates" OFF)
 
 set(SOURCE_FILES
         Application.cpp
@@ -1041,7 +1040,7 @@ if(CHATTERINO_ENABLE_LTO)
                  PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-if(DISABLE_AUTOMATIC_UPDATES)
-    message(STATUS "Disabling automatic updates.")
-    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC DISABLE_AUTOMATIC_UPDATES)
+if(CHATTERINO_DISABLE_UPDATER)
+    message(STATUS "Disabling the updater.")
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_DISABLE_UPDATER)
 endif()
