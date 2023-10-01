@@ -3,7 +3,7 @@ on:
   push:
     tags:
       # Should match semver for mainline releases (not including -beta)
-      - "v2.[0-9]+.[0-9]+"
+      - "NEVER-v2.[0-9]+.[0-9]+"
       # TODO: handle beta and nightly releases
       # Need to make those casks manually first
       # - v2.[0-9]+.[0-9]+-beta(?:[0-9]+)
