@@ -30,6 +30,12 @@
 - Dev: Laid the groundwork for advanced input completion strategies. (#4639, #4846)
 - Dev: Fixed flickering when running with Direct2D on Windows. (#4851)
 
+## 2.4.6
+
+- Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
+- Bugfix: Update Qt version, fixing a security issue with webp loading (see https://www.qt.io/blog/two-qt-security-advisorys-gdi-font-engine-webp-image-format) (#4843)
+- Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
+
 ## 2.4.5
 
 - Major: AutoMod term management messages (e.g. testaccount added "noob" as a blocked term on AutoMod.) are now hidden in Streamer Mode if you have the "Hide moderation actions" setting enabled. (#4758)
