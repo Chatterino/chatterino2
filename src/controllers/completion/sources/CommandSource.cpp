@@ -14,11 +14,17 @@ namespace {
     {
         if (command.startsWith('/') || command.startsWith('.'))
         {
-            out.push_back({command.mid(1), command.at(0)});
+            out.push_back({
+                .name = command.mid(1),
+                .prefix = command.at(0),
+            });
         }
         else
         {
-            out.push_back({command, '/'});
+            out.push_back({
+                .name = command,
+                .prefix = "",
+            });
         }
     }
 

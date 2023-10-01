@@ -1117,7 +1117,6 @@ void Notebook::setTabLocation(NotebookTabLocation location)
 
 void Notebook::paintEvent(QPaintEvent *event)
 {
-    BaseWidget::paintEvent(event);
     auto scale = this->scale();
 
     QPainter painter(this);
