@@ -100,7 +100,7 @@ std::unique_ptr<completion::Source> TabCompletionModel::buildSource(
             return this->buildEmoteSource();
         }
         case SourceKind::User: {
-            return this->buildUserSource();
+            return this->buildUserSource(true);  // Completing with @
         }
         case SourceKind::Command: {
             return this->buildCommandSource();
@@ -116,7 +116,8 @@ std::unique_ptr<completion::Source> TabCompletionModel::buildSource(
         case SourceKind::EmoteUserCommand: {
             std::vector<std::unique_ptr<completion::Source>> sources;
             sources.push_back(this->buildEmoteSource());
-            sources.push_back(this->buildUserSource());
+            sources.push_back(
+                this->buildUserSource(false));  // Not completing with @
             sources.push_back(this->buildCommandSource());
 
             return std::make_unique<completion::UnifiedSource>(
@@ -134,10 +135,12 @@ std::unique_ptr<completion::Source> TabCompletionModel::buildEmoteSource() const
         std::make_unique<completion::ClassicTabEmoteStrategy>());
 }
 
-std::unique_ptr<completion::Source> TabCompletionModel::buildUserSource() const
+std::unique_ptr<completion::Source> TabCompletionModel::buildUserSource(
+    bool prependAt) const
 {
     return std::make_unique<completion::UserSource>(
-        &this->channel_, std::make_unique<completion::ClassicUserStrategy>());
+        &this->channel_, std::make_unique<completion::ClassicUserStrategy>(),
+        nullptr, prependAt);
 }
 
 std::unique_ptr<completion::Source> TabCompletionModel::buildCommandSource()
