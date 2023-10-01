@@ -5,6 +5,8 @@
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
+- Minor: The installer now checks for the VC Runtime version and shows more info when it's outdated. (#4847)
+- Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
 - Bugfix: Fixed a performance issue when displaying replies to certain messages. (#4807)
 - Bugfix: Fixed a data race when disconnecting from Twitch PubSub. (#4771)
@@ -14,6 +16,7 @@
 - Bugfix: Fixed input in reply thread popup losing focus when dragging. (#4815)
 - Bugfix: Fixed the Quick Switcher (CTRL+K) from sometimes showing up on the wrong window. (#4819)
 - Bugfix: Fixed too much text being copied when copying chat messages. (#4812, #4830, #4839)
+- Bugfix: Fixed empty page being added when showing out of bounds dialog. (#4849)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 - Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
@@ -24,7 +27,14 @@
 - Dev: Refactor `Image` & Image's `Frames`. (#4773)
 - Dev: Add `WindowManager::getLastSelectedWindow()` to replace `getMainWindow()`. (#4816)
 - Dev: Clarify signal connection lifetimes where applicable. (#4818)
-- Dev: Laid the groundwork for advanced input completion strategies. (#4639)
+- Dev: Laid the groundwork for advanced input completion strategies. (#4639, #4846, #4853)
+- Dev: Fixed flickering when running with Direct2D on Windows. (#4851)
+
+## 2.4.6
+
+- Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
+- Bugfix: Update Qt version, fixing a security issue with webp loading (see https://www.qt.io/blog/two-qt-security-advisorys-gdi-font-engine-webp-image-format) (#4843)
+- Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 
 ## 2.4.5
 

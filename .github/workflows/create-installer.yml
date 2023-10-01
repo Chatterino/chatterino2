@@ -5,7 +5,7 @@ on:
     workflows: ["Build"]
     types: [completed]
     # make sure this only runs on the default branch
-    branches: [chatterino7, "bugfix-release/**"]
+    branches: [chatterino7, "bugfix-release/**", "release/*"]
   workflow_dispatch:
 
 env:
@@ -31,6 +31,7 @@ jobs:
         with:
           workflow: build.yml
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
+          commit: ${{ github.sha }}
           path: build/
 
       - name: Unzip

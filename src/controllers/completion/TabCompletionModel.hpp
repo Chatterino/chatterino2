@@ -30,7 +30,18 @@ public:
     void updateResults(const QString &query, bool isFirstWord = false);
 
 private:
-    enum class SourceKind { Emote, User, Command, EmoteAndUser };
+    enum class SourceKind {
+        // Known to be an emote, i.e. started with :
+        Emote,
+        // Known to be a username, i.e. started with @
+        User,
+        // Known to be a command, i.e. started with / or .
+        Command,
+        // Emote or command without : or / .
+        EmoteCommand,
+        // Emote, user, or command without :, @, / .
+        EmoteUserCommand
+    };
 
     /// @brief Updates the internal completion source based on the current query.
     /// The completion source will only change if the deduced completion kind
@@ -46,6 +57,10 @@ private:
     std::optional<SourceKind> deduceSourceKind(const QString &query) const;
 
     std::unique_ptr<completion::Source> buildSource(SourceKind kind) const;
+
+    std::unique_ptr<completion::Source> buildEmoteSource() const;
+    std::unique_ptr<completion::Source> buildUserSource(bool prependAt) const;
+    std::unique_ptr<completion::Source> buildCommandSource() const;
 
     Channel &channel_;
     std::unique_ptr<completion::Source> source_{};

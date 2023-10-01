@@ -6,6 +6,7 @@ on:
     branches:
       - chatterino7
       - "bugfix-release/**"
+      - "release/*"
   pull_request:
   workflow_dispatch:
   merge_group:
@@ -15,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/chatterino7' || startsWith(github.ref, 'refs/heads/bugfix-release') }}
+  C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/chatterino7' || startsWith(github.ref, 'refs/heads/bugfix-release') || startsWith(github.ref, 'refs/heads/release/')}}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
   C2_BUILD_WITH_QT6: Off
   # Last known good conan version
@@ -28,13 +29,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest]
-        qt-version: [5.15.2, 6.5.0]
-        force-lto: [false]
-        plugins: [false]
-        skip-artifact: [false]
-        skip-crashpad: [false]
-        clang-tidy-review: [false]
         include:
           - os: windows-latest
             qt-version: 6.5.0
@@ -59,13 +53,21 @@ jobs:
             skip-artifact: false
             skip-crashpad: false
             clang-tidy-review: false
-          # Test for disabling crashpad on Windows
+          # macOS
+          - os: macos-latest
+            qt-version: 5.15.2
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
+          # Windows
           - os: windows-latest
             qt-version: 6.5.0
             force-lto: false
             plugins: false
-            skip-artifact: true
-            skip-crashpad: true
+            skip-artifact: false
+            skip-crashpad: false
             clang-tidy-review: false
 
       fail-fast: false
@@ -114,7 +116,7 @@ jobs:
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
           version: ${{ matrix.qt-version }}
 
-      - name: Install Qt 6.5.3
+      - name: Install Qt 6.5.3 imageformats
         if: startsWith(matrix.qt-version, '6.')
         uses: jurplel/install-qt-action@v3.3.0
         with:
@@ -204,16 +206,13 @@ jobs:
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
         shell: pwsh
-        env:
-          # Always enable PCH on Windows
-          C2_WINDOWS_USE_PCH: "ON"
         run: |
           cd build
           cmake `
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
-              -DUSE_PRECOMPILED_HEADERS=${{ env.C2_WINDOWS_USE_PCH }} `
+              -DUSE_PRECOMPILED_HEADERS=ON `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
@@ -233,7 +232,7 @@ jobs:
           cp bin/crashpad/crashpad_handler.exe Chatterino2/crashpad/crashpad_handler.exe
           7z a bin/chatterino-Qt-${{ matrix.qt-version }}.pdb.7z bin/chatterino.pdb
 
-      - name: Package (windows)
+      - name: Prepare build dir (windows)
         if: startsWith(matrix.os, 'windows')
         working-directory: build
         run: |
@@ -241,7 +240,7 @@ jobs:
           cp bin/chatterino.exe Chatterino2/
           echo nightly > Chatterino2/modes
 
-      - name: Fix Qt (windows)
+      - name: Fix Qt6 (windows)
         if: startsWith(matrix.qt-version, '6.') && startsWith(matrix.os, 'windows')
         working-directory: build
         run: |
@@ -461,6 +460,12 @@ jobs:
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
+        name: Linux Qt6.2.4 AppImage
+        with:
+          name: Chatterino-x86_64-6.2.4.AppImage
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
         name: Ubuntu 22.04 Qt5.15.2 deb
         with:
           name: Chatterino-ubuntu-22.04-Qt-5.15.2.deb
@@ -477,9 +482,6 @@ jobs:
           ls -l
           # Rename the macos build to indicate that it's for macOS 10.15 users
           mv chatterino-macos-Qt-5.15.2.dmg Chatterino-macOS-10.15.dmg
-
-          # Mark all Qt6 builds as EXPERIMENTAL
-          mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
         working-directory: release-artifacts
         shell: bash
 
