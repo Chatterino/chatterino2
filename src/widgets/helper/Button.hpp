@@ -56,7 +56,13 @@ signals:
     void leftMousePress();
 
 protected:
-    virtual void paintEvent(QPaintEvent *) override;
+    void paintEvent(QPaintEvent * /*event*/) override;
+
+    /// Paint this button.
+    /// This is intended for child classes that may want to paint the overlay.
+    /// This function should be used after rendering the custom button,
+    /// because the painter's state will be modified by this function.
+    void paintButton(QPainter &painter);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void enterEvent(QEnterEvent * /*event*/) override;
 #else

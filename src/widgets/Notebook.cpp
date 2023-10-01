@@ -1117,7 +1117,6 @@ void Notebook::setTabLocation(NotebookTabLocation location)
 
 void Notebook::paintEvent(QPaintEvent *event)
 {
-    BaseWidget::paintEvent(event);
     auto scale = this->scale();
 
     QPainter painter(this);
@@ -1438,6 +1437,11 @@ SplitContainer *SplitNotebook::getOrAddSelectedPage()
     }
 
     return this->addPage();
+}
+
+SplitContainer *SplitNotebook::getSelectedPage()
+{
+    return dynamic_cast<SplitContainer *>(Notebook::getSelectedPage());
 }
 
 void SplitNotebook::select(QWidget *page, bool focusPage)
