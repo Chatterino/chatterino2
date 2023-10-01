@@ -33,6 +33,12 @@ void TabCompletionModel::updateResults(const QString &query, bool isFirstWord)
     }
 }
 
+void TabCompletionModel::invalidate()
+{
+    this->sourceKind_ = std::nullopt;
+    this->source_ = nullptr;
+}
+
 void TabCompletionModel::updateSourceFromQuery(const QString &query)
 {
     auto deducedKind = this->deduceSourceKind(query);
