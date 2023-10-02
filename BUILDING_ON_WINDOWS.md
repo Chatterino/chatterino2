@@ -187,19 +187,6 @@ _Note:_ We're using `build` instead of the CLion default `cmake-build-debug` fol
 
 Install [conan](https://conan.io/downloads.html) and make sure it's in your `PATH` (default setting).
 
-<details>
-   <summary>How to add conan 2 to PATH</summary>
-   
-1. Type "path" in the start menu and click on the "Edit the system environment variables" result that shows up (this should open up the 'System Properties' window with the 'Advanced' tab selected).
-2. Press on the "Environment Variables..." button near the bottom right of the 'System Properties' window to open up the 'Environment Variables' window.
-3. Within 'Environment Variables', look at the bottom half of the window where it lists 'System variables' and double click on the variable named 'Path' to open up the 'Edit environment variable' window.
-4. Press the 'New' button near the top right to create a new environment variable.
-5. Open up your terminal with the Visual Studio environment variables (e.g. `x64 Native Tools Command Prompt for VS 2022`) and type "where conan" to find the file path (the folder that contains the conan.exe) to add.
-6. Add conan 2's file path (e.g. `C:\Users\willg\AppData\Roaming\Python\Python311\Scripts`) to the blank text box that shows up.
-7. Press the "OK" button.
-
-</details>
-
 Clone the repository as described in the readme. Open a terminal in the cloned folder and enter the following commands:
 
 1. `mkdir build && cd build`
