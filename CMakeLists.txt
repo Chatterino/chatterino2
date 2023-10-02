@@ -26,7 +26,9 @@ option(BUILD_TRANSLATIONS "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
 option(CHATTERINO_PLUGINS "Enable EXPERIMENTAL plugin support in Chatterino" OFF)
-option(CHATTERINO_DISABLE_UPDATER "Disable update checks" OFF)
+
+option(CHATTERINO_UPDATER "Enable update checks" ON)
+mark_as_advanced(CHATTERINO_UPDATER)
 
 if(CHATTERINO_LTO)
     include(CheckIPOSupported)

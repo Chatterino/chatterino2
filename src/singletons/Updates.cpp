@@ -250,11 +250,8 @@ void Updates::installUpdates()
 
 void Updates::checkForUpdates()
 {
+#ifndef CHATTERINO_DISABLE_UPDATER
     auto version = Version::instance();
-
-#ifdef CHATTERINO_DISABLE_UPDATER
-    return;
-#endif
 
     if (!version.isSupportedOS())
     {
@@ -295,7 +292,7 @@ void Updates::checkForUpdates()
                 return Failure;
             }
 
-#if defined Q_OS_WIN || defined Q_OS_MACOS
+#    if defined Q_OS_WIN || defined Q_OS_MACOS
             /// Downloads an installer for the new version
             auto updateExeUrl = object["updateexe"];
             if (!updateExeUrl.isString())
@@ -307,7 +304,7 @@ void Updates::checkForUpdates()
             }
             this->updateExe_ = updateExeUrl.toString();
 
-#    ifdef Q_OS_WIN
+#        ifdef Q_OS_WIN
             /// Windows portable
             auto portableUrl = object["portable_download"];
             if (!portableUrl.isString())
@@ -319,17 +316,17 @@ void Updates::checkForUpdates()
                 return Failure;
             }
             this->updatePortable_ = portableUrl.toString();
-#    endif
+#        endif
 
-#elif defined Q_OS_LINUX
+#    elif defined Q_OS_LINUX
             QJsonValue updateGuide = object.value("updateguide");
             if (updateGuide.isString())
             {
                 this->updateGuideLink_ = updateGuide.toString();
             }
-#else
+#    else
             return Failure;
-#endif
+#    endif
 
             /// Current version
             this->onlineVersion_ = version.toString();
@@ -349,6 +346,7 @@ void Updates::checkForUpdates()
         })
         .execute();
     this->setStatus_(Searching);
+#endif
 }
 
 Updates::Status Updates::getStatus() const
