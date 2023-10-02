@@ -20,7 +20,7 @@ Notes:
 1. Visit the [Qt Open Source Page](https://www.qt.io/download-open-source).
 2. Scroll down to the bottom
 3. Then select "Download the Qt Online Installer"
-4. Within the installer, Qt will prompt you to create an account (to access Qt downloads).
+4. Within the installer, Qt will prompt you to create an account to access Qt downloads.
 
 Notes:
 
