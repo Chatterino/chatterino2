@@ -39,7 +39,7 @@ Note: This installation will take about 2 GB of disk space.
 
 Once Qt is done installing, make sure you add its bin directory to your `PATH` (e.g. `C:\Qt\5.15.2\msvc2019_64\bin`)
 <details>
-   <summary>How to add Qt's bin directory to PATH</summary>
+   <summary>How to add Qt to PATH</summary>
    
 1. Type "path" in the start menu and click on the "Edit the system environment variables" result that shows up (this should open up the 'System Properties' window with the 'Advanced' tab selected).
 2. Press on the "Environment Variables..." button near the bottom right of the 'System Properties' window to open up the 'Environment Variables' window.
