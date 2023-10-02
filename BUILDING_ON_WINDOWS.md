@@ -20,6 +20,8 @@ Notes:
 1. Visit the [Qt Open Source Page](https://www.qt.io/download-open-source).
 2. Scroll down to the bottom
 3. Then select "Download the Qt Online Installer"
+4. Within the installer, Qt will prompt you to create an account (to access Qt downloads).
+5. When you get to the Installation Folder section within the Qt installer, you can create an empty folder named 'Qt' within your 'C:' directory and install Qt within that folder. (You cannot install Qt in the 'Program Files' folder because of the blank space (' ') between 'Program' and 'Files' and you cannot install Qt directly in 'C:'.)
 
 Notes:
 
@@ -37,6 +39,17 @@ Notes:
 Note: This installation will take about 2 GB of disk space.
 
 Once Qt is done installing, make sure you add its bin directory to your `PATH` (e.g. `C:\Qt\5.15.2\msvc2019_64\bin`)
+<details>
+   <summary>How to add Qt's bin directory to PATH</summary>
+   
+1. Type "path" in the start menu and click on the "Edit the system environment variables" result that shows up (this should open up the 'System Properties' window with the 'Advanced' tab selected).
+2. Press on the "Environment Variables..." button near the bottom right of the 'System Properties' window to open up the 'Environment Variables' window.
+3. Within 'Environment Variables', look at the bottom half of the window where it lists 'System variables' and double click on the variable named 'Path' to open up the 'Edit environment variable' window.
+4. Press the 'New' button near the top right to create a new environment variable.
+5. Add Qt's bin directory file path (e.g. `C:\Qt\5.15.2\msvc2019_64\bin`) to the blank text box that shows up.
+6. Press the "OK" button.
+
+</details>
 
 ### Advanced dependencies
 
@@ -82,6 +95,19 @@ Note: This installation will take about 200 MB of disk space.
 
 Install [conan 2](https://conan.io/downloads.html) and make sure it's in your `PATH` (default setting).
 
+<details>
+   <summary>How to add conan 2 to PATH</summary>
+   
+1. Type "path" in the start menu and click on the "Edit the system environment variables" result that shows up (this should open up the 'System Properties' window with the 'Advanced' tab selected).
+2. Press on the "Environment Variables..." button near the bottom right of the 'System Properties' window to open up the 'Environment Variables' window.
+3. Within 'Environment Variables', look at the bottom half of the window where it lists 'System variables' and double click on the variable named 'Path' to open up the 'Edit environment variable' window.
+4. Press the 'New' button near the top right to create a new environment variable.
+5. Open up your terminal with the Visual Studio environment variables (e.g. `x64 Native Tools Command Prompt for VS 2022`) and type "where conan" to find the file path (the folder that contains the conan.exe) to add.
+6. Add conan 2's file path (e.g. `C:\Users\willg\AppData\Roaming\Python\Python311\Scripts`) to the blank text box that shows up.
+7. Press the "OK" button.
+
+</details>
+
 Then in a terminal, configure conan to use `NMake Makefiles` as its generator:
 
 1. Generate a new profile  
@@ -95,6 +121,7 @@ Open up your terminal with the Visual Studio environment variables (e.g. `x64 Na
 1. `cd build`
 1. `conan install .. -s build_type=Release -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" --build=missing --output-folder=.`
 1. `cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_PREFIX_PATH="C:\Qt\5.15.2\msvc2019_64" ..`
+1. `cd ..`
 1. `nmake`
 
 To build a debug build, you'll also need to add the `-s compiler.runtime_type=Debug` flag to the `conan install` invocation. See [this StackOverflow post](https://stackoverflow.com/questions/59828611/windeployqt-doesnt-deploy-qwindowsd-dll-for-a-debug-application/75607313#75607313)
@@ -159,6 +186,19 @@ To learn more about AddressSanitizer and MSVC, visit the [Microsoft Docs](https:
 _Note:_ We're using `build` instead of the CLion default `cmake-build-debug` folder.
 
 Install [conan](https://conan.io/downloads.html) and make sure it's in your `PATH` (default setting).
+
+<details>
+   <summary>How to add conan 2 to PATH</summary>
+   
+1. Type "path" in the start menu and click on the "Edit the system environment variables" result that shows up (this should open up the 'System Properties' window with the 'Advanced' tab selected).
+2. Press on the "Environment Variables..." button near the bottom right of the 'System Properties' window to open up the 'Environment Variables' window.
+3. Within 'Environment Variables', look at the bottom half of the window where it lists 'System variables' and double click on the variable named 'Path' to open up the 'Edit environment variable' window.
+4. Press the 'New' button near the top right to create a new environment variable.
+5. Open up your terminal with the Visual Studio environment variables (e.g. `x64 Native Tools Command Prompt for VS 2022`) and type "where conan" to find the file path (the folder that contains the conan.exe) to add.
+6. Add conan 2's file path (e.g. `C:\Users\willg\AppData\Roaming\Python\Python311\Scripts`) to the blank text box that shows up.
+7. Press the "OK" button.
+
+</details>
 
 Clone the repository as described in the readme. Open a terminal in the cloned folder and enter the following commands:
 
