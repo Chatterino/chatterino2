@@ -29,7 +29,7 @@
 - Dev: Clarify signal connection lifetimes where applicable. (#4818)
 - Dev: Laid the groundwork for advanced input completion strategies. (#4639, #4846, #4853)
 - Dev: Fixed flickering when running with Direct2D on Windows. (#4851)
-- Dev: Add a compile-time flag `CHATTERINO_DISABLE_UPDATER` to disable update checks. (#4854)
+- Dev: Add a compile-time flag `CHATTERINO_UPDATER` which can be turned off to disable update checks. (#4854)
 
 ## 2.4.6
 
