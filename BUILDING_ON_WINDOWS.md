@@ -113,7 +113,7 @@ Then in a terminal, configure conan to use `NMake Makefiles` as its generator:
 
 #### Build
 
-Open up your terminal with the Visual Studio environment variables (e.g. `x64 Native Tools Command Prompt for VS 2022`), cd to the cloned c2 directory and run the following commands:
+Open up your terminal with the Visual Studio environment variables (e.g. `x64 Native Tools Command Prompt for VS 2022`), cd to the cloned chatterino2 directory and run the following commands:
 
 1. `mkdir build`
 1. `cd build`
