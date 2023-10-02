@@ -27,6 +27,9 @@ option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
 option(CHATTERINO_PLUGINS "Enable EXPERIMENTAL plugin support in Chatterino" OFF)
 
+option(CHATTERINO_UPDATER "Enable update checks" ON)
+mark_as_advanced(CHATTERINO_UPDATER)
+
 if(CHATTERINO_LTO)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)

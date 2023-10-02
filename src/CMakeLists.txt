@@ -1039,3 +1039,8 @@ if(CHATTERINO_ENABLE_LTO)
     set_property(TARGET ${LIBRARY_PROJECT}
                  PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
+
+if(NOT CHATTERINO_UPDATER)
+    message(STATUS "Disabling the updater.")
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_DISABLE_UPDATER)
+endif()
