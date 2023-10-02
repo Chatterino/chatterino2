@@ -45,7 +45,7 @@ Once Qt is done installing, make sure you add its bin directory to your `PATH` (
 1. Type "path" in the start menu and click on the "Edit the system environment variables" result that shows up (this should open up the 'System Properties' window with the 'Advanced' tab selected).
 2. Press on the "Environment Variables..." button near the bottom right of the 'System Properties' window to open up the 'Environment Variables' window.
 3. Within 'Environment Variables', look at the bottom half of the window where it lists 'System variables' and double click on the variable named 'Path' to open up the 'Edit environment variable' window.
-4. Press the 'New' button near the top right to create a new environment variable.
+4. Click the 'New' button top right and paste in the file path for your Qt installation (e.g. `C:\Qt\5.15.2\msvc2019_64\bin` by default).
 5. Add Qt's bin directory file path (e.g. `C:\Qt\5.15.2\msvc2019_64\bin`) to the blank text box that shows up.
 6. Press the "OK" button.
 
