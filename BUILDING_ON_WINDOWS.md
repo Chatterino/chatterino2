@@ -21,7 +21,7 @@ Notes:
 2. Scroll down to the bottom
 3. Then select "Download the Qt Online Installer"
 4. Within the installer, Qt will prompt you to create an account (to access Qt downloads).
-5. When you get to the Installation Folder section within the Qt installer, you can create an empty folder named 'Qt' within your 'C:' directory and install Qt within that folder. (You cannot install Qt in the 'Program Files' folder because of the blank space (' ') between 'Program' and 'Files' and you cannot install Qt directly in 'C:'.)
+5. When you get to the Installation Folder section within the Qt installer, you can install directly within the 'C:' directory (e.g. `C:\Qt`). Then make sure to select the "Custom installation" box so you are able to select components to install. (You cannot install Qt in the 'Program Files' folder because of the blank space (' ') between 'Program' and 'Files'. If you press the 'Browse' button to specify another directory, selecting the 'C:' directory does not automatically create the 'Qt' directory. You have to respecify the 'C:\Qt' directory.)
 
 Notes:
 
