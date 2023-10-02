@@ -3,7 +3,7 @@
 This is a set of guidelines for contributing to Chatterino. The goal is to teach programmers without a C++ background (java/python/etc.), people who haven't used Qt, or otherwise have different experience, the idioms of the codebase. Thus we will focus on those which are different from those other environments. There are extra guidelines available [here](https://hackmd.io/@fourtf/chatterino-pendantic-guidelines) but they are considered as extras and not as important.
 
 ### General (non-code related) guidelines for contributing to Chatterino
-- Make a specific branch for your pull request instead of using the master, main, or mainline branch. This allows you to better manage your workflow and avoid conflicts with Chatterino's main branch name.
+- Make a specific branch for your pull request instead of using the master, main, or mainline branch. This will prevent future problems with updating your branch after your PR is merged.
 - Update the CHANGELOG.md file to include bug fixes and features that you implemented. The number behind the changelog entry indicates the number of the pull request.
 
 # Tooling
