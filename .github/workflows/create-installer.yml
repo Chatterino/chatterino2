@@ -153,7 +153,6 @@ jobs:
           mv chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z Chatterino-Windows-debug-symbols.pdb.7z
 
           mv chatterino-macos-Qt-5.15.2.dmg Chatterino.dmg
-          mv chatterino-macos-Qt-6.5.0.dmg EXPERIMENTAL-Chatterino.Qt6.dmg
 
       - name: Hash files
         working-directory: build

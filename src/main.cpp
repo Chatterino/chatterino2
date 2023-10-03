@@ -17,8 +17,13 @@
 #include <QCommandLineParser>
 #include <QMessageBox>
 #include <QStringList>
+#include <QtCore/QtPlugin>
 
 #include <memory>
+
+#ifdef CHATTERINO_WITH_AVIF_PLUGIN
+Q_IMPORT_PLUGIN(QAVIFPlugin)
+#endif
 
 using namespace chatterino;
 

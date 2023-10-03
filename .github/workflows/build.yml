@@ -290,6 +290,7 @@ jobs:
               libboost-system-dev \
               libboost-filesystem-dev \
               libpulse-dev \
+              libavif-dev \
               libxkbcommon-x11-0 \
               build-essential \
               libgl1-mesa-dev \
@@ -334,7 +335,7 @@ jobs:
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
             -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
             -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
-            -DCHATTERINO_NO_AVIF_PLUGIN=On \
+            -DCHATTERINO_STATIC_AVIF=Off \
             ..
           make -j"$(nproc)"
         shell: bash
@@ -358,14 +359,15 @@ jobs:
             -DBUILD_WITH_QT6=Off
             -DBUILD_TESTS=On
             -DBUILD_BENCHMARKS=On
-            -DCHATTERINO_NO_AVIF_PLUGIN=On
+            -DCHATTERINO_STATIC_AVIF=Off
           apt_packages: >-
             qttools5-dev, qt5-image-formats-plugins, libqt5svg5-dev, 
             libsecret-1-dev,
             libboost-dev, libboost-system-dev, libboost-filesystem-dev,
             libssl-dev,
             rapidjson-dev,
-            libbenchmark-dev
+            libbenchmark-dev,
+            libavif-dev
 
       - name: clang-tidy-review upload
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'
@@ -403,7 +405,7 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install boost openssl rapidjson p7zip create-dmg cmake tree
+          brew install boost openssl rapidjson p7zip create-dmg cmake tree libavif
         shell: bash
 
       - name: Build (MacOS)
@@ -413,7 +415,7 @@ jobs:
           cd build
           cmake \
               -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
               -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
@@ -499,7 +501,7 @@ jobs:
         run: |
           ls -l
           # Rename the macos build to indicate that it's for macOS 10.15 users
-          mv chatterino-macos-Qt-5.15.2.dmg Chatterino-macOS-10.15.dmg
+          mv chatterino-macos-Qt-5.15.2.dmg Chatterino-macOS-12.0.dmg
         working-directory: release-artifacts
         shell: bash
 

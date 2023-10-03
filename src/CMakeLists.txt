@@ -773,7 +773,11 @@ if (BUILD_APP)
     else()
         add_executable(${EXECUTABLE_PROJECT} main.cpp)
     endif()
-    target_link_libraries(${EXECUTABLE_PROJECT} PRIVATE chatterino-qt-plugins)
+    
+    if (CHATTERINO_WITH_AVIF_PLUGIN)
+        target_link_libraries(${EXECUTABLE_PROJECT} PRIVATE kimageformats)
+        target_compile_definitions(${EXECUTABLE_PROJECT} PRIVATE CHATTERINO_WITH_AVIF_PLUGIN)
+    endif()
 
     if(COMMAND add_sanitizers)
         add_sanitizers(${EXECUTABLE_PROJECT})
