@@ -4,6 +4,7 @@ FROM chatterino-ubuntu-$UBUNTU_VERSION-qt6-build
 
 # In CI, this is set from the aqtinstall action
 ENV Qt6_DIR=/opt/qt/6.2.4/gcc_64
+ENV OPENSSL_1_1_1_DIR=/usr/local/ssl
 
 WORKDIR /src/build
 

@@ -22,6 +22,9 @@ env:
   # Last known good conan version
   # 2.0.3 has a bug on Windows (conan-io/conan#13606)
   CONAN_VERSION: 2.0.2
+  OPENSSL_1_1_1_VERSION: 1.1.1w
+  OPENSSL_1_1_1_SHA256: "cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8"
+  OPENSSL_1_1_1_DIR: /usr/local/ssl
 
 jobs:
   build:
@@ -294,7 +297,9 @@ jobs:
               libxcb-image0 \
               libxcb-keysyms1 \
               libxcb-render-util0 \
-              libxcb-xinerama0
+              libxcb-xinerama0 \
+              wget \
+              zlib1g-dev
 
       - name: Apply Qt patches (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.qt-version, '5.')
@@ -302,12 +307,25 @@ jobs:
           patch "$Qt5_DIR/include/QtConcurrent/qtconcurrentthreadengine.h" .patches/qt5-on-newer-gcc.patch
         shell: bash
 
-      - name: Build (Ubuntu)
+      - name: Build OpenSSL 1.1.1
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          cd $RUNNER_WORKSPACE
+          wget "https://www.openssl.org/source/openssl-$OPENSSL_1_1_1_VERSION.tar.gz"
+          echo "${{ env.OPENSSL_1_1_1_SHA256 }}  openssl-$OPENSSL_1_1_1_VERSION.tar.gz" | sha256sum -c
+          tar xf "openssl-$OPENSSL_1_1_1_VERSION.tar.gz"
+          cd "openssl-$OPENSSL_1_1_1_VERSION"
+          ./config --prefix="$OPENSSL_1_1_1_DIR" --openssldir="$OPENSSL_1_1_1_DIR" shared zlib
+          make -j"$(nproc)"
+          sudo make install
+        shell: bash
+
+      - name: Build (Ubuntu), Qt ${{ matrix.qt-version }}
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           mkdir build
           cd build
-          CXXFLAGS=-fno-sized-deallocation cmake \
+          OPENSSL_ROOT_DIR="$OPENSSL_1_1_1_DIR" CXXFLAGS=-fno-sized-deallocation cmake \
             -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
             -DCMAKE_BUILD_TYPE=Release \
             -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \

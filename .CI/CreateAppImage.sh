@@ -25,6 +25,13 @@ else
     echo "No Qt environment variable set, assuming system-installed Qt"
 fi
 
+if [ -n "$OPENSSL_1_1_1_DIR" ]; then
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$OPENSSL_1_1_1_DIR/lib"
+    export PATH="$OPENSSL_1_1_1_DIR/bin:$PATH"
+else
+    echo "No OpenSSL environment variable set, assuming system-installed OpenSSL"
+fi
+
 script_path=$(readlink -f "$0")
 script_dir=$(dirname "$script_path")
 chatterino_dir=$(dirname "$script_dir")

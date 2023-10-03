@@ -1,6 +1,7 @@
 FROM ubuntu:22.04
 
 ENV TZ=UTC
+ENV OPENSSL_VER=1.1.1w
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update && apt-get -y install --no-install-recommends \
@@ -27,8 +28,20 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
 RUN apt-get -y install \
         git \
         lsb-release \
+        checkinstall \
+        zlib1g-dev \
+        wget \
         python3-pip && \
         apt-get clean all
+        
+        
+#Install OpenSSL 1.1
+RUN wget https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz
+RUN tar xf openssl-$OPENSSL_VER.tar.gz
+RUN cd openssl-$OPENSSL_VER && \
+    ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib && \
+    make -j8 && \
+    make install
 
 # Install Qt as we do in CI
 
