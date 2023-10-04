@@ -22,18 +22,14 @@ std::shared_ptr<Hotkey> HotkeyModel::getItemFromRow(
 void HotkeyModel::getRowFromItem(const std::shared_ptr<Hotkey> &item,
                                  std::vector<QStandardItem *> &row)
 {
-    QFont font("Segoe UI", 10);
-
+    setStringItem(row[0], item->name(), false);
+    setStringItem(row[1], item->toString(), false);
     if (!item->validAction())
     {
-        font.setStrikeOut(true);
+        QBrush bgColor(Qt::GlobalColor::darkRed);
+        row[0]->setBackground(bgColor);
+        row[1]->setBackground(bgColor);
     }
-
-    setStringItem(row[0], item->name(), false);
-    row[0]->setData(font, Qt::FontRole);
-
-    setStringItem(row[1], item->toString(), false);
-    row[1]->setData(font, Qt::FontRole);
 }
 
 int HotkeyModel::beforeInsert(const std::shared_ptr<Hotkey> &item,
@@ -46,12 +42,14 @@ int HotkeyModel::beforeInsert(const std::shared_ptr<Hotkey> &item,
         auto newRow = this->createRow();
 
         setStringItem(newRow[0], category, false, false);
-        newRow[0]->setData(QFont("Segoe UI Light", 16), Qt::FontRole);
+        QBrush bgColor(Qt::GlobalColor::darkGray);
+        newRow[0]->setBackground(bgColor);
 
         // make sure category headers aren't editable
         for (unsigned long i = 1; i < newRow.size(); i++)
         {
             setStringItem(newRow[i], "", false, false);
+            newRow[i]->setBackground(bgColor);
         }
 
         this->insertCustomRow(std::move(newRow), proposedIndex);

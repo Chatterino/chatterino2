@@ -123,21 +123,32 @@ void Fonts::initialize(Settings &, Paths &)
 #endif
 }
 
-QFont Fonts::getFont(FontStyle type, float scale)
+QFont Fonts::getFont(FontStyle type, float scale, QWidget *widget)
 {
-    return this->getOrCreateFontData(type, scale).font;
+    return this->getOrCreateFontData(type, scale, widget).font;
 }
 
-QFontMetrics Fonts::getFontMetrics(FontStyle type, float scale)
+QFontMetrics Fonts::getFontMetrics(FontStyle type, float scale, QWidget *widget)
 {
-    return this->getOrCreateFontData(type, scale).metrics;
+    return this->getOrCreateFontData(type, scale, widget).metrics;
 }
 
-Fonts::FontData &Fonts::getOrCreateFontData(FontStyle type, float scale)
+Fonts::FontData &Fonts::getOrCreateFontData(FontStyle type, float scale,
+                                            QWidget *widget)
 {
     assertInGuiThread();
 
     assert(type < FontStyle::EndType);
+
+    // use DPI scaling if widget was passed
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+    if (widget != nullptr)
+    {
+        scale = scale * 96.f /
+                std::max<float>(
+                    0.01f, widget->logicalDpiX() * widget->devicePixelRatioF());
+    }
+#endif
 
     auto &map = this->fontsByType_[size_t(type)];
 
@@ -159,7 +170,7 @@ Fonts::FontData &Fonts::getOrCreateFontData(FontStyle type, float scale)
 
 Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
 {
-    // check if it's a chat (scale the setting)
+    // check if it's a chat
     if (type >= FontStyle::ChatStart && type <= FontStyle::ChatEnd)
     {
         static std::unordered_map<FontStyle, ChatFontData> sizeScale{
@@ -172,37 +183,25 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
             {FontStyle::ChatLarge, {1.2f, false, QFont::Normal}},
             {FontStyle::ChatVeryLarge, {1.4f, false, QFont::Normal}},
         };
-        sizeScale[FontStyle::ChatMediumBold] = {1, false,
-                                                QFont::Weight(getBoldness())};
-        auto data = sizeScale[type];
+
+        ChatFontData data = sizeScale[type];
         return FontData(
             QFont(this->chatFontFamily.getValue(),
                   int(this->chatFontSize.getValue() * data.scale * scale),
                   data.weight, data.italic));
     }
 
-    // normal Ui font (use pt size)
-    {
-#ifdef Q_OS_MAC
-        constexpr float multiplier = 0.8f;
-#else
-        constexpr float multiplier = 1.f;
-#endif
+    // normal UI font
+    static std::unordered_map<FontStyle, UiFontData> defaultSize{
+        {FontStyle::Tiny, {8, "Monospace", false, QFont::Normal}},
+        {FontStyle::UiMedium, {9, DEFAULT_FONT_FAMILY, false, QFont::Normal}},
+        {FontStyle::UiMediumBold, {9, DEFAULT_FONT_FAMILY, false, QFont::Bold}},
+        {FontStyle::UiTabs, {9, DEFAULT_FONT_FAMILY, false, QFont::Normal}},
+    };
 
-        static std::unordered_map<FontStyle, UiFontData> defaultSize{
-            {FontStyle::Tiny, {8, "Monospace", false, QFont::Normal}},
-            {FontStyle::UiMedium,
-             {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
-            {FontStyle::UiMediumBold,
-             {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Bold}},
-            {FontStyle::UiTabs,
-             {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
-        };
-
-        UiFontData &data = defaultSize[type];
-        QFont font(data.name, int(data.size * scale), data.weight, data.italic);
-        return FontData(font);
-    }
+    UiFontData &data = defaultSize[type];
+    return FontData(
+        QFont(data.name, int(data.size * scale), data.weight, data.italic));
 }
 
 Fonts *getFonts()

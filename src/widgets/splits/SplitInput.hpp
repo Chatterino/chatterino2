@@ -104,6 +104,7 @@ protected:
     void hideCompletionPopup();
     void insertCompletionText(const QString &input_) const;
     void openEmotePopup();
+    void updateFonts();
 
     void updateCancelReplyButton();
 

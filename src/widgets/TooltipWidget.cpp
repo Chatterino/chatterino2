@@ -272,7 +272,7 @@ void TooltipWidget::scaleChangedEvent(float)
 void TooltipWidget::updateFont()
 {
     this->setFont(
-        getFonts()->getFont(FontStyle::ChatMediumSmall, this->scale()));
+        getFonts()->getFont(FontStyle::ChatMediumSmall, this->scale(), this));
 }
 
 void TooltipWidget::setWordWrap(bool wrap)

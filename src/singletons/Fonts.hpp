@@ -47,8 +47,9 @@ public:
 
     // font data gets set in createFontData(...)
 
-    QFont getFont(FontStyle type, float scale);
-    QFontMetrics getFontMetrics(FontStyle type, float scale);
+    QFont getFont(FontStyle type, float scale, QWidget *widget = nullptr);
+    QFontMetrics getFontMetrics(FontStyle type, float scale,
+                                QWidget *widget = nullptr);
 
     QStringSetting chatFontFamily;
     IntSetting chatFontSize;
@@ -81,7 +82,7 @@ private:
         QFont::Weight weight;
     };
 
-    FontData &getOrCreateFontData(FontStyle type, float scale);
+    FontData &getOrCreateFontData(FontStyle type, float scale, QWidget *widget);
     FontData createFontData(FontStyle type, float scale);
 
     std::vector<std::unordered_map<float, FontData>> fontsByType_;

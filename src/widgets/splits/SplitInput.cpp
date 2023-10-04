@@ -145,7 +145,7 @@ void SplitInput::initLayout()
     {
         auto textEditLength =
             box.emplace<QLabel>().assign(&this->ui_.textEditLength);
-        textEditLength->setAlignment(Qt::AlignRight);
+        textEditLength->setAlignment(Qt::AlignCenter);
 
         box->addStretch(1);
         box.emplace<EffectLabel>().assign(&this->ui_.emoteButton);
@@ -155,21 +155,16 @@ void SplitInput::initLayout()
 
     // ---- misc
 
-    // set edit font
-    this->ui_.textEdit->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+    this->updateFonts();
+
     QObject::connect(this->ui_.textEdit, &QTextEdit::cursorPositionChanged,
                      this, &SplitInput::onCursorPositionChanged);
     QObject::connect(this->ui_.textEdit, &QTextEdit::textChanged, this,
                      &SplitInput::onTextChanged);
 
-    this->managedConnections_.managedConnect(
-        app->fonts->fontChanged, [=, this]() {
-            this->ui_.textEdit->setFont(
-                app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
-            this->ui_.replyLabel->setFont(
-                app->fonts->getFont(FontStyle::ChatMediumBold, this->scale()));
-        });
+    this->managedConnections_.managedConnect(app->fonts->fontChanged, [this]() {
+        this->updateFonts();
+    });
 
     // open emote popup
     QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [this] {
@@ -200,9 +195,19 @@ void SplitInput::initLayout()
         this->managedConnections_);
 }
 
-void SplitInput::scaleChangedEvent(float scale)
+void SplitInput::updateFonts()
 {
     auto app = getApp();
+    this->ui_.textEdit->setFont(
+        app->fonts->getFont(FontStyle::ChatMedium, this->scale(), this));
+    this->ui_.textEditLength->setFont(
+        app->fonts->getFont(FontStyle::Tiny, this->scale(), this));
+    this->ui_.replyLabel->setFont(
+        app->fonts->getFont(FontStyle::ChatMediumBold, this->scale(), this));
+}
+
+void SplitInput::scaleChangedEvent(float scale)
+{
     // update the icon size of the buttons
     this->updateEmoteButton();
     this->updateCancelReplyButton();
@@ -212,12 +217,7 @@ void SplitInput::scaleChangedEvent(float scale)
     {
         this->setMaximumHeight(this->scaledMaxHeight());
     }
-    this->ui_.textEdit->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
-    this->ui_.textEditLength->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
-    this->ui_.replyLabel->setFont(
-        app->fonts->getFont(FontStyle::ChatMediumBold, this->scale()));
+    this->updateFonts();
 }
 
 void SplitInput::themeChangedEvent()

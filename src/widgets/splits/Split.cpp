@@ -918,6 +918,11 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
     this->selectChannelDialog_ = dialog;
 }
 
+void Split::scaleChangedEvent(float scale)
+{
+    this->setFont(getApp()->fonts->getFont(FontStyle::UiMedium, scale, this));
+}
+
 void Split::updateGifEmotes()
 {
     this->view_->queueUpdate();
@@ -1161,10 +1166,11 @@ void Split::showViewerList()
     auto *loadingLabel = new QLabel("Loading...");
     searchBar->setPlaceholderText("Search User...");
 
-    auto formatListItemText = [](QString text) {
+    auto formatListItemText = [this](QString text) {
         auto item = new QListWidgetItem();
         item->setText(text);
-        item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
+        item->setFont(
+            getApp()->fonts->getFont(FontStyle::UiMedium, this->scale(), this));
         return item;
     };
 

@@ -619,7 +619,7 @@ void BaseWindow::scaleChangedEvent(float scale)
     this->calcButtonsSizes();
 #endif
 
-    this->setFont(getFonts()->getFont(FontStyle::UiTabs, this->qtFontScale()));
+    this->setFont(getFonts()->getFont(FontStyle::UiTabs, this->scale(), this));
 }
 
 void BaseWindow::paintEvent(QPaintEvent *)

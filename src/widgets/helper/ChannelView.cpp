@@ -409,14 +409,8 @@ void ChannelView::scaleChangedEvent(float scale)
 
     if (this->goToBottom_)
     {
-        auto factor = this->qtFontScale();
-#ifdef Q_OS_MACOS
-        factor = scale * 80.f /
-                 std::max<float>(
-                     0.01, this->logicalDpiX() * this->devicePixelRatioF());
-#endif
         this->goToBottom_->getLabel().setFont(
-            getFonts()->getFont(FontStyle::UiMedium, factor));
+            getFonts()->getFont(FontStyle::UiMedium, this->scale(), this));
     }
 }
 
