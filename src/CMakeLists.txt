@@ -1007,6 +1007,7 @@ if (MSVC)
         /wd4505
         /wd4100
         /wd4267
+        /Zc:__cplusplus
     )
     # Disable min/max macros from Windows.h
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
