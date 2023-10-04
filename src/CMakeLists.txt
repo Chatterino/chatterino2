@@ -912,7 +912,16 @@ target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
 
 # miniaudio dependency https://github.com/mackron/miniaudio
-target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
+if (USE_SYSTEM_MINIAUDIO)
+    message(STATUS "Building with system miniaudio")
+    include(CheckIncludeFileCXX)
+    CHECK_INCLUDE_FILE_CXX("miniaudio.h" MINIAUDIO_FOUND)
+    if (NOT MINIAUDIO_FOUND)
+        message(FATAL_ERROR "miniaudio.h not found on your system")
+    endif()
+else ()
+    target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
+endif ()
 
 if (UNIX)
     if (CMAKE_DL_LIBS)
