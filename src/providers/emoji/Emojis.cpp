@@ -53,6 +53,7 @@ void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
 
     rj::getSafe(unparsedEmoji, "non_qualified", emojiData->nonQualifiedCode);
     rj::getSafe(unparsedEmoji, "unified", emojiData->unifiedCode);
+    assert(!emojiData->unifiedCode.isEmpty());
 
     rj::getSafe(unparsedEmoji, "has_img_apple", capabilities.apple);
     rj::getSafe(unparsedEmoji, "has_img_google", capabilities.google);
@@ -79,8 +80,6 @@ void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
     QStringList nonQualifiedCharacters =
         emojiData->nonQualifiedCode.toLower().split('-');
     QStringList unicodeCharacters = emojiData->unifiedCode.toLower().split('-');
-
-    assert(unicodeCharacters.length() >= 1);
 
     for (const QString &unicodeCharacter : unicodeCharacters)
     {
