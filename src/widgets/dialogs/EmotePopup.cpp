@@ -207,7 +207,7 @@ EmotePopup::EmotePopup(QWidget *parent)
 {
     // this->setStayInScreenRect(true);
     this->moveTo(getApp()->windows->emotePopupPos(),
-                 BaseWindow::BoundsChecker::DesiredPosition);
+                 widgets::BoundsChecking::DesiredPosition);
 
     auto *layout = new QVBoxLayout();
     this->getLayoutContainer()->setLayout(layout);

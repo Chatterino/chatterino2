@@ -458,6 +458,8 @@ set(SOURCE_FILES
         util/Twitch.cpp
         util/Twitch.hpp
         util/TypeName.hpp
+        util/WidgetHelpers.cpp
+        util/WidgetHelpers.hpp
         util/WindowsHelper.cpp
         util/WindowsHelper.hpp
         util/XDGDesktopFile.cpp
@@ -910,7 +912,16 @@ target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
 
 # miniaudio dependency https://github.com/mackron/miniaudio
-target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
+if (USE_SYSTEM_MINIAUDIO)
+    message(STATUS "Building with system miniaudio")
+    include(CheckIncludeFileCXX)
+    CHECK_INCLUDE_FILE_CXX("miniaudio.h" MINIAUDIO_FOUND)
+    if (NOT MINIAUDIO_FOUND)
+        message(FATAL_ERROR "miniaudio.h not found on your system")
+    endif()
+else ()
+    target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
+endif ()
 
 if (UNIX)
     if (CMAKE_DL_LIBS)
@@ -996,6 +1007,8 @@ if (MSVC)
         /wd4505
         /wd4100
         /wd4267
+        # Enable updated '__cplusplus' macro - workaround for CMake#18837
+        /Zc:__cplusplus
     )
     # Disable min/max macros from Windows.h
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
@@ -1036,4 +1049,9 @@ if(CHATTERINO_ENABLE_LTO)
     message(STATUS "Enabling LTO for ${LIBRARY_PROJECT}")
     set_property(TARGET ${LIBRARY_PROJECT}
                  PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
+if(NOT CHATTERINO_UPDATER)
+    message(STATUS "Disabling the updater.")
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_DISABLE_UPDATER)
 endif()
