@@ -77,8 +77,6 @@ void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
         emojiData->capabilities.insert("Facebook");
     }
 
-    QStringList nonQualifiedCharacters =
-        emojiData->nonQualifiedCode.toLower().split('-');
     QStringList unicodeCharacters = emojiData->unifiedCode.toLower().split('-');
 
     for (const QString &unicodeCharacter : unicodeCharacters)
@@ -97,8 +95,10 @@ void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
     emojiData->value = QString::fromUcs4(unicodeBytes.data(),
                                          static_cast<int>(unicodeBytes.size()));
 
-    if (nonQualifiedCharacters.length() > 0)
+    if (!emojiData->nonQualifiedCode.isEmpty())
     {
+        QStringList nonQualifiedCharacters =
+            emojiData->nonQualifiedCode.toLower().split('-');
         std::vector<uint32_t> nonQualifiedBytes{};
         for (const QString &unicodeCharacter : nonQualifiedCharacters)
         {
@@ -108,7 +108,8 @@ void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
             if (!ok)
             {
                 qCWarning(chatterinoEmoji)
-                    << "Failed to parse emoji" << emojiData->shortCodes;
+                    << "Failed to parse emoji nonQualified"
+                    << emojiData->shortCodes;
                 return;
             }
         }
