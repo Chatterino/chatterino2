@@ -345,7 +345,8 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
                     break;
                 }
             }
-            else if (remainingCharacters >= emojiNonQualifiedExtraCharacters)
+            if (!emoji->nonQualified.isNull() &&
+                remainingCharacters >= emojiNonQualifiedExtraCharacters)
             {
                 // This checking here relies on the fact that the nonQualified string
                 // always starts with the same byte as value (the unified string)
@@ -368,12 +369,6 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
 
                     break;
                 }
-                // look in emoji->nonQualified
-            }
-            else
-            {
-                // It cannot be this emoji, there's not enough space for it
-                continue;
             }
         }
 
