@@ -350,8 +350,12 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
             {
                 // This checking here relies on the fact that the nonQualified string
                 // always starts with the same byte as value (the unified string)
-                bool match = true;
+                // bool match = true;
+                bool match = QStringView{emoji->nonQualified}.mid(1) ==
+                             QStringView{text}.mid(
+                                 i + 1, emojiNonQualifiedExtraCharacters);
 
+                /*
                 for (int j = 1; j < emoji->nonQualified.length(); ++j)
                 {
                     if (text.at(i + j) != emoji->nonQualified.at(j))
@@ -361,6 +365,7 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
                         break;
                     }
                 }
+                */
 
                 if (match)
                 {
