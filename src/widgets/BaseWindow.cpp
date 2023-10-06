@@ -936,7 +936,7 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
             for (QWidget *widget : this->ui_.buttons)
             {
-                if (widget->geometry().contains(point))
+                if (widget->isVisible() && widget->geometry().contains(point))
                 {
                     client = true;
                 }
