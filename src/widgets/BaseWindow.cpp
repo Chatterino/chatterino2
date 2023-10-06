@@ -965,16 +965,17 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
         return true;
     }
-    else if (this->flags_.has(FramelessDraggable))
+
+    if (this->flags_.has(FramelessDraggable))
     {
         *result = 0;
         bool client = false;
 
-        if (auto widget = this->childAt(point))
+        if (auto *widget = this->childAt(point))
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
-                if (widget == nullptr)
+                if (widget == nullptr || !widget->isVisible())
                 {
                     return false;
                 }
@@ -1004,6 +1005,8 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
         return true;
     }
+
+    // don't handle the message
     return false;
 #else
     return false;
