@@ -379,7 +379,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
-                if (widget == nullptr)
+                if (widget == nullptr || widget->isHidden())
                 {
                     return false;
                 }
@@ -975,7 +975,7 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
-                if (widget == nullptr || !widget->isVisible())
+                if (widget == nullptr || widget->isHidden())
                 {
                     return false;
                 }
