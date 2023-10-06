@@ -934,17 +934,23 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
         {
             bool client = false;
 
-            for (QWidget *widget : this->ui_.buttons)
-            {
-                if (widget->isVisible() && widget->geometry().contains(point))
-                {
-                    client = true;
-                }
-            }
-
+            // Check the main layout first, as it's the largest area
             if (this->ui_.layoutBase->geometry().contains(point))
             {
                 client = true;
+            }
+
+            // Check the titlebar buttons
+            if (!client && this->ui_.titlebarBox->geometry().contains(point))
+            {
+                for (QWidget *widget : this->ui_.buttons)
+                {
+                    if (widget->isVisible() &&
+                        widget->geometry().contains(point))
+                    {
+                        client = true;
+                    }
+                }
             }
 
             if (client)
