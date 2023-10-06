@@ -11,23 +11,23 @@
     "boost-signals2",
     "boost-variant",
     {
-      "name": "qtbase",
-      "default-features": false,
-      "features": [
-        "widgets",
-        "gui",
-        "network",
-        "concurrent",
-        "openssl",
-        "jpeg",
-        "png"
-      ]
-    },
-    {
       "name": "qt5compat",
       "default-features": false,
       "features": [
         "textcodec"
+      ]
+    },
+    {
+      "name": "qtbase",
+      "default-features": false,
+      "features": [
+        "concurrent",
+        "gui",
+        "jpeg",
+        "network",
+        "openssl",
+        "png",
+        "widgets"
       ]
     },
     {
@@ -42,11 +42,15 @@
   "features": {
     "benchmarks": {
       "description": "Build benchamarks",
-      "dependencies": [ "benchmark" ]
+      "dependencies": [
+        "benchmark"
+      ]
     },
     "tests": {
       "description": "Build tests",
-      "dependencies": [ "gtest" ]
+      "dependencies": [
+        "gtest"
+      ]
     }
   }
 }
