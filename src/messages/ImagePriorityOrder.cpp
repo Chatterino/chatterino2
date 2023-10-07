@@ -1,4 +1,4 @@
-#include "ImagePriorityOrder.hpp"
+#include "messages/ImagePriorityOrder.hpp"
 
 #include "common/QLogging.hpp"
 #include "messages/Image.hpp"

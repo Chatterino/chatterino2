@@ -334,8 +334,9 @@ PriorityImageLayoutElement::PriorityImageLayoutElement(
     this->trailingSpace = creator.hasTrailingSpace();
 }
 
-void PriorityImageLayoutElement::addCopyTextToString(QString &str, int from,
-                                                     int to) const
+void PriorityImageLayoutElement::addCopyTextToString(QString &str,
+                                                     uint32_t from,
+                                                     uint32_t to) const
 {
     const auto *emoteElement =
         dynamic_cast<EmoteElement *>(&this->getCreator());
@@ -350,12 +351,13 @@ void PriorityImageLayoutElement::addCopyTextToString(QString &str, int from,
     }
 }
 
-int PriorityImageLayoutElement::getSelectionIndexCount() const
+size_t PriorityImageLayoutElement::getSelectionIndexCount() const
 {
     return this->trailingSpace ? 2 : 1;
 }
 
-void PriorityImageLayoutElement::paint(QPainter &painter)
+void PriorityImageLayoutElement::paint(QPainter &painter,
+                                       const MessageColors &messageColors)
 {
     const auto &imageToUse = this->order_.getLoadedAndQueue();
 
@@ -395,7 +397,7 @@ int PriorityImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
     return 0;
 }
 
-int PriorityImageLayoutElement::getXFromIndex(int index)
+int PriorityImageLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {

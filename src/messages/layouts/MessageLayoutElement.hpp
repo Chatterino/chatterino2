@@ -1,27 +1,21 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
-#include "messages/Link.hpp"
-
-#include <pajlada/signals/signalholder.hpp>
-#include <QPen>
-#include <QPoint>
-#include <QRect>
-#include <QString>
-#include <boost/noncopyable.hpp>
-#include <climits>
-#include <vector>
-
-#include "common/FlagsEnum.hpp"
 #include "messages/ImagePriorityOrder.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 
+#include <boost/noncopyable.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <QPen>
+#include <QPoint>
+#include <QRect>
+#include <QString>
 
 #include <climits>
 #include <cstdint>
+#include <vector>
 
 class QPainter;
 
@@ -113,13 +107,13 @@ public:
                                ImagePriorityOrder &&order, const QSize &size);
 
 protected:
-    void addCopyTextToString(QString &str, int from = 0,
-                             int to = INT_MAX) const override;
-    int getSelectionIndexCount() const override;
-    void paint(QPainter &painter) override;
+    void addCopyTextToString(QString &str, uint32_t from = 0,
+                             uint32_t to = UINT32_MAX) const override;
+    size_t getSelectionIndexCount() const override;
+    void paint(QPainter &painter, const MessageColors &messageColors) override;
     void paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
-    int getXFromIndex(int index) override;
+    int getXFromIndex(size_t index) override;
 
     const ImagePriorityOrder order_;
 };

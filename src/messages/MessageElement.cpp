@@ -309,12 +309,12 @@ std::vector<ImagePtr> LayeredEmoteElement::getLoadedImages(float scale)
 
     for (const auto &emote : this->emotes_)
     {
-        auto image = emote.ptr->images.getImageOrLoaded(scale);
-        if (image->isEmpty())
+        auto priority = emote.ptr->images.getPriority(scale);
+        if (!priority)
         {
             continue;
         }
-        res.push_back(image);
+        res.push_back(priority->getLoadedAndQueue());
     }
     return res;
 }
@@ -698,8 +698,10 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                     return;
                 }
 
+                int currentWidth = metrics.horizontalAdvance(currentText);
+
                 auto size = priority->firstLoadedImageSize() * overallScale;
-                if (!container.fitsInLine(size.width()))
+                if (!container.fitsInLine(currentWidth + size.width()))
                 {
                     currentText += ellipsis;
                     break;

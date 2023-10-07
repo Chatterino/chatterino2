@@ -1,17 +1,21 @@
-#include "ImageSet.hpp"
+#include "messages/ImageSet.hpp"
 
-#include "messages/ImagePriorityOrder.hpp"
 #include "messages/Image.hpp"
+#include "messages/ImagePriorityOrder.hpp"
 #include "singletons/Settings.hpp"
 
-namespace chatterino {
-
 namespace {
-    bool isValidImagePtr(const ImagePtr &img)
-    {
-        return img && !img->isEmpty();
-    }
+
+using namespace chatterino;
+
+bool isValidImagePtr(const ImagePtr &img)
+{
+    return img && !img->isEmpty();
+}
+
 }  // namespace
+
+namespace chatterino {
 
 ImageSet::ImageSet()
     : imageX1_(Image::getEmpty())
