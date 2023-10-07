@@ -504,7 +504,7 @@ QSize Image::size() const
         return pixmap->size() * this->scale_;
     }
 
-    // TODO: Some images contain size as part of their API, we use could use that instead of
+    // TODO: Some images contain size as part of their API, we could use that instead of
     // this hard-coded size.
     return {16, 16};
 }

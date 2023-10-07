@@ -100,7 +100,7 @@ const ImagePtr &ImageSet::getImage(float scale) const
     return getImagePriv(*this, scale);
 }
 
-boost::optional<ImagePriorityOrder> ImageSet::getPriority(float scale) const
+std::optional<ImagePriorityOrder> ImageSet::getPriority(float scale) const
 {
     std::vector<ImagePtr> result;
     result.reserve(4);
@@ -119,7 +119,7 @@ boost::optional<ImagePriorityOrder> ImageSet::getPriority(float scale) const
 
     if (result.empty())
     {
-        return boost::none;
+        return std::nullopt;
     }
 
     return ImagePriorityOrder(std::move(result));

@@ -25,9 +25,19 @@ public:
     const ImagePtr &firstLoadedImage() const;
     const ImagePtr &getLoadedAndQueue() const;
     QSize firstLoadedImageSize() const;
-    bool notAnimated() const;
+
+    /**
+     * Returns true if the image is known to be static (i.e. not animated)
+     * If the image has not been loaded, meaning we don't know if it's static or not, this will return false
+     */
+    bool isStatic() const;
 
 private:
+    /**
+     * Attempt to figure out whether this image is animated or not, and store its state in `animated_`
+     */
+    void loadAnimatedFlag() const;
+
     enum AnimationFlag {
         Unknown,
         No,

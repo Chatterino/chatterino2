@@ -54,13 +54,27 @@ QSize ImagePriorityOrder::firstLoadedImageSize() const
     return this->firstLoadedImage()->size();
 }
 
-bool ImagePriorityOrder::notAnimated() const
+bool ImagePriorityOrder::isStatic() const
 {
+    if (this->animated_ == AnimationFlag::Unknown)
+    {
+        this->loadAnimatedFlag();
+    }
+
     if (this->animated_ != AnimationFlag::Unknown)
     {
         // We have already checked the loaded image at some point
         return this->animated_ == AnimationFlag::No;
     }
+
+    // We aren't sure if the image is animated or not because it isn't loaded.
+    return false;
+}
+
+void ImagePriorityOrder::loadAnimatedFlag() const
+{
+    // This function should only be called when the animation flag is unknown
+    assert(this->animated_ == AnimationFlag::Unknown);
 
     const auto &firstLoaded = this->firstLoadedImage();
     if (firstLoaded->loaded())
@@ -68,16 +82,12 @@ bool ImagePriorityOrder::notAnimated() const
         if (firstLoaded->animated())
         {
             this->animated_ = AnimationFlag::Yes;
-            return false;
         }
-
-        this->animated_ = AnimationFlag::No;
-        return true;
+        else
+        {
+            this->animated_ = AnimationFlag::No;
+        }
     }
-
-    // We aren't sure if the image is animated or not because it isn't loaded.
-    this->animated_ = AnimationFlag::Unknown;
-    return false;
 }
 
 }  // namespace chatterino

@@ -372,7 +372,7 @@ void PriorityImageLayoutElement::paint(QPainter &painter,
 
 void PriorityImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
-    if (this->order_.notAnimated())
+    if (this->order_.isStatic())
     {
         // paintAnimated will be called on non-animated images. If the image has
         // been unloaded but doesn't need to be repainted yet, we don't want to
