@@ -3,8 +3,7 @@
 #include "common/Aliases.hpp"
 
 #include <memory>
-
-#include <boost/optional.hpp>
+#include <optional>
 #include <vector>
 
 namespace chatterino {

@@ -3,6 +3,7 @@
 #include "messages/Image.hpp"
 
 #include <QSize>
+
 #include <vector>
 
 namespace chatterino {
@@ -23,7 +24,11 @@ public:
     bool notAnimated() const;
 
 private:
-    enum AnimationFlag { Unknown, No, Yes };
+    enum AnimationFlag {
+        Unknown,
+        No,
+        Yes,
+    };
 
     std::vector<ImagePtr> order_;
     mutable AnimationFlag animated_ = AnimationFlag::Unknown;
