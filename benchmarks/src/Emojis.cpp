@@ -6,28 +6,6 @@
 
 using namespace chatterino;
 
-namespace {
-
-std::shared_ptr<Emojis> getEmojis()
-{
-    static std::shared_ptr<Emojis> emojis = []() {
-        auto *emojis = new Emojis();
-        emojis->load();
-        return std::make_shared<Emojis>(emojis);
-    }();
-
-    return emojis;
-}
-
-EmotePtr penguin()
-{
-    std::shared_ptr<EmojiData> penguin;
-    getEmojis()->getEmojis().tryGet("1F427", penguin);
-    return penguin->emote;
-}
-
-}  // namespace
-
 static void BM_ShortcodeParsing(benchmark::State &state)
 {
     Emojis emojis;
@@ -163,79 +141,73 @@ static void BM_EmojiParsing2(benchmark::State &state, Args &&...args)
 
     emojis.load();
 
-    struct TestCase {
-        QString input;
-        std::vector<boost::variant<EmotePtr, QString>> expectedOutput;
-    };
-
-    const auto &emojiMap = emojis.getEmojis();
-    std::shared_ptr<EmojiData> penguin;
-    emojiMap.tryGet("1F427", penguin);
-    auto penguinEmoji = penguin->emote;
-
-    std::vector<TestCase> tests{
-        {
-            // 1 emoji
-            "foo 🐧 bar",
-            // expected output
-            {
-                "foo ",
-                penguinEmoji,
-                " bar",
-            },
-        },
-        {
-            // no emoji
-            "foo bar",
-            // expected output
-            {
-                "foo bar",
-            },
-        },
-        {
-            // many emoji
-            "foo 🐧 bar 🐧🐧🐧🐧🐧",
-            // expected output
-            {
-                "foo ",
-                penguinEmoji,
-                " bar ",
-                penguinEmoji,
-                penguinEmoji,
-                penguinEmoji,
-                penguinEmoji,
-                penguinEmoji,
-            },
-        },
-    };
-
     auto argsTuple = std::make_tuple(std::move(args)...);
     auto input = std::get<0>(argsTuple);
-    auto expectedOutput = std::get<1>(argsTuple);
+    auto expectedNumEmojis = std::get<1>(argsTuple);
     for (auto _ : state)
     {
         auto output = emojis.parse(input);
-
-        bool areEqual =
-            std::equal(output.begin(), output.end(), expectedOutput.begin());
-
-        if (!areEqual)
+        int actualNumEmojis = 0;
+        for (const auto &part : output)
         {
-            qDebug() << "BAD BENCH";
-            for (const auto &v : output)
+            if (part.type() == typeid(EmotePtr))
             {
-                if (v.type() == typeid(QString))
-                {
-                    qDebug() << "output:" << boost::get<QString>(v);
-                }
+                ++actualNumEmojis;
             }
+        }
+
+        if (actualNumEmojis != expectedNumEmojis)
+        {
+            qDebug() << "BAD BENCH, EXPECTED NUM EMOJIS IS WRONG"
+                     << actualNumEmojis;
         }
     }
 }
 
-BENCHMARK_CAPTURE(BM_EmojiParsing2, "foo 🐧 bar",
-                  {
-                      "foo ",
-                      penguin(),
-                      " bar",
-                  });
+template <class... Args>
+static void BM_EmojiParsing2New(benchmark::State &state, Args &&...args)
+{
+    Emojis emojis;
+
+    emojis.load();
+
+    auto argsTuple = std::make_tuple(std::move(args)...);
+    auto input = std::get<0>(argsTuple);
+    auto expectedNumEmojis = std::get<1>(argsTuple);
+    for (auto _ : state)
+    {
+        auto output = emojis.parse(input);
+        int actualNumEmojis = 0;
+        for (const auto &part : output)
+        {
+            if (part.type() == typeid(EmotePtr))
+            {
+                ++actualNumEmojis;
+            }
+        }
+
+        if (actualNumEmojis != expectedNumEmojis)
+        {
+            qDebug() << "BAD BENCH, EXPECTED NUM EMOJIS IS WRONG"
+                     << actualNumEmojis;
+        }
+    }
+}
+
+BENCHMARK_CAPTURE(BM_EmojiParsing2, one_emoji, "foo 🐧 bar", 1);
+BENCHMARK_CAPTURE(BM_EmojiParsing2, two_emoji, "foo 🐧 bar 🐧", 2);
+BENCHMARK_CAPTURE(
+    BM_EmojiParsing2, many_emoji,
+    "😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 "
+    "😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 "
+    "😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 ",
+    61);
+
+BENCHMARK_CAPTURE(BM_EmojiParsing2New, one_emoji, "foo 🐧 bar", 1);
+BENCHMARK_CAPTURE(BM_EmojiParsing2New, two_emoji, "foo 🐧 bar 🐧", 2);
+BENCHMARK_CAPTURE(
+    BM_EmojiParsing2New, many_emoji,
+    "😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 "
+    "😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 "
+    "😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 ",
+    61);

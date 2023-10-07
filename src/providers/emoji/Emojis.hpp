@@ -46,6 +46,8 @@ public:
 
     virtual std::vector<boost::variant<EmotePtr, QString>> parse(
         const QString &text) const = 0;
+    virtual std::vector<boost::variant<EmotePtr, QString>> parse2(
+        const QString &text) const = 0;
     virtual const EmojiMap &getEmojis() const = 0;
     virtual const std::vector<QString> &getShortCodes() const = 0;
     virtual QString replaceShortCodes(const QString &text) const = 0;
@@ -57,6 +59,8 @@ public:
     void initialize();
     void load();
     std::vector<boost::variant<EmotePtr, QString>> parse(
+        const QString &text) const override;
+    std::vector<boost::variant<EmotePtr, QString>> parse2(
         const QString &text) const override;
 
     EmojiMap emojis;
