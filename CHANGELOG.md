@@ -6,6 +6,7 @@
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
 - Minor: The installer now checks for the VC Runtime version and shows more info when it's outdated. (#4847)
+- Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
 - Bugfix: Fixed a performance issue when displaying replies to certain messages. (#4807)
