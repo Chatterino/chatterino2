@@ -712,6 +712,8 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                     getTextLayoutElement(currentText, currentWidth, false));
                 currentText.clear();
 
+                // NOTE: This currently doesn't include spaces between the currentText & the new emoji
+                // NOTE: We currently don't properly copy emojis here, since the owner is rarely an EmoteElement
                 container.addElementNoLineBreak(
                     (new PriorityImageLayoutElement(*this, std::move(*priority),
                                                     size))

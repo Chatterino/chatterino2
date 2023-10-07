@@ -338,6 +338,7 @@ void PriorityImageLayoutElement::addCopyTextToString(QString &str,
                                                      uint32_t from,
                                                      uint32_t to) const
 {
+    // NOTE: We currently don't properly copy emojis here, since the owner is rarely an EmoteElement
     const auto *emoteElement =
         dynamic_cast<EmoteElement *>(&this->getCreator());
     if (emoteElement)
