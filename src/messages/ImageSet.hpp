@@ -30,7 +30,7 @@ public:
     const ImagePtr &getImage3() const;
 
     const ImagePtr &getImage(float scale) const;
-    boost::optional<ImagePriorityOrder> getPriority(float scale) const;
+    std::optional<ImagePriorityOrder> getPriority(float scale) const;
 
     bool operator==(const ImageSet &other) const;
     bool operator!=(const ImageSet &other) const;
