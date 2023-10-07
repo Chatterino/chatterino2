@@ -20,4 +20,9 @@ struct Overloaded : Ts... {
     using Ts::operator()...;
 };
 
+// Technically, we shouldn't need this, as we're on C++ 20,
+// but not all of our compilers support CTAD for aggregates yet.
+template <class... Ts>
+Overloaded(Ts...) -> Overloaded<Ts...>;
+
 }  // namespace chatterino::variant
