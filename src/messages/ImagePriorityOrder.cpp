@@ -18,7 +18,7 @@ ImagePriorityOrder::ImagePriorityOrder(ImagePriorityOrder &&other)
 
 const ImagePtr &ImagePriorityOrder::firstLoadedImage() const
 {
-    for (auto &img : this->order_)
+    for (const auto &img : this->order_)
     {
         if (img != nullptr && !img->isEmpty() && img->loaded())
         {
@@ -70,11 +70,9 @@ bool ImagePriorityOrder::notAnimated() const
             this->animated_ = AnimationFlag::Yes;
             return false;
         }
-        else
-        {
-            this->animated_ = AnimationFlag::No;
-            return true;
-        }
+
+        this->animated_ = AnimationFlag::No;
+        return true;
     }
 
     // We aren't sure if the image is animated or not because it isn't loaded.
