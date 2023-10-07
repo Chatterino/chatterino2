@@ -768,35 +768,51 @@ if (BUILD_APP)
     set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
     if (WIN32)
-        if (NOT WINDEPLOYQT_PATH)
-            get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
-            get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
-            string(APPEND WINDEPLOYQT_PATH ${QT_BIN_DIR} /windeployqt.exe)
-        else()
+        if (WINDEPLOYQT_PATH)
             file(TO_CMAKE_PATH "${WINDEPLOYQT_PATH}" WINDEPLOYQT_PATH)
+        else()
+            if (VCPKG_INSTALLED_DIR AND (CMAKE_BUILD_TYPE STREQUAL "Debug"))
+                find_program(WINDEPLOYQT_PATH NAMES windeployqt.debug.bat)
+            else()
+                find_program(WINDEPLOYQT_PATH NAMES windeployqt)
+            endif()
+        endif()
+
+        if (NOT EXISTS ${WINDEPLOYQT_PATH})
+            message(FATAL_ERROR "windeployqt.exe not found")
         endif()
 
         if (CMAKE_BUILD_TYPE STREQUAL "Debug")
             set(WINDEPLOYQT_MODE --debug)
+            get_target_property(QT_CORE_LOC Qt${MAJOR_QT_VERSION}::Core LOCATION_DEBUG)
         else()
             set(WINDEPLOYQT_MODE --release)
+            get_target_property(QT_CORE_LOC Qt${MAJOR_QT_VERSION}::Core LOCATION)
         endif()
+        get_filename_component(QT_BIN_DIR ${QT_CORE_LOC} DIRECTORY)
 
         set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
-        if (X_VCPKG_APPLOCAL_DEPS_INSTALL)
-            install(TARGETS ${EXECUTABLE_PROJECT} RUNTIME DESTINATION .)
-        else()
-            install(TARGETS ${EXECUTABLE_PROJECT} 
-                RUNTIME_DEPENDENCIES 
-                    PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
-                    POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
-                    DIRECTORIES ${QT_BIN_DIR}
-                RUNTIME DESTINATION .)
-            install(CODE "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
-            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")        
-        endif()
+        install(TARGETS ${EXECUTABLE_PROJECT} 
+            RUNTIME_DEPENDENCIES 
+                PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
+                POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
+                DIRECTORIES ${QT_BIN_DIR}
+            RUNTIME DESTINATION .)
+
+        # Hardcoded list of DLLs to install from Qt - these are marked as optional since they only exist for vcpkg
+        install(FILES
+            ${QT_BIN_DIR}/jpeg62.dll
+            ${QT_BIN_DIR}/libwebpdemux.dll
+            ${QT_BIN_DIR}/libwebpmux.dll
+            ${QT_BIN_DIR}/libwebp.dll
+            ${QT_BIN_DIR}/libsharpyuv.dll
+            DESTINATION .
+            OPTIONAL)
+
+        install(CODE "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
+        install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")   
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
