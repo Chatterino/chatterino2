@@ -500,9 +500,13 @@ QSize Image::size() const
     assertInGuiThread();
 
     if (auto pixmap = this->frames_->first())
+    {
         return pixmap->size() * this->scale_;
-    else
-        return {16, 16};
+    }
+
+    // TODO: Some images contain size as part of their API, we use could use that instead of
+    // this hard-coded size.
+    return {16, 16};
 }
 
 void Image::actuallyLoad()
