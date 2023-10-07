@@ -13,9 +13,7 @@
     {
       "name": "qt5compat",
       "default-features": false,
-      "features": [
-        "textcodec"
-      ]
+      "features": ["textcodec"]
     },
     {
       "name": "qtbase",
@@ -33,24 +31,18 @@
     {
       "name": "qtimageformats",
       "default-features": false,
-      "features": [
-        "webp"
-      ]
+      "features": ["webp"]
     },
     "qtsvg"
   ],
   "features": {
     "benchmarks": {
       "description": "Build benchamarks",
-      "dependencies": [
-        "benchmark"
-      ]
+      "dependencies": ["benchmark"]
     },
     "tests": {
       "description": "Build tests",
-      "dependencies": [
-        "gtest"
-      ]
+      "dependencies": ["gtest"]
     }
   }
 }
