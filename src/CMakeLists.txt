@@ -801,7 +801,13 @@ if (BUILD_APP)
                 DIRECTORIES ${QT_BIN_DIR}
             RUNTIME DESTINATION .)
 
-        install(FILES ${QT_BIN_DIR}/jpeg62.dll ${QT_BIN_DIR}/libwebpdemux.dll ${QT_BIN_DIR}/libwebpmux.dll ${QT_BIN_DIR}/libwebp.dll ${QT_BIN_DIR}/libsharpyuv.dll 
+        # Hardcoded list of DLLs to install from Qt - these are marked as optional since they only exist for vcpkg
+        install(FILES
+            ${QT_BIN_DIR}/jpeg62.dll
+            ${QT_BIN_DIR}/libwebpdemux.dll
+            ${QT_BIN_DIR}/libwebpmux.dll
+            ${QT_BIN_DIR}/libwebp.dll
+            ${QT_BIN_DIR}/libsharpyuv.dll
             DESTINATION .
             OPTIONAL)
 
