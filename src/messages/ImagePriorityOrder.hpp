@@ -8,15 +8,19 @@
 
 namespace chatterino {
 
-class ImagePriorityOrder
+class ImagePriorityOrder final
 {
 public:
-    ImagePriorityOrder(std::vector<ImagePtr> &&order);
+    ImagePriorityOrder() = delete;
+    ~ImagePriorityOrder() = default;
+
+    explicit ImagePriorityOrder(std::vector<ImagePtr> &&order);
+
     ImagePriorityOrder(ImagePriorityOrder &&other);
+    ImagePriorityOrder &operator=(ImagePriorityOrder &&other) = delete;
 
     ImagePriorityOrder(const ImagePriorityOrder &other) = delete;
     ImagePriorityOrder &operator=(const ImagePriorityOrder &other) = delete;
-    ImagePriorityOrder &operator=(ImagePriorityOrder &&other) = delete;
 
     const ImagePtr &firstLoadedImage() const;
     const ImagePtr &getLoadedAndQueue() const;
