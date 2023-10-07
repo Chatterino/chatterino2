@@ -12,6 +12,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
+#include "util/Variant.hpp"
 
 namespace chatterino {
 
@@ -665,55 +666,59 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
         container.first = FirstWord::Neutral;
         for (Word &word : this->words_)
         {
-            auto parsedWords = app->emotes->emojis.parse(word.text);
-            if (parsedWords.size() == 0)
+            for (const auto &parsedWord : app->emotes->emojis.parse(word.text))
             {
-                continue;  // sanity check
-            }
+                auto visitor = variant::Overloaded{
+                    [&](const QString &text) {
+                        if (!currentText.isEmpty())
+                        {
+                            currentText += ' ';
+                        }
+                        currentText += text;
+                        QString prev =
+                            currentText;  // only increments the ref-count
+                        currentText =
+                            metrics.elidedText(currentText, Qt::ElideRight,
+                                               container.remainingWidth());
+                        return currentText != prev;
+                    },
+                    [&](const EmotePtr &emote) {
+                        auto image = emote->images.getImageOrLoaded(
+                            container.getScale());
+                        if (image->isEmpty())
+                        {
+                            return false;
+                        }
+                        auto emoteScale = getSettings()->emoteScale.getValue();
 
-            auto &parsedWord = parsedWords[0];
-            if (parsedWord.type() == typeid(QString))
-            {
-                if (!currentText.isEmpty())
-                {
-                    currentText += ' ';
-                }
-                currentText += word.text;
-                QString prev = currentText;  // only increments the ref-count
-                currentText = metrics.elidedText(currentText, Qt::ElideRight,
-                                                 container.remainingWidth());
-                if (currentText != prev)
+                        int currentWidth =
+                            metrics.horizontalAdvance(currentText);
+                        auto emoteSize =
+                            QSize(image->width(), image->height()) *
+                            (emoteScale * container.getScale());
+
+                        if (!container.fitsInLine(currentWidth +
+                                                  emoteSize.width()))
+                        {
+                            currentText += ellipsis;
+                            return true;
+                        }
+
+                        // Add currently pending text to container, then add the emote after.
+                        container.addElementNoLineBreak(getTextLayoutElement(
+                            currentText, currentWidth, false));
+                        currentText.clear();
+
+                        container.addElementNoLineBreak(
+                            (new ImageLayoutElement(*this, image, emoteSize))
+                                ->setLink(this->getLink()));
+                        return false;
+                    }};
+
+                bool done = boost::apply_visitor(visitor, parsedWord);
+                if (done)
                 {
                     break;
-                }
-            }
-            else if (parsedWord.type() == typeid(EmotePtr))
-            {
-                auto emote = boost::get<EmotePtr>(parsedWord);
-                auto image =
-                    emote->images.getImageOrLoaded(container.getScale());
-                if (!image->isEmpty())
-                {
-                    auto emoteScale = getSettings()->emoteScale.getValue();
-
-                    int currentWidth = metrics.horizontalAdvance(currentText);
-                    auto emoteSize = QSize(image->width(), image->height()) *
-                                     (emoteScale * container.getScale());
-
-                    if (!container.fitsInLine(currentWidth + emoteSize.width()))
-                    {
-                        currentText += ellipsis;
-                        break;
-                    }
-
-                    // Add currently pending text to container, then add the emote after.
-                    container.addElementNoLineBreak(
-                        getTextLayoutElement(currentText, currentWidth, false));
-                    currentText.clear();
-
-                    container.addElementNoLineBreak(
-                        (new ImageLayoutElement(*this, image, emoteSize))
-                            ->setLink(this->getLink()));
                 }
             }
         }
