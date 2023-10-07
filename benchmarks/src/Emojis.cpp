@@ -164,49 +164,10 @@ static void BM_EmojiParsing2(benchmark::State &state, Args &&...args)
     }
 }
 
-template <class... Args>
-static void BM_EmojiParsing2New(benchmark::State &state, Args &&...args)
-{
-    Emojis emojis;
-
-    emojis.load();
-
-    auto argsTuple = std::make_tuple(std::move(args)...);
-    auto input = std::get<0>(argsTuple);
-    auto expectedNumEmojis = std::get<1>(argsTuple);
-    for (auto _ : state)
-    {
-        auto output = emojis.parse(input);
-        int actualNumEmojis = 0;
-        for (const auto &part : output)
-        {
-            if (part.type() == typeid(EmotePtr))
-            {
-                ++actualNumEmojis;
-            }
-        }
-
-        if (actualNumEmojis != expectedNumEmojis)
-        {
-            qDebug() << "BAD BENCH, EXPECTED NUM EMOJIS IS WRONG"
-                     << actualNumEmojis;
-        }
-    }
-}
-
 BENCHMARK_CAPTURE(BM_EmojiParsing2, one_emoji, "foo 🐧 bar", 1);
 BENCHMARK_CAPTURE(BM_EmojiParsing2, two_emoji, "foo 🐧 bar 🐧", 2);
 BENCHMARK_CAPTURE(
     BM_EmojiParsing2, many_emoji,
-    "😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 "
-    "😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 "
-    "😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 ",
-    61);
-
-BENCHMARK_CAPTURE(BM_EmojiParsing2New, one_emoji, "foo 🐧 bar", 1);
-BENCHMARK_CAPTURE(BM_EmojiParsing2New, two_emoji, "foo 🐧 bar 🐧", 2);
-BENCHMARK_CAPTURE(
-    BM_EmojiParsing2New, many_emoji,
     "😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 "
     "😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 "
     "😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 😂 ",
