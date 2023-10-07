@@ -5,28 +5,29 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
 
 namespace chatterino {
 
-NewTabItem::NewTabItem(const QString &channelName)
+NewTabItem::NewTabItem(Window *window_, const QString &channelName)
     : AbstractSwitcherItem(QIcon(":/switcher/plus.svg"))
     , channelName_(channelName)
     , text_(QString(TEXT_FORMAT).arg(channelName))
+    , window(window_)
 {
 }
 
 void NewTabItem::action()
 {
-    auto &nb = getApp()->windows->getMainWindow().getNotebook();
+    auto &nb = this->window->getNotebook();
     SplitContainer *container = nb.addPage(true);
 
     Split *split = new Split(container);
     split->setChannel(getApp()->twitch->getOrAddChannel(this->channelName_));
-    container->appendSplit(split);
+    container->insertSplit(split);
 }
 
 void NewTabItem::paint(QPainter *painter, const QRect &rect) const

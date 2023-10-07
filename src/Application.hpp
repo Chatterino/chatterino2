@@ -1,15 +1,18 @@
 #pragma once
 
-#include <QApplication>
-#include <memory>
-
-#include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "singletons/NativeMessaging.hpp"
+
+#include <pajlada/signals.hpp>
+#include <pajlada/signals/signal.hpp>
+#include <QApplication>
+
+#include <memory>
 
 namespace chatterino {
 
 class TwitchIrcServer;
+class ITwitchIrcServer;
 class PubSub;
 
 class CommandController;
@@ -17,18 +20,27 @@ class AccountController;
 class NotificationController;
 class HighlightController;
 class HotkeyController;
+class IUserDataController;
+class UserDataController;
+class SoundController;
+class ITwitchLiveController;
+class TwitchLiveController;
+#ifdef CHATTERINO_HAVE_PLUGINS
+class PluginController;
+#endif
 
 class Theme;
 class WindowManager;
 class Logging;
 class Paths;
-class AccountManager;
 class Emotes;
+class IEmotes;
 class Settings;
 class Fonts;
 class Toasts;
 class ChatterinoBadges;
 class FfzBadges;
+class SeventvBadges;
 
 class IApplication
 {
@@ -40,7 +52,7 @@ public:
 
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
-    virtual Emotes *getEmotes() = 0;
+    virtual IEmotes *getEmotes() = 0;
     virtual AccountController *getAccounts() = 0;
     virtual HotkeyController *getHotkeys() = 0;
     virtual WindowManager *getWindows() = 0;
@@ -48,16 +60,18 @@ public:
     virtual CommandController *getCommands() = 0;
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
-    virtual TwitchIrcServer *getTwitch() = 0;
+    virtual ITwitchIrcServer *getTwitch() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
+    virtual IUserDataController *getUserData() = 0;
+    virtual ITwitchLiveController *getTwitchLiveController() = 0;
 };
 
 class Application : public IApplication
 {
     std::vector<std::unique_ptr<Singleton>> singletons_;
-    int argc_;
-    char **argv_;
+    int argc_{};
+    char **argv_{};
 
 public:
     static Application *instance;
@@ -86,6 +100,17 @@ public:
     TwitchIrcServer *const twitch{};
     ChatterinoBadges *const chatterinoBadges{};
     FfzBadges *const ffzBadges{};
+    SeventvBadges *const seventvBadges{};
+    UserDataController *const userData{};
+    SoundController *const sound{};
+
+private:
+    TwitchLiveController *const twitchLiveController{};
+
+public:
+#ifdef CHATTERINO_HAVE_PLUGINS
+    PluginController *const plugins{};
+#endif
 
     /*[[deprecated]]*/ Logging *const logging{};
 
@@ -97,10 +122,7 @@ public:
     {
         return this->fonts;
     }
-    Emotes *getEmotes() override
-    {
-        return this->emotes;
-    }
+    IEmotes *getEmotes() override;
     AccountController *getAccounts() override
     {
         return this->accounts;
@@ -129,10 +151,7 @@ public:
     {
         return this->highlights;
     }
-    TwitchIrcServer *getTwitch() override
-    {
-        return this->twitch;
-    }
+    ITwitchIrcServer *getTwitch() override;
     ChatterinoBadges *getChatterinoBadges() override
     {
         return this->chatterinoBadges;
@@ -141,10 +160,16 @@ public:
     {
         return this->ffzBadges;
     }
+    IUserDataController *getUserData() override;
+    ITwitchLiveController *getTwitchLiveController() override;
+
+    pajlada::Signals::NoArgSignal streamerModeChanged;
 
 private:
     void addSingleton(Singleton *singleton);
     void initPubSub();
+    void initBttvLiveUpdates();
+    void initSeventvEventAPI();
     void initNm(Paths &paths);
 
     template <typename T,

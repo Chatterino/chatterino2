@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pajlada/signals/signalholder.hpp"
+
 #include <QListWidget>
 
 namespace chatterino {
@@ -15,6 +17,8 @@ public:
 
 private:
     void refreshSelection();
+
+    pajlada::Signals::SignalHolder managedConnections_;
 };
 
 }  // namespace chatterino

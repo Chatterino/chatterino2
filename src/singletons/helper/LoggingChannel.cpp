@@ -1,13 +1,12 @@
 #include "LoggingChannel.hpp"
 
-#include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "messages/Message.hpp"
+#include "messages/MessageThread.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QDir>
-
-#include <ctime>
 
 namespace chatterino {
 
@@ -97,11 +96,48 @@ void LoggingChannel::addMessage(MessagePtr message)
     }
 
     QString str;
+    if (channelName.startsWith("/mentions"))
+    {
+        str.append("#" + message->channelName + " ");
+    }
+
     str.append('[');
     str.append(now.toString("HH:mm:ss"));
     str.append("] ");
 
-    str.append(message->searchText);
+    QString messageText;
+    if (message->loginName.isEmpty())
+    {
+        // This accounts for any messages not explicitly sent by a user, like
+        // system messages, parts of announcements, subs etc.
+        messageText = message->messageText;
+    }
+    else
+    {
+        if (message->localizedName.isEmpty())
+        {
+            messageText = message->loginName + ": " + message->messageText;
+        }
+        else
+        {
+            messageText = message->localizedName + " " + message->loginName +
+                          ": " + message->messageText;
+        }
+    }
+
+    if ((message->flags.has(MessageFlag::ReplyMessage) &&
+         getSettings()->stripReplyMention) &&
+        !getSettings()->hideReplyContext)
+    {
+        qsizetype colonIndex = messageText.indexOf(':');
+        if (colonIndex != -1)
+        {
+            QString rootMessageChatter =
+                message->replyThread->root()->loginName;
+            messageText.insert(colonIndex + 1, " @" + rootMessageChatter);
+        }
+    }
+    str.append(messageText);
     str.append(endline);
 
     this->appendLine(str);
@@ -109,7 +145,7 @@ void LoggingChannel::addMessage(MessagePtr message)
 
 QString LoggingChannel::generateOpeningString(const QDateTime &now) const
 {
-    QString ret = QLatin1Literal("# Start logging at ");
+    QString ret("# Start logging at ");
 
     ret.append(now.toString("yyyy-MM-dd HH:mm:ss "));
     ret.append(now.timeZoneAbbreviation());
@@ -120,7 +156,7 @@ QString LoggingChannel::generateOpeningString(const QDateTime &now) const
 
 QString LoggingChannel::generateClosingString(const QDateTime &now) const
 {
-    QString ret = QLatin1Literal("# Stop logging at ");
+    QString ret("# Stop logging at ");
 
     ret.append(now.toString("yyyy-MM-dd HH:mm:ss"));
     ret.append(now.timeZoneAbbreviation());

@@ -2,6 +2,9 @@
 
 #include "messages/search/MessagePredicate.hpp"
 
+#include <QString>
+#include <QStringList>
+
 namespace chatterino {
 
 /**
@@ -16,10 +19,12 @@ public:
     /**
      * @brief Create an SubtierPredicate with a list of subtiers to search for.
      *
-     * @param subtiers a list of subtiers that a message should contain 
+     * @param subtiers one or more comma-separated subtiers that the message should contain
+     * @param negate when set, excludes messages containing selected subtiers from results
      */
-    SubtierPredicate(const QStringList &subtiers);
+    SubtierPredicate(const QString &subtiers, bool negate);
 
+protected:
     /**
      * @brief Checks whether the message contains any of the subtiers passed
      *        in the constructor.
@@ -28,7 +33,7 @@ public:
      * @return true if the message contains a subtier listed in the specified subtiers,
      *         false otherwise
      */
-    bool appliesTo(const Message &message) override;
+    bool appliesToImpl(const Message &message) override;
 
 private:
     /// Holds the subtiers that will be searched for

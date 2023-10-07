@@ -9,6 +9,7 @@
 #include "messages/MessageElement.hpp"
 #include "providers/LinkResolver.hpp"
 #include "providers/twitch/PubSubActions.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
@@ -22,6 +23,45 @@ namespace {
 QRegularExpression IRC_COLOR_PARSE_REGEX(
     "(\u0003(\\d{1,2})?(,(\\d{1,2}))?|\u000f)",
     QRegularExpression::UseUnicodePropertiesOption);
+
+QString formatUpdatedEmoteList(const QString &platform,
+                               const std::vector<QString> &emoteNames,
+                               bool isAdd, bool isFirstWord)
+{
+    QString text = "";
+    if (isAdd)
+    {
+        text += isFirstWord ? "Added" : "added";
+    }
+    else
+    {
+        text += isFirstWord ? "Removed" : "removed";
+    }
+
+    if (emoteNames.size() == 1)
+    {
+        text += QString(" %1 emote ").arg(platform);
+    }
+    else
+    {
+        text += QString(" %1 %2 emotes ").arg(emoteNames.size()).arg(platform);
+    }
+
+    auto i = 0;
+    for (const auto &emoteName : emoteNames)
+    {
+        i++;
+        if (i > 1)
+        {
+            text += i == emoteNames.size() ? " and " : ", ";
+        }
+        text += emoteName;
+    }
+
+    text += ".";
+
+    return text;
+}
 
 }  // namespace
 
@@ -200,10 +240,10 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
         text.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
     for (const auto &word : textFragments)
     {
-        const auto linkString = this->matchLink(word);
-        if (!linkString.isEmpty())
+        LinkParser parser(word);
+        if (parser.result())
         {
-            this->addLink(word, linkString);
+            this->addLink(*parser.result());
             continue;
         }
 
@@ -473,6 +513,153 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
                                MessageColor::System);
 }
 
+MessageBuilder::MessageBuilder(LiveUpdatesAddEmoteMessageTag /*unused*/,
+                               const QString &platform, const QString &actor,
+                               const std::vector<QString> &emoteNames)
+    : MessageBuilder()
+{
+    auto text =
+        formatUpdatedEmoteList(platform, emoteNames, true, actor.isEmpty());
+
+    this->emplace<TimestampElement>();
+    if (!actor.isEmpty())
+    {
+        this->emplace<TextElement>(actor, MessageElementFlag::Username,
+                                   MessageColor::System)
+            ->setLink({Link::UserInfo, actor});
+    }
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
+                               MessageColor::System);
+
+    QString finalText;
+    if (actor.isEmpty())
+    {
+        finalText = text;
+    }
+    else
+    {
+        finalText = QString("%1 %2").arg(actor, text);
+    }
+
+    this->message().loginName = actor;
+    this->message().messageText = finalText;
+    this->message().searchText = finalText;
+
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::LiveUpdatesAdd);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+}
+
+MessageBuilder::MessageBuilder(LiveUpdatesRemoveEmoteMessageTag /*unused*/,
+                               const QString &platform, const QString &actor,
+                               const std::vector<QString> &emoteNames)
+    : MessageBuilder()
+{
+    auto text =
+        formatUpdatedEmoteList(platform, emoteNames, false, actor.isEmpty());
+
+    this->emplace<TimestampElement>();
+    if (!actor.isEmpty())
+    {
+        this->emplace<TextElement>(actor, MessageElementFlag::Username,
+                                   MessageColor::System)
+            ->setLink({Link::UserInfo, actor});
+    }
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
+                               MessageColor::System);
+
+    QString finalText;
+    if (actor.isEmpty())
+    {
+        finalText = text;
+    }
+    else
+    {
+        finalText = QString("%1 %2").arg(actor, text);
+    }
+
+    this->message().loginName = actor;
+    this->message().messageText = finalText;
+    this->message().searchText = finalText;
+
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::LiveUpdatesRemove);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+}
+
+MessageBuilder::MessageBuilder(LiveUpdatesUpdateEmoteMessageTag /*unused*/,
+                               const QString &platform, const QString &actor,
+                               const QString &emoteName,
+                               const QString &oldEmoteName)
+    : MessageBuilder()
+{
+    QString text;
+    if (actor.isEmpty())
+    {
+        text = "Renamed";
+    }
+    else
+    {
+        text = "renamed";
+    }
+    text +=
+        QString(" %1 emote %2 to %3.").arg(platform, oldEmoteName, emoteName);
+
+    this->emplace<TimestampElement>();
+    if (!actor.isEmpty())
+    {
+        this->emplace<TextElement>(actor, MessageElementFlag::Username,
+                                   MessageColor::System)
+            ->setLink({Link::UserInfo, actor});
+    }
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
+                               MessageColor::System);
+
+    QString finalText;
+    if (actor.isEmpty())
+    {
+        finalText = text;
+    }
+    else
+    {
+        finalText = QString("%1 %2").arg(actor, text);
+    }
+
+    this->message().loginName = actor;
+    this->message().messageText = finalText;
+    this->message().searchText = finalText;
+
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::LiveUpdatesUpdate);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+}
+
+MessageBuilder::MessageBuilder(LiveUpdatesUpdateEmoteSetMessageTag /*unused*/,
+                               const QString &platform, const QString &actor,
+                               const QString &emoteSetName)
+    : MessageBuilder()
+{
+    auto text = QString("switched the active %1 Emote Set to \"%2\".")
+                    .arg(platform, emoteSetName);
+
+    this->emplace<TimestampElement>();
+    this->emplace<TextElement>(actor, MessageElementFlag::Username,
+                               MessageColor::System)
+        ->setLink({Link::UserInfo, actor});
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
+                               MessageColor::System);
+
+    auto finalText = QString("%1 %2").arg(actor, text);
+
+    this->message().loginName = actor;
+    this->message().messageText = finalText;
+    this->message().searchText = finalText;
+
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::LiveUpdatesUpdate);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+}
+
 Message *MessageBuilder::operator->()
 {
     return this->message_.get();
@@ -500,52 +687,45 @@ void MessageBuilder::append(std::unique_ptr<MessageElement> element)
     this->message().elements.push_back(std::move(element));
 }
 
-QString MessageBuilder::matchLink(const QString &string)
+bool MessageBuilder::isEmpty() const
 {
-    LinkParser linkParser(string);
-
-    static QRegularExpression httpRegex(
-        "\\bhttps?://", QRegularExpression::CaseInsensitiveOption);
-    static QRegularExpression ftpRegex(
-        "\\bftps?://", QRegularExpression::CaseInsensitiveOption);
-    static QRegularExpression spotifyRegex(
-        "\\bspotify:", QRegularExpression::CaseInsensitiveOption);
-
-    if (!linkParser.hasMatch())
-    {
-        return QString();
-    }
-
-    QString captured = linkParser.getCaptured();
-
-    if (!captured.contains(httpRegex) && !captured.contains(ftpRegex) &&
-        !captured.contains(spotifyRegex))
-    {
-        captured.insert(0, "http://");
-    }
-
-    return captured;
+    return this->message_->elements.empty();
 }
 
-void MessageBuilder::addLink(const QString &origLink,
-                             const QString &matchedLink)
+MessageElement &MessageBuilder::back()
 {
-    static QRegularExpression domainRegex(
-        R"(^(?:(?:ftp|http)s?:\/\/)?([^\/]+)(?:\/.*)?$)",
-        QRegularExpression::CaseInsensitiveOption);
+    assert(!this->isEmpty());
+    return *this->message().elements.back();
+}
 
+std::unique_ptr<MessageElement> MessageBuilder::releaseBack()
+{
+    assert(!this->isEmpty());
+
+    auto ptr = std::move(this->message().elements.back());
+    this->message().elements.pop_back();
+    return ptr;
+}
+
+void MessageBuilder::addLink(const ParsedLink &parsedLink)
+{
     QString lowercaseLinkString;
-    auto match = domainRegex.match(origLink);
-    if (match.isValid())
+    QString origLink = parsedLink.source;
+    QString matchedLink;
+
+    if (parsedLink.protocol.isNull())
     {
-        lowercaseLinkString = origLink.mid(0, match.capturedStart(1)) +
-                              match.captured(1).toLower() +
-                              origLink.mid(match.capturedEnd(1));
+        matchedLink = QStringLiteral("http://") + parsedLink.source;
     }
     else
     {
-        lowercaseLinkString = origLink;
+        lowercaseLinkString += parsedLink.protocol;
+        matchedLink = parsedLink.source;
     }
+
+    lowercaseLinkString += parsedLink.host.toString().toLower();
+    lowercaseLinkString += parsedLink.rest;
+
     auto linkElement = Link(Link::Url, matchedLink);
 
     auto textColor = MessageColor(MessageColor::Link);
@@ -609,12 +789,10 @@ void MessageBuilder::addIrcMessageText(const QString &text)
         auto string = QString(word);
 
         // Actually just text
-        auto linkString = this->matchLink(string);
-        auto link = Link();
-
-        if (!linkString.isEmpty())
+        LinkParser parser(string);
+        if (parser.result())
         {
-            this->addLink(string, linkString);
+            this->addLink(*parser.result());
             continue;
         }
 
@@ -702,28 +880,24 @@ void MessageBuilder::addTextOrEmoji(const QString &string_)
     auto string = QString(string_);
 
     // Actually just text
-    auto linkString = this->matchLink(string);
-    auto link = Link();
+    LinkParser linkParser(string);
+    if (linkParser.result())
+    {
+        this->addLink(*linkParser.result());
+        return;
+    }
 
     auto &&textColor = this->textColor_;
-    if (linkString.isEmpty())
+    if (string.startsWith('@'))
     {
-        if (string.startsWith('@'))
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                       textColor, FontStyle::ChatMediumBold);
-            this->emplace<TextElement>(
-                string, MessageElementFlag::NonBoldUsername, textColor);
-        }
-        else
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::Text,
-                                       textColor);
-        }
+        this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
+                                   textColor, FontStyle::ChatMediumBold);
+        this->emplace<TextElement>(string, MessageElementFlag::NonBoldUsername,
+                                   textColor);
     }
     else
     {
-        this->addLink(string, linkString);
+        this->emplace<TextElement>(string, MessageElementFlag::Text, textColor);
     }
 }
 

@@ -1,41 +1,47 @@
 #include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/dialogs/switcher/NewPopupItem.hpp"
 #include "widgets/dialogs/switcher/NewTabItem.hpp"
 #include "widgets/dialogs/switcher/SwitchSplitItem.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/listview/GenericListView.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
+#include "widgets/Window.hpp"
+
+namespace {
+
+using namespace chatterino;
+
+QList<SplitContainer *> openPages(Window *window)
+{
+    QList<SplitContainer *> pages;
+
+    auto &nb = window->getNotebook();
+    for (int i = 0; i < nb.getPageCount(); ++i)
+    {
+        pages.append(static_cast<SplitContainer *>(nb.getPageAt(i)));
+    }
+
+    return pages;
+}
+
+}  // namespace
 
 namespace chatterino {
 
-namespace {
-    QList<SplitContainer *> openPages()
-    {
-        QList<SplitContainer *> pages;
-
-        auto &nb = getApp()->windows->getMainWindow().getNotebook();
-        for (int i = 0; i < nb.getPageCount(); ++i)
-        {
-            pages.append(static_cast<SplitContainer *>(nb.getPageAt(i)));
-        }
-
-        return pages;
-    }
-}  // namespace
-
-const QSize QuickSwitcherPopup::MINIMUM_SIZE(500, 300);
-
-QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
-    : BasePopup(FlagsEnum<BaseWindow::Flags>{BaseWindow::Flags::Frameless,
-                                             BaseWindow::Flags::TopMost},
+QuickSwitcherPopup::QuickSwitcherPopup(Window *parent)
+    : BasePopup({BaseWindow::Flags::Frameless, BaseWindow::Flags::TopMost,
+                 BaseWindow::DisableLayoutSave},
                 parent)
     , switcherModel_(this)
+    , window(parent)
 {
     this->setWindowFlag(Qt::Dialog);
     this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
@@ -43,7 +49,6 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
 
     this->initWidgets();
 
-    this->setStayInScreenRect(true);
     const QRect geom = parent->geometry();
     // This places the popup in the middle of the parent widget
     this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
@@ -84,7 +89,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     this->switcherModel_.clear();
 
     // Add items for navigating to different splits
-    for (auto *sc : openPages())
+    for (auto *sc : openPages(this->window))
     {
         const QString &tabTitle = sc->getTab()->getTitle();
         const auto splits = sc->getSplits();
@@ -117,7 +122,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     // Add item for opening a channel in a new tab or new popup
     if (!text.isEmpty())
     {
-        auto newTabItem = std::make_unique<NewTabItem>(text);
+        auto newTabItem = std::make_unique<NewTabItem>(this->window, text);
         this->switcherModel_.addItem(std::move(newTabItem));
 
         auto newPopupItem = std::make_unique<NewPopupItem>(text);
@@ -139,21 +144,6 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
 void QuickSwitcherPopup::themeChangedEvent()
 {
     BasePopup::themeChangedEvent();
-
-    const QString textCol = this->theme->window.text.name();
-    const QString bgCol = this->theme->window.background.name();
-
-    const QString selCol =
-        (this->theme->isLightTheme()
-             ? "#68B1FF"  // Copied from Theme::splits.input.styleSheet
-             : this->theme->tabs.selected.backgrounds.regular.color().name());
-
-    const QString listStyle =
-        QString(
-            "color: %1; background-color: %2; selection-background-color: %3")
-            .arg(textCol)
-            .arg(bgCol)
-            .arg(selCol);
 
     this->ui_.searchEdit->setStyleSheet(this->theme->splits.input.styleSheet);
     this->ui_.list->refreshTheme(*this->theme);

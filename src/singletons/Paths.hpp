@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QString>
 #include <boost/optional.hpp>
+#include <QString>
 
 namespace chatterino {
 
@@ -25,11 +25,20 @@ public:
     // Directory for miscellaneous files. Same as <appDataDirectory>/Misc
     QString miscDirectory;
 
+    // Directory for crashdumps. Same as <appDataDirectory>/Crashes
+    QString crashdumpDirectory;
+
     // Hash of QCoreApplication::applicationFilePath()
     QString applicationFilePathHash;
 
     // Profile avatars for Twitch <appDataDirectory>/cache/twitch
     QString twitchProfileAvatars;
+
+    // Plugin files live here. <appDataDirectory>/Plugins
+    QString pluginsDirectory;
+
+    // Custom themes live here. <appDataDirectory>/Themes
+    QString themesDirectory;
 
     bool createFolder(const QString &folderPath);
     bool isPortable();

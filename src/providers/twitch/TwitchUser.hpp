@@ -1,15 +1,17 @@
 #pragma once
 
-#include "providers/twitch/api/Helix.hpp"
+#include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
-#include <rapidjson/document.h>
-#include <QString>
 #include <pajlada/serialize.hpp>
+#include <QString>
+#include <rapidjson/document.h>
 
 #include <cassert>
 
 namespace chatterino {
+
+struct HelixBlock;
 
 struct TwitchUser {
     QString id;
@@ -24,16 +26,21 @@ struct TwitchUser {
         this->displayName = other.displayName;
     }
 
-    void fromHelixBlock(const HelixBlock &ignore)
-    {
-        this->id = ignore.userId;
-        this->name = ignore.userName;
-        this->displayName = ignore.displayName;
-    }
+    void fromHelixBlock(const HelixBlock &ignore);
 
     bool operator<(const TwitchUser &rhs) const
     {
         return this->id < rhs.id;
+    }
+
+    bool operator==(const TwitchUser &rhs) const
+    {
+        return this->id == rhs.id;
+    }
+
+    bool operator!=(const TwitchUser &rhs) const
+    {
+        return !(*this == rhs);
     }
 };
 
@@ -79,3 +86,11 @@ struct Deserialize<chatterino::TwitchUser> {
 };
 
 }  // namespace pajlada
+
+template <>
+struct std::hash<chatterino::TwitchUser> {
+    inline size_t operator()(const chatterino::TwitchUser &user) const noexcept
+    {
+        return std::hash<QString>{}(user.id);
+    }
+};

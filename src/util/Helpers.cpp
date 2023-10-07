@@ -4,6 +4,7 @@
 
 #include <QDirIterator>
 #include <QLocale>
+#include <QRegularExpression>
 #include <QUuid>
 
 namespace chatterino {
@@ -123,6 +124,13 @@ bool startsWithOrContains(const QString &str1, const QString &str2,
     return str1.contains(str2, caseSensitivity);
 }
 
+bool isNeutral(const QString &s)
+{
+    static const QRegularExpression re("\\p{L}");
+    const QRegularExpressionMatch match = re.match(s);
+    return !match.hasMatch();
+}
+
 QString generateUuid()
 {
     auto uuid = QUuid::createUuid();
@@ -152,12 +160,6 @@ QString shortenString(const QString &str, unsigned maxWidth)
     }
 
     return shortened;
-}
-
-QString localizeNumbers(const int &number)
-{
-    QLocale locale;
-    return locale.toString(number);
 }
 
 QString kFormatNumbers(const int &number)
@@ -267,6 +269,19 @@ int64_t parseDurationToSeconds(const QString &inputString,
     }
 
     return (int64_t)currentValue;
+}
+
+bool compareEmoteStrings(const QString &a, const QString &b)
+{
+    // try comparing insensitively, if they are the same then sensitively
+    // (fixes order of LuL and LUL)
+    int k = QString::compare(a, b, Qt::CaseInsensitive);
+    if (k == 0)
+    {
+        return a > b;
+    }
+
+    return k < 0;
 }
 
 }  // namespace chatterino

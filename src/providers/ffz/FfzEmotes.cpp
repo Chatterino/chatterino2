@@ -1,13 +1,13 @@
 #include "providers/ffz/FfzEmotes.hpp"
 
-#include <QJsonArray>
-
 #include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/ffz/FfzUtil.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 
@@ -19,7 +19,7 @@ namespace {
 
     Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
     {
-        auto emote = urls.value(emoteScale);
+        auto emote = urls[emoteScale];
         if (emote.isUndefined() || emote.isNull())
         {
             return {""};
@@ -27,8 +27,9 @@ namespace {
 
         assert(emote.isString());
 
-        return {"https:" + emote.toString()};
+        return parseFfzUrl(emote.toString());
     }
+
     void fillInEmoteData(const QJsonObject &urls, const EmoteName &name,
                          const QString &tooltip, Emote &emoteData)
     {
@@ -46,6 +47,7 @@ namespace {
                                             : Image::fromUrl(url3x, 0.25)};
         emoteData.tooltip = {tooltip};
     }
+
     EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
     {
         static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
@@ -53,25 +55,57 @@ namespace {
 
         return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
     }
-    std::pair<Outcome, EmoteMap> parseGlobalEmotes(
-        const QJsonObject &jsonRoot, const EmoteMap &currentEmotes)
+
+    void parseEmoteSetInto(const QJsonObject &emoteSet, const QString &kind,
+                           EmoteMap &map)
+    {
+        for (const auto emoteRef : emoteSet["emoticons"].toArray())
+        {
+            const auto emoteJson = emoteRef.toObject();
+
+            // margins
+            auto id = EmoteId{QString::number(emoteJson["id"].toInt())};
+            auto name = EmoteName{emoteJson["name"].toString()};
+            auto author =
+                EmoteAuthor{emoteJson["owner"]["display_name"].toString()};
+            auto urls = emoteJson["urls"].toObject();
+            if (emoteJson["animated"].isObject())
+            {
+                // prefer animated images if available
+                urls = emoteJson["animated"].toObject();
+            }
+
+            Emote emote;
+            fillInEmoteData(urls, name,
+                            QString("%1<br>%2 FFZ Emote<br>By: %3")
+                                .arg(name.string, kind, author.string),
+                            emote);
+            emote.homePage =
+                Url{QString("https://www.frankerfacez.com/emoticon/%1-%2")
+                        .arg(id.string)
+                        .arg(name.string)};
+
+            map[name] = cachedOrMake(std::move(emote), id);
+        }
+    }
+
+    EmoteMap parseGlobalEmotes(const QJsonObject &jsonRoot)
     {
         // Load default sets from the `default_sets` object
         std::unordered_set<int> defaultSets{};
-        auto jsonDefaultSets = jsonRoot.value("default_sets").toArray();
+        auto jsonDefaultSets = jsonRoot["default_sets"].toArray();
         for (auto jsonDefaultSet : jsonDefaultSets)
         {
             defaultSets.insert(jsonDefaultSet.toInt());
         }
 
-        auto jsonSets = jsonRoot.value("sets").toObject();
         auto emotes = EmoteMap();
 
-        for (auto jsonSet : jsonSets)
+        for (const auto emoteSetRef : jsonRoot["sets"].toObject())
         {
-            auto jsonSetObject = jsonSet.toObject();
-            const auto emoteSetID = jsonSetObject.value("id").toInt();
-            if (defaultSets.find(emoteSetID) == defaultSets.end())
+            const auto emoteSet = emoteSetRef.toObject();
+            auto emoteSetID = emoteSet["id"].toInt();
+            if (!defaultSets.contains(emoteSetID))
             {
                 qCDebug(chatterinoFfzemotes)
                     << "Skipping global emote set" << emoteSetID
@@ -79,35 +113,14 @@ namespace {
                 continue;
             }
 
-            auto jsonEmotes = jsonSetObject.value("emoticons").toArray();
-
-            for (auto jsonEmoteValue : jsonEmotes)
-            {
-                auto jsonEmote = jsonEmoteValue.toObject();
-
-                auto name = EmoteName{jsonEmote.value("name").toString()};
-                auto id =
-                    EmoteId{QString::number(jsonEmote.value("id").toInt())};
-                auto urls = jsonEmote.value("urls").toObject();
-
-                auto emote = Emote();
-                fillInEmoteData(urls, name,
-                                name.string + "<br>Global FFZ Emote", emote);
-                emote.homePage =
-                    Url{QString("https://www.frankerfacez.com/emoticon/%1-%2")
-                            .arg(id.string)
-                            .arg(name.string)};
-
-                emotes[name] =
-                    cachedOrMakeEmotePtr(std::move(emote), currentEmotes);
-            }
+            parseEmoteSetInto(emoteSet, "Global", emotes);
         }
 
-        return {Success, std::move(emotes)};
+        return emotes;
     }
 
     boost::optional<EmotePtr> parseAuthorityBadge(const QJsonObject &badgeUrls,
-                                                  const QString tooltip)
+                                                  const QString &tooltip)
     {
         boost::optional<EmotePtr> authorityBadge;
 
@@ -139,40 +152,11 @@ namespace {
 
     EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot)
     {
-        auto jsonSets = jsonRoot.value("sets").toObject();
         auto emotes = EmoteMap();
 
-        for (auto jsonSet : jsonSets)
+        for (const auto emoteSetRef : jsonRoot["sets"].toObject())
         {
-            auto jsonEmotes = jsonSet.toObject().value("emoticons").toArray();
-
-            for (auto _jsonEmote : jsonEmotes)
-            {
-                auto jsonEmote = _jsonEmote.toObject();
-
-                // margins
-                auto id =
-                    EmoteId{QString::number(jsonEmote.value("id").toInt())};
-                auto name = EmoteName{jsonEmote.value("name").toString()};
-                auto author = EmoteAuthor{jsonEmote.value("owner")
-                                              .toObject()
-                                              .value("display_name")
-                                              .toString()};
-                auto urls = jsonEmote.value("urls").toObject();
-
-                Emote emote;
-                fillInEmoteData(urls, name,
-                                QString("%1<br>Channel FFZ Emote<br>By: %2")
-                                    .arg(name.string)
-                                    .arg(author.string),
-                                emote);
-                emote.homePage =
-                    Url{QString("https://www.frankerfacez.com/emoticon/%1-%2")
-                            .arg(id.string)
-                            .arg(name.string)};
-
-                emotes[name] = cachedOrMake(std::move(emote), id);
-            }
+            parseEmoteSetInto(emoteSetRef.toObject(), "Channel", emotes);
         }
 
         return emotes;
@@ -194,7 +178,9 @@ boost::optional<EmotePtr> FfzEmotes::emote(const EmoteName &name) const
     auto emotes = this->global_.get();
     auto it = emotes->find(name);
     if (it != emotes->end())
+    {
         return it->second;
+    }
     return boost::none;
 }
 
@@ -202,7 +188,7 @@ void FfzEmotes::loadEmotes()
 {
     if (!Settings::instance().enableFFZGlobalEmotes)
     {
-        this->global_.set(EMPTY_EMOTE_MAP);
+        this->setEmotes(EMPTY_EMOTE_MAP);
         return;
     }
 
@@ -212,41 +198,43 @@ void FfzEmotes::loadEmotes()
 
         .timeout(30000)
         .onSuccess([this](auto result) -> Outcome {
-            auto emotes = this->emotes();
-            auto pair = parseGlobalEmotes(result.parseJson(), *emotes);
-            if (pair.first)
-                this->global_.set(
-                    std::make_shared<EmoteMap>(std::move(pair.second)));
-            return pair.first;
+            auto parsedSet = parseGlobalEmotes(result.parseJson());
+            this->setEmotes(std::make_shared<EmoteMap>(std::move(parsedSet)));
+
+            return Success;
         })
         .execute();
 }
 
+void FfzEmotes::setEmotes(std::shared_ptr<const EmoteMap> emotes)
+{
+    this->global_.set(std::move(emotes));
+}
+
 void FfzEmotes::loadChannel(
-    std::weak_ptr<Channel> channel, const QString &channelId,
+    std::weak_ptr<Channel> channel, const QString &channelID,
     std::function<void(EmoteMap &&)> emoteCallback,
     std::function<void(boost::optional<EmotePtr>)> modBadgeCallback,
     std::function<void(boost::optional<EmotePtr>)> vipBadgeCallback,
     bool manualRefresh)
 {
     qCDebug(chatterinoFfzemotes)
-        << "[FFZEmotes] Reload FFZ Channel Emotes for channel" << channelId;
+        << "[FFZEmotes] Reload FFZ Channel Emotes for channel" << channelID;
 
-    NetworkRequest("https://api.frankerfacez.com/v1/room/id/" + channelId)
+    NetworkRequest("https://api.frankerfacez.com/v1/room/id/" + channelID)
 
         .timeout(20000)
         .onSuccess([emoteCallback = std::move(emoteCallback),
                     modBadgeCallback = std::move(modBadgeCallback),
                     vipBadgeCallback = std::move(vipBadgeCallback), channel,
-                    manualRefresh](auto result) -> Outcome {
-            auto json = result.parseJson();
+                    manualRefresh](const auto &result) -> Outcome {
+            const auto json = result.parseJson();
+
             auto emoteMap = parseChannelEmotes(json);
             auto modBadge = parseAuthorityBadge(
-                json.value("room").toObject().value("mod_urls").toObject(),
-                "Moderator");
+                json["room"]["mod_urls"].toObject(), "Moderator");
             auto vipBadge = parseAuthorityBadge(
-                json.value("room").toObject().value("vip_badge").toObject(),
-                "VIP");
+                json["room"]["vip_badge"].toObject(), "VIP");
 
             bool hasEmotes = !emoteMap.empty();
 
@@ -269,35 +257,33 @@ void FfzEmotes::loadChannel(
 
             return Success;
         })
-        .onError([channelId, channel, manualRefresh](NetworkResult result) {
+        .onError([channelID, channel, manualRefresh](const auto &result) {
             auto shared = channel.lock();
             if (!shared)
+            {
                 return;
+            }
+
             if (result.status() == 404)
             {
                 // User does not have any FFZ emotes
                 if (manualRefresh)
+                {
                     shared->addMessage(
                         makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
-            }
-            else if (result.status() == NetworkResult::timedoutStatus)
-            {
-                // TODO: Auto retry in case of a timeout, with a delay
-                qCWarning(chatterinoFfzemotes)
-                    << "Fetching FFZ emotes for channel" << channelId
-                    << "failed due to timeout";
-                shared->addMessage(
-                    makeSystemMessage("Failed to fetch FrankerFaceZ channel "
-                                      "emotes. (timed out)"));
+                }
             }
             else
             {
+                // TODO: Auto retry in case of a timeout, with a delay
+                auto errorString = result.formatError();
                 qCWarning(chatterinoFfzemotes)
-                    << "Error fetching FFZ emotes for channel" << channelId
-                    << ", error" << result.status();
-                shared->addMessage(
-                    makeSystemMessage("Failed to fetch FrankerFaceZ channel "
-                                      "emotes. (unknown error)"));
+                    << "Error fetching FFZ emotes for channel" << channelID
+                    << ", error" << errorString;
+                shared->addMessage(makeSystemMessage(
+                    QStringLiteral("Failed to fetch FrankerFaceZ channel "
+                                   "emotes. (Error: %1)")
+                        .arg(errorString)));
             }
         })
         .execute();

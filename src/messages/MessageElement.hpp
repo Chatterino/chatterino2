@@ -6,13 +6,13 @@
 #include "messages/MessageColor.hpp"
 #include "singletons/Fonts.hpp"
 
+#include <pajlada/signals/signalholder.hpp>
 #include <QRect>
 #include <QString>
 #include <QTime>
-#include <boost/noncopyable.hpp>
+
 #include <cstdint>
 #include <memory>
-#include <pajlada/signals/signalholder.hpp>
 #include <vector>
 
 namespace chatterino {
@@ -37,6 +37,7 @@ enum class MessageElementFlag : int64_t {
     TwitchEmoteImage = (1LL << 4),
     TwitchEmoteText = (1LL << 5),
     TwitchEmote = TwitchEmoteImage | TwitchEmoteText,
+
     BttvEmoteImage = (1LL << 6),
     BttvEmoteText = (1LL << 7),
     BttvEmote = BttvEmoteImage | BttvEmoteText,
@@ -47,8 +48,15 @@ enum class MessageElementFlag : int64_t {
     FfzEmoteImage = (1LL << 9),
     FfzEmoteText = (1LL << 10),
     FfzEmote = FfzEmoteImage | FfzEmoteText,
-    EmoteImages = TwitchEmoteImage | BttvEmoteImage | FfzEmoteImage,
-    EmoteText = TwitchEmoteText | BttvEmoteText | FfzEmoteText,
+
+    SevenTVEmoteImage = (1LL << 34),
+    SevenTVEmoteText = (1LL << 35),
+    SevenTVEmote = SevenTVEmoteImage | SevenTVEmoteText,
+
+    EmoteImages =
+        TwitchEmoteImage | BttvEmoteImage | FfzEmoteImage | SevenTVEmoteImage,
+    EmoteText =
+        TwitchEmoteText | BttvEmoteText | FfzEmoteText | SevenTVEmoteText,
 
     BitsStatic = (1LL << 11),
     BitsAnimated = (1LL << 12),
@@ -89,6 +97,15 @@ enum class MessageElementFlag : int64_t {
     // - Chatterino gnome badge
     BadgeChatterino = (1LL << 18),
 
+    // Slot 7: 7TV
+    // - 7TV Admin
+    // - 7TV Dungeon Mistress
+    // - 7TV Moderator
+    // - 7TV Subscriber
+    // - 7TV Translator
+    // - 7TV Contributor
+    BadgeSevenTV = (1LL << 36),
+
     // Slot 7: FrankerFaceZ
     // - FFZ developer badge
     // - FFZ bot badge
@@ -96,7 +113,8 @@ enum class MessageElementFlag : int64_t {
     BadgeFfz = (1LL << 19),
 
     Badges = BadgeGlobalAuthority | BadgePredictions | BadgeChannelAuthority |
-             BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeFfz,
+             BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeSevenTV |
+             BadgeFfz,
 
     ChannelName = (1LL << 20),
 
@@ -122,9 +140,7 @@ enum class MessageElementFlag : int64_t {
     LowercaseLink = (1LL << 29),
     OriginalLink = (1LL << 30),
 
-    // ZeroWidthEmotes are emotes that are supposed to overlay over any pre-existing emotes
-    // e.g. BTTV's SoSnowy during christmas season
-    ZeroWidthEmote = (1LL << 31),
+    // Unused: (1LL << 31)
 
     // for elements of the message reply
     RepliedMessage = (1LL << 32),
@@ -132,13 +148,16 @@ enum class MessageElementFlag : int64_t {
     // for the reply button element
     ReplyButton = (1LL << 33),
 
+    // (1LL << 34) through (1LL << 36) are occupied by
+    // SevenTVEmoteImage, SevenTVEmoteText, and BadgeSevenTV,
+
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
-              BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
-              AlwaysShow,
+              BttvEmoteImage | SevenTVEmoteImage | TwitchEmoteImage |
+              BitsAmount | Text | AlwaysShow,
 };
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
-class MessageElement : boost::noncopyable
+class MessageElement
 {
 public:
     enum UpdateFlags : char {
@@ -152,6 +171,12 @@ public:
     };
 
     virtual ~MessageElement();
+
+    MessageElement(const MessageElement &) = delete;
+    MessageElement &operator=(const MessageElement &) = delete;
+
+    MessageElement(MessageElement &&) = delete;
+    MessageElement &operator=(MessageElement &&) = delete;
 
     MessageElement *setLink(const Link &link);
     MessageElement *setText(const QString &text);
@@ -167,6 +192,7 @@ public:
     const Link &getLink() const;
     bool hasTrailingSpace() const;
     MessageElementFlags getFlags() const;
+    void addFlags(MessageElementFlags flags);
     MessageElement *updateLink();
 
     virtual void addToContainer(MessageLayoutContainer &container,
@@ -183,7 +209,7 @@ private:
     Link link_;
     QString tooltip_;
     ImagePtr thumbnail_;
-    ThumbnailType thumbnailType_;
+    ThumbnailType thumbnailType_{};
     MessageElementFlags flags_;
 };
 
@@ -299,6 +325,48 @@ private:
     EmotePtr emote_;
 };
 
+// A LayeredEmoteElement represents multiple Emotes layered on top of each other.
+// This class takes care of rendering animated and non-animated emotes in the
+// correct order and aligning them in the right way.
+class LayeredEmoteElement : public MessageElement
+{
+public:
+    struct Emote {
+        EmotePtr ptr;
+        MessageElementFlags flags;
+    };
+
+    LayeredEmoteElement(
+        std::vector<Emote> &&emotes, MessageElementFlags flags,
+        const MessageColor &textElementColor = MessageColor::Text);
+
+    void addEmoteLayer(const Emote &emote);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+    // Returns a concatenation of each emote layer's cleaned copy string
+    QString getCleanCopyString() const;
+    const std::vector<Emote> &getEmotes() const;
+    std::vector<Emote> getUniqueEmotes() const;
+    const std::vector<QString> &getEmoteTooltips() const;
+
+private:
+    MessageLayoutElement *makeImageLayoutElement(
+        const std::vector<ImagePtr> &image, const std::vector<QSize> &sizes,
+        QSize largestSize);
+
+    QString getCopyString() const;
+    void updateTooltips();
+    std::vector<ImagePtr> getLoadedImages(float scale);
+
+    std::vector<Emote> emotes_;
+    std::vector<QString> emoteTooltips_;
+
+    std::unique_ptr<TextElement> textElement_;
+    MessageColor textElementColor_;
+};
+
 class BadgeElement : public MessageElement
 {
 public:
@@ -408,10 +476,6 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
-
-private:
-    int neededMargin_;
-    QSize size_;
 };
 
 }  // namespace chatterino

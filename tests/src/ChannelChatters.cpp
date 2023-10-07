@@ -1,5 +1,7 @@
 #include "common/ChannelChatters.hpp"
 
+#include "common/Channel.hpp"
+
 #include <gtest/gtest.h>
 #include <QColor>
 #include <QStringList>

@@ -1,10 +1,13 @@
 #pragma once
 
+#include "common/FlagsEnum.hpp"
+#include "util/WidgetHelpers.hpp"
 #include "widgets/BaseWidget.hpp"
 
-#include <functional>
 #include <pajlada/signals/signalholder.hpp>
-#include "common/FlagsEnum.hpp"
+#include <QTimer>
+
+#include <functional>
 
 class QHBoxLayout;
 struct tagMSG;
@@ -31,6 +34,7 @@ public:
         FramelessDraggable = 16,
         DontFocus = 32,
         Dialog = 64,
+        DisableLayoutSave = 128,
     };
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
@@ -48,15 +52,12 @@ public:
                                       std::function<void()> onClicked);
     EffectLabel *addTitleBarLabel(std::function<void()> onClicked);
 
-    void setStayInScreenRect(bool value);
-    bool getStayInScreenRect() const;
-
     void setActionOnFocusLoss(ActionOnFocusLoss value);
     ActionOnFocusLoss getActionOnFocusLoss() const;
 
-    void moveTo(QWidget *widget, QPoint point, bool offset = true);
+    void moveTo(QPoint point, widgets::BoundsChecking mode);
 
-    virtual float scale() const override;
+    float scale() const override;
     float qtFontScale() const;
 
     pajlada::Signals::NoArgSignal closing;
@@ -64,8 +65,13 @@ public:
     static bool supportsCustomWindowFrame();
 
 protected:
-    virtual bool nativeEvent(const QByteArray &eventType, void *message,
-                             long *result) override;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    bool nativeEvent(const QByteArray &eventType, void *message,
+                     qintptr *result) override;
+#else
+    bool nativeEvent(const QByteArray &eventType, void *message,
+                     long *result) override;
+#endif
     virtual void scaleChangedEvent(float) override;
 
     virtual void paintEvent(QPaintEvent *) override;
@@ -93,22 +99,26 @@ protected:
 
 private:
     void init();
-    void moveIntoDesktopRect(QWidget *parent, QPoint point);
+
     void calcButtonsSizes();
     void drawCustomWindowFrame(QPainter &painter);
     void onFocusLost();
 
     bool handleDPICHANGED(MSG *msg);
     bool handleSHOWWINDOW(MSG *msg);
-    bool handleNCCALCSIZE(MSG *msg, long *result);
     bool handleSIZE(MSG *msg);
     bool handleMOVE(MSG *msg);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    bool handleNCCALCSIZE(MSG *msg, qintptr *result);
+    bool handleNCHITTEST(MSG *msg, qintptr *result);
+#else
+    bool handleNCCALCSIZE(MSG *msg, long *result);
     bool handleNCHITTEST(MSG *msg, long *result);
+#endif
 
     bool enableCustomFrame_;
     ActionOnFocusLoss actionOnFocusLoss_ = Nothing;
     bool frameless_;
-    bool stayInScreenRect_ = false;
     bool shown_ = false;
     FlagsEnum<Flags> flags_;
     float nativeScale_ = 1;

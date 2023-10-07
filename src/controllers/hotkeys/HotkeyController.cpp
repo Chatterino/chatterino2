@@ -1,6 +1,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "singletons/Settings.hpp"
@@ -499,6 +500,10 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
                             QKeySequence("Ctrl+U"), "setTabVisibility",
                             {"toggle"}, "toggle tab visibility");
+
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
+                            QKeySequence("Ctrl+Shift+L"), "setTabVisibility",
+                            {"toggleLiveOnly"}, "toggle live tabs only");
     }
 }
 

@@ -1,17 +1,5 @@
 #include "singletons/WindowManager.hpp"
 
-#include <QDebug>
-#include <QDesktopWidget>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QMessageBox>
-#include <QSaveFile>
-#include <QScreen>
-#include <boost/optional.hpp>
-#include <chrono>
-
-#include <QMessageBox>
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/QLogging.hpp"
@@ -28,13 +16,24 @@
 #include "util/Clamp.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
-#include "widgets/FramelessEmbedWindow.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/FramelessEmbedWindow.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+#include "widgets/Window.hpp"
+
+#include <boost/optional.hpp>
+#include <QDebug>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QMessageBox>
+#include <QSaveFile>
+#include <QScreen>
+
+#include <chrono>
 
 namespace chatterino {
 namespace {
@@ -110,6 +109,7 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
     this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
     this->wordFlagsListener_.addSetting(settings->showBadgesFfz);
+    this->wordFlagsListener_.addSetting(settings->showBadgesSevenTV);
     this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
@@ -179,6 +179,7 @@ void WindowManager::updateWordTypeMask()
     flags.set(settings->showBadgesChatterino ? MEF::BadgeChatterino
                                              : MEF::None);
     flags.set(settings->showBadgesFfz ? MEF::BadgeFfz : MEF::None);
+    flags.set(settings->showBadgesSevenTV ? MEF::BadgeSevenTV : MEF::None);
 
     // username
     flags.set(MEF::Username);
@@ -242,11 +243,15 @@ Window &WindowManager::getMainWindow()
     return *this->mainWindow_;
 }
 
-Window &WindowManager::getSelectedWindow()
+Window *WindowManager::getLastSelectedWindow() const
 {
     assertInGuiThread();
+    if (this->selectedWindow_ == nullptr)
+    {
+        return this->mainWindow_;
+    }
 
-    return *this->selectedWindow_;
+    return this->selectedWindow_;
 }
 
 Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
@@ -260,12 +265,18 @@ Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
             return parent;
         }
 
+        // FIXME: On Windows, parenting popup windows causes unwanted behavior (see
+        //        https://github.com/Chatterino/chatterino2/issues/4179 for discussion). Ideally, we
+        //        would use a different solution rather than relying on OS-specific code but this is
+        //        the low-effort fix for now.
+#ifndef Q_OS_WIN
         if (type == WindowType::Popup)
         {
             // On some window managers, popup windows require a parent to behave correctly. See
             // https://github.com/Chatterino/chatterino2/pull/1843 for additional context.
             return &(this->getMainWindow());
         }
+#endif
 
         // If no parent is set and something other than a popup window is being created, we fall
         // back to the default behavior of no parent.
@@ -337,9 +348,13 @@ void WindowManager::setEmotePopupPos(QPoint pos)
 
 void WindowManager::initialize(Settings &settings, Paths &paths)
 {
+    (void)paths;
     assertInGuiThread();
 
-    getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
+    // We can safely ignore this signal connection since both Themes and WindowManager
+    // share the Application state lifetime
+    // NOTE: APPLICATION_LIFETIME
+    std::ignore = getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
         this->repaintVisibleChatWidgets();
     });
 
@@ -547,7 +562,7 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
 {
     switch (node->getType())
     {
-        case SplitNode::_Split: {
+        case SplitNode::Type::Split: {
             obj.insert("type", "split");
             obj.insert("moderationMode", node->getSplit()->getModerationMode());
 
@@ -561,11 +576,12 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             obj.insert("filters", filters);
         }
         break;
-        case SplitNode::HorizontalContainer:
-        case SplitNode::VerticalContainer: {
-            obj.insert("type", node->getType() == SplitNode::HorizontalContainer
-                                   ? "horizontal"
-                                   : "vertical");
+        case SplitNode::Type::HorizontalContainer:
+        case SplitNode::Type::VerticalContainer: {
+            obj.insert("type",
+                       node->getType() == SplitNode::Type::HorizontalContainer
+                           ? "horizontal"
+                           : "vertical");
 
             QJsonArray itemsArr;
             for (const std::unique_ptr<SplitNode> &n : node->getChildren())
@@ -623,6 +639,10 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             }
         }
         break;
+        case Channel::Type::Misc: {
+            obj.insert("type", "misc");
+            obj.insert("name", channel.get()->getName());
+        }
     }
 }
 
@@ -667,6 +687,10 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     {
         return Irc::instance().getOrAddChannel(descriptor.server_,
                                                descriptor.channelName_);
+    }
+    else if (descriptor.type_ == "misc")
+    {
+        return app->twitch->getChannelOrEmpty(descriptor.channelName_);
     }
 
     return Channel::getEmpty();

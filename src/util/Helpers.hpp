@@ -1,10 +1,12 @@
 #pragma once
 
 #include <QColor>
+#include <QLocale>
 #include <QString>
 #include <QStringRef>
 
 #include <cmath>
+#include <vector>
 
 namespace chatterino {
 
@@ -57,6 +59,11 @@ namespace _helpers_internal {
 bool startsWithOrContains(const QString &str1, const QString &str2,
                           Qt::CaseSensitivity caseSensitivity, bool startsWith);
 
+/**
+ * @brief isNeutral checks if the string doesn't contain any character in the unicode "letter" category
+ * i.e. if the string contains only neutral characters.
+ **/
+bool isNeutral(const QString &s);
 QString generateUuid();
 
 QString formatRichLink(const QString &url, bool file = false);
@@ -66,7 +73,12 @@ QString formatRichNamedLink(const QString &url, const QString &name,
 
 QString shortenString(const QString &str, unsigned maxWidth = 50);
 
-QString localizeNumbers(const int &number);
+template <typename T>
+QString localizeNumbers(T number)
+{
+    QLocale locale;
+    return locale.toString(number);
+}
 
 QString kFormatNumbers(const int &number);
 
@@ -140,5 +152,7 @@ std::vector<T> splitListIntoBatches(const T &list, int batchSize = 100)
 
     return batches;
 }
+
+bool compareEmoteStrings(const QString &a, const QString &b);
 
 }  // namespace chatterino

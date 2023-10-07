@@ -2,15 +2,14 @@
 
 #include "widgets/BaseWindow.hpp"
 
+#include <pajlada/settings/setting.hpp>
+#include <QFrame>
 #include <QPushButton>
 #include <QStackedLayout>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <functional>
-#include <pajlada/settings/setting.hpp>
-#include "widgets/helper/SettingsDialogTab.hpp"
 
-#include <QFrame>
+#include <functional>
 
 class QLineEdit;
 
@@ -19,6 +18,7 @@ namespace chatterino {
 class SettingsPage;
 class SettingsDialogTab;
 class ModerationPage;
+enum class SettingsTabId;
 
 class PageHeader : public QFrame
 {
@@ -27,6 +27,7 @@ class PageHeader : public QFrame
 
 enum class SettingsDialogPreference {
     NoPreference,
+    StreamerMode,
     Accounts,
     ModerationActions,
 };
@@ -57,6 +58,7 @@ private:
     void selectTab(SettingsDialogTab *tab, const bool byUser = true);
     void selectTab(SettingsTabId id);
     void filterElements(const QString &query);
+    void setElementFilter(const QString &query);
 
     void onOkClicked();
     void onCancelClicked();

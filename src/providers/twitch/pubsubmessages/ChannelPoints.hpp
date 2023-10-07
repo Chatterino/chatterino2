@@ -1,9 +1,8 @@
 #pragma once
 
+#include <magic_enum.hpp>
 #include <QJsonObject>
 #include <QString>
-
-#include <magic_enum.hpp>
 
 namespace chatterino {
 

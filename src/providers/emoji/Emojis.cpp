@@ -1,16 +1,19 @@
 #include "providers/emoji/Emojis.hpp"
 
-#include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 #include "singletons/Settings.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
+#include <boost/variant.hpp>
+#include <QFile>
 #include <rapidjson/error/en.h>
 #include <rapidjson/error/error.h>
 #include <rapidjson/rapidjson.h>
-#include <QFile>
-#include <boost/variant.hpp>
+
+#include <array>
 #include <memory>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {
@@ -24,14 +27,14 @@ namespace {
                     const rapidjson::Value &unparsedEmoji,
                     QString shortCode = QString())
     {
-        std::array<uint32_t, 9> unicodeBytes;
+        std::array<uint32_t, 9> unicodeBytes{};
 
         struct {
             bool apple;
             bool google;
             bool twitter;
             bool facebook;
-        } capabilities;
+        } capabilities{};
 
         if (!shortCode.isEmpty())
         {
@@ -213,11 +216,7 @@ void Emojis::sortEmojis()
 
 void Emojis::loadEmojiSet()
 {
-#ifndef CHATTERINO_TEST
-    getSettings()->emojiSet.connect([=](const auto &emojiSet) {
-#else
-    const QString emojiSet = "twitter";
-#endif
+    getSettings()->emojiSet.connect([this](const auto &emojiSet) {
         this->emojis.each([=](const auto &name,
                               std::shared_ptr<EmojiData> &emoji) {
             QString emojiSetToUse = emojiSet;
@@ -262,13 +261,11 @@ void Emojis::loadEmojiSet()
                 EmoteName{emoji->value}, ImageSet{Image::fromUrl({url}, 0.35)},
                 Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"}, Url{}});
         });
-#ifndef CHATTERINO_TEST
     });
-#endif
 }
 
 std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
-    const QString &text)
+    const QString &text) const
 {
     auto result = std::vector<boost::variant<EmotePtr, QString>>();
     int lastParsedEmojiEndIndex = 0;
@@ -362,7 +359,7 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
     return result;
 }
 
-QString Emojis::replaceShortCodes(const QString &text)
+QString Emojis::replaceShortCodes(const QString &text) const
 {
     QString ret(text);
     auto it = this->findShortCodesRegex_.globalMatch(text);
@@ -394,6 +391,16 @@ QString Emojis::replaceShortCodes(const QString &text)
     }
 
     return ret;
+}
+
+const EmojiMap &Emojis::getEmojis() const
+{
+    return this->emojis;
+}
+
+const std::vector<QString> &Emojis::getShortCodes() const
+{
+    return this->shortCodes;
 }
 
 }  // namespace chatterino

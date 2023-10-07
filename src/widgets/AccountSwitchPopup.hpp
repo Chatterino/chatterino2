@@ -1,11 +1,12 @@
 #pragma once
 
-#include "widgets/AccountSwitchWidget.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <QWidget>
 
 namespace chatterino {
+
+class AccountSwitchWidget;
 
 class AccountSwitchPopup : public BaseWindow
 {
@@ -19,6 +20,8 @@ public:
 protected:
     void focusOutEvent(QFocusEvent *event) final;
     void paintEvent(QPaintEvent *event) override;
+
+    void themeChangedEvent() override;
 
 private:
     struct {

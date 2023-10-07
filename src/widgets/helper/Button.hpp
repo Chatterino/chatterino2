@@ -1,9 +1,8 @@
 #pragma once
 
-#include <boost/optional.hpp>
-
 #include "widgets/BaseWidget.hpp"
 
+#include <boost/optional.hpp>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPainter>
@@ -57,8 +56,18 @@ signals:
     void leftMousePress();
 
 protected:
-    virtual void paintEvent(QPaintEvent *) override;
-    virtual void enterEvent(QEvent *) override;
+    void paintEvent(QPaintEvent * /*event*/) override;
+
+    /// Paint this button.
+    /// This is intended for child classes that may want to paint the overlay.
+    /// This function should be used after rendering the custom button,
+    /// because the painter's state will be modified by this function.
+    void paintButton(QPainter &painter);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void enterEvent(QEnterEvent * /*event*/) override;
+#else
+    void enterEvent(QEvent * /*event*/) override;
+#endif
     virtual void leaveEvent(QEvent *) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;

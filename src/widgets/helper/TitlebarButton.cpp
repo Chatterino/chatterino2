@@ -1,6 +1,6 @@
 #include "TitlebarButton.hpp"
 
-#include "BaseTheme.hpp"
+#include "singletons/Theme.hpp"
 
 #include <QPainterPath>
 
@@ -121,8 +121,7 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
         default:;
     }
 
-    Button::paintEvent(event);
-    //    this->fancyPaint(painter);
+    this->paintButton(painter);
 }
 
 }  // namespace chatterino

@@ -1,4 +1,5 @@
 #include "QualityPopup.hpp"
+
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/WindowManager.hpp"
@@ -8,7 +9,7 @@
 namespace chatterino {
 
 QualityPopup::QualityPopup(const QString &channelURL, QStringList options)
-    : BasePopup({},
+    : BasePopup({BaseWindow::DisableLayoutSave},
                 static_cast<QWidget *>(&(getApp()->windows->getMainWindow())))
     , channelURL_(channelURL)
 {

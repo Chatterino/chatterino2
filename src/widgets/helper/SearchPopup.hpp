@@ -1,17 +1,17 @@
 #pragma once
 
 #include "ForwardDecl.hpp"
-#include "controllers/filters/FilterSet.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
-#include "messages/search/MessagePredicate.hpp"
 #include "widgets/BasePopup.hpp"
-#include "widgets/splits/Split.hpp"
 
 #include <memory>
 
 class QLineEdit;
 
 namespace chatterino {
+
+class Split;
+class MessagePredicate;
 
 class SearchPopup : public BasePopup
 {
@@ -31,6 +31,7 @@ public:
 protected:
     virtual void updateWindowTitle();
     void showEvent(QShowEvent *event) override;
+    bool eventFilter(QObject *object, QEvent *event) override;
 
 private:
     void initLayout();

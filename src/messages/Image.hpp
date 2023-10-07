@@ -1,22 +1,22 @@
 #pragma once
 
+#include "common/Aliases.hpp"
+#include "common/Common.hpp"
+
+#include <boost/variant.hpp>
+#include <pajlada/signals/signal.hpp>
 #include <QPixmap>
 #include <QString>
 #include <QThread>
 #include <QTimer>
 #include <QVector>
+
 #include <atomic>
-#include <boost/noncopyable.hpp>
-#include <boost/optional.hpp>
-#include <boost/variant.hpp>
 #include <chrono>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <pajlada/signals/signal.hpp>
-
-#include "common/Aliases.hpp"
-#include "common/Common.hpp"
+#include <optional>
 
 namespace chatterino {
 namespace detail {
@@ -25,21 +25,28 @@ namespace detail {
         Image image;
         int duration;
     };
-    class Frames : boost::noncopyable
+    class Frames
     {
     public:
         Frames();
         Frames(QVector<Frame<QPixmap>> &&frames);
         ~Frames();
 
+        Frames(const Frames &) = delete;
+        Frames &operator=(const Frames &) = delete;
+
+        Frames(Frames &&) = delete;
+        Frames &operator=(Frames &&) = delete;
+
         void clear();
         bool empty() const;
         bool animated() const;
         void advance();
-        boost::optional<QPixmap> current() const;
-        boost::optional<QPixmap> first() const;
+        std::optional<QPixmap> current() const;
+        std::optional<QPixmap> first() const;
 
     private:
+        int64_t memoryUsage() const;
         void processOffset();
         QVector<Frame<QPixmap>> items_;
         int index_{0};
@@ -54,13 +61,19 @@ using ImagePtr = std::shared_ptr<Image>;
 class ImagePriorityOrder;
 
 /// This class is thread safe.
-class Image : public std::enable_shared_from_this<Image>, boost::noncopyable
+class Image : public std::enable_shared_from_this<Image>
 {
 public:
     // Maximum amount of RAM used by the image in bytes.
     static constexpr int maxBytesRam = 20 * 1024 * 1024;
 
     ~Image();
+
+    Image(const Image &) = delete;
+    Image &operator=(const Image &) = delete;
+
+    Image(Image &&) = delete;
+    Image &operator=(Image &&) = delete;
 
     static ImagePtr fromUrl(const Url &url, qreal scale = 1);
     static ImagePtr fromResourcePixmap(const QPixmap &pixmap, qreal scale = 1);
@@ -69,7 +82,7 @@ public:
     const Url &url() const;
     bool loaded() const;
     // either returns the current pixmap, or triggers loading it (lazy loading)
-    boost::optional<QPixmap> pixmapOrLoad() const;
+    std::optional<QPixmap> pixmapOrLoad() const;
     qreal scale() const;
     bool isEmpty() const;
     int width() const;
@@ -77,8 +90,8 @@ public:
     QSize size() const;
     bool animated() const;
 
-    bool operator==(const Image &image) const;
-    bool operator!=(const Image &image) const;
+    bool operator==(const Image &image) = delete;
+    bool operator!=(const Image &image) = delete;
 
 private:
     Image();
@@ -105,10 +118,16 @@ private:
     friend class ImagePriorityOrder;
 };
 
+// forward-declarable function that calls Image::getEmpty() under the hood.
+ImagePtr getEmptyImagePtr();
+
+#ifndef DISABLE_IMAGE_EXPIRATION_POOL
+
 class ImageExpirationPool
 {
 private:
     friend class Image;
+    friend class CommandController;
 
     ImageExpirationPool();
     static ImageExpirationPool &instance();
@@ -124,11 +143,19 @@ private:
      */
     void freeOld();
 
+    /*
+     * Debug function that unloads all images in the pool. This is intended to
+     * test for possible memory leaks from tracked images.
+     */
+    void freeAll();
+
 private:
     // Timer to periodically run freeOld()
-    QTimer freeTimer_;
+    QTimer *freeTimer_;
     std::map<Image *, std::weak_ptr<Image>> allImages_;
     std::mutex mutex_;
 };
+
+#endif
 
 }  // namespace chatterino

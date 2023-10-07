@@ -1,18 +1,12 @@
 #include "common/NetworkRequest.hpp"
 
 #include "common/NetworkPrivate.hpp"
-#include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
-#include "debug/AssertInGuiThread.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
-#include "singletons/Paths.hpp"
-#include "util/DebugCount.hpp"
-#include "util/PostToThread.hpp"
 
 #include <QDebug>
 #include <QFile>
 #include <QtConcurrent>
-#include "common/QLogging.hpp"
 
 #include <cassert>
 
@@ -28,7 +22,7 @@ NetworkRequest::NetworkRequest(const std::string &url,
     this->initializeDefaultValues();
 }
 
-NetworkRequest::NetworkRequest(QUrl url, NetworkRequestType requestType)
+NetworkRequest::NetworkRequest(const QUrl &url, NetworkRequestType requestType)
     : data(new NetworkData)
 {
     this->data->request_.setUrl(url);
@@ -37,10 +31,7 @@ NetworkRequest::NetworkRequest(QUrl url, NetworkRequestType requestType)
     this->initializeDefaultValues();
 }
 
-NetworkRequest::~NetworkRequest()
-{
-    //assert(!this->data || this->executed_);
-}
+NetworkRequest::~NetworkRequest() = default;
 
 NetworkRequest NetworkRequest::type(NetworkRequestType newRequestType) &&
 {
@@ -63,25 +54,25 @@ NetworkRequest NetworkRequest::caller(const QObject *caller) &&
 
 NetworkRequest NetworkRequest::onReplyCreated(NetworkReplyCreatedCallback cb) &&
 {
-    this->data->onReplyCreated_ = cb;
+    this->data->onReplyCreated_ = std::move(cb);
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::onError(NetworkErrorCallback cb) &&
 {
-    this->data->onError_ = cb;
+    this->data->onError_ = std::move(cb);
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::onSuccess(NetworkSuccessCallback cb) &&
 {
-    this->data->onSuccess_ = cb;
+    this->data->onSuccess_ = std::move(cb);
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::finally(NetworkFinallyCallback cb) &&
 {
-    this->data->finally_ = cb;
+    this->data->finally_ = std::move(cb);
     return std::move(*this);
 }
 
@@ -103,6 +94,13 @@ NetworkRequest NetworkRequest::header(const char *headerName,
                                       const QString &value) &&
 {
     this->data->request_.setRawHeader(headerName, value.toUtf8());
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::header(QNetworkRequest::KnownHeaders header,
+                                      const QVariant &value) &&
+{
+    this->data->request_.setHeader(header, value);
     return std::move(*this);
 }
 
@@ -129,24 +127,28 @@ NetworkRequest NetworkRequest::concurrent() &&
     return std::move(*this);
 }
 
-NetworkRequest NetworkRequest::authorizeTwitchV5(const QString &clientID,
-                                                 const QString &oauthToken) &&
-{
-    // TODO: make two overloads, with and without oauth token
-    auto tmp = std::move(*this)
-                   .header("Client-ID", clientID)
-                   .header("Accept", "application/vnd.twitchtv.v5+json");
-
-    if (!oauthToken.isEmpty())
-        return std::move(tmp).header("Authorization", "OAuth " + oauthToken);
-    else
-        return tmp;
-}
-
 NetworkRequest NetworkRequest::multiPart(QHttpMultiPart *payload) &&
 {
     payload->setParent(this->data->lifetimeManager_);
     this->data->multiPartPayload_ = payload;
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::followRedirects(bool on) &&
+{
+    if (on)
+    {
+        this->data->request_.setAttribute(
+            QNetworkRequest::RedirectPolicyAttribute,
+            QNetworkRequest::NoLessSafeRedirectPolicy);
+    }
+    else
+    {
+        this->data->request_.setAttribute(
+            QNetworkRequest::RedirectPolicyAttribute,
+            QNetworkRequest::ManualRedirectPolicy);
+    }
+
     return std::move(*this);
 }
 
@@ -182,17 +184,36 @@ void NetworkRequest::execute()
 
 void NetworkRequest::initializeDefaultValues()
 {
-    const auto userAgent = QString("chatterino/%1 (%2)")
-                               .arg(CHATTERINO_VERSION, CHATTERINO_GIT_HASH)
+    const auto userAgent = QStringLiteral("chatterino/%1 (%2)")
+                               .arg(Version::instance().version(),
+                                    Version::instance().commitHash())
                                .toUtf8();
 
     this->data->request_.setRawHeader("User-Agent", userAgent);
 }
 
-// Helper creator functions
-NetworkRequest NetworkRequest::twitchRequest(QUrl url)
+NetworkRequest NetworkRequest::json(const QJsonArray &root) &&
 {
-    return NetworkRequest(url).authorizeTwitchV5(getDefaultClientID());
+    return std::move(*this).json(QJsonDocument(root));
+}
+
+NetworkRequest NetworkRequest::json(const QJsonObject &root) &&
+{
+    return std::move(*this).json(QJsonDocument(root));
+}
+
+NetworkRequest NetworkRequest::json(const QJsonDocument &document) &&
+{
+    return std::move(*this).json(document.toJson(QJsonDocument::Compact));
+}
+
+NetworkRequest NetworkRequest::json(const QByteArray &payload) &&
+{
+    return std::move(*this)
+        .payload(payload)
+        .header(QNetworkRequest::ContentTypeHeader, "application/json")
+        .header(QNetworkRequest::ContentLengthHeader, payload.length())
+        .header("Accept", "application/json");
 }
 
 }  // namespace chatterino

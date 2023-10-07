@@ -1,24 +1,22 @@
 #include "ModerationPage.hpp"
 
 #include "Application.hpp"
+#include "controllers/logging/ChannelLoggingModel.hpp"
+#include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/moderationactions/ModerationActionModel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QFileDialog>
-#include <QFormLayout>
-#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
-#include <QListView>
 #include <QPushButton>
 #include <QTableView>
-#include <QTextEdit>
-#include <QVBoxLayout>
 #include <QtConcurrent/QtConcurrent>
 
 namespace chatterino {
@@ -72,8 +70,10 @@ ModerationPage::ModerationPage()
 
     auto logs = tabs.appendTab(new QVBoxLayout, "Logs");
     {
-        logs.append(this->createCheckBox("Enable logging",
-                                         getSettings()->enableLogging));
+        QCheckBox *enableLogging = this->createCheckBox(
+            "Enable logging", getSettings()->enableLogging);
+        logs.append(enableLogging);
+
         auto logsPathLabel = logs.emplace<QLabel>();
 
         // Logs (copied from LoggingMananger)
@@ -108,40 +108,71 @@ ModerationPage::ModerationPage()
             });
 
         buttons->addStretch();
-        logs->addStretch(1);
 
         // Show how big (size-wise) the logs are
         auto logsPathSizeLabel = logs.emplace<QLabel>();
         logsPathSizeLabel->setText(QtConcurrent::run([] {
-            return fetchLogDirectorySize();
-        }));
+                                       return fetchLogDirectorySize();
+                                   }).result());
 
         // Select event
-        QObject::connect(selectDir.getElement(), &QPushButton::clicked, this,
-                         [this, logsPathSizeLabel]() mutable {
-                             auto dirName =
-                                 QFileDialog::getExistingDirectory(this);
+        QObject::connect(
+            selectDir.getElement(), &QPushButton::clicked, this,
+            [this, logsPathSizeLabel]() mutable {
+                auto dirName = QFileDialog::getExistingDirectory(this);
 
-                             getSettings()->logPath = dirName;
+                getSettings()->logPath = dirName;
 
-                             // Refresh: Show how big (size-wise) the logs are
-                             logsPathSizeLabel->setText(QtConcurrent::run([] {
-                                 return fetchLogDirectorySize();
-                             }));
-                         });
+                // Refresh: Show how big (size-wise) the logs are
+                logsPathSizeLabel->setText(QtConcurrent::run([] {
+                                               return fetchLogDirectorySize();
+                                           }).result());
+            });
 
         buttons->addSpacing(16);
 
         // Reset custom logpath
-        QObject::connect(resetDir.getElement(), &QPushButton::clicked, this,
-                         [logsPathSizeLabel]() mutable {
-                             getSettings()->logPath = "";
+        QObject::connect(
+            resetDir.getElement(), &QPushButton::clicked, this,
+            [logsPathSizeLabel]() mutable {
+                getSettings()->logPath = "";
 
-                             // Refresh: Show how big (size-wise) the logs are
-                             logsPathSizeLabel->setText(QtConcurrent::run([] {
-                                 return fetchLogDirectorySize();
-                             }));
-                         });
+                // Refresh: Show how big (size-wise) the logs are
+                logsPathSizeLabel->setText(QtConcurrent::run([] {
+                                               return fetchLogDirectorySize();
+                                           }).result());
+            });
+
+        QCheckBox *onlyLogListedChannels =
+            this->createCheckBox("Only log channels listed below",
+                                 getSettings()->onlyLogListedChannels);
+
+        onlyLogListedChannels->setEnabled(getSettings()->enableLogging);
+        logs.append(onlyLogListedChannels);
+
+        // Select event
+        QObject::connect(
+            enableLogging, &QCheckBox::stateChanged, this,
+            [enableLogging, onlyLogListedChannels]() mutable {
+                onlyLogListedChannels->setEnabled(enableLogging->isChecked());
+            });
+
+        EditableModelView *view =
+            logs.emplace<EditableModelView>(
+                    (new ChannelLoggingModel(nullptr))
+                        ->initialized(&getSettings()->loggedChannels))
+                .getElement();
+
+        view->setTitles({"Twitch channels"});
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(
+            QHeaderView::Fixed);
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(
+            0, QHeaderView::Stretch);
+
+        // We can safely ignore this signal connection since we own the view
+        std::ignore = view->addButtonPressed.connect([] {
+            getSettings()->loggedChannels.append(ChannelLog("channel"));
+        });
 
     }  // logs end
 
@@ -179,7 +210,8 @@ ModerationPage::ModerationPage()
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
             0, QHeaderView::Stretch);
 
-        view->addButtonPressed.connect([] {
+        // We can safely ignore this signal connection since we own the view
+        std::ignore = view->addButtonPressed.connect([] {
             getSettings()->moderationActions.append(
                 ModerationAction("/timeout {user.name} 300"));
         });
@@ -213,7 +245,7 @@ void ModerationPage::addModerationButtonSettings(
     texts->setContentsMargins(0, 0, 0, 15);
     texts->setSizeConstraint(QLayout::SetMaximumSize);
 
-    const auto valueChanged = [=] {
+    const auto valueChanged = [=, this] {
         const auto index = QObject::sender()->objectName().toInt();
 
         const auto line = this->durationInputs_[index];
@@ -239,7 +271,7 @@ void ModerationPage::addModerationButtonSettings(
 
     // build one line for each customizable button
     auto i = 0;
-    for (const auto tButton : getSettings()->timeoutButtons.getValue())
+    for (const auto &tButton : getSettings()->timeoutButtons.getValue())
     {
         const auto buttonNumber = QString::number(i);
         auto timeout = timeoutLayout.emplace<QHBoxLayout>().withoutMargin();

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "common/NetworkRequest.hpp"
-#include "messages/Link.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 
-#include <boost/noncopyable.hpp>
+#include <QJsonArray>
+#include <QJsonObject>
 
 #include <functional>
 
@@ -21,9 +21,9 @@ struct IvrSubage {
     const int totalSubMonths;
     const QString followingSince;
 
-    IvrSubage(QJsonObject root)
-        : isSubHidden(root.value("hidden").toBool())
-        , isSubbed(root.value("subscribed").toBool())
+    IvrSubage(const QJsonObject &root)
+        : isSubHidden(root.value("statusHidden").toBool())
+        , isSubbed(!root.value("meta").isNull())
         , subTier(root.value("meta").toObject().value("tier").toString())
         , totalSubMonths(
               root.value("cumulative").toObject().value("months").toInt())
@@ -40,7 +40,7 @@ struct IvrEmoteSet {
     const QString tier;
     const QJsonArray emotes;
 
-    IvrEmoteSet(QJsonObject root)
+    IvrEmoteSet(const QJsonObject &root)
         : setId(root.value("setID").toString())
         , displayName(root.value("channelName").toString())
         , login(root.value("channelLogin").toString())
@@ -60,7 +60,7 @@ struct IvrEmote {
     const QString emoteType;
     const QString imageType;
 
-    explicit IvrEmote(QJsonObject root)
+    explicit IvrEmote(const QJsonObject &root)
         : code(root.value("code").toString())
         , id(root.value("id").toString())
         , setId(root.value("setID").toString())
@@ -73,10 +73,10 @@ struct IvrEmote {
     }
 };
 
-class IvrApi final : boost::noncopyable
+class IvrApi final
 {
 public:
-    // https://api.ivr.fi/docs#tag/Twitch/paths/~1twitch~1subage~1{username}~1{channel}/get
+    // https://api.ivr.fi/v2/docs/static/index.html#/Twitch/get_twitch_subage__user___channel_
     void getSubage(QString userName, QString channelName,
                    ResultCallback<IvrSubage> resultCallback,
                    IvrFailureCallback failureCallback);
@@ -87,6 +87,14 @@ public:
                           IvrFailureCallback failureCallback);
 
     static void initialize();
+
+    IvrApi() = default;
+
+    IvrApi(const IvrApi &) = delete;
+    IvrApi &operator=(const IvrApi &) = delete;
+
+    IvrApi(IvrApi &&) = delete;
+    IvrApi &operator=(IvrApi &&) = delete;
 
 private:
     NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);

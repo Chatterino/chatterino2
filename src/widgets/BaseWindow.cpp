@@ -1,40 +1,33 @@
-#include "BaseWindow.hpp"
+#include "widgets/BaseWindow.hpp"
 
-#include "BaseSettings.hpp"
-#include "BaseTheme.hpp"
-#include "boost/algorithm/algorithm.hpp"
+#include "Application.hpp"
+#include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
-#include "widgets/helper/EffectLabel.hpp"
+#include "widgets/Window.hpp"
 
 #include <QApplication>
-#include <QDebug>
-#include <QDesktopWidget>
 #include <QFont>
 #include <QIcon>
+#include <QScreen>
+
 #include <functional>
 
-#ifdef CHATTERINO
-#    include "Application.hpp"
-#    include "singletons/WindowManager.hpp"
-#endif
-
 #ifdef USEWINSDK
-#    include <ObjIdl.h>
+#    include <dwmapi.h>
 #    include <VersionHelpers.h>
 #    include <Windows.h>
-#    include <dwmapi.h>
-#    include <gdiplus.h>
 #    include <windowsx.h>
 
-//#include <ShellScalingApi.h>
 #    pragma comment(lib, "Dwmapi.lib")
 
 #    include <QHBoxLayout>
-#    include <QVBoxLayout>
 
 #    define WM_DPICHANGED 0x02E0
 #endif
@@ -78,7 +71,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
                 this->updateScale();
             });
         },
-        this->connections_);
+        this->connections_, false);
 
     this->updateScale();
 
@@ -144,7 +137,7 @@ void BaseWindow::init()
             {
                 QHBoxLayout *buttonLayout = this->ui_.titlebarBox =
                     new QHBoxLayout();
-                buttonLayout->setMargin(0);
+                buttonLayout->setContentsMargins(0, 0, 0, 0);
                 layout->addLayout(buttonLayout);
 
                 // title
@@ -248,18 +241,6 @@ void BaseWindow::init()
 #endif
 }
 
-void BaseWindow::setStayInScreenRect(bool value)
-{
-    this->stayInScreenRect_ = value;
-
-    this->moveIntoDesktopRect(this, this->pos());
-}
-
-bool BaseWindow::getStayInScreenRect() const
-{
-    return this->stayInScreenRect_;
-}
-
 void BaseWindow::setActionOnFocusLoss(ActionOnFocusLoss value)
 {
     this->actionOnFocusLoss_ = value;
@@ -343,14 +324,15 @@ bool BaseWindow::event(QEvent *event)
 
 void BaseWindow::wheelEvent(QWheelEvent *event)
 {
-    if (event->orientation() != Qt::Vertical)
+    // ignore horizontal mouse wheels
+    if (event->angleDelta().x() != 0)
     {
         return;
     }
 
     if (event->modifiers() & Qt::ControlModifier)
     {
-        if (event->delta() > 0)
+        if (event->angleDelta().y() > 0)
         {
             getSettings()->setClampedUiScale(
                 getSettings()->getClampedUiScale() + 0.1);
@@ -397,7 +379,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
-                if (widget == nullptr)
+                if (widget == nullptr || widget->isHidden())
                 {
                     return false;
                 }
@@ -521,25 +503,18 @@ void BaseWindow::leaveEvent(QEvent *)
     TooltipWidget::instance()->hide();
 }
 
-void BaseWindow::moveTo(QWidget *parent, QPoint point, bool offset)
+void BaseWindow::moveTo(QPoint point, widgets::BoundsChecking mode)
 {
-    if (offset)
-    {
-        point.rx() += 16;
-        point.ry() += 16;
-    }
-
-    this->moveIntoDesktopRect(parent, point);
+    widgets::moveWindowTo(this, point, mode);
 }
 
 void BaseWindow::resizeEvent(QResizeEvent *)
 {
     // Queue up save because: Window resized
-#ifdef CHATTERINO
-    getApp()->windows->queueSave();
-#endif
-
-    //this->moveIntoDesktopRect(this);
+    if (!flags_.has(DisableLayoutSave))
+    {
+        getApp()->windows->queueSave();
+    }
 
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame() && !this->isResizeFixing_)
@@ -559,16 +534,19 @@ void BaseWindow::resizeEvent(QResizeEvent *)
             });
         });
     }
-#endif
 
     this->calcButtonsSizes();
+#endif
 }
 
 void BaseWindow::moveEvent(QMoveEvent *event)
 {
     // Queue up save because: Window position changed
 #ifdef CHATTERINO
-    getApp()->windows->queueSave();
+    if (!flags_.has(DisableLayoutSave))
+    {
+        getApp()->windows->queueSave();
+    }
 #endif
 
     BaseWidget::moveEvent(event);
@@ -581,58 +559,15 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
-    this->moveIntoDesktopRect(this, this->pos());
-    if (this->frameless_)
-    {
-        QTimer::singleShot(30, this, [this] {
-            this->moveIntoDesktopRect(this, this->pos());
-        });
-    }
 }
 
-void BaseWindow::moveIntoDesktopRect(QWidget *parent, QPoint point)
-{
-    if (!this->stayInScreenRect_)
-        return;
-
-    // move the widget into the screen geometry if it's not already in there
-    QDesktopWidget *desktop = QApplication::desktop();
-    QPoint globalCursorPos = QCursor::pos();
-
-    QRect s = desktop->availableGeometry(parent);
-
-    bool stickRight = false;
-    bool stickBottom = false;
-
-    if (point.x() < s.left())
-    {
-        point.setX(s.left());
-    }
-    if (point.y() < s.top())
-    {
-        point.setY(s.top());
-    }
-    if (point.x() + this->width() > s.right())
-    {
-        stickRight = true;
-        point.setX(s.right() - this->width());
-    }
-    if (point.y() + this->height() > s.bottom())
-    {
-        stickBottom = true;
-        point.setY(s.bottom() - this->height());
-    }
-
-    if (stickRight && stickBottom)
-    {
-        point.setY(globalCursorPos.y() - this->height() - 16);
-    }
-
-    this->move(point);
-}
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
+                             qintptr *result)
+#else
 bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                              long *result)
+#endif
 {
 #ifdef USEWINSDK
     MSG *msg = reinterpret_cast<MSG *>(message);
@@ -705,7 +640,7 @@ void BaseWindow::updateScale()
     auto scale =
         this->nativeScale_ * (this->flags_.has(DisableCustomScaling)
                                   ? 1
-                                  : getABSettings()->getClampedUiScale());
+                                  : getSettings()->getClampedUiScale());
 
     this->setScale(scale);
 
@@ -718,6 +653,11 @@ void BaseWindow::updateScale()
 void BaseWindow::calcButtonsSizes()
 {
     if (!this->shown_)
+    {
+        return;
+    }
+
+    if (this->frameless_)
     {
         return;
     }
@@ -780,21 +720,33 @@ bool BaseWindow::handleDPICHANGED(MSG *msg)
 bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 {
 #ifdef USEWINSDK
-    if (auto dpi = getWindowDpi(msg->hwnd))
+    // ignore window hide event
+    if (!msg->wParam)
     {
-        this->nativeScale_ = dpi.get() / 96.f;
-        this->updateScale();
+        return true;
     }
 
-    if (!this->shown_ && this->isVisible())
+    if (auto dpi = getWindowDpi(msg->hwnd))
     {
+        float currentScale = (float)dpi.get() / 96.F;
+        if (currentScale != this->nativeScale_)
+        {
+            this->nativeScale_ = currentScale;
+            this->updateScale();
+        }
+    }
+
+    if (!this->shown_)
+    {
+        this->shown_ = true;
+
         if (this->hasCustomWindowFrame())
         {
-            this->shown_ = true;
-
-            const MARGINS shadow = {8, 8, 8, 8};
-            DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
+            // disable OS window border
+            const MARGINS margins = {-1};
+            DwmExtendFrameIntoClientArea(HWND(this->winId()), &margins);
         }
+
         if (!this->initalBounds_.isNull())
         {
             ::SetWindowPos(msg->hwnd, nullptr, this->initalBounds_.x(),
@@ -803,9 +755,9 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
                            SWP_NOZORDER | SWP_NOACTIVATE);
             this->currentBounds_ = this->initalBounds_;
         }
-    }
 
-    this->calcButtonsSizes();
+        this->calcButtonsSizes();
+    }
 
     return true;
 #else
@@ -813,22 +765,24 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 #endif
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+bool BaseWindow::handleNCCALCSIZE(MSG *msg, qintptr *result)
+#else
 bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
+#endif
 {
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame())
     {
-        // int cx = GetSystemMetrics(SM_CXSIZEFRAME);
-        // int cy = GetSystemMetrics(SM_CYSIZEFRAME);
-
         if (msg->wParam == TRUE)
         {
-            NCCALCSIZE_PARAMS *ncp =
-                (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
-            ncp->lppos->flags |= SWP_NOREDRAW;
-            RECT *clientRect = &ncp->rgrc[0];
-
-            clientRect->top -= 1;
+            // remove 1 extra pixel on top of custom frame
+            auto *ncp = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
+            if (ncp)
+            {
+                ncp->lppos->flags |= SWP_NOREDRAW;
+                ncp->rgrc[0].top -= 1;
+            }
         }
 
         *result = 0;
@@ -899,7 +853,11 @@ bool BaseWindow::handleMOVE(MSG *msg)
     return false;
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+bool BaseWindow::handleNCHITTEST(MSG *msg, qintptr *result)
+#else
 bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
+#endif
 {
 #ifdef USEWINSDK
     const LONG border_width = 8;  // in pixels
@@ -976,17 +934,23 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
         {
             bool client = false;
 
-            for (QWidget *widget : this->ui_.buttons)
-            {
-                if (widget->geometry().contains(point))
-                {
-                    client = true;
-                }
-            }
-
+            // Check the main layout first, as it's the largest area
             if (this->ui_.layoutBase->geometry().contains(point))
             {
                 client = true;
+            }
+
+            // Check the titlebar buttons
+            if (!client && this->ui_.titlebarBox->geometry().contains(point))
+            {
+                for (QWidget *widget : this->ui_.buttons)
+                {
+                    if (widget->isVisible() &&
+                        widget->geometry().contains(point))
+                    {
+                        client = true;
+                    }
+                }
             }
 
             if (client)
@@ -1001,16 +965,17 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
         return true;
     }
-    else if (this->flags_.has(FramelessDraggable))
+
+    if (this->flags_.has(FramelessDraggable))
     {
         *result = 0;
         bool client = false;
 
-        if (auto widget = this->childAt(point))
+        if (auto *widget = this->childAt(point))
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
-                if (widget == nullptr)
+                if (widget == nullptr || widget->isHidden())
                 {
                     return false;
                 }
@@ -1040,6 +1005,8 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
         return true;
     }
+
+    // don't handle the message
     return false;
 #else
     return false;

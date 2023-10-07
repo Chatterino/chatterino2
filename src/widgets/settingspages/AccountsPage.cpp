@@ -12,6 +12,7 @@
 #include <QHeaderView>
 #include <QTableView>
 #include <QVBoxLayout>
+
 #include <algorithm>
 
 namespace chatterino {
@@ -32,11 +33,10 @@ AccountsPage::AccountsPage()
     view->getTableView()->horizontalHeader()->setVisible(false);
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
 
-    view->addButtonPressed.connect([this] {
-        static auto loginWidget = new LoginWidget(this);
-
-        loginWidget->show();
-        loginWidget->raise();
+    // We can safely ignore this signal connection since we own the view
+    std::ignore = view->addButtonPressed.connect([this] {
+        LoginDialog d(this);
+        d.exec();
     });
 
     view->getTableView()->setStyleSheet("background: #333");

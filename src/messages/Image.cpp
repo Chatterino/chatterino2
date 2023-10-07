@@ -1,29 +1,30 @@
 #include "messages/Image.hpp"
 
+#include "Application.hpp"
+#include "common/Common.hpp"
+#include "common/NetworkRequest.hpp"
+#include "common/NetworkResult.hpp"
+#include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
+#include "debug/AssertInGuiThread.hpp"
+#include "debug/Benchmark.hpp"
+#include "singletons/Emotes.hpp"
+#include "singletons/helper/GifTimer.hpp"
+#include "singletons/WindowManager.hpp"
+#include "util/DebugCount.hpp"
+#include "util/PostToThread.hpp"
+
+#include <boost/functional/hash.hpp>
 #include <QBuffer>
 #include <QImageReader>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QTimer>
-#include <boost/functional/hash.hpp>
+
 #include <functional>
 #include <queue>
 #include <thread>
-
-#include "Application.hpp"
-#include "common/Common.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/QLogging.hpp"
-#include "debug/AssertInGuiThread.hpp"
-#include "debug/Benchmark.hpp"
-#ifndef CHATTERINO_TEST
-#    include "singletons/Emotes.hpp"
-#endif
-#include "singletons/WindowManager.hpp"
-#include "singletons/helper/GifTimer.hpp"
-#include "util/DebugCount.hpp"
-#include "util/PostToThread.hpp"
 
 // Duration between each check of every Image instance
 const auto IMAGE_POOL_CLEANUP_INTERVAL = std::chrono::minutes(1);
@@ -52,12 +53,10 @@ namespace detail {
         {
             DebugCount::increase("animated images");
 
-#ifndef CHATTERINO_TEST
             this->gifTimerConnection_ =
                 getApp()->emotes->gifTimer.signal.connect([this] {
                     this->advance();
                 });
-#endif
         }
 
         auto totalLength =
@@ -72,13 +71,13 @@ namespace detail {
         }
         else
         {
-#ifndef CHATTERINO_TEST
             this->durationOffset_ = std::min<int>(
                 int(getApp()->emotes->gifTimer.position() % totalLength),
                 60000);
-#endif
         }
         this->processOffset();
+        DebugCount::increase("image bytes", this->memoryUsage());
+        DebugCount::increase("image bytes (ever loaded)", this->memoryUsage());
     }
 
     Frames::~Frames()
@@ -94,8 +93,25 @@ namespace detail {
         {
             DebugCount::decrease("animated images");
         }
+        DebugCount::decrease("image bytes", this->memoryUsage());
+        DebugCount::increase("image bytes (ever unloaded)",
+                             this->memoryUsage());
 
         this->gifTimerConnection_.disconnect();
+    }
+
+    int64_t Frames::memoryUsage() const
+    {
+        int64_t usage = 0;
+        for (const auto &frame : this->items_)
+        {
+            auto sz = frame.image.size();
+            auto area = sz.width() * sz.height();
+            auto memory = area * frame.image.depth();
+
+            usage += memory;
+        }
+        return usage;
     }
 
     void Frames::advance()
@@ -134,6 +150,9 @@ namespace detail {
         {
             DebugCount::decrease("loaded images");
         }
+        DebugCount::decrease("image bytes", this->memoryUsage());
+        DebugCount::increase("image bytes (ever unloaded)",
+                             this->memoryUsage());
 
         this->items_.clear();
         this->index_ = 0;
@@ -151,17 +170,23 @@ namespace detail {
         return this->items_.size() > 1;
     }
 
-    boost::optional<QPixmap> Frames::current() const
+    std::optional<QPixmap> Frames::current() const
     {
-        if (this->items_.size() == 0)
-            return boost::none;
+        if (this->items_.empty())
+        {
+            return std::nullopt;
+        }
+
         return this->items_[this->index_].image;
     }
 
-    boost::optional<QPixmap> Frames::first() const
+    std::optional<QPixmap> Frames::first() const
     {
-        if (this->items_.size() == 0)
-            return boost::none;
+        if (this->items_.empty())
+        {
+            return std::nullopt;
+        }
+
         return this->items_.front().image;
     }
 
@@ -189,7 +214,7 @@ namespace detail {
             }
         }
 
-        if (frames.size() == 0)
+        if (frames.empty())
         {
             qCDebug(chatterinoImage)
                 << "Error while reading image" << url.string << ": '"
@@ -225,9 +250,8 @@ namespace detail {
             }
         }
 
-#ifndef CHATTERINO_TEST
         getApp()->windows->forceLayoutChannelViews();
-#endif
+
         loadedEventQueued = false;
     }
 
@@ -269,7 +293,9 @@ namespace detail {
 // IMAGE2
 Image::~Image()
 {
+#ifndef DISABLE_IMAGE_EXPIRATION_POOL
     ImageExpirationPool::instance().removeImagePtr(this);
+#endif
 
     if (this->empty_ && !this->frames_)
     {
@@ -278,7 +304,10 @@ Image::~Image()
         return;
     }
 
-    // run destructor of Frames in gui thread
+    // Ensure the destructor for our frames is called in the GUI thread
+    // If the Image destructor is called outside of the GUI thread, move the
+    // ownership of the frames to the GUI thread, otherwise the frames will be
+    // destructed as part as we go out of scope
     if (!isGuiThread())
     {
         postToThread([frames = this->frames_.release()]() {
@@ -321,10 +350,8 @@ ImagePtr Image::fromResourcePixmap(const QPixmap &pixmap, qreal scale)
         {
             return shared;
         }
-        else
-        {
-            cache.erase(it);
-        }
+
+        cache.erase(it);
     }
 
     auto newImage = ImagePtr(new Image(scale));
@@ -341,6 +368,11 @@ ImagePtr Image::getEmpty()
 {
     static auto empty = ImagePtr(new Image);
     return empty;
+}
+
+ImagePtr getEmptyImagePtr()
+{
+    return Image::getEmpty();
 }
 
 Image::Image()
@@ -388,10 +420,10 @@ bool Image::loaded() const
 {
     assertInGuiThread();
 
-    return bool(this->frames_->current());
+    return this->frames_->current().has_value();
 }
 
-boost::optional<QPixmap> Image::pixmapOrLoad() const
+std::optional<QPixmap> Image::pixmapOrLoad() const
 {
     assertInGuiThread();
 
@@ -414,7 +446,9 @@ void Image::loadIfUnloaded() const
         Image *this2 = const_cast<Image *>(this);
         this2->shouldLoad_ = false;
         this2->actuallyLoad();
+#ifndef DISABLE_IMAGE_EXPIRATION_POOL
         ImageExpirationPool::instance().addImagePtr(this2->shared_from_this());
+#endif
     }
 }
 
@@ -440,9 +474,12 @@ int Image::width() const
     assertInGuiThread();
 
     if (auto pixmap = this->frames_->first())
+    {
         return int(pixmap->width() * this->scale_);
-    else
-        return 16;
+    }
+
+    // No frames loaded, use our default magic width 16
+    return 16;
 }
 
 int Image::height() const
@@ -450,9 +487,12 @@ int Image::height() const
     assertInGuiThread();
 
     if (auto pixmap = this->frames_->first())
+    {
         return int(pixmap->height() * this->scale_);
-    else
-        return 16;
+    }
+
+    // No frames loaded, use our default magic height 16
+    return 16;
 }
 
 QSize Image::size() const
@@ -467,13 +507,16 @@ QSize Image::size() const
 
 void Image::actuallyLoad()
 {
+    auto weak = weakOf(this);
     NetworkRequest(this->url().string)
         .concurrent()
         .cache()
-        .onSuccess([weak = weakOf(this)](auto result) -> Outcome {
+        .onSuccess([weak](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
+            {
                 return Failure;
+            }
 
             auto data = result.getData();
 
@@ -486,12 +529,14 @@ void Image::actuallyLoad()
             {
                 qCDebug(chatterinoImage)
                     << "Error: image cant be read " << shared->url().string;
+                shared->empty_ = true;
                 return Failure;
             }
 
             const auto size = reader.size();
             if (size.isEmpty())
             {
+                shared->empty_ = true;
                 return Failure;
             }
 
@@ -501,6 +546,7 @@ void Image::actuallyLoad()
                 qCDebug(chatterinoImage)
                     << "Error: image has less than 1 frame "
                     << shared->url().string << ": " << reader.errorString();
+                shared->empty_ = true;
                 return Failure;
             }
 
@@ -511,25 +557,29 @@ void Image::actuallyLoad()
             {
                 qCDebug(chatterinoImage) << "image too large in RAM";
 
+                shared->empty_ = true;
                 return Failure;
             }
 
             auto parsed = detail::readFrames(reader, shared->url());
 
-            postToThread(makeConvertCallback(parsed, [weak](auto &&frames) {
-                if (auto shared = weak.lock())
-                {
-                    shared->frames_ =
-                        std::make_unique<detail::Frames>(std::move(frames));
-                }
-            }));
+            postToThread(makeConvertCallback(
+                parsed, [weak = std::weak_ptr<Image>(shared)](auto &&frames) {
+                    if (auto shared = weak.lock())
+                    {
+                        shared->frames_ = std::make_unique<detail::Frames>(
+                            std::forward<decltype(frames)>(frames));
+                    }
+                }));
 
             return Success;
         })
-        .onError([weak = weakOf(this)](auto /*result*/) {
+        .onError([weak](auto /*result*/) {
             auto shared = weak.lock();
             if (!shared)
+            {
                 return false;
+            }
 
             // fourtf: is this the right thing to do?
             shared->empty_ = true;
@@ -546,26 +596,12 @@ void Image::expireFrames()
     this->shouldLoad_ = true;  // Mark as needing load again
 }
 
-bool Image::operator==(const Image &other) const
-{
-    if (this->isEmpty() && other.isEmpty())
-        return true;
-    if (!this->url_.string.isEmpty() && this->url_ == other.url_)
-        return true;
-    if (this->frames_->first() == other.frames_->first())
-        return true;
-
-    return false;
-}
-
-bool Image::operator!=(const Image &other) const
-{
-    return !this->operator==(other);
-}
+#ifndef DISABLE_IMAGE_EXPIRATION_POOL
 
 ImageExpirationPool::ImageExpirationPool()
+    : freeTimer_(new QTimer)
 {
-    QObject::connect(&this->freeTimer_, &QTimer::timeout, [this] {
+    QObject::connect(this->freeTimer_, &QTimer::timeout, [this] {
         if (isGuiThread())
         {
             this->freeOld();
@@ -578,15 +614,15 @@ ImageExpirationPool::ImageExpirationPool()
         }
     });
 
-    this->freeTimer_.start(
+    this->freeTimer_->start(
         std::chrono::duration_cast<std::chrono::milliseconds>(
             IMAGE_POOL_CLEANUP_INTERVAL));
 }
 
 ImageExpirationPool &ImageExpirationPool::instance()
 {
-    static ImageExpirationPool instance;
-    return instance;
+    static auto *instance = new ImageExpirationPool;
+    return *instance;
 }
 
 void ImageExpirationPool::addImagePtr(ImagePtr imgPtr)
@@ -601,14 +637,26 @@ void ImageExpirationPool::removeImagePtr(Image *rawPtr)
     this->allImages_.erase(rawPtr);
 }
 
+void ImageExpirationPool::freeAll()
+{
+    {
+        std::lock_guard<std::mutex> lock(this->mutex_);
+        for (auto it = this->allImages_.begin(); it != this->allImages_.end();)
+        {
+            auto img = it->second.lock();
+            img->expireFrames();
+            it = this->allImages_.erase(it);
+        }
+    }
+    this->freeOld();
+}
+
 void ImageExpirationPool::freeOld()
 {
     std::lock_guard<std::mutex> lock(this->mutex_);
 
-#ifndef NDEBUG
     size_t numExpired = 0;
     size_t eligible = 0;
-#endif
 
     auto now = std::chrono::steady_clock::now();
     for (auto it = this->allImages_.begin(); it != this->allImages_.end();)
@@ -629,17 +677,13 @@ void ImageExpirationPool::freeOld()
             continue;
         }
 
-#ifndef NDEBUG
         ++eligible;
-#endif
 
         // Check if image has expired and, if so, expire its frame data
         auto diff = now - img->lastUsed_;
         if (diff > IMAGE_POOL_IMAGE_LIFETIME)
         {
-#ifndef NDEBUG
             ++numExpired;
-#endif
             img->expireFrames();
             // erase without mutex locking issue
             it = this->allImages_.erase(it);
@@ -649,10 +693,15 @@ void ImageExpirationPool::freeOld()
         ++it;
     }
 
-#ifndef NDEBUG
+#    ifndef NDEBUG
     qCDebug(chatterinoImage) << "freed frame data for" << numExpired << "/"
                              << eligible << "eligible images";
-#endif
+#    endif
+    DebugCount::set("last image gc: expired", numExpired);
+    DebugCount::set("last image gc: eligible", eligible);
+    DebugCount::set("last image gc: left after gc", this->allImages_.size());
 }
+
+#endif
 
 }  // namespace chatterino

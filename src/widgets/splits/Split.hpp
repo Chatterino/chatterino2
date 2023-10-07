@@ -3,14 +3,14 @@
 #include "common/Aliases.hpp"
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
-#include "pajlada/signals/signalholder.hpp"
 #include "widgets/BaseWidget.hpp"
 
+#include <boost/signals2.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QFont>
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <boost/signals2.hpp>
 
 namespace chatterino {
 
@@ -105,7 +105,11 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
-    void enterEvent(QEvent *event) override;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void enterEvent(QEnterEvent * /*event*/) override;
+#else
+    void enterEvent(QEvent * /*event*/) override;
+#endif
     void leaveEvent(QEvent *event) override;
 
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -130,6 +134,14 @@ private:
      */
     void joinChannelInNewTab(ChannelPtr channel);
 
+    /**
+     * @brief Refresh moderation mode layouts/buttons
+     *
+     * Should be called after after the moderation mode is changed or
+     * moderation actions have been changed
+     **/
+    void refreshModerationMode();
+
     IndirectChannel channel_;
 
     bool moderationMode_{};
@@ -151,6 +163,10 @@ private:
     pajlada::Signals::Connection roomModeChangedConnection_;
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
+
+    // This signal-holder is cleared whenever this split changes the underlying channel
+    pajlada::Signals::SignalHolder channelSignalHolder_;
+
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;
 
@@ -168,8 +184,6 @@ public slots:
     void openBrowserPlayer();
     void openInStreamlink();
     void openWithCustomScheme();
-    void copyToClipboard();
-    void startWatching();
     void setFiltersDialog();
     void showSearch(bool singleChannel);
     void showViewerList();

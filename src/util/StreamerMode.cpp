@@ -1,4 +1,4 @@
-#include "StreamerMode.hpp"
+#include "util/StreamerMode.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
@@ -6,20 +6,22 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
-
-#ifdef USEWINSDK
-#    include <Windows.h>
-
-#    include <VersionHelpers.h>
-#    include <WtsApi32.h>
-#    pragma comment(lib, "Wtsapi32.lib")
-#endif
+#include "widgets/Window.hpp"
 
 #include <QProcess>
+
+#ifdef USEWINSDK
+// clang-format off
+// These imports cannot be ordered alphabetically.
+#    include <Windows.h>
+#    include <VersionHelpers.h>
+#    include <WtsApi32.h>
+// clang-format on
+#    pragma comment(lib, "Wtsapi32.lib")
+#endif
 
 namespace chatterino {
 
@@ -69,6 +71,7 @@ bool isInStreamerMode()
                 p.exitStatus() == QProcess::NormalExit)
             {
                 cache = (p.exitCode() == 0);
+                getApp()->streamerModeChanged.invoke();
                 return (p.exitCode() == 0);
             }
 
@@ -87,6 +90,7 @@ bool isInStreamerMode()
             qCWarning(chatterinoStreamerMode) << "pgrep execution timed out!";
 
             cache = false;
+            getApp()->streamerModeChanged.invoke();
             return false;
 #endif
 
@@ -120,6 +124,7 @@ bool isInStreamerMode()
                     if (broadcastingBinaries().contains(processName))
                     {
                         cache = true;
+                        getApp()->streamerModeChanged.invoke();
                         return true;
                     }
                 }
@@ -131,6 +136,7 @@ bool isInStreamerMode()
             }
 
             cache = false;
+            getApp()->streamerModeChanged.invoke();
 #endif
             return false;
     }

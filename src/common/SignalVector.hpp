@@ -1,12 +1,12 @@
 #pragma once
 
+#include "debug/AssertInGuiThread.hpp"
+
+#include <pajlada/signals/signal.hpp>
 #include <QStandardItemModel>
 #include <QTimer>
-#include <boost/noncopyable.hpp>
-#include <pajlada/signals/signal.hpp>
-#include <vector>
 
-#include "debug/AssertInGuiThread.hpp"
+#include <vector>
 
 namespace chatterino {
 
@@ -18,7 +18,7 @@ struct SignalVectorItemEvent {
 };
 
 template <typename T>
-class SignalVector : boost::noncopyable
+class SignalVector
 {
 public:
     pajlada::Signals::Signal<SignalVectorItemEvent<T>> itemInserted;
@@ -38,10 +38,16 @@ public:
     SignalVector(std::function<bool(const T &, const T &)> &&compare)
         : SignalVector()
     {
-        itemCompare_ = std::move(compare);
+        this->itemCompare_ = std::move(compare);
     }
 
-    virtual bool isSorted() const
+    SignalVector(const SignalVector &) = delete;
+    SignalVector &operator=(const SignalVector &) = delete;
+
+    SignalVector(SignalVector &&) = delete;
+    SignalVector &operator=(SignalVector &&) = delete;
+
+    bool isSorted() const
     {
         return bool(this->itemCompare_);
     }
@@ -76,9 +82,13 @@ public:
         else
         {
             if (index == -1)
+            {
                 index = this->items_.size();
+            }
             else
+            {
                 assert(index >= 0 && index <= this->items_.size());
+            }
 
             this->items_.insert(this->items_.begin() + index, item);
         }

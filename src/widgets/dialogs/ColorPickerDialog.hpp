@@ -1,17 +1,23 @@
 #pragma once
 
-#include "util/LayoutCreator.hpp"
 #include "widgets/BasePopup.hpp"
-#include "widgets/helper/ColorButton.hpp"
-#include "widgets/helper/QColorPicker.hpp"
 
 #include <pajlada/signals/signal.hpp>
+#include <QLabel>
+#include <QLineEdit>
+#include <QRegularExpressionValidator>
 
 #include <array>
 
-#include <QLabel>
-
 namespace chatterino {
+
+class ColorButton;
+class QColorLuminancePicker;
+class QColorPicker;
+class QColSpinBox;
+
+template <class T>
+class LayoutCreator;
 
 /**
  * @brief A custom color picker dialog.
@@ -47,8 +53,8 @@ public:
     pajlada::Signals::Signal<QColor> closed;
 
 protected:
-    void closeEvent(QCloseEvent *);
-    void themeChangedEvent();
+    void closeEvent(QCloseEvent *) override;
+    void themeChangedEvent() override;
 
 private:
     struct {
@@ -65,7 +71,7 @@ private:
         struct {
             QLabel *label;
             ColorButton *color;
-        } selected;
+        } selected{};
 
         struct {
             QColorPicker *colorPicker;
@@ -76,7 +82,7 @@ private:
 
             QLabel *htmlLabel;
             QLineEdit *htmlEdit;
-        } picker;
+        } picker{};
     } ui_;
 
     enum SpinBox : size_t { RED = 0, GREEN = 1, BLUE = 2, ALPHA = 3, END };

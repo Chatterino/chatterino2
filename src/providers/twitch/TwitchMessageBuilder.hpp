@@ -2,15 +2,14 @@
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
-#include "messages/MessageThread.hpp"
 #include "messages/SharedMessageBuilder.hpp"
-#include "providers/twitch/ChannelPointReward.hpp"
-#include "providers/twitch/PubSubActions.hpp"
-#include "providers/twitch/TwitchBadge.hpp"
 
+#include <boost/optional.hpp>
 #include <IrcMessage>
 #include <QString>
 #include <QVariant>
+
+#include <unordered_map>
 
 namespace chatterino {
 
@@ -19,12 +18,23 @@ using EmotePtr = std::shared_ptr<const Emote>;
 
 class Channel;
 class TwitchChannel;
+class MessageThread;
+struct HelixVip;
+using HelixModerator = HelixVip;
+struct ChannelPointReward;
+struct DeleteAction;
 
-struct TwitchEmoteOccurence {
+struct TwitchEmoteOccurrence {
     int start;
     int end;
     EmotePtr ptr;
     EmoteName name;
+
+    bool operator==(const TwitchEmoteOccurrence &other) const
+    {
+        return std::tie(this->start, this->end, this->ptr, this->name) ==
+               std::tie(other.start, other.end, other.ptr, other.name);
+    }
 };
 
 class TwitchMessageBuilder : public SharedMessageBuilder
@@ -43,6 +53,7 @@ public:
     TwitchChannel *twitchChannel;
 
     [[nodiscard]] bool isIgnored() const override;
+    bool isIgnoredReply() const;
     void triggerHighlights() override;
     MessagePtr build() override;
 
@@ -71,34 +82,44 @@ public:
     static void listOfUsersSystemMessage(QString prefix, QStringList users,
                                          Channel *channel,
                                          MessageBuilder *builder);
+    static void listOfUsersSystemMessage(
+        QString prefix, const std::vector<HelixModerator> &users,
+        Channel *channel, MessageBuilder *builder);
+
+    static MessagePtr buildHypeChatMessage(Communi::IrcPrivateMessage *message);
 
     // Shares some common logic from SharedMessageBuilder::parseBadgeTag
     static std::unordered_map<QString, QString> parseBadgeInfoTag(
         const QVariantMap &tags);
+
+    static std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(
+        const QVariantMap &tags, const QString &originalMessage,
+        int messageOffset);
 
 private:
     void parseUsernameColor() override;
     void parseUsername() override;
     void parseMessageID();
     void parseRoomID();
+    // Parse & build thread information into the message
+    // Will read information from thread_ or from IRC tags
+    void parseThread();
     void appendUsername();
 
-    void runIgnoreReplaces(std::vector<TwitchEmoteOccurence> &twitchEmotes);
+    void runIgnoreReplaces(std::vector<TwitchEmoteOccurrence> &twitchEmotes);
 
     boost::optional<EmotePtr> getTwitchBadge(const Badge &badge);
-    void appendTwitchEmote(const QString &emote,
-                           std::vector<TwitchEmoteOccurence> &vec,
-                           std::vector<int> &correctPositions);
     Outcome tryAppendEmote(const EmoteName &name) override;
 
     void addWords(const QStringList &words,
-                  const std::vector<TwitchEmoteOccurence> &twitchEmotes);
+                  const std::vector<TwitchEmoteOccurrence> &twitchEmotes);
     void addTextOrEmoji(EmotePtr emote) override;
     void addTextOrEmoji(const QString &value) override;
 
     void appendTwitchBadges();
     void appendChatterinoBadges();
     void appendFfzBadges();
+    void appendSeventvBadges();
     Outcome tryParseCheermote(const QString &string);
 
     bool shouldAddModerationElements() const;
@@ -106,7 +127,7 @@ private:
     QString roomID_;
     bool hasBits_ = false;
     QString bits;
-    int bitsLeft;
+    int bitsLeft{};
     bool bitsStacked = false;
     bool historicalMessage_ = false;
     std::shared_ptr<MessageThread> thread_;

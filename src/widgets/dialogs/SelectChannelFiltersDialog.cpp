@@ -1,5 +1,6 @@
 #include "SelectChannelFiltersDialog.hpp"
 
+#include "controllers/filters/FilterRecord.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QCheckBox>
@@ -48,7 +49,7 @@ SelectChannelFiltersDialog::SelectChannelFiltersDialog(
         (this->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
         Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
-    auto availableFilters = getCSettings().filterRecords.readOnly();
+    auto availableFilters = getSettings()->filterRecords.readOnly();
 
     if (availableFilters->size() == 0)
     {

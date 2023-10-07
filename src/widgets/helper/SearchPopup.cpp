@@ -1,11 +1,10 @@
 #include "SearchPopup.hpp"
 
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QPushButton>
-
+#include "Application.hpp"
 #include "common/Channel.hpp"
+#include "controllers/filters/FilterSet.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "messages/MessageElement.hpp"
 #include "messages/search/AuthorPredicate.hpp"
 #include "messages/search/BadgePredicate.hpp"
 #include "messages/search/ChannelPredicate.hpp"
@@ -14,8 +13,14 @@
 #include "messages/search/RegexPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
 #include "messages/search/SubtierPredicate.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
+#include "widgets/splits/Split.hpp"
+
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QPushButton>
 
 namespace chatterino {
 
@@ -46,17 +51,28 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
 
         // If all predicates match, add the message to the channel
         if (accept)
-            channel->addMessage(message);
+        {
+            auto overrideFlags = boost::optional<MessageFlags>(message->flags);
+            overrideFlags->set(MessageFlag::DoNotLog);
+
+            channel->addMessage(message, overrideFlags);
+        }
     }
 
     return channel;
 }
 
 SearchPopup::SearchPopup(QWidget *parent, Split *split)
-    : BasePopup({}, parent)
+    : BasePopup({BaseWindow::DisableLayoutSave}, parent)
     , split_(split)
 {
     this->initLayout();
+    if (this->split_ && this->split_->getChannelView().hasSelection())
+    {
+        this->searchInput_->setText(
+            this->split_->getChannelView().getSelectedText().trimmed());
+        this->searchInput_->selectAll();
+    }
     this->resize(400, 600);
     this->addShortcuts();
 }
@@ -169,6 +185,22 @@ void SearchPopup::showEvent(QShowEvent *)
     this->search();
 }
 
+bool SearchPopup::eventFilter(QObject *object, QEvent *event)
+{
+    if (object == this->searchInput_ && event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_Backspace &&
+            keyEvent->modifiers() == Qt::ControlModifier &&
+            this->searchInput_->text() == this->searchInput_->selectedText())
+        {
+            this->searchInput_->clear();
+            return true;
+        }
+    }
+    return false;
+}
+
 void SearchPopup::search()
 {
     if (this->snapshot_.size() == 0)
@@ -243,13 +275,13 @@ void SearchPopup::initLayout()
     // VBOX
     {
         auto *layout1 = new QVBoxLayout(this);
-        layout1->setMargin(0);
+        layout1->setContentsMargins(0, 0, 0, 0);
         layout1->setSpacing(0);
 
         // HBOX
         {
-            auto *layout2 = new QHBoxLayout(this);
-            layout2->setMargin(8);
+            auto *layout2 = new QHBoxLayout();
+            layout2->setContentsMargins(8, 8, 8, 8);
             layout2->setSpacing(8);
 
             // SEARCH INPUT
@@ -263,6 +295,7 @@ void SearchPopup::initLayout()
                     QPixmap(":/buttons/clearSearch.png"));
                 QObject::connect(this->searchInput_, &QLineEdit::textChanged,
                                  this, &SearchPopup::search);
+                this->searchInput_->installEventFilter(this);
             }
 
             layout1->addLayout(layout2);
@@ -270,8 +303,9 @@ void SearchPopup::initLayout()
 
         // CHANNELVIEW
         {
-            this->channelView_ = new ChannelView(this, this->split_,
-                                                 ChannelView::Context::Search);
+            this->channelView_ = new ChannelView(
+                this, this->split_, ChannelView::Context::Search,
+                getSettings()->scrollbackSplitLimit);
 
             layout1->addWidget(this->channelView_);
         }
@@ -291,81 +325,63 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     // It also ignores whitespaces in values when being surrounded by quotation
     // marks, to enable inputs like this => regex:"kappa 123"
     static QRegularExpression predicateRegex(
-        R"lit((?:(?<name>\w+):(?<value>".+?"|[^\s]+))|[^\s]+?(?=$|\s))lit");
+        R"lit((?<negation>[!\-])?(?:(?<name>\w+):(?<value>".+?"|[^\s]+))|[^\s]+?(?=$|\s))lit");
     static QRegularExpression trimQuotationMarksRegex(R"(^"|"$)");
 
     QRegularExpressionMatchIterator it = predicateRegex.globalMatch(input);
 
     std::vector<std::unique_ptr<MessagePredicate>> predicates;
-    QStringList authors;
-    QStringList channels;
-    QStringList badges;
-    QStringList subtiers;
 
     while (it.hasNext())
     {
         QRegularExpressionMatch match = it.next();
 
         QString name = match.captured("name");
-
+        bool isNegated = !match.captured("negation").isEmpty();
         QString value = match.captured("value");
         value.remove(trimQuotationMarksRegex);
 
         // match predicates
+
         if (name == "from")
         {
-            authors.append(value);
+            predicates.push_back(
+                std::make_unique<AuthorPredicate>(value, isNegated));
         }
         else if (name == "badge")
         {
-            badges.append(value);
+            predicates.push_back(
+                std::make_unique<BadgePredicate>(value, isNegated));
         }
         else if (name == "subtier")
         {
-            subtiers.append(value);
+            predicates.push_back(
+                std::make_unique<SubtierPredicate>(value, isNegated));
         }
         else if (name == "has" && value == "link")
         {
-            predicates.push_back(std::make_unique<LinkPredicate>());
+            predicates.push_back(std::make_unique<LinkPredicate>(isNegated));
         }
         else if (name == "in")
         {
-            channels.append(value);
+            predicates.push_back(
+                std::make_unique<ChannelPredicate>(value, isNegated));
         }
         else if (name == "is")
         {
             predicates.push_back(
-                std::make_unique<MessageFlagsPredicate>(value));
+                std::make_unique<MessageFlagsPredicate>(value, isNegated));
         }
         else if (name == "regex")
         {
-            predicates.push_back(std::make_unique<RegexPredicate>(value));
+            predicates.push_back(
+                std::make_unique<RegexPredicate>(value, isNegated));
         }
         else
         {
             predicates.push_back(
                 std::make_unique<SubstringPredicate>(match.captured()));
         }
-    }
-
-    if (!authors.empty())
-    {
-        predicates.push_back(std::make_unique<AuthorPredicate>(authors));
-    }
-
-    if (!channels.empty())
-    {
-        predicates.push_back(std::make_unique<ChannelPredicate>(channels));
-    }
-
-    if (!badges.empty())
-    {
-        predicates.push_back(std::make_unique<BadgePredicate>(badges));
-    }
-
-    if (!subtiers.empty())
-    {
-        predicates.push_back(std::make_unique<SubtierPredicate>(subtiers));
     }
 
     return predicates;

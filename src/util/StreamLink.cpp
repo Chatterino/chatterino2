@@ -1,20 +1,20 @@
 #include "util/StreamLink.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
+#include "common/Version.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/SplitCommand.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
 
 #include <QErrorMessage>
 #include <QFileInfo>
 #include <QProcess>
-#include "common/QLogging.hpp"
-#include "common/Version.hpp"
 
 #include <functional>
 
@@ -75,17 +75,16 @@ namespace {
 
     QProcess *createStreamlinkProcess()
     {
-        auto p = new QProcess;
+        auto *p = new QProcess;
 
-        const QString path = [] {
+        const QString path = []() -> QString {
             if (getSettings()->streamlinkUseCustomPath)
             {
-                return getSettings()->streamlinkPath + "/" + getBinaryName();
+                const QString path = getSettings()->streamlinkPath;
+                return path.trimmed() + "/" + getBinaryName();
             }
-            else
-            {
-                return QString{getBinaryName()};
-            }
+
+            return {getBinaryName()};
         }();
 
         if (Version::instance().isFlatpak())

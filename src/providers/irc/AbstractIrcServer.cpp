@@ -1,7 +1,6 @@
 #include "AbstractIrcServer.hpp"
 
 #include "common/Channel.hpp"
-#include "common/Common.hpp"
 #include "common/QLogging.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
@@ -51,7 +50,7 @@ AbstractIrcServer::AbstractIrcServer()
         this->writeConnection_->connectionLost, [this](bool timeout) {
             qCDebug(chatterinoIrc)
                 << "Write connection reconnect requested. Timeout:" << timeout;
-            this->writeConnection_->smartReconnect.invoke();
+            this->writeConnection_->smartReconnect();
         });
 
     // Listen to read connection message signals
@@ -87,7 +86,7 @@ AbstractIrcServer::AbstractIrcServer()
                 this->addGlobalSystemMessage(
                     "Server connection timed out, reconnecting");
             }
-            this->readConnection_->smartReconnect.invoke();
+            this->readConnection_->smartReconnect();
         });
 }
 
@@ -373,10 +372,8 @@ std::shared_ptr<Channel> AbstractIrcServer::getCustomChannel(
 
 QString AbstractIrcServer::cleanChannelName(const QString &dirtyChannelName)
 {
-    if (dirtyChannelName.startsWith('#'))
-        return dirtyChannelName.mid(1);
-    else
-        return dirtyChannelName;
+    // This function is a Noop only for IRC, for Twitch it removes a leading '#' and lowercases the name
+    return dirtyChannelName;
 }
 
 void AbstractIrcServer::addFakeMessage(const QString &data)

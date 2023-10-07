@@ -1,11 +1,12 @@
 #pragma once
 
 #include "common/NetworkCommon.hpp"
-#include "util/QObjectRef.hpp"
 
 #include <QHttpMultiPart>
 #include <QNetworkRequest>
+#include <QPointer>
 #include <QTimer>
+
 #include <functional>
 #include <memory>
 
@@ -37,7 +38,7 @@ struct NetworkData {
 
     QNetworkRequest request_;
     bool hasCaller_{};
-    QObjectRef<QObject> caller_;
+    QPointer<QObject> caller_;
     bool cache_{};
     bool executeConcurrently_{};
 
@@ -67,6 +68,6 @@ private:
     QString hash_;
 };
 
-void load(const std::shared_ptr<NetworkData> &data);
+void load(std::shared_ptr<NetworkData> &&data);
 
 }  // namespace chatterino

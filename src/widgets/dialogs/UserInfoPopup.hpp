@@ -1,7 +1,6 @@
 #pragma once
 
 #include "widgets/DraggablePopup.hpp"
-#include "widgets/helper/ChannelView.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -15,6 +14,8 @@ namespace chatterino {
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 class Label;
+class ChannelView;
+class Split;
 
 class UserInfoPopup final : public DraggablePopup
 {
@@ -38,22 +39,29 @@ private:
     void updateLatestMessages();
 
     void loadAvatar(const QUrl &url);
-    bool isMod_;
-    bool isBroadcaster_;
+    bool isMod_{};
+    bool isBroadcaster_{};
 
     Split *split_;
 
     QString userName_;
     QString userId_;
     QString avatarUrl_;
+
     // The channel the popup was opened from (e.g. /mentions or #forsen). Can be a special channel.
     ChannelPtr channel_;
+
     // The channel the messages are rendered from (e.g. #forsen). Can be a special channel, but will try to not be where possible.
     ChannelPtr underlyingChannel_;
 
     pajlada::Signals::NoArgSignal userStateChanged_;
 
     std::unique_ptr<pajlada::Signals::ScopedConnection> refreshConnection_;
+
+    // If we should close the dialog automatically if the user clicks out
+    // Set based on the "Automatically close usercard when it loses focus" setting
+    // Pinned status is tracked in DraggablePopup::isPinned_.
+    const bool closeAutomatically_;
 
     struct {
         Button *avatarButton = nullptr;

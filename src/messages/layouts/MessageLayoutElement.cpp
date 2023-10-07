@@ -3,14 +3,27 @@
 #include "Application.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
-#include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 
 #include <QDebug>
 #include <QPainter>
 #include <QPainterPath>
+
+namespace {
+
+const QChar RTL_EMBED(0x202B);
+
+void alignRectBottomCenter(QRectF &rect, const QRectF &reference)
+{
+    QPointF newCenter(reference.center().x(),
+                      reference.bottom() - (rect.height() / 2.0));
+    rect.moveCenter(newCenter);
+}
+
+}  // namespace
 
 namespace chatterino {
 
@@ -52,12 +65,12 @@ bool MessageLayoutElement::hasTrailingSpace() const
     return this->trailingSpace;
 }
 
-int MessageLayoutElement::getLine() const
+size_t MessageLayoutElement::getLine() const
 {
     return this->line_;
 }
 
-void MessageLayoutElement::setLine(int line)
+void MessageLayoutElement::setLine(size_t line)
 {
     this->line_ = line;
 }
@@ -108,8 +121,8 @@ ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
     this->trailingSpace = creator.hasTrailingSpace();
 }
 
-void ImageLayoutElement::addCopyTextToString(QString &str, int from,
-                                             int to) const
+void ImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                             uint32_t to) const
 {
     const auto *emoteElement =
         dynamic_cast<EmoteElement *>(&this->getCreator());
@@ -117,19 +130,20 @@ void ImageLayoutElement::addCopyTextToString(QString &str, int from,
     {
         str += emoteElement->getEmote()->getCopyString();
         str = TwitchEmotes::cleanUpEmoteCode(str);
-        if (this->hasTrailingSpace())
+        if (this->hasTrailingSpace() && to >= 2)
         {
-            str += " ";
+            str += ' ';
         }
     }
 }
 
-int ImageLayoutElement::getSelectionIndexCount() const
+size_t ImageLayoutElement::getSelectionIndexCount() const
 {
     return this->trailingSpace ? 2 : 1;
 }
 
-void ImageLayoutElement::paint(QPainter &painter)
+void ImageLayoutElement::paint(QPainter &painter,
+                               const MessageColors & /*messageColors*/)
 {
     if (this->image_ == nullptr)
     {
@@ -167,7 +181,135 @@ int ImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
     return 0;
 }
 
-int ImageLayoutElement::getXFromIndex(int index)
+int ImageLayoutElement::getXFromIndex(size_t index)
+{
+    if (index <= 0)
+    {
+        return this->getRect().left();
+    }
+    else if (index == 1)
+    {
+        // fourtf: remove space width
+        return this->getRect().right();
+    }
+    else
+    {
+        return this->getRect().right();
+    }
+}
+
+//
+// LAYERED IMAGE
+//
+
+LayeredImageLayoutElement::LayeredImageLayoutElement(
+    MessageElement &creator, std::vector<ImagePtr> images,
+    std::vector<QSize> sizes, QSize largestSize)
+    : MessageLayoutElement(creator, largestSize)
+    , images_(std::move(images))
+    , sizes_(std::move(sizes))
+{
+    assert(this->images_.size() == this->sizes_.size());
+    this->trailingSpace = creator.hasTrailingSpace();
+}
+
+void LayeredImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                                    uint32_t to) const
+{
+    const auto *layeredEmoteElement =
+        dynamic_cast<LayeredEmoteElement *>(&this->getCreator());
+    if (layeredEmoteElement)
+    {
+        // cleaning is taken care in call
+        str += layeredEmoteElement->getCleanCopyString();
+        if (this->hasTrailingSpace() && to >= 2)
+        {
+            str += ' ';
+        }
+    }
+}
+
+size_t LayeredImageLayoutElement::getSelectionIndexCount() const
+{
+    return this->trailingSpace ? 2 : 1;
+}
+
+void LayeredImageLayoutElement::paint(QPainter &painter,
+                                      const MessageColors & /*messageColors*/)
+{
+    auto fullRect = QRectF(this->getRect());
+
+    for (size_t i = 0; i < this->images_.size(); ++i)
+    {
+        auto &img = this->images_[i];
+        if (img == nullptr)
+        {
+            continue;
+        }
+
+        auto pixmap = img->pixmapOrLoad();
+        if (img->animated())
+        {
+            // As soon as we see an animated emote layer, we can stop rendering
+            // the static emotes. The paintAnimated function will render any
+            // static emotes layered on top of the first seen animated emote.
+            return;
+        }
+
+        if (pixmap)
+        {
+            // Matching the web chat behavior, we center the emote within the overall
+            // binding box. E.g. small overlay emotes like cvMask will sit in the direct
+            // center of even wide emotes.
+            auto &size = this->sizes_[i];
+            QRectF destRect(0, 0, size.width(), size.height());
+            alignRectBottomCenter(destRect, fullRect);
+
+            painter.drawPixmap(destRect, *pixmap, QRectF());
+        }
+    }
+}
+
+void LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+{
+    auto fullRect = QRectF(this->getRect());
+    fullRect.moveTop(fullRect.y() + yOffset);
+    bool animatedFlag = false;
+
+    for (size_t i = 0; i < this->images_.size(); ++i)
+    {
+        auto &img = this->images_[i];
+        if (img == nullptr)
+        {
+            continue;
+        }
+
+        // If we have a static emote layered on top of an animated emote, we need
+        // to render the static emote again after animating anything below it.
+        if (img->animated() || animatedFlag)
+        {
+            if (auto pixmap = img->pixmapOrLoad())
+            {
+                // Matching the web chat behavior, we center the emote within the overall
+                // binding box. E.g. small overlay emotes like cvMask will sit in the direct
+                // center of even wide emotes.
+                auto &size = this->sizes_[i];
+                QRectF destRect(0, 0, size.width(), size.height());
+                alignRectBottomCenter(destRect, fullRect);
+
+                painter.drawPixmap(destRect, *pixmap, QRectF());
+                animatedFlag = true;
+            }
+        }
+    }
+}
+
+int LayeredImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
+{
+    return 0;
+}
+
+int LayeredImageLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {
@@ -280,7 +422,8 @@ ImageWithBackgroundLayoutElement::ImageWithBackgroundLayoutElement(
 {
 }
 
-void ImageWithBackgroundLayoutElement::paint(QPainter &painter)
+void ImageWithBackgroundLayoutElement::paint(
+    QPainter &painter, const MessageColors & /*messageColors*/)
 {
     if (this->image_ == nullptr)
     {
@@ -311,7 +454,8 @@ ImageWithCircleBackgroundLayoutElement::ImageWithCircleBackgroundLayoutElement(
 {
 }
 
-void ImageWithCircleBackgroundLayoutElement::paint(QPainter &painter)
+void ImageWithCircleBackgroundLayoutElement::paint(
+    QPainter &painter, const MessageColors & /*messageColors*/)
 {
     if (this->image_ == nullptr)
     {
@@ -358,33 +502,39 @@ void TextLayoutElement::listenToLinkChanges()
         });
 }
 
-void TextLayoutElement::addCopyTextToString(QString &str, int from,
-                                            int to) const
+void TextLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                            uint32_t to) const
 {
     str += this->getText().mid(from, to - from);
 
-    if (this->hasTrailingSpace())
+    if (this->hasTrailingSpace() && to > this->getText().length())
     {
-        str += " ";
+        str += ' ';
     }
 }
 
-int TextLayoutElement::getSelectionIndexCount() const
+size_t TextLayoutElement::getSelectionIndexCount() const
 {
     return this->getText().length() + (this->trailingSpace ? 1 : 0);
 }
 
-void TextLayoutElement::paint(QPainter &painter)
+void TextLayoutElement::paint(QPainter &painter,
+                              const MessageColors & /*messageColors*/)
 {
     auto app = getApp();
+    QString text = this->getText();
+    if (text.isRightToLeft() || this->reversedNeutral)
+    {
+        text.prepend(RTL_EMBED);
+    }
 
     painter.setPen(this->color_);
 
     painter.setFont(app->fonts->getFont(this->style_, this->scale_));
 
     painter.drawText(
-        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
-        this->getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
+        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000), text,
+        QTextOption(Qt::AlignLeft | Qt::AlignTop));
 }
 
 void TextLayoutElement::paintAnimated(QPainter &, int)
@@ -408,7 +558,8 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
         auto &&text = this->getText();
         auto width = metrics.horizontalAdvance(this->getText()[i]);
 
-        if (x + width > abs.x())
+        // accept mouse to be at only 50%+ of character width to increase index
+        if (x + (width * 0.5) > abs.x())
         {
             if (text.size() > i + 1 && QChar::isLowSurrogate(text[i].unicode()))
             {
@@ -429,7 +580,7 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
     return this->getSelectionIndexCount() - (this->hasTrailingSpace() ? 1 : 0);
 }
 
-int TextLayoutElement::getXFromIndex(int index)
+int TextLayoutElement::getXFromIndex(size_t index)
 {
     auto app = getApp();
 
@@ -467,23 +618,24 @@ TextIconLayoutElement::TextIconLayoutElement(MessageElement &creator,
 {
 }
 
-void TextIconLayoutElement::addCopyTextToString(QString &str, int from,
-                                                int to) const
+void TextIconLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                                uint32_t to) const
 {
 }
 
-int TextIconLayoutElement::getSelectionIndexCount() const
+size_t TextIconLayoutElement::getSelectionIndexCount() const
 {
     return this->trailingSpace ? 2 : 1;
 }
 
-void TextIconLayoutElement::paint(QPainter &painter)
+void TextIconLayoutElement::paint(QPainter &painter,
+                                  const MessageColors &messageColors)
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     QFont font = app->fonts->getFont(FontStyle::Tiny, this->scale);
 
-    painter.setPen(app->themes->messages.textColors.system);
+    painter.setPen(messageColors.system);
     painter.setFont(font);
 
     QTextOption option;
@@ -515,7 +667,7 @@ int TextIconLayoutElement::getMouseOverIndex(const QPoint &abs) const
     return 0;
 }
 
-int TextIconLayoutElement::getXFromIndex(int index)
+int TextIconLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {
@@ -533,35 +685,50 @@ int TextIconLayoutElement::getXFromIndex(int index)
 }
 
 ReplyCurveLayoutElement::ReplyCurveLayoutElement(MessageElement &creator,
-                                                 const QSize &size,
-                                                 float thickness,
+                                                 int width, float thickness,
+                                                 float radius,
                                                  float neededMargin)
-    : MessageLayoutElement(creator, size)
+    : MessageLayoutElement(creator, QSize(width, 0))
     , pen_(QColor("#888"), thickness, Qt::SolidLine, Qt::RoundCap)
+    , radius_(radius)
     , neededMargin_(neededMargin)
 {
 }
 
-void ReplyCurveLayoutElement::paint(QPainter &painter)
+void ReplyCurveLayoutElement::paint(QPainter &painter,
+                                    const MessageColors & /*messageColors*/)
 {
     QRectF paintRect(this->getRect());
-    QPainterPath bezierPath;
+    QPainterPath path;
 
-    qreal top = paintRect.top() + paintRect.height() * 0.25;  // 25% from top
-    qreal left = paintRect.left() + this->neededMargin_;
-    qreal bottom = paintRect.bottom() - this->neededMargin_;
-    QPointF startPoint(left, bottom);
-    QPointF controlPoint(left, top);
-    QPointF endPoint(paintRect.right(), top);
+    QRectF curveRect = paintRect.marginsRemoved(QMarginsF(
+        this->neededMargin_, this->neededMargin_, 0, this->neededMargin_));
 
-    // Create curve path
-    bezierPath.moveTo(startPoint);
-    bezierPath.quadTo(controlPoint, endPoint);
+    // Make sure that our curveRect can always fit the radius curve
+    if (curveRect.height() < this->radius_)
+    {
+        curveRect.setTop(curveRect.top() -
+                         (this->radius_ - curveRect.height()));
+    }
+
+    QPointF bStartPoint(curveRect.left(), curveRect.top() + this->radius_);
+    QPointF bEndPoint(curveRect.left() + this->radius_, curveRect.top());
+    QPointF bControlPoint(curveRect.topLeft());
+
+    // Draw line from bottom left to curve
+    path.moveTo(curveRect.bottomLeft());
+    path.lineTo(bStartPoint);
+
+    // Draw curve path
+    path.quadTo(bControlPoint, bEndPoint);
+
+    // Draw line from curve to top right
+    path.lineTo(curveRect.topRight());
 
     // Render curve
     painter.setPen(this->pen_);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.drawPath(bezierPath);
+    painter.drawPath(path);
 }
 
 void ReplyCurveLayoutElement::paintAnimated(QPainter &painter, int yOffset)
@@ -573,24 +740,22 @@ int ReplyCurveLayoutElement::getMouseOverIndex(const QPoint &abs) const
     return 0;
 }
 
-int ReplyCurveLayoutElement::getXFromIndex(int index)
+int ReplyCurveLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {
         return this->getRect().left();
     }
-    else
-    {
-        return this->getRect().right();
-    }
+
+    return this->getRect().right();
 }
 
-void ReplyCurveLayoutElement::addCopyTextToString(QString &str, int from,
-                                                  int to) const
+void ReplyCurveLayoutElement::addCopyTextToString(QString &str, uint32_t from,
+                                                  uint32_t to) const
 {
 }
 
-int ReplyCurveLayoutElement::getSelectionIndexCount() const
+size_t ReplyCurveLayoutElement::getSelectionIndexCount() const
 {
     return 1;
 }

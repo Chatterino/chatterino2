@@ -1,23 +1,21 @@
 #include "CommandPage.hpp"
 
+#include "Application.hpp"
+#include "controllers/commands/Command.hpp"
+#include "controllers/commands/CommandController.hpp"
+#include "controllers/commands/CommandModel.hpp"
+#include "singletons/Settings.hpp"
+#include "util/CombinePath.hpp"
+#include "util/LayoutCreator.hpp"
+#include "util/Qt.hpp"
+#include "util/StandardItemHelper.hpp"
+#include "widgets/helper/EditableModelView.hpp"
+
 #include <QHeaderView>
 #include <QLabel>
 #include <QPushButton>
 #include <QStandardItemModel>
 #include <QTableView>
-#include <QTextEdit>
-
-#include "Application.hpp"
-#include "controllers/commands/CommandController.hpp"
-#include "controllers/commands/CommandModel.hpp"
-#include "util/LayoutCreator.hpp"
-#include "util/StandardItemHelper.hpp"
-#include "widgets/helper/EditableModelView.hpp"
-//#include "widgets/helper/ComboBoxItemDelegate.hpp"
-#include "util/CombinePath.hpp"
-#include "util/Qt.hpp"
-
-#include <QLabel>
 #include <QTextEdit>
 
 // clang-format off
@@ -47,7 +45,8 @@ CommandPage::CommandPage()
     view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
-    view->addButtonPressed.connect([] {
+    // We can safely ignore this signal connection since we own the view
+    std::ignore = view->addButtonPressed.connect([] {
         getApp()->commands->items.append(
             Command{"/command", "I made a new command HeyGuys"});
     });

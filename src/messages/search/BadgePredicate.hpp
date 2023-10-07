@@ -2,6 +2,9 @@
 
 #include "messages/search/MessagePredicate.hpp"
 
+#include <QString>
+#include <QStringList>
+
 namespace chatterino {
 
 /**
@@ -16,10 +19,12 @@ public:
     /**
      * @brief Create an BadgePredicate with a list of badges to search for.
      *
-     * @param badges a list of badges that a message should contain 
+     * @param badges one or more comma-separated badges that a message should contain
+     * @param negate when set, excludes list of badges from results
      */
-    BadgePredicate(const QStringList &badges);
+    BadgePredicate(const QString &badges, bool negate);
 
+protected:
     /**
      * @brief Checks whether the message contains any of the badges passed
      *        in the constructor.
@@ -28,7 +33,7 @@ public:
      * @return true if the message contains a badge listed in the specified badges,
      *         false otherwise
      */
-    bool appliesTo(const Message &message) override;
+    bool appliesToImpl(const Message &message) override;
 
 private:
     /// Holds the badges that will be searched for

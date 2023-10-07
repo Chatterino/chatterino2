@@ -1,21 +1,29 @@
 #pragma once
 
-#include <memory>
-#include "common/Channel.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
-#include "common/WindowDescriptors.hpp"
-
-#include "pajlada/settings/settinglistener.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+
+#include <pajlada/settings/settinglistener.hpp>
+#include <QPoint>
+#include <QTimer>
+
+#include <memory>
 
 namespace chatterino {
 
 class Settings;
 class Paths;
 class Window;
-class SplitContainer;
 class ChannelView;
+class IndirectChannel;
+class Split;
+struct SplitDescriptor;
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
+class WindowLayout;
 
 enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
@@ -57,7 +65,14 @@ public:
     void repaintGifEmotes();
 
     Window &getMainWindow();
-    Window &getSelectedWindow();
+
+    // Returns a pointer to the last selected window.
+    // Edge cases:
+    //  - If the application was not focused since the start, this will return a pointer to the main window.
+    //  - If the window was closed this points to the main window.
+    //  - If the window was unfocused since being selected, this function will still return it.
+    Window *getLastSelectedWindow() const;
+
     Window &createWindow(WindowType type, bool show = true,
                          QWidget *parent = nullptr);
 
@@ -145,6 +160,8 @@ private:
 
     QTimer *saveTimer;
     QTimer miscUpdateTimer_;
+
+    friend class Window;  // this is for selectedWindow_
 };
 
 }  // namespace chatterino

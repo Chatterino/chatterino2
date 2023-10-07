@@ -5,313 +5,522 @@ on:
   push:
     branches:
       - master
+      - "bugfix-release/*"
+      - "release/*"
   pull_request:
   workflow_dispatch:
+  merge_group:
 
-concurrency: 
+concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/bugfix-release/') || startsWith(github.ref, 'refs/heads/release/') }}
+  CHATTERINO_REQUIRE_CLEAN_GIT: On
+  C2_BUILD_WITH_QT6: Off
+  # Last known good conan version
+  # 2.0.3 has a bug on Windows (conan-io/conan#13606)
+  CONAN_VERSION: 2.0.2
+
 jobs:
   build:
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ matrix.skip-crashpad && 'off' || 'on' }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-        qt-version: [5.15.2, 5.12.12]
-        pch: [true]
         include:
-          - os: ubuntu-latest
+          # Ubuntu 20.04, Qt 5.12
+          - os: ubuntu-20.04
+            qt-version: 5.12.12
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
+          # Ubuntu 22.04, Qt 5.15
+          - os: ubuntu-22.04
             qt-version: 5.15.2
-            pch: false
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: true
+          # Ubuntu 22.04, Qt 6.2.4 - tests LTO & plugins
+          - os: ubuntu-22.04
+            qt-version: 6.2.4
+            force-lto: true
+            plugins: true
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
+          # macOS
+          - os: macos-latest
+            qt-version: 5.15.2
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
+          # Windows
+          - os: windows-latest
+            qt-version: 6.5.0
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
+          # Windows 7/8
+          - os: windows-latest
+            qt-version: 5.15.2
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: true
+            clang-tidy-review: false
+
       fail-fast: false
 
     steps:
+      - name: Force LTO
+        if: matrix.force-lto
+        run: |
+          echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Enable plugin support
+        if: matrix.plugins
+        run: |
+          echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Set Crashpad
+        if: matrix.skip-crashpad == false
+        run: |
+          echo "C2_ENABLE_CRASHPAD=ON" >> "$GITHUB_ENV"
+        shell: bash
+
       - name: Set environment variables for windows-latest
         if: matrix.os == 'windows-latest'
         run: |
-            echo "vs_version=2022" >> $GITHUB_ENV
+          echo "vs_version=2022" >> "$GITHUB_ENV"
         shell: bash
 
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-          fetch-depth: 0  # allows for tags access
+      - name: Set BUILD_WITH_QT6
+        if: startsWith(matrix.qt-version, '6.')
+        run: |
+          echo "C2_BUILD_WITH_QT6=ON" >> "$GITHUB_ENV"
+        shell: bash
 
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v3
+      - uses: actions/checkout@v4
         with:
-          path: "${{ github.workspace }}/qt/"
-          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}
+          submodules: recursive
+          fetch-depth: 0 # allows for tags access
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+      - name: Install Qt5
+        if: startsWith(matrix.qt-version, '5.')
+        uses: jurplel/install-qt-action@v3.3.0
         with:
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
           version: ${{ matrix.qt-version }}
-          dir: "${{ github.workspace }}/qt/"
+
+      - name: Install Qt 6.5.3 imageformats
+        if: startsWith(matrix.qt-version, '6.')
+        uses: jurplel/install-qt-action@v3.3.0
+        with:
+          cache: false
+          modules: qtimageformats
+          set-env: false
+          version: 6.5.3
+          extra: --noarchives
+
+      - name: Find Qt 6.5.3 Path
+        if: startsWith(matrix.qt-version, '6.') && startsWith(matrix.os, 'windows')
+        shell: pwsh
+        id: find-good-imageformats
+        run: |
+          cd "$Env:RUNNER_WORKSPACE/Qt/6.5.3"
+          cd (Get-ChildItem)[0].Name
+          cd plugins/imageformats
+          echo "PLUGIN_PATH=$(pwd)" | Out-File -Path "$Env:GITHUB_OUTPUT" -Encoding ASCII
+
+      - name: Install Qt6
+        if: startsWith(matrix.qt-version, '6.')
+        uses: jurplel/install-qt-action@v3.3.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
+          modules: qt5compat qtimageformats
+          version: ${{ matrix.qt-version }}
 
       # WINDOWS
-      - name: Cache conan packages part 1
+      - name: Enable Developer Command Prompt (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1.12.1
+
+      - name: Setup conan variables (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          "C2_USE_OPENSSL3=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "True" } else { "False" })" >> "$Env:GITHUB_ENV"
+          "C2_CONAN_CACHE_SUFFIX=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "-QT6" } else { "`" })" >> "$Env:GITHUB_ENV"
+        shell: powershell
+
+      - name: Setup sccache (Windows)
+        # sccache v0.5.3
+        uses: nerixyz/ccache-action@9a7e8d00116ede600ee7717350c6594b8af6aaa5
+        if: startsWith(matrix.os, 'windows')
+        with:
+          variant: sccache
+          # only save on on the default (master) branch
+          save: ${{ github.event_name == 'push' }}
+          key: sccache-build-${{ matrix.os }}-${{ matrix.qt-version }}-${{ matrix.skip-crashpad }}
+          restore-keys: |
+            sccache-build-${{ matrix.os }}-${{ matrix.qt-version }}
+
+      - name: Cache conan packages (Windows)
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.txt') }}
-          path:  ~/.conan/
+          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}${{ env.C2_CONAN_CACHE_SUFFIX }}
+          path: ~/.conan2/
 
-      - name: Cache conan packages part 2
+      - name: Install Conan (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v3
-        with:
-          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
-          path: C:/.conan/
+        run: |
+          python3 -c "import site; import sys; print(f'{site.USER_BASE}\\Python{sys.version_info.major}{sys.version_info.minor}\\Scripts')" >> "$GITHUB_PATH"
+          pip3 install --user "conan==${{ env.CONAN_VERSION }}"
+        shell: powershell
 
-      - name: Add Conan to path
+      - name: Setup Conan (Windows)
         if: startsWith(matrix.os, 'windows')
-        run: echo "C:\Program Files\Conan\conan\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-        
+        run: |
+          conan --version
+          conan profile detect -f
+        shell: powershell
+
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-            choco install conan -y
-        
-      - name: Enable Developer Command Prompt
-        if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.11.0
+          mkdir build
+          cd build
+          conan install .. `
+              -s build_type=RelWithDebInfo `
+              -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" `
+              -b missing `
+              --output-folder=. `
+              -o with_openssl3="$Env:C2_USE_OPENSSL3"
+        shell: powershell
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
+        shell: pwsh
         run: |
-            mkdir build
-            cd build
-            conan install ..  -b missing
-            cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..
-            set cl=/MP
-            nmake /S /NOLOGO
-            windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
-            cp bin/chatterino.exe Chatterino2/
-            echo nightly > Chatterino2/modes
-            7z a chatterino-windows-x86-64.zip Chatterino2/
+          cd build
+          cmake `
+              -G"NMake Makefiles" `
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+              -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
+              -DUSE_PRECOMPILED_HEADERS=ON `
+              -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
+              -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
+              -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
+              -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
+              ..
+          set cl=/MP
+          nmake /S /NOLOGO
 
-      - name: Upload artifact (Windows)
+      - name: Build crashpad (Windows)
+        if: startsWith(matrix.os, 'windows') && !matrix.skip-crashpad
+        shell: pwsh
+        run: |
+          cd build
+          set cl=/MP
+          nmake /S /NOLOGO crashpad_handler
+          mkdir Chatterino2/crashpad
+          cp bin/crashpad/crashpad_handler.exe Chatterino2/crashpad/crashpad_handler.exe
+          7z a bin/chatterino-Qt-${{ matrix.qt-version }}.pdb.7z bin/chatterino.pdb
+
+      - name: Prepare build dir (windows)
         if: startsWith(matrix.os, 'windows')
+        run: |
+          cd build
+          windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
+          cp bin/chatterino.exe Chatterino2/
+          echo nightly > Chatterino2/modes
+
+      - name: Fix Qt6 (windows)
+        if: startsWith(matrix.qt-version, '6.') && startsWith(matrix.os, 'windows')
+        working-directory: build
+        run: |
+          cp ${{ steps.find-good-imageformats.outputs.PLUGIN_PATH }}/qwebp.dll Chatterino2/imageformats/qwebp.dll
+
+      - name: Package (windows)
+        if: startsWith(matrix.os, 'windows')
+        working-directory: build
+        run: |
+          7z a chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip Chatterino2/
+
+      - name: Upload artifact (Windows - binary)
+        if: startsWith(matrix.os, 'windows') && !matrix.skip-artifact
         uses: actions/upload-artifact@v3
         with:
-          name: chatterino-windows-x86-64-${{ matrix.qt-version }}.zip
-          path: build/chatterino-windows-x86-64.zip
+          name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
+          path: build/chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
 
-      - name: Clean Conan pkgs
+      - name: Upload artifact (Windows - symbols)
+        if: startsWith(matrix.os, 'windows') && !matrix.skip-artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}-symbols.pdb.7z
+          path: build/bin/chatterino-Qt-${{ matrix.qt-version }}.pdb.7z
+
+      - name: Clean Conan cache
         if: startsWith(matrix.os, 'windows')
-        run: conan remove "*" -fsb
+        run: conan cache clean --source --build --download "*"
         shell: bash
-        
+
       # LINUX
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            sudo apt-get update
-            sudo apt-get -y install \
-                cmake \
-                virtualenv \
-                rapidjson-dev \
-                libssl-dev \
-                libboost-dev \
-                libxcb-randr0-dev \
-                libboost-system-dev \
-                libboost-filesystem-dev \
-                libpulse-dev \
-                libxkbcommon-x11-0 \
-                libgstreamer-plugins-base1.0-0 \
-                build-essential \
-                libgl1-mesa-dev \
-                libxcb-icccm4 \
-                libxcb-image0 \
-                libxcb-keysyms1 \
-                libxcb-render-util0 \
-                libxcb-xinerama0
+          sudo apt-get update
+          sudo apt-get -y install \
+              cmake \
+              virtualenv \
+              rapidjson-dev \
+              libfuse2 \
+              libssl-dev \
+              libboost-dev \
+              libxcb-randr0-dev \
+              libboost-system-dev \
+              libboost-filesystem-dev \
+              libpulse-dev \
+              libxkbcommon-x11-0 \
+              build-essential \
+              libgl1-mesa-dev \
+              libxcb-icccm4 \
+              libxcb-image0 \
+              libxcb-keysyms1 \
+              libxcb-render-util0 \
+              libxcb-xinerama0
+
+      - name: Apply Qt patches (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.qt-version, '5.')
+        run: |
+          patch "$Qt5_DIR/include/QtConcurrent/qtconcurrentthreadengine.h" .patches/qt5-on-newer-gcc.patch
+        shell: bash
 
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            mkdir build
-            cd build
-            cmake \
-              -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
-              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
-              -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
-              ..
-            make -j$(nproc)
+          mkdir build
+          cd build
+          CXXFLAGS=-fno-sized-deallocation cmake \
+            -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
+            -DUSE_PRECOMPILED_HEADERS=OFF \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
+            -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+            -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
+            -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
+            ..
+          make -j"$(nproc)"
         shell: bash
 
       - name: clang-tidy review
-        if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        uses: pajlada/clang-tidy-review@feat/split-up-review-and-post-workflows
-        id: review
+        if: matrix.clang-tidy-review && github.event_name == 'pull_request'
+        uses: ZedThree/clang-tidy-review@v0.13.4
         with:
-          build_dir: build
-          config_file: '.clang-tidy'
+          build_dir: build-clang-tidy
+          config_file: ".clang-tidy"
           split_workflow: true
+          exclude: "lib/*"
+          cmake_command: >-
+            cmake -S. -Bbuild-clang-tidy 
+            -DCMAKE_BUILD_TYPE=Release 
+            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On 
+            -DUSE_PRECOMPILED_HEADERS=OFF 
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=On 
+            -DCHATTERINO_LTO=Off 
+            -DCHATTERINO_PLUGINS=On 
+            -DBUILD_WITH_QT6=Off
+            -DBUILD_TESTS=On
+            -DBUILD_BENCHMARKS=On
+          apt_packages: >-
+            qttools5-dev, qt5-image-formats-plugins, libqt5svg5-dev, 
+            libsecret-1-dev,
+            libboost-dev, libboost-system-dev, libboost-filesystem-dev,
+            libssl-dev,
+            rapidjson-dev,
+            libbenchmark-dev
 
-      - uses: actions/upload-artifact@v3
-        if: (startsWith(matrix.os, 'ubuntu') && matrix.pch == false && matrix.qt-version == '5.15.2' && github.event_name == 'pull_request')
-        with:
-          name: clang-tidy-review
-          path: |
-            clang-tidy-review-output.json
-            clang-tidy-review-metadata.json
+      - name: clang-tidy-review upload
+        if: matrix.clang-tidy-review && github.event_name == 'pull_request'
+        uses: ZedThree/clang-tidy-review/upload@v0.13.4
 
       - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu-20.04') && !matrix.skip-artifact
         run: |
-            cd build
-            sh ./../.CI/CreateAppImage.sh
+          cd build
+          sh ./../.CI/CreateAppImage.sh
         shell: bash
 
       - name: Package - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && !matrix.skip-artifact
         run: |
-            cd build
-            sh ./../.CI/CreateUbuntuDeb.sh
+          cd build
+          sh ./../.CI/CreateUbuntuDeb.sh
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu-20.04') && !matrix.skip-artifact
         uses: actions/upload-artifact@v3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && !matrix.skip-artifact
         uses: actions/upload-artifact@v3
         with:
-          name: Chatterino-${{ matrix.qt-version }}.deb
-          path: build/Chatterino.deb
+          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
+          path: build/Chatterino-${{ matrix.os }}-x86_64.deb
 
       # MACOS
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-            brew install boost openssl rapidjson p7zip create-dmg cmake tree
+          brew install boost openssl rapidjson p7zip create-dmg cmake tree
         shell: bash
 
       - name: Build (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-            mkdir build
-            cd build
-            cmake \
-                -DCMAKE_BUILD_TYPE=Release \
-                -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
-                -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-                -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
-                ..
-            make -j$(sysctl -n hw.logicalcpu)
+          mkdir build
+          cd build
+          cmake \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+              -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+              -DUSE_PRECOMPILED_HEADERS=OFF \
+              -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+              -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
+              -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
+              ..
+          make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
 
       - name: Package (MacOS)
         if: startsWith(matrix.os, 'macos')
+        env:
+          OUTPUT_DMG_PATH: chatterino-macos-Qt-${{ matrix.qt-version}}.dmg
         run: |
-            ls -la
-            pwd
-            ls -la build || true
-            cd build
-            sh ./../.CI/CreateDMG.sh
+          ls -la
+          pwd
+          ls -la build || true
+          cd build
+          ./../.CI/MacDeploy.sh
+          ./../.CI/CreateDMG.sh
         shell: bash
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v3
         with:
-          name: chatterino-osx-${{ matrix.qt-version }}.dmg
-          path: build/chatterino-osx.dmg
-
+          name: chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
+          path: build/chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
   create-release:
     needs: build
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # allows for tags access
+
+      - uses: actions/download-artifact@v3
+        name: Ubuntu 22.04 Qt6.2.4 deb
+        with:
+          name: Chatterino-ubuntu-22.04-Qt-6.2.4.deb
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        name: Windows Qt6.5.0
+        with:
+          name: chatterino-windows-x86-64-Qt-6.5.0.zip
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        name: Windows Qt6.5.0 symbols
+        with:
+          name: chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        name: Windows Qt5.15.2
+        with:
+          name: chatterino-windows-x86-64-Qt-5.15.2.zip
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        name: Linux Qt5.12.12 AppImage
+        with:
+          name: Chatterino-x86_64-5.12.12.AppImage
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        name: Ubuntu 20.04 Qt5.12.12 deb
+        with:
+          name: Chatterino-ubuntu-20.04-Qt-5.12.12.deb
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        name: Ubuntu 22.04 Qt5.15.2 deb
+        with:
+          name: Chatterino-ubuntu-22.04-Qt-5.15.2.deb
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v3
+        name: macOS x86_64 Qt5.15.2 dmg
+        with:
+          name: chatterino-macos-Qt-5.15.2.dmg
+          path: release-artifacts/
+
+      - name: Copy flatpakref
+        run: |
+          cp .CI/chatterino-nightly.flatpakref release-artifacts/
+        shell: bash
+
+      - name: Rename artifacts
+        run: |
+          ls -l
+          # Rename the macos build to indicate that it's for macOS 10.15 users
+          mv chatterino-macos-Qt-5.15.2.dmg Chatterino-macOS-10.15.dmg
+
+          mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
+
+          # Mark all Windows Qt5 builds as old
+          mv chatterino-windows-x86-64-Qt-5.15.2.zip chatterino-windows-old-x86-64-Qt-5.15.2.zip
+        working-directory: release-artifacts
+        shell: bash
+
       - name: Create release
-        id: create_release
-        uses: pajlada/create-release@v2.0.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1.13.0
         with:
-          tag_name: nightly-build
-          backup_tag_name: backup-nightly-build
-          release_name: Nightly Release
-          body: |
-              Nightly Build
+          replacesArtifacts: true
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifacts: "release-artifacts/*"
+          body: ${{ github.event.head_commit.message }}
           prerelease: true
+          name: Nightly Release
+          tag: nightly-build
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: chatterino-windows-x86-64-5.15.2.zip
-          path: windows/
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: Chatterino-x86_64-5.15.2.AppImage
-          path: linux/
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: Chatterino-5.15.2.deb
-          path: ubuntu/
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: chatterino-osx-5.15.2.dmg
-          path: macos/
-
-      # TODO: Extract dmg and appimage
-
-      # - name: Read upload URL into output
-      #   id: upload_url
-      #   run: |
-      #     echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
-
-      - name: Upload release asset (Windows)
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows/chatterino-windows-x86-64.zip
-          asset_name: chatterino-windows-x86-64.zip
-          asset_content_type: application/zip
-
-      - name: Upload release asset (Ubuntu)
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux/Chatterino-x86_64.AppImage
-          asset_name: Chatterino-x86_64.AppImage
-          asset_content_type: application/x-executable
-
-      - name: Upload release asset (Ubuntu .deb)
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ubuntu/Chatterino.deb
-          asset_name: Chatterino-x86_64.deb
-          asset_content_type: application/vnd.debian.binary-package
-
-      - name: Upload release asset (MacOS)
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos/chatterino-osx.dmg
-          asset_name: chatterino-osx.dmg
-          asset_content_type: application/x-bzip2
-
+      - name: Update nightly-build tag
+        run: |
+          git tag -f nightly-build
+          git push -f origin nightly-build
+        shell: bash

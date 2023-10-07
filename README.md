@@ -1,4 +1,4 @@
-![alt text](https://fourtf.com/img/chatterino-icon-64.png)
+![chatterinoLogo](https://user-images.githubusercontent.com/41973452/272541622-52457e89-5f16-4c83-93e7-91866c25b606.png)
 Chatterino 2 [![GitHub Actions Build (Windows, Ubuntu, MacOS)](https://github.com/Chatterino/chatterino2/workflows/Build/badge.svg?branch=master)](https://github.com/Chatterino/chatterino2/actions?query=workflow%3ABuild+branch%3Amaster) [![Cirrus CI Build (FreeBSD only)](https://api.cirrus-ci.com/github/Chatterino/chatterino2.svg?branch=master)](https://cirrus-ci.com/github/Chatterino/chatterino2/master) [![Chocolatey Package](https://img.shields.io/chocolatey/v/chatterino?include_prereleases)](https://chocolatey.org/packages/chatterino) [![Flatpak Package](https://img.shields.io/flathub/v/com.chatterino.chatterino)](https://flathub.org/apps/details/com.chatterino.chatterino)
 ============
 
@@ -44,13 +44,25 @@ git submodule update --init --recursive
 
 [Building on FreeBSD](../master/BUILDING_ON_FREEBSD.md)
 
+## Git blame
+
+This project has big commits in the history which for example update all line
+endings. To improve the output of git-blame, consider setting:
+
+```
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
+This will ignore all revisions mentioned in the [`.git-blame-ignore-revs`
+file](./.git-blame-ignore-revs). GitHub does this by default.
+
 ## Code style
 
 The code is formatted using clang format in Qt Creator. [.clang-format](src/.clang-format) contains the style file for clang format.
 
 ### Get it automated with QT Creator + Beautifier + Clang Format
 
-1. Download LLVM: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/LLVM-11.0.0-win64.exe
+1. Download LLVM: https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.5/LLVM-15.0.5-win64.exe
 2. During the installation, make sure to add it to your path
 3. In QT Creator, select `Help` > `About Plugins` > `C++` > `Beautifier` to enable the plugin
 4. Restart QT Creator

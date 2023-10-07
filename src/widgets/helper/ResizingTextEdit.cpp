@@ -1,11 +1,13 @@
 #include "widgets/helper/ResizingTextEdit.hpp"
 
 #include "common/Common.hpp"
-#include "common/CompletionModel.hpp"
+#include "common/QLogging.hpp"
+#include "controllers/completion/TabCompletionModel.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QMimeData>
 #include <QMimeDatabase>
+#include <QObject>
 
 namespace chatterino {
 
@@ -19,6 +21,19 @@ ResizingTextEdit::ResizingTextEdit()
 
     QObject::connect(this, &QTextEdit::textChanged, this,
                      &QWidget::updateGeometry);
+
+    QObject::connect(this, &QTextEdit::cursorPositionChanged, [this]() {
+        // If tab was pressed and we're completing/replacing the current word,
+        // this code will not even be called, see ResizingTextEdit::keyPressEvent
+
+        if (!this->completionInProgress_)
+        {
+            return;
+        }
+        qCDebug(chatterinoCommon)
+            << "Finishing completion because cursor moved";
+        this->completionInProgress_ = false;
+    });
 
     // Whenever the setting for emote completion changes, force a
     // refresh on the completion model the next time "Tab" is pressed
@@ -62,7 +77,11 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
 
     auto textUpToCursor = currentText.left(tc.selectionStart());
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    auto words = QStringView{textUpToCursor}.split(' ');
+#else
     auto words = textUpToCursor.splitRef(' ');
+#endif
     if (words.size() == 0)
     {
         return QString();
@@ -141,19 +160,25 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             return;
         }
 
+        // always expected to be TabCompletionModel
         auto *completionModel =
-            static_cast<CompletionModel *>(this->completer_->model());
+            dynamic_cast<TabCompletionModel *>(this->completer_->model());
+        assert(completionModel != nullptr);
 
         if (!this->completionInProgress_)
         {
             // First type pressing tab after modifying a message, we refresh our
             // completion model
             this->completer_->setModel(completionModel);
-            completionModel->refresh(currentCompletionPrefix,
-                                     this->isFirstWord());
+            completionModel->updateResults(currentCompletionPrefix,
+                                           this->isFirstWord());
             this->completionInProgress_ = true;
-            this->completer_->setCompletionPrefix(currentCompletionPrefix);
-            this->completer_->complete();
+            {
+                // this blocks cursor movement events from resetting tab completion
+                QSignalBlocker dontTriggerCursorMovement(this);
+                this->completer_->setCompletionPrefix(currentCompletionPrefix);
+                this->completer_->complete();
+            }
             return;
         }
 
@@ -178,7 +203,11 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             }
         }
 
-        this->completer_->complete();
+        {
+            // this blocks cursor movement events from updating tab completion
+            QSignalBlocker dontTriggerCursorMovement(this);
+            this->completer_->complete();
+        }
         return;
     }
 
@@ -246,6 +275,11 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
                      this, &ResizingTextEdit::insertCompletion);
 }
 
+void ResizingTextEdit::resetCompletion()
+{
+    this->completionInProgress_ = false;
+}
+
 void ResizingTextEdit::insertCompletion(const QString &completion)
 {
     if (this->completer_->widget() != this)
@@ -281,38 +315,37 @@ bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
 
 void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 {
-    if (source->hasImage())
+    if (getSettings()->imageUploaderEnabled)
     {
-        this->imagePasted.invoke(source);
-        return;
-    }
-    else if (source->hasUrls())
-    {
-        bool hasUploadable = false;
-        auto mimeDb = QMimeDatabase();
-        for (const QUrl url : source->urls())
-        {
-            QMimeType mime = mimeDb.mimeTypeForUrl(url);
-            if (mime.name().startsWith("image"))
-            {
-                hasUploadable = true;
-                break;
-            }
-        }
-
-        if (hasUploadable)
+        if (source->hasImage())
         {
             this->imagePasted.invoke(source);
             return;
         }
+
+        if (source->hasUrls())
+        {
+            bool hasUploadable = false;
+            auto mimeDb = QMimeDatabase();
+            for (const QUrl &url : source->urls())
+            {
+                QMimeType mime = mimeDb.mimeTypeForUrl(url);
+                if (mime.name().startsWith("image"))
+                {
+                    hasUploadable = true;
+                    break;
+                }
+            }
+
+            if (hasUploadable)
+            {
+                this->imagePasted.invoke(source);
+                return;
+            }
+        }
     }
 
     insertPlainText(source->text());
-}
-
-QCompleter *ResizingTextEdit::getCompleter() const
-{
-    return this->completer_;
 }
 
 }  // namespace chatterino

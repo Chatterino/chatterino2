@@ -1,7 +1,8 @@
 #include "common/ChatterSet.hpp"
 
-#include <tuple>
 #include "debug/Benchmark.hpp"
+
+#include <tuple>
 
 namespace chatterino {
 
@@ -53,6 +54,11 @@ std::vector<QString> ChatterSet::filterByPrefix(const QString &prefix) const
     }
 
     return result;
+}
+
+std::vector<std::pair<QString, QString>> ChatterSet::all() const
+{
+    return {this->items.begin(), this->items.end()};
 }
 
 }  // namespace chatterino

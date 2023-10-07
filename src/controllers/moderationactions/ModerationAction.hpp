@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QString>
+#include "util/RapidjsonHelpers.hpp"
+
 #include <boost/optional.hpp>
 #include <pajlada/serialize.hpp>
-
-#include "util/RapidjsonHelpers.hpp"
+#include <QString>
 
 #include <memory>
 

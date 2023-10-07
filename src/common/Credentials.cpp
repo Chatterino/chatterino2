@@ -11,13 +11,17 @@
 
 #ifndef NO_QTKEYCHAIN
 #    ifdef CMAKE_BUILD
-#        include "qt5keychain/keychain.h"
+#        if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#            include "qt6keychain/keychain.h"
+#        else
+#            include "qt5keychain/keychain.h"
+#        endif
 #    else
 #        include "keychain.h"
 #    endif
 #endif
-#include <QSaveFile>
 #include <boost/variant.hpp>
+#include <QSaveFile>
 
 #define FORMAT_NAME                                                  \
     ([&] {                                                           \
@@ -197,9 +201,9 @@ void Credentials::get(const QString &provider, const QString &name_,
     }
     else
     {
-        auto &instance = insecureInstance();
+        const auto &instance = insecureInstance();
 
-        onLoaded(instance.object().find(name).value().toString());
+        onLoaded(instance[name].toString());
     }
 }
 

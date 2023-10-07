@@ -1,16 +1,18 @@
 #include "widgets/helper/NotebookButton.hpp"
+
+#include "common/QLogging.hpp"
 #include "singletons/Theme.hpp"
-#include "widgets/Notebook.hpp"
 #include "widgets/helper/Button.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
+#include <QMimeData>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
 #include <QRadialGradient>
-
-#include <QMimeData>
 
 #define nuuls nullptr
 
@@ -49,12 +51,12 @@ void NotebookButton::paintEvent(QPaintEvent *event)
 
     if (mouseDown_ || mouseOver_)
     {
-        background = this->theme->tabs.regular.backgrounds.hover.color();
+        background = this->theme->tabs.regular.backgrounds.hover;
         foreground = this->theme->tabs.regular.text;
     }
     else
     {
-        background = this->theme->tabs.regular.backgrounds.regular.color();
+        background = this->theme->tabs.regular.backgrounds.regular;
         foreground = this->theme->tabs.regular.text;
     }
 
@@ -67,7 +69,7 @@ void NotebookButton::paintEvent(QPaintEvent *event)
         case Plus: {
             painter.setPen([&] {
                 QColor tmp = foreground;
-                if (SplitContainer::isDraggingSplit)
+                if (isDraggingSplit())
                 {
                     tmp = this->theme->tabs.selected.line.regular;
                 }
@@ -136,7 +138,7 @@ void NotebookButton::paintEvent(QPaintEvent *event)
         default:;
     }
 
-    Button::paintEvent(event);
+    this->paintButton(painter);
 }
 
 void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
@@ -181,32 +183,40 @@ void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
 
 void NotebookButton::dropEvent(QDropEvent *event)
 {
-    if (SplitContainer::isDraggingSplit)
+    auto *draggedSplit = dynamic_cast<Split *>(event->source());
+    if (!draggedSplit)
     {
-        event->acceptProposedAction();
-
-        Notebook *notebook = dynamic_cast<Notebook *>(this->parentWidget());
-
-        if (notebook != nuuls)
-        {
-            SplitContainer *page = new SplitContainer(notebook);
-            auto *tab = notebook->addPage(page);
-            page->setTab(tab);
-
-            SplitContainer::draggingSplit->setParent(page);
-            page->appendSplit(SplitContainer::draggingSplit);
-        }
+        qCDebug(chatterinoWidget)
+            << "Dropped something that wasn't a split onto a notebook button";
+        return;
     }
+
+    auto *notebook = dynamic_cast<Notebook *>(this->parentWidget());
+    if (!notebook)
+    {
+        qCDebug(chatterinoWidget) << "Dropped a split onto a notebook button "
+                                     "without a parent notebook";
+        return;
+    }
+
+    event->acceptProposedAction();
+
+    auto *page = new SplitContainer(notebook);
+    auto *tab = notebook->addPage(page);
+    page->setTab(tab);
+
+    draggedSplit->setParent(page);
+    page->insertSplit(draggedSplit);
 }
 
 void NotebookButton::hideEvent(QHideEvent *)
 {
-    this->parent_->performLayout();
+    this->parent_->refresh();
 }
 
 void NotebookButton::showEvent(QShowEvent *)
 {
-    this->parent_->performLayout();
+    this->parent_->refresh();
 }
 
 }  // namespace chatterino

@@ -1,9 +1,11 @@
-#include "ModerationAction.hpp"
+#include "controllers/moderationactions/ModerationAction.hpp"
 
-#include <QRegularExpression>
 #include "Application.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "messages/Image.hpp"
 #include "singletons/Resources.hpp"
+
+#include <QRegularExpression>
 
 namespace chatterino {
 

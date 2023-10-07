@@ -4,6 +4,7 @@
 
 #include <QTimer>
 #include <QWidget>
+
 #include <memory>
 
 namespace chatterino {
@@ -30,6 +31,9 @@ public:
     virtual ~AttachedWindow() override;
 
     static AttachedWindow *get(void *target_, const GetArgs &args);
+#ifdef USEWINSDK
+    static AttachedWindow *getForeground(const GetArgs &args);
+#endif
     static void detach(const QString &winId);
 
     void setChannel(ChannelPtr channel);
@@ -42,7 +46,7 @@ protected:
 private:
     struct {
         Split *split;
-    } ui_;
+    } ui_{};
 
     struct Item {
         void *hwnd;
@@ -57,7 +61,7 @@ private:
 
     void *target_;
     int yOffset_;
-    int currentYOffset_;
+    int currentYOffset_{};
     double x_ = -1;
     double pixelRatio_ = -1;
     int width_ = 360;

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QString>
 #include <pajlada/signals/signal.hpp>
+#include <QString>
 
 namespace chatterino {
 
@@ -23,6 +23,8 @@ public:
 
     // fourtf: don't add this class to the application class
     static Updates &instance();
+
+    static bool isDowngradeOf(const QString &online, const QString &current);
 
     void checkForUpdates();
     const QString &getCurrentVersion() const;
