@@ -291,7 +291,7 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
     const QString &text) const
 {
     auto result = std::vector<boost::variant<EmotePtr, QString>>();
-    int lastParsedEmojiEndIndex = 0;
+    QString::size_type lastParsedEmojiEndIndex = 0;
 
     for (auto i = 0; i < text.length(); ++i)
     {
@@ -311,17 +311,17 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
 
         const auto &possibleEmojis = it.value();
 
-        int remainingCharacters = text.length() - i - 1;
+        auto remainingCharacters = text.length() - i - 1;
 
         std::shared_ptr<EmojiData> matchedEmoji;
 
-        int matchedEmojiLength = 0;
+        QString::size_type matchedEmojiLength = 0;
 
         for (const std::shared_ptr<EmojiData> &emoji : possibleEmojis)
         {
-            int emojiNonQualifiedExtraCharacters =
+            auto emojiNonQualifiedExtraCharacters =
                 emoji->nonQualified.length() - 1;
-            int emojiExtraCharacters = emoji->value.length() - 1;
+            auto emojiExtraCharacters = emoji->value.length() - 1;
             if (remainingCharacters >= emojiExtraCharacters)
             {
                 // look in emoji->value
@@ -360,10 +360,10 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
             continue;
         }
 
-        int currentParsedEmojiFirstIndex = i;
-        int currentParsedEmojiEndIndex = i + (matchedEmojiLength);
+        auto currentParsedEmojiFirstIndex = i;
+        auto currentParsedEmojiEndIndex = i + (matchedEmojiLength);
 
-        int charactersFromLastParsedEmoji =
+        auto charactersFromLastParsedEmoji =
             currentParsedEmojiFirstIndex - lastParsedEmojiEndIndex;
 
         if (charactersFromLastParsedEmoji > 0)
