@@ -57,7 +57,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
         this->setWindowFlags(Qt::ToolTip);
 #else
         this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
-                             Qt::X11BypassWindowManagerHint |
+                             Qt::WindowDoesNotAcceptFocus |
                              Qt::BypassWindowManagerHint);
 #endif
     }
