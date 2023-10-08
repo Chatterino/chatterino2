@@ -955,10 +955,10 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
         return;
     }
 
-    std::optional<QString> oldUserID = makeConditionedOptional(
+    const auto oldUserID = makeConditionedOptional(
         !this->seventvUserID_.isEmpty() && this->seventvUserID_ != newUserID,
         this->seventvUserID_);
-    std::optional<QString> oldEmoteSetID =
+    const auto oldEmoteSetID =
         makeConditionedOptional(!this->seventvEmoteSetID_.isEmpty() &&
                                     this->seventvEmoteSetID_ != newEmoteSetID,
                                 this->seventvEmoteSetID_);
