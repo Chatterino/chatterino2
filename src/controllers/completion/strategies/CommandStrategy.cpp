@@ -2,6 +2,16 @@
 
 namespace chatterino::completion {
 
+QString normalizeQuery(const QString &query)
+{
+    if (query.startsWith('/') || query.startsWith('.'))
+    {
+        return query.mid(1);
+    }
+
+    return query;
+}
+
 CommandStrategy::CommandStrategy(bool startsWithOnly)
     : startsWithOnly_(startsWithOnly)
 {
@@ -11,11 +21,7 @@ void CommandStrategy::apply(const std::vector<CommandItem> &items,
                             std::vector<CommandItem> &output,
                             const QString &query) const
 {
-    QString normalizedQuery = query;
-    if (normalizedQuery.startsWith('/') || normalizedQuery.startsWith('.'))
-    {
-        normalizedQuery = normalizedQuery.mid(1);
-    }
+    QString normalizedQuery = normalizeQuery(query);
 
     if (startsWithOnly_)
     {

@@ -269,7 +269,7 @@ public:
     // contains a comma
     MOCK_METHOD(void, updateFollowerMode,
                 (QString broadcasterID, QString moderatorID,
-                 boost::optional<int> followerModeDuration,
+                 std::optional<int> followerModeDuration,
                  ResultCallback<HelixChatSettings> successCallback,
                  (FailureCallback<HelixUpdateChatSettingsError, QString>
                       failureCallback)),
@@ -279,7 +279,7 @@ public:
     // contains a comma
     MOCK_METHOD(void, updateNonModeratorChatDelay,
                 (QString broadcasterID, QString moderatorID,
-                 boost::optional<int> nonModeratorChatDelayDuration,
+                 std::optional<int> nonModeratorChatDelayDuration,
                  ResultCallback<HelixChatSettings> successCallback,
                  (FailureCallback<HelixUpdateChatSettingsError, QString>
                       failureCallback)),
@@ -289,7 +289,7 @@ public:
     // contains a comma
     MOCK_METHOD(void, updateSlowMode,
                 (QString broadcasterID, QString moderatorID,
-                 boost::optional<int> slowModeWaitTime,
+                 std::optional<int> slowModeWaitTime,
                  ResultCallback<HelixChatSettings> successCallback,
                  (FailureCallback<HelixUpdateChatSettingsError, QString>
                       failureCallback)),
@@ -321,7 +321,7 @@ public:
     // contains a comma
     MOCK_METHOD(void, banUser,
                 (QString broadcasterID, QString moderatorID, QString userID,
-                 boost::optional<int> duration, QString reason,
+                 std::optional<int> duration, QString reason,
                  ResultCallback<> successCallback,
                  (FailureCallback<HelixBanUserError, QString> failureCallback)),
                 (override));  // /timeout, /ban
