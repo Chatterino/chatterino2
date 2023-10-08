@@ -19,6 +19,7 @@
 - Bugfix: Fixed too much text being copied when copying chat messages. (#4812, #4830, #4839)
 - Bugfix: Fixed empty page being added when showing out of bounds dialog. (#4849)
 - Bugfix: Fixed issue on Windows preventing the title bar from being dragged in the top left corner. (#4873)
+- Bugfix: Fixed an issue where reply context didn't render correctly if an emoji was touching text. (#4875)
 - Bugfix: Fixed the input completion popup from disappearing when clicking on it on Windows and macOS. (#4876)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
