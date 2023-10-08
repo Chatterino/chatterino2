@@ -4,9 +4,8 @@
 #include "common/Singleton.hpp"
 #include "util/QStringHash.hpp"
 
-#include <boost/optional.hpp>
-
 #include <memory>
+#include <optional>
 #include <shared_mutex>
 #include <unordered_map>
 #include <vector>
@@ -22,7 +21,7 @@ public:
     virtual void initialize(Settings &settings, Paths &paths) override;
     ChatterinoBadges();
 
-    boost::optional<EmotePtr> getBadge(const UserId &id);
+    std::optional<EmotePtr> getBadge(const UserId &id);
 
 private:
     void loadChatterinoBadges();

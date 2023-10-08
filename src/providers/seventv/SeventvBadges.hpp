@@ -4,10 +4,10 @@
 #include "common/Singleton.hpp"
 #include "util/QStringHash.hpp"
 
-#include <boost/optional.hpp>
 #include <QJsonObject>
 
 #include <memory>
+#include <optional>
 #include <shared_mutex>
 #include <unordered_map>
 
@@ -20,7 +20,7 @@ class SeventvBadges : public Singleton
 {
 public:
     // Return the badge, if any, that is assigned to the user
-    boost::optional<EmotePtr> getBadge(const UserId &id) const;
+    std::optional<EmotePtr> getBadge(const UserId &id) const;
 
     // Assign the given badge to the user
     void assignBadgeToUser(const QString &badgeID, const UserId &userID);

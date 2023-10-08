@@ -12,6 +12,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
+#include "util/Variant.hpp"
 
 namespace chatterino {
 
@@ -665,59 +666,57 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
         container.first = FirstWord::Neutral;
         for (Word &word : this->words_)
         {
-            auto parsedWords = app->emotes->emojis.parse(word.text);
-            if (parsedWords.size() == 0)
+            for (const auto &parsedWord : app->emotes->emojis.parse(word.text))
             {
-                continue;  // sanity check
-            }
-
-            auto &parsedWord = parsedWords[0];
-            if (parsedWord.type() == typeid(QString))
-            {
-                if (!currentText.isEmpty())
+                if (parsedWord.type() == typeid(QString))
                 {
-                    currentText += ' ';
+                    if (!currentText.isEmpty())
+                    {
+                        currentText += ' ';
+                    }
+                    currentText += boost::get<QString>(parsedWord);
+                    QString prev =
+                        currentText;  // only increments the ref-count
+                    currentText =
+                        metrics.elidedText(currentText, Qt::ElideRight,
+                                           container.remainingWidth());
+                    if (currentText != prev)
+                    {
+                        break;
+                    }
                 }
-                currentText += word.text;
-                QString prev = currentText;  // only increments the ref-count
-                currentText = metrics.elidedText(currentText, Qt::ElideRight,
-                                                 container.remainingWidth());
-                if (currentText != prev)
+                else if (parsedWord.type() == typeid(EmotePtr))
                 {
-                    break;
+                    auto emote = boost::get<EmotePtr>(parsedWord);
+                    float overallScale = getSettings()->emoteScale.getValue() *
+                                         container.getScale();
+                    auto priority = emote->images.getPriority(overallScale);
+                    if (!priority)
+                    {
+                        break;
+                    }
+
+                    int currentWidth = metrics.horizontalAdvance(currentText);
+
+                    auto size = priority->firstLoadedImageSize() * overallScale;
+                    if (!container.fitsInLine(currentWidth + size.width()))
+                    {
+                        currentText += ellipsis;
+                        break;
+                    }
+
+                    // Add currently pending text to container, then add the emote after.
+                    container.addElementNoLineBreak(
+                        getTextLayoutElement(currentText, currentWidth, false));
+                    currentText.clear();
+
+                    // NOTE: This currently doesn't include spaces between the currentText & the new emoji
+                    // NOTE: We currently don't properly copy emojis here, since the owner is rarely an EmoteElement
+                    container.addElementNoLineBreak(
+                        (new PriorityImageLayoutElement(
+                             *this, std::move(*priority), size))
+                            ->setLink(this->getLink()));
                 }
-            }
-            else if (parsedWord.type() == typeid(EmotePtr))
-            {
-                auto emote = boost::get<EmotePtr>(parsedWord);
-                float overallScale =
-                    getSettings()->emoteScale.getValue() * container.getScale();
-                auto priority = emote->images.getPriority(overallScale);
-                if (!priority)
-                {
-                    return;
-                }
-
-                int currentWidth = metrics.horizontalAdvance(currentText);
-
-                auto size = priority->firstLoadedImageSize() * overallScale;
-                if (!container.fitsInLine(currentWidth + size.width()))
-                {
-                    currentText += ellipsis;
-                    break;
-                }
-
-                // Add currently pending text to container, then add the emote after.
-                container.addElementNoLineBreak(
-                    getTextLayoutElement(currentText, currentWidth, false));
-                currentText.clear();
-
-                // NOTE: This currently doesn't include spaces between the currentText & the new emoji
-                // NOTE: We currently don't properly copy emojis here, since the owner is rarely an EmoteElement
-                container.addElementNoLineBreak(
-                    (new PriorityImageLayoutElement(*this, std::move(*priority),
-                                                    size))
-                        ->setLink(this->getLink()));
             }
         }
 
@@ -789,7 +788,7 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
             if (auto image = action.getImage())
             {
                 container.addElement(
-                    (new ImageLayoutElement(*this, image.get(), size))
+                    (new ImageLayoutElement(*this, *image, size))
                         ->setLink(Link(Link::UserAction, action.getAction())));
             }
             else

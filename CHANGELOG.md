@@ -20,6 +20,8 @@
 - Bugfix: Fixed too much text being copied when copying chat messages. (#4812, #4830, #4839)
 - Bugfix: Fixed empty page being added when showing out of bounds dialog. (#4849)
 - Bugfix: Fixed issue on Windows preventing the title bar from being dragged in the top left corner. (#4873)
+- Bugfix: Fixed an issue where reply context didn't render correctly if an emoji was touching text. (#4875)
+- Bugfix: Fixed the input completion popup from disappearing when clicking on it on Windows and macOS. (#4876)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 - Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
@@ -36,6 +38,7 @@
 - Dev: Add a compile-time flag `CHATTERINO_UPDATER` which can be turned off to disable update checks. (#4854)
 - Dev: Add a compile-time flag `USE_SYSTEM_MINIAUDIO` which can be turned on to use the system miniaudio. (#4867)
 - Dev: Update vcpkg to use Qt6. (#4872)
+- Dev: Replace `boost::optional` with `std::optional`. (#4877)
 
 ## 2.4.6
 

@@ -110,7 +110,7 @@ namespace {
         {
             MessagePtr message = snapshot[i];
 
-            auto overrideFlags = boost::optional<MessageFlags>(message->flags);
+            auto overrideFlags = std::optional<MessageFlags>(message->flags);
             overrideFlags->set(MessageFlag::DoNotLog);
 
             if (checkMessageUserName(userName, message))

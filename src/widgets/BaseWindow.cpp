@@ -57,7 +57,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
         this->setWindowFlags(Qt::ToolTip);
 #else
         this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
-                             Qt::X11BypassWindowManagerHint |
+                             Qt::WindowDoesNotAcceptFocus |
                              Qt::BypassWindowManagerHint);
 #endif
     }
@@ -728,7 +728,7 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 
     if (auto dpi = getWindowDpi(msg->hwnd))
     {
-        float currentScale = (float)dpi.get() / 96.F;
+        float currentScale = (float)dpi.value() / 96.F;
         if (currentScale != this->nativeScale_)
         {
             this->nativeScale_ = currentScale;

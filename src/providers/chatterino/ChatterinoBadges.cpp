@@ -21,7 +21,7 @@ ChatterinoBadges::ChatterinoBadges()
 {
 }
 
-boost::optional<EmotePtr> ChatterinoBadges::getBadge(const UserId &id)
+std::optional<EmotePtr> ChatterinoBadges::getBadge(const UserId &id)
 {
     std::shared_lock lock(this->mutex_);
 
@@ -30,7 +30,7 @@ boost::optional<EmotePtr> ChatterinoBadges::getBadge(const UserId &id)
     {
         return emotes[it->second];
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 void ChatterinoBadges::loadChatterinoBadges()

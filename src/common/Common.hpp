@@ -1,11 +1,11 @@
 #pragma once
 
-#include <boost/optional.hpp>
 #include <boost/preprocessor.hpp>
 #include <QString>
 #include <QWidget>
 
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace chatterino {
