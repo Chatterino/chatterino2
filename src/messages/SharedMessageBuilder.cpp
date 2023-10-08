@@ -277,4 +277,5 @@ QString SharedMessageBuilder::stylizeUsername(const QString &username,
 
     return usernameText;
 }
+
 }  // namespace chatterino
