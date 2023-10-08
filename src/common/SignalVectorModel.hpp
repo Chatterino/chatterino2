@@ -128,7 +128,8 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override
     {
-        int row = index.row(), column = index.column();
+        int row = index.row();
+        int column = index.column();
         if (row < 0 || column < 0 || row >= this->rows_.size() ||
             column >= this->columnCount_)
         {
@@ -141,7 +142,8 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value,
                  int role) override
     {
-        int row = index.row(), column = index.column();
+        int row = index.row();
+        int column = index.column();
         if (row < 0 || column < 0 || row >= this->rows_.size() ||
             column >= this->columnCount_)
         {

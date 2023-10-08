@@ -308,7 +308,9 @@ void ChannelView::pause(PauseReason reason, std::optional<uint> msecs)
         {
             /// If the new time point is newer then we override.
             if (it->second && it->second.value() < timePoint)
+            {
                 it->second = timePoint;
+            }
         }
     }
     else

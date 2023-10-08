@@ -228,7 +228,7 @@ MessagePtr TwitchMessageBuilder::build()
             this->args.channelPointRewardId);
         if (reward)
         {
-            this->appendChannelPointRewardMessage(
+            TwitchMessageBuilder::appendChannelPointRewardMessage(
                 *reward, this, this->channel->isMod(),
                 this->channel->isBroadcaster());
         }
@@ -1115,7 +1115,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
             !this->isEmpty())
         {
             // Attempt to merge current zero-width emote into any previous emotes
-            auto asEmote = dynamic_cast<EmoteElement *>(&this->back());
+            auto *asEmote = dynamic_cast<EmoteElement *>(&this->back());
             if (asEmote)
             {
                 // Make sure to access asEmote before taking ownership when releasing
@@ -1131,7 +1131,8 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
                 return Success;
             }
 
-            auto asLayered = dynamic_cast<LayeredEmoteElement *>(&this->back());
+            auto *asLayered =
+                dynamic_cast<LayeredEmoteElement *>(&this->back());
             if (asLayered)
             {
                 asLayered->addEmoteLayer({*emote, flags});

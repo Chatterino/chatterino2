@@ -23,7 +23,7 @@
 
 namespace {
 
-std::optional<QByteArray> convertToPng(QImage image)
+std::optional<QByteArray> convertToPng(const QImage &image)
 {
     QByteArray imageData;
     QBuffer buf(&imageData);
@@ -31,16 +31,16 @@ std::optional<QByteArray> convertToPng(QImage image)
     bool success = image.save(&buf, "png");
     if (success)
     {
-        return std::optional<QByteArray>(imageData);
+        return imageData;
     }
-    else
-    {
-        return std::optional<QByteArray>(std::nullopt);
-    }
+
+    return std::nullopt;
 }
+
 }  // namespace
 
 namespace chatterino {
+
 // These variables are only used from the main thread.
 static auto uploadMutex = QMutex();
 static std::queue<RawImageData> uploadQueue;
@@ -271,7 +271,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                     return;
                 }
 
-                std::optional<QByteArray> imageData = convertToPng(img);
+                auto imageData = convertToPng(img);
                 if (imageData)
                 {
                     RawImageData data = {*imageData, "png", localPath};
@@ -339,8 +339,8 @@ void upload(const QMimeData *source, ChannelPtr channel,
 
     else
     {  // not PNG, try loading it into QImage and save it to a PNG.
-        QImage image = qvariant_cast<QImage>(source->imageData());
-        std::optional<QByteArray> imageData = convertToPng(image);
+        auto image = qvariant_cast<QImage>(source->imageData());
+        auto imageData = convertToPng(image);
         if (imageData)
         {
             uploadImageToNuuls({*imageData, "png", ""}, channel,

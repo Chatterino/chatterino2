@@ -44,14 +44,13 @@ float BaseWidget::scale() const
     {
         return *this->overrideScale_;
     }
-    else if (auto baseWidget = dynamic_cast<BaseWidget *>(this->window()))
+
+    if (auto *baseWidget = dynamic_cast<BaseWidget *>(this->window()))
     {
         return baseWidget->scale_;
     }
-    else
-    {
-        return 1.f;
-    }
+
+    return 1.F;
 }
 
 void BaseWidget::setScale(float value)

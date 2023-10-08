@@ -185,7 +185,10 @@ std::optional<EmotePtr> BttvEmotes::emote(const EmoteName &name) const
     auto it = emotes->find(name);
 
     if (it == emotes->end())
+    {
         return std::nullopt;
+    }
+
     return it->second;
 }
 
@@ -203,8 +206,10 @@ void BttvEmotes::loadEmotes()
             auto emotes = this->global_.get();
             auto pair = parseGlobalEmotes(result.parseJsonArray(), *emotes);
             if (pair.first)
+            {
                 this->setEmotes(
                     std::make_shared<EmoteMap>(std::move(pair.second)));
+            }
             return pair.first;
         })
         .execute();
@@ -251,13 +256,18 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
         .onError([channelId, channel, manualRefresh](auto result) {
             auto shared = channel.lock();
             if (!shared)
+            {
                 return;
+            }
+
             if (result.status() == 404)
             {
                 // User does not have any BTTV emotes
                 if (manualRefresh)
+                {
                     shared->addMessage(
                         makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                }
             }
             else
             {
