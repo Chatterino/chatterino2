@@ -1150,7 +1150,8 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     return Failure;
 }
 
-std::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(const Badge &badge)
+std::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
+    const Badge &badge) const
 {
     if (auto channelBadge =
             this->twitchChannel->twitchBadge(badge.key_, badge.value_))
