@@ -2,11 +2,12 @@
 
 #include "common/SignalVector.hpp"
 
-#include <boost/optional.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QAbstractTableModel>
 #include <QMimeData>
 #include <QStandardItem>
+
+#include <optional>
 
 namespace chatterino {
 
@@ -166,7 +167,7 @@ public:
 
             assert(this->rows_[row].original);
             TVectorItem item = this->getItemFromRow(
-                this->rows_[row].items, this->rows_[row].original.get());
+                this->rows_[row].items, this->rows_[row].original.value());
             this->vector_->insert(item, vecRow, this);
         }
 
@@ -262,7 +263,7 @@ public:
 
         TVectorItem item =
             this->getItemFromRow(this->rows_[sourceRow].items,
-                                 this->rows_[sourceRow].original.get());
+                                 this->rows_[sourceRow].original.value());
         this->vector_->removeAt(signalVectorRow);
         this->vector_->insert(
             item, this->getVectorIndexFromModelIndex(destinationChild));
@@ -417,7 +418,7 @@ protected:
 
     struct Row {
         std::vector<QStandardItem *> items;
-        boost::optional<TVectorItem> original;
+        std::optional<TVectorItem> original;
         bool isCustomRow;
 
         Row(std::vector<QStandardItem *> _items, bool _isCustomRow = false)

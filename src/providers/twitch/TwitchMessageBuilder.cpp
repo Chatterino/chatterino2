@@ -229,7 +229,7 @@ MessagePtr TwitchMessageBuilder::build()
         if (reward)
         {
             this->appendChannelPointRewardMessage(
-                reward.get(), this, this->channel->isMod(),
+                *reward, this, this->channel->isMod(),
                 this->channel->isBroadcaster());
         }
     }
@@ -1069,7 +1069,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     const auto &globalSeventvEmotes = app->twitch->getSeventvEmotes();
 
     auto flags = MessageElementFlags();
-    auto emote = boost::optional<EmotePtr>{};
+    auto emote = std::optional<EmotePtr>{};
     bool zeroWidth = false;
 
     // Emote order:
@@ -1124,8 +1124,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
                 auto baseEmoteElement = this->releaseBack();
 
                 std::vector<LayeredEmoteElement::Emote> layers = {
-                    {baseEmote, baseEmoteElement->getFlags()},
-                    {emote.get(), flags}};
+                    {baseEmote, baseEmoteElement->getFlags()}, {*emote, flags}};
                 this->emplace<LayeredEmoteElement>(
                     std::move(layers), baseEmoteElement->getFlags() | flags,
                     this->textColor_);
@@ -1135,7 +1134,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
             auto asLayered = dynamic_cast<LayeredEmoteElement *>(&this->back());
             if (asLayered)
             {
-                asLayered->addEmoteLayer({emote.get(), flags});
+                asLayered->addEmoteLayer({*emote, flags});
                 asLayered->addFlags(flags);
                 return Success;
             }
@@ -1143,15 +1142,14 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
             // No emote to merge with, just show as regular emote
         }
 
-        this->emplace<EmoteElement>(emote.get(), flags, this->textColor_);
+        this->emplace<EmoteElement>(*emote, flags, this->textColor_);
         return Success;
     }
 
     return Failure;
 }
 
-boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
-    const Badge &badge)
+std::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(const Badge &badge)
 {
     if (auto channelBadge =
             this->twitchChannel->twitchBadge(badge.key_, badge.value_))
@@ -1165,7 +1163,7 @@ boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
         return globalBadge;
     }
 
-    return boost::none;
+    return std::nullopt;
 }
 
 std::unordered_map<QString, QString> TwitchMessageBuilder::parseBadgeInfoTag(
@@ -1248,7 +1246,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
             {
                 this->emplace<ModBadgeElement>(
-                        customModBadge.get(),
+                        *customModBadge,
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customModBadge)->tooltip.string);
                 // early out, since we have to add a custom badge element here
@@ -1260,7 +1258,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             if (auto customVipBadge = this->twitchChannel->ffzCustomVipBadge())
             {
                 this->emplace<VipBadgeElement>(
-                        customVipBadge.get(),
+                        *customVipBadge,
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customVipBadge)->tooltip.string);
                 // early out, since we have to add a custom badge element here
@@ -1302,7 +1300,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             }
         }
 
-        this->emplace<BadgeElement>(badgeEmote.get(), badge.flag_)
+        this->emplace<BadgeElement>(*badgeEmote, badge.flag_)
             ->setTooltip(tooltip);
     }
 

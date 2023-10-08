@@ -35,6 +35,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 #include "util/QStringHash.hpp"
 #include "widgets/Window.hpp"
@@ -396,14 +397,14 @@ bool TwitchChannel::isChannelPointRewardKnown(const QString &rewardId)
     return it != pointRewards->end();
 }
 
-boost::optional<ChannelPointReward> TwitchChannel::channelPointReward(
+std::optional<ChannelPointReward> TwitchChannel::channelPointReward(
     const QString &rewardId) const
 {
     auto rewards = this->channelPointRewards_.accessConst();
     auto it = rewards->find(rewardId);
 
     if (it == rewards->end())
-        return boost::none;
+        return std::nullopt;
     return it->second;
 }
 
@@ -751,35 +752,34 @@ SharedAccessGuard<const TwitchChannel::StreamStatus>
     return this->streamStatus_.accessConst();
 }
 
-boost::optional<EmotePtr> TwitchChannel::bttvEmote(const EmoteName &name) const
+std::optional<EmotePtr> TwitchChannel::bttvEmote(const EmoteName &name) const
 {
     auto emotes = this->bttvEmotes_.get();
     auto it = emotes->find(name);
 
     if (it == emotes->end())
-        return boost::none;
+        return std::nullopt;
     return it->second;
 }
 
-boost::optional<EmotePtr> TwitchChannel::ffzEmote(const EmoteName &name) const
+std::optional<EmotePtr> TwitchChannel::ffzEmote(const EmoteName &name) const
 {
     auto emotes = this->ffzEmotes_.get();
     auto it = emotes->find(name);
 
     if (it == emotes->end())
-        return boost::none;
+        return std::nullopt;
     return it->second;
 }
 
-boost::optional<EmotePtr> TwitchChannel::seventvEmote(
-    const EmoteName &name) const
+std::optional<EmotePtr> TwitchChannel::seventvEmote(const EmoteName &name) const
 {
     auto emotes = this->seventvEmotes_.get();
     auto it = emotes->find(name);
 
     if (it == emotes->end())
     {
-        return boost::none;
+        return std::nullopt;
     }
     return it->second;
 }
@@ -865,7 +865,7 @@ void TwitchChannel::removeBttvEmote(
     }
 
     this->addOrReplaceLiveUpdatesAddRemove(false, "BTTV", QString() /*actor*/,
-                                           removed.get()->name.string);
+                                           (*removed)->name.string);
 }
 
 void TwitchChannel::addSeventvEmote(
@@ -904,7 +904,7 @@ void TwitchChannel::removeSeventvEmote(
     }
 
     this->addOrReplaceLiveUpdatesAddRemove(false, "7TV", dispatch.actorName,
-                                           removed.get()->name.string);
+                                           (*removed)->name.string);
 }
 
 void TwitchChannel::updateSeventvUser(
@@ -955,13 +955,13 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
         return;
     }
 
-    boost::optional<QString> oldUserID = boost::make_optional(
+    std::optional<QString> oldUserID = makeConditionedOptional(
         !this->seventvUserID_.isEmpty() && this->seventvUserID_ != newUserID,
         this->seventvUserID_);
-    boost::optional<QString> oldEmoteSetID =
-        boost::make_optional(!this->seventvEmoteSetID_.isEmpty() &&
-                                 this->seventvEmoteSetID_ != newEmoteSetID,
-                             this->seventvEmoteSetID_);
+    std::optional<QString> oldEmoteSetID =
+        makeConditionedOptional(!this->seventvEmoteSetID_.isEmpty() &&
+                                    this->seventvEmoteSetID_ != newEmoteSetID,
+                                this->seventvEmoteSetID_);
 
     this->seventvUserID_ = newUserID;
     this->seventvEmoteSetID_ = newEmoteSetID;
@@ -974,8 +974,8 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
             if (oldUserID || oldEmoteSetID)
             {
                 getApp()->twitch->dropSeventvChannel(
-                    oldUserID.get_value_or(QString()),
-                    oldEmoteSetID.get_value_or(QString()));
+                    oldUserID.value_or(QString()),
+                    oldEmoteSetID.value_or(QString()));
             }
         }
     });
@@ -1251,8 +1251,8 @@ void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)
     this->threads_[thread->rootId()] = thread;
 }
 
-const std::unordered_map<QString, std::weak_ptr<MessageThread>>
-    &TwitchChannel::threads() const
+const std::unordered_map<QString, std::weak_ptr<MessageThread>> &
+    TwitchChannel::threads() const
 {
     return this->threads_;
 }
@@ -1538,8 +1538,8 @@ void TwitchChannel::createClip()
         });
 }
 
-boost::optional<EmotePtr> TwitchChannel::twitchBadge(
-    const QString &set, const QString &version) const
+std::optional<EmotePtr> TwitchChannel::twitchBadge(const QString &set,
+                                                   const QString &version) const
 {
     auto badgeSets = this->badgeSets_.access();
     auto it = badgeSets->find(set);
@@ -1551,20 +1551,20 @@ boost::optional<EmotePtr> TwitchChannel::twitchBadge(
             return it2->second;
         }
     }
-    return boost::none;
+    return std::nullopt;
 }
 
-boost::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
+std::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
 {
     return this->ffzCustomModBadge_.get();
 }
 
-boost::optional<EmotePtr> TwitchChannel::ffzCustomVipBadge() const
+std::optional<EmotePtr> TwitchChannel::ffzCustomVipBadge() const
 {
     return this->ffzCustomVipBadge_.get();
 }
 
-boost::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
+std::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
 {
     auto sets = this->cheerEmoteSets_.access();
     for (const auto &set : *sets)
@@ -1590,7 +1590,7 @@ boost::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
             }
         }
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 void TwitchChannel::updateSevenTVActivity()

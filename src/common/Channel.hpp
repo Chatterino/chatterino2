@@ -4,13 +4,13 @@
 #include "controllers/completion/TabCompletionModel.hpp"
 #include "messages/LimitedQueue.hpp"
 
-#include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QDate>
 #include <QString>
 #include <QTimer>
 
 #include <memory>
+#include <optional>
 
 namespace chatterino {
 
@@ -52,7 +52,7 @@ public:
     pajlada::Signals::Signal<const QString &, const QString &, const QString &,
                              bool &>
         sendReplySignal;
-    pajlada::Signals::Signal<MessagePtr &, boost::optional<MessageFlags>>
+    pajlada::Signals::Signal<MessagePtr &, std::optional<MessageFlags>>
         messageAppended;
     pajlada::Signals::Signal<std::vector<MessagePtr> &> messagesAddedAtStart;
     pajlada::Signals::Signal<size_t, MessagePtr &> messageReplaced;
@@ -75,9 +75,8 @@ public:
     // overridingFlags can be filled in with flags that should be used instead
     // of the message's flags. This is useful in case a flag is specific to a
     // type of split
-    void addMessage(
-        MessagePtr message,
-        boost::optional<MessageFlags> overridingFlags = boost::none);
+    void addMessage(MessagePtr message,
+                    std::optional<MessageFlags> overridingFlags = std::nullopt);
     void addMessagesAtStart(const std::vector<MessagePtr> &messages_);
 
     /// Inserts the given messages in order by Message::serverReceivedTime.

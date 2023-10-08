@@ -9,7 +9,6 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 
-#include <boost/optional.hpp>
 #include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
@@ -134,9 +133,9 @@ public:
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
 
     // Emotes
-    boost::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
-    boost::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
-    boost::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
     std::shared_ptr<const EmoteMap> seventvEmotes() const;
@@ -172,13 +171,13 @@ public:
                            const QString &newEmoteSetID);
 
     // Badges
-    boost::optional<EmotePtr> ffzCustomModBadge() const;
-    boost::optional<EmotePtr> ffzCustomVipBadge() const;
-    boost::optional<EmotePtr> twitchBadge(const QString &set,
-                                          const QString &version) const;
+    std::optional<EmotePtr> ffzCustomModBadge() const;
+    std::optional<EmotePtr> ffzCustomVipBadge() const;
+    std::optional<EmotePtr> twitchBadge(const QString &set,
+                                        const QString &version) const;
 
     // Cheers
-    boost::optional<CheerEmote> cheerEmote(const QString &string);
+    std::optional<CheerEmote> cheerEmote(const QString &string);
 
     // Replies
     /**
@@ -217,7 +216,7 @@ public:
         channelPointRewardAdded;
     void addChannelPointReward(const ChannelPointReward &reward);
     bool isChannelPointRewardKnown(const QString &rewardId);
-    boost::optional<ChannelPointReward> channelPointReward(
+    std::optional<ChannelPointReward> channelPointReward(
         const QString &rewardId) const;
 
     // Live status
@@ -342,8 +341,8 @@ protected:
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;
-    Atomic<boost::optional<EmotePtr>> ffzCustomModBadge_;
-    Atomic<boost::optional<EmotePtr>> ffzCustomVipBadge_;
+    Atomic<std::optional<EmotePtr>> ffzCustomModBadge_;
+    Atomic<std::optional<EmotePtr>> ffzCustomVipBadge_;
 
 private:
     // Badges

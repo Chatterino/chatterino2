@@ -2,11 +2,11 @@
 
 #include "util/DisplayBadge.hpp"
 
-#include <boost/optional.hpp>
 #include <QComboBox>
 #include <QDialog>
 
 #include <memory>
+#include <optional>
 
 namespace chatterino {
 
@@ -14,7 +14,7 @@ class BadgePickerDialog : public QDialog,
                           public std::enable_shared_from_this<BadgePickerDialog>
 {
     using QIconPtr = std::shared_ptr<QIcon>;
-    using BadgeOpt = boost::optional<DisplayBadge>;
+    using BadgeOpt = std::optional<DisplayBadge>;
 
 public:
     BadgePickerDialog(QList<DisplayBadge> badges, QWidget *parent = nullptr);
