@@ -274,8 +274,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 auto imageData = convertToPng(img);
                 if (imageData)
                 {
-                    RawImageData data = {*imageData, "png", localPath};
-                    uploadQueue.push(data);
+                    uploadQueue.emplace(*imageData, "png", localPath);
                 }
                 else
                 {
