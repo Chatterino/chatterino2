@@ -189,8 +189,8 @@ QString HotkeyController::categoryName(HotkeyCategory category) const
     return categoryData.name;
 }
 
-const std::map<HotkeyCategory, HotkeyCategoryData> &
-    HotkeyController::categories() const
+const std::map<HotkeyCategory, HotkeyCategoryData>
+    &HotkeyController::categories() const
 {
     return this->hotkeyCategories_;
 }
