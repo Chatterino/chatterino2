@@ -668,27 +668,30 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
         {
             for (const auto &parsedWord : app->emotes->emojis.parse(word.text))
             {
-                auto visitor = variant::Overloaded{
-                    [&](const QString &text) {
-                        if (!currentText.isEmpty())
-                        {
-                            currentText += ' ';
-                        }
-                        currentText += text;
-                        QString prev =
-                            currentText;  // only increments the ref-count
-                        currentText =
-                            metrics.elidedText(currentText, Qt::ElideRight,
-                                               container.remainingWidth());
-                        return currentText != prev;
-                    },
-                    [&](const EmotePtr &emote) {
-                        auto image = emote->images.getImageOrLoaded(
-                            container.getScale());
-                        if (image->isEmpty())
-                        {
-                            return false;
-                        }
+                if (parsedWord.type() == typeid(QString))
+                {
+                    if (!currentText.isEmpty())
+                    {
+                        currentText += ' ';
+                    }
+                    currentText += boost::get<QString>(parsedWord);
+                    QString prev =
+                        currentText;  // only increments the ref-count
+                    currentText =
+                        metrics.elidedText(currentText, Qt::ElideRight,
+                                           container.remainingWidth());
+                    if (currentText != prev)
+                    {
+                        break;
+                    }
+                }
+                else if (parsedWord.type() == typeid(EmotePtr))
+                {
+                    auto emote = boost::get<EmotePtr>(parsedWord);
+                    auto image =
+                        emote->images.getImageOrLoaded(container.getScale());
+                    if (!image->isEmpty())
+                    {
                         auto emoteScale = getSettings()->emoteScale.getValue();
 
                         int currentWidth =
@@ -701,7 +704,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                                                   emoteSize.width()))
                         {
                             currentText += ellipsis;
-                            return true;
+                            break;
                         }
 
                         // Add currently pending text to container, then add the emote after.
@@ -712,13 +715,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                         container.addElementNoLineBreak(
                             (new ImageLayoutElement(*this, image, emoteSize))
                                 ->setLink(this->getLink()));
-                        return false;
-                    }};
-
-                bool done = boost::apply_visitor(visitor, parsedWord);
-                if (done)
-                {
-                    break;
+                    }
                 }
             }
         }
