@@ -37,6 +37,7 @@
 - Dev: Add a compile-time flag `CHATTERINO_UPDATER` which can be turned off to disable update checks. (#4854)
 - Dev: Add a compile-time flag `USE_SYSTEM_MINIAUDIO` which can be turned on to use the system miniaudio. (#4867)
 - Dev: Update vcpkg to use Qt6. (#4872)
+- Dev: Replace `boost::optional` with `std::optional`. (#4877)
 
 ## 2.4.6
 

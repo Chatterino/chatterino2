@@ -728,7 +728,7 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 
     if (auto dpi = getWindowDpi(msg->hwnd))
     {
-        float currentScale = (float)dpi.get() / 96.F;
+        float currentScale = (float)dpi.value() / 96.F;
         if (currentScale != this->nativeScale_)
         {
             this->nativeScale_ = currentScale;

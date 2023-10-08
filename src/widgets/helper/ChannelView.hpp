@@ -93,8 +93,8 @@ public:
 
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
-    void setOverrideFlags(boost::optional<MessageElementFlags> value);
-    const boost::optional<MessageElementFlags> &getOverrideFlags() const;
+    void setOverrideFlags(std::optional<MessageElementFlags> value);
+    const std::optional<MessageElementFlags> &getOverrideFlags() const;
     void updateLastReadMessage();
 
     /**
@@ -112,7 +112,7 @@ public:
     bool pausable() const;
     void setPausable(bool value);
     bool paused() const;
-    void pause(PauseReason reason, boost::optional<uint> msecs = boost::none);
+    void pause(PauseReason reason, std::optional<uint> msecs = std::nullopt);
     void unpause(PauseReason reason);
 
     MessageElementFlags getFlags() const;
@@ -195,7 +195,7 @@ private:
     void initializeSignals();
 
     void messageAppended(MessagePtr &message,
-                         boost::optional<MessageFlags> overridingFlags);
+                         std::optional<MessageFlags> overridingFlags);
     void messageAddedAtStart(std::vector<MessagePtr> &messages);
     void messageRemoveFromStart(MessagePtr &message);
     void messageReplaced(size_t index, MessagePtr &replacement);
@@ -265,15 +265,15 @@ private:
 
     bool pausable_ = false;
     QTimer pauseTimer_;
-    std::unordered_map<PauseReason, boost::optional<SteadyClock::time_point>>
+    std::unordered_map<PauseReason, std::optional<SteadyClock::time_point>>
         pauses_;
-    boost::optional<SteadyClock::time_point> pauseEnd_;
+    std::optional<SteadyClock::time_point> pauseEnd_;
     int pauseScrollMinimumOffset_ = 0;
     int pauseScrollMaximumOffset_ = 0;
     // Keeps track how many message indices we need to offset the selection when we resume scrolling
     uint32_t pauseSelectionOffset_ = 0;
 
-    boost::optional<MessageElementFlags> overrideFlags_;
+    std::optional<MessageElementFlags> overrideFlags_;
     MessageLayoutPtr lastReadMessage_;
 
     ThreadGuard snapshotGuard_;

@@ -136,7 +136,7 @@ bool ModerationAction::isImage() const
     return bool(this->image_);
 }
 
-const boost::optional<ImagePtr> &ModerationAction::getImage() const
+const std::optional<ImagePtr> &ModerationAction::getImage() const
 {
     assertInGuiThread();
 

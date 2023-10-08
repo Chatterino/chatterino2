@@ -1,9 +1,9 @@
 #include "providers/bttv/BttvLiveUpdates.hpp"
 
-#include <boost/optional.hpp>
 #include <gtest/gtest.h>
 #include <QString>
 
+#include <optional>
 #include <tuple>
 
 using namespace chatterino;
@@ -18,9 +18,9 @@ TEST(BttvLiveUpdates, AllEvents)
     chatterino::BttvLiveUpdates liveUpdates(host);
     liveUpdates.start();
 
-    boost::optional<BttvLiveUpdateEmoteUpdateAddMessage> addMessage;
-    boost::optional<BttvLiveUpdateEmoteUpdateAddMessage> updateMessage;
-    boost::optional<BttvLiveUpdateEmoteRemoveMessage> removeMessage;
+    std::optional<BttvLiveUpdateEmoteUpdateAddMessage> addMessage;
+    std::optional<BttvLiveUpdateEmoteUpdateAddMessage> updateMessage;
+    std::optional<BttvLiveUpdateEmoteRemoveMessage> removeMessage;
 
     std::ignore = liveUpdates.signals_.emoteAdded.connect([&](const auto &m) {
         addMessage = m;
