@@ -95,8 +95,10 @@ Note: This installation will take about 200 MB of disk space.
 Install [conan 2](https://conan.io/downloads.html) and make sure it's in your `PATH` (default setting).
 
 <details>
-   <summary>How to add conan 2 to PATH</summary>
-   
+   <summary>Adding conan to your PATH if you installed it with pip</summary>
+
+_Note: This will add all Python-scripts to your `PATH`, conan being one of them._
+
 1. Type "path" in the start menu and click on the "Edit the system environment variables" result that shows up (this should open up the 'System Properties' window with the 'Advanced' tab selected).
 2. Press on the "Environment Variables..." button near the bottom right of the 'System Properties' window to open up the 'Environment Variables' window.
 3. Within 'Environment Variables', look at the bottom half of the window where it lists 'System variables' and double click on the variable named 'Path' to open up the 'Edit environment variable' window.
