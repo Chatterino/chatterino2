@@ -4,7 +4,6 @@ This is a set of guidelines for contributing to Chatterino. The goal is to teach
 
 ### General (non-code related) guidelines for contributing to Chatterino
 - Make a specific branch for your pull request instead of using the master, main, or mainline branch. This will prevent future problems with updating your branch after your PR is merged.
-- Update the CHANGELOG.md file to include bug fixes and features that you implemented. The number behind the changelog entry indicates the number of the pull request.
 
 # Tooling
 
