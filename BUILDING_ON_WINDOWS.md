@@ -102,7 +102,7 @@ Install [conan 2](https://conan.io/downloads.html) and make sure it's in your `P
 3. Within 'Environment Variables', look at the bottom half of the window where it lists 'System variables' and double click on the variable named 'Path' to open up the 'Edit environment variable' window.
 4. Press the 'New' button near the top right to create a new environment variable.
 5. Open up your terminal with the Visual Studio environment variables (e.g. `x64 Native Tools Command Prompt for VS 2022`) and type "where conan" to find the file path (the folder that contains the conan.exe) to add.
-6. Add conan 2's file path (e.g. `C:\Users\willg\AppData\Roaming\Python\Python311\Scripts`) to the blank text box that shows up.
+6. Add conan 2's file path (e.g. `C:\Users\example\AppData\Roaming\Python\Python311\Scripts`) to the blank text box that shows up.
 7. Press the "OK" button.
 
 </details>
