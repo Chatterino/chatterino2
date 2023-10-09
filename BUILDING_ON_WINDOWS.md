@@ -20,6 +20,7 @@ Notes:
 1. Visit the [Qt Open Source Page](https://www.qt.io/download-open-source).
 2. Scroll down to the bottom
 3. Then select "Download the Qt Online Installer"
+4. Within the installer, Qt will prompt you to create an account to access Qt downloads.
 
 Notes:
 
@@ -28,15 +29,28 @@ Notes:
 #### When prompted which components to install:
 
 1. Unfold the tree element that says "Qt"
-2. Unfold the top most tree element (latest stable Qt version, e.g. `Qt 5.15.2`)
+2. Unfold the top most tree element (latest stable Qt version, e.g. `Qt 6.5.3`)
 3. Under this version, select the following entries:
    - `MSVC 2019 64-bit` (or alternative version if you are using that)
+   - `Qt 5 Compatibility Module`
+   - `Additional Libraries` > `Qt Image Formats`
 4. Under the "Tools" tree element (at the bottom), ensure that `Qt Creator X.X.X` and `Debugging Tools for Windows` are selected. (they should be checked by default)
 5. Continue through the installer and let the installer finish installing Qt.
 
 Note: This installation will take about 2 GB of disk space.
 
-Once Qt is done installing, make sure you add its bin directory to your `PATH` (e.g. `C:\Qt\5.15.2\msvc2019_64\bin`)
+Once Qt is done installing, make sure you add its bin directory to your `PATH` (e.g. `C:\Qt\6.5.3\msvc2019_64\bin`)
+
+<details>
+   <summary>How to add Qt to PATH</summary>
+   
+1. Type "path" in the Windows start menu and click `Edit the system environment variables`.
+2. Click the `Environment Variables...` button bottom right.
+3. In the `User variables` (scoped to the current user) or `System variables` (system-wide) section, scroll down until you find `Path` and double click it.
+4. Click the `New` button top right and paste in the file path for your Qt installation (e.g. `C:\Qt\6.5.3\msvc2019_64\bin` by default).
+5. Click `Ok`
+
+</details>
 
 ### Advanced dependencies
 
@@ -82,6 +96,21 @@ Note: This installation will take about 200 MB of disk space.
 
 Install [conan 2](https://conan.io/downloads.html) and make sure it's in your `PATH` (default setting).
 
+<details>
+   <summary>Adding conan to your PATH if you installed it with pip</summary>
+
+_Note: This will add all Python-scripts to your `PATH`, conan being one of them._
+
+1. Type "path" in the Windows start menu and click `Edit the system environment variables`.
+2. Click the `Environment Variables...` button bottom right.
+3. In the `System variables` section, scroll down until you find `Path` and double click it.
+4. Click the `New` button top right.
+5. Open up a terminal `where.exe conan` to find the file path (the folder that contains the conan.exe) to add.
+6. Add conan 2's file path (e.g. `C:\Users\example\AppData\Roaming\Python\Python311\Scripts`) to the blank text box that shows up. This is your current Python installation's scripts folder.
+7. Click `Ok`
+
+</details>
+
 Then in a terminal, configure conan to use `NMake Makefiles` as its generator:
 
 1. Generate a new profile  
@@ -89,12 +118,12 @@ Then in a terminal, configure conan to use `NMake Makefiles` as its generator:
 
 #### Build
 
-Open up your terminal with the Visual Studio environment variables (e.g. `x64 Native Tools Command Prompt for VS 2022`), cd to the cloned c2 directory and run the following commands:
+Open up your terminal with the Visual Studio environment variables (e.g. `x64 Native Tools Command Prompt for VS 2022`), cd to the cloned chatterino2 directory and run the following commands:
 
 1. `mkdir build`
 1. `cd build`
 1. `conan install .. -s build_type=Release -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" --build=missing --output-folder=.`
-1. `cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_PREFIX_PATH="C:\Qt\5.15.2\msvc2019_64" ..`
+1. `cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_PREFIX_PATH="C:\Qt\6.5.3\msvc2019_64" ..`
 1. `nmake`
 
 To build a debug build, you'll also need to add the `-s compiler.runtime_type=Debug` flag to the `conan install` invocation. See [this StackOverflow post](https://stackoverflow.com/questions/59828611/windeployqt-doesnt-deploy-qwindowsd-dll-for-a-debug-application/75607313#75607313)
@@ -104,7 +133,7 @@ To build a debug build, you'll also need to add the `-s compiler.runtime_type=De
 Once Chatterino has finished building, to ensure all .dll's are available you can run this from the build directory:  
 `windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir bin/`
 
-Can't find windeployqt? You forgot to add your Qt bin directory (e.g. `C:\Qt\5.15.2\msvc2019_64\bin`) to your `PATH`
+Can't find windeployqt? You forgot to add your Qt bin directory (e.g. `C:\Qt\6.5.3\msvc2019_64\bin`) to your `PATH`
 
 ### Run the build in Qt Creator
 
@@ -118,7 +147,7 @@ Can't find windeployqt? You forgot to add your Qt bin directory (e.g. `C:\Qt\5.1
 - In the main screen, click the green "play symbol" on the bottom left to run the project directly.
 - Click the hammer on the bottom left to generate a build (does not run the build though).
 
-Build results will be placed in a folder at the same level as the "chatterino2" project folder (e.g. if your sources are at `C:\Users\example\src\chatterino2`, then the build will be placed in an automatically generated folder under `C:\Users\example\src`, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release`.)
+Build results will be placed in a folder at the same level as the "chatterino2" project folder (e.g. if your sources are at `C:\Users\example\src\chatterino2`, then the build will be placed in an automatically generated folder under `C:\Users\example\src`, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_6.5.3_MSVC2019_64bit-Release`.)
 
 - Note that if you are building chatterino purely for usage, not for development, it is recommended that you click the "PC" icon above the play icon and select "Release" instead of "Debug".
 - Output and error messages produced by the compiler can be seen under the "4 Compile Output" tab in Qt Creator.
@@ -127,17 +156,17 @@ Build results will be placed in a folder at the same level as the "chatterino2" 
 
 If you build chatterino, the result directories will contain a `chatterino.exe` file in the `$OUTPUTDIR\release\` directory. This `.exe` file will not directly run on any given target system, because it will be lacking various Qt runtimes.
 
-To produce a standalone package, you need to generate all required files using the tool `windeployqt`. This tool can be found in the `bin` directory of your Qt installation, e.g. at `C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe`.
+To produce a standalone package, you need to generate all required files using the tool `windeployqt`. This tool can be found in the `bin` directory of your Qt installation, e.g. at `C:\Qt\6.5.3\msvc2019_64\bin\windeployqt.exe`.
 
 To produce all supplement files for a standalone build, follow these steps (adjust paths as required):
 
-1.  Navigate to your build output directory with Windows Explorer, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release`
+1.  Navigate to your build output directory with Windows Explorer, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_6.5.3_MSVC2019_64bit-Release`
 2.  Enter the `release` directory
 3.  Delete all files except the `chatterino.exe` file. You should be left with a directory only containing `chatterino.exe`.
 4.  Open a command prompt and execute:
 
-        cd C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release\release
-        C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe chatterino.exe
+        cd C:\Users\example\src\build-chatterino-Desktop_Qt_6.5.3_MSVC2019_64bit-Release\release
+        C:\Qt\6.5.3\msvc2019_64\bin\windeployqt.exe chatterino.exe
 
 5.  The `releases` directory will now be populated with all the required files to make the chatterino build standalone.
 
@@ -168,7 +197,7 @@ Clone the repository as described in the readme. Open a terminal in the cloned f
 Now open the project in CLion. You will be greeted with the _Open Project Wizard_. Set the _CMake Options_ to
 
 ```
--DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64\lib\cmake\Qt5
+-DCMAKE_PREFIX_PATH=C:\Qt\6.5.3\msvc2019_64\lib\cmake\Qt6
 -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake"
 ```
 
@@ -185,7 +214,7 @@ After the CMake project is loaded, open the _Run/Debug Configurations_.
 
 Select the `CMake Applications > chatterino` configuration and add a new _Run External tool_ task to _Before launch_.
 
-- Set the _Program_ to `C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe`
+- Set the _Program_ to `C:\Qt\6.5.3\msvc2019_64\bin\windeployqt.exe`
 - Set the _Arguments_
   to `$CMakeCurrentProductFile$ --debug --no-compiler-runtime --no-translations --no-opengl-sw --dir bin/`
 - Set the _Working directory_ to `$ProjectFileDir$\build`
