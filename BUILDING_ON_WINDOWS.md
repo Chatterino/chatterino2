@@ -107,7 +107,7 @@ _Note: This will add all Python-scripts to your `PATH`, conan being one of them.
 4. Press the 'New' button near the top right to create a new environment variable.
 5. Open up your terminal with the Visual Studio environment variables (e.g. `x64 Native Tools Command Prompt for VS 2022`) and type "where conan" to find the file path (the folder that contains the conan.exe) to add.
 6. Add conan 2's file path (e.g. `C:\Users\example\AppData\Roaming\Python\Python311\Scripts`) to the blank text box that shows up. This is your current Python installation's scripts folder.
-7. Press the "OK" button.
+7. Click `Ok`
 
 </details>
 
