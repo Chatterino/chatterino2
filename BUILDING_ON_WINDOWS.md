@@ -29,7 +29,7 @@ Notes:
 #### When prompted which components to install:
 
 1. Unfold the tree element that says "Qt"
-2. Unfold the top most tree element (latest stable Qt version, e.g. `Qt 5.15.2`)
+2. Unfold the top most tree element (latest stable Qt version, e.g. `Qt 6.5.3`)
 3. Under this version, select the following entries:
    - `MSVC 2019 64-bit` (or alternative version if you are using that)
 4. Under the "Tools" tree element (at the bottom), ensure that `Qt Creator X.X.X` and `Debugging Tools for Windows` are selected. (they should be checked by default)
@@ -37,14 +37,14 @@ Notes:
 
 Note: This installation will take about 2 GB of disk space.
 
-Once Qt is done installing, make sure you add its bin directory to your `PATH` (e.g. `C:\Qt\5.15.2\msvc2019_64\bin`)
+Once Qt is done installing, make sure you add its bin directory to your `PATH` (e.g. `C:\Qt\6.5.3\msvc2019_64\bin`)
 <details>
    <summary>How to add Qt to PATH</summary>
    
 1. Type "path" in the Windows start menu and click `Edit the system environment variables`.
 2. Click the `Environment Variables...` button bottom right.
 3. In the `System variables` section, scroll down until you find `Path` and double click it.
-4. Click the 'New' button top right and paste in the file path for your Qt installation (e.g. `C:\Qt\5.15.2\msvc2019_64\bin` by default).
+4. Click the 'New' button top right and paste in the file path for your Qt installation (e.g. `C:\Qt\6.5.3\msvc2019_64\bin` by default).
 5. Click `Ok`
 
 </details>
