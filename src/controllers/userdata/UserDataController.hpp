@@ -7,11 +7,11 @@
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/serialize/Container.hpp"
 
-#include <boost/optional.hpp>
 #include <pajlada/settings.hpp>
 #include <QColor>
 #include <QString>
 
+#include <optional>
 #include <shared_mutex>
 #include <unordered_map>
 
@@ -22,7 +22,7 @@ class IUserDataController
 public:
     virtual ~IUserDataController() = default;
 
-    virtual boost::optional<UserData> getUser(const QString &userID) const = 0;
+    virtual std::optional<UserData> getUser(const QString &userID) const = 0;
 
     virtual void setUserColor(const QString &userID,
                               const QString &colorString) = 0;
@@ -35,7 +35,7 @@ public:
 
     // Get extra data about a user
     // If the user does not have any extra data, return none
-    boost::optional<UserData> getUser(const QString &userID) const override;
+    std::optional<UserData> getUser(const QString &userID) const override;
 
     // Update or insert extra data for the user's color override
     void setUserColor(const QString &userID,

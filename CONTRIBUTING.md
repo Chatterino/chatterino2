@@ -43,7 +43,7 @@ int compare(const QString &a, const QString &b);
  * link
  * ^^^ No need to repeat the obvious.
  */
-boost::optional<QRegularExpressionMatch> matchLink(const QString &text);
+std::optional<QRegularExpressionMatch> matchLink(const QString &text);
 ```
 
 # Code

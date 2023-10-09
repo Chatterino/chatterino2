@@ -22,7 +22,7 @@ using GetDpiForMonitor_ = HRESULT(CALLBACK *)(HMONITOR, MONITOR_DPI_TYPE,
                                               UINT *, UINT *);
 
 // TODO: This should be changed to `GetDpiForWindow`.
-boost::optional<UINT> getWindowDpi(HWND hwnd)
+std::optional<UINT> getWindowDpi(HWND hwnd)
 {
     static HINSTANCE shcore = LoadLibrary(L"Shcore.dll");
     if (shcore != nullptr)
@@ -41,7 +41,7 @@ boost::optional<UINT> getWindowDpi(HWND hwnd)
         }
     }
 
-    return boost::none;
+    return std::nullopt;
 }
 
 void flushClipboard()

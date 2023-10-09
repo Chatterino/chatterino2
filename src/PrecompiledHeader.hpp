@@ -2,7 +2,6 @@
 #    include <boost/circular_buffer.hpp>
 #    include <boost/current_function.hpp>
 #    include <boost/foreach.hpp>
-#    include <boost/optional.hpp>
 #    include <boost/signals2.hpp>
 #    include <IrcCommand>
 #    include <IrcConnection>
@@ -117,6 +116,7 @@
 #    include <map>
 #    include <memory>
 #    include <mutex>
+#    include <optional>
 #    include <random>
 #    include <set>
 #    include <string>

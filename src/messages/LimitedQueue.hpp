@@ -3,10 +3,10 @@
 #include "messages/LimitedQueueSnapshot.hpp"
 
 #include <boost/circular_buffer.hpp>
-#include <boost/optional.hpp>
 
 #include <cassert>
 #include <mutex>
+#include <optional>
 #include <shared_mutex>
 #include <vector>
 
@@ -62,13 +62,13 @@ public:
      * @param[in] index the index of the item to fetch
      * @return the item at the index if it's populated, or none if it's not
      */
-    [[nodiscard]] boost::optional<T> get(size_t index) const
+    [[nodiscard]] std::optional<T> get(size_t index) const
     {
         std::shared_lock lock(this->mutex_);
 
         if (index >= this->buffer_.size())
         {
-            return boost::none;
+            return std::nullopt;
         }
 
         return this->buffer_[index];
@@ -79,13 +79,13 @@ public:
      *
      * @return the item at the front of the queue if it's populated, or none the queue is empty
      */
-    [[nodiscard]] boost::optional<T> first() const
+    [[nodiscard]] std::optional<T> first() const
     {
         std::shared_lock lock(this->mutex_);
 
         if (this->buffer_.empty())
         {
-            return boost::none;
+            return std::nullopt;
         }
 
         return this->buffer_.front();
@@ -96,13 +96,13 @@ public:
      *
      * @return the item at the back of the queue if it's populated, or none the queue is empty
      */
-    [[nodiscard]] boost::optional<T> last() const
+    [[nodiscard]] std::optional<T> last() const
     {
         std::shared_lock lock(this->mutex_);
 
         if (this->buffer_.empty())
         {
-            return boost::none;
+            return std::nullopt;
         }
 
         return this->buffer_.back();
@@ -293,14 +293,14 @@ public:
      * 
      * The contents of the LimitedQueue are iterated over from front to back 
      * until the first element that satisfies `pred(item)`. If no item 
-     * satisfies the predicate, or if the queue is empty, then boost::none
+     * satisfies the predicate, or if the queue is empty, then std::nullopt
      * is returned.
      * 
      * @param[in] pred predicate that will be applied to items
-     * @return the first item found or boost::none
+     * @return the first item found or std::nullopt
      */
     template <typename Predicate>
-    [[nodiscard]] boost::optional<T> find(Predicate pred) const
+    [[nodiscard]] std::optional<T> find(Predicate pred) const
     {
         std::shared_lock lock(this->mutex_);
 
@@ -312,7 +312,7 @@ public:
             }
         }
 
-        return boost::none;
+        return std::nullopt;
     }
 
     /**
@@ -320,14 +320,14 @@ public:
      * 
      * The contents of the LimitedQueue are iterated over from back to front 
      * until the first element that satisfies `pred(item)`. If no item 
-     * satisfies the predicate, or if the queue is empty, then boost::none
+     * satisfies the predicate, or if the queue is empty, then std::nullopt
      * is returned.
      * 
      * @param[in] pred predicate that will be applied to items
-     * @return the first item found or boost::none
+     * @return the first item found or std::nullopt
      */
     template <typename Predicate>
-    [[nodiscard]] boost::optional<T> rfind(Predicate pred) const
+    [[nodiscard]] std::optional<T> rfind(Predicate pred) const
     {
         std::shared_lock lock(this->mutex_);
 
@@ -339,7 +339,7 @@ public:
             }
         }
 
-        return boost::none;
+        return std::nullopt;
     }
 
 private:

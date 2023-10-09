@@ -8,8 +8,6 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
-project(chatterino VERSION 2.4.6)
-
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
 option(BUILD_BENCHMARKS "Build the benchmarks for Chatterino" OFF)
@@ -17,6 +15,7 @@ option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
 option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
 option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key chain" ON)
+option(USE_SYSTEM_MINIAUDIO "Build Chatterino with your system miniaudio" OFF)
 option(BUILD_WITH_CRASHPAD "Build chatterino with crashpad" OFF)
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
@@ -26,6 +25,9 @@ option(BUILD_TRANSLATIONS "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
 option(CHATTERINO_PLUGINS "Enable EXPERIMENTAL plugin support in Chatterino" OFF)
+
+option(CHATTERINO_UPDATER "Enable update checks" ON)
+mark_as_advanced(CHATTERINO_UPDATER)
 
 if(CHATTERINO_LTO)
     include(CheckIPOSupported)
@@ -40,6 +42,15 @@ if (BUILD_WITH_QT6)
 else()
     set(MAJOR_QT_VERSION "5")
 endif()
+
+if(BUILD_TESTS)
+    list(APPEND VCPKG_MANIFEST_FEATURES "tests")
+endif()
+if(BUILD_BENCHMARKS)
+    list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
+endif()
+
+project(chatterino VERSION 2.4.6)
 
 find_program(CCACHE_PROGRAM ccache)
 find_program(SCCACHE_PROGRAM sccache)

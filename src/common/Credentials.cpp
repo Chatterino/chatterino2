@@ -11,7 +11,11 @@
 
 #ifndef NO_QTKEYCHAIN
 #    ifdef CMAKE_BUILD
-#        include "qt5keychain/keychain.h"
+#        if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#            include "qt6keychain/keychain.h"
+#        else
+#            include "qt5keychain/keychain.h"
+#        endif
 #    else
 #        include "keychain.h"
 #    endif
