@@ -38,6 +38,7 @@ Notes:
 Note: This installation will take about 2 GB of disk space.
 
 Once Qt is done installing, make sure you add its bin directory to your `PATH` (e.g. `C:\Qt\6.5.3\msvc2019_64\bin`)
+
 <details>
    <summary>How to add Qt to PATH</summary>
    
