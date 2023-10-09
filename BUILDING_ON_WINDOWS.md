@@ -105,7 +105,7 @@ _Note: This will add all Python-scripts to your `PATH`, conan being one of them.
 2. Click the `Environment Variables...` button bottom right.
 3. In the `System variables` section, scroll down until you find `Path` and double click it.
 4. Click the `New` button top right and paste in the file path for your Qt installation (e.g. `C:\Qt\6.5.3\msvc2019_64\bin` by default).
-5. Open up your terminal with the Visual Studio environment variables (e.g. `x64 Native Tools Command Prompt for VS 2022`) and type "where conan" to find the file path (the folder that contains the conan.exe) to add.
+5. Open up a terminal `where.exe conan` to find the file path (the folder that contains the conan.exe) to add.
 6. Add conan 2's file path (e.g. `C:\Users\example\AppData\Roaming\Python\Python311\Scripts`) to the blank text box that shows up. This is your current Python installation's scripts folder.
 7. Click `Ok`
 
