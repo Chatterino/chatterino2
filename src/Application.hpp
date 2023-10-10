@@ -63,6 +63,7 @@ public:
     virtual ITwitchIrcServer *getTwitch() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
+    virtual SeventvBadges *getSeventvBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
     virtual ITwitchLiveController *getTwitchLiveController() = 0;
 };
@@ -159,6 +160,10 @@ public:
     FfzBadges *getFfzBadges() override
     {
         return this->ffzBadges;
+    }
+    SeventvBadges *getSeventvBadges() override
+    {
+        return this->seventvBadges;
     }
     IUserDataController *getUserData() override;
     ITwitchLiveController *getTwitchLiveController() override;
