@@ -1,6 +1,7 @@
 #include "TwitchIrcServer.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/Env.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -518,6 +519,11 @@ const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
 const SeventvEmotes &TwitchIrcServer::getSeventvEmotes() const
 {
     return this->seventv_;
+}
+
+const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
+{
+    return this->watchingChannel;
 }
 
 void TwitchIrcServer::reloadBTTVGlobalEmotes()
