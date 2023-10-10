@@ -1,5 +1,17 @@
+#include "controllers/accounts/AccountController.hpp"
 #include "controllers/filters/lang/Filter.hpp"
 #include "controllers/filters/lang/Types.hpp"
+#include "controllers/highlights/HighlightController.hpp"
+#include "mocks/Channel.hpp"
+#include "mocks/EmptyApplication.hpp"
+#include "mocks/TwitchIrcServer.hpp"
+#include "mocks/UserData.hpp"
+#include "providers/chatterino/ChatterinoBadges.hpp"
+#include "providers/ffz/FfzBadges.hpp"
+#include "providers/seventv/SeventvBadges.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "singletons/Emotes.hpp"
 
 #include <gtest/gtest.h>
 #include <QColor>
@@ -7,8 +19,82 @@
 
 using namespace chatterino;
 using namespace chatterino::filters;
+using chatterino::mock::MockChannel;
 
 TypingContext typingContext = MESSAGE_TYPING_CONTEXT;
+
+namespace {
+
+class MockApplication : mock::EmptyApplication
+{
+public:
+    IEmotes *getEmotes() override
+    {
+        return &this->emotes;
+    }
+
+    IUserDataController *getUserData() override
+    {
+        return &this->userData;
+    }
+
+    AccountController *getAccounts() override
+    {
+        return &this->accounts;
+    }
+
+    ITwitchIrcServer *getTwitch() override
+    {
+        return &this->twitch;
+    }
+
+    ChatterinoBadges *getChatterinoBadges() override
+    {
+        return &this->chatterinoBadges;
+    }
+
+    FfzBadges *getFfzBadges() override
+    {
+        return &this->ffzBadges;
+    }
+
+    SeventvBadges *getSeventvBadges() override
+    {
+        return &this->seventvBadges;
+    }
+
+    HighlightController *getHighlights() override
+    {
+        return &this->highlights;
+    }
+
+    AccountController accounts;
+    Emotes emotes;
+    mock::UserDataController userData;
+    mock::MockTwitchIrcServer twitch;
+    ChatterinoBadges chatterinoBadges;
+    FfzBadges ffzBadges;
+    SeventvBadges seventvBadges;
+    HighlightController highlights;
+};
+
+class FiltersF : public ::testing::Test
+{
+protected:
+    void SetUp() override
+    {
+        this->mockApplication = std::make_unique<MockApplication>();
+    }
+
+    void TearDown() override
+    {
+        this->mockApplication.reset();
+    }
+
+    std::unique_ptr<MockApplication> mockApplication;
+};
+
+}  // namespace
 
 namespace chatterino::filters {
 
@@ -169,4 +255,33 @@ TEST(Filters, Evaluation)
             << qUtf8Printable(expected.toString()) << ".\nDebug: "
             << qUtf8Printable(filter.debugString(typingContext));
     }
+}
+
+TEST_F(FiltersF, TypingContextChecks)
+{
+    MockChannel channel("pajlada");
+
+    QByteArray message =
+        R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=90ef1e46-8baa-4bf2-9c54-272f39d6fa11;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662206235860;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :ACTION Kappa)";
+
+    struct TestCase {
+        QByteArray input;
+    };
+
+    auto *privmsg = dynamic_cast<Communi::IrcPrivateMessage *>(
+        Communi::IrcPrivateMessage::fromData(message, nullptr));
+    EXPECT_NE(privmsg, nullptr);
+
+    QString originalMessage = privmsg->content();
+
+    TwitchMessageBuilder builder(&channel, privmsg, MessageParseArgs{});
+
+    auto msg = builder.build();
+    EXPECT_NE(msg.get(), nullptr);
+
+    auto contextMap = buildContextMap(msg, &channel);
+
+    EXPECT_EQ(contextMap.size(), MESSAGE_TYPING_CONTEXT.size());
+
+    delete privmsg;
 }
