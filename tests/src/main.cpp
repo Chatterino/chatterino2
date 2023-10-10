@@ -1,4 +1,5 @@
 #include "common/NetworkManager.hpp"
+#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 
 #include <gtest/gtest.h>
@@ -23,6 +24,8 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
     // make sure to always debug-log
     QLoggingCategory::setFilterRules("*.debug=true");
+
+    initResources();
 
     chatterino::NetworkManager::init();
 
