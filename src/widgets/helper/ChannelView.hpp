@@ -330,7 +330,6 @@ private:
     } cursors_;
 
     Selection selection_;
-    bool selecting_ = false;
 
     const Context context_;
 

@@ -1091,18 +1091,13 @@ void ChannelView::resizeEvent(QResizeEvent *)
 void ChannelView::setSelection(const SelectionItem &start,
                                const SelectionItem &end)
 {
-    // selections
-    if (!this->selecting_ && start != end)
+    auto newSelection = Selection(start, end);
+    if (this->selection_ != newSelection)
     {
-        // this->messagesAddedSinceSelectionPause_ = 0;
-
-        this->selecting_ = true;
-        // this->pausedBySelection_ = true;
+        this->selection_ = newSelection;
+        this->selectionChanged.invoke();
+        this->update();
     }
-
-    this->selection_ = Selection(start, end);
-
-    this->selectionChanged.invoke();
 }
 
 MessageElementFlags ChannelView::getFlags() const
@@ -2084,16 +2079,6 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
     switch (event->button())
     {
         case Qt::LeftButton: {
-            if (this->selecting_)
-            {
-                // this->pausedBySelection = false;
-                this->selecting_ = false;
-                // this->pauseTimeout.stop();
-                // this->pausedTemporarily = false;
-
-                this->queueLayout();
-            }
-
             if (hoveredElement == nullptr)
             {
                 return;
