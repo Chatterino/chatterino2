@@ -1975,6 +1975,15 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             {
                 return;
             }
+
+            // Triple-clicking a message selects the whole message
+            if (this->clickTimer_->isActive() &&
+                (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
+                                             event->screenPos())) < 10.f))
+            {
+                this->selectWholeMessage(layout.get(), messageIndex);
+                return;
+            }
         }
         else
         {
@@ -2056,15 +2065,6 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
     const MessageLayoutElement *hoverLayoutElement =
         layout->getElementAt(relativePos);
-    // Triple-clicking a message selects the whole message
-    if (this->clickTimer_->isActive() && this->selecting_)
-    {
-        if (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
-                                        event->screenPos())) < 10.f)
-        {
-            this->selectWholeMessage(layout.get(), messageIndex);
-        }
-    }
 
     // handle the click
     this->handleMouseClick(event, hoverLayoutElement, layout);
