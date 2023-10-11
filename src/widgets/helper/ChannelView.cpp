@@ -1974,7 +1974,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             }
 
             // Triple-clicking a message selects the whole message
-            if (this->clickTimer_->isActive() &&
+            if (foundElement && this->clickTimer_->isActive() &&
                 (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
                                              event->screenPos())) < 10.f))
             {
