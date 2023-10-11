@@ -1515,13 +1515,10 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     // is selecting
     if (this->isLeftMouseDown_)
     {
-        // this->pause(PauseReason::Selecting, 300);
         auto index = layout->getSelectionIndex(relativePos);
 
         this->setSelection(this->selection_.start,
                            SelectionItem(messageIndex, index));
-
-        this->queueUpdate();
     }
 
     // message under cursor is collapsed
