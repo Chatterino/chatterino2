@@ -72,7 +72,8 @@ namespace detail {
         else
         {
             this->durationOffset_ = std::min<int>(
-                int(getApp()->emotes->gifTimer.position() % totalLength),
+                int(getIApp()->getEmotes()->getGIFTimer().position() %
+                    totalLength),
                 60000);
         }
         this->processOffset();
