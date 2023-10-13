@@ -17,7 +17,6 @@
 #include <QPalette>
 #include <QStyleFactory>
 #include <Qt>
-#include <QtConcurrent>
 
 #include <csignal>
 
@@ -184,17 +183,20 @@ namespace {
     // improved in the future.
     void clearCache(const QDir &dir)
     {
-        int deletedCount = 0;
-        for (auto &&info : dir.entryInfoList(QDir::Files))
+        size_t deletedCount = 0;
+        for (const auto &info : dir.entryInfoList(QDir::Files))
         {
             if (info.lastModified().addDays(14) < QDateTime::currentDateTime())
             {
                 bool res = QFile(info.absoluteFilePath()).remove();
                 if (res)
+                {
                     ++deletedCount;
+                }
             }
         }
-        qCDebug(chatterinoCache) << "Deleted" << deletedCount << "files";
+        qCDebug(chatterinoCache)
+            << "Deleted" << deletedCount << "files in" << dir.path();
     }
 
     // We delete all but the five most recent crashdumps. This strategy may be
@@ -259,14 +261,18 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
 
     // Clear the cache 1 minute after start.
     QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory(),
-                                   crashDirectory = paths.crashdumpDirectory] {
-        QtConcurrent::run([cachePath]() {
-            clearCache(cachePath);
-        });
+                                   crashDirectory = paths.crashdumpDirectory,
+                                   avatarPath = paths.twitchProfileAvatars] {
+        auto spawnVacuum = [](auto fn, QString path) {
+            QThreadPool::globalInstance()->start(
+                [fn = std::move(fn), path = std::move(path)] {
+                    fn(path);
+                });
+        };
 
-        QtConcurrent::run([crashDirectory]() {
-            clearCrashes(crashDirectory);
-        });
+        spawnVacuum(clearCache, cachePath);
+        spawnVacuum(clearCache, avatarPath);
+        spawnVacuum(clearCrashes, crashDirectory);
     });
 
     chatterino::NetworkManager::init();

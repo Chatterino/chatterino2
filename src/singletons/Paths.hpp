@@ -32,7 +32,7 @@ public:
     // Hash of QCoreApplication::applicationFilePath()
     QString applicationFilePathHash;
 
-    // Profile avatars for Twitch <appDataDirectory>/cache/twitch
+    // Profile avatars for Twitch <appDataDirectory>/ProfileAvatars/twitch
     QString twitchProfileAvatars;
 
     // Plugin files live here. <appDataDirectory>/Plugins

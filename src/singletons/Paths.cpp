@@ -140,11 +140,10 @@ void Paths::initSubDirectories()
     this->cacheDirectory_ = makePath("Cache");
     this->messageLogDirectory = makePath("Logs");
     this->miscDirectory = makePath("Misc");
-    this->twitchProfileAvatars = makePath("ProfileAvatars");
+    this->twitchProfileAvatars = makePath("ProfileAvatars/twitch");
     this->pluginsDirectory = makePath("Plugins");
     this->themesDirectory = makePath("Themes");
     this->crashdumpDirectory = makePath("Crashes");
-    //QDir().mkdir(this->twitchProfileAvatars + "/twitch");
 }
 
 Paths *getPaths()
