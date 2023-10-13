@@ -385,6 +385,7 @@ void ChannelView::unpaused()
 {
     /// Move selection
     this->selection_.shiftMessageIndex(this->pauseSelectionOffset_);
+    this->doubleClickSelection_.shiftMessageIndex(this->pauseSelectionOffset_);
 
     this->pauseSelectionOffset_ = 0;
 }
@@ -927,6 +928,7 @@ void ChannelView::messageAppended(MessagePtr &message,
                 this->scrollBar_->scrollToBottom(false);
             }
             this->selection_.shiftMessageIndex(1);
+            this->doubleClickSelection_.shiftMessageIndex(1);
         }
     }
 
