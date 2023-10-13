@@ -120,7 +120,7 @@ endif ()
 message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 
 if (WIN32)
-    find_package(WinToast REQUIRED)
+    add_subdirectory(lib/WinToast EXCLUDE_FROM_ALL)
 endif ()
 
 find_package(Sanitizers QUIET)

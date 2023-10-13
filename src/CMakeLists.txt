@@ -948,7 +948,7 @@ if (UNIX)
     endif ()
 endif ()
 
-if (WinToast_FOUND)
+if (WIN32)
     target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         WinToast)
