@@ -39,18 +39,11 @@ void TabCompletionModel::updateSourceFromQuery(const QString &query)
     if (!deducedKind)
     {
         // unable to determine what kind of completion is occurring
-        this->sourceKind_ = std::nullopt;
         this->source_ = nullptr;
         return;
     }
 
-    if (this->sourceKind_ == *deducedKind)
-    {
-        // Source already properly configured
-        return;
-    }
-
-    this->sourceKind_ = *deducedKind;
+    // Build source for new query
     this->source_ = this->buildSource(*deducedKind);
 }
 
