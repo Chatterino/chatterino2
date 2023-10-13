@@ -152,10 +152,10 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             return;
         }
 
-        QString currentCompletionPrefix = this->textUnderCursor();
+        QString currentCompletion = this->textUnderCursor();
 
         // check if there is something to complete
-        if (currentCompletionPrefix.size() <= 1)
+        if (currentCompletion.size() <= 1)
         {
             return;
         }
@@ -170,13 +170,12 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             // First type pressing tab after modifying a message, we refresh our
             // completion model
             this->completer_->setModel(completionModel);
-            completionModel->updateResults(currentCompletionPrefix,
+            completionModel->updateResults(currentCompletion,
                                            this->isFirstWord());
             this->completionInProgress_ = true;
             {
                 // this blocks cursor movement events from resetting tab completion
                 QSignalBlocker dontTriggerCursorMovement(this);
-                this->completer_->setCompletionPrefix(currentCompletionPrefix);
                 this->completer_->complete();
             }
             return;
@@ -259,15 +258,6 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
     this->completer_->setWidget(this);
     this->completer_->setCompletionMode(QCompleter::InlineCompletion);
     this->completer_->setCaseSensitivity(Qt::CaseInsensitive);
-
-    if (getSettings()->prefixOnlyEmoteCompletion)
-    {
-        this->completer_->setFilterMode(Qt::MatchStartsWith);
-    }
-    else
-    {
-        this->completer_->setFilterMode(Qt::MatchContains);
-    }
 
     QObject::connect(completer_,
                      static_cast<void (QCompleter::*)(const QString &)>(
