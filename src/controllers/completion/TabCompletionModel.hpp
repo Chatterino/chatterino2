@@ -64,7 +64,6 @@ private:
 
     Channel &channel_;
     std::unique_ptr<completion::Source> source_{};
-    std::optional<SourceKind> sourceKind_{};
 };
 
 }  // namespace chatterino
