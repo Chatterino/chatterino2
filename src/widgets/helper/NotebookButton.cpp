@@ -138,7 +138,7 @@ void NotebookButton::paintEvent(QPaintEvent *event)
         default:;
     }
 
-    Button::paintEvent(event);
+    this->paintButton(painter);
 }
 
 void NotebookButton::mouseReleaseEvent(QMouseEvent *event)

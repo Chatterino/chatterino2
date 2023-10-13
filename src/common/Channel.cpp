@@ -80,7 +80,7 @@ LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
 }
 
 void Channel::addMessage(MessagePtr message,
-                         boost::optional<MessageFlags> overridingFlags)
+                         std::optional<MessageFlags> overridingFlags)
 {
     auto app = getApp();
     MessagePtr deleted;

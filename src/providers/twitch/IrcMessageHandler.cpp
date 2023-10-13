@@ -914,7 +914,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     c->addMessage(_message);
 
-    auto overrideFlags = boost::optional<MessageFlags>(_message->flags);
+    auto overrideFlags = std::optional<MessageFlags>(_message->flags);
     overrideFlags->set(MessageFlag::DoNotTriggerNotification);
     overrideFlags->set(MessageFlag::DoNotLog);
 

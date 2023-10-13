@@ -6,6 +6,7 @@
 #include <QStringRef>
 
 #include <cmath>
+#include <optional>
 #include <vector>
 
 namespace chatterino {
@@ -154,5 +155,29 @@ std::vector<T> splitListIntoBatches(const T &list, int batchSize = 100)
 }
 
 bool compareEmoteStrings(const QString &a, const QString &b);
+
+template <class T>
+constexpr std::optional<T> makeConditionedOptional(bool condition,
+                                                   const T &value)
+{
+    if (condition)
+    {
+        return value;
+    }
+
+    return std::nullopt;
+}
+
+template <class T>
+constexpr std::optional<std::decay_t<T>> makeConditionedOptional(bool condition,
+                                                                 T &&value)
+{
+    if (condition)
+    {
+        return std::optional<std::decay_t<T>>(std::forward<T>(value));
+    }
+
+    return std::nullopt;
+}
 
 }  // namespace chatterino

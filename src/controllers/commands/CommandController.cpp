@@ -114,7 +114,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     const auto &bttvemotes = app->twitch->getBttvEmotes();
     const auto &ffzemotes = app->twitch->getFfzEmotes();
     auto flags = MessageElementFlags();
-    auto emote = boost::optional<EmotePtr>{};
+    auto emote = std::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {
         {  // Twitch emote
@@ -138,7 +138,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
             }
             if (emote)
             {
-                b.emplace<EmoteElement>(emote.get(), flags);
+                b.emplace<EmoteElement>(*emote, flags);
                 continue;
             }
         }  // bttv/ffz emote
@@ -181,7 +181,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
 
     app->twitch->whispersChannel->addMessage(messagexD);
 
-    auto overrideFlags = boost::optional<MessageFlags>(messagexD->flags);
+    auto overrideFlags = std::optional<MessageFlags>(messagexD->flags);
     overrideFlags->set(MessageFlag::DoNotLog);
 
     if (getSettings()->inlineWhispers &&
@@ -2856,7 +2856,7 @@ void CommandController::initialize(Settings &, Paths &paths)
              formatBanTimeoutError](const auto &targetUser) {
                 getHelix()->banUser(
                     twitchChannel->roomId(), currentUser->getUserId(),
-                    targetUser.id, boost::none, reason,
+                    targetUser.id, std::nullopt, reason,
                     [] {
                         // No response for bans, they're emitted over pubsub/IRC instead
                     },
@@ -2910,7 +2910,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         getHelix()->banUser(
             twitchChannel->roomId(), currentUser->getUserId(), target,
-            boost::none, reason,
+            std::nullopt, reason,
             [] {
                 // No response for bans, they're emitted over pubsub/IRC instead
             },

@@ -43,7 +43,7 @@ std::vector<FfzBadges::Badge> FfzBadges::getUserBadges(const UserId &id)
     return badges;
 }
 
-boost::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID)
+std::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID)
 {
     auto it = this->badges.find(badgeID);
     if (it != this->badges.end())
@@ -51,7 +51,7 @@ boost::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID)
         return it->second;
     }
 
-    return boost::none;
+    return std::nullopt;
 }
 
 void FfzBadges::load()

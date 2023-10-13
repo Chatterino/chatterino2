@@ -4,10 +4,10 @@
 #include "common/Singleton.hpp"
 #include "util/QStringHash.hpp"
 
-#include <boost/optional.hpp>
 #include <QColor>
 
 #include <memory>
+#include <optional>
 #include <set>
 #include <shared_mutex>
 #include <unordered_map>
@@ -32,7 +32,7 @@ public:
     std::vector<Badge> getUserBadges(const UserId &id);
 
 private:
-    boost::optional<Badge> getBadge(int badgeID);
+    std::optional<Badge> getBadge(int badgeID);
 
     void load();
 

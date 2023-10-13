@@ -109,7 +109,7 @@ bool Window::event(QEvent *event)
         }
 
         case QEvent::WindowDeactivate: {
-            auto page = this->notebook_->getOrAddSelectedPage();
+            auto *page = this->notebook_->getSelectedPage();
 
             if (page != nullptr)
             {
@@ -119,12 +119,8 @@ bool Window::event(QEvent *event)
                 {
                     split->updateLastReadMessage();
                 }
-            }
 
-            if (SplitContainer *container =
-                    dynamic_cast<SplitContainer *>(page))
-            {
-                container->hideResizeHandles();
+                page->hideResizeHandles();
             }
         }
         break;

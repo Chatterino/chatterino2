@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - master
+      - "bugfix-release/*"
+      - "release/*"
   pull_request:
   workflow_dispatch:
   merge_group:
@@ -14,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' }}
+  C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/bugfix-release/') || startsWith(github.ref, 'refs/heads/release/') }}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
   C2_BUILD_WITH_QT6: Off
   # Last known good conan version
@@ -27,13 +29,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
-        qt-version: [5.15.2, 6.5.0]
-        force-lto: [false]
-        plugins: [false]
-        skip-artifact: [false]
-        skip-crashpad: [false]
-        clang-tidy-review: [false]
         include:
           # Ubuntu 20.04, Qt 5.12
           - os: ubuntu-20.04
@@ -59,12 +54,28 @@ jobs:
             skip-artifact: false
             skip-crashpad: false
             clang-tidy-review: false
-          # Test for disabling crashpad on Windows
+          # macOS
+          - os: macos-latest
+            qt-version: 5.15.2
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
+          # Windows
+          - os: windows-latest
+            qt-version: 6.5.0
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            clang-tidy-review: false
+          # Windows 7/8
           - os: windows-latest
             qt-version: 5.15.2
             force-lto: false
             plugins: false
-            skip-artifact: true
+            skip-artifact: false
             skip-crashpad: true
             clang-tidy-review: false
 
@@ -113,6 +124,26 @@ jobs:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
           version: ${{ matrix.qt-version }}
+
+      - name: Install Qt 6.5.3 imageformats
+        if: startsWith(matrix.qt-version, '6.')
+        uses: jurplel/install-qt-action@v3.3.0
+        with:
+          cache: false
+          modules: qtimageformats
+          set-env: false
+          version: 6.5.3
+          extra: --noarchives
+
+      - name: Find Qt 6.5.3 Path
+        if: startsWith(matrix.qt-version, '6.') && startsWith(matrix.os, 'windows')
+        shell: pwsh
+        id: find-good-imageformats
+        run: |
+          cd "$Env:RUNNER_WORKSPACE/Qt/6.5.3"
+          cd (Get-ChildItem)[0].Name
+          cd plugins/imageformats
+          echo "PLUGIN_PATH=$(pwd)" | Out-File -Path "$Env:GITHUB_OUTPUT" -Encoding ASCII
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
@@ -184,16 +215,13 @@ jobs:
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
         shell: pwsh
-        env:
-          # Enable PCH on Windows when crashpad is enabled
-          C2_WINDOWS_USE_PCH: ${{ matrix.skip-crashpad && 'OFF' || 'ON' }}
         run: |
           cd build
           cmake `
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
-              -DUSE_PRECOMPILED_HEADERS=${{ env.C2_WINDOWS_USE_PCH }} `
+              -DUSE_PRECOMPILED_HEADERS=ON `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
@@ -213,13 +241,24 @@ jobs:
           cp bin/crashpad/crashpad_handler.exe Chatterino2/crashpad/crashpad_handler.exe
           7z a bin/chatterino-Qt-${{ matrix.qt-version }}.pdb.7z bin/chatterino.pdb
 
-      - name: Package (windows)
+      - name: Prepare build dir (windows)
         if: startsWith(matrix.os, 'windows')
         run: |
           cd build
           windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
           cp bin/chatterino.exe Chatterino2/
           echo nightly > Chatterino2/modes
+
+      - name: Fix Qt6 (windows)
+        if: startsWith(matrix.qt-version, '6.') && startsWith(matrix.os, 'windows')
+        working-directory: build
+        run: |
+          cp ${{ steps.find-good-imageformats.outputs.PLUGIN_PATH }}/qwebp.dll Chatterino2/imageformats/qwebp.dll
+
+      - name: Package (windows)
+        if: startsWith(matrix.os, 'windows')
+        working-directory: build
+        run: |
           7z a chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip Chatterino2/
 
       - name: Upload artifact (Windows - binary)
@@ -427,12 +466,6 @@ jobs:
           path: release-artifacts/
 
       - uses: actions/download-artifact@v3
-        name: Windows Qt5.15 symbols
-        with:
-          name: chatterino-windows-x86-64-Qt-5.15.2-symbols.pdb.7z
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v3
         name: Linux Qt5.12.12 AppImage
         with:
           name: Chatterino-x86_64-5.12.12.AppImage
@@ -467,10 +500,10 @@ jobs:
           # Rename the macos build to indicate that it's for macOS 10.15 users
           mv chatterino-macos-Qt-5.15.2.dmg Chatterino-macOS-10.15.dmg
 
-          # Mark all Qt6 builds as EXPERIMENTAL
           mv Chatterino-ubuntu-22.04-x86_64.deb EXPERIMENTAL-Chatterino-ubuntu-22.04-Qt-6.2.4.deb
-          mv chatterino-windows-x86-64-Qt-6.5.0.zip EXPERIMENTAL-chatterino-windows-x86-64-Qt-6.5.0.zip
-          mv chatterino-Qt-6.5.0.pdb.7z EXPERIMENTAL-chatterino-Qt-6.5.0.pdb.7z
+
+          # Mark all Windows Qt5 builds as old
+          mv chatterino-windows-x86-64-Qt-5.15.2.zip chatterino-windows-old-x86-64-Qt-5.15.2.zip
         working-directory: release-artifacts
         shell: bash
 

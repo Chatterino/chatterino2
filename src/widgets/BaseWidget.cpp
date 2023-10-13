@@ -42,16 +42,15 @@ float BaseWidget::scale() const
 {
     if (this->overrideScale_)
     {
-        return this->overrideScale_.get();
+        return *this->overrideScale_;
     }
-    else if (auto baseWidget = dynamic_cast<BaseWidget *>(this->window()))
+
+    if (auto *baseWidget = dynamic_cast<BaseWidget *>(this->window()))
     {
         return baseWidget->scale_;
     }
-    else
-    {
-        return 1.f;
-    }
+
+    return 1.F;
 }
 
 void BaseWidget::setScale(float value)
@@ -65,13 +64,13 @@ void BaseWidget::setScale(float value)
     this->setScaleIndependantSize(this->scaleIndependantSize());
 }
 
-void BaseWidget::setOverrideScale(boost::optional<float> value)
+void BaseWidget::setOverrideScale(std::optional<float> value)
 {
     this->overrideScale_ = value;
     this->setScale(this->scale());
 }
 
-boost::optional<float> BaseWidget::overrideScale() const
+std::optional<float> BaseWidget::overrideScale() const
 {
     return this->overrideScale_;
 }

@@ -458,6 +458,7 @@ set(SOURCE_FILES
         util/Twitch.cpp
         util/Twitch.hpp
         util/TypeName.hpp
+        util/Variant.hpp
         util/WidgetHelpers.cpp
         util/WidgetHelpers.hpp
         util/WindowsHelper.cpp
@@ -768,35 +769,51 @@ if (BUILD_APP)
     set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
     if (WIN32)
-        if (NOT WINDEPLOYQT_PATH)
-            get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
-            get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
-            string(APPEND WINDEPLOYQT_PATH ${QT_BIN_DIR} /windeployqt.exe)
-        else()
+        if (WINDEPLOYQT_PATH)
             file(TO_CMAKE_PATH "${WINDEPLOYQT_PATH}" WINDEPLOYQT_PATH)
+        else()
+            if (VCPKG_INSTALLED_DIR AND (CMAKE_BUILD_TYPE STREQUAL "Debug"))
+                find_program(WINDEPLOYQT_PATH NAMES windeployqt.debug.bat)
+            else()
+                find_program(WINDEPLOYQT_PATH NAMES windeployqt)
+            endif()
+        endif()
+
+        if (NOT EXISTS ${WINDEPLOYQT_PATH})
+            message(FATAL_ERROR "windeployqt.exe not found")
         endif()
 
         if (CMAKE_BUILD_TYPE STREQUAL "Debug")
             set(WINDEPLOYQT_MODE --debug)
+            get_target_property(QT_CORE_LOC Qt${MAJOR_QT_VERSION}::Core LOCATION_DEBUG)
         else()
             set(WINDEPLOYQT_MODE --release)
+            get_target_property(QT_CORE_LOC Qt${MAJOR_QT_VERSION}::Core LOCATION)
         endif()
+        get_filename_component(QT_BIN_DIR ${QT_CORE_LOC} DIRECTORY)
 
         set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
-        if (X_VCPKG_APPLOCAL_DEPS_INSTALL)
-            install(TARGETS ${EXECUTABLE_PROJECT} RUNTIME DESTINATION .)
-        else()
-            install(TARGETS ${EXECUTABLE_PROJECT} 
-                RUNTIME_DEPENDENCIES 
-                    PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
-                    POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
-                    DIRECTORIES ${QT_BIN_DIR}
-                RUNTIME DESTINATION .)
-            install(CODE "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
-            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")        
-        endif()
+        install(TARGETS ${EXECUTABLE_PROJECT} 
+            RUNTIME_DEPENDENCIES 
+                PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
+                POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
+                DIRECTORIES ${QT_BIN_DIR}
+            RUNTIME DESTINATION .)
+
+        # Hardcoded list of DLLs to install from Qt - these are marked as optional since they only exist for vcpkg
+        install(FILES
+            ${QT_BIN_DIR}/jpeg62.dll
+            ${QT_BIN_DIR}/libwebpdemux.dll
+            ${QT_BIN_DIR}/libwebpmux.dll
+            ${QT_BIN_DIR}/libwebp.dll
+            ${QT_BIN_DIR}/libsharpyuv.dll
+            DESTINATION .
+            OPTIONAL)
+
+        install(CODE "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
+        install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")   
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
@@ -912,7 +929,16 @@ target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
 
 # miniaudio dependency https://github.com/mackron/miniaudio
-target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
+if (USE_SYSTEM_MINIAUDIO)
+    message(STATUS "Building with system miniaudio")
+    include(CheckIncludeFileCXX)
+    CHECK_INCLUDE_FILE_CXX("miniaudio.h" MINIAUDIO_FOUND)
+    if (NOT MINIAUDIO_FOUND)
+        message(FATAL_ERROR "miniaudio.h not found on your system")
+    endif()
+else ()
+    target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
+endif ()
 
 if (UNIX)
     if (CMAKE_DL_LIBS)
@@ -998,6 +1024,8 @@ if (MSVC)
         /wd4505
         /wd4100
         /wd4267
+        # Enable updated '__cplusplus' macro - workaround for CMake#18837
+        /Zc:__cplusplus
     )
     # Disable min/max macros from Windows.h
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
@@ -1038,4 +1066,9 @@ if(CHATTERINO_ENABLE_LTO)
     message(STATUS "Enabling LTO for ${LIBRARY_PROJECT}")
     set_property(TARGET ${LIBRARY_PROJECT}
                  PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
+if(NOT CHATTERINO_UPDATER)
+    message(STATUS "Disabling the updater.")
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_DISABLE_UPDATER)
 endif()

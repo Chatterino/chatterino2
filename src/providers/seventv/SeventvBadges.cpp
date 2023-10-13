@@ -13,7 +13,7 @@
 
 namespace chatterino {
 
-boost::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id) const
+std::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id) const
 {
     std::shared_lock lock(this->mutex_);
 
@@ -22,7 +22,7 @@ boost::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id) const
     {
         return it->second;
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 void SeventvBadges::assignBadgeToUser(const QString &badgeID,
