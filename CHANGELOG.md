@@ -17,6 +17,7 @@
 - Bugfix: Fixed input in reply thread popup losing focus when dragging. (#4815)
 - Bugfix: Fixed the Quick Switcher (CTRL+K) from sometimes showing up on the wrong window. (#4819)
 - Bugfix: Fixed too much text being copied when copying chat messages. (#4812, #4830, #4839)
+- Bugfix: Fixed an issue where the setting `Only search for emote autocompletion at the start of emote names` wouldn't disable if it was enabled when the client started. (#4855)
 - Bugfix: Fixed empty page being added when showing out of bounds dialog. (#4849)
 - Bugfix: Fixed issue on Windows preventing the title bar from being dragged in the top left corner. (#4873)
 - Bugfix: Fixed an issue where reply context didn't render correctly if an emoji was touching text. (#4875)
