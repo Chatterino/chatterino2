@@ -679,15 +679,15 @@ endif()
 if (CHATTERINO_GENERATE_COVERAGE)
     include(CodeCoverage)
     append_coverage_compiler_flags_to_target(${LIBRARY_PROJECT})
-    target_link_libraries(${LIBRARY_PROJECT} PUBLIC gcov)
     message(STATUS "project source dir: ${PROJECT_SOURCE_DIR}/src")
-    setup_target_for_coverage_lcov(
+    setup_target_for_coverage_gcovr_html(
         NAME coverage
-        EXECUTABLE ./bin/chatterino-test
-        BASE_DIRECTORY ${PROJECT_SOURCE_DIR}/src
+        EXECUTABLE ctest
         EXCLUDE "/usr/include/*"
         EXCLUDE "build-*/*"
         EXCLUDE "lib/*"
+        EXCLUDE "*/ui_*.h"
+        EXCLUDE "*/moc_*.cpp"
         )
 endif ()
 
