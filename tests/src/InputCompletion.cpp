@@ -5,9 +5,10 @@
 #include "controllers/completion/strategies/ClassicUserStrategy.hpp"
 #include "controllers/completion/strategies/Strategy.hpp"
 #include "messages/Emote.hpp"
+#include "mocks/Channel.hpp"
 #include "mocks/EmptyApplication.hpp"
 #include "mocks/Helix.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
+#include "mocks/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -22,34 +23,13 @@
 
 #include <span>
 
+using namespace chatterino;
+using chatterino::mock::MockChannel;
+
 namespace {
 
-using namespace chatterino;
 using namespace chatterino::completion;
 using ::testing::Exactly;
-
-class MockTwitchIrcServer : public ITwitchIrcServer
-{
-public:
-    const BttvEmotes &getBttvEmotes() const override
-    {
-        return this->bttv;
-    }
-
-    const FfzEmotes &getFfzEmotes() const override
-    {
-        return this->ffz;
-    }
-
-    const SeventvEmotes &getSeventvEmotes() const override
-    {
-        return this->seventv;
-    }
-
-    BttvEmotes bttv;
-    FfzEmotes ffz;
-    SeventvEmotes seventv;
-};
 
 class MockApplication : mock::EmptyApplication
 {
@@ -70,24 +50,11 @@ public:
     }
 
     AccountController accounts;
-    MockTwitchIrcServer twitch;
+    mock::MockTwitchIrcServer twitch;
     Emotes emotes;
 };
 
 }  // namespace
-
-namespace chatterino {
-
-class MockChannel : public Channel
-{
-public:
-    MockChannel(const QString &name)
-        : Channel(name, Channel::Type::Twitch)
-    {
-    }
-};
-
-}  // namespace chatterino
 
 EmotePtr namedEmote(const EmoteName &name)
 {
