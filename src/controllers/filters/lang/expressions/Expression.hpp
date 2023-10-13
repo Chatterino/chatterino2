@@ -16,10 +16,10 @@ class Expression
 public:
     virtual ~Expression() = default;
 
-    virtual QVariant execute(const ContextMap &context) const;
-    virtual PossibleType synthesizeType(const TypingContext &context) const;
-    virtual QString debug(const TypingContext &context) const;
-    virtual QString filterString() const;
+    virtual QVariant execute(const ContextMap &context) const = 0;
+    virtual PossibleType synthesizeType(const TypingContext &context) const = 0;
+    virtual QString debug(const TypingContext &context) const = 0;
+    virtual QString filterString() const = 0;
 };
 
 using ExpressionPtr = std::unique_ptr<Expression>;
