@@ -2758,8 +2758,8 @@ std::pair<size_t, size_t> ChannelView::getWordBounds(
     MessageLayout *layout, const MessageLayoutElement *element,
     const QPoint &relativePos)
 {
-    const int wordStart = layout->getSelectionIndex(relativePos) -
-                          element->getMouseOverIndex(relativePos);
+    const auto wordStart = layout->getSelectionIndex(relativePos) -
+                           element->getMouseOverIndex(relativePos);
     const int selectionLength = element->getSelectionIndexCount();
     const int length =
         element->hasTrailingSpace() ? selectionLength - 1 : selectionLength;
