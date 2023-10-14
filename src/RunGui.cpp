@@ -15,8 +15,10 @@
 #include <QApplication>
 #include <QFile>
 #include <QPalette>
+#include <QProcess>
 #include <QStyleFactory>
 #include <Qt>
+#include <QThreadPool>
 
 #include <csignal>
 
