@@ -1522,7 +1522,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     const MessageLayoutElement *hoverLayoutElement =
         layout->getElementAt(relativePos);
 
-    //selecting single characters
+    // selecting single characters
     if (this->isLeftMouseDown_)
     {
         auto index = layout->getSelectionIndex(relativePos);
@@ -1530,14 +1530,15 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                            SelectionItem(messageIndex, index));
     }
 
-    //selecting whole words
+    // selecting whole words
     if (this->isDoubleClick_ && hoverLayoutElement)
     {
         auto [wordStart, wordEnd] =
             this->getWordBounds(layout.get(), hoverLayoutElement, relativePos);
-        auto wordSelection = Selection{SelectionItem(messageIndex, wordStart),
-                                       SelectionItem(messageIndex, wordEnd)};
-        auto selectUnion = this->doubleClickSelection_ | wordSelection;
+        auto hoveredWord = Selection{SelectionItem(messageIndex, wordStart),
+                                     SelectionItem(messageIndex, wordEnd)};
+        // combined selection spanning from initially selected word to hoveredWord
+        auto selectUnion = this->doubleClickSelection_ | hoveredWord;
 
         this->setSelection(selectUnion);
     }
