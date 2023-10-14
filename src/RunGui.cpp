@@ -15,15 +15,12 @@
 #include <QApplication>
 #include <QFile>
 #include <QPalette>
-#include <QProcess>
 #include <QStyleFactory>
 #include <Qt>
-#include <QThreadPool>
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-#    include <QtConcurrent>
-#endif
+#include <QtConcurrent>
 
 #include <csignal>
+#include <tuple>
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
@@ -268,22 +265,15 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory(),
                                    crashDirectory = paths.crashdumpDirectory,
                                    avatarPath = paths.twitchProfileAvatars] {
-        auto spawnVacuum = [](auto fn, QString path) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-            QtConcurrent::run([fn = std::move(fn), path = std::move(path)] {
-                fn(path);
-            });
-#else
-            QThreadPool::globalInstance()->start(
-                [fn = std::move(fn), path = std::move(path)] {
-                    fn(path);
-                });
-#endif
-        };
-
-        spawnVacuum(clearCache, cachePath);
-        spawnVacuum(clearCache, avatarPath);
-        spawnVacuum(clearCrashes, crashDirectory);
+        std::ignore = QtConcurrent::run([cachePath] {
+            clearCache(cachePath);
+        });
+        std::ignore = QtConcurrent::run([avatarPath] {
+            clearCache(avatarPath);
+        });
+        std::ignore = QtConcurrent::run([crashDirectory] {
+            clearCrashes(crashDirectory);
+        });
     });
 
     chatterino::NetworkManager::init();
