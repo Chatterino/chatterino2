@@ -267,9 +267,9 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
                                    avatarPath = paths.twitchProfileAvatars] {
         auto spawnVacuum = [](auto fn, QString path) {
             QThreadPool::globalInstance()->start(
-                [fn = std::move(fn), path = std::move(path)] {
+                QRunnable::create([fn = std::move(fn), path = std::move(path)] {
                     fn(path);
-                });
+                }));
         };
 
         spawnVacuum(clearCache, cachePath);
