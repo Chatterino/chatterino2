@@ -30,26 +30,9 @@ namespace {
 using namespace chatterino;
 using namespace literals;
 
-QString reactionToString(ToastReaction value)
-{
-    // The constants are macros right now, but we want to avoid ASCII casts,
-    // so we're concatenating them with a QString literal - effectively making them part of it.
-    switch (value)
-    {
-        case ToastReaction::OpenInBrowser:
-            return OPEN_IN_BROWSER u""_s;
-        case ToastReaction::OpenInPlayer:
-            return OPEN_PLAYER_IN_BROWSER u""_s;
-        case ToastReaction::OpenInStreamlink:
-            return OPEN_IN_STREAMLINK u""_s;
-        case ToastReaction::DontOpen:
-        default:
-            return DONT_OPEN u""_s;
-    }
-}
-
 QString avatarFilePath(const QString &channelName)
 {
+    // TODO: cleanup channel (to be used as a file) and use combinePath
     return getPaths()->twitchProfileAvatars % '/' % channelName % u".png";
 }
 
@@ -97,7 +80,20 @@ bool Toasts::isEnabled()
 
 QString Toasts::findStringFromReaction(const ToastReaction &reaction)
 {
-    return reactionToString(reaction);
+    // The constants are macros right now, but we want to avoid ASCII casts,
+    // so we're concatenating them with a QString literal - effectively making them part of it.
+    switch (reaction)
+    {
+        case ToastReaction::OpenInBrowser:
+            return OPEN_IN_BROWSER u""_s;
+        case ToastReaction::OpenInPlayer:
+            return OPEN_PLAYER_IN_BROWSER u""_s;
+        case ToastReaction::OpenInStreamlink:
+            return OPEN_IN_STREAMLINK u""_s;
+        case ToastReaction::DontOpen:
+        default:
+            return DONT_OPEN u""_s;
+    }
 }
 
 QString Toasts::findStringFromReaction(
@@ -117,7 +113,7 @@ void Toasts::sendChannelNotification(const QString &channelName,
         this->sendWindowsNotification(channelName, channelTitle, p);
     };
 #else
-    Q_UNUSED(channelTitle);
+    (void)channelTitle;
     auto sendChannelNotification = [] {
         // Unimplemented for macOS and Linux
     };
