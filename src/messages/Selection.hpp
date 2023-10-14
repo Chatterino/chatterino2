@@ -74,7 +74,7 @@ struct Selection {
     }
 
     //union of both selections
-    Selection operator|=(const Selection &b) const
+    Selection operator|(const Selection &b) const
     {
         return {std::min(this->selectionMin, b.selectionMin),
                 std::max(this->selectionMax, b.selectionMax)};

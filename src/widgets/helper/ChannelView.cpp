@@ -1537,7 +1537,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             this->getWordBounds(layout.get(), hoverLayoutElement, relativePos);
         auto wordSelection = Selection{SelectionItem(messageIndex, wordStart),
                                        SelectionItem(messageIndex, wordEnd)};
-        auto selectUnion = this->doubleClickSelection_ |= wordSelection;
+        auto selectUnion = this->doubleClickSelection_ | wordSelection;
 
         this->setSelection(selectUnion);
     }
