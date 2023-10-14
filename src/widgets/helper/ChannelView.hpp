@@ -311,7 +311,7 @@ private:
     Selection doubleClickSelection_{};
     QPointF lastLeftPressPosition_;
     QPointF lastRightPressPosition_;
-    QPointF lastDClickPosition_;
+    QPointF lastDoubleClickPosition_;
     QTimer *clickTimer_;
 
     bool isScrolling_ = false;

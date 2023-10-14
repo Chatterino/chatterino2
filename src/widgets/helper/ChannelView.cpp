@@ -1835,7 +1835,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         {
             this->isDoubleClick_ = false;
             // Was actually not a wanted triple-click
-            if (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
+            if (fabsf(distanceBetweenPoints(this->lastDoubleClickPosition_,
                                             event->screenPos())) > 10.f)
             {
                 this->clickTimer_->stop();
@@ -1854,7 +1854,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
             // Triple-clicking a message selects the whole message
             if (foundElement && this->clickTimer_->isActive() &&
-                (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
+                (fabsf(distanceBetweenPoints(this->lastDoubleClickPosition_,
                                              event->screenPos())) < 10.f))
             {
                 this->selectWholeMessage(layout.get(), messageIndex);
@@ -2477,7 +2477,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
     }
 
     this->isDoubleClick_ = true;
-    this->lastDClickPosition_ = event->screenPos();
+    this->lastDoubleClickPosition_ = event->screenPos();
     this->clickTimer_->start();
 
     // message under cursor is collapsed
