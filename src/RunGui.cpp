@@ -19,6 +19,9 @@
 #include <QStyleFactory>
 #include <Qt>
 #include <QThreadPool>
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+#    include <QtConcurrent>
+#endif
 
 #include <csignal>
 
@@ -266,10 +269,16 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
                                    crashDirectory = paths.crashdumpDirectory,
                                    avatarPath = paths.twitchProfileAvatars] {
         auto spawnVacuum = [](auto fn, QString path) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+            QtConcurrent::run([fn = std::move(fn), path = std::move(path)] {
+                fn(path);
+            });
+#else
             QThreadPool::globalInstance()->start(
-                QRunnable::create([fn = std::move(fn), path = std::move(path)] {
+                [fn = std::move(fn), path = std::move(path)] {
                     fn(path);
-                }));
+                });
+#endif
         };
 
         spawnVacuum(clearCache, cachePath);
