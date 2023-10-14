@@ -2754,14 +2754,15 @@ void ChannelView::selectWholeMessage(MessageLayout *layout, int &messageIndex)
     this->setSelection(msgStart, msgEnd);
 }
 
+/// @returns [wordStart, wordEnd] position indexes for word hovered by mouse
 std::pair<size_t, size_t> ChannelView::getWordBounds(
     MessageLayout *layout, const MessageLayoutElement *element,
     const QPoint &relativePos)
 {
     const auto wordStart = layout->getSelectionIndex(relativePos) -
                            element->getMouseOverIndex(relativePos);
-    const int selectionLength = element->getSelectionIndexCount();
-    const int length =
+    const auto selectionLength = element->getSelectionIndexCount();
+    const auto length =
         element->hasTrailingSpace() ? selectionLength - 1 : selectionLength;
 
     return {wordStart, wordStart + length};
