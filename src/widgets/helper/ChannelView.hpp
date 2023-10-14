@@ -308,7 +308,6 @@ private:
     bool isLeftMouseDown_ = false;
     bool isRightMouseDown_ = false;
     bool isDoubleClick_ = false;
-    Selection doubleClickSelection_{};
     QPointF lastLeftPressPosition_;
     QPointF lastRightPressPosition_;
     QPointF lastDoubleClickPosition_;
@@ -331,6 +330,7 @@ private:
     } cursors_;
 
     Selection selection_;
+    Selection doubleClickSelection_;
 
     const Context context_;
 
