@@ -132,6 +132,95 @@ void addEmoteContextMenuItems(const Emote &emote,
     }
 }
 
+void addImageContextMenuItems(const MessageLayoutElement *hoveredElement,
+                              MessageLayoutPtr /*layout*/,
+                              QMouseEvent * /*event*/, QMenu &menu)
+{
+    if (hoveredElement == nullptr)
+    {
+        return;
+    }
+
+    const auto &creator = hoveredElement->getCreator();
+    auto creatorFlags = creator.getFlags();
+
+    // Badge actions
+    if (creatorFlags.hasAny({MessageElementFlag::Badges}))
+    {
+        if (auto badgeElement = dynamic_cast<const BadgeElement *>(&creator))
+        {
+            addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
+                                     menu);
+        }
+    }
+
+    // Emote actions
+    if (creatorFlags.hasAny(
+            {MessageElementFlag::EmoteImages, MessageElementFlag::EmojiImage}))
+    {
+        if (auto emoteElement = dynamic_cast<const EmoteElement *>(&creator))
+        {
+            addEmoteContextMenuItems(*emoteElement->getEmote(), creatorFlags,
+                                     menu);
+        }
+        else if (auto layeredElement =
+                     dynamic_cast<const LayeredEmoteElement *>(&creator))
+        {
+            // Give each emote its own submenu
+            for (auto &emote : layeredElement->getUniqueEmotes())
+            {
+                auto emoteAction = menu.addAction(emote.ptr->name.string);
+                auto emoteMenu = new QMenu(&menu);
+                emoteAction->setMenu(emoteMenu);
+                addEmoteContextMenuItems(*emote.ptr, emote.flags, *emoteMenu);
+            }
+        }
+    }
+
+    // add seperator
+    if (!menu.actions().empty())
+    {
+        menu.addSeparator();
+    }
+}
+
+void addLinkContextMenuItems(const MessageLayoutElement *hoveredElement,
+                             MessageLayoutPtr /*layout*/,
+                             QMouseEvent * /*event*/, QMenu &menu)
+{
+    if (hoveredElement == nullptr)
+    {
+        return;
+    }
+
+    const auto &link = hoveredElement->getLink();
+
+    if (link.type != Link::Url)
+    {
+        return;
+    }
+
+    // Link copy
+    QString url = link.value;
+
+    // open link
+    menu.addAction("&Open link", [url] {
+        QDesktopServices::openUrl(QUrl(url));
+    });
+    // open link default
+    if (supportsIncognitoLinks())
+    {
+        menu.addAction("Open link &incognito", [url] {
+            openLinkIncognito(url);
+        });
+    }
+    menu.addAction("&Copy link", [url] {
+        crossPlatformCopy(url);
+    });
+
+    menu.addSeparator();
+}
+
 // Current function: https://www.desmos.com/calculator/vdyamchjwh
 qreal highlightEasingFunction(qreal progress)
 {
@@ -2130,10 +2219,10 @@ void ChannelView::addContextMenuItems(
     menu->setAttribute(Qt::WA_DeleteOnClose);
 
     // Add image options if the element clicked contains an image (e.g. a badge or an emote)
-    this->addImageContextMenuItems(hoveredElement, layout, event, *menu);
+    addImageContextMenuItems(hoveredElement, layout, event, *menu);
 
     // Add link options if the element clicked contains a link
-    this->addLinkContextMenuItems(hoveredElement, layout, event, *menu);
+    addLinkContextMenuItems(hoveredElement, layout, event, *menu);
 
     // Add message options
     this->addMessageContextMenuItems(hoveredElement, layout, event, *menu);
@@ -2152,94 +2241,6 @@ void ChannelView::addContextMenuItems(
     menu->raise();
 }
 
-void ChannelView::addImageContextMenuItems(
-    const MessageLayoutElement *hoveredElement, MessageLayoutPtr /*layout*/,
-    QMouseEvent * /*event*/, QMenu &menu)
-{
-    if (hoveredElement == nullptr)
-    {
-        return;
-    }
-
-    const auto &creator = hoveredElement->getCreator();
-    auto creatorFlags = creator.getFlags();
-
-    // Badge actions
-    if (creatorFlags.hasAny({MessageElementFlag::Badges}))
-    {
-        if (auto badgeElement = dynamic_cast<const BadgeElement *>(&creator))
-        {
-            addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
-                                     menu);
-        }
-    }
-
-    // Emote actions
-    if (creatorFlags.hasAny(
-            {MessageElementFlag::EmoteImages, MessageElementFlag::EmojiImage}))
-    {
-        if (auto emoteElement = dynamic_cast<const EmoteElement *>(&creator))
-        {
-            addEmoteContextMenuItems(*emoteElement->getEmote(), creatorFlags,
-                                     menu);
-        }
-        else if (auto layeredElement =
-                     dynamic_cast<const LayeredEmoteElement *>(&creator))
-        {
-            // Give each emote its own submenu
-            for (auto &emote : layeredElement->getUniqueEmotes())
-            {
-                auto emoteAction = menu.addAction(emote.ptr->name.string);
-                auto emoteMenu = new QMenu(&menu);
-                emoteAction->setMenu(emoteMenu);
-                addEmoteContextMenuItems(*emote.ptr, emote.flags, *emoteMenu);
-            }
-        }
-    }
-
-    // add seperator
-    if (!menu.actions().empty())
-    {
-        menu.addSeparator();
-    }
-}
-
-void ChannelView::addLinkContextMenuItems(
-    const MessageLayoutElement *hoveredElement, MessageLayoutPtr /*layout*/,
-    QMouseEvent * /*event*/, QMenu &menu)
-{
-    if (hoveredElement == nullptr)
-    {
-        return;
-    }
-
-    const auto &link = hoveredElement->getLink();
-
-    if (link.type != Link::Url)
-    {
-        return;
-    }
-
-    // Link copy
-    QString url = link.value;
-
-    // open link
-    menu.addAction("&Open link", [url] {
-        QDesktopServices::openUrl(QUrl(url));
-    });
-    // open link default
-    if (supportsIncognitoLinks())
-    {
-        menu.addAction("Open link &incognito", [url] {
-            openLinkIncognito(url);
-        });
-    }
-    menu.addAction("&Copy link", [url] {
-        crossPlatformCopy(url);
-    });
-
-    menu.addSeparator();
-}
 void ChannelView::addMessageContextMenuItems(
     const MessageLayoutElement * /*hoveredElement*/, MessageLayoutPtr layout,
     QMouseEvent * /*event*/, QMenu &menu)

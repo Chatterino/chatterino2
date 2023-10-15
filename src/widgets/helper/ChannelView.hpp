@@ -218,12 +218,6 @@ private:
                           MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
                              MessageLayoutPtr layout, QMouseEvent *event);
-    void addImageContextMenuItems(const MessageLayoutElement *hoveredElement,
-                                  MessageLayoutPtr layout, QMouseEvent *event,
-                                  QMenu &menu);
-    void addLinkContextMenuItems(const MessageLayoutElement *hoveredElement,
-                                 MessageLayoutPtr layout, QMouseEvent *event,
-                                 QMenu &menu);
     void addMessageContextMenuItems(const MessageLayoutElement *hoveredElement,
                                     MessageLayoutPtr layout, QMouseEvent *event,
                                     QMenu &menu);
