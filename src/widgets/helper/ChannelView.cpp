@@ -182,9 +182,8 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
         this->copySelectedText();
     });
 
-    this->clickTimer_ = new QTimer(this);
-    this->clickTimer_->setSingleShot(true);
-    this->clickTimer_->setInterval(500);
+    this->clickTimer_.setSingleShot(true);
+    this->clickTimer_.setInterval(500);
 
     this->scrollTimer_.setInterval(20);
     QObject::connect(&this->scrollTimer_, &QTimer::timeout, this, [this] {
@@ -1840,7 +1839,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             if (fabsf(distanceBetweenPoints(this->lastDoubleClickPosition_,
                                             event->screenPos())) > 10.f)
             {
-                this->clickTimer_->stop();
+                this->clickTimer_.stop();
                 return;
             }
         }
@@ -1855,7 +1854,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             }
 
             // Triple-clicking a message selects the whole message
-            if (foundElement && this->clickTimer_->isActive() &&
+            if (foundElement && this->clickTimer_.isActive() &&
                 (fabsf(distanceBetweenPoints(this->lastDoubleClickPosition_,
                                              event->screenPos())) < 10.f))
             {
@@ -2473,7 +2472,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
 
     this->isDoubleClick_ = true;
     this->lastDoubleClickPosition_ = event->screenPos();
-    this->clickTimer_->start();
+    this->clickTimer_.start();
 
     // message under cursor is collapsed
     if (layout->flags.has(MessageLayoutFlag::Collapsed))

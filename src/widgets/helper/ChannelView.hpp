@@ -311,7 +311,7 @@ private:
     QPointF lastLeftPressPosition_;
     QPointF lastRightPressPosition_;
     QPointF lastDoubleClickPosition_;
-    QTimer *clickTimer_;
+    QTimer clickTimer_;
 
     bool isScrolling_ = false;
     QPointF lastMiddlePressPosition_;
