@@ -184,9 +184,18 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
 
     this->pauseTimer_.setSingleShot(true);
     QObject::connect(&this->pauseTimer_, &QTimer::timeout, this, [this] {
-        /// remove elements that are finite
+        // remove elements that are finite
         for (auto it = this->pauses_.begin(); it != this->pauses_.end();)
-            it = it->second ? this->pauses_.erase(it) : ++it;
+        {
+            if (it->second)
+            {
+                it = this->pauses_.erase(it);
+            }
+            else
+            {
+                it = ++it;
+            }
+        }
 
         this->updatePauses();
     });
