@@ -2879,30 +2879,19 @@ void ChannelView::setInputReply(const MessagePtr &message)
         return;
     }
 
-    std::shared_ptr<MessageThread> thread;
+    auto thread = message->replyThread;
 
-    if (message->replyThread == nullptr)
+    if (!thread)
     {
-        auto getThread = [&](TwitchChannel *tc) {
-            auto threadIt = tc->threads().find(message->id);
-            if (threadIt != tc->threads().end() && !threadIt->second.expired())
-            {
-                return threadIt->second.lock();
-            }
-
-            auto thread = std::make_shared<MessageThread>(message);
-            tc->addReplyThread(thread);
-            return thread;
-        };
-
-        if (auto tc =
+        // Message did not already have a thread attached, try to find or create one
+        if (auto *tc =
                 dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get()))
         {
-            thread = getThread(tc);
+            thread = tc->getOrCreateThread(message);
         }
-        else if (auto tc = dynamic_cast<TwitchChannel *>(this->channel_.get()))
+        else if (auto *tc = dynamic_cast<TwitchChannel *>(this->channel_.get()))
         {
-            thread = getThread(tc);
+            thread = tc->getOrCreateThread(message);
         }
         else
         {
@@ -2911,10 +2900,6 @@ void ChannelView::setInputReply(const MessagePtr &message)
             // TODO(dnsge): Should probably notify user?
             return;
         }
-    }
-    else
-    {
-        thread = message->replyThread;
     }
 
     this->split_->setInputReply(thread);
