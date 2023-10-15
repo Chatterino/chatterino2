@@ -212,9 +212,6 @@ private:
     void setSelection(const SelectionItem &start, const SelectionItem &end);
     void setSelection(const Selection &newSelection);
     void selectWholeMessage(MessageLayout *layout, int &messageIndex);
-    std::pair<size_t, size_t> getWordBounds(MessageLayout *layout,
-                                            const MessageLayoutElement *element,
-                                            const QPoint &relativePos);
 
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoveredElement,

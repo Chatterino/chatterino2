@@ -142,6 +142,23 @@ qreal highlightEasingFunction(qreal progress)
     return 1.0 + pow((20.0 / 9.0) * (0.5 * progress - 0.5), 3.0);
 }
 
+/// @return the start and end of the word bounds
+std::pair<int, int> getWordBounds(MessageLayout *layout,
+                                  const MessageLayoutElement *element,
+                                  const QPoint &relativePos)
+{
+    assert(layout != nullptr);
+    assert(element != nullptr);
+
+    const auto wordStart = layout->getSelectionIndex(relativePos) -
+                           element->getMouseOverIndex(relativePos);
+    const auto selectionLength = element->getSelectionIndexCount();
+    const auto length =
+        element->hasTrailingSpace() ? selectionLength - 1 : selectionLength;
+
+    return {wordStart, wordStart + length};
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -1535,7 +1552,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (this->isDoubleClick_ && hoverLayoutElement)
     {
         auto [wordStart, wordEnd] =
-            this->getWordBounds(layout.get(), hoverLayoutElement, relativePos);
+            getWordBounds(layout.get(), hoverLayoutElement, relativePos);
         auto hoveredWord = Selection{SelectionItem(messageIndex, wordStart),
                                      SelectionItem(messageIndex, wordEnd)};
         // combined selection spanning from initially selected word to hoveredWord
@@ -2490,7 +2507,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
     }
 
     auto [wordStart, wordEnd] =
-        this->getWordBounds(layout.get(), hoverLayoutElement, relativePos);
+        getWordBounds(layout.get(), hoverLayoutElement, relativePos);
     this->doubleClickSelection_ = {SelectionItem(messageIndex, wordStart),
                                    SelectionItem(messageIndex, wordEnd)};
     this->setSelection(this->doubleClickSelection_);
@@ -2747,20 +2764,6 @@ void ChannelView::selectWholeMessage(MessageLayout *layout, int &messageIndex)
                            layout->getFirstMessageCharacterIndex());
     SelectionItem msgEnd(messageIndex, layout->getLastCharacterIndex());
     this->setSelection(msgStart, msgEnd);
-}
-
-/// @returns [wordStart, wordEnd] position indexes for word hovered by mouse
-std::pair<size_t, size_t> ChannelView::getWordBounds(
-    MessageLayout *layout, const MessageLayoutElement *element,
-    const QPoint &relativePos)
-{
-    const auto wordStart = layout->getSelectionIndex(relativePos) -
-                           element->getMouseOverIndex(relativePos);
-    const auto selectionLength = element->getSelectionIndexCount();
-    const auto length =
-        element->hasTrailingSpace() ? selectionLength - 1 : selectionLength;
-
-    return {wordStart, wordStart + length};
 }
 
 void ChannelView::enableScrolling(const QPointF &scrollStart)
