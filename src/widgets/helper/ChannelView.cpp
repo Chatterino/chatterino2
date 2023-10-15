@@ -1076,7 +1076,7 @@ void ChannelView::updateLastReadMessage()
     this->update();
 }
 
-void ChannelView::resizeEvent(QResizeEvent *)
+void ChannelView::resizeEvent(QResizeEvent * /*event*/)
 {
     this->scrollBar_->setGeometry(this->width() - this->scrollBar_->width(), 0,
                                   this->scrollBar_->width(), this->height());
@@ -1479,7 +1479,7 @@ void ChannelView::enterEvent(QEvent * /*event*/)
 {
 }
 
-void ChannelView::leaveEvent(QEvent *)
+void ChannelView::leaveEvent(QEvent * /*event*/)
 {
     TooltipWidget::instance()->hide();
 
@@ -2502,7 +2502,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-void ChannelView::hideEvent(QHideEvent *)
+void ChannelView::hideEvent(QHideEvent * /*event*/)
 {
     for (auto &layout : this->messagesOnScreen_)
     {
