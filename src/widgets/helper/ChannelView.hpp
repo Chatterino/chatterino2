@@ -224,9 +224,6 @@ private:
     void addTwitchLinkContextMenuItems(
         const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
         QMouseEvent *event, QMenu &menu);
-    void addHiddenContextMenuItems(const MessageLayoutElement *hoveredElement,
-                                   MessageLayoutPtr layout, QMouseEvent *event,
-                                   QMenu &menu);
     void addCommandExecutionContextMenuItems(
         const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
         QMouseEvent *event, QMenu &menu);

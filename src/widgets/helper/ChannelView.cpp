@@ -221,6 +221,30 @@ void addLinkContextMenuItems(const MessageLayoutElement *hoveredElement,
     menu.addSeparator();
 }
 
+void addHiddenContextMenuItems(const MessageLayoutElement * /*hoveredElement*/,
+                               MessageLayoutPtr layout, QMouseEvent *event,
+                               QMenu &menu)
+{
+    if (!layout)
+    {
+        return;
+    }
+
+    if (event->modifiers() != Qt::ShiftModifier)
+    {
+        // NOTE: We currently require the modifier to be ONLY shift - we might want to check if shift is among the modifiers instead
+        return;
+    }
+
+    if (!layout->getMessage()->id.isEmpty())
+    {
+        menu.addAction("Copy message &ID",
+                       [messageID = layout->getMessage()->id] {
+                           crossPlatformCopy(messageID);
+                       });
+    }
+}
+
 // Current function: https://www.desmos.com/calculator/vdyamchjwh
 qreal highlightEasingFunction(qreal progress)
 {
@@ -2231,7 +2255,7 @@ void ChannelView::addContextMenuItems(
     this->addTwitchLinkContextMenuItems(hoveredElement, layout, event, *menu);
 
     // Add hidden options (e.g. copy message ID) if the user held down Shift
-    this->addHiddenContextMenuItems(hoveredElement, layout, event, *menu);
+    addHiddenContextMenuItems(hoveredElement, layout, event, *menu);
 
     // Add executable command options
     this->addCommandExecutionContextMenuItems(hoveredElement, layout, event,
@@ -2388,30 +2412,6 @@ void ChannelView::addTwitchLinkContextMenuItems(
             this->openChannelIn.invoke(twitchUsername,
                                        FromTwitchLinkOpenChannelIn::Streamlink);
         });
-    }
-}
-
-void ChannelView::addHiddenContextMenuItems(
-    const MessageLayoutElement * /*hoveredElement*/, MessageLayoutPtr layout,
-    QMouseEvent *event, QMenu &menu)
-{
-    if (!layout)
-    {
-        return;
-    }
-
-    if (event->modifiers() != Qt::ShiftModifier)
-    {
-        // NOTE: We currently require the modifier to be ONLY shift - we might want to check if shift is among the modifiers instead
-        return;
-    }
-
-    if (!layout->getMessage()->id.isEmpty())
-    {
-        menu.addAction("Copy message &ID",
-                       [messageID = layout->getMessage()->id] {
-                           crossPlatformCopy(messageID);
-                       });
     }
 }
 
