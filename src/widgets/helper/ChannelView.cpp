@@ -69,81 +69,82 @@
 
 namespace {
 
+using namespace chatterino;
+
 constexpr int SCROLLBAR_PADDING = 8;
+
+void addEmoteContextMenuItems(const Emote &emote,
+                              MessageElementFlags creatorFlags, QMenu &menu)
+{
+    auto *openAction = menu.addAction("&Open");
+    auto *openMenu = new QMenu(&menu);
+    openAction->setMenu(openMenu);
+
+    auto *copyAction = menu.addAction("&Copy");
+    auto *copyMenu = new QMenu(&menu);
+    copyAction->setMenu(copyMenu);
+
+    // Add copy and open links for 1x, 2x, 3x
+    auto addImageLink = [&](const ImagePtr &image, char scale) {
+        if (!image->isEmpty())
+        {
+            copyMenu->addAction("&" + QString(scale) + "x link",
+                                [url = image->url()] {
+                                    crossPlatformCopy(url.string);
+                                });
+            openMenu->addAction("&" + QString(scale) + "x link",
+                                [url = image->url()] {
+                                    QDesktopServices::openUrl(QUrl(url.string));
+                                });
+        }
+    };
+
+    addImageLink(emote.images.getImage1(), '1');
+    addImageLink(emote.images.getImage2(), '2');
+    addImageLink(emote.images.getImage3(), '3');
+
+    // Copy and open emote page link
+    auto addPageLink = [&](const QString &name) {
+        copyMenu->addSeparator();
+        openMenu->addSeparator();
+
+        copyMenu->addAction("Copy " + name + " &emote link",
+                            [url = emote.homePage] {
+                                crossPlatformCopy(url.string);
+                            });
+        openMenu->addAction("Open " + name + " &emote link",
+                            [url = emote.homePage] {
+                                QDesktopServices::openUrl(QUrl(url.string));
+                            });
+    };
+
+    if (creatorFlags.has(MessageElementFlag::BttvEmote))
+    {
+        addPageLink("BTTV");
+    }
+    else if (creatorFlags.has(MessageElementFlag::FfzEmote))
+    {
+        addPageLink("FFZ");
+    }
+    else if (creatorFlags.has(MessageElementFlag::SevenTVEmote))
+    {
+        addPageLink("7TV");
+    }
+}
+
+// Current function: https://www.desmos.com/calculator/vdyamchjwh
+qreal highlightEasingFunction(qreal progress)
+{
+    if (progress <= 0.1)
+    {
+        return 1.0 - pow(10.0 * progress, 3.0);
+    }
+    return 1.0 + pow((20.0 / 9.0) * (0.5 * progress - 0.5), 3.0);
+}
 
 }  // namespace
 
 namespace chatterino {
-namespace {
-    void addEmoteContextMenuItems(const Emote &emote,
-                                  MessageElementFlags creatorFlags, QMenu &menu)
-    {
-        auto *openAction = menu.addAction("&Open");
-        auto *openMenu = new QMenu(&menu);
-        openAction->setMenu(openMenu);
-
-        auto *copyAction = menu.addAction("&Copy");
-        auto *copyMenu = new QMenu(&menu);
-        copyAction->setMenu(copyMenu);
-
-        // Add copy and open links for 1x, 2x, 3x
-        auto addImageLink = [&](const ImagePtr &image, char scale) {
-            if (!image->isEmpty())
-            {
-                copyMenu->addAction("&" + QString(scale) + "x link",
-                                    [url = image->url()] {
-                                        crossPlatformCopy(url.string);
-                                    });
-                openMenu->addAction(
-                    "&" + QString(scale) + "x link", [url = image->url()] {
-                        QDesktopServices::openUrl(QUrl(url.string));
-                    });
-            }
-        };
-
-        addImageLink(emote.images.getImage1(), '1');
-        addImageLink(emote.images.getImage2(), '2');
-        addImageLink(emote.images.getImage3(), '3');
-
-        // Copy and open emote page link
-        auto addPageLink = [&](const QString &name) {
-            copyMenu->addSeparator();
-            openMenu->addSeparator();
-
-            copyMenu->addAction("Copy " + name + " &emote link",
-                                [url = emote.homePage] {
-                                    crossPlatformCopy(url.string);
-                                });
-            openMenu->addAction("Open " + name + " &emote link",
-                                [url = emote.homePage] {
-                                    QDesktopServices::openUrl(QUrl(url.string));
-                                });
-        };
-
-        if (creatorFlags.has(MessageElementFlag::BttvEmote))
-        {
-            addPageLink("BTTV");
-        }
-        else if (creatorFlags.has(MessageElementFlag::FfzEmote))
-        {
-            addPageLink("FFZ");
-        }
-        else if (creatorFlags.has(MessageElementFlag::SevenTVEmote))
-        {
-            addPageLink("7TV");
-        }
-    }
-
-    // Current function: https://www.desmos.com/calculator/vdyamchjwh
-    qreal highlightEasingFunction(qreal progress)
-    {
-        if (progress <= 0.1)
-        {
-            return 1.0 - pow(10.0 * progress, 3.0);
-        }
-        return 1.0 + pow((20.0 / 9.0) * (0.5 * progress - 0.5), 3.0);
-    }
-}  // namespace
 
 ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
                          size_t messagesLimit)
