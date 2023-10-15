@@ -878,14 +878,18 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                          });
 
             if (!filtered.empty())
+            {
                 this->channel_->addMessagesAtStart(filtered);
+            }
         });
 
     this->channelConnections_.managedConnect(
         underlyingChannel->messageReplaced,
         [this](auto index, const auto &replacement) {
             if (this->shouldIncludeMessage(replacement))
+            {
                 this->channel_->replaceMessage(index, replacement);
+            }
         });
 
     this->channelConnections_.managedConnect(
@@ -1001,7 +1005,9 @@ bool ChannelView::shouldIncludeMessage(const MessagePtr &m) const
         if (getSettings()->excludeUserMessagesFromFilter &&
             getApp()->accounts->twitch.getCurrent()->getUserName().compare(
                 m->loginName, Qt::CaseInsensitive) == 0)
+        {
             return true;
+        }
 
         return this->channelFilters_->filter(m, this->underlyingChannel_);
     }
@@ -1112,7 +1118,9 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
 
         // alternate color
         if (!this->lastMessageHasAlternateBackgroundReverse_)
+        {
             layout->flags.set(MessageLayoutFlag::AlternateBackground);
+        }
         this->lastMessageHasAlternateBackgroundReverse_ =
             !this->lastMessageHasAlternateBackgroundReverse_;
 
@@ -1124,9 +1132,13 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     if (!addedMessages.empty())
     {
         if (this->scrollBar_->isAtBottom())
+        {
             this->scrollBar_->scrollToBottom();
+        }
         else
+        {
             this->scrollBar_->offset(qreal(addedMessages.size()));
+        }
         this->scrollBar_->offsetMaximum(qreal(addedMessages.size()));
     }
 
@@ -1285,7 +1297,9 @@ MessageElementFlags ChannelView::getFlags() const
     }
 
     if (this->sourceChannel_ == app->twitch->mentionsChannel)
+    {
         flags.set(MessageElementFlag::ChannelName);
+    }
 
     if (this->context_ == Context::ReplyThread ||
         getSettings()->hideReplyContext)
@@ -1811,7 +1825,9 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                                           ImagePtr thumbnail) {
                         auto shared = weakLayout.lock();
                         if (!shared)
+                        {
                             return;
+                        }
                         element->setTooltip(tooltipText);
                         element->setThumbnail(thumbnail);
                     });
@@ -1900,13 +1916,17 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     {
         case Qt::LeftButton: {
             if (this->isScrolling_)
+            {
                 this->disableScrolling();
+            }
 
             this->lastLeftPressPosition_ = event->screenPos();
             this->isLeftMouseDown_ = true;
 
             if (layout->flags.has(MessageLayoutFlag::Collapsed))
+            {
                 return;
+            }
 
             if (getSettings()->linksDoubleClickOnly.getValue())
             {
@@ -1921,7 +1941,9 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
         case Qt::RightButton: {
             if (this->isScrolling_)
+            {
                 this->disableScrolling();
+            }
 
             this->lastRightPressPosition_ = event->screenPos();
             this->isRightMouseDown_ = true;
@@ -1941,13 +1963,19 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             else
             {
                 if (this->isScrolling_)
+                {
                     this->disableScrolling();
+                }
                 else if (hoverLayoutElement != nullptr &&
                          hoverLayoutElement->getFlags().has(
                              MessageElementFlag::Username))
+                {
                     break;
+                }
                 else if (this->scrollBar_->isVisible())
+                {
                     this->enableScrolling(event->screenPos());
+                }
             }
         }
         break;
@@ -2030,9 +2058,13 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         if (this->isScrolling_ && this->scrollBar_->isVisible())
         {
             if (event->screenPos() == this->lastMiddlePressPosition_)
+            {
                 this->enableScrolling(event->screenPos());
+            }
             else
+            {
                 this->disableScrolling();
+            }
 
             return;
         }
@@ -2606,9 +2638,13 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
 
         case Link::Url: {
             if (getSettings()->openLinksIncognito && supportsIncognitoLinks())
+            {
                 openLinkIncognito(link.value);
+            }
             else
+            {
                 QDesktopServices::openUrl(QUrl(link.value));
+            }
         }
         break;
 
@@ -2764,7 +2800,9 @@ bool ChannelView::tryGetMessageAt(QPoint p,
 int ChannelView::getLayoutWidth() const
 {
     if (this->scrollBar_->isVisible())
+    {
         return int(this->width() - SCROLLBAR_PADDING * this->scale());
+    }
 
     return this->width();
 }
@@ -2787,7 +2825,9 @@ void ChannelView::enableScrolling(const QPointF &scrollStart)
     this->scrollTimer_.start();
 
     if (!QGuiApplication::overrideCursor())
+    {
         QGuiApplication::setOverrideCursor(this->cursors_.neutral);
+    }
 }
 
 void ChannelView::disableScrolling()
