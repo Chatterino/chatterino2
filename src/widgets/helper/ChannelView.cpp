@@ -2069,7 +2069,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
             return;
         }
-        else if (foundElement)
+
+        if (foundElement)
         {
             const MessageLayoutElement *hoverLayoutElement =
                 layout->getElementAt(relativePos);
@@ -2078,14 +2079,14 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             {
                 return;
             }
-            else if (hoverLayoutElement->getFlags().has(
-                         MessageElementFlag::Username))
+            if (hoverLayoutElement->getFlags().has(
+                    MessageElementFlag::Username))
             {
                 openTwitchUsercard(this->channel_->getName(),
                                    hoverLayoutElement->getLink().value);
                 return;
             }
-            else if (hoverLayoutElement->getLink().isUrl() == false)
+            if (hoverLayoutElement->getLink().isUrl() == false)
             {
                 return;
             }
@@ -2889,12 +2890,10 @@ void ChannelView::setInputReply(const MessagePtr &message)
             {
                 return threadIt->second.lock();
             }
-            else
-            {
-                auto thread = std::make_shared<MessageThread>(message);
-                tc->addReplyThread(thread);
-                return thread;
-            }
+
+            auto thread = std::make_shared<MessageThread>(message);
+            tc->addReplyThread(thread);
+            return thread;
         };
 
         if (auto tc =
