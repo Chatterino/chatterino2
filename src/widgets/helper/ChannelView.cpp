@@ -67,6 +67,12 @@
 #define CHAT_HOVER_PAUSE_DURATION 1000
 #define TOOLTIP_EMOTE_ENTRIES_LIMIT 7
 
+namespace {
+
+constexpr int SCROLLBAR_PADDING = 8;
+
+}  // namespace
+
 namespace chatterino {
 namespace {
     void addEmoteContextMenuItems(const Emote &emote,
@@ -2729,7 +2735,7 @@ bool ChannelView::tryGetMessageAt(QPoint p,
 int ChannelView::getLayoutWidth() const
 {
     if (this->scrollBar_->isVisible())
-        return int(this->width() - scrollbarPadding * this->scale());
+        return int(this->width() - SCROLLBAR_PADDING * this->scale());
 
     return this->width();
 }

@@ -346,9 +346,6 @@ private:
     MessageColors messageColors_;
     MessagePreferences messagePreferences_;
 
-    static constexpr int leftPadding = 8;
-    static constexpr int scrollbarPadding = 8;
-
 private slots:
     void scrollUpdateRequested();
 };
