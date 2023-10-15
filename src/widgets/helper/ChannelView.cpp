@@ -73,15 +73,15 @@ using namespace chatterino;
 
 constexpr int SCROLLBAR_PADDING = 8;
 
-void addEmoteContextMenuItems(const Emote &emote,
-                              MessageElementFlags creatorFlags, QMenu &menu)
+void addEmoteContextMenuItems(QMenu *menu, const Emote &emote,
+                              MessageElementFlags creatorFlags)
 {
-    auto *openAction = menu.addAction("&Open");
-    auto *openMenu = new QMenu(&menu);
+    auto *openAction = menu->addAction("&Open");
+    auto *openMenu = new QMenu(menu);
     openAction->setMenu(openMenu);
 
-    auto *copyAction = menu.addAction("&Copy");
-    auto *copyMenu = new QMenu(&menu);
+    auto *copyAction = menu->addAction("&Copy");
+    auto *copyMenu = new QMenu(menu);
     copyAction->setMenu(copyMenu);
 
     // Add copy and open links for 1x, 2x, 3x
@@ -132,9 +132,8 @@ void addEmoteContextMenuItems(const Emote &emote,
     }
 }
 
-void addImageContextMenuItems(const MessageLayoutElement *hoveredElement,
-                              MessageLayoutPtr /*layout*/,
-                              QMouseEvent * /*event*/, QMenu &menu)
+void addImageContextMenuItems(QMenu *menu,
+                              const MessageLayoutElement *hoveredElement)
 {
     if (hoveredElement == nullptr)
     {
@@ -147,10 +146,11 @@ void addImageContextMenuItems(const MessageLayoutElement *hoveredElement,
     // Badge actions
     if (creatorFlags.hasAny({MessageElementFlag::Badges}))
     {
-        if (auto badgeElement = dynamic_cast<const BadgeElement *>(&creator))
+        if (const auto *badgeElement =
+                dynamic_cast<const BadgeElement *>(&creator))
         {
-            addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
-                                     menu);
+            addEmoteContextMenuItems(menu, *badgeElement->getEmote(),
+                                     creatorFlags);
         }
     }
 
@@ -158,35 +158,35 @@ void addImageContextMenuItems(const MessageLayoutElement *hoveredElement,
     if (creatorFlags.hasAny(
             {MessageElementFlag::EmoteImages, MessageElementFlag::EmojiImage}))
     {
-        if (auto emoteElement = dynamic_cast<const EmoteElement *>(&creator))
+        if (const auto *emoteElement =
+                dynamic_cast<const EmoteElement *>(&creator))
         {
-            addEmoteContextMenuItems(*emoteElement->getEmote(), creatorFlags,
-                                     menu);
+            addEmoteContextMenuItems(menu, *emoteElement->getEmote(),
+                                     creatorFlags);
         }
-        else if (auto layeredElement =
+        else if (const auto *layeredElement =
                      dynamic_cast<const LayeredEmoteElement *>(&creator))
         {
             // Give each emote its own submenu
             for (auto &emote : layeredElement->getUniqueEmotes())
             {
-                auto emoteAction = menu.addAction(emote.ptr->name.string);
-                auto emoteMenu = new QMenu(&menu);
+                auto *emoteAction = menu->addAction(emote.ptr->name.string);
+                auto *emoteMenu = new QMenu(menu);
                 emoteAction->setMenu(emoteMenu);
-                addEmoteContextMenuItems(*emote.ptr, emote.flags, *emoteMenu);
+                addEmoteContextMenuItems(emoteMenu, *emote.ptr, emote.flags);
             }
         }
     }
 
     // add seperator
-    if (!menu.actions().empty())
+    if (!menu->actions().empty())
     {
-        menu.addSeparator();
+        menu->addSeparator();
     }
 }
 
-void addLinkContextMenuItems(const MessageLayoutElement *hoveredElement,
-                             MessageLayoutPtr /*layout*/,
-                             QMouseEvent * /*event*/, QMenu &menu)
+void addLinkContextMenuItems(QMenu *menu,
+                             const MessageLayoutElement *hoveredElement)
 {
     if (hoveredElement == nullptr)
     {
@@ -204,26 +204,27 @@ void addLinkContextMenuItems(const MessageLayoutElement *hoveredElement,
     QString url = link.value;
 
     // open link
-    menu.addAction("&Open link", [url] {
+    menu->addAction("&Open link", [url] {
         QDesktopServices::openUrl(QUrl(url));
     });
     // open link default
     if (supportsIncognitoLinks())
     {
-        menu.addAction("Open link &incognito", [url] {
+        menu->addAction("Open link &incognito", [url] {
             openLinkIncognito(url);
         });
     }
-    menu.addAction("&Copy link", [url] {
+    menu->addAction("&Copy link", [url] {
         crossPlatformCopy(url);
     });
 
-    menu.addSeparator();
+    menu->addSeparator();
 }
 
-void addHiddenContextMenuItems(const MessageLayoutElement * /*hoveredElement*/,
-                               MessageLayoutPtr layout, QMouseEvent *event,
-                               QMenu &menu)
+void addHiddenContextMenuItems(QMenu *menu,
+                               const MessageLayoutElement * /*hoveredElement*/,
+                               const MessageLayoutPtr &layout,
+                               QMouseEvent *event)
 {
     if (!layout)
     {
@@ -238,10 +239,10 @@ void addHiddenContextMenuItems(const MessageLayoutElement * /*hoveredElement*/,
 
     if (!layout->getMessage()->id.isEmpty())
     {
-        menu.addAction("Copy message &ID",
-                       [messageID = layout->getMessage()->id] {
-                           crossPlatformCopy(messageID);
-                       });
+        menu->addAction("Copy message &ID",
+                        [messageID = layout->getMessage()->id] {
+                            crossPlatformCopy(messageID);
+                        });
     }
 }
 
@@ -2280,41 +2281,39 @@ void ChannelView::addContextMenuItems(
     menu->setAttribute(Qt::WA_DeleteOnClose);
 
     // Add image options if the element clicked contains an image (e.g. a badge or an emote)
-    addImageContextMenuItems(hoveredElement, layout, event, *menu);
+    addImageContextMenuItems(menu, hoveredElement);
 
     // Add link options if the element clicked contains a link
-    addLinkContextMenuItems(hoveredElement, layout, event, *menu);
+    addLinkContextMenuItems(menu, hoveredElement);
 
     // Add message options
-    this->addMessageContextMenuItems(hoveredElement, layout, event, *menu);
+    this->addMessageContextMenuItems(menu, layout);
 
     // Add Twitch-specific link options if the element clicked contains a link detected as a Twitch username
-    this->addTwitchLinkContextMenuItems(hoveredElement, layout, event, *menu);
+    this->addTwitchLinkContextMenuItems(menu, hoveredElement);
 
     // Add hidden options (e.g. copy message ID) if the user held down Shift
-    addHiddenContextMenuItems(hoveredElement, layout, event, *menu);
+    addHiddenContextMenuItems(menu, hoveredElement, layout, event);
 
     // Add executable command options
-    this->addCommandExecutionContextMenuItems(hoveredElement, layout, event,
-                                              *menu);
+    this->addCommandExecutionContextMenuItems(menu, layout);
 
     menu->popup(QCursor::pos());
     menu->raise();
 }
 
-void ChannelView::addMessageContextMenuItems(
-    const MessageLayoutElement * /*hoveredElement*/, MessageLayoutPtr layout,
-    QMouseEvent * /*event*/, QMenu &menu)
+void ChannelView::addMessageContextMenuItems(QMenu *menu,
+                                             const MessageLayoutPtr &layout)
 {
     // Copy actions
     if (!this->selection_.isEmpty())
     {
-        menu.addAction("&Copy selection", [this] {
+        menu->addAction("&Copy selection", [this] {
             crossPlatformCopy(this->getSelectedText());
         });
     }
 
-    menu.addAction("Copy &message", [layout] {
+    menu->addAction("Copy &message", [layout] {
         QString copyString;
         layout->addSelectionText(copyString, 0, INT_MAX,
                                  CopyMode::OnlyTextAndEmotes);
@@ -2322,7 +2321,7 @@ void ChannelView::addMessageContextMenuItems(
         crossPlatformCopy(copyString);
     });
 
-    menu.addAction("Copy &full message", [layout] {
+    menu->addAction("Copy &full message", [layout] {
         QString copyString;
         layout->addSelectionText(copyString, 0, INT_MAX,
                                  CopyMode::EverythingButReplies);
@@ -2334,13 +2333,13 @@ void ChannelView::addMessageContextMenuItems(
     if (this->canReplyToMessages() && layout->isReplyable())
     {
         const auto &messagePtr = layout->getMessagePtr();
-        menu.addAction("&Reply to message", [this, &messagePtr] {
+        menu->addAction("&Reply to message", [this, &messagePtr] {
             this->setInputReply(messagePtr);
         });
 
         if (messagePtr->replyThread != nullptr)
         {
-            menu.addAction("View &thread", [this, &messagePtr] {
+            menu->addAction("View &thread", [this, &messagePtr] {
                 this->showReplyThreadPopup(messagePtr);
             });
         }
@@ -2355,8 +2354,8 @@ void ChannelView::addMessageContextMenuItems(
     if (isSearch || isMentions || isReplyOrUserCard)
     {
         const auto &messagePtr = layout->getMessagePtr();
-        menu.addAction("&Go to message", [this, &messagePtr, isSearch,
-                                          isMentions, isReplyOrUserCard] {
+        menu->addAction("&Go to message", [this, &messagePtr, isSearch,
+                                           isMentions, isReplyOrUserCard] {
             if (isSearch)
             {
                 if (const auto &search =
@@ -2388,8 +2387,7 @@ void ChannelView::addMessageContextMenuItems(
 }
 
 void ChannelView::addTwitchLinkContextMenuItems(
-    const MessageLayoutElement *hoveredElement, MessageLayoutPtr /*layout*/,
-    QMouseEvent * /*event*/, QMenu &menu)
+    QMenu *menu, const MessageLayoutElement *hoveredElement)
 {
     if (hoveredElement == nullptr)
     {
@@ -2430,22 +2428,22 @@ void ChannelView::addTwitchLinkContextMenuItems(
     auto twitchUsername = twitchMatch.captured("username");
     if (!twitchUsername.isEmpty() && !ignoredUsernames.contains(twitchUsername))
     {
-        menu.addSeparator();
-        menu.addAction("&Open in new split", [twitchUsername, this] {
+        menu->addSeparator();
+        menu->addAction("&Open in new split", [twitchUsername, this] {
             this->openChannelIn.invoke(twitchUsername,
                                        FromTwitchLinkOpenChannelIn::Split);
         });
-        menu.addAction("Open in new &tab", [twitchUsername, this] {
+        menu->addAction("Open in new &tab", [twitchUsername, this] {
             this->openChannelIn.invoke(twitchUsername,
                                        FromTwitchLinkOpenChannelIn::Tab);
         });
 
-        menu.addSeparator();
-        menu.addAction("Open player in &browser", [twitchUsername, this] {
+        menu->addSeparator();
+        menu->addAction("Open player in &browser", [twitchUsername, this] {
             this->openChannelIn.invoke(
                 twitchUsername, FromTwitchLinkOpenChannelIn::BrowserPlayer);
         });
-        menu.addAction("Open in &streamlink", [twitchUsername, this] {
+        menu->addAction("Open in &streamlink", [twitchUsername, this] {
             this->openChannelIn.invoke(twitchUsername,
                                        FromTwitchLinkOpenChannelIn::Streamlink);
         });
@@ -2453,13 +2451,12 @@ void ChannelView::addTwitchLinkContextMenuItems(
 }
 
 void ChannelView::addCommandExecutionContextMenuItems(
-    const MessageLayoutElement * /*hoveredElement*/, MessageLayoutPtr layout,
-    QMouseEvent * /*event*/, QMenu &menu)
+    QMenu *menu, const MessageLayoutPtr &layout)
 {
     /* Get commands to be displayed in context menu; 
      * only those that had the showInMsgContextMenu check box marked in the Commands page */
     std::vector<Command> cmds;
-    for (auto &cmd : getApp()->commands->items)
+    for (const auto &cmd : getApp()->commands->items)
     {
         if (cmd.showInMsgContextMenu)
         {
@@ -2472,9 +2469,9 @@ void ChannelView::addCommandExecutionContextMenuItems(
         return;
     }
 
-    menu.addSeparator();
-    auto *executeAction = menu.addAction("&Execute command");
-    auto *cmdMenu = new QMenu(&menu);
+    menu->addSeparator();
+    auto *executeAction = menu->addAction("&Execute command");
+    auto *cmdMenu = new QMenu(menu);
     executeAction->setMenu(cmdMenu);
 
     for (auto &cmd : cmds)
@@ -2498,7 +2495,7 @@ void ChannelView::addCommandExecutionContextMenuItems(
             {
                 channel = this->underlyingChannel_;
             }
-            auto split = dynamic_cast<Split *>(this->parentWidget());
+            auto *split = dynamic_cast<Split *>(this->parentWidget());
             QString userText;
             if (split)
             {

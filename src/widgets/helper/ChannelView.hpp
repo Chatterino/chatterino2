@@ -219,15 +219,12 @@ private:
                           MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
                              MessageLayoutPtr layout, QMouseEvent *event);
-    void addMessageContextMenuItems(const MessageLayoutElement *hoveredElement,
-                                    MessageLayoutPtr layout, QMouseEvent *event,
-                                    QMenu &menu);
+    void addMessageContextMenuItems(QMenu *menu,
+                                    const MessageLayoutPtr &layout);
     void addTwitchLinkContextMenuItems(
-        const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
-        QMouseEvent *event, QMenu &menu);
-    void addCommandExecutionContextMenuItems(
-        const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
-        QMouseEvent *event, QMenu &menu);
+        QMenu *menu, const MessageLayoutElement *hoveredElement);
+    void addCommandExecutionContextMenuItems(QMenu *menu,
+                                             const MessageLayoutPtr &layout);
 
     int getLayoutWidth() const;
     void updatePauses();
