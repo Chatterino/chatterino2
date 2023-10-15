@@ -89,6 +89,11 @@ public:
     {
         return nullptr;
     }
+
+    SeventvPersonalEmotes *getSeventvPersonalEmotes() override
+    {
+        return nullptr;
+    }
 };
 
 }  // namespace chatterino::mock

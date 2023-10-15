@@ -11,6 +11,7 @@
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
+#include "providers/seventv/SeventvPersonalEmotes.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
 
@@ -70,6 +71,11 @@ public:
         return &this->highlights;
     }
 
+    SeventvPersonalEmotes *getSeventvPersonalEmotes() override
+    {
+        return &this->personalEmotes;
+    }
+
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -78,6 +84,7 @@ public:
     FfzBadges ffzBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
+    SeventvPersonalEmotes personalEmotes;
 };
 
 }  // namespace

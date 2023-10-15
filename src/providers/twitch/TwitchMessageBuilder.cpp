@@ -1086,8 +1086,8 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     //  - BetterTTV Global
     //  - 7TV Global
     if (this->twitchChannel != nullptr &&
-        (emote =
-             app->seventvPersonalEmotes->getEmoteForUser(this->userId_, name)))
+        (emote = app->getSeventvPersonalEmotes()->getEmoteForUser(this->userId_,
+                                                                  name)))
     {
         flags = MessageElementFlag::SevenTVEmote;
     }

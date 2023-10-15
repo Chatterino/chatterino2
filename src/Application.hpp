@@ -69,6 +69,8 @@ public:
     virtual SeventvBadges *getSeventvBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
     virtual ITwitchLiveController *getTwitchLiveController() = 0;
+
+    virtual SeventvPersonalEmotes *getSeventvPersonalEmotes() = 0;
 };
 
 class Application : public IApplication
@@ -172,6 +174,11 @@ public:
     }
     IUserDataController *getUserData() override;
     ITwitchLiveController *getTwitchLiveController() override;
+
+    SeventvPersonalEmotes *getSeventvPersonalEmotes() override
+    {
+        return this->seventvPersonalEmotes;
+    }
 
     pajlada::Signals::NoArgSignal streamerModeChanged;
 

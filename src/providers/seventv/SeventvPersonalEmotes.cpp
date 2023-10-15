@@ -3,12 +3,9 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "singletons/Settings.hpp"
 
-#include <boost/optional/optional.hpp>
-
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <utility>
 
 namespace chatterino {
 
@@ -31,7 +28,7 @@ void SeventvPersonalEmotes::createEmoteSet(const QString &id)
     }
 }
 
-boost::optional<std::shared_ptr<const EmoteMap>>
+std::optional<std::shared_ptr<const EmoteMap>>
     SeventvPersonalEmotes::assignUserToEmoteSet(const QString &emoteSetID,
                                                 const QString &userTwitchID)
 {
@@ -41,14 +38,14 @@ boost::optional<std::shared_ptr<const EmoteMap>>
 
     if (list.contains(emoteSetID))
     {
-        return boost::none;
+        return std::nullopt;
     }
     list.append(emoteSetID);
 
     auto set = this->emoteSets_.find(emoteSetID);
     if (set == this->emoteSets_.end())
     {
-        return boost::none;
+        return std::nullopt;
     }
     return set->second.get();  // copy the shared_ptr
 }
@@ -97,7 +94,8 @@ void SeventvPersonalEmotes::addEmoteSetForUser(const QString &emoteSetID,
                                                const QString &userTwitchID)
 {
     std::unique_lock<std::shared_mutex> lock(this->mutex_);
-    this->emoteSets_.emplace(emoteSetID, std::make_shared<const EmoteMap>(map));
+    this->emoteSets_.emplace(emoteSetID,
+                             std::make_shared<const EmoteMap>(std::move(map)));
     this->userEmoteSets_[userTwitchID].append(emoteSetID);
 }
 
@@ -137,7 +135,7 @@ QList<std::shared_ptr<const EmoteMap>>
     return sets;
 }
 
-boost::optional<EmotePtr> SeventvPersonalEmotes::getEmoteForUser(
+std::optional<EmotePtr> SeventvPersonalEmotes::getEmoteForUser(
     const QString &userID, const EmoteName &emoteName) const
 {
     std::shared_lock<std::shared_mutex> lock(this->mutex_);
@@ -169,7 +167,7 @@ boost::optional<EmotePtr> SeventvPersonalEmotes::getEmoteForUser(
         return it->second;  // found the emote
     }
 
-    return boost::none;
+    return std::nullopt;
 }
 
 }  // namespace chatterino

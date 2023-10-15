@@ -5,11 +5,11 @@
 #include "messages/Emote.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 
-#include <boost/optional.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QList>
 
 #include <memory>
+#include <optional>
 #include <shared_mutex>
 #include <unordered_map>
 
@@ -23,7 +23,7 @@ public:
     void createEmoteSet(const QString &id);
 
     // Returns the emote-map of this set if it's new.
-    boost::optional<std::shared_ptr<const EmoteMap>> assignUserToEmoteSet(
+    std::optional<std::shared_ptr<const EmoteMap>> assignUserToEmoteSet(
         const QString &emoteSetID, const QString &userTwitchID);
 
     void updateEmoteSet(const QString &id,
@@ -41,8 +41,8 @@ public:
     QList<std::shared_ptr<const EmoteMap>> getEmoteSetsForUser(
         const QString &userID) const;
 
-    boost::optional<EmotePtr> getEmoteForUser(const QString &userID,
-                                              const EmoteName &emoteName) const;
+    std::optional<EmotePtr> getEmoteForUser(const QString &userID,
+                                            const EmoteName &emoteName) const;
 
 private:
     // emoteSetID => emoteSet
