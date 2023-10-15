@@ -12,122 +12,143 @@
 #include <rapidjson/error/error.h>
 #include <rapidjson/rapidjson.h>
 
-#include <array>
+#include <map>
 #include <memory>
 
-namespace chatterino {
 namespace {
 
-    auto toneNames = std::map<QString, QString>{
-        {"1F3FB", "tone1"}, {"1F3FC", "tone2"}, {"1F3FD", "tone3"},
-        {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
-    };
+using namespace chatterino;
 
-    void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
-                    const rapidjson::Value &unparsedEmoji,
-                    QString shortCode = QString())
+const std::map<QString, QString> TONE_NAMES{
+    {"1F3FB", "tone1"}, {"1F3FC", "tone2"}, {"1F3FD", "tone3"},
+    {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
+};
+
+void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
+                const rapidjson::Value &unparsedEmoji,
+                const QString &shortCode = {})
+{
+    std::vector<uint32_t> unicodeBytes{};
+
+    struct {
+        bool apple;
+        bool google;
+        bool twitter;
+        bool facebook;
+    } capabilities{};
+
+    if (!shortCode.isEmpty())
     {
-        std::array<uint32_t, 9> unicodeBytes{};
+        emojiData->shortCodes.push_back(shortCode);
+    }
+    else
+    {
+        // Load short codes from the suggested short_names
+        const auto &shortNames = unparsedEmoji["short_names"];
+        for (const auto &shortName : shortNames.GetArray())
+        {
+            emojiData->shortCodes.emplace_back(shortName.GetString());
+        }
+    }
 
-        struct {
-            bool apple;
-            bool google;
-            bool twitter;
-            bool facebook;
-        } capabilities{};
+    rj::getSafe(unparsedEmoji, "non_qualified", emojiData->nonQualifiedCode);
+    rj::getSafe(unparsedEmoji, "unified", emojiData->unifiedCode);
+    assert(!emojiData->unifiedCode.isEmpty());
 
-        if (!shortCode.isEmpty())
-        {
-            emojiData->shortCodes.push_back(shortCode);
-        }
-        else
-        {
-            const auto &shortCodes = unparsedEmoji["short_names"];
-            for (const auto &_shortCode : shortCodes.GetArray())
-            {
-                emojiData->shortCodes.emplace_back(_shortCode.GetString());
-            }
-        }
+    rj::getSafe(unparsedEmoji, "has_img_apple", capabilities.apple);
+    rj::getSafe(unparsedEmoji, "has_img_google", capabilities.google);
+    rj::getSafe(unparsedEmoji, "has_img_twitter", capabilities.twitter);
+    rj::getSafe(unparsedEmoji, "has_img_facebook", capabilities.facebook);
 
-        rj::getSafe(unparsedEmoji, "non_qualified",
-                    emojiData->nonQualifiedCode);
-        rj::getSafe(unparsedEmoji, "unified", emojiData->unifiedCode);
+    if (capabilities.apple)
+    {
+        emojiData->capabilities.insert("Apple");
+    }
+    if (capabilities.google)
+    {
+        emojiData->capabilities.insert("Google");
+    }
+    if (capabilities.twitter)
+    {
+        emojiData->capabilities.insert("Twitter");
+    }
+    if (capabilities.facebook)
+    {
+        emojiData->capabilities.insert("Facebook");
+    }
 
-        rj::getSafe(unparsedEmoji, "has_img_apple", capabilities.apple);
-        rj::getSafe(unparsedEmoji, "has_img_google", capabilities.google);
-        rj::getSafe(unparsedEmoji, "has_img_twitter", capabilities.twitter);
-        rj::getSafe(unparsedEmoji, "has_img_facebook", capabilities.facebook);
+    QStringList unicodeCharacters = emojiData->unifiedCode.toLower().split('-');
 
-        if (capabilities.apple)
+    for (const QString &unicodeCharacter : unicodeCharacters)
+    {
+        bool ok{false};
+        unicodeBytes.push_back(QString(unicodeCharacter).toUInt(&ok, 16));
+        if (!ok)
         {
-            emojiData->capabilities.insert("Apple");
-        }
-        if (capabilities.google)
-        {
-            emojiData->capabilities.insert("Google");
-        }
-        if (capabilities.twitter)
-        {
-            emojiData->capabilities.insert("Twitter");
-        }
-        if (capabilities.facebook)
-        {
-            emojiData->capabilities.insert("Facebook");
-        }
-
-        QStringList unicodeCharacters;
-        if (!emojiData->nonQualifiedCode.isEmpty())
-        {
-            unicodeCharacters =
-                emojiData->nonQualifiedCode.toLower().split('-');
-        }
-        else
-        {
-            unicodeCharacters = emojiData->unifiedCode.toLower().split('-');
-        }
-        if (unicodeCharacters.length() < 1)
-        {
+            qCWarning(chatterinoEmoji)
+                << "Failed to parse emoji" << emojiData->shortCodes;
             return;
         }
-
-        int numUnicodeBytes = 0;
-
-        for (const QString &unicodeCharacter : unicodeCharacters)
-        {
-            unicodeBytes.at(numUnicodeBytes++) =
-                QString(unicodeCharacter).toUInt(nullptr, 16);
-        }
-
-        emojiData->value =
-            QString::fromUcs4(unicodeBytes.data(), numUnicodeBytes);
     }
 
-    // getToneNames takes a tones and returns their names in the same order
-    // The format of the tones is: "1F3FB-1F3FB" or "1F3FB"
-    // The output of the tone names is: "tone1-tone1" or "tone1"
-    QString getToneNames(const QString &tones)
+    // We can safely do a narrowing static cast since unicodeBytes will never be a large number
+    emojiData->value = QString::fromUcs4(unicodeBytes.data(),
+                                         static_cast<int>(unicodeBytes.size()));
+
+    if (!emojiData->nonQualifiedCode.isEmpty())
     {
-        auto toneParts = tones.split('-');
-        QStringList toneNameResults;
-        for (const auto &tonePart : toneParts)
+        QStringList nonQualifiedCharacters =
+            emojiData->nonQualifiedCode.toLower().split('-');
+        std::vector<uint32_t> nonQualifiedBytes{};
+        for (const QString &unicodeCharacter : nonQualifiedCharacters)
         {
-            auto toneNameIt = toneNames.find(tonePart);
-            if (toneNameIt == toneNames.end())
+            bool ok{false};
+            nonQualifiedBytes.push_back(
+                QString(unicodeCharacter).toUInt(&ok, 16));
+            if (!ok)
             {
-                qDebug() << "Tone with key" << tonePart
-                         << "does not exist in tone names map";
-                continue;
+                qCWarning(chatterinoEmoji)
+                    << "Failed to parse emoji nonQualified"
+                    << emojiData->shortCodes;
+                return;
             }
-
-            toneNameResults.append(toneNameIt->second);
         }
 
-        assert(!toneNameResults.isEmpty());
-
-        return toneNameResults.join('-');
+        // We can safely do a narrowing static cast since unicodeBytes will never be a large number
+        emojiData->nonQualified =
+            QString::fromUcs4(nonQualifiedBytes.data(),
+                              static_cast<int>(nonQualifiedBytes.size()));
     }
+}
+
+// getToneNames takes a tones and returns their names in the same order
+// The format of the tones is: "1F3FB-1F3FB" or "1F3FB"
+// The output of the tone names is: "tone1-tone1" or "tone1"
+QString getToneNames(const QString &tones)
+{
+    auto toneParts = tones.split('-');
+    QStringList toneNameResults;
+    for (const auto &tonePart : toneParts)
+    {
+        auto toneNameIt = TONE_NAMES.find(tonePart);
+        if (toneNameIt == TONE_NAMES.end())
+        {
+            qDebug() << "Tone with key" << tonePart
+                     << "does not exist in tone names map";
+            continue;
+        }
+
+        toneNameResults.append(toneNameIt->second);
+    }
+
+    assert(!toneNameResults.isEmpty());
+
+    return toneNameResults.join('-');
+}
 
 }  // namespace
+
+namespace chatterino {
 
 void Emojis::load()
 {
@@ -219,6 +240,8 @@ void Emojis::loadEmojiSet()
     getSettings()->emojiSet.connect([this](const auto &emojiSet) {
         this->emojis.each([=](const auto &name,
                               std::shared_ptr<EmojiData> &emoji) {
+            (void)name;
+
             QString emojiSetToUse = emojiSet;
             // clang-format off
             static std::map<QString, QString> emojiSets = {
@@ -243,7 +266,7 @@ void Emojis::loadEmojiSet()
             };
             // clang-format on
 
-            if (emoji->capabilities.count(emojiSetToUse) == 0)
+            if (!emoji->capabilities.contains(emojiSetToUse))
             {
                 emojiSetToUse = "Twitter";
             }
@@ -268,7 +291,7 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
     const QString &text) const
 {
     auto result = std::vector<boost::variant<EmotePtr, QString>>();
-    int lastParsedEmojiEndIndex = 0;
+    QString::size_type lastParsedEmojiEndIndex = 0;
 
     for (auto i = 0; i < text.length(); ++i)
     {
@@ -288,39 +311,47 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
 
         const auto &possibleEmojis = it.value();
 
-        int remainingCharacters = text.length() - i - 1;
+        auto remainingCharacters = text.length() - i - 1;
 
         std::shared_ptr<EmojiData> matchedEmoji;
 
-        int matchedEmojiLength = 0;
+        QString::size_type matchedEmojiLength = 0;
 
         for (const std::shared_ptr<EmojiData> &emoji : possibleEmojis)
         {
-            int emojiExtraCharacters = emoji->value.length() - 1;
-            if (emojiExtraCharacters > remainingCharacters)
+            auto emojiNonQualifiedExtraCharacters =
+                emoji->nonQualified.length() - 1;
+            auto emojiExtraCharacters = emoji->value.length() - 1;
+            if (remainingCharacters >= emojiExtraCharacters)
             {
-                // It cannot be this emoji, there's not enough space for it
-                continue;
-            }
+                // look in emoji->value
+                bool match = QStringView{emoji->value}.mid(1) ==
+                             QStringView{text}.mid(i + 1, emojiExtraCharacters);
 
-            bool match = true;
-
-            for (int j = 1; j < emoji->value.length(); ++j)
-            {
-                if (text.at(i + j) != emoji->value.at(j))
+                if (match)
                 {
-                    match = false;
+                    matchedEmoji = emoji;
+                    matchedEmojiLength = emoji->value.length();
 
                     break;
                 }
             }
-
-            if (match)
+            if (!emoji->nonQualified.isNull() &&
+                remainingCharacters >= emojiNonQualifiedExtraCharacters)
             {
-                matchedEmoji = emoji;
-                matchedEmojiLength = emoji->value.length();
+                // This checking here relies on the fact that the nonQualified string
+                // always starts with the same byte as value (the unified string)
+                bool match = QStringView{emoji->nonQualified}.mid(1) ==
+                             QStringView{text}.mid(
+                                 i + 1, emojiNonQualifiedExtraCharacters);
 
-                break;
+                if (match)
+                {
+                    matchedEmoji = emoji;
+                    matchedEmojiLength = emoji->nonQualified.length();
+
+                    break;
+                }
             }
         }
 
@@ -329,10 +360,10 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
             continue;
         }
 
-        int currentParsedEmojiFirstIndex = i;
-        int currentParsedEmojiEndIndex = i + (matchedEmojiLength);
+        auto currentParsedEmojiFirstIndex = i;
+        auto currentParsedEmojiEndIndex = i + (matchedEmojiLength);
 
-        int charactersFromLastParsedEmoji =
+        auto charactersFromLastParsedEmoji =
             currentParsedEmojiFirstIndex - lastParsedEmojiEndIndex;
 
         if (charactersFromLastParsedEmoji > 0)
@@ -382,7 +413,7 @@ QString Emojis::replaceShortCodes(const QString &text) const
             continue;
         }
 
-        auto emojiData = emojiIt.value();
+        const auto &emojiData = emojiIt.value();
 
         ret.replace(offset + match.capturedStart(), match.capturedLength(),
                     emojiData->value);

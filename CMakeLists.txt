@@ -8,8 +8,6 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
-project(chatterino VERSION 7.4.6)
-
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
 option(BUILD_BENCHMARKS "Build the benchmarks for Chatterino" OFF)
@@ -17,6 +15,7 @@ option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
 option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
 option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key chain" ON)
+option(USE_SYSTEM_MINIAUDIO "Build Chatterino with your system miniaudio" OFF)
 option(BUILD_WITH_CRASHPAD "Build chatterino with crashpad" OFF)
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
@@ -29,10 +28,22 @@ option(CHATTERINO_PLUGINS "Enable EXPERIMENTAL plugin support in Chatterino" OFF
 option(CHATTERINO_NO_AVIF_PLUGIN "Disable AVIF plugin" OFF)
 option(CHATTERINO_STATIC_AVIF "Link to static libavif" ON)
 
+option(CHATTERINO_UPDATER "Enable update checks" ON)
+mark_as_advanced(CHATTERINO_UPDATER)
+
+if(BUILD_TESTS)
+    list(APPEND VCPKG_MANIFEST_FEATURES "tests")
+endif()
+if(BUILD_BENCHMARKS)
+    list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
+endif()
+
+project(chatterino VERSION 7.4.6)
+
 if(CHATTERINO_LTO)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
-    message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO})")
+    message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO} - ${IPO_ERROR})")
 else()
     message(STATUS "LTO: Disabled")
 endif()
@@ -114,7 +125,7 @@ endif ()
 message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 
 if (WIN32)
-    find_package(WinToast REQUIRED)
+    add_subdirectory(lib/WinToast EXCLUDE_FROM_ALL)
 endif ()
 
 find_package(Sanitizers QUIET)

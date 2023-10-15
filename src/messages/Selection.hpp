@@ -38,7 +38,7 @@ struct SelectionItem {
 
     bool operator!=(const SelectionItem &b) const
     {
-        return this->operator==(b);
+        return !this->operator==(b);
     }
 };
 
@@ -60,6 +60,16 @@ struct Selection {
         {
             std::swap(this->selectionMin, this->selectionMax);
         }
+    }
+
+    bool operator==(const Selection &b) const
+    {
+        return this->start == b.start && this->end == b.end;
+    }
+
+    bool operator!=(const Selection &b) const
+    {
+        return !this->operator==(b);
     }
 
     bool isEmpty() const

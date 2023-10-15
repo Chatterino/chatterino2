@@ -179,13 +179,16 @@ std::shared_ptr<const EmoteMap> BttvEmotes::emotes() const
     return this->global_.get();
 }
 
-boost::optional<EmotePtr> BttvEmotes::emote(const EmoteName &name) const
+std::optional<EmotePtr> BttvEmotes::emote(const EmoteName &name) const
 {
     auto emotes = this->global_.get();
     auto it = emotes->find(name);
 
     if (it == emotes->end())
-        return boost::none;
+    {
+        return std::nullopt;
+    }
+
     return it->second;
 }
 
@@ -203,8 +206,10 @@ void BttvEmotes::loadEmotes()
             auto emotes = this->global_.get();
             auto pair = parseGlobalEmotes(result.parseJsonArray(), *emotes);
             if (pair.first)
+            {
                 this->setEmotes(
                     std::make_shared<EmoteMap>(std::move(pair.second)));
+            }
             return pair.first;
         })
         .execute();
@@ -251,13 +256,18 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
         .onError([channelId, channel, manualRefresh](auto result) {
             auto shared = channel.lock();
             if (!shared)
+            {
                 return;
+            }
+
             if (result.status() == 404)
             {
                 // User does not have any BTTV emotes
                 if (manualRefresh)
+                {
                     shared->addMessage(
                         makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                }
             }
             else
             {
@@ -291,7 +301,7 @@ EmotePtr BttvEmotes::addEmote(
     return emote;
 }
 
-boost::optional<std::pair<EmotePtr, EmotePtr>> BttvEmotes::updateEmote(
+std::optional<std::pair<EmotePtr, EmotePtr>> BttvEmotes::updateEmote(
     const QString &channelDisplayName,
     Atomic<std::shared_ptr<const EmoteMap>> &channelEmoteMap,
     const BttvLiveUpdateEmoteUpdateAddMessage &message)
@@ -305,7 +315,7 @@ boost::optional<std::pair<EmotePtr, EmotePtr>> BttvEmotes::updateEmote(
     {
         // We already copied the map at this point and are now discarding the copy.
         // This is fine, because this case should be really rare.
-        return boost::none;
+        return std::nullopt;
     }
     auto oldEmotePtr = it->second;
     // copy the existing emote, to not change the original one
@@ -316,7 +326,7 @@ boost::optional<std::pair<EmotePtr, EmotePtr>> BttvEmotes::updateEmote(
     if (!updateChannelEmote(emote, channelDisplayName, message.jsonEmote))
     {
         // The emote wasn't actually updated
-        return boost::none;
+        return std::nullopt;
     }
 
     auto name = emote.name;
@@ -327,7 +337,7 @@ boost::optional<std::pair<EmotePtr, EmotePtr>> BttvEmotes::updateEmote(
     return std::make_pair(oldEmotePtr, emotePtr);
 }
 
-boost::optional<EmotePtr> BttvEmotes::removeEmote(
+std::optional<EmotePtr> BttvEmotes::removeEmote(
     Atomic<std::shared_ptr<const EmoteMap>> &channelEmoteMap,
     const BttvLiveUpdateEmoteRemoveMessage &message)
 {
@@ -338,7 +348,7 @@ boost::optional<EmotePtr> BttvEmotes::removeEmote(
     {
         // We already copied the map at this point and are now discarding the copy.
         // This is fine, because this case should be really rare.
-        return boost::none;
+        return std::nullopt;
     }
     auto emote = it->second;
     updatedMap.erase(it);

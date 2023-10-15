@@ -3,8 +3,9 @@
 #include "providers/irc/Irc2.hpp"
 #include "widgets/BaseWindow.hpp"
 
-#include <boost/optional.hpp>
 #include <QDialog>
+
+#include <optional>
 
 namespace Ui {
 class IrcConnectionEditor;

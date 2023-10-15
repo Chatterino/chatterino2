@@ -4,7 +4,6 @@
 #include "common/Singleton.hpp"
 #include "common/UniqueAccess.hpp"
 
-#include <boost/optional.hpp>
 #include <pajlada/settings.hpp>
 #include <pajlada/settings/settinglistener.hpp>
 #include <QColor>
@@ -12,6 +11,7 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <utility>
 
 namespace chatterino {
@@ -23,7 +23,7 @@ using MessageFlags = FlagsEnum<MessageFlag>;
 
 struct HighlightResult {
     HighlightResult(bool _alert, bool _playSound,
-                    boost::optional<QUrl> _customSoundUrl,
+                    std::optional<QUrl> _customSoundUrl,
                     std::shared_ptr<QColor> _color, bool _showInMentions);
 
     /**
@@ -46,7 +46,7 @@ struct HighlightResult {
      *
      * May only be set if playSound is true
      **/
-    boost::optional<QUrl> customSoundUrl{};
+    std::optional<QUrl> customSoundUrl{};
 
     /**
      * @brief set if highlight should set a background color
@@ -76,7 +76,7 @@ struct HighlightResult {
 };
 
 struct HighlightCheck {
-    using Checker = std::function<boost::optional<HighlightResult>(
+    using Checker = std::function<std::optional<HighlightResult>(
         const MessageParseArgs &args, const std::vector<Badge> &badges,
         const QString &senderName, const QString &originalMessage,
         const MessageFlags &messageFlags, bool self)>;

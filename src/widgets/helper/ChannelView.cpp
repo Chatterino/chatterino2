@@ -292,13 +292,12 @@ bool ChannelView::paused() const
     return this->pausable() && !this->pauses_.empty();
 }
 
-void ChannelView::pause(PauseReason reason, boost::optional<uint> msecs)
+void ChannelView::pause(PauseReason reason, std::optional<uint> msecs)
 {
     if (msecs)
     {
         /// Msecs has a value
-        auto timePoint =
-            SteadyClock::now() + std::chrono::milliseconds(msecs.get());
+        auto timePoint = SteadyClock::now() + std::chrono::milliseconds(*msecs);
         auto it = this->pauses_.find(reason);
 
         if (it == this->pauses_.end())
@@ -309,15 +308,19 @@ void ChannelView::pause(PauseReason reason, boost::optional<uint> msecs)
         else
         {
             /// If the new time point is newer then we override.
-            if (it->second && it->second.get() < timePoint)
-                it->second = timePoint;
+            auto &previousTimePoint = it->second;
+            if (previousTimePoint.has_value() &&
+                previousTimePoint.value() < timePoint)
+            {
+                previousTimePoint = timePoint;
+            }
         }
     }
     else
     {
         /// Msecs is none -> pause is infinite.
         /// We just override the value.
-        this->pauses_[reason] = boost::none;
+        this->pauses_[reason] = std::nullopt;
     }
 
     this->updatePauses();
@@ -340,7 +343,7 @@ void ChannelView::updatePauses()
         this->unpaused();
 
         /// No pauses so we can stop the timer
-        this->pauseEnd_ = boost::none;
+        this->pauseEnd_ = std::nullopt;
         this->pauseTimer_.stop();
 
         this->scrollBar_->offsetMaximum(this->pauseScrollMaximumOffset_);
@@ -356,7 +359,7 @@ void ChannelView::updatePauses()
                          }))
     {
         /// Some of the pauses are infinite
-        this->pauseEnd_ = boost::none;
+        this->pauseEnd_ = std::nullopt;
         this->pauseTimer_.stop();
     }
     else
@@ -367,7 +370,7 @@ void ChannelView::updatePauses()
                              [](auto &&a, auto &&b) {
                                  return a.second > b.second;
                              })
-                ->second.get();
+                ->second.value();
 
         if (pauseEnd != this->pauseEnd_)
         {
@@ -646,13 +649,12 @@ bool ChannelView::getEnableScrollingToBottom() const
     return this->enableScrollingToBottom_;
 }
 
-void ChannelView::setOverrideFlags(boost::optional<MessageElementFlags> value)
+void ChannelView::setOverrideFlags(std::optional<MessageElementFlags> value)
 {
     this->overrideFlags_ = std::move(value);
 }
 
-const boost::optional<MessageElementFlags> &ChannelView::getOverrideFlags()
-    const
+const std::optional<MessageElementFlags> &ChannelView::getOverrideFlags() const
 {
     return this->overrideFlags_;
 }
@@ -698,7 +700,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
     this->channelConnections_.managedConnect(
         underlyingChannel->messageAppended,
         [this](MessagePtr &message,
-               boost::optional<MessageFlags> overridingFlags) {
+               std::optional<MessageFlags> overridingFlags) {
             if (this->shouldIncludeMessage(message))
             {
                 if (this->channel_->lastDate_ != QDate::currentDate())
@@ -714,12 +716,12 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                 // logging will be handled. Prevent duplications.
                 if (overridingFlags)
                 {
-                    overridingFlags.get().set(MessageFlag::DoNotLog);
+                    overridingFlags->set(MessageFlag::DoNotLog);
                 }
                 else
                 {
                     overridingFlags = MessageFlags(message->flags);
-                    overridingFlags.get().set(MessageFlag::DoNotLog);
+                    overridingFlags->set(MessageFlag::DoNotLog);
                 }
 
                 this->channel_->addMessage(message, overridingFlags);
@@ -765,7 +767,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
     this->channelConnections_.managedConnect(
         this->channel_->messageAppended,
         [this](MessagePtr &message,
-               boost::optional<MessageFlags> overridingFlags) {
+               std::optional<MessageFlags> overridingFlags) {
             this->messageAppended(message, std::move(overridingFlags));
         });
 
@@ -881,12 +883,12 @@ bool ChannelView::hasSourceChannel() const
 }
 
 void ChannelView::messageAppended(MessagePtr &message,
-                                  boost::optional<MessageFlags> overridingFlags)
+                                  std::optional<MessageFlags> overridingFlags)
 {
     auto *messageFlags = &message->flags;
     if (overridingFlags)
     {
-        messageFlags = overridingFlags.get_ptr();
+        messageFlags = &*overridingFlags;
     }
 
     auto messageRef = std::make_shared<MessageLayout>(message);
@@ -1090,18 +1092,13 @@ void ChannelView::resizeEvent(QResizeEvent *)
 void ChannelView::setSelection(const SelectionItem &start,
                                const SelectionItem &end)
 {
-    // selections
-    if (!this->selecting_ && start != end)
+    auto newSelection = Selection(start, end);
+    if (this->selection_ != newSelection)
     {
-        // this->messagesAddedSinceSelectionPause_ = 0;
-
-        this->selecting_ = true;
-        // this->pausedBySelection_ = true;
+        this->selection_ = newSelection;
+        this->selectionChanged.invoke();
+        this->update();
     }
-
-    this->selection_ = Selection(start, end);
-
-    this->selectionChanged.invoke();
 }
 
 MessageElementFlags ChannelView::getFlags() const
@@ -1110,7 +1107,7 @@ MessageElementFlags ChannelView::getFlags() const
 
     if (this->overrideFlags_)
     {
-        return this->overrideFlags_.get();
+        return *this->overrideFlags_;
     }
 
     MessageElementFlags flags = app->windows->getWordFlags();
@@ -1519,13 +1516,10 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     // is selecting
     if (this->isLeftMouseDown_)
     {
-        // this->pause(PauseReason::Selecting, 300);
         auto index = layout->getSelectionIndex(relativePos);
 
         this->setSelection(this->selection_.start,
                            SelectionItem(messageIndex, index));
-
-        this->queueUpdate();
     }
 
     // message under cursor is collapsed
@@ -1979,6 +1973,15 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             {
                 return;
             }
+
+            // Triple-clicking a message selects the whole message
+            if (foundElement && this->clickTimer_->isActive() &&
+                (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
+                                             event->screenPos())) < 10.f))
+            {
+                this->selectWholeMessage(layout.get(), messageIndex);
+                return;
+            }
         }
         else
         {
@@ -2060,15 +2063,6 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
     const MessageLayoutElement *hoverLayoutElement =
         layout->getElementAt(relativePos);
-    // Triple-clicking a message selects the whole message
-    if (this->clickTimer_->isActive() && this->selecting_)
-    {
-        if (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
-                                        event->screenPos())) < 10.f)
-        {
-            this->selectWholeMessage(layout.get(), messageIndex);
-        }
-    }
 
     // handle the click
     this->handleMouseClick(event, hoverLayoutElement, layout);
@@ -2083,16 +2077,6 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
     switch (event->button())
     {
         case Qt::LeftButton: {
-            if (this->selecting_)
-            {
-                // this->pausedBySelection = false;
-                this->selecting_ = false;
-                // this->pauseTimeout.stop();
-                // this->pausedTemporarily = false;
-
-                this->queueLayout();
-            }
-
             if (hoveredElement == nullptr)
             {
                 return;
