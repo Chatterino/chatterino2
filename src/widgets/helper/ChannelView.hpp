@@ -350,12 +350,6 @@ private:
     static constexpr int scrollbarPadding = 8;
 
 private slots:
-    void wordFlagsChanged()
-    {
-        queueLayout();
-        update();
-    }
-
     void scrollUpdateRequested();
 };
 
