@@ -187,8 +187,9 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
     this->clickTimer_->setInterval(500);
 
     this->scrollTimer_.setInterval(20);
-    QObject::connect(&this->scrollTimer_, &QTimer::timeout, this,
-                     &ChannelView::scrollUpdateRequested);
+    QObject::connect(&this->scrollTimer_, &QTimer::timeout, this, [this] {
+        this->scrollUpdateRequested();
+    });
 
     // TODO: Figure out if we need this, and if so, why
     // StrongFocus means we can focus this event through clicking it

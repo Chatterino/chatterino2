@@ -346,7 +346,6 @@ private:
     MessageColors messageColors_;
     MessagePreferences messagePreferences_;
 
-private slots:
     void scrollUpdateRequested();
 };
 
