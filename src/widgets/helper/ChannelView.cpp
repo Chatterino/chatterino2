@@ -979,11 +979,11 @@ void ChannelView::setFilters(const QList<QUuid> &ids)
     this->channelFilters_ = std::make_shared<FilterSet>(ids);
 }
 
-const QList<QUuid> ChannelView::getFilterIds() const
+QList<QUuid> ChannelView::getFilterIds() const
 {
     if (!this->channelFilters_)
     {
-        return QList<QUuid>();
+        return {};
     }
 
     return this->channelFilters_->filterIds();
