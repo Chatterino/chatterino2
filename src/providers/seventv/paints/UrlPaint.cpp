@@ -24,7 +24,8 @@ QBrush UrlPaint::asBrush(const QColor userColor, const QRectF drawingRect) const
 {
     if (auto paintPixmap = this->image_->pixmapOrLoad())
     {
-        paintPixmap = paintPixmap->scaledToWidth(drawingRect.width());
+        auto rect = drawingRect.toRect();
+        paintPixmap = paintPixmap->scaledToWidth(rect.width());
 
         QPixmap userColorPixmap = QPixmap(paintPixmap->size());
         userColorPixmap.fill(userColor);
@@ -32,15 +33,15 @@ QBrush UrlPaint::asBrush(const QColor userColor, const QRectF drawingRect) const
         QPainter painter(&userColorPixmap);
         painter.drawPixmap(0, 0, *paintPixmap);
 
-        const QPixmap combinedPixmap = userColorPixmap.copy(
-            QRect(0, 0, drawingRect.width(), drawingRect.height()));
-        return QBrush(combinedPixmap);
+        const QPixmap combinedPixmap =
+            userColorPixmap.copy(QRect(0, 0, rect.width(), rect.height()));
+        return {combinedPixmap};
     }
 
-    return QBrush(userColor);
+    return {userColor};
 }
 
-std::vector<PaintDropShadow> UrlPaint::getDropShadows() const
+const std::vector<PaintDropShadow> &UrlPaint::getDropShadows() const
 {
     return this->dropShadows_;
 }

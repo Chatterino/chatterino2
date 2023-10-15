@@ -444,22 +444,23 @@ void TextLayoutElement::paint(QPainter &painter,
         text.prepend(RTL_EMBED);
     }
 
-    const auto font = getApp()->getFonts()->getFont(this->style_, this->scale_);
+    auto font = getApp()->getFonts()->getFont(this->style_, this->scale_);
 
-    const bool isNametag =
-        this->getLink().type == chatterino::Link::UserInfo ||
-        this->getLink().type == chatterino::Link::UserWhisper;
-    const bool drawPaint = isNametag && getSettings()->displaySevenTVPaints;
-    const auto seventvPaint =
+    bool isNametag = this->getLink().type == chatterino::Link::UserInfo ||
+                     this->getLink().type == chatterino::Link::UserWhisper;
+    bool drawPaint = isNametag && getSettings()->displaySevenTVPaints;
+    auto seventvPaint =
         getApp()->seventvPaints->getPaint(this->getLink().value.toLower());
     if (drawPaint && seventvPaint.has_value())
     {
         if (seventvPaint.value()->animated())
+        {
             return;
+        }
 
-        const auto paint = seventvPaint.value();
+        const auto &paint = seventvPaint.value();
 
-        const auto paintPixmap =
+        auto paintPixmap =
             paint->getPixmap(this->getText(), font, this->color_,
                              this->getRect().size(), this->scale_);
 

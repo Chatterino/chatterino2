@@ -13,23 +13,27 @@ class Paint
 {
 public:
     virtual QBrush asBrush(QColor userColor, QRectF drawingRect) const = 0;
-    virtual std::vector<PaintDropShadow> getDropShadows() const = 0;
+    virtual const std::vector<PaintDropShadow> &getDropShadows() const = 0;
     virtual bool animated() const = 0;
 
-    QPixmap getPixmap(QString text, QFont font, QColor userColor, QSize size,
-                      float scale) const;
+    QPixmap getPixmap(const QString &text, const QFont &font, QColor userColor,
+                      QSize size, float scale) const;
 
     Paint(QString id)
         : id(std::move(id)){};
     virtual ~Paint() = default;
 
+    Paint(const Paint &) = default;
+    Paint(Paint &&) = delete;
+    Paint &operator=(const Paint &) = default;
+    Paint &operator=(Paint &&) = delete;
+
     QString id;
 
 protected:
-    QColor overlayColors(const QColor background,
-                         const QColor foreground) const;
-    float offsetRepeatingStopPosition(const float position,
-                                      const QGradientStops stops) const;
+    static QColor overlayColors(QColor background, QColor foreground);
+    static qreal offsetRepeatingStopPosition(qreal position,
+                                             const QGradientStops &stops);
 };
 
 }  // namespace chatterino

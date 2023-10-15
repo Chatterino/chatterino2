@@ -1,6 +1,7 @@
 #include "providers/seventv/paints/Paint.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "singletons/Theme.hpp"
 
 #include <QLabel>
@@ -8,9 +9,10 @@
 
 namespace chatterino {
 
-QPixmap Paint::getPixmap(const QString text, const QFont font,
-                         const QColor userColor, const QSize size,
-                         const float scale) const
+using namespace literals;
+
+QPixmap Paint::getPixmap(const QString &text, const QFont &font,
+                         QColor userColor, QSize size, float scale) const
 {
     QPixmap pixmap(size);
     pixmap.fill(Qt::transparent);
@@ -45,41 +47,40 @@ QPixmap Paint::getPixmap(const QString text, const QFont font,
     for (const auto &shadow : this->getDropShadows())
     {
         if (!shadow.isValid())
+        {
             continue;
+        }
 
         // HACK: create a QLabel from the pixmap to apply drop shadows
         QLabel label;
 
-        auto scaledShadow = shadow.scaled(scale / label.devicePixelRatioF());
+        auto scaledShadow = shadow.scaled(
+            scale / static_cast<float>(label.devicePixelRatioF()));
 
         // NOTE: avoid scaling issues on high DPI displays
         pixmap.setDevicePixelRatio(label.devicePixelRatioF());
 
         label.setPixmap(pixmap);
 
-        auto dropShadow = scaledShadow.getGraphicsEffect();
-        label.setGraphicsEffect(dropShadow);
+        QGraphicsDropShadowEffect dropShadow;
+        scaledShadow.apply(dropShadow);
+        label.setGraphicsEffect(&dropShadow);
 
         pixmap = label.grab();
         pixmap.setDevicePixelRatio(1);
-
-        label.deleteLater();
-        delete dropShadow;
     }
 
     if (drawColon)
     {
-        const auto colonColor =
-            getApp()->getThemes()->messages.textColors.regular;
+        auto colonColor = getApp()->getThemes()->messages.textColors.regular;
 
         pixmapPainter.begin(&pixmap);
 
         pixmapPainter.setPen(QPen(colonColor));
         pixmapPainter.setFont(font);
 
-        const QRectF colonBoundingRect(nametagBoundingRect.right(), 0, 10000,
-                                       10000);
-        pixmapPainter.drawText(colonBoundingRect, ":",
+        QRectF colonBoundingRect(nametagBoundingRect.right(), 0, 10000, 10000);
+        pixmapPainter.drawText(colonBoundingRect, u":"_s,
                                QTextOption(Qt::AlignLeft | Qt::AlignTop));
         pixmapPainter.end();
     }
@@ -87,26 +88,27 @@ QPixmap Paint::getPixmap(const QString text, const QFont font,
     return pixmap;
 }
 
-QColor Paint::overlayColors(const QColor background,
-                            const QColor foreground) const
+QColor Paint::overlayColors(QColor background, QColor foreground)
 {
-    const auto alpha = foreground.alphaF();
+    auto alpha = foreground.alphaF();
 
-    const auto r = (1 - alpha) * background.red() + alpha * foreground.red();
-    const auto g =
-        (1 - alpha) * background.green() + alpha * foreground.green();
-    const auto b = (1 - alpha) * background.blue() + alpha * foreground.blue();
+    auto r = (1 - alpha) * static_cast<float>(background.red()) +
+             alpha * static_cast<float>(foreground.red());
+    auto g = (1 - alpha) * static_cast<float>(background.green()) +
+             alpha * static_cast<float>(foreground.green());
+    auto b = (1 - alpha) * static_cast<float>(background.blue()) +
+             alpha * static_cast<float>(foreground.blue());
 
-    return QColor(r, g, b);
+    return {static_cast<int>(r), static_cast<int>(g), static_cast<int>(b)};
 }
 
-float Paint::offsetRepeatingStopPosition(const float position,
-                                         const QGradientStops stops) const
+qreal Paint::offsetRepeatingStopPosition(const qreal position,
+                                         const QGradientStops &stops)
 {
-    const float gradientStart = stops.first().first;
-    const float gradientEnd = stops.last().first;
-    const float gradientLength = gradientEnd - gradientStart;
-    const float offsetPosition = (position - gradientStart) / gradientLength;
+    const qreal gradientStart = stops.first().first;
+    const qreal gradientEnd = stops.last().first;
+    const qreal gradientLength = gradientEnd - gradientStart;
+    const qreal offsetPosition = (position - gradientStart) / gradientLength;
 
     return offsetPosition;
 }

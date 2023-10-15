@@ -272,11 +272,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
         auto avatar =
             head.emplace<Button>(nullptr).assign(&this->ui_.avatarButton);
 
-        this->avatarDestroyed = false;
-        QObject::connect(avatar.getElement(), &QObject::destroyed, [this] {
-            this->avatarDestroyed = true;
-        });
-
         avatar->setScaleIndependantSize(100, 100);
         avatar->setDim(Button::Dim::None);
         QObject::connect(
@@ -1028,19 +1023,22 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
             static auto *manager = new QNetworkAccessManager();
             auto *reply = manager->get(req);
 
-            QObject::connect(reply, &QNetworkReply::finished, this, [=, this] {
-                if (reply->error() == QNetworkReply::NoError)
-                {
-                    this->avatarUrl_ = url;
-                    this->saveCacheAvatar(reply->readAll(), filename);
-                    this->setSevenTVAvatar(filename);
-                }
-                else
-                {
-                    qCWarning(chatterinoSeventv)
-                        << "Error fetching Profile Picture:" << reply->error();
-                }
-            });
+            QObject::connect(reply, &QNetworkReply::finished, this,
+                             [this, reply, url, filename] {
+                                 if (reply->error() == QNetworkReply::NoError)
+                                 {
+                                     this->avatarUrl_ = url;
+                                     this->saveCacheAvatar(reply->readAll(),
+                                                           filename);
+                                     this->setSevenTVAvatar(filename);
+                                 }
+                                 else
+                                 {
+                                     qCWarning(chatterinoSeventv)
+                                         << "Error fetching Profile Picture:"
+                                         << reply->error();
+                                 }
+                             });
 
             return Success;
         })
@@ -1049,14 +1047,7 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
 
 void UserInfoPopup::setSevenTVAvatar(const QString &filename)
 {
-    auto hack = std::weak_ptr<bool>(this->lifetimeHack_);
-
-    if (this->avatarDestroyed || !hack.lock())
-    {
-        return;
-    }
-
-    auto *movie = new QMovie(filename, {});
+    auto *movie = new QMovie(filename, {}, this);
     if (!movie->isValid())
     {
         qCWarning(chatterinoSeventv)
@@ -1064,18 +1055,7 @@ void UserInfoPopup::setSevenTVAvatar(const QString &filename)
         return;
     }
 
-    QObject::connect(movie, &QMovie::frameChanged, [this, movie, hack] {
-        auto destroyed = this->avatarDestroyed || !hack.lock();
-
-        if (destroyed)
-        {
-            movie->disconnect();
-            movie->stop();
-            delete movie;
-
-            return;
-        };
-
+    QObject::connect(movie, &QMovie::frameChanged, this, [this, movie] {
         this->ui_.avatarButton->setPixmap(movie->currentPixmap());
     });
 
@@ -1083,7 +1063,7 @@ void UserInfoPopup::setSevenTVAvatar(const QString &filename)
 }
 
 void UserInfoPopup::saveCacheAvatar(const QByteArray &avatar,
-                                    const QString &filename)
+                                    const QString &filename) const
 {
     QFile outfile(filename);
     if (outfile.open(QIODevice::WriteOnly))
