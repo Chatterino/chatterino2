@@ -112,7 +112,8 @@ public:
     bool pausable() const;
     void setPausable(bool value);
     bool paused() const;
-    void pause(PauseReason reason, std::optional<uint> msecs = std::nullopt);
+    void pause(PauseReason reason,
+               std::optional<uint32_t> msecs = std::nullopt);
     void unpause(PauseReason reason);
 
     MessageElementFlags getFlags() const;

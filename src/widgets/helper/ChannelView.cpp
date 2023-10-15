@@ -1648,7 +1648,8 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (float pauseTime = getSettings()->pauseOnHoverDuration;
         pauseTime > 0.001F)
     {
-        this->pause(PauseReason::Mouse, uint(pauseTime * 1000.F));
+        this->pause(PauseReason::Mouse,
+                    static_cast<uint32_t>(pauseTime * 1000.F));
     }
     else if (pauseTime < -0.5F)
     {
