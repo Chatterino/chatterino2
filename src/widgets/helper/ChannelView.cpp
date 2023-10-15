@@ -317,7 +317,7 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
     // don't have a SplitInput like the SearchPopup or EmotePopup.
     // See SplitInput::installKeyPressedEvent for the copy event
     // from views with a SplitInput.
-    auto shortcut = new QShortcut(QKeySequence::StandardKey::Copy, this);
+    auto *shortcut = new QShortcut(QKeySequence::StandardKey::Copy, this);
     QObject::connect(shortcut, &QShortcut::activated, [this] {
         this->copySelectedText();
     });
@@ -963,10 +963,12 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
     this->queueUpdate();
 
     // Notifications
-    if (auto tc = dynamic_cast<TwitchChannel *>(underlyingChannel.get()))
+    auto *twitchChannel =
+        dynamic_cast<TwitchChannel *>(underlyingChannel.get());
+    if (twitchChannel != nullptr)
     {
         this->channelConnections_.managedConnect(
-            tc->streamStatusChanged, [this]() {
+            twitchChannel->streamStatusChanged, [this]() {
                 this->liveStatusChanged.invoke();
             });
     }
@@ -1248,7 +1250,7 @@ void ChannelView::setSelection(const SelectionItem &start,
 
 MessageElementFlags ChannelView::getFlags() const
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     if (this->overrideFlags_)
     {
@@ -1257,12 +1259,11 @@ MessageElementFlags ChannelView::getFlags() const
 
     MessageElementFlags flags = app->windows->getWordFlags();
 
-    Split *split = dynamic_cast<Split *>(this->parentWidget());
+    auto *split = dynamic_cast<Split *>(this->parentWidget());
 
     if (split == nullptr)
     {
-        SearchPopup *searchPopup =
-            dynamic_cast<SearchPopup *>(this->parentWidget());
+        auto *searchPopup = dynamic_cast<SearchPopup *>(this->parentWidget());
         if (searchPopup != nullptr)
         {
             split = dynamic_cast<Split *>(searchPopup->parentWidget());
@@ -1640,7 +1641,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         this->pause(PauseReason::Mouse);
     }
 
-    auto tooltipWidget = TooltipWidget::instance();
+    auto *tooltipWidget = TooltipWidget::instance();
     std::shared_ptr<MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
@@ -1698,10 +1699,10 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
-    auto element = &hoverLayoutElement->getCreator();
+    auto *element = &hoverLayoutElement->getCreator();
     bool isLinkValid = hoverLayoutElement->getLink().isValid();
-    auto emoteElement = dynamic_cast<const EmoteElement *>(element);
-    auto layeredEmoteElement =
+    const auto *emoteElement = dynamic_cast<const EmoteElement *>(element);
+    const auto *layeredEmoteElement =
         dynamic_cast<const LayeredEmoteElement *>(element);
     bool isNotEmote = emoteElement == nullptr && layeredEmoteElement == nullptr;
 
@@ -1712,7 +1713,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
-        auto badgeElement = dynamic_cast<const BadgeElement *>(element);
+        const auto *badgeElement = dynamic_cast<const BadgeElement *>(element);
 
         if (badgeElement || emoteElement || layeredEmoteElement)
         {
@@ -2119,7 +2120,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             if ((this->context_ == Context::None) &&
                 (hoveredElement != nullptr))
             {
-                auto split = dynamic_cast<Split *>(this->parentWidget());
+                auto *split = dynamic_cast<Split *>(this->parentWidget());
                 auto insertText = [=](QString text) {
                     if (split)
                     {
@@ -2615,11 +2616,11 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             QString value = link.value;
 
             ChannelPtr channel = this->underlyingChannel_;
-            SearchPopup *searchPopup =
+            auto *searchPopup =
                 dynamic_cast<SearchPopup *>(this->parentWidget());
             if (searchPopup != nullptr)
             {
-                Split *split =
+                auto *split =
                     dynamic_cast<Split *>(searchPopup->parentWidget());
                 if (split != nullptr)
                 {
@@ -2826,7 +2827,7 @@ void ChannelView::scrollUpdateRequested()
     }
 
     // "Good" feeling multiplier found by trial-and-error
-    const qreal multiplier = qreal(0.02);
+    const qreal multiplier(0.02);
     this->scrollBar_->offset(multiplier * offset);
 }
 
@@ -2887,10 +2888,10 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
         return;
     }
 
-    auto popupParent =
+    auto *popupParent =
         static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
-    auto popup = new ReplyThreadPopup(getSettings()->autoCloseThreadPopup,
-                                      popupParent, this->split_);
+    auto *popup = new ReplyThreadPopup(getSettings()->autoCloseThreadPopup,
+                                       popupParent, this->split_);
 
     popup->setThread(message->replyThread);
 
