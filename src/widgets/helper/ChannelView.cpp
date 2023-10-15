@@ -733,7 +733,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
         [this](std::vector<MessagePtr> &messages) {
             std::vector<MessagePtr> filtered;
             std::copy_if(messages.begin(), messages.end(),
-                         std::back_inserter(filtered), [this](MessagePtr msg) {
+                         std::back_inserter(filtered), [this](const auto &msg) {
                              return this->shouldIncludeMessage(msg);
                          });
 
@@ -743,7 +743,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
 
     this->channelConnections_.managedConnect(
         underlyingChannel->messageReplaced,
-        [this](size_t index, MessagePtr replacement) {
+        [this](auto index, const auto &replacement) {
             if (this->shouldIncludeMessage(replacement))
                 this->channel_->replaceMessage(index, replacement);
         });
@@ -753,7 +753,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
             std::vector<MessagePtr> filtered;
             filtered.reserve(messages.size());
             std::copy_if(messages.begin(), messages.end(),
-                         std::back_inserter(filtered), [this](MessagePtr msg) {
+                         std::back_inserter(filtered), [this](const auto &msg) {
                              return this->shouldIncludeMessage(msg);
                          });
             this->channel_->fillInMissingMessages(filtered);
@@ -1595,14 +1595,14 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
             else if (layeredEmoteElement)
             {
-                auto &layeredEmotes = layeredEmoteElement->getEmotes();
+                const auto &layeredEmotes = layeredEmoteElement->getEmotes();
                 // Should never be empty but ensure it
                 if (!layeredEmotes.empty())
                 {
                     std::vector<TooltipEntry> entries;
                     entries.reserve(layeredEmotes.size());
 
-                    auto &emoteTooltips =
+                    const auto &emoteTooltips =
                         layeredEmoteElement->getEmoteTooltips();
 
                     // Someone performing some tomfoolery could put an emote with tens,
@@ -2496,14 +2496,14 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
 
     if (getSettings()->linksDoubleClickOnly)
     {
-        auto &link = hoverLayoutElement->getLink();
+        const auto &link = hoverLayoutElement->getLink();
         this->handleLinkClick(event, link, layout.get());
     }
 }
 
 void ChannelView::hideEvent(QHideEvent * /*event*/)
 {
-    for (auto &layout : this->messagesOnScreen_)
+    for (const auto &layout : this->messagesOnScreen_)
     {
         layout->deleteBuffer();
     }
