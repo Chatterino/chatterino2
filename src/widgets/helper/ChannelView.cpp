@@ -555,7 +555,7 @@ void ChannelView::scaleChangedEvent(float scale)
     {
         auto factor = this->qtFontScale();
 #ifdef Q_OS_MACOS
-        factor = scale * 80.f /
+        factor = scale * 80.F /
                  std::max<float>(
                      0.01, this->logicalDpiX() * this->devicePixelRatioF());
 #endif
@@ -1646,11 +1646,11 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 {
     /// Pause on hover
     if (float pauseTime = getSettings()->pauseOnHoverDuration;
-        pauseTime > 0.001f)
+        pauseTime > 0.001F)
     {
-        this->pause(PauseReason::Mouse, uint(pauseTime * 1000.f));
+        this->pause(PauseReason::Mouse, uint(pauseTime * 1000.F));
     }
-    else if (pauseTime < -0.5f)
+    else if (pauseTime < -0.5F)
     {
         this->pause(PauseReason::Mouse);
     }
@@ -2006,7 +2006,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             this->isDoubleClick_ = false;
             // Was actually not a wanted triple-click
             if (fabsf(distanceBetweenPoints(this->lastDoubleClickPosition_,
-                                            event->screenPos())) > 10.f)
+                                            event->screenPos())) > 10.F)
             {
                 this->clickTimer_.stop();
                 return;
@@ -2017,7 +2017,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             this->isLeftMouseDown_ = false;
 
             if (fabsf(distanceBetweenPoints(this->lastLeftPressPosition_,
-                                            event->screenPos())) > 15.f)
+                                            event->screenPos())) > 15.F)
             {
                 return;
             }
@@ -2025,7 +2025,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             // Triple-clicking a message selects the whole message
             if (foundElement && this->clickTimer_.isActive() &&
                 (fabsf(distanceBetweenPoints(this->lastDoubleClickPosition_,
-                                             event->screenPos())) < 10.f))
+                                             event->screenPos())) < 10.F))
             {
                 this->selectWholeMessage(layout.get(), messageIndex);
                 return;
@@ -2043,7 +2043,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             this->isRightMouseDown_ = false;
 
             if (fabsf(distanceBetweenPoints(this->lastRightPressPosition_,
-                                            event->screenPos())) > 15.f)
+                                            event->screenPos())) > 15.F)
             {
                 return;
             }
