@@ -3,7 +3,6 @@
 #include "Paint.hpp"
 
 #include <optional>
-#include <utility>
 
 namespace chatterino {
 
@@ -15,7 +14,7 @@ public:
                         std::vector<PaintDropShadow> dropShadows);
 
     QBrush asBrush(QColor userColor, QRectF drawingRect) const override;
-    std::vector<PaintDropShadow> getDropShadows() const override;
+    const std::vector<PaintDropShadow> &getDropShadows() const override;
     bool animated() const override;
 
 private:
