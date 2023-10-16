@@ -1091,18 +1091,13 @@ void ChannelView::resizeEvent(QResizeEvent *)
 void ChannelView::setSelection(const SelectionItem &start,
                                const SelectionItem &end)
 {
-    // selections
-    if (!this->selecting_ && start != end)
+    auto newSelection = Selection(start, end);
+    if (this->selection_ != newSelection)
     {
-        // this->messagesAddedSinceSelectionPause_ = 0;
-
-        this->selecting_ = true;
-        // this->pausedBySelection_ = true;
+        this->selection_ = newSelection;
+        this->selectionChanged.invoke();
+        this->update();
     }
-
-    this->selection_ = Selection(start, end);
-
-    this->selectionChanged.invoke();
 }
 
 MessageElementFlags ChannelView::getFlags() const
@@ -1520,13 +1515,10 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     // is selecting
     if (this->isLeftMouseDown_)
     {
-        // this->pause(PauseReason::Selecting, 300);
         auto index = layout->getSelectionIndex(relativePos);
 
         this->setSelection(this->selection_.start,
                            SelectionItem(messageIndex, index));
-
-        this->queueUpdate();
     }
 
     // message under cursor is collapsed
@@ -1980,6 +1972,15 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             {
                 return;
             }
+
+            // Triple-clicking a message selects the whole message
+            if (foundElement && this->clickTimer_->isActive() &&
+                (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
+                                             event->screenPos())) < 10.f))
+            {
+                this->selectWholeMessage(layout.get(), messageIndex);
+                return;
+            }
         }
         else
         {
@@ -2061,15 +2062,6 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
     const MessageLayoutElement *hoverLayoutElement =
         layout->getElementAt(relativePos);
-    // Triple-clicking a message selects the whole message
-    if (this->clickTimer_->isActive() && this->selecting_)
-    {
-        if (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
-                                        event->screenPos())) < 10.f)
-        {
-            this->selectWholeMessage(layout.get(), messageIndex);
-        }
-    }
 
     // handle the click
     this->handleMouseClick(event, hoverLayoutElement, layout);
@@ -2084,16 +2076,6 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
     switch (event->button())
     {
         case Qt::LeftButton: {
-            if (this->selecting_)
-            {
-                // this->pausedBySelection = false;
-                this->selecting_ = false;
-                // this->pauseTimeout.stop();
-                // this->pausedTemporarily = false;
-
-                this->queueLayout();
-            }
-
             if (hoveredElement == nullptr)
             {
                 return;

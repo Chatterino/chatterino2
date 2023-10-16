@@ -29,10 +29,19 @@ option(CHATTERINO_PLUGINS "Enable EXPERIMENTAL plugin support in Chatterino" OFF
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
 
+if(BUILD_TESTS)
+    list(APPEND VCPKG_MANIFEST_FEATURES "tests")
+endif()
+if(BUILD_BENCHMARKS)
+    list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
+endif()
+
+project(chatterino VERSION 2.4.6)
+
 if(CHATTERINO_LTO)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
-    message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO})")
+    message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO} - ${IPO_ERROR})")
 else()
     message(STATUS "LTO: Disabled")
 endif()
@@ -42,15 +51,6 @@ if (BUILD_WITH_QT6)
 else()
     set(MAJOR_QT_VERSION "5")
 endif()
-
-if(BUILD_TESTS)
-    list(APPEND VCPKG_MANIFEST_FEATURES "tests")
-endif()
-if(BUILD_BENCHMARKS)
-    list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
-endif()
-
-project(chatterino VERSION 2.4.6)
 
 find_program(CCACHE_PROGRAM ccache)
 find_program(SCCACHE_PROGRAM sccache)
@@ -120,7 +120,7 @@ endif ()
 message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 
 if (WIN32)
-    find_package(WinToast REQUIRED)
+    add_subdirectory(lib/WinToast EXCLUDE_FROM_ALL)
 endif ()
 
 find_package(Sanitizers QUIET)

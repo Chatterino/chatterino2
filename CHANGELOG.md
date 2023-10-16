@@ -17,6 +17,7 @@
 - Bugfix: Fixed input in reply thread popup losing focus when dragging. (#4815)
 - Bugfix: Fixed the Quick Switcher (CTRL+K) from sometimes showing up on the wrong window. (#4819)
 - Bugfix: Fixed too much text being copied when copying chat messages. (#4812, #4830, #4839)
+- Bugfix: Fixed an issue where the setting `Only search for emote autocompletion at the start of emote names` wouldn't disable if it was enabled when the client started. (#4855)
 - Bugfix: Fixed empty page being added when showing out of bounds dialog. (#4849)
 - Bugfix: Fixed issue on Windows preventing the title bar from being dragged in the top left corner. (#4873)
 - Bugfix: Fixed an issue where reply context didn't render correctly if an emoji was touching text. (#4875)
@@ -31,13 +32,14 @@
 - Dev: Refactor `Image` & Image's `Frames`. (#4773)
 - Dev: Add `WindowManager::getLastSelectedWindow()` to replace `getMainWindow()`. (#4816)
 - Dev: Clarify signal connection lifetimes where applicable. (#4818)
-- Dev: Laid the groundwork for advanced input completion strategies. (#4639, #4846, #4853)
+- Dev: Laid the groundwork for advanced input completion strategies. (#4639, #4846, #4853, #4893)
 - Dev: Fixed flickering when running with Direct2D on Windows. (#4851)
 - Dev: Fix qtkeychain include for Qt6 users. (#4863)
 - Dev: Add a compile-time flag `CHATTERINO_UPDATER` which can be turned off to disable update checks. (#4854)
 - Dev: Add a compile-time flag `USE_SYSTEM_MINIAUDIO` which can be turned on to use the system miniaudio. (#4867)
 - Dev: Update vcpkg to use Qt6. (#4872)
 - Dev: Replace `boost::optional` with `std::optional`. (#4877)
+- Dev: Improve performance by reducing repaints caused by selections. (#4889)
 
 ## 2.4.6
 
