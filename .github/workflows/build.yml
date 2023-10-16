@@ -335,7 +335,6 @@ jobs:
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
             -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
             -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
-            -DCHATTERINO_STATIC_AVIF=Off \
             ..
           make -j"$(nproc)"
         shell: bash
@@ -359,7 +358,6 @@ jobs:
             -DBUILD_WITH_QT6=Off
             -DBUILD_TESTS=On
             -DBUILD_BENCHMARKS=On
-            -DCHATTERINO_STATIC_AVIF=Off
           apt_packages: >-
             qttools5-dev, qt5-image-formats-plugins, libqt5svg5-dev, 
             libsecret-1-dev,
