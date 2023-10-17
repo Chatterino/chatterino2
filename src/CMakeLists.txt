@@ -26,8 +26,6 @@ set(SOURCE_FILES
         common/ChatterSet.hpp
         common/Credentials.cpp
         common/Credentials.hpp
-        common/DownloadManager.cpp
-        common/DownloadManager.hpp
         common/Env.cpp
         common/Env.hpp
         common/LinkParser.cpp
