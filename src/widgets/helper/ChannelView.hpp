@@ -210,10 +210,11 @@ private:
 
     void drawMessages(QPainter &painter);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
+    void setSelection(const Selection &newSelection);
     void selectWholeMessage(MessageLayout *layout, int &messageIndex);
-    void getWordBounds(MessageLayout *layout,
-                       const MessageLayoutElement *element,
-                       const QPoint &relativePos, int &wordStart, int &wordEnd);
+    std::pair<size_t, size_t> getWordBounds(MessageLayout *layout,
+                                            const MessageLayoutElement *element,
+                                            const QPoint &relativePos);
 
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoveredElement,
@@ -307,10 +308,9 @@ private:
     bool isLeftMouseDown_ = false;
     bool isRightMouseDown_ = false;
     bool isDoubleClick_ = false;
-    DoubleClickSelection doubleClickSelection_;
     QPointF lastLeftPressPosition_;
     QPointF lastRightPressPosition_;
-    QPointF lastDClickPosition_;
+    QPointF lastDoubleClickPosition_;
     QTimer *clickTimer_;
 
     bool isScrolling_ = false;
@@ -330,6 +330,7 @@ private:
     } cursors_;
 
     Selection selection_;
+    Selection doubleClickSelection_;
 
     const Context context_;
 
