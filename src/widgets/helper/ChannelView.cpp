@@ -791,7 +791,7 @@ bool ChannelView::getEnableScrollingToBottom() const
 
 void ChannelView::setOverrideFlags(std::optional<MessageElementFlags> value)
 {
-    this->overrideFlags_ = std::move(value);
+    this->overrideFlags_ = value;
 }
 
 const std::optional<MessageElementFlags> &ChannelView::getOverrideFlags() const
@@ -912,7 +912,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
         this->channel_->messageAppended,
         [this](MessagePtr &message,
                std::optional<MessageFlags> overridingFlags) {
-            this->messageAppended(message, std::move(overridingFlags));
+            this->messageAppended(message, overridingFlags);
         });
 
     this->channelConnections_.managedConnect(
