@@ -1,4 +1,5 @@
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/filters/lang/expressions/UnaryOperation.hpp"
 #include "controllers/filters/lang/Filter.hpp"
 #include "controllers/filters/lang/Types.hpp"
 #include "controllers/highlights/HighlightController.hpp"
@@ -284,4 +285,89 @@ TEST_F(FiltersF, TypingContextChecks)
     EXPECT_EQ(contextMap.size(), MESSAGE_TYPING_CONTEXT.size());
 
     delete privmsg;
+}
+
+TEST_F(FiltersF, ExpressionDebug)
+{
+    struct TestCase {
+        QString input;
+        QString debugString;
+        QString filterString;
+    };
+
+    // clang-format off
+    std::vector<TestCase> tests{
+        {
+            .input = R".(1 + 1).",
+            .debugString = "BinaryOp[Plus](Val(1) : Int, Val(1) : Int)",
+            .filterString = "(1 + 1)",
+        },
+        {
+            .input = R".(author.color == "#ff0000").",
+            .debugString = "BinaryOp[Eq](Val(author.color) : Color, Val(#ff0000) : String)",
+            .filterString = R".((author.color == "#ff0000")).",
+        },
+        {
+            .input = R".(1).",
+            .debugString = "Val(1)",
+            .filterString = R".(1).",
+        },
+        {
+            .input = R".("asd").",
+            .debugString = R".(Val(asd)).",
+            .filterString = R".("asd").",
+        },
+        {
+            .input = R".(("asd")).",
+            .debugString = R".(Val(asd)).",
+            .filterString = R".("asd").",
+        },
+        {
+            .input = R".(author.subbed).",
+            .debugString = R".(Val(author.subbed)).",
+            .filterString = R".(author.subbed).",
+        },
+        {
+            .input = R".(!author.subbed).",
+            .debugString = R".(UnaryOp[Not](Val(author.subbed) : Bool)).",
+            .filterString = R".((!author.subbed)).",
+        },
+        {
+            .input = R".({"foo", "bar"} contains "foo").",
+            .debugString = R".(BinaryOp[Contains](List(Val(foo) : String, Val(bar) : String) : StringList, Val(foo) : String)).",
+            .filterString = R".(({"foo", "bar"} contains "foo")).",
+        },
+        {
+            .input = R".(!({"foo", "bar"} contains "foo")).",
+            .debugString = R".(UnaryOp[Not](BinaryOp[Contains](List(Val(foo) : String, Val(bar) : String) : StringList, Val(foo) : String) : Bool)).",
+            .filterString = R".((!({"foo", "bar"} contains "foo"))).",
+        },
+        {
+            .input = R".(message.content match r"(\d\d)/(\d\d)/(\d\d\d\d)").",
+            .debugString = R".(BinaryOp[Match](Val(message.content) : String, RegEx((\d\d)/(\d\d)/(\d\d\d\d)) : RegularExpression)).",
+            .filterString = R".((message.content match r"(\d\d)/(\d\d)/(\d\d\d\d)")).",
+        },
+    };
+    // clang-format on
+
+    for (const auto &[input, debugString, filterString] : tests)
+    {
+        const auto filterResult = Filter::fromString(input);
+        const auto *filter = std::get_if<Filter>(&filterResult);
+        EXPECT_NE(filter, nullptr)
+            << "Filter::fromString(" << qUtf8Printable(input)
+            << ") did not build a proper filter";
+
+        const auto actualDebugString = filter->debugString(typingContext);
+        EXPECT_EQ(actualDebugString, debugString)
+            << "filter->debugString() on '" << qUtf8Printable(input)
+            << "' should be '" << qUtf8Printable(debugString) << "', but got '"
+            << qUtf8Printable(actualDebugString) << "'";
+
+        const auto actualFilterString = filter->filterString();
+        EXPECT_EQ(actualFilterString, filterString)
+            << "filter->filterString() on '" << qUtf8Printable(input)
+            << "' should be '" << qUtf8Printable(filterString) << "', but got '"
+            << qUtf8Printable(actualFilterString) << "'";
+    }
 }
