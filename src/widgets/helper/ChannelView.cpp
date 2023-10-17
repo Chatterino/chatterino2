@@ -1529,13 +1529,15 @@ void ChannelView::drawMessages(QPainter &painter)
 
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
-    if (!event->angleDelta().y())
+    if (event->angleDelta().y() == 0)
     {
+        // Ignore any scrolls where no vertical scrolling has taken place
         return;
     }
 
-    if (event->modifiers() & Qt::ControlModifier)
+    if ((event->modifiers() & Qt::ControlModifier) != 0)
     {
+        // Ignore any scrolls where ctrl is held down - it is used for zoom
         event->ignore();
         return;
     }
