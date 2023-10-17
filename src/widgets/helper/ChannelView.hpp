@@ -119,7 +119,7 @@ public:
     MessageElementFlags getFlags() const;
 
     ChannelPtr channel();
-    void setChannel(ChannelPtr channel_);
+    void setChannel(const ChannelPtr &underlyingChannel);
 
     void setFilters(const QList<QUuid> &ids);
     QList<QUuid> getFilterIds() const;

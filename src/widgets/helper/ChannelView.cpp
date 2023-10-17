@@ -820,7 +820,7 @@ bool ChannelView::showScrollbarHighlights() const
     return this->channel_->getType() != Channel::Type::TwitchMentions;
 }
 
-void ChannelView::setChannel(ChannelPtr underlyingChannel)
+void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
 {
     /// Clear connections from the last channel
     this->channelConnections_.clear();
