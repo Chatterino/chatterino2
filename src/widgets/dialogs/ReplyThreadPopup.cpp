@@ -112,8 +112,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
             }
         });
         // clear ChannelView selection when selecting in SplitInput
-        this->ui_.replyInput->selectionChanged.connect([this]() {
-            if (this->ui_.replyInput && this->ui_.threadView->hasSelection())
+        // `replyInput` is a child of this component, so we can discard the result
+        std::ignore = this->ui_.replyInput->selectionChanged.connect([this]() {
             {
                 this->ui_.threadView->clearSelection();
             }
