@@ -2886,9 +2886,9 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
         return;
     }
 
-    auto popupParent =
+    auto *popupParent =
         static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
-    auto popup =
+    auto *popup =
         new ReplyThreadPopup(getSettings()->autoCloseThreadPopup, popupParent,
                              this->underlyingChannel_, this->split_);
 
