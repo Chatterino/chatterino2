@@ -44,6 +44,8 @@ private:
 
     struct {
         ChannelView *threadView = nullptr;
+        /// Input for the thread.
+        /// This might be nullptr if no split is associated with this reply.
         SplitInput *replyInput = nullptr;
 
         QCheckBox *notificationCheckbox = nullptr;
