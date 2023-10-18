@@ -105,7 +105,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
             new SplitInput(this, this->split_, this->ui_.threadView, false);
         // remove the input when the split is removed
         connect(this->split_, &QObject::destroyed, this, [this]() {
-            if (this->ui_.replyInput)
+            if (this->ui_.replyInput != nullptr)
             {
                 this->ui_.replyInput->deleteLater();
                 this->ui_.replyInput = nullptr;
@@ -131,7 +131,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     // the ReplyThreadPopup
     std::ignore = this->ui_.threadView->selectionChanged.connect([this]() {
         // clear SplitInput selection when selecting in ChannelView
-        if (this->ui_.replyInput && this->ui_.replyInput->hasSelection())
+        if (this->ui_.replyInput != nullptr &&
+            this->ui_.replyInput->hasSelection())
         {
             this->ui_.replyInput->clearSelection();
         }
@@ -192,7 +193,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     }
 
     layout->addWidget(this->ui_.threadView, 1);
-    if (this->ui_.replyInput)
+    if (this->ui_.replyInput != nullptr)
     {
         layout->addWidget(this->ui_.replyInput);
     }
@@ -208,7 +209,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
 void ReplyThreadPopup::setThread(std::shared_ptr<MessageThread> thread)
 {
     this->thread_ = std::move(thread);
-    if (this->ui_.replyInput)
+    if (this->ui_.replyInput != nullptr)
     {
         this->ui_.replyInput->setReply(this->thread_);
     }
@@ -321,7 +322,7 @@ void ReplyThreadPopup::updateInputUI()
 
 void ReplyThreadPopup::giveFocus(Qt::FocusReason reason)
 {
-    if (this->ui_.replyInput)
+    if (this->ui_.replyInput != nullptr)
     {
         this->ui_.replyInput->giveFocus(reason);
     }
