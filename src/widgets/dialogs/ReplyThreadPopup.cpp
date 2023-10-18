@@ -112,7 +112,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
             }
         });
         // clear ChannelView selection when selecting in SplitInput
-        // `replyInput` is a child of this component, so we can discard the result
+        // We can safely ignore this signal's connection since replyInput will always be deleted before
+        // the ReplyThreadPopup
         std::ignore = this->ui_.replyInput->selectionChanged.connect([this]() {
             if (this->ui_.threadView->hasSelection())
             {
@@ -133,16 +134,6 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
         if (this->ui_.replyInput && this->ui_.replyInput->hasSelection())
         {
             this->ui_.replyInput->clearSelection();
-        }
-    });
-
-    // clear ChannelView selection when selecting in SplitInput
-    // We can safely ignore this signal's connection since replyInput will always be deleted before
-    // the ReplyThreadPopup
-    std::ignore = this->ui_.replyInput->selectionChanged.connect([this]() {
-        if (this->ui_.threadView->hasSelection())
-        {
-            this->ui_.threadView->clearSelection();
         }
     });
 
