@@ -114,6 +114,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
         // clear ChannelView selection when selecting in SplitInput
         // `replyInput` is a child of this component, so we can discard the result
         std::ignore = this->ui_.replyInput->selectionChanged.connect([this]() {
+            if (this->ui_.threadView->hasSelection())
             {
                 this->ui_.threadView->clearSelection();
             }
@@ -303,7 +304,7 @@ void ReplyThreadPopup::updateInputUI()
 {
     // Bail out if not a twitch channel.
     // Special twitch channels will hide their reply input box.
-    if (!this->channel_->isTwitchChannel() || !this->ui_.replyInput)
+    if (!this->channel_->isTwitchChannel() || this->ui_.replyInput == nullptr)
     {
         return;
     }
