@@ -45,12 +45,55 @@ public:
     void removePage(QWidget *page);
     void removeCurrentPage();
 
+    /**
+     * @brief Returns index of page in Notebook, or -1 if not found.
+     **/
     int indexOf(QWidget *page) const;
+
+    /**
+     * @brief Returns the visible index of page in Notebook, or -1 if not found.
+     * Given page should be visible according to the set TabVisibilityFilter.
+     **/
+    int visibleIndexOf(QWidget *page) const;
+
+    /**
+     * @brief Returns the number of visible tabs in Notebook. 
+     **/
+    int getVisibleTabCount() const;
+
+    /**
+     * @brief Selects the Notebook tab containing the given page.
+     **/
     virtual void select(QWidget *page, bool focusPage = true);
+
+    /**
+     * @brief Selects the Notebook tab at the given index. Ignores whether tabs
+     * are visible or not. 
+     **/
     void selectIndex(int index, bool focusPage = true);
+
+    /**
+     * @brief Selects the index'th visible tab in the Notebook.
+     * 
+     * For example, selecting the 0th visible tab selects the first tab in this 
+     * Notebook that is visible according to the TabVisibilityFilter. If no filter
+     * is set, equivalent to Notebook::selectIndex.
+     **/
     void selectVisibleIndex(int index, bool focusPage = true);
+
+    /**
+     * @brief Selects the next visible tab. Wraps to the start if required. 
+     **/
     void selectNextTab(bool focusPage = true);
+
+    /**
+     * @brief Selects the previous visible tab. Wraps to the end if required. 
+     **/
     void selectPreviousTab(bool focusPage = true);
+
+    /**
+     * @brief Selects the last visible tab. 
+     **/
     void selectLastTab(bool focusPage = true);
 
     int getPageCount() const;
@@ -166,6 +209,8 @@ public:
 
     SplitContainer *addPage(bool select = false);
     SplitContainer *getOrAddSelectedPage();
+    /// Returns `nullptr` when no page is selected.
+    SplitContainer *getSelectedPage();
     void select(QWidget *page, bool focusPage = true) override;
     void themeChangedEvent() override;
 

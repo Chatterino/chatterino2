@@ -4,6 +4,8 @@ option(CHATTERINO_TEST_USE_PUBLIC_HTTPBIN "Use public httpbin for testing networ
 
 set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/resources/test-resources.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/src/TestHelpers.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChannelChatters.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/AccessGuard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkCommon.cpp
@@ -31,6 +33,8 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/LinkParser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/InputCompletion.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Literals.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/XDGDesktopFile.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/XDGHelper.cpp
     # Add your new file above this line!
     )
 
@@ -61,5 +65,10 @@ endif()
 if(CHATTERINO_TEST_USE_PUBLIC_HTTPBIN)
     target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO_TEST_USE_PUBLIC_HTTPBIN)
 endif()
+
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+    AUTORCC ON
+    )
 
 gtest_discover_tests(${PROJECT_NAME})

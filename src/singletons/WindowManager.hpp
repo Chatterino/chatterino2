@@ -65,7 +65,14 @@ public:
     void repaintGifEmotes();
 
     Window &getMainWindow();
-    Window &getSelectedWindow();
+
+    // Returns a pointer to the last selected window.
+    // Edge cases:
+    //  - If the application was not focused since the start, this will return a pointer to the main window.
+    //  - If the window was closed this points to the main window.
+    //  - If the window was unfocused since being selected, this function will still return it.
+    Window *getLastSelectedWindow() const;
+
     Window &createWindow(WindowType type, bool show = true,
                          QWidget *parent = nullptr);
 
@@ -153,6 +160,8 @@ private:
 
     QTimer *saveTimer;
     QTimer miscUpdateTimer_;
+
+    friend class Window;  // this is for selectedWindow_
 };
 
 }  // namespace chatterino

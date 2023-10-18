@@ -14,9 +14,9 @@ public:
     AccountsPage();
 
 private:
-    QPushButton *addButton_;
-    QPushButton *removeButton_;
-    AccountSwitchWidget *accountSwitchWidget_;
+    QPushButton *addButton_{};
+    QPushButton *removeButton_{};
+    AccountSwitchWidget *accountSwitchWidget_{};
 };
 
 }  // namespace chatterino

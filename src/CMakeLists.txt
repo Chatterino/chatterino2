@@ -9,8 +9,6 @@ option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
 set(SOURCE_FILES
         Application.cpp
         Application.hpp
-        BaseSettings.cpp
-        BaseSettings.hpp
         BrowserExtension.cpp
         BrowserExtension.hpp
         RunGui.cpp
@@ -26,12 +24,8 @@ set(SOURCE_FILES
         common/ChatterinoSetting.hpp
         common/ChatterSet.cpp
         common/ChatterSet.hpp
-        common/CompletionModel.cpp
-        common/CompletionModel.hpp
         common/Credentials.cpp
         common/Credentials.hpp
-        common/DownloadManager.cpp
-        common/DownloadManager.hpp
         common/Env.cpp
         common/Env.hpp
         common/LinkParser.cpp
@@ -78,6 +72,28 @@ set(SOURCE_FILES
         controllers/commands/Command.hpp
         controllers/commands/CommandModel.cpp
         controllers/commands/CommandModel.hpp
+
+        controllers/completion/CompletionModel.cpp
+        controllers/completion/CompletionModel.hpp
+        controllers/completion/sources/Source.hpp
+        controllers/completion/sources/CommandSource.cpp
+        controllers/completion/sources/CommandSource.hpp
+        controllers/completion/sources/EmoteSource.cpp
+        controllers/completion/sources/EmoteSource.hpp
+        controllers/completion/sources/Helpers.hpp
+        controllers/completion/sources/UnifiedSource.cpp
+        controllers/completion/sources/UnifiedSource.hpp
+        controllers/completion/sources/UserSource.cpp
+        controllers/completion/sources/UserSource.hpp
+        controllers/completion/strategies/Strategy.hpp
+        controllers/completion/strategies/ClassicEmoteStrategy.cpp
+        controllers/completion/strategies/ClassicEmoteStrategy.hpp
+        controllers/completion/strategies/ClassicUserStrategy.cpp
+        controllers/completion/strategies/ClassicUserStrategy.hpp
+        controllers/completion/strategies/CommandStrategy.cpp
+        controllers/completion/strategies/CommandStrategy.hpp
+        controllers/completion/TabCompletionModel.cpp
+        controllers/completion/TabCompletionModel.hpp
 
         controllers/filters/FilterModel.cpp
         controllers/filters/FilterModel.hpp
@@ -238,8 +254,6 @@ set(SOURCE_FILES
         providers/LinkResolver.hpp
         providers/NetworkConfigurationProvider.cpp
         providers/NetworkConfigurationProvider.hpp
-        providers/RecentMessagesApi.cpp
-        providers/RecentMessagesApi.hpp
 
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp
@@ -287,6 +301,11 @@ set(SOURCE_FILES
         providers/liveupdates/BasicPubSubClient.hpp
         providers/liveupdates/BasicPubSubManager.hpp
         providers/liveupdates/BasicPubSubWebsocket.hpp
+
+        providers/recentmessages/Api.cpp
+        providers/recentmessages/Api.hpp
+        providers/recentmessages/Impl.cpp
+        providers/recentmessages/Impl.hpp
 
         providers/seventv/SeventvAPI.cpp
         providers/seventv/SeventvAPI.hpp
@@ -394,6 +413,7 @@ set(SOURCE_FILES
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
         util/CancellationToken.hpp
+        util/ChannelHelpers.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
         util/ConcurrentMap.hpp
@@ -436,8 +456,17 @@ set(SOURCE_FILES
         util/Twitch.cpp
         util/Twitch.hpp
         util/TypeName.hpp
+        util/Variant.hpp
+        util/WidgetHelpers.cpp
+        util/WidgetHelpers.hpp
         util/WindowsHelper.cpp
         util/WindowsHelper.hpp
+        util/XDGDesktopFile.cpp
+        util/XDGDesktopFile.hpp
+        util/XDGDirectory.cpp
+        util/XDGDirectory.hpp
+        util/XDGHelper.cpp
+        util/XDGHelper.hpp
 
         util/serialize/Container.hpp
 
@@ -463,8 +492,6 @@ set(SOURCE_FILES
         widgets/Notebook.hpp
         widgets/Scrollbar.cpp
         widgets/Scrollbar.hpp
-        widgets/StreamView.cpp
-        widgets/StreamView.hpp
         widgets/TooltipEntryWidget.cpp
         widgets/TooltipEntryWidget.hpp
         widgets/TooltipWidget.cpp
@@ -532,6 +559,8 @@ set(SOURCE_FILES
         widgets/helper/EditableModelView.hpp
         widgets/helper/EffectLabel.cpp
         widgets/helper/EffectLabel.hpp
+        widgets/helper/InvisibleSizeGrip.cpp
+        widgets/helper/InvisibleSizeGrip.hpp
         widgets/helper/NotebookButton.cpp
         widgets/helper/NotebookButton.hpp
         widgets/helper/NotebookTab.cpp
@@ -648,15 +677,15 @@ endif()
 if (CHATTERINO_GENERATE_COVERAGE)
     include(CodeCoverage)
     append_coverage_compiler_flags_to_target(${LIBRARY_PROJECT})
-    target_link_libraries(${LIBRARY_PROJECT} PUBLIC gcov)
     message(STATUS "project source dir: ${PROJECT_SOURCE_DIR}/src")
-    setup_target_for_coverage_lcov(
+    setup_target_for_coverage_gcovr_html(
         NAME coverage
-        EXECUTABLE ./bin/chatterino-test
-        BASE_DIRECTORY ${PROJECT_SOURCE_DIR}/src
+        EXECUTABLE ctest
         EXCLUDE "/usr/include/*"
         EXCLUDE "build-*/*"
         EXCLUDE "lib/*"
+        EXCLUDE "*/ui_*.h"
+        EXCLUDE "*/moc_*.cpp"
         )
 endif ()
 
@@ -738,35 +767,51 @@ if (BUILD_APP)
     set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
     if (WIN32)
-        if (NOT WINDEPLOYQT_PATH)
-            get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
-            get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
-            string(APPEND WINDEPLOYQT_PATH ${QT_BIN_DIR} /windeployqt.exe)
-        else()
+        if (WINDEPLOYQT_PATH)
             file(TO_CMAKE_PATH "${WINDEPLOYQT_PATH}" WINDEPLOYQT_PATH)
+        else()
+            if (VCPKG_INSTALLED_DIR AND (CMAKE_BUILD_TYPE STREQUAL "Debug"))
+                find_program(WINDEPLOYQT_PATH NAMES windeployqt.debug.bat)
+            else()
+                find_program(WINDEPLOYQT_PATH NAMES windeployqt)
+            endif()
+        endif()
+
+        if (NOT EXISTS ${WINDEPLOYQT_PATH})
+            message(FATAL_ERROR "windeployqt.exe not found")
         endif()
 
         if (CMAKE_BUILD_TYPE STREQUAL "Debug")
             set(WINDEPLOYQT_MODE --debug)
+            get_target_property(QT_CORE_LOC Qt${MAJOR_QT_VERSION}::Core LOCATION_DEBUG)
         else()
             set(WINDEPLOYQT_MODE --release)
+            get_target_property(QT_CORE_LOC Qt${MAJOR_QT_VERSION}::Core LOCATION)
         endif()
+        get_filename_component(QT_BIN_DIR ${QT_CORE_LOC} DIRECTORY)
 
         set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
-        if (X_VCPKG_APPLOCAL_DEPS_INSTALL)
-            install(TARGETS ${EXECUTABLE_PROJECT} RUNTIME DESTINATION .)
-        else()
-            install(TARGETS ${EXECUTABLE_PROJECT} 
-                RUNTIME_DEPENDENCIES 
-                    PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
-                    POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
-                    DIRECTORIES ${QT_BIN_DIR}
-                RUNTIME DESTINATION .)
-            install(CODE "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
-            install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")        
-        endif()
+        install(TARGETS ${EXECUTABLE_PROJECT} 
+            RUNTIME_DEPENDENCIES 
+                PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
+                POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
+                DIRECTORIES ${QT_BIN_DIR}
+            RUNTIME DESTINATION .)
+
+        # Hardcoded list of DLLs to install from Qt - these are marked as optional since they only exist for vcpkg
+        install(FILES
+            ${QT_BIN_DIR}/jpeg62.dll
+            ${QT_BIN_DIR}/libwebpdemux.dll
+            ${QT_BIN_DIR}/libwebpmux.dll
+            ${QT_BIN_DIR}/libwebp.dll
+            ${QT_BIN_DIR}/libsharpyuv.dll
+            DESTINATION .
+            OPTIONAL)
+
+        install(CODE "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
+        install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")   
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
@@ -882,7 +927,16 @@ target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
 
 # miniaudio dependency https://github.com/mackron/miniaudio
-target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
+if (USE_SYSTEM_MINIAUDIO)
+    message(STATUS "Building with system miniaudio")
+    include(CheckIncludeFileCXX)
+    CHECK_INCLUDE_FILE_CXX("miniaudio.h" MINIAUDIO_FOUND)
+    if (NOT MINIAUDIO_FOUND)
+        message(FATAL_ERROR "miniaudio.h not found on your system")
+    endif()
+else ()
+    target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/miniaudio)
+endif ()
 
 if (UNIX)
     if (CMAKE_DL_LIBS)
@@ -892,7 +946,7 @@ if (UNIX)
     endif ()
 endif ()
 
-if (WinToast_FOUND)
+if (WIN32)
     target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         WinToast)
@@ -968,6 +1022,8 @@ if (MSVC)
         /wd4505
         /wd4100
         /wd4267
+        # Enable updated '__cplusplus' macro - workaround for CMake#18837
+        /Zc:__cplusplus
     )
     # Disable min/max macros from Windows.h
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
@@ -1008,4 +1064,9 @@ if(CHATTERINO_ENABLE_LTO)
     message(STATUS "Enabling LTO for ${LIBRARY_PROJECT}")
     set_property(TARGET ${LIBRARY_PROJECT}
                  PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
+if(NOT CHATTERINO_UPDATER)
+    message(STATUS "Disabling the updater.")
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_DISABLE_UPDATER)
 endif()

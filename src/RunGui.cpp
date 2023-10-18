@@ -20,6 +20,7 @@
 #include <QtConcurrent>
 
 #include <csignal>
+#include <tuple>
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
@@ -184,17 +185,20 @@ namespace {
     // improved in the future.
     void clearCache(const QDir &dir)
     {
-        int deletedCount = 0;
-        for (auto &&info : dir.entryInfoList(QDir::Files))
+        size_t deletedCount = 0;
+        for (const auto &info : dir.entryInfoList(QDir::Files))
         {
             if (info.lastModified().addDays(14) < QDateTime::currentDateTime())
             {
                 bool res = QFile(info.absoluteFilePath()).remove();
                 if (res)
+                {
                     ++deletedCount;
+                }
             }
         }
-        qCDebug(chatterinoCache) << "Deleted" << deletedCount << "files";
+        qCDebug(chatterinoCache)
+            << "Deleted" << deletedCount << "files in" << dir.path();
     }
 
     // We delete all but the five most recent crashdumps. This strategy may be
@@ -259,12 +263,15 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
 
     // Clear the cache 1 minute after start.
     QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory(),
-                                   crashDirectory = paths.crashdumpDirectory] {
-        QtConcurrent::run([cachePath]() {
+                                   crashDirectory = paths.crashdumpDirectory,
+                                   avatarPath = paths.twitchProfileAvatars] {
+        std::ignore = QtConcurrent::run([cachePath] {
             clearCache(cachePath);
         });
-
-        QtConcurrent::run([crashDirectory]() {
+        std::ignore = QtConcurrent::run([avatarPath] {
+            clearCache(avatarPath);
+        });
+        std::ignore = QtConcurrent::run([crashDirectory] {
             clearCrashes(crashDirectory);
         });
     });

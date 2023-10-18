@@ -24,7 +24,10 @@ static const QMap<QString, QString> validIdentifiersMap = {
     {"flags.system_message", "system message?"},
     {"flags.reward_message", "channel point reward message?"},
     {"flags.first_message", "first message?"},
-    {"flags.elevated_message", "elevated message?"},
+    {"flags.elevated_message", "hype chat message?"},
+    // Ideally these values are unique, because ChannelFilterEditorDialog::ValueSpecifier::expressionText depends on
+    // std::map layout in Qt 6 and internal implementation in Qt 5.
+    {"flags.hype_chat", "hype chat message?"},
     {"flags.cheer_message", "cheer message?"},
     {"flags.whisper", "whisper message?"},
     {"flags.reply", "reply message?"},

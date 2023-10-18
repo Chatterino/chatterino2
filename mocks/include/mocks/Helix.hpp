@@ -31,17 +31,12 @@ public:
                  HelixFailureCallback failureCallback),
                 (override));
 
-    MOCK_METHOD(void, fetchUsersFollows,
-                (QString fromId, QString toId,
-                 ResultCallback<HelixUsersFollowsResponse> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, getUserFollowers,
-                (QString userId,
-                 ResultCallback<HelixUsersFollowsResponse> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
+    MOCK_METHOD(
+        void, getChannelFollowers,
+        (QString broadcasterID,
+         ResultCallback<HelixGetChannelFollowersResponse> successCallback,
+         std::function<void(QString)> failureCallback),
+        (override));
 
     MOCK_METHOD(void, fetchStreams,
                 (QStringList userIds, QStringList userLogins,
@@ -274,7 +269,7 @@ public:
     // contains a comma
     MOCK_METHOD(void, updateFollowerMode,
                 (QString broadcasterID, QString moderatorID,
-                 boost::optional<int> followerModeDuration,
+                 std::optional<int> followerModeDuration,
                  ResultCallback<HelixChatSettings> successCallback,
                  (FailureCallback<HelixUpdateChatSettingsError, QString>
                       failureCallback)),
@@ -284,7 +279,7 @@ public:
     // contains a comma
     MOCK_METHOD(void, updateNonModeratorChatDelay,
                 (QString broadcasterID, QString moderatorID,
-                 boost::optional<int> nonModeratorChatDelayDuration,
+                 std::optional<int> nonModeratorChatDelayDuration,
                  ResultCallback<HelixChatSettings> successCallback,
                  (FailureCallback<HelixUpdateChatSettingsError, QString>
                       failureCallback)),
@@ -294,7 +289,7 @@ public:
     // contains a comma
     MOCK_METHOD(void, updateSlowMode,
                 (QString broadcasterID, QString moderatorID,
-                 boost::optional<int> slowModeWaitTime,
+                 std::optional<int> slowModeWaitTime,
                  ResultCallback<HelixChatSettings> successCallback,
                  (FailureCallback<HelixUpdateChatSettingsError, QString>
                       failureCallback)),
@@ -326,7 +321,7 @@ public:
     // contains a comma
     MOCK_METHOD(void, banUser,
                 (QString broadcasterID, QString moderatorID, QString userID,
-                 boost::optional<int> duration, QString reason,
+                 std::optional<int> duration, QString reason,
                  ResultCallback<> successCallback,
                  (FailureCallback<HelixBanUserError, QString> failureCallback)),
                 (override));  // /timeout, /ban

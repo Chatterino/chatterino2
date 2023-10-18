@@ -31,7 +31,8 @@ struct PubSubAutoModQueueMessage {
     QString senderUserDisplayName;
     QColor senderUserChatColor;
 
-    PubSubAutoModQueueMessage(const QJsonObject &root);
+    PubSubAutoModQueueMessage() = default;
+    explicit PubSubAutoModQueueMessage(const QJsonObject &root);
 };
 
 }  // namespace chatterino

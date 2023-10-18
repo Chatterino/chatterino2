@@ -271,4 +271,17 @@ int64_t parseDurationToSeconds(const QString &inputString,
     return (int64_t)currentValue;
 }
 
+bool compareEmoteStrings(const QString &a, const QString &b)
+{
+    // try comparing insensitively, if they are the same then sensitively
+    // (fixes order of LuL and LUL)
+    int k = QString::compare(a, b, Qt::CaseInsensitive);
+    if (k == 0)
+    {
+        return a > b;
+    }
+
+    return k < 0;
+}
+
 }  // namespace chatterino

@@ -18,7 +18,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
-#include "providers/RecentMessagesApi.hpp"
+#include "providers/recentmessages/Api.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
@@ -35,6 +35,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 #include "util/QStringHash.hpp"
 #include "widgets/Window.hpp"
@@ -94,25 +95,15 @@ TwitchChannel::TwitchChannel(const QString &name)
         }));
 
     this->refreshPubSub();
-    this->userStateChanged.connect([this] {
+    // We can safely ignore this signal connection since it's a private signal, meaning
+    // it will only ever be invoked by TwitchChannel itself
+    std::ignore = this->userStateChanged.connect([this] {
         this->refreshPubSub();
     });
 
-    // room id loaded -> refresh live status
-    this->roomIdChanged.connect([this]() {
-        this->refreshPubSub();
-        this->refreshBadges();
-        this->refreshCheerEmotes();
-        this->refreshFFZChannelEmotes(false);
-        this->refreshBTTVChannelEmotes(false);
-        this->refreshSevenTVChannelEmotes(false);
-        this->joinBttvChannel();
-        this->listenSevenTVCosmetics();
-        getIApp()->getTwitchLiveController()->add(
-            std::dynamic_pointer_cast<TwitchChannel>(shared_from_this()));
-    });
-
-    this->connected.connect([this]() {
+    // We can safely ignore this signal connection this has no external dependencies - once the signal
+    // is destroyed, it will no longer be able to fire
+    std::ignore = this->connected.connect([this]() {
         if (this->roomId().isEmpty())
         {
             // If we get a reconnected event when the room id is not set, we
@@ -125,18 +116,7 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->loadRecentMessagesReconnect();
     });
 
-    this->messageRemovedFromStart.connect([this](MessagePtr &msg) {
-        if (msg->replyThread)
-        {
-            if (msg->replyThread->liveCount(msg) == 0)
-            {
-                this->threads_.erase(msg->replyThread->rootId());
-            }
-        }
-    });
-
     // timers
-
     QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [this] {
         this->refreshChatters();
     });
@@ -417,14 +397,14 @@ bool TwitchChannel::isChannelPointRewardKnown(const QString &rewardId)
     return it != pointRewards->end();
 }
 
-boost::optional<ChannelPointReward> TwitchChannel::channelPointReward(
+std::optional<ChannelPointReward> TwitchChannel::channelPointReward(
     const QString &rewardId) const
 {
     auto rewards = this->channelPointRewards_.accessConst();
     auto it = rewards->find(rewardId);
 
     if (it == rewards->end())
-        return boost::none;
+        return std::nullopt;
     return it->second;
 }
 
@@ -536,6 +516,20 @@ void TwitchChannel::showLoginMessage()
         ->setLink(accountsLink);
 
     this->addMessage(builder.release());
+}
+
+void TwitchChannel::roomIdChanged()
+{
+    this->refreshPubSub();
+    this->refreshBadges();
+    this->refreshCheerEmotes();
+    this->refreshFFZChannelEmotes(false);
+    this->refreshBTTVChannelEmotes(false);
+    this->refreshSevenTVChannelEmotes(false);
+    this->joinBttvChannel();
+    this->listenSevenTVCosmetics();
+    getIApp()->getTwitchLiveController()->add(
+        std::dynamic_pointer_cast<TwitchChannel>(shared_from_this()));
 }
 
 QString TwitchChannel::prepareMessage(const QString &message) const
@@ -729,7 +723,7 @@ void TwitchChannel::setRoomId(const QString &id)
     if (*this->roomID_.accessConst() != id)
     {
         *this->roomID_.access() = id;
-        this->roomIdChanged.invoke();
+        this->roomIdChanged();
         this->loadRecentMessages();
     }
 }
@@ -758,35 +752,34 @@ SharedAccessGuard<const TwitchChannel::StreamStatus>
     return this->streamStatus_.accessConst();
 }
 
-boost::optional<EmotePtr> TwitchChannel::bttvEmote(const EmoteName &name) const
+std::optional<EmotePtr> TwitchChannel::bttvEmote(const EmoteName &name) const
 {
     auto emotes = this->bttvEmotes_.get();
     auto it = emotes->find(name);
 
     if (it == emotes->end())
-        return boost::none;
+        return std::nullopt;
     return it->second;
 }
 
-boost::optional<EmotePtr> TwitchChannel::ffzEmote(const EmoteName &name) const
+std::optional<EmotePtr> TwitchChannel::ffzEmote(const EmoteName &name) const
 {
     auto emotes = this->ffzEmotes_.get();
     auto it = emotes->find(name);
 
     if (it == emotes->end())
-        return boost::none;
+        return std::nullopt;
     return it->second;
 }
 
-boost::optional<EmotePtr> TwitchChannel::seventvEmote(
-    const EmoteName &name) const
+std::optional<EmotePtr> TwitchChannel::seventvEmote(const EmoteName &name) const
 {
     auto emotes = this->seventvEmotes_.get();
     auto it = emotes->find(name);
 
     if (it == emotes->end())
     {
-        return boost::none;
+        return std::nullopt;
     }
     return it->second;
 }
@@ -872,7 +865,7 @@ void TwitchChannel::removeBttvEmote(
     }
 
     this->addOrReplaceLiveUpdatesAddRemove(false, "BTTV", QString() /*actor*/,
-                                           removed.get()->name.string);
+                                           (*removed)->name.string);
 }
 
 void TwitchChannel::addSeventvEmote(
@@ -911,7 +904,7 @@ void TwitchChannel::removeSeventvEmote(
     }
 
     this->addOrReplaceLiveUpdatesAddRemove(false, "7TV", dispatch.actorName,
-                                           removed.get()->name.string);
+                                           (*removed)->name.string);
 }
 
 void TwitchChannel::updateSeventvUser(
@@ -962,13 +955,13 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
         return;
     }
 
-    boost::optional<QString> oldUserID = boost::make_optional(
+    const auto oldUserID = makeConditionedOptional(
         !this->seventvUserID_.isEmpty() && this->seventvUserID_ != newUserID,
         this->seventvUserID_);
-    boost::optional<QString> oldEmoteSetID =
-        boost::make_optional(!this->seventvEmoteSetID_.isEmpty() &&
-                                 this->seventvEmoteSetID_ != newEmoteSetID,
-                             this->seventvEmoteSetID_);
+    const auto oldEmoteSetID =
+        makeConditionedOptional(!this->seventvEmoteSetID_.isEmpty() &&
+                                    this->seventvEmoteSetID_ != newEmoteSetID,
+                                this->seventvEmoteSetID_);
 
     this->seventvUserID_ = newUserID;
     this->seventvEmoteSetID_ = newEmoteSetID;
@@ -981,8 +974,8 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
             if (oldUserID || oldEmoteSetID)
             {
                 getApp()->twitch->dropSeventvChannel(
-                    oldUserID.get_value_or(QString()),
-                    oldEmoteSetID.get_value_or(QString()));
+                    oldUserID.value_or(QString()),
+                    oldEmoteSetID.value_or(QString()));
             }
         }
     });
@@ -1063,6 +1056,17 @@ bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
     return true;
 }
 
+void TwitchChannel::messageRemovedFromStart(const MessagePtr &msg)
+{
+    if (msg->replyThread)
+    {
+        if (msg->replyThread->liveCount(msg) == 0)
+        {
+            this->threads_.erase(msg->replyThread->rootId());
+        }
+    }
+}
+
 const QString &TwitchChannel::subscriptionUrl()
 {
     return this->subscriptionUrl_;
@@ -1108,7 +1112,7 @@ void TwitchChannel::loadRecentMessages()
     }
 
     auto weak = weakOf<Channel>(this);
-    RecentMessagesApi::loadRecentMessages(
+    recentmessages::load(
         this->getName(), weak,
         [weak](const auto &messages) {
             auto shared = weak.lock();
@@ -1121,6 +1125,21 @@ void TwitchChannel::loadRecentMessages()
 
             tc->addMessagesAtStart(messages);
             tc->loadingRecentMessages_.clear();
+
+            std::vector<MessagePtr> msgs;
+            for (MessagePtr msg : messages)
+            {
+                const auto highlighted =
+                    msg->flags.has(MessageFlag::Highlighted);
+                const auto showInMentions =
+                    msg->flags.has(MessageFlag::ShowInMentions);
+                if (highlighted && showInMentions)
+                {
+                    msgs.push_back(msg);
+                }
+            }
+
+            getApp()->twitch->mentionsChannel->fillInMissingMessages(msgs);
         },
         [weak]() {
             auto shared = weak.lock();
@@ -1148,7 +1167,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
     }
 
     auto weak = weakOf<Channel>(this);
-    RecentMessagesApi::loadRecentMessages(
+    recentmessages::load(
         this->getName(), weak,
         [weak](const auto &messages) {
             auto shared = weak.lock();
@@ -1519,8 +1538,8 @@ void TwitchChannel::createClip()
         });
 }
 
-boost::optional<EmotePtr> TwitchChannel::twitchBadge(
-    const QString &set, const QString &version) const
+std::optional<EmotePtr> TwitchChannel::twitchBadge(const QString &set,
+                                                   const QString &version) const
 {
     auto badgeSets = this->badgeSets_.access();
     auto it = badgeSets->find(set);
@@ -1532,20 +1551,20 @@ boost::optional<EmotePtr> TwitchChannel::twitchBadge(
             return it2->second;
         }
     }
-    return boost::none;
+    return std::nullopt;
 }
 
-boost::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
+std::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
 {
     return this->ffzCustomModBadge_.get();
 }
 
-boost::optional<EmotePtr> TwitchChannel::ffzCustomVipBadge() const
+std::optional<EmotePtr> TwitchChannel::ffzCustomVipBadge() const
 {
     return this->ffzCustomVipBadge_.get();
 }
 
-boost::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
+std::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
 {
     auto sets = this->cheerEmoteSets_.access();
     for (const auto &set : *sets)
@@ -1571,7 +1590,7 @@ boost::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
             }
         }
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 void TwitchChannel::updateSevenTVActivity()

@@ -10,6 +10,7 @@
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/Window.hpp"
 
 #include <QApplication>
 #include <QFont>
@@ -56,7 +57,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
         this->setWindowFlags(Qt::ToolTip);
 #else
         this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
-                             Qt::X11BypassWindowManagerHint |
+                             Qt::WindowDoesNotAcceptFocus |
                              Qt::BypassWindowManagerHint);
 #endif
     }
@@ -240,18 +241,6 @@ void BaseWindow::init()
 #endif
 }
 
-void BaseWindow::setStayInScreenRect(bool value)
-{
-    this->stayInScreenRect_ = value;
-
-    this->moveIntoDesktopRect(this->pos());
-}
-
-bool BaseWindow::getStayInScreenRect() const
-{
-    return this->stayInScreenRect_;
-}
-
 void BaseWindow::setActionOnFocusLoss(ActionOnFocusLoss value)
 {
     this->actionOnFocusLoss_ = value;
@@ -390,7 +379,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
-                if (widget == nullptr)
+                if (widget == nullptr || widget->isHidden())
                 {
                     return false;
                 }
@@ -514,15 +503,9 @@ void BaseWindow::leaveEvent(QEvent *)
     TooltipWidget::instance()->hide();
 }
 
-void BaseWindow::moveTo(QWidget *parent, QPoint point, bool offset)
+void BaseWindow::moveTo(QPoint point, widgets::BoundsChecking mode)
 {
-    if (offset)
-    {
-        point.rx() += 16;
-        point.ry() += 16;
-    }
-
-    this->moveIntoDesktopRect(point);
+    widgets::moveWindowTo(this, point, mode);
 }
 
 void BaseWindow::resizeEvent(QResizeEvent *)
@@ -576,59 +559,6 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
-    this->moveIntoDesktopRect(this->pos());
-    if (this->frameless_)
-    {
-        QTimer::singleShot(30, this, [this] {
-            this->moveIntoDesktopRect(this->pos());
-        });
-    }
-}
-
-void BaseWindow::moveIntoDesktopRect(QPoint point)
-{
-    if (!this->stayInScreenRect_)
-    {
-        return;
-    }
-
-    // move the widget into the screen geometry if it's not already in there
-    auto *screen = QApplication::screenAt(point);
-    if (screen == nullptr)
-    {
-        screen = QApplication::primaryScreen();
-    }
-    const QRect bounds = screen->availableGeometry();
-
-    bool stickRight = false;
-    bool stickBottom = false;
-
-    if (point.x() < bounds.left())
-    {
-        point.setX(bounds.left());
-    }
-    if (point.y() < bounds.top())
-    {
-        point.setY(bounds.top());
-    }
-    if (point.x() + this->width() > bounds.right())
-    {
-        stickRight = true;
-        point.setX(bounds.right() - this->width());
-    }
-    if (point.y() + this->height() > bounds.bottom())
-    {
-        stickBottom = true;
-        point.setY(bounds.bottom() - this->height());
-    }
-
-    if (stickRight && stickBottom)
-    {
-        const QPoint globalCursorPos = QCursor::pos();
-        point.setY(globalCursorPos.y() - this->height() - 16);
-    }
-
-    this->move(point);
 }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -710,7 +640,7 @@ void BaseWindow::updateScale()
     auto scale =
         this->nativeScale_ * (this->flags_.has(DisableCustomScaling)
                                   ? 1
-                                  : getABSettings()->getClampedUiScale());
+                                  : getSettings()->getClampedUiScale());
 
     this->setScale(scale);
 
@@ -798,7 +728,7 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 
     if (auto dpi = getWindowDpi(msg->hwnd))
     {
-        float currentScale = (float)dpi.get() / 96.F;
+        float currentScale = (float)dpi.value() / 96.F;
         if (currentScale != this->nativeScale_)
         {
             this->nativeScale_ = currentScale;
@@ -1004,17 +934,23 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
         {
             bool client = false;
 
-            for (QWidget *widget : this->ui_.buttons)
-            {
-                if (widget->geometry().contains(point))
-                {
-                    client = true;
-                }
-            }
-
+            // Check the main layout first, as it's the largest area
             if (this->ui_.layoutBase->geometry().contains(point))
             {
                 client = true;
+            }
+
+            // Check the titlebar buttons
+            if (!client && this->ui_.titlebarBox->geometry().contains(point))
+            {
+                for (QWidget *widget : this->ui_.buttons)
+                {
+                    if (widget->isVisible() &&
+                        widget->geometry().contains(point))
+                    {
+                        client = true;
+                    }
+                }
             }
 
             if (client)
@@ -1029,16 +965,17 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
         return true;
     }
-    else if (this->flags_.has(FramelessDraggable))
+
+    if (this->flags_.has(FramelessDraggable))
     {
         *result = 0;
         bool client = false;
 
-        if (auto widget = this->childAt(point))
+        if (auto *widget = this->childAt(point))
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
-                if (widget == nullptr)
+                if (widget == nullptr || widget->isHidden())
                 {
                     return false;
                 }
@@ -1068,6 +1005,8 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
         return true;
     }
+
+    // don't handle the message
     return false;
 #else
     return false;

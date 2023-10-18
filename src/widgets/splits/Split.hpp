@@ -184,7 +184,6 @@ public slots:
     void openBrowserPlayer();
     void openInStreamlink();
     void openWithCustomScheme();
-    void startWatching();
     void setFiltersDialog();
     void showSearch(bool singleChannel);
     void showViewerList();

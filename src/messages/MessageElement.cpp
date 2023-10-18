@@ -12,6 +12,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
+#include "util/Variant.hpp"
 
 namespace chatterino {
 
@@ -665,81 +666,56 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
         container.first = FirstWord::Neutral;
         for (Word &word : this->words_)
         {
-            auto parsedWords = app->emotes->emojis.parse(word.text);
-            if (parsedWords.size() == 0)
+            for (const auto &parsedWord : app->emotes->emojis.parse(word.text))
             {
-                continue;  // sanity check
-            }
-
-            auto &parsedWord = parsedWords[0];
-            if (parsedWord.type() == typeid(QString))
-            {
-                int nextWidth =
-                    metrics.horizontalAdvance(currentText + word.text);
-
-                // see if the text fits in the current line
-                if (container.fitsInLine(nextWidth))
+                if (parsedWord.type() == typeid(QString))
                 {
-                    currentText += (word.text + " ");
-                }
-                else
-                {
-                    // word overflows, try minimum truncation
-                    bool cutSuccess = false;
-                    for (size_t cut = 1; cut < word.text.length(); ++cut)
+                    if (!currentText.isEmpty())
                     {
-                        // Cut off n characters and append the ellipsis.
-                        // Try removing characters one by one until the word fits.
-                        QString truncatedWord =
-                            word.text.chopped(cut) + ellipsis;
-                        int newSize = metrics.horizontalAdvance(currentText +
-                                                                truncatedWord);
-                        if (container.fitsInLine(newSize))
-                        {
-                            currentText += (truncatedWord);
-
-                            cutSuccess = true;
-                            break;
-                        }
+                        currentText += ' ';
                     }
-
-                    if (!cutSuccess)
+                    currentText += boost::get<QString>(parsedWord);
+                    QString prev =
+                        currentText;  // only increments the ref-count
+                    currentText =
+                        metrics.elidedText(currentText, Qt::ElideRight,
+                                           container.remainingWidth());
+                    if (currentText != prev)
                     {
-                        // We weren't able to show any part of the current word, so
-                        // just append the ellipsis.
-                        currentText += ellipsis;
-                    }
-
-                    break;
-                }
-            }
-            else if (parsedWord.type() == typeid(EmotePtr))
-            {
-                auto emote = boost::get<EmotePtr>(parsedWord);
-                auto image =
-                    emote->images.getImageOrLoaded(container.getScale());
-                if (!image->isEmpty())
-                {
-                    auto emoteScale = getSettings()->emoteScale.getValue();
-
-                    int currentWidth = metrics.horizontalAdvance(currentText);
-                    auto emoteSize = QSize(image->width(), image->height()) *
-                                     (emoteScale * container.getScale());
-
-                    if (!container.fitsInLine(currentWidth + emoteSize.width()))
-                    {
-                        currentText += ellipsis;
                         break;
                     }
+                }
+                else if (parsedWord.type() == typeid(EmotePtr))
+                {
+                    auto emote = boost::get<EmotePtr>(parsedWord);
+                    auto image =
+                        emote->images.getImageOrLoaded(container.getScale());
+                    if (!image->isEmpty())
+                    {
+                        auto emoteScale = getSettings()->emoteScale.getValue();
 
-                    // Add currently pending text to container, then add the emote after.
-                    container.addElementNoLineBreak(
-                        getTextLayoutElement(currentText, currentWidth, false));
-                    currentText.clear();
+                        int currentWidth =
+                            metrics.horizontalAdvance(currentText);
+                        auto emoteSize =
+                            QSize(image->width(), image->height()) *
+                            (emoteScale * container.getScale());
 
-                    container.addElementNoLineBreak(
-                        (new ImageLayoutElement(*this, image, emoteSize))
-                            ->setLink(this->getLink()));
+                        if (!container.fitsInLine(currentWidth +
+                                                  emoteSize.width()))
+                        {
+                            currentText += ellipsis;
+                            break;
+                        }
+
+                        // Add currently pending text to container, then add the emote after.
+                        container.addElementNoLineBreak(getTextLayoutElement(
+                            currentText, currentWidth, false));
+                        currentText.clear();
+
+                        container.addElementNoLineBreak(
+                            (new ImageLayoutElement(*this, image, emoteSize))
+                                ->setLink(this->getLink()));
+                    }
                 }
             }
         }
@@ -806,13 +782,13 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     {
         QSize size(int(container.getScale() * 16),
                    int(container.getScale() * 16));
-        auto actions = getCSettings().moderationActions.readOnly();
+        auto actions = getSettings()->moderationActions.readOnly();
         for (const auto &action : *actions)
         {
             if (auto image = action.getImage())
             {
                 container.addElement(
-                    (new ImageLayoutElement(*this, image.get(), size))
+                    (new ImageLayoutElement(*this, *image, size))
                         ->setLink(Link(Link::UserAction, action.getAction())));
             }
             else

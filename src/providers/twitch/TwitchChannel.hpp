@@ -9,7 +9,6 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 
-#include <boost/optional.hpp>
 #include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
@@ -134,9 +133,9 @@ public:
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
 
     // Emotes
-    boost::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
-    boost::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
-    boost::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
     std::shared_ptr<const EmoteMap> seventvEmotes() const;
@@ -172,13 +171,13 @@ public:
                            const QString &newEmoteSetID);
 
     // Badges
-    boost::optional<EmotePtr> ffzCustomModBadge() const;
-    boost::optional<EmotePtr> ffzCustomVipBadge() const;
-    boost::optional<EmotePtr> twitchBadge(const QString &set,
-                                          const QString &version) const;
+    std::optional<EmotePtr> ffzCustomModBadge() const;
+    std::optional<EmotePtr> ffzCustomVipBadge() const;
+    std::optional<EmotePtr> twitchBadge(const QString &set,
+                                        const QString &version) const;
 
     // Cheers
-    boost::optional<CheerEmote> cheerEmote(const QString &string);
+    std::optional<CheerEmote> cheerEmote(const QString &string);
 
     // Replies
     /**
@@ -191,8 +190,7 @@ public:
     const std::unordered_map<QString, std::weak_ptr<MessageThread>> &threads()
         const;
 
-    // Signals
-    pajlada::Signals::NoArgSignal roomIdChanged;
+    // Only TwitchChannel may invoke this signal
     pajlada::Signals::NoArgSignal userStateChanged;
 
     /**
@@ -218,7 +216,7 @@ public:
         channelPointRewardAdded;
     void addChannelPointReward(const ChannelPointReward &reward);
     bool isChannelPointRewardKnown(const QString &rewardId);
-    boost::optional<ChannelPointReward> channelPointReward(
+    std::optional<ChannelPointReward> channelPointReward(
         const QString &rewardId) const;
 
     // Live status
@@ -242,8 +240,6 @@ private:
         QString actualDisplayName;
     } nameOptions;
 
-private:
-    // Methods
     void refreshPubSub();
     void refreshChatters();
     void refreshBadges();
@@ -252,6 +248,11 @@ private:
     void loadRecentMessagesReconnect();
     void cleanUpReplyThreads();
     void showLoginMessage();
+
+    /// roomIdChanged is called whenever this channel's ID has been changed
+    /// This should only happen once per channel, whenever the ID goes from unset to set
+    void roomIdChanged();
+
     /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
     void joinBttvChannel() const;
     /**
@@ -328,18 +329,20 @@ private:
     const QString subscriptionUrl_;
     const QString channelUrl_;
     const QString popoutPlayerUrl_;
-    int chatterCount_;
+    int chatterCount_{};
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
     std::atomic_flag loadingRecentMessages_ = ATOMIC_FLAG_INIT;
     std::unordered_map<QString, std::weak_ptr<MessageThread>> threads_;
 
 protected:
+    void messageRemovedFromStart(const MessagePtr &msg) override;
+
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;
-    Atomic<boost::optional<EmotePtr>> ffzCustomModBadge_;
-    Atomic<boost::optional<EmotePtr>> ffzCustomVipBadge_;
+    Atomic<std::optional<EmotePtr>> ffzCustomModBadge_;
+    Atomic<std::optional<EmotePtr>> ffzCustomVipBadge_;
 
 private:
     // Badges
@@ -376,7 +379,7 @@ private:
      * The index of the twitch connection in
      * 7TV's user representation.
      */
-    size_t seventvUserTwitchConnectionIndex_;
+    size_t seventvUserTwitchConnectionIndex_{};
 
     /**
      * The next moment in time to signal activity in this channel to 7TV.

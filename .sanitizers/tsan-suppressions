@@ -1,0 +1,17 @@
+race:libdbus-1.so.3
+deadlock:libdbus-1.so.3
+race:libglib-2.0.so.0
+race:libgio-2.0.so.0
+
+# Not sure about these suppression
+# race:qscopedpointer.h
+# race:qarraydata.cpp
+# race:qarraydata.h
+# race:qarraydataops.h
+# race:libQt6Core.so.6
+# race:libQt6Gui.so.6
+# race:libQt6XcbQpa.so.6
+# race:libQt6Network.so.6
+
+# very not sure about this one
+# race:qstring.h

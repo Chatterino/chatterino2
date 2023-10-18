@@ -205,6 +205,9 @@ void TwitchMessageBuilder::triggerHighlights()
 
 MessagePtr TwitchMessageBuilder::build()
 {
+    assert(this->ircMessage != nullptr);
+    assert(this->channel != nullptr);
+
     // PARSE
     this->userId_ = this->ircMessage->tag("user-id").toString();
 
@@ -228,8 +231,8 @@ MessagePtr TwitchMessageBuilder::build()
             this->args.channelPointRewardId);
         if (reward)
         {
-            this->appendChannelPointRewardMessage(
-                reward.get(), this, this->channel->isMod(),
+            TwitchMessageBuilder::appendChannelPointRewardMessage(
+                *reward, this, this->channel->isMod(),
                 this->channel->isBroadcaster());
         }
     }
@@ -433,7 +436,8 @@ void TwitchMessageBuilder::addWords(
 
             // 1. Add text before the emote
             QString preText = word.left(currentTwitchEmote.start - cursor);
-            for (auto &variant : getApp()->emotes->emojis.parse(preText))
+            for (auto &variant :
+                 getIApp()->getEmotes()->getEmojis()->parse(preText))
             {
                 boost::apply_visitor(
                     [&](auto &&arg) {
@@ -453,7 +457,7 @@ void TwitchMessageBuilder::addWords(
         }
 
         // split words
-        for (auto &variant : getApp()->emotes->emojis.parse(word))
+        for (auto &variant : getIApp()->getEmotes()->getEmojis()->parse(word))
         {
             boost::apply_visitor(
                 [&](auto &&arg) {
@@ -748,7 +752,7 @@ void TwitchMessageBuilder::parseUsername()
     }
 
     // Update current user color if this is our message
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (this->ircMessage->nick() == currentUser->getUserName())
     {
         currentUser->setColor(this->usernameColor_);
@@ -757,7 +761,7 @@ void TwitchMessageBuilder::parseUsername()
 
 void TwitchMessageBuilder::appendUsername()
 {
-    auto app = getApp();
+    auto *app = getIApp();
 
     QString username = this->userName;
     this->message().loginName = username;
@@ -802,7 +806,7 @@ void TwitchMessageBuilder::appendUsername()
                                    FontStyle::ChatMediumBold)
             ->setLink({Link::UserWhisper, this->message().displayName});
 
-        auto currentUser = app->accounts->twitch.getCurrent();
+        auto currentUser = app->getAccounts()->twitch.getCurrent();
 
         // Separator
         this->emplace<TextElement>("->", MessageElementFlag::Username,
@@ -834,7 +838,7 @@ void TwitchMessageBuilder::appendUsername()
 void TwitchMessageBuilder::runIgnoreReplaces(
     std::vector<TwitchEmoteOccurrence> &twitchEmotes)
 {
-    auto phrases = getCSettings().ignoredMessages.readOnly();
+    auto phrases = getSettings()->ignoredMessages.readOnly();
     auto removeEmotesInRange = [](int pos, int len,
                                   auto &twitchEmotes) mutable {
         auto it = std::partition(
@@ -1062,14 +1066,14 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
 Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
-    auto *app = getApp();
+    auto *app = getIApp();
 
-    const auto &globalBttvEmotes = app->twitch->getBttvEmotes();
-    const auto &globalFfzEmotes = app->twitch->getFfzEmotes();
-    const auto &globalSeventvEmotes = app->twitch->getSeventvEmotes();
+    const auto &globalBttvEmotes = app->getTwitch()->getBttvEmotes();
+    const auto &globalFfzEmotes = app->getTwitch()->getFfzEmotes();
+    const auto &globalSeventvEmotes = app->getTwitch()->getSeventvEmotes();
 
     auto flags = MessageElementFlags();
-    auto emote = boost::optional<EmotePtr>{};
+    auto emote = std::optional<EmotePtr>{};
     bool zeroWidth = false;
 
     // Emote order:
@@ -1115,7 +1119,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
             !this->isEmpty())
         {
             // Attempt to merge current zero-width emote into any previous emotes
-            auto asEmote = dynamic_cast<EmoteElement *>(&this->back());
+            auto *asEmote = dynamic_cast<EmoteElement *>(&this->back());
             if (asEmote)
             {
                 // Make sure to access asEmote before taking ownership when releasing
@@ -1124,18 +1128,18 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
                 auto baseEmoteElement = this->releaseBack();
 
                 std::vector<LayeredEmoteElement::Emote> layers = {
-                    {baseEmote, baseEmoteElement->getFlags()},
-                    {emote.get(), flags}};
+                    {baseEmote, baseEmoteElement->getFlags()}, {*emote, flags}};
                 this->emplace<LayeredEmoteElement>(
                     std::move(layers), baseEmoteElement->getFlags() | flags,
                     this->textColor_);
                 return Success;
             }
 
-            auto asLayered = dynamic_cast<LayeredEmoteElement *>(&this->back());
+            auto *asLayered =
+                dynamic_cast<LayeredEmoteElement *>(&this->back());
             if (asLayered)
             {
-                asLayered->addEmoteLayer({emote.get(), flags});
+                asLayered->addEmoteLayer({*emote, flags});
                 asLayered->addFlags(flags);
                 return Success;
             }
@@ -1143,15 +1147,15 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
             // No emote to merge with, just show as regular emote
         }
 
-        this->emplace<EmoteElement>(emote.get(), flags, this->textColor_);
+        this->emplace<EmoteElement>(*emote, flags, this->textColor_);
         return Success;
     }
 
     return Failure;
 }
 
-boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
-    const Badge &badge)
+std::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
+    const Badge &badge) const
 {
     if (auto channelBadge =
             this->twitchChannel->twitchBadge(badge.key_, badge.value_))
@@ -1165,7 +1169,7 @@ boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
         return globalBadge;
     }
 
-    return boost::none;
+    return std::nullopt;
 }
 
 std::unordered_map<QString, QString> TwitchMessageBuilder::parseBadgeInfoTag(
@@ -1248,7 +1252,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
             {
                 this->emplace<ModBadgeElement>(
-                        customModBadge.get(),
+                        *customModBadge,
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customModBadge)->tooltip.string);
                 // early out, since we have to add a custom badge element here
@@ -1260,7 +1264,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             if (auto customVipBadge = this->twitchChannel->ffzCustomVipBadge())
             {
                 this->emplace<VipBadgeElement>(
-                        customVipBadge.get(),
+                        *customVipBadge,
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customVipBadge)->tooltip.string);
                 // early out, since we have to add a custom badge element here
@@ -1302,7 +1306,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             }
         }
 
-        this->emplace<BadgeElement>(badgeEmote.get(), badge.flag_)
+        this->emplace<BadgeElement>(*badgeEmote, badge.flag_)
             ->setTooltip(tooltip);
     }
 
@@ -1312,7 +1316,8 @@ void TwitchMessageBuilder::appendTwitchBadges()
 
 void TwitchMessageBuilder::appendChatterinoBadges()
 {
-    if (auto badge = getApp()->chatterinoBadges->getBadge({this->userId_}))
+    if (auto badge =
+            getIApp()->getChatterinoBadges()->getBadge({this->userId_}))
     {
         this->emplace<BadgeElement>(*badge,
                                     MessageElementFlag::BadgeChatterino);
@@ -1322,7 +1327,7 @@ void TwitchMessageBuilder::appendChatterinoBadges()
 void TwitchMessageBuilder::appendFfzBadges()
 {
     for (const auto &badge :
-         getApp()->ffzBadges->getUserBadges({this->userId_}))
+         getIApp()->getFfzBadges()->getUserBadges({this->userId_}))
     {
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
@@ -1331,7 +1336,7 @@ void TwitchMessageBuilder::appendFfzBadges()
 
 void TwitchMessageBuilder::appendSeventvBadges()
 {
-    if (auto badge = getApp()->seventvBadges->getBadge({this->userId_}))
+    if (auto badge = getIApp()->getSeventvBadges()->getBadge({this->userId_}))
     {
         this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeSevenTV);
     }
@@ -1490,6 +1495,7 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     textList.append({redeemed, reward.title, QString::number(reward.cost)});
     builder->message().messageText = textList.join(" ");
     builder->message().searchText = textList.join(" ");
+    builder->message().loginName = reward.user.login;
 }
 
 void TwitchMessageBuilder::liveMessage(const QString &channelName,

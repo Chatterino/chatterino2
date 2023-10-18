@@ -24,7 +24,6 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
-#include <boost/optional.hpp>
 #include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -34,13 +33,14 @@
 #include <QScreen>
 
 #include <chrono>
+#include <optional>
 
 namespace chatterino {
 namespace {
 
-    boost::optional<bool> &shouldMoveOutOfBoundsWindow()
+    std::optional<bool> &shouldMoveOutOfBoundsWindow()
     {
-        static boost::optional<bool> x;
+        static std::optional<bool> x;
         return x;
     }
 
@@ -243,11 +243,15 @@ Window &WindowManager::getMainWindow()
     return *this->mainWindow_;
 }
 
-Window &WindowManager::getSelectedWindow()
+Window *WindowManager::getLastSelectedWindow() const
 {
     assertInGuiThread();
+    if (this->selectedWindow_ == nullptr)
+    {
+        return this->mainWindow_;
+    }
 
-    return *this->selectedWindow_;
+    return this->selectedWindow_;
 }
 
 Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
@@ -344,9 +348,13 @@ void WindowManager::setEmotePopupPos(QPoint pos)
 
 void WindowManager::initialize(Settings &settings, Paths &paths)
 {
+    (void)paths;
     assertInGuiThread();
 
-    getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
+    // We can safely ignore this signal connection since both Themes and WindowManager
+    // share the Application state lifetime
+    // NOTE: APPLICATION_LIFETIME
+    std::ignore = getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
         this->repaintVisibleChatWidgets();
     });
 

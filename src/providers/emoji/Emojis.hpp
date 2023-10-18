@@ -7,7 +7,6 @@
 #include <QRegularExpression>
 #include <QVector>
 
-#include <map>
 #include <set>
 #include <vector>
 
@@ -20,6 +19,9 @@ struct EmojiData {
     // actual byte-representation of the emoji (i.e. \154075\156150 which is
     // :male:)
     QString value;
+
+    // actual byte-representation of the non qualified emoji
+    QString nonQualified;
 
     // i.e. 204e-50a2
     QString unifiedCode;

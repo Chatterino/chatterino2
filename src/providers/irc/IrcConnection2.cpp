@@ -38,18 +38,6 @@ IrcConnection::IrcConnection(QObject *parent)
             }
         });
 
-    // Schedule a reconnect that won't violate RECONNECT_MIN_INTERVAL
-    this->smartReconnect.connect([this] {
-        if (this->reconnectTimer_.isActive())
-        {
-            return;
-        }
-
-        auto delay = this->reconnectBackoff_.next();
-        qCDebug(chatterinoIrc) << "Reconnecting in" << delay.count() << "ms";
-        this->reconnectTimer_.start(delay);
-    });
-
     this->reconnectTimer_.setSingleShot(true);
     QObject::connect(&this->reconnectTimer_, &QTimer::timeout, [this] {
         if (this->isConnected())
@@ -121,6 +109,19 @@ IrcConnection::~IrcConnection()
 {
     // Prematurely disconnect all QObject connections
     this->disconnect();
+}
+
+void IrcConnection::smartReconnect()
+{
+    if (this->reconnectTimer_.isActive())
+    {
+        // Ignore this reconnect request, we already have a reconnect request queued up
+        return;
+    }
+
+    auto delay = this->reconnectBackoff_.next();
+    qCDebug(chatterinoIrc) << "Reconnecting in" << delay.count() << "ms";
+    this->reconnectTimer_.start(delay);
 }
 
 void IrcConnection::open()

@@ -3,7 +3,6 @@
 #include "common/ChatterinoSetting.hpp"
 #include "common/Singleton.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QFont>
 #include <QFontDatabase>

@@ -126,50 +126,41 @@ void Helix::getUserById(QString userId,
         failureCallback);
 }
 
-void Helix::fetchUsersFollows(
-    QString fromId, QString toId,
-    ResultCallback<HelixUsersFollowsResponse> successCallback,
-    HelixFailureCallback failureCallback)
+void Helix::getChannelFollowers(
+    QString broadcasterID,
+    ResultCallback<HelixGetChannelFollowersResponse> successCallback,
+    std::function<void(QString)> failureCallback)
 {
-    assert(!fromId.isEmpty() || !toId.isEmpty());
+    assert(!broadcasterID.isEmpty());
 
     QUrlQuery urlQuery;
-
-    if (!fromId.isEmpty())
-    {
-        urlQuery.addQueryItem("from_id", fromId);
-    }
-
-    if (!toId.isEmpty())
-    {
-        urlQuery.addQueryItem("to_id", toId);
-    }
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
 
     // TODO: set on success and on error
-    this->makeGet("users/follows", urlQuery)
+    this->makeGet("channels/followers", urlQuery)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             auto root = result.parseJson();
             if (root.empty())
             {
-                failureCallback();
+                failureCallback("Bad JSON response");
                 return Failure;
             }
-            successCallback(HelixUsersFollowsResponse(root));
+            successCallback(HelixGetChannelFollowersResponse(root));
             return Success;
         })
-        .onError([failureCallback](auto /*result*/) {
-            // TODO: make better xd
-            failureCallback();
+        .onError([failureCallback](auto result) {
+            auto root = result.parseJson();
+            if (root.empty())
+            {
+                failureCallback("Unknown error");
+                return;
+            }
+
+            // Forward "message" from Twitch
+            HelixError error(root);
+            failureCallback(error.message);
         })
         .execute();
-}
-
-void Helix::getUserFollowers(
-    QString userId, ResultCallback<HelixUsersFollowsResponse> successCallback,
-    HelixFailureCallback failureCallback)
-{
-    this->fetchUsersFollows("", std::move(userId), std::move(successCallback),
-                            std::move(failureCallback));
 }
 
 void Helix::fetchStreams(
@@ -1750,7 +1741,7 @@ void Helix::updateEmoteMode(
 
 void Helix::updateFollowerMode(
     QString broadcasterID, QString moderatorID,
-    boost::optional<int> followerModeDuration,
+    std::optional<int> followerModeDuration,
     ResultCallback<HelixChatSettings> successCallback,
     FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
 {
@@ -1767,7 +1758,7 @@ void Helix::updateFollowerMode(
 
 void Helix::updateNonModeratorChatDelay(
     QString broadcasterID, QString moderatorID,
-    boost::optional<int> nonModeratorChatDelayDuration,
+    std::optional<int> nonModeratorChatDelayDuration,
     ResultCallback<HelixChatSettings> successCallback,
     FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
 {
@@ -1786,7 +1777,7 @@ void Helix::updateNonModeratorChatDelay(
 
 void Helix::updateSlowMode(
     QString broadcasterID, QString moderatorID,
-    boost::optional<int> slowModeWaitTime,
+    std::optional<int> slowModeWaitTime,
     ResultCallback<HelixChatSettings> successCallback,
     FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
 {
@@ -2147,7 +2138,7 @@ void Helix::fetchModerators(
 // Ban/timeout a user
 // https://dev.twitch.tv/docs/api/reference#ban-user
 void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
-                    boost::optional<int> duration, QString reason,
+                    std::optional<int> duration, QString reason,
                     ResultCallback<> successCallback,
                     FailureCallback<HelixBanUserError, QString> failureCallback)
 {
@@ -2867,7 +2858,6 @@ void Helix::sendShoutout(
                 break;
 
                 case 500: {
-                    // Helix returns 500 when user is not mod,
                     if (message.isEmpty())
                     {
                         failureCallback(Error::Unknown,
@@ -2900,14 +2890,14 @@ NetworkRequest Helix::makeRequest(const QString &url, const QUrlQuery &urlQuery,
     {
         qCDebug(chatterinoTwitch)
             << "Helix::makeRequest called without a client ID set BabyRage";
-        // return boost::none;
+        // return std::nullopt;
     }
 
     if (this->oauthToken.isEmpty())
     {
         qCDebug(chatterinoTwitch)
             << "Helix::makeRequest called without an oauth token set BabyRage";
-        // return boost::none;
+        // return std::nullopt;
     }
 
     const QString baseUrl("https://api.twitch.tv/helix/");

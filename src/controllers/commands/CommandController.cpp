@@ -114,7 +114,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     const auto &bttvemotes = app->twitch->getBttvEmotes();
     const auto &ffzemotes = app->twitch->getFfzEmotes();
     auto flags = MessageElementFlags();
-    auto emote = boost::optional<EmotePtr>{};
+    auto emote = std::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {
         {  // Twitch emote
@@ -138,7 +138,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
             }
             if (emote)
             {
-                b.emplace<EmoteElement>(emote.get(), flags);
+                b.emplace<EmoteElement>(*emote, flags);
                 continue;
             }
         }  // bttv/ffz emote
@@ -181,7 +181,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
 
     app->twitch->whispersChannel->addMessage(messagexD);
 
-    auto overrideFlags = boost::optional<MessageFlags>(messagexD->flags);
+    auto overrideFlags = std::optional<MessageFlags>(messagexD->flags);
     overrideFlags->set(MessageFlag::DoNotLog);
 
     if (getSettings()->inlineWhispers &&
@@ -587,8 +587,10 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         this->maxSpaces_ = maxSpaces;
     };
-    this->items.itemInserted.connect(addFirstMatchToMap);
-    this->items.itemRemoved.connect(addFirstMatchToMap);
+    // We can safely ignore these signal connections since items will be destroyed
+    // before CommandController
+    std::ignore = this->items.itemInserted.connect(addFirstMatchToMap);
+    std::ignore = this->items.itemRemoved.connect(addFirstMatchToMap);
 
     // Initialize setting manager for commands.json
     auto path = combinePath(paths.settingsDirectory, "commands.json");
@@ -604,7 +606,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     // Update the setting when the vector of commands has been updated (most
     // likely from the settings dialog)
-    this->items.delayedItemsChanged.connect([this] {
+    std::ignore = this->items.delayedItemsChanged.connect([this] {
         this->commandsSetting_->setValue(this->items.raw());
     });
 
@@ -923,7 +925,8 @@ void CommandController::initialize(Settings &, Paths &paths)
             static_cast<QWidget *>(&(getApp()->windows->getMainWindow())),
             currentSplit);
         userPopup->setData(userName, channel);
-        userPopup->move(QCursor::pos());
+        userPopup->moveTo(QCursor::pos(),
+                          widgets::BoundsChecking::CursorPosition);
         userPopup->show();
         return "";
     });
@@ -2853,7 +2856,7 @@ void CommandController::initialize(Settings &, Paths &paths)
              formatBanTimeoutError](const auto &targetUser) {
                 getHelix()->banUser(
                     twitchChannel->roomId(), currentUser->getUserId(),
-                    targetUser.id, boost::none, reason,
+                    targetUser.id, std::nullopt, reason,
                     [] {
                         // No response for bans, they're emitted over pubsub/IRC instead
                     },
@@ -2907,7 +2910,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         getHelix()->banUser(
             twitchChannel->roomId(), currentUser->getUserId(), target,
-            boost::none, reason,
+            std::nullopt, reason,
             [] {
                 // No response for bans, they're emitted over pubsub/IRC instead
             },

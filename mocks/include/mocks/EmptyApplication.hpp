@@ -7,6 +7,8 @@ namespace chatterino::mock {
 class EmptyApplication : public IApplication
 {
 public:
+    virtual ~EmptyApplication() = default;
+
     Theme *getThemes() override
     {
         return nullptr;
@@ -69,6 +71,12 @@ public:
 
     FfzBadges *getFfzBadges() override
     {
+        return nullptr;
+    }
+
+    SeventvBadges *getSeventvBadges() override
+    {
+        assert(!"getSeventvBadges was called without being initialized");
         return nullptr;
     }
 

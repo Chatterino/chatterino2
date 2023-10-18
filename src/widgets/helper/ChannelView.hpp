@@ -95,8 +95,8 @@ public:
 
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
-    void setOverrideFlags(boost::optional<MessageElementFlags> value);
-    const boost::optional<MessageElementFlags> &getOverrideFlags() const;
+    void setOverrideFlags(std::optional<MessageElementFlags> value);
+    const std::optional<MessageElementFlags> &getOverrideFlags() const;
     void updateLastReadMessage();
 
     /**
@@ -114,7 +114,7 @@ public:
     bool pausable() const;
     void setPausable(bool value);
     bool paused() const;
-    void pause(PauseReason reason, boost::optional<uint> msecs = boost::none);
+    void pause(PauseReason reason, std::optional<uint> msecs = std::nullopt);
     void unpause(PauseReason reason);
 
     MessageElementFlags getFlags() const;
@@ -183,6 +183,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 
     void hideEvent(QHideEvent *) override;
+    void showEvent(QShowEvent *event) override;
 
     void handleLinkClick(QMouseEvent *event, const Link &link,
                          MessageLayout *layout);
@@ -196,24 +197,26 @@ private:
     void initializeSignals();
 
     void messageAppended(MessagePtr &message,
-                         boost::optional<MessageFlags> overridingFlags);
+                         std::optional<MessageFlags> overridingFlags);
     void messageAddedAtStart(std::vector<MessagePtr> &messages);
     void messageRemoveFromStart(MessagePtr &message);
     void messageReplaced(size_t index, MessagePtr &replacement);
     void messagesUpdated();
 
-    void performLayout(bool causedByScrollbar = false);
+    void performLayout(bool causedByScrollbar = false,
+                       bool causedByShow = false);
     void layoutVisibleMessages(
         const LimitedQueueSnapshot<MessageLayoutPtr> &messages);
     void updateScrollbar(const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
-                         bool causedByScrollbar);
+                         bool causedByScrollbar, bool causedByShow);
 
     void drawMessages(QPainter &painter);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
+    void setSelection(const Selection &newSelection);
     void selectWholeMessage(MessageLayout *layout, int &messageIndex);
-    void getWordBounds(MessageLayout *layout,
-                       const MessageLayoutElement *element,
-                       const QPoint &relativePos, int &wordStart, int &wordEnd);
+    std::pair<size_t, size_t> getWordBounds(MessageLayout *layout,
+                                            const MessageLayoutElement *element,
+                                            const QPoint &relativePos);
 
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoveredElement,
@@ -258,25 +261,22 @@ private:
     void showReplyThreadPopup(const MessagePtr &message);
     bool canReplyToMessages() const;
 
-    QTimer *layoutCooldown_;
-    bool layoutQueued_;
+    bool layoutQueued_ = false;
 
-    QTimer updateTimer_;
-    bool updateQueued_ = false;
     bool lastMessageHasAlternateBackground_ = false;
     bool lastMessageHasAlternateBackgroundReverse_ = true;
 
     bool pausable_ = false;
     QTimer pauseTimer_;
-    std::unordered_map<PauseReason, boost::optional<SteadyClock::time_point>>
+    std::unordered_map<PauseReason, std::optional<SteadyClock::time_point>>
         pauses_;
-    boost::optional<SteadyClock::time_point> pauseEnd_;
+    std::optional<SteadyClock::time_point> pauseEnd_;
     int pauseScrollMinimumOffset_ = 0;
     int pauseScrollMaximumOffset_ = 0;
     // Keeps track how many message indices we need to offset the selection when we resume scrolling
     uint32_t pauseSelectionOffset_ = 0;
 
-    boost::optional<MessageElementFlags> overrideFlags_;
+    std::optional<MessageElementFlags> overrideFlags_;
     MessageLayoutPtr lastReadMessage_;
 
     ThreadGuard snapshotGuard_;
@@ -288,7 +288,7 @@ private:
     QPointer<Split> split_;
 
     Scrollbar *scrollBar_;
-    EffectLabel *goToBottom_;
+    EffectLabel *goToBottom_{};
     bool showScrollBar_ = false;
 
     FilterSetPtr channelFilters_;
@@ -310,10 +310,9 @@ private:
     bool isLeftMouseDown_ = false;
     bool isRightMouseDown_ = false;
     bool isDoubleClick_ = false;
-    DoubleClickSelection doubleClickSelection_;
     QPointF lastLeftPressPosition_;
     QPointF lastRightPressPosition_;
-    QPointF lastDClickPosition_;
+    QPointF lastDoubleClickPosition_;
     QTimer *clickTimer_;
 
     bool isScrolling_ = false;
@@ -333,7 +332,7 @@ private:
     } cursors_;
 
     Selection selection_;
-    bool selecting_ = false;
+    Selection doubleClickSelection_;
 
     const Context context_;
 

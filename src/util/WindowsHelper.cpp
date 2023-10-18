@@ -1,29 +1,28 @@
-#include "WindowsHelper.hpp"
+#include "util/WindowsHelper.hpp"
 
-#include <QCoreApplication>
+#include "common/Literals.hpp"
+
+#include <QApplication>
+#include <QClipboard>
 #include <QFileInfo>
 #include <QSettings>
 
 #ifdef USEWINSDK
 
+#    include <Ole2.h>
+#    include <ShellScalingApi.h>
 #    include <Shlwapi.h>
 #    include <VersionHelpers.h>
 
 namespace chatterino {
 
-typedef enum MONITOR_DPI_TYPE {
-    MDT_EFFECTIVE_DPI = 0,
-    MDT_ANGULAR_DPI = 1,
-    MDT_RAW_DPI = 2,
-    MDT_DEFAULT = MDT_EFFECTIVE_DPI
-} MONITOR_DPI_TYPE;
+using namespace literals;
 
-typedef HRESULT(CALLBACK *GetDpiForMonitor_)(HMONITOR, MONITOR_DPI_TYPE, UINT *,
-                                             UINT *);
-typedef HRESULT(CALLBACK *AssocQueryString_)(ASSOCF, ASSOCSTR, LPCWSTR, LPCWSTR,
-                                             LPWSTR, DWORD *);
+using GetDpiForMonitor_ = HRESULT(CALLBACK *)(HMONITOR, MONITOR_DPI_TYPE,
+                                              UINT *, UINT *);
 
-boost::optional<UINT> getWindowDpi(HWND hwnd)
+// TODO: This should be changed to `GetDpiForWindow`.
+std::optional<UINT> getWindowDpi(HWND hwnd)
 {
     static HINSTANCE shcore = LoadLibrary(L"Shcore.dll");
     if (shcore != nullptr)
@@ -34,45 +33,38 @@ boost::optional<UINT> getWindowDpi(HWND hwnd)
             HMONITOR monitor =
                 MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
 
-            UINT xScale, yScale;
-
+            UINT xScale = 96;
+            UINT yScale = 96;
             getDpiForMonitor(monitor, MDT_DEFAULT, &xScale, &yScale);
 
             return xScale;
         }
     }
 
-    return boost::none;
+    return std::nullopt;
 }
-
-typedef HRESULT(CALLBACK *OleFlushClipboard_)();
 
 void flushClipboard()
 {
-    static HINSTANCE ole32 = LoadLibrary(L"Ole32.dll");
-    if (ole32 != nullptr)
+    if (QApplication::clipboard()->ownsClipboard())
     {
-        if (auto oleFlushClipboard =
-                OleFlushClipboard_(GetProcAddress(ole32, "OleFlushClipboard")))
-        {
-            oleFlushClipboard();
-        }
+        OleFlushClipboard();
     }
 }
 
-constexpr const char *runKey =
-    "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+const QString RUN_KEY =
+    uR"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run)"_s;
 
 bool isRegisteredForStartup()
 {
-    QSettings settings(runKey, QSettings::NativeFormat);
+    QSettings settings(RUN_KEY, QSettings::NativeFormat);
 
     return !settings.value("Chatterino").toString().isEmpty();
 }
 
 void setRegisteredForStartup(bool isRegistered)
 {
-    QSettings settings(runKey, QSettings::NativeFormat);
+    QSettings settings(RUN_KEY, QSettings::NativeFormat);
 
     if (isRegistered)
     {
@@ -88,21 +80,8 @@ void setRegisteredForStartup(bool isRegistered)
     }
 }
 
-QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
+QString getAssociatedExecutable(AssociationQueryType queryType, LPCWSTR query)
 {
-    static HINSTANCE shlwapi = LoadLibrary(L"shlwapi");
-    if (shlwapi == nullptr)
-    {
-        return QString();
-    }
-
-    static auto assocQueryString =
-        AssocQueryString_(GetProcAddress(shlwapi, "AssocQueryStringW"));
-    if (assocQueryString == nullptr)
-    {
-        return QString();
-    }
-
     // always error out instead of returning a truncated string when the
     // buffer is too small - avoids race condition when the user changes their
     // default browser between calls to AssocQueryString
@@ -117,28 +96,28 @@ QString getAssociatedCommand(AssociationQueryType queryType, LPCWSTR query)
         }
         else
         {
-            return QString();
+            return {};
         }
     }
 
     DWORD resultSize = 0;
-    if (FAILED(assocQueryString(flags, ASSOCSTR_COMMAND, query, nullptr,
-                                nullptr, &resultSize)))
+    if (FAILED(AssocQueryStringW(flags, ASSOCSTR_EXECUTABLE, query, nullptr,
+                                 nullptr, &resultSize)))
     {
-        return QString();
+        return {};
     }
 
     if (resultSize <= 1)
     {
         // resultSize includes the null terminator. if resultSize is 1, the
         // returned value would be the empty string.
-        return QString();
+        return {};
     }
 
     QString result;
-    auto buf = new wchar_t[resultSize];
-    if (SUCCEEDED(assocQueryString(flags, ASSOCSTR_COMMAND, query, nullptr, buf,
-                                   &resultSize)))
+    auto *buf = new wchar_t[resultSize];
+    if (SUCCEEDED(AssocQueryStringW(flags, ASSOCSTR_EXECUTABLE, query, nullptr,
+                                    buf, &resultSize)))
     {
         // QString::fromWCharArray expects the length in characters *not
         // including* the null terminator, but AssocQueryStringW calculates

@@ -39,6 +39,7 @@ static const QMap<QString, Type> MESSAGE_TYPING_CONTEXT = {
     {"flags.reward_message", Type::Bool},
     {"flags.first_message", Type::Bool},
     {"flags.elevated_message", Type::Bool},
+    {"flags.hype_chat", Type::Bool},
     {"flags.cheer_message", Type::Bool},
     {"flags.whisper", Type::Bool},
     {"flags.reply", Type::Bool},

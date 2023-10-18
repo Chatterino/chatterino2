@@ -14,7 +14,7 @@ bool isIgnoredMessage(IgnoredMessageParameters &&params)
     if (!params.message.isEmpty())
     {
         // TODO(pajlada): Do we need to check if the phrase is valid first?
-        auto phrases = getCSettings().ignoredMessages.readOnly();
+        auto phrases = getSettings()->ignoredMessages.readOnly();
         for (const auto &phrase : *phrases)
         {
             if (phrase.isBlock() && phrase.isMatch(params.message))

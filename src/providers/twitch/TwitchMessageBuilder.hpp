@@ -4,11 +4,11 @@
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
 
-#include <boost/optional.hpp>
 #include <IrcMessage>
 #include <QString>
 #include <QVariant>
 
+#include <optional>
 #include <unordered_map>
 
 namespace chatterino {
@@ -108,7 +108,7 @@ private:
 
     void runIgnoreReplaces(std::vector<TwitchEmoteOccurrence> &twitchEmotes);
 
-    boost::optional<EmotePtr> getTwitchBadge(const Badge &badge);
+    std::optional<EmotePtr> getTwitchBadge(const Badge &badge) const;
     Outcome tryAppendEmote(const EmoteName &name) override;
 
     void addWords(const QStringList &words,
@@ -127,7 +127,7 @@ private:
     QString roomID_;
     bool hasBits_ = false;
     QString bits;
-    int bitsLeft;
+    int bitsLeft{};
     bool bitsStacked = false;
     bool historicalMessage_ = false;
     std::shared_ptr<MessageThread> thread_;
