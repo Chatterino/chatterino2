@@ -76,6 +76,13 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
                                        });
 }
 
+SplitInput::~SplitInput()
+{
+    // shortcuts are registered on the parent widget,
+    // but capture this widget.
+    this->clearShortcuts();
+}
+
 void SplitInput::initLayout()
 {
     auto app = getApp();
