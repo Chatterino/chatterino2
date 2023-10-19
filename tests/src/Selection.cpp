@@ -71,6 +71,17 @@ TEST(Selection, SelectionEq)
     ASSERT_FALSE(a == c);
 }
 
+TEST(Selection, SelectionMinMax)
+{
+    auto a = Selection{{1, 1}, {1, 2}};
+    ASSERT_EQ(a.selectionMin, a.start);
+    ASSERT_EQ(a.selectionMax, a.end);
+
+    auto b = Selection{{2, 0}, {1, 10}};
+    ASSERT_EQ(b.selectionMin, b.end);
+    ASSERT_EQ(b.selectionMax, b.start);
+}
+
 TEST(Selection, SelectionUnion)
 {
     {
@@ -80,7 +91,6 @@ TEST(Selection, SelectionUnion)
 
         ASSERT_EQ(ab.start, a.start);
         ASSERT_EQ(ab.end, b.end);
-        ASSERT_EQ(ab.selectionMin, a.start);
     }
 
     {
@@ -90,7 +100,6 @@ TEST(Selection, SelectionUnion)
 
         ASSERT_EQ(ab.start, a.end);
         ASSERT_EQ(ab.end, b.end);
-        ASSERT_EQ(ab.selectionMin, a.end);
     }
 }
 
