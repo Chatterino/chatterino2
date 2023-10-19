@@ -109,6 +109,9 @@ TEST(Selection, SelectionUnion)
 
         ASSERT_EQ(ab.start, b.start);
         ASSERT_EQ(ab.end, a.start);
+
+        auto ba = b | a;
+        ASSERT_EQ(ab, ba);
     }
 }
 
