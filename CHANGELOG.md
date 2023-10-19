@@ -42,7 +42,7 @@
 - Dev: Update vcpkg to use Qt6. (#4872)
 - Dev: Replace `boost::optional` with `std::optional`. (#4877)
 - Dev: Improve performance by reducing repaints caused by selections. (#4889)
-- Dev: Removed dependency on Qt 5 compatibility module. (#4906)
+- Dev: Removed direct dependency on Qt 5 compatibility module. (#4906)
 
 ## 2.4.6
 
