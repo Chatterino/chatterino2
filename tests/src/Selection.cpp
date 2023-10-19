@@ -127,8 +127,10 @@ TEST(Selection, ShiftMessageIndex)
 
     a.shiftMessageIndex(10);
     ASSERT_EQ(a.selectionMin, a.start);
+    ASSERT_EQ(a.selectionMin.charIndex, 1);
     ASSERT_EQ(a.selectionMin.messageIndex, 90);
     ASSERT_EQ(a.selectionMax, a.end);
+    ASSERT_EQ(a.selectionMax.charIndex, 2);
     ASSERT_EQ(a.selectionMax.messageIndex, 190);
 
     a.shiftMessageIndex(20);
@@ -142,4 +144,6 @@ TEST(Selection, ShiftMessageIndex)
     ASSERT_EQ(a.selectionMax.messageIndex, 0);
     ASSERT_EQ(a.start.messageIndex, 0);
     ASSERT_EQ(a.end.messageIndex, 0);
+    ASSERT_EQ(a.start.charIndex, 0);
+    ASSERT_EQ(a.end.charIndex, 0);
 }
