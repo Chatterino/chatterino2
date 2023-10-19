@@ -101,6 +101,15 @@ TEST(Selection, SelectionUnion)
         ASSERT_EQ(ab.start, a.end);
         ASSERT_EQ(ab.end, b.end);
     }
+
+    {
+        auto a = Selection{{3, 3}, {2, 1}};
+        auto b = Selection{{1, 0}, {1, 10}};
+        auto ab = a | b;
+
+        ASSERT_EQ(ab.start, b.start);
+        ASSERT_EQ(ab.end, a.start);
+    }
 }
 
 TEST(Selection, SelectionSingleMessage)
