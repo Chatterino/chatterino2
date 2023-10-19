@@ -39,7 +39,7 @@ RUN apt-get -y install \
 
 RUN pip3 install -U pip && \
         pip3 install aqtinstall && \
-        aqt install-qt linux desktop $QT_VERSION -O /opt/qt --modules qt5compat
+        aqt install-qt linux desktop $QT_VERSION -O /opt/qt
 
 ADD . /src
 
