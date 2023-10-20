@@ -41,7 +41,7 @@
 - Dev: Add a compile-time flag `USE_SYSTEM_MINIAUDIO` which can be turned on to use the system miniaudio. (#4867)
 - Dev: Update vcpkg to use Qt6. (#4872)
 - Dev: Replace `boost::optional` with `std::optional`. (#4877)
-- Dev: Improve performance by reducing repaints caused by selections. (#4889)
+- Dev: Improve performance of selecting text. (#4889, #4911)
 
 ## 2.4.6
 
