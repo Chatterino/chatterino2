@@ -200,7 +200,7 @@ void MessageLayout::paint(const MessagePaintContext &ctx)
 {
     QPixmap *pixmap = this->ensureBuffer(ctx.painter, ctx.canvasWidth);
 
-    if (!this->bufferValid_ || !ctx.selection.isEmpty())
+    if (!this->bufferValid_)
     {
         this->updateBuffer(pixmap, ctx);
     }
