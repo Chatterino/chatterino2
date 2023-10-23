@@ -39,7 +39,6 @@
 #include <boost/variant.hpp>
 #include <QColor>
 #include <QDebug>
-#include <QStringRef>
 
 #include <chrono>
 #include <unordered_set>
