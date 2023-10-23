@@ -31,8 +31,7 @@
 namespace chatterino {
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
-    : BaseWindow({BaseWindow::Flags::EnableCustomFrame,
-                  BaseWindow::Flags::Dialog, BaseWindow::DisableLayoutSave},
+    : BaseWindow({BaseWindow::Flags::Dialog, BaseWindow::DisableLayoutSave},
                  parent)
     , selectedChannel_(Channel::getEmpty())
 {

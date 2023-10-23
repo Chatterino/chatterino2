@@ -10,8 +10,8 @@
 namespace chatterino {
 
 InputCompletionPopup::InputCompletionPopup(QWidget *parent)
-    : BasePopup({BasePopup::EnableCustomFrame, BasePopup::Frameless,
-                 BasePopup::DontFocus, BaseWindow::DisableLayoutSave},
+    : BasePopup({BasePopup::Frameless, BasePopup::DontFocus,
+                 BaseWindow::DisableLayoutSave},
                 parent)
     , model_(this)
 {

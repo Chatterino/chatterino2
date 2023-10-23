@@ -11,7 +11,7 @@ class BasePopup : public BaseWindow
 {
 public:
     explicit BasePopup(FlagsEnum<BaseWindow::Flags> flags_ = None,
-                       QWidget *parent = nullptr);
+                       QWidget *parent = nullptr, bool addDialogFlag = true);
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;

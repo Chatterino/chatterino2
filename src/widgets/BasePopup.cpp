@@ -6,8 +6,9 @@
 
 namespace chatterino {
 
-BasePopup::BasePopup(FlagsEnum<Flags> _flags, QWidget *parent)
-    : BaseWindow(_flags | Dialog, parent)
+BasePopup::BasePopup(FlagsEnum<Flags> _flags, QWidget *parent,
+                     bool addDialogFlag)
+    : BaseWindow(addDialogFlag ? _flags | Dialog : _flags, parent)
 {
 }
 
