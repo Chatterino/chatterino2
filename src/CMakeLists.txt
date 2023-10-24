@@ -26,8 +26,6 @@ set(SOURCE_FILES
         common/ChatterSet.hpp
         common/Credentials.cpp
         common/Credentials.hpp
-        common/DownloadManager.cpp
-        common/DownloadManager.hpp
         common/Env.cpp
         common/Env.hpp
         common/LinkParser.cpp
@@ -713,13 +711,6 @@ target_link_libraries(${LIBRARY_PROJECT}
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua)
 endif()
-
-if (BUILD_WITH_QT6)
-    target_link_libraries(${LIBRARY_PROJECT}
-            PUBLIC
-            Qt${MAJOR_QT_VERSION}::Core5Compat
-            )
-endif ()
 
 if (BUILD_WITH_QTKEYCHAIN)
     target_link_libraries(${LIBRARY_PROJECT}

@@ -22,6 +22,8 @@
 - Bugfix: Fixed issue on Windows preventing the title bar from being dragged in the top left corner. (#4873)
 - Bugfix: Fixed an issue where reply context didn't render correctly if an emoji was touching text. (#4875)
 - Bugfix: Fixed the input completion popup from disappearing when clicking on it on Windows and macOS. (#4876)
+- Bugfix: Fixed double-click text selection moving its position with each new message. (#4898)
+- Bugfix: Fixed an issue where notifications on Windows would contain no or an old avatar. (#4899)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 - Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
@@ -40,6 +42,7 @@
 - Dev: Update vcpkg to use Qt6. (#4872)
 - Dev: Replace `boost::optional` with `std::optional`. (#4877)
 - Dev: Improve performance by reducing repaints caused by selections. (#4889)
+- Dev: Removed direct dependency on Qt 5 compatibility module. (#4906)
 
 ## 2.4.6
 
