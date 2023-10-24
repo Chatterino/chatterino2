@@ -11,8 +11,6 @@
 #include "util/IrcHelpers.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
-using SBHighlight = chatterino::ScrollbarHighlight;
-
 namespace chatterino {
 
 Message::Message()
@@ -26,7 +24,7 @@ Message::~Message()
     DebugCount::decrease("messages");
 }
 
-SBHighlight Message::getScrollBarHighlight() const
+ScrollbarHighlight Message::getScrollBarHighlight() const
 {
     if (this->flags.has(MessageFlag::Highlighted) ||
         this->flags.has(MessageFlag::HighlightedWhisper))
@@ -49,7 +47,7 @@ SBHighlight Message::getScrollBarHighlight() const
     {
         return {
             ColorProvider::instance().color(ColorType::RedeemedHighlight),
-            SBHighlight::Default,
+            ScrollbarHighlight::Default,
             true,
         };
     }
@@ -59,7 +57,7 @@ SBHighlight Message::getScrollBarHighlight() const
         return {
             ColorProvider::instance().color(
                 ColorType::ElevatedMessageHighlight),
-            SBHighlight::Default,
+            ScrollbarHighlight::Default,
             false,
             false,
             true,
@@ -70,7 +68,7 @@ SBHighlight Message::getScrollBarHighlight() const
     {
         return {
             ColorProvider::instance().color(ColorType::FirstMessageHighlight),
-            SBHighlight::Default,
+            ScrollbarHighlight::Default,
             false,
             true,
         };
