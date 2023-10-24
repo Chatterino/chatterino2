@@ -42,7 +42,7 @@ namespace {
 using namespace chatterino;
 
 // Message types below are the ones that might contain special user's message on USERNOTICE
-static const QSet<QString> SPECIAL_MESSAGE_TYPES{
+const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "sub",            //
     "subgift",        //
     "resub",          // resub messages
