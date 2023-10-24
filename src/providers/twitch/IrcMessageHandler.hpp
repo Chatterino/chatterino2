@@ -33,7 +33,7 @@ public:
      * Parse an IRC message into 0 or more Chatterino messages
      * Takes previously loaded messages into consideration to add reply contexts
      **/
-    std::vector<MessagePtr> parseMessageWithReply(
+    static std::vector<MessagePtr> parseMessageWithReply(
         Channel *channel, Communi::IrcMessage *message,
         std::vector<MessagePtr> &otherLoaded);
 
