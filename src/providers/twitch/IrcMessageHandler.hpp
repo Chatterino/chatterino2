@@ -37,9 +37,6 @@ public:
         Channel *channel, Communi::IrcMessage *message,
         std::vector<MessagePtr> &otherLoaded);
 
-    // parsePrivMessage arses a single IRC PRIVMSG into 0-1 Chatterino messages
-    std::vector<MessagePtr> parsePrivMessage(
-        Channel *channel, Communi::IrcPrivateMessage *message);
     void handlePrivMessage(Communi::IrcPrivateMessage *message,
                            TwitchIrcServer &server);
 

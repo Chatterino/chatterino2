@@ -428,6 +428,37 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
     return builtMessages;
 }
 
+/**
+ * Parse a single IRC PRIVMSG into 0-1 Chatterino messages
+ */
+std::vector<MessagePtr> parsePrivMessage(Channel *channel,
+                                         Communi::IrcPrivateMessage *message)
+{
+    assert(channel != nullptr);
+    assert(message != nullptr);
+
+    std::vector<MessagePtr> builtMessages;
+    MessageParseArgs args;
+    TwitchMessageBuilder builder(channel, message, args, message->content(),
+                                 message->isAction());
+    if (!builder.isIgnored())
+    {
+        builtMessages.emplace_back(builder.build());
+        builder.triggerHighlights();
+    }
+
+    if (message->tags().contains(u"pinned-chat-paid-amount"_s))
+    {
+        auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
+        if (ptr)
+        {
+            builtMessages.emplace_back(std::move(ptr));
+        }
+    }
+
+    return builtMessages;
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -511,7 +542,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessage(
 
     if (command == "PRIVMSG")
     {
-        return this->parsePrivMessage(
+        return parsePrivMessage(
             channel, dynamic_cast<Communi::IrcPrivateMessage *>(message));
     }
 
@@ -524,34 +555,6 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessage(
     {
         return parseNoticeMessage(
             dynamic_cast<Communi::IrcNoticeMessage *>(message));
-    }
-
-    return builtMessages;
-}
-
-std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
-    Channel *channel, Communi::IrcPrivateMessage *message)
-{
-    assert(channel != nullptr);
-    assert(message != nullptr);
-
-    std::vector<MessagePtr> builtMessages;
-    MessageParseArgs args;
-    TwitchMessageBuilder builder(channel, message, args, message->content(),
-                                 message->isAction());
-    if (!builder.isIgnored())
-    {
-        builtMessages.emplace_back(builder.build());
-        builder.triggerHighlights();
-    }
-
-    if (message->tags().contains(u"pinned-chat-paid-amount"_s))
-    {
-        auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
-        if (ptr)
-        {
-            builtMessages.emplace_back(std::move(ptr));
-        }
     }
 
     return builtMessages;
@@ -601,7 +604,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
         auto *tc = dynamic_cast<TwitchChannel *>(channel);
         if (!tc)
         {
-            return this->parsePrivMessage(channel, privMsg);
+            return parsePrivMessage(channel, privMsg);
         }
 
         QString content = privMsg->content();
