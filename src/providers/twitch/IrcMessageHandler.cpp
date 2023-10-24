@@ -220,6 +220,24 @@ float relativeSimilarity(const QString &str1, const QString &str2)
     return float(z) / float(div);
 }
 
+QMap<QString, QString> parseBadges(const QString &badgesString)
+{
+    QMap<QString, QString> badges;
+
+    for (const auto &badgeData : badgesString.split(','))
+    {
+        auto parts = badgeData.split('/');
+        if (parts.length() != 2)
+        {
+            continue;
+        }
+
+        badges.insert(parts[0], parts[1]);
+    }
+
+    return badges;
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -283,24 +301,6 @@ void IrcMessageHandler::setSimilarityFlags(const MessagePtr &message,
             }
         }
     }
-}
-
-static QMap<QString, QString> parseBadges(const QString &badgesString)
-{
-    QMap<QString, QString> badges;
-
-    for (const auto &badgeData : badgesString.split(','))
-    {
-        auto parts = badgeData.split('/');
-        if (parts.length() != 2)
-        {
-            continue;
-        }
-
-        badges.insert(parts[0], parts[1]);
-    }
-
-    return badges;
 }
 
 IrcMessageHandler &IrcMessageHandler::instance()
