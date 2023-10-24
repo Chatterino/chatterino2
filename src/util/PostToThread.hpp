@@ -21,7 +21,7 @@ public:
         this->action_ = std::move(action);
     }
 
-    void run()
+    void run() override
     {
         this->action_();
     }
