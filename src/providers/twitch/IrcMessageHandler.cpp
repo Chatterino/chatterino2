@@ -35,6 +35,8 @@
 #include <memory>
 #include <unordered_set>
 
+using namespace chatterino::literals;
+
 namespace {
 
 using namespace chatterino;
