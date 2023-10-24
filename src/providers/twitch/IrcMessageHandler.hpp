@@ -57,12 +57,12 @@ public:
     void handleJoinMessage(Communi::IrcMessage *message);
     void handlePartMessage(Communi::IrcMessage *message);
 
+private:
     static float similarity(const MessagePtr &msg,
                             const LimitedQueueSnapshot<MessagePtr> &messages);
     static void setSimilarityFlags(const MessagePtr &message,
                                    const ChannelPtr &channel);
 
-private:
     void addMessage(Communi::IrcMessage *message, const QString &target,
                     const QString &originalContent, TwitchIrcServer &server,
                     bool isSub, bool isAction);
