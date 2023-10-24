@@ -1,4 +1,4 @@
-#include "ChannelView.hpp"
+#include "widgets/helper/ChannelView.hpp"
 
 #include "Application.hpp"
 #include "common/Common.hpp"
