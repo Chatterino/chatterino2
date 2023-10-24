@@ -76,8 +76,8 @@ public:
 
 private:
     void addMessage(Communi::IrcMessage *message, const QString &target,
-                    const QString &content, TwitchIrcServer &server,
-                    bool isResub, bool isAction);
+                    const QString &originalContent, TwitchIrcServer &server,
+                    bool isSub, bool isAction);
 
     void populateReply(TwitchChannel *channel, Communi::IrcMessage *message,
                        const std::vector<MessagePtr> &otherLoaded,

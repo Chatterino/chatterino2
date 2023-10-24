@@ -253,11 +253,12 @@ float IrcMessageHandler::similarity(
     return similarityPercent;
 }
 
-void IrcMessageHandler::setSimilarityFlags(MessagePtr msg, ChannelPtr chan)
+void IrcMessageHandler::setSimilarityFlags(MessagePtr message,
+                                           ChannelPtr channel)
 {
     if (getSettings()->similarityEnabled)
     {
-        bool isMyself = msg->loginName ==
+        bool isMyself = message->loginName ==
                         getApp()->accounts->twitch.getCurrent()->getUserName();
         bool hideMyself = getSettings()->hideSimilarMyself;
 
@@ -266,13 +267,14 @@ void IrcMessageHandler::setSimilarityFlags(MessagePtr msg, ChannelPtr chan)
             return;
         }
 
-        if (IrcMessageHandler::similarity(msg, chan->getMessageSnapshot()) >
+        if (IrcMessageHandler::similarity(message,
+                                          channel->getMessageSnapshot()) >
             getSettings()->similarityPercentage)
         {
-            msg->flags.set(MessageFlag::Similar, true);
+            message->flags.set(MessageFlag::Similar, true);
             if (getSettings()->colorSimilarDisabled)
             {
-                msg->flags.set(MessageFlag::Disabled, true);
+                message->flags.set(MessageFlag::Disabled, true);
             }
         }
     }
@@ -513,9 +515,9 @@ void IrcMessageHandler::populateReply(
     }
 }
 
-void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
+void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                    const QString &target,
-                                   const QString &content_,
+                                   const QString &originalContent,
                                    TwitchIrcServer &server, bool isSub,
                                    bool isAction)
 {
@@ -540,14 +542,14 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
 
     auto channel = dynamic_cast<TwitchChannel *>(chan.get());
 
-    const auto &tags = _message->tags();
+    const auto &tags = message->tags();
     if (const auto it = tags.find("custom-reward-id"); it != tags.end())
     {
         const auto rewardId = it.value().toString();
         if (!channel->isChannelPointRewardKnown(rewardId))
         {
             // Need to wait for pubsub reward notification
-            auto clone = _message->clone();
+            auto clone = message->clone();
             qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
                                          "callback since reward is not known:"
                                       << rewardId;
@@ -558,8 +560,8 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                         << "-" << rewardId;
                     if (reward.id == rewardId)
                     {
-                        this->addMessage(clone, target, content_, server, isSub,
-                                         isAction);
+                        this->addMessage(clone, target, originalContent, server,
+                                         isSub, isAction);
                         clone->deleteLater();
                         return true;
                     }
@@ -570,10 +572,10 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         args.channelPointRewardId = rewardId;
     }
 
-    QString content = content_;
+    QString content = originalContent;
     int messageOffset = stripLeadingReplyMention(tags, content);
 
-    TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
+    TwitchMessageBuilder builder(chan.get(), message, args, content, isAction);
     builder.setMessageOffset(messageOffset);
 
     if (const auto it = tags.find("reply-parent-msg-id"); it != tags.end())
@@ -584,7 +586,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         {
             // Thread already exists (has a reply)
             auto thread = threadIt->second.lock();
-            updateReplyParticipatedStatus(tags, _message->nick(), builder,
+            updateReplyParticipatedStatus(tags, message->nick(), builder,
                                           thread, false);
             builder.setThread(thread);
         }
@@ -596,7 +598,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             {
                 // Found root reply message
                 auto newThread = std::make_shared<MessageThread>(root);
-                updateReplyParticipatedStatus(tags, _message->nick(), builder,
+                updateReplyParticipatedStatus(tags, message->nick(), builder,
                                               newThread, true);
 
                 builder.setThread(newThread);
