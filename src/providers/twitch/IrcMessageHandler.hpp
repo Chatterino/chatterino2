@@ -50,10 +50,6 @@ public:
     void handleGlobalUserStateMessage(Communi::IrcMessage *message);
     void handleWhisperMessage(Communi::IrcMessage *message);
 
-    // parseUserNoticeMessage parses a single IRC USERNOTICE message into 0+
-    // Chatterino messages
-    std::vector<MessagePtr> parseUserNoticeMessage(
-        Channel *channel, Communi::IrcMessage *message);
     void handleUserNoticeMessage(Communi::IrcMessage *message,
                                  TwitchIrcServer &server);
 

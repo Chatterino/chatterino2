@@ -350,6 +350,84 @@ std::vector<MessagePtr> parseNoticeMessage(Communi::IrcNoticeMessage *message)
     return builtMessages;
 }
 
+/**
+ * Parse a single IRC USERNOTICE message into 0 or more Chatterino messages
+ **/
+std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
+                                               Communi::IrcMessage *message)
+{
+    assert(channel != nullptr);
+    assert(message != nullptr);
+
+    std::vector<MessagePtr> builtMessages;
+
+    auto tags = message->tags();
+    auto parameters = message->parameters();
+
+    QString msgType = tags.value("msg-id").toString();
+    QString content;
+    if (parameters.size() >= 2)
+    {
+        content = parameters[1];
+    }
+
+    if (isIgnoredMessage({
+            .message = content,
+            .twitchUserID = tags.value("user-id").toString(),
+            .isMod = channel->isMod(),
+            .isBroadcaster = channel->isBroadcaster(),
+        }))
+    {
+        return {};
+    }
+
+    if (SPECIAL_MESSAGE_TYPES.contains(msgType))
+    {
+        // Messages are not required, so they might be empty
+        if (!content.isEmpty())
+        {
+            MessageParseArgs args;
+            args.trimSubscriberUsername = true;
+
+            TwitchMessageBuilder builder(channel, message, args, content,
+                                         false);
+            builder->flags.set(MessageFlag::Subscription);
+            builder->flags.unset(MessageFlag::Highlighted);
+            builtMessages.emplace_back(builder.build());
+        }
+    }
+
+    auto it = tags.find("system-msg");
+
+    if (it != tags.end())
+    {
+        // By default, we return value of system-msg tag
+        QString messageText = it.value().toString();
+
+        if (msgType == "bitsbadgetier")
+        {
+            messageText =
+                QString("%1 just earned a new %2 Bits badge!")
+                    .arg(tags.value("display-name").toString(),
+                         kFormatNumbers(
+                             tags.value("msg-param-threshold").toInt()));
+        }
+        else if (msgType == "announcement")
+        {
+            messageText = "Announcement";
+        }
+
+        auto b = MessageBuilder(systemMessage, parseTagString(messageText),
+                                calculateMessageTime(message).time());
+
+        b->flags.set(MessageFlag::Subscription);
+        auto newMessage = b.release();
+        builtMessages.emplace_back(newMessage);
+    }
+
+    return builtMessages;
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -439,7 +517,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessage(
 
     if (command == "USERNOTICE")
     {
-        return this->parseUserNoticeMessage(channel, message);
+        return parseUserNoticeMessage(channel, message);
     }
 
     if (command == "NOTICE")
@@ -543,7 +621,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
     }
     else if (command == "USERNOTICE")
     {
-        return this->parseUserNoticeMessage(channel, message);
+        return parseUserNoticeMessage(channel, message);
     }
     else if (command == "NOTICE")
     {
@@ -1025,81 +1103,6 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
                 channel->addMessage(_message, overrideFlags);
             });
     }
-}
-
-std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
-    Channel *channel, Communi::IrcMessage *message)
-{
-    assert(channel != nullptr);
-    assert(message != nullptr);
-
-    std::vector<MessagePtr> builtMessages;
-
-    auto tags = message->tags();
-    auto parameters = message->parameters();
-
-    QString msgType = tags.value("msg-id").toString();
-    QString content;
-    if (parameters.size() >= 2)
-    {
-        content = parameters[1];
-    }
-
-    if (isIgnoredMessage({
-            .message = content,
-            .twitchUserID = tags.value("user-id").toString(),
-            .isMod = channel->isMod(),
-            .isBroadcaster = channel->isBroadcaster(),
-        }))
-    {
-        return {};
-    }
-
-    if (SPECIAL_MESSAGE_TYPES.contains(msgType))
-    {
-        // Messages are not required, so they might be empty
-        if (!content.isEmpty())
-        {
-            MessageParseArgs args;
-            args.trimSubscriberUsername = true;
-
-            TwitchMessageBuilder builder(channel, message, args, content,
-                                         false);
-            builder->flags.set(MessageFlag::Subscription);
-            builder->flags.unset(MessageFlag::Highlighted);
-            builtMessages.emplace_back(builder.build());
-        }
-    }
-
-    auto it = tags.find("system-msg");
-
-    if (it != tags.end())
-    {
-        // By default, we return value of system-msg tag
-        QString messageText = it.value().toString();
-
-        if (msgType == "bitsbadgetier")
-        {
-            messageText =
-                QString("%1 just earned a new %2 Bits badge!")
-                    .arg(tags.value("display-name").toString(),
-                         kFormatNumbers(
-                             tags.value("msg-param-threshold").toInt()));
-        }
-        else if (msgType == "announcement")
-        {
-            messageText = "Announcement";
-        }
-
-        auto b = MessageBuilder(systemMessage, parseTagString(messageText),
-                                calculateMessageTime(message).time());
-
-        b->flags.set(MessageFlag::Subscription);
-        auto newMessage = b.release();
-        builtMessages.emplace_back(newMessage);
-    }
-
-    return builtMessages;
 }
 
 void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
