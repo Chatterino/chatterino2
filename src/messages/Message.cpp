@@ -31,39 +31,52 @@ SBHighlight Message::getScrollBarHighlight() const
     if (this->flags.has(MessageFlag::Highlighted) ||
         this->flags.has(MessageFlag::HighlightedWhisper))
     {
-        return SBHighlight(this->highlightColor);
+        return {
+            this->highlightColor,
+        };
     }
 
     if (this->flags.has(MessageFlag::Subscription) &&
         getSettings()->enableSubHighlight)
     {
-        return SBHighlight(
-            ColorProvider::instance().color(ColorType::Subscription));
+        return {
+            ColorProvider::instance().color(ColorType::Subscription),
+        };
     }
 
     if (this->flags.has(MessageFlag::RedeemedHighlight) ||
         this->flags.has(MessageFlag::RedeemedChannelPointReward))
     {
-        return SBHighlight(
+        return {
             ColorProvider::instance().color(ColorType::RedeemedHighlight),
-            SBHighlight::Default, true);
+            SBHighlight::Default,
+            true,
+        };
     }
 
     if (this->flags.has(MessageFlag::ElevatedMessage))
     {
-        return SBHighlight(ColorProvider::instance().color(
-                               ColorType::ElevatedMessageHighlight),
-                           SBHighlight::Default, false, false, true);
+        return {
+            ColorProvider::instance().color(
+                ColorType::ElevatedMessageHighlight),
+            SBHighlight::Default,
+            false,
+            false,
+            true,
+        };
     }
 
     if (this->flags.has(MessageFlag::FirstMessage))
     {
-        return SBHighlight(
+        return {
             ColorProvider::instance().color(ColorType::FirstMessageHighlight),
-            SBHighlight::Default, false, true);
+            SBHighlight::Default,
+            false,
+            true,
+        };
     }
 
-    return SBHighlight();
+    return {};
 }
 
 }  // namespace chatterino
