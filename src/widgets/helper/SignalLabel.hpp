@@ -13,7 +13,7 @@ class SignalLabel : public QLabel
 
 public:
     explicit SignalLabel(QWidget *parent = nullptr, Qt::WindowFlags f = {});
-    virtual ~SignalLabel() override = default;
+    ~SignalLabel() override = default;
 
 signals:
     void mouseDoubleClick(QMouseEvent *ev);
