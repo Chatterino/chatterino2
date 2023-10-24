@@ -459,6 +459,39 @@ std::vector<MessagePtr> parsePrivMessage(Channel *channel,
     return builtMessages;
 }
 
+/**
+ * Parse a single IRC message into 0 or more Chatterino messages
+ **/
+std::vector<MessagePtr> parseMessage(Channel *channel,
+                                     Communi::IrcMessage *message)
+{
+    assert(channel != nullptr);
+    assert(message != nullptr);
+
+    std::vector<MessagePtr> builtMessages;
+
+    auto command = message->command();
+
+    if (command == "PRIVMSG")
+    {
+        return parsePrivMessage(
+            channel, dynamic_cast<Communi::IrcPrivateMessage *>(message));
+    }
+
+    if (command == "USERNOTICE")
+    {
+        return parseUserNoticeMessage(channel, message);
+    }
+
+    if (command == "NOTICE")
+    {
+        return parseNoticeMessage(
+            dynamic_cast<Communi::IrcNoticeMessage *>(message));
+    }
+
+    return builtMessages;
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -528,36 +561,6 @@ IrcMessageHandler &IrcMessageHandler::instance()
 {
     static IrcMessageHandler instance;
     return instance;
-}
-
-std::vector<MessagePtr> IrcMessageHandler::parseMessage(
-    Channel *channel, Communi::IrcMessage *message)
-{
-    assert(channel != nullptr);
-    assert(message != nullptr);
-
-    std::vector<MessagePtr> builtMessages;
-
-    auto command = message->command();
-
-    if (command == "PRIVMSG")
-    {
-        return parsePrivMessage(
-            channel, dynamic_cast<Communi::IrcPrivateMessage *>(message));
-    }
-
-    if (command == "USERNOTICE")
-    {
-        return parseUserNoticeMessage(channel, message);
-    }
-
-    if (command == "NOTICE")
-    {
-        return parseNoticeMessage(
-            dynamic_cast<Communi::IrcNoticeMessage *>(message));
-    }
-
-    return builtMessages;
 }
 
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
