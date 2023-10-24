@@ -91,7 +91,7 @@ class QColorLuminancePicker : public QWidget
     Q_OBJECT
 public:
     QColorLuminancePicker(QWidget *parent = 0);
-    ~QColorLuminancePicker();
+    ~QColorLuminancePicker() override;
 
 public slots:
     void setCol(int h, int s, int v);
