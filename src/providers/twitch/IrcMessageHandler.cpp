@@ -854,7 +854,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
     QVariant _badges = message->tag("badges");
     if (_badges.isValid())
     {
-        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(c.get());
+        auto *tc = dynamic_cast<TwitchChannel *>(c.get());
         if (tc != nullptr)
         {
             auto parsedBadges = parseBadges(_badges.toString());
@@ -867,7 +867,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
     QVariant _mod = message->tag("mod");
     if (_mod.isValid())
     {
-        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(c.get());
+        auto *tc = dynamic_cast<TwitchChannel *>(c.get());
         if (tc != nullptr)
         {
             tc->setMod(_mod == "1");
