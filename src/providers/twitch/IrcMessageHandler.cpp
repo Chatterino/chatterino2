@@ -312,6 +312,9 @@ IrcMessageHandler &IrcMessageHandler::instance()
 std::vector<MessagePtr> IrcMessageHandler::parseMessage(
     Channel *channel, Communi::IrcMessage *message)
 {
+    assert(channel != nullptr);
+    assert(message != nullptr);
+
     std::vector<MessagePtr> builtMessages;
 
     auto command = message->command();
@@ -339,6 +342,9 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessage(
 std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
     Channel *channel, Communi::IrcPrivateMessage *message)
 {
+    assert(channel != nullptr);
+    assert(message != nullptr);
+
     std::vector<MessagePtr> builtMessages;
     MessageParseArgs args;
     TwitchMessageBuilder builder(channel, message, args, message->content(),
@@ -949,6 +955,9 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
     Channel *channel, Communi::IrcMessage *message)
 {
+    assert(channel != nullptr);
+    assert(message != nullptr);
+
     std::vector<MessagePtr> builtMessages;
 
     auto tags = message->tags();
@@ -1102,6 +1111,8 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
 std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     Communi::IrcNoticeMessage *message)
 {
+    assert(message != nullptr);
+
     if (message->content().startsWith("Login auth", Qt::CaseInsensitive))
     {
         const auto linkColor = MessageColor(MessageColor::Link);
