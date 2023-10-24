@@ -70,9 +70,10 @@ public:
     void handleJoinMessage(Communi::IrcMessage *message);
     void handlePartMessage(Communi::IrcMessage *message);
 
-    static float similarity(MessagePtr msg,
+    static float similarity(const MessagePtr &msg,
                             const LimitedQueueSnapshot<MessagePtr> &messages);
-    static void setSimilarityFlags(MessagePtr message, ChannelPtr channel);
+    static void setSimilarityFlags(const MessagePtr &message,
+                                   const ChannelPtr &channel);
 
 private:
     void addMessage(Communi::IrcMessage *message, const QString &target,

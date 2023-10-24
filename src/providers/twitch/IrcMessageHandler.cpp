@@ -222,7 +222,7 @@ static float relativeSimilarity(const QString &str1, const QString &str2)
 };
 
 float IrcMessageHandler::similarity(
-    MessagePtr msg, const LimitedQueueSnapshot<MessagePtr> &messages)
+    const MessagePtr &msg, const LimitedQueueSnapshot<MessagePtr> &messages)
 {
     float similarityPercent = 0.0f;
     int checked = 0;
@@ -253,8 +253,8 @@ float IrcMessageHandler::similarity(
     return similarityPercent;
 }
 
-void IrcMessageHandler::setSimilarityFlags(MessagePtr message,
-                                           ChannelPtr channel)
+void IrcMessageHandler::setSimilarityFlags(const MessagePtr &message,
+                                           const ChannelPtr &channel)
 {
     if (getSettings()->similarityEnabled)
     {
@@ -280,7 +280,7 @@ void IrcMessageHandler::setSimilarityFlags(MessagePtr message,
     }
 }
 
-static QMap<QString, QString> parseBadges(QString badgesString)
+static QMap<QString, QString> parseBadges(const QString &badgesString)
 {
     QMap<QString, QString> badges;
 
