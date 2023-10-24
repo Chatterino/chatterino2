@@ -482,7 +482,7 @@ void IrcMessageHandler::populateReply(
 
         // Thread does not yet exist, find root reply and create thread.
         // Linear search is justified by the infrequent use of replies
-        for (auto &otherMsg : otherLoaded)
+        for (const auto &otherMsg : otherLoaded)
         {
             if (otherMsg->id == replyID)
             {
