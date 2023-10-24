@@ -1023,26 +1023,26 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
     }
 
     // Checking if currentUser is a VIP or staff member
-    QVariant _badges = message->tag("badges");
-    if (_badges.isValid())
+    QVariant badgesTag = message->tag("badges");
+    if (badgesTag.isValid())
     {
         auto *tc = dynamic_cast<TwitchChannel *>(c.get());
         if (tc != nullptr)
         {
-            auto parsedBadges = parseBadges(_badges.toString());
+            auto parsedBadges = parseBadges(badgesTag.toString());
             tc->setVIP(parsedBadges.contains("vip"));
             tc->setStaff(parsedBadges.contains("staff"));
         }
     }
 
     // Checking if currentUser is a moderator
-    QVariant _mod = message->tag("mod");
-    if (_mod.isValid())
+    QVariant modTag = message->tag("mod");
+    if (modTag.isValid())
     {
         auto *tc = dynamic_cast<TwitchChannel *>(c.get());
         if (tc != nullptr)
         {
-            tc->setMod(_mod == "1");
+            tc->setMod(modTag == "1");
         }
     }
 }
