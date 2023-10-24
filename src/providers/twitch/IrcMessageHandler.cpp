@@ -316,11 +316,13 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessage(
         return this->parsePrivMessage(
             channel, static_cast<Communi::IrcPrivateMessage *>(message));
     }
-    else if (command == "USERNOTICE")
+
+    if (command == "USERNOTICE")
     {
         return this->parseUserNoticeMessage(channel, message);
     }
-    else if (command == "NOTICE")
+
+    if (command == "NOTICE")
     {
         return this->parseNoticeMessage(
             static_cast<Communi::IrcNoticeMessage *>(message));
@@ -1121,11 +1123,13 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
 
         return {builder.release()};
     }
-    else if (message->content().startsWith("You are permanently banned "))
+
+    if (message->content().startsWith("You are permanently banned "))
     {
         return {generateBannedMessage(true)};
     }
-    else if (message->tags().value("msg-id") == "msg_timedout")
+
+    if (message->tags().value("msg-id") == "msg_timedout")
     {
         std::vector<MessagePtr> builtMessage;
 
