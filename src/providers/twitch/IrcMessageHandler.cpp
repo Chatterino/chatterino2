@@ -238,6 +238,43 @@ QMap<QString, QString> parseBadges(const QString &badgesString)
     return badges;
 }
 
+std::optional<ClearChatMessage> parseClearChatMessage(
+    Communi::IrcMessage *message)
+{
+    // check parameter count
+    if (message->parameters().length() < 1)
+    {
+        return std::nullopt;
+    }
+
+    // check if the chat has been cleared by a moderator
+    if (message->parameters().length() == 1)
+    {
+        return ClearChatMessage{
+            .message =
+                makeSystemMessage("Chat has been cleared by a moderator.",
+                                  calculateMessageTime(message).time()),
+            .disableAllMessages = true,
+        };
+    }
+
+    // get username, duration and message of the timed out user
+    QString username = message->parameter(1);
+    QString durationInSeconds;
+    QVariant v = message->tag("ban-duration");
+    if (v.isValid())
+    {
+        durationInSeconds = v.toString();
+    }
+
+    auto timeoutMsg =
+        MessageBuilder(timeoutMessage, username, durationInSeconds, false,
+                       calculateMessageTime(message).time())
+            .release();
+
+    return ClearChatMessage{.message = timeoutMsg, .disableAllMessages = false};
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -440,7 +477,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
     }
     else if (command == u"CLEARCHAT"_s)
     {
-        auto cc = this->parseClearChatMessage(message);
+        auto cc = parseClearChatMessage(message);
         if (!cc)
         {
             return builtMessages;
@@ -711,46 +748,9 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
     twitchChannel->roomModesChanged.invoke();
 }
 
-std::optional<ClearChatMessage> IrcMessageHandler::parseClearChatMessage(
-    Communi::IrcMessage *message)
-{
-    // check parameter count
-    if (message->parameters().length() < 1)
-    {
-        return std::nullopt;
-    }
-
-    // check if the chat has been cleared by a moderator
-    if (message->parameters().length() == 1)
-    {
-        return ClearChatMessage{
-            .message =
-                makeSystemMessage("Chat has been cleared by a moderator.",
-                                  calculateMessageTime(message).time()),
-            .disableAllMessages = true,
-        };
-    }
-
-    // get username, duration and message of the timed out user
-    QString username = message->parameter(1);
-    QString durationInSeconds;
-    QVariant v = message->tag("ban-duration");
-    if (v.isValid())
-    {
-        durationInSeconds = v.toString();
-    }
-
-    auto timeoutMsg =
-        MessageBuilder(timeoutMessage, username, durationInSeconds, false,
-                       calculateMessageTime(message).time())
-            .release();
-
-    return ClearChatMessage{.message = timeoutMsg, .disableAllMessages = false};
-}
-
 void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 {
-    auto cc = this->parseClearChatMessage(message);
+    auto cc = parseClearChatMessage(message);
     if (!cc)
     {
         return;

@@ -44,8 +44,6 @@ public:
                            TwitchIrcServer &server);
 
     void handleRoomStateMessage(Communi::IrcMessage *message);
-    std::optional<ClearChatMessage> parseClearChatMessage(
-        Communi::IrcMessage *message);
     void handleClearChatMessage(Communi::IrcMessage *message);
     void handleClearMessageMessage(Communi::IrcMessage *message);
     void handleUserStateMessage(Communi::IrcMessage *message);
