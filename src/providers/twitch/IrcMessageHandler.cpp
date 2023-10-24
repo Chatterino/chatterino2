@@ -557,99 +557,10 @@ namespace chatterino {
 
 using namespace literals;
 
-float IrcMessageHandler::similarity(
-    const MessagePtr &msg, const LimitedQueueSnapshot<MessagePtr> &messages)
-{
-    float similarityPercent = 0.0F;
-    int checked = 0;
-
-    for (int i = 1; i <= messages.size(); ++i)
-    {
-        if (checked >= getSettings()->hideSimilarMaxMessagesToCheck)
-        {
-            break;
-        }
-        const auto &prevMsg = messages[messages.size() - i];
-        if (prevMsg->parseTime.secsTo(QTime::currentTime()) >=
-            getSettings()->hideSimilarMaxDelay)
-        {
-            break;
-        }
-        if (getSettings()->hideSimilarBySameUser &&
-            msg->loginName != prevMsg->loginName)
-        {
-            continue;
-        }
-        ++checked;
-        similarityPercent = std::max(
-            similarityPercent,
-            relativeSimilarity(msg->messageText, prevMsg->messageText));
-    }
-
-    return similarityPercent;
-}
-
-void IrcMessageHandler::setSimilarityFlags(const MessagePtr &message,
-                                           const ChannelPtr &channel)
-{
-    if (getSettings()->similarityEnabled)
-    {
-        bool isMyself = message->loginName ==
-                        getApp()->accounts->twitch.getCurrent()->getUserName();
-        bool hideMyself = getSettings()->hideSimilarMyself;
-
-        if (isMyself && !hideMyself)
-        {
-            return;
-        }
-
-        if (IrcMessageHandler::similarity(message,
-                                          channel->getMessageSnapshot()) >
-            getSettings()->similarityPercentage)
-        {
-            message->flags.set(MessageFlag::Similar, true);
-            if (getSettings()->colorSimilarDisabled)
-            {
-                message->flags.set(MessageFlag::Disabled, true);
-            }
-        }
-    }
-}
-
 IrcMessageHandler &IrcMessageHandler::instance()
 {
     static IrcMessageHandler instance;
     return instance;
-}
-
-void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
-                                          TwitchIrcServer &server)
-{
-    // This is for compatibility with older Chatterino versions. Twitch didn't use
-    // to allow ZERO WIDTH JOINER unicode character, so Chatterino used ESCAPE_TAG
-    // instead.
-    // See https://github.com/Chatterino/chatterino2/issues/3384 and
-    // https://mm2pl.github.io/emoji_rfc.pdf for more details
-
-    this->addMessage(
-        message, message->target(),
-        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
-        false, message->isAction());
-
-    auto chan = channelOrEmptyByTarget(message->target(), server);
-    if (chan->isEmpty())
-    {
-        return;
-    }
-
-    if (message->tags().contains(u"pinned-chat-paid-amount"_s))
-    {
-        auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
-        if (ptr)
-        {
-            chan->addMessage(ptr);
-        }
-    }
 }
 
 std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
@@ -724,129 +635,32 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
     return builtMessages;
 }
 
-void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
-                                   const QString &target,
-                                   const QString &originalContent,
-                                   TwitchIrcServer &server, bool isSub,
-                                   bool isAction)
+void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
+                                          TwitchIrcServer &server)
 {
-    auto chan = channelOrEmptyByTarget(target, server);
+    // This is for compatibility with older Chatterino versions. Twitch didn't use
+    // to allow ZERO WIDTH JOINER unicode character, so Chatterino used ESCAPE_TAG
+    // instead.
+    // See https://github.com/Chatterino/chatterino2/issues/3384 and
+    // https://mm2pl.github.io/emoji_rfc.pdf for more details
 
+    this->addMessage(
+        message, message->target(),
+        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
+        false, message->isAction());
+
+    auto chan = channelOrEmptyByTarget(message->target(), server);
     if (chan->isEmpty())
     {
         return;
     }
 
-    MessageParseArgs args;
-    if (isSub)
+    if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
-        args.isSubscriptionMessage = true;
-        args.trimSubscriberUsername = true;
-    }
-
-    if (chan->isBroadcaster())
-    {
-        args.isStaffOrBroadcaster = true;
-    }
-
-    auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
-
-    const auto &tags = message->tags();
-    if (const auto it = tags.find("custom-reward-id"); it != tags.end())
-    {
-        const auto rewardId = it.value().toString();
-        if (!channel->isChannelPointRewardKnown(rewardId))
+        auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
+        if (ptr)
         {
-            // Need to wait for pubsub reward notification
-            auto *clone = message->clone();
-            qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
-                                         "callback since reward is not known:"
-                                      << rewardId;
-            channel->channelPointRewardAdded.connect(
-                [=, this, &server](ChannelPointReward reward) {
-                    qCDebug(chatterinoTwitch)
-                        << "TwitchChannel reward added callback:" << reward.id
-                        << "-" << rewardId;
-                    if (reward.id == rewardId)
-                    {
-                        this->addMessage(clone, target, originalContent, server,
-                                         isSub, isAction);
-                        clone->deleteLater();
-                        return true;
-                    }
-                    return false;
-                });
-            return;
-        }
-        args.channelPointRewardId = rewardId;
-    }
-
-    QString content = originalContent;
-    int messageOffset = stripLeadingReplyMention(tags, content);
-
-    TwitchMessageBuilder builder(chan.get(), message, args, content, isAction);
-    builder.setMessageOffset(messageOffset);
-
-    if (const auto it = tags.find("reply-parent-msg-id"); it != tags.end())
-    {
-        const QString replyID = it.value().toString();
-        auto threadIt = channel->threads_.find(replyID);
-        if (threadIt != channel->threads_.end() && !threadIt->second.expired())
-        {
-            // Thread already exists (has a reply)
-            auto thread = threadIt->second.lock();
-            updateReplyParticipatedStatus(tags, message->nick(), builder,
-                                          thread, false);
-            builder.setThread(thread);
-        }
-        else
-        {
-            // Thread does not yet exist, find root reply and create thread.
-            auto root = channel->findMessage(replyID);
-            if (root)
-            {
-                // Found root reply message
-                auto newThread = std::make_shared<MessageThread>(root);
-                updateReplyParticipatedStatus(tags, message->nick(), builder,
-                                              newThread, true);
-
-                builder.setThread(newThread);
-                // Store weak reference to thread in channel
-                channel->addReplyThread(newThread);
-            }
-        }
-    }
-
-    if (isSub || !builder.isIgnored())
-    {
-        if (isSub)
-        {
-            builder->flags.set(MessageFlag::Subscription);
-            builder->flags.unset(MessageFlag::Highlighted);
-        }
-        auto msg = builder.build();
-
-        IrcMessageHandler::setSimilarityFlags(msg, chan);
-
-        if (!msg->flags.has(MessageFlag::Similar) ||
-            (!getSettings()->hideSimilar &&
-             getSettings()->shownSimilarTriggerHighlights))
-        {
-            builder.triggerHighlights();
-        }
-
-        const auto highlighted = msg->flags.has(MessageFlag::Highlighted);
-        const auto showInMentions = msg->flags.has(MessageFlag::ShowInMentions);
-
-        if (highlighted && showInMentions)
-        {
-            server.mentionsChannel->addMessage(msg);
-        }
-
-        chan->addMessage(msg);
-        if (auto *chatters = dynamic_cast<ChannelChatters *>(chan.get()))
-        {
-            chatters->addRecentChatter(msg->displayName);
+            chan->addMessage(ptr);
         }
     }
 }
@@ -1337,6 +1151,192 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     if (message->nick() == selfAccountName)
     {
         channel->addMessage(generateBannedMessage(false));
+    }
+}
+
+float IrcMessageHandler::similarity(
+    const MessagePtr &msg, const LimitedQueueSnapshot<MessagePtr> &messages)
+{
+    float similarityPercent = 0.0F;
+    int checked = 0;
+
+    for (int i = 1; i <= messages.size(); ++i)
+    {
+        if (checked >= getSettings()->hideSimilarMaxMessagesToCheck)
+        {
+            break;
+        }
+        const auto &prevMsg = messages[messages.size() - i];
+        if (prevMsg->parseTime.secsTo(QTime::currentTime()) >=
+            getSettings()->hideSimilarMaxDelay)
+        {
+            break;
+        }
+        if (getSettings()->hideSimilarBySameUser &&
+            msg->loginName != prevMsg->loginName)
+        {
+            continue;
+        }
+        ++checked;
+        similarityPercent = std::max(
+            similarityPercent,
+            relativeSimilarity(msg->messageText, prevMsg->messageText));
+    }
+
+    return similarityPercent;
+}
+
+void IrcMessageHandler::setSimilarityFlags(const MessagePtr &message,
+                                           const ChannelPtr &channel)
+{
+    if (getSettings()->similarityEnabled)
+    {
+        bool isMyself = message->loginName ==
+                        getApp()->accounts->twitch.getCurrent()->getUserName();
+        bool hideMyself = getSettings()->hideSimilarMyself;
+
+        if (isMyself && !hideMyself)
+        {
+            return;
+        }
+
+        if (IrcMessageHandler::similarity(message,
+                                          channel->getMessageSnapshot()) >
+            getSettings()->similarityPercentage)
+        {
+            message->flags.set(MessageFlag::Similar, true);
+            if (getSettings()->colorSimilarDisabled)
+            {
+                message->flags.set(MessageFlag::Disabled, true);
+            }
+        }
+    }
+}
+
+void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
+                                   const QString &target,
+                                   const QString &originalContent,
+                                   TwitchIrcServer &server, bool isSub,
+                                   bool isAction)
+{
+    auto chan = channelOrEmptyByTarget(target, server);
+
+    if (chan->isEmpty())
+    {
+        return;
+    }
+
+    MessageParseArgs args;
+    if (isSub)
+    {
+        args.isSubscriptionMessage = true;
+        args.trimSubscriberUsername = true;
+    }
+
+    if (chan->isBroadcaster())
+    {
+        args.isStaffOrBroadcaster = true;
+    }
+
+    auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
+
+    const auto &tags = message->tags();
+    if (const auto it = tags.find("custom-reward-id"); it != tags.end())
+    {
+        const auto rewardId = it.value().toString();
+        if (!channel->isChannelPointRewardKnown(rewardId))
+        {
+            // Need to wait for pubsub reward notification
+            auto *clone = message->clone();
+            qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
+                                         "callback since reward is not known:"
+                                      << rewardId;
+            channel->channelPointRewardAdded.connect(
+                [=, this, &server](ChannelPointReward reward) {
+                    qCDebug(chatterinoTwitch)
+                        << "TwitchChannel reward added callback:" << reward.id
+                        << "-" << rewardId;
+                    if (reward.id == rewardId)
+                    {
+                        this->addMessage(clone, target, originalContent, server,
+                                         isSub, isAction);
+                        clone->deleteLater();
+                        return true;
+                    }
+                    return false;
+                });
+            return;
+        }
+        args.channelPointRewardId = rewardId;
+    }
+
+    QString content = originalContent;
+    int messageOffset = stripLeadingReplyMention(tags, content);
+
+    TwitchMessageBuilder builder(chan.get(), message, args, content, isAction);
+    builder.setMessageOffset(messageOffset);
+
+    if (const auto it = tags.find("reply-parent-msg-id"); it != tags.end())
+    {
+        const QString replyID = it.value().toString();
+        auto threadIt = channel->threads_.find(replyID);
+        if (threadIt != channel->threads_.end() && !threadIt->second.expired())
+        {
+            // Thread already exists (has a reply)
+            auto thread = threadIt->second.lock();
+            updateReplyParticipatedStatus(tags, message->nick(), builder,
+                                          thread, false);
+            builder.setThread(thread);
+        }
+        else
+        {
+            // Thread does not yet exist, find root reply and create thread.
+            auto root = channel->findMessage(replyID);
+            if (root)
+            {
+                // Found root reply message
+                auto newThread = std::make_shared<MessageThread>(root);
+                updateReplyParticipatedStatus(tags, message->nick(), builder,
+                                              newThread, true);
+
+                builder.setThread(newThread);
+                // Store weak reference to thread in channel
+                channel->addReplyThread(newThread);
+            }
+        }
+    }
+
+    if (isSub || !builder.isIgnored())
+    {
+        if (isSub)
+        {
+            builder->flags.set(MessageFlag::Subscription);
+            builder->flags.unset(MessageFlag::Highlighted);
+        }
+        auto msg = builder.build();
+
+        IrcMessageHandler::setSimilarityFlags(msg, chan);
+
+        if (!msg->flags.has(MessageFlag::Similar) ||
+            (!getSettings()->hideSimilar &&
+             getSettings()->shownSimilarTriggerHighlights))
+        {
+            builder.triggerHighlights();
+        }
+
+        const auto highlighted = msg->flags.has(MessageFlag::Highlighted);
+        const auto showInMentions = msg->flags.has(MessageFlag::ShowInMentions);
+
+        if (highlighted && showInMentions)
+        {
+            server.mentionsChannel->addMessage(msg);
+        }
+
+        chan->addMessage(msg);
+        if (auto *chatters = dynamic_cast<ChannelChatters *>(chan.get()))
+        {
+            chatters->addRecentChatter(msg->displayName);
+        }
     }
 }
 
