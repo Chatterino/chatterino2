@@ -109,17 +109,17 @@ public:
     void initialize();
 
     // Channel methods
-    virtual bool isEmpty() const override;
-    virtual bool canSendMessage() const override;
-    virtual void sendMessage(const QString &message) override;
-    virtual void sendReply(const QString &message, const QString &replyId);
-    virtual bool isMod() const override;
+    bool isEmpty() const override;
+    bool canSendMessage() const override;
+    void sendMessage(const QString &message) override;
+    void sendReply(const QString &message, const QString &replyId);
+    bool isMod() const override;
     bool isVip() const;
     bool isStaff() const;
-    virtual bool isBroadcaster() const override;
-    virtual bool hasHighRateLimit() const override;
-    virtual bool canReconnect() const override;
-    virtual void reconnect() override;
+    bool isBroadcaster() const override;
+    bool hasHighRateLimit() const override;
+    bool canReconnect() const override;
+    void reconnect() override;
     void createClip();
 
     // Data
@@ -127,7 +127,7 @@ public:
     const QString &channelUrl();
     const QString &popoutPlayerUrl();
     int chatterCount();
-    virtual bool isLive() const override;
+    bool isLive() const override;
     QString roomId() const;
     SharedAccessGuard<const RoomModes> accessRoomModes() const;
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
