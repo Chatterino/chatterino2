@@ -50,8 +50,6 @@ public:
     void handleUserNoticeMessage(Communi::IrcMessage *message,
                                  TwitchIrcServer &server);
 
-    void handleModeMessage(Communi::IrcMessage *message);
-
     void handleNoticeMessage(Communi::IrcNoticeMessage *message);
 
     void handleJoinMessage(Communi::IrcMessage *message);
