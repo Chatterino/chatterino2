@@ -1,14 +1,9 @@
 #include "messages/Message.hpp"
 
-#include "Application.hpp"
-#include "MessageElement.hpp"
 #include "providers/colors/ColorProvider.hpp"
-#include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
-#include "util/IrcHelpers.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
 namespace chatterino {
