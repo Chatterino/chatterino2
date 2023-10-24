@@ -216,9 +216,14 @@ static float relativeSimilarity(const QString &str1, const QString &str2)
     }
 
     // ensure that no div by 0
-    return z == 0 ? 0.f
-                  : float(z) /
-                        std::max<int>(1, std::max(str1.size(), str2.size()));
+    if (z == 0)
+    {
+        return 0.F;
+    }
+
+    auto div = std::max<int>(1, std::max(str1.size(), str2.size()));
+
+    return float(z) / float(div);
 };
 
 float IrcMessageHandler::similarity(
