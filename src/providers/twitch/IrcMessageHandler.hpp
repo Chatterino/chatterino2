@@ -59,10 +59,6 @@ public:
 
     void handleModeMessage(Communi::IrcMessage *message);
 
-    // parseNoticeMessage parses a single IRC NOTICE message into 0+ chatterino
-    // messages
-    std::vector<MessagePtr> parseNoticeMessage(
-        Communi::IrcNoticeMessage *message);
     void handleNoticeMessage(Communi::IrcNoticeMessage *message);
 
     void handleJoinMessage(Communi::IrcMessage *message);

@@ -275,6 +275,81 @@ std::optional<ClearChatMessage> parseClearChatMessage(
     return ClearChatMessage{.message = timeoutMsg, .disableAllMessages = false};
 }
 
+/**
+ * Parse a single IRC NOTICE message into 0 or more Chatterino messages
+ **/
+std::vector<MessagePtr> parseNoticeMessage(Communi::IrcNoticeMessage *message)
+{
+    assert(message != nullptr);
+
+    if (message->content().startsWith("Login auth", Qt::CaseInsensitive))
+    {
+        const auto linkColor = MessageColor(MessageColor::Link);
+        const auto accountsLink = Link(Link::OpenAccountsPage, QString());
+        const auto curUser = getApp()->accounts->twitch.getCurrent();
+        const auto expirationText = QString("Login expired for user \"%1\"!")
+                                        .arg(curUser->getUserName());
+        const auto loginPromptText = QString("Try adding your account again.");
+
+        MessageBuilder builder;
+        auto text = QString("%1 %2").arg(expirationText, loginPromptText);
+        builder.message().messageText = text;
+        builder.message().searchText = text;
+        builder.message().flags.set(MessageFlag::System);
+        builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+        builder.emplace<TimestampElement>();
+        builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
+                                     MessageColor::System);
+        builder
+            .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
+                                  linkColor)
+            ->setLink(accountsLink);
+
+        return {builder.release()};
+    }
+
+    if (message->content().startsWith("You are permanently banned "))
+    {
+        return {generateBannedMessage(true)};
+    }
+
+    if (message->tags().value("msg-id") == "msg_timedout")
+    {
+        std::vector<MessagePtr> builtMessage;
+
+        QString remainingTime =
+            formatTime(message->content().split(" ").value(5));
+        QString formattedMessage =
+            QString("You are timed out for %1.")
+                .arg(remainingTime.isEmpty() ? "0s" : remainingTime);
+
+        builtMessage.emplace_back(makeSystemMessage(
+            formattedMessage, calculateMessageTime(message).time()));
+
+        return builtMessage;
+    }
+
+    // default case
+    std::vector<MessagePtr> builtMessages;
+
+    auto content = message->content();
+    if (content.startsWith(
+            "Your settings prevent you from sending this whisper",
+            Qt::CaseInsensitive) &&
+        getSettings()->helixTimegateWhisper.getValue() ==
+            HelixTimegateOverride::Timegate)
+    {
+        content = content +
+                  " Consider setting \"Helix timegate /w behaviour\" "
+                  "to \"Always use Helix\" in your Chatterino settings.";
+    }
+    builtMessages.emplace_back(
+        makeSystemMessage(content, calculateMessageTime(message).time()));
+
+    return builtMessages;
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -369,7 +444,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessage(
 
     if (command == "NOTICE")
     {
-        return this->parseNoticeMessage(
+        return parseNoticeMessage(
             dynamic_cast<Communi::IrcNoticeMessage *>(message));
     }
 
@@ -472,7 +547,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
     }
     else if (command == "NOTICE")
     {
-        return this->parseNoticeMessage(
+        return parseNoticeMessage(
             dynamic_cast<Communi::IrcNoticeMessage *>(message));
     }
     else if (command == u"CLEARCHAT"_s)
@@ -1108,82 +1183,9 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
     }
 }
 
-std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
-    Communi::IrcNoticeMessage *message)
-{
-    assert(message != nullptr);
-
-    if (message->content().startsWith("Login auth", Qt::CaseInsensitive))
-    {
-        const auto linkColor = MessageColor(MessageColor::Link);
-        const auto accountsLink = Link(Link::OpenAccountsPage, QString());
-        const auto curUser = getApp()->accounts->twitch.getCurrent();
-        const auto expirationText = QString("Login expired for user \"%1\"!")
-                                        .arg(curUser->getUserName());
-        const auto loginPromptText = QString("Try adding your account again.");
-
-        MessageBuilder builder;
-        auto text = QString("%1 %2").arg(expirationText, loginPromptText);
-        builder.message().messageText = text;
-        builder.message().searchText = text;
-        builder.message().flags.set(MessageFlag::System);
-        builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
-
-        builder.emplace<TimestampElement>();
-        builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
-                                     MessageColor::System);
-        builder
-            .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
-                                  linkColor)
-            ->setLink(accountsLink);
-
-        return {builder.release()};
-    }
-
-    if (message->content().startsWith("You are permanently banned "))
-    {
-        return {generateBannedMessage(true)};
-    }
-
-    if (message->tags().value("msg-id") == "msg_timedout")
-    {
-        std::vector<MessagePtr> builtMessage;
-
-        QString remainingTime =
-            formatTime(message->content().split(" ").value(5));
-        QString formattedMessage =
-            QString("You are timed out for %1.")
-                .arg(remainingTime.isEmpty() ? "0s" : remainingTime);
-
-        builtMessage.emplace_back(makeSystemMessage(
-            formattedMessage, calculateMessageTime(message).time()));
-
-        return builtMessage;
-    }
-
-    // default case
-    std::vector<MessagePtr> builtMessages;
-
-    auto content = message->content();
-    if (content.startsWith(
-            "Your settings prevent you from sending this whisper",
-            Qt::CaseInsensitive) &&
-        getSettings()->helixTimegateWhisper.getValue() ==
-            HelixTimegateOverride::Timegate)
-    {
-        content = content +
-                  " Consider setting \"Helix timegate /w behaviour\" "
-                  "to \"Always use Helix\" in your Chatterino settings.";
-    }
-    builtMessages.emplace_back(
-        makeSystemMessage(content, calculateMessageTime(message).time()));
-
-    return builtMessages;
-}
-
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
-    auto builtMessages = this->parseNoticeMessage(message);
+    auto builtMessages = parseNoticeMessage(message);
 
     for (const auto &msg : builtMessages)
     {
