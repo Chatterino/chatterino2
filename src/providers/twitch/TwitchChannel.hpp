@@ -67,7 +67,7 @@ struct HelixStream;
 
 class TwitchIrcServer;
 
-class TwitchChannel : public Channel, public ChannelChatters
+class TwitchChannel final : public Channel, public ChannelChatters
 {
 public:
     struct StreamStatus {
@@ -140,9 +140,9 @@ public:
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
     std::shared_ptr<const EmoteMap> seventvEmotes() const;
 
-    virtual void refreshBTTVChannelEmotes(bool manualRefresh);
-    virtual void refreshFFZChannelEmotes(bool manualRefresh);
-    virtual void refreshSevenTVChannelEmotes(bool manualRefresh);
+    void refreshBTTVChannelEmotes(bool manualRefresh);
+    void refreshFFZChannelEmotes(bool manualRefresh);
+    void refreshSevenTVChannelEmotes(bool manualRefresh);
 
     const QString &seventvUserID() const;
     const QString &seventvEmoteSetID() const;
