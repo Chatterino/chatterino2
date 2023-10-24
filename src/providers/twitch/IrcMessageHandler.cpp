@@ -229,7 +229,7 @@ using namespace literals;
 float IrcMessageHandler::similarity(
     const MessagePtr &msg, const LimitedQueueSnapshot<MessagePtr> &messages)
 {
-    float similarityPercent = 0.0f;
+    float similarityPercent = 0.0F;
     int checked = 0;
 
     for (int i = 1; i <= messages.size(); ++i)
