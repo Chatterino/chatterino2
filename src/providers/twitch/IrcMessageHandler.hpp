@@ -62,10 +62,6 @@ private:
     void addMessage(Communi::IrcMessage *message, const QString &target,
                     const QString &originalContent, TwitchIrcServer &server,
                     bool isSub, bool isAction);
-
-    void populateReply(TwitchChannel *channel, Communi::IrcMessage *message,
-                       const std::vector<MessagePtr> &otherLoaded,
-                       TwitchMessageBuilder &builder);
 };
 
 }  // namespace chatterino
