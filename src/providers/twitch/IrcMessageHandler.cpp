@@ -42,7 +42,7 @@ namespace {
 using namespace chatterino;
 
 // Message types below are the ones that might contain special user's message on USERNOTICE
-static const QSet<QString> specialMessageTypes{
+static const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "sub",            //
     "subgift",        //
     "resub",          // resub messages
@@ -966,7 +966,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
         return {};
     }
 
-    if (specialMessageTypes.contains(msgType))
+    if (SPECIAL_MESSAGE_TYPES.contains(msgType))
     {
         // Messages are not required, so they might be empty
         if (!content.isEmpty())
@@ -1038,7 +1038,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         return;
     }
 
-    if (specialMessageTypes.contains(msgType))
+    if (SPECIAL_MESSAGE_TYPES.contains(msgType))
     {
         // Messages are not required, so they might be empty
         if (!content.isEmpty())
