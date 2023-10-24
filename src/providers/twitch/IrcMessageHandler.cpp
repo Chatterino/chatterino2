@@ -394,8 +394,8 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
 
     if (command == "PRIVMSG")
     {
-        auto privMsg = static_cast<Communi::IrcPrivateMessage *>(message);
-        auto tc = dynamic_cast<TwitchChannel *>(channel);
+        auto *privMsg = static_cast<Communi::IrcPrivateMessage *>(message);
+        auto *tc = dynamic_cast<TwitchChannel *>(channel);
         if (!tc)
         {
             return this->parsePrivMessage(channel, privMsg);
@@ -540,7 +540,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         args.isStaffOrBroadcaster = true;
     }
 
-    auto channel = dynamic_cast<TwitchChannel *>(chan.get());
+    auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
 
     const auto &tags = message->tags();
     if (const auto it = tags.find("custom-reward-id"); it != tags.end())
@@ -549,7 +549,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         if (!channel->isChannelPointRewardKnown(rewardId))
         {
             // Need to wait for pubsub reward notification
-            auto clone = message->clone();
+            auto *clone = message->clone();
             qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
                                          "callback since reward is not known:"
                                       << rewardId;
@@ -635,7 +635,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         }
 
         chan->addMessage(msg);
-        if (auto chatters = dynamic_cast<ChannelChatters *>(chan.get()))
+        if (auto *chatters = dynamic_cast<ChannelChatters *>(chan.get()))
         {
             chatters->addRecentChatter(msg->displayName);
         }
@@ -897,7 +897,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     args.isReceivedWhisper = true;
 
-    auto c = getApp()->twitch->whispersChannel.get();
+    auto *c = getApp()->twitch->whispersChannel.get();
 
     TwitchMessageBuilder builder(
         c, message, args,
@@ -1240,7 +1240,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             QStringList msgParts = noticeText.split(':');
             MessageBuilder builder;
 
-            auto tc = dynamic_cast<TwitchChannel *>(channel.get());
+            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
             assert(tc != nullptr &&
                    "IrcMessageHandler::handleNoticeMessage. Twitch specific "
                    "functionality called in non twitch channel");
