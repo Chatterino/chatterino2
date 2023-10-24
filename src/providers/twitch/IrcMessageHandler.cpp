@@ -36,6 +36,7 @@
 #include <unordered_set>
 
 namespace {
+
 using namespace chatterino;
 
 // Message types below are the ones that might contain special user's message on USERNOTICE
@@ -174,6 +175,7 @@ ChannelPtr channelOrEmptyByTarget(const QString &target,
 }
 
 }  // namespace
+
 namespace chatterino {
 
 using namespace literals;
@@ -222,6 +224,7 @@ float IrcMessageHandler::similarity(
 {
     float similarityPercent = 0.0f;
     int checked = 0;
+
     for (int i = 1; i <= messages.size(); ++i)
     {
         if (checked >= getSettings()->hideSimilarMaxMessagesToCheck)
@@ -244,6 +247,7 @@ float IrcMessageHandler::similarity(
             similarityPercent,
             relativeSimilarity(msg->messageText, prevMsg->messageText));
     }
+
     return similarityPercent;
 }
 
@@ -1298,4 +1302,5 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
         channel->addMessage(generateBannedMessage(false));
     }
 }
+
 }  // namespace chatterino
