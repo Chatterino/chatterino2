@@ -19,10 +19,9 @@ public:
                         ActionCallback action);
 
     // GenericListItem interface
-public:
-    virtual void action() override;
-    virtual void paint(QPainter *painter, const QRect &rect) const override;
-    virtual QSize sizeHint(const QRect &rect) const override;
+    void action() override;
+    void paint(QPainter *painter, const QRect &rect) const override;
+    QSize sizeHint(const QRect &rect) const override;
 
 private:
     EmotePtr emote_;
