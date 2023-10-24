@@ -33,26 +33,30 @@ SBHighlight Message::getScrollBarHighlight() const
     {
         return SBHighlight(this->highlightColor);
     }
-    else if (this->flags.has(MessageFlag::Subscription) &&
-             getSettings()->enableSubHighlight)
+
+    if (this->flags.has(MessageFlag::Subscription) &&
+        getSettings()->enableSubHighlight)
     {
         return SBHighlight(
             ColorProvider::instance().color(ColorType::Subscription));
     }
-    else if (this->flags.has(MessageFlag::RedeemedHighlight) ||
-             this->flags.has(MessageFlag::RedeemedChannelPointReward))
+
+    if (this->flags.has(MessageFlag::RedeemedHighlight) ||
+        this->flags.has(MessageFlag::RedeemedChannelPointReward))
     {
         return SBHighlight(
             ColorProvider::instance().color(ColorType::RedeemedHighlight),
             SBHighlight::Default, true);
     }
-    else if (this->flags.has(MessageFlag::ElevatedMessage))
+
+    if (this->flags.has(MessageFlag::ElevatedMessage))
     {
         return SBHighlight(ColorProvider::instance().color(
                                ColorType::ElevatedMessageHighlight),
                            SBHighlight::Default, false, false, true);
     }
-    else if (this->flags.has(MessageFlag::FirstMessage))
+
+    if (this->flags.has(MessageFlag::FirstMessage))
     {
         return SBHighlight(
             ColorProvider::instance().color(ColorType::FirstMessageHighlight),
