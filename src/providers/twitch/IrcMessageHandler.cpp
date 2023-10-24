@@ -812,7 +812,9 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     auto msg = chan->findMessage(targetID);
     if (msg == nullptr)
+    {
         return;
+    }
 
     msg->flags.set(MessageFlag::Disabled);
     if (!getSettings()->hideDeletionActions)
