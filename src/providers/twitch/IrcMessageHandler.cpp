@@ -176,13 +176,7 @@ ChannelPtr channelOrEmptyByTarget(const QString &target,
     return server.getChannelOrEmpty(channelName);
 }
 
-}  // namespace
-
-namespace chatterino {
-
-using namespace literals;
-
-static float relativeSimilarity(const QString &str1, const QString &str2)
+float relativeSimilarity(const QString &str1, const QString &str2)
 {
     // Longest Common Substring Problem
     std::vector<std::vector<int>> tree(str1.size(),
@@ -224,7 +218,13 @@ static float relativeSimilarity(const QString &str1, const QString &str2)
     auto div = std::max<int>(1, std::max(str1.size(), str2.size()));
 
     return float(z) / float(div);
-};
+}
+
+}  // namespace
+
+namespace chatterino {
+
+using namespace literals;
 
 float IrcMessageHandler::similarity(
     const MessagePtr &msg, const LimitedQueueSnapshot<MessagePtr> &messages)
