@@ -56,7 +56,7 @@ class QColorPicker : public QFrame
     Q_OBJECT
 public:
     QColorPicker(QWidget *parent);
-    ~QColorPicker();
+    ~QColorPicker() override;
     void setCrossVisible(bool visible);
 
 public slots:
