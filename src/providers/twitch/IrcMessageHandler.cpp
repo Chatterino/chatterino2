@@ -322,7 +322,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessage(
     if (command == "PRIVMSG")
     {
         return this->parsePrivMessage(
-            channel, static_cast<Communi::IrcPrivateMessage *>(message));
+            channel, dynamic_cast<Communi::IrcPrivateMessage *>(message));
     }
 
     if (command == "USERNOTICE")
@@ -333,7 +333,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessage(
     if (command == "NOTICE")
     {
         return this->parseNoticeMessage(
-            static_cast<Communi::IrcNoticeMessage *>(message));
+            dynamic_cast<Communi::IrcNoticeMessage *>(message));
     }
 
     return builtMessages;
@@ -407,7 +407,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
 
     if (command == "PRIVMSG")
     {
-        auto *privMsg = static_cast<Communi::IrcPrivateMessage *>(message);
+        auto *privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
         auto *tc = dynamic_cast<TwitchChannel *>(channel);
         if (!tc)
         {
@@ -436,7 +436,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
     else if (command == "NOTICE")
     {
         return this->parseNoticeMessage(
-            static_cast<Communi::IrcNoticeMessage *>(message));
+            dynamic_cast<Communi::IrcNoticeMessage *>(message));
     }
     else if (command == u"CLEARCHAT"_s)
     {
