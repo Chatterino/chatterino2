@@ -227,7 +227,7 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name,
     auto *b = new QLabel("<a href=\"" + licenseLink + "\">show license</a>");
     QObject::connect(
         b, &QLabel::linkActivated, [parent = this, name, licenseLink] {
-            auto window =
+            auto *window =
                 new BasePopup({BaseWindow::DisableLayoutSave}, parent);
             window->setWindowTitle("Chatterino - License for " + name);
             window->setAttribute(Qt::WA_DeleteOnClose);
