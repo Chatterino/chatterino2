@@ -1563,20 +1563,16 @@ void CommandController::initialize(Settings &, Paths &paths)
                 const auto &msg = *it;
                 if (msg->loginName.compare(username, Qt::CaseInsensitive) == 0)
                 {
-                    std::shared_ptr<MessageThread> thread;
                     // found most recent message by user
                     if (msg->replyThread == nullptr)
                     {
-                        thread = std::make_shared<MessageThread>(msg);
+                        // prepare thread if one does not exist
+                        auto thread = std::make_shared<MessageThread>(msg);
                         twitchChannel->addReplyThread(thread);
-                    }
-                    else
-                    {
-                        thread = msg->replyThread;
                     }
 
                     QString reply = words.mid(2).join(" ");
-                    twitchChannel->sendReply(reply, thread->rootId());
+                    twitchChannel->sendReply(reply, msg->id);
                     return "";
                 }
             }
