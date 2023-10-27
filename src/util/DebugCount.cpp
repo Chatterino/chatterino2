@@ -2,6 +2,8 @@
 
 #include "common/UniqueAccess.hpp"
 
+#include <QStringBuilder>
+
 #include <map>
 
 namespace {
@@ -87,7 +89,7 @@ QString DebugCount::getDebugText()
     QString text;
     for (const auto &[key, count] : *counts)
     {
-        text += key + ": " + QString::number(count.value) + "\n";
+        text += key % ": " % QString::number(count.value) % '\n';
     }
     return text;
 }
