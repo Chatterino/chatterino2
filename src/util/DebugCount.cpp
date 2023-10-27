@@ -2,6 +2,7 @@
 
 #include "common/UniqueAccess.hpp"
 
+#include <QLocale>
 #include <QStringBuilder>
 
 #include <map>
@@ -85,11 +86,12 @@ void DebugCount::decrease(const QString &name, const int64_t &amount)
 QString DebugCount::getDebugText()
 {
     auto counts = COUNTS.access();
+    QLocale locale;
 
     QString text;
     for (const auto &[key, count] : *counts)
     {
-        text += key % ": " % QString::number(count.value) % '\n';
+        text += key % ": " % locale.toString(count.value) % '\n';
     }
     return text;
 }
