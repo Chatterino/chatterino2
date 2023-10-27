@@ -85,13 +85,28 @@ void DebugCount::decrease(const QString &name, const int64_t &amount)
 
 QString DebugCount::getDebugText()
 {
+#if QT_VERSION > QT_VERSION_CHECK(5, 13, 0)
+    static const QLocale locale(QLocale::English);
+#else
+    static QLocale locale(QLocale::English);
+#endif
+
     auto counts = COUNTS.access();
-    QLocale locale;
 
     QString text;
     for (const auto &[key, count] : *counts)
     {
-        text += key % ": " % locale.toString(count.value) % '\n';
+        QString formatted;
+        if (count.flags.has(Flag::DataSize))
+        {
+            formatted = locale.formattedDataSize(count.value);
+        }
+        else
+        {
+            formatted = locale.toString(static_cast<qlonglong>(count.value));
+        }
+
+        text += key % ": " % formatted % '\n';
     }
     return text;
 }

@@ -11,6 +11,8 @@ class DebugCount
 public:
     enum class Flag : uint16_t {
         None = 0,
+        /// The value is a data size in bytes
+        DataSize = 1 << 0,
     };
     using Flags = FlagsEnum<Flag>;
 
