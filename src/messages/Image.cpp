@@ -108,7 +108,7 @@ namespace detail {
         {
             auto sz = frame.image.size();
             auto area = sz.width() * sz.height();
-            auto memory = area * frame.image.depth();
+            auto memory = area * frame.image.depth() / 8;
 
             usage += memory;
         }
