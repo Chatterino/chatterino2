@@ -2,7 +2,7 @@
 
 #include "common/UniqueAccess.hpp"
 
-#include <QMap>
+#include <map>
 
 namespace {
 
@@ -14,7 +14,7 @@ struct Count {
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-UniqueAccess<QMap<QString, Count>> COUNTS;
+UniqueAccess<std::map<QString, Count>> COUNTS;
 
 }  // namespace
 
@@ -27,11 +27,11 @@ void DebugCount::configure(const QString &name, Flags flags)
     auto it = counts->find(name);
     if (it == counts->end())
     {
-        counts->insert(name, {.flags = flags});
+        counts->emplace(name, Count{.flags = flags});
     }
     else
     {
-        it.value().flags = flags;
+        it->second.flags = flags;
     }
 }
 
@@ -42,11 +42,11 @@ void DebugCount::set(const QString &name, const int64_t &amount)
     auto it = counts->find(name);
     if (it == counts->end())
     {
-        counts->insert(name, {amount});
+        counts->emplace(name, Count{amount});
     }
     else
     {
-        it.value().value = amount;
+        it->second.value = amount;
     }
 }
 
@@ -57,11 +57,11 @@ void DebugCount::increase(const QString &name, const int64_t &amount)
     auto it = counts->find(name);
     if (it == counts->end())
     {
-        counts->insert(name, {amount});
+        counts->emplace(name, Count{amount});
     }
     else
     {
-        it.value().value += amount;
+        it->second.value += amount;
     }
 }
 
@@ -72,11 +72,11 @@ void DebugCount::decrease(const QString &name, const int64_t &amount)
     auto it = counts->find(name);
     if (it == counts->end())
     {
-        counts->insert(name, {-amount});
+        counts->emplace(name, Count{-amount});
     }
     else
     {
-        it.value().value -= amount;
+        it->second.value -= amount;
     }
 }
 
@@ -85,9 +85,9 @@ QString DebugCount::getDebugText()
     auto counts = COUNTS.access();
 
     QString text;
-    for (auto it = counts->begin(); it != counts->end(); it++)
+    for (const auto &[key, count] : *counts)
     {
-        text += it.key() + ": " + QString::number(it.value().value) + "\n";
+        text += key + ": " + QString::number(count.value) + "\n";
     }
     return text;
 }
