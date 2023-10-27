@@ -9,7 +9,8 @@ namespace {
 using namespace chatterino;
 
 struct Count {
-    int64_t value;
+    int64_t value = 0;
+    DebugCount::Flags flags = DebugCount::Flag::None;
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
@@ -18,6 +19,21 @@ UniqueAccess<QMap<QString, Count>> COUNTS;
 }  // namespace
 
 namespace chatterino {
+
+void DebugCount::configure(const QString &name, Flags flags)
+{
+    auto counts = COUNTS.access();
+
+    auto it = counts->find(name);
+    if (it == counts->end())
+    {
+        counts->insert(name, {.flags = flags});
+    }
+    else
+    {
+        it.value().flags = flags;
+    }
+}
 
 void DebugCount::set(const QString &name, const int64_t &amount)
 {

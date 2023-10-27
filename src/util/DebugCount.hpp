@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/FlagsEnum.hpp"
+
 #include <QString>
 
 namespace chatterino {
@@ -7,6 +9,13 @@ namespace chatterino {
 class DebugCount
 {
 public:
+    enum class Flag : uint16_t {
+        None = 0,
+    };
+    using Flags = FlagsEnum<Flag>;
+
+    static void configure(const QString &name, Flags flags);
+
     static void set(const QString &name, const int64_t &amount);
 
     static void increase(const QString &name, const int64_t &amount);
