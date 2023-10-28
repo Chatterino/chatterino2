@@ -359,7 +359,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
         if (this->enableInlineReplying_)
         {
             // Remove @username prefix that is inserted when doing inline replies
-            message.remove(0, this->replyThread_->root()->displayName.length() +
+            message.remove(0, this->replyThread_->displayName.length() +
                                   1);  // remove "@username"
 
             if (!message.isEmpty() && message.at(0) == ' ')
@@ -373,7 +373,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
             getApp()->commands->execCommand(message, c, false);
 
         // Reply within TwitchChannel
-        tc->sendReply(sendMessage, this->replyThread_->rootId());
+        tc->sendReply(sendMessage, this->replyThread_->id);
 
         this->postMessageSend(message, arguments);
         return "";
@@ -992,7 +992,7 @@ void SplitInput::editTextChanged()
             // We need to verify that
             // 1. the @username prefix exists and
             // 2. if a character exists after the @username, it is a space
-            QString replyPrefix = "@" + this->replyThread_->root()->displayName;
+            QString replyPrefix = "@" + this->replyThread_->displayName;
             if (!text.startsWith(replyPrefix) ||
                 (text.length() > replyPrefix.length() &&
                  text.at(replyPrefix.length()) != ' '))
@@ -1065,7 +1065,7 @@ void SplitInput::giveFocus(Qt::FocusReason reason)
     this->ui_.textEdit->setFocus(reason);
 }
 
-void SplitInput::setReply(std::shared_ptr<MessageThread> reply,
+void SplitInput::setReply(std::shared_ptr<const Message> reply,
                           bool showReplyingLabel)
 {
     this->replyThread_ = std::move(reply);
@@ -1073,7 +1073,7 @@ void SplitInput::setReply(std::shared_ptr<MessageThread> reply,
     if (this->enableInlineReplying_)
     {
         // Only enable reply label if inline replying
-        auto replyPrefix = "@" + this->replyThread_->root()->displayName;
+        auto replyPrefix = "@" + this->replyThread_->displayName;
         auto plainText = this->ui_.textEdit->toPlainText().trimmed();
         if (!plainText.startsWith(replyPrefix))
         {
@@ -1086,7 +1086,7 @@ void SplitInput::setReply(std::shared_ptr<MessageThread> reply,
             this->ui_.textEdit->resetCompletion();
         }
         this->ui_.replyLabel->setText("Replying to @" +
-                                      this->replyThread_->root()->displayName);
+                                      this->replyThread_->displayName);
     }
 }
 

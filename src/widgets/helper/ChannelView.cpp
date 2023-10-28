@@ -2830,10 +2830,9 @@ void ChannelView::setInputReply(const MessagePtr &message)
         return;
     }
 
-    std::shared_ptr<MessageThread> thread;
-
     if (message->replyThread == nullptr)
     {
+        // Create thread if one does not exist
         auto getThread = [&](TwitchChannel *tc) {
             auto threadIt = tc->threads().find(message->id);
             if (threadIt != tc->threads().end() && !threadIt->second.expired())
@@ -2851,26 +2850,15 @@ void ChannelView::setInputReply(const MessagePtr &message)
         if (auto tc =
                 dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get()))
         {
-            thread = getThread(tc);
+            getThread(tc);
         }
         else if (auto tc = dynamic_cast<TwitchChannel *>(this->channel_.get()))
         {
-            thread = getThread(tc);
+            getThread(tc);
         }
-        else
-        {
-            qCWarning(chatterinoCommon) << "Failed to create new reply thread";
-            // Unable to create new reply thread.
-            // TODO(dnsge): Should probably notify user?
-            return;
-        }
-    }
-    else
-    {
-        thread = message->replyThread;
     }
 
-    this->split_->setInputReply(thread);
+    this->split_->setInputReply(message);
 }
 
 void ChannelView::showReplyThreadPopup(const MessagePtr &message)

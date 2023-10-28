@@ -1542,7 +1542,7 @@ void Split::drag()
     stopDraggingSplit();
 }
 
-void Split::setInputReply(const std::shared_ptr<MessageThread> &reply)
+void Split::setInputReply(const std::shared_ptr<const Message> &reply)
 {
     this->input_->setReply(reply);
 }
