@@ -132,8 +132,7 @@ void LoggingChannel::addMessage(MessagePtr message)
         qsizetype colonIndex = messageText.indexOf(':');
         if (colonIndex != -1)
         {
-            QString rootMessageChatter =
-                message->replyThread->root()->loginName;
+            QString rootMessageChatter = message->replyParent->loginName;
             messageText.insert(colonIndex + 1, " @" + rootMessageChatter);
         }
     }

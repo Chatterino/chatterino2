@@ -58,6 +58,7 @@ public:
     MessagePtr build() override;
 
     void setThread(std::shared_ptr<MessageThread> thread);
+    void setParent(std::shared_ptr<const Message> parent);
     void setMessageOffset(int offset);
 
     static void appendChannelPointRewardMessage(
@@ -131,6 +132,7 @@ private:
     bool bitsStacked = false;
     bool historicalMessage_ = false;
     std::shared_ptr<MessageThread> thread_;
+    std::shared_ptr<const Message> parent_;
 
     /**
      * Starting offset to be used on index-based operations on `originalMessage_`.

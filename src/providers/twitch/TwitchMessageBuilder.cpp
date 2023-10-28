@@ -623,15 +623,21 @@ void TwitchMessageBuilder::parseThread()
     {
         // set references
         this->message().replyThread = this->thread_;
+        this->message().replyParent = this->parent_;
         this->thread_->addToThread(this->weakOf());
 
         // enable reply flag
         this->message().flags.set(MessageFlag::ReplyMessage);
 
-        const auto &threadRoot = this->thread_->root();
+        std::shared_ptr<const Message> threadRoot;
+        if (!this->parent_) {
+            threadRoot = this->thread_->root();
+        } else {
+            threadRoot = this->parent_;
+        }
 
         QString usernameText = SharedMessageBuilder::stylizeUsername(
-            threadRoot->loginName, *threadRoot.get());
+            threadRoot->loginName, *threadRoot);
 
         this->emplace<ReplyCurveElement>();
 
@@ -1809,6 +1815,11 @@ MessagePtr TwitchMessageBuilder::buildHypeChatMessage(
 void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)
 {
     this->thread_ = std::move(thread);
+}
+
+void TwitchMessageBuilder::setParent(std::shared_ptr<const Message> parent)
+{
+    this->parent_ = std::move(parent);
 }
 
 void TwitchMessageBuilder::setMessageOffset(int offset)
