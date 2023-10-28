@@ -43,6 +43,7 @@
 - Dev: Replace `boost::optional` with `std::optional`. (#4877)
 - Dev: Improve performance by reducing repaints caused by selections. (#4889)
 - Dev: Removed direct dependency on Qt 5 compatibility module. (#4906)
+- Dev: Refactor `DebugCount` and add copy button to debug popup. (#4921)
 
 ## 2.4.6
 
