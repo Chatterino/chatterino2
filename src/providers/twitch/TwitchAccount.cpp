@@ -264,6 +264,25 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
             [this, weakChannel](QJsonArray emoteSetArray) {
                 auto emoteData = this->emotes_.access();
                 auto localEmoteData = this->localEmotes_.access();
+
+                std::set<QString> subscriberChannelIDs;
+                for (auto emoteSet : emoteSetArray)
+                {
+                    IvrEmoteSet ivrEmoteSet(emoteSet.toObject());
+                    if (!ivrEmoteSet.tier.isNull())
+                    {
+                        subscriberChannelIDs.insert(ivrEmoteSet.channelId);
+                    }
+                }
+
+                for (auto emoteSet : emoteData->emoteSets)
+                {
+                    if (emoteSet->subscriber)
+                    {
+                        subscriberChannelIDs.insert(emoteSet->channelID);
+                    }
+                }
+
                 for (auto emoteSet_ : emoteSetArray)
                 {
                     auto emoteSet = std::make_shared<EmoteSet>();
@@ -285,8 +304,13 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                         continue;
                     }
 
+                    emoteSet->channelID = ivrEmoteSet.channelId;
                     emoteSet->channelName = ivrEmoteSet.login;
                     emoteSet->text = ivrEmoteSet.displayName;
+                    emoteSet->subscriber = !ivrEmoteSet.tier.isNull();
+
+                    bool haveSubscriberSetForChannel =
+                        subscriberChannelIDs.contains(ivrEmoteSet.channelId);
 
                     for (const auto &emoteObj : ivrEmoteSet.emotes)
                     {
@@ -302,7 +326,8 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                             getApp()->emotes->twitch.getOrCreateEmote(id, code);
 
                         // Follower emotes can be only used in their origin channel
-                        if (ivrEmote.emoteType == "FOLLOWER")
+                        if (ivrEmote.emoteType == "FOLLOWER" &&
+                            !haveSubscriberSetForChannel)
                         {
                             emoteSet->local = true;
 
