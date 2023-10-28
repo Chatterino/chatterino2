@@ -265,7 +265,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                 auto emoteData = this->emotes_.access();
                 auto localEmoteData = this->localEmotes_.access();
 
-                std::set<QString> subscriberChannelIDs;
+                std::unordered_set<QString> subscriberChannelIDs;
                 for (auto emoteSet : emoteSetArray)
                 {
                     IvrEmoteSet ivrEmoteSet(emoteSet.toObject());
@@ -275,7 +275,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                     }
                 }
 
-                for (auto emoteSet : emoteData->emoteSets)
+                for (const auto &emoteSet : emoteData->emoteSets)
                 {
                     if (emoteSet->subscriber)
                     {
@@ -326,6 +326,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                             getApp()->emotes->twitch.getOrCreateEmote(id, code);
 
                         // Follower emotes can be only used in their origin channel
+                        // unless the user is subscribed, then they can be used anywhere.
                         if (ivrEmote.emoteType == "FOLLOWER" &&
                             !haveSubscriberSetForChannel)
                         {

@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Minor: Allow use of Twitch follower emotes in other channels if subscribed. (#4922)
+- Major: Allow use of Twitch follower emotes in other channels if subscribed. (#4922)
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
