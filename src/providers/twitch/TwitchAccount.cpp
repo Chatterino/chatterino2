@@ -268,14 +268,14 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                 std::set<QString> subscriberChannelIDs;
                 for (auto emoteSet : emoteSetArray)
                 {
-                    IvrEmoteSet ivrEmoteSet(emoteSet.toObject());
+                    IvrEmoteSet const ivrEmoteSet(emoteSet.toObject());
                     if (!ivrEmoteSet.tier.isNull())
                     {
                         subscriberChannelIDs.insert(ivrEmoteSet.channelId);
                     }
                 }
 
-                for (auto emoteSet : emoteData->emoteSets)
+                for (const auto& emoteSet : emoteData->emoteSets)
                 {
                     if (emoteSet->subscriber)
                     {
@@ -309,7 +309,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                     emoteSet->text = ivrEmoteSet.displayName;
                     emoteSet->subscriber = !ivrEmoteSet.tier.isNull();
 
-                    bool haveSubscriberSetForChannel =
+                    bool const haveSubscriberSetForChannel =
                         subscriberChannelIDs.contains(ivrEmoteSet.channelId);
 
                     for (const auto &emoteObj : ivrEmoteSet.emotes)
