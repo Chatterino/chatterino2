@@ -279,6 +279,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                         }
 
                         auto *menu = new QMenu(this);
+                        menu->setAttribute(Qt::WA_DeleteOnClose);
 
                         auto avatarUrl = this->avatarUrl_;
 

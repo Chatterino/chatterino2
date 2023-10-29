@@ -2094,6 +2094,7 @@ void ChannelView::addContextMenuItems(
     QMouseEvent *event)
 {
     auto *menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
 
     // Add image options if the element clicked contains an image (e.g. a badge or an emote)
     this->addImageContextMenuItems(hoveredElement, layout, event, *menu);
