@@ -1065,7 +1065,7 @@ void SplitInput::giveFocus(Qt::FocusReason reason)
     this->ui_.textEdit->setFocus(reason);
 }
 
-void SplitInput::setReply(std::shared_ptr<const Message> reply,
+void SplitInput::setReply(MessagePtr reply,
                           bool showReplyingLabel)
 {
     this->replyThread_ = std::move(reply);

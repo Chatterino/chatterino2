@@ -629,7 +629,7 @@ void TwitchMessageBuilder::parseThread()
         // enable reply flag
         this->message().flags.set(MessageFlag::ReplyMessage);
 
-        std::shared_ptr<const Message> threadRoot;
+        MessagePtr threadRoot;
         if (!this->parent_) {
             threadRoot = this->thread_->root();
         } else {
@@ -1817,7 +1817,7 @@ void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)
     this->thread_ = std::move(thread);
 }
 
-void TwitchMessageBuilder::setParent(std::shared_ptr<const Message> parent)
+void TwitchMessageBuilder::setParent(MessagePtr parent)
 {
     this->parent_ = std::move(parent);
 }

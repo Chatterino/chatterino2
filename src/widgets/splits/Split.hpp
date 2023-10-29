@@ -74,7 +74,7 @@ public:
 
     void setContainer(SplitContainer *container);
 
-    void setInputReply(const std::shared_ptr<const Message> &reply);
+    void setInputReply(const MessagePtr &reply);
 
     static pajlada::Signals::Signal<Qt::KeyboardModifiers>
         modifierStatusChanged;

@@ -53,6 +53,8 @@ enum class MessageFlag : int64_t {
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
 struct Message {
     Message();
     ~Message();
@@ -88,13 +90,11 @@ struct Message {
     // the reply thread will be cleaned up by the TwitchChannel.
     // The root of the thread does not have replyThread set.
     std::shared_ptr<MessageThread> replyThread;
-    std::shared_ptr<const Message> replyParent;
+    MessagePtr replyParent;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;
 
     ScrollbarHighlight getScrollBarHighlight() const;
 };
-
-using MessagePtr = std::shared_ptr<const Message>;
 
 }  // namespace chatterino

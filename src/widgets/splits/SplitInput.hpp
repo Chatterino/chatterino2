@@ -40,7 +40,7 @@ public:
     QString getInputText() const;
     void insertText(const QString &text);
 
-    void setReply(std::shared_ptr<const Message> reply,
+    void setReply(MessagePtr reply,
                   bool showInlineReplying = true);
     void setPlaceholderText(const QString &text);
 
@@ -135,7 +135,7 @@ protected:
         EffectLabel *cancelReplyButton;
     } ui_{};
 
-    std::shared_ptr<const Message> replyThread_ = nullptr;
+    MessagePtr replyThread_ = nullptr;
     bool enableInlineReplying_;
 
     pajlada::Signals::SignalHolder managedConnections_;

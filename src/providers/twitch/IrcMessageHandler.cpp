@@ -513,7 +513,7 @@ void IrcMessageHandler::populateReply(
         if (const auto parentIt = tags.find("reply-parent-msg-id"); parentIt != tags.end())
         {
             const QString parentID = parentIt.value().toString();
-            std::shared_ptr<const Message> parent;
+            MessagePtr parent;
             if (replyID == parentID)
             {
                 if (rootThread)
@@ -636,7 +636,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         if (const auto parentIt = tags.find("reply-parent-msg-id"); parentIt != tags.end())
         {
             const QString parentID = parentIt.value().toString();
-            std::shared_ptr<const Message> parent;
+            MessagePtr parent;
             if (replyID == parentID)
             {
                 if (rootThread)
