@@ -630,9 +630,12 @@ void TwitchMessageBuilder::parseThread()
         this->message().flags.set(MessageFlag::ReplyMessage);
 
         MessagePtr threadRoot;
-        if (!this->parent_) {
+        if (!this->parent_)
+        {
             threadRoot = this->thread_->root();
-        } else {
+        }
+        else
+        {
             threadRoot = this->parent_;
         }
 

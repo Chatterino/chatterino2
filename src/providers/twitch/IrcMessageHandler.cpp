@@ -453,7 +453,8 @@ void IrcMessageHandler::populateReply(
     const std::vector<MessagePtr> &otherLoaded, TwitchMessageBuilder &builder)
 {
     const auto &tags = message->tags();
-    if (const auto it = tags.find("reply-thread-parent-msg-id"); it != tags.end())
+    if (const auto it = tags.find("reply-thread-parent-msg-id");
+        it != tags.end())
     {
         const QString replyID = it.value().toString();
         auto threadIt = channel->threads().find(replyID);
@@ -499,7 +500,7 @@ void IrcMessageHandler::populateReply(
             if (foundMessage)
             {
                 std::shared_ptr<MessageThread> newThread =
-                        std::make_shared<MessageThread>(foundMessage);
+                    std::make_shared<MessageThread>(foundMessage);
                 updateReplyParticipatedStatus(tags, message->nick(), builder,
                                               newThread, true);
 
@@ -510,7 +511,8 @@ void IrcMessageHandler::populateReply(
             }
         }
 
-        if (const auto parentIt = tags.find("reply-parent-msg-id"); parentIt != tags.end())
+        if (const auto parentIt = tags.find("reply-parent-msg-id");
+            parentIt != tags.end())
         {
             const QString parentID = parentIt.value().toString();
             MessagePtr parent;
@@ -524,7 +526,8 @@ void IrcMessageHandler::populateReply(
             else
             {
                 auto parentThreadIt = channel->threads().find(parentID);
-                if (parentThreadIt != channel->threads().end() && !parentThreadIt->second.expired())
+                if (parentThreadIt != channel->threads().end() &&
+                    !parentThreadIt->second.expired())
                 {
                     parent = parentThreadIt->second.lock()->root();
                 }
@@ -601,7 +604,8 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
     builder.setMessageOffset(messageOffset);
 
-    if (const auto it = tags.find("reply-thread-parent-msg-id"); it != tags.end())
+    if (const auto it = tags.find("reply-thread-parent-msg-id");
+        it != tags.end())
     {
         const QString replyID = it.value().toString();
         auto threadIt = channel->threads().find(replyID);
@@ -633,7 +637,8 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             }
         }
 
-        if (const auto parentIt = tags.find("reply-parent-msg-id"); parentIt != tags.end())
+        if (const auto parentIt = tags.find("reply-parent-msg-id");
+            parentIt != tags.end())
         {
             const QString parentID = parentIt.value().toString();
             MessagePtr parent;
@@ -647,7 +652,8 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             else
             {
                 auto parentThreadIt = channel->threads().find(parentID);
-                if (parentThreadIt != channel->threads().end() && !parentThreadIt->second.expired())
+                if (parentThreadIt != channel->threads().end() &&
+                    !parentThreadIt->second.expired())
                 {
                     parent = parentThreadIt->second.lock()->root();
                 }
