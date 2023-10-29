@@ -73,18 +73,12 @@ namespace {
                                   MessageElementFlags creatorFlags, QMenu &menu)
     {
         auto *openAction = menu.addAction("&Open");
-        auto openMenu = new QMenu;
+        auto *openMenu = new QMenu(&menu);
         openAction->setMenu(openMenu);
 
         auto *copyAction = menu.addAction("&Copy");
-        auto copyMenu = new QMenu;
+        auto *copyMenu = new QMenu(&menu);
         copyAction->setMenu(copyMenu);
-
-        // see if the QMenu actually gets destroyed
-        QObject::connect(openMenu, &QMenu::destroyed, [] {
-            QMessageBox(QMessageBox::Information, "xD", "the menu got deleted")
-                .exec();
-        });
 
         // Add copy and open links for 1x, 2x, 3x
         auto addImageLink = [&](const ImagePtr &image, char scale) {
@@ -2416,7 +2410,7 @@ void ChannelView::addCommandExecutionContextMenuItems(
 
     menu.addSeparator();
     auto *executeAction = menu.addAction("&Execute command");
-    auto cmdMenu = new QMenu;
+    auto *cmdMenu = new QMenu(&menu);
     executeAction->setMenu(cmdMenu);
 
     for (auto &cmd : cmds)
