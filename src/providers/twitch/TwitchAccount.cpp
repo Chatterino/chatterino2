@@ -267,6 +267,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
 
                 std::unordered_set<QString> subscriberChannelIDs;
                 std::vector<IvrEmoteSet> ivrEmoteSets;
+                ivrEmoteSets.reserve(emoteSetArray.size());
 
                 for (auto emoteSet : emoteSetArray)
                 {
