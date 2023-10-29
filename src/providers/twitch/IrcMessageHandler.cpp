@@ -523,8 +523,8 @@ void IrcMessageHandler::populateReply(
             }
             else
             {
-                auto parentThreadIt = channel->threads_.find(parentID);
-                if (parentThreadIt != channel->threads_.end() && !parentThreadIt->second.expired())
+                auto parentThreadIt = channel->threads().find(parentID);
+                if (parentThreadIt != channel->threads().end() && !parentThreadIt->second.expired())
                 {
                     parent = parentThreadIt->second.lock()->root();
                 }
