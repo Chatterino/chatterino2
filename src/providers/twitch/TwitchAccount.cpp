@@ -266,6 +266,8 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                 auto localEmoteData = this->localEmotes_.access();
 
                 std::unordered_set<QString> subscriberChannelIDs;
+                std::vector<IvrEmoteSet> ivrEmoteSets;
+
                 for (auto emoteSet : emoteSetArray)
                 {
                     IvrEmoteSet ivrEmoteSet(emoteSet.toObject());
@@ -273,6 +275,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                     {
                         subscriberChannelIDs.insert(ivrEmoteSet.channelId);
                     }
+                    ivrEmoteSets.emplace_back(ivrEmoteSet);
                 }
 
                 for (const auto &emoteSet : emoteData->emoteSets)
@@ -283,11 +286,9 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                     }
                 }
 
-                for (auto emoteSet_ : emoteSetArray)
+                for (const auto &ivrEmoteSet : ivrEmoteSets)
                 {
                     auto emoteSet = std::make_shared<EmoteSet>();
-
-                    IvrEmoteSet ivrEmoteSet(emoteSet_.toObject());
 
                     QString setKey = ivrEmoteSet.setId;
                     emoteSet->key = setKey;
