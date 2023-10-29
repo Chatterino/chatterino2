@@ -456,9 +456,9 @@ void IrcMessageHandler::populateReply(
     if (const auto it = tags.find("reply-thread-parent-msg-id"); it != tags.end())
     {
         const QString replyID = it.value().toString();
-        auto threadIt = channel->threads_.find(replyID);
+        auto threadIt = channel->threads().find(replyID);
         std::shared_ptr<MessageThread> rootThread;
-        if (threadIt != channel->threads_.end())
+        if (threadIt != channel->threads().end())
         {
             auto owned = threadIt->second.lock();
             if (owned)
@@ -604,9 +604,9 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
     if (const auto it = tags.find("reply-thread-parent-msg-id"); it != tags.end())
     {
         const QString replyID = it.value().toString();
-        auto threadIt = channel->threads_.find(replyID);
+        auto threadIt = channel->threads().find(replyID);
         std::shared_ptr<MessageThread> rootThread;
-        if (threadIt != channel->threads_.end() && !threadIt->second.expired())
+        if (threadIt != channel->threads().end() && !threadIt->second.expired())
         {
             // Thread already exists (has a reply)
             auto thread = threadIt->second.lock();
@@ -646,8 +646,8 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             }
             else
             {
-                auto parentThreadIt = channel->threads_.find(parentID);
-                if (parentThreadIt != channel->threads_.end() && !parentThreadIt->second.expired())
+                auto parentThreadIt = channel->threads().find(parentID);
+                if (parentThreadIt != channel->threads().end() && !parentThreadIt->second.expired())
                 {
                     parent = parentThreadIt->second.lock()->root();
                 }
