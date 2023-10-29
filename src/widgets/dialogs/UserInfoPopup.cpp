@@ -278,15 +278,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                             return;
                         }
 
-                        static QMenu *previousMenu = nullptr;
-                        if (previousMenu != nullptr)
-                        {
-                            previousMenu->deleteLater();
-                            previousMenu = nullptr;
-                        }
-
-                        auto menu = new QMenu;
-                        previousMenu = menu;
+                        auto *menu = new QMenu(this);
 
                         auto avatarUrl = this->avatarUrl_;
 

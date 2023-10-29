@@ -2093,15 +2093,7 @@ void ChannelView::addContextMenuItems(
     const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
     QMouseEvent *event)
 {
-    static QMenu *previousMenu = nullptr;
-    if (previousMenu != nullptr)
-    {
-        previousMenu->deleteLater();
-        previousMenu = nullptr;
-    }
-
-    auto menu = new QMenu;
-    previousMenu = menu;
+    auto *menu = new QMenu(this);
 
     // Add image options if the element clicked contains an image (e.g. a badge or an emote)
     this->addImageContextMenuItems(hoveredElement, layout, event, *menu);
