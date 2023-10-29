@@ -1536,7 +1536,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
         return;
     }
 
-    if ((event->modifiers() & Qt::ControlModifier) != 0)
+    if (event->modifiers().testFlag(Qt::ControlModifier))
     {
         // Ignore any scrolls where ctrl is held down - it is used for zoom
         event->ignore();
