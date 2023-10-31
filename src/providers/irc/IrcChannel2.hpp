@@ -21,7 +21,7 @@ public:
 
     // Channel methods
     bool canReconnect() const override;
-    QString &logFolderName() override;
+    const QString &logFolderName() override;
     void reconnect() override;
 
 private:

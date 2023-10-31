@@ -78,7 +78,7 @@ bool Channel::hasMessages() const
     return !this->messages_.empty();
 }
 
-QString &Channel::logFolderName()
+const QString &Channel::logFolderName()
 {
     return this->logFolderName_;
 }

@@ -105,7 +105,7 @@ bool IrcChannel::canReconnect() const
     return true;
 }
 
-QString &IrcChannel::logFolderName()
+const QString &IrcChannel::logFolderName()
 {
     return this->logFolderName_;
 }

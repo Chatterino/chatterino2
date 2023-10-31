@@ -104,7 +104,7 @@ public:
     virtual bool shouldIgnoreHighlights() const;
     virtual bool canReconnect() const;
     virtual void reconnect();
-    virtual QString &logFolderName();
+    virtual const QString &logFolderName();
 
     static std::shared_ptr<Channel> getEmpty();
 
