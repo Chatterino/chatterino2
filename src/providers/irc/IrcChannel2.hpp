@@ -12,6 +12,7 @@ class IrcChannel final : public Channel, public ChannelChatters
 {
 public:
     explicit IrcChannel(const QString &name, IrcServer *server);
+    ~IrcChannel();
 
     void sendMessage(const QString &message) override;
 
@@ -20,12 +21,14 @@ public:
 
     // Channel methods
     bool canReconnect() const override;
+    QString &logFolderName() override;
     void reconnect() override;
 
 private:
     void setServer(IrcServer *server);
 
     IrcServer *server_;
+    QString logFolderName_;
 
     friend class Irc;
 };

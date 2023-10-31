@@ -4,9 +4,6 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 
-#include <QDir>
-#include <QStandardPaths>
-
 #include <memory>
 #include <utility>
 
@@ -49,27 +46,36 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
         }
     }
 
-    auto platIt = this->loggingChannels_.find(platformName);
-    if (platIt == this->loggingChannels_.end())
+    this->loggingChannels_.at(platformName)
+        .at(channelName)
+        ->addMessage(message);
+}
+
+void Logging::addChannel(const QString &channelName,
+                         const QString &platformName)
+{
+    if (!this->loggingChannels_.contains(platformName))
+    {
+        this->loggingChannels_.emplace(
+            platformName,
+            std::unordered_map<ChannelName, std::unique_ptr<LoggingChannel>>());
+    }
+
+    if (!this->loggingChannels_.at(platformName).contains(channelName))
     {
         auto channel = new LoggingChannel(channelName, platformName);
-        channel->addMessage(message);
-        auto map = std::map<QString, std::unique_ptr<LoggingChannel>>();
-        this->loggingChannels_[platformName] = std::move(map);
-        auto &ref = this->loggingChannels_.at(platformName);
-        ref.emplace(channelName, std::move(channel));
-        return;
+        this->loggingChannels_.at(platformName)
+            .emplace(channelName,
+                     std::unique_ptr<LoggingChannel>(std::move(channel)));
     }
-    auto chanIt = platIt->second.find(channelName);
-    if (chanIt == platIt->second.end())
+}
+
+void Logging::removeChannel(const QString &channelName,
+                            const QString &platformName)
+{
+    if (this->loggingChannels_.contains(platformName))
     {
-        auto channel = new LoggingChannel(channelName, platformName);
-        channel->addMessage(message);
-        platIt->second.emplace(channelName, std::move(channel));
-    }
-    else
-    {
-        chanIt->second->addMessage(message);
+        this->loggingChannels_.at(platformName).erase(channelName);
     }
 }
 

@@ -104,6 +104,7 @@ public:
     virtual bool shouldIgnoreHighlights() const;
     virtual bool canReconnect() const;
     virtual void reconnect();
+    virtual QString &logFolderName();
 
     static std::shared_ptr<Channel> getEmpty();
 
@@ -118,6 +119,8 @@ private:
     const QString name_;
     LimitedQueue<MessagePtr> messages_;
     Type type_;
+    bool isLogInitialized_{false};
+    QString logFolderName_;
     QTimer clearCompletionModelTimer_;
 };
 

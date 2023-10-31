@@ -6,8 +6,8 @@
 
 #include <QString>
 
-#include <map>
 #include <memory>
+#include <unordered_map>
 #include <unordered_set>
 
 namespace chatterino {
@@ -28,12 +28,15 @@ public:
 
     void addMessage(const QString &channelName, MessagePtr message,
                     const QString &platformName);
+    void addChannel(const QString &channelName, const QString &platformName);
+    void removeChannel(const QString &channelName, const QString &platformName);
 
 private:
     using PlatformName = QString;
     using ChannelName = QString;
-    std::map<PlatformName,
-             std::map<ChannelName, std::unique_ptr<LoggingChannel>>>
+    std::unordered_map<
+        PlatformName,
+        std::unordered_map<ChannelName, std::unique_ptr<LoggingChannel>>>
         loggingChannels_;
 
     // Keeps the value of the `loggedChannels` settings

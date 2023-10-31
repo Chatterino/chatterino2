@@ -3,9 +3,6 @@
 #include "Application.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/irc/IrcChannel2.hpp"
-#include "providers/irc/IrcServer.hpp"
-#include "providers/twitch/IrcMessageHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Settings.hpp"
@@ -32,6 +29,13 @@ Channel::Channel(const QString &name, Type type)
     , messages_(getSettings()->scrollbackSplitLimit)
     , type_(type)
 {
+    this->logFolderName_ = [this]() -> QString {
+        if (this->isTwitchChannel())
+        {
+            return "twitch";
+        }
+        return "other";
+    }();
 }
 
 Channel::~Channel()
@@ -74,6 +78,11 @@ bool Channel::hasMessages() const
     return !this->messages_.empty();
 }
 
+QString &Channel::logFolderName()
+{
+    return this->logFolderName_;
+}
+
 LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
 {
     return this->messages_.getSnapshot();
@@ -82,26 +91,18 @@ LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
 void Channel::addMessage(MessagePtr message,
                          std::optional<MessageFlags> overridingFlags)
 {
-    auto app = getApp();
     MessagePtr deleted;
 
     if (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog))
     {
-        QString channelPlatform("other");
-        if (this->type_ == Type::Irc)
+        if (!this->isLogInitialized_)
         {
-            auto *irc = dynamic_cast<IrcChannel *>(this);
-            if (irc != nullptr)
-            {
-                channelPlatform = QString("irc-%1").arg(
-                    irc->server()->userFriendlyIdentifier());
-            }
+            getApp()->logging->addChannel(this->name_, this->logFolderName());
+            this->isLogInitialized_ = true;
         }
-        else if (this->isTwitchChannel())
-        {
-            channelPlatform = "twitch";
-        }
-        app->logging->addMessage(this->name_, message, channelPlatform);
+
+        getApp()->logging->addMessage(this->name_, message,
+                                      this->logFolderName());
     }
 
     if (this->messages_.pushBack(message, deleted))

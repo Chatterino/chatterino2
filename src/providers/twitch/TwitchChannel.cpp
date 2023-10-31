@@ -32,6 +32,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
+#include "singletons/Logging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
@@ -237,6 +238,7 @@ TwitchChannel::~TwitchChannel()
         getApp()->twitch->seventvEventAPI->unsubscribeTwitchChannel(
             this->roomId());
     }
+    getApp()->logging->removeChannel(this->getName(), this->logFolderName());
 }
 
 void TwitchChannel::initialize()
@@ -1251,8 +1253,8 @@ void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)
     this->threads_[thread->rootId()] = thread;
 }
 
-const std::unordered_map<QString, std::weak_ptr<MessageThread>>
-    &TwitchChannel::threads() const
+const std::unordered_map<QString, std::weak_ptr<MessageThread>> &
+    TwitchChannel::threads() const
 {
     return this->threads_;
 }

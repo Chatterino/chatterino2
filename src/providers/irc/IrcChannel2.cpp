@@ -1,5 +1,6 @@
 #include "IrcChannel2.hpp"
 
+#include "Application.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -7,6 +8,7 @@
 #include "providers/irc/IrcCommands.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/irc/IrcServer.hpp"
+#include "singletons/Logging.hpp"
 #include "util/Helpers.hpp"
 
 namespace chatterino {
@@ -15,7 +17,13 @@ IrcChannel::IrcChannel(const QString &name, IrcServer *server)
     : Channel(name, Channel::Type::Irc)
     , ChannelChatters(*static_cast<Channel *>(this))
     , server_(server)
+    , logFolderName_(QString("irc-%1").arg(server->userFriendlyIdentifier()))
 {
+}
+
+IrcChannel::~IrcChannel()
+{
+    getApp()->logging->removeChannel(this->getName(), this->logFolderName());
 }
 
 void IrcChannel::sendMessage(const QString &message)
@@ -95,6 +103,11 @@ void IrcChannel::setServer(IrcServer *server)
 bool IrcChannel::canReconnect() const
 {
     return true;
+}
+
+QString &IrcChannel::logFolderName()
+{
+    return this->logFolderName_;
 }
 
 void IrcChannel::reconnect()
