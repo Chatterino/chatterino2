@@ -190,6 +190,12 @@ public:
     const std::unordered_map<QString, std::weak_ptr<MessageThread>> &threads()
         const;
 
+    /**
+     * Get the thread for the given message
+     * If no thread can be found for the message, create one
+     */
+    std::shared_ptr<MessageThread> getOrCreateThread(const MessagePtr &message);
+
     // Only TwitchChannel may invoke this signal
     pajlada::Signals::NoArgSignal userStateChanged;
 
