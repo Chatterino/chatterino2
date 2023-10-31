@@ -571,7 +571,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
 
     auto command = message->command();
 
-    if (command == "PRIVMSG")
+    if (command == u"PRIVMSG"_s)
     {
         auto *privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
         auto *tc = dynamic_cast<TwitchChannel *>(channel);
@@ -598,12 +598,12 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
         return builtMessages;
     }
 
-    if (command == "USERNOTICE")
+    if (command == u"USERNOTICE"_s)
     {
         return parseUserNoticeMessage(channel, message);
     }
 
-    if (command == "NOTICE")
+    if (command == u"NOTICE"_s)
     {
         return parseNoticeMessage(
             dynamic_cast<Communi::IrcNoticeMessage *>(message));
