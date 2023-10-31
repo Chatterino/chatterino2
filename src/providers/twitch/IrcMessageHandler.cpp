@@ -886,7 +886,7 @@ void IrcMessageHandler::handleGlobalUserStateMessage(
     currentUser->loadEmotes();
 }
 
-void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
+void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
 {
     MessageParseArgs args;
 
@@ -895,8 +895,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     auto *c = getApp()->twitch->whispersChannel.get();
 
     TwitchMessageBuilder builder(
-        c, message, args,
-        message->parameter(1).replace(COMBINED_FIXER, ZERO_WIDTH_JOINER),
+        c, ircMessage, args,
+        ircMessage->parameter(1).replace(COMBINED_FIXER, ZERO_WIDTH_JOINER),
         false);
 
     if (builder.isIgnored())
@@ -905,19 +905,19 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     }
 
     builder->flags.set(MessageFlag::Whisper);
-    MessagePtr _message = builder.build();
+    MessagePtr message = builder.build();
     builder.triggerHighlights();
 
     getApp()->twitch->lastUserThatWhisperedMe.set(builder.userName);
 
-    if (_message->flags.has(MessageFlag::ShowInMentions))
+    if (message->flags.has(MessageFlag::ShowInMentions))
     {
-        getApp()->twitch->mentionsChannel->addMessage(_message);
+        getApp()->twitch->mentionsChannel->addMessage(message);
     }
 
-    c->addMessage(_message);
+    c->addMessage(message);
 
-    auto overrideFlags = std::optional<MessageFlags>(_message->flags);
+    auto overrideFlags = std::optional<MessageFlags>(message->flags);
     overrideFlags->set(MessageFlag::DoNotTriggerNotification);
     overrideFlags->set(MessageFlag::DoNotLog);
 
@@ -926,8 +926,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
           isInStreamerMode()))
     {
         getApp()->twitch->forEachChannel(
-            [&_message, overrideFlags](ChannelPtr channel) {
-                channel->addMessage(_message, overrideFlags);
+            [&message, overrideFlags](ChannelPtr channel) {
+                channel->addMessage(message, overrideFlags);
             });
     }
 }
