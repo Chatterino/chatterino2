@@ -2258,6 +2258,10 @@ void ChannelView::addMessageContextMenuItems(
 
         if (messagePtr->replyThread != nullptr)
         {
+            menu.addAction("Reply to &original thread", [this, &messagePtr] {
+                this->setInputReply(messagePtr->replyThread->root());
+            });
+
             menu.addAction("View &thread", [this, &messagePtr] {
                 this->showReplyThreadPopup(messagePtr);
             });

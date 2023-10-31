@@ -1067,6 +1067,21 @@ void SplitInput::giveFocus(Qt::FocusReason reason)
 
 void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
 {
+    auto oldParent = this->replyThread_;
+    if (this->enableInlineReplying_ && oldParent)
+    {
+        // Remove old reply prefix
+        auto replyPrefix = "@" + oldParent->displayName;
+        auto plainText = this->ui_.textEdit->toPlainText().trimmed();
+        if (plainText.startsWith(replyPrefix))
+        {
+            plainText.remove(0, replyPrefix.length());
+        }
+        this->ui_.textEdit->setPlainText(plainText.trimmed());
+        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+        this->ui_.textEdit->resetCompletion();
+    }
+
     this->replyThread_ = std::move(reply);
 
     if (this->enableInlineReplying_)
