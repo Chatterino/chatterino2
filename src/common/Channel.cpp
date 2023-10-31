@@ -93,7 +93,8 @@ void Channel::addMessage(MessagePtr message,
 {
     MessagePtr deleted;
 
-    if (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog))
+    if (getSettings()->enableLogging &&
+        (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog)))
     {
         if (!this->isLogInitialized_)
         {

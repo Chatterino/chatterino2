@@ -33,11 +33,6 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
 {
     this->threadGuard.guard();
 
-    if (!getSettings()->enableLogging)
-    {
-        return;
-    }
-
     if (getSettings()->onlyLogListedChannels)
     {
         if (!this->onlyLogListedChannels.contains(channelName))
