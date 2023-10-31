@@ -32,6 +32,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
+#include "singletons/Logging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
@@ -237,6 +238,7 @@ TwitchChannel::~TwitchChannel()
         getApp()->twitch->seventvEventAPI->unsubscribeTwitchChannel(
             this->roomId());
     }
+    getApp()->logging->removeChannel(this->getName(), this->logFolderName());
 }
 
 void TwitchChannel::initialize()
