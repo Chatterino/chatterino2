@@ -12,7 +12,7 @@ class IrcChannel final : public Channel, public ChannelChatters
 {
 public:
     explicit IrcChannel(const QString &name, IrcServer *server);
-    ~IrcChannel();
+    ~IrcChannel() override;
 
     void sendMessage(const QString &message) override;
 

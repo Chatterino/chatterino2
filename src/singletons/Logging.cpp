@@ -43,7 +43,7 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
 
     this->loggingChannels_.at(platformName)
         .at(channelName)
-        ->addMessage(message);
+        ->addMessage(std::move(message));
 }
 
 void Logging::addChannel(const QString &channelName,
@@ -60,8 +60,7 @@ void Logging::addChannel(const QString &channelName,
     {
         auto channel = new LoggingChannel(channelName, platformName);
         this->loggingChannels_.at(platformName)
-            .emplace(channelName,
-                     std::unique_ptr<LoggingChannel>(std::move(channel)));
+            .emplace(channelName, std::unique_ptr<LoggingChannel>(channel));
     }
 }
 
