@@ -46,6 +46,7 @@
 - Dev: Refactor `DebugCount` and add copy button to debug popup. (#4921)
 - Dev: Changed lifetime of context menus. (#4924)
 - Dev: Refactor `ChannelView`, removing a bunch of clang-tidy warnings. (#4926)
+- Dev: Refactor `IrcMessageHandler`, removing a bunch of clang-tidy warnings & changing its public API. (#4927)
 
 ## 2.4.6
 
