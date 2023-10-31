@@ -594,17 +594,22 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
             builtMessages.emplace_back(builder.build());
             builder.triggerHighlights();
         }
+
+        return builtMessages;
     }
-    else if (command == "USERNOTICE")
+
+    if (command == "USERNOTICE")
     {
         return parseUserNoticeMessage(channel, message);
     }
-    else if (command == "NOTICE")
+
+    if (command == "NOTICE")
     {
         return parseNoticeMessage(
             dynamic_cast<Communi::IrcNoticeMessage *>(message));
     }
-    else if (command == u"CLEARCHAT"_s)
+
+    if (command == u"CLEARCHAT"_s)
     {
         auto cc = parseClearChatMessage(message);
         if (!cc)
@@ -630,6 +635,8 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
                 },
                 false);
         }
+
+        return builtMessages;
     }
 
     return builtMessages;
