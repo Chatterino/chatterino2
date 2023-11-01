@@ -19,7 +19,7 @@ class GeneralPage : public SettingsPage
 public:
     GeneralPage();
 
-    bool filterElements(const QString &query);
+    bool filterElements(const QString &query) override;
 
 private:
     void initLayout(GeneralPageView &layout);

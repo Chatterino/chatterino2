@@ -37,8 +37,8 @@ public:
     float qtFontScale() const;
 
 protected:
-    virtual void childEvent(QChildEvent *) override;
-    virtual void showEvent(QShowEvent *) override;
+    void childEvent(QChildEvent *) override;
+    void showEvent(QShowEvent *) override;
 
     virtual void scaleChangedEvent(float newScale);
     virtual void themeChangedEvent();

@@ -22,7 +22,7 @@ class IrcConnectionEditor : public QDialog
 public:
     explicit IrcConnectionEditor(const IrcServerData &data, bool isAdd = false,
                                  QWidget *parent = nullptr);
-    ~IrcConnectionEditor();
+    ~IrcConnectionEditor() override;
 
     IrcServerData data();
 

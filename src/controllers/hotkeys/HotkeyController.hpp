@@ -81,8 +81,8 @@ public:
     /**
      * @returns a const map with the HotkeyCategory enum as its key, and HotkeyCategoryData as the value.
      **/
-    [[nodiscard]] const std::map<HotkeyCategory, HotkeyCategoryData>
-        &categories() const;
+    [[nodiscard]] const std::map<HotkeyCategory, HotkeyCategoryData> &
+        categories() const;
 
     pajlada::Signals::NoArgSignal onItemsUpdated;
 

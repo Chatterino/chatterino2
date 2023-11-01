@@ -44,6 +44,11 @@
 - Dev: Replace `boost::optional` with `std::optional`. (#4877)
 - Dev: Improve performance by reducing repaints caused by selections. (#4889)
 - Dev: Removed direct dependency on Qt 5 compatibility module. (#4906)
+- Dev: Refactor `DebugCount` and add copy button to debug popup. (#4921)
+- Dev: Changed lifetime of context menus. (#4924)
+- Dev: Refactor `ChannelView`, removing a bunch of clang-tidy warnings. (#4926)
+- Dev: Refactor `IrcMessageHandler`, removing a bunch of clang-tidy warnings & changing its public API. (#4927)
+- Dev: Change clang-format from v14 to v16. (#4929)
 
 ## 2.4.6
 
