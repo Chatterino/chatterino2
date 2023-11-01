@@ -1327,7 +1327,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         {
             // Thread already exists (has a reply)
             auto thread = threadIt->second.lock();
-            updateReplyParticipatedStatus(tags, _message->nick(), builder,
+            updateReplyParticipatedStatus(tags, message->nick(), builder,
                                           thread, false);
             builder.setThread(thread);
             rootThread = thread;
