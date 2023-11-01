@@ -133,9 +133,12 @@ void LoggingChannel::addMessage(MessagePtr message)
         if (colonIndex != -1)
         {
             QString rootMessageChatter;
-            if (message->replyParent) {
+            if (message->replyParent)
+            {
                 rootMessageChatter = message->replyParent->loginName;
-            } else {
+            }
+            else
+            {
                 // we actually want to use 'reply-parent-user-login' tag here,
                 // but it's not worth storing just for this edge case
                 rootMessageChatter = message->replyThread->root()->loginName;
