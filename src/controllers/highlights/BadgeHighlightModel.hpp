@@ -25,12 +25,11 @@ public:
 
 protected:
     // vector into model row
-    virtual HighlightBadge getItemFromRow(
-        std::vector<QStandardItem *> &row,
-        const HighlightBadge &original) override;
+    HighlightBadge getItemFromRow(std::vector<QStandardItem *> &row,
+                                  const HighlightBadge &original) override;
 
-    virtual void getRowFromItem(const HighlightBadge &item,
-                                std::vector<QStandardItem *> &row) override;
+    void getRowFromItem(const HighlightBadge &item,
+                        std::vector<QStandardItem *> &row) override;
 };
 
 }  // namespace chatterino

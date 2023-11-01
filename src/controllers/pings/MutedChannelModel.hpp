@@ -12,12 +12,12 @@ class MutedChannelModel : public SignalVectorModel<QString>
 
 protected:
     // turn a vector item into a model row
-    virtual QString getItemFromRow(std::vector<QStandardItem *> &row,
-                                   const QString &original) override;
+    QString getItemFromRow(std::vector<QStandardItem *> &row,
+                           const QString &original) override;
 
     // turns a row in the model into a vector item
-    virtual void getRowFromItem(const QString &item,
-                                std::vector<QStandardItem *> &row) override;
+    void getRowFromItem(const QString &item,
+                        std::vector<QStandardItem *> &row) override;
 };
 
 }  // namespace chatterino

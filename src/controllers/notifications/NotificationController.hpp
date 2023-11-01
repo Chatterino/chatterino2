@@ -20,7 +20,7 @@ enum class Platform : uint8_t {
 class NotificationController final : public Singleton, private QObject
 {
 public:
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, Paths &paths) override;
 
     bool isChannelNotified(const QString &channelName, Platform p);
     void updateChannelNotification(const QString &channelName, Platform p);
