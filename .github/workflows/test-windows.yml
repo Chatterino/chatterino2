@@ -160,7 +160,7 @@ jobs:
 
       - name: Checkout Twitch PubSub Server Test
         if: startsWith(matrix.os, 'windows')
-        use: actions/checkout@v4
+        uses: actions/checkout@v4
         with:
           - repository: 'Chatterino/twitch-pubsub-server-test'
           - path: 'pubsub-server-test'
