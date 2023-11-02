@@ -1,29 +1,40 @@
-#include "DebugPopup.hpp"
+#include "widgets/helper/DebugPopup.hpp"
 
+#include "common/Literals.hpp"
+#include "util/Clipboard.hpp"
 #include "util/DebugCount.hpp"
 
 #include <QFontDatabase>
-#include <QHBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 #include <QTimer>
+#include <QVBoxLayout>
 
 namespace chatterino {
 
+using namespace literals;
+
 DebugPopup::DebugPopup()
 {
-    auto *layout = new QHBoxLayout(this);
+    auto *layout = new QVBoxLayout(this);
     auto *text = new QLabel(this);
     auto *timer = new QTimer(this);
+    auto *copyButton = new QPushButton(u"&Copy"_s);
 
-    timer->setInterval(300);
     QObject::connect(timer, &QTimer::timeout, [text] {
         text->setText(DebugCount::getDebugText());
     });
-    timer->start();
+    timer->start(300);
+    text->setText(DebugCount::getDebugText());
 
     text->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 
     layout->addWidget(text);
+    layout->addWidget(copyButton, 1);
+
+    QObject::connect(copyButton, &QPushButton::clicked, this, [text] {
+        crossPlatformCopy(text->text());
+    });
 }
 
 }  // namespace chatterino

@@ -101,7 +101,7 @@ public:
         return this;
     }
 
-    virtual ~SignalVectorModel()
+    ~SignalVectorModel() override
     {
         for (Row &row : this->rows_)
         {

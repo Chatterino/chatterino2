@@ -72,20 +72,20 @@ protected:
     bool nativeEvent(const QByteArray &eventType, void *message,
                      long *result) override;
 #endif
-    virtual void scaleChangedEvent(float) override;
+    void scaleChangedEvent(float) override;
 
-    virtual void paintEvent(QPaintEvent *) override;
+    void paintEvent(QPaintEvent *) override;
 
-    virtual void changeEvent(QEvent *) override;
-    virtual void leaveEvent(QEvent *) override;
-    virtual void resizeEvent(QResizeEvent *) override;
-    virtual void moveEvent(QMoveEvent *) override;
-    virtual void closeEvent(QCloseEvent *) override;
-    virtual void showEvent(QShowEvent *) override;
+    void changeEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
+    void resizeEvent(QResizeEvent *) override;
+    void moveEvent(QMoveEvent *) override;
+    void closeEvent(QCloseEvent *) override;
+    void showEvent(QShowEvent *) override;
 
-    virtual void themeChangedEvent() override;
-    virtual bool event(QEvent *event) override;
-    virtual void wheelEvent(QWheelEvent *event) override;
+    void themeChangedEvent() override;
+    bool event(QEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
