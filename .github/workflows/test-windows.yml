@@ -158,14 +158,45 @@ jobs:
           nmake /S /NOLOGO
         working-directory: build-test
 
+      - name: Checkout Twitch PubSub Server Test
+        if: startsWith(matrix.os, 'windows')
+        use: actions/checkout@v4
+        with:
+          - repository: 'Chatterino/twitch-pubsub-server-test'
+          - path: 'pubsub-server-test'
+
+      - name: Build and run Twitch PubSub Server Test
+        if: startsWith(matrix.os, 'windows')
+        timeout-minutes: 30
+        run: |
+          cd src/cmd/server
+          go build
+          cp server ../../../
+          cp server.crt ../../../
+          cp server.key ../../../
+          cd ../../..
+          ./server 127.0.0.1:9050 &
+        working-directory: pubsub-server-test
+        shell: pwsh
+
+      - name: Checkout httpbin
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          git clone https://gitlab.com/kennethreitz/httpbin.git httpbin
+
+      - name: Build and run httpbin
+        if: startsWith(matrix.os, 'windows')
+        timeout-minutes: 30
+        run: |
+          pip3 install -r Pipfile
+          gunicorn -b 0.0.0.0:80 httpbin:app -k gevent &
+        working-directory: httpbin
+        shell: pwsh
+
       - name: Test
         if: startsWith(matrix.os, 'windows')
         timeout-minutes: 30
         run: |
-          docker pull kennethreitz/httpbin
-          docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
-          docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
-          docker run -p 9051:80 --detach kennethreitz/httpbin
           ./bin/chatterino-test.exe || ./bin/chatterino-test.exe || ./bin/chatterino-test.exe
         working-directory: build-test
         shell: pwsh
