@@ -792,6 +792,14 @@ void UserInfoPopup::updateUserData()
             return;
         }
 
+        // Correct for when being opened with "id:"
+        if (this->userName_ != user.login)
+        {
+            this->userName_ = user.login;
+
+            // Ensure recent messages are shown
+            this->updateLatestMessages();
+        }
         this->userId_ = user.id;
         this->avatarUrl_ = user.profileImageUrl;
 
@@ -909,8 +917,17 @@ void UserInfoPopup::updateUserData()
             [] {});
     };
 
-    getHelix()->getUserByName(this->userName_, onUserFetched,
-                              onUserFetchFailed);
+    const QString idPrefix = "#";
+    if (this->userName_.startsWith(idPrefix))
+    {
+        getHelix()->getUserById(this->userName_.mid(idPrefix.size()),
+                                onUserFetched, onUserFetchFailed);
+    }
+    else
+    {
+        getHelix()->getUserByName(this->userName_, onUserFetched,
+                                  onUserFetchFailed);
+    }
 
     this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
