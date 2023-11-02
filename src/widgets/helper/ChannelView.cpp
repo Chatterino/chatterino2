@@ -351,7 +351,7 @@ void ChannelView::initializeLayout()
 
     QObject::connect(
         this->goToBottom_, &EffectLabel::leftClicked, this, [this] {
-            QTimer::singleShot(180, [this] {
+            QTimer::singleShot(180, this, [this] {
                 this->scrollBar_->scrollToBottom(
                     getSettings()->enableSmoothScrollingNewMessages.getValue());
             });
