@@ -24,6 +24,7 @@
 - Bugfix: Fixed the input completion popup from disappearing when clicking on it on Windows and macOS. (#4876)
 - Bugfix: Fixed double-click text selection moving its position with each new message. (#4898)
 - Bugfix: Fixed an issue where notifications on Windows would contain no or an old avatar. (#4899)
+- Bugfix: Fixed a crash when clicking `More messages below` button in a usercard and closing it quickly. (#4933)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
