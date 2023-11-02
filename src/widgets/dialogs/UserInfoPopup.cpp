@@ -701,7 +701,18 @@ void UserInfoPopup::setData(const QString &name,
                             const ChannelPtr &contextChannel,
                             const ChannelPtr &openingChannel)
 {
-    this->userName_ = name;
+    const QString idPrefix = "#";
+    bool isId = name.startsWith(idPrefix);
+    if (isId)
+    {
+        this->userId_ = name.mid(idPrefix.size());
+        this->userName_ = "";
+    }
+    else
+    {
+        this->userName_ = name;
+    }
+
     this->channel_ = openingChannel;
 
     if (!contextChannel->isEmpty())
@@ -723,7 +734,11 @@ void UserInfoPopup::setData(const QString &name,
 
     this->userStateChanged_.invoke();
 
-    this->updateLatestMessages();
+    if (!isId)
+    {
+        this->updateLatestMessages();
+    }
+    // If we're opening by ID, this will be called as soon as we get the information from twitch
 }
 
 void UserInfoPopup::updateLatestMessages()
@@ -792,14 +807,14 @@ void UserInfoPopup::updateUserData()
             return;
         }
 
-        // Correct for when being opened with "id:"
-        if (this->userName_ != user.login)
+        // Correct for when being opened with ID
+        if (this->userName_.isEmpty())
         {
             this->userName_ = user.login;
-
             // Ensure recent messages are shown
             this->updateLatestMessages();
         }
+
         this->userId_ = user.id;
         this->avatarUrl_ = user.profileImageUrl;
 
@@ -917,11 +932,10 @@ void UserInfoPopup::updateUserData()
             [] {});
     };
 
-    const QString idPrefix = "#";
-    if (this->userName_.startsWith(idPrefix))
+    if (!this->userId_.isEmpty())
     {
-        getHelix()->getUserById(this->userName_.mid(idPrefix.size()),
-                                onUserFetched, onUserFetchFailed);
+        getHelix()->getUserById(this->userId_, onUserFetched,
+                                onUserFetchFailed);
     }
     else
     {
