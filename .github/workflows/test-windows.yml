@@ -1,5 +1,3 @@
----
-name: Test Windows
 
 on:
   pull_request:
@@ -171,8 +169,6 @@ jobs:
         run: |
           cd cmd/server
           go build
-          ls ../..
-          tree ../..
           cp server.exe ../../
           cp server.crt ../../
           cp server.key ../../
@@ -207,3 +203,4 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: conan cache clean --source --build --download "*"
         shell: pwsh
+
