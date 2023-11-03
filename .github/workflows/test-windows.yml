@@ -171,13 +171,13 @@ jobs:
         run: |
           cd cmd/server
           go build
-          ls
+          ls ../..
           tree ../..
-          cp server ../../
+          cp server.exe ../../
           cp server.crt ../../
           cp server.key ../../
           cd ../..
-          ./server 127.0.0.1:9050 &
+          ./server.exe 127.0.0.1:9050 &
         working-directory: pubsub-server-test
         shell: pwsh
 
