@@ -188,7 +188,8 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         timeout-minutes: 30
         run: |
-          pip3 install pipenv
+          pip3 install --no-cache-dir pipenv
+          pipenv lock -r
           pipenv install
           gunicorn -b 0.0.0.0:80 httpbin:app -k gevent &
         working-directory: httpbin
