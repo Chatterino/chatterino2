@@ -169,12 +169,12 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         timeout-minutes: 30
         run: |
-          cd src/cmd/server
+          cd cmd/server
           go build
-          cp server ../../../
-          cp server.crt ../../../
-          cp server.key ../../../
-          cd ../../..
+          cp server ../../
+          cp server.crt ../../
+          cp server.key ../../
+          cd ../..
           ./server 127.0.0.1:9050 &
         working-directory: pubsub-server-test
         shell: pwsh
