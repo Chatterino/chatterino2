@@ -14,9 +14,9 @@ namespace {
 
 using namespace chatterino;
 
-static constexpr auto NUM_MODERATORS_TO_FETCH_PER_REQUEST = 100;
+constexpr auto NUM_MODERATORS_TO_FETCH_PER_REQUEST = 100;
 
-static constexpr auto NUM_CHATTERS_TO_FETCH = 1000;
+constexpr auto NUM_CHATTERS_TO_FETCH = 1000;
 
 }  // namespace
 
