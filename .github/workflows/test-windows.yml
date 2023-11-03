@@ -171,6 +171,8 @@ jobs:
         run: |
           cd cmd/server
           go build
+          ls -la
+          tree ../..
           cp server ../../
           cp server.crt ../../
           cp server.key ../../
