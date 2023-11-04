@@ -15,6 +15,33 @@
 #include <QMessageBox>
 #include <QTableView>
 
+namespace {
+
+using namespace chatterino;
+
+void tableCellClicked(const QModelIndex &clicked, EditableModelView *view,
+                      HotkeyModel *model)
+{
+    auto hotkey = getApp()->hotkeys->getHotkeyByName(
+        clicked.siblingAtColumn(0).data(Qt::EditRole).toString());
+    if (!hotkey)
+    {
+        return;  // clicked on header or invalid hotkey
+    }
+    EditHotkeyDialog dialog(hotkey);
+    bool wasAccepted = dialog.exec() == 1;
+
+    if (wasAccepted)
+    {
+        auto newHotkey = dialog.data();
+        auto vectorIndex =
+            getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
+        getApp()->hotkeys->save();
+    }
+}
+
+}  // namespace
+
 namespace chatterino {
 
 KeyboardSettingsPage::KeyboardSettingsPage()
@@ -48,8 +75,8 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     });
 
     QObject::connect(view->getTableView(), &QTableView::doubleClicked,
-                     [this, view, model](const QModelIndex &clicked) {
-                         this->tableCellClicked(clicked, view, model);
+                     [view, model](const QModelIndex &clicked) {
+                         tableCellClicked(clicked, view, model);
                      });
 
     auto *resetEverything = new QPushButton("Reset to defaults");
@@ -65,28 +92,6 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         }
     });
     view->addCustomButton(resetEverything);
-}
-
-void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
-                                            EditableModelView *view,
-                                            HotkeyModel *model)
-{
-    auto hotkey = getApp()->hotkeys->getHotkeyByName(
-        clicked.siblingAtColumn(0).data(Qt::EditRole).toString());
-    if (!hotkey)
-    {
-        return;  // clicked on header or invalid hotkey
-    }
-    EditHotkeyDialog dialog(hotkey);
-    bool wasAccepted = dialog.exec() == 1;
-
-    if (wasAccepted)
-    {
-        auto newHotkey = dialog.data();
-        auto vectorIndex =
-            getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
-        getApp()->hotkeys->save();
-    }
 }
 
 }  // namespace chatterino
