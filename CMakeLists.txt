@@ -36,7 +36,11 @@ if(BUILD_BENCHMARKS)
     list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
 endif()
 
-project(chatterino VERSION 2.4.6)
+project(chatterino 
+    VERSION 2.4.6
+    DESCRIPTION "Chat client for twitch.tv"
+    HOMEPAGE_URL "https://chatterino.com/"
+)
 
 if(CHATTERINO_LTO)
     include(CheckIPOSupported)

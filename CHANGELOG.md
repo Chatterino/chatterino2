@@ -51,6 +51,7 @@
 - Dev: Refactor `ChannelView`, removing a bunch of clang-tidy warnings. (#4926)
 - Dev: Refactor `IrcMessageHandler`, removing a bunch of clang-tidy warnings & changing its public API. (#4927)
 - Dev: Change clang-format from v14 to v16. (#4929)
+- Dev: `Details` file properties tab is now populated on Windows. (#4912)
 
 ## 2.4.6
 
