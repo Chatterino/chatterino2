@@ -17,11 +17,11 @@ class LambdaRunnable : public QRunnable
 {
 public:
     LambdaRunnable(std::function<void()> action)
+        : action_(std::move(action))
     {
-        this->action_ = std::move(action);
     }
 
-    void run()
+    void run() override
     {
         this->action_();
     }

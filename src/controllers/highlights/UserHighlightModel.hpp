@@ -16,18 +16,17 @@ public:
 
 protected:
     // vector into model row
-    virtual HighlightPhrase getItemFromRow(
-        std::vector<QStandardItem *> &row,
-        const HighlightPhrase &original) override;
+    HighlightPhrase getItemFromRow(std::vector<QStandardItem *> &row,
+                                   const HighlightPhrase &original) override;
 
-    virtual void getRowFromItem(const HighlightPhrase &item,
-                                std::vector<QStandardItem *> &row) override;
+    void getRowFromItem(const HighlightPhrase &item,
+                        std::vector<QStandardItem *> &row) override;
 
-    virtual void afterInit() override;
+    void afterInit() override;
 
-    virtual void customRowSetData(const std::vector<QStandardItem *> &row,
-                                  int column, const QVariant &value, int role,
-                                  int rowIndex) override;
+    void customRowSetData(const std::vector<QStandardItem *> &row, int column,
+                          const QVariant &value, int role,
+                          int rowIndex) override;
 };
 
 }  // namespace chatterino

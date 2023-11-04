@@ -1251,10 +1251,26 @@ void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)
     this->threads_[thread->rootId()] = thread;
 }
 
-const std::unordered_map<QString, std::weak_ptr<MessageThread>>
-    &TwitchChannel::threads() const
+const std::unordered_map<QString, std::weak_ptr<MessageThread>> &
+    TwitchChannel::threads() const
 {
     return this->threads_;
+}
+
+std::shared_ptr<MessageThread> TwitchChannel::getOrCreateThread(
+    const MessagePtr &message)
+{
+    assert(message != nullptr);
+
+    auto threadIt = this->threads_.find(message->id);
+    if (threadIt != this->threads_.end() && !threadIt->second.expired())
+    {
+        return threadIt->second.lock();
+    }
+
+    auto thread = std::make_shared<MessageThread>(message);
+    this->addReplyThread(thread);
+    return thread;
 }
 
 void TwitchChannel::cleanUpReplyThreads()

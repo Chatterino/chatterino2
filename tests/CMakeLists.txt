@@ -35,6 +35,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/Literals.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/XDGDesktopFile.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/XDGHelper.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Selection.cpp
     # Add your new file above this line!
     )
 
