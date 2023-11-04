@@ -8,6 +8,7 @@
 #include "common/SignalVector.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
+#include "controllers/commands/builtin/twitch/Ban.hpp"
 #include "controllers/commands/builtin/twitch/ChatSettings.hpp"
 #include "controllers/commands/builtin/twitch/ShieldMode.hpp"
 #include "controllers/commands/builtin/twitch/Shoutout.hpp"
@@ -2293,17 +2294,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
     auto unbanLambda = [](auto words, auto channel) {
         auto commandName = words.at(0).toLower();
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
@@ -2411,27 +2401,17 @@ void CommandController::initialize(Settings &, Paths &paths)
             });
 
         return "";
-    };  // These changes are from the helix-command-migration/unban-untimeout branch
+    };
 
-    this->registerCommand("/unban", [unbanLambda](const QStringList &words,
-                                                  auto channel) {
-        return unbanLambda(words, channel);
-    });  // These changes are from the helix-command-migration/unban-untimeout branch
+    this->registerCommand(
+        "/unban", [unbanLambda](const QStringList &words, auto channel) {
+            return unbanLambda(words, channel);
+        });
 
-    this->registerCommand("/untimeout", [unbanLambda](const QStringList &words,
-                                                      auto channel) {
-        return unbanLambda(words, channel);
-    });  // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
-    // These changes are from the helix-command-migration/unban-untimeout branch
+    this->registerCommand(
+        "/untimeout", [unbanLambda](const QStringList &words, auto channel) {
+            return unbanLambda(words, channel);
+        });
 
     this->registerCommand(  // /raid
         "/raid", [](const QStringList &words, auto channel) -> QString {
@@ -2677,251 +2657,10 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/uniquechatoff", &commands::uniqueChatOff);
     this->registerCommand("/r9kbetaoff", &commands::uniqueChatOff);
 
-    auto formatBanTimeoutError =
-        [](const char *operation, HelixBanUserError error,
-           const QString &message, const QString &userTarget) -> QString {
-        using Error = HelixBanUserError;
+    this->registerCommand("/timeout", &commands::sendTimeout);
 
-        QString errorMessage = QString("Failed to %1 user - ").arg(operation);
-
-        switch (error)
-        {
-            case Error::ConflictingOperation: {
-                errorMessage += "There was a conflicting ban operation on "
-                                "this user. Please try again.";
-            }
-            break;
-
-            case Error::Forwarded: {
-                errorMessage += message;
-            }
-            break;
-
-            case Error::Ratelimited: {
-                errorMessage += "You are being ratelimited by Twitch. Try "
-                                "again in a few seconds.";
-            }
-            break;
-
-            case Error::TargetBanned: {
-                // Equivalent IRC error
-                errorMessage += QString("%1 is already banned in this channel.")
-                                    .arg(userTarget);
-            }
-            break;
-
-            case Error::CannotBanUser: {
-                // We can't provide the identical error as in IRC,
-                // because we don't have enough information about the user.
-                // The messages from IRC are formatted like this:
-                // "You cannot {op} moderator {mod} unless you are the owner of this channel."
-                // "You cannot {op} the broadcaster."
-                errorMessage +=
-                    QString("You cannot %1 %2.").arg(operation, userTarget);
-            }
-            break;
-
-            case Error::UserMissingScope: {
-                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
-                errorMessage += "Missing required scope. "
-                                "Re-login with your "
-                                "account and try again.";
-            }
-            break;
-
-            case Error::UserNotAuthorized: {
-                // TODO(pajlada): Phrase MISSING_PERMISSION
-                errorMessage += "You don't have permission to "
-                                "perform that action.";
-            }
-            break;
-
-            case Error::Unknown: {
-                errorMessage += "An unknown error has occurred.";
-            }
-            break;
-        }
-        return errorMessage;
-    };
-
-    this->registerCommand("/timeout", [formatBanTimeoutError](
-                                          const QStringList &words,
-                                          auto channel) {
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("The /timeout command only works in Twitch channels")));
-            return "";
-        }
-        const auto *usageStr =
-            "Usage: \"/timeout <username> [duration][time unit] [reason]\" - "
-            "Temporarily prevent a user from chatting. Duration (optional, "
-            "default=10 minutes) must be a positive integer; time unit "
-            "(optional, default=s) must be one of s, m, h, d, w; maximum "
-            "duration is 2 weeks. Combinations like 1d2h are also allowed. "
-            "Reason is optional and will be shown to the target user and other "
-            "moderators. Use \"/untimeout\" to remove a timeout.";
-        if (words.size() < 2)
-        {
-            channel->addMessage(makeSystemMessage(usageStr));
-            return "";
-        }
-
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to timeout someone!"));
-            return "";
-        }
-
-        auto target = words.at(1);
-        stripChannelName(target);
-
-        int duration = 10 * 60;  // 10min
-        if (words.size() >= 3)
-        {
-            duration = (int)parseDurationToSeconds(words.at(2));
-            if (duration <= 0)
-            {
-                channel->addMessage(makeSystemMessage(usageStr));
-                return "";
-            }
-        }
-        auto reason = words.mid(3).join(' ');
-
-        getHelix()->getUserByName(
-            target,
-            [channel, currentUser, twitchChannel, target, duration, reason,
-             formatBanTimeoutError](const auto &targetUser) {
-                getHelix()->banUser(
-                    twitchChannel->roomId(), currentUser->getUserId(),
-                    targetUser.id, duration, reason,
-                    [] {
-                        // No response for timeouts, they're emitted over pubsub/IRC instead
-                    },
-                    [channel, target, targetUser, formatBanTimeoutError](
-                        auto error, auto message) {
-                        auto errorMessage = formatBanTimeoutError(
-                            "timeout", error, message, targetUser.displayName);
-                        channel->addMessage(makeSystemMessage(errorMessage));
-                    });
-            },
-            [channel, target] {
-                // Equivalent error from IRC
-                channel->addMessage(makeSystemMessage(
-                    QString("Invalid username: %1").arg(target)));
-            });
-
-        return "";
-    });
-
-    this->registerCommand("/ban", [formatBanTimeoutError](
-                                      const QStringList &words, auto channel) {
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("The /ban command only works in Twitch channels")));
-            return "";
-        }
-
-        const auto *usageStr =
-            "Usage: \"/ban <username> [reason]\" - Permanently prevent a user "
-            "from chatting. Reason is optional and will be shown to the target "
-            "user and other moderators. Use \"/unban\" to remove a ban.";
-        if (words.size() < 2)
-        {
-            channel->addMessage(makeSystemMessage(usageStr));
-            return "";
-        }
-
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to ban someone!"));
-            return "";
-        }
-
-        auto target = words.at(1);
-        stripChannelName(target);
-
-        auto reason = words.mid(2).join(' ');
-
-        getHelix()->getUserByName(
-            target,
-            [channel, currentUser, twitchChannel, target, reason,
-             formatBanTimeoutError](const auto &targetUser) {
-                getHelix()->banUser(
-                    twitchChannel->roomId(), currentUser->getUserId(),
-                    targetUser.id, std::nullopt, reason,
-                    [] {
-                        // No response for bans, they're emitted over pubsub/IRC instead
-                    },
-                    [channel, target, targetUser, formatBanTimeoutError](
-                        auto error, auto message) {
-                        auto errorMessage = formatBanTimeoutError(
-                            "ban", error, message, targetUser.displayName);
-                        channel->addMessage(makeSystemMessage(errorMessage));
-                    });
-            },
-            [channel, target] {
-                // Equivalent error from IRC
-                channel->addMessage(makeSystemMessage(
-                    QString("Invalid username: %1").arg(target)));
-            });
-
-        return "";
-    });
-
-    this->registerCommand("/banid", [formatBanTimeoutError](
-                                        const QStringList &words,
-                                        auto channel) {
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("The /banid command only works in Twitch channels")));
-            return "";
-        }
-
-        const auto *usageStr =
-            "Usage: \"/banid <userID> [reason]\" - Permanently prevent a user "
-            "from chatting via their user ID. Reason is optional and will be "
-            "shown to the target user and other moderators.";
-        if (words.size() < 2)
-        {
-            channel->addMessage(makeSystemMessage(usageStr));
-            return "";
-        }
-
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to ban someone!"));
-            return "";
-        }
-
-        auto target = words.at(1);
-        auto reason = words.mid(2).join(' ');
-
-        getHelix()->banUser(
-            twitchChannel->roomId(), currentUser->getUserId(), target,
-            std::nullopt, reason,
-            [] {
-                // No response for bans, they're emitted over pubsub/IRC instead
-            },
-            [channel, target, formatBanTimeoutError](auto error, auto message) {
-                auto errorMessage =
-                    formatBanTimeoutError("ban", error, message, "#" + target);
-                channel->addMessage(makeSystemMessage(errorMessage));
-            });
-
-        return "";
-    });
+    this->registerCommand("/ban", &commands::sendBan);
+    this->registerCommand("/banid", &commands::sendBanById);
 
     for (const auto &cmd : TWITCH_WHISPER_COMMANDS)
     {

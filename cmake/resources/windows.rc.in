@@ -1,0 +1,34 @@
+#include <winver.h>
+
+IDI_ICON1   ICON    "@RES_DIR@/icon.ico"
+
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION        @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,@PROJECT_VERSION_TWEAK@
+    PRODUCTVERSION     @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,@PROJECT_VERSION_TWEAK@
+    FILEFLAGSMASK      VS_FFI_FILEFLAGSMASK
+    FILEFLAGS          VS_FF_SPECIALBUILD
+    FILEOS             VOS__WINDOWS32
+    FILETYPE           VFT_APP
+    FILESUBTYPE        0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "ProductName",      "Chatterino"
+            VALUE "ProductVersion",   "@PROJECT_VERSION@"
+            VALUE "CompanyName",      "Chatterino, @PROJECT_HOMEPAGE_URL@"
+            VALUE "FileDescription",  "Chatterino"
+            VALUE "FileVersion",      "@PROJECT_VERSION@"
+            VALUE "SpecialBuild",     "@GIT_COMMIT@"
+            VALUE "InternalName",     "Chatterino"
+            VALUE "OriginalFilename", "Chatterino"
+            VALUE "LegalCopyright",   "Project contributors 2016-@CURRENT_YEAR@"
+            VALUE "Licence",          "MIT"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

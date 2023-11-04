@@ -167,38 +167,21 @@ jobs:
           rm pubsub-server.zip
         shell: pwsh
 
-      - name: Run Twitch PubSub Server Test
-        if: startsWith(matrix.os, 'windows')
-        timeout-minutes: 30
-        run: |
-          ls
-          ./server.exe 127.0.0.1:9050 &
-        working-directory: pubsub-server-test
-        shell: pwsh
-
       - name: Checkout httpbin
         if: startsWith(matrix.os, 'windows')
-        run: |
-          git clone https://gitlab.com/kennethreitz/httpbin.git httpbin
-
-      - name: Build and run httpbin
-        if: startsWith(matrix.os, 'windows')
-        timeout-minutes: 30
-        run: |
-          pip3 install --no-cache-dir pipenv
-          $pipFile = (Get-Content Pipfile) -as [Collections.ArrayList]
-          $pipFile.Insert(1, 'name = "PyPi"')
-          $pipFile | Set-Content Pipfile
-          echo $pipFile
-          pipenv install
-          gunicorn -b 0.0.0.0:80 httpbin:app -k gevent &
-        working-directory: httpbin
-        shell: pwsh
+        uses: actions/checkout@v4
+        with:
+          repository: "duskmoon314/httpbin-rs"
+          path: "httpbin"
 
       - name: Test
         if: startsWith(matrix.os, 'windows')
         timeout-minutes: 30
         run: |
+          cd ../httpbin
+          cargo run &
+          cd ../../build-test
+          ./pubsub-server-test/server.exe 127.0.0.1:9050 &
           ./bin/chatterino-test.exe || ./bin/chatterino-test.exe || ./bin/chatterino-test.exe
         working-directory: build-test
         shell: pwsh
