@@ -158,23 +158,20 @@ jobs:
           nmake /S /NOLOGO
         working-directory: build-test
 
-      - name: Checkout Twitch PubSub Server Test
+      - name: Download and extract Twitch PubSub Server Test
         if: startsWith(matrix.os, 'windows')
-        uses: actions/checkout@v4
-        with:
-          repository: 'Chatterino/twitch-pubsub-server-test'
-          path: 'pubsub-server-test'
+        run: |
+          mkdir pubsub-server-test
+          Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/releases/download/v1.0.7/server-v1.0.7-windows-amd64.zip" -outfile "pubsub-server.zip"
+          Expand-Archive pubsub-server.zip -DestinationPath pubsub-server-test
+          rm pubsub-server.zip
+        shell: pwsh
 
-      - name: Build and run Twitch PubSub Server Test
+      - name: Run Twitch PubSub Server Test
         if: startsWith(matrix.os, 'windows')
         timeout-minutes: 30
         run: |
-          cd cmd/server
-          go build
-          cp server.exe ../../
-          cp server.crt ../../
-          cp server.key ../../
-          cd ../..
+          ls
           ./server.exe 127.0.0.1:9050 &
         working-directory: pubsub-server-test
         shell: pwsh
@@ -210,4 +207,3 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: conan cache clean --source --build --download "*"
         shell: pwsh
-
