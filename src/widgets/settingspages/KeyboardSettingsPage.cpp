@@ -1,4 +1,4 @@
-#include "KeyboardSettingsPage.hpp"
+#include "widgets/settingspages/KeyboardSettingsPage.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
@@ -22,7 +22,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     LayoutCreator<KeyboardSettingsPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>();
 
-    auto model = getApp()->hotkeys->createModel(nullptr);
+    auto *model = getApp()->hotkeys->createModel(nullptr);
     EditableModelView *view =
         layout.emplace<EditableModelView>(model).getElement();
 
@@ -35,7 +35,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         1, QHeaderView::Stretch);
 
     // We can safely ignore this signal connection since we own the view
-    std::ignore = view->addButtonPressed.connect([view, model] {
+    std::ignore = view->addButtonPressed.connect([] {
         EditHotkeyDialog dialog(nullptr);
         bool wasAccepted = dialog.exec() == 1;
 
@@ -52,7 +52,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
                          this->tableCellClicked(clicked, view, model);
                      });
 
-    QPushButton *resetEverything = new QPushButton("Reset to defaults");
+    auto *resetEverything = new QPushButton("Reset to defaults");
     QObject::connect(resetEverything, &QPushButton::clicked, [this]() {
         auto reply = QMessageBox::question(
             this, "Reset hotkeys",
