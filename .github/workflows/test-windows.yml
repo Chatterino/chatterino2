@@ -180,7 +180,7 @@ jobs:
         run: |
           cd ../httpbin
           cargo run &
-          cd ../../build-test
+          cd ../build-test
           ./pubsub-server-test/server.exe 127.0.0.1:9050 &
           ./bin/chatterino-test.exe || ./bin/chatterino-test.exe || ./bin/chatterino-test.exe
         working-directory: build-test
