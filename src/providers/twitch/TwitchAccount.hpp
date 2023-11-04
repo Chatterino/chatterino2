@@ -36,7 +36,9 @@ public:
     struct EmoteSet {
         QString key;
         QString channelName;
+        QString channelID;
         QString text;
+        bool subscriber{false};
         bool local{false};
         std::vector<TwitchEmote> emotes;
     };

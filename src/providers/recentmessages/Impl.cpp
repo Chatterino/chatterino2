@@ -54,7 +54,6 @@ std::vector<Communi::IrcMessage *> parseRecentMessages(
 std::vector<MessagePtr> buildRecentMessages(
     std::vector<Communi::IrcMessage *> &messages, Channel *channel)
 {
-    auto &handler = IrcMessageHandler::instance();
     std::vector<MessagePtr> allBuiltMessages;
 
     for (auto *message : messages)
@@ -78,8 +77,8 @@ std::vector<MessagePtr> buildRecentMessages(
             }
         }
 
-        auto builtMessages =
-            handler.parseMessageWithReply(channel, message, allBuiltMessages);
+        auto builtMessages = IrcMessageHandler::parseMessageWithReply(
+            channel, message, allBuiltMessages);
 
         for (const auto &builtMessage : builtMessages)
         {

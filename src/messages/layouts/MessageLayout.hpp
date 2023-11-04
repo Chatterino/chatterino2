@@ -60,7 +60,11 @@ public:
     void deleteBuffer();
     void deleteCache();
 
-    // Elements
+    /**
+     * Returns a raw pointer to the element at the given point
+     *
+     * If no element is found at the given point, this returns a null pointer
+     */
     const MessageLayoutElement *getElementAt(QPoint point);
 
     /**
