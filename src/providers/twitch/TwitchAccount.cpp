@@ -311,6 +311,8 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                     emoteSet->text = ivrEmoteSet.displayName;
                     emoteSet->subscriber = !ivrEmoteSet.tier.isNull();
 
+                    // NOTE: If a user does not have a subscriber emote set, but a follower emote set, this logic will be wrong
+                    // However, that's not a realistic problem.
                     bool haveSubscriberSetForChannel =
                         subscriberChannelIDs.contains(ivrEmoteSet.channelId);
 
