@@ -124,4 +124,39 @@ QString requests(const CommandContext &ctx)
     return "";
 }
 
+QString lowtrust(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    QString target(ctx.words.value(1));
+
+    if (target.isEmpty())
+    {
+        if (ctx.channel->getType() == Channel::Type::Twitch &&
+            !ctx.channel->isEmpty())
+        {
+            target = ctx.channel->getName();
+        }
+        else
+        {
+            ctx.channel->addMessage(makeSystemMessage(
+                "Usage: /lowtrust [channel]. You can also use the command "
+                "without arguments in any Twitch channel to open its "
+                "suspicious user activity feed. Only the broadcaster and "
+                "moderators have permission to view this feed."));
+            return "";
+        }
+    }
+
+    stripChannelName(target);
+    QDesktopServices::openUrl(QUrl(
+        QString("https://www.twitch.tv/popout/moderator/%1/low-trust-users")
+            .arg(target)));
+
+    return "";
+}
+
 }  // namespace chatterino::commands
