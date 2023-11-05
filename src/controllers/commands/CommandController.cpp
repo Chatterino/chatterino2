@@ -9,6 +9,7 @@
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 #include "controllers/commands/builtin/Misc.hpp"
 #include "controllers/commands/builtin/twitch/AddModerator.hpp"
+#include "controllers/commands/builtin/twitch/Announce.hpp"
 #include "controllers/commands/builtin/twitch/Ban.hpp"
 #include "controllers/commands/builtin/twitch/Block.hpp"
 #include "controllers/commands/builtin/twitch/ChatSettings.hpp"
@@ -826,69 +827,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/unmod", &commands::removeModerator);
 
-    this->registerCommand(
-        "/announce", [](const QStringList &words, auto channel) -> QString {
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "This command can only be used in Twitch channels."));
-                return "";
-            }
-
-            if (words.size() < 2)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Usage: /announce <message> - Call attention to your "
-                    "message with a highlight."));
-                return "";
-            }
-
-            auto user = getApp()->accounts->twitch.getCurrent();
-            if (user->isAnon())
-            {
-                channel->addMessage(makeSystemMessage(
-                    "You must be logged in to use the /announce command"));
-                return "";
-            }
-
-            getHelix()->sendChatAnnouncement(
-                twitchChannel->roomId(), user->getUserId(),
-                words.mid(1).join(" "), HelixAnnouncementColor::Primary,
-                []() {
-                    // do nothing.
-                },
-                [channel](auto error, auto message) {
-                    using Error = HelixSendChatAnnouncementError;
-                    QString errorMessage =
-                        QString("Failed to send announcement - ");
-
-                    switch (error)
-                    {
-                        case Error::UserMissingScope: {
-                            // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
-                            errorMessage +=
-                                "Missing required scope. Re-login with your "
-                                "account and try again.";
-                        }
-                        break;
-
-                        case Error::Forwarded: {
-                            errorMessage += message;
-                        }
-                        break;
-
-                        case Error::Unknown:
-                        default: {
-                            errorMessage += "An unknown error has occurred.";
-                        }
-                        break;
-                    }
-
-                    channel->addMessage(makeSystemMessage(errorMessage));
-                });
-            return "";
-        });
+    this->registerCommand("/announce", &commands::sendAnnouncement);
 
     this->registerCommand("/vip", [](const QStringList &words, auto channel) {
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
