@@ -10,6 +10,7 @@
 #include "controllers/commands/builtin/Misc.hpp"
 #include "controllers/commands/builtin/twitch/Ban.hpp"
 #include "controllers/commands/builtin/twitch/ChatSettings.hpp"
+#include "controllers/commands/builtin/twitch/Chatters.hpp"
 #include "controllers/commands/builtin/twitch/ShieldMode.hpp"
 #include "controllers/commands/builtin/twitch/Shoutout.hpp"
 #include "controllers/commands/Command.hpp"
@@ -850,114 +851,9 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/lowtrust", &commands::lowtrust);
 
-    auto formatChattersError = [](HelixGetChattersError error,
-                                  QString message) {
-        using Error = HelixGetChattersError;
+    this->registerCommand("/chatters", &commands::chatters);
 
-        QString errorMessage = QString("Failed to get chatter count - ");
-
-        switch (error)
-        {
-            case Error::Forwarded: {
-                errorMessage += message;
-            }
-            break;
-
-            case Error::UserMissingScope: {
-                errorMessage += "Missing required scope. "
-                                "Re-login with your "
-                                "account and try again.";
-            }
-            break;
-
-            case Error::UserNotAuthorized: {
-                errorMessage += "You must have moderator permissions to "
-                                "use this command.";
-            }
-            break;
-
-            case Error::Unknown: {
-                errorMessage += "An unknown error has occurred.";
-            }
-            break;
-        }
-        return errorMessage;
-    };
-
-    this->registerCommand(
-        "/chatters", [formatChattersError](const auto &words, auto channel) {
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /chatters command only works in Twitch Channels"));
-                return "";
-            }
-
-            // Refresh chatter list via helix api for mods
-            getHelix()->getChatters(
-                twitchChannel->roomId(),
-                getApp()->accounts->twitch.getCurrent()->getUserId(), 1,
-                [channel](auto result) {
-                    channel->addMessage(makeSystemMessage(
-                        QString("Chatter count: %1")
-                            .arg(localizeNumbers(result.total))));
-                },
-                [channel, formatChattersError](auto error, auto message) {
-                    auto errorMessage = formatChattersError(error, message);
-                    channel->addMessage(makeSystemMessage(errorMessage));
-                });
-
-            return "";
-        });
-
-    this->registerCommand("/test-chatters", [formatChattersError](
-                                                const auto & /*words*/,
-                                                auto channel) {
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /test-chatters command only works in Twitch Channels"));
-            return "";
-        }
-
-        getHelix()->getChatters(
-            twitchChannel->roomId(),
-            getApp()->accounts->twitch.getCurrent()->getUserId(), 5000,
-            [channel, twitchChannel](auto result) {
-                QStringList entries;
-                for (const auto &username : result.chatters)
-                {
-                    entries << username;
-                }
-
-                QString prefix = "Chatters ";
-
-                if (result.total > 5000)
-                {
-                    prefix += QString("(5000/%1):").arg(result.total);
-                }
-                else
-                {
-                    prefix += QString("(%1):").arg(result.total);
-                }
-
-                MessageBuilder builder;
-                TwitchMessageBuilder::listOfUsersSystemMessage(
-                    prefix, entries, twitchChannel, &builder);
-
-                channel->addMessage(builder.release());
-            },
-            [channel, formatChattersError](auto error, auto message) {
-                auto errorMessage = formatChattersError(error, message);
-                channel->addMessage(makeSystemMessage(errorMessage));
-            });
-
-        return "";
-    });
+    this->registerCommand("/test-chatters", &commands::testChatters);
 
     auto formatModsError = [](HelixGetModeratorsError error, QString message) {
         using Error = HelixGetModeratorsError;
