@@ -310,7 +310,7 @@ void populateReply(TwitchChannel *channel, Communi::IrcMessage *message,
             {
                 if (rootThread)
                 {
-                    parent = rootThread->root();
+                    builder.setParent(rootThread->root());
                 }
             }
             else
