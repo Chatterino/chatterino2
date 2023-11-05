@@ -440,4 +440,23 @@ QString openURL(const CommandContext &ctx)
     return "";
 }
 
+QString sendRawMessage(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    if (ctx.channel->isTwitchChannel())
+    {
+        getApp()->twitch->sendRawMessage(ctx.words.mid(1).join(" "));
+    }
+    else
+    {
+        // other code down the road handles this for IRC
+        return ctx.words.join(" ");
+    }
+    return "";
+}
+
 }  // namespace chatterino::commands
