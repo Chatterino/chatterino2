@@ -13,6 +13,7 @@
 #include "util/FormatTime.hpp"
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
@@ -380,6 +381,21 @@ QString popup(const CommandContext &ctx)
     auto *app = getApp();
     auto targetChannel = app->twitch->getOrAddChannel(target);
     app->windows->openInPopup(targetChannel);
+
+    return "";
+}
+
+QString clearmessages(const CommandContext &ctx)
+{
+    (void)ctx;
+
+    auto *currentPage = dynamic_cast<SplitContainer *>(
+        getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+
+    if (auto *split = currentPage->getSelectedSplit())
+    {
+        split->getChannelView().clearMessages();
+    }
 
     return "";
 }

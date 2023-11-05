@@ -21,5 +21,6 @@ QString marker(const CommandContext &ctx);
 QString streamlink(const CommandContext &ctx);
 QString popout(const CommandContext &ctx);
 QString popup(const CommandContext &ctx);
+QString clearmessages(const CommandContext &ctx);
 
 }  // namespace chatterino::commands

@@ -957,18 +957,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/popup", &commands::popup);
 
-    this->registerCommand("/clearmessages", [](const auto & /*words*/,
-                                               ChannelPtr channel) {
-        auto *currentPage = dynamic_cast<SplitContainer *>(
-            getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
-
-        if (auto split = currentPage->getSelectedSplit())
-        {
-            split->getChannelView().clearMessages();
-        }
-
-        return "";
-    });
+    this->registerCommand("/clearmessages", &commands::clearmessages);
 
     this->registerCommand("/settitle", [](const QStringList &words,
                                           ChannelPtr channel) {
