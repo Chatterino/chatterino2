@@ -63,6 +63,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/Misc.hpp
         controllers/commands/builtin/twitch/AddModerator.cpp
         controllers/commands/builtin/twitch/AddModerator.hpp
+        controllers/commands/builtin/twitch/AddVIP.cpp
+        controllers/commands/builtin/twitch/AddVIP.hpp
         controllers/commands/builtin/twitch/Announce.cpp
         controllers/commands/builtin/twitch/Announce.hpp
         controllers/commands/builtin/twitch/Ban.cpp
