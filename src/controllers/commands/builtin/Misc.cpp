@@ -302,4 +302,37 @@ QString streamlink(const CommandContext &ctx)
     return "";
 }
 
+QString popout(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    QString target(ctx.words.value(1));
+
+    if (target.isEmpty())
+    {
+        if (ctx.channel->getType() == Channel::Type::Twitch &&
+            !ctx.channel->isEmpty())
+        {
+            target = ctx.channel->getName();
+        }
+        else
+        {
+            ctx.channel->addMessage(makeSystemMessage(
+                "Usage: /popout <channel>. You can also use the command "
+                "without arguments in any Twitch channel to open its "
+                "popout chat."));
+            return "";
+        }
+    }
+
+    stripChannelName(target);
+    QDesktopServices::openUrl(QUrl(
+        QString("https://www.twitch.tv/popout/%1/chat?popout=").arg(target)));
+
+    return "";
+}
+
 }  // namespace chatterino::commands

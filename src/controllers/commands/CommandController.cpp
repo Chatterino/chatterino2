@@ -953,34 +953,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/streamlink", &commands::streamlink);
 
-    this->registerCommand("/popout", [](const QStringList &words,
-                                        ChannelPtr channel) {
-        QString target(words.value(1));
-
-        if (target.isEmpty())
-        {
-            if (channel->getType() == Channel::Type::Twitch &&
-                !channel->isEmpty())
-            {
-                target = channel->getName();
-            }
-            else
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Usage: /popout <channel>. You can also use the command "
-                    "without arguments in any Twitch channel to open its "
-                    "popout chat."));
-                return "";
-            }
-        }
-
-        stripChannelName(target);
-        QDesktopServices::openUrl(
-            QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
-                     .arg(target)));
-
-        return "";
-    });
+    this->registerCommand("/popout", &commands::popout);
 
     this->registerCommand("/popup", [](const QStringList &words,
                                        ChannelPtr sourceChannel) {
