@@ -701,7 +701,7 @@ void UserInfoPopup::setData(const QString &name,
                             const ChannelPtr &contextChannel,
                             const ChannelPtr &openingChannel)
 {
-    const QStringView idPrefix = u"#";
+    const QStringView idPrefix = u"id:";
     bool isId = name.startsWith(idPrefix);
     if (isId)
     {
