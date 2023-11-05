@@ -9,6 +9,7 @@
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 #include "controllers/commands/builtin/Misc.hpp"
 #include "controllers/commands/builtin/twitch/Ban.hpp"
+#include "controllers/commands/builtin/twitch/Block.hpp"
 #include "controllers/commands/builtin/twitch/ChatSettings.hpp"
 #include "controllers/commands/builtin/twitch/Chatters.hpp"
 #include "controllers/commands/builtin/twitch/DeleteMessages.hpp"
@@ -627,129 +628,9 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     /// Deprecated commands
 
-    auto blockLambda = [](const auto &words, auto channel) {
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /block command only works in Twitch channels"));
-            return "";
-        }
-        if (words.size() < 2)
-        {
-            channel->addMessage(makeSystemMessage("Usage: /block <user>"));
-            return "";
-        }
+    this->registerCommand("/ignore", &commands::ignoreUser);
 
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to block someone!"));
-            return "";
-        }
-
-        auto target = words.at(1);
-        stripChannelName(target);
-
-        getHelix()->getUserByName(
-            target,
-            [currentUser, channel, target](const HelixUser &targetUser) {
-                getApp()->accounts->twitch.getCurrent()->blockUser(
-                    targetUser.id, nullptr,
-                    [channel, target, targetUser] {
-                        channel->addMessage(makeSystemMessage(
-                            QString("You successfully blocked user %1")
-                                .arg(target)));
-                    },
-                    [channel, target] {
-                        channel->addMessage(makeSystemMessage(
-                            QString("User %1 couldn't be blocked, an unknown "
-                                    "error occurred!")
-                                .arg(target)));
-                    });
-            },
-            [channel, target] {
-                channel->addMessage(
-                    makeSystemMessage(QString("User %1 couldn't be blocked, no "
-                                              "user with that name found!")
-                                          .arg(target)));
-            });
-
-        return "";
-    };
-
-    auto unblockLambda = [](const auto &words, auto channel) {
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /unblock command only works in Twitch channels"));
-            return "";
-        }
-        if (words.size() < 2)
-        {
-            channel->addMessage(makeSystemMessage("Usage: /unblock <user>"));
-            return "";
-        }
-
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to unblock someone!"));
-            return "";
-        }
-
-        auto target = words.at(1);
-        stripChannelName(target);
-
-        getHelix()->getUserByName(
-            target,
-            [currentUser, channel, target](const auto &targetUser) {
-                getApp()->accounts->twitch.getCurrent()->unblockUser(
-                    targetUser.id, nullptr,
-                    [channel, target, targetUser] {
-                        channel->addMessage(makeSystemMessage(
-                            QString("You successfully unblocked user %1")
-                                .arg(target)));
-                    },
-                    [channel, target] {
-                        channel->addMessage(makeSystemMessage(
-                            QString("User %1 couldn't be unblocked, an unknown "
-                                    "error occurred!")
-                                .arg(target)));
-                    });
-            },
-            [channel, target] {
-                channel->addMessage(
-                    makeSystemMessage(QString("User %1 couldn't be unblocked, "
-                                              "no user with that name found!")
-                                          .arg(target)));
-            });
-
-        return "";
-    };
-
-    this->registerCommand(
-        "/ignore", [blockLambda](const auto &words, auto channel) {
-            channel->addMessage(makeSystemMessage(
-                "Ignore command has been renamed to /block, please use it from "
-                "now on as /ignore is going to be removed soon."));
-            blockLambda(words, channel);
-            return "";
-        });
-
-    this->registerCommand(
-        "/unignore", [unblockLambda](const auto &words, auto channel) {
-            channel->addMessage(makeSystemMessage(
-                "Unignore command has been renamed to /unblock, please use it "
-                "from now on as /unignore is going to be removed soon."));
-            unblockLambda(words, channel);
-            return "";
-        });
+    this->registerCommand("/unignore", &commands::unignoreUser);
 
     this->registerCommand("/follow", &commands::follow);
 
@@ -763,9 +644,9 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/uptime", &commands::uptime);
 
-    this->registerCommand("/block", blockLambda);
+    this->registerCommand("/block", &commands::blockUser);
 
-    this->registerCommand("/unblock", unblockLambda);
+    this->registerCommand("/unblock", &commands::unblockUser);
 
     this->registerCommand("/user", &commands::user);
 

@@ -63,6 +63,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/Misc.hpp
         controllers/commands/builtin/twitch/Ban.cpp
         controllers/commands/builtin/twitch/Ban.hpp
+        controllers/commands/builtin/twitch/Block.cpp
+        controllers/commands/builtin/twitch/Block.hpp
         controllers/commands/builtin/twitch/ChatSettings.cpp
         controllers/commands/builtin/twitch/ChatSettings.hpp
         controllers/commands/builtin/twitch/Chatters.cpp
