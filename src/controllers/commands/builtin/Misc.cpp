@@ -11,6 +11,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Clipboard.hpp"
 #include "util/FormatTime.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamLink.hpp"
@@ -484,6 +485,25 @@ QString injectFakeMessage(const CommandContext &ctx)
     auto ircText = ctx.words.mid(1).join(" ");
     getApp()->twitch->addFakeMessage(ircText);
 
+    return "";
+}
+
+QString copyToClipboard(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    if (ctx.words.size() < 2)
+    {
+        ctx.channel->addMessage(
+            makeSystemMessage("Usage: /copy <text> - copies provided "
+                              "text to clipboard."));
+        return "";
+    }
+
+    crossPlatformCopy(ctx.words.mid(1).join(" "));
     return "";
 }
 

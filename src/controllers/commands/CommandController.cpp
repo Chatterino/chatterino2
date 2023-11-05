@@ -1018,18 +1018,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/fakemsg", &commands::injectFakeMessage);
 #endif
 
-    this->registerCommand(
-        "/copy", [](const QStringList &words, ChannelPtr channel) -> QString {
-            if (words.size() < 2)
-            {
-                channel->addMessage(
-                    makeSystemMessage("Usage: /copy <text> - copies provided "
-                                      "text to clipboard."));
-                return "";
-            }
-            crossPlatformCopy(words.mid(1).join(" "));
-            return "";
-        });
+    this->registerCommand("/copy", &commands::copyToClipboard);
 
     this->registerCommand("/color", [](const QStringList &words, auto channel) {
         if (!channel->isTwitchChannel())
