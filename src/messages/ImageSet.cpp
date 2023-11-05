@@ -1,7 +1,19 @@
 #include "messages/ImageSet.hpp"
 
 #include "messages/Image.hpp"
+#include "messages/ImagePriorityOrder.hpp"
 #include "singletons/Settings.hpp"
+
+namespace {
+
+using namespace chatterino;
+
+bool isValidImagePtr(const ImagePtr &img)
+{
+    return img && !img->isEmpty();
+}
+
+}  // namespace
 
 namespace chatterino {
 
@@ -83,31 +95,34 @@ const std::shared_ptr<Image> &getImagePriv(const ImageSet &set, float scale)
     return set.getImage1();
 }
 
-const ImagePtr &ImageSet::getImageOrLoaded(float scale) const
-{
-    auto &&result = getImagePriv(*this, scale);
-
-    // get best image based on scale
-    result->load();
-
-    // prefer other image if selected image is not loaded yet
-    if (result->loaded())
-        return result;
-    else if (this->imageX3_ && !this->imageX3_->isEmpty() &&
-             this->imageX3_->loaded())
-        return this->imageX3_;
-    else if (this->imageX2_ && !this->imageX2_->isEmpty() &&
-             this->imageX2_->loaded())
-        return this->imageX2_;
-    else if (this->imageX1_->loaded())
-        return this->imageX1_;
-    else
-        return result;
-}
-
 const ImagePtr &ImageSet::getImage(float scale) const
 {
     return getImagePriv(*this, scale);
+}
+
+std::optional<ImagePriorityOrder> ImageSet::getPriority(float scale) const
+{
+    std::vector<ImagePtr> result;
+    result.reserve(4);
+
+    auto pushIfNotEmpty = [&result](const ImagePtr &img) {
+        if (isValidImagePtr(img))
+        {
+            result.push_back(img);
+        }
+    };
+
+    pushIfNotEmpty(this->getImage(scale));
+    pushIfNotEmpty(this->imageX3_);
+    pushIfNotEmpty(this->imageX2_);
+    pushIfNotEmpty(this->imageX1_);
+
+    if (result.empty())
+    {
+        return std::nullopt;
+    }
+
+    return ImagePriorityOrder(std::move(result));
 }
 
 bool ImageSet::operator==(const ImageSet &other) const

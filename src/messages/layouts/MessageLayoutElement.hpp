@@ -1,8 +1,12 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "messages/ImagePriorityOrder.hpp"
 #include "messages/Link.hpp"
+#include "messages/MessageColor.hpp"
+#include "messages/MessageElement.hpp"
 
+#include <boost/noncopyable.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QPen>
 #include <QPoint>
@@ -11,6 +15,7 @@
 
 #include <climits>
 #include <cstdint>
+#include <vector>
 
 class QPainter;
 
@@ -61,6 +66,8 @@ public:
     FlagsEnum<MessageElementFlag> getFlags() const;
 
 protected:
+    void setSize(const QSize &size);
+
     bool trailingSpace = true;
 
 private:
@@ -91,6 +98,24 @@ protected:
     int getXFromIndex(size_t index) override;
 
     ImagePtr image_;
+};
+
+class PriorityImageLayoutElement : public MessageLayoutElement
+{
+public:
+    PriorityImageLayoutElement(MessageElement &creator,
+                               ImagePriorityOrder &&order, const QSize &size);
+
+protected:
+    void addCopyTextToString(QString &str, uint32_t from = 0,
+                             uint32_t to = UINT32_MAX) const override;
+    size_t getSelectionIndexCount() const override;
+    void paint(QPainter &painter, const MessageColors &messageColors) override;
+    void paintAnimated(QPainter &painter, int yOffset) override;
+    int getMouseOverIndex(const QPoint &abs) const override;
+    int getXFromIndex(size_t index) override;
+
+    const ImagePriorityOrder order_;
 };
 
 class LayeredImageLayoutElement : public MessageLayoutElement

@@ -3,9 +3,12 @@
 #include "common/Aliases.hpp"
 
 #include <memory>
+#include <optional>
+#include <vector>
 
 namespace chatterino {
 
+class ImagePriorityOrder;
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
 ImagePtr getEmptyImagePtr();
@@ -26,10 +29,8 @@ public:
     const ImagePtr &getImage2() const;
     const ImagePtr &getImage3() const;
 
-    /// Preferes getting an already loaded image, even if it is smaller/bigger.
-    /// However, it starts loading the proper image.
-    const ImagePtr &getImageOrLoaded(float scale) const;
     const ImagePtr &getImage(float scale) const;
+    std::optional<ImagePriorityOrder> getPriority(float scale) const;
 
     bool operator==(const ImageSet &other) const;
     bool operator!=(const ImageSet &other) const;

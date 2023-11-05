@@ -55,6 +55,11 @@ void MessageLayoutElement::setPosition(QPoint point)
     this->rect_.moveTopLeft(point);
 }
 
+void MessageLayoutElement::setSize(const QSize &size)
+{
+    this->rect_.setSize(size);
+}
+
 bool MessageLayoutElement::hasTrailingSpace() const
 {
     return this->trailingSpace;
@@ -305,6 +310,95 @@ int LayeredImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
 }
 
 int LayeredImageLayoutElement::getXFromIndex(size_t index)
+{
+    if (index <= 0)
+    {
+        return this->getRect().left();
+    }
+    else if (index == 1)
+    {
+        // fourtf: remove space width
+        return this->getRect().right();
+    }
+    else
+    {
+        return this->getRect().right();
+    }
+}
+
+PriorityImageLayoutElement::PriorityImageLayoutElement(
+    MessageElement &creator, ImagePriorityOrder &&order, const QSize &size)
+    : MessageLayoutElement(creator, size)
+    , order_(std::move(order))
+{
+    this->trailingSpace = creator.hasTrailingSpace();
+}
+
+void PriorityImageLayoutElement::addCopyTextToString(QString &str,
+                                                     uint32_t from,
+                                                     uint32_t to) const
+{
+    // NOTE: We currently don't properly copy emojis here, since the owner is rarely an EmoteElement
+    const auto *emoteElement =
+        dynamic_cast<EmoteElement *>(&this->getCreator());
+    if (emoteElement)
+    {
+        str += emoteElement->getEmote()->getCopyString();
+        str = TwitchEmotes::cleanUpEmoteCode(str);
+        if (this->hasTrailingSpace())
+        {
+            str += " ";
+        }
+    }
+}
+
+size_t PriorityImageLayoutElement::getSelectionIndexCount() const
+{
+    return this->trailingSpace ? 2 : 1;
+}
+
+void PriorityImageLayoutElement::paint(QPainter &painter,
+                                       const MessageColors &messageColors)
+{
+    const auto &imageToUse = this->order_.getLoadedAndQueue();
+
+    if (!imageToUse->animated())
+    {
+        if (auto pixmap = imageToUse->pixmapOrLoad())
+        {
+            painter.drawPixmap(QRectF(this->getRect()), *pixmap, QRectF());
+        }
+    }
+}
+
+void PriorityImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+{
+    if (this->order_.isStatic())
+    {
+        // paintAnimated will be called on non-animated images. If the image has
+        // been unloaded but doesn't need to be repainted yet, we don't want to
+        // accidentally load it again by calling getLoadedAndQueue.
+        return;
+    }
+
+    const auto &imageToUse = this->order_.getLoadedAndQueue();
+    if (imageToUse->animated())
+    {
+        if (auto pixmap = imageToUse->pixmapOrLoad())
+        {
+            auto rect = this->getRect();
+            rect.moveTop(rect.y() + yOffset);
+            painter.drawPixmap(QRectF(rect), *pixmap, QRectF());
+        }
+    }
+}
+
+int PriorityImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
+{
+    return 0;
+}
+
+int PriorityImageLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {

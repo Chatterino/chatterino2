@@ -58,6 +58,8 @@ namespace detail {
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
 
+class ImagePriorityOrder;
+
 /// This class is thread safe.
 class Image : public std::enable_shared_from_this<Image>
 {
@@ -81,11 +83,11 @@ public:
     bool loaded() const;
     // either returns the current pixmap, or triggers loading it (lazy loading)
     std::optional<QPixmap> pixmapOrLoad() const;
-    void load() const;
     qreal scale() const;
     bool isEmpty() const;
     int width() const;
     int height() const;
+    QSize size() const;
     bool animated() const;
 
     bool operator==(const Image &image) = delete;
@@ -97,6 +99,7 @@ private:
     Image(qreal scale);
 
     void setPixmap(const QPixmap &pixmap);
+    void loadIfUnloaded() const;
     void actuallyLoad();
     void expireFrames();
 
@@ -112,6 +115,7 @@ private:
     std::unique_ptr<detail::Frames> frames_{};
 
     friend class ImageExpirationPool;
+    friend class ImagePriorityOrder;
 };
 
 // forward-declarable function that calls Image::getEmpty() under the hood.

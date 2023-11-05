@@ -17,6 +17,22 @@
 namespace chatterino {
 
 namespace {
+    void addImageSetToContainer(MessageLayoutContainer &container,
+                                MessageElement &element,
+                                const ImageSet &imageSet, float scale)
+    {
+        auto priority = imageSet.getPriority(scale);
+        if (!priority)
+        {
+            return;
+        }
+
+        auto size = priority->firstLoadedImageSize() * container.getScale();
+
+        container.addElement((new PriorityImageLayoutElement(
+                                  element, std::move(*priority), size))
+                                 ->setLink(element.getLink()));
+    }
 
     // Computes the bounding box for the given vector of images
     QSize getBoundingBoxSize(const std::vector<ImagePtr> &images)
@@ -209,19 +225,10 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
     {
         if (flags.has(MessageElementFlag::EmoteImages))
         {
-            auto image =
-                this->emote_->images.getImageOrLoaded(container.getScale());
-            if (image->isEmpty())
-                return;
-
-            auto emoteScale = getSettings()->emoteScale.getValue();
-
-            auto size =
-                QSize(int(container.getScale() * image->width() * emoteScale),
-                      int(container.getScale() * image->height() * emoteScale));
-
-            container.addElement(this->makeImageLayoutElement(image, size)
-                                     ->setLink(this->getLink()));
+            auto overallScale =
+                getSettings()->emoteScale.getValue() * container.getScale();
+            addImageSetToContainer(container, *this, this->emote_->images,
+                                   overallScale);
         }
         else
         {
@@ -303,12 +310,12 @@ std::vector<ImagePtr> LayeredEmoteElement::getLoadedImages(float scale)
 
     for (const auto &emote : this->emotes_)
     {
-        auto image = emote.ptr->images.getImageOrLoaded(scale);
-        if (image->isEmpty())
+        auto priority = emote.ptr->images.getPriority(scale);
+        if (!priority)
         {
             continue;
         }
-        res.push_back(image);
+        res.push_back(priority->getLoadedAndQueue());
     }
     return res;
 }
@@ -417,15 +424,8 @@ void BadgeElement::addToContainer(MessageLayoutContainer &container,
 {
     if (flags.hasAny(this->getFlags()))
     {
-        auto image =
-            this->emote_->images.getImageOrLoaded(container.getScale());
-        if (image->isEmpty())
-            return;
-
-        auto size = QSize(int(container.getScale() * image->width()),
-                          int(container.getScale() * image->height()));
-
-        container.addElement(this->makeImageLayoutElement(image, size));
+        addImageSetToContainer(container, *this, this->emote_->images,
+                               container.getScale());
     }
 }
 
@@ -688,34 +688,34 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                 else if (parsedWord.type() == typeid(EmotePtr))
                 {
                     auto emote = boost::get<EmotePtr>(parsedWord);
-                    auto image =
-                        emote->images.getImageOrLoaded(container.getScale());
-                    if (!image->isEmpty())
+                    float overallScale = getSettings()->emoteScale.getValue() *
+                                         container.getScale();
+                    auto priority = emote->images.getPriority(overallScale);
+                    if (!priority)
                     {
-                        auto emoteScale = getSettings()->emoteScale.getValue();
-
-                        int currentWidth =
-                            metrics.horizontalAdvance(currentText);
-                        auto emoteSize =
-                            QSize(image->width(), image->height()) *
-                            (emoteScale * container.getScale());
-
-                        if (!container.fitsInLine(currentWidth +
-                                                  emoteSize.width()))
-                        {
-                            currentText += ellipsis;
-                            break;
-                        }
-
-                        // Add currently pending text to container, then add the emote after.
-                        container.addElementNoLineBreak(getTextLayoutElement(
-                            currentText, currentWidth, false));
-                        currentText.clear();
-
-                        container.addElementNoLineBreak(
-                            (new ImageLayoutElement(*this, image, emoteSize))
-                                ->setLink(this->getLink()));
+                        break;
                     }
+
+                    int currentWidth = metrics.horizontalAdvance(currentText);
+
+                    auto size = priority->firstLoadedImageSize() * overallScale;
+                    if (!container.fitsInLine(currentWidth + size.width()))
+                    {
+                        currentText += ellipsis;
+                        break;
+                    }
+
+                    // Add currently pending text to container, then add the emote after.
+                    container.addElementNoLineBreak(
+                        getTextLayoutElement(currentText, currentWidth, false));
+                    currentText.clear();
+
+                    // NOTE: This currently doesn't include spaces between the currentText & the new emoji
+                    // NOTE: We currently don't properly copy emojis here, since the owner is rarely an EmoteElement
+                    container.addElementNoLineBreak(
+                        (new PriorityImageLayoutElement(
+                             *this, std::move(*priority), size))
+                            ->setLink(this->getLink()));
                 }
             }
         }
@@ -829,16 +829,8 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
 {
     if (flags.hasAny(this->getFlags()))
     {
-        const auto &image =
-            this->images_.getImageOrLoaded(container.getScale());
-        if (image->isEmpty())
-            return;
-
-        auto size = QSize(image->width() * container.getScale(),
-                          image->height() * container.getScale());
-
-        container.addElement((new ImageLayoutElement(*this, image, size))
-                                 ->setLink(this->getLink()));
+        addImageSetToContainer(container, *this, this->images_,
+                               container.getScale());
     }
 }
 

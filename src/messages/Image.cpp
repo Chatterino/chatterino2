@@ -433,12 +433,12 @@ std::optional<QPixmap> Image::pixmapOrLoad() const
     // See src/messages/layouts/MessageLayoutElement.cpp ImageLayoutElement::paint, for example.
     this->lastUsed_ = std::chrono::steady_clock::now();
 
-    this->load();
+    this->loadIfUnloaded();
 
     return this->frames_->current();
 }
 
-void Image::load() const
+void Image::loadIfUnloaded() const
 {
     assertInGuiThread();
 
@@ -494,6 +494,20 @@ int Image::height() const
 
     // No frames loaded, use our default magic height 16
     return 16;
+}
+
+QSize Image::size() const
+{
+    assertInGuiThread();
+
+    if (auto pixmap = this->frames_->first())
+    {
+        return pixmap->size() * this->scale_;
+    }
+
+    // TODO: Some images contain size as part of their API, we could use that instead of
+    // this hard-coded size.
+    return {16, 16};
 }
 
 void Image::actuallyLoad()
