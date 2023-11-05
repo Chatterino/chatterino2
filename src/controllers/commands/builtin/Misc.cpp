@@ -4,8 +4,11 @@
 #include "controllers/commands/CommandContext.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "util/Twitch.hpp"
 
+#include <QDesktopServices>
 #include <QString>
+#include <QUrl>
 
 namespace chatterino::commands {
 
@@ -55,6 +58,68 @@ QString uptime(const CommandContext &ctx)
         streamStatus->live ? streamStatus->uptime : "Channel is not live.";
 
     ctx.channel->addMessage(makeSystemMessage(messageText));
+
+    return "";
+}
+
+QString user(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    if (ctx.words.size() < 2)
+    {
+        ctx.channel->addMessage(
+            makeSystemMessage("Usage: /user <user> [channel]"));
+        return "";
+    }
+    QString userName = ctx.words[1];
+    stripUserName(userName);
+
+    QString channelName = ctx.channel->getName();
+
+    if (ctx.words.size() > 2)
+    {
+        channelName = ctx.words[2];
+        stripChannelName(channelName);
+    }
+    openTwitchUsercard(channelName, userName);
+
+    return "";
+}
+
+QString requests(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    QString target(ctx.words.value(1));
+
+    if (target.isEmpty())
+    {
+        if (ctx.channel->getType() == Channel::Type::Twitch &&
+            !ctx.channel->isEmpty())
+        {
+            target = ctx.channel->getName();
+        }
+        else
+        {
+            ctx.channel->addMessage(makeSystemMessage(
+                "Usage: /requests [channel]. You can also use the command "
+                "without arguments in any Twitch channel to open its "
+                "channel points requests queue. Only the broadcaster and "
+                "moderators have permission to view the queue."));
+            return "";
+        }
+    }
+
+    stripChannelName(target);
+    QDesktopServices::openUrl(QUrl(
+        QString("https://www.twitch.tv/popout/%1/reward-queue").arg(target)));
 
     return "";
 }

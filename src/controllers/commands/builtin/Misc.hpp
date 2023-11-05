@@ -13,5 +13,7 @@ namespace chatterino::commands {
 QString follow(const CommandContext &ctx);
 QString unfollow(const CommandContext &ctx);
 QString uptime(const CommandContext &ctx);
+QString user(const CommandContext &ctx);
+QString requests(const CommandContext &ctx);
 
 }  // namespace chatterino::commands

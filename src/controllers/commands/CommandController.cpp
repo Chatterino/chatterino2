@@ -763,27 +763,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/unblock", unblockLambda);
 
-    this->registerCommand("/user", [](const auto &words, auto channel) {
-        if (words.size() < 2)
-        {
-            channel->addMessage(
-                makeSystemMessage("Usage: /user <user> [channel]"));
-            return "";
-        }
-        QString userName = words[1];
-        stripUserName(userName);
-
-        QString channelName = channel->getName();
-
-        if (words.size() > 2)
-        {
-            channelName = words[2];
-            stripChannelName(channelName);
-        }
-        openTwitchUsercard(channelName, userName);
-
-        return "";
-    });
+    this->registerCommand("/user", &commands::user);
 
     this->registerCommand("/usercard", [](const auto &words, auto channel) {
         if (words.size() < 2)
@@ -866,35 +846,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand("/requests", [](const QStringList &words,
-                                          ChannelPtr channel) {
-        QString target(words.value(1));
-
-        if (target.isEmpty())
-        {
-            if (channel->getType() == Channel::Type::Twitch &&
-                !channel->isEmpty())
-            {
-                target = channel->getName();
-            }
-            else
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Usage: /requests [channel]. You can also use the command "
-                    "without arguments in any Twitch channel to open its "
-                    "channel points requests queue. Only the broadcaster and "
-                    "moderators have permission to view the queue."));
-                return "";
-            }
-        }
-
-        stripChannelName(target);
-        QDesktopServices::openUrl(
-            QUrl(QString("https://www.twitch.tv/popout/%1/reward-queue")
-                     .arg(target)));
-
-        return "";
-    });
+    this->registerCommand("/requests", &commands::requests);
 
     this->registerCommand("/lowtrust", [](const QStringList &words,
                                           ChannelPtr channel) {
