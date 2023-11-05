@@ -13,6 +13,7 @@
 #include "controllers/commands/builtin/twitch/ChatSettings.hpp"
 #include "controllers/commands/builtin/twitch/Chatters.hpp"
 #include "controllers/commands/builtin/twitch/DeleteMessages.hpp"
+#include "controllers/commands/builtin/twitch/GetModerators.hpp"
 #include "controllers/commands/builtin/twitch/ShieldMode.hpp"
 #include "controllers/commands/builtin/twitch/Shoutout.hpp"
 #include "controllers/commands/builtin/twitch/UpdateChannel.hpp"
@@ -739,97 +740,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/test-chatters", &commands::testChatters);
 
-    auto formatModsError = [](HelixGetModeratorsError error, QString message) {
-        using Error = HelixGetModeratorsError;
-
-        QString errorMessage = QString("Failed to get moderators - ");
-
-        switch (error)
-        {
-            case Error::Forwarded: {
-                errorMessage += message;
-            }
-            break;
-
-            case Error::UserMissingScope: {
-                errorMessage += "Missing required scope. "
-                                "Re-login with your "
-                                "account and try again.";
-            }
-            break;
-
-            case Error::UserNotAuthorized: {
-                errorMessage +=
-                    "Due to Twitch restrictions, "
-                    "this command can only be used by the broadcaster. "
-                    "To see the list of mods you must use the Twitch website.";
-            }
-            break;
-
-            case Error::Unknown: {
-                errorMessage += "An unknown error has occurred.";
-            }
-            break;
-        }
-        return errorMessage;
-    };
-
-    this->registerCommand(
-        "/mods",
-        [formatModsError](const QStringList &words, auto channel) -> QString {
-            auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /mods command only works in Twitch Channels"));
-                return "";
-            }
-
-            switch (getSettings()->helixTimegateModerators.getValue())
-            {
-                case HelixTimegateOverride::Timegate: {
-                    if (areIRCCommandsStillAvailable())
-                    {
-                        return useIRCCommand(words);
-                    }
-                }
-                break;
-
-                case HelixTimegateOverride::AlwaysUseIRC: {
-                    return useIRCCommand(words);
-                }
-                break;
-                case HelixTimegateOverride::AlwaysUseHelix: {
-                    // Fall through to helix logic
-                }
-                break;
-            }
-
-            getHelix()->getModerators(
-                twitchChannel->roomId(), 500,
-                [channel, twitchChannel](auto result) {
-                    if (result.empty())
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "This channel does not have any moderators."));
-                        return;
-                    }
-
-                    // TODO: sort results?
-
-                    MessageBuilder builder;
-                    TwitchMessageBuilder::listOfUsersSystemMessage(
-                        "The moderators of this channel are", result,
-                        twitchChannel, &builder);
-                    channel->addMessage(builder.release());
-                },
-                [channel, formatModsError](auto error, auto message) {
-                    auto errorMessage = formatModsError(error, message);
-                    channel->addMessage(makeSystemMessage(errorMessage));
-                });
-            return "";
-        });
+    this->registerCommand("/mods", &commands::getModerators);
 
     this->registerCommand("/clip", &commands::clip);
 
