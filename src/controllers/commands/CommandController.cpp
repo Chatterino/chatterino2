@@ -1,13 +1,13 @@
 #include "controllers/commands/CommandController.hpp"
 
 #include "Application.hpp"
-#include "common/Env.hpp"
 #include "common/LinkParser.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
+#include "controllers/commands/builtin/Misc.hpp"
 #include "controllers/commands/builtin/twitch/Ban.hpp"
 #include "controllers/commands/builtin/twitch/ChatSettings.hpp"
 #include "controllers/commands/builtin/twitch/ShieldMode.hpp"
@@ -784,28 +784,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
-    this->registerCommand("/debug-env", [](const auto & /*words*/,
-                                           ChannelPtr channel) {
-        auto env = Env::get();
-
-        QStringList debugMessages{
-            "recentMessagesApiUrl: " + env.recentMessagesApiUrl,
-            "linkResolverUrl: " + env.linkResolverUrl,
-            "twitchServerHost: " + env.twitchServerHost,
-            "twitchServerPort: " + QString::number(env.twitchServerPort),
-            "twitchServerSecure: " + QString::number(env.twitchServerSecure),
-        };
-
-        for (QString &str : debugMessages)
-        {
-            MessageBuilder builder;
-            builder.emplace<TimestampElement>(QTime::currentTime());
-            builder.emplace<TextElement>(str, MessageElementFlag::Text,
-                                         MessageColor::System);
-            channel->addMessage(builder.release());
-        }
-        return "";
-    });
+    this->registerCommand("/debug-env", &commands::listEnvironmentVariables);
 
     this->registerCommand("/uptime", [](const auto & /*words*/, auto channel) {
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());

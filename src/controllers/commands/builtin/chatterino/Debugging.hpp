@@ -14,4 +14,6 @@ QString setLoggingRules(const CommandContext &ctx);
 
 QString toggleThemeReload(const CommandContext &ctx);
 
+QString listEnvironmentVariables(const CommandContext &ctx);
+
 }  // namespace chatterino::commands

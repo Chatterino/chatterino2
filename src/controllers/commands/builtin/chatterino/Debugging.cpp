@@ -1,9 +1,11 @@
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 
 #include "common/Channel.hpp"
+#include "common/Env.hpp"
 #include "common/Literals.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "messages/MessageElement.hpp"
 #include "singletons/Theme.hpp"
 
 #include <QLoggingCategory>
@@ -61,6 +63,35 @@ QString toggleThemeReload(const CommandContext &ctx)
         makeSystemMessage(u"Auto reloading theme every %1 ms."_s.arg(
             Theme::AUTO_RELOAD_INTERVAL_MS)));
     return {};
+}
+
+QString listEnvironmentVariables(const CommandContext &ctx)
+{
+    const auto &channel = ctx.channel;
+    if (channel == nullptr)
+    {
+        return "";
+    }
+
+    auto env = Env::get();
+
+    QStringList debugMessages{
+        "recentMessagesApiUrl: " + env.recentMessagesApiUrl,
+        "linkResolverUrl: " + env.linkResolverUrl,
+        "twitchServerHost: " + env.twitchServerHost,
+        "twitchServerPort: " + QString::number(env.twitchServerPort),
+        "twitchServerSecure: " + QString::number(env.twitchServerSecure),
+    };
+
+    for (QString &str : debugMessages)
+    {
+        MessageBuilder builder;
+        builder.emplace<TimestampElement>(QTime::currentTime());
+        builder.emplace<TextElement>(str, MessageElementFlag::Text,
+                                     MessageColor::System);
+        channel->addMessage(builder.release());
+    }
+    return "";
 }
 
 }  // namespace chatterino::commands
