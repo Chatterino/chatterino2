@@ -73,6 +73,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/Shoutout.hpp
         controllers/commands/builtin/twitch/UpdateChannel.cpp
         controllers/commands/builtin/twitch/UpdateChannel.hpp
+        controllers/commands/builtin/twitch/UpdateColor.cpp
+        controllers/commands/builtin/twitch/UpdateColor.hpp
         controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
