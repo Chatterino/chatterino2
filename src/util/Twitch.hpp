@@ -16,6 +16,16 @@ void stripUserName(QString &userName);
 // stripChannelName removes any @ prefix or , suffix to make it more suitable for command use
 void stripChannelName(QString &channelName);
 
+using ParsedUserName = QString;
+using ParsedUserID = QString;
+
+/**
+ * Parse the given input into either a user name or a user ID
+ *
+ * User IDs take priority and are parsed if the input starts with `id:`
+ */
+std::pair<ParsedUserName, ParsedUserID> parseUserNameOrID(const QString &input);
+
 // Matches a strict Twitch user login.
 // May contain lowercase a-z, 0-9, and underscores
 // Must contain between 1 and 25 characters
