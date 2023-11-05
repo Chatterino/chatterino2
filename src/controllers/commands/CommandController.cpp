@@ -747,31 +747,9 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
-    this->registerCommand("/follow", [](const auto &words, auto channel) {
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            return "";
-        }
-        channel->addMessage(makeSystemMessage(
-            "Twitch has removed the ability to follow users through "
-            "third-party applications. For more information, see "
-            "https://github.com/Chatterino/chatterino2/issues/3076"));
-        return "";
-    });
+    this->registerCommand("/follow", &commands::follow);
 
-    this->registerCommand("/unfollow", [](const auto &words, auto channel) {
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            return "";
-        }
-        channel->addMessage(makeSystemMessage(
-            "Twitch has removed the ability to unfollow users through "
-            "third-party applications. For more information, see "
-            "https://github.com/Chatterino/chatterino2/issues/3076"));
-        return "";
-    });
+    this->registerCommand("/unfollow", &commands::unfollow);
 
     /// Supported commands
 
