@@ -81,6 +81,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/GetModerators.hpp
         controllers/commands/builtin/twitch/RemoveModerator.cpp
         controllers/commands/builtin/twitch/RemoveModerator.hpp
+        controllers/commands/builtin/twitch/RemoveVIP.cpp
+        controllers/commands/builtin/twitch/RemoveVIP.hpp
         controllers/commands/builtin/twitch/ShieldMode.cpp
         controllers/commands/builtin/twitch/ShieldMode.hpp
         controllers/commands/builtin/twitch/Shoutout.cpp
