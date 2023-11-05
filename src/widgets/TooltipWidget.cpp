@@ -37,11 +37,16 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     });
     this->updateFont();
 
-    auto windows = getApp()->windows;
+    auto *windows = getApp()->windows;
     this->connections_.managedConnect(windows->gifRepaintRequested, [this] {
+        if (!this->isVisible())
+        {
+            return;
+        }
+
         for (int i = 0; i < this->visibleEntries_; ++i)
         {
-            auto entry = this->entryAt(i);
+            auto *entry = this->entryAt(i);
             if (entry && entry->animated())
             {
                 entry->refreshPixmap();
@@ -49,23 +54,29 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
         }
     });
 
-    this->connections_.managedConnect(windows->miscUpdate, [this] {
-        bool needSizeAdjustment = false;
-        for (int i = 0; i < this->visibleEntries_; ++i)
-        {
-            auto entry = this->entryAt(i);
-            if (entry->hasImage() && entry->attemptRefresh())
+    this->connections_.managedConnect(
+        windows->layoutRequested, [this](auto *chan) {
+            if (chan != nullptr || !this->isVisible())
             {
-                bool successfullyUpdated = entry->refreshPixmap();
-                needSizeAdjustment |= successfullyUpdated;
+                return;
             }
-        }
 
-        if (needSizeAdjustment)
-        {
-            this->adjustSize();
-        }
-    });
+            bool needSizeAdjustment = false;
+            for (int i = 0; i < this->visibleEntries_; ++i)
+            {
+                auto *entry = this->entryAt(i);
+                if (entry->hasImage() && entry->attemptRefresh())
+                {
+                    bool successfullyUpdated = entry->refreshPixmap();
+                    needSizeAdjustment |= successfullyUpdated;
+                }
+            }
+
+            if (needSizeAdjustment)
+            {
+                this->adjustSize();
+            }
+        });
 }
 
 void TooltipWidget::setOne(const TooltipEntry &entry, TooltipStyle style)
@@ -101,6 +112,7 @@ void TooltipWidget::set(const std::vector<TooltipEntry> &entries,
             entryWidget->setImageScale(entry.customWidth, entry.customHeight);
         }
     }
+    this->adjustSize();
 }
 
 void TooltipWidget::setVisibleEntries(int n)

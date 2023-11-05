@@ -12,6 +12,48 @@
 #include <limits>
 #include <memory>
 
+namespace {
+
+using namespace chatterino;
+
+void miniaudioLogCallback(void *userData, ma_uint32 level, const char *pMessage)
+{
+    (void)userData;
+
+    QString message{pMessage};
+
+    switch (level)
+    {
+        case MA_LOG_LEVEL_DEBUG: {
+            qCDebug(chatterinoSound).noquote()
+                << "ma debug:  " << message.trimmed();
+        }
+        break;
+        case MA_LOG_LEVEL_INFO: {
+            qCDebug(chatterinoSound).noquote()
+                << "ma info:   " << message.trimmed();
+        }
+        break;
+        case MA_LOG_LEVEL_WARNING: {
+            qCWarning(chatterinoSound).noquote()
+                << "ma warning:" << message.trimmed();
+        }
+        break;
+        case MA_LOG_LEVEL_ERROR: {
+            qCWarning(chatterinoSound).noquote()
+                << "ma error:  " << message.trimmed();
+        }
+        break;
+        default: {
+            qCWarning(chatterinoSound).noquote()
+                << "ma unknown:" << message.trimmed();
+        }
+        break;
+    }
+}
+
+}  // namespace
+
 namespace chatterino {
 
 // NUM_SOUNDS specifies how many simultaneous default ping sounds & decoders to create
@@ -31,8 +73,30 @@ void SoundController::initialize(Settings &settings, Paths &paths)
 
     ma_result result{};
 
+    // We are leaking this log object on purpose
+    auto *logger = new ma_log;
+
+    result = ma_log_init(nullptr, logger);
+    if (result != MA_SUCCESS)
+    {
+        qCWarning(chatterinoSound) << "Error initializing logger:" << result;
+        return;
+    }
+
+    result = ma_log_register_callback(
+        logger, ma_log_callback_init(miniaudioLogCallback, nullptr));
+    if (result != MA_SUCCESS)
+    {
+        qCWarning(chatterinoSound)
+            << "Error registering logger callback:" << result;
+        return;
+    }
+
+    auto contextConfig = ma_context_config_init();
+    contextConfig.pLog = logger;
+
     /// Initialize context
-    result = ma_context_init(nullptr, 0, nullptr, this->context.get());
+    result = ma_context_init(nullptr, 0, &contextConfig, this->context.get());
     if (result != MA_SUCCESS)
     {
         qCWarning(chatterinoSound) << "Error initializing context:" << result;
