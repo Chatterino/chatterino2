@@ -17,6 +17,7 @@
 #include "controllers/commands/builtin/twitch/Chatters.hpp"
 #include "controllers/commands/builtin/twitch/DeleteMessages.hpp"
 #include "controllers/commands/builtin/twitch/GetModerators.hpp"
+#include "controllers/commands/builtin/twitch/GetVIPs.hpp"
 #include "controllers/commands/builtin/twitch/Raid.hpp"
 #include "controllers/commands/builtin/twitch/RemoveModerator.hpp"
 #include "controllers/commands/builtin/twitch/RemoveVIP.hpp"
@@ -873,56 +874,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
     }
 
-    auto formatVIPListError = [](HelixListVIPsError error,
-                                 const QString &message) -> QString {
-        using Error = HelixListVIPsError;
-
-        QString errorMessage = QString("Failed to list VIPs - ");
-
-        switch (error)
-        {
-            case Error::Forwarded: {
-                errorMessage += message;
-            }
-            break;
-
-            case Error::Ratelimited: {
-                errorMessage += "You are being ratelimited by Twitch. Try "
-                                "again in a few seconds.";
-            }
-            break;
-
-            case Error::UserMissingScope: {
-                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
-                errorMessage += "Missing required scope. "
-                                "Re-login with your "
-                                "account and try again.";
-            }
-            break;
-
-            case Error::UserNotAuthorized: {
-                // TODO(pajlada): Phrase MISSING_PERMISSION
-                errorMessage += "You don't have permission to "
-                                "perform that action.";
-            }
-            break;
-
-            case Error::UserNotBroadcaster: {
-                errorMessage +=
-                    "Due to Twitch restrictions, "
-                    "this command can only be used by the broadcaster. "
-                    "To see the list of VIPs you must use the Twitch website.";
-            }
-            break;
-
-            case Error::Unknown: {
-                errorMessage += "An unknown error has occurred.";
-            }
-            break;
-        }
-        return errorMessage;
-    };
-
     auto formatStartCommercialError = [](HelixStartCommercialError error,
                                          const QString &message) -> QString {
         using Error = HelixStartCommercialError;
@@ -979,78 +930,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         return errorMessage;
     };
 
-    this->registerCommand(
-        "/vips",
-        [formatVIPListError](const QStringList &words,
-                             auto channel) -> QString {
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /vips command only works in Twitch channels"));
-                return "";
-            }
-
-            switch (getSettings()->helixTimegateVIPs.getValue())
-            {
-                case HelixTimegateOverride::Timegate: {
-                    if (areIRCCommandsStillAvailable())
-                    {
-                        return useIRCCommand(words);
-                    }
-
-                    // fall through to Helix logic
-                }
-                break;
-
-                case HelixTimegateOverride::AlwaysUseIRC: {
-                    return useIRCCommand(words);
-                }
-                break;
-
-                case HelixTimegateOverride::AlwaysUseHelix: {
-                    // do nothing and fall through to Helix logic
-                }
-                break;
-            }
-            auto currentUser = getApp()->accounts->twitch.getCurrent();
-            if (currentUser->isAnon())
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Due to Twitch restrictions, "  //
-                    "this command can only be used by the broadcaster. "
-                    "To see the list of VIPs you must use the "
-                    "Twitch website."));
-                return "";
-            }
-
-            getHelix()->getChannelVIPs(
-                twitchChannel->roomId(),
-                [channel, twitchChannel](const std::vector<HelixVip> &vipList) {
-                    if (vipList.empty())
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "This channel does not have any VIPs."));
-                        return;
-                    }
-
-                    auto messagePrefix =
-                        QString("The VIPs of this channel are");
-
-                    // TODO: sort results?
-                    MessageBuilder builder;
-                    TwitchMessageBuilder::listOfUsersSystemMessage(
-                        messagePrefix, vipList, twitchChannel, &builder);
-
-                    channel->addMessage(builder.release());
-                },
-                [channel, formatVIPListError](auto error, auto message) {
-                    auto errorMessage = formatVIPListError(error, message);
-                    channel->addMessage(makeSystemMessage(errorMessage));
-                });
-
-            return "";
-        });
+    this->registerCommand("/vips", &commands::getVIPs);
 
     this->registerCommand(
         "/commercial",
