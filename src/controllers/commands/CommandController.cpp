@@ -1,10 +1,7 @@
 #include "controllers/commands/CommandController.hpp"
 
 #include "Application.hpp"
-#include "common/LinkParser.hpp"
-#include "common/NetworkResult.hpp"
-#include "common/QLogging.hpp"
-#include "common/SignalVector.hpp"
+#include "common/Channel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 #include "controllers/commands/builtin/Misc.hpp"
@@ -32,48 +29,26 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
-#include "controllers/plugins/PluginController.hpp"
-#include "controllers/userdata/UserDataController.hpp"
-#include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "messages/MessageElement.hpp"
-#include "messages/MessageThread.hpp"
-#include "providers/irc/IrcChannel2.hpp"
-#include "providers/irc/IrcServer.hpp"
-#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Clipboard.hpp"
 #include "util/CombinePath.hpp"
-#include "util/FormatTime.hpp"
-#include "util/Helpers.hpp"
-#include "util/IncognitoBrowser.hpp"
-#include "util/PostToThread.hpp"
-#include "util/Qt.hpp"
-#include "util/StreamerMode.hpp"
-#include "util/StreamLink.hpp"
+#include "util/QStringHash.hpp"
 #include "util/Twitch.hpp"
-#include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
-#include "widgets/helper/ChannelView.hpp"
 #include "widgets/splits/Split.hpp"
-#include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
-#include <QApplication>
-#include <QDesktopServices>
-#include <QFile>
-#include <QRegularExpression>
-#include <QUrl>
+#include <QString>
+
+#include <unordered_map>
 
 namespace {
 
