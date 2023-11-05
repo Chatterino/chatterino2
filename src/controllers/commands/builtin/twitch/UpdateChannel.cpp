@@ -49,4 +49,73 @@ QString setTitle(const CommandContext &ctx)
     return "";
 }
 
+QString setGame(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    if (ctx.words.size() < 2)
+    {
+        ctx.channel->addMessage(
+            makeSystemMessage("Usage: /setgame <stream game>"));
+        return "";
+    }
+
+    if (ctx.twitchChannel == nullptr)
+    {
+        ctx.channel->addMessage(
+            makeSystemMessage("Unable to set game of non-Twitch channel."));
+        return "";
+    }
+
+    const auto gameName = ctx.words.mid(1).join(" ");
+
+    getHelix()->searchGames(
+        gameName,
+        [channel{ctx.channel}, twitchChannel{ctx.twitchChannel},
+         gameName](const std::vector<HelixGame> &games) {
+            if (games.empty())
+            {
+                channel->addMessage(makeSystemMessage("Game not found."));
+                return;
+            }
+
+            auto matchedGame = games.at(0);
+
+            if (games.size() > 1)
+            {
+                // NOTE: Improvements could be made with 'fuzzy string matching' code here
+                // attempt to find the best looking game by comparing exactly with lowercase values
+                for (const auto &game : games)
+                {
+                    if (game.name.toLower() == gameName.toLower())
+                    {
+                        matchedGame = game;
+                        break;
+                    }
+                }
+            }
+
+            auto status = twitchChannel->accessStreamStatus();
+            getHelix()->updateChannel(
+                twitchChannel->roomId(), matchedGame.id, "", "",
+                [channel, games, matchedGame](const NetworkResult &) {
+                    channel->addMessage(makeSystemMessage(
+                        QString("Updated game to %1").arg(matchedGame.name)));
+                },
+                [channel] {
+                    channel->addMessage(
+                        makeSystemMessage("Game update failed! Are you "
+                                          "missing the required scope?"));
+                });
+        },
+        [channel{ctx.channel}] {
+            channel->addMessage(makeSystemMessage("Failed to look up game."));
+        });
+
+    return "";
+}
+
 }  // namespace chatterino::commands
