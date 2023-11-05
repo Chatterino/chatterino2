@@ -9,8 +9,10 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/FormatTime.hpp"
+#include "util/IncognitoBrowser.hpp"
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -395,6 +397,44 @@ QString clearmessages(const CommandContext &ctx)
     if (auto *split = currentPage->getSelectedSplit())
     {
         split->getChannelView().clearMessages();
+    }
+
+    return "";
+}
+
+QString openURL(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    if (ctx.words.size() < 2)
+    {
+        ctx.channel->addMessage(makeSystemMessage("Usage: /openurl <URL>"));
+        return "";
+    }
+
+    QUrl url = QUrl::fromUserInput(ctx.words.mid(1).join(" "));
+    if (!url.isValid())
+    {
+        ctx.channel->addMessage(makeSystemMessage("Invalid URL specified."));
+        return "";
+    }
+
+    bool res = false;
+    if (supportsIncognitoLinks() && getSettings()->openLinksIncognito)
+    {
+        res = openLinkIncognito(url.toString(QUrl::FullyEncoded));
+    }
+    else
+    {
+        res = QDesktopServices::openUrl(url);
+    }
+
+    if (!res)
+    {
+        ctx.channel->addMessage(makeSystemMessage("Could not open URL."));
     }
 
     return "";
