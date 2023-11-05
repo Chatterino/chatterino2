@@ -93,8 +93,8 @@ public:
     QPoint emotePopupPos();
     void setEmotePopupPos(QPoint pos);
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
-    virtual void save() override;
+    void initialize(Settings &settings, Paths &paths) override;
+    void save() override;
     void closeAll();
 
     int getGeneration() const;
@@ -121,10 +121,6 @@ public:
     pajlada::Signals::Signal<Channel *> layoutRequested;
 
     pajlada::Signals::NoArgSignal wordFlagsChanged;
-
-    // This signal fires every 100ms and can be used to trigger random things that require a recheck.
-    // It is currently being used by the "Tooltip Preview Image" system to recheck if an image is ready to be rendered.
-    pajlada::Signals::NoArgSignal miscUpdate;
 
     pajlada::Signals::Signal<Split *> selectSplit;
     pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
@@ -159,7 +155,6 @@ private:
     pajlada::SettingListener wordFlagsListener_;
 
     QTimer *saveTimer;
-    QTimer miscUpdateTimer_;
 
     friend class Window;  // this is for selectedWindow_
 };

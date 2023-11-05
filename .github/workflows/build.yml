@@ -341,6 +341,7 @@ jobs:
 
       - name: clang-tidy review
         if: matrix.clang-tidy-review && github.event_name == 'pull_request'
+        timeout-minutes: 10
         uses: ZedThree/clang-tidy-review@v0.14.0
         with:
           build_dir: build-clang-tidy

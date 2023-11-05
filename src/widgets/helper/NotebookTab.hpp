@@ -65,24 +65,24 @@ public:
     int normalTabWidth();
 
 protected:
-    virtual void themeChangedEvent() override;
+    void themeChangedEvent() override;
 
-    virtual void paintEvent(QPaintEvent *) override;
+    void paintEvent(QPaintEvent *) override;
 
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void mouseReleaseEvent(QMouseEvent *event) override;
-    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void enterEvent(QEnterEvent *event) override;
 #else
     void enterEvent(QEvent *event) override;
 #endif
-    virtual void leaveEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
 
-    virtual void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
 
-    virtual void mouseMoveEvent(QMouseEvent *event) override;
-    virtual void wheelEvent(QWheelEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
 private:
     void showRenameDialog();

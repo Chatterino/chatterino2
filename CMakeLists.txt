@@ -37,7 +37,11 @@ if(BUILD_BENCHMARKS)
     list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
 endif()
 
-project(chatterino VERSION 7.4.6)
+project(chatterino 
+    VERSION 7.4.6
+    DESCRIPTION "Chat client for twitch.tv"
+    HOMEPAGE_URL "https://chatterino.com/"
+)
 
 if(CHATTERINO_LTO)
     include(CheckIPOSupported)
@@ -113,13 +117,6 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Svg
     Concurrent
     )
-
-if (BUILD_WITH_QT6)
-    find_package(Qt${MAJOR_QT_VERSION} REQUIRED
-        COMPONENTS
-        Core5Compat
-        )
-endif ()
 
 message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 

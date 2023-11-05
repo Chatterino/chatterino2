@@ -25,7 +25,7 @@ class Emotes final : public IEmotes, public Singleton
 public:
     Emotes();
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, Paths &paths) override;
 
     bool isIgnoredEmote(const QString &emote);
 

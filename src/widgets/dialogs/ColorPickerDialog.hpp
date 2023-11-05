@@ -37,7 +37,7 @@ public:
      */
     ColorPickerDialog(const QColor &initial, QWidget *parent);
 
-    ~ColorPickerDialog();
+    ~ColorPickerDialog() override;
 
     /**
      * @brief Return the final color selected by the user.

@@ -26,6 +26,7 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     this->tableView_->setDragDropOverwriteMode(false);
     this->tableView_->setDefaultDropAction(Qt::DropAction::MoveAction);
     this->tableView_->verticalHeader()->setVisible(false);
+    this->tableView_->horizontalHeader()->setSectionsClickable(false);
 
     // create layout
     QVBoxLayout *vbox = new QVBoxLayout(this);

@@ -124,10 +124,10 @@ public:
     void refresh();
 
 protected:
-    virtual void scaleChangedEvent(float scale_) override;
-    virtual void resizeEvent(QResizeEvent *) override;
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void paintEvent(QPaintEvent *) override;
+    void scaleChangedEvent(float scale_) override;
+    void resizeEvent(QResizeEvent *) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void paintEvent(QPaintEvent *) override;
 
     NotebookButton *getAddButton();
     NotebookButton *addCustomButton();

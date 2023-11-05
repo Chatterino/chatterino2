@@ -63,3 +63,6 @@ CheckOptions:
   # Lua state
   - key: readability-identifier-naming.LocalPointerIgnoredRegexp
     value: ^L$
+
+  - key: misc-const-correctness.AnalyzeValues
+    value: false

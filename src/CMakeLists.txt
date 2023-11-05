@@ -26,8 +26,6 @@ set(SOURCE_FILES
         common/ChatterSet.hpp
         common/Credentials.cpp
         common/Credentials.hpp
-        common/DownloadManager.cpp
-        common/DownloadManager.hpp
         common/Env.cpp
         common/Env.hpp
         common/LinkParser.cpp
@@ -67,6 +65,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/ShieldMode.hpp
         controllers/commands/builtin/twitch/Shoutout.cpp
         controllers/commands/builtin/twitch/Shoutout.hpp
+        controllers/commands/builtin/twitch/Ban.cpp
+        controllers/commands/builtin/twitch/Ban.hpp
         controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
@@ -667,13 +667,7 @@ set(SOURCE_FILES
         ${CMAKE_SOURCE_DIR}/resources/resources.qrc
         )
 
-if (WIN32)
-    # clang-cl doesn't support resource files
-    if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        list(APPEND SOURCE_FILES "${CMAKE_SOURCE_DIR}/resources/windows.rc")
-    endif ()
-
-elseif (APPLE)
+if (APPLE)
     set(MACOS_BUNDLE_ICON_FILE "${CMAKE_SOURCE_DIR}/resources/chatterino.icns")
     list(APPEND SOURCE_FILES "${MACOS_BUNDLE_ICON_FILE}")
     set_source_files_properties(${MACOS_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
@@ -732,13 +726,6 @@ target_link_libraries(${LIBRARY_PROJECT}
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua)
 endif()
-
-if (BUILD_WITH_QT6)
-    target_link_libraries(${LIBRARY_PROJECT}
-            PUBLIC
-            Qt${MAJOR_QT_VERSION}::Core5Compat
-            )
-endif ()
 
 if (BUILD_WITH_QTKEYCHAIN)
     target_link_libraries(${LIBRARY_PROJECT}
