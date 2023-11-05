@@ -61,6 +61,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/chatterino/Debugging.hpp
         controllers/commands/builtin/Misc.cpp
         controllers/commands/builtin/Misc.hpp
+        controllers/commands/builtin/twitch/AddModerator.cpp
+        controllers/commands/builtin/twitch/AddModerator.hpp
         controllers/commands/builtin/twitch/Ban.cpp
         controllers/commands/builtin/twitch/Ban.hpp
         controllers/commands/builtin/twitch/Block.cpp
