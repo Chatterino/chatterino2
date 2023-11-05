@@ -97,6 +97,24 @@ void banUserByID(const ChannelPtr &channel, const TwitchChannel *twitchChannel,
         });
 }
 
+void timeoutUserByID(const ChannelPtr &channel,
+                     const TwitchChannel *twitchChannel,
+                     const QString &sourceUserID, const QString &targetUserID,
+                     int duration, const QString &reason,
+                     const QString &displayName)
+{
+    getHelix()->banUser(
+        twitchChannel->roomId(), sourceUserID, targetUserID, duration, reason,
+        [] {
+            // No response for timeouts, they're emitted over pubsub/IRC instead
+        },
+        [channel, displayName](auto error, auto message) {
+            auto errorMessage =
+                formatBanTimeoutError("timeout", error, message, displayName);
+            channel->addMessage(makeSystemMessage(errorMessage));
+        });
+}
+
 }  // namespace
 
 namespace chatterino::commands {
@@ -259,8 +277,8 @@ QString sendTimeout(const CommandContext &ctx)
         return "";
     }
 
-    auto target = words.at(1);
-    stripChannelName(target);
+    const auto &rawTarget = words.at(1);
+    auto [targetUserName, targetUserID] = parseUserNameOrID(rawTarget);
 
     int duration = 10 * 60;  // 10min
     if (words.size() >= 3)
@@ -274,27 +292,27 @@ QString sendTimeout(const CommandContext &ctx)
     }
     auto reason = words.mid(3).join(' ');
 
-    getHelix()->getUserByName(
-        target,
-        [channel, currentUser, twitchChannel, target, duration,
-         reason](const auto &targetUser) {
-            getHelix()->banUser(
-                twitchChannel->roomId(), currentUser->getUserId(),
-                targetUser.id, duration, reason,
-                [] {
-                    // No response for timeouts, they're emitted over pubsub/IRC instead
-                },
-                [channel, target, targetUser](auto error, auto message) {
-                    auto errorMessage = formatBanTimeoutError(
-                        "timeout", error, message, targetUser.displayName);
-                    channel->addMessage(makeSystemMessage(errorMessage));
-                });
-        },
-        [channel, target] {
-            // Equivalent error from IRC
-            channel->addMessage(
-                makeSystemMessage(QString("Invalid username: %1").arg(target)));
-        });
+    if (!targetUserID.isEmpty())
+    {
+        timeoutUserByID(channel, twitchChannel, currentUser->getUserId(),
+                        targetUserID, duration, reason, targetUserID);
+    }
+    else
+    {
+        getHelix()->getUserByName(
+            targetUserName,
+            [channel, currentUser, twitchChannel, targetUserName, duration,
+             reason](const auto &targetUser) {
+                timeoutUserByID(channel, twitchChannel,
+                                currentUser->getUserId(), targetUser.id,
+                                duration, reason, targetUser.displayName);
+            },
+            [channel, targetUserName] {
+                // Equivalent error from IRC
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid username: %1").arg(targetUserName)));
+            });
+    }
 
     return "";
 }
