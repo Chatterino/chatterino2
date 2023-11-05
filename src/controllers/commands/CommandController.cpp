@@ -23,6 +23,7 @@
 #include "controllers/commands/builtin/twitch/RemoveVIP.hpp"
 #include "controllers/commands/builtin/twitch/ShieldMode.hpp"
 #include "controllers/commands/builtin/twitch/Shoutout.hpp"
+#include "controllers/commands/builtin/twitch/StartCommercial.hpp"
 #include "controllers/commands/builtin/twitch/Unban.hpp"
 #include "controllers/commands/builtin/twitch/UpdateChannel.hpp"
 #include "controllers/commands/builtin/twitch/UpdateColor.hpp"
@@ -874,145 +875,9 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
     }
 
-    auto formatStartCommercialError = [](HelixStartCommercialError error,
-                                         const QString &message) -> QString {
-        using Error = HelixStartCommercialError;
-
-        QString errorMessage = "Failed to start commercial - ";
-
-        switch (error)
-        {
-            case Error::UserMissingScope: {
-                errorMessage += "Missing required scope. Re-login with your "
-                                "account and try again.";
-            }
-            break;
-
-            case Error::TokenMustMatchBroadcaster: {
-                errorMessage += "Only the broadcaster of the channel can run "
-                                "commercials.";
-            }
-            break;
-
-            case Error::BroadcasterNotStreaming: {
-                errorMessage += "You must be streaming live to run "
-                                "commercials.";
-            }
-            break;
-
-            case Error::MissingLengthParameter: {
-                errorMessage +=
-                    "Command must include a desired commercial break "
-                    "length that is greater than zero.";
-            }
-            break;
-
-            case Error::Ratelimited: {
-                errorMessage += "You must wait until your cooldown period "
-                                "expires before you can run another "
-                                "commercial.";
-            }
-            break;
-
-            case Error::Forwarded: {
-                errorMessage += message;
-            }
-            break;
-
-            case Error::Unknown:
-            default: {
-                errorMessage +=
-                    QString("An unknown error has occurred (%1).").arg(message);
-            }
-            break;
-        }
-
-        return errorMessage;
-    };
-
     this->registerCommand("/vips", &commands::getVIPs);
 
-    this->registerCommand(
-        "/commercial",
-        [formatStartCommercialError](const QStringList &words,
-                                     auto channel) -> QString {
-            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
-            if (tc == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /commercial command only works in Twitch channels"));
-                return "";
-            }
-
-            const auto *usageStr = "Usage: \"/commercial <length>\" - Starts a "
-                                   "commercial with the "
-                                   "specified duration for the current "
-                                   "channel. Valid length options "
-                                   "are 30, 60, 90, 120, 150, and 180 seconds.";
-
-            switch (getSettings()->helixTimegateCommercial.getValue())
-            {
-                case HelixTimegateOverride::Timegate: {
-                    if (areIRCCommandsStillAvailable())
-                    {
-                        return useIRCCommand(words);
-                    }
-
-                    // fall through to Helix logic
-                }
-                break;
-
-                case HelixTimegateOverride::AlwaysUseIRC: {
-                    return useIRCCommand(words);
-                }
-                break;
-
-                case HelixTimegateOverride::AlwaysUseHelix: {
-                    // do nothing and fall through to Helix logic
-                }
-                break;
-            }
-
-            if (words.size() < 2)
-            {
-                channel->addMessage(makeSystemMessage(usageStr));
-                return "";
-            }
-
-            auto user = getApp()->accounts->twitch.getCurrent();
-
-            // Avoid Helix calls without Client ID and/or OAuth Token
-            if (user->isAnon())
-            {
-                channel->addMessage(makeSystemMessage(
-                    "You must be logged in to use the /commercial command"));
-                return "";
-            }
-
-            auto broadcasterID = tc->roomId();
-            auto length = words.at(1).toInt();
-
-            getHelix()->startCommercial(
-                broadcasterID, length,
-                [channel](auto response) {
-                    channel->addMessage(makeSystemMessage(
-                        QString("Starting %1 second long commercial break. "
-                                "Keep in mind you are still "
-                                "live and not all viewers will receive a "
-                                "commercial. "
-                                "You may run another commercial in %2 seconds.")
-                            .arg(response.length)
-                            .arg(response.retryAfter)));
-                },
-                [channel, formatStartCommercialError](auto error,
-                                                      auto message) {
-                    auto errorMessage =
-                        formatStartCommercialError(error, message);
-                    channel->addMessage(makeSystemMessage(errorMessage));
-                });
-
-            return "";
-        });
+    this->registerCommand("/commercial", &commands::startCommercial);
 
     this->registerCommand("/unstable-set-user-color", [](const auto &ctx) {
         if (ctx.twitchChannel == nullptr)

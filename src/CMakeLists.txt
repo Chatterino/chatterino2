@@ -91,6 +91,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/ShieldMode.hpp
         controllers/commands/builtin/twitch/Shoutout.cpp
         controllers/commands/builtin/twitch/Shoutout.hpp
+        controllers/commands/builtin/twitch/StartCommercial.cpp
+        controllers/commands/builtin/twitch/StartCommercial.hpp
         controllers/commands/builtin/twitch/Unban.cpp
         controllers/commands/builtin/twitch/Unban.hpp
         controllers/commands/builtin/twitch/UpdateChannel.cpp
