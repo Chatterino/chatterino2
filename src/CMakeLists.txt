@@ -75,6 +75,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/DeleteMessages.hpp
         controllers/commands/builtin/twitch/GetModerators.cpp
         controllers/commands/builtin/twitch/GetModerators.hpp
+        controllers/commands/builtin/twitch/RemoveModerator.cpp
+        controllers/commands/builtin/twitch/RemoveModerator.hpp
         controllers/commands/builtin/twitch/ShieldMode.cpp
         controllers/commands/builtin/twitch/ShieldMode.hpp
         controllers/commands/builtin/twitch/Shoutout.cpp
