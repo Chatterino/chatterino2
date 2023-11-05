@@ -1251,7 +1251,8 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     if (const auto it = tags.find("custom-reward-id"); it != tags.end())
     {
         const auto rewardId = it.value().toString();
-        if (!rewardId.isEmpty() && !channel->isChannelPointRewardKnown(rewardId))
+        if (!rewardId.isEmpty() &&
+            !channel->isChannelPointRewardKnown(rewardId))
         {
             // Need to wait for pubsub reward notification
             auto *rewardClone = new QString(rewardId);
