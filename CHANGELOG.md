@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Allow use of Twitch follower emotes in other channels if subscribed. (#4922)
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
@@ -24,6 +25,8 @@
 - Bugfix: Fixed the input completion popup from disappearing when clicking on it on Windows and macOS. (#4876)
 - Bugfix: Fixed double-click text selection moving its position with each new message. (#4898)
 - Bugfix: Fixed an issue where notifications on Windows would contain no or an old avatar. (#4899)
+- Bugfix: Fixed headers of tables in the settings switching to bold text when selected. (#4913)
+- Bugfix: Fixed tooltips appearing too large and/or away from the cursor. (#4920)
 - Bugfix: Fixed a crash when clicking `More messages below` button in a usercard and closing it quickly. (#4933)
 - Bugfix: Fixed occasional crash for channel point redemptions with text input. (#4942)
 - Dev: Change clang-format from v14 to v16. (#4929)
