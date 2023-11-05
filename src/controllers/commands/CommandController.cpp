@@ -13,6 +13,7 @@
 #include "controllers/commands/builtin/twitch/Chatters.hpp"
 #include "controllers/commands/builtin/twitch/ShieldMode.hpp"
 #include "controllers/commands/builtin/twitch/Shoutout.hpp"
+#include "controllers/commands/builtin/twitch/UpdateChannel.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
@@ -959,37 +960,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/clearmessages", &commands::clearmessages);
 
-    this->registerCommand("/settitle", [](const QStringList &words,
-                                          ChannelPtr channel) {
-        if (words.size() < 2)
-        {
-            channel->addMessage(
-                makeSystemMessage("Usage: /settitle <stream title>"));
-            return "";
-        }
-        if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
-        {
-            auto status = twitchChannel->accessStreamStatus();
-            auto title = words.mid(1).join(" ");
-            getHelix()->updateChannel(
-                twitchChannel->roomId(), "", "", title,
-                [channel, title](NetworkResult) {
-                    channel->addMessage(makeSystemMessage(
-                        QString("Updated title to %1").arg(title)));
-                },
-                [channel] {
-                    channel->addMessage(
-                        makeSystemMessage("Title update failed! Are you "
-                                          "missing the required scope?"));
-                });
-        }
-        else
-        {
-            channel->addMessage(makeSystemMessage(
-                "Unable to set title of non-Twitch channel."));
-        }
-        return "";
-    });
+    this->registerCommand("/settitle", &commands::setTitle);
 
     this->registerCommand("/setgame", [](const QStringList &words,
                                          const ChannelPtr channel) {
