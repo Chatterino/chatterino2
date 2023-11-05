@@ -8,9 +8,15 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/FormatTime.hpp"
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
+#include "widgets/Window.hpp"
 
 #include <QDesktopServices>
 #include <QString>
@@ -331,6 +337,49 @@ QString popout(const CommandContext &ctx)
     stripChannelName(target);
     QDesktopServices::openUrl(QUrl(
         QString("https://www.twitch.tv/popout/%1/chat?popout=").arg(target)));
+
+    return "";
+}
+
+QString popup(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    static const auto *usageMessage =
+        "Usage: /popup [channel]. Open specified Twitch channel in "
+        "a new window. If no channel argument is specified, open "
+        "the currently selected split instead.";
+
+    QString target(ctx.words.value(1));
+    stripChannelName(target);
+
+    // Popup the current split
+    if (target.isEmpty())
+    {
+        auto *currentPage = dynamic_cast<SplitContainer *>(
+            getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+        if (currentPage != nullptr)
+        {
+            auto *currentSplit = currentPage->getSelectedSplit();
+            if (currentSplit != nullptr)
+            {
+                currentSplit->popup();
+
+                return "";
+            }
+        }
+
+        ctx.channel->addMessage(makeSystemMessage(usageMessage));
+        return "";
+    }
+
+    // Open channel passed as argument in a popup
+    auto *app = getApp();
+    auto targetChannel = app->twitch->getOrAddChannel(target);
+    app->windows->openInPopup(targetChannel);
 
     return "";
 }

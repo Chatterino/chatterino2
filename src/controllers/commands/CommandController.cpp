@@ -955,46 +955,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/popout", &commands::popout);
 
-    this->registerCommand("/popup", [](const QStringList &words,
-                                       ChannelPtr sourceChannel) {
-        static const auto *usageMessage =
-            "Usage: /popup [channel]. Open specified Twitch channel in "
-            "a new window. If no channel argument is specified, open "
-            "the currently selected split instead.";
-
-        QString target(words.value(1));
-        stripChannelName(target);
-
-        // Popup the current split
-        if (target.isEmpty())
-        {
-            auto *currentPage =
-                dynamic_cast<SplitContainer *>(getApp()
-                                                   ->windows->getMainWindow()
-                                                   .getNotebook()
-                                                   .getSelectedPage());
-            if (currentPage != nullptr)
-            {
-                auto *currentSplit = currentPage->getSelectedSplit();
-                if (currentSplit != nullptr)
-                {
-                    currentSplit->popup();
-
-                    return "";
-                }
-            }
-
-            sourceChannel->addMessage(makeSystemMessage(usageMessage));
-            return "";
-        }
-
-        // Open channel passed as argument in a popup
-        auto *app = getApp();
-        auto targetChannel = app->twitch->getOrAddChannel(target);
-        app->windows->openInPopup(targetChannel);
-
-        return "";
-    });
+    this->registerCommand("/popup", &commands::popup);
 
     this->registerCommand("/clearmessages", [](const auto & /*words*/,
                                                ChannelPtr channel) {
