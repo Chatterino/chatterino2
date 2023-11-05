@@ -1015,26 +1015,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
 
 #ifndef NDEBUG
-    this->registerCommand(
-        "/fakemsg",
-        [](const QStringList &words, ChannelPtr channel) -> QString {
-            if (!channel->isTwitchChannel())
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /fakemsg command only works in Twitch channels."));
-                return "";
-            }
-            if (words.size() < 2)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Usage: /fakemsg (raw irc text) - injects raw irc text as "
-                    "if it was a message received from TMI"));
-                return "";
-            }
-            auto ircText = words.mid(1).join(" ");
-            getApp()->twitch->addFakeMessage(ircText);
-            return "";
-        });
+    this->registerCommand("/fakemsg", &commands::injectFakeMessage);
 #endif
 
     this->registerCommand(

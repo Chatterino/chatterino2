@@ -24,5 +24,6 @@ QString popup(const CommandContext &ctx);
 QString clearmessages(const CommandContext &ctx);
 QString openURL(const CommandContext &ctx);
 QString sendRawMessage(const CommandContext &ctx);
+QString injectFakeMessage(const CommandContext &ctx);
 
 }  // namespace chatterino::commands

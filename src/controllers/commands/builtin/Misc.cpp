@@ -459,4 +459,32 @@ QString sendRawMessage(const CommandContext &ctx)
     return "";
 }
 
+QString injectFakeMessage(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    if (!ctx.channel->isTwitchChannel())
+    {
+        ctx.channel->addMessage(makeSystemMessage(
+            "The /fakemsg command only works in Twitch channels."));
+        return "";
+    }
+
+    if (ctx.words.size() < 2)
+    {
+        ctx.channel->addMessage(makeSystemMessage(
+            "Usage: /fakemsg (raw irc text) - injects raw irc text as "
+            "if it was a message received from TMI"));
+        return "";
+    }
+
+    auto ircText = ctx.words.mid(1).join(" ");
+    getApp()->twitch->addFakeMessage(ircText);
+
+    return "";
+}
+
 }  // namespace chatterino::commands
