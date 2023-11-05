@@ -21,6 +21,7 @@
 #include "controllers/commands/builtin/twitch/Raid.hpp"
 #include "controllers/commands/builtin/twitch/RemoveModerator.hpp"
 #include "controllers/commands/builtin/twitch/RemoveVIP.hpp"
+#include "controllers/commands/builtin/twitch/SendReply.hpp"
 #include "controllers/commands/builtin/twitch/ShieldMode.hpp"
 #include "controllers/commands/builtin/twitch/Shoutout.hpp"
 #include "controllers/commands/builtin/twitch/StartCommercial.hpp"
@@ -771,51 +772,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/raw", &commands::sendRawMessage);
 
-    this->registerCommand(
-        "/reply", [](const QStringList &words, ChannelPtr channel) {
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /reply command only works in Twitch channels"));
-                return "";
-            }
-
-            if (words.size() < 3)
-            {
-                channel->addMessage(
-                    makeSystemMessage("Usage: /reply <username> <message>"));
-                return "";
-            }
-
-            QString username = words[1];
-            stripChannelName(username);
-
-            auto snapshot = twitchChannel->getMessageSnapshot();
-            for (auto it = snapshot.rbegin(); it != snapshot.rend(); ++it)
-            {
-                const auto &msg = *it;
-                if (msg->loginName.compare(username, Qt::CaseInsensitive) == 0)
-                {
-                    // found most recent message by user
-                    if (msg->replyThread == nullptr)
-                    {
-                        // prepare thread if one does not exist
-                        auto thread = std::make_shared<MessageThread>(msg);
-                        twitchChannel->addReplyThread(thread);
-                    }
-
-                    QString reply = words.mid(2).join(" ");
-                    twitchChannel->sendReply(reply, msg->id);
-                    return "";
-                }
-            }
-
-            channel->addMessage(
-                makeSystemMessage("A message from that user wasn't found"));
-
-            return "";
-        });
+    this->registerCommand("/reply", &commands::sendReply);
 
 #ifndef NDEBUG
     this->registerCommand("/fakemsg", &commands::injectFakeMessage);
