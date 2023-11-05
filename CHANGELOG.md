@@ -29,6 +29,7 @@
 - Bugfix: Fixed tooltips appearing too large and/or away from the cursor. (#4920)
 - Bugfix: Fixed a crash when clicking `More messages below` button in a usercard and closing it quickly. (#4933)
 - Bugfix: Fixed occasional crash for channel point redemptions with text input. (#4942)
+- Bugfix: Fixed first redemption of a channel points reward not appearing in rare cases. (#4943)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
