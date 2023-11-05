@@ -20,4 +20,6 @@ QString listArgs(const CommandContext &ctx);
 
 QString forceImageGarbageCollection(const CommandContext &ctx);
 
+QString forceImageUnload(const CommandContext &ctx);
+
 }  // namespace chatterino::commands

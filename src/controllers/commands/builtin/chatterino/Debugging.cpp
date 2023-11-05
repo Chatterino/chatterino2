@@ -123,4 +123,15 @@ QString forceImageGarbageCollection(const CommandContext &ctx)
     return "";
 }
 
+QString forceImageUnload(const CommandContext &ctx)
+{
+    (void)ctx;
+
+    runInGuiThread([] {
+        auto &iep = ImageExpirationPool::instance();
+        iep.freeAll();
+    });
+    return "";
+}
+
 }  // namespace chatterino::commands

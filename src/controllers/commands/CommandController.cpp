@@ -885,16 +885,8 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/debug-force-image-gc",
                           &commands::forceImageGarbageCollection);
 
-    this->registerCommand(
-        "/debug-force-image-unload",
-        [](const QStringList & /*words*/, auto /*channel*/) -> QString {
-            runInGuiThread([] {
-                using namespace chatterino::detail;
-                auto &iep = ImageExpirationPool::instance();
-                iep.freeAll();
-            });
-            return "";
-        });
+    this->registerCommand("/debug-force-image-unload",
+                          &commands::forceImageUnload);
 
     this->registerCommand("/shield", &commands::shieldModeOn);
     this->registerCommand("/shieldoff", &commands::shieldModeOff);
