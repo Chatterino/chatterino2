@@ -171,7 +171,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         timeout-minutes: 30
         run: |
-          Invoke-WebRequest -Uri "https://gist.github.com/Wissididom/2eff110a9bf5c7bd995f05b42dd63c22/raw/5c11ca381e338d880d0fdf6ec4b6035df2ebf707/httpbin.go" - outfile "httpbin.go"
+          Invoke-WebRequest -Uri "https://gist.github.com/Wissididom/2eff110a9bf5c7bd995f05b42dd63c22/raw/5c11ca381e338d880d0fdf6ec4b6035df2ebf707/httpbin.go" -outfile "httpbin.go"
           go mod init main
           go mod tidy
           go run httpbin.go &
