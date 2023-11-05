@@ -4,9 +4,11 @@
 #include "common/Env.hpp"
 #include "common/Literals.hpp"
 #include "controllers/commands/CommandContext.hpp"
+#include "messages/Image.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "singletons/Theme.hpp"
+#include "util/PostToThread.hpp"
 
 #include <QApplication>
 #include <QLoggingCategory>
@@ -107,6 +109,17 @@ QString listArgs(const CommandContext &ctx)
 
     channel->addMessage(makeSystemMessage(msg));
 
+    return "";
+}
+
+QString forceImageGarbageCollection(const CommandContext &ctx)
+{
+    (void)ctx;
+
+    runInGuiThread([] {
+        auto &iep = ImageExpirationPool::instance();
+        iep.freeOld();
+    });
     return "";
 }
 

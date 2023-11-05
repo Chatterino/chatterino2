@@ -882,16 +882,8 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/unstable-set-user-color",
                           &commands::unstableSetUserClientSideColor);
 
-    this->registerCommand(
-        "/debug-force-image-gc",
-        [](const QStringList & /*words*/, auto /*channel*/) -> QString {
-            runInGuiThread([] {
-                using namespace chatterino::detail;
-                auto &iep = ImageExpirationPool::instance();
-                iep.freeOld();
-            });
-            return "";
-        });
+    this->registerCommand("/debug-force-image-gc",
+                          &commands::forceImageGarbageCollection);
 
     this->registerCommand(
         "/debug-force-image-unload",

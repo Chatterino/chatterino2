@@ -18,4 +18,6 @@ QString listEnvironmentVariables(const CommandContext &ctx);
 
 QString listArgs(const CommandContext &ctx);
 
+QString forceImageGarbageCollection(const CommandContext &ctx);
+
 }  // namespace chatterino::commands
