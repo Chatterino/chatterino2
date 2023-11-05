@@ -21,6 +21,7 @@
 #include "controllers/commands/builtin/twitch/RemoveVIP.hpp"
 #include "controllers/commands/builtin/twitch/ShieldMode.hpp"
 #include "controllers/commands/builtin/twitch/Shoutout.hpp"
+#include "controllers/commands/builtin/twitch/Unban.hpp"
 #include "controllers/commands/builtin/twitch/UpdateChannel.hpp"
 #include "controllers/commands/builtin/twitch/UpdateColor.hpp"
 #include "controllers/commands/Command.hpp"
@@ -835,124 +836,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/unvip", &commands::removeVIP);
 
-    auto unbanLambda = [](auto words, auto channel) {
-        auto commandName = words.at(0).toLower();
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("The %1 command only works in Twitch channels")
-                    .arg(commandName)));
-            return "";
-        }
-        if (words.size() < 2)
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("Usage: \"%1 <username>\" - Removes a ban on a user.")
-                    .arg(commandName)));
-            return "";
-        }
-
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to unban someone!"));
-            return "";
-        }
-
-        auto target = words.at(1);
-        stripChannelName(target);
-
-        getHelix()->getUserByName(
-            target,
-            [channel, currentUser, twitchChannel,
-             target](const auto &targetUser) {
-                getHelix()->unbanUser(
-                    twitchChannel->roomId(), currentUser->getUserId(),
-                    targetUser.id,
-                    [] {
-                        // No response for unbans, they're emitted over pubsub/IRC instead
-                    },
-                    [channel, target, targetUser](auto error, auto message) {
-                        using Error = HelixUnbanUserError;
-
-                        QString errorMessage =
-                            QString("Failed to unban user - ");
-
-                        switch (error)
-                        {
-                            case Error::ConflictingOperation: {
-                                errorMessage +=
-                                    "There was a conflicting ban operation on "
-                                    "this user. Please try again.";
-                            }
-                            break;
-
-                            case Error::Forwarded: {
-                                errorMessage += message;
-                            }
-                            break;
-
-                            case Error::Ratelimited: {
-                                errorMessage +=
-                                    "You are being ratelimited by Twitch. Try "
-                                    "again in a few seconds.";
-                            }
-                            break;
-
-                            case Error::TargetNotBanned: {
-                                // Equivalent IRC error
-                                errorMessage =
-                                    QString(
-                                        "%1 is not banned from this channel.")
-                                        .arg(targetUser.displayName);
-                            }
-                            break;
-
-                            case Error::UserMissingScope: {
-                                // TODO(pajlada): Phrase MISSING_REQUIRED_SCOPE
-                                errorMessage += "Missing required scope. "
-                                                "Re-login with your "
-                                                "account and try again.";
-                            }
-                            break;
-
-                            case Error::UserNotAuthorized: {
-                                // TODO(pajlada): Phrase MISSING_PERMISSION
-                                errorMessage += "You don't have permission to "
-                                                "perform that action.";
-                            }
-                            break;
-
-                            case Error::Unknown: {
-                                errorMessage +=
-                                    "An unknown error has occurred.";
-                            }
-                            break;
-                        }
-
-                        channel->addMessage(makeSystemMessage(errorMessage));
-                    });
-            },
-            [channel, target] {
-                // Equivalent error from IRC
-                channel->addMessage(makeSystemMessage(
-                    QString("Invalid username: %1").arg(target)));
-            });
-
-        return "";
-    };
-
-    this->registerCommand(
-        "/unban", [unbanLambda](const QStringList &words, auto channel) {
-            return unbanLambda(words, channel);
-        });
-
-    this->registerCommand(
-        "/untimeout", [unbanLambda](const QStringList &words, auto channel) {
-            return unbanLambda(words, channel);
-        });
+    this->registerCommand("/unban", &commands::unbanUser);
+    this->registerCommand("/untimeout", &commands::unbanUser);
 
     this->registerCommand(  // /raid
         "/raid", [](const QStringList &words, auto channel) -> QString {
