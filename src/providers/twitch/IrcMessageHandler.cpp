@@ -316,10 +316,13 @@ void populateReply(TwitchChannel *channel, Communi::IrcMessage *message,
             else
             {
                 auto parentThreadIt = channel->threads().find(parentID);
-                if (parentThreadIt != channel->threads().end() &&
-                    !parentThreadIt->second.expired())
+                if (parentThreadIt != channel->threads().end())
                 {
-                    parent = parentThreadIt->second.lock()->root();
+                    auto thread = parentThreadIt->second.lock();
+                    if (thread)
+                    {
+                        builder.setParent(thread->root());
+                    }
                 }
                 else
                 {
