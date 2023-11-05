@@ -1254,33 +1254,38 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         if (!rewardId.isEmpty() &&
             !channel->isChannelPointRewardKnown(rewardId))
         {
-            // Need to wait for pubsub reward notification
-            auto *rewardClone = new QString(rewardId);
-            auto *targetClone = new QString(target);
-            auto *contentClone = new QString(originalContent);
-            auto *clone = message->clone();
-            qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
-                                         "callback since reward is not known:"
-                                      << rewardId;
-            channel->channelPointRewardAdded.connect(
-                [&, rewardClone, clone, targetClone,
-                 contentClone](const auto reward) {
-                    qCDebug(chatterinoTwitch)
-                        << "TwitchChannel reward added callback:" << reward.id
-                        << "-" << *rewardClone;
-                    if (reward.id == *rewardClone)
-                    {
-                        this->addMessage(clone, *targetClone, *contentClone,
-                                         server, false, false);
-                        clone->deleteLater();
-                        delete rewardClone;
-                        delete targetClone;
-                        delete contentClone;
-                        return true;
-                    }
-                    return false;
-                });
-            return;
+            std::shared_lock lock(channel->rewardAddedMutex);
+            if (!channel->isChannelPointRewardKnown(rewardId))
+            {
+                // Need to wait for pubsub reward notification
+                auto *rewardClone = new QString(rewardId);
+                auto *targetClone = new QString(target);
+                auto *contentClone = new QString(originalContent);
+                auto *clone = message->clone();
+                qCDebug(chatterinoTwitch)
+                    << "TwitchChannel reward added ADD "
+                       "callback since reward is not known:"
+                    << rewardId;
+                channel->channelPointRewardAdded.connect(
+                    [&, rewardClone, clone, targetClone,
+                     contentClone](const auto reward) {
+                        qCDebug(chatterinoTwitch)
+                            << "TwitchChannel reward added callback:"
+                            << reward.id << "-" << *rewardClone;
+                        if (reward.id == *rewardClone)
+                        {
+                            this->addMessage(clone, *targetClone, *contentClone,
+                                             server, false, false);
+                            clone->deleteLater();
+                            delete rewardClone;
+                            delete targetClone;
+                            delete contentClone;
+                            return true;
+                        }
+                        return false;
+                    });
+                return;
+            }
         }
         args.channelPointRewardId = rewardId;
     }

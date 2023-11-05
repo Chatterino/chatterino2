@@ -377,6 +377,7 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
         // This only attempts to prevent a crash when invoking the signal.
         try
         {
+            std::unique_lock lock(this->rewardAddedMutex);
             this->channelPointRewardAdded.invoke(reward);
         }
         catch (const std::bad_function_call &)

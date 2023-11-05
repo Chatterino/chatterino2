@@ -18,6 +18,7 @@
 #include <atomic>
 #include <mutex>
 #include <optional>
+#include <shared_mutex>
 #include <unordered_map>
 
 namespace chatterino {
@@ -218,6 +219,7 @@ public:
     pajlada::Signals::NoArgSignal roomModesChanged;
 
     // Channel point rewards
+    std::shared_mutex rewardAddedMutex;
     pajlada::Signals::SelfDisconnectingSignal<ChannelPointReward>
         channelPointRewardAdded;
     void addChannelPointReward(const ChannelPointReward &reward);
