@@ -1,5 +1,6 @@
 #pragma once
 
+#include "messages/Message.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QHBoxLayout>
@@ -19,7 +20,6 @@ class Split;
 class EmotePopup;
 class InputCompletionPopup;
 class EffectLabel;
-class MessageThread;
 class ResizingTextEdit;
 class ChannelView;
 enum class CompletionKind;
@@ -40,8 +40,7 @@ public:
     QString getInputText() const;
     void insertText(const QString &text);
 
-    void setReply(std::shared_ptr<MessageThread> reply,
-                  bool showInlineReplying = true);
+    void setReply(MessagePtr reply, bool showInlineReplying = true);
     void setPlaceholderText(const QString &text);
 
     /**
@@ -135,7 +134,7 @@ protected:
         EffectLabel *cancelReplyButton;
     } ui_{};
 
-    std::shared_ptr<MessageThread> replyThread_ = nullptr;
+    MessagePtr replyThread_ = nullptr;
     bool enableInlineReplying_;
 
     pajlada::Signals::SignalHolder managedConnections_;
