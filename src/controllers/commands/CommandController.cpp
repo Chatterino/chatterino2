@@ -757,24 +757,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/debug-env", &commands::listEnvironmentVariables);
 
-    this->registerCommand("/uptime", [](const auto & /*words*/, auto channel) {
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /uptime command only works in Twitch Channels"));
-            return "";
-        }
-
-        const auto &streamStatus = twitchChannel->accessStreamStatus();
-
-        QString messageText =
-            streamStatus->live ? streamStatus->uptime : "Channel is not live.";
-
-        channel->addMessage(makeSystemMessage(messageText));
-
-        return "";
-    });
+    this->registerCommand("/uptime", &commands::uptime);
 
     this->registerCommand("/block", blockLambda);
 
