@@ -947,22 +947,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
-    this->registerCommand("/clip", [](const auto & /*words*/, auto channel) {
-        if (const auto type = channel->getType();
-            type != Channel::Type::Twitch &&
-            type != Channel::Type::TwitchWatching)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /clip command only works in Twitch Channels"));
-            return "";
-        }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-
-        twitchChannel->createClip();
-
-        return "";
-    });
+    this->registerCommand("/clip", &commands::clip);
 
     this->registerCommand("/marker", [](const QStringList &words,
                                         auto channel) {

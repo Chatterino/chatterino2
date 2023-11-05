@@ -159,4 +159,31 @@ QString lowtrust(const CommandContext &ctx)
     return "";
 }
 
+QString clip(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    if (const auto type = ctx.channel->getType();
+        type != Channel::Type::Twitch && type != Channel::Type::TwitchWatching)
+    {
+        ctx.channel->addMessage(makeSystemMessage(
+            "The /clip command only works in Twitch Channels"));
+        return "";
+    }
+
+    if (ctx.twitchChannel == nullptr)
+    {
+        ctx.channel->addMessage(makeSystemMessage(
+            "The /clip command only works in Twitch Channels"));
+        return "";
+    }
+
+    ctx.twitchChannel->createClip();
+
+    return "";
+}
+
 }  // namespace chatterino::commands
