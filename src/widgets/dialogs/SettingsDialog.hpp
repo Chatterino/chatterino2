@@ -42,9 +42,9 @@ public:
                                SettingsDialogPreference::NoPreference);
 
 protected:
-    virtual void scaleChangedEvent(float newDpi) override;
-    virtual void themeChangedEvent() override;
-    virtual void showEvent(QShowEvent *) override;
+    void scaleChangedEvent(float newDpi) override;
+    void themeChangedEvent() override;
+    void showEvent(QShowEvent *) override;
 
 private:
     void refresh();

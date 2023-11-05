@@ -60,11 +60,29 @@ public:
     void deleteBuffer();
     void deleteCache();
 
-    // Elements
+    /**
+     * Returns a raw pointer to the element at the given point
+     *
+     * If no element is found at the given point, this returns a null pointer
+     */
     const MessageLayoutElement *getElementAt(QPoint point);
-    int getLastCharacterIndex() const;
-    int getFirstMessageCharacterIndex() const;
-    int getSelectionIndex(QPoint position);
+
+    /**
+     * Get the index of the last character in this message's container
+     * This is the sum of all the characters in `elements_`
+     */
+    size_t getLastCharacterIndex() const;
+
+    /**
+     * Get the index of the first visible character in this message's container
+     * This is not always 0 in case there elements that are skipped
+     */
+    size_t getFirstMessageCharacterIndex() const;
+
+    /**
+     * Get the character index at the given position, in the context of selections
+     */
+    size_t getSelectionIndex(QPoint position) const;
     void addSelectionText(QString &str, uint32_t from = 0,
                           uint32_t to = UINT32_MAX,
                           CopyMode copymode = CopyMode::Everything);

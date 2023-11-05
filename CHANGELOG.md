@@ -2,9 +2,13 @@
 
 ## Unversioned
 
+- Major: Allow use of Twitch follower emotes in other channels if subscribed. (#4922)
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
+- Minor: The installer now checks for the VC Runtime version and shows more info when it's outdated. (#4847)
+- Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
+- Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
 - Bugfix: Fixed a performance issue when displaying replies to certain messages. (#4807)
 - Bugfix: Fixed a data race when disconnecting from Twitch PubSub. (#4771)
@@ -13,7 +17,18 @@
 - Bugfix: Fixed selection of tabs after closing a tab when using "Live Tabs Only". (#4770)
 - Bugfix: Fixed input in reply thread popup losing focus when dragging. (#4815)
 - Bugfix: Fixed the Quick Switcher (CTRL+K) from sometimes showing up on the wrong window. (#4819)
-- Bugfix: Fixed too much text being copied when copying chat messages. (#4812)
+- Bugfix: Fixed too much text being copied when copying chat messages. (#4812, #4830, #4839)
+- Bugfix: Fixed an issue where the setting `Only search for emote autocompletion at the start of emote names` wouldn't disable if it was enabled when the client started. (#4855)
+- Bugfix: Fixed empty page being added when showing out of bounds dialog. (#4849)
+- Bugfix: Fixed issue on Windows preventing the title bar from being dragged in the top left corner. (#4873)
+- Bugfix: Fixed an issue where reply context didn't render correctly if an emoji was touching text. (#4875)
+- Bugfix: Fixed the input completion popup from disappearing when clicking on it on Windows and macOS. (#4876)
+- Bugfix: Fixed double-click text selection moving its position with each new message. (#4898)
+- Bugfix: Fixed an issue where notifications on Windows would contain no or an old avatar. (#4899)
+- Bugfix: Fixed headers of tables in the settings switching to bold text when selected. (#4913)
+- Bugfix: Fixed tooltips appearing too large and/or away from the cursor. (#4920)
+- Bugfix: Fixed a crash when clicking `More messages below` button in a usercard and closing it quickly. (#4933)
+- Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 - Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
@@ -24,6 +39,26 @@
 - Dev: Refactor `Image` & Image's `Frames`. (#4773)
 - Dev: Add `WindowManager::getLastSelectedWindow()` to replace `getMainWindow()`. (#4816)
 - Dev: Clarify signal connection lifetimes where applicable. (#4818)
+- Dev: Laid the groundwork for advanced input completion strategies. (#4639, #4846, #4853, #4893)
+- Dev: Fixed flickering when running with Direct2D on Windows. (#4851)
+- Dev: Fix qtkeychain include for Qt6 users. (#4863)
+- Dev: Add a compile-time flag `CHATTERINO_UPDATER` which can be turned off to disable update checks. (#4854)
+- Dev: Add a compile-time flag `USE_SYSTEM_MINIAUDIO` which can be turned on to use the system miniaudio. (#4867)
+- Dev: Update vcpkg to use Qt6. (#4872)
+- Dev: Replace `boost::optional` with `std::optional`. (#4877)
+- Dev: Improve performance by reducing repaints caused by selections. (#4889)
+- Dev: Removed direct dependency on Qt 5 compatibility module. (#4906)
+- Dev: Refactor `DebugCount` and add copy button to debug popup. (#4921)
+- Dev: Changed lifetime of context menus. (#4924)
+- Dev: Refactor `ChannelView`, removing a bunch of clang-tidy warnings. (#4926)
+- Dev: Refactor `IrcMessageHandler`, removing a bunch of clang-tidy warnings & changing its public API. (#4927)
+- Dev: `Details` file properties tab is now populated on Windows. (#4912)
+
+## 2.4.6
+
+- Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
+- Bugfix: Update Qt version, fixing a security issue with webp loading (see https://www.qt.io/blog/two-qt-security-advisorys-gdi-font-engine-webp-image-format) (#4843)
+- Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 
 ## 2.4.5
 

@@ -5,7 +5,10 @@ on:
     workflows: ["Build"]
     types: [completed]
     # make sure this only runs on the default branch
-    branches: [master]
+    branches:
+      - master
+      - "bugfix-release/*"
+      - "release/*"
   workflow_dispatch:
 
 jobs:
@@ -15,9 +18,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
-        qt-version: [5.15.2, 6.5.0]
-    env:
-      VARIANT_SUFFIX: ${{ startsWith(matrix.qt-version, '6.') && '.EXPERIMENTAL-Qt6' || '' }}
+        qt-version: ["6.5.0"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,6 +29,7 @@ jobs:
         with:
           workflow: build.yml
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
+          commit: ${{ github.sha }}
           path: build/
 
       - name: Unzip
@@ -52,5 +54,5 @@ jobs:
       - name: Upload installer
         uses: actions/upload-artifact@v3
         with:
-          path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.exe
-          name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.exe
+          path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe
+          name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe

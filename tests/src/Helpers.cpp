@@ -252,12 +252,18 @@ TEST(Helpers, BatchDifferentInputType)
     EXPECT_EQ(result, expectation);
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
+#    define makeView(x) x
+#else
+#    define makeView(str) (&(str))
+#endif
+
 TEST(Helpers, skipSpace)
 {
     struct TestCase {
         QString input;
-        int startIdx;
-        int expected;
+        SizeType startIdx;
+        SizeType expected;
     };
 
     std::vector<TestCase> tests{{"foo    bar", 3, 6}, {"foo bar", 3, 3},
@@ -266,7 +272,7 @@ TEST(Helpers, skipSpace)
 
     for (const auto &c : tests)
     {
-        const auto actual = skipSpace(&c.input, c.startIdx);
+        const auto actual = skipSpace(makeView(c.input), c.startIdx);
 
         EXPECT_EQ(actual, c.expected)
             << actual << " (" << qUtf8Printable(c.input)
@@ -286,8 +292,8 @@ TEST(Helpers, findUnitMultiplierToSec)
 
     struct TestCase {
         QString input;
-        int startPos;
-        int expectedEndPos;
+        SizeType startPos;
+        SizeType expectedEndPos;
         uint64_t expectedMultiplier;
     };
 
@@ -407,8 +413,8 @@ TEST(Helpers, findUnitMultiplierToSec)
 
     for (const auto &c : tests)
     {
-        int pos = c.startPos;
-        const auto actual = findUnitMultiplierToSec(&c.input, pos);
+        SizeType pos = c.startPos;
+        const auto actual = findUnitMultiplierToSec(makeView(c.input), pos);
 
         if (c.expectedMultiplier == bad)
         {

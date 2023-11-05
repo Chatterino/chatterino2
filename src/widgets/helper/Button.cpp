@@ -36,7 +36,7 @@ Button::Button(BaseWidget *parent)
     this->setMouseTracking(true);
 }
 
-void Button::setMouseEffectColor(boost::optional<QColor> color)
+void Button::setMouseEffectColor(std::optional<QColor> color)
 {
     this->mouseEffectColor_ = std::move(color);
 }
@@ -133,7 +133,11 @@ void Button::setMenu(std::unique_ptr<QMenu> menu)
 void Button::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
+    this->paintButton(painter);
+}
 
+void Button::paintButton(QPainter &painter)
+{
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     if (!this->pixmap_.isNull())
@@ -181,7 +185,7 @@ void Button::fancyPaint(QPainter &painter)
 
     if (this->mouseEffectColor_)
     {
-        c = this->mouseEffectColor_.get();
+        c = *this->mouseEffectColor_;
     }
     else
     {

@@ -72,7 +72,8 @@ namespace detail {
         else
         {
             this->durationOffset_ = std::min<int>(
-                int(getApp()->emotes->gifTimer.position() % totalLength),
+                int(getIApp()->getEmotes()->getGIFTimer().position() %
+                    totalLength),
                 60000);
         }
         this->processOffset();
@@ -107,7 +108,7 @@ namespace detail {
         {
             auto sz = frame.image.size();
             auto area = sz.width() * sz.height();
-            auto memory = area * frame.image.depth();
+            auto memory = area * frame.image.depth() / 8;
 
             usage += memory;
         }
@@ -607,6 +608,13 @@ ImageExpirationPool::ImageExpirationPool()
     this->freeTimer_->start(
         std::chrono::duration_cast<std::chrono::milliseconds>(
             IMAGE_POOL_CLEANUP_INTERVAL));
+
+    // configure all debug counts used by images
+    DebugCount::configure("image bytes", DebugCount::Flag::DataSize);
+    DebugCount::configure("image bytes (ever loaded)",
+                          DebugCount::Flag::DataSize);
+    DebugCount::configure("image bytes (ever unloaded)",
+                          DebugCount::Flag::DataSize);
 }
 
 ImageExpirationPool &ImageExpirationPool::instance()

@@ -24,7 +24,6 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
-#include <boost/optional.hpp>
 #include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -34,13 +33,14 @@
 #include <QScreen>
 
 #include <chrono>
+#include <optional>
 
 namespace chatterino {
 namespace {
 
-    boost::optional<bool> &shouldMoveOutOfBoundsWindow()
+    std::optional<bool> &shouldMoveOutOfBoundsWindow()
     {
-        static boost::optional<bool> x;
+        static std::optional<bool> x;
         return x;
     }
 
@@ -124,12 +124,6 @@ WindowManager::WindowManager()
 
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
         getApp()->windows->save();
-    });
-
-    this->miscUpdateTimer_.start(100);
-
-    QObject::connect(&this->miscUpdateTimer_, &QTimer::timeout, [this] {
-        this->miscUpdate.invoke();
     });
 }
 

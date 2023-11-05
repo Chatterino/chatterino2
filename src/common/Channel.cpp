@@ -26,7 +26,7 @@ namespace chatterino {
 // Channel
 //
 Channel::Channel(const QString &name, Type type)
-    : completionModel(*this)
+    : completionModel(*this, nullptr)
     , lastDate_(QDate::currentDate())
     , name_(name)
     , messages_(getSettings()->scrollbackSplitLimit)
@@ -80,7 +80,7 @@ LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
 }
 
 void Channel::addMessage(MessagePtr message,
-                         boost::optional<MessageFlags> overridingFlags)
+                         std::optional<MessageFlags> overridingFlags)
 {
     auto app = getApp();
     MessagePtr deleted;

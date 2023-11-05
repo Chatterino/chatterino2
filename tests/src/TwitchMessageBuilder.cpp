@@ -1,9 +1,16 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 
 #include "common/Channel.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "mocks/Channel.hpp"
 #include "mocks/EmptyApplication.hpp"
+#include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
+#include "providers/chatterino/ChatterinoBadges.hpp"
+#include "providers/ffz/FfzBadges.hpp"
+#include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
 
@@ -16,6 +23,7 @@
 #include <vector>
 
 using namespace chatterino;
+using chatterino::mock::MockChannel;
 
 namespace {
 
@@ -32,8 +40,44 @@ public:
         return &this->userData;
     }
 
+    AccountController *getAccounts() override
+    {
+        return &this->accounts;
+    }
+
+    ITwitchIrcServer *getTwitch() override
+    {
+        return &this->twitch;
+    }
+
+    ChatterinoBadges *getChatterinoBadges() override
+    {
+        return &this->chatterinoBadges;
+    }
+
+    FfzBadges *getFfzBadges() override
+    {
+        return &this->ffzBadges;
+    }
+
+    SeventvBadges *getSeventvBadges() override
+    {
+        return &this->seventvBadges;
+    }
+
+    HighlightController *getHighlights() override
+    {
+        return &this->highlights;
+    }
+
+    AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
+    mock::MockTwitchIrcServer twitch;
+    ChatterinoBadges chatterinoBadges;
+    FfzBadges ffzBadges;
+    SeventvBadges seventvBadges;
+    HighlightController highlights;
 };
 
 }  // namespace
@@ -345,6 +389,73 @@ TEST_F(TestTwitchMessageBuilder, ParseTwitchEmotes)
         EXPECT_EQ(actualTwitchEmotes, test.expectedTwitchEmotes)
             << "Input for twitch emotes " << test.input.toStdString()
             << " failed";
+
+        delete privmsg;
+    }
+}
+
+TEST_F(TestTwitchMessageBuilder, ParseMessage)
+{
+    MockChannel channel("pajlada");
+
+    struct TestCase {
+        QByteArray input;
+    };
+
+    std::vector<TestCase> testCases{
+        {
+            // action /me message
+            R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=90ef1e46-8baa-4bf2-9c54-272f39d6fa11;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662206235860;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :ACTION Kappa)",
+        },
+        {
+            R"(@badge-info=subscriber/17;badges=subscriber/12,no_audio/1;color=#EBA2C0;display-name=jammehcow;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662201093248;turbo=0;user-id=82674227;user-type= :jammehcow!jammehcow@jammehcow.tmi.twitch.tv PRIVMSG #pajlada :Kappa)",
+        },
+        {
+            R"(@badge-info=;badges=no_audio/1;color=#DAA520;display-name=Mm2PL;emote-only=1;emotes=1902:0-4;first-msg=0;flags=;id=9b1c3cb9-7817-47ea-add1-f9d4a9b4f846;mod=0;returning-chatter=0;room-id=11148817;subscriber=0;tmi-sent-ts=1662201095690;turbo=0;user-id=117691339;user-type= :mm2pl!mm2pl@mm2pl.tmi.twitch.tv PRIVMSG #pajlada :Keepo)",
+        },
+        {
+            R"(@badge-info=;badges=no_audio/1;color=#DAA520;display-name=Mm2PL;emote-only=1;emotes=25:0-4/1902:6-10/305954156:12-19;first-msg=0;flags=;id=7be87072-bf24-4fa3-b3df-0ea6fa5f1474;mod=0;returning-chatter=0;room-id=11148817;subscriber=0;tmi-sent-ts=1662201102276;turbo=0;user-id=117691339;user-type= :mm2pl!mm2pl@mm2pl.tmi.twitch.tv PRIVMSG #pajlada :Kappa Keepo PogChamp)",
+        },
+        {
+            R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emote-only=1;emotes=25:0-4,6-10;first-msg=0;flags=;id=f7516287-e5d1-43ca-974e-fe0cff84400b;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662204375009;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :Kappa Kappa)",
+        },
+        {
+            R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emotes=25:0-4,8-12;first-msg=0;flags=;id=44f85d39-b5fb-475d-8555-f4244f2f7e82;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662204423418;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :Kappa 😂 Kappa)",
+        },
+        {
+            // start out of range
+            R"(@emotes=84608:9-10 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
+        },
+        {
+            // one character emote
+            R"(@emotes=84608:0-0 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
+        },
+        {
+            // two character emote
+            R"(@emotes=84609:0-1 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
+        },
+        {
+            // end out of range
+            R"(@emotes=84608:0-15 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
+        },
+        {
+            // range bad (end character before start)
+            R"(@emotes=84608:15-2 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
+        },
+    };
+
+    for (const auto &test : testCases)
+    {
+        auto *privmsg = dynamic_cast<Communi::IrcPrivateMessage *>(
+            Communi::IrcPrivateMessage::fromData(test.input, nullptr));
+        EXPECT_NE(privmsg, nullptr);
+
+        QString originalMessage = privmsg->content();
+
+        TwitchMessageBuilder builder(&channel, privmsg, MessageParseArgs{});
+
+        auto msg = builder.build();
+        EXPECT_NE(msg.get(), nullptr);
 
         delete privmsg;
     }

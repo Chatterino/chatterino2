@@ -9,7 +9,6 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 
-#include <boost/optional.hpp>
 #include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
@@ -68,7 +67,7 @@ struct HelixStream;
 
 class TwitchIrcServer;
 
-class TwitchChannel : public Channel, public ChannelChatters
+class TwitchChannel final : public Channel, public ChannelChatters
 {
 public:
     struct StreamStatus {
@@ -110,17 +109,17 @@ public:
     void initialize();
 
     // Channel methods
-    virtual bool isEmpty() const override;
-    virtual bool canSendMessage() const override;
-    virtual void sendMessage(const QString &message) override;
-    virtual void sendReply(const QString &message, const QString &replyId);
-    virtual bool isMod() const override;
+    bool isEmpty() const override;
+    bool canSendMessage() const override;
+    void sendMessage(const QString &message) override;
+    void sendReply(const QString &message, const QString &replyId);
+    bool isMod() const override;
     bool isVip() const;
     bool isStaff() const;
-    virtual bool isBroadcaster() const override;
-    virtual bool hasHighRateLimit() const override;
-    virtual bool canReconnect() const override;
-    virtual void reconnect() override;
+    bool isBroadcaster() const override;
+    bool hasHighRateLimit() const override;
+    bool canReconnect() const override;
+    void reconnect() override;
     void createClip();
 
     // Data
@@ -128,22 +127,22 @@ public:
     const QString &channelUrl();
     const QString &popoutPlayerUrl();
     int chatterCount();
-    virtual bool isLive() const override;
+    bool isLive() const override;
     QString roomId() const;
     SharedAccessGuard<const RoomModes> accessRoomModes() const;
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
 
     // Emotes
-    boost::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
-    boost::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
-    boost::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
     std::shared_ptr<const EmoteMap> seventvEmotes() const;
 
-    virtual void refreshBTTVChannelEmotes(bool manualRefresh);
-    virtual void refreshFFZChannelEmotes(bool manualRefresh);
-    virtual void refreshSevenTVChannelEmotes(bool manualRefresh);
+    void refreshBTTVChannelEmotes(bool manualRefresh);
+    void refreshFFZChannelEmotes(bool manualRefresh);
+    void refreshSevenTVChannelEmotes(bool manualRefresh);
 
     const QString &seventvUserID() const;
     const QString &seventvEmoteSetID() const;
@@ -172,13 +171,13 @@ public:
                            const QString &newEmoteSetID);
 
     // Badges
-    boost::optional<EmotePtr> ffzCustomModBadge() const;
-    boost::optional<EmotePtr> ffzCustomVipBadge() const;
-    boost::optional<EmotePtr> twitchBadge(const QString &set,
-                                          const QString &version) const;
+    std::optional<EmotePtr> ffzCustomModBadge() const;
+    std::optional<EmotePtr> ffzCustomVipBadge() const;
+    std::optional<EmotePtr> twitchBadge(const QString &set,
+                                        const QString &version) const;
 
     // Cheers
-    boost::optional<CheerEmote> cheerEmote(const QString &string);
+    std::optional<CheerEmote> cheerEmote(const QString &string);
 
     // Replies
     /**
@@ -190,6 +189,12 @@ public:
     void addReplyThread(const std::shared_ptr<MessageThread> &thread);
     const std::unordered_map<QString, std::weak_ptr<MessageThread>> &threads()
         const;
+
+    /**
+     * Get the thread for the given message
+     * If no thread can be found for the message, create one
+     */
+    std::shared_ptr<MessageThread> getOrCreateThread(const MessagePtr &message);
 
     // Only TwitchChannel may invoke this signal
     pajlada::Signals::NoArgSignal userStateChanged;
@@ -217,7 +222,7 @@ public:
         channelPointRewardAdded;
     void addChannelPointReward(const ChannelPointReward &reward);
     bool isChannelPointRewardKnown(const QString &rewardId);
-    boost::optional<ChannelPointReward> channelPointReward(
+    std::optional<ChannelPointReward> channelPointReward(
         const QString &rewardId) const;
 
     // Live status
@@ -342,8 +347,8 @@ protected:
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;
-    Atomic<boost::optional<EmotePtr>> ffzCustomModBadge_;
-    Atomic<boost::optional<EmotePtr>> ffzCustomVipBadge_;
+    Atomic<std::optional<EmotePtr>> ffzCustomModBadge_;
+    Atomic<std::optional<EmotePtr>> ffzCustomVipBadge_;
 
 private:
     // Badges

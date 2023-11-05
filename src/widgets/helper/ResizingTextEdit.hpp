@@ -23,7 +23,6 @@ public:
     pajlada::Signals::Signal<const QMimeData *> imagePasted;
 
     void setCompleter(QCompleter *c);
-    QCompleter *getCompleter() const;
     /**
      * Resets a completion for this text if one was is progress.
      * See `completionInProgress_`.

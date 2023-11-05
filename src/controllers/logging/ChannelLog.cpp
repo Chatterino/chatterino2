@@ -9,7 +9,7 @@ ChannelLog::ChannelLog(QString channelName)
 
 QString ChannelLog::channelName() const
 {
-    return this->channelName_;
+    return this->channelName_.toLower();
 }
 
 QString ChannelLog::toString() const

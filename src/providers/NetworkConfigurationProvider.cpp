@@ -69,7 +69,7 @@ void NetworkConfigurationProvider::applyFromEnv(const Env &env)
 {
     if (env.proxyUrl)
     {
-        applyProxy(env.proxyUrl.get());
+        applyProxy(*env.proxyUrl);
     }
 }
 

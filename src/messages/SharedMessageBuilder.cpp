@@ -175,7 +175,7 @@ void SharedMessageBuilder::parseHighlights()
 
     if (highlightResult.customSoundUrl)
     {
-        this->highlightSoundUrl_ = highlightResult.customSoundUrl.get();
+        this->highlightSoundUrl_ = *highlightResult.customSoundUrl;
     }
     else
     {
@@ -229,8 +229,6 @@ void SharedMessageBuilder::triggerHighlights()
 QString SharedMessageBuilder::stylizeUsername(const QString &username,
                                               const Message &message)
 {
-    auto app = getApp();
-
     const QString &localizedName = message.localizedName;
     bool hasLocalizedName = !localizedName.isEmpty();
 
@@ -277,4 +275,5 @@ QString SharedMessageBuilder::stylizeUsername(const QString &username,
 
     return usernameText;
 }
+
 }  // namespace chatterino

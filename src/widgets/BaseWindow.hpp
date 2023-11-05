@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "util/WidgetHelpers.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
@@ -36,17 +37,6 @@ public:
         DisableLayoutSave = 128,
     };
 
-    enum class BoundsChecker {
-        // Don't attempt to do any "stay in screen" stuff, just move me!
-        Off,
-
-        // Attempt to keep the window within bounds of the screen the cursor is on
-        CursorPosition,
-
-        // Attempt to keep the window within bounds of the screen the desired position is on
-        DesiredPosition,
-    };
-
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
 
     explicit BaseWindow(FlagsEnum<Flags> flags_ = None,
@@ -65,7 +55,7 @@ public:
     void setActionOnFocusLoss(ActionOnFocusLoss value);
     ActionOnFocusLoss getActionOnFocusLoss() const;
 
-    void moveTo(QPoint point, BoundsChecker boundsChecker);
+    void moveTo(QPoint point, widgets::BoundsChecking mode);
 
     float scale() const override;
     float qtFontScale() const;
@@ -82,20 +72,20 @@ protected:
     bool nativeEvent(const QByteArray &eventType, void *message,
                      long *result) override;
 #endif
-    virtual void scaleChangedEvent(float) override;
+    void scaleChangedEvent(float) override;
 
-    virtual void paintEvent(QPaintEvent *) override;
+    void paintEvent(QPaintEvent *) override;
 
-    virtual void changeEvent(QEvent *) override;
-    virtual void leaveEvent(QEvent *) override;
-    virtual void resizeEvent(QResizeEvent *) override;
-    virtual void moveEvent(QMoveEvent *) override;
-    virtual void closeEvent(QCloseEvent *) override;
-    virtual void showEvent(QShowEvent *) override;
+    void changeEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
+    void resizeEvent(QResizeEvent *) override;
+    void moveEvent(QMoveEvent *) override;
+    void closeEvent(QCloseEvent *) override;
+    void showEvent(QShowEvent *) override;
 
-    virtual void themeChangedEvent() override;
-    virtual bool event(QEvent *event) override;
-    virtual void wheelEvent(QWheelEvent *event) override;
+    void themeChangedEvent() override;
+    bool event(QEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
@@ -105,15 +95,10 @@ protected:
 
     void updateScale();
 
-    boost::optional<QColor> overrideBackgroundColor_;
+    std::optional<QColor> overrideBackgroundColor_;
 
 private:
     void init();
-
-    /**
-     *
-     **/
-    void moveWithinScreen(QPoint point, QPoint origin);
 
     void calcButtonsSizes();
     void drawCustomWindowFrame(QPainter &painter);
