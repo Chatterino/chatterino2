@@ -305,7 +305,6 @@ void populateReply(TwitchChannel *channel, Communi::IrcMessage *message,
             parentIt != tags.end())
         {
             const QString parentID = parentIt.value().toString();
-            MessagePtr parent;
             if (replyID == parentID)
             {
                 if (rootThread)
@@ -326,10 +325,13 @@ void populateReply(TwitchChannel *channel, Communi::IrcMessage *message,
                 }
                 else
                 {
-                    parent = channel->findMessage(parentID);
+                    auto parent = channel->findMessage(parentID);
+                    if (parent)
+                    {
+                        builder.setParent(parent);
+                    }
                 }
             }
-            builder.setParent(parent);
         }
     }
 }
