@@ -18,5 +18,6 @@ QString requests(const CommandContext &ctx);
 QString lowtrust(const CommandContext &ctx);
 QString clip(const CommandContext &ctx);
 QString marker(const CommandContext &ctx);
+QString streamlink(const CommandContext &ctx);
 
 }  // namespace chatterino::commands

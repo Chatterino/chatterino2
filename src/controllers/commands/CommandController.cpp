@@ -951,32 +951,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/marker", &commands::marker);
 
-    this->registerCommand("/streamlink", [](const QStringList &words,
-                                            ChannelPtr channel) {
-        QString target(words.value(1));
-
-        if (target.isEmpty())
-        {
-            if (channel->getType() == Channel::Type::Twitch &&
-                !channel->isEmpty())
-            {
-                target = channel->getName();
-            }
-            else
-            {
-                channel->addMessage(makeSystemMessage(
-                    "/streamlink [channel]. Open specified Twitch channel in "
-                    "streamlink. If no channel argument is specified, open the "
-                    "current Twitch channel instead."));
-                return "";
-            }
-        }
-
-        stripChannelName(target);
-        openStreamlinkForChannel(target);
-
-        return "";
-    });
+    this->registerCommand("/streamlink", &commands::streamlink);
 
     this->registerCommand("/popout", [](const QStringList &words,
                                         ChannelPtr channel) {

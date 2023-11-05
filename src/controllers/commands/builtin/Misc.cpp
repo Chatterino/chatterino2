@@ -9,6 +9,7 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "util/FormatTime.hpp"
+#include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 
 #include <QDesktopServices>
@@ -265,6 +266,38 @@ QString marker(const CommandContext &ctx)
 
             channel->addMessage(makeSystemMessage(errorMessage));
         });
+
+    return "";
+}
+
+QString streamlink(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    QString target(ctx.words.value(1));
+
+    if (target.isEmpty())
+    {
+        if (ctx.channel->getType() == Channel::Type::Twitch &&
+            !ctx.channel->isEmpty())
+        {
+            target = ctx.channel->getName();
+        }
+        else
+        {
+            ctx.channel->addMessage(makeSystemMessage(
+                "/streamlink [channel]. Open specified Twitch channel in "
+                "streamlink. If no channel argument is specified, open the "
+                "current Twitch channel instead."));
+            return "";
+        }
+    }
+
+    stripChannelName(target);
+    openStreamlinkForChannel(target);
 
     return "";
 }
