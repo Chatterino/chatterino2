@@ -4,6 +4,7 @@
 #include "common/Channel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
+#include "controllers/userdata/UserDataController.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -504,6 +505,36 @@ QString copyToClipboard(const CommandContext &ctx)
     }
 
     crossPlatformCopy(ctx.words.mid(1).join(" "));
+    return "";
+}
+
+QString unstableSetUserClientSideColor(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+
+    if (ctx.twitchChannel == nullptr)
+    {
+        ctx.channel->addMessage(
+            makeSystemMessage("The /unstable-set-user-color command only "
+                              "works in Twitch channels"));
+        return "";
+    }
+    if (ctx.words.size() < 2)
+    {
+        ctx.channel->addMessage(makeSystemMessage(
+            QString("Usage: %1 <TwitchUserID> [color]").arg(ctx.words.at(0))));
+        return "";
+    }
+
+    auto userID = ctx.words.at(1);
+
+    auto color = ctx.words.value(2);
+
+    getIApp()->getUserData()->setUserColor(userID, color);
+
     return "";
 }
 

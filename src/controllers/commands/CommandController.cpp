@@ -879,30 +879,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/commercial", &commands::startCommercial);
 
-    this->registerCommand("/unstable-set-user-color", [](const auto &ctx) {
-        if (ctx.twitchChannel == nullptr)
-        {
-            ctx.channel->addMessage(
-                makeSystemMessage("The /unstable-set-user-color command only "
-                                  "works in Twitch channels"));
-            return "";
-        }
-        if (ctx.words.size() < 2)
-        {
-            ctx.channel->addMessage(
-                makeSystemMessage(QString("Usage: %1 <TwitchUserID> [color]")
-                                      .arg(ctx.words.at(0))));
-            return "";
-        }
-
-        auto userID = ctx.words.at(1);
-
-        auto color = ctx.words.value(2);
-
-        getIApp()->getUserData()->setUserColor(userID, color);
-
-        return "";
-    });
+    this->registerCommand("/unstable-set-user-color",
+                          &commands::unstableSetUserClientSideColor);
 
     this->registerCommand(
         "/debug-force-image-gc",
