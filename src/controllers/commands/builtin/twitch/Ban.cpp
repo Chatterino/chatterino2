@@ -169,7 +169,7 @@ QString sendBan(const CommandContext &ctx)
             [] {
                 // No response for bans, they're emitted over pubsub/IRC instead
             },
-            [channel, targetUserID](auto error, auto message) {
+            [channel, targetUserID{targetUserID}](auto error, auto message) {
                 auto errorMessage =
                     formatBanTimeoutError("ban", error, message, targetUserID);
                 channel->addMessage(makeSystemMessage(errorMessage));
@@ -184,7 +184,7 @@ QString sendBan(const CommandContext &ctx)
                 banUserByID(channel, twitchChannel, currentUser->getUserId(),
                             targetUser.id, reason, targetUser.displayName);
             },
-            [channel, targetUserName] {
+            [channel, targetUserName{targetUserName}] {
                 // Equivalent error from IRC
                 channel->addMessage(makeSystemMessage(
                     QString("Invalid username: %1").arg(targetUserName)));
@@ -301,13 +301,14 @@ QString sendTimeout(const CommandContext &ctx)
     {
         getHelix()->getUserByName(
             targetUserName,
-            [channel, currentUser, twitchChannel, targetUserName, duration,
+            [channel, currentUser, twitchChannel,
+             targetUserName{targetUserName}, duration,
              reason](const auto &targetUser) {
                 timeoutUserByID(channel, twitchChannel,
                                 currentUser->getUserId(), targetUser.id,
                                 duration, reason, targetUser.displayName);
             },
-            [channel, targetUserName] {
+            [channel, targetUserName{targetUserName}] {
                 // Equivalent error from IRC
                 channel->addMessage(makeSystemMessage(
                     QString("Invalid username: %1").arg(targetUserName)));
