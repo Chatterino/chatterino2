@@ -8,6 +8,7 @@
 #include "messages/MessageElement.hpp"
 #include "singletons/Theme.hpp"
 
+#include <QApplication>
 #include <QLoggingCategory>
 #include <QString>
 
@@ -91,6 +92,21 @@ QString listEnvironmentVariables(const CommandContext &ctx)
                                      MessageColor::System);
         channel->addMessage(builder.release());
     }
+    return "";
+}
+
+QString listArgs(const CommandContext &ctx)
+{
+    const auto &channel = ctx.channel;
+    if (channel == nullptr)
+    {
+        return "";
+    }
+
+    QString msg = QApplication::instance()->arguments().join(' ');
+
+    channel->addMessage(makeSystemMessage(msg));
+
     return "";
 }
 

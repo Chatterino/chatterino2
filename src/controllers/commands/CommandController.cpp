@@ -775,14 +775,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     /// Supported commands
 
-    this->registerCommand(
-        "/debug-args", [](const auto & /*words*/, auto channel) {
-            QString msg = QApplication::instance()->arguments().join(' ');
-
-            channel->addMessage(makeSystemMessage(msg));
-
-            return "";
-        });
+    this->registerCommand("/debug-args", &commands::listArgs);
 
     this->registerCommand("/debug-env", &commands::listEnvironmentVariables);
 
