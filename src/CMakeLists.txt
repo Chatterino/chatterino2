@@ -67,6 +67,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/ChatSettings.hpp
         controllers/commands/builtin/twitch/Chatters.cpp
         controllers/commands/builtin/twitch/Chatters.hpp
+        controllers/commands/builtin/twitch/DeleteMessages.cpp
+        controllers/commands/builtin/twitch/DeleteMessages.hpp
         controllers/commands/builtin/twitch/ShieldMode.cpp
         controllers/commands/builtin/twitch/ShieldMode.hpp
         controllers/commands/builtin/twitch/Shoutout.cpp

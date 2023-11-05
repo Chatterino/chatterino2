@@ -11,6 +11,7 @@
 #include "controllers/commands/builtin/twitch/Ban.hpp"
 #include "controllers/commands/builtin/twitch/ChatSettings.hpp"
 #include "controllers/commands/builtin/twitch/Chatters.hpp"
+#include "controllers/commands/builtin/twitch/DeleteMessages.hpp"
 #include "controllers/commands/builtin/twitch/ShieldMode.hpp"
 #include "controllers/commands/builtin/twitch/Shoutout.hpp"
 #include "controllers/commands/builtin/twitch/UpdateChannel.hpp"
@@ -1023,136 +1024,9 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/color", &commands::updateUserColor);
 
-    auto deleteMessages = [](TwitchChannel *twitchChannel,
-                             const QString &messageID) {
-        const auto *commandName = messageID.isEmpty() ? "/clear" : "/delete";
+    this->registerCommand("/clear", &commands::deleteAllMessages);
 
-        auto user = getApp()->accounts->twitch.getCurrent();
-
-        // Avoid Helix calls without Client ID and/or OAuth Token
-        if (user->isAnon())
-        {
-            twitchChannel->addMessage(makeSystemMessage(
-                QString("You must be logged in to use the %1 command.")
-                    .arg(commandName)));
-            return "";
-        }
-
-        getHelix()->deleteChatMessages(
-            twitchChannel->roomId(), user->getUserId(), messageID,
-            []() {
-                // Success handling, we do nothing: IRC/pubsub-edge will dispatch the correct
-                // events to update state for us.
-            },
-            [twitchChannel, messageID](auto error, auto message) {
-                QString errorMessage =
-                    QString("Failed to delete chat messages - ");
-
-                switch (error)
-                {
-                    case HelixDeleteChatMessagesError::UserMissingScope: {
-                        errorMessage +=
-                            "Missing required scope. Re-login with your "
-                            "account and try again.";
-                    }
-                    break;
-
-                    case HelixDeleteChatMessagesError::UserNotAuthorized: {
-                        errorMessage +=
-                            "you don't have permission to perform that action.";
-                    }
-                    break;
-
-                    case HelixDeleteChatMessagesError::MessageUnavailable: {
-                        // Override default message prefix to match with IRC message format
-                        errorMessage =
-                            QString(
-                                "The message %1 does not exist, was deleted, "
-                                "or is too old to be deleted.")
-                                .arg(messageID);
-                    }
-                    break;
-
-                    case HelixDeleteChatMessagesError::UserNotAuthenticated: {
-                        errorMessage += "you need to re-authenticate.";
-                    }
-                    break;
-
-                    case HelixDeleteChatMessagesError::Forwarded: {
-                        errorMessage += message;
-                    }
-                    break;
-
-                    case HelixDeleteChatMessagesError::Unknown:
-                    default: {
-                        errorMessage += "An unknown error has occurred.";
-                    }
-                    break;
-                }
-
-                twitchChannel->addMessage(makeSystemMessage(errorMessage));
-            });
-
-        return "";
-    };
-
-    this->registerCommand(
-        "/clear", [deleteMessages](const QStringList &words, auto channel) {
-            (void)words;  // unused
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /clear command only works in Twitch channels"));
-                return "";
-            }
-            return deleteMessages(twitchChannel, QString());
-        });
-
-    this->registerCommand("/delete", [deleteMessages](const QStringList &words,
-                                                      auto channel) {
-        // This is a wrapper over the Helix delete messages endpoint
-        // We use this to ensure the user gets better error messages for missing or malformed arguments
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /delete command only works in Twitch channels"));
-            return "";
-        }
-        if (words.size() < 2)
-        {
-            channel->addMessage(
-                makeSystemMessage("Usage: /delete <msg-id> - Deletes the "
-                                  "specified message."));
-            return "";
-        }
-
-        auto messageID = words.at(1);
-        auto uuid = QUuid(messageID);
-        if (uuid.isNull())
-        {
-            // The message id must be a valid UUID
-            channel->addMessage(makeSystemMessage(
-                QString("Invalid msg-id: \"%1\"").arg(messageID)));
-            return "";
-        }
-
-        auto msg = channel->findMessage(messageID);
-        if (msg != nullptr)
-        {
-            if (msg->loginName == channel->getName() &&
-                !channel->isBroadcaster())
-            {
-                channel->addMessage(makeSystemMessage(
-                    "You cannot delete the broadcaster's messages unless "
-                    "you are the broadcaster."));
-                return "";
-            }
-        }
-
-        return deleteMessages(twitchChannel, messageID);
-    });
+    this->registerCommand("/delete", &commands::deleteOneMessage);
 
     this->registerCommand("/mod", [](const QStringList &words, auto channel) {
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
