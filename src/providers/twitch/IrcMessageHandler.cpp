@@ -1359,28 +1359,33 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
             parentIt != tags.end())
         {
             const QString parentID = parentIt.value().toString();
-            MessagePtr parent;
             if (replyID == parentID)
             {
                 if (rootThread)
                 {
-                    parent = rootThread->root();
+                    builder.setParent(rootThread->root());
                 }
             }
             else
             {
                 auto parentThreadIt = channel->threads().find(parentID);
-                if (parentThreadIt != channel->threads().end() &&
-                    !parentThreadIt->second.expired())
+                if (parentThreadIt != channel->threads().end())
                 {
-                    parent = parentThreadIt->second.lock()->root();
+                    auto thread = parentThreadIt->second.lock();
+                    if (thread)
+                    {
+                        builder.setParent(thread->root());
+                    }
                 }
                 else
                 {
-                    parent = channel->findMessage(parentID);
+                    auto parent = channel->findMessage(parentID);
+                    if (parent)
+                    {
+                        builder.setParent(parent);
+                    }
                 }
             }
-            builder.setParent(parent);
         }
     }
 
