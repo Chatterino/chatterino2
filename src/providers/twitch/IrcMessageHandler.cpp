@@ -1298,8 +1298,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
             qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
                                          "callback since reward is not known:"
                                       << rewardId;
-            channel->waitingRedemptions.push_back(
-                {rewardId, originalContent, {message->clone(), {}}});
+            channel->addQueuedRedemption(rewardId, originalContent, message);
             return;
         }
         args.channelPointRewardId = rewardId;

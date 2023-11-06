@@ -88,8 +88,6 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
-    this->waitingRedemptions.set_capacity(16);
-
     this->bSignals_.emplace_back(
         getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
@@ -350,6 +348,18 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
         manualRefresh);
 }
 
+void TwitchChannel::addQueuedRedemption(const QString &rewardId,
+                                        const QString &originalContent,
+                                        Communi::IrcMessage *message)
+{
+    if (this->waitingRedemptions_.size() >= MAX_QUEUED_REDEMPTIONS)
+    {
+        this->waitingRedemptions_.pop_front();
+    }
+    this->waitingRedemptions_.push_back(
+        {rewardId, originalContent, {message->clone(), {}}});
+}
+
 void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
 {
     assertInGuiThread();
@@ -377,19 +387,16 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
             << reward.title << "," << reward.isUserInputRequired;
 
         auto *server = getApp()->twitch;
-        auto it = std::remove_if(
-            this->waitingRedemptions.begin(), this->waitingRedemptions.end(),
-            [&](const QueuedRedemption &msg) {
-                if (reward.id == msg.rewardID)
-                {
-                    IrcMessageHandler::instance().addMessage(
-                        msg.message.get(), "#" + channelName,
-                        msg.originalContent, *server, false, false);
-                    return true;
-                }
-                return false;
-            });
-        this->waitingRedemptions.erase(it, this->waitingRedemptions.end());
+        this->waitingRedemptions_.remove_if([&](const QueuedRedemption &msg) {
+            if (reward.id == msg.rewardID)
+            {
+                IrcMessageHandler::instance().addMessage(
+                    msg.message.get(), "#" + channelName, msg.originalContent,
+                    *server, false, false);
+                return true;
+            }
+            return false;
+        });
     }
 }
 
