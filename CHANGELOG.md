@@ -7,6 +7,7 @@
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
 - Minor: The installer now checks for the VC Runtime version and shows more info when it's outdated. (#4847)
+- Minor: The `/usercard` command now accepts user ids. (#4934)
 - Minor: Add menu actions to reply directly to a message or the original thread root. (#4923)
 - Minor: The `/reply` command now replies to the latest message of the user. (#4919)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
