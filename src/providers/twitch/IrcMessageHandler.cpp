@@ -1290,27 +1290,15 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     if (const auto it = tags.find("custom-reward-id"); it != tags.end())
     {
         const auto rewardId = it.value().toString();
-        if (!channel->isChannelPointRewardKnown(rewardId))
+        if (!rewardId.isEmpty() &&
+            !channel->isChannelPointRewardKnown(rewardId))
         {
             // Need to wait for pubsub reward notification
-            auto *clone = message->clone();
             qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
                                          "callback since reward is not known:"
                                       << rewardId;
-            channel->channelPointRewardAdded.connect(
-                [=, this, &server](ChannelPointReward reward) {
-                    qCDebug(chatterinoTwitch)
-                        << "TwitchChannel reward added callback:" << reward.id
-                        << "-" << rewardId;
-                    if (reward.id == rewardId)
-                    {
-                        this->addMessage(clone, target, originalContent, server,
-                                         isSub, isAction);
-                        clone->deleteLater();
-                        return true;
-                    }
-                    return false;
-                });
+            channel->waitingRedemptions.push_back(
+                {rewardId, originalContent, QPointer(message->clone())});
             return;
         }
         args.channelPointRewardId = rewardId;

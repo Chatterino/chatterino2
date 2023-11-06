@@ -88,6 +88,8 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
+    this->waitingRedemptions.set_capacity(16);
+
     this->bSignals_.emplace_back(
         getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
@@ -368,25 +370,26 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
     }
     if (result)
     {
+        const auto &channelName = this->getName();
         qCDebug(chatterinoTwitch)
-            << "[TwitchChannel" << this->getName()
+            << "[TwitchChannel" << channelName
             << "] Channel point reward added:" << reward.id << ","
             << reward.title << "," << reward.isUserInputRequired;
 
-        // TODO: There's an underlying bug here. This bug should be fixed.
-        // This only attempts to prevent a crash when invoking the signal.
-        try
-        {
-            this->channelPointRewardAdded.invoke(reward);
-        }
-        catch (const std::bad_function_call &)
-        {
-            qCWarning(chatterinoTwitch).nospace()
-                << "[TwitchChannel " << this->getName()
-                << "] Caught std::bad_function_call when adding channel point "
-                   "reward ChannelPointReward{ id: "
-                << reward.id << ", title: " << reward.title << " }.";
-        }
+        auto *server = getApp()->twitch;
+        auto it = std::remove_if(
+            this->waitingRedemptions.begin(), this->waitingRedemptions.end(),
+            [=, &channelName, &server](const QueuedRedemption &msg) {
+                if (reward.id == msg.rewardId)
+                {
+                    IrcMessageHandler::instance().addMessage(
+                        msg.message, "#" + channelName, msg.originalContent,
+                        *server, false, false);
+                    return true;
+                }
+                return false;
+            });
+        this->waitingRedemptions.erase(it, this->waitingRedemptions.end());
     }
 }
 

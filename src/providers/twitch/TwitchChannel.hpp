@@ -9,6 +9,7 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/circular_buffer/space_optimized.hpp>
 #include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
@@ -101,6 +102,12 @@ public:
          * 0 = slow mode off
          **/
         int slowMode = 0;
+    };
+
+    struct QueuedRedemption {
+        QString rewardId;
+        QString originalContent;
+        QPointer<Communi::IrcMessage> message;
     };
 
     explicit TwitchChannel(const QString &channelName);
@@ -218,8 +225,7 @@ public:
     pajlada::Signals::NoArgSignal roomModesChanged;
 
     // Channel point rewards
-    pajlada::Signals::SelfDisconnectingSignal<ChannelPointReward>
-        channelPointRewardAdded;
+    boost::circular_buffer_space_optimized<QueuedRedemption> waitingRedemptions;
     void addChannelPointReward(const ChannelPointReward &reward);
     bool isChannelPointRewardKnown(const QString &rewardId);
     std::optional<ChannelPointReward> channelPointReward(
