@@ -4,6 +4,7 @@
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/ChannelChatters.hpp"
+#include "common/Common.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
@@ -15,7 +16,6 @@
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
 #include <QElapsedTimer>
-#include <QPointer>
 #include <QRegularExpression>
 
 #include <atomic>
@@ -109,7 +109,7 @@ public:
     struct QueuedRedemption {
         QString rewardID;
         QString originalContent;
-        QPointer<Communi::IrcMessage> message;
+        QObjectPtr<Communi::IrcMessage> message;
     };
 
     explicit TwitchChannel(const QString &channelName);

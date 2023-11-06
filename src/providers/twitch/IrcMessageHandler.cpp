@@ -1,6 +1,7 @@
 #include "providers/twitch/IrcMessageHandler.hpp"
 
 #include "Application.hpp"
+#include "common/Common.hpp"
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -1298,7 +1299,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                          "callback since reward is not known:"
                                       << rewardId;
             channel->waitingRedemptions.push_back(
-                {rewardId, originalContent, QPointer(message->clone())});
+                {rewardId, originalContent, {message->clone(), {}}});
             return;
         }
         args.channelPointRewardId = rewardId;
