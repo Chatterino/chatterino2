@@ -34,17 +34,10 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
-#include "singletons/Settings.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/CombinePath.hpp"
 #include "util/QStringHash.hpp"
-#include "util/Twitch.hpp"
-#include "widgets/dialogs/UserInfoPopup.hpp"
-#include "widgets/splits/Split.hpp"
-#include "widgets/Window.hpp"
 
 #include <QString>
 
