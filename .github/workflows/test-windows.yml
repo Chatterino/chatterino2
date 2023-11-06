@@ -182,6 +182,8 @@ jobs:
           cargo build
           cargo run -- --port 9051 &
           cd ..\build-test
+          Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/raw/master/cmd/server/server.crt" -outfile "pubsub-server-test\server.crt"
+          Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/raw/master/cmd/server/server.key" -outfile "pubsub-server-test\server.key"
           .\pubsub-server-test\server.exe 127.0.0.1:9050 &
           .\bin\chatterino-test.exe || .\bin\chatterino-test.exe || .\bin\chatterino-test.exe
         working-directory: build-test
