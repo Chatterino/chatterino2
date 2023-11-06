@@ -368,7 +368,8 @@ private:
         badgeSets_;  // "subscribers": { "0": ... "3": ... "6": ...
     UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
     UniqueAccess<std::map<QString, ChannelPointReward>> channelPointRewards_;
-    boost::circular_buffer_space_optimized<QueuedRedemption> waitingRedemptions_;
+    boost::circular_buffer_space_optimized<QueuedRedemption>
+        waitingRedemptions_;
 
     bool mod_ = false;
     bool vip_ = false;
