@@ -243,10 +243,12 @@ void populateReply(TwitchChannel *channel, Communi::IrcMessage *message,
                    TwitchMessageBuilder &builder)
 {
     const auto &tags = message->tags();
-    if (const auto it = tags.find("reply-parent-msg-id"); it != tags.end())
+    if (const auto it = tags.find("reply-thread-parent-msg-id");
+        it != tags.end())
     {
         const QString replyID = it.value().toString();
         auto threadIt = channel->threads().find(replyID);
+        std::shared_ptr<MessageThread> rootThread;
         if (threadIt != channel->threads().end())
         {
             auto owned = threadIt->second.lock();
@@ -256,43 +258,80 @@ void populateReply(TwitchChannel *channel, Communi::IrcMessage *message,
                 updateReplyParticipatedStatus(tags, message->nick(), builder,
                                               owned, false);
                 builder.setThread(owned);
-                return;
+                rootThread = owned;
             }
         }
 
-        MessagePtr foundMessage;
-
-        // Thread does not yet exist, find root reply and create thread.
-        // Linear search is justified by the infrequent use of replies
-        for (const auto &otherMsg : otherLoaded)
+        if (!rootThread)
         {
-            if (otherMsg->id == replyID)
+            MessagePtr foundMessage;
+
+            // Thread does not yet exist, find root reply and create thread.
+            // Linear search is justified by the infrequent use of replies
+            for (const auto &otherMsg : otherLoaded)
             {
-                // Found root reply message
-                foundMessage = otherMsg;
-                break;
+                if (otherMsg->id == replyID)
+                {
+                    // Found root reply message
+                    foundMessage = otherMsg;
+                    break;
+                }
+            }
+
+            if (!foundMessage)
+            {
+                // We didn't find the reply root message in the otherLoaded messages
+                // which are typically the already-parsed recent messages from the
+                // Recent Messages API. We could have a really old message that
+                // still exists being replied to, so check for that here.
+                foundMessage = channel->findMessage(replyID);
+            }
+
+            if (foundMessage)
+            {
+                std::shared_ptr<MessageThread> newThread =
+                    std::make_shared<MessageThread>(foundMessage);
+                updateReplyParticipatedStatus(tags, message->nick(), builder,
+                                              newThread, true);
+
+                builder.setThread(newThread);
+                rootThread = newThread;
+                // Store weak reference to thread in channel
+                channel->addReplyThread(newThread);
             }
         }
 
-        if (!foundMessage)
+        if (const auto parentIt = tags.find("reply-parent-msg-id");
+            parentIt != tags.end())
         {
-            // We didn't find the reply root message in the otherLoaded messages
-            // which are typically the already-parsed recent messages from the
-            // Recent Messages API. We could have a really old message that
-            // still exists being replied to, so check for that here.
-            foundMessage = channel->findMessage(replyID);
-        }
-
-        if (foundMessage)
-        {
-            std::shared_ptr<MessageThread> newThread =
-                std::make_shared<MessageThread>(foundMessage);
-            updateReplyParticipatedStatus(tags, message->nick(), builder,
-                                          newThread, true);
-
-            builder.setThread(newThread);
-            // Store weak reference to thread in channel
-            channel->addReplyThread(newThread);
+            const QString parentID = parentIt.value().toString();
+            if (replyID == parentID)
+            {
+                if (rootThread)
+                {
+                    builder.setParent(rootThread->root());
+                }
+            }
+            else
+            {
+                auto parentThreadIt = channel->threads().find(parentID);
+                if (parentThreadIt != channel->threads().end())
+                {
+                    auto thread = parentThreadIt->second.lock();
+                    if (thread)
+                    {
+                        builder.setParent(thread->root());
+                    }
+                }
+                else
+                {
+                    auto parent = channel->findMessage(parentID);
+                    if (parent)
+                    {
+                        builder.setParent(parent);
+                    }
+                }
+            }
         }
     }
 }
@@ -1283,17 +1322,20 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     TwitchMessageBuilder builder(chan.get(), message, args, content, isAction);
     builder.setMessageOffset(messageOffset);
 
-    if (const auto it = tags.find("reply-parent-msg-id"); it != tags.end())
+    if (const auto it = tags.find("reply-thread-parent-msg-id");
+        it != tags.end())
     {
         const QString replyID = it.value().toString();
-        auto threadIt = channel->threads_.find(replyID);
-        if (threadIt != channel->threads_.end() && !threadIt->second.expired())
+        auto threadIt = channel->threads().find(replyID);
+        std::shared_ptr<MessageThread> rootThread;
+        if (threadIt != channel->threads().end() && !threadIt->second.expired())
         {
             // Thread already exists (has a reply)
             auto thread = threadIt->second.lock();
             updateReplyParticipatedStatus(tags, message->nick(), builder,
                                           thread, false);
             builder.setThread(thread);
+            rootThread = thread;
         }
         else
         {
@@ -1307,8 +1349,42 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                               newThread, true);
 
                 builder.setThread(newThread);
+                rootThread = newThread;
                 // Store weak reference to thread in channel
                 channel->addReplyThread(newThread);
+            }
+        }
+
+        if (const auto parentIt = tags.find("reply-parent-msg-id");
+            parentIt != tags.end())
+        {
+            const QString parentID = parentIt.value().toString();
+            if (replyID == parentID)
+            {
+                if (rootThread)
+                {
+                    builder.setParent(rootThread->root());
+                }
+            }
+            else
+            {
+                auto parentThreadIt = channel->threads().find(parentID);
+                if (parentThreadIt != channel->threads().end())
+                {
+                    auto thread = parentThreadIt->second.lock();
+                    if (thread)
+                    {
+                        builder.setParent(thread->root());
+                    }
+                }
+                else
+                {
+                    auto parent = channel->findMessage(parentID);
+                    if (parent)
+                    {
+                        builder.setParent(parent);
+                    }
+                }
             }
         }
     }

@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
-#include "ForwardDecl.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "widgets/splits/Split.hpp"
