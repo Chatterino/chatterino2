@@ -379,7 +379,7 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
         auto *server = getApp()->twitch;
         auto it = std::remove_if(
             this->waitingRedemptions.begin(), this->waitingRedemptions.end(),
-            [=, &channelName, &server](const QueuedRedemption &msg) {
+            [&](const QueuedRedemption &msg) {
                 if (reward.id == msg.rewardId)
                 {
                     IrcMessageHandler::instance().addMessage(
