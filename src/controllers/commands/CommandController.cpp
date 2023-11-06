@@ -29,6 +29,7 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
+#include "controllers/plugins/PluginController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -38,6 +39,7 @@
 #include "singletons/Paths.hpp"
 #include "util/CombinePath.hpp"
 #include "util/QStringHash.hpp"
+#include "util/Qt.hpp"
 
 #include <QString>
 
