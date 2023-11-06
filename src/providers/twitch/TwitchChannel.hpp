@@ -107,7 +107,7 @@ public:
     };
 
     struct QueuedRedemption {
-        QString rewardId;
+        QString rewardID;
         QString originalContent;
         QPointer<Communi::IrcMessage> message;
     };
