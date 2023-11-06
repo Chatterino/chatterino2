@@ -167,16 +167,23 @@ jobs:
           rm pubsub-server.zip
         shell: pwsh
 
+      - name: Checkout httpbox
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/checkout@v4
+        with:
+          repository: "kevinastone/httpbox"
+          path: "httpbox"
+
       - name: Test
         if: startsWith(matrix.os, 'windows')
         timeout-minutes: 30
         run: |
-          Invoke-WebRequest -Uri "https://gist.github.com/Wissididom/2eff110a9bf5c7bd995f05b42dd63c22/raw/5c11ca381e338d880d0fdf6ec4b6035df2ebf707/httpbin.go" -outfile "httpbin.go"
-          go mod init main
-          go mod tidy
-          go run httpbin.go &
-          ./pubsub-server-test/server.exe 127.0.0.1:9050 &
-          ./bin/chatterino-test.exe || ./bin/chatterino-test.exe || ./bin/chatterino-test.exe
+          cd ..\httpbox
+          cargo build
+          cargo run -- --port 9051 &
+          cd ..\build-test
+          .\pubsub-server-test\server.exe 127.0.0.1:9050 &
+          .\bin\chatterino-test.exe || .\bin\chatterino-test.exe || .\bin\chatterino-test.exe
         working-directory: build-test
         shell: pwsh
 
