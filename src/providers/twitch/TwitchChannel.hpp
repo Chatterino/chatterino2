@@ -15,6 +15,7 @@
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
 #include <QElapsedTimer>
+#include <QPointer>
 #include <QRegularExpression>
 
 #include <atomic>
