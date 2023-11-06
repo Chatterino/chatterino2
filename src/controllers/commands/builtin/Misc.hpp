@@ -27,5 +27,6 @@ QString sendRawMessage(const CommandContext &ctx);
 QString injectFakeMessage(const CommandContext &ctx);
 QString copyToClipboard(const CommandContext &ctx);
 QString unstableSetUserClientSideColor(const CommandContext &ctx);
+QString openUsercard(const CommandContext &ctx);
 
 }  // namespace chatterino::commands

@@ -17,6 +17,7 @@
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
+#include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
@@ -535,6 +536,93 @@ QString unstableSetUserClientSideColor(const CommandContext &ctx)
 
     getIApp()->getUserData()->setUserColor(userID, color);
 
+    return "";
+}
+
+QString openUsercard(const CommandContext &ctx)
+{
+    auto channel = ctx.channel;
+
+    if (channel == nullptr)
+    {
+        return "";
+    }
+
+    if (ctx.words.size() < 2)
+    {
+        channel->addMessage(
+            makeSystemMessage("Usage: /usercard <username> [channel] or "
+                              "/usercard id:<id> [channel]"));
+        return "";
+    }
+
+    QString userName = ctx.words[1];
+    stripUserName(userName);
+
+    if (ctx.words.size() > 2)
+    {
+        QString channelName = ctx.words[2];
+        stripChannelName(channelName);
+
+        ChannelPtr channelTemp =
+            getApp()->twitch->getChannelOrEmpty(channelName);
+
+        if (channelTemp->isEmpty())
+        {
+            channel->addMessage(makeSystemMessage(
+                "A usercard can only be displayed for a channel that is "
+                "currently opened in Chatterino."));
+            return "";
+        }
+
+        channel = channelTemp;
+    }
+
+    // try to link to current split if possible
+    Split *currentSplit = nullptr;
+    auto *currentPage = dynamic_cast<SplitContainer *>(
+        getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+    if (currentPage != nullptr)
+    {
+        currentSplit = currentPage->getSelectedSplit();
+    }
+
+    auto differentChannel =
+        currentSplit != nullptr && currentSplit->getChannel() != channel;
+    if (differentChannel || currentSplit == nullptr)
+    {
+        // not possible to use current split, try searching for one
+        const auto &notebook = getApp()->windows->getMainWindow().getNotebook();
+        auto count = notebook.getPageCount();
+        for (int i = 0; i < count; i++)
+        {
+            auto *page = notebook.getPageAt(i);
+            auto *container = dynamic_cast<SplitContainer *>(page);
+            assert(container != nullptr);
+            for (auto *split : container->getSplits())
+            {
+                if (split->getChannel() == channel)
+                {
+                    currentSplit = split;
+                    break;
+                }
+            }
+        }
+
+        // This would have crashed either way.
+        assert(currentSplit != nullptr &&
+               "something went HORRIBLY wrong with the /usercard "
+               "command. It couldn't find a split for a channel which "
+               "should be open.");
+    }
+
+    auto *userPopup = new UserInfoPopup(
+        getSettings()->autoCloseUserPopup,
+        static_cast<QWidget *>(&(getApp()->windows->getMainWindow())),
+        currentSplit);
+    userPopup->setData(userName, channel);
+    userPopup->moveTo(QCursor::pos(), widgets::BoundsChecking::CursorPosition);
+    userPopup->show();
     return "";
 }
 
