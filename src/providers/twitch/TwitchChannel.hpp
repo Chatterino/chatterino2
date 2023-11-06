@@ -10,6 +10,7 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/circular_buffer/space_optimized.hpp>
 #include <boost/signals2.hpp>
 #include <IrcMessage>
 #include <pajlada/signals/signalholder.hpp>
@@ -367,7 +368,7 @@ private:
         badgeSets_;  // "subscribers": { "0": ... "3": ... "6": ...
     UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
     UniqueAccess<std::map<QString, ChannelPointReward>> channelPointRewards_;
-    std::list<QueuedRedemption> waitingRedemptions_;
+    boost::circular_buffer_space_optimized<QueuedRedemption> waitingRedemptions_;
 
     bool mod_ = false;
     bool vip_ = false;
