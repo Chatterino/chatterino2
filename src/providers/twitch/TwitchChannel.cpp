@@ -391,7 +391,7 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
                 if (reward.id == msg.rewardID)
                 {
                     IrcMessageHandler::instance().addMessage(
-                        msg.message.get(), "#" + channelName,
+                        msg.message.get(), shared_from_this(),
                         msg.originalContent, *server, false, false);
                     return true;
                 }

@@ -692,7 +692,7 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
     // https://mm2pl.github.io/emoji_rfc.pdf for more details
 
     this->addMessage(
-        message, message->target(),
+        message, channelOrEmptyByTarget(message->target(), server),
         message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
         false, message->isAction());
 
@@ -1002,7 +1002,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         // Messages are not required, so they might be empty
         if (!content.isEmpty())
         {
-            this->addMessage(message, target, content, server, true, false);
+            this->addMessage(message, chn, content, server, true, false);
         }
     }
 
@@ -1261,13 +1261,11 @@ void IrcMessageHandler::setSimilarityFlags(const MessagePtr &message,
 }
 
 void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
-                                   const QString &target,
+                                   const ChannelPtr &chan,
                                    const QString &originalContent,
                                    TwitchIrcServer &server, bool isSub,
                                    bool isAction)
 {
-    auto chan = channelOrEmptyByTarget(target, server);
-
     if (chan->isEmpty())
     {
         return;
@@ -1307,7 +1305,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     QString content = originalContent;
     int messageOffset = stripLeadingReplyMention(tags, content);
 
-    TwitchMessageBuilder builder(chan.get(), message, args, content, isAction);
+    TwitchMessageBuilder builder(channel, message, args, content, isAction);
     builder.setMessageOffset(messageOffset);
 
     if (const auto it = tags.find("reply-thread-parent-msg-id");

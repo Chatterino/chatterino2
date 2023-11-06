@@ -55,7 +55,7 @@ public:
     void handleJoinMessage(Communi::IrcMessage *message);
     void handlePartMessage(Communi::IrcMessage *message);
 
-    void addMessage(Communi::IrcMessage *message, const QString &target,
+    void addMessage(Communi::IrcMessage *message, const ChannelPtr &chan,
                     const QString &originalContent, TwitchIrcServer &server,
                     bool isSub, bool isAction);
 
