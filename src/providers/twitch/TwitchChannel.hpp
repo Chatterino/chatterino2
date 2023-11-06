@@ -11,6 +11,7 @@
 
 #include <boost/circular_buffer/space_optimized.hpp>
 #include <boost/signals2.hpp>
+#include <IrcMessage>
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
 #include <QElapsedTimer>
