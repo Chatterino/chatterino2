@@ -11,6 +11,8 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
+#include <QUuid>
+
 namespace {
 
 using namespace chatterino;
