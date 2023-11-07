@@ -7,7 +7,6 @@ on:
   merge_group:
 
 env:
-  TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.6
   QT_QPA_PLATFORM: minimal
   # Last known good conan version
   # 2.0.3 has a bug on Windows (conan-io/conan#13606)
@@ -29,7 +28,6 @@ jobs:
         plugins: [false]
         skip-artifact: [false]
         skip-crashpad: [false]
-        clang-tidy-review: [false]
       fail-fast: false
     env:
       C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
@@ -52,12 +50,6 @@ jobs:
         if: matrix.skip-crashpad == false
         run: |
           echo "C2_ENABLE_CRASHPAD=ON" >> "$Env:GITHUB_ENV"
-        shell: pwsh
-
-      - name: Set environment variables for windows-latest
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "vs_version=2022" >> "$Env:GITHUB_ENV"
         shell: pwsh
 
       - name: Set BUILD_WITH_QT6
