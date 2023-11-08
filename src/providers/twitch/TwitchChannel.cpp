@@ -354,8 +354,11 @@ void TwitchChannel::addQueuedRedemption(const QString &rewardId,
                                         const QString &originalContent,
                                         Communi::IrcMessage *message)
 {
-    this->waitingRedemptions_.push_back(
-        {rewardId, originalContent, {message->clone(), {}}});
+    this->waitingRedemptions_.push_back({
+        rewardId,
+        originalContent,
+        {message->clone(), {}},
+    });
 }
 
 void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
