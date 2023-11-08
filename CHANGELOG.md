@@ -52,7 +52,7 @@
 - Dev: Add a compile-time flag `USE_SYSTEM_MINIAUDIO` which can be turned on to use the system miniaudio. (#4867)
 - Dev: Update vcpkg to use Qt6. (#4872)
 - Dev: Replace `boost::optional` with `std::optional`. (#4877)
-- Dev: Improve performance by reducing repaints caused by selections. (#4889)
+- Dev: Improve performance of selecting text. (#4889, #4911)
 - Dev: Removed direct dependency on Qt 5 compatibility module. (#4906)
 - Dev: Refactor `DebugCount` and add copy button to debug popup. (#4921)
 - Dev: Changed lifetime of context menus. (#4924)
