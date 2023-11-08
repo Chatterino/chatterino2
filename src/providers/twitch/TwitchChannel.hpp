@@ -4,12 +4,15 @@
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/ChannelChatters.hpp"
+#include "common/Common.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/circular_buffer/space_optimized.hpp>
 #include <boost/signals2.hpp>
+#include <IrcMessage>
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
 #include <QElapsedTimer>
@@ -66,6 +69,8 @@ struct CheerEmoteSet;
 struct HelixStream;
 
 class TwitchIrcServer;
+
+const int MAX_QUEUED_REDEMPTIONS = 16;
 
 class TwitchChannel final : public Channel, public ChannelChatters
 {
@@ -218,8 +223,13 @@ public:
     pajlada::Signals::NoArgSignal roomModesChanged;
 
     // Channel point rewards
-    pajlada::Signals::SelfDisconnectingSignal<ChannelPointReward>
-        channelPointRewardAdded;
+    void addQueuedRedemption(const QString &rewardId,
+                             const QString &originalContent,
+                             Communi::IrcMessage *message);
+    /**
+     * A rich & hydrated redemption from PubSub has arrived, add it to the channel.
+     * This will look at queued up partial messages, and if one is found it will add the queued up partial messages fully hydrated.
+     **/
     void addChannelPointReward(const ChannelPointReward &reward);
     bool isChannelPointRewardKnown(const QString &rewardId);
     std::optional<ChannelPointReward> channelPointReward(
@@ -245,6 +255,12 @@ private:
         // actualDisplayName is the raw display name string received from Twitch
         QString actualDisplayName;
     } nameOptions;
+
+    struct QueuedRedemption {
+        QString rewardID;
+        QString originalContent;
+        QObjectPtr<Communi::IrcMessage> message;
+    };
 
     void refreshPubSub();
     void refreshChatters();
@@ -356,6 +372,8 @@ private:
         badgeSets_;  // "subscribers": { "0": ... "3": ... "6": ...
     UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
     UniqueAccess<std::map<QString, ChannelPointReward>> channelPointRewards_;
+    boost::circular_buffer_space_optimized<QueuedRedemption>
+        waitingRedemptions_{MAX_QUEUED_REDEMPTIONS};
 
     bool mod_ = false;
     bool vip_ = false;

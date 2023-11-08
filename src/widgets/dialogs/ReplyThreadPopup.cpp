@@ -189,7 +189,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
 void ReplyThreadPopup::setThread(std::shared_ptr<MessageThread> thread)
 {
     this->thread_ = std::move(thread);
-    this->ui_.replyInput->setReply(this->thread_);
+    this->ui_.replyInput->setReply(this->thread_->root());
     this->addMessagesFromThread();
     this->updateInputUI();
 
