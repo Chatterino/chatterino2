@@ -112,16 +112,17 @@ public:
     bool pausable() const;
     void setPausable(bool value);
     bool paused() const;
-    void pause(PauseReason reason, std::optional<uint> msecs = std::nullopt);
+    void pause(PauseReason reason,
+               std::optional<uint32_t> msecs = std::nullopt);
     void unpause(PauseReason reason);
 
     MessageElementFlags getFlags() const;
 
     ChannelPtr channel();
-    void setChannel(ChannelPtr channel_);
+    void setChannel(const ChannelPtr &underlyingChannel);
 
     void setFilters(const QList<QUuid> &ids);
-    const QList<QUuid> getFilterIds() const;
+    QList<QUuid> getFilterIds() const;
     FilterSetPtr getFilterSet() const;
 
     ChannelPtr sourceChannel() const;
@@ -163,9 +164,9 @@ protected:
     void themeChangedEvent() override;
     void scaleChangedEvent(float scale) override;
 
-    void resizeEvent(QResizeEvent *) override;
+    void resizeEvent(QResizeEvent * /*event*/) override;
 
-    void paintEvent(QPaintEvent *) override;
+    void paintEvent(QPaintEvent * /*event*/) override;
     void wheelEvent(QWheelEvent *event) override;
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -173,14 +174,14 @@ protected:
 #else
     void enterEvent(QEvent * /*event*/) override;
 #endif
-    void leaveEvent(QEvent *) override;
+    void leaveEvent(QEvent * /*event*/) override;
 
     void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 
-    void hideEvent(QHideEvent *) override;
+    void hideEvent(QHideEvent * /*event*/) override;
     void showEvent(QShowEvent *event) override;
 
     void handleLinkClick(QMouseEvent *event, const Link &link,
@@ -212,33 +213,18 @@ private:
     void setSelection(const SelectionItem &start, const SelectionItem &end);
     void setSelection(const Selection &newSelection);
     void selectWholeMessage(MessageLayout *layout, int &messageIndex);
-    std::pair<size_t, size_t> getWordBounds(MessageLayout *layout,
-                                            const MessageLayoutElement *element,
-                                            const QPoint &relativePos);
 
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoveredElement,
                           MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
                              MessageLayoutPtr layout, QMouseEvent *event);
-    void addImageContextMenuItems(const MessageLayoutElement *hoveredElement,
-                                  MessageLayoutPtr layout, QMouseEvent *event,
-                                  QMenu &menu);
-    void addLinkContextMenuItems(const MessageLayoutElement *hoveredElement,
-                                 MessageLayoutPtr layout, QMouseEvent *event,
-                                 QMenu &menu);
-    void addMessageContextMenuItems(const MessageLayoutElement *hoveredElement,
-                                    MessageLayoutPtr layout, QMouseEvent *event,
-                                    QMenu &menu);
+    void addMessageContextMenuItems(QMenu *menu,
+                                    const MessageLayoutPtr &layout);
     void addTwitchLinkContextMenuItems(
-        const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
-        QMouseEvent *event, QMenu &menu);
-    void addHiddenContextMenuItems(const MessageLayoutElement *hoveredElement,
-                                   MessageLayoutPtr layout, QMouseEvent *event,
-                                   QMenu &menu);
-    void addCommandExecutionContextMenuItems(
-        const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
-        QMouseEvent *event, QMenu &menu);
+        QMenu *menu, const MessageLayoutElement *hoveredElement);
+    void addCommandExecutionContextMenuItems(QMenu *menu,
+                                             const MessageLayoutPtr &layout);
 
     int getLayoutWidth() const;
     void updatePauses();
@@ -311,7 +297,7 @@ private:
     QPointF lastLeftPressPosition_;
     QPointF lastRightPressPosition_;
     QPointF lastDoubleClickPosition_;
-    QTimer *clickTimer_;
+    QTimer clickTimer_;
 
     bool isScrolling_ = false;
     QPointF lastMiddlePressPosition_;
@@ -345,16 +331,6 @@ private:
 
     MessageColors messageColors_;
     MessagePreferences messagePreferences_;
-
-    static constexpr int leftPadding = 8;
-    static constexpr int scrollbarPadding = 8;
-
-private slots:
-    void wordFlagsChanged()
-    {
-        queueLayout();
-        update();
-    }
 
     void scrollUpdateRequested();
 };

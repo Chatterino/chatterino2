@@ -33,8 +33,8 @@ public:
                         bool dryRun);
     QStringList getDefaultChatterinoCommandList();
 
-    virtual void initialize(Settings &, Paths &paths) override;
-    virtual void save() override;
+    void initialize(Settings &, Paths &paths) override;
+    void save() override;
 
     CommandModel *createModel(QObject *parent);
 

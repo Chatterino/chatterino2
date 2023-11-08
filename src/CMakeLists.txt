@@ -59,12 +59,50 @@ set(SOURCE_FILES
 
         controllers/commands/builtin/chatterino/Debugging.cpp
         controllers/commands/builtin/chatterino/Debugging.hpp
+        controllers/commands/builtin/Misc.cpp
+        controllers/commands/builtin/Misc.hpp
+        controllers/commands/builtin/twitch/AddModerator.cpp
+        controllers/commands/builtin/twitch/AddModerator.hpp
+        controllers/commands/builtin/twitch/AddVIP.cpp
+        controllers/commands/builtin/twitch/AddVIP.hpp
+        controllers/commands/builtin/twitch/Announce.cpp
+        controllers/commands/builtin/twitch/Announce.hpp
+        controllers/commands/builtin/twitch/Ban.cpp
+        controllers/commands/builtin/twitch/Ban.hpp
+        controllers/commands/builtin/twitch/Block.cpp
+        controllers/commands/builtin/twitch/Block.hpp
         controllers/commands/builtin/twitch/ChatSettings.cpp
         controllers/commands/builtin/twitch/ChatSettings.hpp
+        controllers/commands/builtin/twitch/Chatters.cpp
+        controllers/commands/builtin/twitch/Chatters.hpp
+        controllers/commands/builtin/twitch/DeleteMessages.cpp
+        controllers/commands/builtin/twitch/DeleteMessages.hpp
+        controllers/commands/builtin/twitch/GetModerators.cpp
+        controllers/commands/builtin/twitch/GetModerators.hpp
+        controllers/commands/builtin/twitch/GetVIPs.cpp
+        controllers/commands/builtin/twitch/GetVIPs.hpp
+        controllers/commands/builtin/twitch/Raid.cpp
+        controllers/commands/builtin/twitch/Raid.hpp
+        controllers/commands/builtin/twitch/RemoveModerator.cpp
+        controllers/commands/builtin/twitch/RemoveModerator.hpp
+        controllers/commands/builtin/twitch/RemoveVIP.cpp
+        controllers/commands/builtin/twitch/RemoveVIP.hpp
+        controllers/commands/builtin/twitch/SendReply.cpp
+        controllers/commands/builtin/twitch/SendReply.hpp
+        controllers/commands/builtin/twitch/SendWhisper.cpp
+        controllers/commands/builtin/twitch/SendWhisper.hpp
         controllers/commands/builtin/twitch/ShieldMode.cpp
         controllers/commands/builtin/twitch/ShieldMode.hpp
         controllers/commands/builtin/twitch/Shoutout.cpp
         controllers/commands/builtin/twitch/Shoutout.hpp
+        controllers/commands/builtin/twitch/StartCommercial.cpp
+        controllers/commands/builtin/twitch/StartCommercial.hpp
+        controllers/commands/builtin/twitch/Unban.cpp
+        controllers/commands/builtin/twitch/Unban.hpp
+        controllers/commands/builtin/twitch/UpdateChannel.cpp
+        controllers/commands/builtin/twitch/UpdateChannel.hpp
+        controllers/commands/builtin/twitch/UpdateColor.cpp
+        controllers/commands/builtin/twitch/UpdateColor.hpp
         controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
@@ -646,13 +684,7 @@ set(SOURCE_FILES
         ${CMAKE_SOURCE_DIR}/resources/resources.qrc
         )
 
-if (WIN32)
-    # clang-cl doesn't support resource files
-    if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        list(APPEND SOURCE_FILES "${CMAKE_SOURCE_DIR}/resources/windows.rc")
-    endif ()
-
-elseif (APPLE)
+if (APPLE)
     set(MACOS_BUNDLE_ICON_FILE "${CMAKE_SOURCE_DIR}/resources/chatterino.icns")
     list(APPEND SOURCE_FILES "${MACOS_BUNDLE_ICON_FILE}")
     set_source_files_properties(${MACOS_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
@@ -711,13 +743,6 @@ target_link_libraries(${LIBRARY_PROJECT}
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua)
 endif()
-
-if (BUILD_WITH_QT6)
-    target_link_libraries(${LIBRARY_PROJECT}
-            PUBLIC
-            Qt${MAJOR_QT_VERSION}::Core5Compat
-            )
-endif ()
 
 if (BUILD_WITH_QTKEYCHAIN)
     target_link_libraries(${LIBRARY_PROJECT}

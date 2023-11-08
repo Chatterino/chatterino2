@@ -18,6 +18,7 @@
 namespace chatterino {
 
 namespace {
+
     QString configPath()
     {
         return combinePath(getPaths()->settingsDirectory, "irc.json");
@@ -33,7 +34,7 @@ namespace {
 
         // turn a vector item into a model row
         IrcServerData getItemFromRow(std::vector<QStandardItem *> &row,
-                                     const IrcServerData &original)
+                                     const IrcServerData &original) override
         {
             return IrcServerData{
                 row[0]->data(Qt::EditRole).toString(),      // host
@@ -50,7 +51,7 @@ namespace {
 
         // turns a row in the model into a vector item
         void getRowFromItem(const IrcServerData &item,
-                            std::vector<QStandardItem *> &row)
+                            std::vector<QStandardItem *> &row) override
         {
             setStringItem(row[0], item.host, false);
             setStringItem(row[1], QString::number(item.port));
@@ -60,6 +61,7 @@ namespace {
             setStringItem(row[5], item.real);
         }
     };
+
 }  // namespace
 
 inline QString escape(QString str)

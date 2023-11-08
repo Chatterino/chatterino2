@@ -11,7 +11,7 @@ namespace chatterino {
 
 namespace _helpers_internal {
 
-    int skipSpace(const QStringRef &view, int startPos)
+    SizeType skipSpace(StringView view, SizeType startPos)
     {
         while (startPos < view.length() && view.at(startPos).isSpace())
         {
@@ -20,26 +20,26 @@ namespace _helpers_internal {
         return startPos - 1;
     }
 
-    bool matchesIgnorePlural(const QStringRef &word, const QString &singular)
+    bool matchesIgnorePlural(StringView word, const QString &expected)
     {
-        if (!word.startsWith(singular))
+        if (!word.startsWith(expected))
         {
             return false;
         }
-        if (word.length() == singular.length())
+        if (word.length() == expected.length())
         {
             return true;
         }
-        return word.length() == singular.length() + 1 &&
+        return word.length() == expected.length() + 1 &&
                word.at(word.length() - 1).toLatin1() == 's';
     }
 
-    std::pair<uint64_t, bool> findUnitMultiplierToSec(const QStringRef &view,
-                                                      int &pos)
+    std::pair<uint64_t, bool> findUnitMultiplierToSec(StringView view,
+                                                      SizeType &pos)
     {
         // Step 1. find end of unit
-        int startIdx = pos;
-        int endIdx = view.length();
+        auto startIdx = pos;
+        auto endIdx = view.length();
         for (; pos < view.length(); pos++)
         {
             auto c = view.at(pos);
@@ -207,16 +207,19 @@ int64_t parseDurationToSeconds(const QString &inputString,
         return -1;
     }
 
-    // TODO(QT6): use QStringView
-    QStringRef input(&inputString);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
+    StringView input(inputString);
+#else
+    StringView input(&inputString);
+#endif
     input = input.trimmed();
 
     uint64_t currentValue = 0;
 
     bool visitingNumber = true;  // input must start with a number
-    int numberStartIdx = 0;
+    SizeType numberStartIdx = 0;
 
-    for (int pos = 0; pos < input.length(); pos++)
+    for (SizeType pos = 0; pos < input.length(); pos++)
     {
         QChar c = input.at(pos);
 

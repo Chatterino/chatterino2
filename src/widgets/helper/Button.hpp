@@ -69,10 +69,10 @@ protected:
 #else
     void enterEvent(QEvent * /*event*/) override;
 #endif
-    virtual void leaveEvent(QEvent *) override;
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void mouseReleaseEvent(QMouseEvent *event) override;
-    virtual void mouseMoveEvent(QMouseEvent *event) override;
+    void leaveEvent(QEvent *) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
     void fancyPaint(QPainter &painter);
 
