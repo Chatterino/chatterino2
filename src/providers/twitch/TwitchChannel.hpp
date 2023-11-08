@@ -373,7 +373,7 @@ private:
     UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
     UniqueAccess<std::map<QString, ChannelPointReward>> channelPointRewards_;
     boost::circular_buffer_space_optimized<QueuedRedemption>
-        waitingRedemptions_;
+        waitingRedemptions_{MAX_QUEUED_REDEMPTIONS};
 
     bool mod_ = false;
     bool vip_ = false;
