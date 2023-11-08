@@ -856,7 +856,8 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("Usage: /usercard <user> [channel]"));
+                makeSystemMessage("Usage: /usercard <username> [channel] or "
+                                  "/usercard id:<id> [channel]"));
             return "";
         }
 
