@@ -226,6 +226,10 @@ public:
     void addQueuedRedemption(const QString &rewardId,
                              const QString &originalContent,
                              Communi::IrcMessage *message);
+    /**
+     * A rich & hydrated redemption from PubSub has arrived, add it to the channel.
+     * This will look at queued up partial messages, and if one is found it will add the queued up partial messages fully hydrated.
+     **/
     void addChannelPointReward(const ChannelPointReward &reward);
     bool isChannelPointRewardKnown(const QString &rewardId);
     std::optional<ChannelPointReward> channelPointReward(
