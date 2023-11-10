@@ -163,17 +163,6 @@ QString sendBan(const CommandContext &ctx)
     {
         banUserByID(channel, twitchChannel, currentUser->getUserId(),
                     targetUserID, reason, targetUserID);
-        getHelix()->banUser(
-            twitchChannel->roomId(), currentUser->getUserId(), targetUserID,
-            std::nullopt, reason,
-            [] {
-                // No response for bans, they're emitted over pubsub/IRC instead
-            },
-            [channel, targetUserID{targetUserID}](auto error, auto message) {
-                auto errorMessage =
-                    formatBanTimeoutError("ban", error, message, targetUserID);
-                channel->addMessage(makeSystemMessage(errorMessage));
-            });
     }
     else
     {
