@@ -2836,6 +2836,115 @@ void Helix::sendShoutout(
         .execute();
 }
 
+void Helix::createEventSubSubscription(
+    const QString &type, const QString &version, const QString &sessionID,
+    const QJsonObject &condition,
+    ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,
+    FailureCallback<HelixCreateEventSubSubscriptionError, QString>
+        failureCallback)
+{
+    using Error = HelixCreateEventSubSubscriptionError;
+
+    QJsonObject body;
+    body.insert("type", type);
+    body.insert("version", version);
+    body.insert("condition", condition);
+
+    QJsonObject transport;
+    transport.insert("method", "websocket");
+    transport.insert("session_id", sessionID);
+
+    body.insert("transport", transport);
+
+    this->makePost("eventsub/subscriptions", {})
+        .json(body)
+        .onSuccess([successCallback](const auto &result) {
+            if (result.status() != 202)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for creating eventsub subscription was "
+                    << result.formatError() << "but we expected it to be 202";
+            }
+
+            HelixCreateEventSubSubscriptionResponse response(
+                result.parseJson());
+
+            successCallback(response);
+        })
+        .onError([failureCallback](const NetworkResult &result) {
+            if (!result.status())
+            {
+                failureCallback(Error::Forwarded, result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            auto message = obj["message"].toString();
+
+            switch (*result.status())
+            {
+                case 400: {
+                    failureCallback(Error::BadRequest, message);
+                }
+                break;
+
+                case 401: {
+                    failureCallback(Error::Unauthorized, message);
+                }
+                break;
+
+                case 403: {
+                    failureCallback(Error::Forbidden, message);
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                case 500: {
+                    if (message.isEmpty())
+                    {
+                        failureCallback(Error::Forwarded,
+                                        "Twitch internal server error");
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCWarning(chatterinoTwitch)
+                        << "Helix Create EventSub Subscription, unhandled "
+                           "error data:"
+                        << result.formatError() << result.getData() << obj;
+                    failureCallback(Error::Forwarded, message);
+                }
+            }
+        })
+        .execute();
+}
+
+QDebug &operator<<(QDebug &dbg,
+                   const HelixCreateEventSubSubscriptionResponse &data)
+{
+    dbg << "HelixCreateEventSubSubscriptionResponse{ id:" << data.subscriptionID
+        << "status:" << data.subscriptionStatus
+        << "type:" << data.subscriptionType
+        << "version:" << data.subscriptionVersion
+        << "condition:" << data.subscriptionCondition
+        << "createdAt:" << data.subscriptionCreatedAt
+        << "sessionID:" << data.subscriptionSessionID
+        << "connectedAt:" << data.subscriptionConnectedAt
+        << "cost:" << data.subscriptionCost << "total:" << data.total
+        << "totalCost:" << data.totalCost
+        << "maxTotalCost:" << data.maxTotalCost << '}';
+    return dbg;
+}
+
 NetworkRequest Helix::makeRequest(const QString &url, const QUrlQuery &urlQuery,
                                   NetworkRequestType type)
 {

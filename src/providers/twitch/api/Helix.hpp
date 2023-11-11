@@ -706,6 +706,65 @@ struct HelixError {
 
 using HelixGetChannelBadgesError = HelixGetGlobalBadgesError;
 
+struct HelixCreateEventSubSubscriptionResponse {
+    QString subscriptionID;
+    QString subscriptionStatus;
+    QString subscriptionType;
+    QString subscriptionVersion;
+    QJsonObject subscriptionCondition;
+    QString subscriptionCreatedAt;
+    QString subscriptionSessionID;
+    QString subscriptionConnectedAt;
+    int subscriptionCost;
+
+    int total;
+    int totalCost;
+    int maxTotalCost;
+
+    explicit HelixCreateEventSubSubscriptionResponse(
+        const QJsonObject &jsonObject)
+    {
+        {
+            auto jsonData = jsonObject.value("data").toArray().at(0).toObject();
+            this->subscriptionID = jsonData.value("id").toString();
+            this->subscriptionStatus = jsonData.value("status").toString();
+            this->subscriptionType = jsonData.value("type").toString();
+            this->subscriptionVersion = jsonData.value("version").toString();
+            this->subscriptionCondition =
+                jsonData.value("condition").toObject();
+            this->subscriptionCreatedAt =
+                jsonData.value("created_at").toString();
+            this->subscriptionSessionID = jsonData.value("transport")
+                                              .toObject()
+                                              .value("session_id")
+                                              .toString();
+            this->subscriptionConnectedAt = jsonData.value("transport")
+                                                .toObject()
+                                                .value("connected_at")
+                                                .toString();
+            this->subscriptionCost = jsonData.value("cost").toInt();
+        }
+
+        this->total = jsonObject.value("total").toInt();
+        this->totalCost = jsonObject.value("total_cost").toInt();
+        this->maxTotalCost = jsonObject.value("max_total_cost").toInt();
+    }
+
+    friend QDebug &operator<<(
+        QDebug &dbg, const HelixCreateEventSubSubscriptionResponse &data);
+};
+
+enum class HelixCreateEventSubSubscriptionError {
+    BadRequest,
+    Unauthorized,
+    Forbidden,
+    Conflict,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 class IHelix
 {
 public:
@@ -1018,6 +1077,14 @@ public:
         QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
         ResultCallback<> successCallback,
         FailureCallback<HelixSendShoutoutError, QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
+    virtual void createEventSubSubscription(
+        const QString &type, const QString &version, const QString &sessionID,
+        const QJsonObject &condition,
+        ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,
+        FailureCallback<HelixCreateEventSubSubscriptionError, QString>
+            failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 
@@ -1332,6 +1399,14 @@ public:
         QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
         ResultCallback<> successCallback,
         FailureCallback<HelixSendShoutoutError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
+    void createEventSubSubscription(
+        const QString &type, const QString &version, const QString &sessionID,
+        const QJsonObject &condition,
+        ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,
+        FailureCallback<HelixCreateEventSubSubscriptionError, QString>
+            failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 
