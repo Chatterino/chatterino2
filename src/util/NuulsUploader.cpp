@@ -156,7 +156,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
         .headerList(extraHeaders)
         .multiPart(payload)
         .onSuccess([&textEdit, channel,
-                    originalFilePath](NetworkResult result) -> Outcome {
+                    originalFilePath](NetworkResult result) {
             QString link = getSettings()->imageUploaderLink.getValue().isEmpty()
                                ? result.getData()
                                : getLinkFromResponse(
@@ -202,8 +202,6 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
             }
 
             logToFile(originalFilePath, link, deletionLink, channel);
-
-            return Success;
         })
         .onError([channel](NetworkResult result) -> bool {
             auto errorMessage =

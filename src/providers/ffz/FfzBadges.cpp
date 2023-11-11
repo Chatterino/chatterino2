@@ -2,7 +2,6 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "messages/Emote.hpp"
 #include "providers/ffz/FfzUtil.hpp"
 
@@ -59,7 +58,7 @@ void FfzBadges::load()
     static QUrl url("https://api.frankerfacez.com/v1/badges/ids");
 
     NetworkRequest(url)
-        .onSuccess([this](auto result) -> Outcome {
+        .onSuccess([this](auto result) {
             std::unique_lock lock(this->mutex_);
 
             auto jsonRoot = result.parseJson();
@@ -103,8 +102,6 @@ void FfzBadges::load()
                     }
                 }
             }
-
-            return Success;
         })
         .execute();
 }
