@@ -2,10 +2,15 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/Literals.hpp"
 #include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
+#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 
@@ -17,61 +22,368 @@
 #include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QFontDatabase>
 #include <QMessageBox>
+#include <QPointer>
 #include <QUrl>
-
-namespace chatterino {
+#include <QUrlQuery>
 
 namespace {
 
-    bool logInWithCredentials(QWidget *parent, const QString &userID,
-                              const QString &username, const QString &clientID,
-                              const QString &oauthToken)
+using namespace chatterino;
+using namespace literals;
+
+bool logInWithImplicitGrantCredentials(QWidget *parent, const QString &userID,
+                                       const QString &username,
+                                       const QString &clientID,
+                                       const QString &oauthToken)
+{
+    QStringList errors;
+
+    if (userID.isEmpty())
     {
-        QStringList errors;
-
-        if (userID.isEmpty())
-        {
-            errors.append("Missing user ID");
-        }
-        if (username.isEmpty())
-        {
-            errors.append("Missing username");
-        }
-        if (clientID.isEmpty())
-        {
-            errors.append("Missing Client ID");
-        }
-        if (oauthToken.isEmpty())
-        {
-            errors.append("Missing OAuth Token");
-        }
-
-        if (errors.length() > 0)
-        {
-            QMessageBox messageBox(parent);
-            messageBox.setWindowTitle("Invalid account credentials");
-            messageBox.setIcon(QMessageBox::Critical);
-            messageBox.setText(errors.join("<br>"));
-            messageBox.exec();
-            return false;
-        }
-
-        std::string basePath = "/accounts/uid" + userID.toStdString();
-        pajlada::Settings::Setting<QString>::set(basePath + "/username",
-                                                 username);
-        pajlada::Settings::Setting<QString>::set(basePath + "/userID", userID);
-        pajlada::Settings::Setting<QString>::set(basePath + "/clientID",
-                                                 clientID);
-        pajlada::Settings::Setting<QString>::set(basePath + "/oauthToken",
-                                                 oauthToken);
-
-        getApp()->getAccounts()->twitch.reloadUsers();
-        getApp()->getAccounts()->twitch.currentUsername = username;
-        return true;
+        errors.append("Missing user ID");
+    }
+    if (username.isEmpty())
+    {
+        errors.append("Missing username");
+    }
+    if (clientID.isEmpty())
+    {
+        errors.append("Missing Client ID");
+    }
+    if (oauthToken.isEmpty())
+    {
+        errors.append("Missing OAuth Token");
     }
 
+    if (errors.length() > 0)
+    {
+        QMessageBox messageBox(parent);
+        messageBox.setWindowTitle("Invalid account credentials");
+        messageBox.setIcon(QMessageBox::Critical);
+        messageBox.setText(errors.join("<br>"));
+        messageBox.exec();
+        return false;
+    }
+
+    TwitchAccountData{
+        .username = username,
+        .userID = userID,
+        .clientID = clientID,
+        .oauthToken = oauthToken,
+        .ty = TwitchAccount::Type::ImplicitGrant,
+        .refreshToken = {},
+        .expiresAt = {},
+    }
+        .save();
+
+    getApp()->getAccounts()->twitch.reloadUsers();
+    getApp()->getAccounts()->twitch.currentUsername = username;
+    return true;
+}
+
+class DeviceLoginWidget : public QWidget
+{
+public:
+    DeviceLoginWidget();
+
+private:
+    void reset(const QString &prevError = {});
+    void tryInitSession(const QJsonObject &response);
+    void displayError(const QString &error);
+
+    void ping();
+
+    void updateCurrentWidget(QWidget *next);
+
+    QHBoxLayout layout;
+    QLabel *detailLabel = nullptr;
+
+    QTimer expiryTimer_;
+    QTimer pingTimer_;
+    QString verificationUri_;
+    QString userCode_;
+    QString deviceCode_;
+};
+
+DeviceLoginWidget::DeviceLoginWidget()
+{
+    QObject::connect(&this->pingTimer_, &QTimer::timeout, [this] {
+        this->ping();
+    });
+    QObject::connect(&this->expiryTimer_, &QTimer::timeout, [this] {
+        this->reset(u"The code expired."_s);
+    });
+    this->setLayout(&this->layout);
+    this->reset();
+}
+
+void DeviceLoginWidget::updateCurrentWidget(QWidget *next)
+{
+    // clear the layout
+    QLayoutItem *prev = nullptr;
+    while ((prev = this->layout.takeAt(0)))
+    {
+        delete prev->widget();
+        delete prev;
+    }
+
+    // insert the item
+    this->layout.addWidget(next, 1, Qt::AlignCenter);
+}
+
+void DeviceLoginWidget::reset(const QString &prevError)
+{
+    this->expiryTimer_.stop();
+    this->pingTimer_.stop();
+
+    auto *wrap = new QWidget;
+    auto *layout = new QVBoxLayout(wrap);
+
+    auto *titleLabel = new QLabel(u"Click on 'Start' to connect an account!"_s);
+    this->detailLabel = new QLabel(prevError);
+    this->detailLabel->setWordWrap(true);
+    layout->addWidget(titleLabel, 1, Qt::AlignCenter);
+    layout->addWidget(this->detailLabel, 0, Qt::AlignCenter);
+
+    auto *startButton = new QPushButton(u"Start"_s);
+    connect(startButton, &QPushButton::clicked, this, [this] {
+        QUrlQuery query{
+            {u"client_id"_s, DEVICE_AUTH_CLIENT_ID},
+            {u"scopes"_s, DEVICE_AUTH_SCOPES},
+        };
+        NetworkRequest(u"https://id.twitch.tv/oauth2/device"_s,
+                       NetworkRequestType::Post)
+            .payload(query.toString(QUrl::FullyEncoded).toUtf8())
+            .timeout(10000)
+            .caller(this)
+            .onSuccess([this](const auto &res) {
+                this->tryInitSession(res.parseJson());
+                return Success;
+            })
+            .onError([this](const auto &res) {
+                const auto json = res.parseJson();
+                this->displayError(
+                    json["message"_L1].toString(u"error: (no message)"_s));
+            })
+            .execute();
+    });
+    layout->addWidget(startButton);
+
+    this->updateCurrentWidget(wrap);
+}
+
+void DeviceLoginWidget::tryInitSession(const QJsonObject &response)
+{
+    auto getString = [&](auto key, QString &dest) {
+        const auto val = response[key];
+        if (!val.isString())
+        {
+            return false;
+        }
+        dest = val.toString();
+        return true;
+    };
+    if (!getString("device_code"_L1, this->deviceCode_))
+    {
+        this->displayError(u"Failed to initialize: missing 'device_code'"_s);
+        return;
+    }
+    if (!getString("user_code"_L1, this->userCode_))
+    {
+        this->displayError(u"Failed to initialize: missing 'user_code'"_s);
+        return;
+    }
+    if (!getString("verification_uri"_L1, this->verificationUri_))
+    {
+        this->displayError(
+            u"Failed to initialize: missing 'verification_uri'"_s);
+        return;
+    }
+    const auto expiry = response["expires_in"_L1];
+    if (!expiry.isDouble())
+    {
+        this->displayError(u"Failed to initialize: missing 'expires_in'"_s);
+        return;
+    }
+    this->expiryTimer_.start(expiry.toInt(1800) * 1000);
+    this->pingTimer_.start(response["interval"_L1].toInt(5) * 1000);
+
+    auto *wrap = new QWidget;
+    auto *layout = new QVBoxLayout(wrap);
+
+    // A simplified link split by the code, such that
+    // prefixUrl is the part before the code and postfixUrl
+    // is the part after the code.
+    auto [prefixUrl, postfixUrl] = [&] {
+        QStringView view(this->verificationUri_);
+        // TODO(Qt 6): use .sliced()
+        if (view.startsWith(u"https://"))
+        {
+            view = view.mid(8);
+        }
+        if (view.startsWith(u"www."))
+        {
+            view = view.mid(4);
+        }
+
+        auto idx = view.indexOf(this->userCode_);
+        if (idx < 0)
+        {
+            return std::make_tuple(view, QStringView());
+        }
+
+        return std::make_tuple(view.mid(0, idx),
+                               view.mid(idx + this->userCode_.length()));
+    }();
+
+    // <a href={verificationUri}>
+    //   <span>{prefixUrl}</span>
+    //   <span style="font-size: large">{userCode}</span>
+    //   <span>{postfixUrl}</span>
+    // </a>
+    auto *userCode = new QLabel(
+        u"<a href=\"%1\"><span>%2</span><span style=\"font-size: large\">%3</span><span>%4</span></a>"_s
+            .arg(this->verificationUri_, prefixUrl, this->userCode_,
+                 postfixUrl));
+    userCode->setOpenExternalLinks(true);
+    userCode->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    if (getApp()->getStreamerMode()->isEnabled())
+    {
+        userCode->setText(
+            u"You're in streamer mode.\nUse the buttons below.\nDon't show the code on stream!"_s);
+    }
+    layout->addWidget(userCode, 1, Qt::AlignCenter);
+
+    this->detailLabel = new QLabel;
+    layout->addWidget(this->detailLabel, 0, Qt::AlignCenter);
+
+    {
+        auto *hbox = new QHBoxLayout;
+
+        auto addButton = [&](auto text, auto handler) {
+            auto *button = new QPushButton(text);
+            connect(button, &QPushButton::clicked, handler);
+            hbox->addWidget(button, 1);
+        };
+        addButton(u"Copy code"_s, [this] {
+            crossPlatformCopy(this->userCode_);
+        });
+        addButton(u"Copy URL"_s, [this] {
+            crossPlatformCopy(this->verificationUri_);
+        });
+        addButton(u"Open URL"_s, [this] {
+            if (!QDesktopServices::openUrl(QUrl(this->verificationUri_)))
+            {
+                qCWarning(chatterinoWidget) << "open login in browser failed";
+                this->displayError(u"Failed to open browser"_s);
+            }
+        });
+        layout->addLayout(hbox, 1);
+    }
+
+    this->updateCurrentWidget(wrap);
+}
+
+void DeviceLoginWidget::displayError(const QString &error)
+{
+    if (this->detailLabel)
+    {
+        this->detailLabel->setText(error);
+    }
+    else
+    {
+        qCWarning(chatterinoWidget)
+            << "Tried to display error but no detail label was found - error:"
+            << error;
+    }
+}
+
+void DeviceLoginWidget::ping()
+{
+    QUrlQuery query{
+        {u"client_id"_s, DEVICE_AUTH_CLIENT_ID},
+        {u"scope"_s, DEVICE_AUTH_SCOPES},
+        {u"device_code"_s, this->deviceCode_},
+        {u"grant_type"_s, u"urn:ietf:params:oauth:grant-type:device_code"_s},
+    };
+
+    NetworkRequest(u"https://id.twitch.tv/oauth2/token"_s,
+                   NetworkRequestType::Post)
+        .caller(this)
+        .timeout((this->pingTimer_.interval() * 9) / 10)
+        .payload(query.toString(QUrl::FullyEncoded).toUtf8())
+        .onSuccess([this](const auto &res) {
+            const auto json = res.parseJson();
+            auto accessToken = json["access_token"_L1].toString();
+            auto refreshToken = json["refresh_token"_L1].toString();
+            auto expiresIn = json["expires_in"_L1].toInt(-1);
+            if (accessToken.isEmpty() || refreshToken.isEmpty() ||
+                expiresIn <= 0)
+            {
+                this->displayError("Received malformed response");
+                return;
+            }
+            auto expiresAt =
+                QDateTime::currentDateTimeUtc().addSecs(expiresIn - 120);
+            QPointer self(this);
+            auto helix = std::make_shared<Helix>();
+            helix->update(DEVICE_AUTH_CLIENT_ID, accessToken);
+            helix->fetchUsers(
+                {}, {},
+                [self, helix, refreshToken, accessToken,
+                 expiresAt](const auto &res) {
+                    if (res.empty())
+                    {
+                        if (self)
+                        {
+                            self->displayError("No user associated with token");
+                        }
+                        return;
+                    }
+                    const auto &user = res.front();
+                    TwitchAccountData{
+                        .username = user.login,
+                        .userID = user.id,
+                        .clientID = DEVICE_AUTH_CLIENT_ID,
+                        .oauthToken = accessToken,
+                        .ty = TwitchAccount::Type::DeviceAuth,
+                        .refreshToken = refreshToken,
+                        .expiresAt = expiresAt,
+                    }
+                        .save();
+                    getApp()->getAccounts()->twitch.reloadUsers();
+                    getApp()->getAccounts()->twitch.currentUsername =
+                        user.login;
+
+                    if (self)
+                    {
+                        self->window()->close();
+                    }
+                },
+                [self]() {
+                    if (self)
+                    {
+                        self->displayError(
+                            u"Failed to fetch authenticated user"_s);
+                    }
+                });
+        })
+        .onError([this](const auto &res) {
+            auto json = res.parseJson();
+            auto message = json["message"_L1].toString(u"(no message)"_s);
+            if (message != u"authorization_pending"_s)
+            {
+                this->displayError(res.formatError() + u" - "_s + message);
+            }
+        })
+        .execute();
+}
+
 }  // namespace
+
+namespace chatterino {
 
 BasicLoginWidget::BasicLoginWidget()
 {
@@ -145,7 +457,8 @@ BasicLoginWidget::BasicLoginWidget()
             }
         }
 
-        if (logInWithCredentials(this, userID, username, clientID, oauthToken))
+        if (logInWithImplicitGrantCredentials(this, userID, username, clientID,
+                                              oauthToken))
         {
             this->window()->close();
         }
@@ -215,8 +528,8 @@ AdvancedLoginWidget::AdvancedLoginWidget()
                 QString clientID = this->ui_.clientIDInput.text();
                 QString oauthToken = this->ui_.oauthTokenInput.text();
 
-                logInWithCredentials(this, userID, username, clientID,
-                                     oauthToken);
+                logInWithImplicitGrantCredentials(this, userID, username,
+                                                  clientID, oauthToken);
             });
 }
 
@@ -238,7 +551,7 @@ void AdvancedLoginWidget::refreshButtons()
 LoginDialog::LoginDialog(QWidget *parent)
     : QDialog(parent)
 {
-    this->setMinimumWidth(300);
+    this->setMinimumWidth(400);
     this->setWindowFlags(
         (this->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
         Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
@@ -248,6 +561,7 @@ LoginDialog::LoginDialog(QWidget *parent)
     this->setLayout(&this->ui_.mainLayout);
     this->ui_.mainLayout.addWidget(&this->ui_.tabWidget);
 
+    this->ui_.tabWidget.addTab(new DeviceLoginWidget, "Device");
     this->ui_.tabWidget.addTab(&this->ui_.basic, "Basic");
     this->ui_.tabWidget.addTab(&this->ui_.advanced, "Advanced");
 

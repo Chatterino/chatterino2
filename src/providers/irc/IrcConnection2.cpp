@@ -53,7 +53,7 @@ IrcConnection::IrcConnection(QObject *parent)
         else
         {
             qCDebug(chatterinoIrc) << "Reconnecting";
-            this->open();
+            this->connectAndInitializeRequested();
         }
     });
 
