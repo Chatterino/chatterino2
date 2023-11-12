@@ -432,6 +432,7 @@ size_t MessageLayoutContainer::getFirstMessageCharacterIndex() const
     static const FlagsEnum<MessageElementFlag> skippedFlags{
         MessageElementFlag::RepliedMessage,
         MessageElementFlag::Timestamp,
+        MessageElementFlag::ModeratorTools,
         MessageElementFlag::Badges,
         MessageElementFlag::Username,
     };
