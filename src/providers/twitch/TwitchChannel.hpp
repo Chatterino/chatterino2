@@ -5,7 +5,6 @@
 #include "common/Channel.hpp"
 #include "common/ChannelChatters.hpp"
 #include "common/Common.hpp"
-#include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
