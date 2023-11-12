@@ -104,8 +104,8 @@ protected:
         // Initialize helix client
         this->mockHelix = std::make_unique<mock::Helix>();
         initializeHelix(this->mockHelix.get());
-        EXPECT_CALL(*this->mockHelix, loadBlocks).Times(Exactly(1));
-        EXPECT_CALL(*this->mockHelix, update).Times(Exactly(1));
+        EXPECT_CALL(*this->mockHelix, loadBlocks).Times(Exactly(2));
+        EXPECT_CALL(*this->mockHelix, update).Times(Exactly(2));
 
         this->mockApplication = std::make_unique<MockApplication>();
         this->settings = std::make_unique<Settings>(this->settingsDir_->path());
