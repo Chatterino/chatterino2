@@ -1,12 +1,18 @@
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 
+#include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
 #include "common/Literals.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
 #include "util/PostToThread.hpp"
 
@@ -131,6 +137,81 @@ QString forceImageUnload(const CommandContext &ctx)
         auto &iep = ImageExpirationPool::instance();
         iep.freeAll();
     });
+    return "";
+}
+
+QString debugEventSub(const CommandContext &ctx)
+{
+    if (ctx.words.size() < 2)
+    {
+        ctx.channel->addMessage(makeSystemMessage("missing session ID"));
+        return {};
+    }
+
+    const auto &sessionID = ctx.words[1];
+
+    const auto currentUser = getApp()->accounts->twitch.getCurrent();
+
+    if (currentUser->isAnon())
+    {
+        ctx.channel->addMessage(
+            makeSystemMessage("you must be logged in to use this command"));
+        return {};
+    }
+
+    auto sourceUserID = currentUser->getUserId();
+
+    getApp()->twitch->forEachChannelAndSpecialChannels(
+        [sessionID, sourceUserID](const ChannelPtr &channel) {
+            if (channel->getType() == Channel::Type::Twitch)
+            {
+                auto *twitchChannel =
+                    dynamic_cast<TwitchChannel *>(channel.get());
+
+                auto roomID = twitchChannel->roomId();
+
+                if (channel->isBroadcaster())
+                {
+                    QJsonObject condition;
+                    condition.insert("broadcaster_user_id", roomID);
+
+                    getHelix()->createEventSubSubscription(
+                        "channel.ban", "1", sessionID, condition,
+                        [roomID](const auto &response) {
+                            qDebug() << "Successfully subscribed to "
+                                        "channel.ban in"
+                                     << roomID << ":" << response;
+                        },
+                        [roomID](auto error, const auto &message) {
+                            (void)error;
+                            qDebug() << "Failed subscription to channel.ban in"
+                                     << roomID << ":" << message;
+                        });
+                }
+
+                {
+                    QJsonObject condition;
+                    condition.insert("broadcaster_user_id", roomID);
+                    condition.insert("user_id", sourceUserID);
+
+                    getHelix()->createEventSubSubscription(
+                        "channel.chat.notification", "beta", sessionID,
+                        condition,
+                        [roomID](const auto &response) {
+                            qDebug() << "Successfully subscribed to "
+                                        "channel.chat.notification in "
+                                     << roomID << ":" << response;
+                        },
+                        [roomID](auto error, const auto &message) {
+                            (void)error;
+                            qDebug() << "Failed subscription to "
+                                        "channel.chat.notification in"
+                                     << roomID << ":" << message;
+                        });
+                }
+            }
+        });
+
     return "";
 }
 

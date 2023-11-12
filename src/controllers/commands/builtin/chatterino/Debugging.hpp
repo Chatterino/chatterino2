@@ -22,4 +22,6 @@ QString forceImageGarbageCollection(const CommandContext &ctx);
 
 QString forceImageUnload(const CommandContext &ctx);
 
+QString debugEventSub(const CommandContext &ctx);
+
 }  // namespace chatterino::commands
