@@ -35,6 +35,7 @@
 - Bugfix: Fixed a crash when clicking `More messages below` button in a usercard and closing it quickly. (#4933)
 - Bugfix: Fixed thread popup window missing messages for nested threads. (#4923)
 - Bugfix: Fixed an occasional crash for channel point redemptions with text input. (#4949)
+- Bugfix: Fixed triple click on message also selecting moderation buttons. (#4961)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
