@@ -101,6 +101,7 @@
 - Dev: Refactor `common/Credentials`. (#4979)
 - Dev: Refactor chat logger. (#5058)
 - Dev: Refactor Twitch PubSub client. (#5059)
+- Dev: Add EventSub Helix support. (#4962)
 - Dev: Changed lifetime of context menus. (#4924)
 - Dev: Renamed `tools` directory to `scripts`. (#5035)
 - Dev: Refactor `ChannelView`, removing a bunch of clang-tidy warnings. (#4926)
