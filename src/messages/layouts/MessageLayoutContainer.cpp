@@ -430,10 +430,8 @@ size_t MessageLayoutContainer::getSelectionIndex(QPoint point) const
 size_t MessageLayoutContainer::getFirstMessageCharacterIndex() const
 {
     static const FlagsEnum<MessageElementFlag> skippedFlags{
-        MessageElementFlag::RepliedMessage,
-        MessageElementFlag::Timestamp,
-        MessageElementFlag::ModeratorTools,
-        MessageElementFlag::Badges,
+        MessageElementFlag::RepliedMessage, MessageElementFlag::Timestamp,
+        MessageElementFlag::ModeratorTools, MessageElementFlag::Badges,
         MessageElementFlag::Username,
     };
 
