@@ -846,8 +846,10 @@ void TwitchMessageBuilder::appendUsername()
 void TwitchMessageBuilder::runIgnoreReplaces(
     std::vector<TwitchEmoteOccurrence> &twitchEmotes)
 {
+    using SizeType = QString::size_type;
+
     auto phrases = getSettings()->ignoredMessages.readOnly();
-    auto removeEmotesInRange = [](int pos, int len,
+    auto removeEmotesInRange = [](SizeType pos, SizeType len,
                                   auto &twitchEmotes) mutable {
         auto it = std::partition(
             twitchEmotes.begin(), twitchEmotes.end(),
@@ -881,7 +883,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
     auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase,
                                          const auto &midrepl,
-                                         int startIndex) mutable {
+                                         SizeType startIndex) mutable {
         if (!phrase.containsEmote())
         {
             return;
@@ -901,8 +903,9 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                             << "emote null" << emote.first.string;
                     }
                     twitchEmotes.push_back(TwitchEmoteOccurrence{
-                        startIndex + pos,
-                        startIndex + pos + (int)emote.first.string.length(),
+                        static_cast<int>(startIndex + pos),
+                        static_cast<int>(startIndex + pos +
+                                         emote.first.string.length()),
                         emote.second,
                         emote.first,
                     });
@@ -931,18 +934,18 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 continue;
             }
             QRegularExpressionMatch match;
-            int from = 0;
+            SizeType from = 0;
             while ((from = this->originalMessage_.indexOf(regex, from,
                                                           &match)) != -1)
             {
-                int len = match.capturedLength();
+                auto len = match.capturedLength();
                 auto vret = removeEmotesInRange(from, len, twitchEmotes);
                 auto mid = this->originalMessage_.mid(from, len);
                 mid.replace(regex, phrase.getReplace());
 
-                int midsize = mid.size();
+                auto midsize = mid.size();
                 this->originalMessage_.replace(from, len, mid);
-                int pos1 = from;
+                auto pos1 = from;
                 while (pos1 > 0)
                 {
                     if (this->originalMessage_[pos1 - 1] == ' ')
@@ -951,7 +954,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                     }
                     --pos1;
                 }
-                int pos2 = from + midsize;
+                auto pos2 = from + midsize;
                 while (pos2 < this->originalMessage_.length())
                 {
                     if (this->originalMessage_[pos2] == ' ')
@@ -961,7 +964,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                     ++pos2;
                 }
 
-                shiftIndicesAfter(from + len, midsize - len);
+                shiftIndicesAfter(static_cast<int>(from + len),
+                                  static_cast<int>(midsize - len));
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
                 auto midExtendedRef =
@@ -988,7 +992,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                         int last = _match.lastCapturedIndex();
                         for (int i = 0; i <= last; ++i)
                         {
-                            tup.start = from + _match.capturedStart();
+                            tup.start =
+                                static_cast<int>(from + _match.capturedStart());
                             twitchEmotes.push_back(std::move(tup));
                         }
                     }
@@ -1001,18 +1006,18 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         }
         else
         {
-            int from = 0;
+            SizeType from = 0;
             while ((from = this->originalMessage_.indexOf(
                         pattern, from, phrase.caseSensitivity())) != -1)
             {
-                int len = pattern.size();
+                auto len = pattern.size();
                 auto vret = removeEmotesInRange(from, len, twitchEmotes);
                 auto replace = phrase.getReplace();
 
-                int replacesize = replace.size();
+                auto replacesize = replace.size();
                 this->originalMessage_.replace(from, len, replace);
 
-                int pos1 = from;
+                auto pos1 = from;
                 while (pos1 > 0)
                 {
                     if (this->originalMessage_[pos1 - 1] == ' ')
@@ -1021,7 +1026,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                     }
                     --pos1;
                 }
-                int pos2 = from + replacesize;
+                auto pos2 = from + replacesize;
                 while (pos2 < this->originalMessage_.length())
                 {
                     if (this->originalMessage_[pos2] == ' ')
@@ -1031,7 +1036,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                     ++pos2;
                 }
 
-                shiftIndicesAfter(from + len, replacesize - len);
+                shiftIndicesAfter(static_cast<int>(from + len),
+                                  static_cast<int>(replacesize - len));
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
                 auto midExtendedRef =
@@ -1058,7 +1064,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                         int last = match.lastCapturedIndex();
                         for (int i = 0; i <= last; ++i)
                         {
-                            tup.start = from + match.capturedStart();
+                            tup.start =
+                                static_cast<int>(from + match.capturedStart());
                             twitchEmotes.push_back(std::move(tup));
                         }
                     }
