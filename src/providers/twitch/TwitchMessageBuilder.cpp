@@ -915,6 +915,64 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         }
     };
 
+    auto replaceMessageAt = [&](const IgnorePhrase &phrase, SizeType from,
+                                SizeType length, const QString &replacement) {
+        auto vret = removeEmotesInRange(from, length, twitchEmotes);
+        this->originalMessage_.replace(from, length, replacement);
+        auto pos1 = from;
+        while (pos1 > 0)
+        {
+            if (this->originalMessage_[pos1 - 1] == ' ')
+            {
+                break;
+            }
+            --pos1;
+        }
+        auto pos2 = from + replacement.length();
+        while (pos2 < this->originalMessage_.length())
+        {
+            if (this->originalMessage_[pos2] == ' ')
+            {
+                break;
+            }
+            ++pos2;
+        }
+
+        shiftIndicesAfter(static_cast<int>(from + length),
+                          static_cast<int>(replacement.length() - length));
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        auto midExtendedRef =
+            QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
+#else
+        auto midExtendedRef = this->originalMessage_.midRef(pos1, pos2 - pos1);
+#endif
+
+        for (auto &tup : vret)
+        {
+            if (tup.ptr == nullptr)
+            {
+                qCDebug(chatterinoTwitch) << "v nullptr" << tup.name.string;
+                continue;
+            }
+            QRegularExpression emoteregex(
+                "\\b" + tup.name.string + "\\b",
+                QRegularExpression::UseUnicodePropertiesOption);
+            auto _match = emoteregex.match(midExtendedRef);
+            if (_match.hasMatch())
+            {
+                int last = _match.lastCapturedIndex();
+                for (int i = 0; i <= last; ++i)
+                {
+                    tup.start = static_cast<int>(from + _match.capturedStart());
+                    twitchEmotes.push_back(std::move(tup));
+                }
+            }
+        }
+
+        addReplEmotes(phrase, midExtendedRef, pos1);
+    };
+
     for (const auto &phrase : *phrases)
     {
         if (phrase.isBlock())
@@ -938,70 +996,9 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             while ((from = this->originalMessage_.indexOf(regex, from,
                                                           &match)) != -1)
             {
-                auto len = match.capturedLength();
-                auto vret = removeEmotesInRange(from, len, twitchEmotes);
-                auto mid = this->originalMessage_.mid(from, len);
-                mid.replace(regex, phrase.getReplace());
-
-                auto midsize = mid.size();
-                this->originalMessage_.replace(from, len, mid);
-                auto pos1 = from;
-                while (pos1 > 0)
-                {
-                    if (this->originalMessage_[pos1 - 1] == ' ')
-                    {
-                        break;
-                    }
-                    --pos1;
-                }
-                auto pos2 = from + midsize;
-                while (pos2 < this->originalMessage_.length())
-                {
-                    if (this->originalMessage_[pos2] == ' ')
-                    {
-                        break;
-                    }
-                    ++pos2;
-                }
-
-                shiftIndicesAfter(static_cast<int>(from + len),
-                                  static_cast<int>(midsize - len));
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-                auto midExtendedRef =
-                    QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
-#else
-                auto midExtendedRef =
-                    this->originalMessage_.midRef(pos1, pos2 - pos1);
-#endif
-
-                for (auto &tup : vret)
-                {
-                    if (tup.ptr == nullptr)
-                    {
-                        qCDebug(chatterinoTwitch)
-                            << "v nullptr" << tup.name.string;
-                        continue;
-                    }
-                    QRegularExpression emoteregex(
-                        "\\b" + tup.name.string + "\\b",
-                        QRegularExpression::UseUnicodePropertiesOption);
-                    auto _match = emoteregex.match(midExtendedRef);
-                    if (_match.hasMatch())
-                    {
-                        int last = _match.lastCapturedIndex();
-                        for (int i = 0; i <= last; ++i)
-                        {
-                            tup.start =
-                                static_cast<int>(from + _match.capturedStart());
-                            twitchEmotes.push_back(std::move(tup));
-                        }
-                    }
-                }
-
-                addReplEmotes(phrase, midExtendedRef, pos1);
-
-                from += midsize;
+                replaceMessageAt(phrase, from, match.capturedLength(),
+                                 phrase.getReplace());
+                from += phrase.getReplace().length();
             }
         }
         else
@@ -1010,70 +1007,9 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             while ((from = this->originalMessage_.indexOf(
                         pattern, from, phrase.caseSensitivity())) != -1)
             {
-                auto len = pattern.size();
-                auto vret = removeEmotesInRange(from, len, twitchEmotes);
-                auto replace = phrase.getReplace();
-
-                auto replacesize = replace.size();
-                this->originalMessage_.replace(from, len, replace);
-
-                auto pos1 = from;
-                while (pos1 > 0)
-                {
-                    if (this->originalMessage_[pos1 - 1] == ' ')
-                    {
-                        break;
-                    }
-                    --pos1;
-                }
-                auto pos2 = from + replacesize;
-                while (pos2 < this->originalMessage_.length())
-                {
-                    if (this->originalMessage_[pos2] == ' ')
-                    {
-                        break;
-                    }
-                    ++pos2;
-                }
-
-                shiftIndicesAfter(static_cast<int>(from + len),
-                                  static_cast<int>(replacesize - len));
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-                auto midExtendedRef =
-                    QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
-#else
-                auto midExtendedRef =
-                    this->originalMessage_.midRef(pos1, pos2 - pos1);
-#endif
-
-                for (auto &tup : vret)
-                {
-                    if (tup.ptr == nullptr)
-                    {
-                        qCDebug(chatterinoTwitch)
-                            << "v nullptr" << tup.name.string;
-                        continue;
-                    }
-                    QRegularExpression emoteregex(
-                        "\\b" + tup.name.string + "\\b",
-                        QRegularExpression::UseUnicodePropertiesOption);
-                    auto match = emoteregex.match(midExtendedRef);
-                    if (match.hasMatch())
-                    {
-                        int last = match.lastCapturedIndex();
-                        for (int i = 0; i <= last; ++i)
-                        {
-                            tup.start =
-                                static_cast<int>(from + match.capturedStart());
-                            twitchEmotes.push_back(std::move(tup));
-                        }
-                    }
-                }
-
-                addReplEmotes(phrase, midExtendedRef, pos1);
-
-                from += replacesize;
+                replaceMessageAt(phrase, from, pattern.length(),
+                                 phrase.getReplace());
+                from += phrase.getReplace().length();
             }
         }
     }
