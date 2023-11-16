@@ -849,8 +849,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
     using SizeType = QString::size_type;
 
     auto phrases = getSettings()->ignoredMessages.readOnly();
-    auto removeEmotesInRange = [](SizeType pos, SizeType len,
-                                  auto &twitchEmotes) mutable {
+    auto removeEmotesInRange = [&twitchEmotes](SizeType pos, SizeType len) {
         auto it = std::partition(
             twitchEmotes.begin(), twitchEmotes.end(),
             [pos, len](const auto &item) {
@@ -869,7 +868,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         return v;
     };
 
-    auto shiftIndicesAfter = [&twitchEmotes](int pos, int by) mutable {
+    auto shiftIndicesAfter = [&twitchEmotes](int pos, int by) {
         for (auto &item : twitchEmotes)
         {
             auto &index = item.start;
@@ -883,7 +882,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
     auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase,
                                          const auto &midrepl,
-                                         SizeType startIndex) mutable {
+                                         SizeType startIndex) {
         if (!phrase.containsEmote())
         {
             return;
@@ -917,7 +916,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
     auto replaceMessageAt = [&](const IgnorePhrase &phrase, SizeType from,
                                 SizeType length, const QString &replacement) {
-        auto removedEmotes = removeEmotesInRange(from, length, twitchEmotes);
+        auto removedEmotes = removeEmotesInRange(from, length);
         this->originalMessage_.replace(from, length, replacement);
         auto wordStart = from;
         while (wordStart > 0)
