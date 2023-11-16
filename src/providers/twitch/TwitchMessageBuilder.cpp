@@ -1003,17 +1003,17 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                     return;
                 }
             }
+
+            continue;
         }
-        else
+
+        SizeType from = 0;
+        while ((from = this->originalMessage_.indexOf(
+                    pattern, from, phrase.caseSensitivity())) != -1)
         {
-            SizeType from = 0;
-            while ((from = this->originalMessage_.indexOf(
-                        pattern, from, phrase.caseSensitivity())) != -1)
-            {
-                replaceMessageAt(phrase, from, pattern.length(),
-                                 phrase.getReplace());
-                from += phrase.getReplace().length();
-            }
+            replaceMessageAt(phrase, from, pattern.length(),
+                             phrase.getReplace());
+            from += phrase.getReplace().length();
         }
     }
 }
