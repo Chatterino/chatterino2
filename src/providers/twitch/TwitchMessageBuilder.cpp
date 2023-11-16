@@ -990,7 +990,9 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             {
                 continue;
             }
+
             QRegularExpressionMatch match;
+            size_t iterations = 0;
             SizeType from = 0;
             while ((from = this->originalMessage_.indexOf(regex, from,
                                                           &match)) != -1)
@@ -998,6 +1000,13 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 replaceMessageAt(phrase, from, match.capturedLength(),
                                  phrase.getReplace());
                 from += phrase.getReplace().length();
+                iterations++;
+                if (iterations >= 128)
+                {
+                    this->originalMessage_ =
+                        u"Too many replacements - check your ignores!"_s;
+                    return;
+                }
             }
         }
         else
