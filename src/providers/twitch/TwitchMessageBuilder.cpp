@@ -919,33 +919,34 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                                 SizeType length, const QString &replacement) {
         auto vret = removeEmotesInRange(from, length, twitchEmotes);
         this->originalMessage_.replace(from, length, replacement);
-        auto pos1 = from;
-        while (pos1 > 0)
+        auto wordStart = from;
+        while (wordStart > 0)
         {
-            if (this->originalMessage_[pos1 - 1] == ' ')
+            if (this->originalMessage_[wordStart - 1] == ' ')
             {
                 break;
             }
-            --pos1;
+            --wordStart;
         }
-        auto pos2 = from + replacement.length();
-        while (pos2 < this->originalMessage_.length())
+        auto wordEnd = from + replacement.length();
+        while (wordEnd < this->originalMessage_.length())
         {
-            if (this->originalMessage_[pos2] == ' ')
+            if (this->originalMessage_[wordEnd] == ' ')
             {
                 break;
             }
-            ++pos2;
+            ++wordEnd;
         }
 
         shiftIndicesAfter(static_cast<int>(from + length),
                           static_cast<int>(replacement.length() - length));
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        auto midExtendedRef =
-            QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
+        auto midExtendedRef = QStringView{this->originalMessage_}.mid(
+            wordStart, wordEnd - wordStart);
 #else
-        auto midExtendedRef = this->originalMessage_.midRef(pos1, pos2 - pos1);
+        auto midExtendedRef =
+            this->originalMessage_.midRef(wordStart, wordEnd - wordStart);
 #endif
 
         for (auto &tup : vret)
@@ -958,19 +959,19 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             QRegularExpression emoteregex(
                 "\\b" + tup.name.string + "\\b",
                 QRegularExpression::UseUnicodePropertiesOption);
-            auto _match = emoteregex.match(midExtendedRef);
-            if (_match.hasMatch())
+            auto match = emoteregex.match(midExtendedRef);
+            if (match.hasMatch())
             {
-                int last = _match.lastCapturedIndex();
+                int last = match.lastCapturedIndex();
                 for (int i = 0; i <= last; ++i)
                 {
-                    tup.start = static_cast<int>(from + _match.capturedStart());
+                    tup.start = static_cast<int>(from + match.capturedStart());
                     twitchEmotes.push_back(std::move(tup));
                 }
             }
         }
 
-        addReplEmotes(phrase, midExtendedRef, pos1);
+        addReplEmotes(phrase, midExtendedRef, wordStart);
     };
 
     for (const auto &phrase : *phrases)
