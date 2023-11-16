@@ -850,22 +850,18 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
     auto phrases = getSettings()->ignoredMessages.readOnly();
     auto removeEmotesInRange = [&twitchEmotes](SizeType pos, SizeType len) {
+        // all emotes outside the range come before `it`
+        // all emotes in the range start at `it`
         auto it = std::partition(
             twitchEmotes.begin(), twitchEmotes.end(),
             [pos, len](const auto &item) {
+                // returns true for emotes outside the range
                 return !((item.start >= pos) && item.start < (pos + len));
             });
-        for (auto copy = it; copy != twitchEmotes.end(); ++copy)
-        {
-            if ((*copy).ptr == nullptr)
-            {
-                qCDebug(chatterinoTwitch)
-                    << "remem nullptr" << (*copy).name.string;
-            }
-        }
-        std::vector<TwitchEmoteOccurrence> v(it, twitchEmotes.end());
+        std::vector<TwitchEmoteOccurrence> emotesInRange(it,
+                                                         twitchEmotes.end());
         twitchEmotes.erase(it, twitchEmotes.end());
-        return v;
+        return emotesInRange;
     };
 
     auto shiftIndicesAfter = [&twitchEmotes](int pos, int by) {
