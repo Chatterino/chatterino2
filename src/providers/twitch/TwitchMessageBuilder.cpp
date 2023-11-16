@@ -917,7 +917,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
     auto replaceMessageAt = [&](const IgnorePhrase &phrase, SizeType from,
                                 SizeType length, const QString &replacement) {
-        auto vret = removeEmotesInRange(from, length, twitchEmotes);
+        auto removedEmotes = removeEmotesInRange(from, length, twitchEmotes);
         this->originalMessage_.replace(from, length, replacement);
         auto wordStart = from;
         while (wordStart > 0)
@@ -949,25 +949,23 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             this->originalMessage_.midRef(wordStart, wordEnd - wordStart);
 #endif
 
-        for (auto &tup : vret)
+        for (auto &emote : removedEmotes)
         {
-            if (tup.ptr == nullptr)
+            if (emote.ptr == nullptr)
             {
-                qCDebug(chatterinoTwitch) << "v nullptr" << tup.name.string;
+                qCDebug(chatterinoTwitch)
+                    << "Invalid emote occurrence" << emote.name.string;
                 continue;
             }
             QRegularExpression emoteregex(
-                "\\b" + tup.name.string + "\\b",
+                "\\b" + emote.name.string + "\\b",
                 QRegularExpression::UseUnicodePropertiesOption);
             auto match = emoteregex.match(midExtendedRef);
             if (match.hasMatch())
             {
-                int last = match.lastCapturedIndex();
-                for (int i = 0; i <= last; ++i)
-                {
-                    tup.start = static_cast<int>(from + match.capturedStart());
-                    twitchEmotes.push_back(std::move(tup));
-                }
+                emote.start = static_cast<int>(from + match.capturedStart());
+                emote.end = static_cast<int>(from + match.capturedEnd());
+                twitchEmotes.push_back(std::move(emote));
             }
         }
 
