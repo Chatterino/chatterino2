@@ -160,21 +160,16 @@ jobs:
           rm pubsub-server.zip
         shell: pwsh
 
-      - name: Checkout httpbox
+      - name: Checkout, install and run httpbox
         if: startsWith(matrix.os, 'windows')
-        uses: actions/checkout@v4
-        with:
-          repository: "kevinastone/httpbox"
-          path: "httpbox"
+        run: |
+          cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
+          httpbox --port 9051 &
 
       - name: Test
         if: startsWith(matrix.os, 'windows')
         timeout-minutes: 30
         run: |
-          cd ..\httpbox
-          cargo build
-          cargo run -- --port 9051 &
-          cd ..\build-test
           cd ..\pubsub-server-test
           Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.crt" -outfile "server.crt"
           Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key" -outfile "server.key"
