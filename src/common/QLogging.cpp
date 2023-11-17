@@ -32,7 +32,7 @@ Q_LOGGING_CATEGORY(chatterinoNativeMessage, "chatterino.nativemessage",
 Q_LOGGING_CATEGORY(chatterinoNetwork, "chatterino.network", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoNotification, "chatterino.notification",
                    logThreshold);
-Q_LOGGING_CATEGORY(chatterinoNuulsuploader, "chatterino.nuulsuploader",
+Q_LOGGING_CATEGORY(chatterinoImageuploader, "chatterino.imageuploader",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoPubSub, "chatterino.pubsub", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoRecentMessages, "chatterino.recentmessages",

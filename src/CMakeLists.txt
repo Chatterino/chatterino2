@@ -475,8 +475,8 @@ set(SOURCE_FILES
         util/IpcQueue.hpp
         util/LayoutHelper.cpp
         util/LayoutHelper.hpp
-        util/NuulsUploader.cpp
-        util/NuulsUploader.hpp
+        util/ImageUploader.cpp
+        util/ImageUploader.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
         util/RatelimitBucket.cpp

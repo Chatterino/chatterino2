@@ -1,4 +1,4 @@
-#include "NuulsUploader.hpp"
+#include "ImageUploader.hpp"
 
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
@@ -166,7 +166,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                     ? ""
                     : getLinkFromResponse(
                           result, getSettings()->imageUploaderDeletionLink);
-            qCDebug(chatterinoNuulsuploader) << link << deletionLink;
+            qCDebug(chatterinoImageuploader) << link << deletionLink;
             textEdit.insertPlainText(link + " ");
             if (uploadQueue.empty())
             {

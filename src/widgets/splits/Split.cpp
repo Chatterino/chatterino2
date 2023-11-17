@@ -21,7 +21,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
-#include "util/NuulsUploader.hpp"
+#include "util/ImageUploader.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
