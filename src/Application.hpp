@@ -41,6 +41,7 @@ class Toasts;
 class ChatterinoBadges;
 class FfzBadges;
 class SeventvBadges;
+class ImageUploader;
 
 class IApplication
 {
@@ -66,6 +67,7 @@ public:
     virtual SeventvBadges *getSeventvBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
     virtual ITwitchLiveController *getTwitchLiveController() = 0;
+    virtual ImageUploader *getImageUploader() = 0;
 };
 
 class Application : public IApplication
@@ -94,6 +96,7 @@ public:
     HotkeyController *const hotkeys{};
     WindowManager *const windows{};
     Toasts *const toasts{};
+    ImageUploader *const imageUploader{};
 
     CommandController *const commands{};
     NotificationController *const notifications{};
@@ -167,6 +170,10 @@ public:
     }
     IUserDataController *getUserData() override;
     ITwitchLiveController *getTwitchLiveController() override;
+    ImageUploader *getImageUploader() override
+    {
+        return this->imageUploader;
+    }
 
     pajlada::Signals::NoArgSignal streamerModeChanged;
 

@@ -120,10 +120,6 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
     return pattern;
 }
 
-ImageUploader::ImageUploader()
-{
-}
-
 void ImageUploader::save()
 {
 }
