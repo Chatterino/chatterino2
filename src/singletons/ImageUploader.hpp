@@ -3,9 +3,11 @@
 #include "common/Singleton.hpp"
 
 #include <QMimeData>
+#include <QMutex>
 #include <QString>
 
 #include <memory>
+#include <queue>
 
 namespace chatterino {
 
@@ -29,5 +31,9 @@ public:
 private:
     void sendImageUploadRequest(RawImageData imageData, ChannelPtr channel,
                                 ResizingTextEdit &textEdit);
+
+    // These variables are only used from the main thread.
+    QMutex uploadMutex_;
+    std::queue<RawImageData> uploadQueue_;
 };
 }  // namespace chatterino

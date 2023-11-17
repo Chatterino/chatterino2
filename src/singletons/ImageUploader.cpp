@@ -41,10 +41,6 @@ std::optional<QByteArray> convertToPng(const QImage &image)
 
 namespace chatterino {
 
-// These variables are only used from the main thread.
-static auto uploadMutex = QMutex();
-static std::queue<RawImageData> uploadQueue;
-
 // logging information on successful uploads to a json file
 void logToFile(const QString originalFilePath, QString imageLink,
                QString deletionLink, ChannelPtr channel)
@@ -173,7 +169,7 @@ void ImageUploader::sendImageUploadRequest(RawImageData imageData,
                           result, getSettings()->imageUploaderDeletionLink);
             qCDebug(chatterinoImageuploader) << link << deletionLink;
             textEdit.insertPlainText(link + " ");
-            if (uploadQueue.empty())
+            if (this->uploadQueue_.empty())
             {
                 channel->addMessage(makeSystemMessage(
                     QString("Your image has been uploaded to %1 %2.")
@@ -182,7 +178,7 @@ void ImageUploader::sendImageUploadRequest(RawImageData imageData,
                                  ? ""
                                  : QString("(Deletion link: %1 )")
                                        .arg(deletionLink))));
-                uploadMutex.unlock();
+                this->uploadMutex_.unlock();
             }
             else
             {
@@ -195,21 +191,22 @@ void ImageUploader::sendImageUploadRequest(RawImageData imageData,
                                  ? ""
                                  : QString("(Deletion link: %1 )")
                                        .arg(deletionLink))
-                        .arg(uploadQueue.size())
-                        .arg(uploadQueue.size() * (UPLOAD_DELAY / 1000 + 1))));
+                        .arg(this->uploadQueue_.size())
+                        .arg(this->uploadQueue_.size() *
+                             (UPLOAD_DELAY / 1000 + 1))));
                 // 2 seconds for the timer that's there not to spam the remote server
                 // and 1 second of actual uploading.
 
                 QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit, this]() {
-                    this->sendImageUploadRequest(uploadQueue.front(), channel,
-                                                 textEdit);
-                    uploadQueue.pop();
+                    this->sendImageUploadRequest(this->uploadQueue_.front(),
+                                                 channel, textEdit);
+                    this->uploadQueue_.pop();
                 });
             }
 
             logToFile(originalFilePath, link, deletionLink, channel);
         })
-        .onError([channel](NetworkResult result) -> bool {
+        .onError([channel, this](NetworkResult result) -> bool {
             auto errorMessage =
                 QString("An error happened while uploading your image: %1")
                     .arg(result.formatError());
@@ -236,7 +233,7 @@ void ImageUploader::sendImageUploadRequest(RawImageData imageData,
             }
 
             channel->addMessage(makeSystemMessage(errorMessage));
-            uploadMutex.unlock();
+            this->uploadMutex_.unlock();
             return true;
         })
         .execute();
@@ -245,7 +242,7 @@ void ImageUploader::sendImageUploadRequest(RawImageData imageData,
 void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
                            ResizingTextEdit &outputTextEdit)
 {
-    if (!uploadMutex.tryLock())
+    if (!this->uploadMutex_.tryLock())
     {
         channel->addMessage(makeSystemMessage(
             QString("Please wait until the upload finishes.")));
@@ -271,7 +268,7 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
                 {
                     channel->addMessage(
                         makeSystemMessage(QString("Couldn't load image :(")));
-                    uploadMutex.unlock();
+                    this->uploadMutex_.unlock();
                     return;
                 }
 
@@ -279,7 +276,7 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
                 if (imageData)
                 {
                     RawImageData data = {*imageData, "png", localPath};
-                    uploadQueue.push(data);
+                    this->uploadQueue_.push(data);
                 }
                 else
                 {
@@ -287,7 +284,7 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
                         QString("Cannot upload file: %1. Couldn't convert "
                                 "image to png.")
                             .arg(localPath)));
-                    uploadMutex.unlock();
+                    this->uploadMutex_.unlock();
                     return;
                 }
             }
@@ -301,11 +298,11 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
                 {
                     channel->addMessage(
                         makeSystemMessage(QString("Failed to open file. :(")));
-                    uploadMutex.unlock();
+                    this->uploadMutex_.unlock();
                     return;
                 }
                 RawImageData data = {file.readAll(), "gif", localPath};
-                uploadQueue.push(data);
+                this->uploadQueue_.push(data);
                 file.close();
                 // file.readAll() => might be a bit big but it /should/ work
             }
@@ -314,15 +311,15 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
                 channel->addMessage(makeSystemMessage(
                     QString("Cannot upload file: %1. Not an image.")
                         .arg(localPath)));
-                uploadMutex.unlock();
+                this->uploadMutex_.unlock();
                 return;
             }
         }
-        if (!uploadQueue.empty())
+        if (!this->uploadQueue_.empty())
         {
-            this->sendImageUploadRequest(uploadQueue.front(), channel,
+            this->sendImageUploadRequest(this->uploadQueue_.front(), channel,
                                          outputTextEdit);
-            uploadQueue.pop();
+            this->uploadQueue_.pop();
         }
     }
     else if (source->hasFormat("image/png"))
@@ -355,7 +352,7 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
         {
             channel->addMessage(makeSystemMessage(
                 QString("Cannot upload file, failed to convert to png.")));
-            uploadMutex.unlock();
+            this->uploadMutex_.unlock();
         }
     }
 }
