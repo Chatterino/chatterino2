@@ -1,4 +1,4 @@
-#include "ImageUploader.hpp"
+#include "singletons/ImageUploader.hpp"
 
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
