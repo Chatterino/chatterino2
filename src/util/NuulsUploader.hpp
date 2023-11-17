@@ -17,10 +17,6 @@ struct RawImageData {
     QString filePath;
 };
 
-void upload(QByteArray imageData, ChannelPtr channel,
-            ResizingTextEdit &textEdit, std::string format);
-void upload(RawImageData imageData, ChannelPtr channel,
-            ResizingTextEdit &textEdit);
 void upload(const QMimeData *source, ChannelPtr channel,
             ResizingTextEdit &outputTextEdit);
 
