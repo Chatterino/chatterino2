@@ -155,7 +155,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
           mkdir pubsub-server-test
-          Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/releases/download/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/server-v1.0.7-windows-amd64.zip" -outfile "pubsub-server.zip"
+          Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/releases/download/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/server-${{ env.TWITCH_PUBSUB_SERVER_TAG }}-windows-amd64.zip" -outfile "pubsub-server.zip"
           Expand-Archive pubsub-server.zip -DestinationPath pubsub-server-test
           rm pubsub-server.zip
         shell: pwsh
