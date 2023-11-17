@@ -120,8 +120,8 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
     return pattern;
 }
 
-void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
-                        ResizingTextEdit &textEdit)
+void sendImageUploadRequest(RawImageData imageData, ChannelPtr channel,
+                            ResizingTextEdit &textEdit)
 {
     const static char *const boundary = "thisistheboudaryasd";
     const static QString contentType =
@@ -196,7 +196,8 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                 // and 1 second of actual uploading.
 
                 QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit]() {
-                    uploadImageToNuuls(uploadQueue.front(), channel, textEdit);
+                    sendImageUploadRequest(uploadQueue.front(), channel,
+                                           textEdit);
                     uploadQueue.pop();
                 });
             }
@@ -314,25 +315,26 @@ void upload(const QMimeData *source, ChannelPtr channel,
         }
         if (!uploadQueue.empty())
         {
-            uploadImageToNuuls(uploadQueue.front(), channel, outputTextEdit);
+            sendImageUploadRequest(uploadQueue.front(), channel,
+                                   outputTextEdit);
             uploadQueue.pop();
         }
     }
     else if (source->hasFormat("image/png"))
     {
         // the path to file is not present every time, thus the filePath is empty
-        uploadImageToNuuls({source->data("image/png"), "png", ""}, channel,
-                           outputTextEdit);
+        sendImageUploadRequest({source->data("image/png"), "png", ""}, channel,
+                               outputTextEdit);
     }
     else if (source->hasFormat("image/jpeg"))
     {
-        uploadImageToNuuls({source->data("image/jpeg"), "jpeg", ""}, channel,
-                           outputTextEdit);
+        sendImageUploadRequest({source->data("image/jpeg"), "jpeg", ""},
+                               channel, outputTextEdit);
     }
     else if (source->hasFormat("image/gif"))
     {
-        uploadImageToNuuls({source->data("image/gif"), "gif", ""}, channel,
-                           outputTextEdit);
+        sendImageUploadRequest({source->data("image/gif"), "gif", ""}, channel,
+                               outputTextEdit);
     }
 
     else
@@ -341,8 +343,8 @@ void upload(const QMimeData *source, ChannelPtr channel,
         auto imageData = convertToPng(image);
         if (imageData)
         {
-            uploadImageToNuuls({*imageData, "png", ""}, channel,
-                               outputTextEdit);
+            sendImageUploadRequest({*imageData, "png", ""}, channel,
+                                   outputTextEdit);
         }
         else
         {
