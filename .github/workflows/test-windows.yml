@@ -179,7 +179,7 @@ jobs:
           Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/raw/master/cmd/server/server.key" -outfile "server.key"
           .\server.exe 127.0.0.1:9050 &
           cd ..\build-test
-          ctest --repeat until-pass:4 --output-on-failure --label-exclude InputCompletionTest.ClassicEmoteNameFiltering
+          ctest --repeat until-pass:4 --output-on-failure --exclude-regex ClassicEmoteNameFiltering
         working-directory: build-test
         shell: pwsh
 
