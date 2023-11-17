@@ -348,6 +348,17 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
         manualRefresh);
 }
 
+void TwitchChannel::addQueuedRedemption(const QString &rewardId,
+                                        const QString &originalContent,
+                                        Communi::IrcMessage *message)
+{
+    this->waitingRedemptions_.push_back({
+        rewardId,
+        originalContent,
+        {message->clone(), {}},
+    });
+}
+
 void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
 {
     assertInGuiThread();
@@ -368,25 +379,26 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
     }
     if (result)
     {
+        const auto &channelName = this->getName();
         qCDebug(chatterinoTwitch)
-            << "[TwitchChannel" << this->getName()
+            << "[TwitchChannel" << channelName
             << "] Channel point reward added:" << reward.id << ","
             << reward.title << "," << reward.isUserInputRequired;
 
-        // TODO: There's an underlying bug here. This bug should be fixed.
-        // This only attempts to prevent a crash when invoking the signal.
-        try
-        {
-            this->channelPointRewardAdded.invoke(reward);
-        }
-        catch (const std::bad_function_call &)
-        {
-            qCWarning(chatterinoTwitch).nospace()
-                << "[TwitchChannel " << this->getName()
-                << "] Caught std::bad_function_call when adding channel point "
-                   "reward ChannelPointReward{ id: "
-                << reward.id << ", title: " << reward.title << " }.";
-        }
+        auto *server = getApp()->twitch;
+        auto it = std::remove_if(
+            this->waitingRedemptions_.begin(), this->waitingRedemptions_.end(),
+            [&](const QueuedRedemption &msg) {
+                if (reward.id == msg.rewardID)
+                {
+                    IrcMessageHandler::instance().addMessage(
+                        msg.message.get(), shared_from_this(),
+                        msg.originalContent, *server, false, false);
+                    return true;
+                }
+                return false;
+            });
+        this->waitingRedemptions_.erase(it, this->waitingRedemptions_.end());
     }
 }
 
@@ -1369,11 +1381,11 @@ void TwitchChannel::refreshCheerEmotes()
     getHelix()->getCheermotes(
         this->roomId(),
         [this, weak = weakOf<Channel>(this)](
-            const std::vector<HelixCheermoteSet> &cheermoteSets) -> Outcome {
+            const std::vector<HelixCheermoteSet> &cheermoteSets) {
             auto shared = weak.lock();
             if (!shared)
             {
-                return Failure;
+                return;
             }
 
             std::vector<CheerEmoteSet> emoteSets;
@@ -1432,12 +1444,9 @@ void TwitchChannel::refreshCheerEmotes()
             }
 
             *this->cheerEmoteSets_.access() = std::move(emoteSets);
-
-            return Success;
         },
         [] {
             // Failure
-            return Failure;
         });
 }
 
@@ -1644,11 +1653,10 @@ void TwitchChannel::updateSevenTVActivity()
                 std::dynamic_pointer_cast<TwitchChannel>(chan.lock());
             if (!self)
             {
-                return Success;
+                return;
             }
             self->nextSeventvActivity_ =
                 QDateTime::currentDateTimeUtc().addSecs(60);
-            return Success;
         },
         [](const auto &result) {
             qCDebug(chatterinoSeventv)

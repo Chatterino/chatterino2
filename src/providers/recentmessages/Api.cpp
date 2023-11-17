@@ -26,11 +26,11 @@ void load(const QString &channelName, std::weak_ptr<Channel> channelPtr,
     const auto url = constructRecentMessagesUrl(channelName);
 
     NetworkRequest(url)
-        .onSuccess([channelPtr, onLoaded](const auto &result) -> Outcome {
+        .onSuccess([channelPtr, onLoaded](const auto &result) {
             auto shared = channelPtr.lock();
             if (!shared)
             {
-                return Failure;
+                return;
             }
 
             qCDebug(LOG) << "Successfully loaded recent messages for"
@@ -65,8 +65,6 @@ void load(const QString &channelName, std::weak_ptr<Channel> channelPtr,
 
                 onLoaded(messages);
             });
-
-            return Success;
         })
         .onError([channelPtr, onError](const NetworkResult &result) {
             auto shared = channelPtr.lock();
