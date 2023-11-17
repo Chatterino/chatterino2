@@ -64,6 +64,7 @@
 - Dev: Refactor `IrcMessageHandler`, removing a bunch of clang-tidy warnings & changing its public API. (#4927)
 - Dev: `Details` file properties tab is now populated on Windows. (#4912)
 - Dev: Removed `Outcome` from network requests. (#4959)
+- Dev: Added Tests for Windows and MacOS in CI. (#4970)
 
 ## 2.4.6
 
