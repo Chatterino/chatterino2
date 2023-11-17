@@ -164,7 +164,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
           cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
-          httpbox --port 9051
+          httpbox --port 9051 &
 
       - name: Test
         if: startsWith(matrix.os, 'windows')
