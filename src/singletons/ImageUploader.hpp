@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/Singleton.hpp"
+
 #include <QMimeData>
 #include <QString>
 
@@ -17,7 +19,18 @@ struct RawImageData {
     QString filePath;
 };
 
-void upload(const QMimeData *source, ChannelPtr channel,
-            ResizingTextEdit &outputTextEdit);
+class ImageUploader final : public Singleton
+{
+public:
+    ImageUploader();
+
+    void save() override;
+    void upload(const QMimeData *source, ChannelPtr channel,
+                ResizingTextEdit &outputTextEdit);
+
+private:
+    void sendImageUploadRequest(RawImageData imageData, ChannelPtr channel,
+                                ResizingTextEdit &textEdit);
+};
 
 }  // namespace chatterino

@@ -120,8 +120,17 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
     return pattern;
 }
 
-void sendImageUploadRequest(RawImageData imageData, ChannelPtr channel,
-                            ResizingTextEdit &textEdit)
+ImageUploader::ImageUploader()
+{
+}
+
+void ImageUploader::save()
+{
+}
+
+void ImageUploader::sendImageUploadRequest(RawImageData imageData,
+                                           ChannelPtr channel,
+                                           ResizingTextEdit &textEdit)
 {
     const static char *const boundary = "thisistheboudaryasd";
     const static QString contentType =
@@ -155,8 +164,8 @@ void sendImageUploadRequest(RawImageData imageData, ChannelPtr channel,
         .header("Content-Type", contentType)
         .headerList(extraHeaders)
         .multiPart(payload)
-        .onSuccess([&textEdit, channel,
-                    originalFilePath](NetworkResult result) {
+        .onSuccess([&textEdit, channel, originalFilePath,
+                    this](NetworkResult result) {
             QString link = getSettings()->imageUploaderLink.getValue().isEmpty()
                                ? result.getData()
                                : getLinkFromResponse(
@@ -195,9 +204,9 @@ void sendImageUploadRequest(RawImageData imageData, ChannelPtr channel,
                 // 2 seconds for the timer that's there not to spam the remote server
                 // and 1 second of actual uploading.
 
-                QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit]() {
-                    sendImageUploadRequest(uploadQueue.front(), channel,
-                                           textEdit);
+                QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit, this]() {
+                    this->sendImageUploadRequest(uploadQueue.front(), channel,
+                                                 textEdit);
                     uploadQueue.pop();
                 });
             }
@@ -237,8 +246,8 @@ void sendImageUploadRequest(RawImageData imageData, ChannelPtr channel,
         .execute();
 }
 
-void upload(const QMimeData *source, ChannelPtr channel,
-            ResizingTextEdit &outputTextEdit)
+void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
+                           ResizingTextEdit &outputTextEdit)
 {
     if (!uploadMutex.tryLock())
     {
@@ -315,26 +324,26 @@ void upload(const QMimeData *source, ChannelPtr channel,
         }
         if (!uploadQueue.empty())
         {
-            sendImageUploadRequest(uploadQueue.front(), channel,
-                                   outputTextEdit);
+            this->sendImageUploadRequest(uploadQueue.front(), channel,
+                                         outputTextEdit);
             uploadQueue.pop();
         }
     }
     else if (source->hasFormat("image/png"))
     {
         // the path to file is not present every time, thus the filePath is empty
-        sendImageUploadRequest({source->data("image/png"), "png", ""}, channel,
-                               outputTextEdit);
+        this->sendImageUploadRequest({source->data("image/png"), "png", ""},
+                                     channel, outputTextEdit);
     }
     else if (source->hasFormat("image/jpeg"))
     {
-        sendImageUploadRequest({source->data("image/jpeg"), "jpeg", ""},
-                               channel, outputTextEdit);
+        this->sendImageUploadRequest({source->data("image/jpeg"), "jpeg", ""},
+                                     channel, outputTextEdit);
     }
     else if (source->hasFormat("image/gif"))
     {
-        sendImageUploadRequest({source->data("image/gif"), "gif", ""}, channel,
-                               outputTextEdit);
+        this->sendImageUploadRequest({source->data("image/gif"), "gif", ""},
+                                     channel, outputTextEdit);
     }
 
     else
