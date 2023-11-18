@@ -4,6 +4,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -216,31 +217,20 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
                                   getSettings()->imageUploaderDeletionLink);
     qCDebug(chatterinoImageuploader) << link << deletionLink;
     textEdit.insertPlainText(link + " ");
+
+    // 2 seconds for the timer that's there not to spam the remote server
+    // and 1 second of actual uploading.
+    auto timeToUpload = this->uploadQueue_.size() * (UPLOAD_DELAY / 1000 + 1);
+    MessageBuilder builder =
+        MessageBuilder(imageUploaderResultMessage, link, deletionLink,
+                       this->uploadQueue_.size(), timeToUpload);
+    channel->addMessage(builder.release());
     if (this->uploadQueue_.empty())
     {
-        channel->addMessage(makeSystemMessage(
-            QString("Your image has been uploaded to %1 %2.")
-                .arg(link)
-                .arg(deletionLink.isEmpty()
-                         ? ""
-                         : QString("(Deletion link: %1 )").arg(deletionLink))));
         this->uploadMutex_.unlock();
     }
     else
     {
-        channel->addMessage(makeSystemMessage(
-            QString("Your image has been uploaded to %1 %2. %3 left. "
-                    "Please wait until all of them are uploaded. "
-                    "About %4 seconds left.")
-                .arg(link)
-                .arg(deletionLink.isEmpty()
-                         ? ""
-                         : QString("(Deletion link: %1 )").arg(deletionLink))
-                .arg(this->uploadQueue_.size())
-                .arg(this->uploadQueue_.size() * (UPLOAD_DELAY / 1000 + 1))));
-        // 2 seconds for the timer that's there not to spam the remote server
-        // and 1 second of actual uploading.
-
         QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit, this]() {
             this->sendImageUploadRequest(this->uploadQueue_.front(), channel,
                                          textEdit);
