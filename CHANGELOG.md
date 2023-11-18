@@ -40,6 +40,7 @@
 - Bugfix: Fixed some emotes not appearing when using _Ignores_. (#4965)
 - Bugfix: Fixed lookahead/-behind not working in _Ignores_. (#4965)
 - Bugfix: Fixed Image Uploader accidentally deleting images with some hosts when link resolver was enabled. (#4971)
+- Bugfix: Fixed rare crash with Image Uploader when closing a split right after starting an upload. (#4971)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
