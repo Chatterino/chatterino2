@@ -42,8 +42,9 @@ std::optional<QByteArray> convertToPng(const QImage &image)
 namespace chatterino {
 
 // logging information on successful uploads to a json file
-void logToFile(const QString originalFilePath, QString imageLink,
-               QString deletionLink, ChannelPtr channel)
+void ImageUploader::logToFile(const QString &originalFilePath,
+                              const QString &imageLink,
+                              const QString &deletionLink, ChannelPtr channel)
 {
     const QString logFileName =
         combinePath((getSettings()->logPath.getValue().isEmpty()
@@ -247,7 +248,7 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
         });
     }
 
-    logToFile(originalFilePath, link, deletionLink, channel);
+    this->logToFile(originalFilePath, link, deletionLink, channel);
 }
 
 void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,

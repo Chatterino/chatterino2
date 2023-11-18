@@ -39,6 +39,9 @@ private:
                                 ResizingTextEdit &textEdit);
     void handleFailedUpload(const NetworkResult &result, ChannelPtr channel);
 
+    void logToFile(const QString &originalFilePath, const QString &imageLink,
+                   const QString &deletionLink, ChannelPtr channel);
+
     // These variables are only used from the main thread.
     QMutex uploadMutex_;
     std::queue<RawImageData> uploadQueue_;
