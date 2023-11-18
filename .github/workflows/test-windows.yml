@@ -158,17 +158,24 @@ jobs:
           Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/releases/download/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/server-${{ env.TWITCH_PUBSUB_SERVER_TAG }}-windows-amd64.zip" -outfile "pubsub-server.zip"
           Expand-Archive pubsub-server.zip -DestinationPath pubsub-server-test
           rm pubsub-server.zip
+          cd pubsub-server-test
+          Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.crt" -outfile "server.crt"
+          Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key" -outfile "server.key"
+          cd ..
+        shell: pwsh
+
+      - name: Cargo Install httpbox
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
         shell: pwsh
 
       - name: Test
         if: startsWith(matrix.os, 'windows')
         timeout-minutes: 30
         run: |
-          cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
           httpbox --port 9051 &
           cd ..\pubsub-server-test
-          Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.crt" -outfile "server.crt"
-          Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key" -outfile "server.key"
           .\server.exe 127.0.0.1:9050 &
           cd ..\build-test
           ctest --repeat until-pass:4 --output-on-failure --exclude-regex ClassicEmoteNameFiltering
