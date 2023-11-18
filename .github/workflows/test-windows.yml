@@ -110,9 +110,6 @@ jobs:
               -o with_openssl3="$Env:C2_USE_OPENSSL3"
 
       - name: Build
-        env:
-          # Enable PCH on Windows, later we can have it depend on the run/Qt Version like in the build workflow, I just want to make it work
-          C2_WINDOWS_USE_PCH: True
         run: |
           cmake `
               -G"NMake Makefiles" `
@@ -120,7 +117,7 @@ jobs:
               -DBUILD_TESTS=On `
               -DBUILD_APP=OFF `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
-              -DUSE_PRECOMPILED_HEADERS=${{ env.C2_WINDOWS_USE_PCH }} `
+              -DUSE_PRECOMPILED_HEADERS=On `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
               -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
