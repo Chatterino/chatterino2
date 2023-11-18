@@ -24,7 +24,6 @@ jobs:
         qt-version: [5.15.2, 6.5.0]
         force-lto: [false]
         plugins: [false]
-        clang-tidy-review: [false]
       fail-fast: false
     env:
       C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
@@ -63,19 +62,16 @@ jobs:
           version: ${{ matrix.qt-version }}
 
       - name: Install dependencies
-        if: startsWith(matrix.os, 'macos')
         run: |
           brew install boost openssl rapidjson p7zip create-dmg cmake tree docker colima
         shell: bash
 
       - name: Setup Colima
-        if: startsWith(matrix.os, 'macos')
         run: |
           colima start
         shell: bash
 
       - name: Build
-        if: startsWith(matrix.os, 'macos')
         shell: bash
         run: |
           mkdir build-test
@@ -92,7 +88,6 @@ jobs:
           make -j"$(sysctl -n hw.logicalcpu)"
 
       - name: Test
-        if: startsWith(matrix.os, 'macos')
         timeout-minutes: 30
         run: |
           docker pull kennethreitz/httpbin
@@ -104,7 +99,7 @@ jobs:
         shell: bash
 
       - name: Post Setup Colima
-        if: startsWith(matrix.os, 'macos') && always()
+        if: always()
         run: |
           colima stop
         working-directory: build-test
