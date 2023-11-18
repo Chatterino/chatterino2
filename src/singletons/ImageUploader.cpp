@@ -156,87 +156,98 @@ void ImageUploader::sendImageUploadRequest(RawImageData imageData,
         .header("Content-Type", contentType)
         .headerList(extraHeaders)
         .multiPart(payload)
-        .onSuccess([&textEdit, channel, originalFilePath,
-                    this](NetworkResult result) {
-            QString link = getSettings()->imageUploaderLink.getValue().isEmpty()
-                               ? result.getData()
-                               : getLinkFromResponse(
-                                     result, getSettings()->imageUploaderLink);
-            QString deletionLink =
-                getSettings()->imageUploaderDeletionLink.getValue().isEmpty()
-                    ? ""
-                    : getLinkFromResponse(
-                          result, getSettings()->imageUploaderDeletionLink);
-            qCDebug(chatterinoImageuploader) << link << deletionLink;
-            textEdit.insertPlainText(link + " ");
-            if (this->uploadQueue_.empty())
-            {
-                channel->addMessage(makeSystemMessage(
-                    QString("Your image has been uploaded to %1 %2.")
-                        .arg(link)
-                        .arg(deletionLink.isEmpty()
-                                 ? ""
-                                 : QString("(Deletion link: %1 )")
-                                       .arg(deletionLink))));
-                this->uploadMutex_.unlock();
-            }
-            else
-            {
-                channel->addMessage(makeSystemMessage(
-                    QString("Your image has been uploaded to %1 %2. %3 left. "
-                            "Please wait until all of them are uploaded. "
-                            "About %4 seconds left.")
-                        .arg(link)
-                        .arg(deletionLink.isEmpty()
-                                 ? ""
-                                 : QString("(Deletion link: %1 )")
-                                       .arg(deletionLink))
-                        .arg(this->uploadQueue_.size())
-                        .arg(this->uploadQueue_.size() *
-                             (UPLOAD_DELAY / 1000 + 1))));
-                // 2 seconds for the timer that's there not to spam the remote server
-                // and 1 second of actual uploading.
-
-                QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit, this]() {
-                    this->sendImageUploadRequest(this->uploadQueue_.front(),
-                                                 channel, textEdit);
-                    this->uploadQueue_.pop();
-                });
-            }
-
-            logToFile(originalFilePath, link, deletionLink, channel);
-        })
+        .onSuccess(
+            [&textEdit, channel, originalFilePath, this](NetworkResult result) {
+                this->handleSuccessfulUpload(result, originalFilePath, channel,
+                                             textEdit);
+            })
         .onError([channel, this](NetworkResult result) -> bool {
-            auto errorMessage =
-                QString("An error happened while uploading your image: %1")
-                    .arg(result.formatError());
-
-            // Try to read more information from the result body
-            auto obj = result.parseJson();
-            if (!obj.isEmpty())
-            {
-                auto apiCode = obj.value("code");
-                if (!apiCode.isUndefined())
-                {
-                    auto codeString = apiCode.toVariant().toString();
-                    codeString.truncate(20);
-                    errorMessage += QString(" - code: %1").arg(codeString);
-                }
-
-                auto apiError = obj.value("error").toString();
-                if (!apiError.isEmpty())
-                {
-                    apiError.truncate(300);
-                    errorMessage +=
-                        QString(" - error: %1").arg(apiError.trimmed());
-                }
-            }
-
-            channel->addMessage(makeSystemMessage(errorMessage));
-            this->uploadMutex_.unlock();
+            this->handleFailedUpload(result, channel);
             return true;
         })
         .execute();
+}
+
+void ImageUploader::handleFailedUpload(const NetworkResult &result,
+                                       ChannelPtr channel)
+{
+    auto errorMessage =
+        QString("An error happened while uploading your image: %1")
+            .arg(result.formatError());
+
+    // Try to read more information from the result body
+    auto obj = result.parseJson();
+    if (!obj.isEmpty())
+    {
+        auto apiCode = obj.value("code");
+        if (!apiCode.isUndefined())
+        {
+            auto codeString = apiCode.toVariant().toString();
+            codeString.truncate(20);
+            errorMessage += QString(" - code: %1").arg(codeString);
+        }
+
+        auto apiError = obj.value("error").toString();
+        if (!apiError.isEmpty())
+        {
+            apiError.truncate(300);
+            errorMessage += QString(" - error: %1").arg(apiError.trimmed());
+        }
+    }
+
+    channel->addMessage(makeSystemMessage(errorMessage));
+    this->uploadMutex_.unlock();
+}
+
+void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
+                                           QString originalFilePath,
+                                           ChannelPtr channel,
+                                           ResizingTextEdit &textEdit)
+{
+    QString link =
+        getSettings()->imageUploaderLink.getValue().isEmpty()
+            ? result.getData()
+            : getLinkFromResponse(result, getSettings()->imageUploaderLink);
+    QString deletionLink =
+        getSettings()->imageUploaderDeletionLink.getValue().isEmpty()
+            ? ""
+            : getLinkFromResponse(result,
+                                  getSettings()->imageUploaderDeletionLink);
+    qCDebug(chatterinoImageuploader) << link << deletionLink;
+    textEdit.insertPlainText(link + " ");
+    if (this->uploadQueue_.empty())
+    {
+        channel->addMessage(makeSystemMessage(
+            QString("Your image has been uploaded to %1 %2.")
+                .arg(link)
+                .arg(deletionLink.isEmpty()
+                         ? ""
+                         : QString("(Deletion link: %1 )").arg(deletionLink))));
+        this->uploadMutex_.unlock();
+    }
+    else
+    {
+        channel->addMessage(makeSystemMessage(
+            QString("Your image has been uploaded to %1 %2. %3 left. "
+                    "Please wait until all of them are uploaded. "
+                    "About %4 seconds left.")
+                .arg(link)
+                .arg(deletionLink.isEmpty()
+                         ? ""
+                         : QString("(Deletion link: %1 )").arg(deletionLink))
+                .arg(this->uploadQueue_.size())
+                .arg(this->uploadQueue_.size() * (UPLOAD_DELAY / 1000 + 1))));
+        // 2 seconds for the timer that's there not to spam the remote server
+        // and 1 second of actual uploading.
+
+        QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit, this]() {
+            this->sendImageUploadRequest(this->uploadQueue_.front(), channel,
+                                         textEdit);
+            this->uploadQueue_.pop();
+        });
+    }
+
+    logToFile(originalFilePath, link, deletionLink, channel);
 }
 
 void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,

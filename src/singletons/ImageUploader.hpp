@@ -13,6 +13,7 @@ namespace chatterino {
 
 class ResizingTextEdit;
 class Channel;
+class NetworkResult;
 using ChannelPtr = std::shared_ptr<Channel>;
 
 struct RawImageData {
@@ -31,6 +32,12 @@ public:
 private:
     void sendImageUploadRequest(RawImageData imageData, ChannelPtr channel,
                                 ResizingTextEdit &textEdit);
+
+    // This is called from the onSuccess handler of the NetworkRequest in sendImageUploadRequest
+    void handleSuccessfulUpload(const NetworkResult &result,
+                                QString originalFilePath, ChannelPtr channel,
+                                ResizingTextEdit &textEdit);
+    void handleFailedUpload(const NetworkResult &result, ChannelPtr channel);
 
     // These variables are only used from the main thread.
     QMutex uploadMutex_;
