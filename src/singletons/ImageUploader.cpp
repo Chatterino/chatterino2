@@ -15,8 +15,10 @@
 #include <QHttpMultiPart>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <qmessagebox.h>
 #include <QMimeDatabase>
 #include <QMutex>
+#include <qpointer.h>
 #include <QSaveFile>
 
 #define UPLOAD_DELAY 2000
@@ -124,7 +126,7 @@ void ImageUploader::save()
 
 void ImageUploader::sendImageUploadRequest(RawImageData imageData,
                                            ChannelPtr channel,
-                                           ResizingTextEdit &textEdit)
+                                           QPointer<ResizingTextEdit> textEdit)
 {
     const static char *const boundary = "thisistheboudaryasd";
     const static QString contentType =
@@ -159,7 +161,7 @@ void ImageUploader::sendImageUploadRequest(RawImageData imageData,
         .headerList(extraHeaders)
         .multiPart(payload)
         .onSuccess(
-            [&textEdit, channel, originalFilePath, this](NetworkResult result) {
+            [textEdit, channel, originalFilePath, this](NetworkResult result) {
                 this->handleSuccessfulUpload(result, originalFilePath, channel,
                                              textEdit);
             })
@@ -204,8 +206,19 @@ void ImageUploader::handleFailedUpload(const NetworkResult &result,
 void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
                                            QString originalFilePath,
                                            ChannelPtr channel,
-                                           ResizingTextEdit &textEdit)
+                                           QPointer<ResizingTextEdit> textEdit)
 {
+    if (textEdit == nullptr)
+    {
+        // Split was destroyed abort further uploads
+
+        while (!this->uploadQueue_.empty())
+        {
+            this->uploadQueue_.pop();
+        }
+        this->uploadMutex_.unlock();
+        return;
+    }
     QString link =
         getSettings()->imageUploaderLink.getValue().isEmpty()
             ? result.getData()
@@ -216,7 +229,7 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
             : getLinkFromResponse(result,
                                   getSettings()->imageUploaderDeletionLink);
     qCDebug(chatterinoImageuploader) << link << deletionLink;
-    textEdit.insertPlainText(link + " ");
+    textEdit->insertPlainText(link + " ");
 
     // 2 seconds for the timer that's there not to spam the remote server
     // and 1 second of actual uploading.
@@ -242,7 +255,7 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
 }
 
 void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
-                           ResizingTextEdit &outputTextEdit)
+                           QPointer<ResizingTextEdit> outputTextEdit)
 {
     if (!this->uploadMutex_.tryLock())
     {

@@ -405,8 +405,8 @@ Split::Split(QWidget *parent)
                     getSettings()->askOnImageUpload.setValue(false);
                 }
             }
-            getApp()->imageUploader->upload(source, this->getChannel(),
-                                            *this->input_->ui_.textEdit);
+            QPointer<ResizingTextEdit> edit = this->input_->ui_.textEdit;
+            getApp()->imageUploader->upload(source, this->getChannel(), edit);
         });
 
     getSettings()->imageUploaderEnabled.connect(

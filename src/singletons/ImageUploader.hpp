@@ -27,16 +27,16 @@ class ImageUploader final : public Singleton
 public:
     void save() override;
     void upload(const QMimeData *source, ChannelPtr channel,
-                ResizingTextEdit &outputTextEdit);
+                QPointer<ResizingTextEdit> outputTextEdit);
 
 private:
     void sendImageUploadRequest(RawImageData imageData, ChannelPtr channel,
-                                ResizingTextEdit &textEdit);
+                                QPointer<ResizingTextEdit> textEdit);
 
     // This is called from the onSuccess handler of the NetworkRequest in sendImageUploadRequest
     void handleSuccessfulUpload(const NetworkResult &result,
                                 QString originalFilePath, ChannelPtr channel,
-                                ResizingTextEdit &textEdit);
+                                QPointer<ResizingTextEdit> textEdit);
     void handleFailedUpload(const NetworkResult &result, ChannelPtr channel);
 
     void logToFile(const QString &originalFilePath, const QString &imageLink,
