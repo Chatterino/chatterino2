@@ -200,7 +200,7 @@ public:
                                         const QString &version) const;
 
     // Cheers
-    std::optional<CheerEmote> cheerEmote(const QString &string);
+    std::optional<CheerEmote> cheerEmote(const QString &string) const;
 
     // Replies
     /**
