@@ -34,19 +34,16 @@ jobs:
         if: matrix.force-lto
         run: |
           echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
-        shell: bash
 
       - name: Enable plugin support
         if: matrix.plugins
         run: |
           echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
-        shell: bash
 
       - name: Set BUILD_WITH_QT6
         if: startsWith(matrix.qt-version, '6.')
         run: |
           echo "C2_BUILD_WITH_QT6=ON" >> "$GITHUB_ENV"
-        shell: bash
 
       - uses: actions/checkout@v4
         with:
@@ -64,15 +61,12 @@ jobs:
       - name: Install dependencies
         run: |
           brew install boost openssl rapidjson p7zip create-dmg cmake tree docker colima
-        shell: bash
 
       - name: Setup Colima
         run: |
           colima start
-        shell: bash
 
       - name: Build
-        shell: bash
         run: |
           mkdir build-test
           cd build-test
@@ -96,11 +90,9 @@ jobs:
           docker run -p 9051:80 --detach kennethreitz/httpbin
           ctest --repeat until-pass:4 --output-on-failure --exclude-regex ClassicEmoteNameFiltering
         working-directory: build-test
-        shell: bash
 
       - name: Post Setup Colima
         if: always()
         run: |
           colima stop
         working-directory: build-test
-        shell: bash
