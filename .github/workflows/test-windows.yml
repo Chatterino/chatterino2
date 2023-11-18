@@ -66,7 +66,6 @@ jobs:
           version: ${{ matrix.qt-version }}
 
       - name: Enable Developer Command Prompt
-        if: startsWith(matrix.os, 'windows')
         uses: ilammy/msvc-dev-cmd@v1.12.1
 
       - name: Setup conan variables
@@ -79,7 +78,6 @@ jobs:
       - name: Setup sccache
         # sccache v0.5.3
         uses: nerixyz/ccache-action@9a7e8d00116ede600ee7717350c6594b8af6aaa5
-        if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
           # only save on the default (master) branch
@@ -89,27 +87,23 @@ jobs:
             sccache-test-${{ matrix.os }}-${{ matrix.qt-version }}
 
       - name: Cache conan packages
-        if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v3
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}${{ env.C2_CONAN_CACHE_SUFFIX }}
           path: ~/.conan2/
 
       - name: Install Conan
-        if: startsWith(matrix.os, 'windows')
         run: |
           python3 -c "import site; import sys; print(f'{site.USER_BASE}\\Python{sys.version_info.major}{sys.version_info.minor}\\Scripts')" >> "$Env:GITHUB_PATH"
           pip3 install --user "conan==${{ env.CONAN_VERSION }}"
         shell: pwsh
 
       - name: Setup Conan
-        if: startsWith(matrix.os, 'windows')
         run: |
           conan --version
           conan profile detect -f
 
       - name: Install dependencies
-        if: startsWith(matrix.os, 'windows')
         run: |
           mkdir build-test
           cd build-test
@@ -122,7 +116,6 @@ jobs:
         shell: powershell
 
       - name: Build
-        if: startsWith(matrix.os, 'windows')
         shell: pwsh
         env:
           # Enable PCH on Windows, later we can have it depend on the run/Qt Version like in the build workflow, I just want to make it work
@@ -144,7 +137,6 @@ jobs:
         working-directory: build-test
 
       - name: Download and extract Twitch PubSub Server Test
-        if: startsWith(matrix.os, 'windows')
         run: |
           mkdir pubsub-server-test
           Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/releases/download/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/server-${{ env.TWITCH_PUBSUB_SERVER_TAG }}-windows-amd64.zip" -outfile "pubsub-server.zip"
@@ -157,13 +149,11 @@ jobs:
         shell: pwsh
 
       - name: Cargo Install httpbox
-        if: startsWith(matrix.os, 'windows')
         run: |
           cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
         shell: pwsh
 
       - name: Test
-        if: startsWith(matrix.os, 'windows')
         timeout-minutes: 30
         run: |
           httpbox --port 9051 &
@@ -175,6 +165,5 @@ jobs:
         shell: pwsh
 
       - name: Clean Conan cache
-        if: startsWith(matrix.os, 'windows')
         run: conan cache clean --source --build --download "*"
         shell: pwsh
