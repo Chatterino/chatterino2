@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-13]
-        qt-version: [5.15.2, 6.2.4]
+        qt-version: [5.15.2, 6.5.0]
         force-lto: [false]
         plugins: [false]
         clang-tidy-review: [false]
