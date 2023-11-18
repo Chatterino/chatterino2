@@ -4,7 +4,6 @@
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -500,7 +499,6 @@ void TwitchAccount::loadSeventvUserID()
             {
                 this->seventvUserID_ = id;
             }
-            return Success;
         },
         [](const auto &result) {
             qCDebug(chatterinoSeventv)

@@ -36,6 +36,9 @@
 - Bugfix: Fixed thread popup window missing messages for nested threads. (#4923)
 - Bugfix: Fixed an occasional crash for channel point redemptions with text input. (#4949)
 - Bugfix: Fixed triple click on message also selecting moderation buttons. (#4961)
+- Bugfix: Fixed a freeze from a bad regex in _Ignores_. (#4965)
+- Bugfix: Fixed some emotes not appearing when using _Ignores_. (#4965)
+- Bugfix: Fixed lookahead/-behind not working in _Ignores_. (#4965)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
@@ -61,6 +64,7 @@
 - Dev: Refactor `ChannelView`, removing a bunch of clang-tidy warnings. (#4926)
 - Dev: Refactor `IrcMessageHandler`, removing a bunch of clang-tidy warnings & changing its public API. (#4927)
 - Dev: `Details` file properties tab is now populated on Windows. (#4912)
+- Dev: Removed `Outcome` from network requests. (#4959)
 
 ## 2.4.6
 

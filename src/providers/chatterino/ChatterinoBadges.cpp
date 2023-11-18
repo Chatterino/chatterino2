@@ -2,7 +2,6 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "messages/Emote.hpp"
 
 #include <QJsonArray>
@@ -39,7 +38,7 @@ void ChatterinoBadges::loadChatterinoBadges()
 
     NetworkRequest(url)
         .concurrent()
-        .onSuccess([this](auto result) -> Outcome {
+        .onSuccess([this](auto result) {
             auto jsonRoot = result.parseJson();
 
             std::unique_lock lock(this->mutex_);
@@ -64,8 +63,6 @@ void ChatterinoBadges::loadChatterinoBadges()
                 }
                 ++index;
             }
-
-            return Success;
         })
         .execute();
 }

@@ -1381,11 +1381,11 @@ void TwitchChannel::refreshCheerEmotes()
     getHelix()->getCheermotes(
         this->roomId(),
         [this, weak = weakOf<Channel>(this)](
-            const std::vector<HelixCheermoteSet> &cheermoteSets) -> Outcome {
+            const std::vector<HelixCheermoteSet> &cheermoteSets) {
             auto shared = weak.lock();
             if (!shared)
             {
-                return Failure;
+                return;
             }
 
             std::vector<CheerEmoteSet> emoteSets;
@@ -1444,12 +1444,9 @@ void TwitchChannel::refreshCheerEmotes()
             }
 
             *this->cheerEmoteSets_.access() = std::move(emoteSets);
-
-            return Success;
         },
         [] {
             // Failure
-            return Failure;
         });
 }
 
@@ -1656,11 +1653,10 @@ void TwitchChannel::updateSevenTVActivity()
                 std::dynamic_pointer_cast<TwitchChannel>(chan.lock());
             if (!self)
             {
-                return Success;
+                return;
             }
             self->nextSeventvActivity_ =
                 QDateTime::currentDateTimeUtc().addSecs(60);
-            return Success;
         },
         [](const auto &result) {
             qCDebug(chatterinoSeventv)
