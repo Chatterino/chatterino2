@@ -24,7 +24,7 @@ public:
     void addRecentChatter(const QString &user);
     void addJoinedUser(const QString &user);
     void addPartedUser(const QString &user);
-    const QColor getUserColor(const QString &user);
+    const QColor getUserColor(const QString &user) const;
     void setUserColor(const QString &user, const QColor &color);
     void updateOnlineChatters(const std::unordered_set<QString> &usernames);
 
