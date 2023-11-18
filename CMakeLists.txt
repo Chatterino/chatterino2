@@ -123,7 +123,7 @@ endif ()
 find_package(Sanitizers QUIET)
 
 # Find boost on the system
-find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)
+find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers json)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
@@ -212,6 +212,8 @@ endif()
 if (BUILD_WITH_CRASHPAD)
     add_subdirectory("${CMAKE_SOURCE_DIR}/tools/crash-handler")
 endif()
+
+add_subdirectory("${CMAKE_SOURCE_DIR}/../beast-websocket-client" eventsub EXCLUDE_FROM_ALL)
 
 # Used to provide a date of build in the About page (for nightly builds). Getting the actual time of
 # compilation in CMake is a more involved, as documented in https://stackoverflow.com/q/24292898.

@@ -372,6 +372,8 @@ set(SOURCE_FILES
 
         providers/twitch/ChannelPointReward.cpp
         providers/twitch/ChannelPointReward.hpp
+        providers/twitch/EventSub.cpp
+        providers/twitch/EventSub.hpp
         providers/twitch/IrcMessageHandler.cpp
         providers/twitch/IrcMessageHandler.hpp
         providers/twitch/PubSubActions.cpp
@@ -765,6 +767,12 @@ target_link_libraries(${LIBRARY_PROJECT}
         LRUCache
         MagicEnum
         )
+
+target_link_libraries(${LIBRARY_PROJECT}
+        PUBLIC
+        eventsub
+        )
+
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua)
 endif()
@@ -813,6 +821,11 @@ if (BUILD_APP)
     target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
 
     target_link_libraries(${EXECUTABLE_PROJECT} PUBLIC ${LIBRARY_PROJECT})
+
+    target_link_libraries(${EXECUTABLE_PROJECT}
+        PUBLIC
+        eventsub
+        )
 
     set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
