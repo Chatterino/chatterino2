@@ -6,7 +6,10 @@
 #include "eventsub/payloads/channel-ban-v1.hpp"
 #include "eventsub/payloads/session-welcome.hpp"
 #include "eventsub/session.hpp"
+#include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -124,7 +127,7 @@ public:
                         condition.insert("user_id", sourceUserID);
 
                         getHelix()->createEventSubSubscription(
-                            "channel.chat.notification", "beta", sessionID,
+                            "channel.chat.notification", "1", sessionID,
                             condition,
                             [roomID](const auto &response) {
                                 qDebug() << "Successfully subscribed to "
@@ -159,7 +162,51 @@ public:
                   << " reason=" << payload.event.reason
                   << " userLogin=" << payload.event.userLogin
                   << " moderatorLogin=" << payload.event.moderatorUserLogin
-                  << '\n';
+                  << " bannedAt=" << payload.event.bannedAt << '\n';
+
+        auto roomID = QString::fromStdString(payload.event.broadcasterUserID);
+
+        BanAction action{
+            //
+        };
+
+        action.timestamp = std::chrono::steady_clock::now();
+        action.roomID = roomID;
+        action.source = ActionUser{
+            .id = QString::fromStdString(payload.event.moderatorUserID),
+            .login = QString::fromStdString(payload.event.moderatorUserLogin),
+            .displayName =
+                QString::fromStdString(payload.event.moderatorUserName),
+        };
+        action.target = ActionUser{
+            .id = QString::fromStdString(payload.event.userID),
+            .login = QString::fromStdString(payload.event.userLogin),
+            .displayName = QString::fromStdString(payload.event.userName),
+        };
+        action.reason = QString::fromStdString(payload.event.reason);
+        if (payload.event.isPermanent)
+        {
+            action.duration = 0;
+        }
+        else
+        {
+            auto timeoutDuration = payload.event.timeoutDuration();
+            auto timeoutDurationInSeconds =
+                std::chrono::duration_cast<std::chrono::seconds>(
+                    timeoutDuration)
+                    .count();
+            action.duration = timeoutDurationInSeconds;
+            qDebug() << "TIMEOUT DURATION IN SECONDS: "
+                     << timeoutDurationInSeconds;
+        }
+
+        auto chan = getApp()->twitch->getChannelOrEmptyByID(roomID);
+
+        runInGuiThread([action{std::move(action)}, chan{std::move(chan)}] {
+            MessageBuilder msg(action);
+            msg->flags.set(MessageFlag::PubSub);
+            chan->addOrReplaceTimeout(msg.release());
+        });
     }
 
     void onStreamOnline(messages::Metadata metadata,
@@ -180,11 +227,11 @@ public:
 
     void onChannelChatNotification(
         messages::Metadata metadata,
-        payload::channel_chat_notification::beta::Payload payload) override
+        payload::channel_chat_notification::v1::Payload payload) override
     {
         (void)metadata;
         (void)payload;
-        std::cout << "Received channel.chat.notification beta\n";
+        std::cout << "Received channel.chat.notification v1\n";
     }
 
     void onChannelUpdate(messages::Metadata metadata,
