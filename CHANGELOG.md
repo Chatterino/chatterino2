@@ -35,6 +35,7 @@
 - Bugfix: Fixed a crash when clicking `More messages below` button in a usercard and closing it quickly. (#4933)
 - Bugfix: Fixed thread popup window missing messages for nested threads. (#4923)
 - Bugfix: Fixed an occasional crash for channel point redemptions with text input. (#4949)
+- Bugfix: Fixed triple click on message also selecting moderation buttons. (#4961)
 - Bugfix: Fixed a freeze from a bad regex in _Ignores_. (#4965)
 - Bugfix: Fixed some emotes not appearing when using _Ignores_. (#4965)
 - Bugfix: Fixed lookahead/-behind not working in _Ignores_. (#4965)
