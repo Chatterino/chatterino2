@@ -25,7 +25,6 @@ jobs:
       matrix:
         os: [windows-latest]
         qt-version: [5.15.2, 6.5.0]
-        force-lto: [false]
         plugins: [false]
         skip-artifact: [false]
         skip-crashpad: [false]
@@ -35,12 +34,6 @@ jobs:
       QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
 
     steps:
-      - name: Force LTO
-        if: matrix.force-lto
-        run: |
-          echo "C2_ENABLE_LTO=ON" >> "$Env:GITHUB_ENV"
-        shell: pwsh
-
       - name: Enable plugin support
         if: matrix.plugins
         run: |
@@ -143,7 +136,6 @@ jobs:
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
               -DUSE_PRECOMPILED_HEADERS=${{ env.C2_WINDOWS_USE_PCH }} `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
-              -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
               -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
               ..
