@@ -22,7 +22,6 @@ jobs:
       matrix:
         os: [macos-13]
         qt-version: [5.15.2, 6.5.0]
-        force-lto: [false]
         plugins: [false]
       fail-fast: false
     env:
@@ -30,11 +29,6 @@ jobs:
       QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
 
     steps:
-      - name: Force LTO
-        if: matrix.force-lto
-        run: |
-          echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
-
       - name: Enable plugin support
         if: matrix.plugins
         run: |
@@ -75,7 +69,6 @@ jobs:
               -DBUILD_TESTS=On \
               -DBUILD_APP=OFF \
               -DUSE_PRECOMPILED_HEADERS=OFF \
-              -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
               ..
