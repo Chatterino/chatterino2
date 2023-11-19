@@ -686,9 +686,7 @@ MessageBuilder::MessageBuilder(ImageUploaderResultTag /*unused*/,
     // ASSUMPTION: the user gave this uploader configuration to the program
     // therefore they trust that the host is not wrong/malicious. This doesn't obey getSettings()->lowercaseDomains.
     // This also ensures that the LinkResolver doesn't get these links.
-    addText(imageLink,
-            MessageElementFlags(MEF::OriginalLink) |
-                MessageElementFlags(MEF::LowercaseLink),
+    addText(imageLink, {MEF::OriginalLink, MEF::LowercaseLink},
             MessageColor::Link)
         ->setLink({Link::Url, imageLink})
         ->setTrailingSpace(false);
@@ -696,9 +694,7 @@ MessageBuilder::MessageBuilder(ImageUploaderResultTag /*unused*/,
     if (!deletionLink.isEmpty())
     {
         addText("(Deletion link:");
-        addText(deletionLink,
-                MessageElementFlags(MEF::OriginalLink) |
-                    MessageElementFlags(MEF::LowercaseLink),
+        addText(deletionLink, {MEF::OriginalLink, MEF::LowercaseLink},
                 MessageColor::Link)
             ->setLink({Link::Url, deletionLink})
             ->setTrailingSpace(false);
