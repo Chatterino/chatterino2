@@ -6,6 +6,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/LinkResolver.hpp"
 #include "providers/twitch/PubSubActions.hpp"
@@ -658,6 +659,58 @@ MessageBuilder::MessageBuilder(LiveUpdatesUpdateEmoteSetMessageTag /*unused*/,
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::LiveUpdatesUpdate);
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+}
+
+MessageBuilder::MessageBuilder(ImageUploaderResultTag /*unused*/,
+                               const QString &imageLink,
+                               const QString &deletionLink,
+                               size_t imagesStillQueued, size_t secondsLeft)
+    : MessageBuilder()
+{
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+    this->emplace<TimestampElement>();
+
+    using MEF = MessageElementFlag;
+    auto addText = [this](QString text, MessageElementFlags mefs = MEF::Text,
+                          MessageColor color =
+                              MessageColor::System) -> TextElement * {
+        this->message().searchText += text;
+        this->message().messageText += text;
+        return this->emplace<TextElement>(text, mefs, color);
+    };
+
+    addText("Your image has been uploaded to");
+
+    // ASSUMPTION: the user gave this uploader configuration to the program
+    // therefore they trust that the host is not wrong/malicious. This doesn't obey getSettings()->lowercaseDomains.
+    // This also ensures that the LinkResolver doesn't get these links.
+    addText(imageLink, {MEF::OriginalLink, MEF::LowercaseLink},
+            MessageColor::Link)
+        ->setLink({Link::Url, imageLink})
+        ->setTrailingSpace(false);
+
+    if (!deletionLink.isEmpty())
+    {
+        addText("(Deletion link:");
+        addText(deletionLink, {MEF::OriginalLink, MEF::LowercaseLink},
+                MessageColor::Link)
+            ->setLink({Link::Url, deletionLink})
+            ->setTrailingSpace(false);
+        addText(")")->setTrailingSpace(false);
+    }
+    addText(".");
+
+    if (imagesStillQueued == 0)
+    {
+        return;
+    }
+
+    addText(QString("%1 left. Please wait until all of them are uploaded. "
+                    "About %2 seconds left.")
+                .arg(imagesStillQueued)
+                .arg(secondsLeft));
 }
 
 Message *MessageBuilder::operator->()

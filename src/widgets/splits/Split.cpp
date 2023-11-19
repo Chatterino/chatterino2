@@ -16,12 +16,12 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Fonts.hpp"
+#include "singletons/ImageUploader.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
-#include "util/NuulsUploader.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
@@ -405,7 +405,8 @@ Split::Split(QWidget *parent)
                     getSettings()->askOnImageUpload.setValue(false);
                 }
             }
-            upload(source, this->getChannel(), *this->input_->ui_.textEdit);
+            QPointer<ResizingTextEdit> edit = this->input_->ui_.textEdit;
+            getApp()->imageUploader->upload(source, this->getChannel(), edit);
         });
 
     getSettings()->imageUploaderEnabled.connect(

@@ -89,6 +89,11 @@ public:
     {
         return nullptr;
     }
+
+    ImageUploader *getImageUploader() override
+    {
+        return nullptr;
+    }
 };
 
 }  // namespace chatterino::mock

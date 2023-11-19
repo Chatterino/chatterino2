@@ -10,6 +10,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "singletons/ImageUploader.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 #endif
@@ -79,6 +80,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , hotkeys(&this->emplace<HotkeyController>())
     , windows(&this->emplace<WindowManager>())
     , toasts(&this->emplace<Toasts>())
+    , imageUploader(&this->emplace<ImageUploader>())
 
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())

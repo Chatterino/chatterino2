@@ -424,6 +424,8 @@ set(SOURCE_FILES
         singletons/Emotes.hpp
         singletons/Fonts.cpp
         singletons/Fonts.hpp
+        singletons/ImageUploader.cpp
+        singletons/ImageUploader.hpp
         singletons/Logging.cpp
         singletons/Logging.hpp
         singletons/NativeMessaging.cpp
@@ -475,8 +477,6 @@ set(SOURCE_FILES
         util/IpcQueue.hpp
         util/LayoutHelper.cpp
         util/LayoutHelper.hpp
-        util/NuulsUploader.cpp
-        util/NuulsUploader.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
         util/RatelimitBucket.cpp
