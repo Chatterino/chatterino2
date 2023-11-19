@@ -234,9 +234,8 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
     // 2 seconds for the timer that's there not to spam the remote server
     // and 1 second of actual uploading.
     auto timeToUpload = this->uploadQueue_.size() * (UPLOAD_DELAY / 1000 + 1);
-    MessageBuilder builder =
-        MessageBuilder(imageUploaderResultMessage, link, deletionLink,
-                       this->uploadQueue_.size(), timeToUpload);
+    MessageBuilder builder(imageUploaderResultMessage, link, deletionLink,
+                           this->uploadQueue_.size(), timeToUpload);
     channel->addMessage(builder.release());
     if (this->uploadQueue_.empty())
     {
