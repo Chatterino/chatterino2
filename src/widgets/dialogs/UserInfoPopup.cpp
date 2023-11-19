@@ -385,7 +385,10 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
         user.emplace<QCheckBox>("Block").assign(&this->ui_.block);
         user.emplace<QCheckBox>("Ignore highlights")
             .assign(&this->ui_.ignoreHighlights);
-        auto usercard = user.emplace<EffectLabel2>(this);
+        // visibility of this is updated in setData
+
+        auto usercard =
+            user.emplace<EffectLabel2>(this).assign(&this->ui_.usercard);
         usercard->getLabel().setText("Usercard");
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(getResources().buttons.mod);
@@ -739,6 +742,13 @@ void UserInfoPopup::setData(const QString &name,
         this->updateLatestMessages();
     }
     // If we're opening by ID, this will be called as soon as we get the information from twitch
+
+    if (auto *tc = dynamic_cast<TwitchChannel *>(this->channel_.get());
+        tc == nullptr)
+    {
+        // not a normal twitch channel, the url opened by the button will be invalid, so hide the button
+        this->ui_.usercard->hide();
+    }
 }
 
 void UserInfoPopup::updateLatestMessages()
