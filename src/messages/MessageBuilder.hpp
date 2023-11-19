@@ -96,7 +96,7 @@ public:
                    const QString &actor, const QString &emoteSetName);
 
     /**
-      * "Your image has been uploaded to %1[ (Delection link: %2)]."
+      * "Your image has been uploaded to %1[ (Deletion link: %2)]."
       * or "Your image has been uploaded to %1 %2. %3 left. "
       * "Please wait until all of them are uploaded. "
       * "About %4 seconds left."
