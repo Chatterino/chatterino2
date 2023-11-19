@@ -15,10 +15,9 @@
 #include <QHttpMultiPart>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <qmessagebox.h>
 #include <QMimeDatabase>
 #include <QMutex>
-#include <qpointer.h>
+#include <QPointer>
 #include <QSaveFile>
 
 #define UPLOAD_DELAY 2000
