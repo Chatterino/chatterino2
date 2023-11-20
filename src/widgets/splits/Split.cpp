@@ -1124,8 +1124,8 @@ void Split::openWithCustomScheme()
 
 void Split::showChatterList()
 {
-    auto chatterDock =
-        new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
+    auto chatterDock = new QDockWidget(
+        "Chatter List - " + this->getChannel()->getName(), this);
     chatterDock->setAllowedAreas(Qt::LeftDockWidgetArea);
     chatterDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
                              QDockWidget::DockWidgetClosable |
@@ -1336,7 +1336,7 @@ void Split::showChatterList()
             formatListItemText("Due to Twitch restrictions, this feature is "
                                "only \navailable for moderators."));
         chattersList->addItem(
-            formatListItemText("If you would like to see the Viewer list, you "
+            formatListItemText("If you would like to see the Chatter list, you "
                                "must \nuse the Twitch website."));
         loadingLabel->hide();
     }
