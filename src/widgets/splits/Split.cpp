@@ -1146,7 +1146,7 @@ void Split::showChatterList()
     if (!channel)
     {
         qCWarning(chatterinoWidget)
-            << "Viewer list opened when no channel was defined";
+            << "Chatter list opened when no channel was defined";
         return;
     }
 
@@ -1155,7 +1155,7 @@ void Split::showChatterList()
     if (twitchChannel == nullptr)
     {
         qCWarning(chatterinoWidget)
-            << "Viewer list opened in a non-Twitch channel";
+            << "Chatter list opened in a non-Twitch channel";
         return;
     }
 
