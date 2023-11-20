@@ -652,7 +652,7 @@ void Split::addShortcuts()
          }},
         {"openViewerList",
          [this](std::vector<QString>) -> QString {
-             this->showViewerList();
+             this->showChatterList();
              return "";
          }},
         {"clearMessages",
@@ -852,11 +852,11 @@ void Split::setChannel(IndirectChannel newChannel)
 
     if (newChannel.getType() == Channel::Type::Twitch)
     {
-        this->header_->setViewersButtonVisible(true);
+        this->header_->setChattersButtonVisible(true);
     }
     else
     {
-        this->header_->setViewersButtonVisible(false);
+        this->header_->setChattersButtonVisible(false);
     }
 
     this->channelSignalHolder_.managedConnect(
@@ -1028,7 +1028,7 @@ void Split::changeChannel()
     if (popup.size() && popup.at(0)->isVisible() && !popup.at(0)->isFloating())
     {
         popup.at(0)->hide();
-        showViewerList();
+        showChatterList();
     }
 }
 
@@ -1122,31 +1122,31 @@ void Split::openWithCustomScheme()
     }
 }
 
-void Split::showViewerList()
+void Split::showChatterList()
 {
-    auto viewerDock =
-        new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
-    viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
-    viewerDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
-                            QDockWidget::DockWidgetClosable |
-                            QDockWidget::DockWidgetFloatable);
-    viewerDock->resize(
+    auto *chatterDock = new QDockWidget(
+        "Chatter List - " + this->getChannel()->getName(), this);
+    chatterDock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    chatterDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
+                             QDockWidget::DockWidgetClosable |
+                             QDockWidget::DockWidgetFloatable);
+    chatterDock->resize(
         0.5 * this->width(),
         this->height() - this->header_->height() - this->input_->height());
-    viewerDock->move(0, this->header_->height());
+    chatterDock->move(0, this->header_->height());
 
-    auto multiWidget = new QWidget(viewerDock);
+    auto *multiWidget = new QWidget(chatterDock);
     auto *dockVbox = new QVBoxLayout();
-    auto searchBar = new QLineEdit(viewerDock);
+    auto *searchBar = new QLineEdit(chatterDock);
 
-    auto chattersList = new QListWidget();
-    auto resultList = new QListWidget();
+    auto *chattersList = new QListWidget();
+    auto *resultList = new QListWidget();
 
     auto channel = this->getChannel();
     if (!channel)
     {
         qCWarning(chatterinoWidget)
-            << "Viewer list opened when no channel was defined";
+            << "Chatter list opened when no channel was defined";
         return;
     }
 
@@ -1155,7 +1155,7 @@ void Split::showViewerList()
     if (twitchChannel == nullptr)
     {
         qCWarning(chatterinoWidget)
-            << "Viewer list opened in a non-Twitch channel";
+            << "Chatter list opened in a non-Twitch channel";
         return;
     }
 
@@ -1163,14 +1163,14 @@ void Split::showViewerList()
     searchBar->setPlaceholderText("Search User...");
 
     auto formatListItemText = [](QString text) {
-        auto item = new QListWidgetItem();
+        auto *item = new QListWidgetItem();
         item->setText(text);
         item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
         return item;
     };
 
     auto addLabel = [this, formatListItemText, chattersList](QString label) {
-        auto formattedLabel = formatListItemText(label);
+        auto *formattedLabel = formatListItemText(label);
         formattedLabel->setForeground(this->theme->accent);
         chattersList->addItem(formattedLabel);
     };
@@ -1336,13 +1336,13 @@ void Split::showViewerList()
             formatListItemText("Due to Twitch restrictions, this feature is "
                                "only \navailable for moderators."));
         chattersList->addItem(
-            formatListItemText("If you would like to see the Viewer list, you "
+            formatListItemText("If you would like to see the Chatter list, you "
                                "must \nuse the Twitch website."));
         loadingLabel->hide();
     }
 
-    QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {
-        viewerDock->setMinimumWidth(300);
+    QObject::connect(chatterDock, &QDockWidget::topLevelChanged, this, [=]() {
+        chatterDock->setMinimumWidth(300);
     });
 
     auto listDoubleClick = [this](const QModelIndex &index) {
@@ -1364,8 +1364,8 @@ void Split::showViewerList()
 
     HotkeyController::HotkeyMap actions{
         {"delete",
-         [viewerDock](std::vector<QString>) -> QString {
-             viewerDock->close();
+         [chatterDock](std::vector<QString>) -> QString {
+             chatterDock->close();
              return "";
          }},
         {"accept", nullptr},
@@ -1381,7 +1381,7 @@ void Split::showViewerList()
     };
 
     getApp()->hotkeys->shortcutsForCategory(HotkeyCategory::PopupWindow,
-                                            actions, viewerDock);
+                                            actions, chatterDock);
 
     dockVbox->addWidget(searchBar);
     dockVbox->addWidget(loadingLabel);
@@ -1391,10 +1391,10 @@ void Split::showViewerList()
 
     multiWidget->setStyleSheet(this->theme->splits.input.styleSheet);
     multiWidget->setLayout(dockVbox);
-    viewerDock->setWidget(multiWidget);
-    viewerDock->setFloating(true);
-    viewerDock->show();
-    viewerDock->activateWindow();
+    chatterDock->setWidget(multiWidget);
+    chatterDock->setFloating(true);
+    chatterDock->show();
+    chatterDock->activateWindow();
 }
 
 void Split::openSubPage()
