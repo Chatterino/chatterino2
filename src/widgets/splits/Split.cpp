@@ -652,7 +652,7 @@ void Split::addShortcuts()
          }},
         {"openViewerList",
          [this](std::vector<QString>) -> QString {
-             this->showViewerList();
+             this->showChatterList();
              return "";
          }},
         {"clearMessages",
@@ -1028,7 +1028,7 @@ void Split::changeChannel()
     if (popup.size() && popup.at(0)->isVisible() && !popup.at(0)->isFloating())
     {
         popup.at(0)->hide();
-        showViewerList();
+        showChatterList();
     }
 }
 
@@ -1122,7 +1122,7 @@ void Split::openWithCustomScheme()
     }
 }
 
-void Split::showViewerList()
+void Split::showChatterList()
 {
     auto viewerDock =
         new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
