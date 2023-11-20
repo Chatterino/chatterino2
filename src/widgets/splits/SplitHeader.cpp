@@ -320,7 +320,7 @@ void SplitHeader::initializeLayout()
                 });
         }),
         // chatter list
-        this->viewersButton_ = makeWidget<Button>([&](auto w) {
+        this->chattersButton_ = makeWidget<Button>([&](auto w) {
             QObject::connect(w, &Button::leftClicked, this, [this]() {
                 this->split_->showChatterList();
             });
@@ -745,7 +745,7 @@ void SplitHeader::scaleChangedEvent(float scale)
     this->setFixedHeight(w);
     this->dropdownButton_->setFixedWidth(w);
     this->moderationButton_->setFixedWidth(w);
-    this->viewersButton_->setFixedWidth(w);
+    this->chattersButton_->setFixedWidth(w);
     this->addButton_->setFixedWidth(w * 5 / 8);
 }
 
@@ -756,7 +756,7 @@ void SplitHeader::setAddButtonVisible(bool value)
 
 void SplitHeader::setChattersButtonVisible(bool value)
 {
-    this->viewersButton_->setVisible(value);
+    this->chattersButton_->setVisible(value);
 }
 
 void SplitHeader::updateChannelText()
@@ -987,13 +987,13 @@ void SplitHeader::themeChangedEvent()
     // --
     if (this->theme->isLightTheme())
     {
-        this->viewersButton_->setPixmap(getResources().buttons.viewersDark);
+        this->chattersButton_->setPixmap(getResources().buttons.viewersDark);
         this->dropdownButton_->setPixmap(getResources().buttons.menuDark);
         this->addButton_->setPixmap(getResources().buttons.addSplit);
     }
     else
     {
-        this->viewersButton_->setPixmap(getResources().buttons.viewersLight);
+        this->chattersButton_->setPixmap(getResources().buttons.viewersLight);
         this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
         this->addButton_->setPixmap(getResources().buttons.addSplitDark);
     }

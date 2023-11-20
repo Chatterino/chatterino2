@@ -86,7 +86,7 @@ private:
     QAction *modeActionSetFollowers{};
 
     Button *moderationButton_{};
-    Button *viewersButton_{};
+    Button *chattersButton_{};
     Button *addButton_{};
 
     // states
