@@ -1124,7 +1124,7 @@ void Split::openWithCustomScheme()
 
 void Split::showChatterList()
 {
-    auto chatterDock = new QDockWidget(
+    auto *chatterDock = new QDockWidget(
         "Chatter List - " + this->getChannel()->getName(), this);
     chatterDock->setAllowedAreas(Qt::LeftDockWidgetArea);
     chatterDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
@@ -1135,12 +1135,12 @@ void Split::showChatterList()
         this->height() - this->header_->height() - this->input_->height());
     chatterDock->move(0, this->header_->height());
 
-    auto multiWidget = new QWidget(chatterDock);
+    auto *multiWidget = new QWidget(chatterDock);
     auto *dockVbox = new QVBoxLayout();
-    auto searchBar = new QLineEdit(chatterDock);
+    auto *searchBar = new QLineEdit(chatterDock);
 
-    auto chattersList = new QListWidget();
-    auto resultList = new QListWidget();
+    auto *chattersList = new QListWidget();
+    auto *resultList = new QListWidget();
 
     auto channel = this->getChannel();
     if (!channel)
@@ -1163,14 +1163,14 @@ void Split::showChatterList()
     searchBar->setPlaceholderText("Search User...");
 
     auto formatListItemText = [](QString text) {
-        auto item = new QListWidgetItem();
+        auto *item = new QListWidgetItem();
         item->setText(text);
         item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
         return item;
     };
 
     auto addLabel = [this, formatListItemText, chattersList](QString label) {
-        auto formattedLabel = formatListItemText(label);
+        auto *formattedLabel = formatListItemText(label);
         formattedLabel->setForeground(this->theme->accent);
         chattersList->addItem(formattedLabel);
     };
