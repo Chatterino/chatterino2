@@ -1124,20 +1124,20 @@ void Split::openWithCustomScheme()
 
 void Split::showChatterList()
 {
-    auto viewerDock =
+    auto chatterDock =
         new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
-    viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
-    viewerDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
-                            QDockWidget::DockWidgetClosable |
-                            QDockWidget::DockWidgetFloatable);
-    viewerDock->resize(
+    chatterDock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    chatterDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
+                             QDockWidget::DockWidgetClosable |
+                             QDockWidget::DockWidgetFloatable);
+    chatterDock->resize(
         0.5 * this->width(),
         this->height() - this->header_->height() - this->input_->height());
-    viewerDock->move(0, this->header_->height());
+    chatterDock->move(0, this->header_->height());
 
-    auto multiWidget = new QWidget(viewerDock);
+    auto multiWidget = new QWidget(chatterDock);
     auto *dockVbox = new QVBoxLayout();
-    auto searchBar = new QLineEdit(viewerDock);
+    auto searchBar = new QLineEdit(chatterDock);
 
     auto chattersList = new QListWidget();
     auto resultList = new QListWidget();
@@ -1341,8 +1341,8 @@ void Split::showChatterList()
         loadingLabel->hide();
     }
 
-    QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {
-        viewerDock->setMinimumWidth(300);
+    QObject::connect(chatterDock, &QDockWidget::topLevelChanged, this, [=]() {
+        chatterDock->setMinimumWidth(300);
     });
 
     auto listDoubleClick = [this](const QModelIndex &index) {
@@ -1364,8 +1364,8 @@ void Split::showChatterList()
 
     HotkeyController::HotkeyMap actions{
         {"delete",
-         [viewerDock](std::vector<QString>) -> QString {
-             viewerDock->close();
+         [chatterDock](std::vector<QString>) -> QString {
+             chatterDock->close();
              return "";
          }},
         {"accept", nullptr},
@@ -1381,7 +1381,7 @@ void Split::showChatterList()
     };
 
     getApp()->hotkeys->shortcutsForCategory(HotkeyCategory::PopupWindow,
-                                            actions, viewerDock);
+                                            actions, chatterDock);
 
     dockVbox->addWidget(searchBar);
     dockVbox->addWidget(loadingLabel);
@@ -1391,10 +1391,10 @@ void Split::showChatterList()
 
     multiWidget->setStyleSheet(this->theme->splits.input.styleSheet);
     multiWidget->setLayout(dockVbox);
-    viewerDock->setWidget(multiWidget);
-    viewerDock->setFloating(true);
-    viewerDock->show();
-    viewerDock->activateWindow();
+    chatterDock->setWidget(multiWidget);
+    chatterDock->setFloating(true);
+    chatterDock->show();
+    chatterDock->activateWindow();
 }
 
 void Split::openSubPage()
