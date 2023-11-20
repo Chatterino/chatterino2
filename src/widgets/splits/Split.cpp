@@ -852,11 +852,11 @@ void Split::setChannel(IndirectChannel newChannel)
 
     if (newChannel.getType() == Channel::Type::Twitch)
     {
-        this->header_->setViewersButtonVisible(true);
+        this->header_->setChattersButtonVisible(true);
     }
     else
     {
-        this->header_->setViewersButtonVisible(false);
+        this->header_->setChattersButtonVisible(false);
     }
 
     this->channelSignalHolder_.managedConnect(

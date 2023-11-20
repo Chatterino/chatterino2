@@ -754,7 +754,7 @@ void SplitHeader::setAddButtonVisible(bool value)
     this->addButton_->setVisible(value);
 }
 
-void SplitHeader::setViewersButtonVisible(bool value)
+void SplitHeader::setChattersButtonVisible(bool value)
 {
     this->viewersButton_->setVisible(value);
 }

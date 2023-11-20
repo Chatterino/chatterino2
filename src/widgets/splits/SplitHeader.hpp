@@ -28,7 +28,7 @@ public:
     explicit SplitHeader(Split *split);
 
     void setAddButtonVisible(bool value);
-    void setViewersButtonVisible(bool value);
+    void setChattersButtonVisible(bool value);
 
     void updateChannelText();
     void updateModerationModeIcon();
