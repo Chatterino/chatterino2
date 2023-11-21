@@ -127,8 +127,8 @@ AboutPage::AboutPage()
                        "https://github.com/microsoft/fluentui-system-icons",
                        ":/licenses/fluenticons.txt");
             addLicense(form.getElement(), "Howard Hinnant's date.h",
-                       "https://github.com/microsoft/fluentui-system-icons",
-                       ":/licenses/fluenticons.txt");
+                       "https://github.com/HowardHinnant/date",
+                       ":/licenses/howard-hinnant-date.txt");
         }
 
         // Attributions
