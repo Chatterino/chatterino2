@@ -152,6 +152,12 @@ namespace chatterino {
 
 void Emojis::load()
 {
+    if (this->loaded_)
+    {
+        return;
+    }
+    this->loaded_ = true;
+
     this->loadEmojis();
 
     this->sortEmojis();
