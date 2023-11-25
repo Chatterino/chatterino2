@@ -5,6 +5,7 @@
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Fonts.hpp"
@@ -20,6 +21,7 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/splits/SplitInput.hpp"
 
+#include <magic_enum.hpp>
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
@@ -1133,6 +1135,31 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Show send message button", s.showSendButton, false,
         "Show a Send button next to each split input that can be "
         "clicked to send the message");
+
+    auto *soundBackend = layout.addDropdown<SoundBackend>(
+        "Sound backend (requires restart)", {"Miniaudio"},
+        [](auto val) {
+            switch (val)
+            {
+                case SoundBackend::Miniaudio:
+                    return "Miniaudio";
+                default:
+                    return "Miniaudio";
+            }
+        },
+        [](auto args) {
+            const auto &v = args.value;
+            if (v == "Miniaudio")
+            {
+                return SoundBackend::Miniaudio;
+            }
+
+            qCDebug(chatterinoSettings) << "Unknown Sound backend value" << v
+                                        << ", using default value Miniaudio";
+            return SoundBackend::Miniaudio;
+        },
+        false);
+    soundBackend->setMinimumWidth(soundBackend->minimumSizeHint().width());
 
     layout.addStretch();
 

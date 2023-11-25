@@ -9,6 +9,10 @@ namespace chatterino {
 class Settings;
 class Paths;
 
+enum class SoundBackend {
+    Miniaudio,
+};
+
 /**
  * @brief Handles sound loading & playback
  **/
