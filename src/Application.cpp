@@ -10,6 +10,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "singletons/ImageUploader.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -57,6 +58,17 @@
 
 #include <atomic>
 
+namespace {
+
+using namespace chatterino;
+
+ISoundController *makeSoundController(Settings &settings)
+{
+    return new SoundController();
+}
+
+}  // namespace
+
 namespace chatterino {
 
 static std::atomic<bool> isAppInitialized{false};
@@ -92,7 +104,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
     , userData(&this->emplace<UserDataController>())
-    , sound(&this->emplace<SoundController>())
+    , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace<PluginController>())
@@ -258,6 +270,11 @@ IEmotes *Application::getEmotes()
 IUserDataController *Application::getUserData()
 {
     return this->userData;
+}
+
+ISoundController *Application::getSound()
+{
+    return this->sound;
 }
 
 ITwitchLiveController *Application::getTwitchLiveController()

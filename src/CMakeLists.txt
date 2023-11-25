@@ -224,6 +224,7 @@ set(SOURCE_FILES
         controllers/plugins/LuaUtilities.cpp
         controllers/plugins/LuaUtilities.hpp
 
+        controllers/sound/ISoundController.hpp
         controllers/sound/SoundController.cpp
         controllers/sound/SoundController.hpp
 

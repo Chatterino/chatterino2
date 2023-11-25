@@ -67,14 +67,6 @@ namespace chatterino {
 // NUM_SOUNDS specifies how many simultaneous default ping sounds & decoders to create
 constexpr const auto NUM_SOUNDS = 4;
 
-SoundController::SoundController()
-    : context(std::make_unique<ma_context>())
-    , engine(std::make_unique<ma_engine>())
-    , workGuard(boost::asio::make_work_guard(this->ioContext))
-    , sleepTimer(this->ioContext)
-{
-}
-
 void SoundController::initialize(Settings &settings, Paths &paths)
 {
     (void)(settings);
@@ -199,6 +191,14 @@ void SoundController::initialize(Settings &settings, Paths &paths)
     });
 }
 
+SoundController::SoundController()
+    : context(std::make_unique<ma_context>())
+    , engine(std::make_unique<ma_engine>())
+    , workGuard(boost::asio::make_work_guard(this->ioContext))
+    , sleepTimer(this->ioContext)
+{
+}
+
 SoundController::~SoundController()
 {
     // NOTE: This destructor is never called because the `runGui` function calls _exit before that happens
@@ -232,28 +232,6 @@ SoundController::~SoundController()
 
 void SoundController::play(const QUrl &sound)
 {
-#if 1
-    /*
-    static QMediaPlayer mediaPlayer;
-    static QAudioOutput audioOutput;
-    static bool xd = [] {
-        QObject::connect(&mediaPlayer, &QMediaPlayer::errorChanged, [] {
-            qCWarning(chatterinoSound)
-                << "Error changed: " << mediaPlayer.error();
-        });
-        return true;
-    }();
-    mediaPlayer.setAudioOutput(&audioOutput);
-    mediaPlayer.setSource(sound);
-    mediaPlayer.play();
-    */
-    auto effect = new QSoundEffect(
-        static_cast<QObject *>(&getApp()->getWindows()->getMainWindow()));
-    effect->setSource(sound);
-    // effect->setLoopCount(QSoundEffect::Infinite);
-    effect->setVolume(1.0f);
-    effect->play();
-#else
     boost::asio::post(this->ioContext, [this, sound] {
         static size_t i = 0;
 
@@ -316,7 +294,6 @@ void SoundController::play(const QUrl &sound)
             }
         });
     });
-#endif
 }
 
 }  // namespace chatterino

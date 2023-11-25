@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/Singleton.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "util/ThreadGuard.hpp"
 
 #include <boost/asio.hpp>
@@ -20,25 +20,21 @@ struct ma_decoder;
 
 namespace chatterino {
 
-class Settings;
-class Paths;
-
 /**
  * @brief Handles sound loading & playback
  **/
-class SoundController : public Singleton
+class SoundController : public ISoundController
 {
-    SoundController();
-
     void initialize(Settings &settings, Paths &paths) override;
 
 public:
+    SoundController();
     ~SoundController() override;
 
     // Play a sound from the given url
     // If the url points to something that isn't a local file, it will play
     // the default sound initialized in the initialize method
-    void play(const QUrl &sound);
+    void play(const QUrl &sound) final;
 
 private:
     // Used for selecting & initializing an appropriate sound backend
