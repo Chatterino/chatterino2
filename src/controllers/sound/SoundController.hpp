@@ -3,6 +3,7 @@
 #include "common/Singleton.hpp"
 #include "util/ThreadGuard.hpp"
 
+#include <boost/asio.hpp>
 #include <QByteArray>
 #include <QString>
 #include <QUrl>
@@ -61,6 +62,11 @@ private:
     // Thread guard for the play method
     // Ensures play is only ever called from the same thread
     ThreadGuard tgPlay;
+
+    boost::asio::io_context ioContext{1};
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
+        workGuard;
+    std::unique_ptr<std::thread> audioThread;
 
     bool initialized{false};
 
