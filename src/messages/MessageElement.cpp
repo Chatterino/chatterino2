@@ -664,16 +664,23 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
         QString currentText;
 
         container.first = FirstWord::Neutral;
+
+        bool firstIteration = true;
         for (Word &word : this->words_)
         {
+            if (firstIteration)
+            {
+                firstIteration = false;
+            }
+            else
+            {
+                currentText += ' ';
+            }
+
             for (const auto &parsedWord : app->emotes->emojis.parse(word.text))
             {
                 if (parsedWord.type() == typeid(QString))
                 {
-                    if (!currentText.isEmpty())
-                    {
-                        currentText += ' ';
-                    }
                     currentText += boost::get<QString>(parsedWord);
                     QString prev =
                         currentText;  // only increments the ref-count
@@ -714,7 +721,8 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
 
                         container.addElementNoLineBreak(
                             (new ImageLayoutElement(*this, image, emoteSize))
-                                ->setLink(this->getLink()));
+                                ->setLink(this->getLink())
+                                ->setTrailingSpace(false));
                     }
                 }
             }
@@ -723,9 +731,6 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
         // Add the last of the pending message text to the container.
         if (!currentText.isEmpty())
         {
-            // Remove trailing space.
-            currentText = currentText.trimmed();
-
             int width = metrics.horizontalAdvance(currentText);
             container.addElementNoLineBreak(
                 getTextLayoutElement(currentText, width, false));
