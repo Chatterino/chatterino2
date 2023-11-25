@@ -65,6 +65,7 @@ SoundController::SoundController()
     : context(std::make_unique<ma_context>())
     , engine(std::make_unique<ma_engine>())
     , workGuard(boost::asio::make_work_guard(this->ioContext))
+    , sleepTimer(this->ioContext)
 {
 }
 
@@ -267,6 +268,25 @@ void SoundController::play(const QUrl &sound)
             qCWarning(chatterinoSound)
                 << "Failed to play default ping" << result;
         }
+
+        this->sleepTimer.expires_from_now(std::chrono::seconds(4));
+        this->sleepTimer.async_wait([this](const auto &ec) {
+            if (ec)
+            {
+                qCWarning(chatterinoSound) << "not an actual timer smug xd"
+                                           << QString::fromStdString(ec.what());
+                return;
+            }
+
+            qCWarning(chatterinoSound) << "xd";
+            auto result = ma_engine_start(this->engine.get());
+            if (result != MA_SUCCESS)
+            {
+                qCWarning(chatterinoSound)
+                    << "Error starting engine " << result;
+                return;
+            }
+        });
     });
 }
 

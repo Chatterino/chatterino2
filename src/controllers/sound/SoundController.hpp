@@ -59,10 +59,13 @@ private:
     // Ensures play is only ever called from the same thread
     ThreadGuard tgPlay;
 
+    std::chrono::system_clock::time_point lastSoundPlay;
+
     boost::asio::io_context ioContext{1};
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         workGuard;
     std::unique_ptr<std::thread> audioThread;
+    boost::asio::steady_timer sleepTimer;
 
     bool initialized{false};
 
