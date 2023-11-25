@@ -16,7 +16,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 #endif
-#include "controllers/sound/SoundController.hpp"
+#include "controllers/sound/MiniaudioBackend.hpp"
 #include "controllers/twitch/LiveController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -64,7 +64,7 @@ using namespace chatterino;
 
 ISoundController *makeSoundController(Settings &settings)
 {
-    return new SoundController();
+    return new MiniaudioBackend();
 }
 
 }  // namespace

@@ -1,4 +1,4 @@
-#include "controllers/sound/SoundController.hpp"
+#include "controllers/sound/MiniaudioBackend.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
@@ -67,7 +67,7 @@ namespace chatterino {
 // NUM_SOUNDS specifies how many simultaneous default ping sounds & decoders to create
 constexpr const auto NUM_SOUNDS = 4;
 
-void SoundController::initialize(Settings &settings, Paths &paths)
+void MiniaudioBackend::initialize(Settings &settings, Paths &paths)
 {
     (void)(settings);
     (void)(paths);
@@ -191,7 +191,7 @@ void SoundController::initialize(Settings &settings, Paths &paths)
     });
 }
 
-SoundController::SoundController()
+MiniaudioBackend::MiniaudioBackend()
     : context(std::make_unique<ma_context>())
     , engine(std::make_unique<ma_engine>())
     , workGuard(boost::asio::make_work_guard(this->ioContext))
@@ -199,7 +199,7 @@ SoundController::SoundController()
 {
 }
 
-SoundController::~SoundController()
+MiniaudioBackend::~MiniaudioBackend()
 {
     // NOTE: This destructor is never called because the `runGui` function calls _exit before that happens
     // I have manually called the destructor prior to _exit being called to ensure this logic is sound
@@ -230,7 +230,7 @@ SoundController::~SoundController()
     }
 }
 
-void SoundController::play(const QUrl &sound)
+void MiniaudioBackend::play(const QUrl &sound)
 {
     boost::asio::post(this->ioContext, [this, sound] {
         static size_t i = 0;

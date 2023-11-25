@@ -225,8 +225,8 @@ set(SOURCE_FILES
         controllers/plugins/LuaUtilities.hpp
 
         controllers/sound/ISoundController.hpp
-        controllers/sound/SoundController.cpp
-        controllers/sound/SoundController.hpp
+        controllers/sound/MiniaudioBackend.cpp
+        controllers/sound/MiniaudioBackend.hpp
 
         controllers/twitch/LiveController.cpp
         controllers/twitch/LiveController.hpp

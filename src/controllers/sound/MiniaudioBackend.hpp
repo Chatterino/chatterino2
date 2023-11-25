@@ -23,13 +23,13 @@ namespace chatterino {
 /**
  * @brief Handles sound loading & playback
  **/
-class SoundController : public ISoundController
+class MiniaudioBackend : public ISoundController
 {
     void initialize(Settings &settings, Paths &paths) override;
 
 public:
-    SoundController();
-    ~SoundController() override;
+    MiniaudioBackend();
+    ~MiniaudioBackend() override;
 
     // Play a sound from the given url
     // If the url points to something that isn't a local file, it will play
