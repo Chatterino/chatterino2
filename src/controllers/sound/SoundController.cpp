@@ -1,15 +1,21 @@
 #include "controllers/sound/SoundController.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "debug/Benchmark.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
+#include "widgets/Window.hpp"
 
 #include <boost/asio/executor_work_guard.hpp>
 
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
+#include <QAudioOutput>
 #include <QFile>
+#include <QMediaPlayer>
+#include <QSoundEffect>
 
 #include <limits>
 #include <memory>
@@ -226,6 +232,28 @@ SoundController::~SoundController()
 
 void SoundController::play(const QUrl &sound)
 {
+#if 1
+    /*
+    static QMediaPlayer mediaPlayer;
+    static QAudioOutput audioOutput;
+    static bool xd = [] {
+        QObject::connect(&mediaPlayer, &QMediaPlayer::errorChanged, [] {
+            qCWarning(chatterinoSound)
+                << "Error changed: " << mediaPlayer.error();
+        });
+        return true;
+    }();
+    mediaPlayer.setAudioOutput(&audioOutput);
+    mediaPlayer.setSource(sound);
+    mediaPlayer.play();
+    */
+    auto effect = new QSoundEffect(
+        static_cast<QObject *>(&getApp()->getWindows()->getMainWindow()));
+    effect->setSource(sound);
+    // effect->setLoopCount(QSoundEffect::Infinite);
+    effect->setVolume(1.0f);
+    effect->play();
+#else
     boost::asio::post(this->ioContext, [this, sound] {
         static size_t i = 0;
 
@@ -288,6 +316,7 @@ void SoundController::play(const QUrl &sound)
             }
         });
     });
+#endif
 }
 
 }  // namespace chatterino
