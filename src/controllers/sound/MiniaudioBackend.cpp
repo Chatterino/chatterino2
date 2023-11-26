@@ -21,6 +21,10 @@ namespace {
 
 using namespace chatterino;
 
+// The duration after which a sound is played we should try to stop the sound engine, hopefully
+// returning the handle to idle letting the computer or monitors sleep
+constexpr const auto STOP_AFTER_DURATION = std::chrono::seconds(30);
+
 void miniaudioLogCallback(void *userData, ma_uint32 level, const char *pMessage)
 {
     (void)userData;
@@ -273,21 +277,19 @@ void MiniaudioBackend::play(const QUrl &sound)
                 << "Failed to play default ping" << result;
         }
 
-        this->sleepTimer.expires_from_now(std::chrono::seconds(4));
+        this->sleepTimer.expires_from_now(STOP_AFTER_DURATION);
         this->sleepTimer.async_wait([this](const auto &ec) {
             if (ec)
             {
-                qCWarning(chatterinoSound) << "not an actual timer smug xd"
-                                           << QString::fromStdString(ec.what());
+                // Timer was most likely cancelled
                 return;
             }
 
-            qCWarning(chatterinoSound) << "xd";
-            auto result = ma_engine_start(this->engine.get());
+            auto result = ma_engine_stop(this->engine.get());
             if (result != MA_SUCCESS)
             {
                 qCWarning(chatterinoSound)
-                    << "Error starting engine " << result;
+                    << "Error stopping miniaudio engine " << result;
                 return;
             }
         });
