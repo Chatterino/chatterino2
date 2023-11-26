@@ -559,7 +559,7 @@ public:
         "/plugins/enabledPlugins", {}};
 
     // Advanced
-    EnumSetting<SoundBackend> soundBackend = {
+    EnumStringSetting<SoundBackend> soundBackend = {
         "/sound/backend",
         SoundBackend::Miniaudio,
     };

@@ -17,6 +17,7 @@
 #    include "controllers/plugins/PluginController.hpp"
 #endif
 #include "controllers/sound/MiniaudioBackend.hpp"
+#include "controllers/sound/NullBackend.hpp"
 #include "controllers/twitch/LiveController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -64,7 +65,24 @@ using namespace chatterino;
 
 ISoundController *makeSoundController(Settings &settings)
 {
-    return new MiniaudioBackend();
+    SoundBackend soundBackend = settings.soundBackend;
+    switch (soundBackend)
+    {
+        case SoundBackend::Miniaudio: {
+            return new MiniaudioBackend();
+        }
+        break;
+
+        case SoundBackend::Null: {
+            return new NullBackend();
+        }
+        break;
+
+        default: {
+            return new MiniaudioBackend();
+        }
+        break;
+    }
 }
 
 }  // namespace

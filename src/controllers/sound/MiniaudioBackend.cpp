@@ -197,6 +197,7 @@ MiniaudioBackend::MiniaudioBackend()
     , workGuard(boost::asio::make_work_guard(this->ioContext))
     , sleepTimer(this->ioContext)
 {
+    qCInfo(chatterinoSound) << "Initializing miniaudio sound backend";
 }
 
 MiniaudioBackend::~MiniaudioBackend()

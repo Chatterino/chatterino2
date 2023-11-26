@@ -1136,29 +1136,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Show a Send button next to each split input that can be "
         "clicked to send the message");
 
-    auto *soundBackend = layout.addDropdown<SoundBackend>(
-        "Sound backend (requires restart)", {"Miniaudio"},
-        [](auto val) {
-            switch (val)
-            {
-                case SoundBackend::Miniaudio:
-                    return "Miniaudio";
-                default:
-                    return "Miniaudio";
-            }
-        },
-        [](auto args) {
-            const auto &v = args.value;
-            if (v == "Miniaudio")
-            {
-                return SoundBackend::Miniaudio;
-            }
-
-            qCDebug(chatterinoSettings) << "Unknown Sound backend value" << v
-                                        << ", using default value Miniaudio";
-            return SoundBackend::Miniaudio;
-        },
-        false);
+    auto *soundBackend = layout.addDropdownEnumClass<SoundBackend>(
+        "Sound backend (requires restart)",
+        magic_enum::enum_names<SoundBackend>(), s.soundBackend,
+        "Change this only if you're noticing issues with sound playback on "
+        "your system",
+        {});
     soundBackend->setMinimumWidth(soundBackend->minimumSizeHint().width());
 
     layout.addStretch();

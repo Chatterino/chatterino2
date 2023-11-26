@@ -227,6 +227,8 @@ set(SOURCE_FILES
         controllers/sound/ISoundController.hpp
         controllers/sound/MiniaudioBackend.cpp
         controllers/sound/MiniaudioBackend.hpp
+        controllers/sound/NullBackend.cpp
+        controllers/sound/NullBackend.hpp
 
         controllers/twitch/LiveController.cpp
         controllers/twitch/LiveController.hpp
