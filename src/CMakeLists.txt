@@ -59,14 +59,50 @@ set(SOURCE_FILES
 
         controllers/commands/builtin/chatterino/Debugging.cpp
         controllers/commands/builtin/chatterino/Debugging.hpp
+        controllers/commands/builtin/Misc.cpp
+        controllers/commands/builtin/Misc.hpp
+        controllers/commands/builtin/twitch/AddModerator.cpp
+        controllers/commands/builtin/twitch/AddModerator.hpp
+        controllers/commands/builtin/twitch/AddVIP.cpp
+        controllers/commands/builtin/twitch/AddVIP.hpp
+        controllers/commands/builtin/twitch/Announce.cpp
+        controllers/commands/builtin/twitch/Announce.hpp
+        controllers/commands/builtin/twitch/Ban.cpp
+        controllers/commands/builtin/twitch/Ban.hpp
+        controllers/commands/builtin/twitch/Block.cpp
+        controllers/commands/builtin/twitch/Block.hpp
         controllers/commands/builtin/twitch/ChatSettings.cpp
         controllers/commands/builtin/twitch/ChatSettings.hpp
+        controllers/commands/builtin/twitch/Chatters.cpp
+        controllers/commands/builtin/twitch/Chatters.hpp
+        controllers/commands/builtin/twitch/DeleteMessages.cpp
+        controllers/commands/builtin/twitch/DeleteMessages.hpp
+        controllers/commands/builtin/twitch/GetModerators.cpp
+        controllers/commands/builtin/twitch/GetModerators.hpp
+        controllers/commands/builtin/twitch/GetVIPs.cpp
+        controllers/commands/builtin/twitch/GetVIPs.hpp
+        controllers/commands/builtin/twitch/Raid.cpp
+        controllers/commands/builtin/twitch/Raid.hpp
+        controllers/commands/builtin/twitch/RemoveModerator.cpp
+        controllers/commands/builtin/twitch/RemoveModerator.hpp
+        controllers/commands/builtin/twitch/RemoveVIP.cpp
+        controllers/commands/builtin/twitch/RemoveVIP.hpp
+        controllers/commands/builtin/twitch/SendReply.cpp
+        controllers/commands/builtin/twitch/SendReply.hpp
+        controllers/commands/builtin/twitch/SendWhisper.cpp
+        controllers/commands/builtin/twitch/SendWhisper.hpp
         controllers/commands/builtin/twitch/ShieldMode.cpp
         controllers/commands/builtin/twitch/ShieldMode.hpp
         controllers/commands/builtin/twitch/Shoutout.cpp
         controllers/commands/builtin/twitch/Shoutout.hpp
-        controllers/commands/builtin/twitch/Ban.cpp
-        controllers/commands/builtin/twitch/Ban.hpp
+        controllers/commands/builtin/twitch/StartCommercial.cpp
+        controllers/commands/builtin/twitch/StartCommercial.hpp
+        controllers/commands/builtin/twitch/Unban.cpp
+        controllers/commands/builtin/twitch/Unban.hpp
+        controllers/commands/builtin/twitch/UpdateChannel.cpp
+        controllers/commands/builtin/twitch/UpdateChannel.hpp
+        controllers/commands/builtin/twitch/UpdateColor.cpp
+        controllers/commands/builtin/twitch/UpdateColor.hpp
         controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
@@ -407,6 +443,8 @@ set(SOURCE_FILES
         singletons/Emotes.hpp
         singletons/Fonts.cpp
         singletons/Fonts.hpp
+        singletons/ImageUploader.cpp
+        singletons/ImageUploader.hpp
         singletons/Logging.cpp
         singletons/Logging.hpp
         singletons/NativeMessaging.cpp
@@ -458,8 +496,6 @@ set(SOURCE_FILES
         util/IpcQueue.hpp
         util/LayoutHelper.cpp
         util/LayoutHelper.hpp
-        util/NuulsUploader.cpp
-        util/NuulsUploader.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
         util/RatelimitBucket.cpp
@@ -917,7 +953,7 @@ if (CHATTERINO_DEBUG_NATIVE_MESSAGES)
 endif ()
 
 if (MSVC)
-    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc /bigobj)
+    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc /bigobj /utf-8)
 endif ()
 
 if (APPLE AND BUILD_APP)

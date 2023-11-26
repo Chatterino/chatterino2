@@ -3,7 +3,6 @@
 #include "common/Modes.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "Settings.hpp"
@@ -123,7 +122,7 @@ void Updates::installUpdates()
                     box->raise();
                 });
             })
-            .onSuccess([this](auto result) -> Outcome {
+            .onSuccess([this](auto result) {
                 if (result.status() != 200)
                 {
                     auto *box = new QMessageBox(
@@ -133,7 +132,7 @@ void Updates::installUpdates()
                             .arg(result.formatError()));
                     box->setAttribute(Qt::WA_DeleteOnClose);
                     box->exec();
-                    return Failure;
+                    return;
                 }
 
                 QByteArray object = result.getData();
@@ -146,7 +145,7 @@ void Updates::installUpdates()
                 if (file.write(object) == -1)
                 {
                     this->setStatus_(WriteFileFailed);
-                    return Failure;
+                    return;
                 }
                 file.flush();
                 file.close();
@@ -157,7 +156,6 @@ void Updates::installUpdates()
                     {filename, "restart"});
 
                 QApplication::exit(0);
-                return Success;
             })
             .execute();
         this->setStatus_(Downloading);
@@ -185,7 +183,7 @@ void Updates::installUpdates()
                 box->setAttribute(Qt::WA_DeleteOnClose);
                 box->exec();
             })
-            .onSuccess([this](auto result) -> Outcome {
+            .onSuccess([this](auto result) {
                 if (result.status() != 200)
                 {
                     auto *box = new QMessageBox(
@@ -195,7 +193,7 @@ void Updates::installUpdates()
                             .arg(result.formatError()));
                     box->setAttribute(Qt::WA_DeleteOnClose);
                     box->exec();
-                    return Failure;
+                    return;
                 }
 
                 QByteArray object = result.getData();
@@ -218,7 +216,7 @@ void Updates::installUpdates()
                     box->exec();
 
                     QDesktopServices::openUrl(this->updateExe_);
-                    return Failure;
+                    return;
                 }
                 file.flush();
                 file.close();
@@ -241,8 +239,6 @@ void Updates::installUpdates()
 
                     QDesktopServices::openUrl(this->updateExe_);
                 }
-
-                return Success;
             })
             .execute();
         this->setStatus_(Downloading);
@@ -281,7 +277,7 @@ void Updates::checkForUpdates()
     NetworkRequest(url)
         .timeout(60000)
         .followRedirects(true)
-        .onSuccess([this](auto result) -> Outcome {
+        .onSuccess([this](auto result) {
             const auto object = result.parseJson();
             /// Version available on every platform
             auto version = object["version"];
@@ -291,7 +287,7 @@ void Updates::checkForUpdates()
                 this->setStatus_(SearchFailed);
                 qCDebug(chatterinoUpdate)
                     << "error checking version - missing 'version'" << object;
-                return Failure;
+                return;
             }
 
 #    if defined Q_OS_WIN || defined Q_OS_MACOS
@@ -302,7 +298,7 @@ void Updates::checkForUpdates()
                 this->setStatus_(SearchFailed);
                 qCDebug(chatterinoUpdate)
                     << "error checking version - missing 'updateexe'" << object;
-                return Failure;
+                return;
             }
             this->updateExe_ = updateExeUrl.toString();
 
@@ -315,7 +311,7 @@ void Updates::checkForUpdates()
                 qCDebug(chatterinoUpdate)
                     << "error checking version - missing 'portable_download'"
                     << object;
-                return Failure;
+                return;
             }
             this->updatePortable_ = portableUrl.toString();
 #        endif
@@ -327,7 +323,7 @@ void Updates::checkForUpdates()
                 this->updateGuideLink_ = updateGuide.toString();
             }
 #    else
-            return Failure;
+            return;
 #    endif
 
             /// Current version
@@ -344,7 +340,6 @@ void Updates::checkForUpdates()
             {
                 this->setStatus_(NoUpdateAvailable);
             }
-            return Failure;
         })
         .execute();
     this->setStatus_(Searching);

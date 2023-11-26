@@ -2,6 +2,7 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
+#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
@@ -202,7 +203,7 @@ void BttvEmotes::loadEmotes()
 
     NetworkRequest(QString(globalEmoteApiUrl))
         .timeout(30000)
-        .onSuccess([this](auto result) -> Outcome {
+        .onSuccess([this](auto result) {
             auto emotes = this->global_.get();
             auto pair = parseGlobalEmotes(result.parseJsonArray(), *emotes);
             if (pair.first)
@@ -210,7 +211,6 @@ void BttvEmotes::loadEmotes()
                 this->setEmotes(
                     std::make_shared<EmoteMap>(std::move(pair.second)));
             }
-            return pair.first;
         })
         .execute();
 }
@@ -229,7 +229,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(20000)
         .onSuccess([callback = std::move(callback), channel, channelDisplayName,
-                    manualRefresh](auto result) -> Outcome {
+                    manualRefresh](auto result) {
             auto pair =
                 parseChannelEmotes(result.parseJson(), channelDisplayName);
             bool hasEmotes = false;
@@ -251,7 +251,6 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                         makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
                 }
             }
-            return pair.first;
         })
         .onError([channelId, channel, manualRefresh](auto result) {
             auto shared = channel.lock();

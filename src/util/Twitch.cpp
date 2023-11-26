@@ -62,6 +62,33 @@ void stripChannelName(QString &channelName)
     }
 }
 
+std::pair<ParsedUserName, ParsedUserID> parseUserNameOrID(const QString &input)
+{
+    if (input.startsWith("id:"))
+    {
+        return {
+            {},
+            input.mid(3),
+        };
+    }
+
+    QString userName = input;
+
+    if (userName.startsWith('@') || userName.startsWith('#'))
+    {
+        userName.remove(0, 1);
+    }
+    if (userName.endsWith(','))
+    {
+        userName.chop(1);
+    }
+
+    return {
+        userName,
+        {},
+    };
+}
+
 QRegularExpression twitchUserNameRegexp()
 {
     static QRegularExpression re(

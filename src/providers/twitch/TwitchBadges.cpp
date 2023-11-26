@@ -2,7 +2,6 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
@@ -238,7 +237,7 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
     NetworkRequest(image->url().string)
         .concurrent()
         .cache()
-        .onSuccess([this, name, callback](auto result) -> Outcome {
+        .onSuccess([this, name, callback](auto result) {
             auto data = result.getData();
 
             // const cast since we are only reading from it
@@ -248,18 +247,18 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
 
             if (!reader.canRead() || reader.size().isEmpty())
             {
-                return Failure;
+                return;
             }
 
             QImage image = reader.read();
             if (image.isNull())
             {
-                return Failure;
+                return;
             }
 
             if (reader.imageCount() <= 0)
             {
-                return Failure;
+                return;
             }
 
             auto icon = std::make_shared<QIcon>(QPixmap::fromImage(image));
@@ -270,8 +269,6 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
             }
 
             callback(name, icon);
-
-            return Success;
         })
         .execute();
 }

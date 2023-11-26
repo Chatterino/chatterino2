@@ -28,9 +28,11 @@ namespace {
         }
     }
 
-    void addEmojis(std::vector<EmoteItem> &out, const EmojiMap &map)
+    void addEmojis(std::vector<EmoteItem> &out,
+                   const std::vector<EmojiPtr> &map)
     {
-        map.each([&](const QString &, const std::shared_ptr<EmojiData> &emoji) {
+        for (const auto &emoji : map)
+        {
             for (auto &&shortCode : emoji->shortCodes)
             {
                 out.push_back(
@@ -41,7 +43,7 @@ namespace {
                      .providerName = "Emoji",
                      .isEmoji = true});
             }
-        });
+        };
     }
 
 }  // namespace

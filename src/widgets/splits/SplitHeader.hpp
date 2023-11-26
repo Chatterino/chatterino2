@@ -28,7 +28,7 @@ public:
     explicit SplitHeader(Split *split);
 
     void setAddButtonVisible(bool value);
-    void setViewersButtonVisible(bool value);
+    void setChattersButtonVisible(bool value);
 
     void updateChannelText();
     void updateModerationModeIcon();
@@ -86,7 +86,7 @@ private:
     QAction *modeActionSetFollowers{};
 
     Button *moderationButton_{};
-    Button *viewersButton_{};
+    Button *chattersButton_{};
     Button *addButton_{};
 
     // states

@@ -3,7 +3,6 @@
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "messages/Image.hpp"
 #include "messages/Link.hpp"
 #include "singletons/Settings.hpp"
@@ -27,8 +26,7 @@ void LinkResolver::getLinkInfo(
                        QUrl::toPercentEncoding(url, "", "/:"))))
         .caller(caller)
         .timeout(30000)
-        .onSuccess([successCallback,
-                    url](NetworkResult result) mutable -> Outcome {
+        .onSuccess([successCallback, url](NetworkResult result) mutable {
             auto root = result.parseJson();
             auto statusCode = root.value("status").toInt();
             QString response;
@@ -54,8 +52,6 @@ void LinkResolver::getLinkInfo(
             }
             successCallback(QUrl::fromPercentEncoding(response.toUtf8()),
                             Link(Link::Url, linkString), thumbnail);
-
-            return Success;
         })
         .onError([successCallback, url](auto /*result*/) {
             successCallback("No link info found", Link(Link::Url, url),

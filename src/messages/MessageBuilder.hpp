@@ -37,12 +37,19 @@ struct LiveUpdatesAddEmoteMessageTag {
 };
 struct LiveUpdatesUpdateEmoteSetMessageTag {
 };
+struct ImageUploaderResultTag {
+};
+
 const SystemMessageTag systemMessage{};
 const TimeoutMessageTag timeoutMessage{};
 const LiveUpdatesUpdateEmoteMessageTag liveUpdatesUpdateEmoteMessage{};
 const LiveUpdatesRemoveEmoteMessageTag liveUpdatesRemoveEmoteMessage{};
 const LiveUpdatesAddEmoteMessageTag liveUpdatesAddEmoteMessage{};
 const LiveUpdatesUpdateEmoteSetMessageTag liveUpdatesUpdateEmoteSetMessage{};
+
+// This signifies that you want to construct a message containing the result of
+// a successful image upload.
+const ImageUploaderResultTag imageUploaderResultMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
 MessagePtr makeSystemMessage(const QString &text, const QTime &time);
@@ -87,6 +94,16 @@ public:
                    const QString &oldEmoteName);
     MessageBuilder(LiveUpdatesUpdateEmoteSetMessageTag, const QString &platform,
                    const QString &actor, const QString &emoteSetName);
+
+    /**
+      * "Your image has been uploaded to %1[ (Deletion link: %2)]."
+      * or "Your image has been uploaded to %1 %2. %3 left. "
+      * "Please wait until all of them are uploaded. "
+      * "About %4 seconds left."
+      */
+    MessageBuilder(ImageUploaderResultTag, const QString &imageLink,
+                   const QString &deletionLink, size_t imagesStillQueued = 0,
+                   size_t secondsLeft = 0);
 
     virtual ~MessageBuilder() = default;
 

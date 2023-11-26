@@ -185,7 +185,7 @@ public slots:
     void openWithCustomScheme();
     void setFiltersDialog();
     void showSearch(bool singleChannel);
-    void showViewerList();
+    void showChatterList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
     void reconnect();

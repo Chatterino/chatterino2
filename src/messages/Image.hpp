@@ -121,10 +121,7 @@ ImagePtr getEmptyImagePtr();
 
 class ImageExpirationPool
 {
-private:
-    friend class Image;
-    friend class CommandController;
-
+public:
     ImageExpirationPool();
     static ImageExpirationPool &instance();
 
@@ -145,7 +142,6 @@ private:
      */
     void freeAll();
 
-private:
     // Timer to periodically run freeOld()
     QTimer *freeTimer_;
     std::map<Image *, std::weak_ptr<Image>> allImages_;

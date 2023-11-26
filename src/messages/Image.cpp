@@ -4,7 +4,6 @@
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
@@ -502,11 +501,11 @@ void Image::actuallyLoad()
     NetworkRequest(this->url().string)
         .concurrent()
         .cache()
-        .onSuccess([weak](auto result) -> Outcome {
+        .onSuccess([weak](auto result) {
             auto shared = weak.lock();
             if (!shared)
             {
-                return Failure;
+                return;
             }
 
             auto data = result.getData();
@@ -521,14 +520,14 @@ void Image::actuallyLoad()
                 qCDebug(chatterinoImage)
                     << "Error: image cant be read " << shared->url().string;
                 shared->empty_ = true;
-                return Failure;
+                return;
             }
 
             const auto size = reader.size();
             if (size.isEmpty())
             {
                 shared->empty_ = true;
-                return Failure;
+                return;
             }
 
             // returns 1 for non-animated formats
@@ -538,7 +537,7 @@ void Image::actuallyLoad()
                     << "Error: image has less than 1 frame "
                     << shared->url().string << ": " << reader.errorString();
                 shared->empty_ = true;
-                return Failure;
+                return;
             }
 
             // use "double" to prevent int overflows
@@ -549,7 +548,7 @@ void Image::actuallyLoad()
                 qCDebug(chatterinoImage) << "image too large in RAM";
 
                 shared->empty_ = true;
-                return Failure;
+                return;
             }
 
             auto parsed = detail::readFrames(reader, shared->url());
@@ -562,8 +561,6 @@ void Image::actuallyLoad()
                             std::forward<decltype(frames)>(frames));
                     }
                 }));
-
-            return Success;
         })
         .onError([weak](auto /*result*/) {
             auto shared = weak.lock();

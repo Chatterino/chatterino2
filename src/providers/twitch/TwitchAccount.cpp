@@ -4,7 +4,6 @@
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -513,14 +512,22 @@ void TwitchAccount::loadSeventvUserID()
             });
     };
 
-    getSeventvAPI().getUserByTwitchID(
+    auto *seventv = getIApp()->getSeventvAPI();
+    if (!seventv)
+    {
+        qCWarning(chatterinoSeventv)
+            << "Not loading 7TV User ID because the 7TV API is not initialized";
+        return;
+    }
+
+    seventv->getUserByTwitchID(
         this->getUserId(),
         [this, loadPersonalEmotes](const auto &json) {
             const auto user = json["user"].toObject();
             const auto id = user["id"].toString();
             if (id.isEmpty())
             {
-                return Success;
+                return;
             }
             this->seventvUserID_ = id;
 
@@ -536,8 +543,6 @@ void TwitchAccount::loadSeventvUserID()
                     break;
                 }
             }
-
-            return Success;
         },
         [](const auto &result) {
             qCDebug(chatterinoSeventv)

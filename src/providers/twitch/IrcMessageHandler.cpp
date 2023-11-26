@@ -1,6 +1,7 @@
 #include "providers/twitch/IrcMessageHandler.hpp"
 
 #include "Application.hpp"
+#include "common/Common.hpp"
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -557,39 +558,6 @@ std::vector<MessagePtr> parsePrivMessage(Channel *channel,
     return builtMessages;
 }
 
-/**
- * Parse a single IRC message into 0 or more Chatterino messages
- **/
-std::vector<MessagePtr> parseMessage(Channel *channel,
-                                     Communi::IrcMessage *message)
-{
-    assert(channel != nullptr);
-    assert(message != nullptr);
-
-    std::vector<MessagePtr> builtMessages;
-
-    auto command = message->command();
-
-    if (command == "PRIVMSG")
-    {
-        return parsePrivMessage(
-            channel, dynamic_cast<Communi::IrcPrivateMessage *>(message));
-    }
-
-    if (command == "USERNOTICE")
-    {
-        return parseUserNoticeMessage(channel, message);
-    }
-
-    if (command == "NOTICE")
-    {
-        return parseNoticeMessage(
-            dynamic_cast<Communi::IrcNoticeMessage *>(message));
-    }
-
-    return builtMessages;
-}
-
 }  // namespace
 
 namespace chatterino {
@@ -691,7 +659,7 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
     // https://mm2pl.github.io/emoji_rfc.pdf for more details
 
     this->addMessage(
-        message, message->target(),
+        message, channelOrEmptyByTarget(message->target(), server),
         message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
         false, message->isAction());
 
@@ -1001,7 +969,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         // Messages are not required, so they might be empty
         if (!content.isEmpty())
         {
-            this->addMessage(message, target, content, server, true, false);
+            this->addMessage(message, chn, content, server, true, false);
         }
     }
 
@@ -1260,13 +1228,11 @@ void IrcMessageHandler::setSimilarityFlags(const MessagePtr &message,
 }
 
 void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
-                                   const QString &target,
+                                   const ChannelPtr &chan,
                                    const QString &originalContent,
                                    TwitchIrcServer &server, bool isSub,
                                    bool isAction)
 {
-    auto chan = channelOrEmptyByTarget(target, server);
-
     if (chan->isEmpty())
     {
         return;
@@ -1290,27 +1256,14 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     if (const auto it = tags.find("custom-reward-id"); it != tags.end())
     {
         const auto rewardId = it.value().toString();
-        if (!channel->isChannelPointRewardKnown(rewardId))
+        if (!rewardId.isEmpty() &&
+            !channel->isChannelPointRewardKnown(rewardId))
         {
             // Need to wait for pubsub reward notification
-            auto *clone = message->clone();
             qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
                                          "callback since reward is not known:"
                                       << rewardId;
-            channel->channelPointRewardAdded.connect(
-                [=, this, &server](ChannelPointReward reward) {
-                    qCDebug(chatterinoTwitch)
-                        << "TwitchChannel reward added callback:" << reward.id
-                        << "-" << rewardId;
-                    if (reward.id == rewardId)
-                    {
-                        this->addMessage(clone, target, originalContent, server,
-                                         isSub, isAction);
-                        clone->deleteLater();
-                        return true;
-                    }
-                    return false;
-                });
+            channel->addQueuedRedemption(rewardId, originalContent, message);
             return;
         }
         args.channelPointRewardId = rewardId;
@@ -1319,7 +1272,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     QString content = originalContent;
     int messageOffset = stripLeadingReplyMention(tags, content);
 
-    TwitchMessageBuilder builder(chan.get(), message, args, content, isAction);
+    TwitchMessageBuilder builder(channel, message, args, content, isAction);
     builder.setMessageOffset(messageOffset);
 
     if (const auto it = tags.find("reply-thread-parent-msg-id");

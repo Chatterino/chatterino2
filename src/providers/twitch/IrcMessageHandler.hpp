@@ -55,15 +55,15 @@ public:
     void handleJoinMessage(Communi::IrcMessage *message);
     void handlePartMessage(Communi::IrcMessage *message);
 
+    void addMessage(Communi::IrcMessage *message, const ChannelPtr &chan,
+                    const QString &originalContent, TwitchIrcServer &server,
+                    bool isSub, bool isAction);
+
 private:
     static float similarity(const MessagePtr &msg,
                             const LimitedQueueSnapshot<MessagePtr> &messages);
     static void setSimilarityFlags(const MessagePtr &message,
                                    const ChannelPtr &channel);
-
-    void addMessage(Communi::IrcMessage *message, const QString &target,
-                    const QString &originalContent, TwitchIrcServer &server,
-                    bool isSub, bool isAction);
 };
 
 }  // namespace chatterino

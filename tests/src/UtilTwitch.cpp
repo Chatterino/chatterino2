@@ -160,6 +160,116 @@ TEST(UtilTwitch, StripChannelName)
     }
 }
 
+TEST(UtilTwitch, ParseUserNameOrID)
+{
+    struct TestCase {
+        QString input;
+        QString expectedUserName;
+        QString expectedUserID;
+    };
+
+    std::vector<TestCase> tests{
+        {
+            "pajlada",
+            "pajlada",
+            {},
+        },
+        {
+            "Pajlada",
+            "Pajlada",
+            {},
+        },
+        {
+            "@Pajlada",
+            "Pajlada",
+            {},
+        },
+        {
+            "#Pajlada",
+            "Pajlada",
+            {},
+        },
+        {
+            "#Pajlada,",
+            "Pajlada",
+            {},
+        },
+        {
+            "#Pajlada,",
+            "Pajlada",
+            {},
+        },
+        {
+            "@@Pajlada,",
+            "@Pajlada",
+            {},
+        },
+        {
+            // We only strip one character off the front
+            "#@Pajlada,",
+            "@Pajlada",
+            {},
+        },
+        {
+            "@@Pajlada,,",
+            "@Pajlada,",
+            {},
+        },
+        {
+            "",
+            "",
+            {},
+        },
+        {
+            "@",
+            "",
+            {},
+        },
+        {
+            ",",
+            "",
+            {},
+        },
+        {
+            // We purposefully don't handle spaces at the end, as all expected usages of this function split the message up by space and strip the parameters by themselves
+            ", ",
+            ", ",
+            {},
+        },
+        {
+            // We purposefully don't handle spaces at the start, as all expected usages of this function split the message up by space and strip the parameters by themselves
+            " #",
+            " #",
+            {},
+        },
+        {
+            "id:123",
+            {},
+            "123",
+        },
+        {
+            "id:",
+            {},
+            "",
+        },
+    };
+
+    for (const auto &[input, expectedUserName, expectedUserID] : tests)
+    {
+        auto [actualUserName, actualUserID] = parseUserNameOrID(input);
+
+        EXPECT_EQ(actualUserName, expectedUserName)
+            << "name " << qUtf8Printable(actualUserName) << " ("
+            << qUtf8Printable(input) << ") did not match expected value "
+            << qUtf8Printable(expectedUserName);
+
+        EXPECT_EQ(actualUserID, expectedUserID)
+            << "id " << qUtf8Printable(actualUserID) << " ("
+            << qUtf8Printable(input) << ") did not match expected value "
+            << qUtf8Printable(expectedUserID);
+    }
+}
+
 TEST(UtilTwitch, UserLoginRegexp)
 {
     struct TestCase {

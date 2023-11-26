@@ -691,6 +691,8 @@ void SplitInput::installKeyPressedEvent()
 
 void SplitInput::mousePressEvent(QMouseEvent *event)
 {
+    this->giveFocus(Qt::MouseFocusReason);
+
     if (this->hidden)
     {
         BaseWidget::mousePressEvent(event);
