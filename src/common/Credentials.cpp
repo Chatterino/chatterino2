@@ -6,8 +6,10 @@
 #include "util/CombinePath.hpp"
 #include "util/Overloaded.hpp"
 
+#include <boost/variant.hpp>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSaveFile>
 
 #ifndef NO_QTKEYCHAIN
 #    ifdef CMAKE_BUILD
@@ -20,8 +22,6 @@
 #        include "keychain.h"
 #    endif
 #endif
-#include <boost/variant.hpp>
-#include <QSaveFile>
 
 #define FORMAT_NAME                                                  \
     ([&] {                                                           \
