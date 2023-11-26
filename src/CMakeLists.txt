@@ -929,7 +929,7 @@ if (CHATTERINO_DEBUG_NATIVE_MESSAGES)
 endif ()
 
 if (MSVC)
-    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc /bigobj)
+    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc /bigobj /utf-8)
 endif ()
 
 if (APPLE AND BUILD_APP)
