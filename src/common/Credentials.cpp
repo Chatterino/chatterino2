@@ -1,4 +1,4 @@
-#include "Credentials.hpp"
+#include "common/Credentials.hpp"
 
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/Paths.hpp"
