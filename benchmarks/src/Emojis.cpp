@@ -68,9 +68,20 @@ static void BM_EmojiParsing(benchmark::State &state)
     };
 
     const auto &emojiMap = emojis.getEmojis();
-    std::shared_ptr<EmojiData> penguin;
-    emojiMap.tryGet("1F427", penguin);
-    auto penguinEmoji = penguin->emote;
+    auto getEmoji = [&](auto code) {
+        std::shared_ptr<EmojiData> emoji;
+        for (const auto &e : emojis.getEmojis())
+        {
+            if (e->unifiedCode == code)
+            {
+                emoji = e;
+                break;
+            }
+        }
+        return emoji->emote;
+    };
+    auto penguinEmoji = getEmoji("1F427");
+    assert(penguinEmoji.get() != nullptr);
 
     std::vector<TestCase> tests{
         {
