@@ -5,6 +5,7 @@
 #include <QRegularExpression>
 #include <QVector>
 
+#include <memory>
 #include <set>
 #include <vector>
 
