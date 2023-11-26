@@ -61,6 +61,7 @@
 - Dev: Replace `boost::optional` with `std::optional`. (#4877)
 - Dev: Improve performance of selecting text. (#4889, #4911)
 - Dev: Removed direct dependency on Qt 5 compatibility module. (#4906)
+- Dev: Refactor `Emoji`'s EmojiMap into a vector. (#4980)
 - Dev: Refactor `DebugCount` and add copy button to debug popup. (#4921)
 - Dev: Refactor `common/Credentials`. (#4921)
 - Dev: Changed lifetime of context menus. (#4924)
@@ -70,6 +71,7 @@
 - Dev: Removed `Outcome` from network requests. (#4959)
 - Dev: Added Tests for Windows and MacOS in CI. (#4970)
 - Dev: Refactored the Image Uploader feature. (#4971)
+- Dev: Fixed deadlock and use-after-free in tests. (#4981)
 
 ## 2.4.6
 
