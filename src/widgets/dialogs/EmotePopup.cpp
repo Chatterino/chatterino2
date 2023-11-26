@@ -78,9 +78,8 @@ auto makeEmojiMessage(const EmojiMap &emojiMap)
     builder->flags.set(MessageFlag::Centered);
     builder->flags.set(MessageFlag::DisableCompactEmotes);
 
-    emojiMap.each([&builder](const auto &key, const auto &value) {
-        (void)key;  // unused
-
+    for (const auto &value : emojiMap)
+    {
         builder
             .emplace<EmoteElement>(
                 value->emote,
@@ -88,7 +87,7 @@ auto makeEmojiMessage(const EmojiMap &emojiMap)
                                     MessageElementFlag::EmojiAll})
             ->setLink(
                 Link(Link::Type::InsertText, ":" + value->shortCodes[0] + ":"));
-    });
+    }
 
     return builder.release();
 }
@@ -551,14 +550,15 @@ void EmotePopup::filterEmotes(const QString &searchText)
     EmojiMap filteredEmojis{};
     int emojiCount = 0;
 
-    getApp()->getEmotes()->getEmojis()->getEmojis().each(
-        [&, searchText](const auto &name, const auto &emoji) {
-            if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))
-            {
-                filteredEmojis.insert(name, emoji);
-                emojiCount++;
-            }
-        });
+    const auto &emojis = getIApp()->getEmotes()->getEmojis()->getEmojis();
+    for (const auto &emoji : emojis)
+    {
+        if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))
+        {
+            filteredEmojis.push_back(emoji);
+            emojiCount++;
+        }
+    }
     // emojis
     if (emojiCount > 0)
     {

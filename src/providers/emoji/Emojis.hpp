@@ -1,7 +1,5 @@
 #pragma once
 
-#include "util/ConcurrentMap.hpp"
-
 #include <boost/variant.hpp>
 #include <QMap>
 #include <QRegularExpression>
@@ -37,7 +35,7 @@ struct EmojiData {
     EmotePtr emote;
 };
 
-using EmojiMap = ConcurrentMap<QString, std::shared_ptr<EmojiData>>;
+using EmojiMap = std::vector<std::shared_ptr<EmojiData>>;
 
 class IEmojis
 {
