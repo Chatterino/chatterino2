@@ -70,7 +70,14 @@ TEST(Emojis, Parse)
 
     auto getEmoji = [&](auto code) {
         std::shared_ptr<EmojiData> emoji;
-        emojis.getEmojis().tryGet(code, emoji);
+        for (const auto &e : emojis.getEmojis())
+        {
+            if (e->unifiedCode == code)
+            {
+                emoji = e;
+                break;
+            }
+        }
         return emoji->emote;
     };
 
