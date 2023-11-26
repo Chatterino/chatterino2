@@ -732,7 +732,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Network
         Qt${MAJOR_QT_VERSION}::Svg
         Qt${MAJOR_QT_VERSION}::Concurrent
-        Qt${MAJOR_QT_VERSION}::Multimedia
 
         LibCommuni::LibCommuni
         Pajlada::Serialize
