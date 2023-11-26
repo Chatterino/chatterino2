@@ -72,7 +72,7 @@ auto makeEmoteMessage(const EmoteMap &map, const MessageElementFlag &emoteFlag)
     return builder.release();
 }
 
-auto makeEmojiMessage(EmojiMap &emojiMap)
+auto makeEmojiMessage(const EmojiMap &emojiMap)
 {
     MessageBuilder builder;
     builder->flags.set(MessageFlag::Centered);
@@ -165,7 +165,7 @@ void addEmotes(Channel &channel, const EmoteMap &map, const QString &title,
     channel.addMessage(makeEmoteMessage(map, emoteFlag));
 }
 
-void loadEmojis(ChannelView &view, EmojiMap &emojiMap)
+void loadEmojis(ChannelView &view, const EmojiMap &emojiMap)
 {
     ChannelPtr emojiChannel(new Channel("", Channel::Type::None));
     emojiChannel->addMessage(makeEmojiMessage(emojiMap));
@@ -173,7 +173,8 @@ void loadEmojis(ChannelView &view, EmojiMap &emojiMap)
     view.setChannel(emojiChannel);
 }
 
-void loadEmojis(Channel &channel, EmojiMap &emojiMap, const QString &title)
+void loadEmojis(Channel &channel, const EmojiMap &emojiMap,
+                const QString &title)
 {
     channel.addMessage(makeTitleMessage(title));
     channel.addMessage(makeEmojiMessage(emojiMap));
@@ -269,7 +270,8 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->globalEmotesView_ = makeView("Global");
     this->viewEmojis_ = makeView("Emojis");
 
-    loadEmojis(*this->viewEmojis_, getApp()->emotes->emojis.emojis);
+    loadEmojis(*this->viewEmojis_,
+               getApp()->getEmotes()->getEmojis()->getEmojis());
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
                                        [this]() {
@@ -549,8 +551,8 @@ void EmotePopup::filterEmotes(const QString &searchText)
     EmojiMap filteredEmojis{};
     int emojiCount = 0;
 
-    getApp()->emotes->emojis.emojis.each(
-        [&, searchText](const auto &name, std::shared_ptr<EmojiData> &emoji) {
+    getApp()->getEmotes()->getEmojis()->getEmojis().each(
+        [&, searchText](const auto &name, const auto &emoji) {
             if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))
             {
                 filteredEmojis.insert(name, emoji);

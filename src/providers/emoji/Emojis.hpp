@@ -59,7 +59,6 @@ public:
     std::vector<boost::variant<EmotePtr, QString>> parse(
         const QString &text) const override;
 
-    EmojiMap emojis;
     std::vector<QString> shortCodes;
     QString replaceShortCodes(const QString &text) const override;
 
@@ -70,6 +69,8 @@ private:
     void loadEmojis();
     void sortEmojis();
     void loadEmojiSet();
+
+    EmojiMap emojis;
 
     /// Emojis
     QRegularExpression findShortCodesRegex_{":([-+\\w]+):"};
