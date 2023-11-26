@@ -6,10 +6,11 @@
 #include "util/CombinePath.hpp"
 #include "util/Overloaded.hpp"
 
-#include <boost/variant.hpp>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSaveFile>
+
+#include <variant>
 
 #ifndef NO_QTKEYCHAIN
 #    ifdef CMAKE_BUILD
@@ -102,13 +103,20 @@ struct EraseJob {
     QString name;
 };
 
-using Job = boost::variant<SetJob, EraseJob>;
+using Job = std::variant<SetJob, EraseJob>;
 
 std::queue<Job> &jobQueue()
 {
     static std::queue<Job> jobs;
     return jobs;
 }
+
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
 
 void runNextJob()
 {
@@ -121,29 +129,31 @@ void runNextJob()
 
         auto &&item = queue.front();
 
-        if (item.which() == 0)  // set job
-        {
-            auto set = boost::get<SetJob>(item);
-            auto *job = new QKeychain::WritePasswordJob("chatterino");
-            job->setAutoDelete(true);
-            job->setKey(set.name);
-            job->setTextData(set.credential);
-            QObject::connect(job, &QKeychain::Job::finished, qApp, [](auto) {
-                runNextJob();
-            });
-            job->start();
-        }
-        else  // erase job
-        {
-            auto erase = boost::get<EraseJob>(item);
-            auto *job = new QKeychain::DeletePasswordJob("chatterino");
-            job->setAutoDelete(true);
-            job->setKey(erase.name);
-            QObject::connect(job, &QKeychain::Job::finished, qApp, [](auto) {
-                runNextJob();
-            });
-            job->start();
-        }
+        std::visit(
+            overloaded{
+                [](const SetJob &set) {
+                    auto *job = new QKeychain::WritePasswordJob("chatterino");
+                    job->setAutoDelete(true);
+                    job->setKey(set.name);
+                    job->setTextData(set.credential);
+                    QObject::connect(job, &QKeychain::Job::finished, qApp,
+                                     [](auto) {
+                                         runNextJob();
+                                     });
+                    job->start();
+                },
+                [](const EraseJob &erase) {
+                    auto *job = new QKeychain::DeletePasswordJob("chatterino");
+                    job->setAutoDelete(true);
+                    job->setKey(erase.name);
+                    QObject::connect(job, &QKeychain::Job::finished, qApp,
+                                     [](auto) {
+                                         runNextJob();
+                                     });
+                    job->start();
+                },
+            },
+            item);
 
         queue.pop();
     }
