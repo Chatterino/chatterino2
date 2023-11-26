@@ -5,6 +5,7 @@
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
 #include "util/Overloaded.hpp"
+#include "util/Variant.hpp"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -111,13 +112,6 @@ std::queue<Job> &jobQueue()
     return jobs;
 }
 
-template <class... Ts>
-struct overloaded : Ts... {
-    using Ts::operator()...;
-};
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
-
 void runNextJob()
 {
 #ifndef NO_QTKEYCHAIN
@@ -130,7 +124,7 @@ void runNextJob()
         auto &&item = queue.front();
 
         std::visit(
-            overloaded{
+            variant::Overloaded{
                 [](const SetJob &set) {
                     auto *job = new QKeychain::WritePasswordJob("chatterino");
                     job->setAutoDelete(true);
