@@ -61,6 +61,7 @@
 - Dev: Replace `boost::optional` with `std::optional`. (#4877)
 - Dev: Improve performance of selecting text. (#4889, #4911)
 - Dev: Removed direct dependency on Qt 5 compatibility module. (#4906)
+- Dev: Refactor `Emoji`'s EmojiMap into a vector. (#4980)
 - Dev: Refactor `DebugCount` and add copy button to debug popup. (#4921)
 - Dev: Changed lifetime of context menus. (#4924)
 - Dev: Refactor `ChannelView`, removing a bunch of clang-tidy warnings. (#4926)
