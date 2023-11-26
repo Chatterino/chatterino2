@@ -42,14 +42,12 @@ bool useKeyring()
     {
         return false;
     }
-    else
-    {
+
 #ifdef Q_OS_LINUX
-        return getSettings()->useKeyring;
+    return getSettings()->useKeyring;
 #else
-        return true;
+    return true;
 #endif
-    }
 }
 
 // Insecure storage:
