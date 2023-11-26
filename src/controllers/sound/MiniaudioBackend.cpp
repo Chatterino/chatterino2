@@ -12,10 +12,7 @@
 
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
-#include <QAudioOutput>
 #include <QFile>
-#include <QMediaPlayer>
-#include <QSoundEffect>
 
 #include <limits>
 #include <memory>
