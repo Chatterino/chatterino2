@@ -80,6 +80,8 @@ private:
     // Maps the first character of the emoji unicode string to a vector of
     // possible emojis
     QMap<QChar, QVector<std::shared_ptr<EmojiData>>> emojiFirstByte_;
+
+    bool loaded_ = false;
 };
 
 }  // namespace chatterino
