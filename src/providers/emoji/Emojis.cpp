@@ -427,7 +427,7 @@ QString Emojis::replaceShortCodes(const QString &text) const
     return ret;
 }
 
-const EmojiMap &Emojis::getEmojis() const
+const std::vector<EmojiPtr> &Emojis::getEmojis() const
 {
     return this->emojis;
 }

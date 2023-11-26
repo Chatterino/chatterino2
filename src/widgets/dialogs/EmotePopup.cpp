@@ -72,7 +72,7 @@ auto makeEmoteMessage(const EmoteMap &map, const MessageElementFlag &emoteFlag)
     return builder.release();
 }
 
-auto makeEmojiMessage(const EmojiMap &emojiMap)
+auto makeEmojiMessage(const std::vector<EmojiPtr> &emojiMap)
 {
     MessageBuilder builder;
     builder->flags.set(MessageFlag::Centered);
@@ -164,7 +164,7 @@ void addEmotes(Channel &channel, const EmoteMap &map, const QString &title,
     channel.addMessage(makeEmoteMessage(map, emoteFlag));
 }
 
-void loadEmojis(ChannelView &view, const EmojiMap &emojiMap)
+void loadEmojis(ChannelView &view, const std::vector<EmojiPtr> &emojiMap)
 {
     ChannelPtr emojiChannel(new Channel("", Channel::Type::None));
     emojiChannel->addMessage(makeEmojiMessage(emojiMap));
@@ -172,7 +172,7 @@ void loadEmojis(ChannelView &view, const EmojiMap &emojiMap)
     view.setChannel(emojiChannel);
 }
 
-void loadEmojis(Channel &channel, const EmojiMap &emojiMap,
+void loadEmojis(Channel &channel, const std::vector<EmojiPtr> &emojiMap,
                 const QString &title)
 {
     channel.addMessage(makeTitleMessage(title));
@@ -547,7 +547,7 @@ void EmotePopup::filterEmotes(const QString &searchText)
         this->filterTwitchEmotes(searchChannel, searchText);
     }
 
-    EmojiMap filteredEmojis{};
+    std::vector<EmojiPtr> filteredEmojis{};
     int emojiCount = 0;
 
     const auto &emojis = getIApp()->getEmotes()->getEmojis()->getEmojis();

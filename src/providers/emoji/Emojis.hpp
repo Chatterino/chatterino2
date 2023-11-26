@@ -35,7 +35,7 @@ struct EmojiData {
     EmotePtr emote;
 };
 
-using EmojiMap = std::vector<std::shared_ptr<EmojiData>>;
+using EmojiPtr = std::shared_ptr<EmojiData>;
 
 class IEmojis
 {
@@ -44,7 +44,7 @@ public:
 
     virtual std::vector<boost::variant<EmotePtr, QString>> parse(
         const QString &text) const = 0;
-    virtual const EmojiMap &getEmojis() const = 0;
+    virtual const std::vector<EmojiPtr> &getEmojis() const = 0;
     virtual const std::vector<QString> &getShortCodes() const = 0;
     virtual QString replaceShortCodes(const QString &text) const = 0;
 };
@@ -60,7 +60,7 @@ public:
     std::vector<QString> shortCodes;
     QString replaceShortCodes(const QString &text) const override;
 
-    const EmojiMap &getEmojis() const override;
+    const std::vector<EmojiPtr> &getEmojis() const override;
     const std::vector<QString> &getShortCodes() const override;
 
 private:
@@ -68,7 +68,7 @@ private:
     void sortEmojis();
     void loadEmojiSet();
 
-    EmojiMap emojis;
+    std::vector<EmojiPtr> emojis;
 
     /// Emojis
     QRegularExpression findShortCodesRegex_{":([-+\\w]+):"};

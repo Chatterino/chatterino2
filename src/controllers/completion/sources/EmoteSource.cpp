@@ -27,7 +27,8 @@ namespace {
         }
     }
 
-    void addEmojis(std::vector<EmoteItem> &out, const EmojiMap &map)
+    void addEmojis(std::vector<EmoteItem> &out,
+                   const std::vector<EmojiPtr> &map)
     {
         for (const auto &emoji : map)
         {
