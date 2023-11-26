@@ -171,10 +171,6 @@ Credentials &Credentials::instance()
     return creds;
 }
 
-Credentials::Credentials()
-{
-}
-
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Credentials::get(const QString &provider, const QString &name_,
                       QObject *receiver,
