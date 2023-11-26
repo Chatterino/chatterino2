@@ -84,6 +84,7 @@ jobs:
         run: |
           cmake \
             -DBUILD_TESTS=On \
+            -DBUILD_BENCHMARKS=On \
             -DBUILD_APP=OFF \
             -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
             ..
