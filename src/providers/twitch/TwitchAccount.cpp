@@ -491,7 +491,13 @@ void TwitchAccount::loadSeventvUserID()
         return;
     }
 
-    getSeventvAPI().getUserByTwitchID(
+    auto *seventv = getIApp()->getSeventvAPI();
+    if (!seventv)
+    {
+        return;
+    }
+
+    seventv->getUserByTwitchID(
         this->getUserId(),
         [this](const auto &json) {
             const auto id = json["user"]["id"].toString();
