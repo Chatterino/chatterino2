@@ -94,6 +94,11 @@ public:
     {
         return nullptr;
     }
+
+    SeventvAPI *getSeventvAPI() override
+    {
+        return nullptr;
+    }
 };
 
 }  // namespace chatterino::mock
