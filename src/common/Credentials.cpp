@@ -126,7 +126,7 @@ void runNextJob()
         if (item.which() == 0)  // set job
         {
             auto set = boost::get<SetJob>(item);
-            auto job = new QKeychain::WritePasswordJob("chatterino");
+            auto *job = new QKeychain::WritePasswordJob("chatterino");
             job->setAutoDelete(true);
             job->setKey(set.name);
             job->setTextData(set.credential);
@@ -138,7 +138,7 @@ void runNextJob()
         else  // erase job
         {
             auto erase = boost::get<EraseJob>(item);
-            auto job = new QKeychain::DeletePasswordJob("chatterino");
+            auto *job = new QKeychain::DeletePasswordJob("chatterino");
             job->setAutoDelete(true);
             job->setKey(erase.name);
             QObject::connect(job, &QKeychain::Job::finished, qApp, [](auto) {
@@ -189,7 +189,7 @@ void Credentials::get(const QString &provider, const QString &name_,
     {
 #ifndef NO_QTKEYCHAIN
         // if NO_QTKEYCHAIN is set, then this code is never used either way
-        auto job = new QKeychain::ReadPasswordJob("chatterino");
+        auto *job = new QKeychain::ReadPasswordJob("chatterino");
         job->setAutoDelete(true);
         job->setKey(name);
         QObject::connect(
