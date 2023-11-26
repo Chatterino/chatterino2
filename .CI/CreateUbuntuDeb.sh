@@ -21,14 +21,14 @@ deb_path="Chatterino-ubuntu-${ubuntu_release}-x86_64.deb"
 # Refactor opportunity:
 case "$ubuntu_release" in
     20.04)
-        dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, qt5-image-formats-plugins, libboost-filesystem1.71.0, libavif"
+        dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, qt5-image-formats-plugins, libboost-filesystem1.71.0, libavif-bin"
         ;;
     22.04)
         if [ -n "$Qt6_DIR" ]; then
             echo "Qt6_DIR set, assuming Qt6"
-            dependencies="libc6, libstdc++6, libqt6core6, libqt6widgets6, libqt6network6, libqt6core5compat6, libqt6svg6, qt6-qpa-plugins, qt6-image-formats-plugins, libavif"
+            dependencies="libc6, libstdc++6, libqt6core6, libqt6widgets6, libqt6network6, libqt6core5compat6, libqt6svg6, qt6-qpa-plugins, qt6-image-formats-plugins, libavif-bin"
         else
-            dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, qt5-image-formats-plugins, libboost-filesystem1.74.0, libavif"
+            dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, qt5-image-formats-plugins, libboost-filesystem1.74.0, libavif-bin"
         fi
         ;;
     *)
