@@ -85,6 +85,12 @@ public:
         return nullptr;
     }
 
+    ISoundController *getSound() override
+    {
+        assert(!"getSound was called without being initialized");
+        return nullptr;
+    }
+
     ITwitchLiveController *getTwitchLiveController() override
     {
         return nullptr;
