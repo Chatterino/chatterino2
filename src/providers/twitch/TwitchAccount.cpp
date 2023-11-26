@@ -494,6 +494,8 @@ void TwitchAccount::loadSeventvUserID()
     auto *seventv = getIApp()->getSeventvAPI();
     if (!seventv)
     {
+        qCWarning(chatterinoSeventv)
+            << "Not loading 7TV User ID because the 7TV API is not initialized";
         return;
     }
 
