@@ -1012,10 +1012,10 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
     NetworkRequest(SEVENTV_USER_API.arg(user.id))
         .timeout(20000)
         .onSuccess([this, hack = std::weak_ptr<bool>(this->lifetimeHack_)](
-                       const NetworkResult &result) -> Outcome {
+                       const NetworkResult &result) {
             if (!hack.lock())
             {
-                return Success;
+                return;
             }
 
             auto root = result.parseJson();
@@ -1023,7 +1023,7 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
 
             if (url.isEmpty())
             {
-                return Success;
+                return;
             }
             url.prepend("https:");
 
@@ -1037,7 +1037,7 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
             {
                 this->avatarUrl_ = url;
                 this->setSevenTVAvatar(filename);
-                return Success;
+                return;
             }
 
             QNetworkRequest req(url);
@@ -1064,7 +1064,7 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
                                  }
                              });
 
-            return Success;
+            return;
         })
         .execute();
 }
