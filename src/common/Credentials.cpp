@@ -177,6 +177,7 @@ Credentials::Credentials()
 {
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Credentials::get(const QString &provider, const QString &name_,
                       QObject *receiver,
                       std::function<void(const QString &)> &&onLoaded)
@@ -209,6 +210,7 @@ void Credentials::get(const QString &provider, const QString &name_,
     }
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Credentials::set(const QString &provider, const QString &name_,
                       const QString &credential)
 {
@@ -235,6 +237,7 @@ void Credentials::set(const QString &provider, const QString &name_,
     }
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Credentials::erase(const QString &provider, const QString &name_)
 {
     assertInGuiThread();
