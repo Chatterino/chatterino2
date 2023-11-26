@@ -66,6 +66,7 @@ enum UsernameRightClickBehavior : int {
 class Settings
 {
     static Settings *instance_;
+    Settings *prevInstance_ = nullptr;
 
 public:
     Settings(const QString &settingsDirectory);
