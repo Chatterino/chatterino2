@@ -20,17 +20,6 @@ class EffectLabel;
 class TitleBarButton;
 enum class TitleBarButtonStyle;
 
-enum class BoundsChecking {
-    // Attempt to keep the window within bounds of the screen the cursor is on
-    CursorPosition,
-
-    // Attempt to keep the window within bounds of the screen the desired position is on
-    DesiredPosition,
-};
-
-/// Move the `window` to `point` and do bounds-checking to ensure that it stays on exactly one screen.
-void moveWindowTo(QWidget *window, QPoint point, BoundsChecking mode);
-
 class BaseWindow : public BaseWidget
 {
     Q_OBJECT
