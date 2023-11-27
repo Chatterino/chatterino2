@@ -23,7 +23,7 @@ namespace {
      * will get. Additional letters also increase the cost in this mode.
      *
      * @return How different the emote is from query. Values in the range [-10,
-     * \infty]. Negative cost means exact match.
+     * \infty].
      */
     int costOfEmote(const QString &query, const QString &emote,
                     bool prioritizeUpper)
