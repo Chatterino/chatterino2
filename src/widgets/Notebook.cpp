@@ -1,6 +1,7 @@
 #include "widgets/Notebook.hpp"
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -1344,13 +1345,22 @@ void SplitNotebook::addCustomButtons()
     // settings
     auto settingsBtn = this->addCustomButton();
 
-    settingsBtn->setVisible(!getSettings()->hidePreferencesButton.getValue());
+    // This is to ensure you can't lock yourself out of the settings
+    if (getArgs().safeMode)
+    {
+        settingsBtn->setVisible(true);
+    }
+    else
+    {
+        settingsBtn->setVisible(
+            !getSettings()->hidePreferencesButton.getValue());
 
-    getSettings()->hidePreferencesButton.connect(
-        [settingsBtn](bool hide, auto) {
-            settingsBtn->setVisible(!hide);
-        },
-        this->signalHolder_);
+        getSettings()->hidePreferencesButton.connect(
+            [settingsBtn](bool hide, auto) {
+                settingsBtn->setVisible(!hide);
+            },
+            this->signalHolder_);
+    }
 
     settingsBtn->setIcon(NotebookButton::Settings);
 
