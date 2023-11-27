@@ -5,7 +5,7 @@
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 
-#include <qnamespace.h>
+#include <Qt>
 
 #include <algorithm>
 
